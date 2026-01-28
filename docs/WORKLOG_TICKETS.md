@@ -15,13 +15,13 @@
 
 | Metric | Count |
 |--------|-------|
-| ✅ DONE | 34 |
+| ✅ DONE | 35 |
 | 🟡 IN_PROGRESS | 0 |
 | 🔵 OPEN | 10 |
 | 🔴 BLOCKED | 0 |
-| **Total** | **44** |
+| **Total** | **45** |
 
-**Last Updated:** 2026-01-28 21:45 UTC
+**Last Updated:** 2026-01-28 21:50 UTC
 
 **Current Priority:** TCK-20260128-017 (Fix Backend Failing Tests - P1)
 
@@ -2878,7 +2878,8 @@ Status updates:
 Type: WORKFLOW
 Owner: GPT-5.2 (Codex CLI)
 Created: 2026-01-28 23:50 IST
-Status: **IN_PROGRESS**
+Status: **DONE** ✅
+Completed: 2026-01-28 23:55 IST
 Priority: P2
 
 Description:
@@ -2893,6 +2894,57 @@ Scope contract:
   - Changing application code
   - Importing/copying external prompts verbatim
 - Behavior change allowed: N/A (docs/prompts only)
+
+Outputs:
+- `prompts/workflow/prompt-library-curation-v1.0.md`
+- `prompts/workflow/prompt-quality-gate-v1.0.md`
+- `docs/process/PROMPT_STYLE_GUIDE.md`
+- `prompts/README.md` updated with links
+
+Evidence:
+- **Command**: `ls -la prompts/workflow/prompt-library-curation-v1.0.md prompts/workflow/prompt-quality-gate-v1.0.md docs/process/PROMPT_STYLE_GUIDE.md`
+- **Output**: files present (created 2026-01-28)
+- **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
+
+Status updates:
+- [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
+- [2026-01-28 23:55 IST] Marked DONE with evidence
+
+---
+
+### TCK-20260128-029 :: Add “What Next?” Product Strategy Prompts (Personas/SWOT)
+Type: PRODUCT
+Owner: GPT-5.2 (Codex CLI)
+Created: 2026-01-29 00:05 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 00:10 IST
+Priority: P2
+
+Description:
+Add prompts that help an agent recommend the next product focus using market/audience thinking (personas, SWOT, positioning, roadmap) in addition to codebase constraints.
+
+Scope contract:
+- In-scope:
+  - Add product strategy prompts under `prompts/product/`
+  - Update `prompts/README.md` index
+- Out-of-scope:
+  - Implementing new product features
+  - External web research that copies proprietary content verbatim
+- Behavior change allowed: N/A (prompts only)
+
+Outputs:
+- `prompts/product/next-focus-strategy-v1.0.md`
+- `prompts/product/lightweight-market-scan-v1.0.md`
+- `prompts/README.md` updated with links
+
+Evidence:
+- **Command**: `ls -la prompts/product/next-focus-strategy-v1.0.md prompts/product/lightweight-market-scan-v1.0.md`
+- **Output**: files present (created 2026-01-28)
+- **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
+
+Status updates:
+- [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
+- [2026-01-29 00:10 IST] Marked DONE with evidence
 
 ---
 
@@ -4843,6 +4895,53 @@ Execution log:
 
 ---
 
+#### TCK-20240128-029 :: UI Audit - App.tsx
+Type: AUDIT
+Owner: GitHub Copilot
+Created: 2026-01-28 21:47 UTC
+Status: **DONE** ✅
+Completed: 2026-01-28 21:50 UTC
+Priority: P2 (Medium)
+
+Description:
+Conduct UI audit of App.tsx component using ui-file-audit-v1.0.md prompt.
+
+Scope contract:
+- In-scope:
+  - Analyze App.tsx for UI correctness, UX regressions, accessibility gaps
+  - Check state handling, routing logic, error boundaries
+  - Focus on routing behavior and component structure
+  - Suggest improvements with priorities
+- Out-of-scope:
+  - Code changes or fixes
+  - Other UI files
+- Behavior change allowed: NO
+
+Targets:
+- Repo: advay-vision-learning
+- File(s): src/frontend/src/App.tsx
+- Branch: main
+- Prompt: prompts/ui/ui-file-audit-v1.0.md
+
+Acceptance Criteria:
+- [x] Audit artifact created in docs/audit/
+- [x] Issues identified with severity levels
+- [x] Test recommendations provided
+- [x] Safe refactor suggestions included
+
+Evidence of Completion:
+- ✅ UI audit completed using ui-file-audit-v1.0.md
+- ✅ Artifact created: docs/audit/ui__src__frontend__src__App.tsx.md
+- ✅ 4 issues identified (1 P1, 3 P2)
+- ✅ Focus on routing reliability and error handling
+- ✅ Test scenarios and refactor suggestions provided
+
+Execution log:
+- 2026-01-28 21:47 UTC | Started UI audit of App.tsx
+- 2026-01-28 21:50 UTC | Completed audit, created artifact
+
+---
+
 ---
 
 ## AUDIT FINDINGS CONSOLIDATION - 2026-01-29
@@ -5415,5 +5514,145 @@ The timing attack fix ensures that:
 1. Non-existent users trigger a dummy bcrypt verification (constant time)
 2. Existing users with wrong passwords trigger real bcrypt verification
 3. Both paths take approximately the same time, preventing user enumeration
+
+---
+
+---
+
+## SECURITY-HIGH-002 :: COMPLETED ✅
+
+**Type**: SECURITY  
+**Priority**: P0  
+**Status**: DONE ✅  
+**Completed**: 2026-01-29 00:45 IST  
+**Source**: `functional__src__backend__app__api__v1__endpoints__auth.py.md` (HIGH-FUNC-001)
+
+### Changes Made
+
+**1. Database Model** (`src/backend/app/db/models/user.py`):
+- Added `email_verified: bool` field (default False)
+- Added `email_verification_token: str | None` field
+- Added `email_verification_expires: datetime | None` field
+
+**2. Email Service** (`src/backend/app/core/email.py`) - NEW FILE:
+- `EmailService.generate_verification_token()` - Secure random token
+- `EmailService.get_verification_expiry()` - 24 hour expiration
+- `EmailService.send_verification_email()` - Logs email to console (dev mode)
+- `EmailService.send_password_reset_email()` - For future use
+
+**3. User Service** (`src/backend/app/services/user_service.py`):
+- Updated `create()` to generate verification token and send email
+- Added `get_by_verification_token()` to look up users by token
+- Added `verify_email()` to mark email as verified
+
+**4. Auth Endpoints** (`src/backend/app/api/v1/endpoints/auth.py`):
+- Updated `login()` to check `email_verified` (returns 403 if not verified)
+- Added `POST /auth/verify-email` endpoint
+- Added `POST /auth/resend-verification` endpoint
+
+**5. Config** (`src/backend/app/core/config.py`):
+- Added `FRONTEND_URL` setting for email links
+
+**6. Schema** (`src/backend/app/schemas/user.py`):
+- Added `email_verified` to UserBase schema
+
+### Tests Added
+
+**File**: `src/backend/tests/test_security.py` (expanded)
+
+- `test_login_requires_email_verification` - Verifies 403 for unverified users
+- `test_email_verification_flow` - Complete registration → verify → login flow
+- `test_invalid_verification_token` - Rejects invalid tokens
+- `test_resend_verification` - Resend verification email
+
+### Verification
+
+```bash
+cd src/backend && uv run pytest tests/test_security.py -v
+# Output: 6 passed, 1 skipped
+
+# All tests pass
+cd src/backend && uv run pytest -v
+# Output: 23 passed, 1 skipped, 2 warnings
+```
+
+### API Changes
+
+**New Endpoints**:
+- `POST /api/v1/auth/verify-email?token={token}` - Verify email
+- `POST /api/v1/auth/resend-verification?email={email}` - Resend verification
+
+**Modified Endpoints**:
+- `POST /api/v1/auth/login` - Now returns 403 if email not verified
+
+### Breaking Changes
+
+⚠️ **BREAKING**: Users must now verify their email before logging in. Existing users in production databases will need:
+1. Migration to set `email_verified = true` for existing active users, OR
+2. Force them to re-verify on next login
+
+---
+
+---
+
+## SECURITY-HIGH-003 :: COMPLETED ✅
+
+**Type**: SECURITY  
+**Priority**: P0  
+**Status**: DONE ✅  
+**Completed**: 2026-01-29 01:00 IST  
+**Source**: `functional__src__backend__app__api__v1__endpoints__auth.py.md` (HIGH-FUNC-002)
+
+### Changes Made
+
+**1. Database Model** (`src/backend/app/db/models/user.py`):
+- Added `password_reset_token: str | None` field
+- Added `password_reset_expires: datetime | None` field
+
+**2. User Service** (`src/backend/app/services/user_service.py`):
+- Added `get_by_password_reset_token()` - Look up user by reset token
+- Added `create_password_reset_token()` - Generate secure reset token
+- Added `reset_password()` - Update password and clear token
+
+**3. Auth Endpoints** (`src/backend/app/api/v1/endpoints/auth.py`):
+- Added `POST /auth/forgot-password` - Request password reset email
+- Added `POST /auth/reset-password` - Reset password with token
+
+**4. Email Service** (`src/backend/app/core/email.py`):
+- Already had `send_password_reset_email()` from SECURITY-HIGH-002
+
+### Tests Added
+
+**File**: `src/backend/tests/test_security.py` (expanded)
+
+- `test_forgot_password_generates_token` - Verifies token creation
+- `test_reset_password_with_valid_token` - Complete reset flow
+- `test_reset_password_invalid_token` - Rejects invalid tokens
+- `test_reset_password_short_password` - Validates password length
+- `test_forgot_password_nonexistent_user` - Prevents user enumeration
+
+### Verification
+
+```bash
+cd src/backend && uv run pytest tests/test_security.py -v
+# Output: 11 passed, 1 skipped
+
+# All tests pass
+cd src/backend && uv run pytest -v
+# Output: 28 passed, 1 skipped, 2 warnings
+```
+
+### API Changes
+
+**New Endpoints**:
+- `POST /api/v1/auth/forgot-password?email={email}` - Request reset
+- `POST /api/v1/auth/reset-password?token={token}&new_password={password}` - Reset password
+
+### Security Features
+
+1. **Token Expiration**: Reset tokens expire after 24 hours
+2. **One-time Use**: Tokens cleared after successful reset
+3. **User Enumeration Prevention**: Same message whether user exists or not
+4. **Password Validation**: Minimum 8 characters required
 
 ---
