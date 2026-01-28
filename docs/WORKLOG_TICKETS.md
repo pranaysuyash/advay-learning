@@ -15,13 +15,13 @@
 
 | Metric | Count |
 |--------|-------|
-| ✅ DONE | 18 |
+| ✅ DONE | 19 |
 | 🟡 IN_PROGRESS | 0 |
 | 🔵 OPEN | 7 |
 | 🔴 BLOCKED | 0 |
-| **Total** | **25** |
+| **Total** | **26** |
 
-**Last Updated:** 2024-01-28 18:50 UTC
+**Last Updated:** 2024-01-28 19:05 UTC
 
 **Current Priority:** TCK-20260128-002 (Align docs/scripts - P0, blocks contributors)
 
@@ -344,6 +344,54 @@ Evidence of Completion:
 Execution log:
 - 2024-01-28 18:45 UTC | Started UI audit of Login.tsx
 - 2024-01-28 18:50 UTC | Completed audit, created artifact
+
+---
+
+#### TCK-20240128-010 :: Threat Model Audit - Auth Endpoints
+Type: AUDIT
+Owner: AI Assistant
+Created: 2024-01-28 19:00 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 19:05 UTC
+Priority: P1 (High)
+
+Description:
+Conduct threat modeling audit of authentication endpoints using threat-model-v1.0.md prompt.
+
+Scope contract:
+- In-scope:
+  - Analyze auth.py for security threats
+  - Map data flows and trust boundaries
+  - Identify prioritized threats with mitigations
+  - Focus on authentication-specific risks
+- Out-of-scope:
+  - Code changes or fixes
+  - Other security domains (camera, storage)
+- Behavior change allowed: NO
+
+Targets:
+- Repo: advay-vision-learning
+- File(s): src/backend/app/api/v1/endpoints/auth.py
+- Branch: main
+- Prompt: prompts/security/threat-model-v1.0.md
+
+Acceptance Criteria:
+- [ ] Threat model artifact created in docs/audit/
+- [ ] Data flow diagram included
+- [ ] 8 prioritized threats identified
+- [ ] Mitigation recommendations provided
+- [ ] Testing suggestions included
+
+Evidence of Completion:
+- ✅ Threat model completed using threat-model-v1.0.md
+- ✅ Artifact created: docs/audit/threat-model__src__backend__app__api__v1__endpoints__auth.py.md
+- ✅ 8 threats identified (3 HIGH, 3 MED, 2 LOW impact)
+- ✅ Data flow and trust boundaries mapped
+- ✅ Security recommendations with priorities
+
+Execution log:
+- 2024-01-28 19:00 UTC | Started threat model audit of auth endpoints
+- 2024-01-28 19:05 UTC | Completed audit, created artifact
 
 ---
 
