@@ -5656,3 +5656,107 @@ cd src/backend && uv run pytest -v
 4. **Password Validation**: Minimum 8 characters required
 
 ---
+
+---
+
+## SECURITY-HIGH-004 :: COMPLETED ✅
+
+**Type**: SECURITY  
+**Priority**: P0  
+**Status**: DONE ✅  
+**Completed**: 2026-01-29 01:20 IST  
+**Source**: `threat-model__src__backend__app__api__v1__endpoints__auth.py.md` (T2), `src__frontend__src__services__api.ts.md` (MED-SEC-001)
+
+### Changes Made
+
+**1. Auth Endpoints** (`src/backend/app/api/v1/endpoints/auth.py`) - MAJOR REFACTOR:
+
+- **Login**: Now sets `httpOnly` cookies instead of returning tokens in body
+  - `access_token` cookie: Short-lived (15 min)
+  - `refresh_token` cookie: Long-lived (7 days)
+  - Both cookies: `httpOnly`, `Secure` (in prod), `SameSite=lax`
+
+- **New Logout Endpoint**: `POST /auth/logout` - Clears both cookies
+
+- **Refresh**: Now reads refresh token from cookie, updates both cookies
+
+- **New Me Endpoint**: `GET /auth/me` - Returns current user info
+
+**2. Dependencies** (`src/backend/app/api/deps.py`):
+- Updated `get_current_user()` to read token from:
+  1. Authorization header (Bearer token) - for backward compatibility
+  2. Cookie (`access_token`) - new cookie-based auth
+
+**3. Test Infrastructure** (`src/backend/tests/conftest.py`):
+- Updated `auth_token` fixture to extract token from cookies
+
+### Tests Added
+
+**File**: `src/backend/tests/test_security.py` (expanded)
+
+- `test_login_sets_http_only_cookies` - Verifies cookies are set correctly
+- `test_logout_clears_cookies` - Verifies logout clears cookies
+- `test_protected_endpoint_with_cookie` - Cookie auth works
+- `test_protected_endpoint_without_cookie_fails` - No cookie = 401
+
+### Verification
+
+```bash
+cd src/backend && uv run pytest tests/test_security.py -v
+# Output: 15 passed, 1 skipped
+
+# All tests pass
+cd src/backend && uv run pytest -v
+# Output: 32 passed, 1 skipped, 2 warnings
+```
+
+### API Changes
+
+**Modified Endpoints**:
+- `POST /api/v1/auth/login` - Returns `{message, user}` + sets cookies (was: `{access_token, refresh_token}`)
+- `POST /api/v1/auth/refresh` - Updates cookies, returns `{message}` (was: `{access_token, refresh_token}`)
+
+**New Endpoints**:
+- `POST /api/v1/auth/logout` - Clear authentication cookies
+- `GET /api/v1/auth/me` - Get current user (uses cookie)
+
+### Security Improvements
+
+1. **XSS Protection**: Tokens not accessible via `document.cookie` (httpOnly)
+2. **CSRF Protection**: `SameSite=lax` prevents cross-site requests
+3. **Secure Transport**: `Secure` flag in production
+4. **Automatic Handling**: Cookies sent automatically with requests
+
+### Breaking Changes
+
+⚠️ **BREAKING**: Frontend must be updated to:
+1. Remove localStorage token storage
+2. Expect cookies instead of token response
+3. Handle logout via `/auth/logout` endpoint
+4. No need to manually set Authorization header (cookies handled automatically)
+
+### Frontend Updates Needed
+
+The frontend (`src/frontend/src/services/api.ts`) needs updating to:
+- Remove `localStorage.getItem('access_token')` calls
+- Remove manual `Authorization` header setting
+- Add `withCredentials: true` to axios config for CORS cookie support
+- Update login/register handlers to not expect tokens in response
+
+---
+
+## P0 SECURITY TICKETS SUMMARY
+
+**All 4 P0 security tickets completed!**
+
+| Ticket | Title | Status | Tests |
+|--------|-------|--------|-------|
+| SECURITY-HIGH-001 | Fix Timing Attack | ✅ DONE | 1 passed |
+| SECURITY-HIGH-002 | Email Verification | ✅ DONE | 4 passed |
+| SECURITY-HIGH-003 | Password Reset | ✅ DONE | 5 passed |
+| SECURITY-HIGH-004 | httpOnly Cookies | ✅ DONE | 4 passed |
+
+**Total**: 14 new security tests added, all passing (32 total tests)
+
+---
+
