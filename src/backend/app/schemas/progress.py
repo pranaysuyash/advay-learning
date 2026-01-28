@@ -11,7 +11,7 @@ class ProgressBase(BaseModel):
     content_id: str
     score: int = 0
     duration_seconds: int = 0
-    metadata: Dict[str, Any] = {}
+    meta_data: Dict[str, Any] = {}
 
 
 class ProgressCreate(ProgressBase):
@@ -23,7 +23,7 @@ class ProgressUpdate(BaseModel):
     """Progress update schema."""
     score: Optional[int] = None
     duration_seconds: Optional[int] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
 
 
 class Progress(ProgressBase):

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
     
+    # Frontend URL (for email links)
+    FRONTEND_URL: str = "http://localhost:5173"
+    
     # Storage
     USE_LOCAL_STORAGE: bool = True
     LOCAL_STORAGE_PATH: str = "./storage"

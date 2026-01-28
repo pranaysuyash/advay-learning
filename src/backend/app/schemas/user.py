@@ -10,6 +10,7 @@ class UserBase(BaseModel):
     email: EmailStr
     is_active: bool = True
     role: str = "parent"
+    email_verified: bool = False
 
 
 class UserCreate(UserBase):

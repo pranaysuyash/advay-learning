@@ -12,6 +12,8 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### Project Manager (PM)
 - Feature PRD + ticket split: `prompts/product/feature-prd-and-ticketing-v1.0.md`
 - Backlog grooming: `prompts/product/backlog-grooming-v1.0.md`
+- Next focus strategy (personas/SWOT/roadmap): `prompts/product/next-focus-strategy-v1.0.md`
+- Lightweight market scan (validation + insights): `prompts/product/lightweight-market-scan-v1.0.md`
 
 ### UI / UX
 - Repo-aware UX audit: `prompts/ui/repo-aware-ui-auditor-v1.0.md`
@@ -81,6 +83,13 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Issue sync (ticket ↔ issue): `prompts/workflow/issue-sync-v1.0.md`
 - Worklog → Issues triage (batch): `prompts/workflow/worklog-to-issues-triage-v1.0.md`
 - Issue → Worklog intake: `prompts/workflow/issue-to-ticket-intake-v1.0.md`
+- Pre-flight check (anti-drift): `prompts/workflow/pre-flight-check-v1.0.md`
+- Quick process reminder: `docs/process/PROCESS_REMINDER.md`
+- Tech debt handling (no “preexisting” excuses): `prompts/workflow/tech-debt-handling-v1.0.md`
+- Ownership policy: `docs/process/OWNERSHIP_POLICY.md`
+- Prompt curation (external → repo-native): `prompts/workflow/prompt-library-curation-v1.0.md`
+- Prompt quality gate (rubric + test cases): `prompts/workflow/prompt-quality-gate-v1.0.md`
+- Prompt style guide: `docs/process/PROMPT_STYLE_GUIDE.md`
 - Out-of-scope → next audit queue: `prompts/triage/out-of-scope-v1.0.md`
   - Appends to: `docs/AUDIT_BACKLOG.md`
 - Generalized triage (local review, no PR): `prompts/triage/generalized-triage-v1.0.md`

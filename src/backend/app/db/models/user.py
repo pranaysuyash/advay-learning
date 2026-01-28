@@ -20,6 +20,15 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
     role: Mapped[str] = mapped_column(String, default="parent")  # parent, admin
     
+    # Email verification fields
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verification_token: Mapped[str | None] = mapped_column(String, nullable=True)
+    email_verification_expires: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    
+    # Password reset fields
+    password_reset_token: Mapped[str | None] = mapped_column(String, nullable=True)
+    password_reset_expires: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow

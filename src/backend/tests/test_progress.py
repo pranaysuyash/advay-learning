@@ -24,7 +24,7 @@ class TestProgress:
                 "content_id": "A",
                 "score": 85,
                 "duration_seconds": 30,
-                "metadata": {"accuracy": 90}
+                "meta_data": {"accuracy": 90}
             }
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201

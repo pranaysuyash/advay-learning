@@ -75,15 +75,26 @@ async def test_user(client: AsyncClient) -> dict:
     
     # Register user
     response = await client.post("/api/v1/auth/register", json=user_data)
-    if response.status_code == 400:  # User might already exist
-        pass
+    if response.status_code == 200:
+        # Get verification token from response and verify email
+        # For tests, we need to manually verify since we can't access the token
+        # We'll use the resend endpoint to get a new token
+        from app.db.session import async_session
+        from app.services.user_service import UserService
+        from app.core.email import EmailService
+        
+        async with async_session() as session:
+            user = await UserService.get_by_email(session, user_data["email"])
+            if user and not user.email_verified:
+                # Manually verify for testing
+                await UserService.verify_email(session, user)
     
     return user_data
 
 
 @pytest.fixture
 async def auth_token(client: AsyncClient, test_user: dict) -> str:
-    """Get authentication token for test user."""
+    """Get authentication token for test user via cookie-based login."""
     response = await client.post(
         "/api/v1/auth/login",
         data={
@@ -92,7 +103,16 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
         }
     )
     assert response.status_code == 200
-    return response.json()["access_token"]
+    
+    # Extract token from cookies
+    cookies = response.cookies
+    access_token = cookies.get("access_token")
+    if not access_token:
+        # Fallback: try to get from response body if not in cookies
+        # This shouldn't happen with cookie-based auth, but for backward compatibility
+        access_token = response.json().get("access_token")
+    
+    return access_token
 
 
 @pytest.fixture

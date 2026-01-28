@@ -1,7 +1,7 @@
 """API dependencies."""
 
 from typing import AsyncGenerator, Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,8 +14,12 @@ from app.db.models.user import User
 from app.schemas.token import TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_PREFIX}/auth/login"
+    tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
+    auto_error=False  # Don't auto-error, we'll check cookies too
 )
+
+# Cookie name constants
+ACCESS_TOKEN_COOKIE = "access_token"
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -24,16 +28,32 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+async def get_token_from_request(request: Request) -> Optional[str]:
+    """Get token from Authorization header or cookie."""
+    # First try Authorization header (Bearer token)
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        return auth_header[7:]  # Remove "Bearer " prefix
+    
+    # Fall back to cookie
+    return request.cookies.get(ACCESS_TOKEN_COOKIE)
+
+
 async def get_current_user(
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    token: str = Depends(oauth2_scheme)
 ) -> User:
-    """Get current user from JWT token."""
+    """Get current user from JWT token (header or cookie)."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # Get token from header or cookie
+    token = await get_token_from_request(request)
+    if not token:
+        raise credentials_exception
     
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])

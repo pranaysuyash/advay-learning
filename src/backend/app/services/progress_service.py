@@ -36,7 +36,7 @@ class ProgressService:
             content_id=progress_in.content_id,
             score=progress_in.score,
             duration_seconds=progress_in.duration_seconds,
-            meta_data=progress_in.metadata,
+            meta_data=progress_in.meta_data,
         )
         db.add(progress)
         await db.commit()
