@@ -110,6 +110,9 @@ Every work unit MUST produce:
 - [ ] Check for existing tests
 - [ ] Verify no uncommitted changes in unrelated files
 - [ ] Confirm scope contract is clear
+- [ ] Stage changes appropriately:
+  - Use `git add -A` for comprehensive audit sessions
+  - Use `git add <specific-files>` for focused code changes
 ```
 
 ### Before Creating PR
@@ -414,6 +417,10 @@ prompts/
 ```bash
 # Check git status
 git status --porcelain
+
+# Stage changes (choose based on context)
+git add -A                    # Stage ALL changes (new, modified, deleted)
+git add <file1> <file2>       # Stage specific files only
 
 # Check diff stats
 git diff --stat origin/main...HEAD
