@@ -1,12 +1,18 @@
 # Questions & Clarifications
 
-**Active Questions**: 1  
-**Resolved Questions**: 0  
+**Active Questions**: 0  
+**Resolved Questions**: 1  
 **Last Updated**: 2026-01-28
 
 ---
 
 ## Active Questions
+
+*None currently*
+
+---
+
+## Resolved Questions
 
 ### Q-001: Difficulty Progression System for Kids
 **Status**: RESOLVED ✅  
@@ -108,11 +114,7 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 - docs/clarity/research/2026-01-28-difficulty-progression.md - Full research
 - docs/plans/TCK-20260128-021-implementation-plan.md - Implementation plan
 
----
 
-## Resolved Questions
-
-*None yet*
 
 ---
 

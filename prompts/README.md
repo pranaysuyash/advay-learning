@@ -77,6 +77,10 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Canonical file finder (prove what’s used): `prompts/workflow/canonical-file-finder-v1.0.md`
 - Docs index enforcer (no orphan docs): `prompts/workflow/docs-index-enforcer-v1.0.md`
 - Deprecation policy (retire safely): `prompts/workflow/deprecation-policy-v1.0.md`
+- Issues workflow policy (worklog is canonical): `docs/ISSUES_WORKFLOW.md`
+- Issue sync (ticket ↔ issue): `prompts/workflow/issue-sync-v1.0.md`
+- Worklog → Issues triage (batch): `prompts/workflow/worklog-to-issues-triage-v1.0.md`
+- Issue → Worklog intake: `prompts/workflow/issue-to-ticket-intake-v1.0.md`
 - Out-of-scope → next audit queue: `prompts/triage/out-of-scope-v1.0.md`
   - Appends to: `docs/AUDIT_BACKLOG.md`
 - Generalized triage (local review, no PR): `prompts/triage/generalized-triage-v1.0.md`

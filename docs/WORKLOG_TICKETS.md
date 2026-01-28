@@ -15,13 +15,13 @@
 
 | Metric | Count |
 |--------|-------|
-| ✅ DONE | 12 |
+| ✅ DONE | 18 |
 | 🟡 IN_PROGRESS | 0 |
 | 🔵 OPEN | 7 |
 | 🔴 BLOCKED | 0 |
-| **Total** | **19** |
+| **Total** | **25** |
 
-**Last Updated:** 2024-01-28 17:00 UTC
+**Last Updated:** 2024-01-28 18:50 UTC
 
 **Current Priority:** TCK-20260128-002 (Align docs/scripts - P0, blocks contributors)
 
@@ -298,6 +298,52 @@ Acceptance Criteria:
 - [ ] Progress charts displayed
 - [ ] Can export data
 - [ ] Settings editable
+
+---
+
+#### TCK-20240128-009 :: UI Audit - Login Page
+Type: AUDIT
+Owner: AI Assistant
+Created: 2024-01-28 18:45 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 18:50 UTC
+Priority: P2 (Medium)
+
+Description:
+Conduct UI/UX audit of Login.tsx using ui-file-audit-v1.0.md prompt.
+
+Scope contract:
+- In-scope:
+  - Analyze Login.tsx for UI/UX issues
+  - Check accessibility, usability, and maintainability
+  - Create audit artifact with findings
+  - Suggest improvements with priorities
+- Out-of-scope:
+  - Code changes or fixes
+  - Other pages/components
+- Behavior change allowed: NO
+
+Targets:
+- Repo: advay-vision-learning
+- File(s): src/frontend/src/pages/Login.tsx
+- Branch: main
+- Prompt: prompts/ui/ui-file-audit-v1.0.md
+
+Acceptance Criteria:
+- [ ] Audit artifact created in docs/audit/
+- [ ] Issues identified with severity levels
+- [ ] Test recommendations provided
+- [ ] Safe refactor suggestions included
+
+Evidence of Completion:
+- ✅ UI audit completed using ui-file-audit-v1.0.md
+- ✅ Artifact created: docs/audit/ui__src__frontend__src__pages__Login.tsx.md
+- ✅ 5 issues identified (2 P1, 3 P2)
+- ✅ Test scenarios and refactor suggestions provided
+
+Execution log:
+- 2024-01-28 18:45 UTC | Started UI audit of Login.tsx
+- 2024-01-28 18:50 UTC | Completed audit, created artifact
 
 ---
 
@@ -2253,6 +2299,47 @@ Status updates:
 
 ---
 
+### TCK-20260128-025 :: Add GitHub Issues Sync Workflow Prompts
+Type: WORKFLOW
+Owner: GPT-5.2 (Codex CLI)
+Created: 2026-01-28 22:40 IST
+Status: **DONE** ✅
+Completed: 2026-01-28 23:15 IST
+Priority: P1
+
+Description:
+Add prompts that let agents mirror worklog tickets into GitHub Issues (for visibility/collaboration) while keeping `docs/WORKLOG_TICKETS.md` as the single source of truth.
+
+Scope contract:
+- In-scope:
+  - Add prompts under `prompts/workflow/` for worklog↔issues syncing
+  - Add a small policy doc describing the “worklog is canonical” rule
+  - Update `prompts/README.md` index
+- Out-of-scope:
+  - Actually creating GitHub Issues (requires configured repo + auth)
+  - Changing any code in `src/`
+- Behavior change allowed: N/A (docs/prompts only)
+
+Outputs:
+- Policy: `docs/ISSUES_WORKFLOW.md`
+- Prompts:
+  - `prompts/workflow/issue-sync-v1.0.md`
+  - `prompts/workflow/worklog-to-issues-triage-v1.0.md`
+  - `prompts/workflow/issue-to-ticket-intake-v1.0.md`
+- Index update: `prompts/README.md`
+
+Evidence:
+- **Command**: `ls -la docs/ISSUES_WORKFLOW.md prompts/workflow/issue-sync-v1.0.md prompts/workflow/worklog-to-issues-triage-v1.0.md prompts/workflow/issue-to-ticket-intake-v1.0.md`
+- **Output**: files present (created 2026-01-28)
+- **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
+
+Status updates:
+- [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
+- [2026-01-28 23:12 IST] Created policy + prompts and updated prompt index
+- [2026-01-28 23:15 IST] Marked DONE with evidence
+
+---
+
 ## TCK-20260128-009 Amendment :: Implementation Plan Created
 
 **Status Update**: 2026-01-28 19:45 IST
@@ -3071,6 +3158,281 @@ Risks/notes:
 
 ---
 
+## TCK-20240128-013 :: Initial project commit
+Type: INFRASTRUCTURE
+Owner: GitHub Copilot
+Created: 2024-01-28 17:05 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 17:10 UTC
+
+Scope contract:
+- In-scope:
+  - Verify .gitignore excludes unwanted files (.env, venv, node_modules, etc.)
+  - Stage all project files
+  - Create proper commit message
+  - Execute initial commit
+- Out-of-scope:
+  - Code changes
+  - Additional commits
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): All project files
+- Branch: main
+
+Inputs:
+- .gitignore: Comprehensive exclusions for Python, Node, IDE, env files
+- Files to commit: 197 files (docs, prompts, src, tests, scripts)
+
+Plan:
+- Check .gitignore completeness
+- Verify no unwanted files present
+- Git add -A
+- Commit with detailed message
+
+Execution log:
+- 2024-01-28 17:05 UTC | Verified .gitignore excludes .venv, node_modules, .env, *.db, logs, etc.
+- 2024-01-28 17:06 UTC | Confirmed no unwanted files in working directory
+- 2024-01-28 17:07 UTC | Staged all files with git add -A
+- 2024-01-28 17:08 UTC | Committed with detailed message: "Initial commit: Complete learning for kids project setup"
+- 2024-01-28 17:10 UTC | Commit successful: ffff591 (197 files, 37,070 insertions)
+
+Status updates:
+- 2024-01-28 17:05 UTC | OPEN → IN_PROGRESS
+- 2024-01-28 17:10 UTC | IN_PROGRESS → DONE
+
+Next actions:
+- Push to remote repository if needed
+- Continue with development tasks
+
+Risks/notes:
+- Repository now has version control
+- All project artifacts committed safely
+- Ready for collaborative development
+
+---
+
+## TCK-20240128-014 :: Audit src/backend/app/api/v1/endpoints/users.py
+Type: AUDIT
+Owner: GitHub Copilot
+Created: 2024-01-28 17:15 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 17:30 UTC
+
+Scope contract:
+- In-scope:
+  - Technical audit of user management endpoints
+  - Security and permission analysis
+  - Input validation and error handling review
+- Out-of-scope:
+  - Functional audit (user experience)
+  - Service layer changes
+  - Frontend integration
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): src/backend/app/api/v1/endpoints/users.py
+- Branch: main
+- Prompt used: prompts/audit/audit-v1.5.1.md
+
+Inputs:
+- Prompt used: prompts/audit/audit-v1.5.1.md
+- Previous audits: Multiple backend files audited
+
+Plan:
+- Analyze user management endpoints
+- Check security, permissions, validations
+- Create audit artifact with findings
+- Update worklog
+
+Execution log:
+- 2024-01-28 17:15 UTC | Started audit of users.py
+- 2024-01-28 17:20 UTC | Identified 7 findings: no rate limiting, insufficient permissions, no input validation, no logging, no email conflict check, no profile limits, no error handling
+- 2024-01-28 17:25 UTC | Created audit artifact: docs/audit/src__backend__app__api__v1__endpoints__users.py.md
+- 2024-01-28 17:30 UTC | Updated worklog ticket
+
+Status updates:
+- 2024-01-28 17:15 UTC | OPEN → IN_PROGRESS
+- 2024-01-28 17:30 UTC | IN_PROGRESS → DONE
+
+Next actions:
+1) Audit next endpoint: profiles.py
+2) Consider remediation for rate limiting and permissions
+
+Risks/notes:
+- MEDIUM risk (user data access)
+- Missing rate limiting exposes to abuse
+- Permission logic may need expansion for family accounts
+
+---
+
+## TCK-20240128-015 :: Audit src/backend/app/api/v1/endpoints/progress.py
+Type: AUDIT
+Owner: GitHub Copilot
+Created: 2024-01-28 17:35 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 17:50 UTC
+
+Scope contract:
+- In-scope:
+  - Technical audit of progress tracking endpoints
+  - Data validation and performance analysis
+  - Security and access control review
+- Out-of-scope:
+  - Functional audit (learning experience)
+  - Analytics algorithm changes
+  - Achievement system
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): src/backend/app/api/v1/endpoints/progress.py
+- Branch: main
+- Prompt used: prompts/audit/audit-v1.5.1.md
+
+Inputs:
+- Prompt used: prompts/audit/audit-v1.5.1.md
+- Previous audits: Multiple backend endpoints audited
+
+Plan:
+- Analyze progress endpoints for technical issues
+- Check validations, performance, security
+- Create audit artifact with findings
+- Update worklog
+
+Execution log:
+- 2024-01-28 17:35 UTC | Started audit of progress.py
+- 2024-01-28 17:40 UTC | Identified 7 findings: no rate limiting, no input validation, hardcoded threshold, no logging, no error handling, inefficient stats, no progress validation
+- 2024-01-28 17:45 UTC | Created audit artifact: docs/audit/src__backend__app__api__v1__endpoints__progress.py.md
+- 2024-01-28 17:50 UTC | Updated worklog ticket
+
+Status updates:
+- 2024-01-28 17:35 UTC | OPEN → IN_PROGRESS
+- 2024-01-28 17:50 UTC | IN_PROGRESS → DONE
+
+Next actions:
+1) Audit frontend files for technical issues
+2) Consider remediation for validation and performance issues
+
+Risks/notes:
+- MEDIUM risk (learning data integrity)
+- Hardcoded completion logic limits flexibility
+- Stats calculation may not scale with usage
+
+---
+
+## TCK-20240128-016 :: Audit src/frontend/src/services/api.ts
+Type: AUDIT
+Owner: GitHub Copilot
+Created: 2024-01-28 17:55 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 18:10 UTC
+
+Scope contract:
+- In-scope:
+  - Technical audit of frontend API service layer
+  - Security analysis of token handling
+  - Error handling and reliability review
+- Out-of-scope:
+  - Functional audit (user experience)
+  - Backend API changes
+  - UI component auditing
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): src/frontend/src/services/api.ts
+- Branch: main
+- Prompt used: prompts/audit/audit-v1.5.1.md
+
+Inputs:
+- Prompt used: prompts/audit/audit-v1.5.1.md
+- Previous audits: Multiple backend and frontend files audited
+
+Plan:
+- Analyze API service for technical issues
+- Check security, error handling, type safety
+- Create audit artifact with findings
+- Update worklog
+
+Execution log:
+- 2024-01-28 17:55 UTC | Started audit of api.ts
+- 2024-01-28 18:00 UTC | Identified 8 findings: insecure token storage, no CSRF, limited error handling, silent refresh failure, no deduplication, type issues, no logging, hardcoded timeout
+- 2024-01-28 18:05 UTC | Created audit artifact: docs/audit/src__frontend__src__services__api.ts.md
+- 2024-01-28 18:10 UTC | Updated worklog ticket
+
+Status updates:
+- 2024-01-28 17:55 UTC | OPEN → IN_PROGRESS
+- 2024-01-28 18:10 UTC | IN_PROGRESS → DONE
+
+Next actions:
+1) Audit authStore.ts for state management issues
+2) Consider remediation for token security
+
+Risks/notes:
+- MEDIUM risk (frontend security)
+- localStorage token storage vulnerable to XSS
+- Poor error handling affects user experience
+
+---
+
+## TCK-20240128-017 :: Audit src/frontend/src/store/authStore.ts
+Type: AUDIT
+Owner: GitHub Copilot
+Created: 2024-01-28 18:15 UTC
+Status: **DONE** ✅
+Completed: 2024-01-28 18:30 UTC
+
+Scope contract:
+- In-scope:
+  - Technical audit of authentication state management
+  - Security analysis of token handling
+  - Error handling and persistence review
+- Out-of-scope:
+  - Functional audit (auth flow UX)
+  - Component-level auditing
+  - Backend auth changes
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): src/frontend/src/store/authStore.ts
+- Branch: main
+- Prompt used: prompts/audit/audit-v1.5.1.md
+
+Inputs:
+- Prompt used: prompts/audit/audit-v1.5.1.md
+- Previous audits: Multiple backend and frontend files audited
+
+Plan:
+- Analyze auth store for technical issues
+- Check state management, security, error handling
+- Create audit artifact with findings
+- Update worklog
+
+Execution log:
+- 2024-01-28 18:15 UTC | Started audit of authStore.ts
+- 2024-01-28 18:20 UTC | Identified 7 findings: no token expiration, unsafe auto-login, incomplete error handling, missing loading state, unsafe types, no refresh scheduling, synchronous logout
+- 2024-01-28 18:25 UTC | Created audit artifact: docs/audit/src__frontend__src__store__authStore.ts.md
+- 2024-01-28 18:30 UTC | Updated worklog ticket
+
+Status updates:
+- 2024-01-28 18:15 UTC | OPEN → IN_PROGRESS
+- 2024-01-28 18:30 UTC | IN_PROGRESS → DONE
+
+Next actions:
+1) Audit Login.tsx for UI/UX issues
+2) Consider remediation for token expiration handling
+
+Risks/notes:
+- MEDIUM risk (auth reliability)
+- No token expiration checking leads to silent failures
+- Auto-login assumptions may break with email verification
+
+---
+
 ## TCK-20240128-012 :: Functional Audit src/backend/app/api/v1/endpoints/auth.py
 Type: AUDIT
 Owner: GitHub Copilot
@@ -3227,3 +3589,67 @@ Implemented adaptive difficulty progression where kids unlock letters in batches
 
 ---
 
+
+---
+
+## BUGFIX: Dashboard Real Progress Data
+
+**Issue**: Dashboard showing mock/random data instead of real progress  
+**Status**: FIXED ✅  
+**Fixed**: 2026-01-28 21:45 IST
+
+### Problem
+Dashboard stats were using `Math.random()` to generate fake progress:
+- `lettersLearned: Math.floor(Math.random() * alphabet.letters.length)`
+- `averageAccuracy: Math.floor(Math.random() * 30) + 70`
+- `totalTime: Math.floor(Math.random() * 120) + 30`
+
+### Solution
+Connected Dashboard to `useProgressStore` for real data:
+
+**Changes to Dashboard.tsx**:
+
+1. **Import progress store**:
+   ```typescript
+   import { useAuthStore, useProfileStore, useSettingsStore, useProgressStore } from '../store';
+   ```
+
+2. **Real stats calculation**:
+   ```typescript
+   const { letterProgress, getMasteredLettersCount } = useProgressStore();
+   
+   // Real mastered count
+   const masteredCount = getMasteredLettersCount(lang);
+   
+   // Real average accuracy from attempts
+   const averageAccuracy = attemptsWithAccuracy.length > 0
+     ? Math.round(attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) / attemptsWithAccuracy.length)
+     : 0;
+   
+   // Estimated time (2 minutes per attempt)
+   const estimatedTimeMinutes = totalAttempts * 2;
+   ```
+
+3. **Real letter progress display**:
+   - Shows actual mastery status per letter
+   - Shows best accuracy percentage
+   - Progress bars reflect real accuracy
+
+### Stats Now Showing Real Data
+
+| Stat | Before (Mock) | After (Real) |
+|------|---------------|--------------|
+| Letters Learned | Random | Actual mastered count |
+| Average Accuracy | Random 70-100% | Calculated from attempts |
+| Time Spent | Random 30-150 min | Estimated from attempt count |
+| Letter Progress | Fake learned/not learned | Real mastery + accuracy |
+
+### Files Modified
+- `src/frontend/src/pages/Dashboard.tsx`
+
+### Verification
+- ✅ Type check passes
+- ✅ Lint passes
+- ✅ Dashboard now shows real progress from progressStore
+
+---

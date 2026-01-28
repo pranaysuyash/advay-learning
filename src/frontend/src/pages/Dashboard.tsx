@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useAuthStore, useProfileStore, useSettingsStore } from '../store';
+import { useAuthStore, useProfileStore, useSettingsStore, useProgressStore } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 
@@ -60,19 +60,39 @@ export function Dashboard() {
     }
   };
 
-  // Transform profiles to include progress data
+  // Get real progress data
+  const { letterProgress, getMasteredLettersCount } = useProgressStore();
+
+  // Transform profiles to include REAL progress data
   const children: ChildProfile[] = profiles.map(profile => {
     const alphabet = getAlphabet(profile.preferred_language || 'english');
+    const lang = profile.preferred_language || 'english';
+    const langProgress = letterProgress[lang] || [];
+    
+    // Calculate real stats
+    const masteredCount = getMasteredLettersCount(lang);
+    const totalLetters = alphabet.letters.length;
+    
+    // Calculate average accuracy from attempts
+    const attemptsWithAccuracy = langProgress.filter(p => p.attempts > 0);
+    const averageAccuracy = attemptsWithAccuracy.length > 0
+      ? Math.round(attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) / attemptsWithAccuracy.length)
+      : 0;
+    
+    // Estimate time spent (5 minutes per attempt as rough estimate)
+    const totalAttempts = langProgress.reduce((sum, p) => sum + p.attempts, 0);
+    const estimatedTimeMinutes = totalAttempts * 2; // ~2 minutes per tracing session
+    
     return {
       id: profile.id,
       name: profile.name,
       age: profile.age || 5,
-      preferredLanguage: profile.preferred_language || 'english',
+      preferredLanguage: lang,
       progress: {
-        lettersLearned: Math.floor(Math.random() * alphabet.letters.length), // Mock data
-        totalLetters: alphabet.letters.length,
-        averageAccuracy: Math.floor(Math.random() * 30) + 70, // 70-100%
-        totalTime: Math.floor(Math.random() * 120) + 30, // 30-150 minutes
+        lettersLearned: masteredCount,
+        totalLetters: totalLetters,
+        averageAccuracy: averageAccuracy,
+        totalTime: estimatedTimeMinutes,
       },
     };
   });
@@ -244,33 +264,46 @@ export function Dashboard() {
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-4">Learning Progress</h2>
               <div className="space-y-4">
-                {getAlphabet(selectedChildData.preferredLanguage).letters.slice(0, 5).map((letter, i) => {
-                  const learned = i < selectedChildData.progress.lettersLearned;
-                  return (
-                    <div key={letter.char} className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
-                        learned ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'
-                      }`}>
-                        {letter.char}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm">{letter.name}</span>
-                          <span className="text-sm text-white/60">
-                            {learned ? '✓ Learned' : '○ Not learned'}
-                          </span>
+                {(() => {
+                  const lang = selectedChildData.preferredLanguage;
+                  const langProgress = letterProgress[lang] || [];
+                  const alphabet = getAlphabet(lang);
+                  
+                  // Show first 5 letters with real progress
+                  return alphabet.letters.slice(0, 5).map((letter) => {
+                    const letterProg = langProgress.find(p => p.letter === letter.char);
+                    const learned = letterProg?.mastered || false;
+                    const accuracy = letterProg?.bestAccuracy || 0;
+                    
+                    return (
+                      <div key={letter.char} className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
+                          learned ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'
+                        }`}>
+                          {letter.char}
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all ${
-                              learned ? 'bg-green-500 w-full' : 'bg-white/20 w-0'
-                            }`}
-                          />
+                        <div className="flex-1">
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm">{letter.name}</span>
+                            <span className="text-sm text-white/60">
+                              {learned 
+                                ? `✓ Mastered (${Math.round(accuracy)}%)` 
+                                : accuracy > 0 
+                                  ? `○ ${Math.round(accuracy)}% best`
+                                  : '○ Not started'}
+                            </span>
+                          </div>
+                          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full transition-all bg-green-500"
+                              style={{ width: `${accuracy}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
 

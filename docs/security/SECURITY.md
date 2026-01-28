@@ -106,6 +106,80 @@ Landmarks Used for Interaction
 
 Only learning progress and settings (never camera data).
 
+## CORS (Cross-Origin Resource Sharing) Policy
+
+### Current Configuration
+
+The backend CORS is configured in `src/backend/app/main.py`:
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,  # Default: ["http://localhost:5173", "http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+### Security Considerations
+
+⚠️ **WARNING**: The current configuration allows:
+- All HTTP methods (`["*"]`)
+- All headers (`["*"]`)
+- Credentials (cookies, auth headers)
+
+**Risk**: If `ALLOWED_ORIGINS` is set to `["*"]` (wildcard) with `allow_credentials=True`, this creates a security vulnerability where malicious websites could make authenticated requests.
+
+### Recommended Configurations
+
+**Development (Safe)**:
+```python
+ALLOWED_ORIGINS=["http://localhost:5173", "http://localhost:3000"]
+allow_credentials=True
+allow_methods=["GET", "POST", "PUT", "DELETE"]
+allow_headers=["Authorization", "Content-Type"]
+```
+
+**Production (Safe)**:
+```python
+ALLOWED_ORIGINS=["https://yourdomain.com"]  # Explicit domains only
+allow_credentials=True
+allow_methods=["GET", "POST", "PUT", "DELETE"]
+allow_headers=["Authorization", "Content-Type"]
+allow_origin_regex=None  # Don't use regex in production
+```
+
+**Unsafe (DO NOT USE)**:
+```python
+ALLOWED_ORIGINS=["*"]  # Wildcard with credentials = DANGEROUS
+allow_credentials=True
+```
+
+### Runtime Safety Check
+
+The application logs a warning on startup if potentially dangerous CORS config is detected:
+```python
+if "*" in settings.ALLOWED_ORIGINS and allow_credentials:
+    logger.warning("CORS: Wildcard origin with credentials is insecure!")
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Comma-separated list of allowed origins |
+
+### Best Practices
+
+1. **Never use wildcard (`*`) with credentials** in production
+2. **Explicitly list domains** that need access
+3. **Limit HTTP methods** to only those needed (GET, POST, etc.)
+4. **Limit headers** to only those needed
+5. **Regular audits** of CORS configuration
+
+---
+
 ## Network Security
 
 ### Default: Offline

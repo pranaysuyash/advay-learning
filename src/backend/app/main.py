@@ -1,5 +1,6 @@
 """Main FastAPI application entry point."""
 
+import logging
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
@@ -9,6 +10,9 @@ from app.core.health import get_health_status
 from app.api.v1.api import api_router
 from app.db.session import get_db
 
+# Setup logging
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title="Advay Vision Learning API",
     description="AI-powered educational platform with computer vision",
@@ -16,6 +20,14 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# CORS Security Check
+if "*" in settings.ALLOWED_ORIGINS:
+    logger.warning(
+        "SECURITY WARNING: CORS ALLOWED_ORIGINS contains wildcard '*'. "
+        "This is insecure when combined with allow_credentials=True. "
+        "See docs/security/SECURITY.md#cors-cross-origin-resource-sharing-policy"
+    )
 
 # CORS
 app.add_middleware(
