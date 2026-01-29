@@ -8,7 +8,7 @@ interface MascotProps {
     enableVideo?: boolean;
 }
 
-const MASCOT_IMAGE_SRC = '/assets/images/pip_mascot.png';
+const MASCOT_IMAGE_SRC = '/assets/images/red_panda_no_bg.png';
 const MASCOT_VIDEO_SRC = '/assets/videos/pip_alpha_v2.webm';
 
 // Random celebration triggers (in milliseconds)
@@ -81,15 +81,26 @@ export function Mascot({
         };
     }, [enableVideo, isVideoLoaded, showVideo, scheduleNextCelebration]);
 
-    // Preload video on mount
+    // Preload video on mount and set loaded state
     useEffect(() => {
         if (enableVideo) {
+            console.log('[Mascot] Preloading video...');
             // Create a hidden video element to preload
             const preloadVideo = document.createElement('video');
             preloadVideo.src = MASCOT_VIDEO_SRC;
             preloadVideo.preload = 'auto';
+            
+            preloadVideo.onloadeddata = () => {
+                console.log('[Mascot] Video preloaded successfully');
+                setIsVideoLoaded(true);
+            };
+            
+            preloadVideo.onerror = (e) => {
+                console.error('[Mascot] Video preload failed:', e);
+                setIsVideoLoaded(false);
+            };
+            
             preloadVideo.load();
-            console.log('[Mascot] Preloading video...');
         }
     }, [enableVideo]);
 
@@ -184,13 +195,9 @@ export function Mascot({
                         src={MASCOT_VIDEO_SRC}
                         autoPlay
                         onEnded={handleVideoEnded}
-                        onLoadedData={() => {
-                            console.log('[Mascot] Video loaded successfully');
-                            setIsVideoLoaded(true);
-                        }}
                         onError={(e) => {
-                            console.error('[Mascot] Video failed to load:', e);
-                            setIsVideoLoaded(false);
+                            console.error('[Mascot] Video playback error:', e);
+                            setShowVideo(false);
                         }}
                         className="absolute inset-0 w-full h-full object-contain"
                         playsInline

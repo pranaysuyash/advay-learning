@@ -21,9 +21,9 @@
 | -------------- | ------ |
 | ✅ DONE        | 53     |
 | 🟡 IN_PROGRESS | 0      |
-| 🔵 OPEN        | 7      |
+| 🔵 OPEN        | 12     |
 | 🔴 BLOCKED     | 0      |
-| **Total**      | **60** |
+| **Total**      | **65** |
 
 **Last Updated:** 2026-01-29 17:30 UTC
 
@@ -11593,8 +11593,492 @@ Status: **DONE**
 **Completion:**
 - Status: DONE ✅
 - Timestamp: 2026-01-29 17:30 UTC
-- Artifact: `docs/audit/authentication_system_audit_20260129.md`
+- Artifact: `docs/audit/authentication_system_audit__TCK-20260129-080.md`
 - Evidence: Comprehensive audit document with 21 sections
 - Verification: All discovery commands successful, findings documented
+
+---
+
+### TCK-20260129-081 :: Implement Token Revocation Mechanism (M1)
+
+Type: REMEDIATION
+Owner: TBD
+Created: 2026-01-29 17:45 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Add JWT ID (jti) claims to access and refresh tokens
+  - Create database table for token revocation tracking
+  - Implement revocation checks in token validation
+  - Add admin endpoint for token revocation
+  - Update token creation functions in security.py
+- Out-of-scope:
+  - Frontend UI for token management
+  - Comprehensive token analytics
+  - Multi-factor authentication integration
+- Behavior change allowed: YES (adding jti claims, revocation functionality)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/backend/app/core/security.py`, `src/backend/app/db/models/`, `src/backend/app/api/`
+- Branch: main
+- Base commit: 3925d36
+
+**Inputs:**
+- Audit findings: M1 from TCK-20260129-080
+- Reference implementation: OAuth2 token revocation RFC 7009
+- Database: SQLAlchemy + PostgreSQL
+
+**Requirements:**
+1. Add `jti` (JWT ID) claim to all tokens with UUID
+2. Create `revoked_tokens` table with `jti`, `user_id`, `revoked_at`, `reason`
+3. Add `is_token_revoked(jti: str)` function to check revocation status
+4. Modify token validation to check revocation status
+5. Add admin endpoint `POST /admin/tokens/{jti}/revoke`
+6. Add tests for revocation functionality
+
+**Acceptance Criteria:**
+- ✅ Tokens include unique jti claims
+- ✅ Revoked tokens are rejected during validation
+- ✅ Admin can revoke specific tokens via API
+- ✅ Revocation persists across server restarts
+- ✅ Performance impact < 5ms per token validation
+- ✅ Comprehensive test coverage (unit + integration)
+
+**Implementation Plan:**
+1. **Database Schema** (1 day)
+   - Create migration for revoked_tokens table
+   - Add indexes for performance
+
+2. **Token Enhancement** (1 day)
+   - Modify `create_access_token()` and `create_refresh_token()`
+   - Add jti generation and storage
+
+3. **Revocation Logic** (1 day)
+   - Implement revocation check function
+   - Integrate with token validation
+
+4. **Admin API** (0.5 day)
+   - Add revocation endpoint
+   - Add proper authorization
+
+5. **Testing** (1 day)
+   - Unit tests for revocation logic
+   - Integration tests for full flow
+   - Performance tests
+
+**Risk Assessment:**
+- **Security Risk**: HIGH (if not implemented, compromised tokens remain valid)
+- **Implementation Risk**: MEDIUM (database changes, token format changes)
+- **Compatibility Risk**: LOW (backward compatible, old tokens without jti still work)
+
+**Dependencies:**
+- None (independent feature)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 4-5 days
+
+**Priority:** HIGH (Security-critical feature)
+
+---
+
+### TCK-20260129-082 :: Implement Refresh Token Rotation (M2)
+
+Type: REMEDIATION
+Owner: TBD
+Created: 2026-01-29 17:50 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Track refresh tokens in database with versioning
+  - Invalidate old refresh tokens on rotation
+  - Implement refresh token reuse detection
+  - Update refresh endpoint logic
+  - Add comprehensive tests
+- Out-of-scope:
+  - Token revocation UI
+  - Multi-device token management
+  - Session management features
+- Behavior change allowed: YES (refresh token rotation logic)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/backend/app/api/v1/endpoints/auth.py`, `src/backend/app/db/models/`, `src/backend/app/services/`
+- Branch: main
+- Base commit: 3925d36
+
+**Inputs:**
+- Audit findings: M2 from TCK-20260129-080
+- Reference: OAuth2 refresh token rotation best practices
+- Database: SQLAlchemy + PostgreSQL
+
+**Requirements:**
+1. Add `refresh_tokens` table with `token_hash`, `user_id`, `version`, `expires_at`
+2. Store refresh token hash (not raw token) for security
+3. Implement version-based rotation (increment version on each refresh)
+4. Invalidate all previous versions when new token issued
+5. Detect and prevent refresh token reuse attacks
+6. Add comprehensive test coverage
+
+**Acceptance Criteria:**
+- ✅ Each refresh creates new token with incremented version
+- ✅ Old refresh tokens are invalidated immediately
+- ✅ Reuse of old tokens is detected and rejected
+- ✅ Performance impact < 10ms per refresh operation
+- ✅ Database storage uses token hashes (not raw tokens)
+- ✅ Comprehensive test coverage (unit + integration)
+
+**Implementation Plan:**
+1. **Database Schema** (1 day)
+   - Create refresh_tokens table with proper indexes
+   - Add foreign key to users table
+
+2. **Token Storage** (1 day)
+   - Implement secure token hash storage
+   - Add version tracking logic
+
+3. **Rotation Logic** (1 day)
+   - Modify refresh endpoint to implement rotation
+   - Add version increment on each refresh
+   - Invalidate previous versions
+
+4. **Reuse Detection** (0.5 day)
+   - Implement token reuse detection
+   - Add security logging for suspicious activity
+
+5. **Testing** (1 day)
+   - Unit tests for rotation logic
+   - Integration tests for full refresh flow
+   - Security tests for reuse prevention
+
+**Risk Assessment:**
+- **Security Risk**: HIGH (stolen refresh tokens can be reused)
+- **Implementation Risk**: MEDIUM (database changes, complex logic)
+- **Compatibility Risk**: MEDIUM (changes refresh token behavior)
+
+**Dependencies:**
+- None (independent of token revocation)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 4-5 days
+
+**Priority:** HIGH (Security-critical feature)
+
+**Related Tickets:**
+- TCK-20260129-081 (Token Revocation) - Complementary security feature
+
+---
+
+### TCK-20260129-083 :: Add Comprehensive Refresh Tests (M3)
+
+Type: REMEDIATION
+Owner: TBD
+Created: 2026-01-29 17:55 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Add unit tests for refresh endpoint
+  - Add integration tests for refresh flow
+  - Test token expiration scenarios
+  - Test invalid token rejection
+  - Test edge cases and error conditions
+- Out-of-scope:
+  - Frontend test integration
+  - Performance benchmarking
+  - Load testing
+- Behavior change allowed: NO (test-only changes)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/backend/tests/test_auth.py`, `src/backend/tests/test_security.py`
+- Branch: main
+- Base commit: 3925d36
+
+**Inputs:**
+- Audit findings: M3 from TCK-20260129-080
+- Existing test patterns in test suite
+- Refresh endpoint implementation
+
+**Requirements:**
+1. Test successful refresh with valid token
+2. Test refresh with invalid token (401 response)
+3. Test refresh with expired token (401 response)
+4. Test refresh with malformed token (401 response)
+5. Test refresh token rotation (if implemented)
+6. Test rate limiting on refresh endpoint
+7. Test cookie handling in refresh response
+
+**Acceptance Criteria:**
+- ✅ 100% code coverage for refresh endpoint
+- ✅ All edge cases tested and documented
+- ✅ Tests pass in CI/CD pipeline
+- ✅ Test execution time < 200ms per test
+- ✅ No regressions in existing functionality
+- ✅ Clear test documentation and assertions
+
+**Test Cases to Implement:**
+1. `test_refresh_success()` - Valid token refresh
+2. `test_refresh_invalid_token()` - Invalid token rejection
+3. `test_refresh_expired_token()` - Expired token handling
+4. `test_refresh_malformed_token()` - Malformed token rejection
+5. `test_refresh_rate_limiting()` - Rate limit enforcement
+6. `test_refresh_cookie_handling()` - Cookie settings verification
+7. `test_refresh_token_rotation()` - Rotation logic (if implemented)
+8. `test_refresh_user_inactive()` - Inactive user handling
+
+**Implementation Plan:**
+1. **Test Setup** (0.5 day)
+   - Create test fixtures and helpers
+   - Set up test database with refresh tokens
+
+2. **Core Tests** (1 day)
+   - Implement success and failure test cases
+   - Add edge case testing
+
+3. **Integration Tests** (0.5 day)
+   - Test full refresh flow with authentication
+   - Test cookie handling and security settings
+
+4. **Documentation** (0.25 day)
+   - Add test documentation
+   - Update test coverage reports
+
+**Risk Assessment:**
+- **Security Risk**: MEDIUM (untested refresh endpoint could have vulnerabilities)
+- **Implementation Risk**: LOW (test-only changes)
+- **Compatibility Risk**: LOW (no behavior changes)
+
+**Dependencies:**
+- None (independent testing work)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 2-3 days
+
+**Priority:** MEDIUM (Important but not security-critical)
+
+**Related Tickets:**
+- TCK-20260129-082 (Refresh Rotation) - Tests will validate this feature
+- TCK-20260129-081 (Token Revocation) - Tests may cover revocation scenarios
+
+---
+
+### TCK-20260129-084 :: Add Request Schema for Refresh Endpoint (L1)
+
+Type: REMEDIATION
+Owner: TBD
+Created: 2026-01-29 18:00 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Create Pydantic model for refresh request
+  - Update refresh endpoint to use schema
+  - Add request validation
+  - Update OpenAPI documentation
+- Out-of-scope:
+  - Major API contract changes
+  - Frontend integration
+  - Performance optimization
+- Behavior change allowed: NO (schema validation only)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/backend/app/schemas/token.py`, `src/backend/app/api/v1/endpoints/auth.py`
+- Branch: main
+- Base commit: 3925d36
+
+**Inputs:**
+- Audit findings: L1 from TCK-20260129-080
+- Existing schema patterns in codebase
+- Pydantic documentation
+
+**Requirements:**
+1. Create `TokenRefreshRequest` Pydantic model
+2. Add proper field validation and documentation
+3. Update refresh endpoint to use typed request body
+4. Ensure backward compatibility with existing clients
+5. Update OpenAPI schema documentation
+6. Add minimal test coverage
+
+**Acceptance Criteria:**
+- ✅ Request schema properly documented in OpenAPI
+- ✅ Input validation working correctly
+- ✅ Backward compatibility maintained
+- ✅ Clear error messages for validation failures
+- ✅ Test coverage for schema validation
+- ✅ No breaking changes to existing API
+
+**Implementation Plan:**
+1. **Schema Creation** (0.25 day)
+   - Create TokenRefreshRequest model
+   - Add field documentation and examples
+
+2. **Endpoint Update** (0.25 day)
+   - Modify refresh endpoint signature
+   - Add schema validation
+
+3. **Documentation** (0.1 day)
+   - Update OpenAPI docs
+   - Add examples to API documentation
+
+4. **Testing** (0.1 day)
+   - Add schema validation tests
+   - Test error handling
+
+**Risk Assessment:**
+- **Security Risk**: LOW (improves API contract clarity)
+- **Implementation Risk**: LOW (simple schema addition)
+- **Compatibility Risk**: LOW (backward compatible)
+
+**Dependencies:**
+- None (independent improvement)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 0.5-1 day
+
+**Priority:** LOW (Nice-to-have improvement)
+
+**Related Tickets:**
+- TCK-20260129-083 (Refresh Tests) - Tests should cover schema validation
+
+---
+
+### TCK-20260129-085 :: Fix Registration Status Code (L2)
+
+Type: REMEDIATION
+Owner: TBD
+Created: 2026-01-29 18:05 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Change registration endpoint status code from 200 to 201
+  - Update tests to expect 201 status code
+  - Update documentation
+- Out-of-scope:
+  - Major API contract changes
+  - Frontend integration changes
+  - Other endpoint status code changes
+- Behavior change allowed: YES (status code change)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/backend/app/api/v1/endpoints/auth.py`, `src/backend/tests/test_auth.py`
+- Branch: main
+- Base commit: 3925d36
+
+**Inputs:**
+- Audit findings: L2 from TCK-20260129-080
+- REST API best practices
+- HTTP status code specifications
+
+**Requirements:**
+1. Change `@router.post("/register")` to return `status_code=201`
+2. Update test assertions to expect 201 status code
+3. Update API documentation to reflect change
+4. Ensure backward compatibility where possible
+5. Add deprecation notice if needed
+
+**Acceptance Criteria:**
+- ✅ Registration endpoint returns 201 status code
+- ✅ All tests pass with new status code
+- ✅ API documentation updated
+- ✅ No breaking changes to client functionality
+- ✅ Follows REST conventions for resource creation
+- ✅ Clear migration path documented
+
+**Implementation Plan:**
+1. **Code Change** (0.1 day)
+   - Modify registration endpoint status code
+   - Update response model if needed
+
+2. **Test Updates** (0.1 day)
+   - Update test assertions
+   - Add test for status code verification
+
+3. **Documentation** (0.1 day)
+   - Update OpenAPI documentation
+   - Add changelog entry
+
+4. **Verification** (0.1 day)
+   - Run full test suite
+   - Verify no regressions
+
+**Risk Assessment:**
+- **Security Risk**: LOW (status code change only)
+- **Implementation Risk**: LOW (simple change)
+- **Compatibility Risk**: LOW (minor API contract change)
+
+**Dependencies:**
+- None (independent fix)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 0.25-0.5 day
+
+**Priority:** LOW (REST convention compliance)
+
+**Related Tickets:**
+- None
+
+**Migration Notes:**
+- Clients expecting 200 should update to expect 201
+- Both status codes may be accepted during transition period
+- Change aligns with HTTP/REST best practices
+
+---
+
+### TCK-20260129-079 :: CRITICAL FIX - Add greenlet to Backend Dependencies
+
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-29 19:40 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 19:45 IST
+
+Issue:
+Backend failed with "greenlet library is required" error. SQLAlchemy async requires greenlet at runtime, but it was only in dev dependencies.
+
+Root Cause:
+- greenlet was in [dependency-groups] dev but not in main dependencies
+- SQLAlchemy async operations require greenlet for coroutine support
+- This was a pre-existing bug that manifested when venv was rebuilt
+
+Fix:
+Added `greenlet>=3.0.0` to main dependencies in src/backend/pyproject.toml
+
+Files Modified:
+- src/backend/pyproject.toml
+
+Impact:
+- Backend now starts correctly without manual greenlet installation
+- Database connections work properly
+
+---
+
+### TCK-20260129-080 :: Update Mascot Image to red_panda_no_bg.png
+
+Type: IMPROVEMENT
+Owner: AI Assistant
+Created: 2026-01-29 19:45 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 19:45 IST
+
+Changed mascot static image from pip_mascot.png to red_panda_no_bg.png
+
+Files Modified:
+- src/frontend/src/components/Mascot.tsx
 
 ---
