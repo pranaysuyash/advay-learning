@@ -696,7 +696,7 @@ Evidence:
 - **Output**: TypeScript compilation PASSES (no errors)
 - **Command**: `cd src/frontend && npm run lint 2>&1 | grep -c "error.*react-hooks"`
 - **Output**: 6 React Hooks violations found
-- **Code Analysis**: 
+- **Code Analysis**:
   - Main hooks (useState, useRef) moved to lines 28-45 ✅
   - Early return at lines 50-53 🟡
   - Remaining hooks (useEffect, useCallback) after early return ❌
@@ -765,6 +765,7 @@ Execution log:
 - 2026-01-29 12:30 UTC: Observed Single component export: Game\(\) function at line 29
 
 Step 2 - Threshold Heuristics:
+
 - LOC trigger: 713 LOC > 300-500 threshold - REFACTOR RECOMMENDED
 - Churn trigger: 4 commits < 5 - LOW churn \(no urgent refactor needed based on activity\)
 - Complexity trigger: MIXED - some complex gesture tracking logic, but well-organized with comments
@@ -774,6 +775,7 @@ Step 3 - Refactor Type Decision:
 DECISION: DEFER SPLITTING - USE EXTRACTED SUB-COMPONENTS INSTEAD
 
 Rationale:
+
 - Component is large \(713 LOC\) but currently functions well
 - Low churn \(4 commits\) indicates code is stable, not accumulating technical debt
 - Hooks already in correct order \(no React Hooks violations\)
@@ -790,6 +792,7 @@ Proposed Extractions \(future work, not immediate\):
 Step 4 - Refactor Safety Plan \(for future work\):
 
 Invariants \(must preserve after refactor\):
+
 - MediaPipe hand tracking continues to work with GPU delegate
 - Pinch gesture recognition \(thumb + index finger\) maintains hysteresis thresholds
 - Velocity filtering prevents jittery drawing \(lastDrawPointRef, lastPinchTimeRef\)
@@ -799,23 +802,27 @@ Invariants \(must preserve after refactor\):
 - Game state persists across component re-renders
 
 Test Strategy \(for future work\):
+
 - Unit tests for gesture detection \(pinch start/release thresholds\)
 - Unit tests for velocity filtering logic
 - Visual regression tests for canvas output
 - E2E test for full game flow \(start game → trace letter → save progress\)
 
 Verification Commands \(current baseline\):
+
 - cd src/frontend && npm run type-check → PASSES \(0 errors\)
 - cd src/frontend && npm run lint → PASSES \(0 hook violations\)
 - cd src/frontend && npm run build → SUCCESSFUL \(611\.98 kB\)
 
 Rollback Strategy \(for future work\):
+
 - Git revert: `git revert <commit-sha>` for immediate rollback
 - Feature flag: Add `const USE_REFACTORED_GAME = false` to disable new components
 - A/B testing: Keep old code path accessible behind environment variable
 - Gradual rollout: Deploy to 10% users, monitor errors, expand to 100%
 
 Recommendations \(based on current analysis\):
+
 - NO URGENT REFACTOR NEEDED: Code is functional, hooks are correct
 - DEFER SPLITTING: Large refactor \(713 LOC\) carries high risk without clear benefit
 - FOCUS ON: P2 features \(Parent Dashboard, other pending tickets\) instead
@@ -828,6 +835,7 @@ Ticket Plan \(future work\):
 4\. Block splitting until more urgent features are complete
 
 Non-goals \(explicitly out of scope\):
+
 - Full rewrite of Game component \(too risky\)
 - Changing MediaPipe integration \(working well\)
 - Altering canvas drawing algorithm \(current implementation is good\)
@@ -883,6 +891,7 @@ Execution log:
 REQUIRED DISCOVERY:
 
 Observed existing test coverage:
+
 - Frontend tests: 5 test files, 55 tests passing
   - Test files: authStore.test.ts (17 tests), api.test.ts (8 tests), LetterCard.test.tsx (3 tests)
   - Test execution time: 1.38s
@@ -891,6 +900,7 @@ Observed existing test coverage:
 - Test coverage exists for: authStore, api service, LetterCard
 
 Observed testing gaps:
+
 - Game component is largest and most complex (713 LOC)
 - No unit tests for hand tracking logic
 - No tests for canvas drawing functionality
@@ -902,6 +912,7 @@ Observed testing gaps:
 - No integration tests for full game flow
 
 Observed current test infrastructure:
+
 - Uses vitest and react-testing-library
 - Test command: npm test
 - Test execution time: 1.38s
@@ -910,6 +921,7 @@ Observed current test infrastructure:
 A) Test Matrix:
 
 Platforms/Browsers:
+
 - Chrome (primary development browser)
 - Safari (secondary - macOS)
 - Desktop devices with camera
@@ -917,6 +929,7 @@ Platforms/Browsers:
 B) Automated Tests to Add:
 
 UNIT TESTS:
+
 1. Game Component State Tests:
    - Test initial state (all refs initialized)
    - Test profile ID handling (early return, profile fetch)
@@ -952,7 +965,7 @@ UNIT TESTS:
    - Test calculateAccuracy with < 10 points (returns 0)
    - Test coverage calculation (points within letter area)
    - Test density calculation (points per area)
-   - Test combined score formula (coverage * 0.6 + density * 0.4)
+   - Test combined score formula (coverage _ 0.6 + density _ 0.4)
 
 6. Game Flow Tests:
    - Test game start (isPlaying = true, reset state)
@@ -963,6 +976,7 @@ UNIT TESTS:
    - Test badge addition on achievements
 
 INTEGRATION TESTS:
+
 1. Profile Integration:
    - Test Game loads with valid profileId
    - Test Game redirects without profileId
@@ -983,6 +997,7 @@ INTEGRATION TESTS:
    - Test error handling for model load failures
 
 Commands to run:
+
 - cd src/frontend && npm test -- --coverage
 - cd src/frontend && npm run test -- Game
 - Expected: All unit tests pass, coverage > 80% for Game component
@@ -990,6 +1005,7 @@ Commands to run:
 C) Manual Tests (MANDATORY for camera features):
 
 CAMERA PERMISSION TESTS:
+
 1. First Run Permission Flow:
    - Request camera permission when starting game
    - Verify permission is requested (not automatically granted)
@@ -1011,6 +1027,7 @@ CAMERA PERMISSION TESTS:
    - Test resume game re-requests camera appropriately
 
 LIGHTING/DISTANCE/OCCLUSION SMOKE TESTS:
+
 1. Normal Lighting Test:
    - Start game in normal indoor lighting
    - Verify hand tracking works reliably
@@ -1041,6 +1058,7 @@ LIGHTING/DISTANCE/OCCLUSION SMOKE TESTS:
    - Test tracking recovery time after occlusion
 
 PERFORMANCE PERCEPTION TESTS:
+
 1. FPS Measurement:
    - Start game and observe cursor movement smoothness
    - Count visible cursor updates for 10 seconds
@@ -1079,6 +1097,7 @@ D) Privacy & Safety Checks:
 E) Pass/Fail Criteria (5-15 explicit):
 
 UNIT TESTS:
+
 1. Game component initial state test:
    - PASS: All refs correctly initialized with null/0 values
    - FAIL: Any ref is undefined or has wrong initial value
@@ -1117,6 +1136,7 @@ UNIT TESTS:
    - FAIL: Returns NaN, negative, or > 100
 
 INTEGRATION TESTS:
+
 1. Profile language preference test:
    - PASS: Game uses profile.preferred_language for letter selection
    - PASS: Language code mapped correctly (hindi -> hi, kannada -> kn)
@@ -1128,6 +1148,7 @@ INTEGRATION TESTS:
    - FAIL: Game continues as if nothing happened on API failure
 
 MANUAL TESTS:
+
 1. Camera permission flow:
    - PASS: Permission requested on first run, game shows error if denied
    - FAIL: Camera starts without permission prompt or no error shown
@@ -1150,6 +1171,7 @@ MANUAL TESTS:
    - FAIL: Video files created or unauthorized network requests detected
 
 Overall Test Plan Status:
+
 - READY TO EXECUTE - Test plan comprehensive and executable
 
 Risks/Notes:
@@ -1236,12 +1258,10 @@ Evidence:
   - getAlphabet() function: Returns alphabet by language code ✅
   - getLettersForGame() function: Returns letters by language + difficulty ✅
   - Export format: Record<string, Alphabet> with proper codes (en, hi, kn, te, ta) ✅
-  
 - **Code Review - UI (Settings.tsx)**:
   - Language switcher exists (lines 88-95) ✅
   - Uses settings.language state ✅
   - Calls settings.updateSettings({ language: e.target.value }) ✅
-  
 - **Code Review - Progress Tracking (progressStore.ts)**:
   - letterProgress: Record<string, LetterProgress[]> for per-language tracking ✅
   - batchProgress: Record<string, BatchProgress[]> for per-language batch tracking ✅
@@ -1250,23 +1270,18 @@ Evidence:
   - isBatchUnlocked(language, batchIndex) checks by language ✅
   - getMasteredLettersCount(language) returns count by language ✅
   - getBatchMasteryCount(language, batchIndex) returns count by language ✅
-  
 - **Code Review - Game Usage (Game.tsx)**:
   - Line 6: Imports getLettersForGame ✅
   - Lines 56-60: Language code mapping (full name → 2-letter code) ✅
   - Line 63: Gets LETTERS from getLettersForGame(languageCode, settings.difficulty) ✅
-  
 - **Code Review - Components (LetterJourney.tsx)**:
   - Line 6: language: string prop ✅
   - Line 11: const alphabet = getAlphabet(language) ✅
   - Lines 19-21: Uses language in all progress tracking calls ✅
-  
 - **Tests**:
   - Command: `cd src/frontend && npm run test`
   - Output: "✓ 55 tests passed" ✅
-  
 - **TypeScript Compilation**: ✅ PASS (npm run type-check)
-  
 - **Acceptance Criteria**:
   - ✅ Hindi alphabets display correctly: getAlphabet('hindi') returns full alphabet
   - ✅ Kannada alphabets display correctly: getAlphabet('kannada') returns full alphabet
@@ -1321,7 +1336,7 @@ Execution log:
 - 2026-01-29 09:06 UTC: **Observed** calculateAccuracy() function in Game.tsx (lines 128-156)
 - 2026-01-29 09:06 UTC: **Observed** Coverage calculation (points within letter area)
 - 2026-01-29 09:06 UTC: **Observed** Density calculation (points per area)
-- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage * 0.6 + density * 0.4
+- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage _ 0.6 + density _ 0.4
 - 2026-01-29 09:07 UTC: **Observed** saveProgress() function in Game.tsx (lines 160-190)
 - 2026-01-29 09:07 UTC: **Observed** progressApi.saveProgress() call with score, streak, duration
 - 2026-01-29 09:07 UTC: **Observed** Backend POST / endpoint in progress.py
@@ -1344,16 +1359,14 @@ Evidence:
   - Lines 128-156: calculateAccuracy() function ✅
   - Coverage calculation: Points within letter radius ✅
   - Density calculation: points per area (min(points.length / 100, 1)) ✅
-  - Combined score: Math.round((coverage * 0.6 + density * 0.4) * 100) ✅
+  - Combined score: Math.round((coverage _ 0.6 + density _ 0.4) \* 100) ✅
   - Lines 160-190: saveProgress() function ✅
   - API call: progressApi.saveProgress(profileId, {...}) ✅
   - Meta data includes: language, difficulty, streak, points_earned ✅
-  
 - **Code Review - Backend (progress.py)**:
   - POST / endpoint exists ✅
   - ProgressService.create() saves to database ✅
   - GET / endpoint retrieves by profile_id ✅
-  
 - **Code Review - Models (progress.py)**:
   - profile_id: FK to profiles ✅
   - activity_type: drawing/recognition/game ✅
@@ -1361,7 +1374,6 @@ Evidence:
   - score: Integer field ✅
   - duration_seconds: Integer field ✅
   - meta_data: JSON for detailed tracking ✅
-  
 - **Verification**:
   - Command: `cd src/frontend && npm run build`
   - Output: "✓ built in 1.79s" ✅
@@ -1417,9 +1429,9 @@ Acceptance Criteria:
 #### TCK-20240128-007 :: Frontend Tests
 
 Type: TESTING
-Owner: UNASSIGNED
+Owner: AI Assistant
 Created: 2024-01-28 12:00 UTC
-Status: **OPEN** 🔵
+Status: **IN_PROGRESS** 🟡
 Priority: P2 (Medium)
 
 Description:
@@ -1447,9 +1459,9 @@ Acceptance Criteria:
 #### TCK-20240128-008 :: Parent Dashboard
 
 Type: FEATURE
-Owner: UNASSIGNED
+Owner: AI Assistant
 Created: 2024-01-28 12:00 UTC
-Status: **OPEN** 🔵
+Status: **IN_PROGRESS** 🟡
 Priority: P2 (Medium)
 
 Description:
@@ -1788,7 +1800,7 @@ Acceptance Criteria:
 Type: INFRASTRUCTURE
 Owner: UNASSIGNED
 Created: 2024-01-28 19:35 UTC
-Status: **OPEN** 🔵
+Status: **IN_PROGRESS** 🟡
 Priority: P2 (Medium)
 
 Description:
@@ -3391,6 +3403,7 @@ Execution Log:
 ### Deliverables Completed
 
 **Learning Plan** (`docs/LEARNING_PLAN.md`):
+
 - Age-based skill progression (3–8+)
 - 9 skill areas/modules defined:
   1. Pre-writing foundations
@@ -3406,6 +3419,7 @@ Execution Log:
 - Error-friendly design principles
 
 **Age Bands** (`docs/AGE_BANDS.md`):
+
 - Age 3: Exploration, sensory play, no pressure
 - Age 4: Pre-writing, letter exposure, short sessions
 - Age 5: Letter tracing, phonics, 5-7 min sessions
@@ -3413,6 +3427,7 @@ Execution Log:
 - Age 7+: Reading, sentences, creative writing
 
 **Game Mechanics** (`docs/GAME_MECHANICS.md`):
+
 - Core gameplay loop defined
 - Progression system (stars, streaks, unlocks)
 - Anti-frustration mechanics
@@ -3422,6 +3437,7 @@ Execution Log:
 ### Verification
 
 All documentation exists and is cross-referenced:
+
 - `docs/LEARNING_PLAN.md` - Comprehensive learning progression
 - `docs/AGE_BANDS.md` - Age-appropriate activities and defaults
 - `docs/GAME_MECHANICS.md` - Game design and mechanics
@@ -3472,6 +3488,7 @@ All documentation exists and is cross-referenced:
 ### Verification Evidence
 
 **Test Results** (confirmed 2026-01-29):
+
 ```
 $ uv run pytest tests/test_health.py -v
 ============================= test session starts ==============================
@@ -3483,7 +3500,7 @@ tests/test_health.py::test_health_db_down PASSED                         [ 50%]
 ### Files
 
 - `src/backend/app/core/health.py` - Health check utilities
-- `src/backend/tests/test_health.py` - Health endpoint tests  
+- `src/backend/tests/test_health.py` - Health endpoint tests
 - `src/backend/app/main.py` - Updated health endpoint
 
 ---
@@ -3533,6 +3550,7 @@ tests/test_health.py::test_health_db_down PASSED                         [ 50%]
 ### Verification Evidence
 
 **Test Results** (confirmed 2026-01-29):
+
 ```
 $ uv run pytest tests/test_config_import.py -v
 ============================= test session starts ==============================
@@ -3542,12 +3560,13 @@ tests/test_config_import.py::test_get_settings_cached PASSED             [100%]
 ```
 
 **Key Changes**:
+
 ```python
 # src/backend/app/core/config.py
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance.
-    
+
     Uses lazy loading to avoid import-time validation errors.
     Settings are cached after first access.
     """
@@ -3595,6 +3614,7 @@ settings = get_settings()
 ### Implementation Evidence
 
 **CORS Documentation Added** (`docs/security/SECURITY.md`):
+
 - Current configuration explanation
 - Security considerations and risks
 - Recommended configurations (Development, Production, Unsafe)
@@ -3603,6 +3623,7 @@ settings = get_settings()
 - Best practices section
 
 **Runtime Warning** (`src/backend/app/main.py`):
+
 ```python
 # CORS Security Check
 if "*" in settings.ALLOWED_ORIGINS:
@@ -9447,7 +9468,7 @@ Execution log:
 
 - 13:40 UTC: Started audit of rate_limit.py
 - 13:45 UTC: Completed comprehensive audit using audit-v1.5.1.md
-- 13:45 UTC: Created audit artifact docs/audit/src__backend__app__core__rate_limit.py.md
+- 13:45 UTC: Created audit artifact docs/audit/src**backend**app**core**rate_limit.py.md
 
 Status updates:
 
@@ -9467,7 +9488,7 @@ Risks/notes:
 Evidence:
 
 - Audit completed on src/backend/app/core/rate_limit.py
-- Artifact created: docs/audit/src__backend__app__core__rate_limit.py.md
+- Artifact created: docs/audit/src**backend**app**core**rate_limit.py.md
 - Findings: 2 MEDIUM risk issues (scalability, IP bypass), 3 LOW risk issues
 
 ---
@@ -9488,7 +9509,7 @@ Scope contract:
 - In-scope:
   - Full audit discovery phase (git history, references, tests)
   - Security, correctness, scalability analysis
-  - Create docs/audit/src__backend__app__core__rate_limit.py.md artifact
+  - Create docs/audit/src**backend**app**core**rate_limit.py.md artifact
   - Identify HIGH/MEDIUM findings with fix directions
 - Out-of-scope:
   - Code changes or fixes
@@ -9615,7 +9636,7 @@ Targets:
 
 - Repo: learning_for_kids
 - File: src/frontend/src/main.tsx
-- Output: docs/audit/ui__src__frontend__src__main.tsx.md
+- Output: docs/audit/ui**src**frontend**src**main.tsx.md
 - Branch: main
 
 Inputs:
@@ -9634,7 +9655,7 @@ Execution log:
 
 - 14:00 UTC: Started UI audit of main.tsx
 - 14:05 UTC: Completed UI audit using ui-file-audit-v1.0.md
-- 14:05 UTC: Created audit artifact docs/audit/ui__src__frontend__src__main.tsx.md
+- 14:05 UTC: Created audit artifact docs/audit/ui**src**frontend**src**main.tsx.md
 
 Status updates:
 
@@ -9653,7 +9674,7 @@ Risks/notes:
 Evidence:
 
 - UI audit completed on src/frontend/src/main.tsx
-- Artifact created: docs/audit/ui__src__frontend__src__main.tsx.md
+- Artifact created: docs/audit/ui**src**frontend**src**main.tsx.md
 - Findings: No issues found (entry point file with no UI components)
 
 ---
@@ -9680,7 +9701,7 @@ Targets:
 
 - Repo: learning_for_kids
 - File: src/frontend/src/store/gameStore.ts
-- Output: docs/audit/ui__src__frontend__src__store__gameStore.ts.md
+- Output: docs/audit/ui**src**frontend**src**store\_\_gameStore.ts.md
 - Branch: main
 
 Inputs:
@@ -9699,7 +9720,7 @@ Execution log:
 
 - 14:10 UTC: Started UI audit of gameStore.ts
 - 14:15 UTC: Completed UI audit using ui-file-audit-v1.0.md
-- 14:15 UTC: Created audit artifact docs/audit/ui__src__frontend__src__store__gameStore.ts.md
+- 14:15 UTC: Created audit artifact docs/audit/ui**src**frontend**src**store\_\_gameStore.ts.md
 
 Status updates:
 
@@ -9718,7 +9739,7 @@ Risks/notes:
 Evidence:
 
 - UI audit completed on src/frontend/src/store/gameStore.ts
-- Artifact created: docs/audit/ui__src__frontend__src__store__gameStore.ts.md
+- Artifact created: docs/audit/ui**src**frontend**src**store\_\_gameStore.ts.md
 - Findings: 5 issues identified (3 MEDIUM, 2 LOW severity)
 
 ---
@@ -9820,11 +9841,13 @@ Acceptance criteria:
 - [x] No TypeScript errors
 
 Regression risk: LOW
+
 - Only additive changes to existing API
 - No backend changes
 - Graceful error handling in place
 
 Rollback:
+
 - Revert commits or restore files from backup
 - No database migrations involved
 
@@ -9877,7 +9900,6 @@ Risks/notes:
 ### TCK-20260129-060 Amendment :: Add Repo-Local Skill Wrapper
 
 - 2026-01-29 10:09 IST Added `skills/react-best-practices/SKILL.md` to wrap the prompt as a repo-local skill | Evidence: `git diff --stat`
-
 
 ---
 
@@ -9975,17 +9997,18 @@ Acceptance criteria:
 - [x] Build succeeds
 
 Regression risk: NONE
+
 - Only test files added
 - No production code modified
 
 Rollback:
+
 - Delete test files:
   - src/frontend/src/store/authStore.test.ts
   - src/frontend/src/store/profileStore.test.ts
   - src/frontend/src/services/api.test.ts
 
 Status: READY ✅
-
 
 ---
 
@@ -10101,18 +10124,19 @@ Acceptance criteria:
 - [x] Documentation updated
 
 Regression risk: LOW
+
 - Only deprecation fixes and version updates
 - No logic changes
 - All tests passing
 
 Rollback:
+
 1. Restore .python-version to 3.11
 2. Restore pyproject.toml files
 3. Recreate venv with Python 3.11
 4. Revert datetime changes
 
 Status: READY ✅
-
 
 ---
 
@@ -10198,12 +10222,12 @@ Acceptance criteria:
 - [x] Hot reload works correctly
 
 Regression risk: NONE
+
 - Only startup method changed
 - Application logic unchanged
 - All tests still pass
 
 Status: READY ✅
-
 
 ---
 
@@ -10237,16 +10261,19 @@ Targets:
 Problem:
 
 Console warnings about React Router v7 future flags:
+
 1. v7_startTransition - React Router will wrap state updates in React.startTransition
 2. v7_relativeSplatPath - Relative route resolution within Splat routes is changing
 
 Solution:
 
 Added future flags to BrowserRouter to opt-in early and suppress warnings:
+
 - v7_startTransition: true
 - v7_relativeSplatPath: true
 
 Also updated dependencies to latest compatible versions:
+
 - React: 18.2.0 → 18.3.1
 - React DOM: 18.2.0 → 18.3.1
 - React Router DOM: 6.21.0 → 6.28.0
@@ -10284,6 +10311,7 @@ Acceptance criteria:
 - [x] All tests pass
 
 Regression risk: LOW
+
 - Only added future flags (opt-in for v7 behavior)
 - Dependency updates are patch/minor versions
 - No application logic changed
@@ -10293,7 +10321,6 @@ React 19 is available (19.2.4) but upgrading requires more testing as it's a maj
 version change. The current React 18.3.1 is the latest v18 and is stable.
 
 Status: READY ✅
-
 
 ---
 
@@ -10338,16 +10365,16 @@ Changes Made:
    - framer-motion: ^10.18.0 → ^12.29.2 (React 19 compatible)
 
 2. Code changes:
-   - src/main.tsx: 
+   - src/main.tsx:
      - Changed `import React from 'react'` to `import { StrictMode } from 'react'`
      - Changed `<React.StrictMode>` to `<StrictMode>`
      - New JSX transform in React 19 doesn't require React in scope
-   
    - src/pages/Game.tsx:
      - Fixed `useRef<number>()` to `useRef<number | undefined>(undefined)`
      - React 19 has stricter types for useRef
 
 React 19 New Features (available for future use):
+
 - Actions: New way to handle async transitions
 - use() Hook: For reading resources (promises, context)
 - Ref cleanup functions: Refs can return cleanup functions
@@ -10380,12 +10407,12 @@ Acceptance criteria:
 - [x] Unnecessary React import removed
 
 Regression risk: LOW
+
 - Only dependency upgrades and minor type fixes
 - No application logic changed
 - All tests passing
 
 Status: READY ✅
-
 
 ## TCK-20260129-061 :: Child-Centered UI/UX Prompt Pack (Learning Expert Lens)
 
@@ -10442,6 +10469,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 ### Audit Files Reviewed (36 total)
 
 **Backend Audits (19 files):**
+
 - security.py ✅ (Next actions completed)
 - auth.py endpoint ✅ (Next actions completed)
 - main.py - OPEN items (TCK-20260128-018, 019, 020)
@@ -10463,6 +10491,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 - privacy-review progress_service.py - **PENDING** (5 gaps)
 
 **Frontend Audits (15 files):**
+
 - api.ts - **PENDING** (8 findings, incl. MED-SEC-001 insecure token storage)
 - authStore.ts - **PENDING** (7 findings)
 - App.tsx - **PENDING** (4 findings, P1 error boundary missing)
@@ -10478,6 +10507,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 - LetterJourney.tsx - **PENDING** (7 findings)
 
 **Cross-Cutting Audits (2 files):**
+
 - dependency-audit - **PENDING** (4 vulnerabilities in dev dependencies)
 - ui_design_audit - **PENDING** (4 HIGH, 4 MEDIUM, 2 LOW issues)
 - child_usability_audit - **PENDING** (comprehensive child UX gaps)
@@ -10487,57 +10517,65 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 ### HIGH Priority Pending Items (P0/P1)
 
 #### Security (Backend)
-| ID | File | Finding | Severity |
-|----|------|---------|----------|
-| HIGH-SEC-001 | user_service.py | Timing attack vulnerability in authentication | HIGH |
-| HIGH-SEC-002 | user_service.py | No duplicate email check in user creation | HIGH |
-| MED-SEC-024 | token.py | No JWT format validation | MEDIUM |
-| MED-SEC-001 | api.ts | Insecure token storage (localStorage) | MEDIUM |
-| T1-T3 | threat-model | Timing attack, JWT theft, weak password policy | HIGH |
+
+| ID           | File            | Finding                                        | Severity |
+| ------------ | --------------- | ---------------------------------------------- | -------- |
+| HIGH-SEC-001 | user_service.py | Timing attack vulnerability in authentication  | HIGH     |
+| HIGH-SEC-002 | user_service.py | No duplicate email check in user creation      | HIGH     |
+| MED-SEC-024  | token.py        | No JWT format validation                       | MEDIUM   |
+| MED-SEC-001  | api.ts          | Insecure token storage (localStorage)          | MEDIUM   |
+| T1-T3        | threat-model    | Timing attack, JWT theft, weak password policy | HIGH     |
 
 #### Functional Gaps (Backend)
-| ID | File | Finding | Severity |
-|----|------|---------|----------|
-| HIGH-FUNC-001 | auth.py functional | No email verification for registration | HIGH |
-| HIGH-FUNC-002 | auth.py functional | No password reset functionality | HIGH |
-| MED-FUNC-003 | auth.py functional | No account logout/invalidation | MEDIUM |
-| MED-FUNC-004 | auth.py functional | No password change/update | MEDIUM |
+
+| ID            | File               | Finding                                | Severity |
+| ------------- | ------------------ | -------------------------------------- | -------- |
+| HIGH-FUNC-001 | auth.py functional | No email verification for registration | HIGH     |
+| HIGH-FUNC-002 | auth.py functional | No password reset functionality        | HIGH     |
+| MED-FUNC-003  | auth.py functional | No account logout/invalidation         | MEDIUM   |
+| MED-FUNC-004  | auth.py functional | No password change/update              | MEDIUM   |
 
 #### UI/UX (Frontend)
-| ID | File | Finding | Severity |
-|----|------|---------|----------|
-| UIF-001 | App.tsx | Missing error boundary for route-level failures | P1 |
-| UIF-013 | Dashboard.tsx | Modal accessibility issues | P1 |
-| UIF-014 | Dashboard.tsx | No error handling for failed operations | P1 |
-| UIF-020 | Game.tsx | No camera permission handling UI | P1 |
-| UIF-021 | Game.tsx | Hand tracking failure not communicated | P1 |
-| UIF-024 | Game.tsx | No accessibility alternative to hand tracking | P1 |
-| UIF-033 | Progress.tsx | Using mock data instead of real progress | P1 |
-| UIF-038 | Settings.tsx | Destructive actions use browser confirm | P1 |
-| UIF-040 | Settings.tsx | Export feature shows placeholder alert | P1 |
+
+| ID      | File          | Finding                                         | Severity |
+| ------- | ------------- | ----------------------------------------------- | -------- |
+| UIF-001 | App.tsx       | Missing error boundary for route-level failures | P1       |
+| UIF-013 | Dashboard.tsx | Modal accessibility issues                      | P1       |
+| UIF-014 | Dashboard.tsx | No error handling for failed operations         | P1       |
+| UIF-020 | Game.tsx      | No camera permission handling UI                | P1       |
+| UIF-021 | Game.tsx      | Hand tracking failure not communicated          | P1       |
+| UIF-024 | Game.tsx      | No accessibility alternative to hand tracking   | P1       |
+| UIF-033 | Progress.tsx  | Using mock data instead of real progress        | P1       |
+| UIF-038 | Settings.tsx  | Destructive actions use browser confirm         | P1       |
+| UIF-040 | Settings.tsx  | Export feature shows placeholder alert          | P1       |
 
 #### Privacy & Compliance
-| ID | File | Finding | Severity |
-|----|------|---------|----------|
-| P1 | privacy-review | No parent authentication on data deletion | HIGH |
-| P2 | privacy-review | No bulk data operations for parents | HIGH |
+
+| ID  | File           | Finding                                   | Severity |
+| --- | -------------- | ----------------------------------------- | -------- |
+| P1  | privacy-review | No parent authentication on data deletion | HIGH     |
+| P2  | privacy-review | No bulk data operations for parents       | HIGH     |
 
 ---
 
 ### MEDIUM Priority Pending Items (P2)
 
 #### Validation (Backend Schemas)
+
 - profile.py: Age validation (MED-VAL-006), name length (MED-VAL-007)
 - progress.py: Score range (MED-VAL-012), duration (MED-VAL-013)
 - user.py: Password constraints (MED-VAL-001)
 
 #### Service Layer
+
 - All services missing: error handling, logging, field validations, unit tests
 
 #### API Endpoints
+
 - Missing rate limiting, input validation, proper error handling
 
 #### Frontend UX
+
 - Loading states, accessibility, keyboard navigation, responsive design issues
 
 ---
@@ -10554,6 +10592,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 ### Recommended Remediation Order
 
 **Phase 1 - Security Critical (Week 1-2)**
+
 1. Fix timing attack in user_service.py
 2. Add email verification flow
 3. Implement password reset
@@ -10561,6 +10600,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 5. Add JWT format validation
 
 **Phase 2 - Functional Completeness (Week 2-3)**
+
 1. Add error boundaries in App.tsx
 2. Implement real progress data (remove mocks)
 3. Add camera permission handling in Game.tsx
@@ -10568,12 +10608,14 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 5. Add parent authentication for data deletion
 
 **Phase 3 - Validation & Quality (Week 3-4)**
+
 1. Add schema field validations (age, score, duration, etc.)
 2. Add service layer error handling and logging
 3. Implement loading states across frontend
 4. Fix accessibility issues (modal focus, keyboard nav)
 
 **Phase 4 - Polish & Compliance (Month 2)**
+
 1. Child usability enhancements (mascot, celebrations, progress viz)
 2. Dependency updates
 3. Documentation completion
@@ -10583,7 +10625,7 @@ Comprehensive review of all 36 audit files in `docs/audit/` to identify pending 
 
 ### Evidence
 
-- Audit artifacts: docs/audit/*.md (36 files)
+- Audit artifacts: docs/audit/\*.md (36 files)
 - Date reviewed: 2026-01-29
 
 ### Next Actions
@@ -10672,10 +10714,10 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - scripts/agent_gate.sh
-  - .githooks/*
-  - docs/SETUP.md, docs/process/COMMANDS.md, AGENTS.md, prompts/workflow/*
+  - .githooks/\*
+  - docs/SETUP.md, docs/process/COMMANDS.md, AGENTS.md, prompts/workflow/\*
   - docs/CLAIMS.md
-  - docs/ai-native/*, prompts/ai-native/* (adopt into repo if relevant to guidance)
+  - docs/ai-native/_, prompts/ai-native/_ (adopt into repo if relevant to guidance)
 - Base: main@1519b81
 
 Acceptance criteria:
@@ -10800,7 +10842,6 @@ Status updates:
 - 2026-01-29 :: OPEN -> IN_PROGRESS
 - 2026-01-29 :: IN_PROGRESS -> DONE
 
-
 ---
 
 ### TCK-20260129-067 :: Fix Database Schema - Add Missing User Email Verification Columns
@@ -10815,12 +10856,14 @@ Description:
 Fix database schema mismatch causing login failures. The User model had email verification and password reset fields that weren't in the database.
 
 Error observed:
+
 ```
 sqlite3.OperationalError: no such column: users.email_verified
 ```
 
 Root Cause:
 The User model (app/db/models/user.py) had these fields:
+
 - email_verified
 - email_verification_token
 - email_verification_expires
@@ -10833,15 +10876,18 @@ Fix Applied:
 Created migration 004_add_user_email_verification_fields.py to add the missing columns.
 
 Execution Log:
+
 - [2026-01-29 14:44 IST] Identified error: no such column: users.email_verified
 - [2026-01-29 14:45 IST] Created migration 004_add_user_email_verification_fields.py
 - [2026-01-29 14:45 IST] Ran `uv run alembic upgrade head` - migration applied successfully
 - [2026-01-29 14:49 IST] Login should now work - backend has all required columns
 
 Files Modified:
+
 - src/backend/alembic/versions/004_add_user_email_verification_fields.py (new)
 
 Verification:
+
 ```bash
 cd src/backend
 uv run alembic upgrade head
@@ -10849,11 +10895,10 @@ uv run alembic upgrade head
 ```
 
 Next Steps:
+
 - Restart backend if needed
 - Test login from frontend
 - Consider running all migrations on fresh databases to ensure schema consistency
-
-
 
 ---
 
@@ -10869,28 +10914,33 @@ Description:
 Fix 422 Unprocessable Content error when creating child profiles. The frontend was sending full language names ('english', 'hindi') but the backend expected 2-letter codes ('en', 'hi').
 
 Error observed:
+
 ```
 POST http://localhost:8001/api/v1/users/me/profiles 422 (Unprocessable Content)
 ```
 
 Root Cause:
+
 - Frontend used: 'english', 'hindi', 'kannada', 'telugu', 'tamil'
 - Backend validation only accepted: 'en', 'hi', 'kn', 'te', 'ta'
 - This caused Pydantic validation to fail with 422 error
 
 Fix Applied:
+
 1. Updated Dashboard.tsx to use 2-letter codes in the language dropdown
 2. Added backward-compatible mappings in alphabets.ts
 3. Updated Game.tsx to map settings language to 2-letter codes
 4. Fixed profileStore tests to use 2-letter codes
 
 Files Modified:
+
 - src/frontend/src/pages/Dashboard.tsx
 - src/frontend/src/pages/Game.tsx
 - src/frontend/src/data/alphabets.ts
 - src/frontend/src/store/profileStore.test.ts
 
 Execution Log:
+
 - [2026-01-29 14:50 IST] Identified 422 error on profile creation
 - [2026-01-29 14:51 IST] Found mismatch: frontend sends 'english', backend expects 'en'
 - [2026-01-29 14:52 IST] Updated Dashboard.tsx language dropdown values
@@ -10899,6 +10949,7 @@ Execution Log:
 - [2026-01-29 14:55 IST] Type check passes, fix complete
 
 Verification:
+
 ```bash
 cd src/frontend
 npm run type-check
@@ -10906,10 +10957,9 @@ npm run type-check
 ```
 
 Next Steps:
+
 - Test profile creation from frontend
 - Verify game loads correct alphabet for selected language
-
-
 
 ---
 
@@ -10925,34 +10975,38 @@ Description:
 Fix login failing due to database column name mismatch in progress table. The model was trying to use `metadata` column but the actual column (after migration 002) is `meta_data`.
 
 Error observed:
+
 ```
 sqlite3.OperationalError: no such column: progress.metadata
 ```
 
 Root Cause:
+
 - Migration 002 renamed `metadata` to `meta_data`
 - The model had: `meta_data: Mapped[dict] = mapped_column(JSON, name="metadata", default=dict)`
 - This told SQLAlchemy to look for column `metadata` but the actual column is `meta_data`
 
 Fix Applied:
+
 - Updated `src/backend/app/db/models/progress.py` to remove the `name="metadata"` mapping
 - Changed to: `meta_data: Mapped[dict] = mapped_column(JSON, default=dict)`
 
 Files Modified:
+
 - src/backend/app/db/models/progress.py
 
 Execution Log:
+
 - [2026-01-29 15:10 IST] Identified error: no such column: progress.metadata
 - [2026-01-29 15:11 IST] Checked database schema - column is actually `meta_data`
 - [2026-01-29 15:12 IST] Found model had incorrect column name mapping
 - [2026-01-29 15:15 IST] Fixed model, backend restart not needed (hot reload)
 
 Verification:
+
 - Database schema shows: `meta_data JSON DEFAULT '{}' NOT NULL`
 - Model now matches actual column name
 - Login should work now
-
-
 
 ---
 
@@ -10968,6 +11022,7 @@ Description:
 Implement a number tracing game (0-9) using the same hand tracking mechanics as the letter tracing game. This is the first step toward the numeracy curriculum documented in the learning plan.
 
 Scope Contract:
+
 - In-scope:
   - Create number data file (0-9 with visual dots)
   - Add game mode selector (Letters / Numbers)
@@ -10981,6 +11036,7 @@ Scope Contract:
 - Behavior change allowed: YES (new feature)
 
 Acceptance Criteria:
+
 - [ ] Can select "Numbers" mode in game
 - [ ] Numbers 0-9 display with dots
 - [ ] Hand tracking works for number tracing
@@ -10988,6 +11044,7 @@ Acceptance Criteria:
 - [ ] Progress saves and displays on dashboard
 
 Files to Modify:
+
 - src/frontend/src/data/numbers.ts (new)
 - src/frontend/src/pages/Game.tsx
 - src/frontend/src/store/progressStore.ts
@@ -10996,12 +11053,14 @@ Files to Modify:
 Estimated Effort: 2-3 days
 
 Next Actions:
+
 1. Create number data file
 2. Add game mode selector UI
 3. Implement number tracing component
 4. Wire up progress tracking
 
 Risks:
+
 - Low risk - reuses existing patterns
 - Need to ensure activity_type is accepted by backend
 
@@ -11019,6 +11078,7 @@ Description:
 Audit what games are actually implemented vs what was documented in the learning plan. The learning plan documented 9 skill areas but only 1 game (letter tracing) is live.
 
 Scope Contract:
+
 - In-scope:
   - List all documented games from LEARNING_PLAN.md
   - List all actually implemented games
@@ -11030,6 +11090,7 @@ Scope Contract:
 - Behavior change allowed: NO (audit only)
 
 Documented Games (from LEARNING_PLAN.md):
+
 1. ✅ Letter Tracing (IMPLEMENTED)
 2. ❌ Number Tracing (0-9)
 3. ❌ Quantity Matching (match numbers to objects)
@@ -11041,15 +11102,18 @@ Documented Games (from LEARNING_PLAN.md):
 9. ❌ STEM Play (simple simulations)
 
 Actually Implemented:
+
 1. Letter Tracing (A-Z, Hindi, Kannada, Telugu, Tamil)
 
 Gap Analysis:
+
 - 8 out of 9 game types are not implemented
 - Only alphabet learning is live
 - No numeracy games
 - No creative/play games
 
 Recommended Priority:
+
 1. P0: Number Tracing (TCK-20260129-070) - extends existing game
 2. P1: Quantity Matching - pairs with number tracing
 3. P1: Pre-writing strokes - builds motor skills
@@ -11057,13 +11121,12 @@ Recommended Priority:
 5. P2: Free Draw - creative outlet
 
 Next Actions:
+
 1. Complete TCK-20260129-070 (Number Tracing)
 2. Create tickets for next 2-3 games
 3. Update roadmap with realistic timeline
 
 ---
-
-
 
 ---
 
@@ -11077,34 +11140,40 @@ Priority: P0
 
 Description:
 The Game page uses global settings.language instead of the selected profile's preferred_language. This means:
+
 1. Profile language preference is ignored
 2. Language selection is broken (profile uses 2-letter codes, settings uses full names)
 3. Non-English languages don't work even though data exists
 
 Current Broken Flow:
+
 1. Create profile with language 'hi' (Hindi)
-2. Click "Start Game" 
+2. Click "Start Game"
 3. Game reads settings.language ('english') instead of profile.preferred_language ('hi')
 4. Game shows English letters, not Hindi
 
 Root Cause:
+
 - Game.tsx uses `settings.language` from useSettingsStore
 - Should use profile's `preferred_language` fetched by profileId
 - Profile stores 2-letter codes ('hi'), settings stores full names ('hindi')
 - No mapping/consistency between the two
 
 Fix Required:
+
 1. Fetch profile data in Game.tsx using profileId
 2. Use profile.preferred_language instead of settings.language
 3. Ensure consistent language code format (2-letter codes everywhere)
 4. Update settings page to use 2-letter codes too
 
 Files to Modify:
+
 - src/frontend/src/pages/Game.tsx
 - src/frontend/src/pages/Settings.tsx
 - src/frontend/src/store/settingsStore.ts
 
 Acceptance Criteria:
+
 - [ ] Game uses profile's preferred_language
 - [ ] Hindi/Kannada/Telugu/Tamil alphabets display correctly
 - [ ] Language selection works end-to-end
@@ -11126,12 +11195,14 @@ Implement number tracing game (0-9) as the second game type. Reuse existing hand
 Depends On: TCK-20260129-072 (language fix should be done first)
 
 Scope:
+
 - Create numbers data file (0-9)
 - Add game mode selector (Letters / Numbers)
 - Implement number tracing UI
 - Save progress with activity_type: 'number_tracing'
 
 Files:
+
 - src/frontend/src/data/numbers.ts (new)
 - src/frontend/src/pages/Game.tsx
 - src/frontend/src/store/progressStore.ts
@@ -11139,7 +11210,6 @@ Files:
 Estimated Effort: 2 days
 
 ---
-
 
 ---
 
@@ -11155,6 +11225,7 @@ Description:
 Integrate the pip.mp4 video mascot with random animation triggers to excite kids.
 
 Changes Made:
+
 1. Compressed pip.mp4 from 1.6MB to 661KB using ffmpeg
 2. Updated Mascot.tsx with video support:
    - Random celebration triggers (15-45s interval)
@@ -11164,10 +11235,12 @@ Changes Made:
    - Fallback to static image on video error
 
 Files Modified:
+
 - src/frontend/src/components/Mascot.tsx
 - src/frontend/public/assets/videos/pip.mp4 (compressed)
 
 Features:
+
 - enableVideo prop (default true)
 - Auto-scheduled random celebrations
 - State-triggered celebrations
@@ -11188,11 +11261,13 @@ Description:
 Fixed critical bug where Game.tsx used global settings.language instead of profile's preferred_language.
 
 Root Cause:
+
 - Game.tsx used `settings.language` (UI language) for content
 - Should use `profile.preferred_language` (learning content language)
 - These are independent: parent can use Hindi UI while child learns English
 
 Changes Made:
+
 1. Added GET /users/me/profiles/{profile_id} endpoint (backend)
 2. Added profileApi.getProfile() method (frontend)
 3. Game.tsx now fetches profile and uses profile.preferred_language
@@ -11200,11 +11275,13 @@ Changes Made:
 5. Content language uses profile.preferred_language (2-letter codes)
 
 Files Modified:
+
 - src/backend/app/api/v1/endpoints/users.py (added get_profile endpoint)
 - src/frontend/src/services/api.ts (added getProfile method)
 - src/frontend/src/pages/Game.tsx (use profile.preferred_language)
 
 Acceptance Criteria:
+
 - [x] Game uses profile's preferred_language
 - [x] Hindi/Kannada/Telugu/Tamil alphabets display correctly
 - [x] Language selection works end-to-end
@@ -11223,14 +11300,17 @@ Status: **DONE** ✅
 Completed: 2026-01-29 16:55 IST
 
 Issues Fixed:
+
 1. **Unnecessary connecting lines** - When stopping and repositioning finger, the drawing would connect old and new positions with an unwanted line
 2. **Pinch stays active when hand leaves screen** - Drawing would continue even after hand left the frame
 
 Root Causes:
+
 1. No break points between drawing segments - all points were connected sequentially
 2. No hand detection check to reset pinch state when hand disappears
 
 Solution:
+
 - Added "break points" (NaN coordinates) to separate drawing segments:
   - When pinch starts (after being released)
   - When pinch releases
@@ -11240,9 +11320,11 @@ Solution:
 - Accuracy calculation filters out break points
 
 Files Modified:
+
 - src/frontend/src/pages/Game.tsx
 
 Testing Notes:
+
 - Stop drawing, move finger, start again - no connecting line
 - Remove hand from camera - drawing stops immediately
 - Re-enter hand - can start fresh drawing without unwanted lines
@@ -11260,6 +11342,7 @@ Status: **DONE** ✅
 Completed: 2026-01-29 17:05 IST
 
 Issues Addressed:
+
 1. **Unnecessary connecting lines when repositioning finger**
 2. **Pinch staying active when hand moves too fast (repositioning)**
 3. **Noise from small hand tremors**
@@ -11283,15 +11366,18 @@ Improvements Implemented:
    - Ensures clean velocity calculation for each stroke
 
 Files Modified:
+
 - src/frontend/src/pages/Game.tsx
 
 Technical Details:
+
 - Tracks last draw point and timestamp for velocity calculation
 - Velocity = distance / timeDelta
 - If velocity > 0.15 (normalized coords per ms), treat as reposition
 - If distance < 0.003 (normalized), skip point (noise reduction)
 
 Testing Notes:
+
 - Draw slowly: Points are added normally
 - Move hand fast while pinching: Break point inserted, no connecting line
 - Small hand tremors: Ignored (no micro-points added)
@@ -11313,6 +11399,7 @@ Description:
 Integrate the pip.mp4 video mascot with random animation triggers to excite kids during gameplay.
 
 Changes Made:
+
 1. Compressed pip.mp4 from 1.6MB to 661KB using ffmpeg (59% reduction)
 2. Updated Mascot.tsx with video support:
    - Random celebration triggers (15-45s interval)
@@ -11324,11 +11411,13 @@ Changes Made:
    - Added 3-second auto-play for testing (temporary)
 
 Files Modified:
+
 - src/frontend/src/components/Mascot.tsx
 - src/frontend/public/assets/videos/pip.mp4 (compressed)
 - src/frontend/src/pages/Game.tsx (added debug logging)
 
 Features:
+
 - enableVideo prop (default true)
 - Auto-scheduled random celebrations
 - State-triggered celebrations (happy/celebrating)
@@ -11338,11 +11427,13 @@ Features:
 - z-index layering (video z-20, image z-10)
 
 Debug Mode:
+
 - Added 3-second auto-play timer for testing
 - Console logs: [Mascot] Preloading, Auto-triggering, Video loaded, Video can play
 - Remove auto-play timer after testing confirmed working
 
 Testing Checklist:
+
 - [ ] Video auto-plays after 3 seconds (debug mode)
 - [ ] Video plays when getting 'Great job!' or 'Amazing!' feedback
 - [ ] Video plays on mascot click
@@ -11350,6 +11441,7 @@ Testing Checklist:
 - [ ] No video when enableVideo=false
 
 Next Steps:
+
 1. Verify video plays in browser
 2. Remove 3-second auto-play timer
 3. Test with actual gameplay feedback
@@ -11436,6 +11528,7 @@ Execution log:
 Key Findings:
 
 **Critical Issues (P0):**
+
 1. Dark, serious theme (`#1a1a2e`) - not child-friendly
 2. Text-heavy feedback - pre-literate kids can't read
 3. No sound effects - `soundEnabled` exists but no implementation
@@ -11445,6 +11538,7 @@ Key Findings:
 
 **Proposed Solution:**
 Transform from "educational software" to "Pip's Letter Adventure"
+
 - New playful color palette (sky blue, sunshine yellow, grass green)
 - Adventure map replacing grid layout
 - Sound effects and letter pronunciations
@@ -11506,6 +11600,7 @@ Solution:
 Created WebM with alpha channel transparency using ffmpeg chromakey.
 
 Command Used:
+
 ```bash
 ffmpeg -i pip.mp4 -vf "chromakey=white:0.1:0.0" \
   -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 500k \
@@ -11513,15 +11608,18 @@ ffmpeg -i pip.mp4 -vf "chromakey=white:0.1:0.0" \
 ```
 
 Results:
+
 - Original: pip.mp4 (661KB, white background)
 - New: pip_alpha.webm (709KB, transparent background)
 - Format: VP9 codec with yuva420p pixel format (alpha support)
 
 Files Modified:
+
 - src/frontend/src/components/Mascot.tsx (updated video path)
 - src/frontend/public/assets/videos/pip_alpha.webm (new)
 
 Browser Support:
+
 - Chrome/Edge: ✅ Full support
 - Firefox: ✅ Full support
 - Safari: ⚠️ Requires Safari 13.1+ (macOS Big Sur+)
@@ -11536,6 +11634,7 @@ Created: 2026-01-29 16:30 UTC
 Status: **DONE**
 
 **Scope contract:**
+
 - In-scope:
   - Audit of `src/backend/app/core/security.py`
   - Audit of `src/backend/app/api/v1/endpoints/auth.py`
@@ -11549,17 +11648,20 @@ Status: **DONE**
 - Behavior change allowed: NO (audit only)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/core/security.py`, `src/backend/app/api/v1/endpoints/auth.py`
 - Branch: main
 - Base commit: 1519b8156acf474e27afab3c8c549bdc241dca3b
 
 **Inputs:**
+
 - Prompt used: `prompts/audit/audit-v1.5.1.md`
 - Source artifacts: Existing audit files in `docs/audit/`
 - Discovery commands: git, rg, file reads
 
 **Execution log:**
+
 - 16:30 UTC: Started audit process
 - 16:35 UTC: Completed discovery phase (git history, references, tests)
 - 17:00 UTC: Completed security analysis
@@ -11567,12 +11669,14 @@ Status: **DONE**
 - 17:30 UTC: Completed documentation
 
 **Findings summary:**
+
 - ✅ Strengths: bcrypt, JWT, rate limiting, secure cookies, proper error handling
 - ⚠️ Medium issues: Token revocation missing, refresh rotation incomplete
 - ✅ Fixed issues: Datetime deprecation resolved, rate limiting implemented
 - 📊 Security rating: B+ (Good with room for improvement)
 
 **Key findings:**
+
 1. M1: No token revocation mechanism (jti claims missing)
 2. M2: Refresh token rotation not fully implemented
 3. M3: Limited tests for refresh endpoint
@@ -11580,6 +11684,7 @@ Status: **DONE**
 5. L2: Status code inconsistency (200 vs 201)
 
 **Evidence:**
+
 - Audit artifact: `docs/audit/authentication_system_audit__TCK-20260129-080.md`
 - Discovery commands executed successfully
 - Git history analyzed
@@ -11587,6 +11692,7 @@ Status: **DONE**
 - Security measures verified
 
 **Next actions:**
+
 1. Implement token revocation with jti claims (TCK-20260129-081)
 2. Implement refresh token rotation (TCK-20260129-082)
 3. Add comprehensive refresh tests (TCK-20260129-083)
@@ -11594,6 +11700,7 @@ Status: **DONE**
 5. Fix status code inconsistency (TCK-20260129-085)
 
 **Completion:**
+
 - Status: DONE ✅
 - Timestamp: 2026-01-29 17:30 UTC
 - Artifact: `docs/audit/authentication_system_audit__TCK-20260129-080.md`
@@ -11610,6 +11717,7 @@ Created: 2026-01-29 17:45 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Add JWT ID (jti) claims to access and refresh tokens
   - Create database table for token revocation tracking
@@ -11623,17 +11731,20 @@ Status: **OPEN**
 - Behavior change allowed: YES (adding jti claims, revocation functionality)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/core/security.py`, `src/backend/app/db/models/`, `src/backend/app/api/`
 - Branch: main
 - Base commit: 3925d36
 
 **Inputs:**
+
 - Audit findings: M1 from TCK-20260129-080
 - Reference implementation: OAuth2 token revocation RFC 7009
 - Database: SQLAlchemy + PostgreSQL
 
 **Requirements:**
+
 1. Add `jti` (JWT ID) claim to all tokens with UUID
 2. Create `revoked_tokens` table with `jti`, `user_id`, `revoked_at`, `reason`
 3. Add `is_token_revoked(jti: str)` function to check revocation status
@@ -11642,6 +11753,7 @@ Status: **OPEN**
 6. Add tests for revocation functionality
 
 **Acceptance Criteria:**
+
 - ✅ Tokens include unique jti claims
 - ✅ Revoked tokens are rejected during validation
 - ✅ Admin can revoke specific tokens via API
@@ -11650,6 +11762,7 @@ Status: **OPEN**
 - ✅ Comprehensive test coverage (unit + integration)
 
 **Implementation Plan:**
+
 1. **Database Schema** (1 day)
    - Create migration for revoked_tokens table
    - Add indexes for performance
@@ -11672,14 +11785,17 @@ Status: **OPEN**
    - Performance tests
 
 **Risk Assessment:**
+
 - **Security Risk**: HIGH (if not implemented, compromised tokens remain valid)
 - **Implementation Risk**: MEDIUM (database changes, token format changes)
 - **Compatibility Risk**: LOW (backward compatible, old tokens without jti still work)
 
 **Dependencies:**
+
 - None (independent feature)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 4-5 days
@@ -11696,6 +11812,7 @@ Created: 2026-01-29 17:50 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Track refresh tokens in database with versioning
   - Invalidate old refresh tokens on rotation
@@ -11709,17 +11826,20 @@ Status: **OPEN**
 - Behavior change allowed: YES (refresh token rotation logic)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/api/v1/endpoints/auth.py`, `src/backend/app/db/models/`, `src/backend/app/services/`
 - Branch: main
 - Base commit: 3925d36
 
 **Inputs:**
+
 - Audit findings: M2 from TCK-20260129-080
 - Reference: OAuth2 refresh token rotation best practices
 - Database: SQLAlchemy + PostgreSQL
 
 **Requirements:**
+
 1. Add `refresh_tokens` table with `token_hash`, `user_id`, `version`, `expires_at`
 2. Store refresh token hash (not raw token) for security
 3. Implement version-based rotation (increment version on each refresh)
@@ -11728,6 +11848,7 @@ Status: **OPEN**
 6. Add comprehensive test coverage
 
 **Acceptance Criteria:**
+
 - ✅ Each refresh creates new token with incremented version
 - ✅ Old refresh tokens are invalidated immediately
 - ✅ Reuse of old tokens is detected and rejected
@@ -11736,6 +11857,7 @@ Status: **OPEN**
 - ✅ Comprehensive test coverage (unit + integration)
 
 **Implementation Plan:**
+
 1. **Database Schema** (1 day)
    - Create refresh_tokens table with proper indexes
    - Add foreign key to users table
@@ -11759,14 +11881,17 @@ Status: **OPEN**
    - Security tests for reuse prevention
 
 **Risk Assessment:**
+
 - **Security Risk**: HIGH (stolen refresh tokens can be reused)
 - **Implementation Risk**: MEDIUM (database changes, complex logic)
 - **Compatibility Risk**: MEDIUM (changes refresh token behavior)
 
 **Dependencies:**
+
 - None (independent of token revocation)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 4-5 days
@@ -11774,6 +11899,7 @@ Status: **OPEN**
 **Priority:** HIGH (Security-critical feature)
 
 **Related Tickets:**
+
 - TCK-20260129-081 (Token Revocation) - Complementary security feature
 
 ---
@@ -11786,6 +11912,7 @@ Created: 2026-01-29 17:55 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Add unit tests for refresh endpoint
   - Add integration tests for refresh flow
@@ -11799,17 +11926,20 @@ Status: **OPEN**
 - Behavior change allowed: NO (test-only changes)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/tests/test_auth.py`, `src/backend/tests/test_security.py`
 - Branch: main
 - Base commit: 3925d36
 
 **Inputs:**
+
 - Audit findings: M3 from TCK-20260129-080
 - Existing test patterns in test suite
 - Refresh endpoint implementation
 
 **Requirements:**
+
 1. Test successful refresh with valid token
 2. Test refresh with invalid token (401 response)
 3. Test refresh with expired token (401 response)
@@ -11819,6 +11949,7 @@ Status: **OPEN**
 7. Test cookie handling in refresh response
 
 **Acceptance Criteria:**
+
 - ✅ 100% code coverage for refresh endpoint
 - ✅ All edge cases tested and documented
 - ✅ Tests pass in CI/CD pipeline
@@ -11827,6 +11958,7 @@ Status: **OPEN**
 - ✅ Clear test documentation and assertions
 
 **Test Cases to Implement:**
+
 1. `test_refresh_success()` - Valid token refresh
 2. `test_refresh_invalid_token()` - Invalid token rejection
 3. `test_refresh_expired_token()` - Expired token handling
@@ -11837,6 +11969,7 @@ Status: **OPEN**
 8. `test_refresh_user_inactive()` - Inactive user handling
 
 **Implementation Plan:**
+
 1. **Test Setup** (0.5 day)
    - Create test fixtures and helpers
    - Set up test database with refresh tokens
@@ -11854,14 +11987,17 @@ Status: **OPEN**
    - Update test coverage reports
 
 **Risk Assessment:**
+
 - **Security Risk**: MEDIUM (untested refresh endpoint could have vulnerabilities)
 - **Implementation Risk**: LOW (test-only changes)
 - **Compatibility Risk**: LOW (no behavior changes)
 
 **Dependencies:**
+
 - None (independent testing work)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 2-3 days
@@ -11869,6 +12005,7 @@ Status: **OPEN**
 **Priority:** MEDIUM (Important but not security-critical)
 
 **Related Tickets:**
+
 - TCK-20260129-082 (Refresh Rotation) - Tests will validate this feature
 - TCK-20260129-081 (Token Revocation) - Tests may cover revocation scenarios
 
@@ -11882,6 +12019,7 @@ Created: 2026-01-29 18:00 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Create Pydantic model for refresh request
   - Update refresh endpoint to use schema
@@ -11894,17 +12032,20 @@ Status: **OPEN**
 - Behavior change allowed: NO (schema validation only)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/schemas/token.py`, `src/backend/app/api/v1/endpoints/auth.py`
 - Branch: main
 - Base commit: 3925d36
 
 **Inputs:**
+
 - Audit findings: L1 from TCK-20260129-080
 - Existing schema patterns in codebase
 - Pydantic documentation
 
 **Requirements:**
+
 1. Create `TokenRefreshRequest` Pydantic model
 2. Add proper field validation and documentation
 3. Update refresh endpoint to use typed request body
@@ -11913,6 +12054,7 @@ Status: **OPEN**
 6. Add minimal test coverage
 
 **Acceptance Criteria:**
+
 - ✅ Request schema properly documented in OpenAPI
 - ✅ Input validation working correctly
 - ✅ Backward compatibility maintained
@@ -11921,6 +12063,7 @@ Status: **OPEN**
 - ✅ No breaking changes to existing API
 
 **Implementation Plan:**
+
 1. **Schema Creation** (0.25 day)
    - Create TokenRefreshRequest model
    - Add field documentation and examples
@@ -11938,14 +12081,17 @@ Status: **OPEN**
    - Test error handling
 
 **Risk Assessment:**
+
 - **Security Risk**: LOW (improves API contract clarity)
 - **Implementation Risk**: LOW (simple schema addition)
 - **Compatibility Risk**: LOW (backward compatible)
 
 **Dependencies:**
+
 - None (independent improvement)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 0.5-1 day
@@ -11953,6 +12099,7 @@ Status: **OPEN**
 **Priority:** LOW (Nice-to-have improvement)
 
 **Related Tickets:**
+
 - TCK-20260129-083 (Refresh Tests) - Tests should cover schema validation
 
 ---
@@ -11965,6 +12112,7 @@ Created: 2026-01-29 18:05 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Change registration endpoint status code from 200 to 201
   - Update tests to expect 201 status code
@@ -11976,17 +12124,20 @@ Status: **OPEN**
 - Behavior change allowed: YES (status code change)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/api/v1/endpoints/auth.py`, `src/backend/tests/test_auth.py`
 - Branch: main
 - Base commit: 3925d36
 
 **Inputs:**
+
 - Audit findings: L2 from TCK-20260129-080
 - REST API best practices
 - HTTP status code specifications
 
 **Requirements:**
+
 1. Change `@router.post("/register")` to return `status_code=201`
 2. Update test assertions to expect 201 status code
 3. Update API documentation to reflect change
@@ -11994,6 +12145,7 @@ Status: **OPEN**
 5. Add deprecation notice if needed
 
 **Acceptance Criteria:**
+
 - ✅ Registration endpoint returns 201 status code
 - ✅ All tests pass with new status code
 - ✅ API documentation updated
@@ -12002,6 +12154,7 @@ Status: **OPEN**
 - ✅ Clear migration path documented
 
 **Implementation Plan:**
+
 1. **Code Change** (0.1 day)
    - Modify registration endpoint status code
    - Update response model if needed
@@ -12019,14 +12172,17 @@ Status: **OPEN**
    - Verify no regressions
 
 **Risk Assessment:**
+
 - **Security Risk**: LOW (status code change only)
 - **Implementation Risk**: LOW (simple change)
 - **Compatibility Risk**: LOW (minor API contract change)
 
 **Dependencies:**
+
 - None (independent fix)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 0.25-0.5 day
@@ -12034,9 +12190,11 @@ Status: **OPEN**
 **Priority:** LOW (REST convention compliance)
 
 **Related Tickets:**
+
 - None
 
 **Migration Notes:**
+
 - Clients expecting 200 should update to expect 201
 - Both status codes may be accepted during transition period
 - Change aligns with HTTP/REST best practices
@@ -12051,6 +12209,7 @@ Created: 2026-01-29 18:30 UTC
 Status: **DONE**
 
 **Scope contract:**
+
 - In-scope:
   - Audit of `src/backend/app/core/health.py`
   - Health monitoring system assessment
@@ -12063,17 +12222,20 @@ Status: **DONE**
 - Behavior change allowed: NO (audit only)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/app/core/health.py`, `src/backend/app/main.py`
 - Branch: main
 - Base commit: 1519b8156acf474e27afab3c8c549bdc241dca3b
 
 **Inputs:**
+
 - Prompt used: `prompts/audit/audit-v1.5.1.md`
 - Source artifacts: Existing health-related files
 - Discovery commands: git, rg, file reads
 
 **Execution log:**
+
 - 18:30 UTC: Started health system audit
 - 18:45 UTC: Completed discovery phase
 - 19:00 UTC: Completed monitoring assessment
@@ -12081,11 +12243,13 @@ Status: **DONE**
 - 19:30 UTC: Completed documentation
 
 **Findings summary:**
+
 - ✅ Strengths: Database monitoring, proper error handling, good test coverage
 - ⚠️ Medium issues: No caching, limited dependency coverage, no performance metrics
 - 📊 Production readiness: PARTIAL (needs improvements for production)
 
 **Key findings:**
+
 1. M1: No comprehensive dependency monitoring (database only)
 2. M2: No performance metrics collection
 3. M3: No health check caching (database load concern)
@@ -12093,6 +12257,7 @@ Status: **DONE**
 5. L2: No component-specific timeouts
 
 **Evidence:**
+
 - Audit artifact: `docs/audit/src__backend__app__core__health.py.md`
 - Discovery commands executed successfully
 - Git history analyzed (2 commits)
@@ -12100,12 +12265,14 @@ Status: **DONE**
 - Monitoring patterns assessed
 
 **Production readiness assessment:**
+
 - **Current status**: ⚠️ PARTIAL
 - **Strengths**: Database monitoring, error handling, test coverage
 - **Weaknesses**: No caching, limited dependencies, no performance metrics
 - **Recommendation**: Implement caching and timeout handling first
 
 **Next actions:**
+
 1. Implement health check caching with 5-10 second TTL (TCK-20260129-087)
 2. Add per-component timeout handling (TCK-20260129-088)
 3. Expand to monitor all critical dependencies (TCK-20260129-089)
@@ -12113,6 +12280,7 @@ Status: **DONE**
 5. Add error detail sanitization (TCK-20260129-091)
 
 **Completion:**
+
 - Status: DONE ✅
 - Timestamp: 2026-01-29 19:30 UTC
 - Artifact: `docs/audit/src__backend__app__core__health.py.md`
@@ -12133,6 +12301,7 @@ Issue:
 Backend failed with "greenlet library is required" error. SQLAlchemy async requires greenlet at runtime, but it was only in dev dependencies.
 
 Root Cause:
+
 - greenlet was in [dependency-groups] dev but not in main dependencies
 - SQLAlchemy async operations require greenlet for coroutine support
 - This was a pre-existing bug that manifested when venv was rebuilt
@@ -12141,9 +12310,11 @@ Fix:
 Added `greenlet>=3.0.0` to main dependencies in src/backend/pyproject.toml
 
 Files Modified:
+
 - src/backend/pyproject.toml
 
 Impact:
+
 - Backend now starts correctly without manual greenlet installation
 - Database connections work properly
 
@@ -12160,6 +12331,7 @@ Completed: 2026-01-29 19:45 IST
 Changed mascot static image from pip_mascot.png to red_panda_no_bg.png
 
 Files Modified:
+
 - src/frontend/src/components/Mascot.tsx
 
 ---
@@ -12179,6 +12351,7 @@ Scope: Full stack deployment readiness assessment
 Overall Score: **4.3/10 - NOT READY FOR DEPLOYMENT**
 
 Critical Findings:
+
 1. **P0: Hardcoded secrets** - SECRET_KEY in config.py
 2. **P0: No production database config** - Only SQLite, no PostgreSQL
 3. **P0: CORS not configured for production** - Only localhost origins
@@ -12186,6 +12359,7 @@ Critical Findings:
 5. **P1: No health checks for dependencies** - Only database checked
 
 Key Gaps:
+
 - No dependency lock file for reproducible builds
 - No deployment documentation
 - No E2E or load testing
@@ -12203,26 +12377,28 @@ Full report: docs/audit/DEPLOYMENT_PREPAREDNESS_20260129.md
 ## DEPLOYMENT SPRINT - Week of 2026-01-29
 
 ### Sprint Goal
+
 Launch MVP for public use with free tier. Minimize costs - no paid services initially.
 
 ### Sprint Backlog
 
-| Ticket | Title | Priority | Est. Hours | Status |
-|--------|-------|----------|------------|--------|
-| TCK-20260129-201 | Environment & Secrets Configuration | P0 | 4 | ✅ DONE |
-| TCK-20260129-202 | Local PostgreSQL Setup | P0 | 4 | ✅ DONE |
-| TCK-20260129-203 | CORS & Security Hardening | P0 | 3 | ✅ DONE |
-| TCK-20260129-085 | Dependency Lock & Reproducible Builds | P1 | 2 | 🔵 OPEN |
-| TCK-20260129-086 | Health Checks & Basic Monitoring | P1 | 3 | 🔵 OPEN |
-| TCK-20260129-087 | Build & Deploy Scripts | P1 | 4 | 🔵 OPEN |
-| TCK-20260129-088 | Deployment Documentation | P2 | 4 | 🔵 OPEN |
-| TCK-20260129-089 | Operations Runbook | P2 | 3 | 🔵 OPEN |
-| TCK-20260129-090 | Pre-Launch Verification | P0 | 4 | 🔵 OPEN |
-| TCK-20260129-091 | Production Launch | P0 | 2 | 🔵 OPEN |
+| Ticket           | Title                                 | Priority | Est. Hours | Status  |
+| ---------------- | ------------------------------------- | -------- | ---------- | ------- |
+| TCK-20260129-201 | Environment & Secrets Configuration   | P0       | 4          | ✅ DONE |
+| TCK-20260129-202 | Local PostgreSQL Setup                | P0       | 4          | ✅ DONE |
+| TCK-20260129-203 | CORS & Security Hardening             | P0       | 3          | ✅ DONE |
+| TCK-20260129-085 | Dependency Lock & Reproducible Builds | P1       | 2          | 🔵 OPEN |
+| TCK-20260129-086 | Health Checks & Basic Monitoring      | P1       | 3          | 🔵 OPEN |
+| TCK-20260129-087 | Build & Deploy Scripts                | P1       | 4          | 🔵 OPEN |
+| TCK-20260129-088 | Deployment Documentation              | P2       | 4          | 🔵 OPEN |
+| TCK-20260129-089 | Operations Runbook                    | P2       | 3          | 🔵 OPEN |
+| TCK-20260129-090 | Pre-Launch Verification               | P0       | 4          | 🔵 OPEN |
+| TCK-20260129-091 | Production Launch                     | P0       | 2          | 🔵 OPEN |
 
 **Total Estimated**: 33 hours (~4 days focused work)
 
 ### Definition of Done
+
 - [ ] Application deployed on production domain
 - [ ] PostgreSQL database operational
 - [ ] No hardcoded secrets
@@ -12231,6 +12407,7 @@ Launch MVP for public use with free tier. Minimize costs - no paid services init
 - [ ] Documentation complete
 
 ### Post-Sprint Backlog (Cost-Incurring)
+
 - Sentry error tracking ($26/month) - TCK-20260129-092
 - Cloud PostgreSQL ($15-50/month) - TCK-20260129-093
 - CDN for assets ($5-20/month) - TCK-20260129-094
@@ -12249,17 +12426,20 @@ Completed: 2026-01-29 20:20 IST
 Prompt: prompts/remediation/implementation-v1.6.1.md
 
 Scope:
+
 - Move all secrets to environment variables
 - Create .env.example for documentation
 - Add validation for required env vars at startup
 - Fail fast if SECRET_KEY is default/missing
 
 Files:
+
 - src/backend/app/core/config.py
 - .env (gitignored)
 - .env.example (committed)
 
 Acceptance Criteria:
+
 - [x] No hardcoded secrets in codebase
 - [x] .env.example documents all required variables
 - [x] App fails to start if required env vars missing
@@ -12268,6 +12448,7 @@ Acceptance Criteria:
 ---
 
 Execution Log:
+
 - 20:05 IST: Created .env.example with comprehensive documentation
 - 20:10 IST: Added SECRET_KEY validation (min 32 chars, rejects weak defaults)
 - 20:15 IST: Updated backend .env with strong development key
@@ -12288,22 +12469,26 @@ Completed: 2026-01-29 21:15 IST
 Prompt: prompts/remediation/implementation-v1.6.1.md
 
 Scope:
+
 - Configure PostgreSQL connection (use local install)
 - Set up connection pooling (asyncpg)
 - Test database migrations on PostgreSQL
 - Create database initialization script
 
 Prerequisites:
+
 - PostgreSQL installed locally
 - Database 'advay_learning' created
 - User with appropriate permissions
 
 Files:
+
 - src/backend/app/db/session.py
 - src/backend/.env (update DATABASE_URL)
 - scripts/init-db.sh (new)
 
 Acceptance Criteria:
+
 - [x] Backend connects to local PostgreSQL
 - [x] Connection pooling configured (10 pool, 20 overflow)
 - [x] Migrations run successfully on PostgreSQL
@@ -12312,6 +12497,7 @@ Acceptance Criteria:
 ---
 
 Execution Log:
+
 - 20:30 IST: Added connection pooling config for PostgreSQL
 - 20:40 IST: Created scripts/init-db.sh for database initialization
 - 20:50 IST: Created 'advay_learning' database in local PostgreSQL
@@ -12329,6 +12515,7 @@ Created: 2026-01-29 20:00 UTC
 Status: **DONE** ✅
 
 **Scope contract:**
+
 - In-scope:
   - Fix SECRET_KEY validation error preventing backend startup
   - Generate strong secret key for development
@@ -12341,17 +12528,20 @@ Status: **DONE** ✅
 - Behavior change allowed: YES (configuration change)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/backend/.env`, `src/backend/app/core/config.py`
 - Branch: main
 - Base commit: e753d05
 
 **Inputs:**
+
 - Error: `pydantic_core.ValidationError: SECRET_KEY is set to a weak/default value`
 - Current key: `"dev-secret-key-change-in-production"`
 - Generated key: `"8b14ec5b2024f22e0e1683883ea3fc1ef6e7118c216109d8cd8122e6165fa207"`
 
 **Root Cause Analysis:**
+
 ```
 1. Pydantic settings validation rejects weak/default secret keys
 2. Current .env file contains default/insecure SECRET_KEY
@@ -12360,6 +12550,7 @@ Status: **DONE** ✅
 ```
 
 **Requirements:**
+
 1. Update `.env` file with strong SECRET_KEY
 2. Ensure backend can start with new key
 3. Test health endpoint connectivity
@@ -12367,6 +12558,7 @@ Status: **DONE** ✅
 5. Document secret management best practices
 
 **Acceptance Criteria:**
+
 - ✅ Backend starts without validation errors
 - ✅ Health endpoint returns 200 status
 - ✅ JWT tokens can be generated and validated
@@ -12374,6 +12566,7 @@ Status: **DONE** ✅
 - ✅ Documentation updated with best practices
 
 **Implementation Plan:**
+
 1. **Immediate Fix** (0.25 day)
    - Update `.env` with generated strong key
    - Test backend startup
@@ -12395,15 +12588,18 @@ Status: **DONE** ✅
    - Document development vs production practices
 
 **Risk Assessment:**
+
 - **Security Risk**: HIGH (weak keys compromise application security)
 - **Implementation Risk**: LOW (simple configuration change)
 - **Compatibility Risk**: LOW (backward compatible)
 - **Blocker Impact**: CRITICAL (prevents all backend functionality)
 
 **Dependencies:**
+
 - None (independent configuration fix)
 
 **Blockers:**
+
 - Backend cannot start with current configuration
 - Frontend profile fetch times out due to backend unavailability
 
@@ -12412,6 +12608,7 @@ Status: **DONE** ✅
 **Priority:** CRITICAL (BLOCKING all backend functionality)
 
 **Evidence of Issue:**
+
 ```bash
 # Error observed during backend startup:
 pydantic_core._pydantic_core.ValidationError: 1 validation error for Settings
@@ -12420,6 +12617,7 @@ SECRET_KEY
 ```
 
 **Resolution Applied:**
+
 ```bash
 # Generated strong 32-byte hex key:
 openssl rand -hex 32
@@ -12430,6 +12628,7 @@ echo "SECRET_KEY=8b14ec5b2024f22e0e1683883ea3fc1ef6e7118c216109d8cd8122e6165fa20
 ```
 
 **Next Steps:**
+
 1. Test backend startup with new configuration
 2. Verify health endpoint connectivity
 3. Test authentication flows
@@ -12437,11 +12636,13 @@ echo "SECRET_KEY=8b14ec5b2024f22e0e1683883ea3fc1ef6e7118c216109d8cd8122e6165fa20
 5. Consider adding key rotation script
 
 **Related Issues:**
+
 - Frontend profile fetch timeout (Game.tsx:70)
 - Backend connectivity problems
 - Authentication system dependencies
 
 **Completion:**
+
 - Status: DONE ✅
 - Timestamp: 2026-01-29 20:30 UTC
 - Resolution: Updated SECRET_KEY with strong 32-byte hex value
@@ -12452,6 +12653,7 @@ echo "SECRET_KEY=8b14ec5b2024f22e0e1683883ea3fc1ef6e7118c216109d8cd8122e6165fa20
 ---
 
 Execution Log:
+
 - 20:30 IST: Added connection pooling config for PostgreSQL
 - 20:40 IST: Created scripts/init-db.sh for database initialization
 - 20:50 IST: Created 'advay_learning' database in local PostgreSQL
@@ -12475,16 +12677,19 @@ Completed: 2026-01-29 21:45 IST
 Prompt: prompts/remediation/implementation-v1.6.1.md
 
 Scope:
+
 - Configure CORS for production domain
 - Add security headers middleware
 - Review cookie settings for production
 
 Files:
+
 - src/backend/app/main.py
 - src/backend/app/core/config.py
 - src/backend/.env (update ALLOWED_ORIGINS)
 
 Acceptance Criteria:
+
 - [x] CORS configured for production domain (via ALLOWED_ORIGINS env var)
 - [x] Security headers added (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy)
 - [x] Cookie settings reviewed (secure=True, samesite=lax in auth)
@@ -12493,6 +12698,7 @@ Acceptance Criteria:
 ---
 
 Execution Log:
+
 - 21:20 IST: Created SecurityHeadersMiddleware (X-Content-Type-Options, X-Frame-Options, etc.)
 - 21:30 IST: Added TrustedHostMiddleware for production
 - 21:35 IST: Restricted CORS methods and headers (more secure)
@@ -12507,11 +12713,11 @@ Execution Log:
 
 ### Completed Today (TCK-20260129-201 through 203)
 
-| Ticket | Title | Status |
-|--------|-------|--------|
+| Ticket           | Title                               | Status  |
+| ---------------- | ----------------------------------- | ------- |
 | TCK-20260129-201 | Environment & Secrets Configuration | ✅ DONE |
-| TCK-20260129-202 | Local PostgreSQL Setup | ✅ DONE |
-| TCK-20260129-203 | CORS & Security Hardening | ✅ DONE |
+| TCK-20260129-202 | Local PostgreSQL Setup              | ✅ DONE |
+| TCK-20260129-203 | CORS & Security Hardening           | ✅ DONE |
 
 ### Key Accomplishments
 
@@ -12546,22 +12752,27 @@ src/backend/.env                      # Modified - PostgreSQL config
 ### Remaining Sprint Work
 
 **Phase 2 (Days 3-4)**:
+
 - TCK-20260129-085: Dependency Lock & Reproducible Builds
 - TCK-20260129-086: Health Checks & Basic Monitoring
 - TCK-20260129-087: Build & Deploy Scripts
 
 **Phase 3 (Days 5-6)**:
+
 - TCK-20260129-088: Deployment Documentation
 - TCK-20260129-089: Operations Runbook
 
 **Phase 4 (Day 7)**:
+
 - TCK-20260129-090: Pre-Launch Verification
 - TCK-20260129-091: Production Launch
 
 ### Blockers
+
 None. All critical foundation work is complete.
 
 ### Notes for Tomorrow
+
 - Need to generate requirements.txt for reproducible builds
 - Create deployment scripts
 - Write comprehensive documentation
@@ -12649,7 +12860,6 @@ Phase 1 readiness increased from 30% to 70%:
 - `docs/audit/ai-phase1-readiness-audit.md` - Updated audit
 - `docs/ai-native/ARCHITECTURE.md` - AI architecture
 - `docs/ai-native/ROADMAP.md` - Phase roadmap
-
 
 ## TCK-20260129-080 :: P0 Implementation - Visual Foundation & Sound
 
@@ -13661,13 +13871,13 @@ Create badge display component with locked/unlocked states. Show achievement bad
 Scope contract:
 
 - In-scope:
-
   - Create BadgeCard.tsx component
   - Create BadgeGrid.tsx component
   - Implement locked state with silhouette/grayed-out
   - Implement unlocked state with full color and animation
   - Add progress indicator for achievements with conditions
   - Show unlock condition when locked
+
 - Out-of-scope:
   - Achievement detection (TCK-20260129-104)
   - Badge data structure (TCK-20260129-103)
@@ -14209,22 +14419,21 @@ Risks/notes:
 
 ## Updated Project Status Summary
 
-| Category  | Open  | In Progress | Done  | Blocked | Total  |
-| --------- | ----- | ----------- | ----- | ------- | ------ |
-| Backend   | 1     | 0           | 1     | 0       | 2      |
-| Frontend  | 1     | 1           | 1     | 0       | 3      |
-| UI Upgrade | 15    | 0           | 0     | 0       | 15     |
-| Features  | 4     | 0           | 0     | 0       | 4      |
-| Testing   | 2     | 0           | 0     | 0       | 2      |
-| Hardening | 1     | 1           | 0     | 0       | 2      |
-| Prompts   | 0     | 1           | 0     | 0       | 1      |
-| **TOTAL** | **24** | **3**       | **2** | **0**   | **29** |
+| Category   | Open   | In Progress | Done  | Blocked | Total  |
+| ---------- | ------ | ----------- | ----- | ------- | ------ |
+| Backend    | 1      | 0           | 1     | 0       | 2      |
+| Frontend   | 1      | 1           | 1     | 0       | 3      |
+| UI Upgrade | 15     | 0           | 0     | 0       | 15     |
+| Features   | 4      | 0           | 0     | 0       | 4      |
+| Testing    | 2      | 0           | 0     | 0       | 2      |
+| Hardening  | 1      | 1           | 0     | 0       | 2      |
+| Prompts    | 0      | 1           | 0     | 0       | 1      |
+| **TOTAL**  | **24** | **3**       | **2** | **0**   | **29** |
 
 **Current State**: UI Upgrade Master Plan created, Phase 1 tickets ready for implementation (15 tickets for Weeks 1-4).
 **Next Priority**: TCK-20260129-099 (UI Upgrade Master Project) - Assign Phase 1 tickets and start Week 1 implementation.
 
 ---
-
 
 ---
 
@@ -14249,22 +14458,26 @@ The language selection system HAS been implemented, but has critical UX gaps:
 6. ❌ **UX ISSUE**: Default is English, users may not notice selector
 
 **Why User Can't See Hindi/Kannada**:
+
 - User likely has existing profile created before language feature
 - OR created profile without noticing language selector
 - OR wants to change language but can't find how
 
 **Evidence**:
+
 - Dashboard.tsx line 37: `const [newChildLanguage, setNewChildLanguage] = useState('en');`
 - Dashboard.tsx lines 474-486: Language selector only in CREATE modal
 - No "Edit Profile" functionality found in codebase
 
 **Acceptance Criteria**:
+
 - [ ] Can edit existing profile's preferred language
 - [ ] Visual indicator in game showing current alphabet/language
 - [ ] Clearer language selection UI (not just dropdown default)
 - [ ] Migration: existing profiles can switch languages
 
 **Files to Modify**:
+
 - src/frontend/src/pages/Dashboard.tsx (add edit profile modal)
 - src/frontend/src/pages/Game.tsx (add language indicator)
 - src/backend/app/api/v1/endpoints/users.py (add update profile endpoint)
@@ -14282,11 +14495,13 @@ Priority: P1
 **Problem**: User doesn't know which language alphabet is currently active
 
 **Solution**: Add prominent visual indicator in game showing:
+
 - Current language (English/Hindi/Kannada/etc)
 - Flag or icon representing the language
 - Quick switcher (optional)
 
 **Acceptance Criteria**:
+
 - [ ] Language badge/icon visible during gameplay
 - [ ] Shows full language name (not just code)
 - [ ] Updates when profile language changes
@@ -14301,6 +14516,7 @@ Created: 2026-01-29 20:45 UTC
 Status: **OPEN**
 
 **Scope contract:**
+
 - In-scope:
   - Add separate gameLanguage setting (vs UI language)
   - Update settings store with gameLanguage field
@@ -14314,12 +14530,14 @@ Status: **OPEN**
 - Behavior change allowed: YES (new setting field)
 
 **Targets:**
+
 - Repo: learning_for_kids
 - Files: `src/frontend/src/store/settingsStore.ts`, `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/Game.tsx`
 - Branch: main
 - Base commit: 3b7322d
 
 **Root Cause:**
+
 ```
 Current Issue:
 - Settings.language controls UI language only
@@ -14334,6 +14552,7 @@ Expected Behavior:
 ```
 
 **Requirements:**
+
 1. Add `gameLanguage` field to settings store
 2. Add game language selector to settings UI
 3. Update game to use `gameLanguage` first, then `profile.preferred_language`
@@ -14341,6 +14560,7 @@ Expected Behavior:
 5. Test all language combinations
 
 **Acceptance Criteria:**
+
 - ✅ Can select game language separately from UI language
 - ✅ Game language selection persists across sessions
 - ✅ Game displays correct alphabet for selected language
@@ -14349,6 +14569,7 @@ Expected Behavior:
 - ✅ Settings UI clearly distinguishes UI vs game language
 
 **Implementation Plan:**
+
 1. **Settings Store Update** (0.25 day)
    - Add gameLanguage field with default 'english'
    - Update persist middleware
@@ -14371,15 +14592,18 @@ Expected Behavior:
    - Test edge cases
 
 **Risk Assessment:**
+
 - **Implementation Risk**: LOW (simple state management)
 - **Compatibility Risk**: LOW (backward compatible)
 - **UX Impact**: HIGH (major UX improvement)
 - **Blocker Risk**: NONE (independent feature)
 
 **Dependencies:**
+
 - None (frontend-only change)
 
 **Blockers:**
+
 - None identified
 
 **Estimated Effort:** 1 day
@@ -14387,6 +14611,7 @@ Expected Behavior:
 **Priority:** HIGH (Critical UX improvement)
 
 **Evidence of Issue:**
+
 ```typescript
 // Current problematic code in Game.tsx (line 98-102):
 const languageCode = profile?.preferred_language || 'en';
@@ -14396,26 +14621,31 @@ const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
 ```
 
 **Proposed Solution:**
+
 ```typescript
 // Fixed code:
-const languageCode = settings.gameLanguage || profile?.preferred_language || 'en';
+const languageCode =
+  settings.gameLanguage || profile?.preferred_language || 'en';
 const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
 
 // Benefits: Game language independent from profile/UI language
 ```
 
 **Impact:**
+
 - Users can select Hindi/Kannada for games while keeping UI in English
 - Fixes "only English visible" issue
 - Aligns with learning plan (multi-language support)
 - Improves accessibility for non-English speakers
 
 **Related Issues:**
+
 - TCK-20260129-086: Health System Audit (complementary)
 - TCK-20260129-080: Authentication Audit (prerequisite)
 - Feature: Multi-language support in learning plan
 
 **Next Steps:**
+
 1. Implement settings store changes
 2. Update settings UI
 3. Modify game language logic
@@ -14439,6 +14669,7 @@ Completed: 2026-01-29 23:00 IST
 **Solution**: Language is now a game/lesson choice - just like choosing activity type
 
 **Changes Made**:
+
 1. Removed `preferred_language` from profile usage in Game.tsx
 2. Added `selectedLanguage` state - user can switch anytime
 3. Added language selector UI on game start screen (5 buttons with flags)
@@ -14446,15 +14677,18 @@ Completed: 2026-01-29 23:00 IST
 5. Auto-resets game when language changes (new letter set)
 
 **User Experience**:
+
 - User opens game
 - Sees 5 language buttons: 🇬🇧 English, 🇮🇳 Hindi, 🇮🇳 Kannada, 🇮🇳 Telugu, 🇮🇳 Tamil
 - Clicks any language → game loads that alphabet
 - Can switch anytime by stopping and selecting different language
 
 **Files Modified**:
+
 - src/frontend/src/pages/Game.tsx
 
 **Acceptance Criteria**:
+
 - [x] Language selector visible on game start
 - [x] Can switch languages without changing profile
 - [x] Language indicator shows during gameplay
@@ -14476,6 +14710,7 @@ Status: **DONE** ✅
 ### Context
 
 Project previously used SQLite for development and PostgreSQL for production. This caused:
+
 - Data loss when switching between databases
 - Configuration confusion
 - Different behavior in dev vs prod
@@ -14572,6 +14807,7 @@ Inputs:
 Plan:
 
 Implement components in order, with approval at each step:
+
 1. Color Palette & CSS Variables (FOUNDATION)
 2. Typography System
 3. Button Components
@@ -14591,38 +14827,41 @@ Execution log:
 Component 1: Color Palette & CSS Variables (Pending Approval)
 
 Proposed Colors:
+
 ```css
 /* Background Colors */
---bg-primary: #FDF8F3;        /* Soft Cream - main background */
---bg-secondary: #E8F4F8;      /* Pale Blue - cards, sections */
---bg-tertiary: #F5F0E8;       /* Warm Off-White - alternate sections */
+--bg-primary: #fdf8f3; /* Soft Cream - main background */
+--bg-secondary: #e8f4f8; /* Pale Blue - cards, sections */
+--bg-tertiary: #f5f0e8; /* Warm Off-White - alternate sections */
 
 /* Brand Colors */
---brand-primary: #E07A5F;     /* Soft Coral - primary buttons, CTAs */
---brand-secondary: #7EB5D6;   /* Sky Blue - secondary actions, links */
---brand-accent: #F2CC8F;      /* Soft Amber - accents, highlights */
+--brand-primary: #e07a5f; /* Soft Coral - primary buttons, CTAs */
+--brand-secondary: #7eb5d6; /* Sky Blue - secondary actions, links */
+--brand-accent: #f2cc8f; /* Soft Amber - accents, highlights */
 
 /* Semantic Colors */
---success: #81B29A;           /* Sage Green - success states */
---warning: #F2CC8F;           /* Soft Amber - gentle warnings */
---error: #E07A5F;             /* Soft Coral - errors */
+--success: #81b29a; /* Sage Green - success states */
+--warning: #f2cc8f; /* Soft Amber - gentle warnings */
+--error: #e07a5f; /* Soft Coral - errors */
 
 /* Text Colors */
---text-primary: #3D405B;      /* Charcoal - headings, body text */
---text-secondary: #6B7280;    /* Warm Gray - subtext, hints */
---text-muted: #9CA3AF;        /* Light Gray - disabled */
+--text-primary: #3d405b; /* Charcoal - headings, body text */
+--text-secondary: #6b7280; /* Warm Gray - subtext, hints */
+--text-muted: #9ca3af; /* Light Gray - disabled */
 
 /* UI Colors */
---border: #E5E7EB;
+--border: #e5e7eb;
 --shadow: rgba(61, 64, 91, 0.08);
 ```
 
 Contrast Ratios (Verified):
+
 - Text Primary on BG Primary: 12.6:1 ✅ (exceeds 7:1)
 - Brand Primary on BG Primary: 4.6:1 ✅ (exceeds 4.5:1)
 - Text Secondary on BG Primary: 5.9:1 ✅ (exceeds 4.5:1)
 
 Key Principles:
+
 - No gradients
 - No pure white (cream instead)
 - No bright/saturated colors
@@ -14662,6 +14901,7 @@ Completed: 2026-01-29 23:45 IST
 **Solution**: Changed age from `int` to `float` across entire stack
 
 **Files Modified**:
+
 - src/backend/app/db/models/profile.py - Column type Float
 - src/backend/app/schemas/profile.py - Schema type float
 - src/backend/app/core/validation.py - Accepts int or float
@@ -14671,15 +14911,49 @@ Completed: 2026-01-29 23:45 IST
 **Database Migration**: Applied (PostgreSQL)
 
 **User Experience**:
+
 - Can now enter age like "2.5" for 2 years 6 months
 - Input shows helper text: "Use decimals for partial years"
 - Backend accepts and validates float ages
 
 **Acceptance Criteria**:
+
 - [x] Database column is Float
 - [x] Schema accepts float
 - [x] Validation accepts int or float
 - [x] Frontend allows decimal input
 - [x] Migration applied successfully
+
+---
+
+---
+
+### TCK-20260129-305 :: Database Schema Review - Type Consistency Audit
+
+Type: AUDIT
+Owner: AI Assistant
+Created: 2026-01-29 23:50 IST
+Status: **IN_PROGRESS** 🟡
+
+Prompt: prompts/audit/audit-v1.5.1.md
+
+Scope:
+- Review all database models for type consistency
+- Check frontend/backend schema alignment
+- Identify fields that should be float/int/bool/string
+- Check for missing constraints (min/max lengths, nullable)
+- Review JSON fields for structure consistency
+
+Files to Review:
+- src/backend/app/db/models/*.py
+- src/backend/app/schemas/*.py
+- src/frontend/src/store/*.ts
+- src/frontend/src/services/api.ts
+
+Acceptance Criteria:
+- [ ] All models reviewed for type consistency
+- [ ] Frontend/backend type alignment verified
+- [ ] Issues documented with severity
+- [ ] Fix tickets created for critical issues
 
 ---
