@@ -845,6 +845,293 @@ Acceptance Criteria:
 - [ ] Regression testing strategy defined
 - [ ] Ready to execute test plan
 
+Execution log:
+
+REQUIRED DISCOVERY:
+
+Observed existing test coverage:
+- Frontend tests: 5 test files, 55 tests passing
+  - Test files: authStore.test.ts (17 tests), api.test.ts (8 tests), LetterCard.test.tsx (3 tests)
+  - Test execution time: 1.38s
+  - All current tests passing
+- NO tests found for Game.tsx component
+- Test coverage exists for: authStore, api service, LetterCard
+
+Observed testing gaps:
+- Game component is largest and most complex (713 LOC)
+- No unit tests for hand tracking logic
+- No tests for canvas drawing functionality
+- No tests for gesture recognition (pinch detection)
+- No tests for velocity filtering logic
+- No tests for accuracy calculation
+- No tests for game flow (start, play, stop, letter navigation)
+- No tests for MediaPipe integration
+- No integration tests for full game flow
+
+Observed current test infrastructure:
+- Uses vitest and react-testing-library
+- Test command: npm test
+- Test execution time: 1.38s
+- All current tests passing
+
+A) Test Matrix:
+
+Platforms/Browsers:
+- Chrome (primary development browser)
+- Safari (secondary - macOS)
+- Desktop devices with camera
+
+B) Automated Tests to Add:
+
+UNIT TESTS:
+1. Game Component State Tests:
+   - Test initial state (all refs initialized)
+   - Test profile ID handling (early return, profile fetch)
+   - Test language code mapping (full name to 2-letter code)
+   - Test letter selection based on language and difficulty
+   - Test hand landmarker initialization (loading states)
+
+2. Hand Tracking Tests:
+   - Test MediaPipe initialization (success, failure states)
+   - Test hand detection (landmarks available)
+   - Test index finger tip tracking (landmark 8)
+   - Test thumb tip tracking (landmark 4)
+   - Test cursor visibility and positioning
+   - Test frame skipping optimization (every 2nd frame)
+
+3. Gesture Recognition Tests:
+   - Test pinch start detection (distance < 0.05 threshold)
+   - Test pinch release detection (distance > 0.08 threshold)
+   - Test hysteresis logic (no rapid toggle)
+   - Test velocity filtering (movement threshold: 0.003)
+   - Test velocity threshold (max: 0.15)
+   - Test null point insertion (line break on release)
+
+4. Canvas Drawing Tests:
+   - Test canvas initialization and cleanup
+   - Test smoothPoints function (moving average over 3 points)
+   - Test drawing when isDrawing is true
+   - Test no drawing when isDrawing is false
+   - Test unbounded growth prevention (max 5000 points)
+   - Test drawing with cursor visibility (no drawing until pinch)
+
+5. Accuracy Calculation Tests:
+   - Test calculateAccuracy with < 10 points (returns 0)
+   - Test coverage calculation (points within letter area)
+   - Test density calculation (points per area)
+   - Test combined score formula (coverage * 0.6 + density * 0.4)
+
+6. Game Flow Tests:
+   - Test game start (isPlaying = true, reset state)
+   - Test game stop (isPlaying = false, cleanup)
+   - Test letter navigation (next/previous)
+   - Test progress saving (accuracy calculation, API call)
+   - Test streak tracking increment
+   - Test badge addition on achievements
+
+INTEGRATION TESTS:
+1. Profile Integration:
+   - Test Game loads with valid profileId
+   - Test Game redirects without profileId
+   - Test Game uses profile's preferred_language
+   - Test Game respects settings.difficulty
+
+2. Backend API Integration:
+   - Test progressApi.saveProgress call
+   - Test profileApi.getProfile call
+   - Test error handling (network failures, timeouts)
+   - Test authentication token passing
+
+3. MediaPipe Integration:
+   - Test FilesetResolver initialization
+   - Test HandLandmarker.createFromOptions with GPU delegate
+   - Test VIDEO running mode
+   - Test model asset path loading
+   - Test error handling for model load failures
+
+Commands to run:
+- cd src/frontend && npm test -- --coverage
+- cd src/frontend && npm run test -- Game
+- Expected: All unit tests pass, coverage > 80% for Game component
+
+C) Manual Tests (MANDATORY for camera features):
+
+CAMERA PERMISSION TESTS:
+1. First Run Permission Flow:
+   - Request camera permission when starting game
+   - Verify permission is requested (not automatically granted)
+   - Test allow permission (camera starts, video feed visible)
+   - Test deny permission (appropriate error message shown)
+   - Test revoke permission (stop game, show re-request prompt)
+
+2. Camera On/Off Indicator:
+   - Verify camera indicator is visible when camera is active
+   - Test indicator disappears when camera is stopped
+   - Test indicator shows correct state (on/off)
+   - Document indicator position and visual appearance
+
+3. Camera Stop Control:
+   - Test game stop button stops camera
+   - Verify video stream is terminated
+   - Test animation frames are cancelled
+   - Confirm no camera light/sound when stopped
+   - Test resume game re-requests camera appropriately
+
+LIGHTING/DISTANCE/OCCLUSION SMOKE TESTS:
+1. Normal Lighting Test:
+   - Start game in normal indoor lighting
+   - Verify hand tracking works reliably
+   - Observe FPS should be stable (> 20 FPS)
+   - Test pinch gesture recognition
+
+2. Low Lighting Test:
+   - Dim room lighting
+   - Verify hand detection still works (may have reduced confidence)
+   - Test if tracking becomes unreliable, shows appropriate feedback
+   - Document lighting threshold where tracking fails
+
+3. Bright Lighting Test:
+   - Use bright light or direct sunlight
+   - Verify hand detection doesn't get confused
+   - Test if reflection causes jittery tracking
+   - Observe if tracking remains stable
+
+4. Distance Test:
+   - Test at normal distance (arm's length from camera)
+   - Test too close (within 30cm) - verify it works or shows warning
+   - Test too far (beyond 2m) - verify it shows appropriate feedback
+
+5. Hand Occlusion Test:
+   - Place object (book/box) partially blocking hand
+   - Verify tracking continues with visible part
+   - Test if hand leaves frame and re-enters
+   - Test tracking recovery time after occlusion
+
+PERFORMANCE PERCEPTION TESTS:
+1. FPS Measurement:
+   - Start game and observe cursor movement smoothness
+   - Count visible cursor updates for 10 seconds
+   - Verify FPS is acceptable (> 15 FPS for smooth experience)
+   - Note any jank or dropped frames
+
+2. MediaPipe Load Time:
+   - Time model loading when starting game
+   - Verify loading indicator shows
+   - Acceptable: < 3 seconds for model load
+   - Document actual load time
+
+3. Frame Skipping Effectiveness:
+   - Observe if frame skipping (30 FPS target) maintains smooth tracking
+   - Test if reducing to 15 FPS (every 4th frame) still works
+   - Note performance differences
+
+D) Privacy & Safety Checks:
+
+1. No Video Storage:
+   - Verify no video files are created in browser
+   - Check browser network tab - no video uploads
+   - Check downloads folder - no video downloads
+   - Verify only processed data (coordinates, gestures) is stored
+
+2. No External Network Calls for Tracking:
+   - Verify MediaPipe models load from allowed CDN (jsdelivr, googleapis)
+   - Check for any tracking/telemetry network requests
+   - Confirm all network calls are documented/authorized
+
+3. Export/Delete Flows:
+   - Test if export feature exists - verify parent gate required
+   - Test if delete profile exists - verify password re-auth required
+   - Ensure children cannot export data without parent permission
+
+E) Pass/Fail Criteria (5-15 explicit):
+
+UNIT TESTS:
+1. Game component initial state test:
+   - PASS: All refs correctly initialized with null/0 values
+   - FAIL: Any ref is undefined or has wrong initial value
+
+2. Profile ID handling test:
+   - PASS: Returns <Navigate to="/dashboard"> when no profileId
+   - FAIL: Redirects not called or returns undefined
+
+3. Hand landmarker initialization test:
+   - PASS: Loading state true before model loads
+   - PASS: Loading state false after model loads (or error)
+   - FAIL: Loading state never updates, causing infinite loading
+
+4. Pinch detection test:
+   - PASS: isPinching becomes true when distance < 0.05
+   - PASS: isPinching becomes false when distance > 0.08
+   - FAIL: isPinching doesn't toggle or toggles rapidly
+
+5. Velocity filtering test:
+   - PASS: Point not added when distance < 0.003 (MIN_MOVEMENT_THRESHOLD)
+   - PASS: Point not added when velocity > 0.15 (MAX_VELOCITY_THRESHOLD)
+   - PASS: Null point added when high velocity detected (line break)
+   - FAIL: Points added when movement is too small or too fast
+
+6. Canvas drawing test:
+   - PASS: Drawing happens only when isDrawing is true
+   - PASS: No drawing when isDrawing is false but cursor visible
+   - PASS: Array growth prevented at 5000 points
+   - FAIL: Drawing when should not draw or array exceeds limit
+
+7. Accuracy calculation test:
+   - PASS: Returns 0 when points < 10
+   - PASS: Coverage calculation uses letter radius
+   - PASS: Density calculation normalizes to 0-1 range
+   - PASS: Combined score formula produces 0-100 range
+   - FAIL: Returns NaN, negative, or > 100
+
+INTEGRATION TESTS:
+1. Profile language preference test:
+   - PASS: Game uses profile.preferred_language for letter selection
+   - PASS: Language code mapped correctly (hindi -> hi, kannada -> kn)
+   - FAIL: Game uses wrong language or ignores profile preference
+
+2. Backend API error handling test:
+   - PASS: Error message shown when API call fails
+   - PASS: Game doesn't crash or freeze on network error
+   - FAIL: Game continues as if nothing happened on API failure
+
+MANUAL TESTS:
+1. Camera permission flow:
+   - PASS: Permission requested on first run, game shows error if denied
+   - FAIL: Camera starts without permission prompt or no error shown
+
+2. Camera indicator:
+   - PASS: Indicator visible when camera active, hidden when inactive
+   - FAIL: No indicator or indicator wrong state
+
+3. Lighting/distance tests:
+   - PASS: Hand tracking works in normal, low, bright lighting
+   - PASS: Appropriate feedback shown when conditions are poor
+   - FAIL: Tracking unreliable without feedback or no graceful degradation
+
+4. Performance tests:
+   - PASS: FPS > 15, cursor movement smooth, model load < 3s
+   - FAIL: FPS < 10, cursor janky, model load > 5s
+
+5. Privacy checks:
+   - PASS: No video stored, no external tracking calls found
+   - FAIL: Video files created or unauthorized network requests detected
+
+Overall Test Plan Status:
+- READY TO EXECUTE - Test plan comprehensive and executable
+
+Risks/Notes:
+
+- Game component is complex (713 LOC) - testing will be time-consuming
+- Camera tests require manual testing with actual camera hardware
+- MediaPipe model loading times may vary by device and network
+- Performance may vary significantly by device (laptop with camera vs high-end machine)
+- Lighting/distance tests require controlled environment or multiple test sessions
+- Privacy verification requires network inspection (browser DevTools)
+- No existing tests means higher initial setup effort
+- E2E tests will require multiple runs and careful documentation
+- Integration tests require backend API to be running
+- Some manual tests require camera permissions which may persist after testing
+
 ---
 
 #### TCK-20240128-004 :: Multi-Language Support
