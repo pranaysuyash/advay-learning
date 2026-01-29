@@ -861,6 +861,8 @@ Risks/notes:
 - Full splitting carries high risk without clear benefit
 - Better to focus on P2 features (Parent Dashboard) than risky refactor
 - Proposed gradual extraction approach for future improvements
+- NO Game component tests: Frontend test suite has 0 tests for Game.tsx
+- Test coverage exists for: authStore (17 tests), api service (8 tests), LetterCard (3 tests)
 - WebGL warning `gl_context.cc:1004] OpenGL error checking is disabled` is browser environment warning, NOT code issue
 - WebGL warning does not affect functionality or build success
 - WebGL warning is from ANGLE (Chrome graphics layer) and cannot be "fixed" in code
@@ -11053,5 +11055,138 @@ Next Steps:
 1. Verify video plays in browser
 2. Remove 3-second auto-play timer
 3. Test with actual gameplay feedback
+
+---
+
+## TCK-20260129-067 :: UI/UX Improvement Plan - Making the App Magical
+
+Type: PLANNING
+Owner: AI Assistant
+Created: 2026-01-29 17:45 IST
+Status: **OPEN** 🔵
+
+Scope contract:
+
+- In-scope:
+  - Comprehensive UI/UX improvement planning
+  - Analysis of current UI state and existing UX docs
+  - Creation of detailed implementation plan with phases
+  - Documentation of findings and recommendations
+- Out-of-scope:
+  - Actual implementation (pending user approval)
+  - Asset creation (audio, visual)
+  - Code changes
+- Behavior change allowed: YES (visual redesign)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files Analyzed:
+  - `src/frontend/src/App.tsx` - Route structure
+  - `src/frontend/src/pages/Home.tsx` - Landing page
+  - `src/frontend/src/pages/Game.tsx` - Main game screen
+  - `src/frontend/src/pages/Dashboard.tsx` - Parent dashboard
+  - `src/frontend/src/pages/Progress.tsx` - Progress view
+  - `src/frontend/src/pages/Settings.tsx` - Settings page
+  - `src/frontend/src/components/LetterJourney.tsx` - Letter grid
+  - `src/frontend/src/components/Mascot.tsx` - Pip mascot
+  - `src/frontend/src/components/ui/Layout.tsx` - Navigation
+  - `src/frontend/src/index.css` - Global styles
+- Docs Reviewed:
+  - `UX_VISION_CLAUDE.md` - Child-first design thinking
+  - `UX_ENHANCEMENTS.md` - Buddy mascot concept
+  - `UX_VISION_SYNTHESIS.md` - Consolidated priorities
+  - `UX_IMPROVEMENTS.md` - Feature backlog
+  - `GAME_MECHANICS.md` - Scoring and feedback loops
+  - `PROJECT_STATUS.md` - Current project state
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Prompt used: N/A (planning phase)
+- Source artifacts:
+  - `docs/UX_VISION_CLAUDE.md`
+  - `docs/UX_ENHANCEMENTS.md`
+  - `docs/UX_VISION_SYNTHESIS.md`
+  - `docs/UX_IMPROVEMENTS.md`
+  - `docs/GAME_MECHANICS.md`
+
+Plan:
+
+1. Analyze current UI components and identify issues
+2. Review all existing UX documentation
+3. Synthesize findings into comprehensive plan
+4. Create detailed implementation phases
+5. Document in `UI_UX_IMPROVEMENT_PLAN.md`
+6. Create worklog ticket for tracking
+7. Present to user for approval
+
+Execution log:
+
+- 17:00 IST: Started UI/UX analysis
+- 17:10 IST: Analyzed Game.tsx - identified text-heavy feedback, percentage scores
+- 17:15 IST: Analyzed LetterJourney.tsx - basic grid layout, needs adventure map
+- 17:20 IST: Analyzed Mascot.tsx - good foundation, needs enhancement
+- 17:25 IST: Analyzed Home.tsx, Dashboard.tsx - dark theme, adult-centric
+- 17:30 IST: Reviewed UX_VISION_CLAUDE.md - child-first principles
+- 17:35 IST: Reviewed UX_VISION_SYNTHESIS.md - consolidated priorities
+- 17:40 IST: Created comprehensive improvement plan
+- 17:45 IST: Created UI_UX_IMPROVEMENT_PLAN.md
+- 17:50 IST: Created worklog ticket TCK-20260129-067
+
+Key Findings:
+
+**Critical Issues (P0):**
+1. Dark, serious theme (`#1a1a2e`) - not child-friendly
+2. Text-heavy feedback - pre-literate kids can't read
+3. No sound effects - `soundEnabled` exists but no implementation
+4. Percentage scores ("85% accuracy") - kids don't understand
+5. No celebration animations - success feels flat
+6. No onboarding - kids don't know what to do
+
+**Proposed Solution:**
+Transform from "educational software" to "Pip's Letter Adventure"
+- New playful color palette (sky blue, sunshine yellow, grass green)
+- Adventure map replacing grid layout
+- Sound effects and letter pronunciations
+- Star ratings replacing percentages
+- Confetti and celebration animations
+- Letter creatures collection system
+- Child-friendly onboarding
+
+Implementation Phases:
+
+**Phase 1 (Week 1):** Visual Foundation - Colors, typography, backgrounds
+**Phase 2 (Weeks 1-2):** Adventure Map - Replace grid with themed path
+**Phase 3 (Week 2):** Sound System - Audio feedback, letter sounds
+**Phase 4 (Week 2):** Celebrations - Confetti, stars, animations
+**Phase 5 (Week 3):** Game Redesign - Full-screen camera, minimal UI
+**Phase 6 (Week 3):** Navigation - Icon-based, Pip-guided
+**Phase 7 (Week 4):** Onboarding - First-time tutorial
+**Phase 8 (Weeks 4-5):** Letter Creatures - Collectible characters
+
+Status updates:
+
+- 2026-01-29 17:50 IST: Status OPEN - Planning complete, awaiting user approval
+
+Next actions:
+
+1. User reviews `docs/UI_UX_IMPROVEMENT_PLAN.md`
+2. User approves scope (P0 only, or include P1/P2)
+3. Create implementation tickets for approved phases
+4. Begin Phase 1 implementation
+
+Risks/notes:
+
+- **Asset dependency**: Letter creatures need illustrations
+- **Audio dependency**: Need sound files or Web Speech API
+- **Scope creep risk**: Full plan is 6 weeks; recommend starting with P0 only
+- **Child testing needed**: Should test with actual children after P0
+
+Artifacts:
+
+- `docs/UI_UX_IMPROVEMENT_PLAN.md` - Complete improvement plan
+- This ticket - TCK-20260129-067
 
 ---
