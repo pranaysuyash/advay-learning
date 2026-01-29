@@ -19,17 +19,19 @@
 
 | Metric         | Count  |
 | -------------- | ------ |
-| ✅ DONE        | 56     |
+| ✅ DONE        | 57     |
 | 🟡 IN_PROGRESS | 0      |
-| 🔵 OPEN        | 12     |
+| 🔵 OPEN        | 13     |
 | 🔴 BLOCKED     | 0      |
-| **Total**      | **68** |
+| **Total**      | **70** |
 
-**Last Updated:** 2026-01-29 17:30 UTC
+**Last Updated:** 2026-01-29 19:00 UTC
 
-**Current Priority:** Test authentication endpoints and profile functionality
+**Current Priority:** AI Phase 1 - Letter audio files
 
 ### Recent Completions (2026-01-29)
+
+- TCK-20260129-100: AI Phase 1 TTS Implementation ✅ NEW
 - TCK-20260129-092: CRITICAL FIX - Resolve SECRET_KEY Validation Error ✅
 - TCK-20260129-086: Comprehensive Health System Audit ✅
 - TCK-20260129-080: Comprehensive Authentication System Audit ✅
@@ -12206,9 +12208,9 @@ Launch MVP for public use with free tier. Minimize costs - no paid services init
 
 | Ticket | Title | Priority | Est. Hours | Status |
 |--------|-------|----------|------------|--------|
-| TCK-20260129-082 | Environment & Secrets Configuration | P0 | 4 | 🔵 OPEN |
-| TCK-20260129-083 | Local PostgreSQL Setup | P0 | 4 | 🔵 OPEN |
-| TCK-20260129-084 | CORS & Security Hardening | P0 | 3 | 🔵 OPEN |
+| TCK-20260129-201 | Environment & Secrets Configuration | P0 | 4 | ✅ DONE |
+| TCK-20260129-202 | Local PostgreSQL Setup | P0 | 4 | ✅ DONE |
+| TCK-20260129-203 | CORS & Security Hardening | P0 | 3 | ✅ DONE |
 | TCK-20260129-085 | Dependency Lock & Reproducible Builds | P1 | 2 | 🔵 OPEN |
 | TCK-20260129-086 | Health Checks & Basic Monitoring | P1 | 3 | 🔵 OPEN |
 | TCK-20260129-087 | Build & Deploy Scripts | P1 | 4 | 🔵 OPEN |
@@ -12235,12 +12237,13 @@ Launch MVP for public use with free tier. Minimize costs - no paid services init
 
 ---
 
-### TCK-20260129-082 :: Environment & Secrets Configuration
+### TCK-20260129-201 :: Environment & Secrets Configuration
 
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-29 20:00 IST
-Status: **IN_PROGRESS** 🟡
+Status: **DONE** ✅
+Completed: 2026-01-29 20:20 IST
 
 Prompt: prompts/remediation/implementation-v1.6.1.md
 
@@ -12256,10 +12259,10 @@ Files:
 - .env.example (committed)
 
 Acceptance Criteria:
-- [ ] No hardcoded secrets in codebase
-- [ ] .env.example documents all required variables
-- [ ] App fails to start if required env vars missing
-- [ ] SECRET_KEY validated (not default, minimum length)
+- [x] No hardcoded secrets in codebase
+- [x] .env.example documents all required variables
+- [x] App fails to start if required env vars missing
+- [x] SECRET_KEY validated (not default, minimum length)
 
 ---
 
@@ -12269,17 +12272,17 @@ Execution Log:
 - 20:15 IST: Updated backend .env with strong development key
 - 20:20 IST: All checks pass (config validation, lint, type-check)
 
-Status: **DONE** ✅
-Completed: 2026-01-29 20:20 IST
+---
 
 ---
 
-### TCK-20260129-083 :: Local PostgreSQL Setup
+### TCK-20260129-202 :: Local PostgreSQL Setup
 
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-29 20:20 IST
-Status: **IN_PROGRESS** 🟡
+Status: **DONE** ✅
+Completed: 2026-01-29 21:15 IST
 
 Prompt: prompts/remediation/implementation-v1.6.1.md
 
@@ -12300,10 +12303,20 @@ Files:
 - scripts/init-db.sh (new)
 
 Acceptance Criteria:
-- [ ] Backend connects to local PostgreSQL
-- [ ] Connection pooling configured
-- [ ] Migrations run successfully on PostgreSQL
-- [ ] Database initialization script works
+- [x] Backend connects to local PostgreSQL
+- [x] Connection pooling configured (10 pool, 20 overflow)
+- [x] Migrations run successfully on PostgreSQL
+- [x] Database initialization script works
+
+---
+
+Execution Log:
+- 20:30 IST: Added connection pooling config for PostgreSQL
+- 20:40 IST: Created scripts/init-db.sh for database initialization
+- 20:50 IST: Created 'advay_learning' database in local PostgreSQL
+- 21:00 IST: Updated .env to use PostgreSQL
+- 21:10 IST: Tested PostgreSQL connection - SUCCESS
+- 21:15 IST: Ran all migrations on PostgreSQL - SUCCESS
 
 ---
 
@@ -12434,5 +12447,1978 @@ echo "SECRET_KEY=8b14ec5b2024f22e0e1683883ea3fc1ef6e7118c216109d8cd8122e6165fa20
 - Verification: Backend starts successfully, health endpoint returns 200
 - Evidence: `curl http://localhost:8001/health` returns healthy status
 - Next Steps: Test authentication endpoints and profile functionality
+
+---
+
+Execution Log:
+- 20:30 IST: Added connection pooling config for PostgreSQL
+- 20:40 IST: Created scripts/init-db.sh for database initialization
+- 20:50 IST: Created 'advay_learning' database in local PostgreSQL
+- 21:00 IST: Updated .env to use PostgreSQL
+- 21:10 IST: Tested PostgreSQL connection - SUCCESS
+- 21:15 IST: Ran all migrations on PostgreSQL - SUCCESS
+
+Status: **DONE** ✅
+Completed: 2026-01-29 21:15 IST
+
+---
+
+### TCK-20260129-203 :: CORS & Security Hardening
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-29 21:15 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 21:45 IST
+
+Prompt: prompts/remediation/implementation-v1.6.1.md
+
+Scope:
+- Configure CORS for production domain
+- Add security headers middleware
+- Review cookie settings for production
+
+Files:
+- src/backend/app/main.py
+- src/backend/app/core/config.py
+- src/backend/.env (update ALLOWED_ORIGINS)
+
+Acceptance Criteria:
+- [x] CORS configured for production domain (via ALLOWED_ORIGINS env var)
+- [x] Security headers added (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy)
+- [x] Cookie settings reviewed (secure=True, samesite=lax in auth)
+- [x] Wildcard CORS warning addressed (restricted to specific methods/headers)
+
+---
+
+Execution Log:
+- 21:20 IST: Created SecurityHeadersMiddleware (X-Content-Type-Options, X-Frame-Options, etc.)
+- 21:30 IST: Added TrustedHostMiddleware for production
+- 21:35 IST: Restricted CORS methods and headers (more secure)
+- 21:40 IST: Added CORS preflight caching (max_age=600)
+- 21:45 IST: Verified server starts successfully
+
+---
+
+---
+
+## SPRINT PROGRESS SUMMARY - End of Day 1
+
+### Completed Today (TCK-20260129-201 through 203)
+
+| Ticket | Title | Status |
+|--------|-------|--------|
+| TCK-20260129-201 | Environment & Secrets Configuration | ✅ DONE |
+| TCK-20260129-202 | Local PostgreSQL Setup | ✅ DONE |
+| TCK-20260129-203 | CORS & Security Hardening | ✅ DONE |
+
+### Key Accomplishments
+
+1. **Secrets Management**
+   - Created .env.example with comprehensive documentation
+   - Added SECRET_KEY validation (min 32 chars, rejects weak values)
+   - App now fails fast if secrets are missing/weak
+
+2. **PostgreSQL Integration**
+   - Configured connection pooling (10 persistent, 20 overflow)
+   - Created database initialization script (scripts/init-db.sh)
+   - Migrations run successfully on PostgreSQL
+   - Backend now uses local PostgreSQL instead of SQLite
+
+3. **Security Hardening**
+   - Added security headers middleware (X-Content-Type-Options, X-Frame-Options, etc.)
+   - Added TrustedHostMiddleware for production
+   - Restricted CORS to specific methods and headers
+   - Added CORS preflight caching
+
+### Files Created/Modified
+
+```
+.env.example                          # New - Environment documentation
+scripts/init-db.sh                    # New - Database initialization
+src/backend/app/core/config.py        # Modified - SECRET_KEY validation
+src/backend/app/db/session.py         # Modified - Connection pooling
+src/backend/app/main.py               # Modified - Security headers
+src/backend/.env                      # Modified - PostgreSQL config
+```
+
+### Remaining Sprint Work
+
+**Phase 2 (Days 3-4)**:
+- TCK-20260129-085: Dependency Lock & Reproducible Builds
+- TCK-20260129-086: Health Checks & Basic Monitoring
+- TCK-20260129-087: Build & Deploy Scripts
+
+**Phase 3 (Days 5-6)**:
+- TCK-20260129-088: Deployment Documentation
+- TCK-20260129-089: Operations Runbook
+
+**Phase 4 (Day 7)**:
+- TCK-20260129-090: Pre-Launch Verification
+- TCK-20260129-091: Production Launch
+
+### Blockers
+None. All critical foundation work is complete.
+
+### Notes for Tomorrow
+- Need to generate requirements.txt for reproducible builds
+- Create deployment scripts
+- Write comprehensive documentation
+
+---
+
+## TCK-20260129-100 :: AI Phase 1 TTS Implementation
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-29 18:00 UTC
+Completed: 2026-01-29 19:00 UTC
+Status: **DONE** ✅
+
+### Scope
+
+Implement Text-to-Speech foundation for "Pip Feels Alive" - Phase 1 of AI-native features.
+
+### Deliverables
+
+1. **TTSService** (`src/frontend/src/services/ai/tts/TTSService.ts`)
+   - Web Speech API wrapper
+   - Pip-friendly voice settings (rate: 1.0, pitch: 1.2)
+   - Multi-language support (en, hi, kn, te, ta)
+   - Volume control synced with settingsStore
+   - Mute toggle respects `soundEnabled` setting
+
+2. **useTTS Hook** (`src/frontend/src/hooks/useTTS.ts`)
+   - React hook for easy TTS integration
+   - Automatic cleanup on unmount
+   - Settings synchronization
+
+3. **Pip Response Templates** (`src/frontend/src/data/pipResponses.ts`)
+   - 60+ child-friendly messages across 11 categories
+   - traceSuccess, traceGood, traceTryAgain, etc.
+   - Stars instead of percentages (⭐⭐⭐)
+   - Streak milestone celebrations
+
+4. **Mascot Integration** (`src/frontend/src/components/Mascot.tsx`)
+   - Added `speakMessage` and `language` props
+   - Pip now speaks all feedback messages
+   - Emoji removal for cleaner TTS
+
+5. **Game.tsx Updates** (`src/frontend/src/pages/Game.tsx`)
+   - Replaced percentage-based feedback with stars
+   - Added varied response messages
+   - Passes language to Mascot
+
+### Files Created
+
+```text
+src/frontend/src/services/ai/tts/TTSService.ts
+src/frontend/src/services/ai/tts/index.ts
+src/frontend/src/services/ai/index.ts
+src/frontend/src/hooks/useTTS.ts
+src/frontend/src/hooks/index.ts
+src/frontend/src/data/pipResponses.ts
+```
+
+### Files Modified
+
+```text
+src/frontend/src/components/Mascot.tsx
+src/frontend/src/pages/Game.tsx
+docs/audit/ai-phase1-readiness-audit.md
+```
+
+### Audit Update
+
+Phase 1 readiness increased from 30% to 70%:
+
+- ✅ TTS Infrastructure: IMPLEMENTED
+- ✅ Quick Response Templates: IMPLEMENTED
+- ✅ TTS-Mascot Integration: IMPLEMENTED
+- ❌ Letter Pronunciation Audio: Still needs 334 audio files
+
+### Testing
+
+- Build passes: `npm run build` ✅
+- No TypeScript errors
+- TTS uses Web Speech API (Chrome, Safari, Firefox, Edge)
+
+### Related Documents
+
+- `docs/audit/ai-phase1-readiness-audit.md` - Updated audit
+- `docs/ai-native/ARCHITECTURE.md` - AI architecture
+- `docs/ai-native/ROADMAP.md` - Phase roadmap
+
+
+## TCK-20260129-080 :: P0 Implementation - Visual Foundation & Sound
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 18:00 IST
+Status: **IN_PROGRESS** 🟡
+
+Scope contract:
+
+- In-scope:
+  - New playful color palette (sky blue, sunshine yellow, grass green, coral orange)
+  - Child-friendly typography (Nunito/Fredoka)
+  - Star rating system (replaces percentage)
+  - Sound system with Web Speech API (robotic but functional)
+  - Confetti celebration on success
+  - Keep audio architecture open for future file-based sounds
+- Out-of-scope:
+  - Custom audio file recording
+  - Complex animations beyond confetti
+  - Adventure map (P1)
+  - Letter creatures (P2)
+- Behavior change allowed: YES (visual redesign)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `src/frontend/src/index.css` - New color variables, fonts
+  - `src/frontend/tailwind.config.js` - Theme extension
+  - `src/frontend/index.html` - Google Fonts
+  - `src/frontend/src/hooks/useAudio.ts` - New audio hook
+  - `src/frontend/src/components/StarRating.tsx` - New component
+  - `src/frontend/src/components/Celebration.tsx` - Confetti component
+  - `src/frontend/src/pages/Game.tsx` - Integrate stars, sound, confetti
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Prompt used: N/A (implementation from plan)
+- Source artifacts:
+  - `docs/UI_UX_IMPROVEMENT_PLAN.md` - Phase 1 specification
+  - `docs/UX_VISION_CLAUDE.md` - Child-first principles
+- Child tester: 2yr 9mo son
+
+Plan:
+
+1. Update CSS with new color palette and typography
+2. Create useAudio hook with Web Speech API
+3. Create StarRating component
+4. Create Celebration (confetti) component
+5. Integrate into Game.tsx
+6. Test with child
+
+Execution log:
+
+- 18:00 IST: Created implementation ticket TCK-20260129-080
+- 18:05 IST: Starting Phase 1A - Color palette and typography
+- 18:10 IST: Added Google Fonts (Fredoka, Nunito) to index.html
+- 18:15 IST: Updated tailwind.config.js with playful color palette
+- 18:20 IST: Rewrote index.css with new colors, animations, button styles
+- 18:30 IST: Created useAudio.ts hook with Web Speech API
+- 18:40 IST: Created StarRating.tsx component with animations
+- 18:50 IST: Created Celebration.tsx confetti component
+- 19:00 IST: Rewrote Game.tsx with new child-friendly design
+- 19:15 IST: Updated Layout.tsx with icon-based navigation
+- 19:20 IST: Updated Home.tsx with playful hero section
+- 19:30 IST: Build successful - all TypeScript errors resolved
+
+Status updates:
+
+- 2026-01-29 18:00 IST: Status IN_PROGRESS - Starting P0 implementation
+- 2026-01-29 19:30 IST: Phase 1A complete - Visual foundation done
+
+Next actions:
+
+1. Update index.css with new colors
+2. Add Google Fonts to index.html
+3. Extend tailwind.config.js
+4. Create useAudio hook
+5. Create StarRating component
+6. Create Celebration component
+7. Update Game.tsx integration
+8. Test with child
+
+Risks/notes:
+
+- **Child testing**: 2yr 9mo may have limited attention span - keep sessions short
+- **Web Speech API**: Robotic voice acceptable for MVP, plan for recorded audio later
+- **Color contrast**: Ensure new palette meets accessibility standards
+- **Audio permission**: Browser may block autoplay - need user interaction first
+
+---
+
+## TCK-20260129-081 :: P1 Implementation - Adventure Map
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 18:00 IST
+Status: **OPEN** 🔵
+
+Scope contract:
+
+- In-scope:
+  - Replace LetterJourney grid with Adventure Map
+  - SVG path winding through themed zones
+  - Pip positioned at current letter
+  - 5 themed zones (Meadow, Beach, Forest, Mountains, Sky)
+  - Cloud overlay for locked zones
+- Out-of-scope:
+  - Complex animations for Pip walking
+  - 3D effects
+  - Letter creatures on map (P2)
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `src/frontend/src/components/AdventureMap.tsx` - New component
+  - `src/frontend/src/components/LetterJourney.tsx` - Replace with AdventureMap
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Source: `docs/UI_UX_IMPROVEMENT_PLAN.md` - Phase 2 specification
+
+Plan:
+
+1. Create AdventureMap component with SVG path
+2. Design 5 zone themes
+3. Position letter nodes along path
+4. Add Pip character positioning
+5. Replace LetterJourney in Dashboard
+
+Status updates:
+
+- 2026-01-29 18:00 IST: Status OPEN - Waiting for P0 completion
+
+Next actions:
+
+1. Start after TCK-20260129-080 complete
+2. Create AdventureMap component
+3. Design zone themes
+4. Integrate with Dashboard
+
+---
+
+## TCK-20260129-082 :: P1 Implementation - Game Screen Redesign
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 18:00 IST
+Status: **OPEN** 🔵
+
+Scope contract:
+
+- In-scope:
+  - Full-screen camera view
+  - Minimal UI overlay
+  - Big primary action button
+  - Pip always visible in corner
+  - Ghost letter hint enhancement
+- Out-of-scope:
+  - Complex gesture tutorials
+  - Multiple camera views
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `src/frontend/src/pages/Game.tsx` - Major redesign
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Source: `docs/UI_UX_IMPROVEMENT_PLAN.md` - Phase 5 specification
+- Child tester: 2yr 9mo son
+
+Plan:
+
+1. Redesign Game.tsx layout
+2. Full-screen camera
+3. Minimal controls
+4. Enhanced Pip visibility
+5. Test with child
+
+Status updates:
+
+- 2026-01-29 18:00 IST: Status OPEN - Waiting for P0 completion
+
+---
+
+## TCK-20260129-083 :: P2 Implementation - Onboarding Flow
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 18:00 IST
+Status: **OPEN** 🔵
+
+Scope contract:
+
+- In-scope:
+  - First-time user tutorial
+  - Pip sleeping → wake up animation
+  - Gesture demonstration
+  - Guided first letter tracing
+- Out-of-scope:
+  - Complex branching tutorials
+  - Parent onboarding
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `src/frontend/src/components/Onboarding.tsx` - New component
+  - `src/frontend/src/App.tsx` - Add onboarding route/state
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Source: `docs/UI_UX_IMPROVEMENT_PLAN.md` - Phase 7 specification
+- Child tester: 2yr 9mo son
+
+Plan:
+
+1. Create Onboarding component
+2. Design step-by-step flow
+3. Add to App routing
+4. Store "onboarding complete" in localStorage
+5. Test with child
+
+Status updates:
+
+- 2026-01-29 18:00 IST: Status OPEN - Waiting for P1 completion
+
+---
+
+## TCK-20260129-084 :: P2 Implementation - Letter Creatures Collection
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 18:00 IST
+Status: **OPEN** 🔵
+
+Scope contract:
+
+- In-scope:
+  - 26 letter creature designs (CSS/SVG art initially)
+  - Collection screen
+  - Creature animations on tap
+  - Letter sound on tap
+- Out-of-scope:
+  - Complex illustrations (start with simple shapes)
+  - 3D models
+  - Complex animations
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `src/frontend/src/components/LetterCreature.tsx` - New component
+  - `src/frontend/src/pages/Collection.tsx` - New page
+  - `src/frontend/src/data/creatures.ts` - Creature definitions
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Source: `docs/UI_UX_IMPROVEMENT_PLAN.md` - Phase 8 specification
+- Child tester: 2yr 9mo son
+
+Plan:
+
+1. Design simple CSS/SVG creatures (A=Apple, B=Ball, etc.)
+2. Create LetterCreature component
+3. Create Collection page
+4. Add to navigation
+5. Test with child
+
+Status updates:
+
+- 2026-01-29 18:00 IST: Status OPEN - Waiting for P1 completion
+
+---
+
+---
+
+## UI Upgrade Project - Phase 1: Engagement & Motivation
+
+### TCK-20260129-099 :: UI Upgrade Master Project Plan
+
+Type: PROJECT
+Owner: Development Team Lead
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Master project plan for comprehensive UI/UX upgrade targeting children aged 4-10 years. This plan orchestrates all UI enhancement work across 3 phases: P0 (Engagement), P1 (Polish), P2 (Safety). See docs/UI_UPGRADE_MASTER_PLAN.md for complete details.
+
+Scope contract:
+
+- In-scope:
+  - P0: Achievement-triggered celebrations, particle effects, audio feedback, gamified progress
+  - P1: Themes, avatars, animations, widgets
+  - P2: Accessibility compliance, screen time management, COPPA features
+  - Project coordination, ticket creation, and progress tracking
+- Out-of-scope:
+  - Backend API changes (unless required for new features)
+  - Mobile app development (web-only)
+  - Social features (P3 future work)
+  - Adaptive learning system (P3 future work)
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/UI_UPGRADE_MASTER_PLAN.md (master plan)
+  - docs/UI_UPGRADE_PLAN.md (initial plan - superseded)
+  - All Phase 1 implementation tickets (TCK-20260129-100 through TCK-20260129-114)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [x] Master project plan created (docs/UI_UPGRADE_MASTER_PLAN.md)
+- [x] Phase 1 tickets created (15 tickets for Weeks 1-4)
+- [ ] Phase 1 implementation started
+- [ ] Phase 1 completed by Week 4
+- [ ] All P0 deliverables met
+- [ ] Weekly progress updates in this ticket
+
+Dependencies:
+
+- None (this is the parent ticket)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created master project plan document | Evidence:
+  - **Command**: `cat docs/UI_UPGRADE_MASTER_PLAN.md | head -20`
+  - **Output**: Master project plan exists with comprehensive 3-phase roadmap
+  - **Interpretation**: Observed — 47-section master plan with detailed scope, risks, QA plan
+- [2026-01-29 22:00 UTC] Created Phase 1 implementation tickets | Evidence:
+  - **Command**: `cat docs/WORKLOG_TICKETS.md | grep -c "TCK-20260129-1"`
+  - **Output**: 15 tickets created for Phase 1 (TCK-20260129-100 through TCK-20260129-114)
+  - **Interpretation**: Observed — All Week 1-4 tickets ready for implementation
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Master plan created, Phase 1 tickets ready
+
+Next actions:
+
+1. Review master plan with development team
+2. Assign Phase 1 tickets to developers
+3. Start Week 1: Celebration System Foundation (TCK-20260129-100 through TCK-20260129-102)
+4. Set up weekly progress meetings
+5. Begin implementation when team is ready
+
+Risks/notes:
+
+- This is a 3-month project with estimated 120-160 hours
+- Scope discipline is critical - avoid feature creep
+- Parent feedback should be collected after each phase
+- Regular retro sessions to adjust timeline if needed
+- All work must be tracked in this master ticket
+
+Related Documents:
+
+- docs/UI_UPGRADE_MASTER_PLAN.md - Complete project plan
+- docs/UI_UPGRADE_PLAN.md - Initial plan (reference)
+- docs/audit/ui_design_audit.md - General UI audit findings
+- docs/audit/child_usability_audit.md - Child-centered recommendations
+- AGENTS.md - Agent coordination guidelines
+
+---
+
+### TCK-20260129-100 :: Implement Particle Effects System
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Implement particle effects system for celebrations (confetti, sparkles, stars) using canvas-confetti library. This provides the foundation for all celebration animations throughout the app.
+
+Scope contract:
+
+- In-scope:
+  - Install and integrate canvas-confetti library
+  - Create ParticleEffects.tsx component with multiple effect types
+  - Implement confetti, sparkles, and stars effects
+  - Add performance optimization (GPU acceleration)
+  - Create reusable hooks (useConfetti, useSparkles)
+- Out-of-scope:
+  - Celebration triggers (TCK-20260129-104)
+  - Audio integration (TCK-20260129-102)
+  - Mascot integration (TCK-20260129-106)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/celebrations/ParticleEffects.tsx (NEW)
+  - src/frontend/src/hooks/useConfetti.ts (NEW)
+  - src/frontend/src/hooks/useSparkles.ts (NEW)
+  - src/frontend/package.json (add canvas-confetti)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] canvas-confetti installed and working
+- [ ] ParticleEffects.tsx component created with 3 effect types
+- [ ] Confetti animation triggers correctly
+- [ ] Sparkles animation triggers correctly
+- [ ] Stars animation triggers correctly
+- [ ] Performance optimized (GPU acceleration, particle count limits)
+- [ ] Reusable hooks created and documented
+- [ ] Unit tests for particle effects
+- [ ] No performance regression (Lighthouse score >90)
+
+Dependencies:
+
+- None
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Install canvas-confetti dependency
+2. Create ParticleEffects component with effect types
+3. Create reusable hooks for common particle patterns
+4. Add unit tests for all effect types
+5. Test performance on low-end devices
+6. Document component props and usage
+
+Risks/notes:
+
+- Canvas animations must be performant on mobile devices
+- Particle count should be limited on slow devices
+- Consider "reduced motion" preference
+- Fallback to CSS animations if canvas fails
+
+---
+
+### TCK-20260129-101 :: Create Celebration Component Infrastructure
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Create celebration component infrastructure that coordinates particle effects, mascot animations, and audio feedback. This is the orchestrator for all achievement celebrations.
+
+Scope contract:
+
+- In-scope:
+  - Create CelebrationSystem.tsx component
+  - Integrate particle effects from TCK-20260129-100
+  - Create celebration types (success, achievement, milestone)
+  - Add animation sequencing (particles → mascot → audio)
+  - Implement celebration duration and cleanup
+- Out-of-scope:
+  - Achievement detection logic (TCK-20260129-104)
+  - Mascot video integration (TCK-20260129-106)
+  - Audio system (TCK-20260129-102)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/celebrations/CelebrationSystem.tsx (NEW)
+  - src/frontend/src/hooks/useCelebration.ts (NEW)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] CelebrationSystem.tsx component created
+  - Support for multiple celebration types
+  - Integrates particle effects
+  - Sequences animations properly
+- [ ] useCelebration hook created for triggering celebrations
+- [ ] Celebration cleanup after duration
+- [ ] No memory leaks (particles removed after animation)
+- [ ] Unit tests for celebration sequencing
+- [ ] Integration tests with particle effects
+
+Dependencies:
+
+- TCK-20260129-100 (Particle Effects System) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-100
+
+Next actions:
+
+1. Wait for TCK-20260129-100 completion
+2. Design celebration component interface
+3. Implement celebration sequencing logic
+4. Integrate with particle effects
+5. Add cleanup and memory management
+6. Create unit tests for all celebration types
+
+Risks/notes:
+
+- Celebration timing must be synced with mascot video
+- Multiple celebrations shouldn't overlap
+- Performance impact of simultaneous effects
+- Cleanup critical to prevent memory leaks
+
+---
+
+### TCK-20260129-102 :: Add Audio Feedback System
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Implement audio feedback system with sound effects for achievements, interactions, and celebrations. Sound assets must be age-appropriate and engaging for children.
+
+Scope contract:
+
+- In-scope:
+  - Create AudioManager class
+  - Implement useAudioFeedback hook
+  - Define sound effects (correct, incorrect, celebration, button click)
+  - Add volume control and mute toggle
+  - Load and cache audio assets
+- Out-of-scope:
+  - Sound asset creation (external resource)
+  - Speech synthesis (future work)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/utils/audioFeedback.ts (NEW)
+  - src/frontend/src/hooks/useAudioFeedback.ts (NEW)
+  - src/frontend/public/assets/sounds/ (NEW - placeholder paths)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] AudioManager class created with play() method
+- [ ] useAudioFeedback hook created for component usage
+- [ ] 5 sound effect types defined (correct, incorrect, celebration, achievement, button)
+- [ ] Volume control implemented (0-100%)
+- [ ] Mute toggle with persistence in localStorage
+- [ ] Audio assets load without errors
+- [ ] No console errors during playback
+- [ ] Works with "reduced motion" preference
+
+Dependencies:
+
+- None (can proceed in parallel with TCK-20260129-100, TCK-20260129-101)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Create audio asset specification document
+2. Send specification to audio designer
+3. Implement AudioManager class
+4. Create useAudioFeedback hook
+5. Add volume and mute controls
+6. Test audio loading and playback
+7. Document audio API usage
+
+Risks/notes:
+
+- Sound asset creation is external dependency
+- Audio must be age-appropriate and non-negative
+- Browser autoplay policies may block audio
+- Performance impact of loading audio assets
+- Need fallback for audio loading failures
+
+---
+
+### TCK-20260129-103 :: Define Achievement Types and Conditions
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Define achievement types, conditions, and rewards. Create comprehensive achievement system with clear unlocking criteria and progression.
+
+Scope contract:
+
+- In-scope:
+  - Create achievements.ts data structure
+  - Define 10+ achievement types
+  - Specify unlock conditions for each achievement
+  - Add achievement metadata (title, description, icon, rarity)
+  - Create achievement categories (learning, social, streak)
+- Out-of-scope:
+  - Achievement detection logic (TCK-20260129-104)
+  - Achievement UI display (TCK-20260129-108)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/data/achievements.ts (NEW)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] achievements.ts file created with 10+ achievements
+- [ ] Each achievement has: id, title, description, icon, condition, rarity
+- [ ] Achievement types include: learning, mastery, streak, social, milestone
+- [ ] Unlock conditions are testable and deterministic
+- [ ] Achievement categories defined for display
+- [ ] TypeScript types properly defined
+- [ ] Documentation of achievement system
+
+Dependencies:
+
+- None (data structure work)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Define achievement categories and types
+2. Design 10+ specific achievements with child-friendly titles
+3. Write unlock conditions for each achievement
+4. Create TypeScript interfaces for achievement data
+5. Document achievement system design
+6. Review with team for balance and progression
+
+Risks/notes:
+
+- Achievement difficulty must be balanced (not too easy, not impossible)
+- Unlock conditions must be testable
+- Achievements must be motivating for children
+- Need achievement icons/visuals (external resource)
+- Consider future achievement expansion
+
+---
+
+### TCK-20260129-104 :: Implement Achievement Detection System
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Implement achievement detection system that monitors progress data and unlocks achievements when conditions are met. Integrates with existing progress tracking.
+
+Scope contract:
+
+- In-scope:
+  - Create achievement detection logic
+  - Monitor progress data (letters learned, accuracy, streak, time spent)
+  - Trigger achievement unlocks when conditions met
+  - Persist unlocked achievements
+  - Create achievement notification system
+- Out-of-scope:
+  - Achievement UI display (TCK-20260129-108)
+  - Celebration triggers (TCK-20260129-105)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/utils/achievementDetection.ts (NEW)
+  - src/frontend/src/store/achievementStore.ts (NEW)
+  - src/frontend/src/hooks/useAchievements.ts (NEW)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] Achievement detection logic created
+- [ ] Monitors all relevant progress metrics
+- [ ] Detects when achievement conditions are met
+- [ ] Unlocks achievements and persists state
+- [ ] Shows notification when achievement unlocked
+- [ ] Achievement state persists across sessions
+- [ ] Unit tests for detection logic
+- [ ] Integration with existing progress tracking
+
+Dependencies:
+
+- TCK-20260129-103 (Achievement Types) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-103
+
+Next actions:
+
+1. Wait for TCK-20260129-103 completion
+2. Design achievement detection algorithm
+3. Create achievementStore with Zustand
+4. Implement checkAchievements() function
+5. Add achievement notification system
+6. Integrate with existing progress tracking
+7. Write unit tests for detection logic
+
+Risks/notes:
+
+- Achievement detection must be performant (not checked on every render)
+- Race conditions with concurrent achievement unlocks
+- Achievement persistence must be reliable
+- False positives in detection logic
+- Need to handle achievement re-locks (if desired)
+
+---
+
+### TCK-20260129-105 :: Connect Celebrations to Game Achievements
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Connect celebration system to game achievements. When achievements are unlocked, trigger appropriate celebration animation with particles, mascot, and audio.
+
+Scope contract:
+
+- In-scope:
+  - Integrate CelebrationSystem with achievement detection
+  - Trigger celebrations when achievements unlock
+  - Map achievement types to celebration types
+  - Add celebration to Game.tsx achievement flow
+  - Ensure celebrations don't overlap or spam
+- Out-of-scope:
+  - Achievement detection logic (TCK-20260129-104)
+  - Mascot video integration (TCK-20260129-106)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/Game.tsx (MODIFY)
+  - src/frontend/src/components/celebrations/CelebrationSystem.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] Celebration triggers on achievement unlock
+- [ ] Correct celebration type for each achievement
+- [ ] Celebrations don't overlap or play simultaneously
+- [ ] Integration with Game.tsx achievement flow
+- [ ] Celebration cooldown to prevent spam
+- [ ] Manual celebration trigger for testing
+- [ ] Integration tests for celebration triggers
+
+Dependencies:
+
+- TCK-20260129-100 (Particle Effects) - MUST COMPLETE FIRST
+- TCK-20260129-101 (Celebration System) - MUST COMPLETE FIRST
+- TCK-20260129-102 (Audio Feedback) - MUST COMPLETE FIRST
+- TCK-20260129-104 (Achievement Detection) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by 4 dependencies
+
+Next actions:
+
+1. Wait for all 4 dependencies to complete
+2. Map achievement types to celebration types
+3. Add celebration trigger to achievement unlock
+4. Implement celebration cooldown system
+5. Add manual trigger for testing
+6. Write integration tests
+7. Test all achievement types trigger correct celebrations
+
+Risks/notes:
+
+- Multiple achievements unlocking simultaneously
+- Celebration spam from rapid achievements
+- Performance impact of multiple celebrations
+- User annoyance from too many celebrations
+- Need celebration skip/pause option
+
+---
+
+### TCK-20260129-106 :: Integrate Mascot Video with Achievements
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Integrate mascot "Pip" video celebrations with achievement system. When achievements unlock, mascot should play appropriate video animation.
+
+Scope contract:
+
+- In-scope:
+  - Update Mascot.tsx to accept achievement state
+  - Trigger mascot video on achievement unlock
+  - Add mascot expressions for different achievement types
+  - Ensure mascot video doesn't overlap with random celebrations
+  - Add mascot speech bubbles for achievement messages
+- Out-of-scope:
+  - Mascot video creation (external asset)
+  - Achievement detection logic (TCK-20260129-104)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/Mascot.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] Mascot triggers video on achievement unlock
+- [ ] Different mascot expressions for achievement types
+- [ ] Mascot speech bubble shows achievement message
+- [ ] Video doesn't overlap with random mascot animations
+- [ ] Achievement state prop added to Mascot component
+- [ ] Integration with celebration system
+- [ ] Unit tests for mascot state transitions
+
+Dependencies:
+
+- TCK-20260129-104 (Achievement Detection) - MUST COMPLETE FIRST
+- TCK-20260129-105 (Celebration Triggers) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
+
+Next actions:
+
+1. Wait for TCK-20260129-104 and TCK-20260129-105 to complete
+2. Add achievement state prop to Mascot component
+3. Define mascot expressions for achievement types
+4. Implement mascot speech bubble for achievement messages
+5. Ensure video animation doesn't conflict with random animations
+6. Write unit tests for mascot state transitions
+7. Test mascot video plays correctly on achievement unlock
+
+Risks/notes:
+
+- Mascot video may not exist for all achievement types
+- Video loading performance impact
+- Mascot animations overlapping or conflicting
+- Speech bubble positioning and timing
+- Need fallback if video fails to load
+
+---
+
+### TCK-20260129-107 :: Create XP and Level System
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Create XP and level system with progression mechanics. Children earn XP from activities, level up, and unlock new features as they progress.
+
+Scope contract:
+
+- In-scope:
+  - Define XP values for activities (letter learned, perfect score, streak)
+  - Create level progression formula
+  - Implement level titles and milestones
+  - Create XP tracking in progress store
+  - Add level-up detection and triggers
+- Out-of-scope:
+  - Level-up animations (TCK-20260129-110)
+  - Level UI display (TCK-20260129-109)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/utils/levelSystem.ts (NEW)
+  - src/frontend/src/store/progressStore.ts (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] XP values defined for all activities
+- [ ] Level progression formula implemented
+- [ ] 8+ level titles defined (Explorer, Apprentice, etc.)
+  - [ ] Level milestones created (every 100 XP)
+  - [ ] XP tracking in progress store
+  - [ ] Level-up detection triggers on XP threshold
+  - [ ] Level state persists across sessions
+  - [ ] Unit tests for XP calculation
+  - [ ] Integration with existing progress tracking
+
+Dependencies:
+
+- None (can proceed in parallel)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Design XP system and progression formula
+2. Define level titles and descriptions
+3. Implement XP calculation utilities
+4. Add XP tracking to progress store
+5. Create level-up detection logic
+6. Write unit tests for XP calculations
+7. Test level progression and persistence
+
+Risks/notes:
+
+- XP values must be balanced for progression pace
+- Level-up frequency must feel rewarding but not spammy
+- XP system must integrate with existing progress tracking
+- Need to handle XP loss/reset if desired
+- Level titles must be child-friendly and motivating
+
+---
+
+### TCK-20260129-108 :: Implement Badge Display Component
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Create badge display component with locked/unlocked states. Show achievement badges with progress indicators and unlock conditions.
+
+Scope contract:
+
+- In-scope:
+
+  - Create BadgeCard.tsx component
+  - Create BadgeGrid.tsx component
+  - Implement locked state with silhouette/grayed-out
+  - Implement unlocked state with full color and animation
+  - Add progress indicator for achievements with conditions
+  - Show unlock condition when locked
+- Out-of-scope:
+  - Achievement detection (TCK-20260129-104)
+  - Badge data structure (TCK-20260129-103)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/gamification/BadgeCard.tsx (NEW)
+  - src/frontend/src/components/gamification/BadgeGrid.tsx (NEW)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] BadgeCard component created with locked/unlocked states
+  - [ ] BadgeGrid component created with responsive layout
+  - [ ] Locked badges show silhouette/grayed-out state
+  - [ ] Unlocked badges show full color and animation
+  - [ ] Progress indicator for conditional achievements
+  - [ ] Unlock condition displayed when locked
+  - [ ] Badge click shows achievement details
+  - [ ] Responsive layout for mobile/tablet/desktop
+  - [ ] Unit tests for badge states
+
+Dependencies:
+
+- TCK-20260129-103 (Achievement Types) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-103
+
+Next actions:
+
+1. Wait for TCK-20260129-103 completion
+2. Design BadgeCard component interface
+3. Implement locked state styling (silhouette, grayed-out)
+4. Implement unlocked state styling (full color, animation)
+5. Add progress indicator for conditional achievements
+6. Create BadgeGrid with responsive layout
+7. Write unit tests for all badge states
+8. Test on mobile/tablet/desktop
+
+Risks/notes:
+
+- Badge icons needed (external resource)
+- Locked state must still be recognizable
+- Progress indicator calculation complexity
+- Badge grid performance with many badges
+- Accessibility of badge grid (keyboard navigation)
+
+---
+
+### TCK-20260129-109 :: Redesign Dashboard with Gamified Elements
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Redesign dashboard with gamified elements including XP bar, level display, and badges. Transform existing functional dashboard into engaging, rewarding experience.
+
+Scope contract:
+
+- In-scope:
+  - Add XP progress bar to dashboard header
+  - Display current level and level title
+  - Add badge grid section to dashboard
+  - Integrate LevelProgress component
+  - Integrate BadgeGrid component
+  - Maintain existing dashboard functionality (stats, progress, quick actions)
+- Out-of-scope:
+  - Level system logic (TCK-20260129-107)
+  - Badge display components (TCK-20260129-108)
+  - Complete dashboard redesign (only gamification additions)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/Dashboard.tsx (MODIFY)
+  - src/frontend/src/components/gamification/LevelProgress.tsx (NEW)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] XP progress bar added to dashboard header
+  - [ ] Current level and title displayed
+  - [ ] Badge grid section added to dashboard
+  - [ ] LevelProgress component integrated
+  - [ ] BadgeGrid component integrated
+  - [ ] All existing dashboard functionality preserved
+  - [ ] Responsive layout maintained
+  - [ ] No performance regression
+
+Dependencies:
+
+- TCK-20260129-107 (XP/Level System) - MUST COMPLETE FIRST
+- TCK-20260129-108 (Badge Display) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
+
+Next actions:
+
+1. Wait for TCK-20260129-107 and TCK-20260129-108 to complete
+2. Design gamified dashboard layout
+3. Create LevelProgress component
+4. Add XP bar and level display to dashboard
+5. Add badge grid section
+6. Ensure existing functionality preserved
+7. Test responsive layout
+8. Performance test with many badges
+
+Risks/notes:
+
+- Dashboard layout may become crowded
+- XP bar and level display performance
+- Badge grid loading time with many badges
+- Maintaining existing dashboard functionality
+- Mobile layout with new gamification elements
+
+---
+
+### TCK-20260129-110 :: Add Level-Up Animations
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Add level-up animation when player advances to next level. Create celebratory moment with particles, mascot animation, and sound effect.
+
+Scope contract:
+
+- In-scope:
+  - Create LevelUpAnimation component
+  - Trigger animation when level increases
+  - Add confetti/fireworks particles
+  - Add mascot celebration animation
+  - Add level-up sound effect
+  - Display level-up message and level title
+- Out-of-scope:
+  - Level system logic (TCK-20260129-107)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/gamification/LevelUpAnimation.tsx (NEW)
+  - src/frontend/src/pages/Dashboard.tsx (MODIFY)
+  - src/frontend/src/pages/Game.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] LevelUpAnimation component created
+  - [ ] Animation triggers when level increases
+  - [ ] Confetti/fireworks particles display
+  - [ ] Mascot celebration animation plays
+  - [ ] Level-up sound effect plays
+  - [ ] Level-up message and title displayed
+  - [ ] Animation smooth at 60fps
+  - [ ] No memory leaks after animation
+  - [ ] Animation doesn't overlap with other celebrations
+
+Dependencies:
+
+- TCK-20260129-100 (Particle Effects) - MUST COMPLETE FIRST
+- TCK-20260129-102 (Audio Feedback) - MUST COMPLETE FIRST
+- TCK-20260129-106 (Mascot Integration) - MUST COMPLETE FIRST
+- TCK-20260129-107 (XP/Level System) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by 4 dependencies
+
+Next actions:
+
+1. Wait for all 4 dependencies to complete
+2. Design level-up animation sequence
+3. Create LevelUpAnimation component
+4. Add particle effects (confetti, fireworks)
+5. Integrate mascot celebration
+6. Add level-up sound effect
+7. Display level-up message and title
+8. Trigger animation on level increase
+9. Test animation smoothness and cleanup
+
+Risks/notes:
+
+- Level-up frequency during rapid progression
+- Animation overlapping with achievement celebrations
+- Performance impact of multiple effects
+- Memory leaks from particle systems
+- Need level-up skip option
+
+---
+
+### TCK-20260129-111 :: Implement Enhanced Progress Charts
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Implement enhanced progress charts with animations. Show learning history, streaks, and mastery progress with visual, animated charts.
+
+Scope contract:
+
+- In-scope:
+  - Create ProgressChart.tsx component
+  - Implement learning history line chart
+  - Implement streak bar chart
+  - Implement mastery pie/donut chart
+  - Add animations to chart rendering
+  - Make charts responsive and interactive
+- Out-of-scope:
+  - Charting library integration (use built-in or consider recharts)
+  - Backend API changes (use existing progress data)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/ProgressChart.tsx (NEW)
+  - src/frontend/src/pages/Progress.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] ProgressChart component created with 3 chart types
+  - [ ] Learning history line chart with dates
+  - [ ] Streak bar chart with consecutive days
+  - [ ] Mastery donut chart with letter categories
+  - [ ] Charts animate on load
+  - [ ] Charts are interactive (tooltips, hover)
+  - [ ] Responsive layout for mobile/tablet
+  - [ ] No performance regression
+
+Dependencies:
+
+- None (can proceed in parallel)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Choose charting library (recharts, chart.js, or built-in)
+2. Design ProgressChart component interface
+3. Implement learning history line chart
+4. Implement streak bar chart
+5. Implement mastery donut chart
+6. Add animations and interactivity
+7. Test responsive layout
+8. Performance test with data
+
+Risks/notes:
+
+- Charting library bundle size impact
+- Chart performance with large datasets
+- Mobile chart readability
+- Chart color accessibility
+- Chart animation performance
+
+---
+
+### TCK-20260129-112 :: Create Child-Safe Navigation Bar
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Create child-safe navigation bar with large touch targets, back button, and emergency help. Ensure children can navigate safely and parents can access controls.
+
+Scope contract:
+
+- In-scope:
+  - Create ChildNavBar.tsx component
+  - Add large touch targets (minimum 60px)
+  - Add back button when needed
+  - Add home button always available
+  - Add help button for parents
+  - Fixed bottom positioning
+  - Safe area insets for notched phones
+- Out-of-scope:
+  - Breadcrumb navigation (TCK-20260129-113)
+  - Parent help modal (future work)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/navigation/ChildNavBar.tsx (NEW)
+  - src/frontend/src/pages/Game.tsx (MODIFY)
+  - src/frontend/src/pages/Dashboard.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] ChildNavBar component created with 4 buttons
+  - [ ] All touch targets minimum 60px
+  - [ ] Back button visible on sub-pages
+  - [ ] Home button always visible
+  - [ ] Help button for parents
+  - [ ] Fixed bottom positioning
+  - [ ] Safe area insets for iPhone notch
+  - [ ] Keyboard navigation works
+  - [ ] ARIA labels present
+
+Dependencies:
+
+- None (can proceed in parallel)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Design ChildNavBar component interface
+2. Create component with 4 buttons
+3. Implement touch targets with minimum 60px
+4. Add back button logic (conditional visibility)
+5. Add home button always visible
+6. Add help button for parent controls
+7. Implement fixed bottom positioning
+8. Add safe area insets for notched phones
+9. Test keyboard navigation and ARIA labels
+
+Risks/notes:
+
+- Bottom navigation bar may interfere with Game canvas
+- Safe area insets complexity
+- Touch target size on small screens
+- Help button accessibility
+- Back button logic complexity
+
+---
+
+### TCK-20260129-113 :: Add Breadcrumb Navigation
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Add breadcrumb navigation to show children their current location. Help children understand where they are and navigate back easily.
+
+Scope contract:
+
+- In-scope:
+  - Create Breadcrumb.tsx component
+  - Add breadcrumb to all protected pages
+  - Show hierarchical path (Home > Letters > Letter A)
+  - Make breadcrumbs clickable for navigation
+  - Style with child-friendly design
+- Out-of-scope:
+  - Child-safe navigation bar (TCK-20260129-112)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/navigation/Breadcrumb.tsx (NEW)
+  - src/frontend/src/pages/Game.tsx (MODIFY)
+  - src/frontend/src/pages/Dashboard.tsx (MODIFY)
+  - src/frontend/src/pages/Settings.tsx (MODIFY)
+  - src/frontend/src/pages/Progress.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] Breadcrumb component created
+  - [ ] Breadcrumb shows hierarchical path
+  - [ ] All breadcrumbs clickable for navigation
+  - [ ] Current location not clickable
+  - [ ] Child-friendly styling
+  - [ ] Responsive layout for mobile
+  - [ ] ARIA navigation landmark
+  - [ ] Keyboard navigation works
+
+Dependencies:
+
+- None (can proceed in parallel)
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Design Breadcrumb component interface
+2. Create Breadcrumb component with path rendering
+3. Add clickable navigation for all but last item
+4. Add breadcrumbs to all protected pages
+5. Style with child-friendly design
+6. Test responsive layout on mobile
+7. Test keyboard navigation and ARIA
+
+Risks/notes:
+
+- Breadcrumb path complexity
+- Mobile breadcrumb truncation
+- Navigation conflict with ChildNavBar
+- ARIA landmark implementation
+- Breadcrumb styling consistency
+
+---
+
+### TCK-20260129-114 :: Update Game Page with Progress Visualization
+
+Type: FEATURE
+Owner: UNASSIGNED
+Created: 2026-01-29 22:00 UTC
+Status: **OPEN** 🔵
+Priority: P0
+
+Description:
+Update Game page with enhanced progress visualization. Show real-time progress, XP earned, and level-up notifications during gameplay.
+
+Scope contract:
+
+- In-scope:
+  - Add real-time XP display to Game page
+  - Add level display to Game page
+  - Show progress toward next letter
+  - Add streak indicator in Game header
+  - Integrate celebration triggers
+  - Maintain existing game functionality
+- Out-of-scope:
+  - Level system logic (TCK-20260129-107)
+  - Celebration triggers (TCK-20260129-105)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/Game.tsx (MODIFY)
+- Branch: main
+- Git availability: YES
+
+Acceptance Criteria:
+
+- [ ] Real-time XP display added to Game header
+  - [ ] Current level displayed in Game
+  - [ ] Progress toward next letter shown
+  - [ ] Streak indicator in Game header
+  - [ ] Celebration triggers integrated
+  - [ ] All existing game functionality preserved
+  - [ ] No performance regression in hand tracking
+  - [ ] Responsive layout maintained
+
+Dependencies:
+
+- TCK-20260129-107 (XP/Level System) - MUST COMPLETE FIRST
+- TCK-20260129-105 (Celebration Triggers) - MUST COMPLETE FIRST
+
+Execution log:
+
+- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+
+Status updates:
+
+- [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
+
+Next actions:
+
+1. Wait for TCK-20260129-107 and TCK-20260129-105 to complete
+2. Design Game page progress visualization layout
+3. Add real-time XP display
+4. Add level display
+5. Add progress toward next letter
+6. Add streak indicator
+7. Integrate celebration triggers
+8. Test hand tracking performance with new UI
+9. Test responsive layout
+
+Risks/notes:
+
+- Game page UI crowding with new elements
+- Performance impact on hand tracking
+- Real-time updates causing re-renders
+- Mobile layout with new progress elements
+- Maintaining existing game functionality
+
+---
+
+## Updated Project Status Summary
+
+| Category  | Open  | In Progress | Done  | Blocked | Total  |
+| --------- | ----- | ----------- | ----- | ------- | ------ |
+| Backend   | 1     | 0           | 1     | 0       | 2      |
+| Frontend  | 1     | 1           | 1     | 0       | 3      |
+| UI Upgrade | 15    | 0           | 0     | 0       | 15     |
+| Features  | 4     | 0           | 0     | 0       | 4      |
+| Testing   | 2     | 0           | 0     | 0       | 2      |
+| Hardening | 1     | 1           | 0     | 0       | 2      |
+| Prompts   | 0     | 1           | 0     | 0       | 1      |
+| **TOTAL** | **24** | **3**       | **2** | **0**   | **29** |
+
+**Current State**: UI Upgrade Master Plan created, Phase 1 tickets ready for implementation (15 tickets for Weeks 1-4).
+**Next Priority**: TCK-20260129-099 (UI Upgrade Master Project) - Assign Phase 1 tickets and start Week 1 implementation.
+
+---
+
+
+---
+
+### TCK-20260129-301 :: CRITICAL BUG - Cannot Change Profile Language
+
+Type: BUG
+Owner: AI Assistant
+Created: 2026-01-29 22:30 IST
+Status: **OPEN** 🔴
+Priority: P0
+
+**User Report**: "I can only see English alphabets nothing else"
+
+**Root Cause Analysis**:
+The language selection system HAS been implemented, but has critical UX gaps:
+
+1. ✅ Backend: Stores preferred_language in profile
+2. ✅ Dashboard: Language selector exists when CREATING profile
+3. ✅ Game: Uses profile.preferred_language to load correct alphabet
+4. ❌ **MISSING**: Cannot EDIT language for existing profile
+5. ❌ **MISSING**: No visual indicator in game showing active alphabet
+6. ❌ **UX ISSUE**: Default is English, users may not notice selector
+
+**Why User Can't See Hindi/Kannada**:
+- User likely has existing profile created before language feature
+- OR created profile without noticing language selector
+- OR wants to change language but can't find how
+
+**Evidence**:
+- Dashboard.tsx line 37: `const [newChildLanguage, setNewChildLanguage] = useState('en');`
+- Dashboard.tsx lines 474-486: Language selector only in CREATE modal
+- No "Edit Profile" functionality found in codebase
+
+**Acceptance Criteria**:
+- [ ] Can edit existing profile's preferred language
+- [ ] Visual indicator in game showing current alphabet/language
+- [ ] Clearer language selection UI (not just dropdown default)
+- [ ] Migration: existing profiles can switch languages
+
+**Files to Modify**:
+- src/frontend/src/pages/Dashboard.tsx (add edit profile modal)
+- src/frontend/src/pages/Game.tsx (add language indicator)
+- src/backend/app/api/v1/endpoints/users.py (add update profile endpoint)
+
+---
+
+### TCK-20260129-302 :: Add Visual Language Indicator in Game
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-29 22:35 IST
+Status: **OPEN** 🔵
+Priority: P1
+
+**Problem**: User doesn't know which language alphabet is currently active
+
+**Solution**: Add prominent visual indicator in game showing:
+- Current language (English/Hindi/Kannada/etc)
+- Flag or icon representing the language
+- Quick switcher (optional)
+
+**Acceptance Criteria**:
+- [ ] Language badge/icon visible during gameplay
+- [ ] Shows full language name (not just code)
+- [ ] Updates when profile language changes
+
+---
+
+### TCK-20260129-093 :: FIX Game Language Selector (Separate from UI Language)
+
+Type: BUGFIX
+Owner: Mistral Vibe
+Created: 2026-01-29 20:45 UTC
+Status: **OPEN**
+
+**Scope contract:**
+- In-scope:
+  - Add separate gameLanguage setting (vs UI language)
+  - Update settings store with gameLanguage field
+  - Add game language selector to settings UI
+  - Update game logic to prioritize gameLanguage
+  - Test all language combinations
+- Out-of-scope:
+  - Backend changes
+  - New language additions
+  - Profile language migration
+- Behavior change allowed: YES (new setting field)
+
+**Targets:**
+- Repo: learning_for_kids
+- Files: `src/frontend/src/store/settingsStore.ts`, `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/Game.tsx`
+- Branch: main
+- Base commit: 3b7322d
+
+**Root Cause:**
+```
+Current Issue:
+- Settings.language controls UI language only
+- Game uses profile.preferred_language for content
+- No way to select game language independently
+- Users can only see English letters in game
+
+Expected Behavior:
+- UI language ≠ Game content language
+- Separate selectors for each
+- Game language persists independently
+```
+
+**Requirements:**
+1. Add `gameLanguage` field to settings store
+2. Add game language selector to settings UI
+3. Update game to use `gameLanguage` first, then `profile.preferred_language`
+4. Ensure backward compatibility
+5. Test all language combinations
+
+**Acceptance Criteria:**
+- ✅ Can select game language separately from UI language
+- ✅ Game language selection persists across sessions
+- ✅ Game displays correct alphabet for selected language
+- ✅ Hindi/Kannada letters accessible in game
+- ✅ Backward compatible with existing profiles
+- ✅ Settings UI clearly distinguishes UI vs game language
+
+**Implementation Plan:**
+1. **Settings Store Update** (0.25 day)
+   - Add gameLanguage field with default 'english'
+   - Update persist middleware
+   - Add migration for existing users
+
+2. **Settings UI Update** (0.25 day)
+   - Add game language selector dropdown
+   - Update labels to clarify UI vs game language
+   - Add visual distinction between selectors
+
+3. **Game Logic Update** (0.25 day)
+   - Update language selection logic
+   - Add fallback chain: gameLanguage → profile.language → 'en'
+   - Ensure all language data loads correctly
+
+4. **Testing** (0.25 day)
+   - Test all language combinations
+   - Verify persistence
+   - Test backward compatibility
+   - Test edge cases
+
+**Risk Assessment:**
+- **Implementation Risk**: LOW (simple state management)
+- **Compatibility Risk**: LOW (backward compatible)
+- **UX Impact**: HIGH (major UX improvement)
+- **Blocker Risk**: NONE (independent feature)
+
+**Dependencies:**
+- None (frontend-only change)
+
+**Blockers:**
+- None identified
+
+**Estimated Effort:** 1 day
+
+**Priority:** HIGH (Critical UX improvement)
+
+**Evidence of Issue:**
+```typescript
+// Current problematic code in Game.tsx (line 98-102):
+const languageCode = profile?.preferred_language || 'en';
+const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
+
+// Problem: Only uses profile language, no game-specific selection
+```
+
+**Proposed Solution:**
+```typescript
+// Fixed code:
+const languageCode = settings.gameLanguage || profile?.preferred_language || 'en';
+const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
+
+// Benefits: Game language independent from profile/UI language
+```
+
+**Impact:**
+- Users can select Hindi/Kannada for games while keeping UI in English
+- Fixes "only English visible" issue
+- Aligns with learning plan (multi-language support)
+- Improves accessibility for non-English speakers
+
+**Related Issues:**
+- TCK-20260129-086: Health System Audit (complementary)
+- TCK-20260129-080: Authentication Audit (prerequisite)
+- Feature: Multi-language support in learning plan
+
+**Next Steps:**
+1. Implement settings store changes
+2. Update settings UI
+3. Modify game language logic
+4. Test all combinations
+5. Update documentation
 
 ---
