@@ -203,3 +203,8 @@ directory = "htmlcov"
 [tool.pydantic-settings]
 env_file = ".env"
 env_file_encoding = "utf-8"
+
+[dependency-groups]
+dev = [
+    "pip-audit>=2.10.0",
+]

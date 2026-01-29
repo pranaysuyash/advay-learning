@@ -45,6 +45,11 @@ dev = [
     { name = "ruff" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pip-audit" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
@@ -70,6 +75,9 @@ requires-dist = [
     { name = "structlog", specifier = ">=23.0.0" },
 ]
 provides-extras = ["dev", "audio"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pip-audit", specifier = ">=2.10.0" }]
 
 [[package]]
 name = "annotated-types"
