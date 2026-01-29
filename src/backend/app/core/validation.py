@@ -56,11 +56,11 @@ def validate_email_format(email: str) -> str:
     return email
 
 
-def validate_age(age: Optional[int], min_age: int = 0, max_age: int = 18) -> Optional[int]:
+def validate_age(age: Optional[float], min_age: float = 0, max_age: float = 18) -> Optional[float]:
     """Validate age is within acceptable range.
     
     Args:
-        age: The age to validate
+        age: The age to validate (can be float for partial years, e.g., 2.5)
         min_age: Minimum acceptable age (default 0)
         max_age: Maximum acceptable age (default 18)
         
@@ -73,13 +73,13 @@ def validate_age(age: Optional[int], min_age: int = 0, max_age: int = 18) -> Opt
     if age is None:
         return None
     
-    if not isinstance(age, int):
-        raise ValidationError("age must be an integer")
+    if not isinstance(age, (int, float)):
+        raise ValidationError("age must be a number")
     
     if age < min_age or age > max_age:
         raise ValidationError(f"age must be between {min_age} and {max_age}")
     
-    return age
+    return float(age)
 
 
 def validate_language_code(language: Optional[str]) -> Optional[str]:

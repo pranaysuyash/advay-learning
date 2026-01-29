@@ -11,13 +11,13 @@ from app.core.validation import validate_age, validate_language_code, Validation
 class ProfileBase(BaseModel):
     """Base profile schema."""
     name: str
-    age: Optional[int] = None
+    age: Optional[float] = None
     preferred_language: str = "en"
     settings: Dict[str, Any] = {}
     
     @field_validator('age')
     @classmethod
-    def validate_age_range(cls, v: Optional[int]) -> Optional[int]:
+    def validate_age_range(cls, v: Optional[float]) -> Optional[float]:
         """Validate age is between 0 and 18."""
         if v is not None:
             try:
@@ -45,7 +45,7 @@ class ProfileCreate(ProfileBase):
 class ProfileUpdate(BaseModel):
     """Profile update schema."""
     name: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[float] = None
     preferred_language: Optional[str] = None
     settings: Optional[Dict[str, Any]] = None
 

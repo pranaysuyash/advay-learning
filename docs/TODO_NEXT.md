@@ -128,6 +128,39 @@ See `docs/clarity/questions.md`:
 
 ---
 
+## AI-Native Features (Phase 1 - In Progress)
+
+### Completed ✅
+
+- [x] **AI-001**: Pip Voice (TTS)
+  - TTSService with Web Speech API
+  - useTTS hook for React components
+  - Pip-friendly voice settings
+  - Multi-language support (en, hi, kn, te, ta)
+
+- [x] **AI-003**: Pip Quick Responses
+  - 60+ child-friendly response templates
+  - Stars instead of percentages (⭐⭐⭐)
+  - Streak milestone celebrations
+  - TTS-Mascot integration
+
+### Remaining (Phase 1)
+
+- [ ] **AI-002**: Letter Pronunciation Audio
+  - Need ~334 audio files for all 5 languages
+  - English: 52 files (26 letters × 2 sounds)
+  - Hindi: 70 files, Kannada/Telugu: 76 each, Tamil: 60
+  - Options: Record, source from educational resources, or use TTS
+
+### Phase 2+ (Future)
+
+- [ ] **AI-004**: Voice Input (STT)
+- [ ] **AI-005**: Simple Conversations
+- [ ] **AI-006**: Story Time
+- [ ] **AI-007**: Activity Suggestions
+
+---
+
 ## Feature Ideas (Future)
 
 - [ ] Achievement system
@@ -147,4 +180,4 @@ See `docs/clarity/questions.md`:
 
 ---
 
-**Last Updated**: 2026-01-29
+**Last Updated**: 2026-01-29 (TTS Implementation Complete)

@@ -4,6 +4,7 @@
 
 - **Python**: 3.13 or higher
 - **Node.js**: 18 or higher
+- **PostgreSQL**: 14 or higher
 - **uv**: Python package manager
 - **Git**: Version control
 
@@ -38,6 +39,20 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 uv --version
 ```
 
+## Database Setup (PostgreSQL)
+
+```bash
+# macOS with Homebrew
+brew install postgresql@14
+brew services start postgresql@14
+
+# Create database
+createdb advay_learning
+
+# Or via psql
+psql postgres -c "CREATE DATABASE advay_learning;"
+```
+
 ## Backend Setup
 
 ```bash
@@ -56,8 +71,12 @@ uv pip install -e ".[dev]"
 # Copy environment template
 cp .env.example .env
 
-# Edit .env with your settings
-# Generate secret key: openssl rand -hex 32
+# Edit .env with your settings:
+# - DATABASE_URL=postgresql+asyncpg://postgres@localhost:5432/advay_learning
+# - Generate secret key: openssl rand -hex 32
+
+# Run database migrations
+alembic upgrade head
 
 # Run server
 python -m uvicorn app.main:app --reload --port 8001

@@ -2,18 +2,281 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   COLOR SYSTEM - Research-Based Palette
+   For children ages 2-5 (toddlers/preschoolers)
+   ======================================== */
+
+:root {
+  /* Background Colors */
+  --bg-primary: #FDF8F3;
+  --bg-secondary: #E8F4F8;
+  --bg-tertiary: #F5F0E8;
+
+  /* Brand Colors */
+  --brand-primary: #E07A5F;
+  --brand-primary-hover: #C96A52;
+  --brand-primary-active: #B55D48;
+  --brand-secondary: #7EB5D6;
+  --brand-secondary-hover: #6BA3C5;
+  --brand-accent: #F2CC8F;
+
+  /* Semantic Colors */
+  --success: #81B29A;
+  --success-hover: #6F9E88;
+  --warning: #F2CC8F;
+  --error: #E07A5F;
+
+  /* Text Colors */
+  --text-primary: #3D405B;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-inverse: #FFFFFF;
+
+  /* UI Colors */
+  --border: #E5E7EB;
+  --border-focus: #7EB5D6;
+  --shadow: rgba(61, 64, 91, 0.08);
+  --shadow-lg: rgba(61, 64, 91, 0.12);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
-  color: white;
+  line-height: 1.5;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: 0 0 var(--space-md) 0;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
+
+p {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-secondary-hover);
+}
+
+/* ========================================
+   SELECTION
+   ======================================== */
+
+::selection {
+  background: var(--brand-accent);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   FOCUS STYLES (Accessibility)
+   ======================================== */
+
+*:focus-visible {
+  outline: 3px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   BUTTON COMPONENTS
+   ======================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-height: 48px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+  background-color: var(--brand-primary);
+  color: var(--text-inverse);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-lg);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--brand-primary-active);
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: var(--brand-secondary);
+  color: var(--text-inverse);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--brand-secondary-hover);
+  transform: translateY(-1px);
+}
+
+/* Success Button */
+.btn-success {
+  background-color: var(--success);
+  color: var(--text-inverse);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--success-hover);
+  transform: translateY(-1px);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Large Button (for game actions) */
+.btn-lg {
+  padding: var(--space-lg) var(--space-xl);
+  font-size: 1.25rem;
+  min-height: 60px;
+  border-radius: var(--radius-xl);
+}
+
+/* ========================================
+   CARD COMPONENTS
+   ======================================== */
+
+.card {
+  background-color: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 16px var(--shadow-lg);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-inverse { color: var(--text-inverse); }
+
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-tertiary { background-color: var(--bg-tertiary); }
+
+/* Touch target sizing (60px minimum for toddlers) */
+.touch-target {
+  min-width: 60px;
+  min-height: 60px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

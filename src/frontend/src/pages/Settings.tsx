@@ -85,14 +85,14 @@ export function Settings() {
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-white/80 mb-2'>
-                  Language
+                  UI Language
                 </label>
                 <select
                   value={settings.language}
                   onChange={(e) =>
                     settings.updateSettings({ language: e.target.value })
                   }
-                  aria-label='Application language'
+                  aria-label='Application UI language'
                   className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                 >
                   <option value='english'>English</option>
@@ -100,6 +100,24 @@ export function Settings() {
                   <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
                   <option value='telugu'>Telugu (తెలుగు)</option>
                   <option value='tamil'>Tamil (தமிழ்)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-white/80 mb-2'>
+                  Game Language
+                </label>
+                <select
+                  value={settings.gameLanguage}
+                  onChange={(e) =>
+                    settings.updateSettings({ gameLanguage: e.target.value })
+                  }
+                  aria-label='Game content language'
+                  className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                >
+                  <option value='english'>English</option>
+                  <option value='hindi'>Hindi (हिन्दी)</option>
+                  <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
                 </select>
               </div>
 

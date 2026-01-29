@@ -19,19 +19,20 @@
 
 | Metric         | Count  |
 | -------------- | ------ |
-| ✅ DONE        | 57     |
+| ✅ DONE        | 58     |
 | 🟡 IN_PROGRESS | 0      |
-| 🔵 OPEN        | 13     |
+| 🔵 OPEN        | 12     |
 | 🔴 BLOCKED     | 0      |
 | **Total**      | **70** |
 
-**Last Updated:** 2026-01-29 19:00 UTC
+**Last Updated:** 2026-01-29 22:30 UTC
 
 **Current Priority:** AI Phase 1 - Letter audio files
 
 ### Recent Completions (2026-01-29)
 
-- TCK-20260129-100: AI Phase 1 TTS Implementation ✅ NEW
+- TCK-20260129-101: SQLite to PostgreSQL Migration Cleanup ✅ NEW
+- TCK-20260129-100: AI Phase 1 TTS Implementation ✅
 - TCK-20260129-092: CRITICAL FIX - Resolve SECRET_KEY Validation Error ✅
 - TCK-20260129-086: Comprehensive Health System Audit ✅
 - TCK-20260129-080: Comprehensive Authentication System Audit ✅
@@ -14420,5 +14421,265 @@ const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
 3. Modify game language logic
 4. Test all combinations
 5. Update documentation
+
+---
+
+---
+
+### TCK-20260129-303 :: FIX - Language as Game Choice (Not Profile Setting)
+
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-29 22:45 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 23:00 IST
+
+**Problem**: Language was tied to profile, users couldn't switch languages easily
+
+**Solution**: Language is now a game/lesson choice - just like choosing activity type
+
+**Changes Made**:
+1. Removed `preferred_language` from profile usage in Game.tsx
+2. Added `selectedLanguage` state - user can switch anytime
+3. Added language selector UI on game start screen (5 buttons with flags)
+4. Added language indicator during gameplay (shows current alphabet)
+5. Auto-resets game when language changes (new letter set)
+
+**User Experience**:
+- User opens game
+- Sees 5 language buttons: 🇬🇧 English, 🇮🇳 Hindi, 🇮🇳 Kannada, 🇮🇳 Telugu, 🇮🇳 Tamil
+- Clicks any language → game loads that alphabet
+- Can switch anytime by stopping and selecting different language
+
+**Files Modified**:
+- src/frontend/src/pages/Game.tsx
+
+**Acceptance Criteria**:
+- [x] Language selector visible on game start
+- [x] Can switch languages without changing profile
+- [x] Language indicator shows during gameplay
+- [x] All 5 languages work (en, hi, kn, te, ta)
+- [x] Game resets properly when language changes
+
+---
+
+---
+
+## TCK-20260129-101 :: SQLite to PostgreSQL Migration Cleanup
+
+Type: INFRASTRUCTURE
+Owner: AI Assistant
+Created: 2026-01-29 22:30 UTC
+Completed: 2026-01-29 22:30 UTC
+Status: **DONE** ✅
+
+### Context
+
+Project previously used SQLite for development and PostgreSQL for production. This caused:
+- Data loss when switching between databases
+- Configuration confusion
+- Different behavior in dev vs prod
+
+### Changes Made
+
+1. **Removed SQLite database files**
+   - Deleted `advay_vision.db` (77KB of old data)
+   - Deleted `app.db` (empty)
+
+2. **Updated `.env.example`**
+   - Removed SQLite option from comments
+   - PostgreSQL is now the only supported database
+
+3. **Updated `docs/SETUP.md`**
+   - Added PostgreSQL to prerequisites
+   - Added database setup section with createdb command
+   - Added alembic migration step
+
+4. **Updated `README.md`**
+   - Added PostgreSQL to prerequisites
+   - Updated Quick Start with createdb step
+   - Changed tech stack to show PostgreSQL for both dev and prod
+
+5. **Updated ADR documents**
+   - `docs/architecture/decisions/002-python-tech-stack.md` - PostgreSQL instead of SQLite
+   - `docs/architecture/decisions/003-storage-strategy.md` - Complete rewrite for PostgreSQL
+
+6. **Created test user in PostgreSQL**
+   - User: pranay.suyash@gmail.com
+   - Email verified: true
+
+### Files Modified
+
+```text
+.env.example
+docs/SETUP.md
+README.md
+docs/TECH_STACK_DECISION.md
+docs/architecture/decisions/002-python-tech-stack.md
+docs/architecture/decisions/003-storage-strategy.md
+```
+
+### Files Deleted
+
+```text
+src/backend/advay_vision.db
+src/backend/app.db
+```
+
+### Impact
+
+- All developers must now have PostgreSQL installed locally
+- No more data confusion between dev and prod
+- Production parity achieved
+
+## TCK-20260129-085 :: Component-Based UI Redesign - Research-Based Approach
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 19:00 IST
+Status: **IN_PROGRESS** 🟡
+
+Scope contract:
+
+- In-scope:
+  - Component-by-component UI redesign based on research
+  - Each component reviewed and approved before implementation
+  - Research-backed color palette (calm, accessible)
+  - No gradients, no bright colors, no decorative animations
+  - WCAG AA+ accessibility compliance
+- Out-of-scope:
+  - Any component not explicitly approved
+  - Bright/saturated colors
+  - Complex animations
+  - Visual clutter
+- Behavior change allowed: YES (complete visual redesign)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files: All frontend UI components (one at a time)
+- Branch: main
+- Base: main@latest
+
+Inputs:
+
+- Prompt used: N/A (research-based implementation)
+- Source artifacts:
+  - `docs/DESIGN_RESEARCH.md` - Comprehensive research document
+  - WCAG 2.2 Guidelines
+  - Color psychology research for toddlers
+
+Plan:
+
+Implement components in order, with approval at each step:
+1. Color Palette & CSS Variables (FOUNDATION)
+2. Typography System
+3. Button Components
+4. Card/Container Components
+5. Navigation
+6. Game Screen Layout
+7. Star Rating Component
+8. Sound Integration
+
+Execution log:
+
+- 19:00 IST: Created component-based implementation ticket
+- 19:05 IST: Reverted previous poor UI changes
+- 19:10 IST: Completed design research document
+- 19:15 IST: Proposing Component 1: Color Palette
+
+Component 1: Color Palette & CSS Variables (Pending Approval)
+
+Proposed Colors:
+```css
+/* Background Colors */
+--bg-primary: #FDF8F3;        /* Soft Cream - main background */
+--bg-secondary: #E8F4F8;      /* Pale Blue - cards, sections */
+--bg-tertiary: #F5F0E8;       /* Warm Off-White - alternate sections */
+
+/* Brand Colors */
+--brand-primary: #E07A5F;     /* Soft Coral - primary buttons, CTAs */
+--brand-secondary: #7EB5D6;   /* Sky Blue - secondary actions, links */
+--brand-accent: #F2CC8F;      /* Soft Amber - accents, highlights */
+
+/* Semantic Colors */
+--success: #81B29A;           /* Sage Green - success states */
+--warning: #F2CC8F;           /* Soft Amber - gentle warnings */
+--error: #E07A5F;             /* Soft Coral - errors */
+
+/* Text Colors */
+--text-primary: #3D405B;      /* Charcoal - headings, body text */
+--text-secondary: #6B7280;    /* Warm Gray - subtext, hints */
+--text-muted: #9CA3AF;        /* Light Gray - disabled */
+
+/* UI Colors */
+--border: #E5E7EB;
+--shadow: rgba(61, 64, 91, 0.08);
+```
+
+Contrast Ratios (Verified):
+- Text Primary on BG Primary: 12.6:1 ✅ (exceeds 7:1)
+- Brand Primary on BG Primary: 4.6:1 ✅ (exceeds 4.5:1)
+- Text Secondary on BG Primary: 5.9:1 ✅ (exceeds 4.5:1)
+
+Key Principles:
+- No gradients
+- No pure white (cream instead)
+- No bright/saturated colors
+- Charcoal instead of black
+
+Status updates:
+
+- 2026-01-29 19:15 IST: Status IN_PROGRESS - Component 1 proposed, awaiting approval
+
+Next actions:
+
+1. User reviews Component 1 (Color Palette)
+2. User approves or requests changes
+3. Upon approval, implement Component 1
+4. Propose Component 2 (Typography)
+
+Risks/notes:
+
+- **One component at a time** - No rushing, thorough review at each step
+- **Research-backed** - All decisions based on child psychology and accessibility
+- **Child-tested** - Each component should be tested with 2yr 9mo son
+
+---
+
+---
+
+### TCK-20260129-304 :: Change Profile Age from Integer to Float
+
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-29 23:30 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 23:45 IST
+
+**Problem**: Age was integer, couldn't represent partial years (e.g., 2 years 6 months = 2.5)
+
+**Solution**: Changed age from `int` to `float` across entire stack
+
+**Files Modified**:
+- src/backend/app/db/models/profile.py - Column type Float
+- src/backend/app/schemas/profile.py - Schema type float
+- src/backend/app/core/validation.py - Accepts int or float
+- src/backend/alembic/versions/739ac7e9e4e3_change_age_from_int_to_float.py - Migration
+- src/frontend/src/pages/Dashboard.tsx - Input step=0.1, parseFloat
+
+**Database Migration**: Applied (PostgreSQL)
+
+**User Experience**:
+- Can now enter age like "2.5" for 2 years 6 months
+- Input shows helper text: "Use decimals for partial years"
+- Backend accepts and validates float ages
+
+**Acceptance Criteria**:
+- [x] Database column is Float
+- [x] Schema accepts float
+- [x] Validation accepts int or float
+- [x] Frontend allows decimal input
+- [x] Migration applied successfully
 
 ---

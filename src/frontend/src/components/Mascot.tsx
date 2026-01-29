@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTTS } from '../hooks/useTTS';
 
 interface MascotProps {
     state?: 'idle' | 'happy' | 'thinking' | 'waiting' | 'celebrating';
     message?: string;
     className?: string;
     enableVideo?: boolean;
+    /** Whether Pip should speak the message (default: true) */
+    speakMessage?: boolean;
+    /** Language code for TTS (default: 'en') */
+    language?: string;
 }
 
 const MASCOT_IMAGE_SRC = '/assets/images/red_panda_no_bg.png';
@@ -15,17 +20,23 @@ const MASCOT_VIDEO_SRC = '/assets/videos/pip_alpha_v2.webm';
 const MIN_CELEBRATION_INTERVAL = 15000; // 15 seconds
 const MAX_CELEBRATION_INTERVAL = 45000; // 45 seconds
 
-export function Mascot({ 
-    state = 'idle', 
-    message, 
+export function Mascot({
+    state = 'idle',
+    message,
     className = '',
-    enableVideo = true 
+    enableVideo = true,
+    speakMessage = true,
+    language = 'en'
 }: MascotProps) {
     const [bounce, setBounce] = useState(false);
     const [showVideo, setShowVideo] = useState(false);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const celebrationTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const lastSpokenMessageRef = useRef<string | null>(null);
+
+    // TTS integration
+    const { speakInLanguage, isEnabled: ttsEnabled } = useTTS();
 
     // Schedule next random celebration - defined first to avoid circular dependency
     const scheduleNextCelebration = useCallback(() => {
@@ -103,6 +114,23 @@ export function Mascot({
             preloadVideo.load();
         }
     }, [enableVideo]);
+
+    // TTS: Speak message when it changes
+    useEffect(() => {
+        if (
+            speakMessage &&
+            ttsEnabled &&
+            message &&
+            message !== lastSpokenMessageRef.current
+        ) {
+            lastSpokenMessageRef.current = message;
+            // Remove emojis for cleaner TTS (keep the text human-readable)
+            const cleanMessage = message.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+            if (cleanMessage) {
+                speakInLanguage(cleanMessage, language);
+            }
+        }
+    }, [message, speakMessage, ttsEnabled, speakInLanguage, language]);
 
     // Bounce animation trigger
     useEffect(() => {

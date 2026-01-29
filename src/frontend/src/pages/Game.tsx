@@ -6,7 +6,7 @@ import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE } from '../store';
 import { Mascot } from '../components/Mascot';
-import { progressApi, profileApi } from '../services/api';
+import { progressApi } from '../services/api';
 
 interface Point {
   x: number;
@@ -19,12 +19,14 @@ interface GameStats {
   streak: number;
 }
 
-interface Profile {
-  id: string;
-  name: string;
-  preferred_language: string;
-  age?: number;
-}
+// Available languages for the game
+const LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
+  { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+  { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+  { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+] as const;
 
 export function Game() {
   const location = useLocation();
@@ -48,6 +50,10 @@ export function Game() {
   const [startTime, setStartTime] = useState<number>(0);
   const [, setSessionStats] = useState<GameStats>({ accuracy: 0, timeSpent: 0, streak: 0 });
   const animationRef = useRef<number | undefined>(undefined);
+  
+  // Language selection - user can switch anytime
+  // Use gameLanguage setting if available, otherwise default to 'en'
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(settings.gameLanguage || 'en');
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
   const lastDrawPointRef = useRef<Point | null>(null);
@@ -55,33 +61,32 @@ export function Game() {
   // Get profile ID from route state (passed from Dashboard)
   const profileId = location.state?.profileId as string | undefined;
 
-  // Profile state - fetched from API
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  // Note: Profile ID is used for progress tracking, not language
+  // Language is a game choice, not a profile setting
 
-  // Fetch profile data on mount (only if profileId exists)
-  useEffect(() => {
-    if (!profileId) return;
-    const fetchProfile = async () => {
-      try {
-        const response = await profileApi.getProfile(profileId);
-        setProfile(response.data);
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [profileId]);
-
-  // Use profile's preferred_language for content, settings.language for UI
-  // Profile stores 2-letter codes ('en', 'hi', 'kn', 'te', 'ta')
-  const languageCode = profile?.preferred_language || 'en';
+  // Language is a game/lesson choice - user can switch anytime
+  // NOT tied to profile - just like choosing "Letters" vs "Numbers"
+  const languageCode = selectedLanguage;
   
-  // Get letters based on profile's preferred language and settings difficulty
+  // Get letters based on selected language and settings difficulty
   const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
   const currentLetter = LETTERS[currentLetterIndex];
+  
+  // Reset letter index when language changes
+  // Also update selectedLanguage when gameLanguage setting changes
+  useEffect(() => {
+    setCurrentLetterIndex(0);
+    setScore(0);
+    setStreak(0);
+    drawnPointsRef.current = [];
+  }, [selectedLanguage]);
+
+  // Update selectedLanguage when gameLanguage setting changes
+  useEffect(() => {
+    if (settings.gameLanguage) {
+      setSelectedLanguage(settings.gameLanguage);
+    }
+  }, [settings.gameLanguage]);
 
   // Initialize hand landmarker
   useEffect(() => {
@@ -657,8 +662,30 @@ export function Game() {
               <p className="text-white/70 mb-4 max-w-md mx-auto">
                 Use your hand to trace letters! The camera will track your finger movements.
               </p>
+              {/* Language Selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Choose Alphabet
+                </label>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => setSelectedLanguage(lang.code)}
+                      className={`px-4 py-2 rounded-lg font-medium transition ${
+                        selectedLanguage === lang.code
+                          ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      <span className="mr-2">{lang.flag}</span>
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="text-sm text-white/50 mb-8">
-                Learning: <span className="text-white/80 capitalize">{profileLoading ? 'Loading...' : profile?.preferred_language || 'English'}</span> |
                 Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
               </div>
               {isModelLoading ? (
@@ -692,6 +719,9 @@ export function Game() {
                 <div className="absolute top-4 left-4 flex gap-2">
                   <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/10">
                     🎯 Trace: {currentLetter.char}
+                  </div>
+                  <div className="bg-blue-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/10">
+                    {LANGUAGES.find(l => l.code === selectedLanguage)?.flag} {LANGUAGES.find(l => l.code === selectedLanguage)?.name}
                   </div>
                   {streak > 2 && (
                     <div className="bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20">

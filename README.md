@@ -16,18 +16,23 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 ### Prerequisites
 - Python 3.13+
 - Node.js 18+
+- PostgreSQL 14+
 - uv (Python package manager)
 
 ### Setup
 
 ```bash
+# 0. Database setup (PostgreSQL required)
+createdb advay_learning
+
 # 1. Backend setup
 cd src/backend
 uv venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env: set DATABASE_URL and SECRET_KEY
+alembic upgrade head  # Run migrations
 
 # 2. Frontend setup
 cd ../frontend
@@ -54,7 +59,7 @@ Access:
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
 - **Backend**: Python 3.13+, FastAPI, SQLAlchemy
 - **CV Engine**: MediaPipe, TensorFlow.js, OpenCV
-- **Database**: PostgreSQL (production), SQLite (dev)
+- **Database**: PostgreSQL (both dev and production)
 - **Storage**: AWS S3 / Local filesystem
 - **Auth**: JWT-based authentication
 

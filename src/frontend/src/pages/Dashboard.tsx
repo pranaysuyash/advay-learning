@@ -452,19 +452,21 @@ export function Dashboard() {
 
                 <div>
                   <label className='block text-sm font-medium text-white/80 mb-2'>
-                    Age
+                    Age (years)
                   </label>
                   <input
                     type='number'
                     min={2}
                     max={12}
+                    step={0.1}
                     value={newChildAge}
                     onChange={(e) =>
-                      setNewChildAge(parseInt(e.target.value) || 5)
+                      setNewChildAge(parseFloat(e.target.value) || 5)
                     }
-                    placeholder='Enter age (2-12)'
+                    placeholder='Enter age (2-12, can use decimals like 2.5)'
                     className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                   />
+                  <p className='text-xs text-white/50 mt-1'>Use decimals for partial years (e.g., 2.5 for 2 years 6 months)</p>
                 </div>
 
                 <div>

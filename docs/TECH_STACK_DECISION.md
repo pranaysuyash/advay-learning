@@ -24,12 +24,12 @@ Build: Local-only, no server needed
 - Need to learn TypeScript/React if unfamiliar
 - Slightly less CV control than Python
 
-### Option C: Python Desktop
+### Option C: Python Desktop (Not Chosen)
 ```
 Language: Python 3.13+
 UI: PyQt6
 Vision: MediaPipe Python + OpenCV
-Storage: SQLite
+Storage: PostgreSQL
 Build: PyInstaller executable
 ```
 

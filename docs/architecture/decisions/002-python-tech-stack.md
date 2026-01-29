@@ -29,7 +29,7 @@ We will use **Python 3.13+** with the following stack:
 
 ### Data
 - **Pydantic**: Data validation and settings
-- **SQLite**: Local database
+- **PostgreSQL**: Database (both dev and production)
 
 ## Consequences
 
@@ -79,4 +79,4 @@ We will use **Python 3.13+** with the following stack:
 
 ## Related Decisions
 - ADR 001: Local-First Architecture
-- ADR 003: SQLite for Local Storage
+- ADR 003: Storage Strategy (PostgreSQL)

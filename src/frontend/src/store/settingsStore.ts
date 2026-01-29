@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 interface Settings {
   language: string;
+  gameLanguage: string;  // NEW: Separate game content language
   difficulty: string;
   cameraEnabled: boolean;
   soundEnabled: boolean;
@@ -17,6 +18,7 @@ interface SettingsState extends Settings {
 
 const defaultSettings: Settings = {
   language: 'english',
+  gameLanguage: 'english', // NEW: Default game language
   difficulty: 'medium', // Default to medium (more letters than easy)
   cameraEnabled: false, // Default to off for privacy
   soundEnabled: true,

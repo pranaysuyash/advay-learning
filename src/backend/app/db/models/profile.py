@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
@@ -17,7 +17,7 @@ class Profile(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
     parent_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    age: Mapped[int] = mapped_column(Integer, nullable=True)
+    age: Mapped[float] = mapped_column(Float, nullable=True)
     avatar_url: Mapped[str] = mapped_column(String, nullable=True)
     preferred_language: Mapped[str] = mapped_column(String, default="english")
     settings: Mapped[dict] = mapped_column(JSON, default=dict)
