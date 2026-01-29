@@ -11190,3 +11190,42 @@ Artifacts:
 - This ticket - TCK-20260129-067
 
 ---
+
+---
+
+### TCK-20260129-078 :: Video Mascot - Transparent Background (WebM with Alpha)
+
+Type: IMPROVEMENT
+Owner: AI Assistant
+Created: 2026-01-29 18:50 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 18:50 IST
+
+Issue:
+Original MP4 video had white background that didn't blend with game UI.
+
+Solution:
+Created WebM with alpha channel transparency using ffmpeg chromakey.
+
+Command Used:
+```bash
+ffmpeg -i pip.mp4 -vf "chromakey=white:0.1:0.0" \
+  -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 500k \
+  -auto-alt-ref 0 pip_alpha.webm
+```
+
+Results:
+- Original: pip.mp4 (661KB, white background)
+- New: pip_alpha.webm (709KB, transparent background)
+- Format: VP9 codec with yuva420p pixel format (alpha support)
+
+Files Modified:
+- src/frontend/src/components/Mascot.tsx (updated video path)
+- src/frontend/public/assets/videos/pip_alpha.webm (new)
+
+Browser Support:
+- Chrome/Edge: ✅ Full support
+- Firefox: ✅ Full support
+- Safari: ⚠️ Requires Safari 13.1+ (macOS Big Sur+)
+
+---
