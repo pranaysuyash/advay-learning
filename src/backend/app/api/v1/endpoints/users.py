@@ -148,6 +148,40 @@ async def create_profile(
     return profile
 
 
+@router.get("/me/profiles/{profile_id}", response_model=Profile)
+async def get_profile(
+    profile_id: str,
+    current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Profile:
+    """Get a specific profile by ID."""
+    # Validate profile_id format
+    try:
+        validate_uuid(profile_id, "profile_id")
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        )
+    
+    # Get profile
+    profile = await ProfileService.get_by_id(db, profile_id)
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
+    
+    # Verify profile belongs to current user
+    if profile.parent_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+        )
+    
+    return profile
+
+
 @router.delete("/me/profiles/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_profile(
     request: Request,

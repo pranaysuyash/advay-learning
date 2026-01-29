@@ -86,6 +86,7 @@ export const userApi = {
 // Profile API
 export const profileApi = {
   getProfiles: () => apiClient.get('/users/me/profiles'),
+  getProfile: (profileId: string) => apiClient.get(`/users/me/profiles/${profileId}`),
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) =>
     apiClient.post('/users/me/profiles', data),
 };

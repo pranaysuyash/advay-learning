@@ -20,8 +20,7 @@ class Progress(Base):
     content_id: Mapped[str] = mapped_column(String, nullable=False)  # letter, word, object identifier
     score: Mapped[int] = mapped_column(Integer, default=0)
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
-    # Keep attribute name `meta_data` but map to DB column named `metadata` (legacy migration)
-    meta_data: Mapped[dict] = mapped_column(JSON, name="metadata", default=dict)  # detailed tracking (maps to existing column)
+    meta_data: Mapped[dict] = mapped_column(JSON, default=dict)  # detailed tracking
 
     completed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

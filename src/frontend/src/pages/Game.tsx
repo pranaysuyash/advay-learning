@@ -6,7 +6,7 @@ import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE } from '../store';
 import { Mascot } from '../components/Mascot';
-import { progressApi } from '../services/api';
+import { progressApi, profileApi } from '../services/api';
 
 interface Point {
   x: number;
@@ -17,6 +17,13 @@ interface GameStats {
   accuracy: number;
   timeSpent: number;
   streak: number;
+}
+
+interface Profile {
+  id: string;
+  name: string;
+  preferred_language: string;
+  age?: number;
 }
 
 export function Game() {
@@ -43,23 +50,36 @@ export function Game() {
   const animationRef = useRef<number | undefined>(undefined);
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
-
+  const lastDrawPointRef = useRef<Point | null>(null);
+  const lastPinchTimeRef = useRef<number>(0);
   // Get profile ID from route state (passed from Dashboard)
   const profileId = location.state?.profileId as string | undefined;
 
-  // Redirect to dashboard if no profile selected
-  if (!profileId) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  // Profile state - fetched from API
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  // Map full language names to 2-letter codes for alphabet lookup
-  const languageCode = settings.language === 'hindi' ? 'hi'
-                      : settings.language === 'kannada' ? 'kn'
-                      : settings.language === 'telugu' ? 'te'
-                      : settings.language === 'tamil' ? 'ta'
-                      : 'en';
+  // Fetch profile data on mount (only if profileId exists)
+  useEffect(() => {
+    if (!profileId) return;
+    const fetchProfile = async () => {
+      try {
+        const response = await profileApi.getProfile(profileId);
+        setProfile(response.data);
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [profileId]);
+
+  // Use profile's preferred_language for content, settings.language for UI
+  // Profile stores 2-letter codes ('en', 'hi', 'kn', 'te', 'ta')
+  const languageCode = profile?.preferred_language || 'en';
   
-  // Get letters based on selected language and difficulty
+  // Get letters based on profile's preferred language and settings difficulty
   const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
   const currentLetter = LETTERS[currentLetterIndex];
 
@@ -127,7 +147,10 @@ export function Game() {
 
   // Calculate tracing accuracy
   const calculateAccuracy = useCallback((points: Point[]): number => {
-    if (points.length < 10) return 0;
+    // Filter out break points (NaN values)
+    const validPoints = points.filter(p => !isNaN(p.x) && !isNaN(p.y));
+    
+    if (validPoints.length < 10) return 0;
 
     const canvas = canvasRef.current;
     if (!canvas) return 0;
@@ -137,7 +160,7 @@ export function Game() {
     const letterRadius = Math.min(canvas.width, canvas.height) * 0.25;
 
     // Check how many points are within the letter area
-    const pointsInArea = points.filter(point => {
+    const pointsInArea = validPoints.filter(point => {
       const px = point.x * canvas.width;
       const py = point.y * canvas.height;
       const distance = Math.sqrt(Math.pow(px - centerX, 2) + Math.pow(py - centerY, 2));
@@ -145,10 +168,10 @@ export function Game() {
     });
 
     // Calculate coverage (how much of the letter area was traced)
-    const coverage = pointsInArea.length / points.length;
+    const coverage = pointsInArea.length / validPoints.length;
 
     // Calculate density (points per area)
-    const density = Math.min(points.length / 100, 1);
+    const density = Math.min(validPoints.length / 100, 1);
 
     // Combined score (0-100)
     const accuracy = Math.round((coverage * 0.6 + density * 0.4) * 100);
@@ -187,7 +210,7 @@ export function Game() {
       console.error('Failed to save progress:', error);
       // Don't block the game if saving fails - will retry next time
     }
-  }, [user, profileId, currentLetter, settings.language, score, startTime, streak]);
+  }, [user, profileId, currentLetter, languageCode, settings.difficulty, startTime, streak]);
 
   // Drawing loop
   const detectAndDraw = useCallback(() => {
@@ -255,10 +278,25 @@ export function Game() {
 
     // Draw drawn points (with smoothing)
     if (drawnPointsRef.current.length > 0) {
-      // Apply smoothing for better visual quality
-      const pointsToDraw = drawnPointsRef.current.length > 3
-        ? smoothPoints(drawnPointsRef.current)
-        : drawnPointsRef.current;
+      // Build segments separated by break points (NaN values)
+      const segments: Point[][] = [];
+      let currentSegment: Point[] = [];
+      
+      drawnPointsRef.current.forEach((point) => {
+        if (isNaN(point.x) || isNaN(point.y)) {
+          // Break point - save current segment and start new one
+          if (currentSegment.length > 0) {
+            segments.push(currentSegment);
+            currentSegment = [];
+          }
+        } else {
+          currentSegment.push(point);
+        }
+      });
+      // Don't forget the last segment
+      if (currentSegment.length > 0) {
+        segments.push(currentSegment);
+      }
 
       ctx.beginPath();
       ctx.strokeStyle = currentLetter.color;
@@ -268,13 +306,22 @@ export function Game() {
       ctx.shadowColor = currentLetter.color;
       ctx.shadowBlur = 10;
 
-      pointsToDraw.forEach((point, index) => {
-        if (index === 0) {
-          ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
-        } else {
-          ctx.lineTo(point.x * canvas.width, point.y * canvas.height);
-        }
+      // Draw each segment with smoothing
+      segments.forEach((segment) => {
+        if (segment.length === 0) return;
+        
+        // Apply smoothing for better visual quality
+        const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
+        
+        pointsToDraw.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
+          } else {
+            ctx.lineTo(point.x * canvas.width, point.y * canvas.height);
+          }
+        });
       });
+      
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
@@ -291,16 +338,32 @@ export function Game() {
         Math.pow(thumbTip.y - indexTip.y, 2)
       );
 
-      // Hysteresis: start pinch < 0.05, release pinch > 0.08
+      // Hysteresis: start pinch < 0.05, release pinch > 0.07
+      // Lower release threshold makes it easier to stop drawing (more responsive)
       const PINCH_START_THRESHOLD = 0.05;
-      const PINCH_RELEASE_THRESHOLD = 0.08;
+      const PINCH_RELEASE_THRESHOLD = 0.07;
+
+      // Track previous pinch state to detect transitions
+      const wasPinching = isPinching;
 
       if (!isPinching && pinchDistance < PINCH_START_THRESHOLD) {
         setIsPinching(true);
         setIsDrawing(true);
+        // Just started pinching - add a null point to break the line
+        // This prevents connecting from previous position when repositioning finger
+        if (wasPinching !== true) {
+          drawnPointsRef.current.push({ x: NaN, y: NaN });
+          // Reset tracking for velocity calculation
+          lastDrawPointRef.current = null;
+          lastPinchTimeRef.current = performance.now();
+        }
       } else if (isPinching && pinchDistance > PINCH_RELEASE_THRESHOLD) {
         setIsPinching(false);
         setIsDrawing(false);
+        // Just released pinch - add a null point to break the line
+        drawnPointsRef.current.push({ x: NaN, y: NaN });
+        // Reset tracking
+        lastDrawPointRef.current = null;
       }
 
       // IMPORTANT: MediaPipe x coordinates are normalized [0,1] where 0 is left, 1 is right
@@ -327,9 +390,61 @@ export function Game() {
       // This allows cursor to be visible without recording
       if (isDrawing) {
         const nextPoints = drawnPointsRef.current;
-        nextPoints.push({ x: displayX, y: displayY });
+        
+        // Velocity filtering: if moving too fast, it's likely a reposition, not drawing
+        // Minimum movement threshold: don't add points if finger hasn't moved enough
+        const MIN_MOVEMENT_THRESHOLD = 0.003; // ~3px on a 1000px canvas
+        const MAX_VELOCITY_THRESHOLD = 0.15;  // Max reasonable drawing speed
+        
+        const lastPoint = lastDrawPointRef.current;
+        const now = performance.now();
+        const timeDelta = now - lastPinchTimeRef.current;
+        
+        let shouldAddPoint = true;
+        
+        if (lastPoint && timeDelta > 0) {
+          const dx = displayX - lastPoint.x;
+          const dy = displayY - lastPoint.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const velocity = distance / timeDelta;
+          
+          // Skip if movement is too small (reduces noise)
+          if (distance < MIN_MOVEMENT_THRESHOLD) {
+            shouldAddPoint = false;
+          }
+          
+          // Skip if velocity is too high (likely a reposition, not drawing)
+          if (velocity > MAX_VELOCITY_THRESHOLD) {
+            shouldAddPoint = false;
+            // Also add a break point to separate this from previous drawing
+            if (nextPoints.length > 0 && !isNaN(nextPoints[nextPoints.length - 1].x)) {
+              nextPoints.push({ x: NaN, y: NaN });
+            }
+          }
+        }
+        
+        if (shouldAddPoint) {
+          nextPoints.push({ x: displayX, y: displayY });
+          lastDrawPointRef.current = { x: displayX, y: displayY };
+          lastPinchTimeRef.current = now;
+        }
+        
         // Prevent unbounded growth if a session runs for a long time
         if (nextPoints.length > 5000) nextPoints.shift();
+      } else {
+        // Reset tracking when not drawing
+        lastDrawPointRef.current = null;
+      }
+    } else {
+      // No hand detected - reset pinch and drawing state
+      // This prevents unwanted drawing when hand leaves and re-enters the frame
+      if (isPinching) {
+        setIsPinching(false);
+        setIsDrawing(false);
+        // Add null point to break the line when hand disappears
+        drawnPointsRef.current.push({ x: NaN, y: NaN });
+        // Reset tracking
+        lastDrawPointRef.current = null;
       }
     }
 
@@ -433,6 +548,11 @@ export function Game() {
       }
     }, 3000);
   };
+
+  // Redirect to dashboard if no profile selected
+  if (!profileId) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -538,7 +658,7 @@ export function Game() {
                 Use your hand to trace letters! The camera will track your finger movements.
               </p>
               <div className="text-sm text-white/50 mb-8">
-                Language: <span className="text-white/80 capitalize">{settings.language}</span> |
+                Learning: <span className="text-white/80 capitalize">{profileLoading ? 'Loading...' : profile?.preferred_language || 'English'}</span> |
                 Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
               </div>
               {isModelLoading ? (
@@ -606,10 +726,16 @@ export function Game() {
 
                 {/* In-Game Mascot */}
                 <div className="absolute bottom-0 left-4 z-20">
-                  <Mascot
-                    state={feedback.includes('Great') || feedback.includes('Amazing') ? 'happy' : isDrawing ? 'waiting' : 'idle'}
-                    message={feedback || (isDrawing ? "Keep going!" : "Trace the letter!")}
-                  />
+                  {(() => {
+                    const mascotState = feedback.includes('Great') || feedback.includes('Amazing') ? 'happy' : isDrawing ? 'waiting' : 'idle';
+                    console.log('[Game] Mascot state:', mascotState, 'Feedback:', feedback);
+                    return (
+                      <Mascot
+                        state={mascotState}
+                        message={feedback || (isDrawing ? "Keep going!" : "Trace the letter!")}
+                      />
+                    );
+                  })()}
                 </div>
               </div>
 
