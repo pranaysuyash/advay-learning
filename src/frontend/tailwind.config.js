@@ -32,15 +32,16 @@ export default {
         'warning': '#F2CC8F',
         'error': '#E07A5F',
 
-        // Text colors
-        'text-primary': '#3D405B',
-        'text-secondary': '#6B7280',
+        // Text colors - Enhanced contrast
+        'text-primary': '#1F2937',
+        'text-secondary': '#4B5563',
         'text-muted': '#9CA3AF',
         'text-inverse': '#FFFFFF',
 
-        // UI colors
-        'border': '#E5E7EB',
-        'border-focus': '#7EB5D6',
+        // UI colors - Sharper borders
+        'border': '#D1D5DB',
+        'border-strong': '#9CA3AF',
+        'border-focus': '#2563EB',
       },
       fontFamily: {
         sans: ['Nunito', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],

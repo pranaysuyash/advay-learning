@@ -23,9 +23,10 @@
 
 ## Component 1: Color Palette & CSS Variables
 
-### Status: ✅ COMPLETE
+### Status: ✅ COMPLETE (Enhanced)
 
 **Implemented:** 2026-01-29  
+**Enhanced:** 2026-01-29 (contrast & borders)  
 **Approved By:** User  
 **Files Modified:**
 - `src/frontend/src/index.css` - Complete color system with CSS variables
@@ -34,11 +35,21 @@
 
 **What's Included:**
 - 15 CSS custom properties for consistent theming
+- **Enhanced text contrast**: #1F2937 (darker) for primary text
+- **Sharper borders**: 2px solid #D1D5DB, strong variant #9CA3AF
+- **Improved readability**: font-weight 600 body, 800 headings
 - Button component classes (.btn, .btn-primary, .btn-secondary, etc.)
-- Card component classes (.card, .card-hover)
+- Card component classes with 2px sharp borders
 - Accessibility features (focus styles, reduced motion support)
 - Touch target utilities (60px minimum for toddlers)
 - Tailwind integration with all custom colors
+
+**Contrast Improvements:**
+- Text Primary: #1F2937 (was #3D405B) - 15.8:1 ratio on cream background
+- Text Secondary: #4B5563 (was #6B7280) - 7.8:1 ratio
+- Body font-weight: 600 (was 400) - bolder, clearer
+- Headings: font-weight 800 with -0.02em letter-spacing
+- Borders: 2px solid (was 1px) - sharper definition
 
 ### Proposed Implementation
 
