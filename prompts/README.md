@@ -23,6 +23,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Single UI file audit: `prompts/ui/ui-file-audit-v1.0.md`
 - Child-centered UX audit (learning expert lens): `prompts/ui/child-centered-ux-audit-v1.0.md`
 - Kids playtest protocol (lightweight): `prompts/ui/kids-playtest-protocol-v1.0.md`
+- MediaPipe kids-app UX/QA audit pack (master + persona scenarios): `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md`
 
 ### Engineering (Dev)
 - One-file audit: `prompts/audit/audit-v1.5.1.md`

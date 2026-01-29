@@ -62,6 +62,11 @@ Before starting ANY work, determine:
    - Acceptance criteria
    - Base branch: main
 
+2.5. Select the correct repo prompt (MANDATORY):
+   - Use `prompts/README.md` to find the appropriate prompt for the work type.
+   - Open and follow that prompt’s required steps + required artifacts.
+   - If the user provides an external prompt, curate it into `prompts/` (repo-native) and add it to `prompts/README.md` so future agents use the same source of truth.
+
 3. Ticket Action (MANDATORY):
    - Create or update docs/WORKLOG_TICKETS.md
    - Append-only discipline
@@ -90,6 +95,9 @@ Every work unit MUST produce:
 2. **Audit Artifact** (for audits) in `docs/audit/<file>.md`
 3. **Verifier Pack** (for PRs) in PR description
 4. **Evidence Log** with raw command outputs
+5. **Docs updates** when you change behavior or workflow:
+   - If you add or change prompts, update `prompts/README.md`.
+   - If you add tooling/scripts/hooks, update `docs/SETUP.md` (and `scripts/setup.sh` if applicable).
 
 ---
 
@@ -101,6 +109,7 @@ Every work unit MUST produce:
 - [ ] Read AGENTS.md (this file)
 - [ ] Check docs/WORKLOG_TICKETS.md for existing work
 - [ ] Ensure local workflow gate is enabled (`git config core.hooksPath .githooks`)
+- [ ] Find the correct prompt in prompts/README.md and follow it
 - [ ] Determine work type and select correct prompt
 - [ ] Define scope contract (invariants, non-goals, acceptance criteria)
 - [ ] Create or update worklog ticket
@@ -418,6 +427,7 @@ Pass if:
 6. **Never** skip worklog updates
 7. **Never** claim "ready" without evidence
 8. **Never** expand scope without explicit approval
+9. **Never** run ad-hoc “process” work without curating it into repo prompts/docs (if it will be reused)
 
 ---
 
