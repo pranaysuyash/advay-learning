@@ -7,6 +7,24 @@
 - **uv**: Python package manager
 - **Git**: Version control
 
+## Enable Local Agent Workflow Controls (Required)
+
+This repo uses local git hooks to enforce ticket + evidence discipline (even without PRs).
+
+```bash
+# Enable repo-managed hooks
+git config core.hooksPath .githooks
+
+# Ensure hook scripts are executable
+chmod +x .githooks/* scripts/agent_gate.sh
+```
+
+To manually run the gate on your staged changes:
+
+```bash
+./scripts/agent_gate.sh --staged
+```
+
 ## Install uv
 
 ```bash

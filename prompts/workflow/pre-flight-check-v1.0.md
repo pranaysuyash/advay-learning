@@ -33,6 +33,27 @@ If you see:
 - Duplicate ticket IDs → run `prompts/workflow/ticket-hygiene-v1.0.md` first.
 - Missing ticket for current work → create it now (stop until done).
 
+## Step 1.2 — Local Workflow Gate Enabled (Required)
+
+Run:
+
+```bash
+git config --get core.hooksPath
+```
+
+If the output is not `.githooks`, fix it before proceeding:
+
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/* scripts/agent_gate.sh
+```
+
+Optional manual verification:
+
+```bash
+./scripts/agent_gate.sh --staged
+```
+
 ---
 
 ## Step 1.5 — Required Repo Discovery (rg-first)

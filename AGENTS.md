@@ -22,6 +22,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 
 - **Worklog**: `docs/WORKLOG_TICKETS.md` - All work tracking
 - **Audits**: `docs/audit/<sanitized-file>.md` - Audit artifacts
+- **Claims**: `docs/CLAIMS.md` - Append-only claim registry (prevents cross-agent contradictions)
 - **Prompts**: `prompts/` - All AI prompts
 - **Code**: Repository itself
 
@@ -99,6 +100,7 @@ Every work unit MUST produce:
 ```markdown
 - [ ] Read AGENTS.md (this file)
 - [ ] Check docs/WORKLOG_TICKETS.md for existing work
+- [ ] Ensure local workflow gate is enabled (`git config core.hooksPath .githooks`)
 - [ ] Determine work type and select correct prompt
 - [ ] Define scope contract (invariants, non-goals, acceptance criteria)
 - [ ] Create or update worklog ticket
@@ -269,6 +271,31 @@ M src/backend/app/main.py
 ```
 
 **Interpretation**: `Observed` - One modified file, one untracked file
+```
+
+---
+
+## Local Enforcement (No PR Required)
+
+This repo enforces workflow discipline locally via git hooks (so agents cannot “forget” tickets/evidence).
+
+Required one-time setup per clone:
+
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/* scripts/agent_gate.sh
+```
+
+What is enforced at commit time:
+
+1. If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_TICKETS.md`.
+2. Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
+3. Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
+
+Manual check (recommended before committing):
+
+```bash
+./scripts/agent_gate.sh --staged
 ```
 
 ---

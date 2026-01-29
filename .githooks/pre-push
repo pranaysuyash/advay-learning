@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+# Basic safety net: validate the tip commit being pushed.
+head_sha="$(git rev-parse HEAD)"
+./scripts/agent_gate.sh --commit "$head_sha"
+

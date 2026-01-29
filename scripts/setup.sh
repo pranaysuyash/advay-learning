@@ -25,6 +25,12 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Configure local repo git hooks (agent workflow gate)
+print_info "Configuring local git hooks..."
+git config core.hooksPath .githooks
+chmod +x .githooks/* scripts/agent_gate.sh || true
+print_info "Git hooks configured (core.hooksPath=.githooks) ✓"
+
 # Check if Python 3.11+ is installed
 print_info "Checking Python version..."
 if ! command -v python3 &> /dev/null; then
@@ -57,12 +63,11 @@ print_info "uv $UV_VERSION found ✓"
 # Create virtual environment
 print_info "Creating virtual environment..."
 if [ -d ".venv" ]; then
-    print_warn "Virtual environment already exists. Removing old environment..."
-    rm -rf .venv
+    print_warn "Virtual environment already exists. Reusing .venv (no duplicates)."
+else
+    uv venv --python python3
+    print_info "Virtual environment created ✓"
 fi
-
-uv venv --python python3
-print_info "Virtual environment created ✓"
 
 # Activate virtual environment
 print_info "Activating virtual environment..."

@@ -6,6 +6,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 1) Use: `prompts/workflow/agent-entrypoint-v1.0.md`
 2) Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
+3) Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
 ## Prompt Map (By Role / Job)
 
@@ -78,6 +79,12 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Handoff note: `prompts/workflow/handoff-v1.0.md`
 - Completion report (success/failure evidence): `prompts/workflow/completion-report-v1.0.md`
 - Repo hygiene sweep (no stray files): `prompts/workflow/repo-hygiene-sweep-v1.0.md`
+
+## AI-Native (Optional)
+
+Prompts and docs for building “AI-native” feature slices live under:
+- `prompts/ai-native/`
+- `docs/ai-native/`
 - Preservation-first upgrades (no parallel versions): `prompts/workflow/preservation-first-upgrade-v1.0.md`
 - Ticket hygiene (avoid ID collisions): `prompts/workflow/ticket-hygiene-v1.0.md`
 - Pre-merge clean room gate: `prompts/workflow/pre-merge-clean-room-check-v1.0.md`

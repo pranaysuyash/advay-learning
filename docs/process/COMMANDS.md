@@ -16,6 +16,17 @@ find docs -maxdepth 2 -type f -name '*.md' | sort
 find prompts -maxdepth 3 -type f -name '*.md' | sort
 ```
 
+## Local Workflow Gate (No PR Required)
+
+```bash
+# Ensure repo-managed hooks are enabled
+git config core.hooksPath .githooks
+git config --get core.hooksPath
+
+# Run the workflow gate against staged changes
+./scripts/agent_gate.sh --staged
+```
+
 ## Canonical File Finding
 
 ```bash

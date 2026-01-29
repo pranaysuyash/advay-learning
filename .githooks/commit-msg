@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+msg_file="${1:-}"
+if [[ -z "$msg_file" ]]; then
+  exit 2
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+changed_paths="$(git diff --cached --name-only)"
+if [[ -z "${changed_paths//$'\n'/}" ]]; then
+  exit 0
+fi
+
+if echo "$changed_paths" | rg -q '^(src/|docs/audit/)'; then
+  if ! rg -q 'TCK-[0-9]{8}-[0-9]{3}' "$msg_file"; then
+    echo "commit-msg: missing ticket reference (TCK-YYYYMMDD-###) in commit message for src/ or docs/audit/ changes." >&2
+    echo "commit-msg: add a 'Refs:' section or include TCK-... anywhere in the message." >&2
+    exit 1
+  fi
+fi
+
