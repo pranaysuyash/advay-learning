@@ -9848,7 +9848,7 @@ Risks/notes:
 Type: HARDENING
 Owner: Codex (GPT-5.2)
 Created: 2026-01-29
-Status: IN_PROGRESS
+Status: DONE
 
 Scope contract:
 
@@ -9911,6 +9911,49 @@ Next actions:
 
 **Output**:
 `agent-gate: audit artifact docs/audit/_gate_test.md must reference a ticket id (TCK-YYYYMMDD-###).`
+
+Status updates:
+
+- 2026-01-29 :: OPEN -> IN_PROGRESS
+- 2026-01-29 :: IN_PROGRESS -> DONE
+
+---
+
+## TCK-20260129-065 :: AI-Native Docs Index Completion
+
+Type: DOCS
+Owner: Codex (GPT-5.2)
+Created: 2026-01-29
+Status: IN_PROGRESS
+
+Scope contract:
+
+- In-scope:
+  - Add missing `docs/ai-native` index/spec docs referenced by the AI-native architecture/safety docs.
+  - Keep changes limited to documentation (no runtime behavior changes).
+- Out-of-scope:
+  - Implementing AI-native features in code.
+- Behavior change allowed: NO (docs-only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/ai-native/README.md
+  - docs/ai-native/FEATURE_SPECS.md
+  - docs/ai-native/ROADMAP.md (if referenced)
+- Base: main@b808cb6
+
+Next actions:
+
+1. Add missing docs and ensure internal links resolve
+
+### Evidence
+
+**Command**: `ls -la docs/ai-native`
+
+**Output**:
+Contains: `ARCHITECTURE.md`, `SAFETY_GUIDELINES.md`, `README.md`, `FEATURE_SPECS.md`, `ROADMAP.md`
 
 Status updates:
 
