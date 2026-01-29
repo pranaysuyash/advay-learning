@@ -628,5 +628,7 @@ export function Game() {
             </div>
           )}
         </div>
-        );
+      </motion.div>
+    </div>
+  );
 }
