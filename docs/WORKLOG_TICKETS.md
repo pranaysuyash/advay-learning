@@ -808,64 +808,42 @@ Non-goals \(explicitly out of scope\):
 - 2026-01-29 12:40 UTC: Ready for review
 - 2026-01-29 12:45 UTC: All acceptance criteria met
 
-Status updates:
+---
 
-- 2026-01-29 12:30 UTC: Started refactoring plan
-- 2026-01-29 12:45 UTC: Completed successfully
+#### TCK-20260129-004 :: Test Plan for Game Component
 
-Evidence:
+Type: TESTING
+Owner: AI Assistant
+Created: 2026-01-29 13:00 UTC
+Status: **IN_PROGRESS** 🟡
+Priority: P1 (High)
 
-- File Metrics:
-  - LOC: 713
-  - Git commits: 4 total
-  - Top-level declarations: 39
-  - Control flow: 1 try/catch
-  - JSX elements: 42
-  - Comment blocks: 55
-  
-- Threshold Analysis:
-  - LOC trigger: REFACTOR RECOMMENDED (>500 LOC)
-  - Churn trigger: NO REFACTOR NEEDED (4 commits < 5)
-  - Complexity trigger: MIXED (well-organized with comments)
-  - Test pain: NO (current structure is testable)
-  
-- Current State:
-  - All React hooks in correct order
-  - No React Hooks violations
-  - TypeScript compilation passes
-  - ESLint passes
-  - Hand tracking functional
-  - Canvas drawing functional
-  - Gesture tracking functional
-  
-- Verification:
-  - Command: `cd src/frontend && npm run type-check`
-  - Command: `cd src/frontend && npm run lint`
-  - Command: `cd src/frontend && npm run build`
-  - All commands passed successfully
+Description:
+Create comprehensive test plan for Game component using prompts/qa/test-plan-v1.0.md
 
-- Acceptance Criteria:
-  - All React Hooks violations verified as not applicable
-  - ESLint passes with 0 errors
-  - TypeScript compilation passes
-  - Hand tracking still works
-  - Canvas drawing still works
-  - Pinch gesture recognition still works
-  - Smoothing still applied
-  - Refactor plan documented
+Scope:
 
-Risks/notes:
+- Review existing test coverage
+- Identify testing gaps for Game component
+- Create test matrix (unit, integration, E2E)
+- Define manual testing procedures for hand tracking, canvas drawing, gesture recognition
+- Specify test data and edge cases
+- Include camera/MediaPipe specific tests
+- Plan regression testing approach
 
-- NO URGENT REFACTOR NEEDED: Code is functional with correct hook ordering
-- Component is large (713 LOC) but stable (low churn)
-- Full splitting carries high risk without clear benefit
-- Better to focus on P2 features (Parent Dashboard) than risky refactor
-- Proposed gradual extraction approach for future improvements
-- NO Game component tests: Frontend test suite has 0 tests for Game.tsx
-- Test coverage exists for: authStore (17 tests), api service (8 tests), LetterCard (3 tests)
-- WebGL warning `gl_context.cc:1004] OpenGL error checking is disabled` is browser environment warning, NOT code issue
-- WebGL warning does not affect functionality or build success
-- WebGL warning is from ANGLE (Chrome graphics layer) and cannot be "fixed" in code
+Dependencies:
+
+- TCK-20240128-007 (Frontend Tests - DONE)
+
+Acceptance Criteria:
+
+- [ ] Test plan documented in worklog
+- [ ] Test matrix created (unit, integration, E2E)
+- [ ] Manual testing procedures defined
+- [ ] Edge cases and test data specified
+- [ ] Camera/MediaPipe testing approach documented
+- [ ] Regression testing strategy defined
+- [ ] Ready to execute test plan
 
 ---
 
@@ -11058,7 +11036,7 @@ Next Steps:
 
 ---
 
-## TCK-20260129-067 :: UI/UX Improvement Plan - Making the App Magical
+## TCK-20260129-079 :: UI/UX Improvement Plan - Making the App Magical
 
 Type: PLANNING
 Owner: AI Assistant
@@ -11133,7 +11111,7 @@ Execution log:
 - 17:35 IST: Reviewed UX_VISION_SYNTHESIS.md - consolidated priorities
 - 17:40 IST: Created comprehensive improvement plan
 - 17:45 IST: Created UI_UX_IMPROVEMENT_PLAN.md
-- 17:50 IST: Created worklog ticket TCK-20260129-067
+- 17:50 IST: Created worklog ticket TCK-20260129-079
 
 Key Findings:
 
@@ -11187,7 +11165,7 @@ Risks/notes:
 Artifacts:
 
 - `docs/UI_UX_IMPROVEMENT_PLAN.md` - Complete improvement plan
-- This ticket - TCK-20260129-067
+- This ticket - TCK-20260129-079
 
 ---
 
