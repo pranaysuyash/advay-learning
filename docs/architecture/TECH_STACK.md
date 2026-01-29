@@ -3,7 +3,7 @@
 ## Core Technologies
 
 ### Language & Runtime
-- **Python 3.11+**: Modern Python with improved performance and type hints
+- **Python 3.13+**: Modern Python with improved performance and type hints
 - **Type Hints**: Full type annotation for better code quality
 
 ### Package Management

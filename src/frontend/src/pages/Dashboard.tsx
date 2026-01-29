@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useAuthStore, useProfileStore, useSettingsStore, useProgressStore } from '../store';
+import {
+  useAuthStore,
+  useProfileStore,
+  useSettingsStore,
+  useProgressStore,
+} from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 
@@ -24,7 +29,7 @@ export function Dashboard() {
   const settings = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
-  
+
   // Add Child Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [newChildName, setNewChildName] = useState('');
@@ -35,10 +40,10 @@ export function Dashboard() {
   useEffect(() => {
     fetchProfiles();
   }, [fetchProfiles]);
-  
+
   const handleCreateProfile = async () => {
     if (!newChildName.trim()) return;
-    
+
     setIsCreating(true);
     try {
       await createProfile({
@@ -64,25 +69,29 @@ export function Dashboard() {
   const { letterProgress, getMasteredLettersCount } = useProgressStore();
 
   // Transform profiles to include REAL progress data
-  const children: ChildProfile[] = profiles.map(profile => {
+  const children: ChildProfile[] = profiles.map((profile) => {
     const alphabet = getAlphabet(profile.preferred_language || 'english');
     const lang = profile.preferred_language || 'english';
     const langProgress = letterProgress[lang] || [];
-    
+
     // Calculate real stats
     const masteredCount = getMasteredLettersCount(lang);
     const totalLetters = alphabet.letters.length;
-    
+
     // Calculate average accuracy from attempts
-    const attemptsWithAccuracy = langProgress.filter(p => p.attempts > 0);
-    const averageAccuracy = attemptsWithAccuracy.length > 0
-      ? Math.round(attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) / attemptsWithAccuracy.length)
-      : 0;
-    
+    const attemptsWithAccuracy = langProgress.filter((p) => p.attempts > 0);
+    const averageAccuracy =
+      attemptsWithAccuracy.length > 0
+        ? Math.round(
+            attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
+              attemptsWithAccuracy.length,
+          )
+        : 0;
+
     // Estimate time spent (5 minutes per attempt as rough estimate)
     const totalAttempts = langProgress.reduce((sum, p) => sum + p.attempts, 0);
     const estimatedTimeMinutes = totalAttempts * 2; // ~2 minutes per tracing session
-    
+
     return {
       id: profile.id,
       name: profile.name,
@@ -97,42 +106,51 @@ export function Dashboard() {
     };
   });
 
-  const selectedChildData = children.find(c => c.id === selectedChild) || children[0];
+  const selectedChildData =
+    children.find((c) => c.id === selectedChild) || children[0];
 
-  const stats = selectedChildData ? [
-    { 
-      label: 'Letters Learned', 
-      value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`, 
-      icon: '🔤',
-      percent: (selectedChildData.progress.lettersLearned / selectedChildData.progress.totalLetters) * 100
-    },
-    { 
-      label: 'Average Accuracy', 
-      value: `${selectedChildData.progress.averageAccuracy}%`, 
-      icon: '🎯',
-      percent: selectedChildData.progress.averageAccuracy
-    },
-    { 
-      label: 'Time Spent', 
-      value: `${Math.floor(selectedChildData.progress.totalTime / 60)}h ${selectedChildData.progress.totalTime % 60}m`, 
-      icon: '⏱️',
-      percent: Math.min((selectedChildData.progress.totalTime / 300) * 100, 100)
-    },
-    { 
-      label: 'Current Streak', 
-      value: '5 days', 
-      icon: '🔥',
-      percent: 75
-    },
-  ] : [];
+  const stats = selectedChildData
+    ? [
+        {
+          label: 'Letters Learned',
+          value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
+          icon: '🔤',
+          percent:
+            (selectedChildData.progress.lettersLearned /
+              selectedChildData.progress.totalLetters) *
+            100,
+        },
+        {
+          label: 'Average Accuracy',
+          value: `${selectedChildData.progress.averageAccuracy}%`,
+          icon: '🎯',
+          percent: selectedChildData.progress.averageAccuracy,
+        },
+        {
+          label: 'Time Spent',
+          value: `${Math.floor(selectedChildData.progress.totalTime / 60)}h ${selectedChildData.progress.totalTime % 60}m`,
+          icon: '⏱️',
+          percent: Math.min(
+            (selectedChildData.progress.totalTime / 300) * 100,
+            100,
+          ),
+        },
+        {
+          label: 'Current Streak',
+          value: '5 days',
+          icon: '🔥',
+          percent: 75,
+        },
+      ]
+    : [];
 
   const handleExport = async () => {
     setExporting(true);
-    
+
     // Prepare export data
     const exportData = {
       exportDate: new Date().toISOString(),
-      children: children.map(child => ({
+      children: children.map((child) => ({
         name: child.name,
         age: child.age,
         language: child.preferredLanguage,
@@ -141,7 +159,9 @@ export function Dashboard() {
     };
 
     // Create and download file
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -150,28 +170,28 @@ export function Dashboard() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     setExporting(false);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
+        <div className='mb-8 flex justify-between items-start'>
           <div>
-            <h1 className="text-3xl font-bold">Parent Dashboard</h1>
-            <p className="text-white/60 mt-1">
+            <h1 className='text-3xl font-bold'>Parent Dashboard</h1>
+            <p className='text-white/60 mt-1'>
               Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
             </p>
           </div>
           <button
             onClick={handleExport}
             disabled={exporting || children.length === 0}
-            className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition disabled:opacity-50 flex items-center gap-2"
+            className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition disabled:opacity-50 flex items-center gap-2'
           >
             {exporting ? '⏳ Exporting...' : '📥 Export Data'}
           </button>
@@ -179,12 +199,12 @@ export function Dashboard() {
 
         {/* Child Selector */}
         {children.length > 0 && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-white/60 mb-2">
+          <div className='mb-6'>
+            <label className='block text-sm font-medium text-white/60 mb-2'>
               Select Child
             </label>
-            <div className="flex gap-2 flex-wrap">
-              {children.map(child => (
+            <div className='flex gap-2 flex-wrap'>
+              {children.map((child) => (
                 <button
                   key={child.id}
                   onClick={() => setSelectedChild(child.id)}
@@ -203,25 +223,25 @@ export function Dashboard() {
 
         {/* Stats Grid */}
         {selectedChildData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
             {stats.map((stat, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white/5 border border-white/10 rounded-xl p-6"
+                className='bg-white/5 border border-white/10 rounded-xl p-6'
               >
-                <div className="text-3xl mb-2">{stat.icon}</div>
-                <div className="text-3xl font-bold">{stat.value}</div>
-                <div className="text-white/60 mb-3">{stat.label}</div>
+                <div className='text-3xl mb-2'>{stat.icon}</div>
+                <div className='text-3xl font-bold'>{stat.value}</div>
+                <div className='text-white/60 mb-3'>{stat.label}</div>
                 {/* Progress bar */}
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${stat.percent}%` }}
                     transition={{ duration: 0.5, delay: i * 0.1 + 0.3 }}
-                    className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full"
+                    className='h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full'
                   />
                 </div>
               </motion.div>
@@ -231,27 +251,29 @@ export function Dashboard() {
 
         {/* Empty State */}
         {children.length === 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center mb-8">
-            <div className="text-6xl mb-4">👨‍👩‍👧‍👦</div>
-            <h2 className="text-2xl font-semibold mb-2">No Children Added Yet</h2>
-            <p className="text-white/60 mb-6">
+          <div className='bg-white/5 border border-white/10 rounded-xl p-12 text-center mb-8'>
+            <div className='text-6xl mb-4'>👨‍👩‍👧‍👦</div>
+            <h2 className='text-2xl font-semibold mb-2'>
+              No Children Added Yet
+            </h2>
+            <p className='text-white/60 mb-6'>
               Add a child profile to start tracking their learning progress.
             </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition"
+              className='px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition'
             >
               Add Child Profile
             </button>
           </div>
         )}
-        
+
         {/* Add Child Button (when children exist) */}
         {children.length > 0 && (
-          <div className="mb-8 text-center">
+          <div className='mb-8 text-center'>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm"
+              className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm'
             >
               + Add Another Child
             </button>
@@ -260,42 +282,59 @@ export function Dashboard() {
 
         {/* Progress Chart */}
         {selectedChildData && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-4">Learning Progress</h2>
-              <div className="space-y-4">
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
+            <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <h2 className='text-xl font-semibold mb-4'>Learning Progress</h2>
+              <div className='space-y-4'>
                 {(() => {
                   const lang = selectedChildData.preferredLanguage;
                   const langProgress = letterProgress[lang] || [];
                   const alphabet = getAlphabet(lang);
-                  
+
                   // Show first 5 letters with real progress
                   return alphabet.letters.slice(0, 5).map((letter) => {
-                    const letterProg = langProgress.find(p => p.letter === letter.char);
+                    const letterProg = langProgress.find(
+                      (p) => p.letter === letter.char,
+                    );
                     const learned = letterProg?.mastered || false;
                     const accuracy = letterProg?.bestAccuracy || 0;
-                    
+
                     return (
-                      <div key={letter.char} className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
-                          learned ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'
-                        }`}>
+                      <div
+                        key={letter.char}
+                        className='flex items-center gap-4'
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
+                            learned
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'bg-white/10 text-white/40'
+                          }`}
+                        >
                           {letter.char}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm">{letter.name}</span>
-                            <span className="text-sm text-white/60">
-                              {learned 
-                                ? `✓ Mastered (${Math.round(accuracy)}%)` 
-                                : accuracy > 0 
+                        <div className='flex-1'>
+                          <div className='flex justify-between mb-1'>
+                            <span className='text-sm'>{letter.name}</span>
+                            <span className='text-sm text-white/60'>
+                              {learned
+                                ? `✓ Mastered (${Math.round(accuracy)}%)`
+                                : accuracy > 0
                                   ? `○ ${Math.round(accuracy)}% best`
                                   : '○ Not started'}
                             </span>
                           </div>
-                          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full rounded-full transition-all bg-green-500"
+                          <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                accuracy === 100
+                                  ? 'bg-green-500'
+                                  : accuracy >= 70
+                                    ? 'bg-blue-500'
+                                    : accuracy >= 40
+                                      ? 'bg-yellow-500'
+                                      : 'bg-red-500'
+                              }`}
                               style={{ width: `${accuracy}%` }}
                             />
                           </div>
@@ -307,43 +346,52 @@ export function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-              <div className="space-y-3">
+            <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <h2 className='text-xl font-semibold mb-4'>Quick Actions</h2>
+              <div className='space-y-3'>
                 <Link
-                  to="/game"
-                  className="block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center"
+                  to='/game'
+                  state={{ profileId: selectedChildData?.id }}
+                  className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
                 >
                   🎮 Start Learning Game
                 </Link>
                 <Link
-                  to="/settings"
-                  className="block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center"
+                  to='/settings'
+                  className='block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center'
                 >
                   ⚙️ Manage Settings
                 </Link>
                 <button
                   onClick={() => alert('Weekly report feature coming soon!')}
-                  className="block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center"
+                  className='block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center'
                 >
                   📊 View Weekly Report
                 </button>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <h3 className="font-medium mb-2">Current Settings</h3>
-                <div className="space-y-2 text-sm text-white/60">
-                  <div className="flex justify-between">
+              <div className='mt-6 pt-6 border-t border-white/10'>
+                <h3 className='font-medium mb-2'>Current Settings</h3>
+                <div className='space-y-2 text-sm text-white/60'>
+                  <div className='flex justify-between'>
                     <span>Language:</span>
-                    <span className="text-white capitalize">{selectedChildData.preferredLanguage}</span>
+                    <span className='text-white capitalize'>
+                      {selectedChildData.preferredLanguage}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className='flex justify-between'>
                     <span>Difficulty:</span>
-                    <span className="text-white capitalize">{settings.difficulty}</span>
+                    <span className='text-white capitalize'>
+                      {settings.difficulty}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className='flex justify-between'>
                     <span>Time Limit:</span>
-                    <span className="text-white">{settings.timeLimit > 0 ? `${settings.timeLimit} min` : 'No limit'}</span>
+                    <span className='text-white'>
+                      {settings.timeLimit > 0
+                        ? `${settings.timeLimit} min`
+                        : 'No limit'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -353,92 +401,96 @@ export function Dashboard() {
 
         {/* Letter Journey */}
         {selectedChildData && (
-          <div className="mb-8">
-            <LetterJourney 
-              language={selectedChildData.preferredLanguage}
-            />
+          <div className='mb-8'>
+            <LetterJourney language={selectedChildData.preferredLanguage} />
           </div>
         )}
 
         {/* Tips Section */}
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-3 text-blue-400">💡 Learning Tips</h2>
-          <ul className="space-y-2 text-white/70 text-sm">
+        <div className='bg-blue-500/10 border border-blue-500/20 rounded-xl p-6'>
+          <h2 className='text-lg font-semibold mb-3 text-blue-400'>
+            💡 Learning Tips
+          </h2>
+          <ul className='space-y-2 text-white/70 text-sm'>
             <li>• Encourage your child to practice for 10-15 minutes daily</li>
             <li>• Celebrate achievements to keep motivation high</li>
             <li>• Use the tracing game to improve handwriting skills</li>
             <li>• Switch languages to build multilingual skills</li>
           </ul>
         </div>
-        
+
         {/* Add Child Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full"
+              className='bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full'
             >
-              <h2 className="text-2xl font-bold mb-4">Add Child Profile</h2>
-              
-              <div className="space-y-4">
+              <h2 className='text-2xl font-bold mb-4'>Add Child Profile</h2>
+
+              <div className='space-y-4'>
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className='block text-sm font-medium text-white/80 mb-2'>
                     Child's Name *
                   </label>
                   <input
-                    type="text"
+                    type='text'
                     value={newChildName}
                     onChange={(e) => setNewChildName(e.target.value)}
-                    placeholder="Enter name"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition"
+                    placeholder='Enter name'
+                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                     autoFocus
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className='block text-sm font-medium text-white/80 mb-2'>
                     Age
                   </label>
                   <input
-                    type="number"
+                    type='number'
                     min={2}
                     max={12}
                     value={newChildAge}
-                    onChange={(e) => setNewChildAge(parseInt(e.target.value) || 5)}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition"
+                    onChange={(e) =>
+                      setNewChildAge(parseInt(e.target.value) || 5)
+                    }
+                    placeholder='Enter age (2-12)'
+                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className='block text-sm font-medium text-white/80 mb-2'>
                     Preferred Language
                   </label>
                   <select
                     value={newChildLanguage}
                     onChange={(e) => setNewChildLanguage(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition"
+                    aria-label='Preferred Language'
+                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                   >
-                    <option value="english">English</option>
-                    <option value="hindi">Hindi (हिन्दी)</option>
-                    <option value="kannada">Kannada (ಕನ್ನಡ)</option>
-                    <option value="telugu">Telugu (తెలుగు)</option>
-                    <option value="tamil">Tamil (தமிழ்)</option>
+                    <option value='english'>English</option>
+                    <option value='hindi'>Hindi (हिन्दी)</option>
+                    <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
+                    <option value='telugu'>Telugu (తెలుగు)</option>
+                    <option value='tamil'>Tamil (தமிழ்)</option>
                   </select>
                 </div>
               </div>
-              
-              <div className="flex gap-3 mt-6">
+
+              <div className='flex gap-3 mt-6'>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition"
+                  className='flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition'
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateProfile}
                   disabled={!newChildName.trim() || isCreating}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {isCreating ? 'Creating...' : 'Add Child'}
                 </button>

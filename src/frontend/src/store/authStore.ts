@@ -1,50 +1,52 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authApi, userApi } from '../services/api';
+import { authApi } from '../services/api';
 
 interface User {
   id: string;
   email: string;
   role: string;
   is_active: boolean;
+  email_verified?: boolean;
 }
 
 interface AuthState {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   clearError: () => void;
+  checkAuth: () => Promise<void>;
 }
 
 // Helper to extract error message from various error formats
 function getErrorMessage(error: any): string {
   if (!error.response?.data) return 'An error occurred';
-  
+
   const data = error.response.data;
-  
+
   // Simple string detail
   if (typeof data.detail === 'string') return data.detail;
-  
+
   // Array of validation errors
   if (Array.isArray(data.detail)) {
-    return data.detail.map((err: any) => err.msg || err.message || 'Invalid input').join(', ');
+    return data.detail
+      .map((err: any) => err.msg || err.message || 'Invalid input')
+      .join(', ');
   }
-  
+
   // Object with msg
   if (data.msg) return data.msg;
-  
+
   // Object with message
   if (data.message) return data.message;
-  
+
   return 'An error occurred';
 }
 
@@ -52,8 +54,6 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -61,26 +61,22 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authApi.login(email, password);
-          const { access_token, refresh_token } = response.data;
-          
-          // Store tokens
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
-          
+          await authApi.login(email, password);
+
+          // Tokens are now stored in httpOnly cookies by the backend
+          // We just need to update the auth state
           set({
-            accessToken: access_token,
-            refreshToken: refresh_token,
             isAuthenticated: true,
             isLoading: false,
           });
-          
+
           // Fetch user data
           await get().fetchUser();
         } catch (error: any) {
           set({
             error: getErrorMessage(error),
             isLoading: false,
+            isAuthenticated: false,
           });
           throw error;
         }
@@ -90,8 +86,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           await authApi.register(email, password);
-          // Auto-login after registration
-          await get().login(email, password);
+          // Don't auto-login after registration - user needs to verify email first
+          set({
+            isLoading: false,
+            error: null,
+          });
         } catch (error: any) {
           set({
             error: getErrorMessage(error),
@@ -101,13 +100,17 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+      logout: async () => {
+        try {
+          // Call logout endpoint to clear cookies on server
+          await authApi.logout();
+        } catch (error) {
+          // Ignore errors, still clear local state
+          console.error('Logout error:', error);
+        }
+
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
           error: null,
         });
@@ -115,11 +118,25 @@ export const useAuthStore = create<AuthState>()(
 
       fetchUser: async () => {
         try {
-          const response = await userApi.getMe();
+          const response = await authApi.getMe();
           set({ user: response.data });
         } catch (error: any) {
-          // If fetching user fails, logout
-          get().logout();
+          // If fetching user fails, clear auth state
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+        }
+      },
+
+      checkAuth: async () => {
+        // Check if user is authenticated by trying to fetch user data
+        // Cookies are automatically sent with the request
+        try {
+          await get().fetchUser();
+          set({ isAuthenticated: true });
+        } catch (error) {
+          set({ isAuthenticated: false });
         }
       },
 
@@ -127,6 +144,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      // Only persist user data and auth state, NOT tokens
+      // Tokens are in httpOnly cookies
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
@@ -136,6 +155,6 @@ export const useAuthStore = create<AuthState>()(
           state.isLoading = false;
         }
       },
-    }
-  )
+    },
+  ),
 );

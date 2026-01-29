@@ -20,6 +20,8 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Generic UI review (artifact-based): `prompts/ui/generic-ui-reviewer-v1.0.md`
 - UI change spec writer: `prompts/ui/ui-change-spec-v1.0.md`
 - Single UI file audit: `prompts/ui/ui-file-audit-v1.0.md`
+- Child-centered UX audit (learning expert lens): `prompts/ui/child-centered-ux-audit-v1.0.md`
+- Kids playtest protocol (lightweight): `prompts/ui/kids-playtest-protocol-v1.0.md`
 
 ### Engineering (Dev)
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
@@ -27,7 +29,9 @@ This folder contains the reusable prompts that govern how agents work on this re
 - **Implementation planning (before coding)**: `prompts/planning/implementation-planning-v1.0.md`
 - Implement a feature slice (non-audit): `prompts/implementation/feature-implementation-v1.0.md`
 - Hardening (one scope): `prompts/hardening/hardening-v1.1.md`
+- React best practices (Vercel-aligned): `prompts/hardening/react-best-practices-v1.0.md`
 - Generalized hardening (local review, no PR): `prompts/hardening/generalized-implementer-v1.0.md`
+- Generalized code review + audit (report-only): `prompts/review/generalized-code-review-audit-v1.0.md`
 - PR review: `prompts/review/pr-review-v1.6.1.md`
 - Verify remediation: `prompts/verification/verification-v1.2.md`
 - Merge conflicts: `prompts/merge/merge-conflict-v1.2.md`
@@ -66,6 +70,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 ### Curriculum / Content
 - Learning module spec: `prompts/content/learning-module-spec-v1.0.md`
+- Kids microcopy & feedback pass: `prompts/content/kids-microcopy-and-feedback-v1.0.md`
 
 ## Workflow / Tracking
 
@@ -88,8 +93,15 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Tech debt handling (no “preexisting” excuses): `prompts/workflow/tech-debt-handling-v1.0.md`
 - Ownership policy: `docs/process/OWNERSHIP_POLICY.md`
 - Prompt curation (external → repo-native): `prompts/workflow/prompt-library-curation-v1.0.md`
+- Vercel React guidance → repo prompt curation: `prompts/workflow/vercel-react-best-practices-curation-v1.0.md`
 - Prompt quality gate (rubric + test cases): `prompts/workflow/prompt-quality-gate-v1.0.md`
 - Prompt style guide: `docs/process/PROMPT_STYLE_GUIDE.md`
+- Command toolkit (rg-first): `docs/process/COMMANDS.md`
+- Refactor thresholds (when to refactor): `prompts/workflow/refactor-thresholds-v1.0.md`
+- PR/merge quality gate (approve/request changes): `prompts/workflow/pr-merge-quality-gate-v1.0.md`
+- Bot comments resolution (checks + waivers): `prompts/workflow/bot-comments-resolution-v1.0.md`
+- Post-merge branch cleanup (delete safely): `prompts/workflow/post-merge-branch-cleanup-v1.0.md`
+- Pause/reassess/consolidate (stop reactive changes): `prompts/workflow/pause-reassess-consolidate-v1.0.md`
 - Out-of-scope → next audit queue: `prompts/triage/out-of-scope-v1.0.md`
   - Appends to: `docs/AUDIT_BACKLOG.md`
 - Generalized triage (local review, no PR): `prompts/triage/generalized-triage-v1.0.md`

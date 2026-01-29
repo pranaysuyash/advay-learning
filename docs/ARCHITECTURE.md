@@ -50,7 +50,7 @@
 
 ### Backend (`src/backend/`)
 
-**Technology**: Python 3.11+ + FastAPI
+**Technology**: Python 3.13+ + FastAPI
 
 **Key Components**:
 - FastAPI for REST API

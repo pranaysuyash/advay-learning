@@ -26,7 +26,7 @@ Build: Local-only, no server needed
 
 ### Option C: Python Desktop
 ```
-Language: Python 3.11+
+Language: Python 3.13+
 UI: PyQt6
 Vision: MediaPipe Python + OpenCV
 Storage: SQLite

@@ -128,3 +128,103 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 
 ---
 
+
+---
+
+## NEW QUESTIONS FROM SECURITY IMPLEMENTATION (2026-01-29)
+
+### Q-002: Email Service Provider for Production
+**Status**: OPEN 🔵  
+**Created**: 2026-01-29  
+**Tags**: #email #production #infrastructure #security
+
+**Question**:
+What email service should we use for production email delivery (verification, password reset)?
+
+**Current State**:
+- Currently using console logging for emails (development only)
+- Need real email delivery for production
+
+**Options Considered**:
+
+| Service | Cost | Pros | Cons |
+|---------|------|------|------|
+| SendGrid | Free tier: 100/day | Good deliverability, well-documented | Requires API key management |
+| AWS SES | Pay per use (~$0.10/1000) | Very cheap, reliable | AWS account required, complex setup |
+| Mailgun | Free tier: 5000/month | Good for startups | Can be expensive at scale |
+| SMTP (self-hosted) | Free | Full control | Deliverability issues, maintenance |
+
+**Decision Needed**:
+1. Which service for production?
+2. How to handle API keys/secrets?
+3. Email template design/branding?
+4. Rate limiting on email sends?
+
+**Related**: SECURITY-HIGH-002, SECURITY-HIGH-003
+
+---
+
+### Q-003: Password Policy Strictness
+**Status**: ✅ DECIDED & IMPLEMENTED  
+**Created**: 2026-01-29  
+**Updated**: 2026-01-29  
+**Tags**: #security #passwords #ux
+
+**Question**:
+How strict should our password requirements be for a kids' learning app?
+
+**Decision**:
+**Moderate Policy** - 8+ characters, requiring at least one uppercase letter, one lowercase letter, and one digit.
+
+**Rationale**:
+- This is a PARENT account (not kid account) - parents need reasonable security
+- Parents may reuse passwords from other sites - complexity helps protect against breaches
+- Balance: Not too strict (causes frustration) but not too loose (security risk)
+- Kids apps are targets for account takeovers - moderate complexity provides baseline protection
+- No special characters required (reduces friction for parents)
+
+**Implementation**:
+- ✅ Backend validation in `UserCreate` schema (`src/backend/app/schemas/user.py`)
+- ✅ Error messages guide users to fix weak passwords
+- ✅ All tests updated with strong passwords
+- ⏳ Frontend password strength indicator (future enhancement)
+
+**Related**: SECURITY-HIGH-005 ✅ COMPLETE
+
+---
+
+### Q-004: Session Timeout Duration
+**Status**: OPEN 🔵  
+**Created**: 2026-01-29  
+**Tags**: #security #sessions #ux
+
+**Question**:
+What should our session timeout be for parent accounts?
+
+**Current Settings**:
+- Access token: 15 minutes
+- Refresh token: 7 days
+- No idle timeout detection
+
+**Considerations**:
+- Parents may step away from computer
+- Kids might use parent's device
+- Banking apps: 5-15 minutes
+- Social media: weeks/months
+- This is NOT financial data, but IS child data
+
+**Options**:
+1. **Short** (15 min access, 1 day refresh) - More secure, more login friction
+2. **Medium** (15 min access, 7 day refresh) - Current, balanced
+3. **Long** (1 hour access, 30 day refresh) - Less friction, less secure
+4. **Adaptive** (shorter on shared devices, longer on trusted) - Complex
+
+**Decision Needed**:
+- Keep current or change?
+- Add idle detection (auto-logout after inactivity)?
+- "Remember this device" option?
+
+**Related**: SECURITY-HIGH-004
+
+---
+

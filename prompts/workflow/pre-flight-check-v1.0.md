@@ -35,6 +35,29 @@ If you see:
 
 ---
 
+## Step 1.5 — Required Repo Discovery (rg-first)
+
+Run:
+```bash
+rg -n "TODO|FIXME|HACK" -S src docs prompts || true
+find docs -maxdepth 2 -type f -name '*.md' | sort
+find prompts -maxdepth 3 -type f -name '*.md' | sort
+```
+
+If the work is feature-specific, add a focused search:
+```bash
+rg -n "<keyword>" -S src
+```
+
+If you discover suspicious duplicates (`*_v2`, `*_new`, `*copy*`), run:
+```bash
+find src -maxdepth 8 -type f \\( -name '*_v2.*' -o -name '*_new.*' -o -name '*copy*' -o -name '*backup*' -o -name '*old*' \\)
+```
+
+Reference: `docs/process/COMMANDS.md`
+
+---
+
 ## Step 2 — Scope Contract (Required)
 Capture (one scope only):
 - In-scope:

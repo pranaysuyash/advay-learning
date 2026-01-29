@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Python**: 3.11 or higher
+- **Python**: 3.13 or higher
 - **Node.js**: 18 or higher
 - **uv**: Python package manager
 - **Git**: Version control
@@ -42,7 +42,7 @@ cp .env.example .env
 # Generate secret key: openssl rand -hex 32
 
 # Run server
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8001
 ```
 
 ## Frontend Setup
@@ -62,8 +62,8 @@ npm run dev
 
 ## Verify Installation
 
-- Backend: http://localhost:8000/health
-- API Docs: http://localhost:8000/docs
+- Backend: http://localhost:8001/health
+- API Docs: http://localhost:8001/docs
 - Frontend: http://localhost:5173
 
 ## Running Tests

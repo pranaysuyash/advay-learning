@@ -9,7 +9,9 @@
 ## Discovery Appendix
 
 ### File Tracking and Context
+
 **Commands Executed:**
+
 ```bash
 git rev-parse --is-inside-work-tree
 # Output: true
@@ -22,20 +24,25 @@ git status --porcelain -- src/frontend/src/App.tsx
 ```
 
 ### Git History Discovery
+
 **Commands Executed:**
+
 ```bash
 git log -n 20 --follow -- src/frontend/src/App.tsx
 # Output: Single commit - ffff5919097a30f1876a5cfa0beedd1d78f9fd69 (Initial commit)
 ```
 
 ### Inbound and Outbound Reference Discovery
+
 **Outbound Dependencies (Observed):**
+
 - `react-router-dom`: Routes, Route
 - `./components/ui/Layout`: Layout component
 - `./components/ui/ProtectedRoute`: ProtectedRoute component
 - `./pages/*`: All page components (Home, Login, Register, Dashboard, Game, Progress, Settings)
 
 **Inbound References (Observed):**
+
 ```bash
 rg -n "from.*App" src/frontend/src/
 # Output:
@@ -43,13 +50,16 @@ rg -n "from.*App" src/frontend/src/
 ```
 
 ### Test Discovery
+
 **Commands Executed:**
+
 ```bash
 find tests -name "*.ts" -o -name "*.tsx" | xargs grep -l "App" 2>/dev/null || echo "No test files found"
 # Output: No test files found importing App
 ```
 
 ## UI_FILE_AUDIT_RESULT=
+
 ```json
 {
   "meta": {
@@ -113,7 +123,9 @@ find tests -name "*.ts" -o -name "*.tsx" | xargs grep -l "App" 2>/dev/null || ec
           "tradeoffs": "Requires creating or importing ErrorBoundary component"
         }
       ],
-      "validation": ["Navigate to invalid route, verify error boundary catches and displays fallback UI"]
+      "validation": [
+        "Navigate to invalid route, verify error boundary catches and displays fallback UI"
+      ]
     },
     {
       "id": "UIF-002",
@@ -149,7 +161,9 @@ find tests -name "*.ts" -o -name "*.tsx" | xargs grep -l "App" 2>/dev/null || ec
           "tradeoffs": "Adds minor complexity but improves maintainability"
         }
       ],
-      "validation": ["Verify route constants are used consistently across navigation components"]
+      "validation": [
+        "Verify route constants are used consistently across navigation components"
+      ]
     },
     {
       "id": "UIF-004",
@@ -209,10 +223,11 @@ find tests -name "*.ts" -o -name "*.tsx" | xargs grep -l "App" 2>/dev/null || ec
 ## Human Explanation
 
 **Top Issues Identified:**
+
 1. **P1 Error Boundary Missing**: Route failures will crash the entire app instead of showing user-friendly errors
-2. **P2 No 404 Route**: Invalid URLs show blank pages instead of helpful 404 pages  
+2. **P2 No 404 Route**: Invalid URLs show blank pages instead of helpful 404 pages
 3. **P2 Hard-coded Routes**: Route path changes require updating multiple locations
 
 **Safest Fix Path:**
 Start with the error boundary (P1) as it prevents app crashes, then add 404 route (P2) for better UX, followed by route constants (P2) for maintainability. These are all low-risk changes that significantly improve reliability and user experience.</content>
-<parameter name="filePath">/Users/pranay/Projects/learning_for_kids/docs/audit/ui__src__frontend__src__App.tsx.md
+<parameter name="filePath">/Users/pranay/Projects/learning_for_kids/docs/audit/ui**src**frontend**src**App.tsx.md

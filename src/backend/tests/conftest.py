@@ -1,12 +1,14 @@
-import pytest
 import asyncio
 import os
 from typing import AsyncGenerator, Generator
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from httpx import AsyncClient, ASGITransport
+
+import pytest
 
 # Load test environment before any app imports
 from dotenv import load_dotenv
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env.test'))
 
 # Set testing environment
@@ -70,9 +72,9 @@ async def test_user(client: AsyncClient) -> dict:
     """Create a test user and return credentials."""
     user_data = {
         "email": "test@example.com",
-        "password": "testpassword123"
+        "password": "TestPassword123"
     }
-    
+
     # Register user
     response = await client.post("/api/v1/auth/register", json=user_data)
     if response.status_code == 200:
@@ -81,14 +83,13 @@ async def test_user(client: AsyncClient) -> dict:
         # We'll use the resend endpoint to get a new token
         from app.db.session import async_session
         from app.services.user_service import UserService
-        from app.core.email import EmailService
-        
+
         async with async_session() as session:
             user = await UserService.get_by_email(session, user_data["email"])
             if user and not user.email_verified:
                 # Manually verify for testing
                 await UserService.verify_email(session, user)
-    
+
     return user_data
 
 
@@ -103,7 +104,7 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
         }
     )
     assert response.status_code == 200
-    
+
     # Extract token from cookies
     cookies = response.cookies
     access_token = cookies.get("access_token")
@@ -111,7 +112,7 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
         # Fallback: try to get from response body if not in cookies
         # This shouldn't happen with cookie-based auth, but for backward compatibility
         access_token = response.json().get("access_token")
-    
+
     return access_token
 
 

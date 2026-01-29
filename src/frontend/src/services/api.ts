@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8001';
 const API_VERSION = (import.meta as any).env?.VITE_API_VERSION || 'v1';
 
 export const API_URL = `${API_BASE_URL}/api/${API_VERSION}`;
@@ -12,48 +12,28 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+  withCredentials: true, // IMPORTANT: Send cookies with cross-origin requests
 });
 
-// Request interceptor - add auth token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor - handle errors
+// Response interceptor - handle errors and token refresh
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config;
     
     if (error.response?.status === 401 && originalRequest) {
-      // Token expired, try to refresh
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
-          const { access_token, refresh_token } = response.data;
-          
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
-          
-          // Retry original request
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, logout
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-        }
+      // Token expired, try to refresh using cookie
+      try {
+        // The refresh endpoint reads refresh_token from cookie and sets new cookies
+        await axios.post(`${API_URL}/auth/refresh`, {}, {
+          withCredentials: true,
+        });
+        
+        // Retry original request (cookies automatically included)
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);
@@ -71,8 +51,29 @@ export const authApi = {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }),
   
-  refresh: (refreshToken: string) =>
-    apiClient.post('/auth/refresh', { refresh_token: refreshToken }),
+  logout: () =>
+    apiClient.post('/auth/logout'),
+  
+  refresh: () =>
+    // Refresh token is automatically sent via cookie
+    apiClient.post('/auth/refresh'),
+  
+  verifyEmail: (token: string) =>
+    apiClient.post('/auth/verify-email', null, { params: { token } }),
+  
+  resendVerification: (email: string) =>
+    apiClient.post('/auth/resend-verification', null, { params: { email } }),
+  
+  forgotPassword: (email: string) =>
+    apiClient.post('/auth/forgot-password', null, { params: { email } }),
+  
+  resetPassword: (token: string, newPassword: string) =>
+    apiClient.post('/auth/reset-password', null, { 
+      params: { token, new_password: newPassword } 
+    }),
+  
+  getMe: () =>
+    apiClient.get('/auth/me'),
 };
 
 // User API
@@ -98,7 +99,7 @@ export const progressApi = {
     content_id: string;
     score: number;
     duration_seconds?: number;
-    metadata?: Record<string, any>;
+    meta_data?: Record<string, any>;
   }) => apiClient.post('/progress/', data, { params: { profile_id: profileId } }),
   getStats: (profileId: string) =>
     apiClient.get('/progress/stats', { params: { profile_id: profileId } }),

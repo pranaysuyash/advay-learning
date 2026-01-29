@@ -4,7 +4,7 @@
 
 - Node.js 18+ 
 - npm or yarn
-- Python 3.11+ (for backend)
+- Python 3.13+ (for backend)
 - uv (Python package manager) - `pip install uv`
 - Modern browser with WebGL support
 
@@ -21,7 +21,7 @@ uv sync
 
 # Run backend server (use port 8001 if 8000 is taken)
 cd src/backend
-uv run uvicorn app.main:app --reload --port 8001
+uv run python -m uvicorn app.main:app --reload --port 8001
 ```
 
 Backend API will be at: http://localhost:8001
@@ -92,7 +92,7 @@ npm run test
 cd src/backend
 
 # Run with auto-reload (change port if needed)
-uv run uvicorn app.main:app --reload --port 8001
+uv run python -m uvicorn app.main:app --reload --port 8001
 
 # Run database migrations
 uv run alembic upgrade head
@@ -128,7 +128,7 @@ src/
 ## Troubleshooting
 
 ### Backend won't start
-- Check Python 3.11+ is installed
+- Check Python 3.13+ is installed
 - Ensure uv is installed: `pip install uv`
 - Run `uv sync` from **project root** (not src/backend)
 - Try a different port: `--port 8001` or `--port 8002`

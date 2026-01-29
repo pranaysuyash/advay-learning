@@ -162,6 +162,7 @@ For M1 (MEDIUM) - Make engine creation import-safe
 
 - Where: `src/backend/app/db/session.py`
 - What: Replace top-level `engine = create_async_engine(...)` with lazy accessor pattern:
+
   ```py
   _engine = None
   def get_engine():
@@ -170,6 +171,7 @@ For M1 (MEDIUM) - Make engine creation import-safe
           _engine = create_async_engine(settings.DATABASE_URL, echo=settings.DEBUG)
       return _engine
   ```
+
   And create `get_session_factory()` that uses the engine.
 - Why: Avoid import-time crashes and allow tests or scripts to prepare environment before the engine is created.
 - Failure it prevents: Test/CI import errors on missing `DATABASE_URL`; startup crashes when environment not prepared.

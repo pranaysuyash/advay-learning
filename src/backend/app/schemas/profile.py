@@ -1,16 +1,40 @@
 """Profile schemas."""
 
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from app.core.validation import validate_age, validate_language_code, ValidationError
 
 
 class ProfileBase(BaseModel):
     """Base profile schema."""
     name: str
     age: Optional[int] = None
-    preferred_language: str = "english"
+    preferred_language: str = "en"
     settings: Dict[str, Any] = {}
+    
+    @field_validator('age')
+    @classmethod
+    def validate_age_range(cls, v: Optional[int]) -> Optional[int]:
+        """Validate age is between 0 and 18."""
+        if v is not None:
+            try:
+                validate_age(v)
+            except ValidationError as e:
+                raise ValueError(str(e))
+        return v
+    
+    @field_validator('preferred_language')
+    @classmethod
+    def validate_language(cls, v: str) -> str:
+        """Validate language code is supported."""
+        try:
+            validate_language_code(v)
+        except ValidationError as e:
+            raise ValueError(str(e))
+        return v
 
 
 class ProfileCreate(ProfileBase):
@@ -29,7 +53,7 @@ class ProfileUpdate(BaseModel):
 class Profile(ProfileBase):
     """Profile response schema."""
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     parent_id: str
     created_at: datetime

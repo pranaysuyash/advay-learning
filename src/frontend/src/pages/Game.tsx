@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE } from '../store';
-// import { progressApi } from '../services/api'; // TODO: Enable when profile ID available
+import { Mascot } from '../components/Mascot';
+import { progressApi } from '../services/api';
 
 interface Point {
   x: number;
@@ -18,9 +20,18 @@ interface GameStats {
 }
 
 export function Game() {
+  const location = useLocation();
   const settings = useSettingsStore();
   const { user } = useAuthStore();
   const { markLetterAttempt, getUnlockedBatches, addBadge } = useProgressStore();
+
+  // Get profile ID from route state (passed from Dashboard)
+  const profileId = location.state?.profileId as string | undefined;
+
+  // Redirect to dashboard if no profile selected
+  if (!profileId) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -36,10 +47,10 @@ export function Game() {
   const [streak, setStreak] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(0);
   const [, setSessionStats] = useState<GameStats>({ accuracy: 0, timeSpent: 0, streak: 0 });
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
-  
+
   // Get letters based on selected language and difficulty
   const LETTERS: Letter[] = getLettersForGame(settings.language, settings.difficulty);
   const currentLetter = LETTERS[currentLetterIndex];
@@ -80,13 +91,13 @@ export function Game() {
   // Smooth points using moving average
   const smoothPoints = useCallback((points: Point[]): Point[] => {
     if (points.length < 3) return points;
-    
+
     const smoothed: Point[] = [];
     const windowSize = 3; // Average over 3 points
-    
+
     for (let i = 0; i < points.length; i++) {
       let sumX = 0, sumY = 0, count = 0;
-      
+
       // Average over window centered at current point
       for (let j = -Math.floor(windowSize / 2); j <= Math.floor(windowSize / 2); j++) {
         const idx = i + j;
@@ -96,27 +107,27 @@ export function Game() {
           count++;
         }
       }
-      
+
       smoothed.push({
         x: sumX / count,
         y: sumY / count
       });
     }
-    
+
     return smoothed;
   }, []);
 
   // Calculate tracing accuracy
   const calculateAccuracy = useCallback((points: Point[]): number => {
     if (points.length < 10) return 0;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return 0;
-    
+
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const letterRadius = Math.min(canvas.width, canvas.height) * 0.25;
-    
+
     // Check how many points are within the letter area
     const pointsInArea = points.filter(point => {
       const px = point.x * canvas.width;
@@ -124,36 +135,40 @@ export function Game() {
       const distance = Math.sqrt(Math.pow(px - centerX, 2) + Math.pow(py - centerY, 2));
       return distance < letterRadius;
     });
-    
+
     // Calculate coverage (how much of the letter area was traced)
     const coverage = pointsInArea.length / points.length;
-    
+
     // Calculate density (points per area)
     const density = Math.min(points.length / 100, 1);
-    
+
     // Combined score (0-100)
     const accuracy = Math.round((coverage * 0.6 + density * 0.4) * 100);
-    
+
     return Math.min(accuracy, 100);
   }, []);
 
   // Save progress to backend
   const saveProgress = useCallback(async (letterAccuracy: number) => {
-    if (!user) return;
-    
+    if (!user || !profileId) return;
+
     const timeSpent = Math.round((Date.now() - startTime) / 1000);
-    
+
     try {
-      // Note: This would need a profile ID in production
-      // For now, we'll just log it
-      console.log('Saving progress:', {
-        letter: currentLetter.char,
-        language: settings.language,
-        accuracy: letterAccuracy,
-        timeSpent,
-        score: score + (letterAccuracy > 70 ? 10 : 5),
+      // Save to backend API
+      await progressApi.saveProgress(profileId, {
+        activity_type: 'letter_tracing',
+        content_id: currentLetter.char,
+        score: letterAccuracy,
+        duration_seconds: timeSpent,
+        meta_data: {
+          language: settings.language,
+          difficulty: settings.difficulty,
+          streak: streak,
+          points_earned: letterAccuracy > 70 ? 10 : 5,
+        },
       });
-      
+
       // Update session stats
       setSessionStats(prev => ({
         accuracy: Math.round((prev.accuracy * prev.streak + letterAccuracy) / (prev.streak + 1)),
@@ -162,8 +177,9 @@ export function Game() {
       }));
     } catch (error) {
       console.error('Failed to save progress:', error);
+      // Don't block the game if saving fails - will retry next time
     }
-  }, [user, currentLetter, settings.language, score, startTime]);
+  }, [user, profileId, currentLetter, settings.language, score, startTime, streak]);
 
   // Drawing loop
   const detectAndDraw = useCallback(() => {
@@ -192,7 +208,7 @@ export function Game() {
       return;
     }
     lastVideoTimeRef.current = video.currentTime;
-    
+
     // Skip frames to reduce lag (process every 2nd frame = 30fps instead of 60fps)
     frameSkipRef.current++;
     if (frameSkipRef.current % 2 !== 0) {
@@ -212,7 +228,7 @@ export function Game() {
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw hint outline if enabled (drawn normally - not mirrored)
     if (settings.showHints) {
       ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.6}px sans-serif`;
@@ -220,7 +236,7 @@ export function Game() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(currentLetter.char, canvas.width / 2, canvas.height / 2);
-      
+
       // Draw tracing guide circle
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.25, 0, 2 * Math.PI);
@@ -232,10 +248,10 @@ export function Game() {
     // Draw drawn points (with smoothing)
     if (drawnPointsRef.current.length > 0) {
       // Apply smoothing for better visual quality
-      const pointsToDraw = drawnPointsRef.current.length > 3 
+      const pointsToDraw = drawnPointsRef.current.length > 3
         ? smoothPoints(drawnPointsRef.current)
         : drawnPointsRef.current;
-      
+
       ctx.beginPath();
       ctx.strokeStyle = currentLetter.color;
       ctx.lineWidth = 12;
@@ -243,7 +259,7 @@ export function Game() {
       ctx.lineJoin = 'round';
       ctx.shadowColor = currentLetter.color;
       ctx.shadowBlur = 10;
-      
+
       pointsToDraw.forEach((point, index) => {
         if (index === 0) {
           ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
@@ -260,17 +276,17 @@ export function Game() {
       const landmarks = results.landmarks[0];
       const indexTip = landmarks[8];
       const thumbTip = landmarks[4];
-      
+
       // Pinch detection: thumb (4) and index (8) distance
       const pinchDistance = Math.sqrt(
         Math.pow(thumbTip.x - indexTip.x, 2) +
         Math.pow(thumbTip.y - indexTip.y, 2)
       );
-      
+
       // Hysteresis: start pinch < 0.05, release pinch > 0.08
       const PINCH_START_THRESHOLD = 0.05;
       const PINCH_RELEASE_THRESHOLD = 0.08;
-      
+
       if (!isPinching && pinchDistance < PINCH_START_THRESHOLD) {
         setIsPinching(true);
         setIsDrawing(true);
@@ -278,13 +294,13 @@ export function Game() {
         setIsPinching(false);
         setIsDrawing(false);
       }
-      
+
       // IMPORTANT: MediaPipe x coordinates are normalized [0,1] where 0 is left, 1 is right
       // Since the webcam is mirrored with CSS, we need to mirror the x coordinate
       // so the cursor appears where the user expects it
       const displayX = 1 - indexTip.x;
       const displayY = indexTip.y;
-      
+
       // Draw cursor with glow (larger and brighter when pinching)
       ctx.beginPath();
       const cursorRadius = isPinching ? 15 : 12;
@@ -358,34 +374,34 @@ export function Game() {
   const checkProgress = () => {
     const letterAccuracy = calculateAccuracy(drawnPointsRef.current);
     setAccuracy(letterAccuracy);
-    
+
     // Difficulty affects accuracy thresholds
     const goodThreshold = settings.difficulty === 'easy' ? 60 : settings.difficulty === 'medium' ? 70 : 80;
     const okThreshold = settings.difficulty === 'easy' ? 30 : settings.difficulty === 'medium' ? 40 : 50;
-    
+
     // Track progress for adaptive unlock system
     const previousBatches = getUnlockedBatches(settings.language);
     markLetterAttempt(settings.language, currentLetter.char, letterAccuracy);
     const currentBatches = getUnlockedBatches(settings.language);
-    
+
     // Check if new batch was unlocked
     const newBatchUnlocked = currentBatches > previousBatches;
-    
+
     if (letterAccuracy >= goodThreshold) {
       // Good tracing
       const points = letterAccuracy > 90 ? 20 : letterAccuracy > 80 ? 15 : 10;
       setScore((prev) => prev + points);
       setStreak((prev) => prev + 1);
-      
+
       if (newBatchUnlocked) {
         setFeedback(`🎉 Amazing! New letters unlocked! +${points} points`);
         addBadge(`batch-${currentBatches}`);
       } else {
         setFeedback(`Great job! ${letterAccuracy}% accuracy! 🎉 +${points} points`);
       }
-      
+
       saveProgress(letterAccuracy);
-      
+
       // Auto advance after delay
       setTimeout(() => {
         nextLetter();
@@ -402,7 +418,7 @@ export function Game() {
       setStreak(0);
       setFeedback(`Try again! ${letterAccuracy}% - Trace the letter more carefully ✏️`);
     }
-    
+
     setTimeout(() => {
       if (letterAccuracy < 70) {
         setFeedback('');
@@ -475,7 +491,7 @@ export function Game() {
                 animate={{ width: `${accuracy}%` }}
                 transition={{ duration: 0.5 }}
                 className="h-full rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: accuracy >= 70 ? '#10b981' : accuracy >= 40 ? '#f59e0b' : '#ef4444'
                 }}
               />
@@ -488,117 +504,129 @@ export function Game() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-              feedback.includes('Great') 
-                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                : feedback.includes('Good')
+            className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback.includes('Great')
+              ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+              : feedback.includes('Good')
                 ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
                 : 'bg-red-500/20 border border-red-500/30 text-red-400'
-            }`}
+              }`}
           >
             {feedback}
           </motion.div>
         )}
 
-        {!isPlaying ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <div className="text-6xl mb-4">✋</div>
-            <h2 className="text-2xl font-semibold mb-4">Ready to Learn?</h2>
-            <p className="text-white/70 mb-4 max-w-md mx-auto">
-              Use your hand to trace letters! The camera will track your finger movements.
-            </p>
-            <div className="text-sm text-white/50 mb-8">
-              Language: <span className="text-white/80 capitalize">{settings.language}</span> | 
-              Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
+        {/* Game Area */}
+        <div className="relative">
+          {!isPlaying ? (
+            <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center relative overflow-hidden">
+              {/* Mascot Preview */}
+              <div className="absolute -bottom-4 -left-4 opacity-50 pointer-events-none">
+                <Mascot state="idle" />
+              </div>
+
+              <div className="text-6xl mb-4">✋</div>
+              <h2 className="text-2xl font-semibold mb-4">Ready to Learn?</h2>
+              <p className="text-white/70 mb-4 max-w-md mx-auto">
+                Use your hand to trace letters! The camera will track your finger movements.
+              </p>
+              <div className="text-sm text-white/50 mb-8">
+                Language: <span className="text-white/80 capitalize">{settings.language}</span> |
+                Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
+              </div>
+              {isModelLoading ? (
+                <div className="text-white/60">Loading hand tracking...</div>
+              ) : (
+                <button
+                  onClick={startGame}
+                  className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                >
+                  Start Game
+                </button>
+              )}
             </div>
-            {isModelLoading ? (
-              <div className="text-white/60">Loading hand tracking...</div>
-            ) : (
-              <button
-                onClick={startGame}
-                className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition"
-              >
-                Start Game
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-2xl">
-              {/* Webcam video */}
-              <Webcam
-                ref={webcamRef}
-                className="absolute inset-0 w-full h-full object-cover"
-                mirrored
-                videoConstraints={{ width: 640, height: 480 }}
-              />
-              {/* Canvas overlay for tracing */}
-              <canvas
-                ref={canvasRef}
-                className="absolute inset-0 w-full h-full"
-              />
-              
-              {/* Controls overlay */}
-              <div className="absolute top-4 left-4 flex gap-2">
-                <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm">
-                  🎯 Trace: {currentLetter.char}
-                </div>
-                {streak > 2 && (
-                  <div className="bg-orange-500/50 backdrop-blur px-3 py-1 rounded-full text-sm">
-                    🔥 {streak} streak!
+          ) : (
+            <div className="space-y-4">
+              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-2xl border-4 border-orange-400/30">
+                {/* Webcam video */}
+                <Webcam
+                  ref={webcamRef}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  mirrored
+                  videoConstraints={{ width: 640, height: 480 }}
+                />
+                {/* Canvas overlay for tracing */}
+                <canvas
+                  ref={canvasRef}
+                  className="absolute inset-0 w-full h-full"
+                />
+
+                {/* Controls overlay */}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/10">
+                    🎯 Trace: {currentLetter.char}
                   </div>
-                )}
-              </div>
-              
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                  onClick={() => setIsDrawing(!isDrawing)}
-                  className={`px-4 py-2 rounded-lg transition text-sm font-semibold ${
-                    isDrawing 
-                      ? 'bg-red-500/70 hover:bg-red-500/90 border border-red-400/50' 
-                      : 'bg-green-500/70 hover:bg-green-500/90 border border-green-400/50'
-                  }`}
-                >
-                  {isPinching ? '👌 Pinching...' : isDrawing ? '✋ Stop Drawing' : '✏️ Start Drawing'}
-                </button>
-                <button
-                  onClick={clearDrawing}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={stopGame}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm"
-                >
-                  Stop
-                </button>
-              </div>
-            </div>
+                  {streak > 2 && (
+                    <div className="bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20">
+                      🔥 {streak} streak!
+                    </div>
+                  )}
+                </div>
 
-            {/* Action buttons */}
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={checkProgress}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/30 transition"
-              >
-                ✅ Check My Tracing
-              </button>
-              <button
-                onClick={nextLetter}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition"
-              >
-                Skip →
-              </button>
-            </div>
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    onClick={() => setIsDrawing(!isDrawing)}
+                    className={`px-4 py-2 rounded-lg transition text-sm font-bold shadow-lg ${isDrawing
+                      ? 'bg-red-500 hover:bg-red-600 text-white border-b-4 border-red-700 active:border-b-0 active:translate-y-1'
+                      : 'bg-green-500 hover:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1'
+                      }`}
+                  >
+                    {isPinching ? '👌 Pinching...' : isDrawing ? '✋ Stop Drawing' : '✏️ Start Drawing'}
+                  </button>
+                  <button
+                    onClick={clearDrawing}
+                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={stopGame}
+                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur"
+                  >
+                    Stop
+                  </button>
+                </div>
 
-            <p className="text-center text-white/60 text-sm">
-              Hold your hand up and pinch thumb + index finger to draw! Or click the button.
-              {settings.showHints && ' The faint letter shows where to trace.'}
-            </p>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
+                {/* In-Game Mascot */}
+                <div className="absolute bottom-0 left-4 z-20">
+                  <Mascot
+                    state={feedback.includes('Great') || feedback.includes('Amazing') ? 'happy' : isDrawing ? 'waiting' : 'idle'}
+                    message={feedback || (isDrawing ? "Keep going!" : "Trace the letter!")}
+                  />
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={checkProgress}
+                  className="px-8 py-4 bg-gradient-to-b from-green-400 to-green-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-green-800 active:border-b-0 active:translate-y-1"
+                >
+                  ✅ Check My Tracing
+                </button>
+                <button
+                  onClick={nextLetter}
+                  className="px-8 py-4 bg-gradient-to-b from-blue-400 to-blue-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-blue-800 active:border-b-0 active:translate-y-1"
+                >
+                  Skip →
+                </button>
+              </div>
+
+              <p className="text-center text-white/60 text-sm font-medium">
+                Hold your hand up and pinch thumb + index finger to draw! Or click the button.
+                {settings.showHints && ' The faint letter shows where to trace.'}
+              </p>
+            </div>
+          )}
+        </div>
+        );
 }

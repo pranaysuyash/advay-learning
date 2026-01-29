@@ -1,4 +1,3 @@
-import pytest
 from httpx import AsyncClient
 
 
@@ -11,7 +10,7 @@ class TestAuth:
             "/api/v1/auth/register",
             json={
                 "email": "newuser@example.com",
-                "password": "password123"
+                "password": "Password123"
             }
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
@@ -26,7 +25,7 @@ class TestAuth:
             "/api/v1/auth/register",
             json={
                 "email": test_user["email"],
-                "password": "password123"
+                "password": "Password123"
             }
         )
         assert response.status_code == 400
@@ -46,7 +45,7 @@ class TestAuth:
         assert data["message"] == "Login successful"
         assert "user" in data
         assert data["user"]["email"] == test_user["email"]
-        
+
         # Verify cookies are set
         cookies = response.cookies
         assert "access_token" in cookies

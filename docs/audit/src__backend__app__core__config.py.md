@@ -151,6 +151,7 @@ For M1 (MEDIUM) - Make settings import-safe and testable
 - Where: `src/backend/app/core/config.py` and `src/backend/app/core/__init__.py` or a new `app/core/config_utils.py`
 - What: Replace `settings = Settings()` with a lazy accessor:
   - Add:
+
     ```py
     _settings: Settings | None = None
     def get_settings() -> Settings:
@@ -159,6 +160,7 @@ For M1 (MEDIUM) - Make settings import-safe and testable
             _settings = Settings()
         return _settings
     ```
+
   - Update call sites to import `get_settings` or keep `settings = get_settings()` in `app/main.py` and tests to avoid import-time validation.
 - Why: Prevent import-time validation errors and give test harness control over env injection.
 - Failure it prevents: Tests/CI failing due to missing env variables when importing modules.

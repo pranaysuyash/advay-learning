@@ -1,8 +1,9 @@
 """Progress schemas."""
 
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
 class ProgressBase(BaseModel):
@@ -29,7 +30,7 @@ class ProgressUpdate(BaseModel):
 class Progress(ProgressBase):
     """Progress response schema."""
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     profile_id: str
     completed_at: datetime

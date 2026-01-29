@@ -1,8 +1,9 @@
 """Progress service for business logic."""
 
 from typing import List, Optional
+
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
 
 from app.db.models.progress import Progress
 from app.schemas.progress import ProgressCreate, ProgressUpdate
@@ -10,13 +11,13 @@ from app.schemas.progress import ProgressCreate, ProgressUpdate
 
 class ProgressService:
     """Progress service."""
-    
+
     @staticmethod
     async def get_by_id(db: AsyncSession, progress_id: str) -> Optional[Progress]:
         """Get progress by ID."""
         result = await db.execute(select(Progress).where(Progress.id == progress_id))
         return result.scalar_one_or_none()
-    
+
     @staticmethod
     async def get_by_profile(db: AsyncSession, profile_id: str) -> List[Progress]:
         """Get progress by profile ID."""
@@ -26,7 +27,7 @@ class ProgressService:
             .order_by(desc(Progress.completed_at))
         )
         return result.scalars().all()
-    
+
     @staticmethod
     async def create(db: AsyncSession, profile_id: str, progress_in: ProgressCreate) -> Progress:
         """Create new progress entry."""
@@ -42,19 +43,19 @@ class ProgressService:
         await db.commit()
         await db.refresh(progress)
         return progress
-    
+
     @staticmethod
     async def update(db: AsyncSession, progress: Progress, progress_in: ProgressUpdate) -> Progress:
         """Update progress."""
         update_data = progress_in.model_dump(exclude_unset=True)
-        
+
         for field, value in update_data.items():
             setattr(progress, field, value)
-        
+
         await db.commit()
         await db.refresh(progress)
         return progress
-    
+
     @staticmethod
     async def delete(db: AsyncSession, progress: Progress) -> None:
         """Delete progress."""

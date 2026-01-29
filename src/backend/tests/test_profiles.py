@@ -1,4 +1,3 @@
-import pytest
 from httpx import AsyncClient
 
 
@@ -13,7 +12,7 @@ class TestProfiles:
             json={
                 "name": "Test Child",
                 "age": 5,
-                "preferred_language": "english"
+                "preferred_language": "en"
             }
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
@@ -30,7 +29,7 @@ class TestProfiles:
             headers=auth_headers,
             json={"name": "Test Child", "age": 5}
         )
-        
+
         response = await client.get("/api/v1/users/me/profiles", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
@@ -51,7 +50,7 @@ class TestProfiles:
             {"name": "Child 1", "age": 4},
             {"name": "Child 2", "age": 6}
         ]
-        
+
         for profile in profiles:
             response = await client.post(
                 "/api/v1/users/me/profiles",
@@ -59,7 +58,7 @@ class TestProfiles:
                 json=profile
             )
             assert response.status_code == 200  # Endpoint returns 200, not 201
-        
+
         # Verify both exist
         response = await client.get("/api/v1/users/me/profiles", headers=auth_headers)
         data = response.json()

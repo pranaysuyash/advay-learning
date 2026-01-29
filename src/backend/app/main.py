@@ -1,13 +1,17 @@
 """Main FastAPI application entry point."""
 
 import logging
-from fastapi import FastAPI, Depends, HTTPException
+from typing import Any
+
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
+from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.health import get_health_status
-from app.api.v1.api import api_router
+from app.core.rate_limit import setup_rate_limiting
 from app.db.session import get_db
 
 # Setup logging
@@ -20,6 +24,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Setup rate limiting
+setup_rate_limiting(app)
 
 # CORS Security Check
 if "*" in settings.ALLOWED_ORIGINS:
@@ -53,23 +60,30 @@ async def root() -> dict:
 
 
 @app.get("/health")
-async def health_check(db = Depends(get_db)) -> dict:
+async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Health check endpoint.
     
     Returns 200 if all dependencies are healthy.
     Returns 503 if any critical dependency is unhealthy.
     """
     status = await get_health_status(db)
-    
+
     if status["status"] != "healthy":
         raise HTTPException(
             status_code=HTTP_503_SERVICE_UNAVAILABLE,
             detail=status
         )
-    
-    return status
+
+    return status  # type: ignore
 
 
 if __name__ == "__main__":
+    # Use python -m uvicorn for better multiprocessing support in Python 3.13+
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=settings.DEBUG)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=settings.DEBUG,
+        workers=1,
+    )

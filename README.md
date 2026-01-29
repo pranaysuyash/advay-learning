@@ -14,7 +14,7 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.13+
 - Node.js 18+
 - uv (Python package manager)
 
@@ -37,7 +37,7 @@ cp .env.example .env.local
 # 3. Run development servers
 # Terminal 1 - Backend
 cd src/backend
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8001
 
 # Terminal 2 - Frontend
 cd src/frontend
@@ -46,13 +46,13 @@ npm run dev
 
 Access:
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- Backend API: http://localhost:8001
+- API Docs: http://localhost:8001/docs
 
 ## 🏗️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
-- **Backend**: Python 3.11+, FastAPI, SQLAlchemy
+- **Backend**: Python 3.13+, FastAPI, SQLAlchemy
 - **CV Engine**: MediaPipe, TensorFlow.js, OpenCV
 - **Database**: PostgreSQL (production), SQLite (dev)
 - **Storage**: AWS S3 / Local filesystem

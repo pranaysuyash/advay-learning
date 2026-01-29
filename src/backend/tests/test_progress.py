@@ -1,4 +1,3 @@
-import pytest
 from httpx import AsyncClient
 
 
@@ -14,7 +13,7 @@ class TestProgress:
             json={"name": "Test Child", "age": 5}
         )
         profile_id = profile_response.json()["id"]
-        
+
         response = await client.post(
             "/api/v1/progress/",
             headers=auth_headers,
@@ -41,7 +40,7 @@ class TestProgress:
             json={"name": "Test Child", "age": 5}
         )
         profile_id = profile_response.json()["id"]
-        
+
         await client.post(
             "/api/v1/progress/",
             headers=auth_headers,
@@ -53,7 +52,7 @@ class TestProgress:
                 "duration_seconds": 30
             }
         )
-        
+
         response = await client.get(
             "/api/v1/progress/",
             headers=auth_headers,
@@ -73,7 +72,7 @@ class TestProgress:
             json={"name": "Test Child", "age": 5}
         )
         profile_id = profile_response.json()["id"]
-        
+
         # Save multiple progress entries
         for letter in ["A", "B", "C"]:
             await client.post(
@@ -87,7 +86,7 @@ class TestProgress:
                     "duration_seconds": 25
                 }
             )
-        
+
         response = await client.get(
             "/api/v1/progress/stats",
             headers=auth_headers,

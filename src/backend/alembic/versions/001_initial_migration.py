@@ -5,8 +5,9 @@ Revises:
 Create Date: 2024-01-28 00:00:00.000000
 
 """
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '001'
@@ -31,7 +32,7 @@ def upgrade() -> None:
         sa.UniqueConstraint('email')
     )
     op.create_index('ix_users_email', 'users', ['email'], unique=True)
-    
+
     # Create profiles table
     op.create_table(
         'profiles',
@@ -47,7 +48,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['parent_id'], ['users.id'], ondelete='CASCADE')
     )
-    
+
     # Create progress table
     op.create_table(
         'progress',
@@ -62,7 +63,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['profile_id'], ['profiles.id'], ondelete='CASCADE')
     )
-    
+
     # Create achievements table
     op.create_table(
         'achievements',

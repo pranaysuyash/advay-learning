@@ -13,22 +13,26 @@ This document governs how AI agents (including myself and others) work on the Ad
 ## Core Principles
 
 ### 1. Evidence-First Development
+
 - Every claim must be backed by evidence
 - Evidence types: `Observed` (directly verified), `Inferred` (logical implication), `Unknown` (cannot determine)
 - Never upgrade `Inferred` to `Observed`
 
 ### 2. Single Source of Truth
+
 - **Worklog**: `docs/WORKLOG_TICKETS.md` - All work tracking
 - **Audits**: `docs/audit/<sanitized-file>.md` - Audit artifacts
 - **Prompts**: `prompts/` - All AI prompts
 - **Code**: Repository itself
 
 ### 3. Scope Discipline
+
 - One audit = One file
 - One PR = One audit remediation OR one hardening scope
 - No scope creep without explicit approval
 
 ### 4. Preservation First
+
 - Never discard contributor code unless clearly inferior
 - Keep meaningful comments/tests/docs unless incorrect
 - Prefer merging both sides when resolving conflicts
@@ -66,16 +70,16 @@ Before starting ANY work, determine:
 
 Based on work type, follow the appropriate prompt:
 
-| Work Type | Prompt File | Purpose |
-|-----------|-------------|---------|
-| File Audit | `prompts/audit/audit-v1.5.1.md` | Comprehensive single-file audit |
-| Remediation | `prompts/remediation/implementation-v1.6.1.md` | Fix audit findings |
-| Hardening | `prompts/hardening/hardening-v1.1.md` | Production hardening |
-| PR Review | `prompts/review/pr-review-v1.6.1.md` | Review existing PR |
-| Verification | `prompts/verification/verification-v1.2.md` | Verify remediation |
-| Merge Conflict | `prompts/merge/merge-conflict-v1.2.md` | Resolve conflicts |
-| Post-Merge | `prompts/merge/post-merge-v1.0.md` | Validate after merge |
-| Triage | `prompts/triage/out-of-scope-v1.0.md` | Queue next audits |
+| Work Type      | Prompt File                                    | Purpose                         |
+| -------------- | ---------------------------------------------- | ------------------------------- |
+| File Audit     | `prompts/audit/audit-v1.5.1.md`                | Comprehensive single-file audit |
+| Remediation    | `prompts/remediation/implementation-v1.6.1.md` | Fix audit findings              |
+| Hardening      | `prompts/hardening/hardening-v1.1.md`          | Production hardening            |
+| PR Review      | `prompts/review/pr-review-v1.6.1.md`           | Review existing PR              |
+| Verification   | `prompts/verification/verification-v1.2.md`    | Verify remediation              |
+| Merge Conflict | `prompts/merge/merge-conflict-v1.2.md`         | Resolve conflicts               |
+| Post-Merge     | `prompts/merge/post-merge-v1.0.md`             | Validate after merge            |
+| Triage         | `prompts/triage/out-of-scope-v1.0.md`          | Queue next audits               |
 
 ### Phase 3: Documentation
 
@@ -98,8 +102,9 @@ Every work unit MUST produce:
 - [ ] Determine work type and select correct prompt
 - [ ] Define scope contract (invariants, non-goals, acceptance criteria)
 - [ ] Create or update worklog ticket
-- [ ] Verify environment (Python 3.11+, Node 18+, uv installed)
+- [ ] Verify environment (Python 3.13+, Node 18+, uv installed)
 - [ ] Check existing venv (don't create duplicates)
+- [ ] Check running servers (frontend on 6173, backend on 8001)
 ```
 
 ### Before Code Changes
@@ -150,18 +155,28 @@ Every work unit MUST produce:
 **ALWAYS check before creating venv:**
 
 ```bash
+# Check Python version
+python --version  # Should be 3.13+
+
+# Check if uv is installed
+uv --version
+
 # Check if venv already exists
-ls -la src/backend/.venv 2>/dev/null && echo "venv exists" || echo "venv missing"
+ls -la .venv 2>/dev/null && echo "venv exists" || echo "venv missing"
 
 # Check if activated
 echo $VIRTUAL_ENV
 
+# Check running servers
+lsof -i :6173 2>/dev/null && echo "Frontend server running on 6173" || echo "Frontend server not running"
+lsof -i :8001 2>/dev/null && echo "Backend server running on 8001" || echo "Backend server not running"
+
 # If venv exists but not activated:
-cd src/backend && source .venv/bin/activate  # macOS/Linux
+source .venv/bin/activate  # macOS/Linux
 # or: .venv\Scripts\activate  # Windows
 
 # If venv missing:
-cd src/backend && uv venv && source .venv/bin/activate
+uv venv && source .venv/bin/activate
 ```
 
 **NEVER create nested venvs.**
@@ -219,13 +234,13 @@ cd src/frontend && npm install
 
 ### Required Evidence Types
 
-| Claim Type | Required Evidence |
-|------------|-------------------|
-| Code behavior | Git diff, code snippet |
-| Test results | Test command + output |
-| Performance | Benchmark command + output |
-| Security | Security scan output |
-| Dependencies | Package list + versions |
+| Claim Type    | Required Evidence          |
+| ------------- | -------------------------- |
+| Code behavior | Git diff, code snippet     |
+| Test results  | Test command + output      |
+| Performance   | Benchmark command + output |
+| Security      | Security scan output       |
+| Dependencies  | Package list + versions    |
 
 ### Evidence Labels
 
@@ -233,10 +248,8 @@ Every non-trivial claim MUST be labeled:
 
 - **Observed**: Directly verified from file or command output
   - Example: "`Observed`: File exists at path (ls -la output)"
-  
 - **Inferred**: Logically implied from Observed facts
   - Example: "`Inferred`: Function is called based on import statement"
-  
 - **Unknown**: Cannot be determined from available evidence
   - Example: "`Unknown`: Runtime behavior without execution"
 
@@ -249,8 +262,10 @@ When including command output:
 
 **Output**:
 ```
+
 M src/backend/app/main.py
-?? docs/audit/server__auth.py.md
+?? docs/audit/server\_\_auth.py.md
+
 ```
 
 **Interpretation**: `Observed` - One modified file, one untracked file
@@ -270,6 +285,7 @@ src/frontend/components/Button.tsx  docs/audit/src__frontend__components__Button
 ```
 
 **Sanitization rules**:
+
 - Replace `/` with `__`
 - Replace `\` with `__`
 - Keep original extension
@@ -326,6 +342,7 @@ TCK-20240128-002
 ### Audit Gate
 
 Pass if:
+
 - [ ] Discovery appendix complete
 - [ ] Evidence labels correct (Observed/Inferred/Unknown)
 - [ ] Freeze rule used if contradictions
@@ -335,6 +352,7 @@ Pass if:
 ### Implementation Gate
 
 Pass if:
+
 - [ ] Diff limited to audited file + tests
 - [ ] Each change maps to finding ID
 - [ ] Invariants preserved (or Behavior change: YES)
@@ -345,6 +363,7 @@ Pass if:
 ### PR Review Gate
 
 Pass if:
+
 - [ ] Diff-only scope
 - [ ] Findings-driven review
 - [ ] Docs-truth verified
@@ -354,6 +373,7 @@ Pass if:
 ### Verification Gate
 
 Pass if:
+
 - [ ] All findings marked (FIXED/PARTIAL/NOT FIXED/REGRESSED/NA)
 - [ ] Evidence for each marking
 - [ ] No regressions introduced
@@ -447,12 +467,14 @@ cd src/frontend && npm run lint
 
 ```markdown
 ## TCK-YYYYMMDD-### :: [Short Title]
+
 Type: [AUDIT|REMEDIATION|HARDENING|REVIEW|VERIFICATION|POST_MERGE|TRIAGE]
 Owner: [Agent Name]
 Created: [YYYY-MM-DD HH:MM TZ]
 Status: [OPEN|IN_PROGRESS|BLOCKED|DONE|DROPPED]
 
 Scope contract:
+
 - In-scope:
   - ...
 - Out-of-scope:
@@ -460,28 +482,35 @@ Scope contract:
 - Behavior change allowed: [YES|NO|UNKNOWN]
 
 Targets:
+
 - Repo: [name]
 - File(s): [path]
 - Branch/PR: [branch/PR link]
 - Range: [base..head]
 
 Inputs:
+
 - Prompt used: [name + version]
 - Source artifacts: [links]
 
 Plan:
+
 - ...
 
 Execution log:
+
 - [timestamp] [action] | Evidence: [output]
 
 Status updates:
+
 - [timestamp] [status change]
 
 Next actions:
-1) ...
+
+1. ...
 
 Risks/notes:
+
 - ...
 ```
 
@@ -489,9 +518,10 @@ Risks/notes:
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2024-01-28 | Initial version |
+| Version | Date       | Changes         |
+| ------- | ---------- | --------------- |
+| 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001 |
+| 1.0     | 2024-01-28 | Initial version |
 
 ---
 

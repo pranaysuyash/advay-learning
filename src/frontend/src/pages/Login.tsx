@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store';
+import { authApi } from '../services/api';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showResend, setShowResend] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
   const navigate = useNavigate();
   
   const { login, error, clearError, isLoading } = useAuthStore();
@@ -18,12 +21,28 @@ export function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setShowResend(false);
+    setResendMessage('');
     
     try {
       await login(email, password);
       navigate('/dashboard');
+    } catch (error: any) {
+      // Check if error is due to unverified email
+      const errorMsg = error.response?.data?.detail || '';
+      if (errorMsg.toLowerCase().includes('not verified') || errorMsg.toLowerCase().includes('verify')) {
+        setShowResend(true);
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    try {
+      const response = await authApi.resendVerification(email);
+      setResendMessage(response.data.message);
+      setShowResend(false);
     } catch (error) {
-      // Error is handled in store
+      setResendMessage('Failed to resend verification email. Please try again.');
     }
   };
 
@@ -40,6 +59,20 @@ export function Login() {
         {error && (
           <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-6">
             {error}
+            {showResend && (
+              <button
+                onClick={handleResendVerification}
+                className="block mt-2 text-red-400 hover:text-red-300 underline"
+              >
+                Resend verification email
+              </button>
+            )}
+          </div>
+        )}
+
+        {resendMessage && (
+          <div className="bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg mb-6">
+            {resendMessage}
           </div>
         )}
 

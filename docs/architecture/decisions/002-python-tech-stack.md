@@ -11,10 +11,10 @@ We need to select the programming language and core technologies for the learnin
 - Good performance for real-time CV
 
 ## Decision
-We will use **Python 3.11+** with the following stack:
+We will use **Python 3.13+** with the following stack:
 
 ### Core
-- **Language**: Python 3.11+
+- **Language**: Python 3.13+
 - **Package Manager**: uv (fast, modern)
 - **Environment**: venv (standard library)
 
