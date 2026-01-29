@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Game } from './pages/Game';
 import { Progress } from './pages/Progress';
 import { Settings } from './pages/Settings';
+import { StyleTest } from './components/StyleTest';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Settings />
           </ProtectedRoute>
         } />
+        <Route path="/style-test" element={<StyleTest />} />
       </Routes>
     </Layout>
   );

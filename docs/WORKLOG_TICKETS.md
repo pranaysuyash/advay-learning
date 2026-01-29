@@ -19,13 +19,13 @@
 
 | Metric         | Count  |
 | -------------- | ------ |
-| ✅ DONE        | 59     |
+| ✅ DONE        | 60     |
 | 🟡 IN_PROGRESS | 0      |
 | 🔵 OPEN        | 12     |
 | 🔴 BLOCKED     | 0      |
-| **Total**      | **71** |
+| **Total**      | **72** |
 
-**Last Updated:** 2026-01-29 23:15 UTC
+**Last Updated:** 2026-01-29 23:45 UTC
 
 **Current Priority:** Multi-language expansion and game language testing
 
@@ -15324,3 +15324,210 @@ Evidence:
 - Migration file present: 739ac7e9e4e3_change_age_from_int_to_float.py
 
 ---
+
+---
+
+### TCK-20260129-400 :: MediaPipe Content Review - Game Catalog & Activity Library
+
+Type: DOCUMENTATION
+Owner: AI Assistant
+Created: 2026-01-29 23:15 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 23:45 IST
+
+Scope contract:
+- In-scope:
+  - Review and synthesize MediaPipe technical overview content
+  - Create comprehensive GAME_CATALOG.md with all activity ideas
+  - Create game design prompt for future content generation
+  - Organize activities by learning domain and core patterns
+  - Document MVP game set recommendation
+- Out-of-scope:
+  - Implementation of games
+  - Asset creation
+  - Technical architecture changes
+
+Targets:
+- Repo: learning_for_kids
+- Files Created:
+  - docs/GAME_CATALOG.md (new)
+  - prompts/content/game-design-prompt-v1.0.md (new)
+- Branch: main
+
+Inputs:
+- Source: User conversation about MediaPipe, learning activities, game ideas
+- Context: Existing docs/GAME_MECHANICS.md, docs/LEARNING_PLAN.md
+- Platform: React + FastAPI web app with MediaPipe integration
+
+---
+
+## Summary of Work
+
+### 1. MediaPipe Technical Overview Documented
+
+**Observed**: MediaPipe is Google's cross-platform framework for real-time perception:
+- **Input**: Camera frames
+- **Processing**: Model + post-processing pipeline
+- **Output**: Landmarks, masks, classifications
+
+**Key Features for Advay**:
+- Hand Landmarker (21 keypoints per hand) - for tracing, drag-drop, pinch
+- Pose Landmarker (33 keypoints) - for body games, Simon Says
+- Face Landmarker (468+ points) - for expression games
+- Segmentation - for magic backgrounds, silhouette effects
+
+**Mode Selection**:
+- **VIDEO/STREAM mode**: Uses timestamps and tracking (recommended for games)
+- **IMAGE mode**: Single frame analysis
+
+### 2. Game Catalog Created (docs/GAME_CATALOG.md)
+
+**8 Core Game Patterns Identified**:
+1. Touch Targets
+2. Drag & Drop (Pinch Grab)
+3. Trace Paths
+4. Hold Still
+5. Match Pose/Expression
+6. Sequence Memory
+7. Catch & Avoid
+8. Scavenger Hunt
+
+**Activity Library Organized by Domain**:
+
+| Domain | Activity Count | Key Games |
+|--------|---------------|-----------|
+| Pre-writing & Fine Motor | 6 | Air Tracing, Maze Walk, Connect Dots |
+| Alphabets & Phonics | 5 | Letter Hunt, Build a Word, Sight Word Pop |
+| Numbers & Math | 7 | Finger Count, Count & Drag, Make 10 |
+| Colors & Sorting | 7 | Sort by Color, Pattern Builder, Paint Mixer |
+| Language Learning | 5 | Bilingual Mode, Action Verbs, Prepositions |
+| Gross Motor | 5 | Simon Says, Freeze Dance, Yoga Animals |
+| Social-Emotional | 2 | Expression Mirror, Feelings Story |
+| Creativity | 3 | Magic Backgrounds, Silhouette Painting |
+| Logic & Memory | 4 | Gesture Sequence, Memory Match |
+| STEM | 4 | Space Clean-up, Underwater Bubbles |
+
+**Total**: 48+ distinct game ideas documented
+
+### 3. Lesson Packs Defined
+
+**6 Curriculum Packs**:
+1. Fine Motor Foundations (2-4 weeks)
+2. Letters & Sounds (4-8 weeks)
+3. Numbers & Counting (4-8 weeks)
+4. Colors, Shapes, Patterns (ongoing)
+5. Movement & Listening (ongoing)
+6. Multilingual Mode (layer on top)
+
+### 4. MVP Game Set Recommended
+
+**First 8 Games to Ship**:
+1. Finger Paint Trace (letters/shapes)
+2. Pick and Drop Sort (apples into buckets)
+3. Balloon Pop (by color/letter)
+4. Simon Says Body
+5. Freeze Dance
+6. Finger Count Show Me N
+7. Maze Finger Walk
+8. Magic Background Story Mode
+
+**Coverage**: Pre-writing, math, colors, motor, creativity, "wow" factor
+
+### 5. Game Design Prompt Created
+
+**prompts/content/game-design-prompt-v1.0.md**:
+- Input parameters specification
+- Core pattern selection guide
+- Output format template
+- Pedagogical principles checklist
+- Example request/response
+- Content expansion rules
+
+---
+
+## Key Design Principles Documented
+
+### Adaptive Difficulty Rules
+- 3 wins in a row → slightly harder
+- 2 fails in a row → easier + hint
+- Never increase difficulty immediately after failure
+
+### Session Structure
+- 8-12 minutes per session
+- 3 games per session (2 easy, 1 challenging)
+- 20-second recap with reward
+
+### Scoring Philosophy
+- Generous scoring (toddlers quit if unfair)
+- Coarse buckets: 0-39 (try again), 40-69 (good try), 70-89 (great), 90-100 (amazing)
+- Focus on effort, not perfection
+
+### Privacy & Safety
+- No camera frames stored
+- No cloud by default
+- No biometric identity features
+- Parent controls for camera features
+
+---
+
+## Content Expansion Strategy
+
+To reach 100+ games:
+1. Build 8-10 core patterns (reusable)
+2. Create content packs as JSON configurations
+3. Reskin, don't rebuild (same code, new art/audio)
+4. Quest lines connect mini-games with narrative
+
+**Example JSON Configuration**:
+```json
+{
+  "gameType": "dragDropSort",
+  "theme": "space",
+  "items": ["meteor", "star", "planet"],
+  "categories": ["rock", "gas", "ice"],
+  "difficulty": "medium"
+}
+```
+
+---
+
+## Files Created
+
+| File | Size | Purpose |
+|------|------|---------|
+| docs/GAME_CATALOG.md | ~17KB | Master reference for all activities |
+| prompts/content/game-design-prompt-v1.0.md | ~7KB | Template for generating new game ideas |
+
+---
+
+Execution log:
+- 23:15 IST: Started content review and synthesis
+- 23:20 IST: Analyzed existing GAME_MECHANICS.md and LEARNING_PLAN.md
+- 23:25 IST: Organized activities by learning domain and core patterns
+- 23:30 IST: Created comprehensive GAME_CATALOG.md
+- 23:35 IST: Defined lesson packs and MVP game set
+- 23:40 IST: Created game design prompt template
+- 23:45 IST: Updated worklog, marked as DONE
+
+Status updates:
+- 23:15 IST: Status: IN_PROGRESS
+- 23:45 IST: Status: DONE ✅
+
+Next actions:
+- Prioritize MVP games for implementation
+- Create asset list for first 8 games
+- Design quest line narrative connecting games
+
+Risks/notes:
+- 48+ game ideas documented - may need prioritization framework
+- Some games require pose/face detection (not yet implemented)
+- Consider starting with hand-tracking-only games first
+
+Evidence:
+- GAME_CATALOG.md created with 48+ activity definitions
+- 8 core patterns documented with difficulty knobs
+- 6 lesson packs defined
+- Game design prompt created for future content generation
+
+---
+
