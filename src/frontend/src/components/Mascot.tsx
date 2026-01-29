@@ -155,7 +155,7 @@ export function Mascot({
             <motion.div
                 variants={containerVariants}
                 animate={state}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer w-32 h-32"
                 onClick={() => {
                     if (enableVideo && isVideoLoaded) {
                         setShowVideo(true);
