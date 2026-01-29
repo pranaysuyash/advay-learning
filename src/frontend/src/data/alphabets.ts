@@ -231,6 +231,12 @@ export const tamilAlphabet: Alphabet = {
 
 // All alphabets
 export const alphabets: Record<string, Alphabet> = {
+  en: englishAlphabet,
+  hi: hindiAlphabet,
+  kn: kannadaAlphabet,
+  te: teluguAlphabet,
+  ta: tamilAlphabet,
+  // Legacy mappings for backward compatibility
   english: englishAlphabet,
   hindi: hindiAlphabet,
   kannada: kannadaAlphabet,

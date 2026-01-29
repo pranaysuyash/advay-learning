@@ -29,8 +29,8 @@ describe('ProfileStore', () => {
   describe('fetchProfiles', () => {
     it('should fetch and set profiles', async () => {
       const mockProfiles = [
-        { id: '1', name: 'Child 1', age: 5, preferred_language: 'english', created_at: '2024-01-01' },
-        { id: '2', name: 'Child 2', age: 7, preferred_language: 'hindi', created_at: '2024-01-02' },
+        { id: '1', name: 'Child 1', age: 5, preferred_language: 'en', created_at: '2024-01-01' },
+        { id: '2', name: 'Child 2', age: 7, preferred_language: 'hi', created_at: '2024-01-02' },
       ];
       vi.mocked(profileApi.getProfiles).mockResolvedValueOnce({ data: mockProfiles } as any);
 
@@ -103,7 +103,7 @@ describe('ProfileStore', () => {
         id: '3',
         name: 'New Child',
         age: 6,
-        preferred_language: 'kannada',
+        preferred_language: 'kn',
         created_at: '2024-01-03',
       };
       vi.mocked(profileApi.createProfile).mockResolvedValueOnce({ data: newProfile } as any);
@@ -112,7 +112,7 @@ describe('ProfileStore', () => {
       await store.createProfile({
         name: 'New Child',
         age: 6,
-        preferred_language: 'kannada',
+        preferred_language: 'kn',
       });
 
       const state = useProfileStore.getState();
@@ -142,7 +142,7 @@ describe('ProfileStore', () => {
         id: '1',
         name: 'Existing Child',
         age: 5,
-        preferred_language: 'english',
+        preferred_language: 'en',
         created_at: '2024-01-01',
       };
       useProfileStore.setState({ profiles: [existingProfile] });
@@ -151,7 +151,7 @@ describe('ProfileStore', () => {
         id: '2',
         name: 'New Child',
         age: 7,
-        preferred_language: 'hindi',
+        preferred_language: 'hi',
         created_at: '2024-01-02',
       };
       vi.mocked(profileApi.createProfile).mockResolvedValueOnce({ data: newProfile } as any);
@@ -160,7 +160,7 @@ describe('ProfileStore', () => {
       await store.createProfile({
         name: 'New Child',
         age: 7,
-        preferred_language: 'hindi',
+        preferred_language: 'hi',
       });
 
       const state = useProfileStore.getState();
@@ -173,7 +173,7 @@ describe('ProfileStore', () => {
       const newProfile = {
         id: '1',
         name: 'Child Without Optional',
-        preferred_language: 'english',
+        preferred_language: 'en',
         created_at: '2024-01-01',
       };
       vi.mocked(profileApi.createProfile).mockResolvedValueOnce({ data: newProfile } as any);
@@ -194,7 +194,7 @@ describe('ProfileStore', () => {
         id: '1',
         name: 'Test Child',
         age: 5,
-        preferred_language: 'english',
+        preferred_language: 'en',
         created_at: '2024-01-01',
       };
 
@@ -210,7 +210,7 @@ describe('ProfileStore', () => {
         currentProfile: {
           id: '1',
           name: 'Test',
-          preferred_language: 'english',
+          preferred_language: 'en',
           created_at: '2024-01-01',
         },
       });

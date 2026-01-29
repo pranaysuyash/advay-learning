@@ -34,7 +34,7 @@ export function Dashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newChildName, setNewChildName] = useState('');
   const [newChildAge, setNewChildAge] = useState(5);
-  const [newChildLanguage, setNewChildLanguage] = useState('english');
+  const [newChildLanguage, setNewChildLanguage] = useState('en');
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function Dashboard() {
       // Reset form and close modal
       setNewChildName('');
       setNewChildAge(5);
-      setNewChildLanguage('english');
+      setNewChildLanguage('en');
       setShowAddModal(false);
       // Refresh profiles
       await fetchProfiles();
@@ -70,8 +70,14 @@ export function Dashboard() {
 
   // Transform profiles to include REAL progress data
   const children: ChildProfile[] = profiles.map((profile) => {
-    const alphabet = getAlphabet(profile.preferred_language || 'english');
-    const lang = profile.preferred_language || 'english';
+    // Map 2-letter codes to full names for alphabet lookup
+    const langCode = profile.preferred_language || 'en';
+    const lang = langCode === 'hi' ? 'hindi' 
+               : langCode === 'kn' ? 'kannada'
+               : langCode === 'te' ? 'telugu'
+               : langCode === 'ta' ? 'tamil'
+               : 'english';
+    const alphabet = getAlphabet(langCode);
     const langProgress = letterProgress[lang] || [];
 
     // Calculate real stats
@@ -471,11 +477,11 @@ export function Dashboard() {
                     aria-label='Preferred Language'
                     className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
                   >
-                    <option value='english'>English</option>
-                    <option value='hindi'>Hindi (हिन्दी)</option>
-                    <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
-                    <option value='telugu'>Telugu (తెలుగు)</option>
-                    <option value='tamil'>Tamil (தமிழ்)</option>
+                    <option value='en'>English</option>
+                    <option value='hi'>Hindi (हिन्दी)</option>
+                    <option value='kn'>Kannada (ಕನ್ನಡ)</option>
+                    <option value='te'>Telugu (తెలుగు)</option>
+                    <option value='ta'>Tamil (தமிழ்)</option>
                   </select>
                 </div>
               </div>

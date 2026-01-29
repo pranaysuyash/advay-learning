@@ -10253,3 +10253,59 @@ Next Steps:
 - Test login from frontend
 - Consider running all migrations on fresh databases to ensure schema consistency
 
+
+
+---
+
+### TCK-20260129-068 :: Fix Language Code Mismatch Between Frontend and Backend
+
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-29 14:50 IST
+Status: **DONE** ✅
+Completed: 2026-01-29 14:55 IST
+
+Description:
+Fix 422 Unprocessable Content error when creating child profiles. The frontend was sending full language names ('english', 'hindi') but the backend expected 2-letter codes ('en', 'hi').
+
+Error observed:
+```
+POST http://localhost:8001/api/v1/users/me/profiles 422 (Unprocessable Content)
+```
+
+Root Cause:
+- Frontend used: 'english', 'hindi', 'kannada', 'telugu', 'tamil'
+- Backend validation only accepted: 'en', 'hi', 'kn', 'te', 'ta'
+- This caused Pydantic validation to fail with 422 error
+
+Fix Applied:
+1. Updated Dashboard.tsx to use 2-letter codes in the language dropdown
+2. Added backward-compatible mappings in alphabets.ts
+3. Updated Game.tsx to map settings language to 2-letter codes
+4. Fixed profileStore tests to use 2-letter codes
+
+Files Modified:
+- src/frontend/src/pages/Dashboard.tsx
+- src/frontend/src/pages/Game.tsx
+- src/frontend/src/data/alphabets.ts
+- src/frontend/src/store/profileStore.test.ts
+
+Execution Log:
+- [2026-01-29 14:50 IST] Identified 422 error on profile creation
+- [2026-01-29 14:51 IST] Found mismatch: frontend sends 'english', backend expects 'en'
+- [2026-01-29 14:52 IST] Updated Dashboard.tsx language dropdown values
+- [2026-01-29 14:53 IST] Added backward-compatible mappings in alphabets.ts
+- [2026-01-29 14:54 IST] Updated Game.tsx to use languageCode mapping
+- [2026-01-29 14:55 IST] Type check passes, fix complete
+
+Verification:
+```bash
+cd src/frontend
+npm run type-check
+# Output: tsc --noEmit (no errors)
+```
+
+Next Steps:
+- Test profile creation from frontend
+- Verify game loads correct alphabet for selected language
+

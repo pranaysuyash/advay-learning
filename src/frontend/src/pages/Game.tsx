@@ -25,13 +25,6 @@ export function Game() {
   const { user } = useAuthStore();
   const { markLetterAttempt, getUnlockedBatches, addBadge } = useProgressStore();
 
-  // Get profile ID from route state (passed from Dashboard)
-  const profileId = location.state?.profileId as string | undefined;
-
-  // Redirect to dashboard if no profile selected
-  if (!profileId) {
-    return <Navigate to="/dashboard" replace />;
-  }
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,8 +44,23 @@ export function Game() {
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
 
+  // Get profile ID from route state (passed from Dashboard)
+  const profileId = location.state?.profileId as string | undefined;
+
+  // Redirect to dashboard if no profile selected
+  if (!profileId) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Map full language names to 2-letter codes for alphabet lookup
+  const languageCode = settings.language === 'hindi' ? 'hi'
+                      : settings.language === 'kannada' ? 'kn'
+                      : settings.language === 'telugu' ? 'te'
+                      : settings.language === 'tamil' ? 'ta'
+                      : 'en';
+  
   // Get letters based on selected language and difficulty
-  const LETTERS: Letter[] = getLettersForGame(settings.language, settings.difficulty);
+  const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
   const currentLetter = LETTERS[currentLetterIndex];
 
   // Initialize hand landmarker
@@ -162,7 +170,7 @@ export function Game() {
         score: letterAccuracy,
         duration_seconds: timeSpent,
         meta_data: {
-          language: settings.language,
+          language: languageCode,
           difficulty: settings.difficulty,
           streak: streak,
           points_earned: letterAccuracy > 70 ? 10 : 5,
@@ -380,9 +388,9 @@ export function Game() {
     const okThreshold = settings.difficulty === 'easy' ? 30 : settings.difficulty === 'medium' ? 40 : 50;
 
     // Track progress for adaptive unlock system
-    const previousBatches = getUnlockedBatches(settings.language);
-    markLetterAttempt(settings.language, currentLetter.char, letterAccuracy);
-    const currentBatches = getUnlockedBatches(settings.language);
+    const previousBatches = getUnlockedBatches(languageCode);
+    markLetterAttempt(languageCode, currentLetter.char, letterAccuracy);
+    const currentBatches = getUnlockedBatches(languageCode);
 
     // Check if new batch was unlocked
     const newBatchUnlocked = currentBatches > previousBatches;
