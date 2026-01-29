@@ -9959,3 +9959,38 @@ Status updates:
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
 - 2026-01-29 :: IN_PROGRESS -> DONE
+
+---
+
+## TCK-20260129-066 :: AI-Native Prompts README
+
+Type: DOCS
+Owner: Codex (GPT-5.2)
+Created: 2026-01-29
+Status: DONE
+
+Scope contract:
+
+- In-scope:
+  - Add `prompts/ai-native/README.md` index so the prompt pack is self-describing.
+- Out-of-scope:
+  - Any changes to existing prompt content.
+- Behavior change allowed: NO (docs-only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): prompts/ai-native/README.md
+- Base: main@d7a374b
+
+### Evidence
+
+**Command**: `ls -la prompts/ai-native`
+
+**Output**:
+Includes `README.md` and the `ai-feature-*-v1.0.md` prompt pack.
+
+Status updates:
+
+- 2026-01-29 :: OPEN -> IN_PROGRESS
+- 2026-01-29 :: IN_PROGRESS -> DONE
