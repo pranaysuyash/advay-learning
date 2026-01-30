@@ -4,11 +4,18 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame, Letter } from '../data/alphabets';
-import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE } from '../store';
+import {
+  useSettingsStore,
+  useAuthStore,
+  useProgressStore,
+  BATCH_SIZE,
+} from '../store';
 import { Mascot } from '../components/Mascot';
 import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
 import { getRandomIcon } from '../utils/iconUtils';
+import { UIIcon } from '../components/ui/Icon';
+import { GameTutorial } from '../components/GameTutorial';
 
 interface Point {
   x: number;
@@ -35,624 +42,71 @@ export function Game() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const { user } = useAuthStore();
-  const { markLetterAttempt, getUnlockedBatches, addBadge } = useProgressStore();
+  const { markLetterAttempt, getUnlockedBatches, addBadge } =
+    useProgressStore();
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
-  const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
-  const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
-  const [isModelLoading, setIsModelLoading] = useState(false);
-  const drawnPointsRef = useRef<Point[]>([]);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [isPinching, setIsPinching] = useState(false);
-  const [feedback, setFeedback] = useState<string>('');
-  const [accuracy, setAccuracy] = useState<number>(0);
-  const [streak, setStreak] = useState<number>(0);
-  const [startTime, setStartTime] = useState<number>(0);
-  const [, setSessionStats] = useState<GameStats>({ accuracy: 0, timeSpent: 0, streak: 0 });
-  const animationRef = useRef<number | undefined>(undefined);
-  
-  // Language selection - user can switch anytime
-  // Use gameLanguage setting if available, otherwise default to 'en'
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(settings.gameLanguage || 'en');
-  const lastVideoTimeRef = useRef<number>(-1);
-  const frameSkipRef = useRef<number>(0);
-  const lastDrawPointRef = useRef<Point | null>(null);
-  const lastPinchTimeRef = useRef<number>(0);
-  // Get profile ID from route state (passed from Dashboard)
-  const profileId = location.state?.profileId as string | undefined;
-
-  // Pending progress count for this profile (offline/synced)
-  const [pendingCount, setPendingCount] = useState<number>(0);
-
-  // Subscribe to queue changes for showing pending indicators and auto-sync on reconnect
-  useEffect(() => {
-    if (!profileId) return;
-
-    const update = () => setPendingCount(progressQueue.getPending(profileId).length);
-    update();
-    const unsubscribe = progressQueue.subscribe(update);
-
-    const handleOnline = () => {
-      if (navigator.onLine) {
-        // Dynamically import api client to avoid circular deps in tests
-        import('../services/api').then((m) => {
-          progressQueue.syncAll(m.default).catch(() => {});
-        });
-      }
-    };
-
-    window.addEventListener('online', handleOnline);
-
-    return () => {
-      unsubscribe();
-      window.removeEventListener('online', handleOnline);
-    };
-  }, [profileId]);
-
-  // Note: Profile ID is used for progress tracking, not language
-  // Language is a game choice, not a profile setting
-
-  // Language is a game/lesson choice - user can switch anytime
-  // NOT tied to profile - just like choosing "Letters" vs "Numbers"
-  const languageCode = selectedLanguage;
-  
-  // Get letters based on selected language and settings difficulty
-  const LETTERS: Letter[] = getLettersForGame(languageCode, settings.difficulty);
-  const currentLetter = LETTERS[currentLetterIndex];
-  
-  // Reset letter index when language changes
-  // Also update selectedLanguage when gameLanguage setting changes
-  useEffect(() => {
-    setCurrentLetterIndex(0);
-    setScore(0);
-    setStreak(0);
-    drawnPointsRef.current = [];
-  }, [selectedLanguage]);
-
-  // Update selectedLanguage when gameLanguage setting changes
-  useEffect(() => {
-    if (settings.gameLanguage) {
-      setSelectedLanguage(settings.gameLanguage);
-    }
-  }, [settings.gameLanguage]);
-
-  // Initialize hand landmarker
-  useEffect(() => {
-    const initializeHandLandmarker = async () => {
-      setIsModelLoading(true);
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
-        );
-        const landmarker = await HandLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-            delegate: 'GPU',
-          },
-          runningMode: 'VIDEO',
-          numHands: 1,
-        });
-        setHandLandmarker(landmarker);
-      } catch (error) {
-        console.error('Failed to load hand landmarker:', error);
-        setFeedback('Camera tracking not available. Try drawing with mouse!');
-      }
-      setIsModelLoading(false);
-    };
-
-    initializeHandLandmarker();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
-  // Smooth points using moving average
-  const smoothPoints = useCallback((points: Point[]): Point[] => {
-    if (points.length < 3) return points;
-
-    const smoothed: Point[] = [];
-    const windowSize = 3; // Average over 3 points
-
-    for (let i = 0; i < points.length; i++) {
-      let sumX = 0, sumY = 0, count = 0;
-
-      // Average over window centered at current point
-      for (let j = -Math.floor(windowSize / 2); j <= Math.floor(windowSize / 2); j++) {
-        const idx = i + j;
-        if (idx >= 0 && idx < points.length) {
-          sumX += points[idx].x;
-          sumY += points[idx].y;
-          count++;
-        }
-      }
-
-      smoothed.push({
-        x: sumX / count,
-        y: sumY / count
-      });
-    }
-
-    return smoothed;
-  }, []);
-
-  // Calculate tracing accuracy
-  const calculateAccuracy = useCallback((points: Point[]): number => {
-    // Filter out break points (NaN values)
-    const validPoints = points.filter(p => !isNaN(p.x) && !isNaN(p.y));
-    
-    if (validPoints.length < 10) return 0;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return 0;
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const letterRadius = Math.min(canvas.width, canvas.height) * 0.25;
-
-    // Check how many points are within the letter area
-    const pointsInArea = validPoints.filter(point => {
-      const px = point.x * canvas.width;
-      const py = point.y * canvas.height;
-      const distance = Math.sqrt(Math.pow(px - centerX, 2) + Math.pow(py - centerY, 2));
-      return distance < letterRadius;
-    });
-
-    // Calculate coverage (how much of the letter area was traced)
-    const coverage = pointsInArea.length / validPoints.length;
-
-    // Calculate density (points per area)
-    const density = Math.min(validPoints.length / 100, 1);
-
-    // Combined score (0-100)
-    const accuracy = Math.round((coverage * 0.6 + density * 0.4) * 100);
-
-    return Math.min(accuracy, 100);
-  }, []);
-
-  // Save progress to backend (with offline queue fallback)
-  const saveProgress = useCallback(async (letterAccuracy: number) => {
-    if (!user || !profileId) return;
-
-    const timeSpent = Math.round((Date.now() - startTime) / 1000);
-
-    // Build queue item
-    const idempotency_key = (typeof crypto !== 'undefined' && (crypto as any).randomUUID)
-      ? (crypto as any).randomUUID()
-      : `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-    const item = {
-      idempotency_key,
-      profile_id: profileId,
-      activity_type: 'letter_tracing',
-      content_id: currentLetter.char,
-      score: letterAccuracy,
-      duration_seconds: timeSpent,
-      meta_data: {
-        language: languageCode,
-        difficulty: settings.difficulty,
-        streak: streak,
-        points_earned: letterAccuracy > 70 ? 10 : 5,
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      // Try immediate save
-      await progressApi.saveProgress(profileId, {
-        activity_type: item.activity_type,
-        content_id: item.content_id,
-        score: item.score,
-        duration_seconds: item.duration_seconds,
-        meta_data: item.meta_data,
-      });
-
-      // On success, update session stats
-      setSessionStats(prev => ({
-        accuracy: Math.round((prev.accuracy * prev.streak + letterAccuracy) / (prev.streak + 1)),
-        timeSpent: prev.timeSpent + timeSpent,
-        streak: prev.streak + 1,
-      }));
-
-      // Also attempt to flush any pending items
-      if (navigator.onLine) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const apiClient = (await import('../services/api')).default;
-        progressQueue.syncAll(apiClient).catch(() => {});
-      }
-    } catch (error) {
-      console.error('Failed to save progress, enqueuing for later sync:', error);
-      // Enqueue for later sync
-      progressQueue.enqueue(item);
-
-      // Update session stats optimistically
-      setSessionStats(prev => ({
-        accuracy: Math.round((prev.accuracy * prev.streak + letterAccuracy) / (prev.streak + 1)),
-        timeSpent: prev.timeSpent + timeSpent,
-        streak: prev.streak + 1,
-      }));
-
-      // Try to sync if online
-      if (navigator.onLine) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const apiClient = (await import('../services/api')).default;
-        progressQueue.syncAll(apiClient).catch(() => {});
-      }
-    }
-  }, [user, profileId, currentLetter, languageCode, settings.difficulty, startTime, streak]);
-
-  // Drawing loop
-  const detectAndDraw = useCallback(() => {
-    if (!webcamRef.current || !canvasRef.current || !handLandmarker || !isPlaying) return;
-
-    const video = webcamRef.current.video;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!video || !ctx) return;
-
-    // Wait for video to be ready with valid dimensions
-    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
-      animationRef.current = requestAnimationFrame(detectAndDraw);
-      return;
-    }
-
-    // Match canvas size to video
-    if (canvas.width !== video.videoWidth) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-    }
-
-    // Only process if video frame has changed
-    if (video.currentTime === lastVideoTimeRef.current) {
-      animationRef.current = requestAnimationFrame(detectAndDraw);
-      return;
-    }
-    lastVideoTimeRef.current = video.currentTime;
-
-    // Skip frames to reduce lag (process every 2nd frame = 30fps instead of 60fps)
-    frameSkipRef.current++;
-    if (frameSkipRef.current % 2 !== 0) {
-      animationRef.current = requestAnimationFrame(detectAndDraw);
-      return;
-    }
-
-    // Detect hand
-    let results;
-    try {
-      results = handLandmarker.detectForVideo(video, performance.now());
-    } catch (e) {
-      // MediaPipe error, skip this frame
-      animationRef.current = requestAnimationFrame(detectAndDraw);
-      return;
-    }
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw hint outline if enabled (drawn normally - not mirrored)
-    if (settings.showHints) {
-      ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.6}px sans-serif`;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(currentLetter.char, canvas.width / 2, canvas.height / 2);
-
-      // Draw tracing guide circle
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.25, 0, 2 * Math.PI);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Draw drawn points (with smoothing)
-    if (drawnPointsRef.current.length > 0) {
-      // Build segments separated by break points (NaN values)
-      const segments: Point[][] = [];
-      let currentSegment: Point[] = [];
-      
-      drawnPointsRef.current.forEach((point) => {
-        if (isNaN(point.x) || isNaN(point.y)) {
-          // Break point - save current segment and start new one
-          if (currentSegment.length > 0) {
-            segments.push(currentSegment);
-            currentSegment = [];
-          }
-        } else {
-          currentSegment.push(point);
-        }
-      });
-      // Don't forget the last segment
-      if (currentSegment.length > 0) {
-        segments.push(currentSegment);
-      }
-
-      ctx.beginPath();
-      ctx.strokeStyle = currentLetter.color;
-      ctx.lineWidth = 12;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.shadowColor = currentLetter.color;
-      ctx.shadowBlur = 10;
-
-      // Draw each segment with smoothing
-      segments.forEach((segment) => {
-        if (segment.length === 0) return;
-        
-        // Apply smoothing for better visual quality
-        const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
-        
-        pointsToDraw.forEach((point, index) => {
-          if (index === 0) {
-            ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
-          } else {
-            ctx.lineTo(point.x * canvas.width, point.y * canvas.height);
-          }
-        });
-      });
-      
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
-    // Draw hand tracking point (index finger tip = landmark 8)
-    if (results.landmarks && results.landmarks.length > 0) {
-      const landmarks = results.landmarks[0];
-      const indexTip = landmarks[8];
-      const thumbTip = landmarks[4];
-
-      // Pinch detection: thumb (4) and index (8) distance
-      const pinchDistance = Math.sqrt(
-        Math.pow(thumbTip.x - indexTip.x, 2) +
-        Math.pow(thumbTip.y - indexTip.y, 2)
-      );
-
-      // Hysteresis: start pinch < 0.05, release pinch > 0.07
-      // Lower release threshold makes it easier to stop drawing (more responsive)
-      const PINCH_START_THRESHOLD = 0.05;
-      const PINCH_RELEASE_THRESHOLD = 0.07;
-
-      // Track previous pinch state to detect transitions
-      const wasPinching = isPinching;
-
-      if (!isPinching && pinchDistance < PINCH_START_THRESHOLD) {
-        setIsPinching(true);
-        setIsDrawing(true);
-        // Just started pinching - add a null point to break the line
-        // This prevents connecting from previous position when repositioning finger
-        if (wasPinching !== true) {
-          drawnPointsRef.current.push({ x: NaN, y: NaN });
-          // Reset tracking for velocity calculation
-          lastDrawPointRef.current = null;
-          lastPinchTimeRef.current = performance.now();
-        }
-      } else if (isPinching && pinchDistance > PINCH_RELEASE_THRESHOLD) {
-        setIsPinching(false);
-        setIsDrawing(false);
-        // Just released pinch - add a null point to break the line
-        drawnPointsRef.current.push({ x: NaN, y: NaN });
-        // Reset tracking
-        lastDrawPointRef.current = null;
-      }
-
-      // IMPORTANT: MediaPipe x coordinates are normalized [0,1] where 0 is left, 1 is right
-      // Since the webcam is mirrored with CSS, we need to mirror the x coordinate
-      // so the cursor appears where the user expects it
-      const displayX = 1 - indexTip.x;
-      const displayY = indexTip.y;
-
-      // Draw cursor with glow (larger and brighter when pinching)
-      ctx.beginPath();
-      const cursorRadius = isPinching ? 15 : 12;
-      const cursorGlow = isPinching ? 25 : 15;
-      ctx.arc(displayX * canvas.width, displayY * canvas.height, cursorRadius, 0, 2 * Math.PI);
-      ctx.fillStyle = isPinching ? '#ffff00' : currentLetter.color;
-      ctx.shadowColor = isPinching ? '#ffff00' : currentLetter.color;
-      ctx.shadowBlur = cursorGlow;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // Add point to drawing only when in drawing mode
-      // This allows cursor to be visible without recording
-      if (isDrawing) {
-        const nextPoints = drawnPointsRef.current;
-        
-        // Velocity filtering: if moving too fast, it's likely a reposition, not drawing
-        // Minimum movement threshold: don't add points if finger hasn't moved enough
-        const MIN_MOVEMENT_THRESHOLD = 0.003; // ~3px on a 1000px canvas
-        const MAX_VELOCITY_THRESHOLD = 0.15;  // Max reasonable drawing speed
-        
-        const lastPoint = lastDrawPointRef.current;
-        const now = performance.now();
-        const timeDelta = now - lastPinchTimeRef.current;
-        
-        let shouldAddPoint = true;
-        
-        if (lastPoint && timeDelta > 0) {
-          const dx = displayX - lastPoint.x;
-          const dy = displayY - lastPoint.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const velocity = distance / timeDelta;
-          
-          // Skip if movement is too small (reduces noise)
-          if (distance < MIN_MOVEMENT_THRESHOLD) {
-            shouldAddPoint = false;
-          }
-          
-          // Skip if velocity is too high (likely a reposition, not drawing)
-          if (velocity > MAX_VELOCITY_THRESHOLD) {
-            shouldAddPoint = false;
-            // Also add a break point to separate this from previous drawing
-            if (nextPoints.length > 0 && !isNaN(nextPoints[nextPoints.length - 1].x)) {
-              nextPoints.push({ x: NaN, y: NaN });
-            }
-          }
-        }
-        
-        if (shouldAddPoint) {
-          nextPoints.push({ x: displayX, y: displayY });
-          lastDrawPointRef.current = { x: displayX, y: displayY };
-          lastPinchTimeRef.current = now;
-        }
-        
-        // Prevent unbounded growth if a session runs for a long time
-        if (nextPoints.length > 5000) nextPoints.shift();
-      } else {
-        // Reset tracking when not drawing
-        lastDrawPointRef.current = null;
-      }
-    } else {
-      // No hand detected - reset pinch and drawing state
-      // This prevents unwanted drawing when hand leaves and re-enters the frame
-      if (isPinching) {
-        setIsPinching(false);
-        setIsDrawing(false);
-        // Add null point to break the line when hand disappears
-        drawnPointsRef.current.push({ x: NaN, y: NaN });
-        // Reset tracking
-        lastDrawPointRef.current = null;
-      }
-    }
-
-    animationRef.current = requestAnimationFrame(detectAndDraw);
-  }, [handLandmarker, isPlaying, isDrawing, isPinching, currentLetter, settings.showHints, smoothPoints]);
-
-  // Start detection loop when playing
-  useEffect(() => {
-    if (isPlaying) {
-      animationRef.current = requestAnimationFrame(detectAndDraw);
-    } else {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    }
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isPlaying, detectAndDraw]);
-
-  const startGame = () => {
-    setIsPlaying(true);
-    setIsDrawing(false);  // Reset drawing state - user must explicitly start
-    drawnPointsRef.current = [];
-    setFeedback('');
-    setAccuracy(0);
-    setStartTime(Date.now());
-  };
-
-  const stopGame = () => {
-    setIsPlaying(false);
-    setIsDrawing(false);  // Reset drawing state
-    drawnPointsRef.current = [];
-    setAccuracy(0);
-  };
+  const [tutorialCompleted, setTutorialCompleted] = useState(false);
 
   const goToHome = () => {
     stopGame();
     navigate('/dashboard');
   };
 
-  const clearDrawing = () => {
-    drawnPointsRef.current = [];
-    setAccuracy(0);
+  const handleTutorialComplete = () => {
+    setTutorialCompleted(true);
+    localStorage.setItem('tutorialCompleted', 'true');
   };
 
-  const nextLetter = () => {
-    setCurrentLetterIndex((prev) => (prev + 1) % LETTERS.length);
-    drawnPointsRef.current = [];
-    setAccuracy(0);
+  const handleSkipTutorial = () => {
+    setTutorialCompleted(true);
+    localStorage.setItem('tutorialCompleted', 'true');
   };
 
-  const checkProgress = () => {
-    const letterAccuracy = calculateAccuracy(drawnPointsRef.current);
-    setAccuracy(letterAccuracy);
-
-    // Difficulty affects accuracy thresholds
-    const goodThreshold = settings.difficulty === 'easy' ? 60 : settings.difficulty === 'medium' ? 70 : 80;
-    const okThreshold = settings.difficulty === 'easy' ? 30 : settings.difficulty === 'medium' ? 40 : 50;
-
-    // Track progress for adaptive unlock system
-    const previousBatches = getUnlockedBatches(languageCode);
-    markLetterAttempt(languageCode, currentLetter.char, letterAccuracy);
-    const currentBatches = getUnlockedBatches(languageCode);
-
-    // Check if new batch was unlocked
-    const newBatchUnlocked = currentBatches > previousBatches;
-
-    if (letterAccuracy >= goodThreshold) {
-      // Good tracing
-      const points = letterAccuracy > 90 ? 20 : letterAccuracy > 80 ? 15 : 10;
-      setScore((prev) => prev + points);
-      setStreak((prev) => prev + 1);
-
-      if (newBatchUnlocked) {
-        setFeedback(`🎉 Amazing! New letters unlocked! +${points} points`);
-        addBadge(`batch-${currentBatches}`);
-      } else {
-        setFeedback(`Great job! ${letterAccuracy}% accuracy! 🎉 +${points} points`);
-      }
-
-      saveProgress(letterAccuracy);
-
-      // Auto advance after delay
-      setTimeout(() => {
-        nextLetter();
-        setFeedback('');
-      }, 2000);
-    } else if (letterAccuracy >= okThreshold) {
-      // Okay tracing
-      setScore((prev) => prev + 5);
-      setStreak(0);
-      setFeedback(`Good try! ${letterAccuracy}% - Keep practicing! 💪 +5 points`);
-      saveProgress(letterAccuracy);
-    } else {
-      // Poor tracing
-      setStreak(0);
-      setFeedback(`Try again! ${letterAccuracy}% - Trace the letter more carefully ✏️`);
-    }
-
-    setTimeout(() => {
-      if (letterAccuracy < 70) {
-        setFeedback('');
-      }
-    }, 3000);
-  };
+  useEffect(() => {
+    const hasCompletedTutorial = localStorage.getItem('tutorialCompleted') === 'true';
+    setTutorialCompleted(hasCompletedTutorial);
+  }, []);
 
   // Redirect to dashboard if no profile selected
   if (!profileId) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to='/dashboard' replace />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Learning Game</h1>
-            <p className="text-white/60">Trace letters with your finger!</p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold">Score: {score}</div>
-            <div className="flex items-center gap-4 text-sm text-white/60">
-              <span>🔥 Streak: {streak}</span>
-              <span>Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1} of {Math.ceil(LETTERS.length / BATCH_SIZE)}</span>
+    <>
+      {!tutorialCompleted && (
+        <GameTutorial onComplete={handleTutorialComplete} onSkip={handleSkipTutorial} />
+      )}
+      <div className='max-w-7xl mx-auto px-4 py-8'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {/* Header */}
+          <div className='flex justify-between items-center mb-6'>
+            <div>
+              <h1 className='text-3xl font-bold'>Learning Game</h1>
+              <p className='text-white/60'>Trace letters with your finger!</p>
+            </div>
+          <div className='text-right'>
+            <div className='text-2xl font-bold'>Score: {score}</div>
+            <div className='flex items-center gap-4 text-sm text-white/60'>
+              <span className="flex items-center gap-1">
+                <UIIcon name="flame" size={16} className="text-orange-400" />
+                Streak: {streak}
+              </span>
+              <span>
+                Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1} of{' '}
+                {Math.ceil(LETTERS.length / BATCH_SIZE)}
+              </span>
               {pendingCount > 0 && (
-                <div className="ml-2 inline-block bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold">
-                  ⚠️ Pending ({pendingCount})
+                <div className='ml-2 inline-flex items-center gap-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold'>
+                  <UIIcon name="warning" size={14} />
+                  Pending ({pendingCount})
                 </div>
               )}
             </div>
@@ -660,29 +114,32 @@ export function Game() {
         </div>
 
         {/* Letter Display */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-          <div className="flex items-center justify-center gap-8">
-            <div className="text-center">
-              <div className="text-8xl font-bold" style={{ color: currentLetter.color }}>
+        <div className='bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm'>
+          <div className='flex items-center justify-center gap-8'>
+            <div className='text-center'>
+              <div
+                className='text-8xl font-bold'
+                style={{ color: currentLetter.color }}
+              >
                 {currentLetter.char}
               </div>
               {currentLetter.transliteration && (
-                <div className="text-lg text-white/60 mt-2">
+                <div className='text-lg text-white/60 mt-2'>
                   {currentLetter.transliteration}
                 </div>
               )}
             </div>
-            <div className="w-20 h-20">
+            <div className='w-20 h-20'>
               <img
                 src={getRandomIcon(currentLetter)}
                 alt={currentLetter.name}
-                className="w-full h-full object-contain"
+                className='w-full h-full object-contain'
               />
             </div>
-            <div className="text-center">
-              <div className="text-2xl">{currentLetter.name}</div>
+            <div className='text-center'>
+              <div className='text-2xl'>{currentLetter.name}</div>
               {currentLetter.pronunciation && (
-                <div className="text-sm text-white/60 mt-1">
+                <div className='text-sm text-white/60 mt-1'>
                   "{currentLetter.pronunciation}"
                 </div>
               )}
@@ -695,22 +152,37 @@ export function Game() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6"
+            className='bg-white/10 border border-border rounded-xl p-4 mb-6 shadow-sm'
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-white/80">Tracing Accuracy</span>
-              <span className="font-bold" style={{ color: accuracy >= 70 ? '#10b981' : accuracy >= 40 ? '#f59e0b' : '#ef4444' }}>
+            <div className='flex justify-between items-center mb-2'>
+              <span className='text-white/80'>Tracing Accuracy</span>
+              <span
+                className='font-bold'
+                style={{
+                  color:
+                    accuracy >= 70
+                      ? '#10b981'
+                      : accuracy >= 40
+                        ? '#f59e0b'
+                        : '#ef4444',
+                }}
+              >
                 {accuracy}%
               </span>
             </div>
-            <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+            <div className='h-3 bg-white/10 rounded-full overflow-hidden'>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${accuracy}%` }}
                 transition={{ duration: 0.5 }}
-                className="h-full rounded-full"
+                className='h-full rounded-full'
                 style={{
-                  backgroundColor: accuracy >= 70 ? '#10b981' : accuracy >= 40 ? '#f59e0b' : '#ef4444'
+                  backgroundColor:
+                    accuracy >= 70
+                      ? '#10b981'
+                      : accuracy >= 40
+                        ? '#f59e0b'
+                        : '#ef4444',
                 }}
               />
             </div>
@@ -722,37 +194,45 @@ export function Game() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback.includes('Great')
-              ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-              : feedback.includes('Good')
-                ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                : 'bg-red-500/20 border border-red-500/30 text-red-400'
-              }`}
+            className={`rounded-xl p-4 mb-6 text-center font-semibold ${
+              feedback.includes('Great')
+                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                : feedback.includes('Good')
+                  ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                  : 'bg-red-500/20 border border-red-500/30 text-red-400'
+            }`}
           >
             {feedback}
           </motion.div>
         )}
 
         {/* Game Area */}
-        <div className="relative">
+        <div className='relative'>
           {!isPlaying ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center relative overflow-hidden">
+            <div className='bg-white/10 border border-border rounded-xl p-12 text-center relative overflow-hidden shadow-sm'>
               {/* Mascot Preview */}
-              <div className="absolute -bottom-4 -left-4 opacity-50 pointer-events-none">
-                <Mascot state="idle" />
+              <div className='absolute -bottom-4 -left-4 opacity-50 pointer-events-none'>
+                <Mascot state='idle' />
               </div>
 
-              <div className="text-6xl mb-4">✋</div>
-              <h2 className="text-2xl font-semibold mb-4">Ready to Learn?</h2>
-              <p className="text-white/70 mb-4 max-w-md mx-auto">
-                Use your hand to trace letters! The camera will track your finger movements.
+              <div className='w-24 h-24 mx-auto mb-4'>
+                <img 
+                  src="/assets/images/onboarding-hand.svg" 
+                  alt="Hand tracking"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <h2 className='text-2xl font-semibold mb-4'>Ready to Learn?</h2>
+              <p className='text-white/70 mb-4 max-w-md mx-auto'>
+                Use your hand to trace letters! The camera will track your
+                finger movements.
               </p>
               {/* Language Selector */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-white/80 mb-2">
+              <div className='mb-6'>
+                <label className='block text-sm font-medium text-white/80 mb-2'>
                   Choose Alphabet
                 </label>
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className='flex flex-wrap justify-center gap-2'>
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
@@ -763,29 +243,35 @@ export function Game() {
                           : 'bg-white/10 text-white/80 hover:bg-white/20'
                       }`}
                     >
-                      <span className="mr-2">{lang.flag}</span>
+                      <span className='mr-2'>{lang.flag}</span>
                       {lang.name}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="text-sm text-white/50 mb-8">
-                Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
+              <div className='text-sm text-white/50 mb-8'>
+                Difficulty:{' '}
+                <span className='text-white/80 capitalize'>
+                  {settings.difficulty}
+                </span>
               </div>
-              <div className="flex justify-center gap-4">
+              <div className='flex justify-center gap-4'>
                 <button
                   onClick={goToHome}
-                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg"
+                  className='px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg flex items-center gap-2'
                 >
-                  🏠 Home
+                  <UIIcon name="home" size={20} />
+                  Home
                 </button>
                 {isModelLoading ? (
-                  <div className="text-white/60 px-6 py-3">Loading hand tracking...</div>
+                  <div className='text-white/60 px-6 py-3'>
+                    Loading hand tracking...
+                  </div>
                 ) : (
                   <button
                     onClick={startGame}
-                    className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                    className='px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20'
                   >
                     Start Game
                   </button>
@@ -793,75 +279,106 @@ export function Game() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-2xl border-4 border-orange-400/30">
+            <div className='space-y-4'>
+              <div className='relative bg-black rounded-xl overflow-hidden aspect-video shadow-2xl border-4 border-orange-400/30'>
                 {/* Webcam video */}
                 <Webcam
                   ref={webcamRef}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className='absolute inset-0 w-full h-full object-cover'
                   mirrored
                   videoConstraints={{ width: 640, height: 480 }}
                 />
                 {/* Canvas overlay for tracing */}
                 <canvas
                   ref={canvasRef}
-                  className="absolute inset-0 w-full h-full"
+                  className='absolute inset-0 w-full h-full'
                 />
 
                 {/* Controls overlay */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/10">
-                    🎯 Trace: {currentLetter.char}
+                <div className='absolute top-4 left-4 flex gap-2'>
+                  <div className='bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border flex items-center gap-1'>
+                    <UIIcon name="target" size={14} />
+                    Trace: {currentLetter.char}
                   </div>
-                  <div className="bg-blue-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/10">
-                    {LANGUAGES.find(l => l.code === selectedLanguage)?.flag} {LANGUAGES.find(l => l.code === selectedLanguage)?.name}
+                  <div className='bg-blue-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border'>
+                    {LANGUAGES.find((l) => l.code === selectedLanguage)?.flag}{' '}
+                    {LANGUAGES.find((l) => l.code === selectedLanguage)?.name}
                   </div>
                   {streak > 2 && (
-                    <div className="bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20">
+                    <div className='bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20'>
                       🔥 {streak} streak!
                     </div>
                   )}
                 </div>
 
-                <div className="absolute top-4 right-4 flex gap-2">
+                <div className='absolute top-4 right-4 flex gap-2'>
                   <button
                     onClick={goToHome}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg"
+                    className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2'
                   >
-                    🏠 Home
+                    <UIIcon name="home" size={16} />
+                    Home
                   </button>
                   <button
                     onClick={() => setIsDrawing(!isDrawing)}
-                    className={`px-4 py-2 rounded-lg transition text-sm font-bold shadow-lg ${isDrawing
-                      ? 'bg-red-500 hover:bg-red-600 text-white border-b-4 border-red-700 active:border-b-0 active:translate-y-1'
-                      : 'bg-green-500 hover:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1'
-                      }`}
+                    className={`px-4 py-2 rounded-lg transition text-sm font-bold shadow-lg ${
+                      isDrawing
+                        ? 'bg-red-500 hover:bg-red-600 text-white border-b-4 border-red-700 active:border-b-0 active:translate-y-1'
+                        : 'bg-green-500 hover:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1'
+                    }`}
                   >
-                    {isPinching ? '👌 Pinching...' : isDrawing ? '✋ Stop Drawing' : '✏️ Start Drawing'}
+                    {isPinching
+                      ? 'Pinching...'
+                      : isDrawing
+                        ? (
+                          <>
+                            <UIIcon name="hand" size={16} />
+                            Stop Drawing
+                          </>
+                        )
+                        : (
+                          <>
+                            <UIIcon name="pencil" size={16} />
+                            Start Drawing
+                          </>
+                        )}
                   </button>
                   <button
                     onClick={clearDrawing}
-                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur"
+                    className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
                   >
                     Clear
                   </button>
                   <button
                     onClick={stopGame}
-                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur"
+                    className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
                   >
                     Stop
                   </button>
                 </div>
 
                 {/* In-Game Mascot */}
-                <div className="absolute bottom-0 left-4 z-20">
+                <div className='absolute bottom-0 left-4 z-20'>
                   {(() => {
-                    const mascotState = feedback.includes('Great') || feedback.includes('Amazing') ? 'happy' : isDrawing ? 'waiting' : 'idle';
-                    console.log('[Game] Mascot state:', mascotState, 'Feedback:', feedback);
+                    const mascotState =
+                      feedback.includes('Great') || feedback.includes('Amazing')
+                        ? 'happy'
+                        : isDrawing
+                          ? 'waiting'
+                          : 'idle';
+                    console.log(
+                      '[Game] Mascot state:',
+                      mascotState,
+                      'Feedback:',
+                      feedback,
+                    );
                     return (
                       <Mascot
                         state={mascotState}
-                        message={feedback || (isDrawing ? "Keep going!" : "Trace the letter!")}
+                        message={
+                          feedback ||
+                          (isDrawing ? 'Keep going!' : 'Trace the letter!')
+                        }
                       />
                     );
                   })()}
@@ -869,29 +386,31 @@ export function Game() {
               </div>
 
               {/* Action buttons */}
-              <div className="flex justify-center gap-4">
+              <div className='flex justify-center gap-4'>
                 <button
                   onClick={checkProgress}
-                  className="px-8 py-4 bg-gradient-to-b from-green-400 to-green-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-green-800 active:border-b-0 active:translate-y-1"
+                  className='px-8 py-4 bg-gradient-to-b from-green-400 to-green-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-green-800 active:border-b-0 active:translate-y-1'
                 >
                   ✅ Check My Tracing
                 </button>
                 <button
                   onClick={nextLetter}
-                  className="px-8 py-4 bg-gradient-to-b from-blue-400 to-blue-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-blue-800 active:border-b-0 active:translate-y-1"
+                  className='px-8 py-4 bg-gradient-to-b from-blue-400 to-blue-600 rounded-xl font-bold text-lg text-white shadow-xl hover:scale-105 transition border-b-4 border-blue-800 active:border-b-0 active:translate-y-1'
                 >
                   Skip →
                 </button>
               </div>
 
-              <p className="text-center text-white/60 text-sm font-medium">
-                Hold your hand up and pinch thumb + index finger to draw! Or click the button.
-                {settings.showHints && ' The faint letter shows where to trace.'}
+              <p className='text-center text-white/60 text-sm font-medium'>
+                Hold your hand up and pinch thumb + index finger to draw! Or
+                click the button.
+                {settings.showHints &&
+                  ' The faint letter shows where to trace.'}
               </p>
             </div>
           )}
         </div>
       </motion.div>
-    </div>
-  );
+    </>
+      );
 }
