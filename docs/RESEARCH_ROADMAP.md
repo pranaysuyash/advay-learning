@@ -413,6 +413,171 @@ Define what data to collect, how to analyze it, and how to use insights while re
 
 ---
 
+### 3.11 RESEARCH-011: Deployment & Distribution Strategy
+**Priority:** P1 - High
+**Category:** Technical
+**Estimated Effort:** 1-2 days
+
+#### Objective
+Define how the app will be built, distributed, and updated across platforms.
+
+#### Research Questions
+1. PWA vs. React Native vs. Native app - which is best for camera-heavy apps?
+2. What are the Play Store/App Store requirements for kids' apps?
+3. How do we handle app updates without disrupting learning progress?
+4. What's the optimal app size for Indian market (data constraints)?
+5. How do we implement staged rollouts for testing?
+6. What's the CI/CD pipeline for kids' apps (extra testing needed)?
+7. How do we handle device fragmentation in Android?
+
+#### Deliverables
+- [ ] Platform decision document (PWA vs Native)
+- [ ] App store submission checklist
+- [ ] Update strategy document
+- [ ] CI/CD pipeline design
+- [ ] Device testing matrix
+
+#### Sources to Research
+- Play Store Kids category requirements
+- Apple App Store Kids category guidelines
+- PWA camera/ML performance benchmarks
+- Indian smartphone market data
+- Similar apps' distribution strategies
+
+---
+
+### 3.12 RESEARCH-012: Safety & Content Moderation
+**Priority:** P1 - High
+**Category:** Product
+**Estimated Effort:** 1 day
+
+#### Objective
+Ensure the app is safe for children and has appropriate safeguards.
+
+#### Research Questions
+1. What content moderation is needed for user-generated content (if any)?
+2. How do we prevent inappropriate use of the camera?
+3. What safeguards exist for chat/social features (if planned)?
+4. How do we handle reporting of issues?
+5. What emergency/safety information should be accessible?
+6. How do we prevent addiction/overuse patterns?
+7. What parental controls are expected/required?
+
+#### Deliverables
+- [ ] Safety features checklist
+- [ ] Screen time/addiction prevention design
+- [ ] Parental control requirements
+- [ ] Reporting mechanism design
+- [ ] Content guidelines document
+
+#### Sources to Research
+- Kids' app safety best practices
+- Screen time research for children
+- Parental control implementations
+- NCMEC guidelines (if applicable)
+- Competitor safety features
+
+---
+
+### 3.13 RESEARCH-013: Offline Experience Design
+**Priority:** P1 - High
+**Category:** Technical
+**Estimated Effort:** 1-2 days
+
+#### Objective
+Define how the app works when there's no or poor internet connectivity.
+
+#### Research Questions
+1. What features work offline vs. require connectivity?
+2. How do we sync progress when connection is restored?
+3. What content needs to be pre-downloaded?
+4. How much storage do we need for offline content?
+5. How do we handle conflicts in offline data?
+6. What's the user experience for offline mode?
+7. How do we communicate connectivity status to children?
+
+#### Deliverables
+- [ ] Offline feature matrix
+- [ ] Sync architecture document
+- [ ] Storage requirements analysis
+- [ ] Offline UX guidelines
+- [ ] Conflict resolution strategy
+
+#### Sources to Research
+- Offline-first architecture patterns
+- Service Worker capabilities
+- IndexedDB/local storage limits
+- Competitor offline implementations
+- Indian connectivity statistics
+
+---
+
+### 3.14 RESEARCH-014: Gamification & Motivation Psychology
+**Priority:** P2 - Medium
+**Category:** Product
+**Estimated Effort:** 1-2 days
+
+#### Objective
+Design ethical, effective motivation systems that drive learning without creating addiction.
+
+#### Research Questions
+1. What reward systems work for ages 3-10 without creating dependence?
+2. How do we balance intrinsic vs. extrinsic motivation?
+3. What's the right frequency/magnitude of rewards?
+4. How do streaks affect children (positive/negative)?
+5. What collectible systems work without FOMO?
+6. How do we motivate without pressure/anxiety?
+7. What does "ethical gamification" mean for kids?
+
+#### Deliverables
+- [ ] Reward system design principles
+- [ ] Streak/consistency mechanic recommendation
+- [ ] Collectibles system design
+- [ ] Anti-addiction guidelines
+- [ ] Motivation research summary
+
+#### Sources to Research
+- Child psychology research on rewards
+- Gamification ethics literature
+- Competitor gamification analysis
+- Addiction prevention in kids' apps
+- Educational game design research
+
+---
+
+### 3.15 RESEARCH-015: Teacher & School Integration
+**Priority:** P3 - Low (Post-MVP)
+**Category:** Business
+**Estimated Effort:** 1-2 days
+
+#### Objective
+Explore B2B opportunities with schools, teachers, and educational institutions.
+
+#### Research Questions
+1. What do teachers need from educational apps?
+2. How do schools procure and deploy apps?
+3. What classroom features are needed (multi-student, teacher dashboard)?
+4. What pricing models work for schools in India?
+5. What certifications/approvals do schools require?
+6. How do we integrate with existing school systems?
+7. What content alignment with curriculum is needed?
+
+#### Deliverables
+- [ ] Teacher requirements document
+- [ ] School sales process analysis
+- [ ] Classroom feature requirements
+- [ ] B2B pricing model
+- [ ] Partnership opportunity list
+
+#### Sources to Research
+- EdTech school sales research
+- Teacher adoption case studies
+- Indian school technology adoption
+- Government education initiatives
+- Competitor B2B strategies
+
+---
+
 ## 4. Research Execution Plan
 
 ### 4.1 Prioritized Sequence
@@ -421,12 +586,16 @@ Define what data to collect, how to analyze it, and how to use insights while re
 Phase 1: Foundation (Week 1)
 ├── RESEARCH-001: Technical Implementation Patterns [P0]
 ├── RESEARCH-002: Monetization & Business Model [P0]
-└── RESEARCH-006: Legal & Compliance [P1]
+├── RESEARCH-006: Legal & Compliance [P1]
+├── RESEARCH-011: Deployment & Distribution [P1]
+└── RESEARCH-012: Safety & Content Moderation [P1]
 
 Phase 2: Product Design (Week 2)
 ├── RESEARCH-003: Curriculum & Learning Outcomes [P1]
 ├── RESEARCH-004: Accessibility Standards [P1]
-└── RESEARCH-007: Parent Experience & Dashboard [P2]
+├── RESEARCH-007: Parent Experience & Dashboard [P2]
+├── RESEARCH-013: Offline Experience Design [P1]
+└── RESEARCH-014: Gamification & Motivation [P2]
 
 Phase 3: Content & Polish (Week 3)
 ├── RESEARCH-005: Sound & Music Production [P2]
@@ -434,7 +603,8 @@ Phase 3: Content & Polish (Week 3)
 └── RESEARCH-010: Analytics & Data Strategy [P2]
 
 Phase 4: Growth (Post-MVP)
-└── RESEARCH-008: Growth & Marketing Strategy [P3]
+├── RESEARCH-008: Growth & Marketing Strategy [P3]
+└── RESEARCH-015: Teacher & School Integration [P3]
 ```
 
 ### 4.2 Research Effort Summary
@@ -451,8 +621,13 @@ Phase 4: Growth (Post-MVP)
 | RESEARCH-008 | Growth/Marketing | P3 | 2 days | RESEARCH-002, 006 |
 | RESEARCH-009 | Localization | P2 | 1-2 days | RESEARCH-003 |
 | RESEARCH-010 | Analytics | P2 | 1 day | RESEARCH-006 |
+| RESEARCH-011 | Deployment/Distribution | P1 | 1-2 days | RESEARCH-001 |
+| RESEARCH-012 | Safety/Moderation | P1 | 1 day | RESEARCH-006 |
+| RESEARCH-013 | Offline Experience | P1 | 1-2 days | RESEARCH-001 |
+| RESEARCH-014 | Gamification/Motivation | P2 | 1-2 days | RESEARCH-003 |
+| RESEARCH-015 | Teacher/School Integration | P3 | 1-2 days | RESEARCH-002, 008 |
 
-**Total Estimated Effort:** 16-22 days (can be parallelized)
+**Total Estimated Effort:** 22-30 days (can be parallelized to ~3 weeks)**
 
 ### 4.3 Research Output Format
 
@@ -541,30 +716,38 @@ Each research document should follow this structure:
 
 ```
 RESEARCH-001 (Technical) ──┬──► RESEARCH-004 (Accessibility)
-                          │
+                          ├──► RESEARCH-011 (Deployment)
+                          └──► RESEARCH-013 (Offline)
+
 RESEARCH-002 (Monetization)┬──► RESEARCH-005 (Sound)
                           ├──► RESEARCH-006 (Legal)
-                          └──► RESEARCH-008 (Growth)
+                          ├──► RESEARCH-008 (Growth)
+                          └──► RESEARCH-015 (Schools)
 
 RESEARCH-003 (Curriculum) ──┬──► RESEARCH-007 (Parent Dashboard)
-                           └──► RESEARCH-009 (Localization)
+                           ├──► RESEARCH-009 (Localization)
+                           └──► RESEARCH-014 (Gamification)
 
-RESEARCH-006 (Legal) ──────────► RESEARCH-010 (Analytics)
+RESEARCH-006 (Legal) ──────┬──► RESEARCH-010 (Analytics)
+                          └──► RESEARCH-012 (Safety)
 ```
 
 ### 6.2 Parallel Tracks
 
 **Track A: Technical Foundation**
-- RESEARCH-001 → RESEARCH-004
+- RESEARCH-001 → RESEARCH-004, RESEARCH-011, RESEARCH-013
 
 **Track B: Business Model**
-- RESEARCH-002 → RESEARCH-006 → RESEARCH-008
+- RESEARCH-002 → RESEARCH-006 → RESEARCH-008, RESEARCH-015
 
 **Track C: Product & Content**
-- RESEARCH-003 → RESEARCH-007, RESEARCH-009
+- RESEARCH-003 → RESEARCH-007, RESEARCH-009, RESEARCH-014
 
-**Track D: Infrastructure**
-- RESEARCH-005, RESEARCH-010 (can run in parallel with others)
+**Track D: Compliance & Safety**
+- RESEARCH-006 → RESEARCH-010, RESEARCH-012
+
+**Track E: Infrastructure**
+- RESEARCH-005 (can run in parallel with others)
 
 ### 6.3 Critical Path
 
@@ -574,8 +757,10 @@ The minimum path to start implementation:
 1. RESEARCH-001 (Technical) - Must know what's buildable
 2. RESEARCH-002 (Monetization) - Must know business viability
 3. RESEARCH-006 (Legal) - Must know compliance requirements
+4. RESEARCH-011 (Deployment) - Must know platform choice
+5. RESEARCH-012 (Safety) - Must know safety requirements
 
-Total: ~6-8 days before implementation decisions
+Total: ~8-10 days before implementation decisions
 ```
 
 ---
@@ -596,12 +781,17 @@ Total: ~6-8 days before implementation decisions
 | RESEARCH-008 | Growth/Marketing | NOT STARTED | - | - | - |
 | RESEARCH-009 | Localization | NOT STARTED | - | - | - |
 | RESEARCH-010 | Analytics | NOT STARTED | - | - | - |
+| RESEARCH-011 | Deployment/Distribution | NOT STARTED | - | - | - |
+| RESEARCH-012 | Safety/Moderation | NOT STARTED | - | - | - |
+| RESEARCH-013 | Offline Experience | NOT STARTED | - | - | - |
+| RESEARCH-014 | Gamification/Motivation | NOT STARTED | - | - | - |
+| RESEARCH-015 | Teacher/School Integration | NOT STARTED | - | - | - |
 
 ### 7.2 Next Steps
 
 1. **Immediate:** Review this roadmap, adjust priorities if needed
-2. **Week 1:** Execute RESEARCH-001, RESEARCH-002, RESEARCH-006
-3. **Week 2:** Execute RESEARCH-003, RESEARCH-004, RESEARCH-007
+2. **Week 1:** Execute RESEARCH-001, RESEARCH-002, RESEARCH-006, RESEARCH-011, RESEARCH-012
+3. **Week 2:** Execute RESEARCH-003, RESEARCH-004, RESEARCH-007, RESEARCH-013, RESEARCH-014
 4. **Week 3:** Execute remaining research
 5. **Ongoing:** Update findings as implementation reveals new questions
 
