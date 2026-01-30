@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { profileApi } from '../services/api';
 
-interface Profile {
+export interface Profile {
   id: string;
   name: string;
   age?: number;

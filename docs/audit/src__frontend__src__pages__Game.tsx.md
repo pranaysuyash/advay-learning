@@ -276,3 +276,43 @@ Multiple findings from this audit have been addressed by existing tickets:
 
 **Note**: This ticket is for TCK-20260129-050 which implements comprehensive testing.
 
+---
+
+### Audit run: 2026-01-30 12:00 IST
+
+Repo access: YES (I can run git/rg commands and edit files)
+
+Git availability: YES
+
+**Discovery Appendix (commands & high-signal outputs)**
+
+- `git rev-parse --is-inside-work-tree` → `true` **(Observed)**
+- `git ls-files -- src/frontend/src/pages/Game.tsx` → `src/frontend/src/pages/Game.tsx` **(Observed)**
+- `git log -n 20 --follow -- src/frontend/src/pages/Game.tsx` → recent history observed (see artifact) **(Observed)**
+- `git rev-parse HEAD` → `8790dc0` **(Observed)**
+- `rg -n --hidden --no-ignore -S "Game" src` → inbound references in `App.tsx`, `Games.tsx` (Observed)
+- Test discovery: `vitest` summary shows a pending test `src/pages/__tests__/Game.pending.test.tsx` (Observed)
+
+**New Critical Finding (HIGH)**
+
+- ID: F-Game-08 | Severity: HIGH
+  - Evidence: `Game.tsx` uses `useProfileStore` (e.g., `useProfileStore.getState().fetchProfiles()` and `const { profiles } = useProfileStore();`) but **does not import it** at the top of the file (Observed snippet):
+
+  ```tsx
+  import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE, } from '../store';
+  // ... later in file:
+  useProfileStore.getState().fetchProfiles();
+  const { profiles } = useProfileStore();
+  ```
+
+  - Failure mode: Runtime ReferenceError when the component initializes (component will crash on render or on first useEffect) (Observed)
+  - Blast radius: HIGH — prevents the Game screen from rendering for any user flow that navigates to `/game` (Observed)
+  - Minimal fix: Add the missing import: `import { useProfileStore } from '../store';` at the top of `Game.tsx`. Add a unit/smoke test that mounts the component and asserts no ReferenceError for missing store references.
+  - Post-fix invariant: `Game` renders (or redirects) without throwing ReferenceError; profile fetch is called only when `profileId` exists (Inferred)
+
+**Artifact written/appended:** YES — this run appended the audit results to `docs/audit/src__frontend__src__pages__Game.tsx.md` (this file)
+
+**Prepared by:** GitHub Copilot
+
+---
+

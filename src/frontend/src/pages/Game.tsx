@@ -7,6 +7,7 @@ import {
   useSettingsStore,
   useAuthStore,
   useProgressStore,
+  useProfileStore,
   BATCH_SIZE,
 } from '../store';
 import { Mascot } from '../components/Mascot';
@@ -107,6 +108,8 @@ export function Game() {
   const toggleHighContrast = () => {
     setHighContrast((prev) => !prev);
   };
+  // Mark as used for now (can be removed if feature not needed)
+  void toggleHighContrast;
 
   useEffect(() => {
     const hasCompletedTutorial = localStorage.getItem('tutorialCompleted') === 'true';

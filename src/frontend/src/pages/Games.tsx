@@ -16,7 +16,7 @@ interface Game {
 
 export function Games() {
   const navigate = useNavigate();
-  const { profiles, currentProfile } = useProfileStore();
+  const { currentProfile } = useProfileStore();
 
   const availableGames: Game[] = [
     {
