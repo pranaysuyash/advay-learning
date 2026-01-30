@@ -9,7 +9,7 @@ from app.api.deps import get_current_user, get_db
 from app.core.security import verify_password
 from app.core.validation import validate_uuid, ValidationError
 from app.db.models.user import User as UserModel
-from app.schemas.profile import Profile, ProfileCreate
+from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
 from app.schemas.user import User, UserUpdate
 from app.schemas.verification import DeleteAccountRequest, DeleteProfileRequest
 from app.services.audit_service import AuditService

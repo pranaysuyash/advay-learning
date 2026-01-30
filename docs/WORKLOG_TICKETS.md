@@ -1007,6 +1007,65 @@ Acceptance Criteria:
 Status updates:
 - [2026-01-30 11:44 UTC] DONE - Brand-aligned UI refresh applied; frontend tests + production build verified.
 
+---
+
+### TCK-20260130-032 :: Fix ProfileUpdate Import in users.py
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 16:35 UTC
+Status: **DONE**
+Priority: P0
+
+Description:
+Fix NameError in users.py where ProfileUpdate was used but not imported, preventing backend server startup.
+
+Scope contract:
+- In-scope:
+  - Add ProfileUpdate to import statement in users.py
+  - Verify backend server starts successfully
+- Out-of-scope: Fix other type issues in the file
+- Behavior change allowed: YES (bug fix)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/backend/app/api/v1/endpoints/users.py`
+- Branch/PR: main
+- Range: line 12 (import statement) and line 188 (usage)
+
+Acceptance Criteria:
+- [x] ProfileUpdate imported correctly on line 12
+- [x] No NameError when importing users.py module
+- [x] Backend server starts successfully on port 8001
+
+Execution log:
+- [2026-01-30 16:35 UTC] Confirmed ProfileUpdate missing from import | Evidence:
+  - **Command**: `rg -n "from app.schemas.profile import" src/backend/app/api/v1/endpoints/users.py`
+  - **Output**: `from app.schemas.profile import Profile, ProfileCreate`
+  - **Interpretation**: Observed — ProfileUpdate not imported despite being used on line 188
+
+- [2026-01-30 16:35 UTC] Added ProfileUpdate to import | Evidence:
+  - **Command**: `rg -n "from app.schemas.profile import" src/backend/app/api/v1/endpoints/users.py`
+  - **Output**: `from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate`
+  - **Interpretation**: Observed — ProfileUpdate now imported
+
+- [2026-01-30 16:35 UTC] Verified server startup | Evidence:
+  - **Command**: `cd src/backend && source .venv/bin/activate && timeout 10s uvicorn app.main:app --host 0.0.0.0 --port 8001`
+  - **Output**: 
+    ```
+    INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+    INFO:     Started reloader process [45933] using WatchFiles
+    INFO:     Started server process [45935]
+    INFO:     Waiting for application startup.
+    INFO:     Application startup complete.
+    ```
+  - **Interpretation**: Observed — Server starts successfully without NameError
+
+Status updates:
+- [2026-01-30 16:35 UTC] **DONE** — ProfileUpdate import fixed; backend server starts successfully | Evidence: Import and server startup commands successful
+
+---
+
 ## Quick Status Dashboard
 
 | Metric         | Count  |
