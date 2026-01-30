@@ -2564,11 +2564,24 @@ Artifact Created:
 - **Full Audit Report:** `docs/audit/FINGER_NUMBER_SHOW_UX_AUDIT.md`
 - Contains detailed analysis, code snippets, recommendations, and testing checklist
 
+Remediation Tickets Created:
+
+| Finding | Ticket | Status | Description |
+|---------|--------|--------|-------------|
+| FNS-01 | TCK-20260130-015 | OPEN | Add Language/Alphabet Support |
+| FNS-02 | TCK-20260130-020 | IN_PROGRESS | Camera-First Layout |
+| FNS-03 | TCK-20260130-040 | OPEN | Fix Button Visibility |
+| FNS-04 | TCK-20260130-041 | OPEN | Add Hold Progress Indicator |
+| FNS-05 | TCK-20260130-042 | OPEN | Unify Prompt Placement |
+| FNS-06 | TCK-20260130-043 | OPEN | Add Accessibility Features |
+
+Audit Document: `docs/audit/archive/FINGER_NUMBER_SHOW_UX_AUDIT.md`
+
 Next Actions:
-1. Create remediation tickets for P1 findings (FNS-01, FNS-02)
-2. Schedule design review for layout changes
-3. Prioritize language support addition
-4. Plan accessibility improvements
+1. ~~Create remediation tickets~~ ✅ DONE - All 6 findings have tickets
+2. Schedule design review for layout changes (TCK-20260130-020)
+3. Prioritize language support addition (TCK-20260130-015)
+4. Plan accessibility improvements (TCK-20260130-043)
 
 Evidence:
 
@@ -2777,7 +2790,140 @@ Risks/notes:
 - Finger counting logic may need adjustment for letters
 - May require significant UI restructuring of FingerNumberShow.tsx
 - Should test thoroughly with all 5 languages
-- Consider reusing Game.tsx logic for language/alphabet display
+- Consider reusing AlphabetGame.tsx logic for language/alphabet display
+
+---
+
+### TCK-20260130-040 :: Fix Start Button Visibility in Finger Number Show
+
+Type: REMEDIATION / UX
+Owner: UNASSIGNED
+Created: 2026-01-30 17:00 IST
+Status: **OPEN** 🔵
+Priority: P2 (High)
+
+Description:
+Fix the Start Game button visibility issue in Finger Number Show where users report needing browser console to find and click the button.
+
+Audit Finding: FNS-03
+
+Scope contract:
+- In-scope:
+  - Increase button z-index to ensure it's above overlays
+  - Add prominent visual ring/border to button
+  - Increase touch target size (min 56px height)
+  - Add play icon to button for visual affordance
+  - Test button visibility across different screen sizes
+- Out-of-scope:
+  - Changing game logic or flow
+  - Redesigning entire start screen
+
+Acceptance Criteria:
+- [ ] Button clearly visible without console inspection
+- [ ] Button has visual ring/border indicating interactivity
+- [ ] Touch target minimum 56px height
+- [ ] Play icon visible on button
+- [ ] Tested on mobile and desktop viewports
+- [ ] No z-index conflicts with camera preview
+
+---
+
+### TCK-20260130-041 :: Add Hold Progress Indicator for Number Matching
+
+Type: REMEDIATION / UX
+Owner: UNASSIGNED
+Created: 2026-01-30 17:00 IST
+Status: **OPEN** 🔵
+Priority: P2 (High)
+
+Description:
+Add visual feedback for the 450ms hold requirement when matching numbers in Finger Number Show. Users currently don't understand why the game doesn't immediately register a match.
+
+Audit Finding: FNS-04
+
+Scope contract:
+- In-scope:
+  - Add "Hold it!" text when number is matched but hold time not yet reached
+  - Add progress bar/timer showing 450ms hold requirement
+  - Make detected count badge pulse/glow when match detected
+  - Add clearer success feedback animation
+  - Optional: Add manual "Next" button instead of auto-advance
+- Out-of-scope:
+  - Changing the 450ms hold duration
+  - Changing success detection logic
+
+Acceptance Criteria:
+- [ ] "Hold it!" text appears when number matched
+- [ ] Progress bar shows filling over 450ms
+- [ ] Detected count glows/pulses green when matched
+- [ ] Clear success celebration before advancing
+- [ ] User testing confirms confusion is resolved
+
+---
+
+### TCK-20260130-042 :: Unify Prompt Placement in Finger Number Show
+
+Type: REMEDIATION / UX
+Owner: UNASSIGNED
+Created: 2026-01-30 17:00 IST
+Status: **OPEN** 🔵
+Priority: P3 (Medium)
+
+Description:
+Unify the target number display to a single persistent location instead of showing in center then moving to top-left.
+
+Audit Finding: FNS-05
+
+Scope contract:
+- In-scope:
+  - Create persistent target card (top-left)
+  - Create detected count card (top-right) with match state
+  - Remove center overlay prompt stage
+  - Ensure both cards visible throughout gameplay
+- Out-of-scope:
+  - Changing camera layout (covered by TCK-20260130-020)
+  - Redesigning entire game UI
+
+Acceptance Criteria:
+- [ ] Target number in persistent card (top-left)
+- [ ] Detected count in persistent card (top-right)
+- [ ] Cards visible throughout gameplay
+- [ ] No center overlay prompt stage
+- [ ] Visual distinction between target and detected values
+
+---
+
+### TCK-20260130-043 :: Add Accessibility Features to Finger Number Show
+
+Type: REMEDIATION / A11Y
+Owner: UNASSIGNED
+Created: 2026-01-30 17:00 IST
+Status: **OPEN** 🔵
+Priority: P3 (Medium)
+
+Description:
+Add keyboard navigation, ARIA labels, and screen reader support to Finger Number Show game.
+
+Audit Finding: FNS-06
+
+Scope contract:
+- In-scope:
+  - Add keyboard controls (Space/Enter to start/stop)
+  - Add ARIA live region for announcements
+  - Add aria-label to webcam and buttons
+  - Ensure focus indicators visible
+  - Add text alternatives for color-only feedback
+- Out-of-scope:
+  - Full WCAG 2.1 AA compliance audit
+  - Screen reader testing with actual users
+
+Acceptance Criteria:
+- [ ] Space/Enter starts and stops game
+- [ ] ARIA live region announces score changes
+- [ ] Webcam has descriptive aria-label
+- [ ] All buttons have aria-labels
+- [ ] Focus indicators visible on all interactive elements
+- [ ] Colorblind-friendly feedback (not just color)
 
 ---
 
@@ -16854,7 +17000,214 @@ Priority: P1
 - [ ] Shows full language name (not just code)
 - [ ] Updates when profile language changes
 
----
+----
+
+### TCK-20260201-001 :: Analytics Phase 1 - Extend Data Model for Multi-Game Tracking
+
+Type: INFRASTRUCTURE / DATABASE
+Owner: AI Assistant
+Created: 2026-01-31 00:15 UTC
+Status: **OPEN** 🔵
+Priority: P1
+
+**Context**: Current tracking only supports Alphabet Tracing (letters). Need unified model for all 4 games.
+
+**Scope**:
+
+- Extend `progress` table to include `game_type` field
+- Create `game_sessions` table for session-level metrics
+- Create `skill_metrics` table for literacy/numeracy/motor scores
+- Migration for existing letter-only data
+- Design based on `docs/audit/ANALYTICS_TRACKING_AUDIT.md`
+
+**Schema Changes**:
+
+```sql
+-- Add game_type to progress
+ALTER TABLE progress ADD COLUMN game_type VARCHAR(50);
+
+-- New table: game_sessions
+CREATE TABLE game_sessions (
+  id UUID PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id),
+  game_type VARCHAR(50),
+  started_at TIMESTAMP,
+  ended_at TIMESTAMP,
+  duration_seconds INT,
+  score INT,
+  metrics JSONB
+);
+
+-- New table: skill_metrics (aggregated weekly)
+CREATE TABLE skill_metrics (
+  id UUID PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id),
+  week_start DATE,
+  literacy_score INT,
+  numeracy_score INT,
+  motor_skills_score INT,
+  engagement_score INT
+);
+```
+
+**Acceptance Criteria**:
+
+- [ ] Database migrations created and tested
+- [ ] Existing letter data migrated with game_type='alphabet_tracing'
+- [ ] API endpoints updated to support new schema
+- [ ] No data loss during migration
+- [ ] Rollback plan documented
+
+**Files to Modify**:
+
+- `src/backend/app/db/models/progress.py`
+- `src/backend/app/schemas/progress.py`
+- `src/backend/app/api/v1/endpoints/progress.py`
+- Alembic migrations
+
+----
+
+### TCK-20260201-002 :: Analytics Phase 2 - Instrument All Games with Tracking
+
+Type: IMPLEMENTATION
+Owner: AI Assistant
+Created: 2026-01-31 00:15 UTC
+Status: **OPEN** 🔵
+Priority: P1
+
+**Context**: Add tracking hooks to all games based on schemas from Phase 1.
+
+**Games to Instrument**:
+
+| Game | Metrics to Track | Status |
+|------|------------------|--------|
+| Alphabet Tracing | ✅ Already tracked | Complete |
+| FingerNumberShow | Numbers shown, correct counts, accuracy | New |
+| ConnectTheDots | Completion time, path accuracy | New |
+| LetterHunt | Letters found, time to find | New |
+
+**Implementation Details**:
+
+**FingerNumberShow** (`src/frontend/src/games/FingerNumberShow.tsx`):
+- Track: target number, shown fingers, correct/incorrect
+- Track: detection confidence, completion time
+- Send to: POST /api/v1/progress
+
+**ConnectTheDots** (`src/frontend/src/games/ConnectTheDots.tsx`):
+- Track: puzzle size, completion time, dot connection accuracy
+- Track: path deviation from ideal line
+
+**LetterHunt** (`src/frontend/src/games/LetterHunt.tsx`):
+- Track: letters found, letters missed, time per letter
+- Track: distractor clicks (wrong letters clicked)
+
+**Acceptance Criteria**:
+
+- [ ] FingerNumberShow sends progress events
+- [ ] ConnectTheDots sends progress events
+- [ ] LetterHunt sends progress events
+- [ ] All games include game_type field
+- [ ] Progress shows in database correctly
+- [ ] No performance impact on gameplay
+
+----
+
+### TCK-20260201-003 :: Analytics Phase 3 - Redesign Dashboard for Multi-Game View
+
+Type: UI/UX
+Owner: AI Assistant
+Created: 2026-01-31 00:15 UTC
+Status: **OPEN** 🔵
+Priority: P1
+
+**Context**: Dashboard currently shows letter-only stats. Need unified view for all games.
+
+**Design**: Based on `docs/audit/ANALYTICS_TRACKING_AUDIT.md` Section "Unified Dashboard Design"
+
+**New Dashboard Layout**:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Overall Progress                                       │
+│  ┌──────────┬──────────┬──────────┬──────────┐         │
+│  │ Literacy │ Numeracy │ Motor    │ Sessions │         │
+│  │   65%    │   40%    │   72%    │   12     │         │
+│  └──────────┴──────────┴──────────┴──────────┘         │
+├─────────────────────────────────────────────────────────┤
+│  Game Activity                                          │
+│  Alphabet Tracing    ████████████░░░  45 min            │
+│  Finger Numbers      ██████░░░░░░░░░  20 min            │
+│  Connect the Dots    ███░░░░░░░░░░░░  10 min            │
+│  Letter Hunt         █████░░░░░░░░░░  15 min            │
+├─────────────────────────────────────────────────────────┤
+│  Skill Development (Last 30 Days)                       │
+│  Letter Recognition:  ████████░░  +23%                  │
+│  Number Counting:     ██████░░░░  +15%                  │
+│  Hand Tracking:       █████████░  +31%                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Acceptance Criteria**:
+
+- [ ] Replace "Letters Learned" with 4 skill categories
+- [ ] Add game activity breakdown section
+- [ ] Add skill development trend charts
+- [ ] Remove letter-only focus from UI
+- [ ] Mobile responsive design
+- [ ] Loading states for async data
+
+**Files to Modify**:
+
+- `src/frontend/src/pages/Dashboard.tsx`
+- New component: `src/frontend/src/components/GameActivityChart.tsx`
+- New component: `src/frontend/src/components/SkillTrendChart.tsx`
+
+----
+
+### TCK-20260201-004 :: Analytics Phase 4 - Parent Insights & Notifications
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-31 00:15 UTC
+Status: **OPEN** 🔵
+Priority: P2
+
+**Context**: Help parents understand their child's progress with automated insights.
+
+**Features**:
+
+1. **Weekly Summary Email**
+   - Total play time per game
+   - Skills improvement %
+   - Areas needing practice
+   - Suggested activities
+
+2. **Skill Milestone Notifications**
+   - "Child mastered all numbers 1-10!"
+   - "Accuracy improved 20% this week!"
+   - "Completed 5 tracing sessions!"
+
+3. **Game Recommendations**
+   - "Try Connect the Dots to improve motor skills"
+   - "Letter Hunt can help with letter recognition"
+
+**Acceptance Criteria**:
+
+- [ ] Weekly email template created
+- [ ] Email sending job (cron/background)
+- [ ] Milestone detection logic
+- [ ] In-app milestone notifications
+- [ ] Recommendation engine (rule-based)
+- [ ] Parent can opt-out of emails
+
+**Files to Create/Modify**:
+
+- `src/backend/app/services/email_service.py`
+- `src/backend/app/services/insights_service.py`
+- `src/backend/app/tasks/weekly_summary.py`
+- Email templates in `src/backend/templates/emails/`
+
+----
 
 ### TCK-20260129-093 :: FIX Game Language Selector (Separate from UI Language)
 
