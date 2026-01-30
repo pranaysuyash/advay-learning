@@ -153,10 +153,21 @@ Comprehensive audit of the Advay Vision Learning frontend interface from a user 
 
 ## Next Steps
 
-1. Create remediation tickets for HIGH priority issues
+1. ~~Create remediation tickets for HIGH priority issues~~ ✅ COMPLETED
+   - Created TCK-20260131-002: Fix Accessibility & Form Issues
 2. Schedule accessibility testing
 3. Plan user testing with children
 4. Update design system documentation
+
+---
+
+## Related Tickets
+
+**TCK-20260131-002: Fix Accessibility & Form Issues**
+- Status: OPEN
+- Created: 2026-01-31 00:00 UTC
+- Addresses all HIGH and MEDIUM findings from this audit
+- See docs/tickets/TCK-20260131-002.md for full details
 
 ## Related Files
 

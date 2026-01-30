@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { useSettingsStore, useProgressStore } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
+import { Button, Card, CardHeader } from '../components/ui';
+import { useConfirm } from '../components/ui/ConfirmDialog';
+import { useToast } from '../components/ui/Toast';
 
 export function Settings() {
   const settings = useSettingsStore();
@@ -12,11 +15,11 @@ export function Settings() {
     getUnlockedBatches,
     getMasteredLettersCount,
   } = useProgressStore();
+  const confirm = useConfirm();
+  const toast = useToast();
   const [cameraPermission, setCameraPermission] = useState<
     'granted' | 'denied' | 'prompt'
   >('prompt');
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [parentGatePassed, setParentGatePassed] = useState(false);
   const [holdingGate, setHoldingGate] = useState(false);
   const [holdDuration, setHoldDuration] = useState(0);
@@ -154,7 +157,7 @@ export function Settings() {
 
             <div className='max-w-2xl space-y-6'>
               {/* Learning Preferences */}
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <h2 className='text-xl font-semibold mb-4'>
                   Learning Preferences
                 </h2>
@@ -170,7 +173,7 @@ export function Settings() {
                         settings.updateSettings({ language: e.target.value })
                       }
                       aria-label='Application UI language'
-                      className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                      className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
                       <option value='english'>English</option>
                       <option value='hindi'>Hindi (हिन्दी)</option>
@@ -192,7 +195,7 @@ export function Settings() {
                         })
                       }
                       aria-label='Game content language'
-                      className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                      className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
                       <option value='english'>English</option>
                       <option value='hindi'>Hindi (हिन्दी)</option>
@@ -210,7 +213,7 @@ export function Settings() {
                         settings.updateSettings({ difficulty: e.target.value })
                       }
                       aria-label='Game difficulty level'
-                      className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                      className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
                       <option value='easy'>Easy</option>
                       <option value='medium'>Medium</option>
@@ -222,7 +225,7 @@ export function Settings() {
                     <label className='block text-sm font-medium text-white/80 mb-2'>
                       Sound Effects
                     </label>
-                    <div className='flex items-center justify-between bg-white/5 border border-white/20 rounded-lg px-4 py-3'>
+                    <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                       <span className='text-white/60'>Enable sounds</span>
                       <button
                         onClick={() =>
@@ -253,11 +256,11 @@ export function Settings() {
               </div>
 
               {/* Camera Settings */}
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <h2 className='text-xl font-semibold mb-4'>Camera Settings</h2>
 
                 <div className='space-y-4'>
-                  <div className='flex items-center justify-between bg-white/5 border border-white/20 rounded-lg px-4 py-3'>
+                  <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Enable Camera</div>
                       <div className='text-sm text-white/60'>
@@ -316,7 +319,7 @@ export function Settings() {
                   </div>
 
                   {/* Privacy Note */}
-                  <div className='text-sm text-white/50 bg-white/5 rounded-lg p-3'>
+                  <div className='text-sm text-white/50 bg-white/10 rounded-lg p-3'>
                     <strong className='text-white/70'>Privacy:</strong> Camera
                     data is processed locally on your device. No video is sent
                     to our servers.
@@ -325,7 +328,7 @@ export function Settings() {
               </div>
 
               {/* Parental Controls */}
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <h2 className='text-xl font-semibold mb-4'>
                   Parental Controls
                 </h2>
@@ -346,7 +349,7 @@ export function Settings() {
                         })
                       }
                       aria-label='Daily time limit'
-                      className='px-3 py-2 bg-white/10 border border-white/20 rounded-lg'
+                      className='px-3 py-2 bg-white/10 border border-border rounded-lg shadow-sm'
                     >
                       <option value={0}>No limit</option>
                       <option value={15}>15 minutes</option>
@@ -356,7 +359,7 @@ export function Settings() {
                     </select>
                   </div>
 
-                  <div className='flex items-center justify-between bg-white/5 border border-white/20 rounded-lg px-4 py-3'>
+                  <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Show Letter Hints</div>
                       <div className='text-sm text-white/60'>
@@ -396,9 +399,9 @@ export function Settings() {
 
                 <div className='space-y-4'>
                   {/* Progress Summary */}
-                  <div className='bg-white/5 rounded-lg p-4'>
+                  <div className='bg-white/10 rounded-lg p-4 shadow-sm'>
                     <div className='text-sm text-white/60 mb-2'>
-                      Learning Progress
+                      Alphabet Learning Progress
                     </div>
                     <div className='text-2xl font-bold'>
                       {getMasteredLettersCount(settings.language)} /{' '}
@@ -410,113 +413,89 @@ export function Settings() {
                     </div>
                   </div>
 
-                  <button
-                    className='w-full px-4 py-3 bg-green-500/20 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition text-left flex justify-between items-center'
-                    onClick={() => setShowUnlockConfirm(true)}
-                  >
-                    <span className="flex items-center gap-2">
-                      <UIIcon name="unlock" size={18} />
-                      Unlock All Letters
-                    </span>
-                    <span className='text-white/40 text-sm'>
-                      Skip progression
-                    </span>
-                  </button>
-
-                  <button
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-left flex justify-between items-center'
-                    onClick={() => {
-                      if (
-                        confirm(
-                          'Reset all letter progress? This cannot be undone.',
-                        )
-                      ) {
-                        resetProgress(settings.language);
+                  <Button
+                    variant="success"
+                    fullWidth
+                    icon="unlock"
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        title: 'Unlock All Letters?',
+                        message: 'This will unlock all letters immediately. Your child will skip the progressive learning experience.',
+                        confirmText: 'Yes, Unlock All',
+                        cancelText: 'Cancel',
+                        type: 'warning',
+                      });
+                      if (confirmed) {
+                        const totalLetters = getAlphabet(settings.language).letters.length;
+                        const totalBatches = Math.ceil(totalLetters / 5);
+                        unlockAllBatches(settings.language, totalBatches);
+                        toast.showToast('All letters unlocked!', 'success');
                       }
                     }}
                   >
-                    <span>🔄 Reset Letter Progress</span>
-                    <span className='text-white/40 text-sm'>Start over</span>
-                  </button>
-                </div>
+                    Unlock All Letters
+                  </Button>
 
-                {showUnlockConfirm && (
-                  <div className='mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg'>
-                    <p className='text-yellow-300 mb-3 flex items-start gap-2'>
-                      <UIIcon name="warning" size={18} className="flex-shrink-0 mt-0.5" />
-                      This will unlock all letters immediately. Your child
-                      will skip the progressive learning experience.
-                    </p>
-                    <div className='flex gap-2'>
-                      <button
-                        onClick={() => {
-                          const totalLetters = getAlphabet(settings.language)
-                            .letters.length;
-                          const totalBatches = Math.ceil(totalLetters / 5);
-                          unlockAllBatches(settings.language, totalBatches);
-                          setShowUnlockConfirm(false);
-                        }}
-                        className='px-4 py-2 bg-yellow-500 rounded-lg hover:bg-yellow-600 transition'
-                      >
-                        Yes, Unlock All
-                      </button>
-                      <button
-                        onClick={() => setShowUnlockConfirm(false)}
-                        className='px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition'
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    icon="warning"
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        title: 'Reset Letter Progress?',
+                        message: 'This will reset all letter progress. This cannot be undone.',
+                        confirmText: 'Yes, Reset',
+                        cancelText: 'Cancel',
+                        type: 'danger',
+                      });
+                      if (confirmed) {
+                        resetProgress(settings.language);
+                        toast.showToast('Letter progress reset', 'success');
+                      }
+                    }}
+                  >
+                    Reset Letter Progress
+                  </Button>
+                </div>
               </div>
 
               {/* Data & Privacy */}
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <h2 className='text-xl font-semibold mb-4'>Data & Privacy</h2>
 
                 <div className='space-y-3'>
-                  <button
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-left flex justify-between items-center'
-                    onClick={() => alert('Export feature coming soon!')}
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    icon="download"
+                    onClick={() => {
+                      toast.showToast('Export feature coming soon!', 'info');
+                    }}
                   >
-                    <span className="flex items-center gap-2">
-                      <UIIcon name="download" size={18} />
-                      Export Learning Data
-                    </span>
-                    <span className='text-white/40 text-sm'>JSON</span>
-                  </button>
+                    Export Learning Data
+                  </Button>
 
-                  <button
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-left flex justify-between items-center'
-                    onClick={() => setShowResetConfirm(true)}
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    icon="warning"
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        title: 'Reset All Settings?',
+                        message: 'This will reset all settings to default. This cannot be undone.',
+                        confirmText: 'Yes, Reset',
+                        cancelText: 'Cancel',
+                        type: 'danger',
+                      });
+                      if (confirmed) {
+                        handleReset();
+                        toast.showToast('Settings reset to default', 'success');
+                      }
+                    }}
                   >
-                    <span>🔄 Reset All Settings</span>
-                    <span className='text-white/40 text-sm'>Cannot undo</span>
-                  </button>
+                    Reset All Settings
+                  </Button>
                 </div>
-
-                {showResetConfirm && (
-                  <div className='mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg'>
-                    <p className='text-red-300 mb-3'>
-                      Are you sure? This will reset all settings to default.
-                    </p>
-                    <div className='flex gap-2'>
-                      <button
-                        onClick={handleReset}
-                        className='px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 transition'
-                      >
-                        Yes, Reset
-                      </button>
-                      <button
-                        onClick={() => setShowResetConfirm(false)}
-                        className='px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition'
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* App Info */}

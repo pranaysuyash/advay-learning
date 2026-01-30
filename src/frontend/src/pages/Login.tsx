@@ -51,7 +51,7 @@ export function Login() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/5 border border-white/10 rounded-xl p-8"
+        className="bg-white/10 border border-border rounded-xl p-8 shadow-sm"
       >
         <h1 className="text-3xl font-bold text-center mb-2">Welcome Back</h1>
         <p className="text-white/60 text-center mb-8">Sign in to continue learning</p>
@@ -85,7 +85,7 @@ export function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition"
+              className="w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition"
               placeholder="you@example.com"
               required
               disabled={isLoading}
@@ -100,7 +100,7 @@ export function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition"
+              className="w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition"
               placeholder="••••••••"
               required
               disabled={isLoading}

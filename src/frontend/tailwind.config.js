@@ -13,6 +13,7 @@ export default {
         'bg-tertiary': '#F5F0E8',
 
         // Brand colors
+        // See docs/BRAND_KIT.md for complete brand guidelines
         'brand-primary': {
           DEFAULT: '#E07A5F',
           hover: '#C96A52',
@@ -23,6 +24,24 @@ export default {
           hover: '#6BA3C5',
         },
         'brand-accent': '#F2CC8F',
+
+        // Brand colors from architecture
+        'pip': {
+          orange: '#E85D04',      // Primary brand color
+          rust: '#D4561C',        // Hover states
+          light: '#F26C22',       // Illustrations
+          cream: '#FFF8F0',       // Backgrounds
+          blush: '#FFB5A7',       // Accents
+        },
+        'advay': {
+          slate: '#2D3748',       // Text, tech
+        },
+        'discovery': {
+          cream: '#FFF8F0',       // Primary background
+        },
+        'vision': {
+          blue: '#3B82F6',        // AI features, links
+        },
 
         // Semantic colors
         'success': {

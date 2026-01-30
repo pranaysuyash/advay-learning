@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Background - Discovery Cream -->
+  <rect width="800" height="600" fill="#FFF8F0"/>
+  
+  <!-- Title - Advay Slate -->
+  <text x="400" y="40" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="24" fill="#2D3748">
+    Advay — Brand Color Palette
+  </text>
+  
+  <!-- Primary Colors -->
+  <text x="40" y="80" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Primary Brand Colors</text>
+  
+  <g transform="translate(40, 100)">
+    <rect width="120" height="80" rx="12" fill="#E85D04"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Pip Orange</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#E85D04</text>
+  </g>
+  
+  <g transform="translate(180, 100)">
+    <rect width="120" height="80" rx="12" fill="#2D3748"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Advay Slate</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#2D3748</text>
+  </g>
+  
+  <g transform="translate(320, 100)">
+    <rect width="120" height="80" rx="12" fill="#3B82F6"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Vision Blue</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#3B82F6</text>
+  </g>
+  
+  <!-- Background Colors -->
+  <text x="40" y="220" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Background Colors</text>
+  
+  <g transform="translate(40, 240)">
+    <rect width="120" height="80" rx="12" fill="#FFF8F0" stroke="#E5E5E5" stroke-width="2"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="#2D3748">Discovery Cream</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">#FFF8F0</text>
+  </g>
+  
+  <g transform="translate(180, 240)">
+    <rect width="120" height="80" rx="12" fill="#F5F0E8"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="#2D3748">Warm Sand</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">#F5F0E8</text>
+  </g>
+  
+  <g transform="translate(320, 240)">
+    <rect width="120" height="80" rx="12" fill="#FFFFFF" stroke="#E5E5E5" stroke-width="2"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="#2D3748">Pure White</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">#FFFFFF</text>
+  </g>
+  
+  <!-- Supporting Colors -->
+  <text x="40" y="360" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Supporting Colors</text>
+  
+  <g transform="translate(40, 380)">
+    <rect width="120" height="80" rx="12" fill="#81B29A"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Success Sage</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#81B29A</text>
+  </g>
+  
+  <g transform="translate(180, 380)">
+    <rect width="120" height="80" rx="12" fill="#F2CC8F"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="#2D3748">Sunny Yellow</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#2D3748">#F2CC8F</text>
+  </g>
+  
+  <g transform="translate(320, 380)">
+    <rect width="120" height="80" rx="12" fill="#E07A5F"/>
+    <text x="60" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Terracotta</text>
+    <text x="60" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#E07A5F</text>
+  </g>
+  
+  <!-- Mascot Colors -->
+  <text x="480" y="80" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Pip Illustration Colors</text>
+  
+  <g transform="translate(480, 100)">
+    <rect width="100" height="80" rx="12" fill="#E85D04"/>
+    <text x="50" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Pip Orange</text>
+    <text x="50" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#E85D04</text>
+  </g>
+  
+  <g transform="translate(600, 100)">
+    <rect width="100" height="80" rx="12" fill="#F26C22"/>
+    <text x="50" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="white">Orange Light</text>
+    <text x="50" y="125" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="white">#F26C22</text>
+  </g>
+  
+  <g transform="translate(720, 100)">
+    <rect width="60" height="80" rx="12" fill="#FFF8F0"/>
+    <rect x="10" y="10" width="40" height="60" rx="8" fill="none" stroke="#E5E5E5" stroke-width="1"/>
+    <text x="30" y="105" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="700" font-size="12" fill="#2D3748">Cream</text>
+    <text x="30" y="120" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="600" font-size="10" fill="#4A5568">#FFF8F0</text>
+  </g>
+  
+  <!-- Logo Mark Preview -->
+  <text x="480" y="220" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Logo Mark</text>
+  
+  <g transform="translate(520, 250)">
+    <circle cx="50" cy="55" r="25" fill="#E85D04"/>
+    <circle cx="28" cy="32" r="12" fill="#E85D04"/>
+    <circle cx="50" cy="22" r="12" fill="#E85D04"/>
+    <circle cx="72" cy="32" r="12" fill="#E85D04"/>
+    <ellipse cx="42" cy="48" rx="8" ry="6" fill="#FFF8F0" opacity="0.4"/>
+  </g>
+  
+  <!-- Typography Sample -->
+  <text x="480" y="360" font-family="Nunito, sans-serif" font-weight="700" font-size="16" fill="#2D3748">Typography</text>
+  
+  <text x="480" y="390" font-family="Nunito, sans-serif" font-weight="800" font-size="24" fill="#2D3748">Nunito Bold 800</text>
+  <text x="480" y="415" font-family="Nunito, sans-serif" font-weight="600" font-size="16" fill="#4A5568">Nunito SemiBold 600</text>
+  <text x="480" y="440" font-family="Nunito, sans-serif" font-weight="400" font-size="14" fill="#718096">Nunito Regular 400</text>
+  
+  <!-- Brand Meaning -->
+  <text x="480" y="480" font-family="Nunito, sans-serif" font-weight="700" font-size="14" fill="#2D3748">Brand Meaning</text>
+  <text x="480" y="505" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">A - Active</text>
+  <text x="480" y="525" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">D - Discovery</text>
+  <text x="480" y="545" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">V - Vision</text>
+  <text x="560" y="505" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">A - AI</text>
+  <text x="560" y="525" font-family="Nunito, sans-serif" font-weight="600" font-size="12" fill="#4A5568">Y - Youth</text>
+  <text x="560" y="545" font-family="Nunito, sans-serif" font-weight="700" font-size="11" fill="#E85D04">Sanskrit: Unique</text>
+</svg>

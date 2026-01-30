@@ -3,7 +3,10 @@
 ## Prerequisites
 
 - **Python**: 3.13 or higher
-- **Node.js**: 18 or higher
+- **Node.js**: 24 or higher (use `nvm` or `volta` to manage local Node versions)
+
+> Tip: To switch to the recommended Node version (nvm): `nvm use 24`
+
 - **PostgreSQL**: 14 or higher
 - **uv**: Python package manager
 - **Git**: Version control
@@ -122,6 +125,7 @@ npm test
 ## IDE Setup
 
 ### VS Code Extensions
+
 - Python
 - Pylance
 - ESLint

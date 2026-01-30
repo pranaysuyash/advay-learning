@@ -707,3 +707,149 @@ The UI Upgrade Project is considered complete when:
 **Document Owner:** Development Team Lead
 
 **Remember:** This is a living document. Update as we learn more during implementation. Scope discipline is critical - stay focused on deliverables and avoid feature creep.
+
+## Appendix A: MediaPipe Educational Features Research
+
+**Date:** 2026-01-30 00:45 UTC
+
+**Status:** COMPLETED ✅
+
+**Artifacts Created:**
+
+1. **docs/MEDIAPIPE_EDUCATIONAL_FEATURES.md** (~15,000 words)
+   - Comprehensive MediaPipe capabilities documentation
+   - 50+ educational features across 8 domains
+   - Technical implementation patterns
+   - Architecture recommendations
+   - Best practices and constraints
+
+2. **prompts/implementation/camera-game-v1.0.md** (~5,000 words)
+   - Generic prompt for camera-based games
+   - Architecture patterns (camera manager, task runner, game engine)
+   - Best practices (smoothing, performance, safety)
+
+3. **prompts/implementation/educational-feature-v1.0.md** (~5,000 words)
+   - Specific prompt for educational features
+   - Feature patterns (gesture recognition, vocabulary, expressions)
+   - Language support (Hindi, Kannada, English)
+   - Component structures
+
+**Worklog Tickets Created:** 8
+- TCK-20260129-150: MediaPipe Capabilities & Features (RESEARCH)
+- TCK-20260129-200: Implement Finger Number Show (FEATURE)
+- TCK-20260129-201: Implement Connect-the-Dots (FEATURE)
+- TCK-20260129-203: Implement Simon Says Body (FEATURE)
+- TCK-20260129-204: Implement Freeze Dance (FEATURE)
+- TCK-20260129-205: Implement Yoga Animals (FEATURE)
+- TCK-2026-0129-206: Implement Reach Stars (FEATURE)
+- TCK-20260129-207: Implement Tap Count (FEATURE)
+- TCK-20260129-208: Implement Sort into Buckets (FEATURE)
+- TCK-20260129-209: Implement Free Paint Mode (ENHANCEMENT)
+
+**Summary:**
+- All MediaPipe capabilities documented with examples
+- 50+ educational features cataloged
+- Generic implementation prompts created
+- 8 MVP game tickets ready for implementation
+- Reusable component patterns defined
+- Clear technical architecture established
+
+---
+
+## Appendix B: Educational Extensions Roadmap
+
+**Date:** 2026-01-30 01:00 UTC
+
+**Status:** READY FOR IMPLEMENTATION
+
+**Extended Timeline (4+ Months):**
+
+**Month 1-2:** Core Educational Features (8 games)
+- Week 1-2: Finger Number Show, Connect-the-Dots
+- Week 3-4: Simon Says Body, Freeze Dance, Yoga Animals
+- Week 5-8: Reach Stars, Tap Count, Sort Buckets
+- Week 9-12: Free Paint Mode (brush system integration)
+
+**Month 3-4:** Language & Vocabulary Features
+- Week 1-2: Hindi Greetings (6 gestures), Point and Say
+- Week 3-4: Vocabulary Builder (20+ objects), Show and Tell
+- Week 5-8: Expression Mirror (6+ expressions), Mouth Shapes
+- Week 9-12: Head Orientation (4 directions)
+
+**Month 5-6:** Advanced Features
+- Week 1-2: Scavenger Hunt (real-world object detection)
+- Week 3-4: Story Quests (segmentation + tasks)
+- Week 5-8: Pattern Builder (color/shape patterns)
+- Week 9-12: Logic & Memory (gesture sequences, puzzles)
+
+**Month 7-8: Social & Creative
+- Week 1-2: Feelings Story (emotional awareness)
+- Week 3-4: Sticker Book & Collectibles (achievement system integration)
+- Week 5-8: Magic Background Worlds (Space, Underwater, Jungle)
+
+---
+
+## Updated Success Metrics
+
+**Engagement Targets:**
+- Daily Active Users: +25% (from current baseline)
+- Session Duration: 15-20 minutes (from 10-15 minutes)
+- Retention: 50% 7-day retention (from 40%)
+- Completion Rate: 80% game completion
+
+**Learning Targets:**
+- 10 new words/numbers per week
+- 50+ gestures mastered
+- 20+ activities completed per session
+- 6+ new colors learned per month
+- 5- patterns completed per month
+
+**Technical Targets:**
+- Maintain 25-30 FPS with all games active
+- Bundle size increase <15% from baseline
+- Lighthouse score >90 on all pages
+- No regression in existing features
+
+---
+
+## Related Documents
+
+1. **docs/MEDIAPIPE_EDUCATIONAL_FEATURES.md** - MediaPipe capabilities guide
+2. **prompts/implementation/camera-game-v1.0.md** - Generic camera game prompt
+3. **prompts/implementation/educational-feature-v1.0.md** - Educational feature prompt
+4. **docs/UI_UPGRADE_PLAN.md** - Master plan (this document, updated)
+5. **docs/WORKLOG_TICKETS.md** - All tickets and status
+
+---
+
+**Document Status:** UPDATED ✅
+**Version:** 2.0 (comprehensive expansion)
+**Last Updated:** 2026-01-30 01:00 UTC
+
+---
+
+## Next Steps
+
+**For Development Team:**
+
+1. **Review Documentation:** Read all 3 documents created above
+2. **Choose Priority:** Decide which 8 MVP games to implement first
+3. **Start Implementation:** Use prompts to implement chosen games
+4. **Follow Process:** For each game, follow the prompt's steps
+5. **Update Worklog:** Mark tickets DONE with evidence as you complete each
+
+**Recommended Starting Point:**
+Implement **Finger Number Show** (TCK-20260129-200) first - it's simple, uses just Hand Landmarker (no complex ML), educational value is clear, builds on existing letter tracing foundation.
+
+**After That:**
+- **Connect-the-Dots** (TCK-20260129-201) - Fine motor skill development
+- **Simon Says Body** (TCK-20260129-203) - Gross motor + following instructions
+- **Freeze Dance** (TCK-20260129-204) - Rhythm + pose control
+
+**Weeks 5-8:**
+- **Weeks 1-2:** Complete all 8 MVP games
+- **Week 3-4:** Add 2 educational features (Hindi greetings, Vocabulary Builder)
+- **Week 5-8:** Integrate brush system (Phase 1 from UI upgrade plan) with educational extensions
+
+---
+

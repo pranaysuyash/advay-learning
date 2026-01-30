@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <!-- Background -->
+  <rect width="200" height="160" rx="16" fill="#FFF8F0"/>
+  
+  <!-- Confetti pieces -->
+  <g fill="#E85D04">
+    <rect x="20" y="30" width="6" height="10" rx="1" transform="rotate(15 23 35)"/>
+    <rect x="170" y="40" width="6" height="10" rx="1" transform="rotate(-20 173 45)"/>
+    <rect x="30" y="120" width="5" height="8" rx="1" transform="rotate(45 32.5 124)"/>
+  </g>
+  <g fill="#3B82F6">
+    <rect x="180" y="100" width="6" height="10" rx="1" transform="rotate(30 183 105)"/>
+    <rect x="15" y="80" width="5" height="8" rx="1" transform="rotate(-15 17.5 84)"/>
+  </g>
+  <g fill="#81B29A">
+    <rect x="160" y="25" width="5" height="8" rx="1" transform="rotate(60 162.5 29)"/>
+    <rect x="25" y="55" width="6" height="10" rx="1" transform="rotate(-45 28 60)"/>
+  </g>
+  <g fill="#F2CC8F">
+    <rect x="175" y="130" width="6" height="10" rx="1" transform="rotate(25 178 135)"/>
+    <rect x="40" y="135" width="5" height="8" rx="1" transform="rotate(-60 42.5 139)"/>
+  </g>
+  
+  <!-- Star badge in center -->
+  <g transform="translate(100, 80)">
+    <!-- Outer glow -->
+    <circle r="45" fill="#F2CC8F" opacity="0.3">
+      <animate attributeName="r" values="45;50;45" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Star background -->
+    <circle r="38" fill="#F2CC8F"/>
+    <circle r="32" fill="#FFE4A1"/>
+    
+    <!-- Main star -->
+    <path d="M0 -28 L6 -10 L26 -10 L10 2 L16 20 L0 10 L-16 20 L-10 2 L-26 -10 L-6 -10 Z" fill="#E85D04"/>
+    
+    <!-- Center sparkle -->
+    <circle r="6" fill="white"/>
+  </g>
+  
+  <!-- Pip's paws celebrating at bottom -->
+  <g transform="translate(60, 130)">
+    <!-- Left paw -->
+    <ellipse cx="0" cy="0" rx="12" ry="10" fill="#F26C22"/>
+    <circle cx="-5" cy="-5" r="3" fill="#F26C22"/>
+    <circle cx="0" cy="-8" r="3" fill="#F26C22"/>
+    <circle cx="5" cy="-5" r="3" fill="#F26C22"/>
+  </g>
+  <g transform="translate(140, 130)">
+    <!-- Right paw -->
+    <ellipse cx="0" cy="0" rx="12" ry="10" fill="#F26C22"/>
+    <circle cx="-5" cy="-5" r="3" fill="#F26C22"/>
+    <circle cx="0" cy="-8" r="3" fill="#F26C22"/>
+    <circle cx="5" cy="-5" r="3" fill="#F26C22"/>
+  </g>
+</svg>

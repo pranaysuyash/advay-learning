@@ -1,0 +1,41 @@
+/* ========================================
+   Advay — Brand Color Palette
+   Active Discovery Vision AI for Youth
+   ======================================== */
+
+:root {
+  /* Primary Brand Colors */
+  --pip-orange: #E85D04;
+  --pip-orange-hover: #D4561C;
+  --pip-orange-active: #C44A0A;
+  
+  /* Advay Colors */
+  --advay-slate: #2D3748;
+  --advay-slate-light: #4A5568;
+  
+  /* Supporting Colors */
+  --discovery-cream: #FFF8F0;
+  --vision-blue: #3B82F6;
+  --vision-blue-hover: #2563EB;
+  
+  /* Extended Palette */
+  --terracotta: #E07A5F;
+  --sky-blue: #7EB5D6;
+  --sunny-yellow: #F2CC8F;
+  --sunny-yellow-dark: #E5B86E;
+  --success-sage: #81B29A;
+  --success-sage-hover: #6F9E88;
+  
+  /* Mascot Illustration Colors */
+  --pip-orange-light: #F26C22;
+  --pip-rust: #D4561C;
+  --pip-cream: #FFF8F0;
+  --pip-blush: #FFB5A7;
+  
+  /* UI Colors */
+  --border-light: #D1D5DB;
+  --border-medium: #9CA3AF;
+  --text-muted: #9CA3AF;
+  --shadow-color: rgba(45, 55, 72, 0.08);
+  --shadow-color-lg: rgba(45, 55, 72, 0.12);
+}

@@ -48,6 +48,8 @@ dev = [
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.21.0",
     "factory-boy>=3.3.0",
+    "python-dotenv>=1.0.0",
+    "alembic>=1.11.1",
     
     # Code Quality
     "ruff>=0.1.0",
@@ -157,7 +159,7 @@ ignore_missing_imports = true
 # Pytest Configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests"]
+testpaths = ["tests", "src/backend/tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

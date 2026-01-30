@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" fill="none">
+  <!-- Background -->
+  <rect width="300" height="240" rx="20" fill="#FFF8F0"/>
+  
+  <!-- Camera frame outline -->
+  <rect x="70" y="40" width="160" height="120" rx="12" fill="#2D3748" opacity="0.1"/>
+  <rect x="75" y="45" width="150" height="110" rx="8" fill="white" stroke="#2D3748" stroke-width="2"/>
+  
+  <!-- Camera dot -->
+  <circle cx="85" cy="55" r="4" fill="#E85D04"/>
+  
+  <!-- Hand inside camera -->
+  <g transform="translate(115, 65)">
+    <!-- Hand tracking indicator -->
+    <circle cx="35" cy="45" r="40" fill="#3B82F6" opacity="0.1">
+      <animate attributeName="r" values="40;45;40" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.1;0.05;0.1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Palm -->
+    <ellipse cx="35" cy="55" rx="28" ry="32" fill="#FDBA74"/>
+    
+    <!-- Fingers spread for tracking -->
+    <!-- Index -->
+    <ellipse cx="18" cy="22" rx="9" ry="22" fill="#FDBA74"/>
+    <circle cx="18" cy="6" r="5" fill="#3B82F6"/>
+    <!-- Middle -->
+    <ellipse cx="35" cy="18" rx="9" ry="26" fill="#FDBA74"/>
+    <circle cx="35" cy="2" r="5" fill="#3B82F6"/>
+    <!-- Ring -->
+    <ellipse cx="52" cy="22" rx="9" ry="24" fill="#FDBA74"/>
+    <circle cx="52" cy="6" r="5" fill="#3B82F6"/>
+    <!-- Pinky -->
+    <ellipse cx="66" cy="32" rx="7" ry="20" fill="#FDBA74" transform="rotate(15 66 32)"/>
+    <!-- Thumb -->
+    <ellipse cx="10" cy="50" rx="8" ry="18" fill="#FDBA74" transform="rotate(-30 10 50)"/>
+    
+    <!-- Tracking points on fingertips -->
+    <g fill="#3B82F6">
+      <circle cx="18" cy="6" r="4" opacity="0.5">
+        <animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="35" cy="2" r="4" opacity="0.5">
+        <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="52" cy="6" r="4" opacity="0.5">
+        <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+  
+  <!-- Instructions below -->
+  <text x="150" y="195" font-family="Nunito, sans-serif" font-size="14" font-weight="700" fill="#2D3748" text-anchor="middle">Show your hand to the camera</text>
+  <text x="150" y="215" font-family="Nunito, sans-serif" font-size="12" font-weight="600" fill="#2D3748" opacity="0.7" text-anchor="middle">I'll track your finger to trace letters!</text>
+  
+  <!-- Corner decorations -->
+  <circle cx="30" cy="40" r="4" fill="#F2CC8F"/>
+  <circle cx="270" cy="200" r="4" fill="#81B29A"/>
+  <circle cx="40" cy="210" r="3" fill="#E85D04"/>
+</svg>

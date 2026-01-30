@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 interface Settings {
   language: string;
-  gameLanguage: string;  // NEW: Separate game content language
+  gameLanguage: string; // NEW: Separate game content language
   difficulty: string;
   cameraEnabled: boolean;
   soundEnabled: boolean;
@@ -32,7 +32,15 @@ export const useSettingsStore = create<SettingsState>()(
       ...defaultSettings,
 
       updateSettings: (newSettings) => {
-        set((state) => ({ ...state, ...newSettings }));
+        set((state) => {
+          // If language is updated and gameLanguage isn't explicitly provided,
+          // keep gameLanguage in sync with language for game content localization.
+          const merged = { ...state, ...newSettings };
+          if (newSettings.language && newSettings.gameLanguage === undefined) {
+            merged.gameLanguage = newSettings.language;
+          }
+          return merged;
+        });
       },
 
       resetSettings: () => {
@@ -40,7 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
     }),
     {
-      name: 'settings-storage',
-    }
-  )
+      name: 'advay-settings',
+    },
+  ),
 );

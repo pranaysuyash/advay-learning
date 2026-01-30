@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" fill="none">
+  <!-- Background -->
+  <rect width="300" height="240" rx="20" fill="#FFF8F0"/>
+  
+  <!-- Sun rays -->
+  <g stroke="#F2CC8F" stroke-width="3" stroke-linecap="round" opacity="0.5">
+    <line x1="150" y1="30" x2="150" y2="45"/>
+    <line x1="150" y1="195" x2="150" y2="210"/>
+    <line x1="75" y1="120" x2="90" y2="120"/>
+    <line x1="210" y1="120" x2="225" y2="120"/>
+    <line x1="95" y1="65" x2="105" y2="75"/>
+    <line x1="195" y1="165" x2="205" y2="175"/>
+    <line x1="205" y1="65" x2="195" y2="75"/>
+    <line x1="105" y1="165" x2="95" y2="175"/>
+  </g>
+  
+  <!-- Central circle (sun) -->
+  <circle cx="150" cy="120" r="50" fill="#F2CC8F" opacity="0.3"/>
+  
+  <!-- Pip mascot (center, waving) -->
+  <g transform="translate(110, 60)">
+    <!-- Tail -->
+    <ellipse cx="65" cy="90" rx="18" ry="25" fill="#F26C22" transform="rotate(-20 65 90)"/>
+    <ellipse cx="65" cy="90" rx="12" ry="18" fill="#D4561C" transform="rotate(-20 65 90)"/>
+    
+    <!-- Body -->
+    <ellipse cx="40" cy="85" rx="28" ry="32" fill="#F26C22"/>
+    <ellipse cx="40" cy="88" rx="20" ry="24" fill="#FFF8F0"/>
+    
+    <!-- Left arm (waving) -->
+    <ellipse cx="5" cy="55" rx="12" ry="20" fill="#F26C22" transform="rotate(-40 5 55)"/>
+    
+    <!-- Right arm -->
+    <ellipse cx="75" cy="75" rx="12" ry="18" fill="#F26C22" transform="rotate(20 75 75)"/>
+    
+    <!-- Head -->
+    <circle cx="40" cy="45" r="32" fill="#F26C22"/>
+    
+    <!-- Ears -->
+    <ellipse cx="12" cy="18" rx="14" ry="18" fill="#F26C22" transform="rotate(-20 12 18)"/>
+    <ellipse cx="12" cy="18" rx="8" ry="12" fill="#FFF8F0" transform="rotate(-20 12 18)"/>
+    <ellipse cx="68" cy="18" rx="14" ry="18" fill="#F26C22" transform="rotate(20 68 18)"/>
+    <ellipse cx="68" cy="18" rx="8" ry="12" fill="#FFF8F0" transform="rotate(20 68 18)"/>
+    
+    <!-- Face markings -->
+    <circle cx="22" cy="42" r="10" fill="#FFF8F0"/>
+    <circle cx="58" cy="42" r="10" fill="#FFF8F0"/>
+    <ellipse cx="40" cy="55" rx="14" ry="11" fill="#FFF8F0"/>
+    
+    <!-- Eyes (happy) -->
+    <path d="M16 40 Q22 35 28 40" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M52 40 Q58 35 64 40" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Nose -->
+    <ellipse cx="40" cy="52" rx="4" ry="3.5" fill="#1F2937"/>
+    
+    <!-- Big smile -->
+    <path d="M32 58 Q40 68 48 58" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round"/>
+    
+    <!-- Cheeks -->
+    <circle cx="18" cy="50" r="4" fill="#FFB5A7" opacity="0.6"/>
+    <circle cx="62" cy="50" r="4" fill="#FFB5A7" opacity="0.6"/>
+    
+    <!-- Highlight -->
+    <ellipse cx="28" cy="28" rx="6" ry="3" fill="white" opacity="0.3"/>
+  </g>
+  
+  <!-- Welcome text below -->
+  <text x="150" y="195" font-family="Nunito, sans-serif" font-size="14" font-weight="700" fill="#2D3748" text-anchor="middle">Hi! I'm Pip!</text>
+  
+  <!-- Floating sparkles -->
+  <circle cx="40" y="50" r="3" fill="#E85D04"/>
+  <circle cx="260" y="80" r="3" fill="#3B82F6"/>
+  <circle cx="50" y="200" r="3" fill="#81B29A"/>
+  <circle cx="250" y="190" r="3" fill="#F2CC8F"/>
+</svg>

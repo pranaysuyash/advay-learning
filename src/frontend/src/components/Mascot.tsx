@@ -32,7 +32,7 @@ export function Mascot({
     const [showVideo, setShowVideo] = useState(false);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const celebrationTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const celebrationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSpokenMessageRef = useRef<string | null>(null);
 
     // TTS integration

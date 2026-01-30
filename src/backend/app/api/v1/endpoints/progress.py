@@ -10,7 +10,7 @@ from app.core.validation import validate_uuid, ValidationError
 from app.schemas.progress import Progress, ProgressCreate
 from app.schemas.user import User
 from app.services.profile_service import ProfileService
-from app.services.progress_service import ProgressService
+from app.services.progress_service import ProgressService, DuplicateProgressError
 
 router = APIRouter()
 
@@ -82,6 +82,61 @@ async def save_progress(
 
     progress = await ProgressService.create(db, profile_id, progress_in)
     return progress
+
+
+@router.post("/batch")
+async def save_progress_batch(
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Batch save progress items. Expects body: { profile_id: string, items: [ { idempotency_key, activity_type, content_id, score, duration_seconds?, meta_data?, timestamp } ] }
+
+    Simple dedupe by idempotency_key implemented at service layer if available.
+    """
+    profile_id = payload.get('profile_id')
+    items = payload.get('items') or []
+
+    # Basic validation
+    try:
+        validate_uuid(profile_id, "profile_id")
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        )
+
+    profile = await ProfileService.get_by_id(db, profile_id)
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
+
+    if profile.parent_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+        )
+
+    results = []
+    for it in items:
+        key = it.get('idempotency_key')
+        try:
+            # Try to create; ProgressService.create will raise DuplicateProgressError if duplicate
+            progress = await ProgressService.create(db, profile_id, it)
+            results.append({ 'idempotency_key': key, 'status': 'ok', 'server_id': str(progress.id) })
+        except Exception as e:
+            # Handle duplicate specifically
+            if isinstance(e, DuplicateProgressError):
+                # Attempt to get existing id if available
+                existing_id = getattr(e, 'existing_id', None)
+                results.append({ 'idempotency_key': key, 'status': 'duplicate', 'server_id': existing_id })
+            else:
+                # Other errors reported as error for that item
+                results.append({ 'idempotency_key': key, 'status': 'error', 'error': str(e) })
+
+    return { 'results': results }
 
 
 @router.get("/stats")

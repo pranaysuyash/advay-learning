@@ -33,7 +33,7 @@ export function Home() {
           </Link>
           <Link
             to="/game"
-            className="px-8 py-3 bg-white/10 border border-white/20 rounded-lg font-semibold hover:bg-white/20 transition"
+            className="px-8 py-3 bg-white/10 border border-border rounded-lg font-semibold hover:bg-white/20 transition"
           >
             Try Demo
           </Link>
@@ -43,17 +43,17 @@ export function Home() {
       <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
           {
-            icon: '✋',
+            icon: '/assets/images/feature-hand-tracking.svg',
             title: 'Hand Tracking',
             description: 'Draw and interact using natural hand gestures'
           },
           {
-            icon: '🔤',
+            icon: '/assets/images/feature-multilang.svg',
             title: 'Multi-Language',
-            description: 'Learn English, Hindi, and Kannada alphabets'
+            description: 'Learn English, Hindi, Kannada and more alphabets'
           },
           {
-            icon: '🎮',
+            icon: '/assets/images/feature-gamified.svg',
             title: 'Gamified',
             description: 'Earn rewards and track your progress'
           }
@@ -63,9 +63,15 @@ export function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white/5 border border-white/10 rounded-xl p-6 text-center"
+            className="bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm"
           >
-            <div className="text-4xl mb-4">{feature.icon}</div>
+            <div className="w-20 h-20 mx-auto mb-4">
+              <img 
+                src={feature.icon} 
+                alt={feature.title}
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
             <p className="text-white/70">{feature.description}</p>
           </motion.div>

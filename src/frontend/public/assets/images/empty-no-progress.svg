@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <!-- Background -->
+  <rect width="200" height="160" rx="16" fill="#FFF8F0"/>
+  
+  <!-- Chart/graph placeholder -->
+  <g transform="translate(40, 30)">
+    <!-- Bar chart outline -->
+    <rect x="0" y="60" width="20" height="40" rx="4" fill="#E5E7EB"/>
+    <rect x="30" y="40" width="20" height="60" rx="4" fill="#E5E7EB"/>
+    <rect x="60" y="70" width="20" height="30" rx="4" fill="#E5E7EB"/>
+    <rect x="90" y="50" width="20" height="50" rx="4" fill="#E5E7EB"/>
+    
+    <!-- Dashed line for progress -->
+    <path d="M10 80 Q40 70 70 75 T130 60" stroke="#E85D04" stroke-width="2" stroke-dasharray="5 3" fill="none" opacity="0.4"/>
+  </g>
+  
+  <!-- Pip mascot (encouraging) -->
+  <g transform="translate(130, 70)">
+    <!-- Simple body -->
+    <ellipse cx="25" cy="35" rx="20" ry="22" fill="#F26C22"/>
+    <ellipse cx="25" cy="38" rx="14" ry="16" fill="#FFF8F0"/>
+    
+    <!-- Head -->
+    <circle cx="25" cy="15" r="16" fill="#F26C22"/>
+    
+    <!-- Ears -->
+    <ellipse cx="10" cy="5" rx="6" ry="8" fill="#F26C22" transform="rotate(-20 10 5)"/>
+    <ellipse cx="40" cy="5" rx="6" ry="8" fill="#F26C22" transform="rotate(20 40 5)"/>
+    
+    <!-- Face -->
+    <circle cx="18" cy="14" r="4" fill="#1F2937"/>
+    <circle cx="19" cy="12.5" r="1.5" fill="white"/>
+    <circle cx="32" cy="14" r="4" fill="#1F2937"/>
+    <circle cx="33" cy="12.5" r="1.5" fill="white"/>
+    
+    <!-- Smile -->
+    <path d="M20 22 Q25 26 30 22" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Speech bubble -->
+    <g transform="translate(-50, -25)">
+      <rect x="0" y="0" width="50" height="28" rx="8" fill="white" stroke="#E85D04" stroke-width="1.5"/>
+      <path d="M40 28 L45 35 L35 28" fill="white" stroke="#E85D04" stroke-width="1.5"/>
+      <path d="M41.5 28 L45 33 L37 28" fill="white"/>
+      <text x="25" y="18" font-family="Nunito, sans-serif" font-size="10" font-weight="700" fill="#2D3748" text-anchor="middle">Start!</text>
+    </g>
+  </g>
+  
+  <!-- Sparkles -->
+  <circle cx="35" cy="35" r="3" fill="#F2CC8F"/>
+  <circle cx="175" cy="130" r="3" fill="#81B29A"/>
+</svg>

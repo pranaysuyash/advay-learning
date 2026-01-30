@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { useProgressStore, BATCH_SIZE } from '../store';
 import { getAlphabet } from '../data/alphabets';
+import { Icon } from './Icon';
+import { UIIcon } from './ui/Icon';
 
 interface LetterJourneyProps {
   language: string;
@@ -27,7 +29,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
   });
   
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+    <div className="bg-white/10 border border-border rounded-xl p-6 shadow-sm">
       <h2 className="text-2xl font-bold mb-2">Letter Journey</h2>
       <p className="text-white/60 mb-6">
         Master 3 letters in each batch to unlock the next! 
@@ -54,11 +56,11 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                       ? 'bg-blue-500 text-white'
                       : 'bg-white/20 text-white/60'
                 }`}>
-                  {isCompleted ? '✓' : batchIndex + 1}
+                  {isCompleted ? <UIIcon name="check" size={16} /> : batchIndex + 1}
                 </div>
-                <span className="font-medium">
+                <span className="font-medium flex items-center gap-2">
                   Batch {batchIndex + 1}
-                  {!isUnlocked && ' 🔒'}
+                  {!isUnlocked && <UIIcon name="lock" size={14} className="text-white/40" />}
                 </span>
                 <span className="text-sm text-white/60">
                   {masteredCount}/3 to unlock
@@ -86,16 +88,23 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                           : 'cursor-not-allowed opacity-50'
                         }
                         ${isMastered 
-                          ? 'bg-green-500/30 border-2 border-green-500' 
+                          ? 'bg-green-500/30 border-2 border-green-500 shadow-md' 
                           : isUnlocked
-                            ? 'bg-white/10 border border-white/20 hover:bg-white/20'
-                            : 'bg-white/5 border border-white/10'
+                            ? 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-sm'
+                            : 'bg-white/5 border border-border opacity-70'
                         }
                       `}
                     >
-                      <span className="text-2xl font-bold" style={{ color: letter.color }}>
+                      <span className="text-xl font-bold" style={{ color: letter.color }}>
                         {letter.char}
                       </span>
+                      <Icon 
+                        src={letter.icon} 
+                        alt={letter.name}
+                        size={24}
+                        className="opacity-90"
+                        fallback={letter.emoji || '✨'}
+                      />
                       {isMastered && (
                         <span className="text-xs text-green-400">★</span>
                       )}
@@ -111,7 +120,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
               
               {/* Connector line */}
               {batchIndex < totalBatches - 1 && (
-                <div className="absolute left-4 top-14 w-0.5 h-6 bg-white/10" />
+                <div className="absolute left-4 top-14 w-0.5 h-6 bg-white/20" />
               )}
             </div>
           );
@@ -119,17 +128,17 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
       </div>
       
       {/* Legend */}
-      <div className="mt-6 pt-6 border-t border-white/10 flex flex-wrap gap-4 text-sm">
+      <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-green-500/30 border border-green-500" />
           <span className="text-white/60">Mastered</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-white/10 border border-white/20" />
+          <div className="w-4 h-4 rounded bg-white/10 border border-border" />
           <span className="text-white/60">Available</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-white/5 border border-white/10 opacity-50" />
+          <div className="w-4 h-4 rounded bg-white/10 border border-border opacity-50" />
           <span className="text-white/60">Locked</span>
         </div>
       </div>

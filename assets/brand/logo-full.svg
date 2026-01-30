@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+  <!-- Logo Mark (Paw) - Pip Orange -->
+  <g transform="translate(15, 10)">
+    <!-- Main paw pad -->
+    <circle cx="40" cy="50" r="22" fill="#E85D04"/>
+    <!-- Toe pads -->
+    <circle cx="20" cy="28" r="10" fill="#E85D04"/>
+    <circle cx="40" cy="18" r="10" fill="#E85D04"/>
+    <circle cx="60" cy="28" r="10" fill="#E85D04"/>
+    <!-- Highlight -->
+    <ellipse cx="33" cy="43" rx="7" ry="5" fill="#FFF8F0" opacity="0.4"/>
+  </g>
+  
+  <!-- Wordmark - Advay Slate -->
+  <text x="95" y="45" font-family="Nunito, sans-serif" font-weight="800" font-size="28" fill="#2D3748">
+    Advay
+  </text>
+  <text x="95" y="72" font-family="Nunito, sans-serif" font-weight="700" font-size="20" fill="#3B82F6">
+    Active Discovery Vision AI
+  </text>
+</svg>

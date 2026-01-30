@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="56" fill="#FFF8F0"/>
+  
+  <!-- Globe base -->
+  <circle cx="60" cy="60" r="32" fill="#3B82F6" opacity="0.2"/>
+  <circle cx="60" cy="60" r="28" fill="#3B82F6" opacity="0.1"/>
+  
+  <!-- Globe lines -->
+  <ellipse cx="60" cy="60" rx="28" ry="28" stroke="#3B82F6" stroke-width="2" fill="none"/>
+  <ellipse cx="60" cy="60" rx="12" ry="28" stroke="#3B82F6" stroke-width="1.5" fill="none"/>
+  <line x1="32" y1="60" x2="88" y2="60" stroke="#3B82F6" stroke-width="1.5"/>
+  <line x1="60" y1="32" x2="60" y2="88" stroke="#3B82F6" stroke-width="1.5"/>
+  
+  <!-- Letter A -->
+  <text x="38" y="55" font-family="Nunito, sans-serif" font-size="16" font-weight="800" fill="#E85D04">A</text>
+  
+  <!-- Hindi letter अ -->
+  <text x="70" y="55" font-family="Noto Sans Devanagari, sans-serif" font-size="14" font-weight="700" fill="#E85D04">अ</text>
+  
+  <!-- Kannada letter ಅ -->
+  <text x="50" y="80" font-family="Noto Sans Kannada, sans-serif" font-size="12" font-weight="700" fill="#2D3748">ಅ</text>
+  
+  <!-- Floating sparkles -->
+  <circle cx="25" cy="40" r="2" fill="#F2CC8F"/>
+  <circle cx="95" cy="35" r="2" fill="#81B29A"/>
+  <circle cx="90" cy="85" r="2" fill="#E85D04"/>
+  
+  <!-- Connection lines -->
+  <path d="M45 50 Q60 35 75 50" stroke="#F2CC8F" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>
+</svg>

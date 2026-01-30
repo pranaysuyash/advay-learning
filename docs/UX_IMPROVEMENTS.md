@@ -164,6 +164,35 @@ Current status:
    - Improvement trends
    - Comparison to age benchmarks
 
+---
+
+### UI Borders & Card Contrast Improvements (2026-01-30)
+
+**Finding**: Several card-like UI elements used extremely low-contrast white borders (e.g., `border-white/10`) on a light background, making borders and separators barely visible, especially in large screens and low-contrast viewing conditions.
+
+**Fix implemented (Medium-scope)**:
+- Replace faint borders with semantic tokens: `border-border` (standard) and `border-border-strong` (focus states).
+- Add `bg-white/10` to primary card surfaces to lift cards off the background.
+- Apply `shadow-sm` to main cards and `shadow-md` to emphasized/mastered cards for subtle depth.
+- Ensure `select`/`input` controls use `border-border` and `focus:border-border-strong` for clearer affordance.
+
+**Files updated**:
+- `src/frontend/src/components/LetterJourney.tsx` (card borders, legend tokens)
+- `src/frontend/src/components/ui/Layout.tsx` (header separator)
+- `src/frontend/src/components/ui/Card.tsx` (card defaults)
+- `src/frontend/src/components/ui/Button.tsx` (secondary variant tokens)
+- `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/games/FingerNumberShow.tsx`, `src/frontend/src/pages/Login.tsx`, `src/frontend/src/pages/Register.tsx`, `src/frontend/src/pages/Progress.tsx`, `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/pages/Game.tsx`
+
+**Evidence & Results**:
+- **Before screenshots**: `docs/screenshots/ui_contrast/before/{home,dashboard,game,progress,settings}.png`
+- **After screenshots**: `docs/screenshots/ui_contrast/after/{home,dashboard,game,progress,settings}.png`
+- **Unit tests**: `npx vitest --run` → **76 tests passed** (Observed)
+- **Build**: `npx vite build` → **build succeeded** (Observed)
+
+**Why**: Improves perceived separation and accessibility without changing the color palette; consistent token use makes future design adjustments easier.
+
+**Next**: Add a visual regression snapshot pipeline and integrate the `StyleTest` page into QA for quick manual checks.
+
 3. **Multiple Child Management**
    - Better child switching
    - Individual progress for each

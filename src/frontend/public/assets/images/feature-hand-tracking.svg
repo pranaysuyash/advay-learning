@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="56" fill="#FFF8F0"/>
+  
+  <!-- Hand illustration -->
+  <g transform="translate(30, 20)">
+    <!-- Palm -->
+    <ellipse cx="30" cy="50" rx="22" ry="28" fill="#F26C22"/>
+    
+    <!-- Fingers -->
+    <!-- Thumb -->
+    <ellipse cx="12" cy="45" rx="8" ry="14" fill="#F26C22" transform="rotate(-30 12 45)"/>
+    <!-- Index -->
+    <ellipse cx="30" cy="22" rx="7" ry="18" fill="#F26C22"/>
+    <!-- Middle -->
+    <ellipse cx="42" cy="24" rx="7" ry="20" fill="#F26C22"/>
+    <!-- Ring -->
+    <ellipse cx="52" cy="30" rx="7" ry="18" fill="#F26C22" transform="rotate(10 52 30)"/>
+    <!-- Pinky -->
+    <ellipse cx="60" cy="40" rx="6" ry="14" fill="#F26C22" transform="rotate(25 60 40)"/>
+    
+    <!-- Highlight on index finger (tracking point) -->
+    <circle cx="30" cy="8" r="4" fill="#3B82F6"/>
+    <circle cx="30" cy="8" r="8" fill="#3B82F6" opacity="0.3">
+      <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Sparkles -->
+  <circle cx="25" cy="35" r="3" fill="#F2CC8F"/>
+  <circle cx="95" cy="45" r="2" fill="#81B29A"/>
+  <circle cx="88" cy="85" r="3" fill="#3B82F6"/>
+</svg>

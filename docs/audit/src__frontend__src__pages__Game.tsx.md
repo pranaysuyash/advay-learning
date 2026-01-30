@@ -14,19 +14,19 @@
 Commands executed and high-signal outputs (raw excerpts):
 
 - git rev-parse --is-inside-work-tree
-  - Output: `true`  **(Observed)**
+  - Output: `true` **(Observed)**
 
 - git ls-files | rg "Game.tsx"
-  - Output: `26:src/pages/Game.tsx`  **(Observed)**
+  - Output: `26:src/pages/Game.tsx` **(Observed)**
 
 - git log -n 20 --follow --pretty=oneline -- src/pages/Game.tsx
   - Output (recent commits):
-    - `d7d0670e0c... docs(worklog): add comprehensive test plan for Game component`  **(Observed)**
-    - `f79f48f6... docs(worklog): update React Hooks ticket status and create refactor plan`  **(Observed)**
-    - `e389a9b4... fix(frontend): close JSX tags in Game.tsx and update worklog`  **(Observed)**
+    - `d7d0670e0c... docs(worklog): add comprehensive test plan for Game component` **(Observed)**
+    - `f79f48f6... docs(worklog): update React Hooks ticket status and create refactor plan` **(Observed)**
+    - `e389a9b4... fix(frontend): close JSX tags in Game.tsx and update worklog` **(Observed)**
 
 - git rev-parse HEAD
-  - Output: `d7d0670e0c7977093b7606b9415405669f4258a3`  **(Observed)**
+  - Output: `d7d0670e0c7977093b7606b9415405669f4258a3` **(Observed)**
 
 - Search for inbound references (rg):
   - `App.tsx` imports `Game` and mounts it at route `/game` (Observed)
@@ -111,7 +111,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 
 ## 7) Problems and risks (findings)
 
-1. ID: F-Game-01  | Severity: HIGH
+1. ID: F-Game-01 | Severity: HIGH
    - Evidence: Observed URLs in initialization:
      - `FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/.../wasm')`
      - `modelAssetPath: 'https://storage.googleapis.com/.../hand_landmarker.task'` (Observed)
@@ -119,7 +119,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
    - Blast radius: Prevents the tracing experience for all users relying on camera detection (high user impact).
    - Minimal fix direction: Add a fallback strategy (local bundled WASM/model with checksum/ETag verification or an alternative CPU-based model) and surfacing a clear, actionable UI when model fetch fails.
 
-2. ID: F-Game-02  | Severity: HIGH
+2. ID: F-Game-02 | Severity: HIGH
    - Evidence: No explicit camera permission or denial handling; code relies on camera readiness checks and model load errors to set `feedback` (Observed/Inferred).
    - Failure mode: If the user denies camera permission, the UI remains in a loading/blank state or displays a generic message; the user may not understand how to proceed.
    - Blast radius: Major usability failure — users can't play the game on permission denial devices or when camera is unavailable.
@@ -168,13 +168,16 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 ## 9) Inter-file impact analysis
 
 ### 9.1 Inbound impact
+
 - `App.tsx`, `Layout.tsx`, and `Home.tsx` depend on this component mounting successfully; changing its route or props signature could break navigation (Observed).
 - Tests must protect the scoring and progression invariants when changing algorithms (Inferred).
 
 ### 9.2 Outbound impact
+
 - Backend `progressApi` expectations: shape of `saveProgress` payload must remain stable (content_id, score, duration_seconds) or backend integration tests should be updated (Inferred).
 
 ### 9.3 Change impact per finding
+
 - F-Game-01 (model/network): Adding a local fallback or checksum-protected bundle reduces runtime network fragility and should not break callers; tests should ensure model-unavailable path shows fallback UI.
 - F-Game-03 (dispose landmarker): Adding a `landmarker.close()` call is local and backward-compatible but must be covered by a test that mounts/unmounts component and asserts no lingering timers or resources.
 
@@ -182,7 +185,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 
 ## 10) Patch plan (actionable, scoped) — for HIGH/MEDIUM findings only
 
-1) F-Game-01 (HIGH) — Add robust model fallback
+1. F-Game-01 (HIGH) — Add robust model fallback
    - Where: `src/frontend/src/pages/Game.tsx`, `initializeHandLandmarker` function
    - What: Attempt primary CDN load; on failure, try a bundled local model asset (vendor/ or public/) with integrity check (SHA256) and then a CPU delegate fallback.
    - Why: Reduce fragility and supply-chain risk for production and offline/dev use.
@@ -190,7 +193,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
    - Invariant to preserve: When model load fails, UI shows clear actionable fallback and game remains playable via mouse input (Inferred)
    - Test: Integration test that simulates fetch failure and asserts fallback UI is shown and drawing with mouse still works (`Game - model fail -> fallback mode`).
 
-2) F-Game-02 (HIGH) — Explicit camera permission handling and fallback
+2. F-Game-02 (HIGH) — Explicit camera permission handling and fallback
    - Where: Top-level of `Game` component, before `startGame` and model init
    - What: Check `navigator.permissions.query({ name: 'camera' })` if available; subscribe to `react-webcam` error events; if 'denied' or error, show dedicated permission UI with steps and a 'Use mouse to draw' fallback switch.
    - Why: Improve usability for denied / unavailable cameras
@@ -198,7 +201,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
    - Invariant to preserve: Users can still complete a session and score using an alternate input method (mouse click-drag) (Inferred)
    - Test: Unit test for permission-handling logic; e2e test simulating permission denied and asserting fallback UI and drawing works.
 
-3) F-Game-03 (MEDIUM) — Dispose of `HandLandmarker`
+3. F-Game-03 (MEDIUM) — Dispose of `HandLandmarker`
    - Where: `useEffect` cleanup that initialized the landmarker
    - What: If `handLandmarker` exposes a `close()` or `dispose()` call, call it and set state to null in cleanup.
    - Why: Prevent resource leak and keep memory usage stable across mounts
@@ -206,13 +209,13 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
    - Invariant to preserve: No background detections after unmount (observed via no requestAnimationFrame loops running)
    - Test: Mount/unmount test verifying no active animation frames or active landmarker references.
 
-4) F-Game-04 (MEDIUM) — Add unit tests for core algorithms
+4. F-Game-04 (MEDIUM) — Add unit tests for core algorithms
    - Where: `src/frontend/src/pages/__tests__/Game.utils.test.ts` or similar
    - What: Tests for `calculateAccuracy`, `smoothPoints`, pinch thresholds and checkProgress scoring branches
    - Why: Prevent regression in scoring and unlock logic
    - Test: Deterministic inputs producing expected accuracy percentages and scoring outcomes.
 
-5) F-Game-05 (MEDIUM) — Add delegate fallback handling
+5. F-Game-05 (MEDIUM) — Add delegate fallback handling
    - Where: `initializeHandLandmarker` model initialization
    - What: Try GPU delegate first, catch errors, and retry with CPU delegate. Add a diagnostic flag in `settings` or runtime to show which delegate was used.
    - Why: Increase compatibility across devices
@@ -237,6 +240,7 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 ## 12) Risk rating
 
 **Overall risk: MEDIUM**
+
 - Rationale: Two HIGH findings (model network dependency and permission handling) materially affect user experience and require fixes; several MEDIUM items affect stability and cross-device compatibility. Not rated HIGH overall because core functionality is implemented defensively (per-frame errors are caught and progress save calls are non-blocking) and the app remains partially functional without the ideal environment.
 
 ---
@@ -255,4 +259,20 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 
 **Prepared by:** GitHub Copilot
 
+---
+
+## Related Tickets
+
+Multiple findings from this audit have been addressed by existing tickets:
+
+| Finding | Ticket ID | Status |
+|---------|------------|--------|
+| F-Game-01: MediaPipe CDN failure | Need new ticket | OPEN |
+| F-Game-02: Camera permission denial | Need new ticket | OPEN |
+| F-Game-03: No explicit disposal | Need new ticket | OPEN |
+| F-Game-04: Missing tests | Covered by TCK-20260129-050 | IN_PROGRESS |
+| F-Game-05: GPU fallback | Need new ticket | OPEN |
+| F-Game-06: Debug logging | Part of general cleanup | N/A |
+
+**Note**: This ticket is for TCK-20260129-050 which implements comprehensive testing.
 

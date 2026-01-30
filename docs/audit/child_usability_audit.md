@@ -348,3 +348,14 @@ Audit of the Advay Vision Learning platform specifically from a child's perspect
 - 2026-01-29: Initial child usability audit completed
 - 2026-01-29: Added specific implementation examples, research basis, and technical notes</content>
   <parameter name="filePath">/Users/pranay/Projects/learning_for_kids/docs/audit/child_usability_audit.md
+
+---
+
+## Related Tickets
+
+**TCK-20260131-003: Child Usability Enhancements**
+- Status: OPEN
+- Created: 2026-01-31 00:00 UTC
+- Addresses all HIGH and MEDIUM findings from this audit
+- See docs/tickets/TCK-20260131-003.md for full details
+

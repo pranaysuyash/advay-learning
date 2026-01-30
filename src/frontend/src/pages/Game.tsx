@@ -49,7 +49,9 @@ export function Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState<number>(0);
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
 
   const goToHome = () => {
     stopGame();
@@ -66,15 +68,42 @@ export function Game() {
     localStorage.setItem('tutorialCompleted', 'true');
   };
 
+  const toggleHighContrast = () => {
+    setHighContrast((prev) => !prev);
+  };
+
   useEffect(() => {
     const hasCompletedTutorial = localStorage.getItem('tutorialCompleted') === 'true';
     setTutorialCompleted(hasCompletedTutorial);
   }, []);
 
+  // Language selection - user can switch anytime
+  // Use gameLanguage setting if available, otherwise default to 'en'
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(
+    settings.gameLanguage || 'en',
+  );
+
+  // Get profile ID from route state (passed from Dashboard)
+  const profileId = (location.state as any)?.profileId as string | undefined;
+
   // Redirect to dashboard if no profile selected
   if (!profileId) {
     return <Navigate to='/dashboard' replace />;
   }
+
+  const LETTERS = getLettersForGame(selectedLanguage);
+  const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
+  const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [accuracy, setAccuracy] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    const update = () => setPendingCount(progressQueue.getPending(profileId || '').length);
+    update();
+    const unsubscribe = progressQueue.subscribe(update);
+    return unsubscribe;
+  }, [profileId]);
 
   return (
     <>
@@ -284,7 +313,7 @@ export function Game() {
                 {/* Webcam video */}
                 <Webcam
                   ref={webcamRef}
-                  className='absolute inset-0 w-full h-full object-cover'
+                  className={`absolute inset-0 w-full h-full object-cover ${highContrast ? 'opacity-70' : ''}`}
                   mirrored
                   videoConstraints={{ width: 640, height: 480 }}
                 />
@@ -312,6 +341,12 @@ export function Game() {
                 </div>
 
                 <div className='absolute top-4 right-4 flex gap-2'>
+                  <button
+                    onClick={toggleHighContrast}
+                    className="px-3 py-1 bg-white/20 border border-white/20 rounded hover:bg-white/30 transition text-xs font-semibold"
+                  >
+                    {highContrast ? '🔆 High Contrast' : '🔅 Normal Contrast'}
+                  </button>
                   <button
                     onClick={goToHome}
                     className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2'
@@ -345,13 +380,13 @@ export function Game() {
                   </button>
                   <button
                     onClick={clearDrawing}
-                    className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
+                    className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
                   >
                     Clear
                   </button>
                   <button
                     onClick={stopGame}
-                    className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
+                    className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
                   >
                     Stop
                   </button>
@@ -411,6 +446,7 @@ export function Game() {
           )}
         </div>
       </motion.div>
-    </>
-      );
+    </div>
+  </>
+  );
 }

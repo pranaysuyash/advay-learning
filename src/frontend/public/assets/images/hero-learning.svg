@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Background -->
+  <rect width="400" height="300" rx="24" fill="#FFF8F0"/>
+  
+  <!-- Decorative shapes -->
+  <circle cx="50" cy="50" r="30" fill="#F2CC8F" opacity="0.3"/>
+  <circle cx="350" cy="250" r="40" fill="#81B29A" opacity="0.2"/>
+  <circle cx="320" cy="60" r="20" fill="#3B82F6" opacity="0.2"/>
+  
+  <!-- Child hand (simplified, friendly) -->
+  <g transform="translate(80, 80)">
+    <!-- Hand base -->
+    <ellipse cx="40" cy="60" rx="35" ry="40" fill="#F26C22" opacity="0.2"/>
+    
+    <!-- Palm -->
+    <ellipse cx="40" cy="70" rx="28" ry="32" fill="#FDBA74"/>
+    
+    <!-- Fingers raised (waving) -->
+    <!-- Index -->
+    <ellipse cx="25" cy="35" rx="10" ry="22" fill="#FDBA74"/>
+    <!-- Middle -->
+    <ellipse cx="40" cy="30" rx="10" ry="26" fill="#FDBA74"/>
+    <!-- Ring -->
+    <ellipse cx="55" cy="35" rx="10" ry="24" fill="#FDBA74"/>
+    <!-- Pinky -->
+    <ellipse cx="68" cy="45" rx="8" ry="18" fill="#FDBA74" transform="rotate(15 68 45)"/>
+    <!-- Thumb -->
+    <ellipse cx="15" cy="65" rx="10" ry="18" fill="#FDBA74" transform="rotate(-30 15 65)"/>
+    
+    <!-- Tracing highlight on index finger -->
+    <circle cx="25" cy="18" r="6" fill="#3B82F6"/>
+    <circle cx="25" cy="18" r="10" fill="#3B82F6" opacity="0.3">
+      <animate attributeName="r" values="10;14;10" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Letter A being traced -->
+  <g transform="translate(220, 100)">
+    <!-- Glow effect -->
+    <ellipse cx="40" cy="60" rx="55" ry="65" fill="#E85D04" opacity="0.1"/>
+    
+    <!-- The letter A outline -->
+    <path d="M20 100 L40 30 L60 100 M28 75 L52 75" 
+          stroke="#E85D04" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.2"/>
+    
+    <!-- The letter A filled -->
+    <path d="M20 100 L40 30 L60 100 M28 75 L52 75" 
+          stroke="#E85D04" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"
+          stroke-dasharray="200" stroke-dashoffset="200">
+      <animate attributeName="stroke-dashoffset" values="200;0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Sparkle on letter -->
+    <circle cx="40" cy="30" r="4" fill="#F2CC8F">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Pip mascot watching -->
+  <g transform="translate(280, 180)">
+    <!-- Body -->
+    <ellipse cx="30" cy="40" rx="25" ry="28" fill="#F26C22"/>
+    <ellipse cx="30" cy="43" rx="18" ry="20" fill="#FFF8F0"/>
+    
+    <!-- Head -->
+    <circle cx="30" cy="18" r="22" fill="#F26C22"/>
+    
+    <!-- Ears -->
+    <ellipse cx="12" cy="5" rx="9" ry="11" fill="#F26C22" transform="rotate(-20 12 5)"/>
+    <ellipse cx="12" cy="5" rx="5" ry="7" fill="#FFF8F0" transform="rotate(-20 12 5)"/>
+    <ellipse cx="48" cy="5" rx="9" ry="11" fill="#F26C22" transform="rotate(20 48 5)"/>
+    <ellipse cx="48" cy="5" rx="5" ry="7" fill="#FFF8F0" transform="rotate(20 48 5)"/>
+    
+    <!-- Face markings -->
+    <circle cx="18" cy="16" r="6" fill="#FFF8F0"/>
+    <circle cx="42" cy="16" r="6" fill="#FFF8F0"/>
+    <ellipse cx="30" cy="24" rx="9" ry="7" fill="#FFF8F0"/>
+    
+    <!-- Eyes (watching) -->
+    <circle cx="22" cy="16" r="3.5" fill="#1F2937"/>
+    <circle cx="23" cy="14.5" r="1.5" fill="white"/>
+    <circle cx="38" cy="16" r="3.5" fill="#1F2937"/>
+    <circle cx="39" cy="14.5" r="1.5" fill="white"/>
+    
+    <!-- Nose -->
+    <ellipse cx="30" cy="23" rx="3" ry="2.5" fill="#1F2937"/>
+    
+    <!-- Smile -->
+    <path d="M26 28 Q30 32 34 28" stroke="#1F2937" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Cheeks -->
+    <circle cx="15" cy="22" r="3" fill="#FFB5A7" opacity="0.6"/>
+    <circle cx="45" cy="22" r="3" fill="#FFB5A7" opacity="0.6"/>
+  </g>
+  
+  <!-- Floating letters -->
+  <text x="40" y="240" font-family="Nunito, sans-serif" font-size="20" font-weight="800" fill="#E85D04" opacity="0.6">B</text>
+  <text x="150" y="260" font-family="Noto Sans Devanagari, sans-serif" font-size="16" font-weight="700" fill="#81B29A">क</text>
+  <text x="360" y="200" font-family="Nunito, sans-serif" font-size="18" font-weight="800" fill="#3B82F6" opacity="0.6">C</text>
+  
+  <!-- Sparkles -->
+  <circle cx="190" cy="50" r="4" fill="#F2CC8F"/>
+  <circle cx="370" cy="150" r="3" fill="#81B29A"/>
+  <circle cx="30" cy="280" r="3" fill="#3B82F6"/>
+</svg>

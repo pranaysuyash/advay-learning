@@ -70,6 +70,10 @@ storage/temp/*
 storage/drawings/*
 !storage/drawings/.gitkeep
 
+# Runtime temp files
+.tmp/
+*.pid
+
 # Secrets
 *.key
 *.pem

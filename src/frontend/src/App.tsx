@@ -1,19 +1,25 @@
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/ui/Layout';
 import { ProtectedRoute } from './components/ui/ProtectedRoute';
+import { ToastProvider } from './components/ui/Toast';
+import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Game } from './pages/Game';
+import { Games } from './pages/Games';
 import { Progress } from './pages/Progress';
 import { Settings } from './pages/Settings';
 import { StyleTest } from './components/StyleTest';
+import { FingerNumberShow } from './games/FingerNumberShow';
 
 function App() {
   return (
-    <Layout>
-      <Routes>
+    <ToastProvider>
+      <ConfirmProvider>
+        <Layout>
+          <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -25,6 +31,16 @@ function App() {
         <Route path="/game" element={
           <ProtectedRoute>
             <Game />
+          </ProtectedRoute>
+        } />
+        <Route path="/games" element={
+          <ProtectedRoute>
+            <Games />
+          </ProtectedRoute>
+        } />
+        <Route path="/games/finger-number-show" element={
+          <ProtectedRoute>
+            <FingerNumberShow />
           </ProtectedRoute>
         } />
         <Route path="/progress" element={
@@ -39,7 +55,9 @@ function App() {
         } />
         <Route path="/style-test" element={<StyleTest />} />
       </Routes>
-    </Layout>
+        </Layout>
+      </ConfirmProvider>
+    </ToastProvider>
   );
 }
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Shadow -->
+  <ellipse cx="32" cy="56" rx="16" ry="3" fill="#000" opacity="0.1"/>
+  
+  <!-- Body -->
+  <ellipse cx="32" cy="34" rx="20" ry="14" fill="#06b6d4"/>
+  
+  <!-- Highlight -->
+  <ellipse cx="26" cy="30" rx="5" ry="3" fill="#a5f3fc" opacity="0.5"/>
+  
+  <!-- Tail -->
+  <path d="M12 34l-8-8v16l8-8z" fill="#0891b2"/>
+  
+  <!-- Fins -->
+  <path d="M32 20l-4-8h8l-4 8z" fill="#0891b2"/>
+  <path d="M26 38l-4 6h8l-4-6z" fill="#0891b2"/>
+  
+  <!-- Eye -->
+  <circle cx="44" cy="30" r="3" fill="#1f2937"/>
+  <circle cx="45" cy="29" r="1" fill="#fff"/>
+  
+  <!-- Mouth -->
+  <path d="M48 36q2 2 0 4" stroke="#0891b2" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  
+  <!-- Scales -->
+  <path d="M28 34h4M36 34h4M32 38h4" stroke="#0891b2" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+</svg>

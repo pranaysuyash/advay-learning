@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Main paw pad (circle) - Pip Orange -->
+  <circle cx="50" cy="55" r="25" fill="#E85D04"/>
+  
+  <!-- Toe pads (circles) - Pip Orange -->
+  <circle cx="28" cy="32" r="12" fill="#E85D04"/>
+  <circle cx="50" cy="22" r="12" fill="#E85D04"/>
+  <circle cx="72" cy="32" r="12" fill="#E85D04"/>
+  
+  <!-- Highlight on main pad - Discovery Cream -->
+  <ellipse cx="42" cy="48" rx="8" ry="6" fill="#FFF8F0" opacity="0.4"/>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Shadow -->
+  <ellipse cx="32" cy="56" rx="20" ry="3" fill="#000" opacity="0.1"/>
+  
+  <!-- Main body -->
+  <rect x="14" y="28" width="36" height="26" rx="2" fill="#f97316"/>
+  
+  <!-- Roof -->
+  <path d="M8 28l24-20 24 20" fill="#ea580c"/>
+  <path d="M8 28l24-20 24 20" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Door -->
+  <rect x="26" y="40" width="12" height="14" rx="1" fill="#7c2d12"/>
+  <circle cx="35" cy="47" r="1.5" fill="#fbbf24"/>
+  
+  <!-- Window -->
+  <rect x="18" y="34" width="8" height="8" rx="1" fill="#bae6fd"/>
+  <path d="M22 34v8M18 38h8" stroke="#7dd3fc" stroke-width="1"/>
+  
+  <!-- Chimney -->
+  <rect x="42" y="14" width="6" height="10" rx="1" fill="#9a3412"/>
+  
+  <!-- Smoke -->
+  <circle cx="45" cy="10" r="2" fill="#e5e7eb" opacity="0.6"/>
+  <circle cx="48" cy="6" r="1.5" fill="#e5e7eb" opacity="0.4"/>
+</svg>

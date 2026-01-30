@@ -174,16 +174,15 @@ export function getTracingResponse(accuracy: number): string {
  *
  * @param letter - The letter character
  * @param word - Example word (e.g., "Apple" for A)
- * @param emoji - Optional emoji
  * @returns Introduction message
  */
-export function getLetterIntro(letter: string, word: string, emoji?: string): string {
+export function getLetterIntro(letter: string, word: string): string {
   const intros = [
-    `This is ${letter}! ${letter} is for ${word}!${emoji ? ' ' + emoji : ''}`,
-    `Let's learn ${letter}! Like in ${word}!${emoji ? ' ' + emoji : ''}`,
-    `Here's ${letter}! Can you say ${word}?${emoji ? ' ' + emoji : ''}`,
-    `Meet the letter ${letter}! ${word} starts with ${letter}!${emoji ? ' ' + emoji : ''}`,
-    `Time for ${letter}! ${word} begins with ${letter}!${emoji ? ' ' + emoji : ''}`,
+    `This is ${letter}! ${letter} is for ${word}!`,
+    `Let's learn ${letter}! Like in ${word}!`,
+    `Here's ${letter}! Can you say ${word}?`,
+    `Meet the letter ${letter}! ${word} starts with ${letter}!`,
+    `Time for ${letter}! ${word} begins with ${letter}!`,
   ];
   return intros[Math.floor(Math.random() * intros.length)];
 }

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Tail -->
+  <ellipse cx="160" cy="140" rx="35" ry="45" fill="#F26C22" transform="rotate(-20 160 140)"/>
+  <ellipse cx="160" cy="140" rx="25" ry="35" fill="#D4561C" transform="rotate(-20 160 140)"/>
+  <path d="M145 120 Q150 140 145 160" stroke="#B84515" stroke-width="3" fill="none" opacity="0.5"/>
+  <path d="M160 115 Q165 140 160 165" stroke="#B84515" stroke-width="3" fill="none" opacity="0.5"/>
+  <path d="M175 120 Q180 140 175 160" stroke="#B84515" stroke-width="3" fill="none" opacity="0.5"/>
+  
+  <!-- Body -->
+  <ellipse cx="100" cy="130" rx="45" ry="50" fill="#F26C22"/>
+  <ellipse cx="100" cy="135" rx="30" ry="35" fill="#FFF8F0"/>
+  
+  <!-- Arms -->
+  <ellipse cx="55" cy="110" rx="15" ry="25" fill="#F26C22" transform="rotate(30 55 110)"/>
+  <ellipse cx="145" cy="110" rx="15" ry="25" fill="#F26C22" transform="rotate(-30 145 110)"/>
+  
+  <!-- Head -->
+  <circle cx="100" cy="70" r="45" fill="#F26C22"/>
+  
+  <!-- Ears -->
+  <ellipse cx="65" cy="35" rx="18" ry="22" fill="#F26C22" transform="rotate(-20 65 35)"/>
+  <ellipse cx="65" cy="35" rx="10" ry="14" fill="#FFF8F0" transform="rotate(-20 65 35)"/>
+  <ellipse cx="135" cy="35" rx="18" ry="22" fill="#F26C22" transform="rotate(20 135 35)"/>
+  <ellipse cx="135" cy="35" rx="10" ry="14" fill="#FFF8F0" transform="rotate(20 135 35)"/>
+  
+  <!-- Face markings -->
+  <circle cx="75" cy="65" r="12" fill="#FFF8F0"/>
+  <circle cx="125" cy="65" r="12" fill="#FFF8F0"/>
+  <ellipse cx="100" cy="80" rx="18" ry="14" fill="#FFF8F0"/>
+  
+  <!-- Eyes -->
+  <circle cx="85" cy="65" r="6" fill="#1F2937"/>
+  <circle cx="87" cy="63" r="2" fill="white"/>
+  <circle cx="115" cy="65" r="6" fill="#1F2937"/>
+  <circle cx="117" cy="63" r="2" fill="white"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="78" rx="5" ry="4" fill="#1F2937"/>
+  
+  <!-- Mouth -->
+  <path d="M95 85 Q100 90 105 85" stroke="#1F2937" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Cheeks -->
+  <circle cx="70" cy="75" r="5" fill="#FFB5A7" opacity="0.6"/>
+  <circle cx="130" cy="75" r="5" fill="#FFB5A7" opacity="0.6"/>
+  
+  <!-- Highlight -->
+  <ellipse cx="85" cy="45" rx="8" ry="4" fill="white" opacity="0.3"/>
+</svg>

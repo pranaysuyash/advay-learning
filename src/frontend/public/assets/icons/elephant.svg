@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Shadow -->
+  <ellipse cx="32" cy="56" rx="18" ry="3" fill="#000" opacity="0.1"/>
+  
+  <!-- Body -->
+  <ellipse cx="32" cy="42" rx="20" ry="14" fill="#8b5cf6"/>
+  
+  <!-- Head -->
+  <circle cx="32" cy="24" r="14" fill="#8b5cf6"/>
+  
+  <!-- Ears -->
+  <ellipse cx="14" cy="26" rx="6" ry="10" fill="#7c3aed"/>
+  <ellipse cx="50" cy="26" rx="6" ry="10" fill="#7c3aed"/>
+  
+  <!-- Trunk -->
+  <path d="M32 32q0 8 0 16q0 4-4 4" stroke="#8b5cf6" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M32 32q0 8 0 16q0 4-4 4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>
+  
+  <!-- Eyes -->
+  <circle cx="26" cy="22" r="2.5" fill="#1f2937"/>
+  <circle cx="38" cy="22" r="2.5" fill="#1f2937"/>
+  <circle cx="27" cy="21" r="0.8" fill="#fff"/>
+  <circle cx="39" cy="21" r="0.8" fill="#fff"/>
+  
+  <!-- Tusks -->
+  <path d="M28 32q-2 4-4 2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M36 32q2 4 4 2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  
+  <!-- Legs -->
+  <rect x="22" y="48" width="4" height="8" rx="2" fill="#7c3aed"/>
+  <rect x="38" y="48" width="4" height="8" rx="2" fill="#7c3aed"/>
+</svg>

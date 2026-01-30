@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="56" fill="#FFF8F0"/>
+  
+  <!-- Trophy base -->
+  <path d="M45 35 L45 55 Q45 70 60 75 Q75 70 75 55 L75 35 Z" fill="#F2CC8F"/>
+  <path d="M45 35 L45 55 Q45 70 60 75 Q75 70 75 55 L75 35 Z" fill="url(#goldGradient)"/>
+  
+  <!-- Trophy handles -->
+  <path d="M45 42 Q35 42 35 52 Q35 62 45 60" stroke="#F2CC8F" stroke-width="4" fill="none"/>
+  <path d="M75 42 Q85 42 85 52 Q85 62 75 60" stroke="#F2CC8F" stroke-width="4" fill="none"/>
+  
+  <!-- Trophy base stand -->
+  <rect x="52" y="75" width="16" height="8" rx="2" fill="#E5B86E"/>
+  <rect x="48" y="83" width="24" height="6" rx="2" fill="#E5B86E"/>
+  
+  <!-- Star on trophy -->
+  <path d="M60 48 L62 54 L68 54 L63 58 L65 64 L60 60 L55 64 L57 58 L52 54 L58 54 Z" fill="#E85D04"/>
+  
+  <!-- Sparkles around trophy -->
+  <g fill="#F2CC8F">
+    <circle cx="30" cy="45" r="3"/>
+    <circle cx="90" cy="40" r="2"/>
+    <circle cx="92" cy="70" r="3"/>
+    <circle cx="28" cy="75" r="2"/>
+  </g>
+  
+  <!-- Progress ring -->
+  <circle cx="60" cy="60" r="48" stroke="#81B29A" stroke-width="3" stroke-dasharray="75 226" stroke-linecap="round" fill="none" opacity="0.6"/>
+  
+  <defs>
+    <linearGradient id="goldGradient" x1="45" y1="35" x2="75" y2="75" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F2CC8F"/>
+      <stop offset="50%" stop-color="#FFE4A1"/>
+      <stop offset="100%" stop-color="#F2CC8F"/>
+    </linearGradient>
+  </defs>
+</svg>

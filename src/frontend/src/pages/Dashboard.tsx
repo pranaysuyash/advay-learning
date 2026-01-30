@@ -9,6 +9,9 @@ import {
 } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
+import { Icon } from '../components/Icon';
+import { UIIcon, Button, Card } from '../components/ui';
+import { useToast } from '../components/ui/Toast';
 
 interface ChildProfile {
   id: string;
@@ -26,6 +29,7 @@ interface ChildProfile {
 export function Dashboard() {
   const { user } = useAuthStore();
   const { profiles, fetchProfiles, createProfile } = useProfileStore();
+  const toast = useToast();
   const settings = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -120,7 +124,7 @@ export function Dashboard() {
         {
           label: 'Letters Learned',
           value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
-          icon: '🔤',
+          iconName: 'letters' as const,
           percent:
             (selectedChildData.progress.lettersLearned /
               selectedChildData.progress.totalLetters) *
@@ -129,13 +133,13 @@ export function Dashboard() {
         {
           label: 'Average Accuracy',
           value: `${selectedChildData.progress.averageAccuracy}%`,
-          icon: '🎯',
+          iconName: 'target' as const,
           percent: selectedChildData.progress.averageAccuracy,
         },
         {
           label: 'Time Spent',
           value: `${Math.floor(selectedChildData.progress.totalTime / 60)}h ${selectedChildData.progress.totalTime % 60}m`,
-          icon: '⏱️',
+          iconName: 'timer' as const,
           percent: Math.min(
             (selectedChildData.progress.totalTime / 300) * 100,
             100,
@@ -144,7 +148,7 @@ export function Dashboard() {
         {
           label: 'Current Streak',
           value: '5 days',
-          icon: '🔥',
+          iconName: 'flame' as const,
           percent: 75,
         },
       ]
@@ -197,9 +201,19 @@ export function Dashboard() {
           <button
             onClick={handleExport}
             disabled={exporting || children.length === 0}
-            className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition disabled:opacity-50 flex items-center gap-2'
+            className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition disabled:opacity-50 flex items-center gap-2'
           >
-            {exporting ? '⏳ Exporting...' : '📥 Export Data'}
+            {exporting ? (
+                  <>
+                    <UIIcon name="hourglass" size={18} className="inline mr-2" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <UIIcon name="download" size={18} className="inline mr-2" />
+                    Export Data
+                  </>
+                )}
           </button>
         </div>
 
@@ -217,7 +231,7 @@ export function Dashboard() {
                   className={`px-4 py-2 rounded-lg transition ${
                     selectedChildData?.id === child.id
                       ? 'bg-red-500 text-white'
-                      : 'bg-white/10 border border-white/20 hover:bg-white/20'
+                      : 'bg-white/10 border border-border hover:bg-white/20 shadow-sm'
                   }`}
                 >
                   {child.name} ({child.age} yrs)
@@ -236,20 +250,23 @@ export function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className='bg-white/5 border border-white/10 rounded-xl p-6'
               >
-                <div className='text-3xl mb-2'>{stat.icon}</div>
-                <div className='text-3xl font-bold'>{stat.value}</div>
-                <div className='text-white/60 mb-3'>{stat.label}</div>
-                {/* Progress bar */}
-                <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${stat.percent}%` }}
-                    transition={{ duration: 0.5, delay: i * 0.1 + 0.3 }}
-                    className='h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full'
-                  />
-                </div>
+                <Card>
+                  <div className='mb-2'>
+                    <UIIcon name={stat.iconName} size={32} className="text-white/80" />
+                  </div>
+                  <div className='text-3xl font-bold'>{stat.value}</div>
+                  <div className='text-white/60 mb-3'>{stat.label}</div>
+                  {/* Progress bar */}
+                  <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${stat.percent}%` }}
+                      transition={{ duration: 0.5, delay: i * 0.1 + 0.3 }}
+                      className='h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full'
+                    />
+                  </div>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -257,8 +274,14 @@ export function Dashboard() {
 
         {/* Empty State */}
         {children.length === 0 && (
-          <div className='bg-white/5 border border-white/10 rounded-xl p-12 text-center mb-8'>
-            <div className='text-6xl mb-4'>👨‍👩‍👧‍👦</div>
+          <div className='bg-white/10 border border-border rounded-xl p-12 text-center mb-8 shadow-sm'>
+            <div className='w-24 h-24 mx-auto mb-4'>
+              <img 
+                src="/assets/images/empty-no-children.svg" 
+                alt="No children"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h2 className='text-2xl font-semibold mb-2'>
               No Children Added Yet
             </h2>
@@ -279,7 +302,7 @@ export function Dashboard() {
           <div className='mb-8 text-center'>
             <button
               onClick={() => setShowAddModal(true)}
-              className='px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-sm'
+              className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-sm'
             >
               + Add Another Child
             </button>
@@ -289,7 +312,7 @@ export function Dashboard() {
         {/* Progress Chart */}
         {selectedChildData && (
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-            <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+            <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
               <h2 className='text-xl font-semibold mb-4'>Learning Progress</h2>
               <div className='space-y-4'>
                 {(() => {
@@ -321,13 +344,37 @@ export function Dashboard() {
                         </div>
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
-                            <span className='text-sm'>{letter.name}</span>
+                            <span className='text-sm flex items-center gap-2'>
+                              <Icon 
+                                src={letter.icon} 
+                                alt={letter.name}
+                                size={16}
+                                className="opacity-80"
+                                fallback={letter.emoji || '✨'}
+                              />
+                              {letter.name}
+                            </span>
                             <span className='text-sm text-white/60'>
                               {learned
-                                ? `✓ Mastered (${Math.round(accuracy)}%)`
+                                ? (
+                                  <>
+                                    <UIIcon name="check" size={14} className="inline mr-1 text-green-400" />
+                                    Mastered ({Math.round(accuracy)}%)
+                                  </>
+                                )
                                 : accuracy > 0
-                                  ? `○ ${Math.round(accuracy)}% best`
-                                  : '○ Not started'}
+                                  ? (
+                                    <>
+                                      <UIIcon name="circle" size={14} className="inline mr-1 text-white/40" />
+                                      {Math.round(accuracy)}% best
+                                    </>
+                                  )
+                                  : (
+                                    <>
+                                      <UIIcon name="circle" size={14} className="inline mr-1 text-white/40" />
+                                      Not started
+                                    </>
+                                  )}
                             </span>
                           </div>
                           <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
@@ -352,25 +399,24 @@ export function Dashboard() {
               </div>
             </div>
 
-            <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+            <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
               <h2 className='text-xl font-semibold mb-4'>Quick Actions</h2>
               <div className='space-y-3'>
                 <Link
-                  to='/game'
-                  state={{ profileId: selectedChildData?.id }}
+                  to='/games'
                   className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
                 >
-                  🎮 Start Learning Game
+                  🎮 Explore All Games
                 </Link>
                 <Link
                   to='/settings'
-                  className='block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center'
+                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
                 >
                   ⚙️ Manage Settings
                 </Link>
                 <button
-                  onClick={() => alert('Weekly report feature coming soon!')}
-                  className='block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition text-center'
+                  onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
+                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
                 >
                   📊 View Weekly Report
                 </button>
@@ -445,7 +491,7 @@ export function Dashboard() {
                     value={newChildName}
                     onChange={(e) => setNewChildName(e.target.value)}
                     placeholder='Enter name'
-                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     autoFocus
                   />
                 </div>
@@ -464,7 +510,7 @@ export function Dashboard() {
                       setNewChildAge(parseFloat(e.target.value) || 5)
                     }
                     placeholder='Enter age (2-12, can use decimals like 2.5)'
-                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                   />
                   <p className='text-xs text-white/50 mt-1'>Use decimals for partial years (e.g., 2.5 for 2 years 6 months)</p>
                 </div>
@@ -477,7 +523,7 @@ export function Dashboard() {
                     value={newChildLanguage}
                     onChange={(e) => setNewChildLanguage(e.target.value)}
                     aria-label='Preferred Language'
-                    className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-red-500 transition'
+                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                   >
                     <option value='en'>English</option>
                     <option value='hi'>Hindi (हिन्दी)</option>
@@ -491,7 +537,7 @@ export function Dashboard() {
               <div className='flex gap-3 mt-6'>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className='flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition'
+                  className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition' 
                 >
                   Cancel
                 </button>

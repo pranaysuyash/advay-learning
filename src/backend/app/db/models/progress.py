@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
@@ -22,7 +22,13 @@ class Progress(Base):
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
     meta_data: Mapped[dict] = mapped_column(JSON, default=dict)  # detailed tracking
 
+    # Optional idempotency key set by clients to avoid duplicates (unique per profile)
+    idempotency_key: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+
     completed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    __table_args__ = (
+        UniqueConstraint('profile_id', 'idempotency_key', name='uix_profile_id_idempotency_key'),
+    )
     # Relationships
     profile: Mapped["Profile"] = relationship("Profile", back_populates="progress")

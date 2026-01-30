@@ -1,0 +1,7 @@
+# Note: This repository uses local/offline CI checks only.
+# GitHub Actions workflows are intentionally not used in this project.
+# The original CI workflow was removed to emphasize that checks are run via local scripts
+# and the `uv`-managed venv as per AGENTS.md.
+# If you still want to enable a GitHub workflow in the future, restore a CI YAML with the
+# appropriate steps to install `uv` and run `uv run pytest` and frontend tests.
+

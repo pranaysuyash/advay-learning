@@ -1,4 +1,5 @@
 # Advay Vision Learning 🎨👋
+**Active Discovery Vision AI for Youth**
 
 AI-powered interactive learning platform for young children (2-8 years) using computer vision for hand tracking, drawing, and language recognition.
 

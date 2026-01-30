@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Badge background circle -->
+  <circle cx="40" cy="40" r="36" fill="#F2CC8F"/>
+  <circle cx="40" cy="40" r="30" fill="#FFE4A1"/>
+  
+  <!-- Star -->
+  <path d="M40 14 L46 32 L66 32 L50 44 L56 62 L40 50 L24 62 L30 44 L14 32 L34 32 Z" 
+        fill="#E85D04"/>
+  
+  <!-- Star highlight -->
+  <path d="M40 18 L44 31 L60 31 L48 41 L52 55 L40 46 L28 55 L32 41 L20 31 L36 31 Z" 
+        fill="url(#starGradient)"/>
+  
+  <!-- Center sparkle -->
+  <circle cx="40" cy="40" r="5" fill="white"/>
+  
+  <!-- Outer ring dots -->
+  <g fill="#E85D04">
+    <circle cx="40" cy="4" r="3"/>
+    <circle cx="68" cy="20" r="3"/>
+    <circle cx="68" cy="60" r="3"/>
+    <circle cx="40" cy="76" r="3"/>
+    <circle cx="12" cy="60" r="3"/>
+    <circle cx="12" cy="20" r="3"/>
+  </g>
+  
+  <defs>
+    <linearGradient id="starGradient" x1="20" y1="18" x2="60" y2="55" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F26C22"/>
+      <stop offset="100%" stop-color="#E85D04"/>
+    </linearGradient>
+  </defs>
+</svg>
