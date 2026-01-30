@@ -2,6 +2,8 @@
 
 Use when you need an evidence-first, persona-based UX/QA evaluation of the running camera app without changing code.
 
+**Important**: You may run **any single prompt independently**. Only run multiple prompts if the request explicitly asks for a multi-lens or comprehensive report.
+
 Repo rules:
 - Follow `AGENTS.md` (ticket + evidence discipline).
 - Do not claim “Observed” without reproduction steps or artifacts.
@@ -1098,4 +1100,3 @@ Core evaluation principle
 
 Final report format (strict)
 - Use the “Final report format” structure from Prompt A.
-
