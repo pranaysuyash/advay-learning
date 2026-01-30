@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
+import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
+import { hitTestRects } from '../utils/hitTest';
 
 interface LetterOption {
   id: number;
@@ -17,6 +20,21 @@ interface LetterOption {
 export function LetterHunt() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
+  const webcamRef = useRef<Webcam>(null);
+  const cameraAreaRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const rafIdRef = useRef<number | null>(null);
+  const lastPinchingRef = useRef<boolean>(false);
+  const lastSelectAtRef = useRef<number>(0);
+
+  const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
+  const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
+  const [trackingStatus, setTrackingStatus] = useState<'idle' | 'ready' | 'error'>('idle');
+  const [useMouseFallback, setUseMouseFallback] = useState<boolean>(false);
+  // Cursor coordinates are local to the camera container (CSS pixels).
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(null);
+
   const [score, setScore] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
   const [timeLeft, setTimeLeft] = useState<number>(30); // 30 seconds per level
@@ -30,6 +48,35 @@ export function LetterHunt() {
 
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
+
+  const initializeHandLandmarker = useCallback(async () => {
+    if (handLandmarker || isModelLoading) return;
+    setIsModelLoading(true);
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+      );
+      const landmarker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'GPU',
+        },
+        runningMode: 'VIDEO',
+        numHands: 1,
+        minHandDetectionConfidence: 0.3,
+        minHandPresenceConfidence: 0.3,
+        minTrackingConfidence: 0.3,
+      });
+      setHandLandmarker(landmarker);
+      setTrackingStatus('ready');
+    } catch (e) {
+      console.error('Failed to load hand landmarker:', e);
+      setTrackingStatus('error');
+    } finally {
+      setIsModelLoading(false);
+    }
+  }, [handLandmarker, isModelLoading]);
 
   // Initialize a round
   useEffect(() => {
@@ -97,7 +144,7 @@ export function LetterHunt() {
     setTimeout(nextRound, 1500);
   };
 
-  const handleLetterClick = (option: LetterOption) => {
+  const handleSelectOption = useCallback((option: LetterOption) => {
     if (option.isTarget) {
       // Correct answer
       setScore(prev => prev + timeLeft * 5); // More points for faster answers
@@ -108,7 +155,7 @@ export function LetterHunt() {
       setFeedback({ message: `Oops! That was ${option.char}, not ${targetLetter}`, type: 'error' });
       setTimeout(nextRound, 1500);
     }
-  };
+  }, [targetLetter, timeLeft]);
 
   const nextRound = () => {
     setFeedback(null);
@@ -136,6 +183,13 @@ export function LetterHunt() {
     setLevel(1);
     setRound(1);
     setTimeLeft(30);
+    setCursor(null);
+    setHoveredOptionIndex(null);
+    lastPinchingRef.current = false;
+    lastSelectAtRef.current = 0;
+
+    // Camera-first: initialize tracking on game start.
+    initializeHandLandmarker();
   };
 
   const resetGame = () => {
@@ -146,11 +200,106 @@ export function LetterHunt() {
     setRound(1);
     setTimeLeft(30);
     setFeedback(null);
+    setCursor(null);
+    setHoveredOptionIndex(null);
+    lastPinchingRef.current = false;
+    lastSelectAtRef.current = 0;
   };
 
   const goToHome = () => {
     navigate('/dashboard');
   };
+
+  const detectAndUpdateCursor = useCallback(() => {
+    if (!gameStarted || gameCompleted || feedback) {
+      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+      return;
+    }
+
+    const landmarker = handLandmarker as any;
+    const webcam = webcamRef.current as any;
+    const container = cameraAreaRef.current;
+    const video: HTMLVideoElement | undefined = webcam?.video;
+
+    if (!container || !video || typeof landmarker?.detectForVideo !== 'function') {
+      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+      return;
+    }
+
+    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+      return;
+    }
+
+    let results: any = null;
+    try {
+      results = landmarker.detectForVideo(video, performance.now());
+    } catch {
+      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+      return;
+    }
+
+    const landmarks: any[] | undefined = results?.landmarks?.[0];
+    if (!landmarks || landmarks.length < 9) {
+      if (cursor !== null) setCursor(null);
+      if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
+      lastPinchingRef.current = false;
+      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
+    const indexTip = landmarks[8];
+    const thumbTip = landmarks[4];
+
+    const xNorm = indexTip?.x ?? 0.5;
+    const yNorm = indexTip?.y ?? 0.5;
+
+    // Mirror X to match the mirrored webcam view.
+    const localX = (1 - xNorm) * rect.width;
+    const localY = yNorm * rect.height;
+    const nextCursor = { x: localX, y: localY };
+    setCursor(nextCursor);
+
+    // Determine which option tile is currently "hovered" by the cursor.
+    const rects = optionRefs.current
+      .map((el) => (el ? el.getBoundingClientRect() : null))
+      .filter(Boolean) as DOMRect[];
+    const hitIndex = hitTestRects({ x: rect.left + localX, y: rect.top + localY }, rects);
+    if (hitIndex !== hoveredOptionIndex) setHoveredOptionIndex(hitIndex);
+
+    // Pinch detection (thumb tip to index tip).
+    const dx = (thumbTip?.x ?? 0) - (indexTip?.x ?? 0);
+    const dy = (thumbTip?.y ?? 0) - (indexTip?.y ?? 0);
+    const pinchDistance = Math.sqrt(dx * dx + dy * dy);
+    const pinchingNow = pinchDistance < 0.05;
+
+    const wasPinching = lastPinchingRef.current;
+    lastPinchingRef.current = pinchingNow;
+
+    // Select on pinch "down" edge (debounced).
+    if (pinchingNow && !wasPinching) {
+      const now = Date.now();
+      if (now - lastSelectAtRef.current > 450 && hitIndex != null && options[hitIndex]) {
+        lastSelectAtRef.current = now;
+        handleSelectOption(options[hitIndex]);
+      }
+    }
+
+    rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+  }, [feedback, gameCompleted, gameStarted, handLandmarker, handleSelectOption, hoveredOptionIndex, options]);
+
+  useEffect(() => {
+    if (!gameStarted) return;
+    if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
+    rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
+    return () => {
+      if (rafIdRef.current != null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [detectAndUpdateCursor, gameStarted]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -176,7 +325,7 @@ export function LetterHunt() {
         </div>
 
         {/* Game Area */}
-        <div className="bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm">
+        <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
           {!gameStarted ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="w-24 h-24 mx-auto mb-6">
@@ -188,22 +337,22 @@ export function LetterHunt() {
               </div>
               
               <h2 className="text-2xl font-semibold mb-4">Letter Hunt Challenge</h2>
-              <p className="text-white/70 mb-6 max-w-md text-center">
-                Find the target letter among the options. Look carefully and tap the correct one!
+              <p className="text-text-secondary mb-6 max-w-md text-center">
+                Use your camera to control a cursor with your index finger, then pinch (thumb + index) to select the matching letter.
                 Complete all rounds to advance to the next level.
               </p>
-              
+
               <div className="flex gap-4">
                 <button
                   onClick={goToHome}
-                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg flex items-center gap-2"
+                  className="px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft flex items-center gap-2 text-text-primary hover:bg-bg-tertiary"
                 >
                   <UIIcon name="home" size={20} />
                   Home
                 </button>
                 <button
                   onClick={startGame}
-                  className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                  className="px-8 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg"
                 >
                   Start Game
                 </button>
@@ -226,13 +375,13 @@ export function LetterHunt() {
               <div className="flex gap-4">
                 <button
                   onClick={resetGame}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition"
+                  className="px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg"
                 >
                   Play Again
                 </button>
                 <button
                   onClick={goToHome}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition"
+                  className="px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft text-text-primary hover:bg-bg-tertiary"
                 >
                   Home
                 </button>
@@ -240,17 +389,106 @@ export function LetterHunt() {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Target Letter Display */}
-              <div className="bg-white/10 border border-border rounded-xl p-6 text-center">
-                <div className="text-sm text-white/60 mb-2">Find this letter:</div>
-                <div 
-                  className="text-8xl font-bold mx-auto inline-block"
-                  style={{ color: alphabet.letters.find(l => l.char === targetLetter)?.color || '#EF4444' }}
-                >
-                  {targetLetter}
+              {/* Camera hero (main mechanic) */}
+              <div ref={cameraAreaRef} className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-soft">
+                <div className="aspect-video w-full">
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    mirrored
+                    className="h-full w-full object-cover"
+                    videoConstraints={{ facingMode: 'user' }}
+                  />
                 </div>
-                <div className="mt-2 text-lg">
-                  {alphabet.letters.find(l => l.char === targetLetter)?.name}
+
+                {/* Top HUD */}
+                <div className="absolute inset-x-0 top-0 p-4 flex items-start justify-between">
+                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white">
+                    <div className="text-xs opacity-80">Find this letter</div>
+                    <div className="flex items-baseline gap-2">
+                      <div
+                        className="text-4xl font-extrabold leading-none"
+                        style={{
+                          color:
+                            alphabet.letters.find((l) => l.char === targetLetter)?.color ??
+                            '#E85D04',
+                        }}
+                      >
+                        {targetLetter}
+                      </div>
+                      <div className="text-sm opacity-90">
+                        {alphabet.letters.find((l) => l.char === targetLetter)?.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white text-right">
+                    <div className="text-sm font-bold">Score: {score}</div>
+                    <div className="text-xs opacity-80">
+                      Level {level} · Round {round}/{totalRounds} · {timeLeft}s
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tracking status */}
+                {trackingStatus !== 'ready' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-black/60 backdrop-blur px-4 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold">
+                      {isModelLoading
+                        ? 'Loading hand tracking…'
+                        : trackingStatus === 'error'
+                          ? 'Hand tracking unavailable. Enable mouse fallback below.'
+                          : 'Starting camera…'}
+                    </div>
+                  </div>
+                )}
+
+                {/* Cursor */}
+                {cursor && (
+                  <div
+                    className="absolute w-4 h-4 rounded-full bg-pip-orange shadow-soft-lg border-2 border-white/80"
+                    style={{
+                      left: cursor.x - 8,
+                      top: cursor.y - 8,
+                    }}
+                  />
+                )}
+
+                {/* Options overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <div className="bg-black/45 backdrop-blur rounded-2xl border border-white/15 p-3">
+                    <div className="text-xs text-white/80 mb-2 flex items-center justify-between">
+                      <span>Point with your index finger · Pinch to select</span>
+                      <span className="opacity-80">{useMouseFallback ? 'Mouse fallback ON' : ''}</span>
+                    </div>
+                    <div className="flex gap-2 justify-between">
+                      {options.map((option, idx) => (
+                        <button
+                          key={option.id}
+                          ref={(el) => {
+                            optionRefs.current[idx] = el;
+                          }}
+                          type="button"
+                          onClick={
+                            useMouseFallback || trackingStatus === 'error'
+                              ? () => handleSelectOption(option)
+                              : undefined
+                          }
+                          className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition ${
+                            hoveredOptionIndex === idx
+                              ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
+                              : 'border-white/15 bg-white/10 hover:bg-white/15'
+                          }`}
+                          style={{ borderColor: hoveredOptionIndex === idx ? '#fff' : option.color + '40' }}
+                        >
+                          <div className="text-3xl font-extrabold leading-none" style={{ color: option.color }}>
+                            {option.char}
+                          </div>
+                          <div className="text-[11px] text-white/80 truncate">{option.name}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -261,57 +499,46 @@ export function LetterHunt() {
                   animate={{ opacity: 1, scale: 1 }}
                   className={`rounded-xl p-4 text-center font-semibold ${
                     feedback.type === 'success'
-                      ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                      ? 'bg-success/20 border border-success/30 text-success'
+                      : 'bg-error/10 border border-error/20 text-error'
                   }`}
                 >
                   {feedback.message}
                 </motion.div>
               )}
 
-              {/* Letter Options */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                {options.map((option) => (
-                  <motion.button
-                    key={option.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleLetterClick(option)}
-                    className="bg-white/10 border border-border rounded-xl p-6 flex flex-col items-center justify-center hover:bg-white/20 transition"
-                    style={{ borderColor: option.color + '40' }}
-                  >
-                    <div 
-                      className="text-6xl font-bold mb-2"
-                      style={{ color: option.color }}
-                    >
-                      {option.char}
-                    </div>
-                    <div className="text-sm text-white/70">{option.name}</div>
-                  </motion.button>
-                ))}
-              </div>
-
               {/* Game Controls */}
               <div className="flex justify-between items-center">
                 <button
                   onClick={goToHome}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-border rounded-lg font-semibold transition flex items-center gap-2 text-text-primary hover:bg-bg-tertiary shadow-soft"
                 >
                   <UIIcon name="home" size={16} />
                   Home
                 </button>
                 
                 <div className="text-center">
-                  <div className="text-sm text-white/60">Round {round} of {totalRounds}</div>
-                  <div className="text-sm text-white/60">Level {level}</div>
+                  <div className="text-sm text-text-secondary">Round {round} of {totalRounds}</div>
+                  <div className="text-sm text-text-secondary">Level {level}</div>
                 </div>
-                
-                <button
-                  onClick={resetGame}
-                  className="px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition"
-                >
-                  Reset
-                </button>
+
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-text-secondary flex items-center gap-2 select-none">
+                    <input
+                      type="checkbox"
+                      checked={useMouseFallback}
+                      onChange={(e) => setUseMouseFallback(e.target.checked)}
+                      className="accent-pip-orange"
+                    />
+                    Mouse fallback
+                  </label>
+                  <button
+                    onClick={resetGame}
+                    className="px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition shadow-soft text-text-primary"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
 
               {/* Mascot */}
@@ -326,13 +553,13 @@ export function LetterHunt() {
         </div>
         
         {/* Game Instructions */}
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-3 text-blue-400">How to Play</h2>
-          <ul className="space-y-2 text-white/70 text-sm">
-            <li>• A target letter will be displayed at the top</li>
-            <li>• Find that letter among the options below</li>
-            <li>• Tap on the correct letter to score points</li>
-            <li>• You have 30 seconds per round - answer quickly for bonus points!</li>
+        <div className="bg-white border border-border rounded-xl p-6 shadow-soft">
+          <h2 className="text-lg font-semibold mb-3 text-advay-slate">How to Play</h2>
+          <ul className="space-y-2 text-text-secondary text-sm">
+            <li>• A target letter appears on the camera screen</li>
+            <li>• Move your index finger to control the cursor</li>
+            <li>• Pinch (thumb + index) while hovering a tile to select it</li>
+            <li>• You have 30 seconds per round — faster answers score more</li>
             <li>• Complete all 10 rounds to advance to the next level</li>
           </ul>
         </div>

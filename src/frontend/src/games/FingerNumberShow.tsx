@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+import { useTTS } from '../hooks/useTTS';
 
 interface Point {
   x: number;
@@ -91,6 +92,9 @@ export function FingerNumberShow() {
   const [feedback, setFeedback] = useState<string>('');
   const [difficulty, setDifficulty] = useState<number>(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
+  const lastSpokenTargetRef = useRef<number | null>(null);
+  const lastSpokenAtRef = useRef<number>(0);
 
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
@@ -147,8 +151,24 @@ export function FingerNumberShow() {
 
     lastTargetRef.current = nextTarget;
     setTargetNumber(nextTarget);
-    setFeedback(`Show me ${NUMBER_NAMES[nextTarget]} fingers! 🤚`);
-  }, [refillTargetBag]);
+    const prompt =
+      nextTarget === 0
+        ? 'Make a fist for zero.'
+        : `Show me ${NUMBER_NAMES[nextTarget]} fingers.`;
+    setFeedback(prompt);
+
+    // TTS: speak prompt on target change (debounced to avoid spam).
+    if (ttsEnabled) {
+      const now = Date.now();
+      const shouldSpeak =
+        lastSpokenTargetRef.current !== nextTarget || now - lastSpokenAtRef.current > 2000;
+      if (shouldSpeak) {
+        lastSpokenTargetRef.current = nextTarget;
+        lastSpokenAtRef.current = now;
+        void speak(prompt);
+      }
+    }
+  }, [refillTargetBag, speak, ttsEnabled]);
 
   useEffect(() => {
     const initializeHandLandmarker = async () => {
@@ -277,8 +297,8 @@ export function FingerNumberShow() {
       setHandsBreakdown(breakdown);
     }
 
-    const handsSeenRecently = Date.now() - lastHandsSeenAtRef.current < 700;
-    const canSucceedOnZero = targetNumber === 0 ? handsSeenRecently : true;
+    // For target 0: require a detected hand (closed fist) to avoid “no hands = success”.
+    const canSucceedOnZero = targetNumber === 0 ? detectedHands > 0 : true;
 
     if (totalFingers === targetNumber && !showCelebration && canSucceedOnZero) {
       setShowCelebration(true);
@@ -320,9 +340,10 @@ export function FingerNumberShow() {
     setFeedback('');
   };
 
-  const handsSeenRecently = Date.now() - lastHandsSeenAtRef.current < 700;
   const isDetectedMatch =
-    currentCount === targetNumber && (targetNumber !== 0 || handsSeenRecently);
+    targetNumber === 0
+      ? currentCount === 0 && handsDetected > 0
+      : currentCount === targetNumber;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -432,19 +453,45 @@ export function FingerNumberShow() {
                   className="absolute inset-0 w-full h-full"
                 />
 
-                {/* Instruction overlay (camera-first hero) */}
+	                {/* Instruction overlay (camera-first hero) */}
 	                <div className="absolute inset-x-0 top-4 flex justify-center pointer-events-none">
-	                  <div className="bg-black/40 backdrop-blur px-4 py-2 rounded-full border border-white/20 text-white text-sm md:text-base font-semibold">
-	                    Show <span className="font-extrabold">{targetNumber}</span> fingers
-	                    <span className="opacity-80"> ({NUMBER_NAMES[targetNumber]})</span>
+	                  <div className="bg-black/45 backdrop-blur px-5 py-3 rounded-2xl border border-white/20 text-white shadow-soft-lg">
+	                    {targetNumber === 0 ? (
+	                      <div className="flex items-center gap-3">
+	                        <span className="text-sm md:text-base opacity-85 font-semibold">
+	                          Make a fist:
+	                        </span>
+	                        <span className="text-5xl md:text-6xl font-black leading-none">
+	                          0
+	                        </span>
+	                        <span className="text-base md:text-lg font-semibold opacity-90">
+	                          ({NUMBER_NAMES[0]})
+	                        </span>
+	                      </div>
+	                    ) : (
+	                      <div className="flex items-center gap-3">
+	                        <span className="text-sm md:text-base opacity-85 font-semibold">
+	                          Show
+	                        </span>
+	                        <span className="text-5xl md:text-6xl font-black leading-none">
+	                          {targetNumber}
+	                        </span>
+	                        <span className="text-base md:text-lg font-semibold opacity-90">
+	                          fingers
+	                        </span>
+	                        <span className="text-sm md:text-base opacity-80">
+	                          ({NUMBER_NAMES[targetNumber]})
+	                        </span>
+	                      </div>
+	                    )}
 	                  </div>
 	                </div>
 
                 {/* Controls overlay */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
-                    Target: {targetNumber}
-                  </div>
+	                <div className="absolute top-4 left-4 flex gap-2">
+	                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+	                    Target: {targetNumber}
+	                  </div>
 	                  <div
 	                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white ${
 	                      isDetectedMatch ? 'ring-2 ring-green-400/70' : ''
@@ -456,6 +503,24 @@ export function FingerNumberShow() {
 	                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
 	                    Hands: {handsDetected}
 	                  </div>
+	                  {ttsAvailable && (
+	                    <button
+	                      type="button"
+	                      onClick={() => {
+	                        const prompt =
+	                          targetNumber === 0
+	                            ? 'Make a fist for zero.'
+	                            : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
+	                        void speak(prompt);
+	                      }}
+	                      className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white hover:bg-black/60 transition ${
+	                        ttsEnabled ? '' : 'opacity-60'
+	                      }`}
+	                      title={ttsEnabled ? 'Replay prompt' : 'Enable sound in Settings to hear prompts'}
+	                    >
+	                      🔊
+	                    </button>
+	                  )}
 	                  <div className="bg-bg-tertiary/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border text-text-primary">
 	                    {(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}
 	                  </div>

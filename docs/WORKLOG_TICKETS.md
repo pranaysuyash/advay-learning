@@ -223,6 +223,42 @@ Evidence:
   ```
 - **Interpretation**: Observed — LetterHunt uses camera-first pinch selection, helper is unit-tested, and build/tests succeed.
 
+### TCK-20260130-028 :: FingerNumberShow prompt UX + TTS + stop “auto-changing” for 0
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 12:51 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Address three issues in FingerNumberShow:
+1) “Show me 0 fingers” prompt is too small.
+2) TTS is not working for the prompt.
+3) Target can appear to “auto change” (especially around 0) due to success being triggered without an intentional gesture.
+
+Scope contract:
+- In-scope:
+  - Make the in-camera instruction overlay more legible (especially `0`).
+  - Treat target `0` as “make a fist” (hand present) so success doesn’t trigger when no hands are visible.
+  - Add prompt TTS on target changes + “Replay prompt” button using existing `useTTS` / `TTSService`.
+  - Verify frontend tests + production build and record evidence.
+- Out-of-scope:
+  - Replacing the tracking model, new voices, or backend changes
+  - Global audio UX beyond the prompt TTS for this game
+- Behavior change allowed: YES (bug fix + UX improvement)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/games/FingerNumberShow.tsx`
+  - (optional) `src/frontend/src/services/ai/tts/TTSService.ts` if needed
+
+Acceptance Criteria:
+- [ ] Target overlay is large and readable; `0` is visually prominent.
+- [ ] Target `0` requires a detected hand (fist) to succeed (no more “no hands = success”).
+- [ ] TTS speaks the prompt when the target changes (when sound is enabled + browser supports).
+- [ ] Frontend tests and production build pass.
+
 ### TCK-20260130-025 :: Brand Guidelines Analysis & Competitive Research
 Type: RESEARCH
 Owner: AI Assistant
@@ -1211,7 +1247,8 @@ Targets:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-30 12:00 UTC
-Status: **OPEN**
+Status: **DONE** ✅
+Completed: 2026-01-30 16:00 IST
 
 Scope contract:
 - In-scope:
@@ -1222,7 +1259,71 @@ Scope contract:
   - Large game redesigns
 
 Targets:
-- Files: `src/frontend/src/pages/Game.tsx`, tests, and demo fixtures
+- Files: `src/frontend/src/pages/AlphabetGame.tsx`
+
+Execution log:
+
+- 15:55 IST: Reviewed existing code - mouse drawing already implemented via pointer events
+- 15:58 IST: Added `inputMode` state ('camera' | 'mouse') to track input method
+- 16:00 IST: Updated `startGame()` to fallback to mouse mode when camera denied
+- 16:02 IST: Updated permission warning to show amber (not red) with mouse mode message
+- 16:04 IST: Enabled Start Game button when camera denied - now shows "Play with Mouse/Touch"
+- 16:06 IST: Added input mode indicator in game UI (green badge for camera, blue for mouse)
+- 16:08 IST: Updated `stopGame()` to reset input mode
+- 16:10 IST: Build successful - 579 modules, 692KB JS
+
+Changes made to AlphabetGame.tsx:
+
+1. Added state:
+   - `inputMode: 'camera' | 'mouse'` - tracks current input method
+
+2. Updated `startGame()`:
+   - On camera denial: sets `inputMode = 'mouse'`, starts game with feedback message
+   - Game no longer blocked when camera denied
+
+3. Updated permission warning UI:
+   - Changed from red (error) to amber (warning)
+   - Message: "Camera not available - Mouse/Touch Mode Active"
+   - Added subtext explaining mouse/touch is available
+
+4. Updated Start Game button:
+   - Always enabled (removed disabled state)
+   - Dynamic text: "Play with Mouse/Touch" when camera denied
+
+5. Added input mode indicator in game:
+   - Green badge with camera icon: "Hand Tracking"
+   - Blue badge with hand icon: "Mouse/Touch"
+   - Positioned in top controls overlay
+
+Acceptance criteria:
+
+- [x] Camera permission state detected on mount
+- [x] Dedicated permission UI shown when denied (amber warning, not red error)
+- [x] Mouse/touch fallback mechanism clearly indicated
+- [x] Game can start without camera (mouse mode)
+- [x] Input mode indicator visible during gameplay
+- [x] Build passes TypeScript compilation
+
+Evidence:
+
+**Build:**
+```
+vite v7.3.1 building client environment for production...
+✓ 579 modules transformed.
+✓ built in 1.91s
+```
+
+**User flow when camera denied:**
+1. User clicks "Play with Mouse/Touch" button
+2. Game starts with blue "Mouse/Touch" indicator
+3. User can draw with mouse/touch immediately
+4. Canvas pointer events handle drawing (already implemented)
+
+**User flow when camera granted:**
+1. User clicks "Start Learning!" button
+2. Game starts with green "Hand Tracking" indicator
+3. Hand tracking initialized
+4. User can draw with hand pinch or mouse/touch
 
 ---
 

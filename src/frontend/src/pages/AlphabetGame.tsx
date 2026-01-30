@@ -66,6 +66,9 @@ export function AlphabetGame() {
   >('prompt');
   const [showPermissionWarning, setShowPermissionWarning] = useState(false);
 
+  // Input mode: camera (hand tracking) or mouse (pointer/touch)
+  const [inputMode, setInputMode] = useState<'camera' | 'mouse'>('camera');
+
   // Basic game controls and stubs
   const startGame = async () => {
     setIsModelLoading(false);
@@ -107,7 +110,10 @@ export function AlphabetGame() {
     } catch {
       setCameraPermission('denied');
       setShowPermissionWarning(true);
-      // Don't start the game if permission denied
+      setInputMode('mouse');
+      // Still allow game to start with mouse mode
+      setIsPlaying(true);
+      setFeedback('Camera not available. Use your mouse or finger to draw!');
     }
   };
 
@@ -122,7 +128,8 @@ export function AlphabetGame() {
       cancelAnimationFrame(rafIdRef.current);
       rafIdRef.current = null;
     }
-    // Don't hide permission warning - user needs to know if they want to restart
+    // Reset input mode to camera for next session (will auto-fallback if needed)
+    setInputMode('camera');
   };
 
   const clearDrawing = () => {
@@ -602,15 +609,16 @@ export function AlphabetGame() {
 
           {/* Game Area - Full focus on camera when playing */}
           <div className={`${isPlaying ? 'mt-0' : '-mt-4'}`}>
-            {/* Permission Warning */}
+            {/* Permission Warning - With Mouse Fallback */}
             {showPermissionWarning && (
-              <div className='bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-4 text-center'>
-                <div className='flex items-center justify-center gap-2 text-red-400 font-semibold'>
+              <div className='bg-amber-500/20 border border-amber-500/30 rounded-xl p-4 mb-4 text-center'>
+                <div className='flex items-center justify-center gap-2 text-amber-400 font-semibold'>
                   <UIIcon name='warning' size={20} />
-                  <span>Camera permission denied</span>
+                  <span>Camera not available - Mouse/Touch Mode Active</span>
                 </div>
-                <p className='text-red-300/80 text-sm mt-1'>
-                  Please allow camera access in your browser settings to play.
+                <p className='text-amber-300/80 text-sm mt-1'>
+                  You can still play using your mouse or finger to draw! 
+                  Allow camera access in browser settings for hand tracking.
                 </p>
               </div>
             )}
@@ -691,20 +699,13 @@ export function AlphabetGame() {
                     <div className='text-text-secondary px-8 py-4 text-lg font-bold'>
                       Loading hand tracking...
                     </div>
-                  ) : cameraPermission === 'denied' ? (
-                    <button
-                      disabled
-                      className='px-8 py-4 bg-bg-tertiary border border-border rounded-xl font-bold text-lg text-text-muted cursor-not-allowed'
-                    >
-                      Camera Access Required
-                    </button>
                   ) : (
                     <button
                       onClick={startGame}
                       className='px-8 py-4 bg-pip-orange rounded-xl font-bold text-lg text-white hover:bg-pip-rust transition-all transform hover:scale-105 shadow-soft-lg flex items-center gap-3'
                     >
                       <UIIcon name='sparkles' size={24} />
-                      Start Learning!
+                      {cameraPermission === 'denied' ? 'Play with Mouse/Touch' : 'Start Learning!'}
                     </button>
                   )}
                 </div>
@@ -770,7 +771,7 @@ export function AlphabetGame() {
                   )}
 
                   {/* Controls overlay */}
-                  <div className='absolute top-4 left-4 flex gap-2'>
+                  <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
                     <div className='bg-black/50 backdrop-blur px-4 py-2 rounded-full text-base font-bold border-2 border-white/30 flex items-center gap-2'>
                       <UIIcon
                         name='target'
@@ -780,6 +781,18 @@ export function AlphabetGame() {
                       <span className='text-white'>
                         Trace: {currentLetter.char}
                       </span>
+                    </div>
+                    {/* Input Mode Indicator */}
+                    <div className={`backdrop-blur px-4 py-2 rounded-full text-sm font-bold border-2 flex items-center gap-2 ${
+                      inputMode === 'camera' 
+                        ? 'bg-green-500/30 border-green-400/50 text-green-300' 
+                        : 'bg-blue-500/30 border-blue-400/50 text-blue-300'
+                    }`}>
+                      <UIIcon 
+                        name={inputMode === 'camera' ? 'camera' : 'hand'} 
+                        size={16} 
+                      />
+                      <span>{inputMode === 'camera' ? 'Hand Tracking' : 'Mouse/Touch'}</span>
                     </div>
                     <div className='relative group'>
                       <button
