@@ -23,6 +23,59 @@ interface HandLandmarkerResult {
   landmarks: Landmark[][];
 }
 
+const NUMBER_NAMES = [
+  'Zero',
+  'One',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+] as const;
+
+const DIFFICULTY_LEVELS: DifficultyLevel[] = [
+  { name: 'Level 1', minNumber: 0, maxNumber: 2, rewardMultiplier: 1.2 },
+  { name: 'Level 2', minNumber: 0, maxNumber: 5, rewardMultiplier: 1.0 },
+  { name: 'Level 3', minNumber: 0, maxNumber: 10, rewardMultiplier: 0.8 },
+];
+
+export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
+  // Fingers (index/middle/ring/pinky): tip is "up" relative to PIP
+  const fingerPairs = [
+    { tip: 8, pip: 6 },
+    { tip: 12, pip: 10 },
+    { tip: 16, pip: 14 },
+    { tip: 20, pip: 18 },
+  ];
+
+  let count = 0;
+  for (const pair of fingerPairs) {
+    const tip = landmarks[pair.tip];
+    const pip = landmarks[pair.pip];
+    if (tip && pip && tip.y < pip.y) count++;
+  }
+
+  // Thumb: use relative X direction based on hand orientation.
+  // We infer handedness from index MCP (5) vs pinky MCP (17) X positions.
+  // This stays consistent even when the video is mirrored.
+  const thumbTip = landmarks[4];
+  const thumbIp = landmarks[3];
+  const indexMcp = landmarks[5];
+  const pinkyMcp = landmarks[17];
+
+  if (thumbTip && thumbIp && indexMcp && pinkyMcp) {
+    const isRightHand = indexMcp.x < pinkyMcp.x;
+    const thumbExtended = isRightHand ? thumbTip.x < thumbIp.x : thumbTip.x > thumbIp.x;
+    if (thumbExtended) count++;
+  }
+
+  return count;
+}
+
 export function FingerNumberShow() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,19 +85,70 @@ export function FingerNumberShow() {
   const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
   const [isModelLoading, setIsModelLoading] = useState(false);
   const [currentCount, setCurrentCount] = useState<number>(0);
+  const [handsDetected, setHandsDetected] = useState<number>(0);
+  const [handsBreakdown, setHandsBreakdown] = useState<string>('');
   const [targetNumber, setTargetNumber] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [difficulty, setDifficulty] = useState<number>(0);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const difficultyLevels: DifficultyLevel[] = [
-    { name: 'Level 1', minNumber: 0, maxNumber: 2, rewardMultiplier: 1.2 },
-    { name: 'Level 2', minNumber: 0, maxNumber: 5, rewardMultiplier: 1.0 },
-    { name: 'Level 3', minNumber: 0, maxNumber: 10, rewardMultiplier: 0.8 },
-  ];
-
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
+  const lastHandsSeenAtRef = useRef<number>(0);
+  const targetBagRef = useRef<number[]>([]);
+  const lastTargetRef = useRef<number | null>(null);
+  const bagKeyRef = useRef<string>('');
+
+  const randomInt = useCallback((maxExclusive: number) => {
+    if (maxExclusive <= 1) return 0;
+    try {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      return arr[0] % maxExclusive;
+    } catch {
+      return Math.floor(Math.random() * maxExclusive);
+    }
+  }, []);
+
+  const shuffleInPlace = useCallback((arr: number[]) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = randomInt(i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }, [randomInt]);
+
+  const refillTargetBag = useCallback((minNumber: number, maxNumber: number) => {
+    const nextBag: number[] = [];
+    for (let n = minNumber; n <= maxNumber; n++) nextBag.push(n);
+    shuffleInPlace(nextBag);
+
+    // Avoid immediate repeats across refills when possible.
+    if (nextBag.length > 1 && lastTargetRef.current != null && nextBag[0] === lastTargetRef.current) {
+      const swapIndex = nextBag.length - 1;
+      [nextBag[0], nextBag[swapIndex]] = [nextBag[swapIndex], nextBag[0]];
+    }
+
+    targetBagRef.current = nextBag;
+  }, [shuffleInPlace]);
+
+  const setNextTarget = useCallback((levelIndex: number) => {
+    const level = DIFFICULTY_LEVELS[levelIndex];
+    if (!level) return;
+    const { minNumber, maxNumber } = level;
+    const nextKey = `${levelIndex}:${minNumber}-${maxNumber}`;
+
+    if (bagKeyRef.current !== nextKey || targetBagRef.current.length === 0) {
+      bagKeyRef.current = nextKey;
+      refillTargetBag(minNumber, maxNumber);
+    }
+
+    const nextTarget = targetBagRef.current.shift();
+    if (typeof nextTarget !== 'number') return;
+
+    lastTargetRef.current = nextTarget;
+    setTargetNumber(nextTarget);
+    setFeedback(`Show me ${NUMBER_NAMES[nextTarget]} fingers! 🤚`);
+  }, [refillTargetBag]);
 
   useEffect(() => {
     const initializeHandLandmarker = async () => {
@@ -60,6 +164,10 @@ export function FingerNumberShow() {
           },
           runningMode: 'VIDEO',
           numHands: 2,
+          // Be more permissive so both hands register more reliably in real-world lighting/angles.
+          minHandDetectionConfidence: 0.3,
+          minHandPresenceConfidence: 0.3,
+          minTrackingConfidence: 0.3,
         });
         setHandLandmarker(landmarker);
       } catch (error) {
@@ -75,40 +183,19 @@ export function FingerNumberShow() {
   useEffect(() => {
     if (!isPlaying) return;
 
-    const pickTargetNumber = () => {
-      const level = difficultyLevels[difficulty];
-      const { minNumber, maxNumber } = level;
-      const range = maxNumber - minNumber + 1;
-      const newTarget = Math.floor(Math.random() * range) + minNumber;
-      setTargetNumber(newTarget);
-      const names = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
-      setFeedback(`Show me ${names[newTarget]} fingers! 🤚`);
-    };
-
-    pickTargetNumber();
-  }, [isPlaying, difficulty]);
+    setNextTarget(difficulty);
+  }, [isPlaying, difficulty, setNextTarget]);
 
   const countExtendedFingers = useCallback((landmarks: Point[]): number => {
-    const fingerPairs = [
-      { tip: 8, pip: 6 },
-      { tip: 12, pip: 10 },
-      { tip: 16, pip: 14 },
-      { tip: 20, pip: 18 },
-    ];
-
-    let count = 0;
-    fingerPairs.forEach(pair => {
-      const tip = landmarks[pair.tip];
-      const pip = landmarks[pair.pip];
-      if (tip.y < pip.y) {
-        count++;
-      }
-    });
-
-    return count;
+    return countExtendedFingersFromLandmarks(landmarks);
   }, []);
 
-  const detectAndDraw = useCallback(() => { // eslint-disable-line react-hooks/exhaustive-deps
+  const lastHandsUiRef = useRef<{ hands: number; breakdown: string }>({
+    hands: 0,
+    breakdown: '',
+  });
+
+  const detectAndDraw = useCallback(() => {
     if (!webcamRef.current || !canvasRef.current || !handLandmarker || !isPlaying) return;
 
     const video = webcamRef.current.video;
@@ -149,10 +236,15 @@ export function FingerNumberShow() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     let totalFingers = 0;
+    const perHand: number[] = [];
+    let detectedHands = 0;
 
     if (results && results.landmarks && results.landmarks.length > 0) {
+      lastHandsSeenAtRef.current = Date.now();
+      detectedHands = results.landmarks.length;
       results.landmarks.forEach((landmarks: Landmark[], handIndex: number) => {
         const fingerCount = countExtendedFingers(landmarks);
+        perHand.push(fingerCount);
         totalFingers += fingerCount;
 
         const wrist = landmarks[0];
@@ -174,9 +266,23 @@ export function FingerNumberShow() {
 
     setCurrentCount(totalFingers);
 
-    if (totalFingers === targetNumber && targetNumber > 0 && !showCelebration) {
+    const breakdown = perHand.length > 0 ? perHand.join(' + ') : '';
+    const lastUi = lastHandsUiRef.current;
+    if (lastUi.hands !== detectedHands) {
+      lastUi.hands = detectedHands;
+      setHandsDetected(detectedHands);
+    }
+    if (lastUi.breakdown !== breakdown) {
+      lastUi.breakdown = breakdown;
+      setHandsBreakdown(breakdown);
+    }
+
+    const handsSeenRecently = Date.now() - lastHandsSeenAtRef.current < 700;
+    const canSucceedOnZero = targetNumber === 0 ? handsSeenRecently : true;
+
+    if (totalFingers === targetNumber && !showCelebration && canSucceedOnZero) {
       setShowCelebration(true);
-      const level = difficultyLevels[difficulty];
+      const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
       const points = Math.round(10 * level.rewardMultiplier);
       setScore(prev => prev + points);
       setStreak(prev => prev + 1);
@@ -185,16 +291,12 @@ export function FingerNumberShow() {
 
       setTimeout(() => {
         setShowCelebration(false);
-        const { minNumber, maxNumber } = level;
-        const range = maxNumber - minNumber + 1;
-        const newTarget = Math.floor(Math.random() * range) + minNumber;
-        setTargetNumber(newTarget);
-        setFeedback(`Show me ${names[newTarget]} fingers! 🤚`);
+        setNextTarget(difficulty);
       }, 2000);
     }
 
     requestAnimationFrame(detectAndDraw);
-  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, showCelebration, difficulty]);
+  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, showCelebration, difficulty, setNextTarget]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -218,6 +320,10 @@ export function FingerNumberShow() {
     setFeedback('');
   };
 
+  const handsSeenRecently = Date.now() - lastHandsSeenAtRef.current < 700;
+  const isDetectedMatch =
+    currentCount === targetNumber && (targetNumber !== 0 || handsSeenRecently);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <motion.div
@@ -228,33 +334,33 @@ export function FingerNumberShow() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Finger Number Show</h1>
-            <p className="text-white/60">Show numbers with your fingers!</p>
+            <p className="text-text-secondary">Show numbers with your fingers!</p>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold">Score: {score}</div>
-            <div className="flex items-center gap-4 text-sm text-white/60">
+            <div className="text-2xl font-bold text-text-primary">Score: {score}</div>
+            <div className="flex items-center justify-end gap-4 text-sm text-text-secondary">
               <span>🔥 Streak: {streak}</span>
-              <span>{difficultyLevels[difficulty].name}</span>
+              <span>{(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}</span>
             </div>
           </div>
         </div>
 
         {/* Difficulty Selection */}
         {!isPlaying && (
-          <div className="bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm">
-            <div className="text-sm font-medium text-white/80 mb-2">
+          <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
+            <div className="text-sm font-medium text-text-secondary mb-2">
               Choose Difficulty
             </div>
             <div className="flex gap-2">
-              {difficultyLevels.map((level) => (
+              {DIFFICULTY_LEVELS.map((level, levelIndex) => (
                 <button
                   key={level.name}
                   type="button"
-                  onClick={() => setDifficulty(difficultyLevels.indexOf(level))}
+                  onClick={() => setDifficulty(levelIndex)}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
-                    difficulty === difficultyLevels.indexOf(level)
-                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
-                      : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    difficulty === levelIndex
+                      ? 'bg-pip-orange text-white shadow-soft'
+                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
                   }`}
                 >
                   {level.name} ({level.minNumber}-{level.maxNumber})
@@ -262,46 +368,6 @@ export function FingerNumberShow() {
               ))}
             </div>
           </div>
-        )}
-
-        {/* Target Number Display */}
-        {isPlaying && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-8 mb-6 text-center"
-          >
-            <div className="text-white/70 mb-2 text-lg">Show me</div>
-            <div className="text-9xl font-bold text-white mb-2">
-              {targetNumber}
-            </div>
-            <div className="text-3xl text-white/80">{['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'][targetNumber]}</div>
-            <div className="text-white/60 mt-4 text-lg">fingers! 🤚</div>
-          </motion.div>
-        )}
-
-        {/* Current Count Display */}
-        {isPlaying && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`bg-white/10 border border-border rounded-xl p-6 mb-6 text-center shadow-sm ${
-              currentCount === targetNumber && targetNumber > 0
-                ? 'border-green-500/50 bg-green-500/10'
-                : 'border-border'
-            }`}
-          >
-            <div className="text-white/70 mb-2">You're showing</div>
-            <div className={`text-8xl font-bold mb-2 ${
-              currentCount === targetNumber && targetNumber > 0
-                ? 'text-green-400'
-                : 'text-white'
-            }`}>
-              {currentCount}
-            </div>
-            <div className="text-2xl text-white/80">{['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'][currentCount]}</div>
-            <div className="text-white/60 mt-2">fingers</div>
-          </motion.div>
         )}
 
         {/* Feedback */}
@@ -313,8 +379,8 @@ export function FingerNumberShow() {
               exit={{ opacity: 0, scale: 0.9 }}
               className={`rounded-xl p-4 mb-6 text-center font-semibold ${
                 feedback.includes('Great') || feedback.includes('Amazing')
-                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                  : 'bg-white/10 border border-border text-white/80' 
+                  ? 'bg-success/20 border border-success/30 text-text-success'
+                  : 'bg-white border border-border text-text-secondary'
               }`}
             >
               {feedback}
@@ -325,27 +391,27 @@ export function FingerNumberShow() {
         {/* Game Area */}
         <div className="relative">
           {!isPlaying ? (
-            <div className="bg-white/10 border border-border rounded-xl p-12 text-center shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-12 text-center shadow-soft">
               <div className="text-6xl mb-4">🤚</div>
               <h2 className="text-2xl font-semibold mb-4">Ready to Count?</h2>
-              <p className="text-white/70 mb-8 max-w-md mx-auto">
+              <p className="text-text-secondary mb-8 max-w-md mx-auto">
                 Hold up your fingers to show numbers! The camera will count how many fingers you're showing.
               </p>
               <div className="flex justify-center gap-4">
                 <button
                   type="button"
                   onClick={() => window.history.back()}
-                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg"
+                  className="px-6 py-3 bg-white border border-border rounded-lg font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition shadow-soft"
                 >
-                  🏠 Back
+                  Back
                 </button>
                 {isModelLoading ? (
-                  <div className="text-white/60 px-6 py-3">Loading hand tracking...</div>
+                  <div className="text-text-secondary px-6 py-3">Loading hand tracking...</div>
                 ) : (
                   <button
                     type="button"
                     onClick={startGame}
-                    className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                    className="px-8 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg"
                   >
                     Start Game
                   </button>
@@ -354,7 +420,7 @@ export function FingerNumberShow() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-2xl border-4 border-purple-400/30">
+              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-soft-lg border border-border">
                 <Webcam
                   ref={webcamRef}
                   className="absolute inset-0 w-full h-full object-cover"
@@ -366,16 +432,35 @@ export function FingerNumberShow() {
                   className="absolute inset-0 w-full h-full"
                 />
 
+                {/* Instruction overlay (camera-first hero) */}
+	                <div className="absolute inset-x-0 top-4 flex justify-center pointer-events-none">
+	                  <div className="bg-black/40 backdrop-blur px-4 py-2 rounded-full border border-white/20 text-white text-sm md:text-base font-semibold">
+	                    Show <span className="font-extrabold">{targetNumber}</span> fingers
+	                    <span className="opacity-80"> ({NUMBER_NAMES[targetNumber]})</span>
+	                  </div>
+	                </div>
+
                 {/* Controls overlay */}
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border">
-                    🎯 Show: {targetNumber}
+                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+                    Target: {targetNumber}
                   </div>
-                  <div className="bg-purple-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border">
-                    {difficultyLevels[difficulty].name}
-                  </div>
+	                  <div
+	                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white ${
+	                      isDetectedMatch ? 'ring-2 ring-green-400/70' : ''
+	                    }`}
+	                  >
+	                    Detected: {currentCount}
+	                    {handsBreakdown ? <span className="opacity-80"> ({handsBreakdown})</span> : null}
+	                  </div>
+	                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+	                    Hands: {handsDetected}
+	                  </div>
+	                  <div className="bg-bg-tertiary/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border text-text-primary">
+	                    {(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}
+	                  </div>
                   {streak > 2 && (
-                    <div className="bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20">
+                    <div className="bg-pip-orange/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-soft">
                       🔥 {streak} streak!
                     </div>
                   )}
@@ -385,21 +470,21 @@ export function FingerNumberShow() {
                   <button
                     type="button"
                     onClick={() => window.history.back()}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg"
+                    className="px-4 py-2 bg-white/90 hover:bg-white text-text-primary border border-border rounded-lg transition text-sm font-semibold shadow-soft"
                   >
-                    🏠 Back
+                    Back
                   </button>
                   <button
                     type="button"
                     onClick={stopGame}
-                    className="px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/30 transition text-sm font-semibold backdrop-blur"
+                    className="px-4 py-2 bg-error/90 border border-text-error/30 text-white rounded-lg hover:bg-text-error transition text-sm font-semibold shadow-soft"
                   >
                     Stop
                   </button>
                 </div>
               </div>
 
-              <p className="text-center text-white/60 text-sm font-medium">
+              <p className="text-center text-text-secondary text-sm font-medium">
                 Hold up your fingers to show numbers! Use both hands for numbers greater than 5.
               </p>
             </div>

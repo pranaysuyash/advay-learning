@@ -51,25 +51,25 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
           className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl"
         >
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2 text-orange-500">
+            <h2 className="text-2xl font-bold mb-2 text-brand-primary">
               How to Play
             </h2>
             <div className="space-y-8">
               <div className="mb-4">
                 <div className="flex items-center justify-center mb-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${currentStep === 0 ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-400'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${currentStep === 0 ? 'bg-brand-primary text-white' : 'bg-brand-accent text-brand-primary'}`}>
                     <span className="text-xl font-bold">{currentStep + 1}</span>
                   </div>
-                  <div className="text-gray-600">
-                    {currentStep > 0 && <span className="text-orange-500 mr-2">Step {currentStep}</span>}
+                  <div className="text-text-secondary">
+                    {currentStep > 0 && <span className="text-brand-primary mr-2">Step {currentStep}</span>}
                     {steps[currentStep].title}
                   </div>
                 </div>
-                <p className="text-gray-700 text-lg leading-relaxed">
+                <p className="text-text-primary text-lg leading-relaxed">
                   {steps[currentStep].description}
                 </p>
                 <div className="flex items-center justify-center mb-4">
-                  <div className="text-orange-500">
+                  <div className="text-brand-primary">
                     {steps[currentStep].icon}
                   </div>
                 </div>
@@ -78,13 +78,13 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
               <div className="flex justify-between items-center gap-4">
                 <button
                   onClick={handleSkip}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-semibold transition"
+                  className="px-4 py-2 text-text-secondary hover:text-text-primary font-semibold transition"
                 >
                   Skip
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition"
+                  className="px-6 py-2 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-lg font-semibold transition"
                 >
                   {currentStep === steps.length - 1 ? 'Start Playing' : 'Next'}
                 </button>

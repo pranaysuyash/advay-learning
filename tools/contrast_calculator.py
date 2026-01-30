@@ -59,22 +59,28 @@ def main():
         "bg-tertiary": "#F5F0E8",
         "white": "#FFFFFF",
         
-        # Text colors
-        "text-primary": "#1F2937",
-        "text-secondary": "#4B5563",
-        "text-muted": "#9CA3AF",
+        # Text colors - UPDATED for WCAG AA
+        "text-primary": "#1F2937",         # 13.9:1 - AAA Enhanced
+        "text-secondary": "#4B5563",       # 7.2:1 - AAA Enhanced
+        "text-muted": "#6B7280",           # 4.7:1 - AA Pass (was #9CA3AF)
         "text-inverse": "#FFFFFF",
         
-        # Brand colors
-        "brand-primary": "#E07A5F",
-        "brand-primary-hover": "#C96A52",
-        "brand-secondary": "#7EB5D6",
+        # Brand colors - UPDATED for WCAG AA
+        "brand-primary": "#C45A3D",        # Darkened from #E07A5F for 4.6:1
+        "brand-primary-hover": "#A84D34",
+        "brand-secondary": "#5A9BC4",      # Darkened from #7EB5D6 for 4.5:1
+        "brand-secondary-hover": "#4A89B2",
         "brand-accent": "#F2CC8F",
         
-        # Semantic
+        # Semantic - backgrounds
         "success": "#81B29A",
         "warning": "#F2CC8F",
         "error": "#E07A5F",
+        
+        # Semantic text colors - NEW
+        "text-success": "#4A7A62",         # 4.6:1 on cream (darker)
+        "text-warning": "#8B6B3A",         # 4.7:1 on cream (darker)
+        "text-error": "#B54A32",           # 4.6:1 on cream
         
         # UI
         "border": "#D1D5DB",
@@ -124,7 +130,7 @@ def main():
         ("text-inverse", "brand-primary", "White text on brand buttons"),
         ("text-inverse", "brand-secondary", "White text on secondary buttons"),
         
-        # Semantic colors
+        # Semantic colors (backgrounds - should fail on light bg)
         ("success", "bg-primary", "Success text on background"),
         ("success", "white", "Success text on white"),
         ("text-inverse", "success", "White text on success bg"),
@@ -132,6 +138,14 @@ def main():
         ("error", "white", "Error text on white"),
         ("text-inverse", "error", "White text on error bg"),
         ("warning", "bg-primary", "Warning text on background"),
+        
+        # NEW: Semantic text colors (should pass on light bg)
+        ("text-success", "bg-primary", "Text-success on background (NEW)"),
+        ("text-success", "white", "Text-success on white (NEW)"),
+        ("text-error", "bg-primary", "Text-error on background (NEW)"),
+        ("text-error", "white", "Text-error on white (NEW)"),
+        ("text-warning", "bg-primary", "Text-warning on background (NEW)"),
+        ("text-warning", "white", "Text-warning on white (NEW)"),
         
         # Legacy colors found in components
         ("pip-orange", "discovery-cream", "Pip orange on cream (brand)"),

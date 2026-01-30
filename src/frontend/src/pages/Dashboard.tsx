@@ -32,6 +32,7 @@ interface ChildProfile {
     averageAccuracy: number;
     totalTime: number;
   };
+  languageProgress: LanguageProgress[];
 }
 
 interface LanguageProgress {
@@ -176,7 +177,7 @@ export function Dashboard() {
   const selectedChildData =
     children.find((c) => c.id === selectedChild) || children[0];
 
-            const stats = selectedChildData
+  const stats = selectedChildData
     ? [
         {
           label: 'Letters Learned',
@@ -201,12 +202,6 @@ export function Dashboard() {
             (selectedChildData.progress.totalTime / 300) * 100,
             100,
           ),
-        },
-        {
-          label: 'Current Streak',
-          value: `🔥 ${selectedChildData.streak} days`,
-          iconName: 'flame' as const,
-          percent: 75,
         },
       ]
     : [];
@@ -251,14 +246,14 @@ export function Dashboard() {
         <div className='mb-8 flex justify-between items-start'>
           <div>
             <h1 className='text-2xl md:text-3xl font-bold'>Parent Dashboard</h1>
-            <p className='text-base text-white/80 mt-1'>
+            <p className='text-base text-text-secondary mt-1'>
               Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
             </p>
           </div>
           <button
             onClick={handleExport}
             disabled={exporting || children.length === 0}
-            className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition disabled:opacity-50 flex items-center gap-2'
+            className='px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition disabled:opacity-50 text-text-secondary hover:text-text-primary shadow-soft flex items-center gap-2'
           >
             {exporting ? (
                   <>
@@ -277,7 +272,7 @@ export function Dashboard() {
         {/* Child Selector */}
         {children.length > 0 && (
           <div className='mb-6'>
-            <label className='block text-sm font-medium text-white/60 mb-2'>
+            <label className='block text-sm font-medium text-text-secondary mb-2'>
               Select Child
             </label>
             <div className='flex gap-2 flex-wrap'>
@@ -287,8 +282,8 @@ export function Dashboard() {
                   onClick={() => setSelectedChild(child.id)}
                   className={`px-4 py-2 rounded-lg transition ${
                     selectedChildData?.id === child.id
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white/10 border border-border hover:bg-white/20 shadow-sm'
+                      ? 'bg-pip-orange text-white shadow-soft'
+                      : 'bg-white border border-border hover:bg-bg-tertiary shadow-soft text-text-primary'
                   }`}
                 >
                   {child.name} ({child.age} yrs)
@@ -310,23 +305,23 @@ export function Dashboard() {
                 >
                   <Card>
                     <div className='flex items-center gap-3 mb-2'>
-                      <div className='w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center'>
-                        <UIIcon name={stat.iconName} size={20} aria-label={getIconLabel(stat.iconName)} className="text-white/80" />
+                      <div className='w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center'>
+                        <UIIcon name={stat.iconName} size={20} className="text-text-secondary" />
                       </div>
                       <div>
-                        <p className='text-base text-white/90'>{stat.label}</p>
+                        <p className='text-base text-text-secondary'>{stat.label}</p>
                       </div>
                     </div>
 
-                    <div className='text-3xl font-bold mt-2 text-white'>{getKidFriendlyStatValue(stat)}</div>
+                    <div className='text-3xl font-bold mt-2 text-text-primary'>{stat.value}</div>
 
                   {/* Progress bar */}
-                  <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-3'>
+                  <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden mt-3'>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${stat.percent}%` }}
                       transition={{ duration: 0.5, delay: i * 0.1 + 0.3 }}
-                      className='h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full'
+                      className='h-full bg-pip-orange rounded-full'
                     />
                   </div>
                 </Card>
@@ -337,7 +332,7 @@ export function Dashboard() {
 
         {/* Empty State */}
         {children.length === 0 && (
-          <div className='bg-white/10 border border-border rounded-xl p-12 text-center mb-8 shadow-sm'>
+          <div className='bg-white border border-border rounded-xl p-12 text-center mb-8 shadow-soft'>
             <div className='w-24 h-24 mx-auto mb-4'>
               <img 
                 src="/assets/images/empty-no-children.svg" 
@@ -348,12 +343,13 @@ export function Dashboard() {
             <h2 className='text-2xl font-semibold mb-2'>
               No Children Added Yet
             </h2>
-            <p className='text-white/60 mb-6'>
+            <p className='text-text-secondary mb-6'>
               Add a child profile to start tracking their learning progress.
             </p>
             <button
+              type="button"
               onClick={() => setShowAddModal(true)}
-              className='px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition'
+              className='px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust shadow-soft hover:shadow-soft-lg transition'
             >
               Add Child Profile
             </button>
@@ -364,8 +360,9 @@ export function Dashboard() {
         {children.length > 0 && (
           <div className='mb-8 text-center'>
             <button
+              type="button"
               onClick={() => setShowAddModal(true)}
-              className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-sm'
+              className='px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition text-sm text-text-secondary hover:text-text-primary shadow-soft'
             >
               + Add Another Child
             </button>
@@ -375,10 +372,10 @@ export function Dashboard() {
         {/* Progress Chart */}
         {selectedChildData && (
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-            <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+            <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <div className='flex justify-between items-center mb-4'>
                 <h2 className='text-xl font-semibold'>Learning Progress</h2>
-                <div className='text-sm px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full'>
+                <div className='text-sm px-3 py-1 bg-bg-tertiary text-text-secondary border border-border rounded-full'>
                   {selectedChildData.preferredLanguage}
                 </div>
               </div>
@@ -405,7 +402,7 @@ export function Dashboard() {
                           className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
                             learned
                               ? 'bg-green-500/20 text-green-400'
-                              : 'bg-white/10 text-white/40'
+                              : 'bg-bg-tertiary text-text-muted border border-border'
                           }`}
                         >
                           {letter.char}
@@ -422,7 +419,7 @@ export function Dashboard() {
                               />
                               {letter.name}
                             </span>
-                            <span className='text-sm text-white/60'>
+                            <span className='text-sm text-text-secondary'>
                               {learned
                                 ? (
                                   <>
@@ -433,19 +430,19 @@ export function Dashboard() {
                                 : accuracy > 0
                                   ? (
                                     <>
-                                      <UIIcon name="circle" size={14} className="inline mr-1 text-white/40" />
+                                      <UIIcon name="circle" size={14} className="inline mr-1 text-text-muted" />
                                       {Math.round(accuracy)}% best
                                     </>
                                   )
                                   : (
                                     <>
-                                      <UIIcon name="circle" size={14} className="inline mr-1 text-white/40" />
+                                      <UIIcon name="circle" size={14} className="inline mr-1 text-text-muted" />
                                       Not started
                                     </>
                                   )}
                             </span>
                           </div>
-                          <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
+                          <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden'>
                             <div
                               className={`h-full rounded-full transition-all ${
                                 accuracy === 100
@@ -468,7 +465,7 @@ export function Dashboard() {
             </div>
 
             {/* Multi-Language Progress */}
-            <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+            <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <h2 className='text-xl font-semibold mb-4'>Multi-Language Progress</h2>
               {selectedChildData.languageProgress.length > 0 ? (
                 <div className='space-y-3'>
@@ -476,7 +473,7 @@ export function Dashboard() {
                     <div key={langProg.language} className='border border-border rounded-lg p-3'>
                       <div className='flex justify-between items-center mb-2'>
                         <span className='font-medium capitalize'>{langProg.language}</span>
-                        <span className='text-sm text-white/60'>
+                        <span className='text-sm text-text-secondary'>
                           {langProg.lettersLearned}/{langProg.totalLetters} letters
                         </span>
                       </div>
@@ -488,9 +485,9 @@ export function Dashboard() {
                         <span>Time Spent:</span>
                         <span>{Math.floor(langProg.totalTime / 60)}h {langProg.totalTime % 60}m</span>
                       </div>
-                      <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-2'>
+                      <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden mt-2'>
                         <div
-                          className='h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500'
+                          className='h-full rounded-full bg-pip-orange'
                           style={{ width: `${(langProg.lettersLearned / langProg.totalLetters) * 100}%` }}
                         />
                       </div>
@@ -498,7 +495,7 @@ export function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className='text-center py-6 text-white/60'>
+                <div className='text-center py-6 text-text-secondary'>
                   <p>No progress recorded in other languages yet.</p>
                   <p className='text-sm mt-2'>Try switching languages in the game to start learning!</p>
                 </div>
@@ -507,44 +504,45 @@ export function Dashboard() {
               <div className='mt-6 pt-6 border-t border-border'>
                 <h3 className='font-medium mb-2'>Quick Actions</h3>
                 <div className='space-y-3'>
-                  <Link
-                    to='/games'
-                    className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
-                  >
-                    🎮 Explore All Games
-                  </Link>
-                  <Link
-                    to='/settings'
-                    className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                  >
-                    ⚙️ Manage Settings
-                  </Link>
-                  <button
-                    onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
-                    className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                  >
-                    📊 View Weekly Report
-                  </button>
+                <Link
+                  to='/games'
+                  className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
+                >
+                  🎮 Explore All Games
+                </Link>
+                <Link
+                  to='/settings'
+                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
+                >
+                  ⚙️ Manage Settings
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
+                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
+                >
+                  📊 View Weekly Report
+                </button>
                 </div>
 
                 <div className='mt-6'>
                   <h3 className='font-medium mb-2'>Current Settings</h3>
-                  <div className='space-y-2 text-sm text-white/60'>
+                  <div className='space-y-2 text-sm text-text-secondary'>
                     <div className='flex justify-between'>
                       <span>Primary Language:</span>
-                      <span className='text-white capitalize'>
+                      <span className='text-text-primary capitalize'>
                         {selectedChildData.preferredLanguage}
                       </span>
                     </div>
                     <div className='flex justify-between'>
                       <span>Difficulty:</span>
-                      <span className='text-white capitalize'>
+                      <span className='text-text-primary capitalize'>
                         {settings.difficulty}
                       </span>
                     </div>
                     <div className='flex justify-between'>
                       <span>Time Limit:</span>
-                      <span className='text-white'>
+                      <span className='text-text-primary'>
                         {settings.timeLimit > 0
                           ? `${settings.timeLimit} min`
                           : 'No limit'}
@@ -565,11 +563,11 @@ export function Dashboard() {
         )}
 
         {/* Tips Section */}
-        <div className='bg-blue-500/10 border border-blue-500/20 rounded-xl p-6'>
-          <h2 className='text-lg font-semibold mb-3 text-blue-400'>
+        <div className='bg-bg-secondary border border-border rounded-xl p-6 shadow-soft'>
+          <h2 className='text-lg font-semibold mb-3 text-vision-blue'>
             💡 Learning Tips
           </h2>
-          <ul className='space-y-2 text-white/70 text-sm'>
+          <ul className='space-y-2 text-text-secondary text-sm'>
             <li>• Encourage your child to practice for 10-15 minutes daily</li>
             <li>• Celebrate achievements to keep motivation high</li>
             <li>• Use the tracing game to improve handwriting skills</li>
@@ -583,13 +581,13 @@ export function Dashboard() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className='bg-gray-900 border border-border rounded-xl p-6 max-w-md w-full shadow-sm'
+              className='bg-white border border-border rounded-xl p-6 max-w-md w-full shadow-soft-lg'
             >
               <h2 className='text-2xl font-bold mb-4'>Add Child Profile</h2>
 
               <div className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium text-white/80 mb-2'>
+                  <label className='block text-sm font-medium text-text-secondary mb-2'>
                     Child's Name *
                   </label>
           <input
@@ -598,13 +596,12 @@ export function Dashboard() {
             onChange={(e) => setNewChildName(e.target.value)}
             placeholder="Child's name"
             autoComplete="name"
-            className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-             />
-                  />
+            className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+          />
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium text-white/80 mb-2'>
+                  <label className='block text-sm font-medium text-text-secondary mb-2'>
                     Age (years)
                   </label>
           <input
@@ -618,20 +615,20 @@ export function Dashboard() {
             }
             placeholder='Age (2-12 years)'
             autoComplete="bday"
-            className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+            className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                   />
-                  <p className='text-xs text-white/50 mt-1'>Use decimals for partial years (e.g., 2.5 for 2 years 6 months)</p>
+                  <p className='text-xs text-text-secondary mt-1'>Use decimals for partial years (e.g., 2.5 for 2 years 6 months)</p>
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium text-white/80 mb-2'>
+                  <label className='block text-sm font-medium text-text-secondary mb-2'>
                     Preferred Language
                   </label>
                    <select
                      value={newChildLanguage}
                      onChange={(e) => setNewChildLanguage(e.target.value)}
                      aria-label='Choose language'
-                     className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                     className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                    >
                      <option value='en'>🇬🇳 English</option>
                      <option value='hi'>🇮🇳 Hindi</option>
@@ -644,12 +641,14 @@ export function Dashboard() {
 
               <div className='flex gap-3 mt-6'>
                 <button
+                  type="button"
                   onClick={() => setShowAddModal(false)}
                   className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition' 
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleCreateProfile}
                   disabled={!newChildName.trim() || isCreating}
                   className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'

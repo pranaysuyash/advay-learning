@@ -317,7 +317,7 @@ export function LetterHunt() {
               {/* Mascot */}
               <div className="flex justify-center">
                 <Mascot 
-                  state={feedback?.type === 'success' ? 'happy' : feedback?.type === 'error' ? 'sad' : 'idle'} 
+                  state={feedback?.type === 'success' ? 'happy' : feedback?.type === 'error' ? 'thinking' : 'idle'} 
                   message={feedback?.message || `Find the letter "${targetLetter}"!`}
                 />
               </div>

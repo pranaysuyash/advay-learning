@@ -75,11 +75,6 @@ export function Progress() {
     fetchProgress();
   }, [selectedProfileId]);
 
-  // Get profile to determine preferred language
-  const profile = profiles.find(p => p.id === selectedProfileId);
-  const profileLanguage = profile?.preferred_language || 'en';
-  const alphabet = getAlphabet(profileLanguage);
-
   // Transform progress data for display
   const letterProgressDisplay = progress
     .filter((p) => p.activity_type === 'letter_tracing')
@@ -195,7 +190,7 @@ export function Progress() {
 
             {/* Pending indicator */}
             {pendingCount > 0 && (
-              <div className='inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold'>
+              <div className='inline-flex items-center gap-2 bg-warning/20 border border-warning/30 text-text-warning px-3 py-1 rounded-full text-sm font-semibold'>
                 <UIIcon name="warning" size={14} />
                 Pending ({pendingCount})
               </div>
@@ -252,7 +247,7 @@ export function Progress() {
 
         {error && (
           <div className='bg-red-500/20 border border-red-500/30 rounded-xl p-6 mb-8'>
-            <p className='text-red-400'>{error}</p>
+            <p className='text-text-error'>{error}</p>
           </div>
         )}
 
@@ -343,7 +338,7 @@ export function Progress() {
                       <div className='text-sm text-white/60 flex items-center gap-1'>
                         {item.status === 'completed' ? (
                           <>
-                            <UIIcon name="check" size={12} className="text-green-400" />
+                            <UIIcon name="check" size={12} className="text-text-success" />
                             Done
                           </>
                         ) : item.status === 'in_progress' ? (
@@ -389,7 +384,7 @@ export function Progress() {
                           {activity.time}
                         </div>
                       </div>
-                      <div className='text-green-400 font-semibold'>
+                      <div className='text-text-success font-semibold'>
                         {activity.score}
                       </div>
                     </div>

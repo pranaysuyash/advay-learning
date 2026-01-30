@@ -28,14 +28,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1a1a2e] disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variants = {
-      primary: 'bg-gradient-to-r from-[#E85D04] to-[#F26C22] text-white border-b-4 border-[#D4561C] hover:shadow-lg hover:shadow-orange-500/30 active:border-b-0 active:translate-y-1 focus:ring-orange-500',
-      secondary: 'bg-white/10 text-white border border-border hover:bg-white/20 focus:ring-white/30',
-      danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white border-b-4 border-red-700 hover:shadow-lg hover:shadow-red-500/30 active:border-b-0 active:translate-y-1 focus:ring-red-500',
-      success: 'bg-gradient-to-r from-green-500 to-green-600 text-white border-b-4 border-green-700 hover:shadow-lg hover:shadow-green-500/30 active:border-b-0 active:translate-y-1 focus:ring-green-500',
-      ghost: 'bg-transparent text-white/80 hover:text-white hover:bg-white/10 focus:ring-white/30',
+      primary: 'bg-pip-orange text-white shadow-soft hover:bg-pip-rust hover:shadow-soft-lg active:bg-pip-rust focus:ring-pip-orange',
+      secondary: 'bg-white text-advay-slate border border-border shadow-soft hover:bg-bg-tertiary hover:shadow-soft-lg active:bg-bg-tertiary focus:ring-vision-blue',
+      danger: 'bg-error text-white shadow-soft hover:bg-red-700 hover:shadow-soft-lg active:bg-red-700 focus:ring-red-500',
+      success: 'bg-success text-white shadow-soft hover:bg-success-hover hover:shadow-soft-lg active:bg-success-hover focus:ring-success',
+      ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-tertiary focus:ring-vision-blue',
     };
 
     const sizes = {

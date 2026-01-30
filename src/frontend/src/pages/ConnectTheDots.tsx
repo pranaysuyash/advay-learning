@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
-import { useSettingsStore } from '../store';
 
 interface Dot {
   id: number;
@@ -15,7 +14,6 @@ interface Dot {
 
 export function ConnectTheDots() {
   const navigate = useNavigate();
-  const settings = useSettingsStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dots, setDots] = useState<Dot[]>([]);
   const [currentDotIndex, setCurrentDotIndex] = useState<number>(0);
@@ -239,8 +237,12 @@ export function ConnectTheDots() {
                     if (!canvasRef.current) return;
                     
                     const rect = canvasRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
+                    // Canvas internal coordinates are fixed (800x600). The element is responsive,
+                    // so map from CSS pixels → canvas pixels to keep hit-testing correct.
+                    const scaleX = canvasRef.current.width / rect.width;
+                    const scaleY = canvasRef.current.height / rect.height;
+                    const x = (e.clientX - rect.left) * scaleX;
+                    const y = (e.clientY - rect.top) * scaleY;
                     
                     // Find the closest dot within a certain radius
                     const radius = 30;
