@@ -910,11 +910,91 @@ Next actions:
 Risks/notes:
 
 - Major feature gap - users cannot trace alphabet letters from other languages
-- Current implementation is numbers-only, missing core functionality
+- Current implementation is numbers-only with English word labels
 - Should be high priority as it's a key learning feature
 - May require significant UI restructuring of FingerNumberShow.tsx
-- Consider reusing alphabet tracing logic from Game.tsx
-- Test thoroughly with all supported languages
+- Test thoroughly with all supported languages (English, Hindi, Kannada, Telugu, Tamil)
+
+---
+
+### TCK-20260130-015 :: Add Language Selection & Alphabet Tracing to Finger Number Show
+
+Type: FEATURE / UX
+Owner: UNASSIGNED
+Created: 2026-01-30 16:00 IST
+Status: **OPEN** 🔵
+Priority: P1 (High - Core Feature Gap)
+
+Description:
+Add language selection UI and alphabet letter tracing functionality to Finger Number Show game, enabling users to practice letters from different languages (English, Hindi, Kannada, Telugu, Tamil) instead of just English number labels.
+
+Scope contract:
+
+- In-scope:
+  - Add language selection buttons for all supported languages
+  - Switch display between numbers and alphabet letters based on selected language
+  - Update hand tracking to trace alphabet letters
+  - Save language preference to settings/profile
+  - Support all supported languages: English, Hindi, Kannada, Telugu, Tamil
+  - Show language flags/emoji in selector
+  - Maintain number mode as option
+- Out-of-scope:
+  - Changing difficulty levels
+  - Removing number mode entirely
+  - Changing hand tracking MediaPipe configuration
+
+Targets:
+
+- Repo: learning_for_kids
+- File: src/frontend/src/games/FingerNumberShow.tsx
+- Related: src/frontend/src/data/alphabets.ts
+- Branch: main
+
+Dependencies:
+
+- TCK-20260130-015: Manual UX Audit - FINDING #5 (Language/Alphabet gap)
+- src/frontend/src/data/alphabets.ts (alphabet data source)
+
+Acceptance Criteria:
+
+- [ ] Language selection UI added with buttons for all languages
+- [ ] Each button shows language name + flag emoji
+- [ ] Clicking language button switches display to alphabet letters
+- [ ] Alphabet letters display correctly (with letter name and character)
+- [ ] Hand tracking works with alphabet letters
+- [ ] Language preference saved to settings
+- [ ] Both modes work (numbers and alphabet letters)
+- [ ] All supported languages available (English, Hindi, Kannada, Telugu, Tamil)
+- [ ] TypeScript compilation passes
+- [ ] No regression in number mode functionality
+
+Evidence needed:
+
+- Language selector UI visible in screenshots
+- Alphabet letters display for each language
+- Hand tracking tracing alphabet letters
+- Language switching works seamlessly
+- Settings shows saved language preference
+- Screenshots of all supported languages
+
+Next actions:
+
+- Review alphabets.ts data structure for all languages
+- Design language selector UI (horizontal buttons or dropdown)
+- Add alphabet display to game area (below target/current count)
+- Update finger counting logic to work with letters (may need threshold adjustment)
+- Add toggle between numbers/letters modes
+- Test with all supported languages
+- Update worklog with comprehensive evidence
+
+Risks/notes:
+
+- Major feature gap - this is core learning functionality
+- User reported this as blocking issue
+- Finger counting logic may need adjustment for letters
+- May require significant UI restructuring of FingerNumberShow.tsx
+- Should test thoroughly with all 5 languages
+- Consider reusing Game.tsx logic for language/alphabet display
 
 ---
 

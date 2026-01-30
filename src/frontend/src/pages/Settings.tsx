@@ -111,8 +111,7 @@ export function Settings() {
 
   const handleReset = () => {
     settings.resetSettings();
-    setShowResetConfirm(false);
-  };
+  }; 
 
   return (
     <div className='max-w-7xl mx-auto px-4 py-8'>

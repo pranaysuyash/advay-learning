@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
-import { getLettersForGame, Letter } from '../data/alphabets';
+import { getLettersForGame } from '../data/alphabets';
 import {
   useSettingsStore,
   useAuthStore,
@@ -11,7 +10,6 @@ import {
   BATCH_SIZE,
 } from '../store';
 import { Mascot } from '../components/Mascot';
-import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
 import { getRandomIcon } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
@@ -48,8 +46,8 @@ export function Game() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState<number>(0);
+  const [score, _setScore] = useState(0);
+  const [streak, _setStreak] = useState<number>(0);
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
@@ -128,7 +126,7 @@ export function Game() {
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
   const [pendingCount, setPendingCount] = useState<number>(0);
-  const [accuracy, setAccuracy] = useState<number>(0);
+  const [accuracy, _setAccuracy] = useState<number>(0);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -257,9 +255,9 @@ export function Game() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-              feedback.includes('Great')
+              feedback?.includes('Great')
                 ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                : feedback.includes('Good')
+                : feedback?.includes('Good')
                   ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
                   : 'bg-red-500/20 border border-red-500/30 text-red-400'
             }`}
@@ -429,7 +427,7 @@ export function Game() {
                 <div className='absolute bottom-0 left-4 z-20'>
                   {(() => {
                     const mascotState =
-                      feedback.includes('Great') || feedback.includes('Amazing')
+                      (feedback?.includes('Great') || feedback?.includes('Amazing'))
                         ? 'happy'
                         : isDrawing
                           ? 'waiting'

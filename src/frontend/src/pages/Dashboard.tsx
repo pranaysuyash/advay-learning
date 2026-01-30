@@ -10,7 +10,7 @@ import {
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 import { Icon } from '../components/Icon';
-import { UIIcon, Button, Card } from '../components/ui';
+import { UIIcon, Card } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 interface ChildProfile {

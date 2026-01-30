@@ -2,7 +2,7 @@ import { ReactNode, ButtonHTMLAttributes, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { UIIcon, IconName } from './Icon';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success';
   size?: 'sm' | 'md' | 'lg';
   icon?: IconName;
@@ -10,7 +10,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   fullWidth?: boolean;
   children: ReactNode;
-}
+} 
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -62,7 +62,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ${className}
         `}
         disabled={disabled || isLoading}
-        {...props}
+        {...(props as any)}
       >
         {isLoading ? (
           <>
