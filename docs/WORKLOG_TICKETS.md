@@ -16464,8 +16464,8 @@ Risks/notes:
 Type: BUG
 Owner: AI Assistant
 Created: 2026-01-29 22:30 IST
-Status: **IN_PROGRESS** 🟡
-Started: 2026-01-30 17:00 UTC
+Status: **DONE** ✅
+Completed: 2026-01-30 22:55 UTC
 Priority: P0
 
 **User Report**: "I can only see English alphabets nothing else"
@@ -16509,13 +16509,28 @@ The language selection system HAS been implemented, but has critical UX gaps:
 
 - 17:00 UTC: Analysis complete - 3 issues identified (no edit, wrong lang source, no indicator)
 - 17:05 UTC: Starting implementation - 5 components to modify
+- 17:15 UTC: Backend PATCH endpoint added
+- 17:25 UTC: Frontend API and store methods added
+- 17:45 UTC: Dashboard edit modal and buttons added
+- 17:55 UTC: AlphabetGame language source fixed
+- 18:00 UTC: TypeScript errors fixed
+- 18:05 UTC: Tests pass (85 tests)
+- 18:10 UTC: Build successful
+- 22:55 UTC: Committed and marked DONE
 
-**Implementation Plan:**
-1. Backend: Add PATCH /me/profiles/{id} endpoint
-2. Frontend API: Add profileApi.updateProfile() method  
-3. Frontend Store: Add updateProfile() action
-4. Dashboard: Add "Edit Profile" modal with language selector
-5. AlphabetGame: Use profile language instead of settings
+**Implementation Completed:**
+1. ✅ Backend: Add PATCH /me/profiles/{id} endpoint
+2. ✅ Frontend API: Add profileApi.updateProfile() method  
+3. ✅ Frontend Store: Add updateProfile() action
+4. ✅ Dashboard: Add "Edit Profile" modal with language selector
+5. ✅ AlphabetGame: Use profile language instead of settings
+
+**Test Results:**
+- Test Files: 14 passed
+- Tests: 85 passed
+- Build: Successful
+
+**Commit:** eb16899 - fix(TCK-20260129-301): Enable profile language editing
 
 ---
 
