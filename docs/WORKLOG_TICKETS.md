@@ -774,11 +774,18 @@ User-Reported Issues:
    - Current layout: numbers top → camera bottom → questions bottom
    - Screen space not optimized vertically
 
-4. **Question Placement Ambiguity** (Not in current code)
+4. **Question Placement Ambiguity** (NOT in current code)
    - User asks: "questions should be on same side or on right?"
    - No clear pattern in current code
    - Should questions be grouped with target/current count?
    - Or separate screen?
+
+5. **NEW: No Language Selection / Alphabet Tracing** (Critical gap)
+   - Component only shows numbers (0-10), not alphabet letters
+   - NO language selection UI to switch between languages (English, Hindi, Kannada, Telugu, Tamil)
+   - Users cannot trace alphabet letters from other languages
+   - User expectation: Language buttons to switch, alphabet letters to trace (like Game page)
+   - Current state: Hardcoded to numbers only, single language
 
 Evidence:
 
@@ -804,20 +811,21 @@ Recommendations:
 
 2. **Number Completion Feedback** (P2 - Medium):
    - Add visual transition when number is matched
-   - Add waiting indicator if game requires action (e.g., timer, "Show next number")
-   - Make target number animate or flash when waiting for more fingers
-   - Clear visual distinction between "showing" and "completed" states
+   - Add waiting indicator if game requires additional input
+   - Make target number animate or flash when waiting
+   - Add clear "showing" vs "completed" visual states
+   - Consider adding timer bar if waiting period required
 
 3. **Camera/Canvas Layout** (P1 - High):
-   - Move camera/canvas to center screen or split layout
-   - Consider 2-column layout: LEFT column (target + current count), RIGHT column (camera + canvas + questions)
-   - OR: TOP row (target + current), BOTTOM row (camera + canvas) spanning full width
-   - OR: Use responsive grid that repositions based on screen size
+   - Move camera/canvas to CENTER screen (full width, middle)
+   - Use 2-column layout: LEFT column (target + current count), RIGHT column (camera + canvas)
+   - OR use responsive grid that adjusts based on screen size
    - Ensure camera feed is primary focus when playing
+   - Consider using flexbox for better responsiveness
 
 4. **Question Placement** (P3 - Low):
    - Group questions with game controls (Stop, Back buttons)
-   - OR place questions in a dedicated sidebar/panel
+   - OR place questions in dedicated sidebar/panel
    - Ensure consistent pattern across game types
    - Test both options with actual users to determine preference
 
@@ -825,16 +833,88 @@ Next actions:
 
 - Create remediation ticket for Start Game button visibility
 - Create remediation ticket for number completion feedback
-- Create remediation ticket for camera/canvas layout improvement
-- Decide on question placement pattern
+- Create remediation ticket for camera/canvas layout improvement (P1)
+- Create remediation ticket for question placement (P3)
+- Decide on question placement pattern before implementing
 - Test changes with actual users (children 4-10 years old)
+- Consider adding user setting for question position preference
+
+---
+
+### TCK-20260130-015 :: Add Language Selection to Finger Number Show (Feature)
+
+Type: FEATURE / UX
+Owner: UNASSIGNED
+Created: 2026-01-30 16:00 IST
+Status: **OPEN** 🔵
+Priority: P1 (High - Core Feature Gap)
+
+Description:
+Add language selection UI and alphabet letter tracing to Finger Number Show game, enabling users to trace letters from different languages (English, Hindi, Kannada, Telugu, Tamil).
+
+Scope contract:
+
+- In-scope:
+  - Add language selection buttons for all supported languages
+  - Switch from numbers-only to alphabet letters
+  - Use existing alphabet data (getLettersForGame from alphabets.ts)
+  - Maintain hand tracking and number detection functionality
+  - Update display to show alphabet letter for selected language
+  - Save language preference to user settings/profile
+- Out-of-scope:
+  - Changing finger counting logic
+  - Redesigning entire game architecture
+  - Changing to different game mechanics
+
+Targets:
+
+- Repo: learning_for_kids
+- File: src/frontend/src/games/FingerNumberShow.tsx
+- Branch: main
+- Related: src/frontend/src/data/alphabets.ts
+
+Dependencies:
+
+- None (standalone feature)
+
+Acceptance Criteria:
+
+- [ ] Language selection UI added with buttons for all languages
+- [ ] Each button shows language name + flag emoji
+- [ ] Clicking language button updates display to alphabet letters
+- [ ] Display shows alphabet letter (not just number)
+- [ ] Hand tracking continues to work with letter display
+- [ ] User can switch languages at any time
+- [ ] Language preference saved to settings
+- [ ] All supported languages available (English, Hindi, Kannada, Telugu, Tamil)
+- [ ] No TypeScript errors
+- [ ] Hand tracking still functions correctly
+
+Evidence needed:
+
+- Language selection UI visible
+- Alphabet letters display correctly for each language
+- Language switching works without page reload
+- Hand tracking overlay works with letter display
+- Screenshots showing different languages
+
+Next actions:
+
+- Review getLettersForGame function for alphabet data
+- Design language selector UI (buttons, dropdown, or tab bar)
+- Update finger detection logic to work with letter displays
+- Test hand tracking with alphabet letters
+- Test language switching during gameplay
+- Update worklog with screenshots and testing evidence
 
 Risks/notes:
 
-- Manual audit based on user report - not reproduced with actual users
-- May need user testing to validate findings
-- Layout changes may require significant restructuring of component
-- Should prioritize P1 (layout) over P2/P3 items
+- Major feature gap - users cannot trace alphabet letters from other languages
+- Current implementation is numbers-only, missing core functionality
+- Should be high priority as it's a key learning feature
+- May require significant UI restructuring of FingerNumberShow.tsx
+- Consider reusing alphabet tracing logic from Game.tsx
+- Test thoroughly with all supported languages
 
 ---
 
