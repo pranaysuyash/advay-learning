@@ -22,8 +22,11 @@ Method: Repo-aware UI audit + targeted deep dives of camera screens. External re
 - `src/frontend/tailwind.config.js`
 
 ### External research (selected)
-- Osmo “How it works” / device setup: https://www.playosmo.com/en/devices/
-- Osmo Masterpiece (camera + paper drawing) discussion: https://medium.com/@jankoroettgers/osmo-keeps-it-magical-with-new-drawing-app-724c89812c6b
+- UX Design for Children (Eleken) - "Virtual helpers/characters make navigation smoother"
+- Kids App Design (AppDeveloper Magazine) - "Brain has immediate vs delayed gratification systems"
+- Designing Apps for Young Kids (UX Collective) - "Feedback should always be positive, never negative"
+- Non-Addictive Learning Apps (Smart Tales) - "Avoid flashy distractions or instant gratification"
+- Design Patterns for Learning Games (ResearchGate) - "Match game patterns with learning functions"
 
 ---
 

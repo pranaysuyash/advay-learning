@@ -54,7 +54,7 @@ Each letter includes:
 
 ### 1.2 Game Implementation
 
-**Game.tsx** (769 lines) implements:
+**AlphabetGame.tsx** (900+ lines) implements:
 - Hand tracking with MediaPipe
 - Letter tracing with pinch gestures
 - Accuracy calculation
@@ -127,7 +127,7 @@ src/frontend/src/data/pipResponses.ts ✅
 | Requirement | Status | Gap |
 |-------------|--------|-----|
 | Letter audio files | ❌ No | Need 26 English + all other languages |
-| Audio plays on letter display | ❌ No | Need to integrate in Game.tsx |
+| Audio plays on letter display | ❌ No | Need to integrate in AlphabetGame.tsx |
 | Phonics sounds (not just names) | ❌ No | Need proper educational audio |
 | Multi-language support | ❌ No | Need Hindi/Kannada/Telugu/Tamil audio |
 
@@ -158,7 +158,7 @@ src/frontend/src/data/pipResponses.ts ✅
 | TTS integration | ✅ Yes | Mascot speaks all messages |
 | Mascot state sync | ✅ Yes | State changes + TTS work |
 
-**New Feedback System (Game.tsx):**
+**New Feedback System (AlphabetGame.tsx):**
 ```typescript
 // Uses pipResponses.ts templates
 getTracingResponse(accuracy)  // Random encouraging messages
@@ -226,7 +226,7 @@ The Mascot component accepts `message` prop but only displays it visually:
 |------|--------|--------|
 | Record/source English letter audio (26 letters) | 4-6 hours | Letter pronunciation |
 | Create audio playback utility | 1 hour | Letter sounds |
-| Integrate audio in Game.tsx letter display | 2 hours | Learning experience |
+| Integrate audio in AlphabetGame.tsx letter display | 2 hours | Learning experience |
 
 ### Priority 2 (Polish)
 
@@ -251,12 +251,12 @@ The Mascot component accepts `message` prop but only displays it visually:
 1. **Day 1-2:** Create TTSService.ts with Web Speech API
 2. **Day 3:** Create useTTS hook
 3. **Day 4:** Integrate TTS with Mascot (speak messages)
-4. **Day 5:** Add success/failure sounds to Game.tsx
+4. **Day 5:** Add success/failure sounds to AlphabetGame.tsx
 
 ### Week 2: Letter Audio
 1. **Day 1-2:** Source/record English letter audio
 2. **Day 3:** Create audio playback utility
-3. **Day 4:** Integrate letter pronunciation in Game.tsx
+3. **Day 4:** Integrate letter pronunciation in AlphabetGame.tsx
 4. **Day 5:** Testing and polish
 
 ---

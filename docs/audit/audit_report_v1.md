@@ -139,7 +139,7 @@
 
 ## 10. Prioritized Roadmap
 **Next 24 Hours ("Polish & Fix")**
-- Add "Home" button to Game.tsx.
+- Add "Home" button to AlphabetGame.tsx.
 - Fix "Permission Not Requested" bug in Settings.
 - Add "Pinch" animation GIF/Lottie to Game start.
 - Change background to a Kid-friendly Blue gradient.

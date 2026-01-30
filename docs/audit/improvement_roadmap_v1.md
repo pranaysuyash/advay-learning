@@ -40,7 +40,7 @@
 ### Phase 1: Squashing Friction (Next 24 Hours)
 - **Goal**: Make the first 60 seconds feel seamless.
 - **Tasks**:
-    1.  Add `HomeButton` to `Game.tsx`.
+    1.  Add `HomeButton` to `AlphabetGame.tsx`.
     2.  Add `.overlay { background: rgba(0,0,0,0.3) }` to webcam container for contrast.
     3.  Fix "Permission Not Requested" bug in `Settings.tsx`.
     4.  Add "Pinch to Start" instruction text.

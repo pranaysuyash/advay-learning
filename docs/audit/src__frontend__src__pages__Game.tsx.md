@@ -1,9 +1,11 @@
-# AUDIT: `src/frontend/src/pages/Game.tsx`
+# AUDIT: `src/frontend/src/pages/Game.tsx` (OBSOLETE - File Removed)
+
+> ⚠️ **DEPRECATION NOTICE**: This file was removed on 2026-01-30. `Game.tsx` was a compatibility shim that re-exported `AlphabetGame`. The canonical implementation is now in `AlphabetGame.tsx`. See audit `docs/audit/src__frontend__src__pages__AlphabetGame.tsx.md` for current game audit.
 
 **Audit prompt**: prompts/audit/audit-v1.5.1.md
 **Audit version**: 1.5.1
 **Date**: 2026-01-29 16:03 IST
-**Audited file**: `src/frontend/src/pages/Game.tsx`
+**Audited file**: `src/frontend/src/pages/Game.tsx` (REMOVED 2026-01-30)
 **Base commit SHA**: d7d0670e0c7977093b7606b9415405669f4258a3
 **Auditor**: GitHub Copilot
 

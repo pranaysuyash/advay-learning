@@ -25,7 +25,7 @@ const useEyeTracking = (
     modelAssetPath = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
     delegate = 'GPU',
     minFaceDetectionConfidence = 0.5,
-    minTrackingConfidence = 0.5,
+    minFaceTrackingConfidence = 0.5,
     minFacePresenceConfidence = 0.5,
     runningMode = 'VIDEO',
     numFaces = 1,
@@ -67,7 +67,6 @@ const useEyeTracking = (
           runningMode,
           numFaces,
           minFaceDetectionConfidence,
-          minTrackingConfidence,
           minFacePresenceConfidence,
         });
         
@@ -135,10 +134,9 @@ const useEyeTracking = (
         const leftEyeClosed = leftEAR < BLINK_THRESHOLD;
         const rightEyeClosed = rightEAR < BLINK_THRESHOLD;
         const isBlinking = leftEyeClosed && rightEyeClosed;
+        const wasOpen = !previousEyeStates.current.left && !previousEyeStates.current.right;
 
         // Detect blink transition (both eyes were open, now both are closed)
-        const _wasBlinking = previousEyeStates.current.left && previousEyeStates.current.right;
-        const wasOpen = !previousEyeStates.current.left && !previousEyeStates.current.right;
         const isTransitionToBlink = wasOpen && isBlinking;
 
         // Update state

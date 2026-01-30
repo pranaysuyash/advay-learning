@@ -312,14 +312,12 @@ export function AlphabetGame() {
   }, [isPlaying]);
 
   // Inactivity detector
-  const inactivityData = useInactivityDetector(() => {
+  useInactivityDetector(() => {
     // Called when inactivity is detected
     setInactiveTime(prev => prev + 1);
     setWellnessReminderType('inactive');
     setShowWellnessReminder(true);
   }, 60000); // Trigger after 1 minute of inactivity
-
-  const { isActive, timeRemaining, formattedTime } = inactivityData;
 
   // Handle wellness reminder dismissal
   const handleWellnessReminderDismiss = () => {

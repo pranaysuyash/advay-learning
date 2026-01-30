@@ -370,8 +370,8 @@
  }
  }
  
- requestAnimationFrame(detectAndDraw);
- }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, showCelebration, difficulty, setNextTarget]);
+  requestAnimationFrame(detectAndDraw);
+  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget]);
  
  useEffect(() => {
  if (isPlaying) {

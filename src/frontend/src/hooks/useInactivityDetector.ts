@@ -1,15 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 
-interface _InactivityDetectorProps {
-  onInactivityDetected: () => void;
-  timeoutMs?: number; // Time in milliseconds before inactivity is detected (default 60000ms = 1 minute)
-  onActivityDetected?: () => void;
-}
-
 const useInactivityDetector = (onInactivityDetected: () => void, timeoutMs: number = 60000) => {
   const [isActive, setIsActive] = useState<boolean>(true);
   const [timeRemaining, setTimeRemaining] = useState<number>(timeoutMs);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   // Reset the inactivity timer

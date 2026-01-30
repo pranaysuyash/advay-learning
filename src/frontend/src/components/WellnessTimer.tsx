@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UIIcon } from '../components/ui/Icon';
 
-// Define NodeJS namespace for TypeScript
-declare global {
-  namespace NodeJS {
-    interface Timeout {}
-    interface Interval {}
-  }
-}
-
 interface WellnessTimerProps {
   onBreakReminder: () => void;
   activeThreshold?: number; // Time in minutes before break reminder (default 15)
@@ -28,8 +20,8 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   const [showInactiveReminder, setShowInactiveReminder] = useState<boolean>(false);
   const [isHidden, setIsHidden] = useState<boolean>(true);
   
-  const activeTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const inactiveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const activeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inactiveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameActiveRef = useRef<boolean>(true); // Assume game is active initially
 
   // Format time for display
@@ -66,7 +58,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
       if (activeTimerRef.current) clearInterval(activeTimerRef.current);
       if (inactiveTimerRef.current) clearTimeout(inactiveTimerRef.current);
     };
-  }, []);
+  }, [resetInactiveTimer]);
 
   // Effect to handle inactive time counting
   useEffect(() => {

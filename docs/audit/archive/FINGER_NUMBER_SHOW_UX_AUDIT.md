@@ -1,10 +1,22 @@
-# Finger Number Show - Comprehensive UX Audit
+# Finger Number Show - Comprehensive UX Audit (ARCHIVED)
 
-**Ticket:** TCK-20260130-014  
+**Status:** ARCHIVED - All remediation tickets created  
+**Original Ticket:** TCK-20260130-014  
 **Date:** 2026-01-30  
 **Auditor:** AI Assistant  
 **File:** `src/frontend/src/games/FingerNumberShow.tsx`  
-**Lines of Code:** 619  
+**Lines of Code:** 619
+
+## Remediation Status
+
+| Finding | Status | Ticket | Description |
+|---------|--------|--------|-------------|
+| FNS-01 | 🔵 OPEN | TCK-20260130-015 | Add Language/Alphabet Support |
+| FNS-02 | 🟡 IN_PROGRESS | TCK-20260130-020 | Camera-First Layout |
+| FNS-03 | 🔵 OPEN | TCK-20260130-040 | Fix Button Visibility |
+| FNS-04 | 🔵 OPEN | TCK-20260130-041 | Add Hold Progress Indicator |
+| FNS-05 | 🔵 OPEN | TCK-20260130-042 | Unify Prompt Placement |
+| FNS-06 | 🔵 OPEN | TCK-20260130-043 | Add Accessibility Features |  
 
 ---
 
@@ -41,7 +53,7 @@ Users should be able to:
 ### User Impact
 - **High** - Users cannot practice non-English alphabets
 - Children learning native languages cannot use this game mode
-- Inconsistent with Game.tsx which supports 5 languages
+- Inconsistent with AlphabetGame.tsx which supports 5 languages
 
 ### Evidence
 ```tsx
@@ -57,7 +69,7 @@ const NUMBER_NAMES = [
 ### Recommendation
 **Priority: P1**
 
-Add language selection similar to Game.tsx:
+Add language selection similar to AlphabetGame.tsx:
 ```tsx
 // Add language selector UI
 const LANGUAGES = [
