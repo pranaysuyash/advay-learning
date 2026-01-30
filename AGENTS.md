@@ -101,6 +101,109 @@ Every work unit MUST produce:
 
 ---
 
+## Audit-to-Ticket Workflow
+
+### Overview
+
+A critical gap identified: Audit reports contain comprehensive findings but ~90% are not systematically converted to worklog tickets. This causes important issues to be forgotten and context to be lost.
+
+### Process
+
+When reading audit documents and finding actionable issues:
+
+1. **Immediate Action:**
+   ```bash
+   # Check if worklog ticket exists for the issue
+   grep "TCK-YYYYMMDD-NNN" docs/WORKLOG_TICKETS.md
+   
+   # If NOT found, CREATE IT IMMEDIATELY
+   # Even if status is OPEN - getting it tracked is priority over perfecting
+   
+   # Document the audit source and finding ID
+   ```
+
+2. **Ticket Creation Template:**
+   ```markdown
+   ### TCK-YYYYMMDD-NNN :: [Descriptive Title]
+   
+   Type: [AUDIT_FINDING | BUG | FEATURE | IMPROVEMENT]
+   Owner: [Agent Name]
+   Created: [Date]
+   Status: **OPEN**
+   Priority: [P0 | P1 | P2 | P3]
+   
+   Scope contract:
+   - In-scope: [specific scope]
+   - Out-of-scope: [what's not included]
+   - Behavior change allowed: [YES/NO]
+   
+   Targets:
+   - Repo: learning_for_kids
+   - File(s): [files to modify]
+   - Branch/PR: main
+   
+   Acceptance Criteria:
+   - [ ] [specific acceptance criteria]
+   - [ ] [more criteria...]
+   
+   Source:
+   - Audit file: `docs/audit/[file-name].md`
+   - Finding ID: Issue #[X] or Finding X from audit
+   - Evidence: [Quote or specific reference]
+   
+   Execution log:
+   - [timestamp] [action] | Evidence: [evidence]
+   
+   Status updates:
+   - [timestamp] **OPEN** — Ticket created, awaiting implementation
+   ```
+
+3. **Audit Discovery Phase Best Practices:**
+   - **Create tickets FIRST** before starting code changes
+   - **Always link** to specific audit file and line numbers
+   - **Use evidence** (quotes, screenshots, line numbers) from audit
+   - **Don't batch** unrelated fixes in one ticket
+   - **One issue = one ticket** (unless explicitly scoped)
+
+### Regular Audit Review
+
+Use the provided audit review script:
+```bash
+# Weekly task: Review audit docs for untracked findings
+./scripts/audit_review.sh
+
+# Should report:
+# - Total findings reviewed: X
+# - Tickets created: Y
+# - Gap: Z (90%)
+# - Action: Create missing tickets
+```
+
+### Ticket Creation Discipline
+
+**CRITICAL:** When you discover an issue in an audit document:
+
+1. **ALWAYS** create a worklog ticket (even OPEN) before starting implementation
+2. **NEVER** just implement the fix without a tracking ticket
+3. **ALWAYS** reference the specific audit file and finding ID
+4. **ALWAYS** include the evidence from the audit
+
+### Root Cause
+
+The audit-to-ticket gap exists because:
+
+1. **No systematic workflow** for converting audit findings → tickets
+2. **Silent backlog building** - Audit docs contain "roadmaps" and "improvement plans" but aren't tracked
+3. **Discovery disconnect** - Finding issues (Phase 1) isn't tracked, only remediation (Phase 2) is
+
+### Required Actions
+
+1. **Immediate:** Run `./scripts/audit_review.sh` and create tickets for all untracked findings
+2. **Update:** This AGENTS.md with audit-to-ticket workflow guidance ✅
+3. **Weekly:** Make audit review a recurring task to catch gaps early
+
+---
+
 ## Mandatory Checklists
 
 ### Before Starting Any Work

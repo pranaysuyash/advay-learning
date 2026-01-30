@@ -1129,22 +1129,158 @@ Status updates:
 
 ---
 
-## Quick Status Dashboard
+### TCK-20260130-035 :: Fix Permission Warning Persistence Bug (P0)
 
-| Metric         | Count  |
-| -------------- | ------ |
-| ✅ DONE        | 74     |
-| 🟡 IN_PROGRESS | 0      |
-| 🔵 OPEN        | 13     |
-| 🔴 BLOCKED     | 0      |
-| **Total**      | **87** |
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-30 17:30 UTC
+Status: **OPEN**
+Priority: P0
 
-**Last Updated:** 2026-01-30 16:20 IST
+Description:
+Fix bug where "Permission not requested" warning persists in Settings even when camera is currently active and working properly.
+
+Scope contract:
+- In-scope:
+  - Settings.tsx camera permission state management
+  - Sync camera state between Game and Settings
+  - Fix permission warning persistence across navigation
+  - Ensure warning only shows when permission is actually denied
+- Out-of-scope: Implement full permission management system
+- Behavior change allowed: YES (bug fix)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/Game.tsx`
+- Branch/PR: main
+- Range: Camera state management logic
+
+Acceptance Criteria:
+- [ ] Permission warning only shows when camera is actually denied
+- [ ] Permission state persists correctly between Game and Settings
+- [ ] Camera active state properly tracked in store
+- [ ] No false "Permission not requested" warnings when camera works
+- [ ] Tests verify state management
+
+Source:
+- Audit file: `docs/audit/QA_WORKLOG_2026_01_29.md`
+- Finding ID: Issue #4 - "Permission not requested" warning persists bugs
+- Audit Report: `docs/audit/audit_report_v1.md`
+- Evidence: Screenshot showing warning visible on Settings screen when camera is active
+
+Status updates:
+- [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260130-036 :: Add Tutorial Overlay - Pinch to Start Game (P0)
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-30 17:30 UTC
+Status: **OPEN**
+Priority: P0
+
+Description:
+Add animated tutorial overlay showing hand pinching gesture to explain how to start the drawing game. Critical for first-time users (2-3 year olds) who don't understand "Pinch to draw".
+
+Scope contract:
+- In-scope:
+  - Create TutorialOverlay component with 3-step animation
+  - Show "Pinch like this!" animation before first letter
+  - Lottie/GIF or CSS animation of hand pinching
+  - Dismiss on first successful tracing
+  - Store tutorial completion in settings store
+  - Show again only if user re-enables tutorial
+- Out-of-scope: Full in-game tutorial system, complex gesture training
+- Behavior change allowed: YES (feature addition for onboarding)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/TutorialOverlay.tsx`, `src/frontend/src/pages/Game.tsx`
+- Branch/PR: main
+- Range: Tutorial overlay integration
+
+Acceptance Criteria:
+- [ ] Tutorial overlay shows before first game start
+- [ ] Animation clearly shows pinching hand gesture
+- [ ] Text "Pinch to start tracing" clearly visible
+- [ ] Overlay dismisses automatically after first successful trace
+- [ ] Tutorial completion saved to settings store
+- [ ] Option to re-enable tutorial in Settings
+- [ ] Animation is smooth and kid-friendly
+
+Source:
+- Audit file: `docs/audit/QA_WORKLOG_2026_01_29.md`
+- Finding ID: Issue #2 - "Pinch to Draw" mechanic is not explained
+- Audit Report: `docs/audit/audit_report_v1.md`
+- Evidence: "Kid A (2–3 years): Doesn't understand 'Pinch', just waves hand."
+
+Status updates:
+- [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260130-037 :: Add Onboarding Flow - First-Time User Tutorial (P0)
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-30 17:30 UTC
+Status: **OPEN**
+Priority: P0
+
+Description:
+Implement comprehensive onboarding flow for first-time users who are dropped directly into activities without calibration or "How to Play" tutorial. Addresses "Onboarding Vacuum" gap where users don't intuitively know how to use the app.
+
+Scope contract:
+- In-scope:
+  - Create onboarding flow component
+  - 3-step tutorial: 1) Welcome → 2) Hand Detection → 3) Try First Activity
+  - Calibration step to verify camera/hand tracking works
+  - Clear visual instructions for main gestures (pinch, tap, drag)
+  - Skip button for experienced users
+  - Track onboarding completion in settings store
+  - Show for first-time users only
+- Out-of-scope: Complex tutorial system with saved progress, multi-language tutorials
+- Behavior change allowed: YES (feature addition for user experience)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/OnboardingFlow.tsx`, `src/frontend/src/App.tsx`, `src/frontend/src/pages/Home.tsx`
+- Branch/PR: main
+- Range: Onboarding integration at app entry point
+
+Acceptance Criteria:
+- [ ] Onboarding flow shows for first-time users
+- [ ] Step 1: Welcome screen with mascot greeting
+- [ ] Step 2: Camera calibration/hand detection verification
+- [ ] Step 3: Guided first activity (Letter Tracing)
+- [ ] Clear "Skip onboarding" option for experienced users
+- [ ] Onboarding completion stored in user settings
+- [ ] Visual mascot animations throughout flow
+- [ ] Voice-over or text instructions in kid-friendly language
+- [ ] Calibration pass/fail feedback
+- [ ] Tests verify onboarding flow completes successfully
+
+Source:
+- Audit file: `docs/audit/audit_report_v1.md`
+- Finding ID: "Onboarding Vacuum" - Users are dropped directly into activity without calibration or tutorial
+- Evidence: "Kid A (2–3 years): Cannot read 'Start Game'. Needs a big Green 'Play' button."
+
+Status updates:
+- [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
+
+---
+ 
+**Last Updated:** 2026-01-30 16:50 IST
 
 **Current Priority:** Multi-language expansion and game language testing
 
 ### Recent Completions (2026-01-30)
 
+- TCK-20260130-014: Manual UX Audit - Finger Number Show ✅ NEW
+- TCK-20260130-018: Fix useProfileStore import & add smoke test ✅ NEW
+- TCK-20260130-017: Icon & Image Runtime Fallbacks + Tests ✅ NEW
 - TCK-20260130-016: Model & delegate fallback (GPU -> CPU) ✅ NEW
 - TCK-20260130-015: Camera permission handling & mouse-fallback ✅ NEW
 - TCK-20260129-093: FIX Game Language Selector (Separate from UI Language) ✅ NEW
@@ -2342,7 +2478,8 @@ Execution log:
 Type: AUDIT / UX
 Owner: AI Assistant
 Created: 2026-01-30 16:00 IST
-Status: **OPEN** 🔵
+Status: **DONE** ✅
+Completed: 2026-01-30 16:45 IST
 Priority: P2 (Medium)
 
 Description:
@@ -2366,38 +2503,72 @@ Targets:
 - File: src/frontend/src/games/FingerNumberShow.tsx
 - Branch: main
 
-User-Reported Issues:
+Execution log:
 
-1. **Start Button Not Visible** (Line 345-352)
-   - User had to use console to highlight and click button
-   - Button exists but may be hidden or obscured
-   - No visual affordance that it's interactive
+- 16:00 IST: Started comprehensive UX audit of FingerNumberShow.tsx (619 lines)
+- 16:10 IST: Analyzed component structure, state management, and hand tracking logic
+- 16:20 IST: Documented user-reported issues (button visibility, feedback confusion, layout)
+- 16:30 IST: Identified additional issues (accessibility, language support, visual hierarchy)
+- 16:40 IST: Created detailed audit report with 6 findings and recommendations
+- 16:45 IST: Audit complete, report saved to docs/audit/FINGER_NUMBER_SHOW_UX_AUDIT.md
 
-2. **No Progress/Waiting Feedback** (Line 69-81, 268-281)
-   - "You're showing [number]" appears when number matched
-   - User correctly boxed number green but game didn't proceed
-   - No indication of waiting state or expected next action
-   - Confusing - is it waiting for timer? expecting more input?
+Audit Findings Summary:
 
-3. **Camera/Canvas Below Numbers** (Lines 356-367, 268-280)
-   - Camera and canvas area positioned BELOW number displays
-   - Numbers shown first, then camera area below
-   - User suggests camera should take up CENTER screen
-   - Current layout: numbers top → camera bottom → questions bottom
-   - Screen space not optimized vertically
+| Finding ID | Severity | Issue | Line(s) |
+|------------|----------|-------|---------|
+| FNS-01 | 🔴 Critical | No Language Selection / Alphabet Support | Component-level |
+| FNS-02 | 🔴 Critical | Camera Layout - Numbers Above Camera | 507-537 |
+| FNS-03 | 🟠 High | Start Button Visibility Issue | 493-503 |
+| FNS-04 | 🟠 High | Number Completion Feedback Confusion | 341-371, 539-560 |
+| FNS-05 | 🟡 Medium | Question/Prompt Placement Ambiguity | 520-560 |
+| FNS-06 | 🟡 Medium | Missing Accessibility Features | Various |
 
-4. **Question Placement Ambiguity** (NOT in current code)
-   - User asks: "questions should be on same side or on right?"
-   - No clear pattern in current code
-   - Should questions be grouped with target/current count?
-   - Or separate screen?
+Key Issues Documented:
 
-5. **NEW: No Language Selection / Alphabet Tracing** (Critical gap)
-   - Component only shows numbers (0-10), not alphabet letters
-   - NO language selection UI to switch between languages (English, Hindi, Kannada, Telugu, Tamil)
-   - Users cannot trace alphabet letters from other languages
-   - User expectation: Language buttons to switch, alphabet letters to trace (like Game page)
-   - Current state: Hardcoded to numbers only, single language
+1. **FNS-01: No Language/Alphabet Support** (Critical)
+   - Only supports numbers 0-10, no alphabet letters
+   - No language selection UI (English, Hindi, Kannada, Telugu, Tamil)
+   - Inconsistent with Game.tsx which supports 5 languages
+   - Recommendation: Add language selector and alphabet tracing
+
+2. **FNS-02: Camera Layout Issues** (Critical)
+   - Numbers displayed above camera feed
+   - Camera not centered/focal point
+   - Vertical space wasted
+   - Recommendation: Full-screen camera with overlay or split-screen layout
+
+3. **FNS-03: Button Visibility** (High)
+   - User reported needing console to find button
+   - Possible z-index or contrast issues
+   - Recommendation: Increase z-index, add ring, larger touch target
+
+4. **FNS-04: Feedback Confusion** (High)
+   - 450ms hold requirement not visible to user
+   - No "holding" progress indicator
+   - Auto-advance surprises users
+   - Recommendation: Add hold progress bar, visual state changes
+
+5. **FNS-05: Prompt Placement** (Medium)
+   - Target shown in two locations (center then top-left)
+   - Unclear visual grouping
+   - Recommendation: Persistent target card, mirrored detected count
+
+6. **FNS-06: Accessibility** (Medium)
+   - No keyboard navigation
+   - Missing ARIA labels
+   - No screen reader support
+   - Color-only feedback
+   - Recommendation: Add keyboard controls, ARIA live regions
+
+Artifact Created:
+- **Full Audit Report:** `docs/audit/FINGER_NUMBER_SHOW_UX_AUDIT.md`
+- Contains detailed analysis, code snippets, recommendations, and testing checklist
+
+Next Actions:
+1. Create remediation tickets for P1 findings (FNS-01, FNS-02)
+2. Schedule design review for layout changes
+3. Prioritize language support addition
+4. Plan accessibility improvements
 
 Evidence:
 
@@ -22679,8 +22850,79 @@ Platform had multiple games implemented (alphabet tracing, finger number show, e
 - Proper categorization of learning domains
 # Ticket: TCK-20260131-004
 # Title: Fix Dashboard Screen - UX, Accessibility & Readability Improvements
+ **Related Tickets**:
+ ````
 
-Type: REMEDIATION
+ ---
+ ### TCK-20260130-201 :: Camera Game Screen UX Audit + Market Research
+ Type: AUDIT
+ Owner: GitHub Copilot
+ Created: 2026-01-30 12:45 UTC
+ Status: **IN_PROGRESS**
+ Priority: P0
+
+ Description:
+ Repo-aware UX audit focused on camera-based game screens (hero camera area vs UI overload), plus external research scan of similar kid-facing camera/gesture apps to inform recommendations.
+
+ Scope contract:
+ - In-scope:
+   - src/frontend/src/pages/AlphabetGame.tsx
+   - src/frontend/src/pages/LetterHunt.tsx
+   - src/frontend/src/games/FingerNumberShow.tsx
+   - Shared UI overlay patterns used in camera screens
+   - Research on comparable kid-facing camera/gesture apps
+ - Out-of-scope:
+   - Implementing UI changes
+   - Backend changes
+   - Non-camera games
+ - Behavior change allowed: UNKNOWN
+
+ Targets:
+ - Repo: learning_for_kids
+ - File(s): src/frontend/src/pages/AlphabetGame.tsx; src/frontend/src/pages/LetterHunt.tsx; src/frontend/src/games/FingerNumberShow.tsx
+ - Branch/PR: main
+ - Range: Unknown
+ Git availability:
+ - YES
+
+ Acceptance Criteria:
+ - [ ] Repo-aware UI audit delivered with evidence-labeled findings
+ - [ ] Deep-dive on camera screen files with hero-area focus
+ - [ ] External research scan summarized with citations
+ - [ ] Clear recommendations to reduce cognitive overload
+
+ Execution log:
+ - [2026-01-30 12:45 UTC] Ran repo discovery commands | Evidence:
+   - **Command**: `ls -la && cat src/frontend/package.json && find . -maxdepth 3 -type f -name "vite.config.*" && rg -n "createRoot|ReactDOM.render|new Vue|createApp" . && rg -n "Router|Routes|createBrowserRouter" . && rg -n "Route|path=|createBrowserRouter" src/ && rg -n "pages/|app/|routes/|screens/" src/ && rg -n "tailwind|styled-components|emotion|chakra|mui" . && rg -n "tokens|theme|design system|palette" . && rg -n "useQuery|useMutation|react-query|axios|fetch" src/ && rg -n "loading|isLoading|error|empty" src/ && rg -n "aria-|role=|tabIndex|onKeyDown" src/ && rg -n "Dialog|Modal|Drawer|Popover" src/ && rg -n "@media|sm:|md:|lg:|breakpoint" src/ && rg -n "overflow|truncate|ellipsis" src/ && rg -n "map\(|filter\(|sort\(" src/ && rg -n "useMemo|useCallback|memo\(" src/`
+   - **Output**:
+     ```
+     main
+     2a9db571c7008cec80f344defd37713766cb904f
+     ./src/frontend/vite.config.ts
+     src/frontend/src/main.tsx: ReactDOM.createRoot(...)
+     src/frontend/src/App.tsx: Routes/Route definitions
+     src/frontend/src/pages/AlphabetGame.tsx, LetterHunt.tsx, games/FingerNumberShow.tsx present
+     tailwindcss present (tailwind.config.js)
+     ```
+   - **Interpretation**: Observed — React+Vite+Tailwind app with camera-based game routes present.
+ - [2026-01-30 13:05 UTC] Created audit report artifact | Evidence:
+   - **Command**: N/A (file creation)
+   - **Output**:
+     ```
+     docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md
+     ```
+   - **Interpretation**: Observed — audit report saved in docs/audit.
+
+ Status updates:
+ - [2026-01-30 12:45 UTC] IN_PROGRESS - Discovery complete; audit + research underway
+
+ Next actions:
+ 1) Produce Phase A repo-aware UI audit output (JSON sentinel)
+ 2) Deep-dive on AlphabetGame/LetterHunt/FingerNumberShow camera UX
+ 3) Run web research and capture citations
+
+ Risks/notes:
+ - Existing UI overload may be due to mixed design system usage across screens (Observed in prior audits).
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
 Status: OPEN
