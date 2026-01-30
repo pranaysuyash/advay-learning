@@ -13,8 +13,9 @@
 | **Phase 1** | Core Stability | 8 | Week 1-2 | Fix bugs, security, stability |
 | **Phase 2** | Game Completeness | 10 | Week 3-4 | Complete FingerNumberShow + tracing |
 | **Phase 3** | Multi-language | 6 | Week 5-6 | Full language support |
-| **Phase 4** | Gamification | 20 | Month 2 | Achievements, XP, celebrations |
-| **Phase 5** | Polish & Launch | 12 | Month 3 | Performance, accessibility, launch |
+| **Phase 4** | Analytics & Tracking | 4 | Week 7-8 | Unified tracking for all games |
+| **Phase 5** | Gamification | 20 | Month 2 | Achievements, XP, celebrations |
+| **Phase 6** | Polish & Launch | 12 | Month 3 | Performance, accessibility, launch |
 
 ---
 
@@ -102,7 +103,79 @@
 
 ---
 
-## Phase 4: Gamification & Engagement (Month 2)
+## Phase 4: Analytics & Tracking (Weeks 7-8)
+
+**Critical Gap**: Dashboard only tracks Alphabet Tracing (letters), ignores 3 other games.
+
+### Overview
+
+| Ticket | Phase | Description | Effort | Week |
+|--------|-------|-------------|--------|------|
+| TCK-20260201-001 | 1 | Extend Data Model | Medium | Week 7 |
+| TCK-20260201-002 | 2 | Instrument All Games | High | Week 7-8 |
+| TCK-20260201-003 | 3 | Redesign Dashboard | High | Week 8 |
+| TCK-20260201-004 | 4 | Parent Insights | Medium | Week 8 |
+
+### What Gets Fixed
+
+**Before** (Current):
+```
+Dashboard shows:
+├── Letters Learned: 12/26
+├── Accuracy: 85%
+├── Time Spent: 45 min
+└── 🚨 MISSING: FingerNumberShow, ConnectTheDots, LetterHunt data
+```
+
+**After** (With Analytics):
+```
+Dashboard shows:
+├── 📊 Overall Skills
+│   ├── Literacy: 65% (letters)
+│   ├── Numeracy: 40% (numbers)
+│   ├── Motor Skills: 72% (tracing)
+│   └── Engagement: 12 sessions
+├── 🎮 Game Activity
+│   ├── Alphabet Tracing: 45 min
+│   ├── Finger Numbers: 20 min
+│   ├── Connect the Dots: 10 min
+│   └── Letter Hunt: 15 min
+└── 📈 Skill Development
+    ├── Letter Recognition: +23%
+    ├── Number Counting: +15%
+    └── Hand Tracking: +31%
+```
+
+### Technical Approach
+
+**Database Changes**:
+- Add `game_type` to progress table
+- New `game_sessions` table for per-session metrics
+- New `skill_metrics` table for aggregated weekly scores
+
+**Game Instrumentation**:
+- FingerNumberShow: Track numbers shown, finger counts, accuracy
+- ConnectTheDots: Track completion time, path accuracy
+- LetterHunt: Track letters found, time to find
+
+**Dashboard Redesign**:
+- Replace letter-only stats with 4 skill categories
+- Add game activity breakdown
+- Add skill development trend charts
+
+### Phase 4 Exit Criteria
+
+- [ ] All 4 games tracked in database
+- [ ] Dashboard shows unified skill view
+- [ ] Parents can see game breakdown
+- [ ] Skill improvement trends visible
+- [ ] Ready for Phase 5 (Gamification)
+
+**Reference**: `docs/audit/ANALYTICS_TRACKING_AUDIT.md`
+
+---
+
+## Phase 5: Gamification & Engagement (Month 2)
 
 ### Foundation Layer
 
@@ -153,7 +226,7 @@
 
 ---
 
-## Phase 5: Polish & Launch (Month 3)
+## Phase 6: Polish & Launch (Month 3)
 
 ### UI/UX Polish
 
