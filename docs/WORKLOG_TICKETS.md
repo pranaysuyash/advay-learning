@@ -1066,6 +1066,69 @@ Status updates:
 
 ---
 
+### TCK-20260130-034 :: Fix Dashboard selectedChildData Initialization Bug
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 17:00 UTC
+Status: **DONE**
+Priority: P0
+
+Description:
+Fix ReferenceError in Dashboard.tsx where `selectedChildData` was accessed before initialization on line 180, causing app crash.
+
+Scope contract:
+- In-scope:
+  - Add missing `useMemo` import to Dashboard.tsx
+  - Fix incomplete `const stats = selectedChildData` on line 224
+  - Wrap stats definition in proper `useMemo` hook
+  - Add correct dependencies to useMemo
+- Out-of-scope: Fix LSP warnings about form labels and button types
+- Behavior change allowed: YES (critical bug fix)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/Dashboard.tsx`
+- Branch/PR: main
+- Range: Lines 1, 224
+
+Acceptance Criteria:
+- [x] `useMemo` imported from React
+- [x] `stats` properly defined with `useMemo` hook
+- [x] Dependencies include `children`, `selectedChild`, `getStarRating`, `formatTimeKidFriendly`
+- [x] TypeScript compiles without errors
+- [x] All 87 tests pass
+- [x] Frontend builds successfully
+
+Execution log:
+- [2026-01-30 17:00 UTC] Identified root cause | Evidence:
+  - **Finding**: Line 224 had `const stats = selectedChildData` (incomplete, missing useMemo wrapper)
+  - **Finding**: Line 224-251 accessed `selectedChildData.progress.*` without useMemo
+  - **Finding**: Missing `useMemo` import on line 1
+  - **Interpretation**: Observed — stats variable was trying to access object properties without proper memoization
+
+- [2026-01-30 17:05 UTC] Added `useMemo` import | Evidence:
+  - **Command**: `sed -n '1p' src/frontend/src/pages/Dashboard.tsx`
+  - **Output**: `import { useEffect, useState } from 'react';`
+  - **Edit**: Changed to `import { useEffect, useState, useMemo } from 'react';`
+  - **Interpretation**: Observed — useMemo now imported
+
+- [2026-01-30 17:10 UTC] Fixed stats useMemo definition | Evidence:
+  - **Edit**: Wrapped stats definition in `useMemo` with proper dependencies
+  - **Command**: `cd src/frontend && npm run build`
+  - **Output**: `✓ built in 2.07s`
+  - **Interpretation**: Observed — TypeScript compilation successful
+
+- [2026-01-30 17:15 UTC] Ran tests | Evidence:
+  - **Command**: `cd src/frontend && npm test`
+  - **Output**: `Test Files 15 passed (15) Tests 87 passed (87)`
+  - **Interpretation**: Observed — All tests passing
+
+Status updates:
+- [2026-01-30 17:15 UTC] **DONE** — Fixed selectedChildData initialization bug | Evidence: Build + tests successful
+
+---
+
 ## Quick Status Dashboard
 
 | Metric         | Count  |
@@ -26026,3 +26089,8 @@ Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
 Status: OPEN
 Priority: P0 (Critical - Prevents User Frustration)
+
+---
+## 2026-01-30 Text & Contrast Audit
+
+- [2026-01-30 12:30 UTC] Completed app-wide text/contrast audit covering typography, text colors, and contrast across pages/components. Report: docs/audit/TEXT_CONTRAST_TEXT_AUDIT_2026-01-30.md

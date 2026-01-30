@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -220,8 +220,8 @@ export function Dashboard() {
 
   const selectedChildData =
     children.find((c) => c.id === selectedChild) || children[0];
-
-  const stats = selectedChildData
+  
+  const stats = useMemo(() => selectedChildData
     ? [
         {
           label: 'Letters Learned',
@@ -248,7 +248,7 @@ export function Dashboard() {
           ),
         },
       ]
-    : [];
+    : [], [children, selectedChild, getStarRating, formatTimeKidFriendly]);
 
   const handleExport = async () => {
     setExporting(true);
