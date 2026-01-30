@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation, Navigate } from 'react-router-dom';
+import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE } from '../store';
 import { Mascot } from '../components/Mascot';
 import { progressApi } from '../services/api';
+import { progressQueue } from '../services/progressQueue';
+import { getRandomIcon } from '../utils/iconUtils';
 
 interface Point {
   x: number;
@@ -30,6 +32,7 @@ const LANGUAGES = [
 
 export function Game() {
   const location = useLocation();
+  const navigate = useNavigate();
   const settings = useSettingsStore();
   const { user } = useAuthStore();
   const { markLetterAttempt, getUnlockedBatches, addBadge } = useProgressStore();
@@ -60,6 +63,34 @@ export function Game() {
   const lastPinchTimeRef = useRef<number>(0);
   // Get profile ID from route state (passed from Dashboard)
   const profileId = location.state?.profileId as string | undefined;
+
+  // Pending progress count for this profile (offline/synced)
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  // Subscribe to queue changes for showing pending indicators and auto-sync on reconnect
+  useEffect(() => {
+    if (!profileId) return;
+
+    const update = () => setPendingCount(progressQueue.getPending(profileId).length);
+    update();
+    const unsubscribe = progressQueue.subscribe(update);
+
+    const handleOnline = () => {
+      if (navigator.onLine) {
+        // Dynamically import api client to avoid circular deps in tests
+        import('../services/api').then((m) => {
+          progressQueue.syncAll(m.default).catch(() => {});
+        });
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [profileId]);
 
   // Note: Profile ID is used for progress tracking, not language
   // Language is a game choice, not a profile setting
@@ -184,36 +215,74 @@ export function Game() {
     return Math.min(accuracy, 100);
   }, []);
 
-  // Save progress to backend
+  // Save progress to backend (with offline queue fallback)
   const saveProgress = useCallback(async (letterAccuracy: number) => {
     if (!user || !profileId) return;
 
     const timeSpent = Math.round((Date.now() - startTime) / 1000);
 
+    // Build queue item
+    const idempotency_key = (typeof crypto !== 'undefined' && (crypto as any).randomUUID)
+      ? (crypto as any).randomUUID()
+      : `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    const item = {
+      idempotency_key,
+      profile_id: profileId,
+      activity_type: 'letter_tracing',
+      content_id: currentLetter.char,
+      score: letterAccuracy,
+      duration_seconds: timeSpent,
+      meta_data: {
+        language: languageCode,
+        difficulty: settings.difficulty,
+        streak: streak,
+        points_earned: letterAccuracy > 70 ? 10 : 5,
+      },
+      timestamp: new Date().toISOString(),
+    };
+
     try {
-      // Save to backend API
+      // Try immediate save
       await progressApi.saveProgress(profileId, {
-        activity_type: 'letter_tracing',
-        content_id: currentLetter.char,
-        score: letterAccuracy,
-        duration_seconds: timeSpent,
-        meta_data: {
-          language: languageCode,
-          difficulty: settings.difficulty,
-          streak: streak,
-          points_earned: letterAccuracy > 70 ? 10 : 5,
-        },
+        activity_type: item.activity_type,
+        content_id: item.content_id,
+        score: item.score,
+        duration_seconds: item.duration_seconds,
+        meta_data: item.meta_data,
       });
 
-      // Update session stats
+      // On success, update session stats
       setSessionStats(prev => ({
         accuracy: Math.round((prev.accuracy * prev.streak + letterAccuracy) / (prev.streak + 1)),
         timeSpent: prev.timeSpent + timeSpent,
         streak: prev.streak + 1,
       }));
+
+      // Also attempt to flush any pending items
+      if (navigator.onLine) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const apiClient = (await import('../services/api')).default;
+        progressQueue.syncAll(apiClient).catch(() => {});
+      }
     } catch (error) {
-      console.error('Failed to save progress:', error);
-      // Don't block the game if saving fails - will retry next time
+      console.error('Failed to save progress, enqueuing for later sync:', error);
+      // Enqueue for later sync
+      progressQueue.enqueue(item);
+
+      // Update session stats optimistically
+      setSessionStats(prev => ({
+        accuracy: Math.round((prev.accuracy * prev.streak + letterAccuracy) / (prev.streak + 1)),
+        timeSpent: prev.timeSpent + timeSpent,
+        streak: prev.streak + 1,
+      }));
+
+      // Try to sync if online
+      if (navigator.onLine) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const apiClient = (await import('../services/api')).default;
+        progressQueue.syncAll(apiClient).catch(() => {});
+      }
     }
   }, [user, profileId, currentLetter, languageCode, settings.difficulty, startTime, streak]);
 
@@ -488,6 +557,11 @@ export function Game() {
     setAccuracy(0);
   };
 
+  const goToHome = () => {
+    stopGame();
+    navigate('/dashboard');
+  };
+
   const clearDrawing = () => {
     drawnPointsRef.current = [];
     setAccuracy(0);
@@ -576,6 +650,11 @@ export function Game() {
             <div className="flex items-center gap-4 text-sm text-white/60">
               <span>🔥 Streak: {streak}</span>
               <span>Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1} of {Math.ceil(LETTERS.length / BATCH_SIZE)}</span>
+              {pendingCount > 0 && (
+                <div className="ml-2 inline-block bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold">
+                  ⚠️ Pending ({pendingCount})
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -593,7 +672,13 @@ export function Game() {
                 </div>
               )}
             </div>
-            <div className="text-6xl">{currentLetter.emoji}</div>
+            <div className="w-20 h-20">
+              <img
+                src={getRandomIcon(currentLetter)}
+                alt={currentLetter.name}
+                className="w-full h-full object-contain"
+              />
+            </div>
             <div className="text-center">
               <div className="text-2xl">{currentLetter.name}</div>
               {currentLetter.pronunciation && (
@@ -688,16 +773,24 @@ export function Game() {
               <div className="text-sm text-white/50 mb-8">
                 Difficulty: <span className="text-white/80 capitalize">{settings.difficulty}</span>
               </div>
-              {isModelLoading ? (
-                <div className="text-white/60">Loading hand tracking...</div>
-              ) : (
+              <div className="flex justify-center gap-4">
                 <button
-                  onClick={startGame}
-                  className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                  onClick={goToHome}
+                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg"
                 >
-                  Start Game
+                  🏠 Home
                 </button>
-              )}
+                {isModelLoading ? (
+                  <div className="text-white/60 px-6 py-3">Loading hand tracking...</div>
+                ) : (
+                  <button
+                    onClick={startGame}
+                    className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition shadow-red-900/20"
+                  >
+                    Start Game
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -731,6 +824,12 @@ export function Game() {
                 </div>
 
                 <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    onClick={goToHome}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg"
+                  >
+                    🏠 Home
+                  </button>
                   <button
                     onClick={() => setIsDrawing(!isDrawing)}
                     className={`px-4 py-2 rounded-lg transition text-sm font-bold shadow-lg ${isDrawing
