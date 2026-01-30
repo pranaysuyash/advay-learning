@@ -221,16 +221,19 @@ export function Dashboard() {
   const selectedChildData =
     children.find((c) => c.id === selectedChild) || children[0];
   
+  // TODO: Replace with unified tracking from ANALYTICS_TRACKING_AUDIT.md
+  // Currently only tracking Alphabet Tracing - need to add:
+  // - FingerNumberShow metrics
+  // - ConnectTheDots metrics  
+  // - LetterHunt metrics
+  // - Overall literacy/numeracy/motor scores
   const stats = useMemo(() => selectedChildData
     ? [
         {
-          label: 'Letters Learned',
-          value: `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters}`,
+          label: 'Literacy',  // Was: Letters Learned
+          value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
           iconName: 'letters' as const,
-          percent:
-            (selectedChildData.progress.lettersLearned /
-              selectedChildData.progress.totalLetters) *
-            100,
+          percent: (selectedChildData.progress.lettersLearned / selectedChildData.progress.totalLetters) * 100,
         },
         {
           label: 'Accuracy',
@@ -239,14 +242,18 @@ export function Dashboard() {
           percent: selectedChildData.progress.averageAccuracy,
         },
         {
-          label: 'Time Spent',
+          label: 'Time',
           value: formatTimeKidFriendly(selectedChildData.progress.totalTime),
           iconName: 'timer' as const,
-          percent: Math.min(
-            (selectedChildData.progress.totalTime / 300) * 100,
-            100,
-          ),
+          percent: Math.min((selectedChildData.progress.totalTime / 300) * 100, 100),
         },
+        // TODO: Add when FingerNumberShow tracking is implemented:
+        // {
+        //   label: 'Numeracy',
+        //   value: `${numbersMastered}/${totalNumbers}`,
+        //   iconName: 'hand' as const,
+        //   percent: (numbersMastered / totalNumbers) * 100,
+        // },
       ]
     : [], [children, selectedChild, getStarRating, formatTimeKidFriendly]);
 
@@ -286,46 +293,22 @@ export function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {/* Header - Compact with icon actions */}
+        {/* Header - Clean, single title */}
         <div className='mb-6 flex justify-between items-center'>
-          <div>
-            <h1 className='text-2xl font-bold'>Dashboard</h1>
-            <p className='text-sm text-text-secondary mt-0.5'>
-              {children.length > 0 
-                ? `${children.length} child${children.length > 1 ? 'ren' : ''}`
-                : 'Welcome! Add a child to get started'}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleExport}
-              disabled={exporting || children.length === 0}
-              className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30"
-              title="Export progress data"
-            >
-              {exporting ? (
-                <UIIcon name="hourglass" size={20} />
-              ) : (
-                <UIIcon name="download" size={20} />
-              )}
-            </button>
-            <Link
-              to="/settings"
-              className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition"
-              title="Settings"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </Link>
-          </div>
+          <h1 className='text-2xl font-bold'>Dashboard</h1>
+          <button
+            onClick={handleExport}
+            disabled={exporting || children.length === 0}
+            className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30"
+            title="Export progress data"
+          >
+            {exporting ? <UIIcon name="hourglass" size={20} /> : <UIIcon name="download" size={20} />}
+          </button>
         </div>
 
-        {/* Child Selector - Inline with actions */}
+        {/* Child Selector - Clean, minimal */}
         {children.length > 0 && (
           <div className='mb-4 flex items-center gap-2 flex-wrap'>
-            <span className='text-sm text-text-secondary mr-1'>Child:</span>
             {children.map((child) => (
               <div key={child.id} className="flex items-center">
                 <button
@@ -360,7 +343,7 @@ export function Dashboard() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add
+              Add Child
             </button>
           </div>
         )}
