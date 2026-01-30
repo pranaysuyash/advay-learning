@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useProfileStore } from '../store';
+import { useProfileStore, useProgressStore } from '../store';
 import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
 import apiClient from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
+import { getAlphabet } from '../data/alphabets';
 
 interface ProgressItem {
   id: string;
@@ -24,6 +25,7 @@ interface ProgressStats {
 
 export function Progress() {
   const { profiles } = useProfileStore();
+  const { letterProgress: localLetterProgress } = useProgressStore();
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [stats, setStats] = useState<ProgressStats | null>(null);
@@ -31,6 +33,7 @@ export function Progress() {
   const [error, setError] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [syncing, setSyncing] = useState<boolean>(false);
+  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'all'>('all');
 
   useEffect(() => {
     const update = () =>
@@ -72,8 +75,13 @@ export function Progress() {
     fetchProgress();
   }, [selectedProfileId]);
 
+  // Get profile to determine preferred language
+  const profile = profiles.find(p => p.id === selectedProfileId);
+  const profileLanguage = profile?.preferred_language || 'en';
+  const alphabet = getAlphabet(profileLanguage);
+
   // Transform progress data for display
-  const letterProgress = progress
+  const letterProgressDisplay = progress
     .filter((p) => p.activity_type === 'letter_tracing')
     .reduce(
       (acc, item) => {
@@ -105,7 +113,7 @@ export function Progress() {
     );
 
   // Sort by letter
-  letterProgress.sort((a, b) => a.letter.localeCompare(b.letter));
+  letterProgressDisplay.sort((a, b) => a.letter.localeCompare(b.letter));
 
   // Get recent activity
   const recentActivity = progress.slice(0, 10).map((item) => ({
@@ -117,6 +125,47 @@ export function Progress() {
     score: `+${Math.round(item.score)}`,
   }));
 
+  // Calculate weekly/monthly progress
+  const calculatePeriodProgress = () => {
+    const now = new Date();
+    const periodAgo = new Date(now);
+
+    if (reportPeriod === 'week') {
+      periodAgo.setDate(now.getDate() - 7);
+    } else if (reportPeriod === 'month') {
+      periodAgo.setMonth(now.getMonth() - 1);
+    } else {
+      // For 'all', return all progress
+      return progress;
+    }
+
+    return progress.filter(item => {
+      const itemDate = new Date(item.completed_at);
+      return itemDate >= periodAgo && itemDate <= now;
+    });
+  };
+
+  const periodProgress = calculatePeriodProgress();
+  const periodStats = {
+    activities: periodProgress.length,
+    avgAccuracy: periodProgress.length > 0
+      ? Math.round(periodProgress.reduce((sum, item) => sum + item.score, 0) / periodProgress.length)
+      : 0,
+    newLetters: periodProgress.filter(p => p.activity_type === 'letter_tracing').length
+  };
+
+  // Get progress by language
+  const languageProgress = Object.entries(localLetterProgress).map(([lang, progress]) => {
+    const mastered = progress.filter(p => p.mastered).length;
+    const total = getAlphabet(lang).letters.length;
+    return {
+      language: lang,
+      mastered,
+      total,
+      percentage: total > 0 ? Math.round((mastered / total) * 100) : 0
+    };
+  });
+
   return (
     <div className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
@@ -127,6 +176,23 @@ export function Progress() {
           <h1 className='text-3xl font-bold'>Learning Progress</h1>
 
           <div className='flex items-center gap-4'>
+            {/* Period Selector */}
+            <div className='flex bg-white/10 border border-border rounded-lg p-1'>
+              {(['week', 'month', 'all'] as const).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setReportPeriod(period)}
+                  className={`px-3 py-1 rounded-md text-sm capitalize ${
+                    reportPeriod === period
+                      ? 'bg-red-500 text-white'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  {period}
+                </button>
+              ))}
+            </div>
+
             {/* Pending indicator */}
             {pendingCount > 0 && (
               <div className='inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold'>
@@ -174,8 +240,8 @@ export function Progress() {
         {loading && (
           <div className='text-center py-12'>
             <div className='w-16 h-16 mx-auto mb-4'>
-              <img 
-                src="/assets/images/loading-pip.svg" 
+              <img
+                src="/assets/images/loading-pip.svg"
                 alt="Loading"
                 className="w-full h-full object-contain"
               />
@@ -192,25 +258,25 @@ export function Progress() {
 
         {!loading && !error && stats && (
           <>
-            {/* Stats Overview */}
+            {/* Period Stats Overview */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-8'>
               <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
-                  {stats.total_activities}
+                  {periodStats.activities}
                 </div>
-                <div className='text-white/60'>Total Activities</div>
+                <div className='text-white/60'>Activities in {reportPeriod}</div>
               </div>
               <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
-                  {stats.completion_count}
+                  {periodStats.newLetters}
                 </div>
-                <div className='text-white/60'>Letters Mastered</div>
+                <div className='text-white/60'>Letters Practiced</div>
               </div>
               <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
-                  {Math.round(stats.average_score)}%
+                  {periodStats.avgAccuracy}%
                 </div>
-                <div className='text-white/60'>Average Accuracy</div>
+                <div className='text-white/60'>Avg. Accuracy</div>
               </div>
               <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>{stats.total_score}</div>
@@ -218,16 +284,49 @@ export function Progress() {
               </div>
             </div>
 
+            {/* Multi-Language Progress */}
+            <div className='bg-white/10 border border-border rounded-xl p-6 mb-8 shadow-sm'>
+              <h2 className='text-xl font-semibold mb-4'>Multi-Language Progress</h2>
+              {languageProgress.length > 0 ? (
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {languageProgress.map((langProg) => (
+                    <div key={langProg.language} className='border border-border rounded-lg p-3'>
+                      <div className='flex justify-between items-center mb-2'>
+                        <span className='font-medium capitalize'>{langProg.language}</span>
+                        <span className='text-sm text-white/60'>
+                          {langProg.mastered}/{langProg.total} letters
+                        </span>
+                      </div>
+                      <div className='flex justify-between text-sm mb-1'>
+                        <span>Completion:</span>
+                        <span>{langProg.percentage}%</span>
+                      </div>
+                      <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-2'>
+                        <div
+                          className='h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500'
+                          style={{ width: `${langProg.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className='text-white/60 text-center py-4'>
+                  No progress in other languages yet.
+                </p>
+              )}
+            </div>
+
             {/* Letter Progress */}
             <div className='bg-white/10 border border-border rounded-xl p-6 mb-8 shadow-sm'>
               <h2 className='text-xl font-semibold mb-4'>Alphabet Mastery</h2>
-              {letterProgress.length === 0 ? (
+              {letterProgressDisplay.length === 0 ? (
                 <p className='text-white/60 text-center py-8'>
                   No progress yet. Start playing to track your learning!
                 </p>
               ) : (
                 <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'>
-                  {letterProgress.map((item) => (
+                  {letterProgressDisplay.map((item) => (
                     <div
                       key={item.letter}
                       className={`p-4 rounded-lg text-center ${
@@ -235,7 +334,7 @@ export function Progress() {
                           ? 'bg-green-500/20 border border-green-500/30'
                           : item.status === 'in_progress'
                             ? 'bg-yellow-500/20 border border-yellow-500/30'
-                            : 'bg-white/10 border border-border' 
+                            : 'bg-white/10 border border-border'
                       }`}
                     >
                       <div className='text-2xl font-bold mb-1'>

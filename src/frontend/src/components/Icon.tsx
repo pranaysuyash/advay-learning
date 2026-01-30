@@ -22,15 +22,16 @@ interface IconProps {
  */
 export function Icon({ src, alt = '', size = 32, className = '', fallback = '✨' }: IconProps) {
   const [hasError, setHasError] = useState(false);
-  
-  // Get the first valid icon path
+  const [index, setIndex] = useState(0);
+
+  // Get the current icon path (supports string or array of candidates)
   const iconSrc = useMemo(() => {
     if (Array.isArray(src)) {
-      return src[0] || '';
+      return src[index] || '';
     }
     return src;
-  }, [src]);
-  
+  }, [src, index]);
+
   // Don't render if no icon source
   if (!iconSrc) {
     return (
@@ -44,13 +45,13 @@ export function Icon({ src, alt = '', size = 32, className = '', fallback = '✨
       </span>
     );
   }
-  
-  // Show fallback if icon failed to load
+
+  // Show fallback if all icon candidates failed to load
   if (hasError) {
     return (
       <span 
         className={`inline-flex items-center justify-center ${className}`}
-        style={{ width: size, height: size, fontSize: size * 0.7 }}
+        style={{ width: size, height: size * 0.7 }}
         role="img"
         aria-label={alt}
       >
@@ -58,7 +59,7 @@ export function Icon({ src, alt = '', size = 32, className = '', fallback = '✨
       </span>
     );
   }
-  
+
   return (
     <img
       src={iconSrc}
@@ -66,7 +67,14 @@ export function Icon({ src, alt = '', size = 32, className = '', fallback = '✨
       width={size}
       height={size}
       className={`inline-block object-contain ${className}`}
-      onError={() => setHasError(true)}
+      onError={() => {
+        // If multiple candidates are provided, try the next one before showing fallback
+        if (Array.isArray(src) && index < src.length - 1) {
+          setIndex(i => i + 1);
+        } else {
+          setHasError(true);
+        }
+      }}
       loading="lazy"
     />
   );

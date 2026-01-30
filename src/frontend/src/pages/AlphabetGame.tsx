@@ -25,7 +25,7 @@ const LANGUAGES = [
   { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
 ] as const;
 
-export function Game() {
+export function AlphabetGame() {
   const location = useLocation();
   const navigate = useNavigate();
   const settings = useSettingsStore();
@@ -357,7 +357,11 @@ export function Game() {
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => setSelectedLanguage(lang.code)}
+                      onClick={() => {
+                        setSelectedLanguage(lang.code);
+                        // Reset to first letter when language changes
+                        setCurrentLetterIndex(0);
+                      }}
                       className={`px-4 py-2 rounded-lg font-medium transition ${
                         selectedLanguage === lang.code
                           ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
@@ -369,6 +373,9 @@ export function Game() {
                     </button>
                   ))}
                 </div>
+                <p className='text-center text-sm text-white/50 mt-2'>
+                  Progress is tracked separately for each language
+                </p>
               </div>
 
               <div className='text-sm text-white/50 mb-8'>
@@ -440,9 +447,26 @@ export function Game() {
                     <UIIcon name="target" size={14} />
                     Trace: {currentLetter.char}
                   </div>
-                  <div className='bg-blue-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border'>
-                    {LANGUAGES.find((l) => l.code === selectedLanguage)?.flag}{' '}
-                    {LANGUAGES.find((l) => l.code === selectedLanguage)?.name}
+                  <div className='relative group'>
+                    <button
+                      className='bg-blue-500/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border hover:bg-blue-500/70 transition'
+                      onClick={() => {
+                        // Cycle through languages
+                        const currentIndex = LANGUAGES.findIndex(l => l.code === selectedLanguage);
+                        const nextIndex = (currentIndex + 1) % LANGUAGES.length;
+                        const nextLang = LANGUAGES[nextIndex];
+                        setSelectedLanguage(nextLang.code);
+                        setCurrentLetterIndex(0);
+                      }}
+                      title="Click to cycle through languages"
+                    >
+                      {LANGUAGES.find((l) => l.code === selectedLanguage)?.flag}{' '}
+                      {LANGUAGES.find((l) => l.code === selectedLanguage)?.name}
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute left-0 mt-1 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 z-10 whitespace-nowrap">
+                      Click to switch languages
+                    </div>
                   </div>
                   {streak > 2 && (
                     <div className='bg-orange-500/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-lg shadow-orange-500/20'>

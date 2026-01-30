@@ -344,10 +344,33 @@ Scope contract:
 Targets:
 - Files: `src/frontend/src/pages/Game.tsx`, build/public assets, tests
 
+---
+
+### TCK-20260130-017 :: Icon & Image Runtime Fallbacks + Tests
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 16:30 UTC
+Status: **OPEN**
+
+Scope contract:
+- In-scope:
+  - Make the `Icon` component resilient to missing/404 assets by iterating through candidate sources before showing fallback
+  - Add unit tests for `Icon` behavior and a lightweight test ensuring English alphabet has at least one existing icon file
+  - Add a short remediation note to the `Game` audit artifact and update worklog evidence
+- Out-of-scope:
+  - Adding missing SVGs or creating new illustrations (this ticket assumes assets will be added separately)
+
+Targets:
+- Files: `src/frontend/src/components/Icon.tsx`, `src/frontend/src/components/__tests__/Icon.test.tsx`, `src/frontend/src/data/__tests__/englishIconsExist.test.ts`
 
 Inputs:
+- Implemented code changes and unit tests; local vitest run shows `Icon` tests passing and `englishIconsExist` passing (1 failing suite unrelated: pending Game test)
 
-- Started discovery and git history checks
+Evidence:
+- **Command**: `cd src/frontend && npm test`
+
+**Observed**: `Icon` tests passed and `englishIconsExist` passed; overall test run shows 79 tests passing, 1 existing failing pending test unrelated to this change.
 
 ---
 
@@ -21309,5 +21332,133 @@ Evidence:
 
 - **Command**: `rg -n "className=\"bg-|text-" src/frontend/src/pages/Dashboard.tsx | head -20`
 - **Output**: Multiple instances of hardcoded colors and small text classes
+
+---
+# Ticket: TCK-20260131-005
+# Title: Implement Dashboard UX, Accessibility & Readability Fixes
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-31 00:00 UTC
+Status: IN_PROGRESS
+Priority: P0 (Critical - Parent/Kid Facing Screen)
+
+Scope contract:
+
+- In-scope:
+  - Increase main heading text size (p-6 to text-2xl)
+  - Increase secondary text sizes (p-6 to text-base)
+  - Add ARIA labels to all icons (letters, target, timer, flame, check, circle)
+  - Transform stats display to kid-friendly (star ratings instead of percentages)
+  - Fix form accessibility (remove autoFocus, add autocomplete attributes)
+  - Simplify language names or show flags (🇮🇳)
+  - Add visual feedback (celebrations, mascot encouragement on milestones)
+  - Differentiate action buttons visually (primary vs secondary)
+  - Improve progress section (celebration animations, visual storytelling)
+  - Add semantic color system (reusable color utilities)
+  - Test with screen reader
+  - Verify WCAG AA contrast compliance
+- Out-of-scope:
+  - Complete redesign of data structures
+  - New features beyond fixing current issues
+  - Backend changes to progress API
+  - Behavior change allowed: YES (improving UX without breaking functionality)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files to modify:
+  - src/frontend/src/pages/Dashboard.tsx (main target - all fixes in one file)
+  - src/frontend/src/components/ui/Card.tsx (review and enhance)
+  - Branch: main
+- Git availability: YES
+
+Related Audit Findings:
+
+1. **ui__src__frontend__src__pages__Dashboard.tsx.md** - Complete Dashboard audit just completed
+2. **ui_design_audit.md** - General accessibility guidelines
+3. **child_usability_audit.md** - Kid-centered UX principles
+4. **ux_feedback_v1.md** - User feedback from personas
+
+Acceptance Criteria:
+
+- [ ] Main heading increased to text-2xl or text-3xl (current: text-3xl)
+- [ ] Secondary text increased to text-base or text-lg (current: p-6)
+- [ ] All icons have aria-label or helper text labels
+- [ ] Stats display uses star ratings (⭐⭐⭐) instead of percentages
+- [ ] Time displayed in simple format ("About 2 hours" instead of "2h 30m")
+- [ ] Form inputs have autocomplete attributes (autocomplete="name"/"bday")
+- [ ] autoFocus attribute removed from all input fields
+- [ ] Action buttons visually differentiated (primary vs secondary)
+- [ ] Language selector simplified or uses flags (🇮🇳)
+- [ ] Progress section has celebration animations and visual storytelling
+- [ ] Semantic color system implemented
+- [ ] TypeScript compilation passes
+- [ ] No new ESLint errors
+- [ ] Tested with screen reader (VoiceOver/NVDA)
+- [ ] Color contrast meets WCAG AA (4.5:1 ratio)
+- [ ] All stats clear and understandable
+
+Dependencies:
+
+- None (can proceed independently)
+
+Execution log:
+
+- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx audit findings
+- [2026-01-31 00:00 UTC] Moved ticket to IN_PROGRESS
+
+Status updates:
+
+- [2026-01-31 00:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Increase main heading text size to text-2xl
+2. Update all secondary text from p-6 to text-base or text-lg
+3. Add aria-label to letters icon: "Letters learned"
+4. Add aria-label to target icon: "Target accuracy goal"
+5. Add aria-label to timer icon: "Time spent learning"
+6. Add aria-label to flame icon: "Current streak of days played"
+7. Add aria-label to check icon: "Achievement badge unlocked"
+8. Add aria-label to circle icon: "Accuracy level achieved"
+9. Transform "Letters Learned: 5/26" to "5 of 26 letters"
+10. Transform "Average Accuracy: 75%" to star rating (⭐⭐⭐)
+11. Transform time display from "2h 30m" to "About 2 hours"
+12. Remove autoFocus from all input fields
+13. Add autocomplete="name" to child name input
+14. Add autocomplete="bday" to age input
+15. Change language selector to show flags (🇮🇳) or simplified names
+16. Add visual feedback (mascot message) on good performance
+17. Add celebration animation (confetti) when milestones reached
+18. Differentiate action buttons (Add Child = primary, + Add Another = secondary)
+19. Add progress section visual storytelling (fun facts, milestones)
+20. Implement semantic color system for stats cards
+21. Test with screen reader
+22. Verify WCAG AA contrast
+23. Update audit doc with completion status
+
+Risks/notes:
+
+- Text sizes affect readability for both kids and parents
+- Missing ARIA labels violate WCAG guidelines
+- Abstract stats are confusing for children
+- Form accessibility issues block disabled users
+- Similar button styling causes confusion
+- Language names with Unicode are hard to read
+
+Evidence:
+
+- **Audit Reference**: docs/audit/ui__src__frontend__src__pages__Dashboard.tsx.md
+- **Command**: `rg -n "className.*text-3xl\|text-2xl" src/frontend/src/pages/Dashboard.tsx`
+- **Output**: Current heading uses text-3xl
+- **Code Review**:
+  - Line 96: `<h1 className='text-3xl font-bold'>Parent Dashboard</h1>`
+  - Line 57: `<p className='text-white/60'>...</p>`
+  - Line 27: `<UIIcon name="letters" ... aria-hidden="true" />`
+  - Line 40: `<UIIcon name="target" ... aria-hidden="true" />`
+  - Line 23- `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`
+  - Line 35: `${selectedChildData.progress.averageAccuracy}%`
 
 ---

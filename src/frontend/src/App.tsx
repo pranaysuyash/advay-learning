@@ -7,8 +7,10 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
-import { Game } from './pages/Game';
+import { AlphabetGame } from './pages/AlphabetGame';
 import { Games } from './pages/Games';
+import { ConnectTheDots } from './pages/ConnectTheDots';
+import { LetterHunt } from './pages/LetterHunt';
 import { Progress } from './pages/Progress';
 import { Settings } from './pages/Settings';
 import { StyleTest } from './components/StyleTest';
@@ -30,7 +32,7 @@ function App() {
         } />
         <Route path="/game" element={
           <ProtectedRoute>
-            <Game />
+            <AlphabetGame />
           </ProtectedRoute>
         } />
         <Route path="/games" element={
@@ -41,6 +43,16 @@ function App() {
         <Route path="/games/finger-number-show" element={
           <ProtectedRoute>
             <FingerNumberShow />
+          </ProtectedRoute>
+        } />
+        <Route path="/games/connect-the-dots" element={
+          <ProtectedRoute>
+            <ConnectTheDots />
+          </ProtectedRoute>
+        } />
+        <Route path="/games/letter-hunt" element={
+          <ProtectedRoute>
+            <LetterHunt />
           </ProtectedRoute>
         } />
         <Route path="/progress" element={

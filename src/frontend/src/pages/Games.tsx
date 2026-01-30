@@ -44,7 +44,7 @@ export function Games() {
       id: 'connect-the-dots',
       title: 'Connect the Dots',
       description: 'Connect numbered dots to form letters, numbers, and shapes',
-      path: '#', // Will be implemented later
+      path: '/games/connect-the-dots',
       icon: 'target',
       ageRange: '4-6 years',
       category: 'Fine Motor',
@@ -54,7 +54,7 @@ export function Games() {
       id: 'letter-hunt',
       title: 'Letter Hunt',
       description: 'Find the target letter among distractors',
-      path: '#', // Will be implemented later
+      path: '/games/letter-hunt',
       icon: 'target',
       ageRange: '3-6 years',
       category: 'Alphabets',
@@ -102,6 +102,15 @@ export function Games() {
                       <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full">
                         {game.difficulty}
                       </span>
+                      {game.id === 'alphabet-tracing' && currentProfile && (
+                        <span className="text-xs px-2 py-1 bg-red-500/20 text-red-300 rounded-full">
+                          {currentProfile.preferred_language === 'en' ? 'English' :
+                           currentProfile.preferred_language === 'hi' ? 'Hindi' :
+                           currentProfile.preferred_language === 'kn' ? 'Kannada' :
+                           currentProfile.preferred_language === 'te' ? 'Telugu' :
+                           currentProfile.preferred_language === 'ta' ? 'Tamil' : 'English'} Alphabet
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -131,7 +140,13 @@ export function Games() {
                         }}
                         className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center"
                       >
-                        Play Game
+                        {currentProfile
+                          ? `Play in ${currentProfile.preferred_language === 'en' ? 'English' :
+                             currentProfile.preferred_language === 'hi' ? 'Hindi' :
+                             currentProfile.preferred_language === 'kn' ? 'Kannada' :
+                             currentProfile.preferred_language === 'te' ? 'Telugu' :
+                             currentProfile.preferred_language === 'ta' ? 'Tamil' : 'English'}`
+                          : 'Select Profile First'}
                       </button>
                     ) : (
                       <Link
@@ -157,6 +172,16 @@ export function Games() {
             <li>• Multilingual support for diverse learning needs</li>
             <li>• Progressive difficulty to match learning pace</li>
             <li>• Safe, ad-free environment for children</li>
+          </ul>
+        </div>
+
+        {/* Game Selection Info */}
+        <div className="mt-6 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+          <h3 className="font-medium text-yellow-400 mb-2">How Game Selection Works</h3>
+          <ul className="text-white/70 text-sm space-y-1">
+            <li>• The Alphabet Tracing game uses the language set in your child's profile</li>
+            <li>• You can change the language in Settings or by editing your child's profile</li>
+            <li>• Progress is tracked separately for each language</li>
           </ul>
         </div>
       </motion.div>

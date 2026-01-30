@@ -13,6 +13,14 @@ import { Icon } from '../components/Icon';
 import { UIIcon, Card } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
+interface LanguageProgress {
+  language: string;
+  lettersLearned: number;
+  totalLetters: number;
+  averageAccuracy: number;
+  totalTime: number;
+}
+
 interface ChildProfile {
   id: string;
   name: string;
@@ -24,6 +32,14 @@ interface ChildProfile {
     averageAccuracy: number;
     totalTime: number;
   };
+}
+
+interface LanguageProgress {
+  language: string;
+  lettersLearned: number;
+  totalLetters: number;
+  averageAccuracy: number;
+  totalTime: number;
 }
 
 export function Dashboard() {
@@ -39,6 +55,21 @@ export function Dashboard() {
   const [newChildName, setNewChildName] = useState('');
   const [newChildAge, setNewChildAge] = useState(5);
   const [newChildLanguage, setNewChildLanguage] = useState('en');
+
+  // Helper function to get star rating from percentage
+  const getStarRating = (accuracy: number): { stars: number; emoji: string } => {
+    if (accuracy >= 90) return { stars: 3, emoji: '⭐⭐⭐' };
+    if (accuracy >= 70) return { stars: 2, emoji: '⭐⭐' };
+    if (accuracy >= 40) return { stars: 1, emoji: '⭐' };
+    return { stars: 0, emoji: '☆' };
+  };
+
+  // Helper function to format time kid-friendly
+  const formatTimeKidFriendly = (minutes: number): string => {
+    if (minutes < 60) return `${Math.floor(minutes)} minutes`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
+    return `about ${Math.floor(minutes / 60)} hours`;
+  };
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
@@ -76,7 +107,7 @@ export function Dashboard() {
   const children: ChildProfile[] = profiles.map((profile) => {
     // Map 2-letter codes to full names for alphabet lookup
     const langCode = profile.preferred_language || 'en';
-    const lang = langCode === 'hi' ? 'hindi' 
+    const lang = langCode === 'hi' ? 'hindi'
                : langCode === 'kn' ? 'kannada'
                : langCode === 'te' ? 'telugu'
                : langCode === 'ta' ? 'tamil'
@@ -84,7 +115,7 @@ export function Dashboard() {
     const alphabet = getAlphabet(langCode);
     const langProgress = letterProgress[lang] || [];
 
-    // Calculate real stats
+    // Calculate real stats for the primary language
     const masteredCount = getMasteredLettersCount(lang);
     const totalLetters = alphabet.letters.length;
 
@@ -102,6 +133,31 @@ export function Dashboard() {
     const totalAttempts = langProgress.reduce((sum, p) => sum + p.attempts, 0);
     const estimatedTimeMinutes = totalAttempts * 2; // ~2 minutes per tracing session
 
+    // Calculate progress for all languages
+    const allLanguages = ['english', 'hindi', 'kannada', 'telugu', 'tamil'];
+    const languageProgress: LanguageProgress[] = allLanguages.map(language => {
+      const langAlphabet = getAlphabet(language);
+      const langProg = letterProgress[language] || [];
+
+      const mastered = getMasteredLettersCount(language);
+      const total = langAlphabet.letters.length;
+
+      const attempts = langProg.filter((p) => p.attempts > 0);
+      const avgAcc = attempts.length > 0
+        ? Math.round(attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) / attempts.length)
+        : 0;
+
+      const totalTime = langProg.reduce((sum, p) => sum + p.attempts, 0) * 2;
+
+      return {
+        language,
+        lettersLearned: mastered,
+        totalLetters: total,
+        averageAccuracy: avgAcc,
+        totalTime
+      };
+    }).filter(lp => lp.lettersLearned > 0); // Only show languages with progress
+
     return {
       id: profile.id,
       name: profile.name,
@@ -113,17 +169,18 @@ export function Dashboard() {
         averageAccuracy: averageAccuracy,
         totalTime: estimatedTimeMinutes,
       },
+      languageProgress
     };
   });
 
   const selectedChildData =
     children.find((c) => c.id === selectedChild) || children[0];
 
-  const stats = selectedChildData
+            const stats = selectedChildData
     ? [
         {
           label: 'Letters Learned',
-          value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
+          value: `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters}`,
           iconName: 'letters' as const,
           percent:
             (selectedChildData.progress.lettersLearned /
@@ -131,14 +188,14 @@ export function Dashboard() {
             100,
         },
         {
-          label: 'Average Accuracy',
-          value: `${selectedChildData.progress.averageAccuracy}%`,
+          label: 'Accuracy',
+          value: getStarRating(selectedChildData.progress.averageAccuracy).emoji,
           iconName: 'target' as const,
           percent: selectedChildData.progress.averageAccuracy,
         },
         {
           label: 'Time Spent',
-          value: `${Math.floor(selectedChildData.progress.totalTime / 60)}h ${selectedChildData.progress.totalTime % 60}m`,
+          value: formatTimeKidFriendly(selectedChildData.progress.totalTime),
           iconName: 'timer' as const,
           percent: Math.min(
             (selectedChildData.progress.totalTime / 300) * 100,
@@ -147,7 +204,7 @@ export function Dashboard() {
         },
         {
           label: 'Current Streak',
-          value: '5 days',
+          value: `🔥 ${selectedChildData.streak} days`,
           iconName: 'flame' as const,
           percent: 75,
         },
@@ -193,8 +250,8 @@ export function Dashboard() {
         {/* Header */}
         <div className='mb-8 flex justify-between items-start'>
           <div>
-            <h1 className='text-3xl font-bold'>Parent Dashboard</h1>
-            <p className='text-white/60 mt-1'>
+            <h1 className='text-2xl md:text-3xl font-bold'>Parent Dashboard</h1>
+            <p className='text-base text-white/80 mt-1'>
               Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
             </p>
           </div>
@@ -244,24 +301,24 @@ export function Dashboard() {
         {/* Stats Grid */}
         {selectedChildData && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-            {stats.map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Card>
-                  <div className='flex items-center gap-3 mb-2'>
-                    <div className='w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center'>
-                      <UIIcon name={stat.iconName} size={20} className="text-white/80" aria-hidden="true" />
+          {stats.map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <Card>
+                    <div className='flex items-center gap-3 mb-2'>
+                      <div className='w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center'>
+                        <UIIcon name={stat.iconName} size={20} aria-label={getIconLabel(stat.iconName)} className="text-white/80" />
+                      </div>
+                      <div>
+                        <p className='text-base text-white/90'>{stat.label}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='text-sm text-white/60'>{stat.label}</p>
-                    </div>
-                  </div>
 
-                  <div className='text-3xl font-bold mt-2'>{stat.value}</div>
+                    <div className='text-3xl font-bold mt-2 text-white'>{getKidFriendlyStatValue(stat)}</div>
 
                   {/* Progress bar */}
                   <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-3'>
@@ -319,7 +376,12 @@ export function Dashboard() {
         {selectedChildData && (
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
             <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-              <h2 className='text-xl font-semibold mb-4'>Learning Progress</h2>
+              <div className='flex justify-between items-center mb-4'>
+                <h2 className='text-xl font-semibold'>Learning Progress</h2>
+                <div className='text-sm px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full'>
+                  {selectedChildData.preferredLanguage}
+                </div>
+              </div>
               <div className='space-y-4'>
                 {(() => {
                   const lang = selectedChildData.preferredLanguage;
@@ -351,8 +413,8 @@ export function Dashboard() {
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
                             <span className='text-sm flex items-center gap-2'>
-                              <Icon 
-                                src={letter.icon} 
+                              <Icon
+                                src={letter.icon}
                                 alt={letter.name}
                                 size={16}
                                 className="opacity-80"
@@ -405,51 +467,89 @@ export function Dashboard() {
               </div>
             </div>
 
+            {/* Multi-Language Progress */}
             <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-              <h2 className='text-xl font-semibold mb-4'>Quick Actions</h2>
-              <div className='space-y-3'>
-                <Link
-                  to='/games'
-                  className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
-                >
-                  🎮 Explore All Games
-                </Link>
-                <Link
-                  to='/settings'
-                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                >
-                  ⚙️ Manage Settings
-                </Link>
-                <button
-                  onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
-                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                >
-                  📊 View Weekly Report
-                </button>
-              </div>
+              <h2 className='text-xl font-semibold mb-4'>Multi-Language Progress</h2>
+              {selectedChildData.languageProgress.length > 0 ? (
+                <div className='space-y-3'>
+                  {selectedChildData.languageProgress.map((langProg) => (
+                    <div key={langProg.language} className='border border-border rounded-lg p-3'>
+                      <div className='flex justify-between items-center mb-2'>
+                        <span className='font-medium capitalize'>{langProg.language}</span>
+                        <span className='text-sm text-white/60'>
+                          {langProg.lettersLearned}/{langProg.totalLetters} letters
+                        </span>
+                      </div>
+                      <div className='flex justify-between text-sm mb-1'>
+                        <span>Avg. Accuracy:</span>
+                        <span>{langProg.averageAccuracy}%</span>
+                      </div>
+                      <div className='flex justify-between text-sm'>
+                        <span>Time Spent:</span>
+                        <span>{Math.floor(langProg.totalTime / 60)}h {langProg.totalTime % 60}m</span>
+                      </div>
+                      <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-2'>
+                        <div
+                          className='h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500'
+                          style={{ width: `${(langProg.lettersLearned / langProg.totalLetters) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className='text-center py-6 text-white/60'>
+                  <p>No progress recorded in other languages yet.</p>
+                  <p className='text-sm mt-2'>Try switching languages in the game to start learning!</p>
+                </div>
+              )}
 
               <div className='mt-6 pt-6 border-t border-border'>
-                <h3 className='font-medium mb-2'>Current Settings</h3>
-                <div className='space-y-2 text-sm text-white/60'>
-                  <div className='flex justify-between'>
-                    <span>Language:</span>
-                    <span className='text-white capitalize'>
-                      {selectedChildData.preferredLanguage}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>Difficulty:</span>
-                    <span className='text-white capitalize'>
-                      {settings.difficulty}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>Time Limit:</span>
-                    <span className='text-white'>
-                      {settings.timeLimit > 0
-                        ? `${settings.timeLimit} min`
-                        : 'No limit'}
-                    </span>
+                <h3 className='font-medium mb-2'>Quick Actions</h3>
+                <div className='space-y-3'>
+                  <Link
+                    to='/games'
+                    className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
+                  >
+                    🎮 Explore All Games
+                  </Link>
+                  <Link
+                    to='/settings'
+                    className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
+                  >
+                    ⚙️ Manage Settings
+                  </Link>
+                  <button
+                    onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
+                    className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
+                  >
+                    📊 View Weekly Report
+                  </button>
+                </div>
+
+                <div className='mt-6'>
+                  <h3 className='font-medium mb-2'>Current Settings</h3>
+                  <div className='space-y-2 text-sm text-white/60'>
+                    <div className='flex justify-between'>
+                      <span>Primary Language:</span>
+                      <span className='text-white capitalize'>
+                        {selectedChildData.preferredLanguage}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span>Difficulty:</span>
+                      <span className='text-white capitalize'>
+                        {settings.difficulty}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span>Time Limit:</span>
+                      <span className='text-white'>
+                        {settings.timeLimit > 0
+                          ? `${settings.timeLimit} min`
+                          : 'No limit'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -492,13 +592,14 @@ export function Dashboard() {
                   <label className='block text-sm font-medium text-white/80 mb-2'>
                     Child's Name *
                   </label>
-                  <input
-                    type='text'
-                    value={newChildName}
-                    onChange={(e) => setNewChildName(e.target.value)}
-                    placeholder='Enter name'
-                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                    autoFocus
+          <input
+            type='text'
+            value={newChildName}
+            onChange={(e) => setNewChildName(e.target.value)}
+            placeholder="Child's name"
+            autoComplete="name"
+            className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+             />
                   />
                 </div>
 
@@ -506,17 +607,18 @@ export function Dashboard() {
                   <label className='block text-sm font-medium text-white/80 mb-2'>
                     Age (years)
                   </label>
-                  <input
-                    type='number'
-                    min={2}
-                    max={12}
-                    step={0.1}
-                    value={newChildAge}
-                    onChange={(e) =>
-                      setNewChildAge(parseFloat(e.target.value) || 5)
-                    }
-                    placeholder='Enter age (2-12, can use decimals like 2.5)'
-                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+          <input
+            type='number'
+            min={2}
+            max={12}
+            step={0.1}
+            value={newChildAge}
+            onChange={(e) =>
+              setNewChildAge(parseFloat(e.target.value) || 5)
+            }
+            placeholder='Age (2-12 years)'
+            autoComplete="bday"
+            className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                   />
                   <p className='text-xs text-white/50 mt-1'>Use decimals for partial years (e.g., 2.5 for 2 years 6 months)</p>
                 </div>
@@ -525,17 +627,17 @@ export function Dashboard() {
                   <label className='block text-sm font-medium text-white/80 mb-2'>
                     Preferred Language
                   </label>
-                  <select
-                    value={newChildLanguage}
-                    onChange={(e) => setNewChildLanguage(e.target.value)}
-                    aria-label='Preferred Language'
-                    className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  >
-                    <option value='en'>English</option>
-                    <option value='hi'>Hindi (हिन्दी)</option>
-                    <option value='kn'>Kannada (ಕನ್ನಡ)</option>
-                    <option value='te'>Telugu (తెలుగు)</option>
-                    <option value='ta'>Tamil (தமிழ்)</option>
+                   <select
+                     value={newChildLanguage}
+                     onChange={(e) => setNewChildLanguage(e.target.value)}
+                     aria-label='Choose language'
+                     className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                   >
+                     <option value='en'>🇬🇳 English</option>
+                     <option value='hi'>🇮🇳 Hindi</option>
+                     <option value='kn'>🇮🇳 Kannada</option>
+                     <option value='te'>🇮🇳 Telugu</option>
+                     <option value='ta'>🇮🇳 Tamil</option>
                   </select>
                 </div>
               </div>
