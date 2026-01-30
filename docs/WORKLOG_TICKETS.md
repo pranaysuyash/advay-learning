@@ -15,6 +15,114 @@
 
 ---
 
+### TCK-20260130-027 :: Brand Guidelines Competitive Analysis
+Type: DOCUMENTATION
+Owner: AI Assistant
+Created: 2026-01-30 14:00 UTC
+Status: **DONE**
+Priority: P1
+
+Description:
+Created comprehensive brand guidelines analysis comparing current state vs. AI recommendations vs. competitor approaches vs. market best practices.
+
+Scope contract:
+- In-scope:
+  - Current state analysis of existing brand documentation
+  - Competitor deep dive (Khan Academy Kids, ABCmouse, HOMER, Duolingo ABC, Osmo)
+  - Market trends and EdTech design patterns 2025-2026
+  - Gap analysis across brand identity, UX, and competitive differentiation
+  - Recommendations with implementation roadmap
+  - Brand identity framework (mission, vision, values, pillars)
+- Out-of-scope: Implementation of brand changes
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `docs/BRAND_GUIDELINES_ANALYSIS.md`
+- Branch/PR: main
+
+Acceptance Criteria:
+- [x] Competitor comparison matrix
+- [x] Gap analysis documented
+- [x] Recommendations organized by priority
+- [x] 12-week implementation roadmap
+- [x] Brand pillars defined (Magic, Movement, Mastery, Meaning)
+
+Execution log:
+- [2026-01-30 14:00 UTC] Created BRAND_GUIDELINES_ANALYSIS.md
+  - Analyzed 5 major competitors
+  - Documented market trends
+  - Created gap analysis
+  - Proposed tagline: "Wave Hello to Learning"
+  - Defined brand pillars and positioning
+
+Status updates:
+- [2026-01-30 14:15 UTC] **DONE** — Brand guidelines analysis complete | Evidence: `docs/BRAND_GUIDELINES_ANALYSIS.md`
+
+---
+
+### TCK-20260130-026 :: Brand Voice & Mascot Comprehensive Guide
+Type: DOCUMENTATION
+Owner: AI Assistant
+Created: 2026-01-30 13:30 UTC
+Status: **DONE**
+Priority: P1
+
+Description:
+Created comprehensive brand voice, mascot personality, and character specification document for Pip and the Advay Vision Learning brand.
+
+Scope contract:
+- In-scope:
+  - Pip's complete backstory and world-building
+  - Personality deep dive (traits, behaviors, emotional range)
+  - Voice and speech patterns with examples
+  - Expression library (16 expressions documented)
+  - Animation principles and timing guidelines
+  - Sound identity (voice, SFX, ambient, music)
+  - Interaction patterns
+  - Supporting characters (zone creatures)
+  - Parent-facing voice guidelines
+  - Localization guidelines (5 languages)
+  - Technical implementation reference
+- Out-of-scope:
+  - Actual asset creation
+  - Code implementation
+- Behavior change allowed: N/A (documentation)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `docs/BRAND_VOICE_MASCOT_GUIDE.md` (created)
+- Branch/PR: main (uncommitted)
+- Range: N/A
+
+Acceptance Criteria:
+- [x] Pip's personality fully defined with traits and behaviors
+- [x] Expression library with 16 expressions
+- [x] Voice/speech patterns with example phrases
+- [x] Animation principles documented
+- [x] Sound identity guidelines
+- [x] Supporting character concepts (10 zone creatures)
+- [x] Localization guidelines for 5 languages
+- [x] Implementation reference with TypeScript interface
+
+Execution log:
+- [2026-01-30 13:30 UTC] Reviewed existing Mascot.tsx implementation
+- [2026-01-30 13:45 UTC] Created BRAND_VOICE_MASCOT_GUIDE.md (~1500 lines)
+  - 12 major sections + 3 appendices
+  - Pip's origin story and 5-zone world
+  - Complete personality framework
+  - 16 expressions with descriptions
+  - Sound/music specifications
+  - 10 zone creature characters
+  - Implementation specifications
+
+Status updates:
+- [2026-01-30 13:45 UTC] **DONE** — Comprehensive mascot guide complete | Evidence:
+  - **File created**: `docs/BRAND_VOICE_MASCOT_GUIDE.md`
+  - **Content**: 12 sections covering personality, voice, expressions, animation, sound, interaction, supporting cast, localization, implementation
+
+---
+
 ### TCK-20260130-025 :: FingerNumberShow count two hands (sum + reliability)
 Type: REMEDIATION
 Owner: AI Assistant
@@ -65,6 +173,55 @@ Execution log:
     ✓ built in 2.16s
     ```
   - **Interpretation**: Observed — changes compile and tests pass; UI now exposes hands + per-hand breakdown to confirm two-hand summing at runtime.
+
+### TCK-20260130-027 :: LetterHunt camera-first mechanic (pinch to select)
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 12:45 UTC
+Status: **DONE**
+Priority: P0
+
+Description:
+LetterHunt (“Find the letter”) should use camera hand tracking for the main mechanic (no mouse/tap required by default).
+
+Scope contract:
+- In-scope:
+  - Make the camera area the hero and overlay the 5 letter choices on top.
+  - Use index-finger cursor + pinch (thumb+index) to select the hovered tile.
+  - Keep an optional “Mouse fallback” toggle for debugging if tracking is unavailable.
+  - Add a small unit test for hit-testing logic.
+  - Verify frontend tests and production build.
+- Out-of-scope:
+  - New scoring rules, difficulty tuning, or new game modes
+  - Backend changes
+- Behavior change allowed: YES (input mechanic change)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/LetterHunt.tsx`
+  - `src/frontend/src/utils/hitTest.ts`
+  - `src/frontend/src/utils/__tests__/hitTest.test.ts`
+
+Acceptance Criteria:
+- [x] Default gameplay does not require mouse/tap to select letters.
+- [x] Pinch selection chooses the hovered option tile.
+- [x] `npm test` passes.
+- [x] `npm run build` passes.
+
+Evidence:
+- **Command**: `cd src/frontend && npm test`
+- **Output**:
+  ```
+   Test Files  14 passed (14)
+        Tests  84 passed (84)
+  ```
+- **Command**: `cd src/frontend && npm run build`
+- **Output**:
+  ```
+  ✓ built in 2.62s
+  ```
+- **Interpretation**: Observed — LetterHunt uses camera-first pinch selection, helper is unit-tested, and build/tests succeed.
 
 ### TCK-20260130-025 :: Brand Guidelines Analysis & Competitive Research
 Type: RESEARCH
