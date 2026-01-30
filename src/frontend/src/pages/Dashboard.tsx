@@ -316,10 +316,12 @@ export function Dashboard() {
         {/* Child Selector */}
         {children.length > 0 && (
           <div className='mb-6'>
-            <label className='block text-sm font-medium text-text-secondary mb-2'>
-              Select Child
-            </label>
-            <div className='flex gap-2 flex-wrap'>
+            <div className="flex items-center justify-between mb-2">
+              <label className='text-sm font-medium text-text-secondary'>
+                Select Child
+              </label>
+            </div>
+            <div className='flex gap-2 flex-wrap items-center'>
               {children.map((child) => (
                 <div key={child.id} className="flex items-center gap-1">
                   <button
@@ -344,6 +346,18 @@ export function Dashboard() {
                   </button>
                 </div>
               ))}
+              {/* Add Child Button - inline with child selectors */}
+              <button
+                type="button"
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1 px-3 py-2 bg-bg-tertiary border border-dashed border-border-strong rounded-lg hover:bg-white hover:border-pip-orange hover:text-pip-orange transition text-sm text-text-muted"
+                title="Add another child"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Child
+              </button>
             </div>
           </div>
         )}
@@ -407,19 +421,6 @@ export function Dashboard() {
               className='px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust shadow-soft hover:shadow-soft-lg transition'
             >
               Add Child Profile
-            </button>
-          </div>
-        )}
-
-        {/* Add Child Button (when children exist) */}
-        {children.length > 0 && (
-          <div className='mb-8 text-center'>
-            <button
-              type="button"
-              onClick={() => setShowAddModal(true)}
-              className='px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition text-sm text-text-secondary hover:text-text-primary shadow-soft'
-            >
-              + Add Another Child
             </button>
           </div>
         )}

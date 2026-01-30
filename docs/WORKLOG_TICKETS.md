@@ -16654,6 +16654,11 @@ The language selection system HAS been implemented, but has critical UX gaps:
 
 **Commit:** eb16899 - fix(TCK-20260129-301): Enable profile language editing
 
+**Post-Implementation UI Improvement:**
+- 23:15 UTC: Moved "Add Child" button to inline with child selector buttons
+- Removed redundant button below stats section
+- Better UX - add button now contextually placed with child list
+
 ---
 
 ### TCK-20260129-302 :: Add Visual Language Indicator in Game
