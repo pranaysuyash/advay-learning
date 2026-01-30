@@ -723,6 +723,121 @@ Execution log:
 
 ## OPEN Queue (Ready to Pick Up)
 
+### Manual UX Audit: Finger Number Show Game Issues
+
+### TCK-20260130-014 :: Manual UX Audit - Finger Number Show
+
+Type: AUDIT / UX
+Owner: AI Assistant
+Created: 2026-01-30 16:00 IST
+Status: **OPEN** 🔵
+Priority: P2 (Medium)
+
+Description:
+Manual UX audit identifying usability issues in Finger Number Show game based on user testing.
+
+Scope contract:
+
+- In-scope:
+  - Document Start Game button visibility issue
+  - Document number completion feedback problem
+  - Document camera/canvas layout issue (positioning)
+  - Document question placement ambiguity
+  - Provide recommendations for each issue
+- Out-of-scope:
+  - Implementing fixes (separate remediation tickets)
+  - Testing other games
+
+Targets:
+
+- Repo: learning_for_kids
+- File: src/frontend/src/games/FingerNumberShow.tsx
+- Branch: main
+
+User-Reported Issues:
+
+1. **Start Button Not Visible** (Line 345-352)
+   - User had to use console to highlight and click button
+   - Button exists but may be hidden or obscured
+   - No visual affordance that it's interactive
+
+2. **No Progress/Waiting Feedback** (Line 69-81, 268-281)
+   - "You're showing [number]" appears when number matched
+   - User correctly boxed number green but game didn't proceed
+   - No indication of waiting state or expected next action
+   - Confusing - is it waiting for timer? expecting more input?
+
+3. **Camera/Canvas Below Numbers** (Lines 356-367, 268-280)
+   - Camera and canvas area positioned BELOW number displays
+   - Numbers shown first, then camera area below
+   - User suggests camera should take up CENTER screen
+   - Current layout: numbers top → camera bottom → questions bottom
+   - Screen space not optimized vertically
+
+4. **Question Placement Ambiguity** (Not in current code)
+   - User asks: "questions should be on same side or on right?"
+   - No clear pattern in current code
+   - Should questions be grouped with target/current count?
+   - Or separate screen?
+
+Evidence:
+
+- **File Analysis**: src/frontend/src/games/FingerNumberShow.tsx (412 lines)
+- **Line 345-352**: Start Game button in "Ready to Count?" state
+- **Line 69-81**: Target number display shows "Show me [number]"
+- **Line 268-281**: Current count display shows "You're showing [number]"
+- **Line 356-367**: Webcam and canvas in playing state
+- **Layout Structure**:
+  - Difficulty selection (lines 243-265): TOP
+  - Target number display (lines 268-280): TOP
+  - Current count display (lines 282-292): TOP
+  - Game area (camera + canvas) (lines 356-367): BOTTOM
+  - Questions text (lines 403-404): BOTTOM
+
+Recommendations:
+
+1. **Start Button Visibility** (P2 - Medium):
+   - Make Start button more prominent (larger, higher contrast)
+   - Add hover effect or animation to draw attention
+   - Consider adding pulse effect to "Ready to Count?" state
+   - Move button to more visible location if obscured by other elements
+
+2. **Number Completion Feedback** (P2 - Medium):
+   - Add visual transition when number is matched
+   - Add waiting indicator if game requires action (e.g., timer, "Show next number")
+   - Make target number animate or flash when waiting for more fingers
+   - Clear visual distinction between "showing" and "completed" states
+
+3. **Camera/Canvas Layout** (P1 - High):
+   - Move camera/canvas to center screen or split layout
+   - Consider 2-column layout: LEFT column (target + current count), RIGHT column (camera + canvas + questions)
+   - OR: TOP row (target + current), BOTTOM row (camera + canvas) spanning full width
+   - OR: Use responsive grid that repositions based on screen size
+   - Ensure camera feed is primary focus when playing
+
+4. **Question Placement** (P3 - Low):
+   - Group questions with game controls (Stop, Back buttons)
+   - OR place questions in a dedicated sidebar/panel
+   - Ensure consistent pattern across game types
+   - Test both options with actual users to determine preference
+
+Next actions:
+
+- Create remediation ticket for Start Game button visibility
+- Create remediation ticket for number completion feedback
+- Create remediation ticket for camera/canvas layout improvement
+- Decide on question placement pattern
+- Test changes with actual users (children 4-10 years old)
+
+Risks/notes:
+
+- Manual audit based on user report - not reproduced with actual users
+- May need user testing to validate findings
+- Layout changes may require significant restructuring of component
+- Should prioritize P1 (layout) over P2/P3 items
+
+---
+
 ### How to Pick Up Work
 
 1. Choose a ticket from below

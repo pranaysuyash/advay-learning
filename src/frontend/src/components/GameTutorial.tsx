@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X } from 'lucide-react';
+import { UIIcon } from './ui/Icon';
 
 interface GameTutorialProps {
   onComplete: () => void;
@@ -14,17 +14,17 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
     {
       title: 'Show Your Hands',
       description: 'Hold your hands up so the camera can see them',
-      icon: <Hand className="w-12 h-12" />
+      icon: <UIIcon name="hand" size={48} className="w-12 h-12" />
     },
     {
       title: 'Pinch Your Fingers',
       description: 'Pinch your thumb and index finger together',
-      icon: <HandHelping className="w-12 h-12" />
+      icon: <UIIcon name="hand" size={48} className="w-12 h-12" />
     },
     {
       title: 'Trace the Letter',
       description: 'Use your finger to trace the letter on the screen',
-      icon: <PenTool className="w-12 h-12" />
+      icon: <UIIcon name="pencil" size={48} className="w-12 h-12" />
     }
   ];
 

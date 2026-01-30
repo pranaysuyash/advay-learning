@@ -252,13 +252,19 @@ export function Dashboard() {
                 transition={{ delay: i * 0.1 }}
               >
                 <Card>
-                  <div className='mb-2'>
-                    <UIIcon name={stat.iconName} size={32} className="text-white/80" />
+                  <div className='flex items-center gap-3 mb-2'>
+                    <div className='w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center'>
+                      <UIIcon name={stat.iconName} size={20} className="text-white/80" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <p className='text-sm text-white/60'>{stat.label}</p>
+                    </div>
                   </div>
-                  <div className='text-3xl font-bold'>{stat.value}</div>
-                  <div className='text-white/60 mb-3'>{stat.label}</div>
+
+                  <div className='text-3xl font-bold mt-2'>{stat.value}</div>
+
                   {/* Progress bar */}
-                  <div className='h-2 bg-white/10 rounded-full overflow-hidden'>
+                  <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-3'>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${stat.percent}%` }}

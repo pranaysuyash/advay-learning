@@ -53,6 +53,39 @@ export function Game() {
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
+  // Model & drawing state (was missing after recent edits)
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isPinching, setIsPinching] = useState(false);
+
+  // Basic game controls and stubs
+  const startGame = () => {
+    setIsModelLoading(false);
+    setIsPlaying(true);
+  };
+
+  const stopGame = () => {
+    setIsPlaying(false);
+    setIsDrawing(false);
+    setIsPinching(false);
+  };
+
+  const clearDrawing = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  const checkProgress = async () => {
+    // placeholder for progress checking logic
+  };
+
+  const nextLetter = () => {
+    setCurrentLetterIndex((i) => Math.min(i + 1, LETTERS.length - 1));
+  };
+
   const goToHome = () => {
     stopGame();
     navigate('/dashboard');
