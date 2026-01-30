@@ -11,7 +11,7 @@ import {
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 import { Icon } from '../components/Icon';
-import { UIIcon, Card } from '../components/ui';
+import { UIIcon } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 interface LanguageProgress {
@@ -45,10 +45,10 @@ interface LanguageProgress {
 }
 
 export function Dashboard() {
-  const { user } = useAuthStore();
+  useAuthStore();
   const { profiles, fetchProfiles, createProfile, updateProfile } = useProfileStore();
   const toast = useToast();
-  const settings = useSettingsStore();
+  useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -286,115 +286,102 @@ export function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {/* Header */}
-        <div className='mb-8 flex justify-between items-start'>
+        {/* Header - Compact with icon actions */}
+        <div className='mb-6 flex justify-between items-center'>
           <div>
-            <h1 className='text-2xl md:text-3xl font-bold'>Parent Dashboard</h1>
-            <p className='text-base text-text-secondary mt-1'>
-              Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
+            <h1 className='text-2xl font-bold'>Dashboard</h1>
+            <p className='text-sm text-text-secondary mt-0.5'>
+              {children.length > 0 
+                ? `${children.length} child${children.length > 1 ? 'ren' : ''}`
+                : 'Welcome! Add a child to get started'}
             </p>
           </div>
-          <button
-            onClick={handleExport}
-            disabled={exporting || children.length === 0}
-            className='px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition disabled:opacity-50 text-text-secondary hover:text-text-primary shadow-soft flex items-center gap-2'
-          >
-            {exporting ? (
-                  <>
-                    <UIIcon name="hourglass" size={18} className="inline mr-2" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <UIIcon name="download" size={18} className="inline mr-2" />
-                    Export Data
-                  </>
-                )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              disabled={exporting || children.length === 0}
+              className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30"
+              title="Export progress data"
+            >
+              {exporting ? (
+                <UIIcon name="hourglass" size={20} />
+              ) : (
+                <UIIcon name="download" size={20} />
+              )}
+            </button>
+            <Link
+              to="/settings"
+              className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition"
+              title="Settings"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
-        {/* Child Selector */}
+        {/* Child Selector - Inline with actions */}
         {children.length > 0 && (
-          <div className='mb-6'>
-            <div className="flex items-center justify-between mb-2">
-              <label className='text-sm font-medium text-text-secondary'>
-                Select Child
-              </label>
-            </div>
-            <div className='flex gap-2 flex-wrap items-center'>
-              {children.map((child) => (
-                <div key={child.id} className="flex items-center gap-1">
-                  <button
-                    onClick={() => setSelectedChild(child.id)}
-                    className={`px-4 py-2 rounded-lg transition ${
-                      selectedChildData?.id === child.id
-                        ? 'bg-pip-orange text-white shadow-soft'
-                        : 'bg-white border border-border hover:bg-bg-tertiary shadow-soft text-text-primary'
-                    }`}
-                  >
-                    {child.name} ({child.age} yrs)
-                  </button>
-                  <button
-                    onClick={() => handleOpenEditModal(child)}
-                    className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition"
-                    aria-label={`Edit ${child.name}'s profile`}
-                    title="Edit profile"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-              {/* Add Child Button - inline with child selectors */}
-              <button
-                type="button"
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1 px-3 py-2 bg-bg-tertiary border border-dashed border-border-strong rounded-lg hover:bg-white hover:border-pip-orange hover:text-pip-orange transition text-sm text-text-muted"
-                title="Add another child"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add Child
-              </button>
-            </div>
+          <div className='mb-4 flex items-center gap-2 flex-wrap'>
+            <span className='text-sm text-text-secondary mr-1'>Child:</span>
+            {children.map((child) => (
+              <div key={child.id} className="flex items-center">
+                <button
+                  onClick={() => setSelectedChild(child.id)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
+                    selectedChildData?.id === child.id
+                      ? 'bg-pip-orange text-white shadow-soft'
+                      : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
+                  }`}
+                >
+                  <span className="font-medium">{child.name}</span>
+                  <span className="opacity-70 text-xs">({child.age})</span>
+                </button>
+                <button
+                  onClick={() => handleOpenEditModal(child)}
+                  className="p-1.5 ml-0.5 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-md transition"
+                  aria-label={`Edit ${child.name}'s profile`}
+                  title="Edit"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1 px-2 py-1.5 text-sm text-text-muted hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30"
+              title="Add child"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add
+            </button>
           </div>
         )}
 
-        {/* Stats Grid */}
+        {/* Compact Stats Bar */}
         {selectedChildData && (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-          {stats.map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <Card>
-                    <div className='flex items-center gap-3 mb-2'>
-                      <div className='w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center'>
-                        <UIIcon name={stat.iconName} size={20} className="text-text-secondary" />
-                      </div>
-                      <div>
-                        <p className='text-base text-text-secondary'>{stat.label}</p>
-                      </div>
-                    </div>
-
-                    <div className='text-3xl font-bold mt-2 text-text-primary'>{stat.value}</div>
-
-                  {/* Progress bar */}
-                  <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden mt-3'>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${stat.percent}%` }}
-                      transition={{ duration: 0.5, delay: i * 0.1 + 0.3 }}
+          <div className='mb-6 flex flex-wrap items-center gap-4 py-3 px-4 bg-white border border-border rounded-xl shadow-soft'>
+            {stats.map((stat, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <UIIcon name={stat.iconName} size={16} className="text-text-muted" />
+                <span className="text-sm text-text-secondary">{stat.label}:</span>
+                <span className="text-sm font-semibold text-text-primary">{stat.value}</span>
+                {stat.percent > 0 && (
+                  <div className='w-16 h-1.5 bg-bg-tertiary rounded-full overflow-hidden'>
+                    <div
                       className='h-full bg-pip-orange rounded-full'
+                      style={{ width: `${stat.percent}%` }}
                     />
                   </div>
-                </Card>
-              </motion.div>
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -557,63 +544,29 @@ export function Dashboard() {
                 </div>
               )}
 
+              {/* Play Games Button */}
               <div className='mt-6 pt-6 border-t border-border'>
-                <h3 className='font-medium mb-2'>Quick Actions</h3>
-                <div className='space-y-3'>
                 <Link
                   to='/games'
-                  className='block w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center'
+                  className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition text-center'
                 >
-                  🎮 Explore All Games
+                  <UIIcon name="hand" size={20} />
+                  Play Games
                 </Link>
-                <Link
-                  to='/settings'
-                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                >
-                  ⚙️ Manage Settings
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => toast.showToast('Weekly report feature coming soon!', 'info')}
-                  className='block w-full px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-center'
-                >
-                  📊 View Weekly Report
-                </button>
-                </div>
-
-                <div className='mt-6'>
-                  <h3 className='font-medium mb-2'>Current Settings</h3>
-                  <div className='space-y-2 text-sm text-text-secondary'>
-                    <div className='flex justify-between'>
-                      <span>Primary Language:</span>
-                      <span className='text-text-primary capitalize'>
-                        {selectedChildData.preferredLanguage}
-                      </span>
-                    </div>
-                    <div className='flex justify-between'>
-                      <span>Difficulty:</span>
-                      <span className='text-text-primary capitalize'>
-                        {settings.difficulty}
-                      </span>
-                    </div>
-                    <div className='flex justify-between'>
-                      <span>Time Limit:</span>
-                      <span className='text-text-primary'>
-                        {settings.timeLimit > 0
-                          ? `${settings.timeLimit} min`
-                          : 'No limit'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Letter Journey */}
+        {/* Letter Journey - PROMINENT at top */}
         {selectedChildData && (
-          <div className='mb-8'>
+          <div className='mb-6'>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className='text-lg font-semibold'>Letter Journey</h2>
+              <span className="text-xs text-text-muted capitalize">
+                {selectedChildData.preferredLanguage}
+              </span>
+            </div>
             <LetterJourney language={selectedChildData.preferredLanguage} />
           </div>
         )}
