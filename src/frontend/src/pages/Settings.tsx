@@ -317,6 +317,30 @@ export function Settings() {
                     )}
                   </div>
 
+                  {/* Hand Tracking Delegate */}
+                  <div>
+                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                      Hand Tracking Mode
+                    </label>
+                    <select
+                      value={settings.handTrackingDelegate}
+                      onChange={(e) =>
+                        settings.updateSettings({
+                          handTrackingDelegate: e.target.value as 'GPU' | 'CPU',
+                        })
+                      }
+                      aria-label='Hand tracking processing mode'
+                      className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                    >
+                      <option value='GPU'>GPU (Faster, requires good graphics)</option>
+                      <option value='CPU'>CPU (Compatible with all devices)</option>
+                    </select>
+                    <p className='text-sm text-white/50 mt-2'>
+                      GPU mode is faster but may not work on all devices. 
+                      The app will automatically fall back to CPU if needed.
+                    </p>
+                  </div>
+
                   {/* Privacy Note */}
                   <div className='text-sm text-white/50 bg-white/10 rounded-lg p-3'>
                     <strong className='text-white/70'>Privacy:</strong> Camera

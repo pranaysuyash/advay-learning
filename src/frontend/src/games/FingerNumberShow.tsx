@@ -45,7 +45,33 @@ const DIFFICULTY_LEVELS: DifficultyLevel[] = [
 ];
 
 export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
-  // Fingers (index/middle/ring/pinky): tip is "up" relative to PIP
+  const dist = (a: Point, b: Point) => {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const wrist = landmarks[0];
+  const indexMcp = landmarks[5];
+  const middleMcp = landmarks[9];
+  const ringMcp = landmarks[13];
+  const pinkyMcp = landmarks[17];
+
+  if (!wrist) return 0;
+
+  // Palm center is a stable reference even when the hand rotates (helps thumb).
+  const palmPoints = [wrist, indexMcp, middleMcp, ringMcp, pinkyMcp].filter(Boolean) as Point[];
+  const palmCenter =
+    palmPoints.length > 0
+      ? palmPoints.reduce(
+          (acc, p) => ({ x: acc.x + p.x / palmPoints.length, y: acc.y + p.y / palmPoints.length }),
+          { x: 0, y: 0 },
+        )
+      : wrist;
+
+  // Fingers (index/middle/ring/pinky):
+  // Primary heuristic: tip is "up" relative to PIP (works for upright hands).
+  // Fallback heuristic: tip is further from wrist than PIP (works for rotated/sideways hands).
   const fingerPairs = [
     { tip: 8, pip: 6 },
     { tip: 12, pip: 10 },
@@ -57,21 +83,23 @@ export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
   for (const pair of fingerPairs) {
     const tip = landmarks[pair.tip];
     const pip = landmarks[pair.pip];
-    if (tip && pip && tip.y < pip.y) count++;
+    if (!tip || !pip) continue;
+    const up = tip.y < pip.y;
+    const further = dist(tip, wrist) > dist(pip, wrist) + 0.02;
+    if (up || further) count++;
   }
 
-  // Thumb: use relative X direction based on hand orientation.
-  // We infer handedness from index MCP (5) vs pinky MCP (17) X positions.
-  // This stays consistent even when the video is mirrored.
+  // Thumb:
+  // Use a distance-based heuristic (orientation-invariant) instead of relying on X direction.
+  // Thumb is extended when thumb tip is notably further from palm center than thumb IP.
   const thumbTip = landmarks[4];
   const thumbIp = landmarks[3];
-  const indexMcp = landmarks[5];
-  const pinkyMcp = landmarks[17];
-
-  if (thumbTip && thumbIp && indexMcp && pinkyMcp) {
-    const isRightHand = indexMcp.x < pinkyMcp.x;
-    const thumbExtended = isRightHand ? thumbTip.x < thumbIp.x : thumbTip.x > thumbIp.x;
-    if (thumbExtended) count++;
+  if (thumbTip && thumbIp) {
+    const thumbFurther = dist(thumbTip, palmCenter) > dist(thumbIp, palmCenter) + 0.02;
+    // Extra guard to reduce false positives when hand is partially occluded.
+    const thumbFurtherFromIndex =
+      indexMcp ? dist(thumbTip, indexMcp) > dist(thumbIp, indexMcp) + 0.01 : true;
+    if (thumbFurther && thumbFurtherFromIndex) count++;
   }
 
   return count;
@@ -95,6 +123,14 @@ export function FingerNumberShow() {
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
   const lastSpokenTargetRef = useRef<number | null>(null);
   const lastSpokenAtRef = useRef<number>(0);
+  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [promptStage, setPromptStage] = useState<'center' | 'side'>('center');
+  const successLockRef = useRef<boolean>(false);
+  const stableMatchRef = useRef<{ startAt: number | null; target: number | null; count: number | null }>({
+    startAt: null,
+    target: null,
+    count: null,
+  });
 
   const lastVideoTimeRef = useRef<number>(-1);
   const frameSkipRef = useRef<number>(0);
@@ -156,6 +192,11 @@ export function FingerNumberShow() {
         ? 'Make a fist for zero.'
         : `Show me ${NUMBER_NAMES[nextTarget]} fingers.`;
     setFeedback(prompt);
+    setPromptStage('center');
+    if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
+    promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
+    successLockRef.current = false;
+    stableMatchRef.current = { startAt: null, target: null, count: null };
 
     // TTS: speak prompt on target change (debounced to avoid spam).
     if (ttsEnabled) {
@@ -300,19 +341,33 @@ export function FingerNumberShow() {
     // For target 0: require a detected hand (closed fist) to avoid “no hands = success”.
     const canSucceedOnZero = targetNumber === 0 ? detectedHands > 0 : true;
 
-    if (totalFingers === targetNumber && !showCelebration && canSucceedOnZero) {
-      setShowCelebration(true);
-      const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
-      const points = Math.round(10 * level.rewardMultiplier);
-      setScore(prev => prev + points);
-      setStreak(prev => prev + 1);
-      const names = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
-      setFeedback(`Great! ${names[totalFingers]} fingers! 🎉 +${points} points`);
+    const eligibleMatch = totalFingers === targetNumber && canSucceedOnZero;
+    const nowMs = Date.now();
+    if (!eligibleMatch) {
+      stableMatchRef.current = { startAt: null, target: null, count: null };
+    } else {
+      const stable = stableMatchRef.current;
+      const same =
+        stable.target === targetNumber &&
+        stable.count === totalFingers &&
+        stable.startAt != null;
+      if (!same) {
+        stableMatchRef.current = { startAt: nowMs, target: targetNumber, count: totalFingers };
+      } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
+        // Lock immediately to avoid multi-frame double scoring.
+        successLockRef.current = true;
+        setShowCelebration(true);
+        const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
+        const points = Math.round(10 * level.rewardMultiplier);
+        setScore((prev) => prev + points);
+        setStreak((prev) => prev + 1);
+        setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 
-      setTimeout(() => {
-        setShowCelebration(false);
-        setNextTarget(difficulty);
-      }, 2000);
+        setTimeout(() => {
+          setShowCelebration(false);
+          setNextTarget(difficulty);
+        }, 1800);
+      }
     }
 
     requestAnimationFrame(detectAndDraw);
@@ -323,7 +378,10 @@ export function FingerNumberShow() {
       requestAnimationFrame(detectAndDraw);
     }
     return () => {
-      // Cleanup
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+        promptTimeoutRef.current = null;
+      }
     };
   }, [isPlaying, detectAndDraw]);
 
@@ -338,12 +396,18 @@ export function FingerNumberShow() {
   const stopGame = () => {
     setIsPlaying(false);
     setFeedback('');
+    if (promptTimeoutRef.current) {
+      clearTimeout(promptTimeoutRef.current);
+      promptTimeoutRef.current = null;
+    }
   };
 
   const isDetectedMatch =
     targetNumber === 0
       ? currentCount === 0 && handsDetected > 0
       : currentCount === targetNumber;
+  const isPromptFeedback =
+    feedback.startsWith('Show me ') || feedback.startsWith('Make a fist ');
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -393,7 +457,7 @@ export function FingerNumberShow() {
 
         {/* Feedback */}
         <AnimatePresence>
-          {feedback && (
+          {feedback && (!isPlaying || !isPromptFeedback) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -441,7 +505,7 @@ export function FingerNumberShow() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-soft-lg border border-border">
+	              <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-soft-lg border border-border">
                 <Webcam
                   ref={webcamRef}
                   className="absolute inset-0 w-full h-full object-cover"
@@ -453,44 +517,38 @@ export function FingerNumberShow() {
                   className="absolute inset-0 w-full h-full"
                 />
 
-	                {/* Instruction overlay (camera-first hero) */}
-	                <div className="absolute inset-x-0 top-4 flex justify-center pointer-events-none">
-	                  <div className="bg-black/45 backdrop-blur px-5 py-3 rounded-2xl border border-white/20 text-white shadow-soft-lg">
-	                    {targetNumber === 0 ? (
-	                      <div className="flex items-center gap-3">
-	                        <span className="text-sm md:text-base opacity-85 font-semibold">
-	                          Make a fist:
-	                        </span>
-	                        <span className="text-5xl md:text-6xl font-black leading-none">
-	                          0
-	                        </span>
-	                        <span className="text-base md:text-lg font-semibold opacity-90">
-	                          ({NUMBER_NAMES[0]})
-	                        </span>
-	                      </div>
-	                    ) : (
-	                      <div className="flex items-center gap-3">
-	                        <span className="text-sm md:text-base opacity-85 font-semibold">
-	                          Show
-	                        </span>
-	                        <span className="text-5xl md:text-6xl font-black leading-none">
+	                {/* One-time big prompt (center) then moves to the side */}
+	                {promptStage === 'center' && (
+	                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+	                    <div className="bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg">
+	                      <div className="text-center">
+	                        <div className="text-sm md:text-base opacity-85 font-semibold mb-2">
+	                          {targetNumber === 0 ? 'Make a fist' : 'Show'}
+	                        </div>
+	                        <div className="text-7xl md:text-8xl font-black leading-none">
 	                          {targetNumber}
-	                        </span>
-	                        <span className="text-base md:text-lg font-semibold opacity-90">
-	                          fingers
-	                        </span>
-	                        <span className="text-sm md:text-base opacity-80">
-	                          ({NUMBER_NAMES[targetNumber]})
-	                        </span>
+	                        </div>
+	                        <div className="text-base md:text-lg opacity-90 font-semibold mt-2">
+	                          {NUMBER_NAMES[targetNumber]}
+	                        </div>
 	                      </div>
-	                    )}
+	                    </div>
 	                  </div>
-	                </div>
+	                )}
 
-                {/* Controls overlay */}
+	                {/* Controls overlay */}
 	                <div className="absolute top-4 left-4 flex gap-2">
-	                  <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
-	                    Target: {targetNumber}
+	                  <div className="bg-black/55 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+	                    {promptStage === 'side' ? (
+	                      <span>
+	                        Show <span className="font-extrabold">{targetNumber}</span>{' '}
+	                        <span className="opacity-80">({NUMBER_NAMES[targetNumber]})</span>
+	                      </span>
+	                    ) : (
+	                      <span>
+	                        Target: <span className="font-extrabold">{targetNumber}</span>
+	                      </span>
+	                    )}
 	                  </div>
 	                  <div
 	                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white ${
@@ -524,12 +582,12 @@ export function FingerNumberShow() {
 	                  <div className="bg-bg-tertiary/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border text-text-primary">
 	                    {(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}
 	                  </div>
-                  {streak > 2 && (
-                    <div className="bg-pip-orange/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-soft">
-                      🔥 {streak} streak!
-                    </div>
-                  )}
-                </div>
+	                  {streak > 2 && (
+	                    <div className="bg-pip-orange/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-soft">
+	                      🔥 {streak} streak!
+	                    </div>
+	                  )}
+	                </div>
 
                 <div className="absolute top-4 right-4 flex gap-2">
                   <button

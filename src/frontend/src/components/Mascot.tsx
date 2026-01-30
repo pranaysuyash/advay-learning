@@ -34,9 +34,32 @@ export function Mascot({
     const videoRef = useRef<HTMLVideoElement>(null);
     const celebrationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSpokenMessageRef = useRef<string | null>(null);
+    const lastSpokenAtRef = useRef<number>(0);
+    const speakDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const hasUserGestureRef = useRef<boolean>(false);
 
     // TTS integration
     const { speakInLanguage, isEnabled: ttsEnabled } = useTTS();
+
+    const getCleanMessage = useCallback((text: string) => {
+        // Remove emojis for cleaner TTS (keep the text human-readable)
+        return text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+    }, []);
+
+    // Track first user gesture (helps browsers that block autoplay TTS).
+    useEffect(() => {
+        const markGesture = () => {
+            hasUserGestureRef.current = true;
+            window.removeEventListener('pointerdown', markGesture);
+            window.removeEventListener('keydown', markGesture);
+        };
+        window.addEventListener('pointerdown', markGesture, { once: true });
+        window.addEventListener('keydown', markGesture, { once: true });
+        return () => {
+            window.removeEventListener('pointerdown', markGesture);
+            window.removeEventListener('keydown', markGesture);
+        };
+    }, []);
 
     // Schedule next random celebration - defined first to avoid circular dependency
     const scheduleNextCelebration = useCallback(() => {
@@ -117,20 +140,36 @@ export function Mascot({
 
     // TTS: Speak message when it changes
     useEffect(() => {
-        if (
-            speakMessage &&
-            ttsEnabled &&
-            message &&
-            message !== lastSpokenMessageRef.current
-        ) {
-            lastSpokenMessageRef.current = message;
-            // Remove emojis for cleaner TTS (keep the text human-readable)
-            const cleanMessage = message.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
-            if (cleanMessage) {
-                speakInLanguage(cleanMessage, language);
-            }
+        if (!speakMessage || !ttsEnabled || !message) return;
+        if (message === lastSpokenMessageRef.current) return;
+
+        // Debounce and rate-limit to avoid “auto changing” spam canceling speech.
+        if (speakDebounceRef.current) {
+            clearTimeout(speakDebounceRef.current);
         }
-    }, [message, speakMessage, ttsEnabled, speakInLanguage, language]);
+
+        const pendingMessage = message;
+        speakDebounceRef.current = setTimeout(() => {
+            // Prefer speaking after a user gesture; if none has occurred yet, we may still try,
+            // but user can always tap Pip to force speech in a gesture context.
+            const cleanMessage = getCleanMessage(pendingMessage);
+            if (!cleanMessage) return;
+
+            const now = Date.now();
+            if (now - lastSpokenAtRef.current < 1500) return;
+
+            lastSpokenAtRef.current = now;
+            lastSpokenMessageRef.current = pendingMessage;
+            speakInLanguage(cleanMessage, language);
+        }, 400);
+
+        return () => {
+            if (speakDebounceRef.current) {
+                clearTimeout(speakDebounceRef.current);
+                speakDebounceRef.current = null;
+            }
+        };
+    }, [getCleanMessage, language, message, speakInLanguage, speakMessage, ttsEnabled]);
 
     // Bounce animation trigger
     useEffect(() => {
@@ -196,6 +235,15 @@ export function Mascot({
                 animate={state}
                 className="relative cursor-pointer w-32 h-32"
                 onClick={() => {
+                    // If TTS is blocked by autoplay policies, this click provides the required user gesture.
+                    if (ttsEnabled && message) {
+                        const cleanMessage = getCleanMessage(message);
+                        if (cleanMessage) {
+                            lastSpokenAtRef.current = Date.now();
+                            lastSpokenMessageRef.current = message;
+                            speakInLanguage(cleanMessage, language);
+                        }
+                    }
                     if (enableVideo && isVideoLoaded) {
                         setShowVideo(true);
                         videoRef.current?.play().catch(() => setShowVideo(false));

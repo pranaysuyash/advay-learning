@@ -6,6 +6,7 @@ import {
   useProfileStore,
   useSettingsStore,
   useProgressStore,
+  type Profile,
 } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
@@ -45,7 +46,7 @@ interface LanguageProgress {
 
 export function Dashboard() {
   const { user } = useAuthStore();
-  const { profiles, fetchProfiles, createProfile } = useProfileStore();
+  const { profiles, fetchProfiles, createProfile, updateProfile } = useProfileStore();
   const toast = useToast();
   const settings = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
@@ -56,6 +57,13 @@ export function Dashboard() {
   const [newChildName, setNewChildName] = useState('');
   const [newChildAge, setNewChildAge] = useState(5);
   const [newChildLanguage, setNewChildLanguage] = useState('en');
+
+  // Edit Profile Modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editLanguage, setEditLanguage] = useState('en');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Helper function to get star rating from percentage
   const getStarRating = (accuracy: number): { stars: number; emoji: string } => {
@@ -98,6 +106,42 @@ export function Dashboard() {
       console.error('Failed to create profile:', error);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  // Handle opening the edit modal
+  const handleOpenEditModal = (child: ChildProfile) => {
+    // Find the actual Profile from profiles array
+    const profile = profiles.find(p => p.id === child.id);
+    if (!profile) return;
+    setEditingProfile(profile);
+    setEditName(profile.name);
+    setEditLanguage(profile.preferred_language || 'en');
+    setShowEditModal(true);
+  };
+
+  // Handle updating profile
+  const handleUpdateProfile = async () => {
+    if (!editingProfile || !editName.trim()) return;
+
+    setIsUpdating(true);
+    try {
+      await updateProfile(editingProfile.id, {
+        name: editName.trim(),
+        preferred_language: editLanguage,
+      });
+      toast.showToast(`Updated ${editName}'s profile!`, 'success');
+      setShowEditModal(false);
+      setEditingProfile(null);
+      setEditName('');
+      setEditLanguage('en');
+      // Refresh profiles to ensure consistency
+      await fetchProfiles();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast.showToast('Failed to update profile. Please try again.', 'error');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -277,17 +321,28 @@ export function Dashboard() {
             </label>
             <div className='flex gap-2 flex-wrap'>
               {children.map((child) => (
-                <button
-                  key={child.id}
-                  onClick={() => setSelectedChild(child.id)}
-                  className={`px-4 py-2 rounded-lg transition ${
-                    selectedChildData?.id === child.id
-                      ? 'bg-pip-orange text-white shadow-soft'
-                      : 'bg-white border border-border hover:bg-bg-tertiary shadow-soft text-text-primary'
-                  }`}
-                >
-                  {child.name} ({child.age} yrs)
-                </button>
+                <div key={child.id} className="flex items-center gap-1">
+                  <button
+                    onClick={() => setSelectedChild(child.id)}
+                    className={`px-4 py-2 rounded-lg transition ${
+                      selectedChildData?.id === child.id
+                        ? 'bg-pip-orange text-white shadow-soft'
+                        : 'bg-white border border-border hover:bg-bg-tertiary shadow-soft text-text-primary'
+                    }`}
+                  >
+                    {child.name} ({child.age} yrs)
+                  </button>
+                  <button
+                    onClick={() => handleOpenEditModal(child)}
+                    className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition"
+                    aria-label={`Edit ${child.name}'s profile`}
+                    title="Edit profile"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -654,6 +709,79 @@ export function Dashboard() {
                   className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {isCreating ? 'Creating...' : 'Add Child'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Edit Profile Modal */}
+        {showEditModal && editingProfile && (
+          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className='bg-bg-secondary rounded-2xl p-6 w-full max-w-md shadow-soft-lg border border-border'
+            >
+              <h3 className='text-xl font-semibold mb-1'>Edit Profile</h3>
+              <p className='text-text-secondary text-sm mb-6'>
+                Update {editingProfile.name}'s information
+              </p>
+
+              <div className='space-y-4'>
+                <div>
+                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                    Child's Name
+                  </label>
+                  <input
+                    type='text'
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Enter child's name"
+                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                    Preferred Language
+                  </label>
+                  <select
+                    value={editLanguage}
+                    onChange={(e) => setEditLanguage(e.target.value)}
+                    aria-label='Choose language'
+                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                  >
+                    <option value='en'>🇬🇧 English</option>
+                    <option value='hi'>🇮🇳 Hindi</option>
+                    <option value='kn'>🇮🇳 Kannada</option>
+                    <option value='te'>🇮🇳 Telugu</option>
+                    <option value='ta'>🇮🇳 Tamil</option>
+                  </select>
+                  <p className='text-text-muted text-xs mt-2'>
+                    This will change the alphabet language in games
+                  </p>
+                </div>
+              </div>
+
+              <div className='flex gap-3 mt-6'>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingProfile(null);
+                  }}
+                  className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition'
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpdateProfile}
+                  disabled={!editName.trim() || isUpdating}
+                  className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </motion.div>

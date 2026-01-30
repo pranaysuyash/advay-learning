@@ -83,29 +83,52 @@ export function AlphabetGame() {
       setFeedback(null);
       setAccuracy(0);
 
-      // Lazy-load hand tracking model on first start.
+      // Lazy-load hand tracking model on first start with fallback.
       if (!landmarkerRef.current) {
         setIsModelLoading(true);
-        try {
-          const vision = await FilesetResolver.forVisionTasks(
-            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
-          );
-          const landmarker = await HandLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-              delegate: 'GPU',
-            },
-            runningMode: 'VIDEO',
-            numHands: 2,
-          });
-          landmarkerRef.current = landmarker;
-        } catch (e) {
-          console.error('[AlphabetGame] Failed to load hand tracker:', e);
-          setFeedback('Hand tracking failed to load. You can still draw with your mouse.');
-        } finally {
-          setIsModelLoading(false);
+        const preferredDelegate = settings.handTrackingDelegate || 'GPU';
+        
+        // Try preferred delegate first, then fallback
+        const delegatesToTry: Array<'GPU' | 'CPU'> = 
+          preferredDelegate === 'GPU' ? ['GPU', 'CPU'] : ['CPU', 'GPU'];
+        
+        let lastError: Error | null = null;
+        let loadedDelegate: 'GPU' | 'CPU' | null = null;
+        
+        for (const delegate of delegatesToTry) {
+          try {
+            console.log(`[AlphabetGame] Trying to load hand tracker with ${delegate} delegate...`);
+            const vision = await FilesetResolver.forVisionTasks(
+              'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+            );
+            const landmarker = await HandLandmarker.createFromOptions(vision, {
+              baseOptions: {
+                modelAssetPath:
+                  'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+                delegate,
+              },
+              runningMode: 'VIDEO',
+              numHands: 2,
+            });
+            landmarkerRef.current = landmarker;
+            loadedDelegate = delegate;
+            console.log(`[AlphabetGame] Successfully loaded hand tracker with ${delegate} delegate`);
+            break; // Success, exit loop
+          } catch (e) {
+            lastError = e as Error;
+            console.warn(`[AlphabetGame] Failed to load with ${delegate} delegate:`, e);
+            // Continue to try next delegate
+          }
         }
+        
+        if (loadedDelegate) {
+          setFeedback(`Hand tracking active (${loadedDelegate} mode). Use your hand or mouse!`);
+        } else {
+          console.error('[AlphabetGame] Failed to load hand tracker with any delegate:', lastError);
+          setFeedback('Hand tracking unavailable. Use your mouse or finger to draw!');
+        }
+        
+        setIsModelLoading(false);
       }
     } catch {
       setCameraPermission('denied');
@@ -259,9 +282,9 @@ export function AlphabetGame() {
   // Profile available for future use (e.g., displaying child's name)
   void profile;
 
-  // Game language is INDEPENDENT of profile language
-  // User selects game language in Settings, or can change in-game anytime
-  const defaultLanguage = settings.gameLanguage || 'en';
+  // Game language is determined by profile's preferred_language
+  // This ensures consistency across the app
+  const defaultLanguage = profile?.preferred_language || settings.gameLanguage || 'en';
 
   // Language selection - user can switch anytime
   const [selectedLanguage, setSelectedLanguage] =

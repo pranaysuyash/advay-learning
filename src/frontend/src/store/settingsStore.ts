@@ -9,6 +9,7 @@ interface Settings {
   soundEnabled: boolean;
   timeLimit: number;
   showHints: boolean;
+  handTrackingDelegate: 'GPU' | 'CPU'; // NEW: Hand tracking delegate preference
 }
 
 interface SettingsState extends Settings {
@@ -24,6 +25,7 @@ const defaultSettings: Settings = {
   soundEnabled: true,
   timeLimit: 0, // No limit
   showHints: true,
+  handTrackingDelegate: 'GPU', // NEW: Default to GPU for best performance
 };
 
 export const useSettingsStore = create<SettingsState>()(

@@ -182,6 +182,60 @@ async def get_profile(
     return profile
 
 
+@router.patch("/me/profiles/{profile_id}", response_model=Profile)
+async def update_profile(
+    profile_id: str,
+    profile_in: ProfileUpdate,
+    current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Profile:
+    """Update a child's profile (name, age, preferred_language, settings).
+    
+    Allows parents to edit profile details without deleting and recreating.
+    """
+    # Validate profile_id format
+    try:
+        validate_uuid(profile_id, "profile_id")
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        )
+    
+    # Get profile
+    profile = await ProfileService.get_by_id(db, profile_id)
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
+    
+    # Verify profile belongs to current user
+    if profile.parent_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+        )
+    
+    # Update profile
+    updated = await ProfileService.update(db, profile, profile_in)
+    
+    # Log the update
+    await AuditService.log_action(
+        db,
+        user_id=current_user.id,
+        user_email=current_user.email,
+        action="profile_update",
+        resource_type="profile",
+        resource_id=profile_id,
+        details=f"Profile updated: {profile.name}",
+        ip_address=None,  # Request object not available in this context
+        user_agent=None,
+    )
+    
+    return updated
+
+
 @router.delete("/me/profiles/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_profile(
     request: Request,

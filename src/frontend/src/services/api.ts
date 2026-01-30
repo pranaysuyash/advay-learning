@@ -89,6 +89,8 @@ export const profileApi = {
   getProfile: (profileId: string) => apiClient.get(`/users/me/profiles/${profileId}`),
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) =>
     apiClient.post('/users/me/profiles', data),
+  updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string }>) =>
+    apiClient.patch(`/users/me/profiles/${profileId}`, data),
 };
 
 // Progress API

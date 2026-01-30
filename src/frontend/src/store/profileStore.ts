@@ -18,6 +18,7 @@ interface ProfileState {
   // Actions
   fetchProfiles: () => Promise<void>;
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) => Promise<void>;
+  updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string }>) => Promise<void>;
   setCurrentProfile: (profile: Profile | null) => void;
   clearError: () => void;
 }
@@ -57,6 +58,27 @@ export const useProfileStore = create<ProfileState>()((set) => ({
     } catch (error: any) {
       set({
         error: error.response?.data?.detail || 'Failed to create profile',
+        isLoading: false,
+      });
+    }
+  },
+
+  updateProfile: async (profileId, data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await profileApi.updateProfile(profileId, data);
+      set((state) => ({
+        profiles: state.profiles.map(p => 
+          p.id === profileId ? response.data : p
+        ),
+        currentProfile: state.currentProfile?.id === profileId 
+          ? response.data 
+          : state.currentProfile,
+        isLoading: false,
+      }));
+    } catch (error: any) {
+      set({
+        error: error.response?.data?.detail || 'Failed to update profile',
         isLoading: false,
       });
     }
