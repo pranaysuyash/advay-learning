@@ -15,17 +15,6 @@ import { getRandomIcon } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
 import { GameTutorial } from '../components/GameTutorial';
 
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface GameStats {
-  accuracy: number;
-  timeSpent: number;
-  streak: number;
-}
-
 // Available languages for the game
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -39,9 +28,8 @@ export function Game() {
   const location = useLocation();
   const navigate = useNavigate();
   const settings = useSettingsStore();
-  const { user } = useAuthStore();
-  const { markLetterAttempt, getUnlockedBatches, addBadge } =
-    useProgressStore();
+  useAuthStore();
+  useProgressStore();
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,16 +44,33 @@ export function Game() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
 
+  // Camera permission state
+  const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const [showPermissionWarning, setShowPermissionWarning] = useState(false);
+
   // Basic game controls and stubs
-  const startGame = () => {
+  const startGame = async () => {
     setIsModelLoading(false);
-    setIsPlaying(true);
+    
+    // Check camera permission before starting
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      setCameraPermission('granted');
+      setShowPermissionWarning(false);
+      setIsPlaying(true);
+    } catch {
+      setCameraPermission('denied');
+      setShowPermissionWarning(true);
+      // Don't start the game if permission denied
+    }
   };
 
   const stopGame = () => {
     setIsPlaying(false);
     setIsDrawing(false);
     setIsPinching(false);
+    // Don't hide permission warning - user needs to know if they want to restart
   };
 
   const clearDrawing = () => {
@@ -106,13 +111,43 @@ export function Game() {
   useEffect(() => {
     const hasCompletedTutorial = localStorage.getItem('tutorialCompleted') === 'true';
     setTutorialCompleted(hasCompletedTutorial);
-  }, []);
 
-  // Language selection - user can switch anytime
-  // Use gameLanguage setting if available, otherwise default to 'en'
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(
-    settings.gameLanguage || 'en',
-  );
+    // Fetch profiles to ensure we have the latest data
+    useProfileStore.getState().fetchProfiles();
+
+    // Check camera permission on mount
+    const checkCameraPermission = async () => {
+      try {
+        // Try using the Permissions API first
+        const result = await navigator.permissions.query({
+          name: 'camera' as PermissionName,
+        });
+        setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
+        setShowPermissionWarning(result.state === 'denied');
+
+        // Listen for permission changes
+        result.addEventListener('change', () => {
+          setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
+          setShowPermissionWarning(result.state === 'denied');
+        });
+      } catch {
+        // Fallback: try to get user media to check permission
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            stream.getTracks().forEach((track) => track.stop());
+            setCameraPermission('granted');
+            setShowPermissionWarning(false);
+          })
+          .catch(() => {
+            setCameraPermission('denied');
+            setShowPermissionWarning(true);
+          });
+      }
+    };
+
+    checkCameraPermission();
+  }, []);
 
   // Get profile ID from route state (passed from Dashboard)
   const profileId = (location.state as any)?.profileId as string | undefined;
@@ -122,12 +157,22 @@ export function Game() {
     return <Navigate to='/dashboard' replace />;
   }
 
+  // Get profile to determine preferred language
+  const { profiles } = useProfileStore();
+  const profile = profiles.find(p => p.id === profileId);
+
+  // Use profile's preferred language as default, fallback to settings, then to 'en'
+  const defaultLanguage = profile?.preferred_language || settings.gameLanguage || 'en';
+
+  // Language selection - user can switch anytime
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(defaultLanguage);
+
   const LETTERS = getLettersForGame(selectedLanguage);
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [accuracy, _setAccuracy] = useState<number>(0);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, _setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const update = () => setPendingCount(progressQueue.getPending(profileId || '').length);
@@ -268,6 +313,19 @@ export function Game() {
 
         {/* Game Area */}
         <div className='relative'>
+          {/* Permission Warning */}
+          {showPermissionWarning && (
+            <div className='bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-4 text-center'>
+              <div className='flex items-center justify-center gap-2 text-red-400 font-semibold'>
+                <UIIcon name="warning" size={20} />
+                <span>Camera permission denied</span>
+              </div>
+              <p className='text-red-300/80 text-sm mt-1'>
+                Please allow camera access in your browser settings to play.
+              </p>
+            </div>
+          )}
+
           {!isPlaying ? (
             <div className='bg-white/10 border border-border rounded-xl p-12 text-center relative overflow-hidden shadow-sm'>
               {/* Mascot Preview */}
@@ -328,6 +386,13 @@ export function Game() {
                   <div className='text-white/60 px-6 py-3'>
                     Loading hand tracking...
                   </div>
+                ) : cameraPermission === 'denied' ? (
+                  <button
+                    disabled
+                    className='px-8 py-3 bg-gray-500/50 rounded-lg font-semibold cursor-not-allowed text-white/60'
+                  >
+                    Camera Required
+                  </button>
                 ) : (
                   <button
                     onClick={startGame}
@@ -347,6 +412,18 @@ export function Game() {
                   className={`absolute inset-0 w-full h-full object-cover ${highContrast ? 'opacity-70' : ''}`}
                   mirrored
                   videoConstraints={{ width: 640, height: 480 }}
+                  onUserMedia={() => {
+                    // Camera successfully started
+                    setCameraPermission('granted');
+                    setShowPermissionWarning(false);
+                  }}
+                  onUserMediaError={(err) => {
+                    // Camera failed to start
+                    console.error('[Game] Camera error:', err);
+                    setCameraPermission('denied');
+                    setShowPermissionWarning(true);
+                    setIsPlaying(false);
+                  }}
                 />
                 {/* Canvas overlay for tracing */}
                 <canvas
@@ -372,11 +449,21 @@ export function Game() {
                 </div>
 
                 <div className='absolute top-4 right-4 flex gap-2'>
+                  {isPlaying && (
+                    <div className='bg-green-500/90 backdrop-blur px-3 py-1 rounded-full animate-pulse shadow-lg shadow-green-500/20 border border-green-400 flex items-center gap-1'>
+                      <UIIcon name="camera" size={16} className="text-green-400" />
+                      <div className='flex items-center gap-1'>
+                        <div className='w-2 h-2 bg-red-500 rounded-full animate-ping' />
+                        <span className='text-sm font-bold text-white'>Camera Active</span>
+                      </div>
+                    </div>
+                  )}
                   <button
-                    onClick={toggleHighContrast}
-                    className="px-3 py-1 bg-white/20 border border-white/20 rounded hover:bg-white/30 transition text-xs font-semibold"
+                    onClick={goToHome}
+                    className='px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold transition shadow-lg flex items-center gap-2'
                   >
-                    {highContrast ? '🔆 High Contrast' : '🔅 Normal Contrast'}
+                    <UIIcon name="home" size={20} />
+                    Home
                   </button>
                   <button
                     onClick={goToHome}

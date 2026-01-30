@@ -194,25 +194,25 @@ export function Progress() {
           <>
             {/* Stats Overview */}
             <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-8'>
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6 text-center'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
                   {stats.total_activities}
                 </div>
                 <div className='text-white/60'>Total Activities</div>
               </div>
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6 text-center'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
                   {stats.completion_count}
                 </div>
                 <div className='text-white/60'>Letters Mastered</div>
               </div>
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6 text-center'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
                   {Math.round(stats.average_score)}%
                 </div>
                 <div className='text-white/60'>Average Accuracy</div>
               </div>
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6 text-center'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>{stats.total_score}</div>
                 <div className='text-white/60'>Total Points</div>
               </div>
@@ -235,7 +235,7 @@ export function Progress() {
                           ? 'bg-green-500/20 border border-green-500/30'
                           : item.status === 'in_progress'
                             ? 'bg-yellow-500/20 border border-yellow-500/30'
-                            : 'bg-white/5 border border-white/10'
+                            : 'bg-white/10 border border-border' 
                       }`}
                     >
                       <div className='text-2xl font-bold mb-1'>

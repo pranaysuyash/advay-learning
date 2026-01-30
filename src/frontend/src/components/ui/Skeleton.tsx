@@ -31,7 +31,7 @@ export function Skeleton({
 // Pre-built skeleton layouts
 export function SkeletonCard() {
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+    <div className="bg-white/10 border border-border rounded-2xl p-6 shadow-sm">
       <div className="flex items-start gap-4">
         <Skeleton width={48} height={48} circle />
         <div className="flex-1 space-y-2">
@@ -49,7 +49,7 @@ export function SkeletonCard() {
 
 export function SkeletonStat() {
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+    <div className="bg-white/10 border border-border rounded-2xl p-6 shadow-sm">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <Skeleton width={80} height={16} />

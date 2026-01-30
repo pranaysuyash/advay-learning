@@ -428,7 +428,7 @@ export function Dashboard() {
                 </button>
               </div>
 
-              <div className='mt-6 pt-6 border-t border-white/10'>
+              <div className='mt-6 pt-6 border-t border-border'>
                 <h3 className='font-medium mb-2'>Current Settings</h3>
                 <div className='space-y-2 text-sm text-white/60'>
                   <div className='flex justify-between'>
@@ -483,7 +483,7 @@ export function Dashboard() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className='bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full'
+              className='bg-gray-900 border border-border rounded-xl p-6 max-w-md w-full shadow-sm'
             >
               <h2 className='text-2xl font-bold mb-4'>Add Child Profile</h2>
 

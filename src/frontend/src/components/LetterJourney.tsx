@@ -91,7 +91,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                           ? 'bg-green-500/30 border-2 border-green-500 shadow-md' 
                           : isUnlocked
                             ? 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-sm'
-                            : 'bg-white/5 border border-border opacity-70'
+                            : 'bg-white/10 border border-border opacity-70'
                         }
                       `}
                     >

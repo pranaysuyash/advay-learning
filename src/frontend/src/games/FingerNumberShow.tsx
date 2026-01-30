@@ -288,7 +288,7 @@ export function FingerNumberShow() {
             className={`bg-white/10 border border-border rounded-xl p-6 mb-6 text-center shadow-sm ${
               currentCount === targetNumber && targetNumber > 0
                 ? 'border-green-500/50 bg-green-500/10'
-                : 'border-white/10'
+                : 'border-border'
             }`}
           >
             <div className="text-white/70 mb-2">You're showing</div>

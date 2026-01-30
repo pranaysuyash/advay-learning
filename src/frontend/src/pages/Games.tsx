@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, UIIcon } from '../components/ui';
+import { useProfileStore } from '../store';
 
 interface Game {
   id: string;
@@ -14,6 +15,9 @@ interface Game {
 }
 
 export function Games() {
+  const navigate = useNavigate();
+  const { profiles, currentProfile } = useProfileStore();
+
   const availableGames: Game[] = [
     {
       id: 'alphabet-tracing',
@@ -108,19 +112,35 @@ export function Games() {
                 
                 <div className="mt-auto">
                   {game.path.startsWith('#') ? (
-                    <button 
+                    <button
                       className="w-full px-4 py-3 bg-white/10 border border-border rounded-lg text-white/50 cursor-not-allowed"
                       disabled
                     >
                       Coming Soon
                     </button>
                   ) : (
-                    <Link 
-                      to={game.path}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center block"
-                    >
-                      Play Game
-                    </Link>
+                    game.id === 'alphabet-tracing' ? (
+                      <button
+                        onClick={() => {
+                          if (currentProfile) {
+                            navigate(game.path, { state: { profileId: currentProfile.id } });
+                          } else {
+                            // If no profile is selected, redirect to dashboard to select one
+                            navigate('/dashboard');
+                          }
+                        }}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center"
+                      >
+                        Play Game
+                      </button>
+                    ) : (
+                      <Link
+                        to={game.path}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center block"
+                      >
+                        Play Game
+                      </Link>
+                    )
                   )}
                 </div>
               </Card>

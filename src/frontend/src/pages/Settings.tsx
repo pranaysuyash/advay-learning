@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useSettingsStore, useProgressStore } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
-import { Button, Card, CardHeader } from '../components/ui';
+import { Button } from '../components/ui';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import { useToast } from '../components/ui/Toast';
 
@@ -333,7 +333,7 @@ export function Settings() {
                 </h2>
 
                 <div className='space-y-4'>
-                  <div className='flex items-center justify-between bg-white/5 border border-white/20 rounded-lg px-4 py-3'>
+                  <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Daily Time Limit</div>
                       <div className='text-sm text-white/60'>
@@ -393,7 +393,7 @@ export function Settings() {
               </div>
 
               {/* Parent Controls */}
-              <div className='bg-white/5 border border-white/10 rounded-xl p-6'>
+              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <h2 className='text-xl font-semibold mb-4'>Parent Controls</h2>
 
                 <div className='space-y-4'>
