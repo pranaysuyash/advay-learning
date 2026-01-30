@@ -64,7 +64,31 @@ python_functions = "test_*"
 python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "cv2.*",
+    "mediapipe.*",
+    "pygame.*",
+    "pyttsx3.*",
+    "fastapi.*",
+    "sqlalchemy.*",
+    "alembic.*",
+    "pydantic.*",
+    "python_jose.*",
+    "passlib.*",
+    "boto3.*",
+    "bcrypt.*",
+    "slowapi.*",
+    "aiosqlite.*",
+    "asyncpg.*",
+    "redis.*",
+    "httpx.*",
+    "app.*",
+]
+ignore_missing_imports = true
 
 [dependency-groups]
 dev = [

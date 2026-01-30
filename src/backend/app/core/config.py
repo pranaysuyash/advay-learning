@@ -1,11 +1,9 @@
 """Application configuration."""
 
-import json
-import sys
 from functools import lru_cache
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from pydantic import ConfigDict, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,7 +20,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
-    
+
     @field_validator('SECRET_KEY')
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
@@ -77,7 +75,7 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance.
-    
+
     Uses lazy loading to avoid import-time validation errors.
     Settings are cached after first access.
     """

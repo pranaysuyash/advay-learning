@@ -1,6 +1,5 @@
 """Tests for parent verification and data deletion."""
 
-import pytest
 from httpx import AsyncClient
 
 
@@ -184,8 +183,8 @@ class TestAuditLogging:
 
     async def test_failed_deletion_logged(self, client: AsyncClient, auth_headers: dict, db_session):
         """Test that failed deletion attempts are logged."""
-        from app.services.audit_service import AuditService
         from app.db.session import async_session
+        from app.services.audit_service import AuditService
 
         # Create a profile
         create_response = await client.post(

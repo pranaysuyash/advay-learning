@@ -48,7 +48,7 @@ def main():
     # Determine reload mode
     reload_mode = not args.production and settings.DEBUG
 
-    print(f"🚀 Starting backend server...")
+    print("🚀 Starting backend server...")
     print(f"   Host: {args.host}")
     print(f"   Port: {args.port}")
     print(f"   Reload: {reload_mode}")

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.core.security import verify_password
-from app.core.validation import validate_uuid, ValidationError
+from app.core.validation import ValidationError, validate_uuid
 from app.db.models.user import User as UserModel
 from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
 from app.schemas.user import User, UserUpdate
@@ -42,7 +42,7 @@ async def get_user(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Only allow users to view themselves or superusers to view anyone
     if current_user.id != user_id and not current_user.is_superuser:
         raise HTTPException(
@@ -78,7 +78,7 @@ async def delete_my_account(
     db: AsyncSession = Depends(get_db)
 ) -> None:
     """Delete current user account with parent verification.
-    
+
     Requires password re-authentication for security.
     This is a destructive operation that cannot be undone.
     """
@@ -102,11 +102,11 @@ async def delete_my_account(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect password. Account deletion cancelled.",
         )
-    
+
     # Store user info for audit log before deletion
     user_id = current_user.id
     user_email = current_user.email
-    
+
     # Log the deletion with verification
     await AuditService.log_action(
         db,
@@ -121,7 +121,7 @@ async def delete_my_account(
         verification_required=True,
         verification_method="password_reauth",
     )
-    
+
     # Delete user (cascade will delete profiles and progress)
     await UserService.delete(db, current_user)
 
@@ -163,7 +163,7 @@ async def get_profile(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Get profile
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
@@ -171,14 +171,14 @@ async def get_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found",
         )
-    
+
     # Verify profile belongs to current user
     if profile.parent_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
         )
-    
+
     return profile
 
 
@@ -190,7 +190,7 @@ async def update_profile(
     db: AsyncSession = Depends(get_db)
 ) -> Profile:
     """Update a child's profile (name, age, preferred_language, settings).
-    
+
     Allows parents to edit profile details without deleting and recreating.
     """
     # Validate profile_id format
@@ -201,7 +201,7 @@ async def update_profile(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Get profile
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
@@ -209,17 +209,17 @@ async def update_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found",
         )
-    
+
     # Verify profile belongs to current user
     if profile.parent_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
         )
-    
+
     # Update profile
     updated = await ProfileService.update(db, profile, profile_in)
-    
+
     # Log the update
     await AuditService.log_action(
         db,
@@ -232,7 +232,7 @@ async def update_profile(
         ip_address=None,  # Request object not available in this context
         user_agent=None,
     )
-    
+
     return updated
 
 
@@ -245,7 +245,7 @@ async def delete_profile(
     db: AsyncSession = Depends(get_db)
 ) -> None:
     """Delete a child's profile with parent verification.
-    
+
     Requires password re-authentication for security.
     This will also delete all progress data associated with the profile.
     """
@@ -257,7 +257,7 @@ async def delete_profile(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Get profile
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
@@ -265,14 +265,14 @@ async def delete_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found",
         )
-    
+
     # Verify profile belongs to current user
     if profile.parent_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
         )
-    
+
     # Verify password (parent verification)
     if not verify_password(delete_req.password, current_user.hashed_password):
         # Log failed verification attempt
@@ -293,7 +293,7 @@ async def delete_profile(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect password. Profile deletion cancelled.",
         )
-    
+
     # Log the deletion with verification
     await AuditService.log_action(
         db,
@@ -308,6 +308,6 @@ async def delete_profile(
         verification_required=True,
         verification_method="password_reauth",
     )
-    
+
     # Delete profile (cascade will delete progress)
     await ProfileService.delete(db, profile)

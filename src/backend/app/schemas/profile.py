@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.core.validation import validate_age, validate_language_code, ValidationError
+from app.core.validation import ValidationError, validate_age, validate_language_code
 
 
 class ProfileBase(BaseModel):
@@ -14,7 +14,7 @@ class ProfileBase(BaseModel):
     age: Optional[float] = None
     preferred_language: str = "en"
     settings: Dict[str, Any] = {}
-    
+
     @field_validator('age')
     @classmethod
     def validate_age_range(cls, v: Optional[float]) -> Optional[float]:
@@ -25,7 +25,7 @@ class ProfileBase(BaseModel):
             except ValidationError as e:
                 raise ValueError(str(e))
         return v
-    
+
     @field_validator('preferred_language')
     @classmethod
     def validate_language(cls, v: str) -> str:

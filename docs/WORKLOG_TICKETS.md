@@ -26341,3 +26341,133 @@ Priority: P0 (Critical - Prevents User Frustration)
 ## 2026-01-30 Text & Contrast Audit
 
 - [2026-01-30 12:30 UTC] Completed app-wide text/contrast audit covering typography, text colors, and contrast across pages/components. Report: docs/audit/TEXT_CONTRAST_TEXT_AUDIT_2026-01-30.md
+
+### TCK-20260130-044 :: Fix Settings Parent Gate - Add Cancel Option
+
+Type: BUGFIX
+Owner: AI Assistant
+Created: 2026-01-30 18:00 UTC
+Status: **DONE**
+Priority: P0
+
+Description:
+Fix UX issue where Settings parent gate has no way to cancel - if user clicks by mistake or changes mind, they're forced to hold for 3 seconds.
+
+Scope contract:
+- In-scope:
+  - Add "← Go Back" button to cancel and navigate back to dashboard
+  - Add ESC key support to cancel parent gate
+  - Add text "or press ESC to cancel" for clarity
+  - Implement handleCancelGate with useCallback
+  - Add ESC key event listener
+- Out-of-scope: Redesign entire parent gate system
+- Behavior change allowed: YES (UX improvement for usability)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/Settings.tsx`
+- Branch/PR: main
+- Range: Lines 23-75 (parent gate logic)
+
+Acceptance Criteria:
+- [x] "← Go Back" button visible below hold button
+- [x] Clicking "Go Back" cancels parent gate and navigates back
+- [x] ESC key cancels parent gate and navigates back
+- [x] Text "or press ESC to cancel" clearly displayed
+- [x] handleCancelGate uses useCallback to prevent recreation
+- [x] ESC key event listener properly added and cleaned up
+- [x] Tests pass (87/87)
+- [x] Frontend builds successfully
+
+Execution log:
+- [2026-01-30 18:00 UTC] Identified UX issue | Evidence:
+  - **Finding**: Settings parent gate (lines 23-50) has only "Hold" button
+  - **Finding**: No cancel option if user clicks by mistake
+  - **Finding**: User forced to hold 3 seconds even if they change mind
+  - **Interpretation**: Observed — Poor UX, no escape from gate
+
+- [2026-01-30 18:05 UTC] Added cancel button | Evidence:
+  - **Edit**: Added "← Go Back" button below hold button (line 50-57)
+  - **Edit**: Added text "or press ESC to cancel" (line 56-57)
+  - **Edit**: Implemented handleCancelGate with useCallback (lines 64-72)
+  - **Edit**: Added ESC key event listener (lines 74-87)
+  - **Edit**: Imported useCallback from React (line 1)
+  - **Command**: `cd src/frontend && npm test`
+  - **Output**: `Test Files 15 passed (87) Tests 87 passed`
+  - **Interpretation**: Observed — All tests pass, fix implemented correctly
+
+- [2026-01-30 18:10 UTC] Verified UX improvement | Evidence:
+  - **Finding**: User can now cancel parent gate by clicking "Go Back" or pressing ESC
+  - **Finding**: No longer forced to hold 3 seconds if change mind
+  - **Interpretation**: Observed — Better UX, clear escape path
+
+Source:
+- User Report: "dont have an option to cancel the parent gate popup, if i clicked by mistake"
+- Context: Settings page parent gate UX usability issue
+
+Status updates:
+- [2026-01-30 18:10 UTC] **DONE** — Added cancel option to parent gate | Evidence: Tests pass, UX improved
+
+---
+
+### TCK-20260130-045 :: Simplify Camera Game Screen UX - Make Camera Hero Focus
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 18:30 UTC
+Status: **OPEN**
+Priority: P1
+
+Description:
+Implement comprehensive UX improvements for camera game screens based on audit findings. Current screens have multiple competing UI clusters (overlays, status banners, control strips) that dilute camera feed as the primary visual focus, causing cognitive overload for kids.
+
+Scope contract:
+- In-scope:
+  - Reduce overlays to single top bar during active play
+  - Remove developer-level technical state messages ("Hand tracking active (GPU mode)")
+  - Consolidate action buttons to two primary actions + overflow menu
+  - Simplify progress/score hierarchy to show single primary goal
+  - Remove status banners that compete with camera hero surface
+  - Replace technical system states with user-meaningful indicators ("Camera On" / "Touch Mode")
+- Out-of-scope: Complete redesign of game mechanics, new game features
+- Behavior change allowed: YES (UX improvement for cognitive load reduction)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/AlphabetGame.tsx`, `src/frontend/src/pages/LetterHunt.tsx`, `src/frontend/src/games/FingerNumberShow.tsx`, `src/frontend/src/components/ui/Layout.tsx`
+- Branch/PR: main
+- Range: Game UI overlay and control layout refactoring
+
+Acceptance Criteria:
+- [ ] Camera feed occupies >70% of vertical space during active play
+- [ ] No technical terms shown during play (no "GPU mode", "Hand tracking active")
+- [ ] Max 2 primary buttons visible during play (Start/Stop Drawing + Clear)
+- [ ] Goal + feedback visible without scrolling or multiple banners
+- [ ] Single primary goal: "Trace letter A" prominently displayed
+- [ ] Status banners removed during active play
+- [ ] "Camera On" / "Touch Mode" user-meaningful indicators added
+- [ ] Tests verify UX improvements
+- [ ] Frontend builds successfully
+
+Execution log:
+- [2026-01-30 18:30 UTC] Reviewed camera game UX audit | Evidence:
+  - **Finding**: Audit file: `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`
+  - **Finding**: 5 major UX issues identified across camera game screens
+  - **Interpretation**: Observed — Comprehensive audit with clear problems
+
+- [2026-01-30 18:35 UTC] Created worklog ticket | Evidence:
+  - **Action**: Created TCK-20260130-045 for camera UX improvements
+  - **Interpretation**: Observed — Ticket created with proper scope and acceptance criteria
+
+Source:
+- Audit file: `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`
+- Finding IDs: Issues #1-5 (Camera not dominant, Technical states visible, Too many simultaneous actions, Status banners compete, Progress/score hierarchy inconsistent)
+- Evidence: 
+  - "In `AlphabetGame.tsx`, the letter panel can float in the corner while a dense control strip overlays the camera feed"
+  - "Text like 'Hand tracking active (GPU mode)' appears in the camera experience"
+  - "AlphabetGame shows Home, Start/Stop Drawing, Clear, Stop, language toggle, camera status, streak indicator, and batch stats at once"
+
+Status updates:
+- [2026-01-30 18:30 UTC] **OPEN** — Ticket created, awaiting implementation
+
+---

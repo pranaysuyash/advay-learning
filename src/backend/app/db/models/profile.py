@@ -1,12 +1,18 @@
 """Profile model for children."""
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
+
+if TYPE_CHECKING:
+    from app.db.models.achievement import Achievement
+    from app.db.models.progress import Progress
+    from app.db.models.user import User
 
 
 class Profile(Base):
@@ -15,7 +21,9 @@ class Profile(Base):
     __tablename__ = "profiles"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
-    parent_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    parent_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     name: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[float] = mapped_column(Float, nullable=True)
     avatar_url: Mapped[str] = mapped_column(String, nullable=True)

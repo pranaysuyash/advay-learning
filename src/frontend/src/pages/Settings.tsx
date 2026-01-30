@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useSettingsStore, useProgressStore } from '../store';
 import { getAlphabet } from '../data/alphabets';
@@ -53,6 +53,29 @@ export function Settings() {
     setHoldingGate(false);
     setHoldDuration(0);
   };
+
+  const handleCancelGate = useCallback(() => {
+    setHoldingGate(false);
+    setHoldDuration(0);
+    // Navigate back to dashboard
+    window.history.back();
+  }, []);
+
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !parentGatePassed) {
+        handleCancelGate();
+      }
+    };
+
+    if (!parentGatePassed) {
+      document.addEventListener('keydown', handleEscKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [parentGatePassed, handleCancelGate]);
 
   useEffect(() => {
     return () => {
@@ -121,7 +144,7 @@ export function Settings() {
       >
         {!parentGatePassed && (
           <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
+              <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
               <h2 className='text-2xl font-bold mb-4'>Parent Gate</h2>
               <p className='text-gray-600 mb-6'>
                 Hold button below for 3 seconds to access Settings. This
@@ -143,8 +166,17 @@ export function Settings() {
                   ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
                   : '👆 Hold to Access Settings (3s)'}
               </button>
-              <div className='mt-6 text-sm text-gray-500'>
-                Press and hold to continue
+              <div className='flex gap-3 mt-6 justify-center'>
+                <button
+                  onClick={handleCancelGate}
+                  className='px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition'
+                  type='button'
+                >
+                  ← Go Back
+                </button>
+                <div className='text-sm text-gray-500'>
+                  or press ESC to cancel
+                </div>
               </div>
             </div>
           </div>

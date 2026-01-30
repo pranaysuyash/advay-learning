@@ -23,6 +23,9 @@ import { getAllIcons } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
 import { Icon } from '../components/Icon';
 import { GameTutorial } from '../components/GameTutorial';
+import WellnessTimer from '../components/WellnessTimer';
+import WellnessReminder from '../components/WellnessReminder';
+import useInactivityDetector from '../hooks/useInactivityDetector';
 
 // Available languages for the game
 const LANGUAGES = [
@@ -168,6 +171,12 @@ export function AlphabetGame() {
   const [accuracy, setAccuracy] = useState<number>(0);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  // Wellness tracking state
+  const [showWellnessReminder, setShowWellnessReminder] = useState<boolean>(false);
+  const [wellnessReminderType, setWellnessReminderType] = useState<'break' | 'water' | 'stretch' | 'inactive' | null>(null);
+  const [activeTime, setActiveTime] = useState<number>(0); // in minutes
+  const [inactiveTime, setInactiveTime] = useState<number>(0); // in seconds
+
   const checkProgress = async () => {
     // Minimal, deterministic scoring: ensures the core tracking UX is testable.
     const points = drawnPointsRef.current.length;
@@ -290,6 +299,41 @@ export function AlphabetGame() {
   const [selectedLanguage, setSelectedLanguage] =
     useState<string>(defaultLanguage);
 
+  // Wellness tracking effects
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    // Track active time (when game is being played)
+    const activeTimer = setInterval(() => {
+      setActiveTime(prev => prev + 1);
+    }, 60000); // Every minute
+
+    return () => clearInterval(activeTimer);
+  }, [isPlaying]);
+
+  // Inactivity detector
+  const inactivityData = useInactivityDetector(() => {
+    // Called when inactivity is detected
+    setInactiveTime(prev => prev + 1);
+    setWellnessReminderType('inactive');
+    setShowWellnessReminder(true);
+  }, 60000); // Trigger after 1 minute of inactivity
+
+  const { isActive, timeRemaining, formattedTime } = inactivityData;
+
+  // Handle wellness reminder dismissal
+  const handleWellnessReminderDismiss = () => {
+    setShowWellnessReminder(false);
+    setWellnessReminderType(null);
+  };
+
+  // Handle wellness reminder postpone (if applicable)
+  const handleWellnessReminderPostpone = () => {
+    // For now, just dismiss and reset the timer
+    setShowWellnessReminder(false);
+    setWellnessReminderType(null);
+  };
+
   const LETTERS = getLettersForGame(selectedLanguage);
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
@@ -406,11 +450,6 @@ export function AlphabetGame() {
     };
   }, [isPlaying, isDrawing, currentLetter.color]);
 
-  // Redirect to dashboard if no profile selected
-  if (!profileId) {
-    return <Navigate to='/dashboard' replace />;
-  }
-
   const getCanvasPointFromPointerEvent = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -478,6 +517,11 @@ export function AlphabetGame() {
     (e.currentTarget as any).releasePointerCapture?.(e.pointerId);
     lastDrawPointRef.current = null;
   }, []);
+
+  // Redirect to dashboard if no profile selected
+  if (!profileId) {
+    return <Navigate to='/dashboard' replace />;
+  }
 
   return (
     <>
@@ -976,6 +1020,30 @@ export function AlphabetGame() {
             )}
           </div>
         </motion.div>
+
+        {/* Wellness Timer */}
+        <WellnessTimer
+          onBreakReminder={() => {
+            setWellnessReminderType('break');
+            setShowWellnessReminder(true);
+          }}
+          activeThreshold={15}
+          inactiveThreshold={60}
+          onInactiveDetected={() => {
+            setWellnessReminderType('inactive');
+            setShowWellnessReminder(true);
+          }}
+        />
+
+        {/* Wellness Reminder */}
+        {showWellnessReminder && wellnessReminderType && (
+          <WellnessReminder
+            activeTime={activeTime}
+            inactiveTime={inactiveTime}
+            onDismiss={handleWellnessReminderDismiss}
+            onPostpone={handleWellnessReminderPostpone}
+          />
+        )}
       </div>
     </>
   );

@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 class ProgressBase(BaseModel):
     """Base progress schema."""
+
     activity_type: str
     content_id: str
     score: int = 0
@@ -17,12 +18,14 @@ class ProgressBase(BaseModel):
 
 class ProgressCreate(ProgressBase):
     """Progress creation schema."""
+
     idempotency_key: str | None = None
     timestamp: str | None = None
 
 
 class ProgressUpdate(BaseModel):
     """Progress update schema."""
+
     score: Optional[int] = None
     duration_seconds: Optional[int] = None
     meta_data: Optional[Dict[str, Any]] = None
@@ -30,25 +33,10 @@ class ProgressUpdate(BaseModel):
 
 class Progress(ProgressBase):
     """Progress response schema."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str
     profile_id: str
     completed_at: datetime
     idempotency_key: str | None = None
-
-
-class ProgressUpdate(BaseModel):
-    """Progress update schema."""
-    score: Optional[int] = None
-    duration_seconds: Optional[int] = None
-    meta_data: Optional[Dict[str, Any]] = None
-
-
-class Progress(ProgressBase):
-    """Progress response schema."""
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    profile_id: str
-    completed_at: datetime

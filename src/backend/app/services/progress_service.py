@@ -69,7 +69,7 @@ class ProgressService:
 
         try:
             await db.commit()
-        except Exception as e:
+        except Exception:
             # If an integrity error occurs due to a unique constraint, convert to DuplicateProgressError
             await db.rollback()
             # Attempt to lookup existing record to return useful info

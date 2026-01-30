@@ -1,7 +1,6 @@
 import pytest
-
 from httpx import AsyncClient
-from app.main import app
+
 
 @pytest.mark.asyncio
 async def test_progress_batch_endpoint(client: AsyncClient, auth_headers):
@@ -30,14 +29,14 @@ async def test_progress_batch_endpoint(client: AsyncClient, auth_headers):
         }
     ]
 
-    response = await client.post(f"/api/v1/progress/batch", json={"profile_id": profile_id, "items": items}, headers=auth_headers)
+    response = await client.post("/api/v1/progress/batch", json={"profile_id": profile_id, "items": items}, headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert "results" in data
     assert len(data["results"]) == 2
 
     # Repeat same batch - should be deduped and return duplicate statuses
-    response2 = await client.post(f"/api/v1/progress/batch", json={"profile_id": profile_id, "items": items}, headers=auth_headers)
+    response2 = await client.post("/api/v1/progress/batch", json={"profile_id": profile_id, "items": items}, headers=auth_headers)
     assert response2.status_code == 200
     data2 = response2.json()
     assert "results" in data2
@@ -52,7 +51,7 @@ async def test_progress_batch_endpoint(client: AsyncClient, auth_headers):
         "score": 85,
         "timestamp": "2026-01-29T00:00:10Z"
     }
-    response3 = await client.post(f"/api/v1/progress/batch", json={"profile_id": profile_id, "items": [items[0], new_item]}, headers=auth_headers)
+    response3 = await client.post("/api/v1/progress/batch", json={"profile_id": profile_id, "items": [items[0], new_item]}, headers=auth_headers)
     assert response3.status_code == 200
     data3 = response3.json()
     assert len(data3['results']) == 2

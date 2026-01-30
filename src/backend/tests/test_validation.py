@@ -4,11 +4,11 @@ import pytest
 from httpx import AsyncClient
 
 from app.core.validation import (
-    validate_uuid,
-    validate_email_format,
-    validate_age,
-    validate_language_code,
     ValidationError,
+    validate_age,
+    validate_email_format,
+    validate_language_code,
+    validate_uuid,
 )
 from app.schemas.user import validate_password_strength
 

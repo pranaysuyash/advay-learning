@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { useAuthStore } from '../../store/authStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { progressQueue } from '../../services/progressQueue';
-import { Game } from '../Game';
+import { AlphabetGame as Game } from '../AlphabetGame';
 
 // Minimal mocks for heavy external deps
 vi.mock('react-webcam', () => ({

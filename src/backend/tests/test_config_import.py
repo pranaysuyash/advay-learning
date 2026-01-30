@@ -4,7 +4,7 @@
 
 def test_import_app_with_test_env():
     """Test that app can be imported with test environment.
-    
+
     This verifies the fix for M2 (import-time settings instantiation).
     """
     # Ensure .env.test is loaded (conftest.py should do this)

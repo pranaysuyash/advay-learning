@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
 from app.api.v1.api import api_router
@@ -20,25 +19,25 @@ from app.db.session import get_db
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to all responses."""
-    
+
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-        
+
         # Prevent MIME type sniffing
         response.headers["X-Content-Type-Options"] = "nosniff"
-        
+
         # Prevent clickjacking
         response.headers["X-Frame-Options"] = "DENY"
-        
+
         # XSS protection
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        
+
         # Referrer policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        
+
         # Permissions policy (disable unused features)
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        
+
         return response
 
 # Setup logging
@@ -104,7 +103,7 @@ async def root() -> dict:
 @app.get("/health")
 async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Health check endpoint.
-    
+
     Returns 200 if all dependencies are healthy.
     Returns 503 if any critical dependency is unhealthy.
     """

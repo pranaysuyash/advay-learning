@@ -19,7 +19,7 @@ test('offline progress sync end-to-end (scaffold)', async ({
 
   // Simulate offline and enqueue via window call
   await page.evaluate(() => {
-    // @ts-ignore - window.progressQueue is injected by app import in test runs
+    // @ts-expect-error - window.progressQueue is injected by app import in test runs
     if ((window as any).progressQueue) {
       (window as any).progressQueue.enqueue({
         idempotency_key: 'e2e-1',
@@ -35,7 +35,7 @@ test('offline progress sync end-to-end (scaffold)', async ({
   // Bring back online and call sync
   await page.context().setOffline(false);
   await page.evaluate(async () => {
-    // @ts-ignore
+    // @ts-expect-error - window.progressQueue and apiClient are injected by app import in test runs
     if ((window as any).progressQueue && (window as any).apiClient) {
       await (window as any).progressQueue.syncAll((window as any).apiClient);
     }

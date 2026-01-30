@@ -389,9 +389,9 @@ class TestCookieAuthentication:
 
 class TestAuthRateLimiting:
     """Test authentication rate limiting.
-    
+
     Note: In testing mode, rate limits are set very high (10000/minute)
-    to avoid interfering with other tests. These tests verify the 
+    to avoid interfering with other tests. These tests verify the
     rate limiting infrastructure is in place and would work in production.
     """
 
@@ -427,7 +427,7 @@ class TestAuthRateLimiting:
     @pytest.mark.skip(reason="Production rate limits disabled in test mode")
     async def test_login_rate_limiting_production(self, client: AsyncClient):
         """Verify repeated failed logins trigger rate limiting (5/minute).
-        
+
         This test is skipped in test mode because rate limits are set high
         to avoid interfering with other tests. Run with TESTING=false to test
         actual rate limiting behavior.

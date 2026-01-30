@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.add_column('users', sa.Column('email_verified', sa.Boolean(), nullable=False, server_default='false'))
     op.add_column('users', sa.Column('email_verification_token', sa.String(), nullable=True))
     op.add_column('users', sa.Column('email_verification_expires', sa.DateTime(), nullable=True))
-    
+
     # Add password reset fields to users table
     op.add_column('users', sa.Column('password_reset_token', sa.String(), nullable=True))
     op.add_column('users', sa.Column('password_reset_expires', sa.DateTime(), nullable=True))

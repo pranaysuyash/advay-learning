@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 async def check_database(db: AsyncSession) -> Dict[str, Any]:
     """Check database connectivity.
-    
+
     Returns:
         Dict with 'status' ('healthy' or 'unhealthy') and optional 'error'
     """
@@ -22,7 +22,7 @@ async def check_database(db: AsyncSession) -> Dict[str, Any]:
 
 async def get_health_status(db: AsyncSession) -> Dict[str, Any]:
     """Get comprehensive health status.
-    
+
     Returns:
         Dict with overall status and component statuses
     """

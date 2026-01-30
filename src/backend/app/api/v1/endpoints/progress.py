@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.core.validation import validate_uuid, ValidationError
+from app.core.validation import ValidationError, validate_uuid
 from app.schemas.progress import Progress, ProgressCreate
 from app.schemas.user import User
 from app.services.profile_service import ProfileService
-from app.services.progress_service import ProgressService, DuplicateProgressError
+from app.services.progress_service import DuplicateProgressError, ProgressService
 
 router = APIRouter()
 
@@ -30,7 +30,7 @@ async def get_progress(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Verify profile belongs to current user
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
@@ -65,7 +65,7 @@ async def save_progress(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Verify profile belongs to current user
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
@@ -154,7 +154,7 @@ async def get_progress_stats(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
-    
+
     # Verify profile belongs to current user
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:

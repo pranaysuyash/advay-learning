@@ -1,9 +1,9 @@
 """Audit log service for tracking sensitive operations."""
 
-from typing import Any, Optional
+from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.audit_log import AuditLog
 
@@ -27,7 +27,7 @@ class AuditService:
         verification_method: Optional[str] = None,
     ) -> AuditLog:
         """Log a sensitive action.
-        
+
         Args:
             db: Database session
             user_id: ID of user performing the action
@@ -40,7 +40,7 @@ class AuditService:
             user_agent: Client user agent
             verification_required: Whether parent verification was required
             verification_method: Method used for verification
-            
+
         Returns:
             Created audit log entry
         """
@@ -69,13 +69,13 @@ class AuditService:
         offset: int = 0,
     ) -> list[AuditLog]:
         """Get audit logs for a specific user.
-        
+
         Args:
             db: Database session
             user_id: User ID to filter by
             limit: Maximum number of results
             offset: Number of results to skip
-            
+
         Returns:
             List of audit log entries
         """
@@ -95,12 +95,12 @@ class AuditService:
         resource_id: str,
     ) -> list[AuditLog]:
         """Get audit logs for a specific resource.
-        
+
         Args:
             db: Database session
             resource_type: Type of resource
             resource_id: Resource ID
-            
+
         Returns:
             List of audit log entries
         """

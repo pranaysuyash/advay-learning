@@ -34,7 +34,7 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.PrimaryKeyConstraint('id'),
     )
-    
+
     # Create indexes for common queries
     op.create_index('ix_audit_logs_user_id', 'audit_logs', ['user_id'], unique=False)
     op.create_index('ix_audit_logs_action', 'audit_logs', ['action'], unique=False)
