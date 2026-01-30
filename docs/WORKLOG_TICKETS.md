@@ -374,6 +374,31 @@ Evidence:
 
 ---
 
+### TCK-20260130-018 :: Fix missing useProfileStore import in Game.tsx & add smoke test
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 16:40 UTC
+Status: **OPEN**
+
+Scope contract:
+- In-scope:
+  - Add missing import `import { useProfileStore } from '../store';` to `Game.tsx`.
+  - Add a smoke test mounting `Game` to assert no ReferenceError on render and a unit test that ensures profile fetch runs only when `profileId` exists.
+- Out-of-scope:
+  - Any broader refactor or behavior changes to the Game flow.
+
+Targets:
+- Files: `src/frontend/src/pages/Game.tsx`, `src/frontend/src/pages/__tests__/Game.smoke.test.tsx`
+
+Inputs:
+- Audit finding F-Game-08 recorded in `docs/audit/src__frontend__src__pages__Game.tsx.md` (2026-01-30 run)
+
+Evidence:
+- `Game.tsx` references `useProfileStore` but does not import it; this leads to a ReferenceError when the component mounts (Observed).
+
+---
+
 ### TCK-20260128-047 :: Comprehensive Code Quality Remediation
 
 Type: REMEDIATION
