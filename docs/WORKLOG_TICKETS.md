@@ -19288,8 +19288,9 @@ Next actions:
 ### TCK-20260130-011 :: Fix Webcam Overlay Contrast/Visibility (P0)
 
 Type: REMEDIATION / UX
-Owner: UNASSIGNED
+Owner: AI Assistant
 Created: 2026-01-30 11:08 IST
+Status: **IN_PROGRESS** 🟡
 Status: **OPEN** 🔵
 Priority: P0 (Critical - Classroom Usability)
 
@@ -20408,4 +20409,105 @@ Risks/notes:
 - Gradual migration approach - old inline styles still work
 
 ---
+
+
+
+## TCK-20260131-002 :: Fix Accessibility & Form Issues from UI Design Audit
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-31 00:00 UTC
+Status: OPEN
+Priority: P1 (High - Accessibility Compliance)
+
+Scope contract:
+
+- In-scope:
+  - Add autocomplete attributes to all form inputs
+  - Add password visibility toggle (show/hide password)
+  - Implement proper error handling UI for failed form submissions
+  - Add loading states to forms during async operations
+  - Implement keyboard navigation improvements (focus management, tab order)
+  - Add ARIA labels to emoji elements throughout the UI
+  - Verify WCAG AA contrast compliance for all text elements
+- Out-of-scope:
+  - Complete redesign of authentication flows
+  - Backend changes to API
+  - Advanced accessibility features
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- Files to modify:
+  - src/frontend/src/pages/Login.tsx
+  - src/frontend/src/pages/Register.tsx
+  - src/frontend/src/components/ui/Button.tsx
+  - Branch: main
+- Git availability: YES
+
+Related Audit Findings:
+
+1. ui_design_audit.md - HIGH: Accessibility Violation - Missing Autocomplete Attributes
+2. ui_design_audit.md - HIGH: Missing Error Handling UI
+3. ui_design_audit.md - HIGH: No Loading States
+4. ui_design_audit.md - MEDIUM: Password Visibility Toggle Missing
+5. ui_design_audit.md - MEDIUM: Keyboard Navigation
+
+Acceptance Criteria:
+
+- [ ] Email inputs have autocomplete="email" attribute
+- [ ] Password inputs have autocomplete attributes
+- [ ] All password fields have visibility toggle
+- [ ] Login/Register forms show error messages on failed submission
+- [ ] All forms show loading state during async operations
+- [ ] Button elements have explicit type attributes
+- [ ] Emoji elements have aria-label attributes
+- [ ] Focus management works correctly
+- [ ] All text meets WCAG AA contrast
+- [ ] TypeScript compilation passes
+
+Dependencies:
+
+- None (can proceed independently)
+
+Execution log:
+
+- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Reviewed ui_design_audit.md findings
+- [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
+
+Status updates:
+
+- [2026-01-31 00:00 UTC] OPEN - Ready for implementation
+
+Next actions:
+
+1. Add autocomplete attributes to Login.tsx
+2. Add autocomplete attributes to Register.tsx
+3. Implement password visibility toggle component
+4. Integrate password visibility toggle in Login and Register forms
+5. Add error state display for failed authentication
+6. Add loading state to form submit buttons
+7. Add type="button" attributes to all button elements
+8. Add aria-label attributes to emoji elements throughout UI
+9. Test keyboard navigation
+10. Run automated accessibility check
+
+Risks/notes:
+
+- Accessibility compliance is required for production
+- Missing autocomplete attributes affect form usability
+- Password visibility is a security/usability best practice
+- Error handling affects user experience
+- Loading states prevent confusion about app responsiveness
+
+Evidence:
+
+- **Audit Reference**: docs/audit/ui_design_audit.md
+- **Command**: `grep -n "autocomplete\|password.*visibility" docs/WORKLOG_TICKETS.md`
+- **Output**: No existing tickets found for these issues
+
+---
+
 
