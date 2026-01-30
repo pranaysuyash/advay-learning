@@ -15,6 +15,56 @@
 
 ---
 
+### TCK-20260130-028 :: Research Roadmap Planning
+Type: PLANNING
+Owner: AI Assistant
+Created: 2026-01-30 14:30 UTC
+Status: **DONE**
+Priority: P0
+
+Description:
+Created comprehensive research roadmap documenting all 10 research areas needed before and during implementation, with prioritization, dependencies, and execution plan.
+
+Scope contract:
+- In-scope:
+  - Document all research areas needed
+  - Define research questions for each area
+  - Create prioritization framework
+  - Map dependencies between research areas
+  - Create execution timeline
+  - Define research output templates
+- Out-of-scope: Actual research execution
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `docs/RESEARCH_ROADMAP.md`
+- Branch/PR: main
+
+Acceptance Criteria:
+- [x] 10 research areas documented with questions and deliverables
+- [x] Priority framework defined (P0-P3)
+- [x] Dependencies mapped
+- [x] 3-phase execution plan
+- [x] Research templates included
+- [x] Status tracking dashboard
+
+Research Areas Planned:
+1. RESEARCH-001: Technical Implementation Patterns (P0)
+2. RESEARCH-002: Monetization & Business Model (P0)
+3. RESEARCH-003: Curriculum & Learning Outcomes (P1)
+4. RESEARCH-004: Accessibility Standards (P1)
+5. RESEARCH-005: Sound & Music Production (P2)
+6. RESEARCH-006: Legal & Compliance (P1)
+7. RESEARCH-007: Parent Experience & Dashboard (P2)
+8. RESEARCH-008: Growth & Marketing Strategy (P3)
+9. RESEARCH-009: Localization & Cultural Adaptation (P2)
+10. RESEARCH-010: Analytics & Data Strategy (P2)
+
+Status updates:
+- [2026-01-30 14:30 UTC] **DONE** — Research roadmap complete | Evidence: `docs/RESEARCH_ROADMAP.md`
+
+---
+
 ### TCK-20260130-027 :: Brand Guidelines Competitive Analysis
 Type: DOCUMENTATION
 Owner: AI Assistant
@@ -258,6 +308,60 @@ Acceptance Criteria:
 - [ ] Target `0` requires a detected hand (fist) to succeed (no more “no hands = success”).
 - [ ] TTS speaks the prompt when the target changes (when sound is enabled + browser supports).
 - [ ] Frontend tests and production build pass.
+
+Status updates:
+- [2026-01-30 12:51 UTC] **DONE** — Prompt overlay enlarged; `0` now “make a fist” (hand required); TTS prompt added + replay button | Evidence:
+  - **Command**: `cd src/frontend && npm test`
+  - **Output**:
+    ```
+     Test Files  14 passed (14)
+          Tests  84 passed (84)
+    ```
+  - **Command**: `cd src/frontend && npm run build`
+  - **Output**:
+    ```
+    ✓ built in 4.46s
+    ```
+  - **Interpretation**: Observed — changes compile and tests pass; prompt UX + 0 gating + TTS replay are implemented.
+
+### TCK-20260130-029 :: Mascot TTS reliability (debounce + tap-to-speak)
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-30 12:59 UTC
+Status: **DONE**
+Priority: P1
+
+Description:
+Fix “TTS not working / auto changing” by making Pip’s speech less spammy (debounced + rate-limited) and ensuring there’s always a user-gesture path to speak (tap Pip).
+
+Scope contract:
+- In-scope:
+  - Debounce + rate-limit automatic TTS in `Mascot` so frequent message changes don’t constantly cancel speech.
+  - On mascot click, also trigger TTS for the current message (user gesture unlock path).
+  - Verify frontend tests + build and record evidence.
+- Out-of-scope:
+  - Replacing the TTS engine or adding external TTS providers
+  - New settings UX for voice selection
+- Behavior change allowed: YES (improves TTS behavior)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/Mascot.tsx`
+
+Evidence:
+- **Command**: `cd src/frontend && npm test`
+- **Output**:
+  ```
+   Test Files  14 passed (14)
+        Tests  84 passed (84)
+  ```
+- **Command**: `cd src/frontend && npm run build`
+- **Output**:
+  ```
+  ✓ built in 1.43s
+  ```
+- **Interpretation**: Observed — changes compile and tests pass; Mascot speech is now debounced and can be triggered via click.
 
 ### TCK-20260130-025 :: Brand Guidelines Analysis & Competitive Research
 Type: RESEARCH
@@ -824,18 +928,19 @@ Status updates:
 
 | Metric         | Count  |
 | -------------- | ------ |
-| ✅ DONE        | 72     |
+| ✅ DONE        | 73     |
 | 🟡 IN_PROGRESS | 0      |
-| 🔵 OPEN        | 15     |
+| 🔵 OPEN        | 14     |
 | 🔴 BLOCKED     | 0      |
 | **Total**      | **87** |
 
-**Last Updated:** 2026-01-30 16:38 IST
+**Last Updated:** 2026-01-30 16:10 IST
 
 **Current Priority:** Multi-language expansion and game language testing
 
 ### Recent Completions (2026-01-30)
 
+- TCK-20260130-015: Camera permission handling & mouse-fallback ✅ NEW
 - TCK-20260129-093: FIX Game Language Selector (Separate from UI Language) ✅ NEW
 - TCK-20260130-016: Text Contrast Audit - WCAG Compliance Analysis ✅ NEW
 - TCK-20260130-013: Fix Permission Warning Persistence Bug ✅ NEW
