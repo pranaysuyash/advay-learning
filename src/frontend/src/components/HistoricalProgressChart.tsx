@@ -87,7 +87,7 @@ const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data,
           color: 'rgba(255, 255, 255, 0.1)',
         },
         ticks: {
-          color: '#9CA3AF',
+          color: '#6B7280', // Updated to match text-muted (4.7:1 WCAG AA)
         },
       },
       y: {
@@ -96,12 +96,12 @@ const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data,
           color: 'rgba(255, 255, 255, 0.1)',
         },
         ticks: {
-          color: '#9CA3AF',
+          color: '#6B7280', // Updated to match text-muted (4.7:1 WCAG AA)
         },
         title: {
           display: true,
           text: 'Letters Learned',
-          color: '#9CA3AF',
+          color: '#6B7280', // Updated to match text-muted (4.7:1 WCAG AA)
         },
       },
       y1: {
@@ -111,12 +111,12 @@ const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data,
           drawOnChartArea: false,
         },
         ticks: {
-          color: '#9CA3AF',
+          color: '#6B7280', // Updated to match text-muted (4.7:1 WCAG AA)
         },
         title: {
           display: true,
           text: 'Accuracy %',
-          color: '#9CA3AF',
+          color: '#6B7280', // Updated to match text-muted (4.7:1 WCAG AA)
         },
       },
     },

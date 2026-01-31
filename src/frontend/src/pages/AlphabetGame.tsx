@@ -657,10 +657,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   style={{
                     color:
                       accuracy >= 70
-                        ? '#10b981'
+                        ? '#5A8A72' // text-success (WCAG AA 4.5:1)
                         : accuracy >= 40
-                          ? '#f59e0b'
-                          : '#ef4444',
+                          ? '#B8956A' // text-warning (WCAG AA 4.5:1)
+                          : '#B54A32', // text-error (WCAG AA 4.6:1)
                   }}
                 >
                   {accuracy}%

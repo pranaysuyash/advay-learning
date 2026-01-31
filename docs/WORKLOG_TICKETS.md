@@ -29903,3 +29903,59 @@ Status updates:
 - [2026-01-31 23:45 UTC] **IN_PROGRESS** — 8/10 complete
 
 3. Commit all changes with TCK-20260131-150 reference
+
+
+### TCK-20260201-001 :: WCAG color contrast remediation
+
+Type: REMEDIATION
+Owner: GitHub Copilot
+Created: 2026-02-01 00:00 UTC
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+- In-scope: Update hardcoded colors to WCAG AA compliant palette (#9CA3AF to #6B7280, semantic progress colors)
+- Out-of-scope: Decorative SVGs, canvas colors, background-only colors
+- Behavior change allowed: NO (color values only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): HistoricalProgressChart.tsx, AlphabetGame.tsx, Dashboard.tsx
+- Branch/PR: main
+
+Execution log:
+- [2026-02-01 00:05 UTC] Updated HistoricalProgressChart: #9CA3AF → #6B7280 (4.7:1)
+- [2026-02-01 00:10 UTC] Updated AlphabetGame progress colors (4.5:1+ contrast)
+- [2026-02-01 00:12 UTC] Updated Dashboard progress colors
+- [2026-02-01 00:15 UTC] TypeScript verified (modified files pass)
+
+Status updates:
+- [2026-02-01 00:15 UTC] **DONE** — All changes complete
+
+
+### TCK-20260201-001 :: WCAG color contrast remediation
+
+Type: REMEDIATION
+Owner: GitHub Copilot
+Created: 2026-02-01 00:00 UTC
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+- In-scope: Update hardcoded colors to WCAG AA compliant palette (#9CA3AF to #6B7280, semantic progress colors)
+- Out-of-scope: Decorative SVGs, canvas colors, background-only colors
+- Behavior change allowed: NO (color values only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): HistoricalProgressChart.tsx, AlphabetGame.tsx, Dashboard.tsx
+- Branch/PR: main
+
+Execution log:
+- [2026-02-01 00:05 UTC] Updated HistoricalProgressChart: #9CA3AF → #6B7280 (4.7:1)
+- [2026-02-01 00:10 UTC] Updated AlphabetGame progress colors (4.5:1+ contrast)
+- [2026-02-01 00:12 UTC] Updated Dashboard progress colors
+- [2026-02-01 00:15 UTC] TypeScript verified (modified files pass)
+
+Status updates:
+- [2026-02-01 00:15 UTC] **DONE** — All changes complete

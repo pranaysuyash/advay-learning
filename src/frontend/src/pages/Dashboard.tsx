@@ -357,7 +357,7 @@ export function Dashboard() {
                 <span className="text-sm text-text-secondary">{stat.label}:</span>
                 <span className="text-sm font-semibold text-text-primary">{stat.value}</span>
                 {stat.percent > 0 && (
-                  <progress value={stat.percent} max={100} className='w-16 h-1.5 rounded-full' style={{accentColor: '#f97316'}} />
+                  <progress value={stat.percent} max={100} className='w-16 h-1.5 rounded-full' style={{accentColor: '#E85D04'}} />
                 )}
               </div>
             ))}
@@ -463,7 +463,7 @@ export function Dashboard() {
                                   )}
                             </span>
                           </div>
-                          <progress value={accuracy} max={100} className='w-full h-2 rounded-full' style={{accentColor: accuracy === 100 ? '#10b981' : accuracy >= 70 ? '#3b82f6' : accuracy >= 40 ? '#eab308' : '#ef4444'}} />
+                          <progress value={accuracy} max={100} className='w-full h-2 rounded-full' style={{accentColor: accuracy === 100 ? '#5A8A72' : accuracy >= 70 ? '#5A8A72' : accuracy >= 40 ? '#B8956A' : '#B54A32'}} />
                         </div>
                       </div>
                     );
