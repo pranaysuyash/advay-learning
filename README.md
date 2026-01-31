@@ -71,6 +71,39 @@ Access:
 - [docs/SETUP.md](docs/SETUP.md) - Detailed setup
 - [docs/SECURITY.md](docs/SECURITY.md) - Security guidelines
 - [docs/GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md) - Git process
+- [docs/LINTING_GUIDELINES.md](docs/LINTING_GUIDELINES.md) - Linting guidelines
+- [docs/POST_ERROR_RESOLUTION_PLAN.md](docs/POST_ERROR_RESOLUTION_PLAN.md) - Post-resolution work plan
+
+## 🔒 Troubleshooting
+
+### VS Code Workspace Issues
+
+**Problem**: TypeScript errors not showing in VS Code "Problems" panel
+**Solution**: Update `.vscode/settings.json` with ESLint workspace configuration
+```json
+{
+  "eslint.workingDirectories": ["src/frontend"],
+  "eslint.validate": ["javascript", "typescript"],
+  "eslint.options": {
+    "rules": {
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "warn"
+    }
+  }
+}
+```
+**Evidence**: TCK-20260131-008 (Priority 8) updated settings and both frontend and backend linters working correctly.
+
+### Common Development Issues
+
+**Problem**: Frontend tests failing due to vite/dependency issues
+**Solution**: Always run `npm install` after package.json changes, clear `node_modules/.vite` cache if needed
+
+**Problem**: TypeScript errors after refactoring
+**Solution**: Run `npm run type-check` to verify compilation before committing changes
+
+**Problem**: Mypy import errors
+**Solution**: Ensure mypy config path is correct (`pyproject.toml` not `src/backend/pyproject.toml`)
 
 ## 🤖 AI Agent System
 

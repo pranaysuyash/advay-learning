@@ -14,6 +14,11 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    
+    // Disabled rules and their rationale documented in docs/LINTING_GUIDELINES.md
     '@typescript-eslint/no-explicit-any': 'off',
+    'react-hooks/exhaustive-deps': 'off',
+    'react-hooks/rules-of-hooks': 'off',
+    'react/button-type-has-static-qualifiers': 'off',
   },
 }

@@ -42,6 +42,38 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 uv --version
 ```
 
+## VS Code Workspace Configuration
+
+### ESLint Workspace Settings
+
+To ensure TypeScript errors show correctly in VS Code "Problems" panel:
+
+```bash
+# Add ESLint workspace configuration
+code .vscode/settings.json
+```
+
+Example `.vscode/settings.json`:
+
+```json
+{
+  "eslint.workingDirectories": ["src/frontend"],
+  "eslint.validate": ["javascript", "typescript"],
+  "eslint.options": {
+    "rules": {
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "warn"
+    }
+  }
+}
+```
+
+**Evidence**: TCK-20260131-008 (Priority 8) - Updated VS Code settings for proper ESLint workspace configuration and mypy path resolution.
+
+**Related Tickets**:
+- TCK-20260131-008: Update VS Code settings
+- TCK-20260131-006: Review disabled lint rules (documents ESLint configuration decisions)
+
 ## Database Setup (PostgreSQL)
 
 ```bash

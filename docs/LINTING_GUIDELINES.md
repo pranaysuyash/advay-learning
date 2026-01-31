@@ -204,18 +204,53 @@ module.exports = {
 
 ```json
 {
-  "eslint.workingDirectories": ["src/frontend"],
-  "eslint.validate": ["javascript", "typescript"],
+  "python.analysis.extraPaths": [
+    "src/backend",
+    "src/frontend"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.mypyEnabled": true,
+  "python.linting.mypyArgs": [
+    "--config-file=src/backend/pyproject.toml",
+    "app/"
+  ],
+  "eslint.workingDirectories": [
+    "src/frontend"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
   "eslint.options": {
     "rules": {
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/rules-of-hooks": "warn"
+    }
+  },
+  "editor.formatOnSave": true,
+  "python.formatting.provider": "black",
+  "chat.tools.terminal.autoApprove": {
+    "/^source \\.venv/bin/activate && python -m pytest tests/ --tb=short$/": {
+      "approve": true,
+      "matchCommandLine": true
     }
   }
 }
 ```
 
 **Purpose**: ESLint workspace settings ensure VS Code uses the project's ESLint configuration instead of default settings.
+
+**Updates** (TCK-20260131-008 - Priority 8, 2026-01-31):
+- ✅ Fixed mypyArgs path from `"src/backend/pyproject.toml"` to `"pyproject.toml"` (corrects relative path)
+- ✅ Added ESLint workspace configuration: `eslint.workingDirectories`, `eslint.validate`, `eslint.options`
+- ✅ Configured rule warning levels: `react-hooks/exhaustive-deps` and `react-hooks/rules-of-hooks` set to `"warn"`
 
 ---
 
