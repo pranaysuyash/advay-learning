@@ -1626,3 +1626,5 @@ Created comprehensive angel investor evaluation prompt for MediaPipe-based, came
 Type: POLISH_FOR_DEMO
 Status: **IN_PROGRESS**
 Evidence: Audit complete - FingerNumberShow has hand tracking, LetterHunt has pinch. Starting Mode A/B verification.
+
+- [2026-02-02 00:05 IST] Created CameraPermissionTutorial.tsx (5-step tutorial) | Evidence: commit ready
