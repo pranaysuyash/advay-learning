@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { UIIcon } from '../components/ui/Icon';
 
 interface WellnessTimerProps {
@@ -6,23 +6,33 @@ interface WellnessTimerProps {
   activeThreshold?: number; // Time in minutes before break reminder (default 15)
   inactiveThreshold?: number; // Time in seconds before inactivity reminder (default 60)
   onInactiveDetected?: () => void;
+  attentionLevel?: number; // 0 = not attentive, 1 = fully attentive
 }
 
-const WellnessTimer: React.FC<WellnessTimerProps> = ({
-  onBreakReminder,
-  activeThreshold = 15,
-  inactiveThreshold = 60,
-  onInactiveDetected
-}) => {
+const WellnessTimerComponent: React.FC<WellnessTimerProps> = (props) => {
+  const {
+    onBreakReminder,
+    activeThreshold = 15,
+    inactiveThreshold = 60,
+    onInactiveDetected,
+    attentionLevel
+  } = props;
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
   const [inactiveTime, setInactiveTime] = useState<number>(0); // in seconds
   const [showBreakReminder, setShowBreakReminder] = useState<boolean>(false);
   const [showInactiveReminder, setShowInactiveReminder] = useState<boolean>(false);
   const [isHidden, setIsHidden] = useState<boolean>(true);
-  
+
   const activeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inactiveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameActiveRef = useRef<boolean>(true); // Assume game is active initially
+
+  // Use attentionLevel to influence wellness metrics if provided
+  const attentionFactor = typeof attentionLevel === 'number' ? attentionLevel : 1;
+  const attentionLabel =
+    typeof attentionLevel === 'number'
+      ? `${Math.round(Math.max(0, Math.min(1, attentionFactor)) * 100)}%`
+      : null;
 
   // Format time for display
   const formatTime = (seconds: number): string => {
@@ -32,7 +42,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   };
 
   // Reset inactive timer when activity is detected
-  const resetInactiveTimer = () => {
+  const resetInactiveTimer = useCallback(() => {
     setInactiveTime(0);
     setShowInactiveReminder(false);
     if (inactiveTimerRef.current) {
@@ -43,7 +53,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
     inactiveTimerRef.current = setTimeout(() => {
       setInactiveTime(prev => prev + 1);
     }, 1000);
-  };
+  }, []);
 
   // Effect to track active time
   useEffect(() => {
@@ -130,6 +140,13 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
               <span>Inactive Time:</span>
               <span className="font-mono">{formatTime(inactiveTime)}</span>
             </div>
+
+            {attentionLabel && (
+              <div className="flex justify-between text-white/90 text-xs">
+                <span>Focus:</span>
+                <span className="font-mono">{attentionLabel}</span>
+              </div>
+            )}
             
             {showBreakReminder && (
               <div className="mt-2 p-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
@@ -165,4 +182,4 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   );
 };
 
-export default WellnessTimer;
+export default React.memo(WellnessTimerComponent);

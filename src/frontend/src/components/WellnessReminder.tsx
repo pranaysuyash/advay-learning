@@ -18,7 +18,7 @@ interface ReminderConfig {
   condition: (activeTime: number | undefined, inactiveTime: number | undefined) => boolean;
 }
 
-const WellnessReminder: React.FC<WellnessReminderProps> = ({
+const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
   activeTime: _activeTime,
   inactiveTime,
   onDismiss,
@@ -87,14 +87,14 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
   const reminder = currentReminder!;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <dialog open className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" aria-modal="true" aria-labelledby="wellness-title">
       <div className={`bg-gradient-to-br ${reminder.color} rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-white/20`}>
         <div className="text-center">
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <UIIcon name={reminder.icon as any} size={48} className="text-white" />
           </div>
 
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 id="wellness-title" className="text-2xl font-bold text-white mb-3">
             {reminder.title}
           </h2>
 
@@ -105,6 +105,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
           <div className="flex flex-col sm:flex-row gap-3">
             {onPostpone && (
               <button
+                type="button"
                 onClick={onPostpone}
                 className="flex-1 px-6 py-3 bg-white/20 text-white rounded-xl font-semibold hover:bg-white/30 transition backdrop-blur-sm"
               >
@@ -112,6 +113,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
               </button>
             )}
             <button
+              type="button"
               onClick={onDismiss}
               className="flex-1 px-6 py-3 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition"
             >
@@ -120,8 +122,8 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };
 
-export default WellnessReminder;
+export default React.memo(WellnessReminderComponent);

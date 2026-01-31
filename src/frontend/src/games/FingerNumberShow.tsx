@@ -3,6 +3,7 @@
  import Webcam from 'react-webcam';
  import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
  import { useTTS } from '../hooks/useTTS';
+import { getLettersForGame, Letter } from '../data/alphabets';
  
  interface Point {
  x: number;
@@ -122,6 +123,21 @@
   // @ts-expect-error - showCelebration is used by code below (removed for lint)
   const [showCelebration, setShowCelebration] = useState(false);
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
+
+  // Language and mode selection
+  const LANGUAGES = [
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
+    { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+    { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+    { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+  ] as const;
+
+  type GameMode = 'numbers' | 'letters';
+  const [gameMode, setGameMode] = useState<GameMode>('numbers');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+  const [targetLetter, setTargetLetter] = useState<Letter | null>(null);
+
  const lastSpokenTargetRef = useRef<number | null>(null);
  const lastSpokenAtRef = useRef<number>(0);
  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -172,45 +188,98 @@
  targetBagRef.current = nextBag;
  }, [shuffleInPlace]);
  
+ // Letter bag ref for letter mode
+ const letterBagRef = useRef<Letter[]>([]);
+ const lastLetterRef = useRef<Letter | null>(null);
+
+ const letters = getLettersForGame(selectedLanguage);
+
+ const refillLetterBag = useCallback(() => {
+   const nextBag = [...letters];
+   // Shuffle
+   for (let i = nextBag.length - 1; i > 0; i--) {
+     const j = randomInt(i + 1);
+     [nextBag[i], nextBag[j]] = [nextBag[j], nextBag[i]];
+   }
+   // Avoid immediate repeats
+   if (nextBag.length > 1 && lastLetterRef.current && nextBag[0].char === lastLetterRef.current.char) {
+     const swapIndex = nextBag.length - 1;
+     [nextBag[0], nextBag[swapIndex]] = [nextBag[swapIndex], nextBag[0]];
+   }
+   letterBagRef.current = nextBag;
+ }, [letters, randomInt]);
+
  const setNextTarget = useCallback((levelIndex: number) => {
- const level = DIFFICULTY_LEVELS[levelIndex];
- if (!level) return;
- const { minNumber, maxNumber } = level;
- const nextKey = `${levelIndex}:${minNumber}-${maxNumber}`;
- 
- if (bagKeyRef.current !== nextKey || targetBagRef.current.length === 0) {
- bagKeyRef.current = nextKey;
- refillTargetBag(minNumber, maxNumber);
- }
- 
- const nextTarget = targetBagRef.current.shift();
- if (typeof nextTarget !== 'number') return;
- 
- lastTargetRef.current = nextTarget;
- setTargetNumber(nextTarget);
- const prompt =
- nextTarget === 0
- ? 'Make a fist for zero.'
- : `Show me ${NUMBER_NAMES[nextTarget]} fingers.`;
- setFeedback(prompt);
- setPromptStage('center');
- if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
- promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
- successLockRef.current = false;
- stableMatchRef.current = { startAt: null, target: null, count: null };
- 
- // TTS: speak prompt on target change (debounced to avoid spam).
- if (ttsEnabled) {
- const now = Date.now();
- const shouldSpeak =
- lastSpokenTargetRef.current !== nextTarget || now - lastSpokenAtRef.current > 2000;
- if (shouldSpeak) {
- lastSpokenTargetRef.current = nextTarget;
- lastSpokenAtRef.current = now;
- void speak(prompt);
- }
- }
- }, [refillTargetBag, speak, ttsEnabled]);
+   if (gameMode === 'letters') {
+     // Letter mode
+     if (letterBagRef.current.length === 0) {
+       refillLetterBag();
+     }
+     const nextLetter = letterBagRef.current.shift();
+     if (!nextLetter) return;
+     
+     lastLetterRef.current = nextLetter;
+     setTargetLetter(nextLetter);
+     setTargetNumber(0); // Reset number target
+     const prompt = `Show me the letter ${nextLetter.name}!`;
+     setFeedback(prompt);
+     setPromptStage('center');
+     if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
+     promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
+     successLockRef.current = false;
+     stableMatchRef.current = { startAt: null, target: null, count: null };
+     
+     if (ttsEnabled) {
+       const now = Date.now();
+       const shouldSpeak =
+         lastSpokenTargetRef.current !== nextLetter.char.charCodeAt(0) || now - lastSpokenAtRef.current > 2000;
+       if (shouldSpeak) {
+         lastSpokenTargetRef.current = nextLetter.char.charCodeAt(0);
+         lastSpokenAtRef.current = now;
+         void speak(prompt);
+       }
+     }
+   } else {
+     // Number mode
+     const level = DIFFICULTY_LEVELS[levelIndex];
+     if (!level) return;
+     const { minNumber, maxNumber } = level;
+     const nextKey = `${levelIndex}:${minNumber}-${maxNumber}`;
+     
+     if (bagKeyRef.current !== nextKey || targetBagRef.current.length === 0) {
+       bagKeyRef.current = nextKey;
+       refillTargetBag(minNumber, maxNumber);
+     }
+     
+     const nextTarget = targetBagRef.current.shift();
+     if (typeof nextTarget !== 'number') return;
+     
+     lastTargetRef.current = nextTarget;
+     setTargetNumber(nextTarget);
+     setTargetLetter(null); // Reset letter target
+     const prompt =
+       nextTarget === 0
+         ? 'Make a fist for zero.'
+         : `Show me ${NUMBER_NAMES[nextTarget]} fingers.`;
+     setFeedback(prompt);
+     setPromptStage('center');
+     if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
+     promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
+     successLockRef.current = false;
+     stableMatchRef.current = { startAt: null, target: null, count: null };
+     
+     if (ttsEnabled) {
+       const now = Date.now();
+       const shouldSpeak =
+         lastSpokenTargetRef.current !== nextTarget || now - lastSpokenAtRef.current > 2000;
+       if (shouldSpeak) {
+         lastSpokenTargetRef.current = nextTarget;
+         lastSpokenAtRef.current = now;
+         void speak(prompt);
+       }
+     }
+   }
+ }, [refillTargetBag, refillLetterBag, speak, ttsEnabled, gameMode, letters]);
  
  useEffect(() => {
  const initializeHandLandmarker = async () => {
@@ -403,10 +472,20 @@
  }
  };
  
+ const getLetterNumberValue = (letter: Letter | null): number => {
+   if (!letter) return 0;
+   const code = letter.char.toUpperCase().charCodeAt(0);
+   // A=1, B=2, etc. Support A-Z only for this game
+   if (code >= 65 && code <= 90) return code - 64;
+   return 0;
+ };
+
  const isDetectedMatch =
- targetNumber === 0
- ? currentCount === 0 && handsDetected > 0
- : currentCount === targetNumber;
+   gameMode === 'letters'
+     ? targetLetter && currentCount === getLetterNumberValue(targetLetter) && handsDetected > 0
+     : targetNumber === 0
+       ? currentCount === 0 && handsDetected > 0
+       : currentCount === targetNumber;
  const isPromptFeedback =
  feedback.startsWith('Show me ') || feedback.startsWith('Make a fist ');
  
@@ -419,8 +498,14 @@
  {/* Header */}
  <div className="flex justify-between items-center mb-6">
  <div>
- <h1 className="text-3xl font-bold">Finger Number Show</h1>
- <p className="text-text-secondary">Show numbers with your fingers!</p>
+ <h1 className="text-3xl font-bold">
+ {gameMode === 'letters' ? 'Letter Finger Show' : 'Finger Number Show'}
+ </h1>
+ <p className="text-text-secondary">
+ {gameMode === 'letters' 
+ ? 'Show letters by counting with your fingers!' 
+ : 'Show numbers with your fingers!'}
+ </p>
  </div>
  <div className="text-right">
  <div className="text-2xl font-bold text-text-primary">Score: {score}</div>
@@ -431,8 +516,66 @@
  </div>
  </div>
  
- {/* Difficulty Selection */}
+ {/* Mode Selection */}
  {!isPlaying && (
+ <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
+ <div className="text-sm font-medium text-text-secondary mb-3">
+ Choose Game Mode
+ </div>
+ <div className="flex gap-2 mb-4">
+ <button
+ type="button"
+ onClick={() => setGameMode('numbers')}
+ className={`px-4 py-2 rounded-lg font-medium transition ${
+ gameMode === 'numbers'
+ ? 'bg-pip-orange text-white shadow-soft'
+ : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+ }`}
+ >
+ 🔢 Numbers
+ </button>
+ <button
+ type="button"
+ onClick={() => setGameMode('letters')}
+ className={`px-4 py-2 rounded-lg font-medium transition ${
+ gameMode === 'letters'
+ ? 'bg-pip-orange text-white shadow-soft'
+ : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+ }`}
+ >
+ 🔤 Letters
+ </button>
+ </div>
+
+ {gameMode === 'letters' && (
+ <>
+ <div className="text-sm font-medium text-text-secondary mb-2">
+ Choose Language
+ </div>
+ <div className="flex flex-wrap gap-2">
+ {LANGUAGES.map((lang) => (
+ <button
+ key={lang.code}
+ type="button"
+ onClick={() => setSelectedLanguage(lang.code)}
+ className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+ selectedLanguage === lang.code
+ ? 'bg-success/20 border border-success/30 text-text-success'
+ : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+ }`}
+ >
+ <span>{lang.flag}</span>
+ <span>{lang.name}</span>
+ </button>
+ ))}
+ </div>
+ </>
+ )}
+ </div>
+ )}
+
+ {/* Difficulty Selection */}
+ {!isPlaying && gameMode === 'numbers' && (
  <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
  <div className="text-sm font-medium text-text-secondary mb-2">
  Choose Difficulty
@@ -478,10 +621,14 @@
  <div className="relative">
  {!isPlaying ? (
  <div className="bg-white border border-border rounded-xl p-12 text-center shadow-soft">
- <div className="text-6xl mb-4">🤚</div>
- <h2 className="text-2xl font-semibold mb-4">Ready to Count?</h2>
+ <div className="text-6xl mb-4">{gameMode === 'letters' ? '🔤' : '🤚'}</div>
+ <h2 className="text-2xl font-semibold mb-4">
+ {gameMode === 'letters' ? 'Ready to Learn Letters?' : 'Ready to Count?'}
+ </h2>
  <p className="text-text-secondary mb-8 max-w-md mx-auto">
- Hold up your fingers to show numbers! The camera will count how many fingers you're showing.
+ {gameMode === 'letters'
+ ? 'Show me letters by holding up the right number of fingers! A=1 finger, B=2 fingers, and so on.'
+ : 'Hold up your fingers to show numbers! The camera will count how many fingers you\'re showing.'}
  </p>
  <div className="flex justify-center gap-4">
  <button
@@ -523,6 +670,23 @@
  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
  <div className="bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg">
  <div className="text-center">
+ {gameMode === 'letters' && targetLetter ? (
+ <>
+ <div className="text-sm md:text-base opacity-85 font-semibold mb-2">
+ Show me
+ </div>
+ <div className="text-7xl md:text-8xl font-black leading-none">
+ {targetLetter.char}
+ </div>
+ <div className="text-base md:text-lg opacity-90 font-semibold mt-2">
+ {targetLetter.name}
+ </div>
+ <div className="text-sm opacity-70 mt-1">
+ ({targetLetter.pronunciation})
+ </div>
+ </>
+ ) : (
+ <>
  <div className="text-sm md:text-base opacity-85 font-semibold mb-2">
  {targetNumber === 0 ? 'Make a fist' : 'Show'}
  </div>
@@ -532,6 +696,8 @@
  <div className="text-base md:text-lg opacity-90 font-semibold mt-2">
  {NUMBER_NAMES[targetNumber]}
  </div>
+ </>
+ )}
  </div>
  </div>
  </div>
@@ -541,14 +707,27 @@
  <div className="absolute top-4 left-4 flex gap-2">
  <div className="bg-black/55 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
  {promptStage === 'side' ? (
+ gameMode === 'letters' && targetLetter ? (
+ <span>
+ Show <span className="font-extrabold">{targetLetter.name}</span>{' '}
+ <span className="opacity-80">({targetLetter.char})</span>
+ </span>
+ ) : (
  <span>
  Show <span className="font-extrabold">{targetNumber}</span>{' '}
  <span className="opacity-80">({NUMBER_NAMES[targetNumber]})</span>
+ </span>
+ )
+ ) : (
+ gameMode === 'letters' && targetLetter ? (
+ <span>
+ Target: <span className="font-extrabold">{targetLetter.char}</span>
  </span>
  ) : (
  <span>
  Target: <span className="font-extrabold">{targetNumber}</span>
  </span>
+ )
  )}
  </div>
  <div
@@ -567,7 +746,9 @@
  type="button"
  onClick={() => {
  const prompt =
- targetNumber === 0
+ gameMode === 'letters' && targetLetter
+ ? `Show me the letter ${targetLetter.name}!`
+ : targetNumber === 0
  ? 'Make a fist for zero.'
  : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
  void speak(prompt);
@@ -580,9 +761,11 @@
  🔊
  </button>
  )}
+ {gameMode === 'numbers' && (
  <div className="bg-bg-tertiary/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border text-text-primary">
  {(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}
  </div>
+ )}
  {streak > 2 && (
  <div className="bg-pip-orange/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-soft">
  🔥 {streak} streak!
@@ -609,7 +792,9 @@
  </div>
  
  <p className="text-center text-text-secondary text-sm font-medium">
- Hold up your fingers to show numbers! Use both hands for numbers greater than 5.
+ {gameMode === 'letters'
+ ? 'Hold up fingers for the letter position! A=1, B=2, C=3, and so on.'
+ : 'Hold up your fingers to show numbers! Use both hands for numbers greater than 5.'}
  </p>
  </div>
  )}

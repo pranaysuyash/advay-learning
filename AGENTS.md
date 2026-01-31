@@ -4,8 +4,8 @@
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.0  
-**Last Updated**: 2024-01-28  
+**Version**: 1.2  
+**Last Updated**: 2026-01-31  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -37,6 +37,15 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Never discard contributor code unless clearly inferior
 - Keep meaningful comments/tests/docs unless incorrect
 - Prefer merging both sides when resolving conflicts
+- **No deletions without explicit approval**:
+  - Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
+  - If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
+
+### 5. Staging Is Always Comprehensive
+
+- Always stage changes with: `git add -A`
+- Do not “selectively stage” unless the user explicitly asks.
+- Do not use staging as a mechanism to “drop” other agents’ work.
 
 ---
 
@@ -229,9 +238,7 @@ The audit-to-ticket gap exists because:
 - [ ] Check for existing tests
 - [ ] Verify no uncommitted changes in unrelated files
 - [ ] Confirm scope contract is clear
-- [ ] Stage changes appropriately:
-  - Use `git add -A` for comprehensive audit sessions
-  - Use `git add <specific-files>` for focused code changes
+- [ ] Stage changes using `git add -A` (unless user explicitly requests partial staging)
 ```
 
 ### Before Creating PR
@@ -531,6 +538,7 @@ Pass if:
 7. **Never** claim "ready" without evidence
 8. **Never** expand scope without explicit approval
 9. **Never** run ad-hoc “process” work without curating it into repo prompts/docs (if it will be reused)
+10. **Never** delete other agents’ work/artifacts (docs, audits, tickets, assets) unless the user explicitly asks or explicitly approves it in the active ticket (recorded with evidence).
 
 ---
 
@@ -660,6 +668,7 @@ Risks/notes:
 
 | Version | Date       | Changes         |
 | ------- | ---------- | --------------- |
+| 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes |
 | 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001 |
 | 1.0     | 2024-01-28 | Initial version |
 

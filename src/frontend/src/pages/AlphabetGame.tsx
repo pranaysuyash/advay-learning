@@ -1,4 +1,4 @@
-import {
+import React, {
   useState,
   useRef,
   useEffect,
@@ -36,7 +36,7 @@ const LANGUAGES = [
   { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
 ] as const;
 
-export function AlphabetGame() {
+export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const location = useLocation();
   const navigate = useNavigate();
   const settings = useSettingsStore();
@@ -756,14 +756,19 @@ export function AlphabetGame() {
                   Use your hand to trace letters! The camera will track your
                   finger movements.
                 </p>
-                {/* Language Selector */}
-                <div className='mb-8'>
-                  <label className='block text-lg font-bold text-text-primary mb-4'>
-                    Choose Your Alphabet
-                  </label>
-                  <div className='flex flex-wrap justify-center gap-4'>
+                  {/* Language Selector */}
+                  <div className='mb-8'>
+                    <label className='block text-lg font-bold text-text-primary mb-4' htmlFor='alphabet-select'>
+                      Choose Your Alphabet
+                    </label>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                      <select
+                        id='alphabet-select'
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
                     {LANGUAGES.map((lang) => (
                       <button
+                        type="button"
                         key={lang.code}
                         onClick={() => {
                           setSelectedLanguage(lang.code);
@@ -793,25 +798,27 @@ export function AlphabetGame() {
                   </span>
                 </div>
                 <div className='flex justify-center gap-6'>
-                  <button
-                    onClick={goToHome}
-                    className='px-6 py-4 bg-white border border-border rounded-xl font-bold text-lg text-advay-slate transition hover:bg-bg-tertiary shadow-soft flex items-center gap-3'
-                  >
-                    <UIIcon name='home' size={24} />
-                    Home
-                  </button>
+                   <button
+                     type="button"
+                     onClick={goToHome}
+                     className='px-6 py-4 bg-white border border-border rounded-xl font-bold text-lg text-advay-slate transition hover:bg-bg-tertiary shadow-soft flex items-center gap-3'
+                   >
+                     <UIIcon name='home' size={24} />
+                     Home
+                   </button>
                   {isModelLoading ? (
                     <div className='text-text-secondary px-8 py-4 text-lg font-bold'>
                       Loading hand tracking...
                     </div>
                   ) : (
-                    <button
-                      onClick={startGame}
-                      className='px-8 py-4 bg-pip-orange rounded-xl font-bold text-lg text-white hover:bg-pip-rust transition-all transform hover:scale-105 shadow-soft-lg flex items-center gap-3'
-                    >
-                      <UIIcon name='sparkles' size={24} />
-                      {cameraPermission === 'denied' ? 'Play with Mouse/Touch' : 'Start Learning!'}
-                    </button>
+                     <button
+                       type="submit"
+                       onClick={startGame}
+                       className='px-8 py-4 bg-pip-orange rounded-xl font-bold text-lg text-white hover:bg-pip-rust transition-all transform hover:scale-105 shadow-soft-lg flex items-center gap-3'
+                     >
+                       <UIIcon name='sparkles' size={24} />
+                       {cameraPermission === 'denied' ? 'Play with Mouse/Touch' : 'Start Learning!'}
+                     </button>
                   )}
                 </div>
               </div>
@@ -909,14 +916,26 @@ export function AlphabetGame() {
                     )}
                   </div>
 
-                  <div className='absolute top-4 right-4 flex gap-2'>
-                    <button
-                      onClick={goToHome}
-                      className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft flex items-center gap-2 hover:bg-white'
-                    >
-                      <UIIcon name='home' size={16} />
-                      Home
-                    </button>
+                   <div className='absolute top-4 right-4 flex gap-2'>
+                     <button
+                       type="button"
+                       onClick={goToHome}
+                       className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft flex items-center gap-2 hover:bg-white'
+                     >
+                       <UIIcon name='home' size={16} />
+                       Home
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => setIsDrawing(!isDrawing)}
+                       className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
+                         isDrawing
+                           ? 'bg-error text-white hover:bg-red-700'
+                           : 'bg-success text-white hover:bg-success-hover'
+                       }`}
+                     >
+                       {isDrawing ? 'Stop Drawing' : 'Start Drawing'}
+                     </button>
                     <button
                       onClick={() => setIsDrawing(!isDrawing)}
                       className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
@@ -932,7 +951,7 @@ export function AlphabetGame() {
                         </span>
                       ) : isDrawing ? (
                         <span className='flex items-center gap-2'>
-                          <UIIcon name='hand' size={16} />
+                          <UIIcon name='pencil' size={16} />
                           Stop Drawing
                         </span>
                       ) : (
@@ -943,17 +962,45 @@ export function AlphabetGame() {
                       )}
                     </button>
                     <button
+                      type="button"
+                      onClick={() => setIsDrawing(!isDrawing)}
+                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
+                        isDrawing
+                          ? 'bg-error text-white hover:bg-red-700'
+                          : 'bg-success text-white hover:bg-success-hover'
+                      }`}
+                    >
+                      {isPinching ? (
+                        <span className='flex items-center gap-2'>
+                          <UIIcon name='hand' size={16} />
+                          Pinching...
+                        </span>
+                      ) : isDrawing ? (
+                        <span className='flex items-center gap-2'>
+                          <UIIcon name='pencil' size={16} />
+                          Stop Drawing
+                        </span>
+                      ) : (
+                        <span className='flex items-center gap-2'>
+                          <UIIcon name='pencil' size={16} />
+                          Start Drawing
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
                       onClick={clearDrawing}
                       className='px-4 py-2 bg-vision-blue text-white border border-blue-700/20 rounded-xl transition text-sm font-bold shadow-soft hover:bg-blue-700'
                     >
                       Clear
                     </button>
-                    <button
-                      onClick={stopGame}
-                      className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft hover:bg-white'
-                    >
-                      Stop
-                    </button>
+                     <button
+                       type="button"
+                       onClick={stopGame}
+                       className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft hover:bg-white'
+                     >
+                       Stop
+                     </button>
                   </div>
 
                   {/* In-Game Mascot */}
@@ -983,19 +1030,21 @@ export function AlphabetGame() {
                 <div
                   className={`flex justify-center gap-6 ${isPlaying ? 'mt-48' : ''}`}
                 >
-                  <button
-                    onClick={checkProgress}
-                    className='px-8 py-5 bg-success rounded-2xl font-bold text-xl text-white shadow-soft-lg hover:bg-success-hover hover:scale-105 transition flex items-center gap-3'
-                  >
-                    <UIIcon name='check' size={24} />
-                    Check My Tracing
-                  </button>
-                  <button
-                    onClick={nextLetter}
-                    className='px-8 py-5 bg-vision-blue rounded-2xl font-bold text-xl text-white shadow-soft-lg hover:bg-blue-700 hover:scale-105 transition flex items-center gap-3'
-                  >
-                    Skip to Next →
-                  </button>
+                   <button
+                     type="submit"
+                     onClick={checkProgress}
+                     className='px-8 py-5 bg-success rounded-2xl font-bold text-xl text-white shadow-soft-lg hover:bg-success-hover hover:scale-105 transition flex items-center gap-3'
+                   >
+                     <UIIcon name='check' size={24} />
+                     Check My Tracing
+                   </button>
+                   <button
+                     type="submit"
+                     onClick={nextLetter}
+                     className='px-8 py-5 bg-vision-blue rounded-2xl font-bold text-xl text-white shadow-soft-lg hover:bg-blue-700 hover:scale-105 transition flex items-center gap-3'
+                   >
+                     Skip to Next →
+                   </button>
                 </div>
 
                 <p
@@ -1038,4 +1087,6 @@ export function AlphabetGame() {
       </div>
     </>
   );
-}
+});
+
+export default AlphabetGame;

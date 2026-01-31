@@ -123,40 +123,42 @@ function ConfirmDialog({
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
             onClick={onCancel}
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
-          >
-            <div className="bg-[#1a1a2e] border border-border rounded-2xl p-6 shadow-2xl mx-4">
+          <dialog open className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md" aria-modal="true" aria-labelledby="confirm-dialog-title">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="bg-[#1a1a2e] border border-border rounded-2xl p-6 shadow-2xl mx-4"
+            >
               <div className="flex items-start gap-4 mb-6">
                 <div className={`w-12 h-12 rounded-xl ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
                   <UIIcon name={styles.icon} size={24} className={styles.iconColor} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-1">{dialog.title}</h3>
+                  <h3 id="confirm-dialog-title" className="text-xl font-bold mb-1">{dialog.title}</h3>
                   <p className="text-white/70 text-sm">{dialog.message}</p>
                 </div>
               </div>
               
               <div className="flex gap-3 justify-end">
                 <button
+                  type="button"
                   onClick={onCancel}
                   className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm font-medium"
                 >
                   {dialog.cancelText}
                 </button>
                 <button
+                  type="button"
                   onClick={onConfirm}
                   className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition border-b-4 active:border-b-0 active:translate-y-1 ${styles.confirmBtn}`}
                 >
                   {dialog.confirmText}
                 </button>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </dialog>
         </>
       )}
     </AnimatePresence>

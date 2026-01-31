@@ -3,7 +3,8 @@ import { useState } from 'react';
 export type IconName = 
   | 'letters' | 'target' | 'timer' | 'flame' | 'hand' | 'pencil' | 'home'
   | 'check' | 'lock' | 'unlock' | 'warning' | 'download' | 'hourglass'
-  | 'circle' | 'sparkles' | 'heart' | 'star' | 'camera' | 'trophy';
+  | 'circle' | 'sparkles' | 'heart' | 'star' | 'camera' | 'trophy'
+  | 'coffee' | 'drop' | 'body' | 'eye';
 
 interface UIIconProps {
   name: IconName;
@@ -32,6 +33,10 @@ const iconPaths: Record<IconName, string> = {
   star: '/assets/icons/ui/star.svg',
   camera: '/assets/icons/ui/camera.svg',
   trophy: '/assets/icons/ui/trophy.svg',
+  coffee: '/assets/icons/ui/coffee.svg',
+  drop: '/assets/icons/ui/drop.svg',
+  body: '/assets/icons/ui/body.svg',
+  eye: '/assets/icons/ui/eye.svg',
 };
 
 export function UIIcon({ name, size = 24, className = '', color = 'currentColor' }: UIIconProps) {

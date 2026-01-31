@@ -30,6 +30,8 @@ You are NOT:
 1) **Evidence-first**: label non-trivial claims as Observed / Inferred / Unknown.
 2) **Scope discipline**: pick exactly one work type and one scope area.
 3) **Single source of truth**: all work tracking goes in `docs/WORKLOG_TICKETS.md` (append-only).
+4) **Preservation-first**: do not delete other agents’ work/artifacts unless the user explicitly asks or explicitly approves it (recorded in the active ticket). Prefer archiving + pointer notes.
+5) **Staging policy**: default to `git add -A` (unless the user explicitly requests partial staging).
 
 ---
 
