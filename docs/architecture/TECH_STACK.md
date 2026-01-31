@@ -34,9 +34,13 @@ Option C: **Dear PyGui**
 **Recommendation**: Start with PyQt6 for rapid prototyping, can switch to lighter option if needed.
 
 ### Storage
-- **SQLite**: Local-first database via `sqlite3` (stdlib)
+- **PostgreSQL**: Primary database (via `asyncpg` async driver)
+  - Connection pooling: pool_size=10, max_overflow=20
+  - Pool recycling every 30 minutes
+  - Connection health checks enabled (pool_pre_ping)
+- **SQLAlchemy ORM**: Async ORM for database operations
 - **Pydantic**: Data validation and serialization
-- **Optional**: `sqlalchemy` if ORM complexity grows
+- **Alembic**: Database migrations
 
 ### Audio (Future)
 - **pygame.mixer**: Simple sound playback

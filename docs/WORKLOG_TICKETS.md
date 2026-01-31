@@ -2,6 +2,8 @@
 
 **Comprehensive record of all work — OPEN, IN_PROGRESS, BLOCKED, and DONE tickets.**
 
+> **Infrastructure fix (TCK-20260201-011)**: Removed SQLite regression (session.py restored, pool config fixed), deleted broken root venv. See WORKLOG_ADDENDUM_v2.md for details.
+
 **File Organization**:
 
 - **WORKLOG_TICKETS.md (this file)** — PRIMARY reference. ALL tickets (OPEN, IN_PROGRESS, BLOCKED, DONE) are recorded here. Currently 900KB+, stays primary while <30,000 lines

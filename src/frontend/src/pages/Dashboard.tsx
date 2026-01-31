@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -44,7 +44,7 @@ interface LanguageProgress {
   totalTime: number;
 }
 
-export function Dashboard() {
+export const Dashboard = memo(function DashboardComponent() {
   useAuthStore();
   const { profiles, fetchProfiles, createProfile, updateProfile } =
     useProfileStore();
@@ -813,4 +813,4 @@ export function Dashboard() {
       </motion.div>
     </section>
   );
-}
+});

@@ -21,9 +21,9 @@ interface WellnessDashboardProps {
   }) => void;
 }
 
-const WellnessDashboard: React.FC<WellnessDashboardProps> = ({ 
-  childId, 
-  onWellnessAlert 
+const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
+  childId,
+  onWellnessAlert
 }) => {
   const [metrics, setMetrics] = useState<WellnessMetrics>({
     postureScore: 85,
@@ -33,7 +33,7 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
     hydrationReminders: 1,
     stretchReminders: 1
   });
-  
+
   const [showDetails, setShowDetails] = useState(false);
   const { lastPosture, isLoading: postureLoading } = usePostureDetection();
   const { lastAttention, isLoading: attentionLoading } = useAttentionDetection();
@@ -162,7 +162,7 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
       {/* Wellness Recommendations */}
       <div className="bg-white/5 border border-border rounded-xl p-5">
         <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-          <UIIcon name="lightbulb" size={18} className="text-yellow-400" />
+          <UIIcon name="star" size={18} className="text-yellow-400" />
           Wellness Recommendations
         </h3>
         <ul className="space-y-2 text-sm text-white/80">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FilesetResolver, FaceLandmarker, FaceLandmarkerOptions, FaceLandmarkerResult } from '@mediapipe/tasks-vision';
+import { FilesetResolver, FaceLandmarker, FaceLandmarkerOptions } from '@mediapipe/tasks-vision';
 
 interface AttentionData {
   focusLevel: number; // 0-1 (1 = fully focused)

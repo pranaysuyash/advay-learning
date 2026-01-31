@@ -19,9 +19,9 @@ os.environ["TESTING"] = "true"
 from app.db import session as db_session_module
 from app.db.base_class import Base
 
-# Create test engine
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+# Create test engine (uses PostgreSQL test database from .env.test)
+from app.core.config import settings
+test_engine = create_async_engine(settings.DATABASE_URL, echo=False)
 test_async_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 # Monkey-patch the session module

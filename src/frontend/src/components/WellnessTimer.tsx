@@ -152,7 +152,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
           {showScreenTimeReminder && (
             <div className="mt-3 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
               <div className="flex items-center gap-1 text-red-300 text-xs">
-                <UIIcon name="monitor" size={12} />
+                <UIIcon name="eye" size={12} />
                 <span>Time for a longer break!</span>
               </div>
             </div>

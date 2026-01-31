@@ -153,7 +153,7 @@ When reading audit documents and finding actionable issues:
    ### TCK-YYYYMMDD-NNN :: [Descriptive Title]
 
    Type: [AUDIT_FINDING | BUG | FEATURE | IMPROVEMENT]
-   Owner: [Agent Name]
+   Owner: Pranay (human owner, agent name in execution log)
    Created: [Date]
    Status: **OPEN**
    Priority: [P0 | P1 | P2 | P3]
@@ -715,7 +715,7 @@ cd src/frontend && npm run lint
 ## TCK-YYYYMMDD-### :: [Short Title]
 
 Type: [AUDIT|REMEDIATION|HARDENING|REVIEW|VERIFICATION|POST_MERGE|TRIAGE]
-Owner: [Agent Name]
+Owner: Pranay
 Created: [YYYY-MM-DD HH:MM TZ]
 Status: [OPEN|IN_PROGRESS|BLOCKED|DONE|DROPPED]
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
@@ -21,7 +21,7 @@ interface LetterOption {
   isTarget: boolean;
 }
 
-export function LetterHunt() {
+export const LetterHunt = memo(function LetterHuntComponent() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const webcamRef = useRef<Webcam>(null);
@@ -625,4 +625,4 @@ export function LetterHunt() {
       </motion.div>
     </section>
   );
-}
+});

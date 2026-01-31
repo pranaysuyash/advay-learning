@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
@@ -53,7 +53,7 @@ const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   { name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
 ];
 
-export function FingerNumberShow() {
+export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -905,4 +905,4 @@ export function FingerNumberShow() {
       </motion.div>
     </div>
   );
-}
+});

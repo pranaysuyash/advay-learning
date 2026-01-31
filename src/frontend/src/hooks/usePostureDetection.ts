@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FilesetResolver, PoseLandmarker, PoseLandmarkerOptions, PoseLandmarkerResult } from '@mediapipe/tasks-vision';
+import { FilesetResolver, PoseLandmarker, PoseLandmarkerOptions } from '@mediapipe/tasks-vision';
 
 interface PostureData {
   shoulderAlignment: number; // 0-1 score (1 = perfectly aligned)
@@ -9,7 +9,7 @@ interface PostureData {
 }
 
 interface PostureFeedback {
-  type: 'good' | 'needsAdjustment' | 'poor';
+  type: 'good' | 'needsAdjustment' | 'poor' | 'warning' | 'critical';
   message: string;
   suggestions: string[];
 }
@@ -174,7 +174,7 @@ export function usePostureDetection(onAlert?: (alert: PostureAlert) => void) {
   // Generate feedback based on posture data
   const generatePostureFeedback = (posture: PostureData): PostureFeedback => {
     const { shoulderAlignment, spineCurvature } = posture;
-    
+
     if (shoulderAlignment < 0.6 || spineCurvature < 0.6) {
       return {
         type: 'critical',
