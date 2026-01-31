@@ -327,6 +327,73 @@ cd src/frontend && npm install
 
 ---
 
+## Terminal & Git Workflow Issues
+
+### Heredoc Corruption in Multi-Line Input
+
+**Problem**: Pasting or echoing multi-line git commit messages (especially via heredoc) into terminal can cause:
+- Cursor contamination and terminal state corruption
+- Display shows mangled "cmdand heredoc>" prompts
+- Actual file operations may succeed despite corrupted output
+
+**Root Cause**: Unquoted heredoc delimiters allow shell expansion and cursor position corruption when pasted into certain terminal states.
+
+**Solution - Three Safe Methods** (in order of preference):
+
+1. **Quoted heredoc (BEST for complex messages)**:
+   ```bash
+   git commit -F - <<'DELIMITER'
+   Subject line here
+   
+   Multi-line body text here
+   More details...
+   DELIMITER
+   ```
+   The single quotes around `'DELIMITER'` prevent shell expansion.
+
+2. **File-based message**:
+   ```bash
+   echo "commit message" > /tmp/msg.txt
+   git commit -F /tmp/msg.txt
+   ```
+   Avoids terminal input entirely.
+
+3. **Configure git editor**:
+   ```bash
+   git config core.editor "nano"  # or vim, emacs, etc.
+   git commit  # Will open editor, no terminal paste issues
+   ```
+
+**Always Verify**: After commit, check `git log --oneline -1` to confirm commit succeeded, even if terminal output looks corrupted.
+
+### Parallel Work Preservation (CRITICAL)
+
+**Principle**: Multiple agents may work simultaneously on the same branch. Never discard unrecognized changes.
+
+**Rules**:
+- **Preserve all staged/unstaged changes** from other agents
+- **Never git reset/revert** without explicit user approval
+- **When committing**, include all staged changes (use `git add -A` before committing)
+- **If git status shows unrelated files**, they're from parallel work — leave them staged
+- **Only unstage specific files** if explicitly instructed
+
+**Example Scenario**:
+```bash
+# You see git status shows:
+M  docs/WORKLOG_TICKETS.md       # Your work
+A  src/components/NewFeature.tsx # Parallel agent's work
+
+# CORRECT: Commit both together
+git add -A && git commit -m "..."
+
+# WRONG: Try to cherry-pick only your changes
+git reset src/components/NewFeature.tsx  # ❌ Deletes other agent's work
+```
+
+**Evidence**: When commits include changes you didn't make, that's evidence of parallel work. Check git log to see who authored each change, don't assume it's a mistake.
+
+---
+
 ## Security Checklist
 
 ### For Any Code Change
