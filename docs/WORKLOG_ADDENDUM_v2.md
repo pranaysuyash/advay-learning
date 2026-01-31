@@ -335,3 +335,574 @@ Evidence:
 - Backend verification: `app.main` and `app.db.session` imports successful
 - Dependency check: aiosqlite removed from pyproject.toml
 - Config verification: All .env files use postgresql+asyncpg protocol
+
+---
+
+### TCK-20260131-001 :: Dependency Lock - Generate requirements.txt
+
+Type: DEPLOYMENT_PREP
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P1
+
+**Description**:
+Generate requirements.txt from pyproject.toml for reproducible builds and production deployment. Current state: No requirements.txt exists, which is needed for production deployment scripts.
+
+**Scope contract**:
+
+- In-scope:
+  - Generate requirements.txt from pyproject.toml using `uv pip compile` or `pip-compile`
+  - Pin all dependency versions (direct + transitive)
+  - Document installation steps for fresh environments
+  - Test clean install in fresh venv to verify requirements.txt works
+  - Commit requirements.txt to git
+- Out-of-scope:
+  - Adding new dependencies
+  - Removing dependencies (unless they break)
+  - Dependency upgrades (version freeze only)
+- Behavior change allowed: NO (infrastructure-only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/backend/requirements.txt (new)
+  - src/backend/pyproject.toml (read-only)
+  - docs/SETUP.md (update installation steps)
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] requirements.txt generated from pyproject.toml
+- [ ] All dependencies pinned with exact versions
+- [ ] Clean install in fresh venv succeeds: `uv venv && source .venv/bin/activate && pip install -r requirements.txt`
+- [ ] Application starts successfully after clean install
+- [ ] Installation steps documented in SETUP.md
+- [ ] requirements.txt committed to git
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: No requirements.txt found in src/backend/
+
+**Evidence**:
+
+- File check: `ls src/backend/requirements.txt` - No such file or directory
+- Pydantic settings: Uses pyproject.toml but no requirements.txt generated
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 2.1: "Dependency Lock" (TCK-20260129-085 in roadmap, but different content)
+
+---
+
+### TCK-20260131-002 :: Build & Deploy Scripts - Production Deployment
+
+Type: DEPLOYMENT_PREP
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P0
+
+**Description**:
+Create production build and deployment scripts for both frontend and backend. Current state: No deploy.sh or build.sh exists, only dev/setup scripts.
+
+**Scope contract**:
+
+- In-scope:
+  - Create scripts/build.sh: Production build for frontend + backend
+  - Create scripts/deploy.sh: Deploy to production server
+  - Frontend build: `npm run build` (already exists)
+  - Backend: No build step needed (Python), but verify dependencies installed
+  - Static asset collection (frontend dist files)
+  - Database migration check/run
+  - Health check verification after deployment
+  - Rollback capability (git revert or previous build restore)
+  - Environment variable validation before deploy
+- Out-of-scope:
+  - CI/CD pipeline setup (separate ticket)
+  - Multi-environment deployment (dev/staging/prod) - prod only for now
+  - Docker containers (optional, can be added later)
+- Behavior change allowed: NO (infrastructure-only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - scripts/build.sh (new)
+  - scripts/deploy.sh (new)
+  - scripts/rollback.sh (new)
+  - docs/DEPLOYMENT.md (reference for usage)
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] scripts/build.sh:
+  - Builds frontend (npm run build)
+  - Runs backend typecheck/lint
+  - Creates production artifacts
+  - Exits with error code on failure
+- [ ] scripts/deploy.sh:
+  - Validates production environment variables
+  - Runs database migrations
+  - Deploys frontend build artifacts
+  - Restarts backend server
+  - Runs health check (curl /health endpoint)
+  - Exits with error if health check fails
+  - Provides rollback option
+- [ ] scripts/rollback.sh:
+  - Reverts to previous git commit
+  - Restores previous build artifacts
+  - Restarts backend
+- [ ] All scripts are executable (chmod +x)
+- [ ] Documentation in DEPLOYMENT.md on how to use scripts
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: No deploy.sh, build.sh found in scripts/
+
+**Evidence**:
+
+- Existing scripts: init-db.sh, setup.sh, check.sh, verify.sh (dev/setup scripts only)
+- Missing scripts: deploy.sh, build.sh (production deployment)
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 2.3: "Build & Deploy Scripts" (TCK-20260129-087 in roadmap)
+- TCK-20260131-001: Dependency Lock (must run before build/deploy)
+
+---
+
+### TCK-20260131-003 :: Deployment Documentation
+
+Type: DOCUMENTATION
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P1
+
+**Description**:
+Create comprehensive deployment documentation including DEPLOYMENT.md, ENVIRONMENT.md, and TROUBLESHOOTING.md. Current state: Only DEPLOYMENT_ROADMAP_v1.md exists (plan, not guide).
+
+**Scope contract**:
+
+- In-scope:
+  - Create docs/DEPLOYMENT.md: Step-by-step deployment guide
+  - Create docs/ENVIRONMENT.md: All environment variables documented
+  - Create docs/TROUBLESHOOTING.md: Common deployment issues + solutions
+  - Document production server setup (VPS, dependencies)
+  - Document SSL/HTTPS setup (Let's Encrypt or similar)
+  - Document database setup and backup procedures
+  - Document monitoring and log collection
+  - Include diagrams where helpful (architecture, deployment flow)
+- Out-of-scope:
+  - Video tutorials
+  - Multi-cloud deployment (single platform docs for now)
+- Behavior change allowed: NO (documentation-only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/DEPLOYMENT.md (new)
+  - docs/ENVIRONMENT.md (new)
+  - docs/TROUBLESHOOTING.md (new)
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] docs/DEPLOYMENT.md:
+  - Prerequisites (server requirements, software versions)
+  - Step-by-step deployment process
+  - Frontend deployment (build, configure nginx)
+  - Backend deployment (dependencies, systemd service, uvicorn)
+  - Database setup (PostgreSQL installation, migrations)
+  - SSL/HTTPS setup
+  - Post-deployment verification
+  - Rollback procedure
+- [ ] docs/ENVIRONMENT.md:
+  - All environment variables listed with descriptions
+  - Default values (for dev)
+  - Production values (what to set)
+  - How to generate SECRET_KEY
+  - How to configure DATABASE_URL
+  - How to configure CORS for production domain
+  - Optional variables (AWS S3, Redis) and when they're needed
+- [ ] docs/TROUBLESHOOTING.md:
+  - Server won't start (common issues)
+  - Database connection errors
+  - Frontend build errors
+  - Permission errors
+  - Port conflicts
+  - SSL certificate issues
+  - Health check failures
+  - Log locations and how to read them
+- [ ] All docs are markdown with clear sections
+- [ ] Code examples are copy-paste ready
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: No DEPLOYMENT.md, ENVIRONMENT.md, TROUBLESHOOTING.md found in docs/
+
+**Evidence**:
+
+- File check: `ls docs/ | grep -E "DEPLOYMENT|ENVIRONMENT|TROUBLESHOOT"` - No results
+- Existing: DEPLOYMENT_ROADMAP_v1.md (plan only), not execution guide
+- Existing: SETUP.md (dev setup), not production deployment
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 3.1: "Deployment Documentation" (TCK-20260129-088 in roadmap)
+
+---
+
+### TCK-20260131-004 :: Operations Runbook
+
+Type: DOCUMENTATION
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P1
+
+**Description**:
+Create operations runbook for day-to-day production management. Current state: No RUNBOOK.md exists, only dev scripts.
+
+**Scope contract**:
+
+- In-scope:
+  - Create docs/RUNBOOK.md or RUNBOOK.md at root
+  - Start/stop/restart procedures for frontend + backend
+  - Database backup commands (automated and manual)
+  - Log locations and how to monitor them
+  - Common maintenance tasks (clearing cache, restarting services)
+  - Security updates (how to update dependencies, system packages)
+  - Scaling procedures (what to do if traffic increases)
+  - Monitoring setup (basic log monitoring, no paid tools initially)
+  - Incident response (what to do when things break)
+- Out-of-scope:
+  - Complex orchestration (Kubernetes, Nomad)
+  - Advanced monitoring (Prometheus, Grafana, Sentry) - can be added later
+  - Automated scaling (manual procedures only for now)
+- Behavior change allowed: NO (documentation-only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/RUNBOOK.md (new) or RUNBOOK.md (new at root)
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] RUNBOOK.md includes:
+  - **Service Management**:
+    - Start frontend: `systemctl start advay-frontend`
+    - Stop frontend: `systemctl stop advay-frontend`
+    - Restart frontend: `systemctl restart advay-frontend`
+    - Start backend: `systemctl start advay-backend`
+    - Stop backend: `systemctl stop advay-backend`
+    - Restart backend: `systemctl restart advay-backend`
+  - **Database Backups**:
+    - Automated backup script (cron job setup)
+    - Manual backup command: `pg_dump ...`
+    - Restore procedure: `psql ... < backup.sql`
+    - Backup location and rotation policy
+  - **Log Management**:
+    - Frontend logs: `/var/log/advay-frontend/`
+    - Backend logs: `/var/log/advay-backend/`
+    - How to tail logs: `tail -f /var/log/advay-backend/app.log`
+    - How to search logs: `grep ERROR /var/log/advay-backend/app.log`
+  - **Common Tasks**:
+    - Clear frontend cache: `rm -rf dist/* && npm run build`
+    - Check service status: `systemctl status advay-backend`
+    - Check disk space: `df -h`
+    - Check memory: `free -h`
+  - **Security Updates**:
+    - Update system: `apt update && apt upgrade`
+    - Update Python packages: `uv pip install -r requirements.txt --upgrade`
+    - Review security advisories
+  - **Incident Response**:
+    - What to do if server is down
+    - What to do if database is down
+    - What to do if frontend is slow
+    - How to contact on-call (who to alert)
+- [ ] All commands are copy-paste ready
+- [ ] Sections are clearly labeled and easy to navigate
+- [ ] Includes contact information (who to contact for issues)
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: No RUNBOOK.md found
+
+**Evidence**:
+
+- File check: `ls | grep RUNBOOK` - No results
+- File check: `ls docs/RUNBOOK.md` - No such file
+- Existing: scripts/init-db.sh (database init), but no backup or runbook
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 3.2: "Operations Runbook" (TCK-20260129-089 in roadmap)
+
+---
+
+### TCK-20260131-005 :: Pre-Launch Verification Checklist
+
+Type: VERIFICATION
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P0
+
+**Description**:
+Run comprehensive pre-launch verification checklist before production deployment. Current state: Checklist defined in DEPLOYMENT_ROADMAP_v1.md but not executed.
+
+**Scope contract**:
+
+- In-scope:
+  - Verify all environment variables are set in production
+  - Test database migrations on production database
+  - Verify health endpoint is responding
+  - Verify frontend builds without errors
+  - Test authentication flow (register, login, logout)
+  - Test all games (FingerNumberShow, AlphabetGame, LetterHunt, ConnectTheDots)
+  - Verify progress saving to database
+  - Test camera permissions and hand tracking
+  - Test CORS configuration (frontend domain whitelisted)
+  - Verify SSL/HTTPS is working
+  - Test error pages (404, 500)
+  - Test responsive design on mobile/tablet/desktop
+  - Run lighthouse performance audit
+  - Verify no hardcoded secrets in code
+  - Check for console errors in browser
+  - Test with multiple users (session isolation)
+  - Verify email notifications work (if implemented)
+- Out-of-scope:
+  - Load testing (separate ticket)
+  - Security audit (separate ticket)
+  - Penetration testing (separate ticket)
+- Behavior change allowed: NO (verification-only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/PRE_LAUNCH_CHECKLIST.md (new, as verification artifact)
+  - Production server (deployment target)
+  - Production database (testing target)
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] All checklist items completed and documented
+- [ ] Any failing items are fixed or documented as known issues
+- [ ] Evidence collected for each checklist item (screenshots, logs, test outputs)
+- [ ] Verification document (PRE_LAUNCH_CHECKLIST.md) created with:
+  - Checklist item
+  - Status (PASS/FAIL/KNOWN_ISSUE)
+  - Evidence (screenshot link, log excerpt, test output)
+  - Notes (any issues found or fixes applied)
+- [ ] Stakeholder sign-off (Pranay approves)
+- [ ] Ready for production launch
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: Checklist defined in DEPLOYMENT_ROADMAP_v1.md but not executed
+
+**Evidence**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 4.1: Pre-Launch Checklist defined (10 items)
+- Checklist items: env vars, migrations, health, frontend build, auth, games, progress, camera, CORS, SSL
+- Current status: Checklist not executed yet
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+
+**Verification checklist (from DEPLOYMENT_ROADMAP_v1.md)**:
+
+- [ ] All env vars set in production
+- [ ] Database migrations run
+- [ ] Health endpoint responding
+- [ ] Frontend builds without errors
+- [ ] Authentication working
+- [ ] Game functionality tested
+- [ ] Progress saving working
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 4.1: "Pre-Launch Checklist" (TCK-20260129-090 in roadmap)
+- Must complete before: TCK-20260131-006 (Production Launch)
+
+---
+
+### TCK-20260131-006 :: Production Launch
+
+Type: DEPLOYMENT
+Owner: TBD
+Created: 2026-01-31 23:00 UTC
+Status: **OPEN**
+Priority: P0
+
+**Description**:
+Deploy application to production and announce to users. Current state: Not deployed yet.
+
+**Scope contract**:
+
+- In-scope:
+  - Deploy backend to production server (use scripts/deploy.sh)
+  - Deploy frontend to production server (build + configure nginx)
+  - Run database migrations (or verify already run)
+  - Verify health endpoint is healthy (curl https://api.advay.com/health)
+  - Run smoke tests (critical user flows):
+    - Register new user
+    - Login
+    - Play one game (FingerNumberShow)
+    - Verify progress saved
+  - Monitor logs for errors in first 10 minutes
+  - If critical issues: Rollback immediately
+  - Announce to users (email, social media, or in-app)
+  - Monitor user feedback (support email, app reviews)
+- Out-of-scope:
+  - Marketing campaign (separate work)
+  - App store submission (separate work - see RESEARCH-011-DEPLOYMENT-DISTRIBUTION.md)
+- Behavior change allowed: YES (production deployment is the goal)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- Production server: [TODO: define server URL]
+- Production domain: [TODO: define domain]
+- Production database: [TODO: define database location]
+- Branch/PR: main
+
+**Acceptance Criteria**:
+
+- [ ] Backend deployed and serving on production domain
+- [ ] Frontend deployed and serving on production domain
+- [ ] SSL/HTTPS working (no certificate warnings)
+- [ ] Health endpoint returns 200 OK
+- [ ] Smoke tests pass:
+  - [ ] Register new user
+  - [ ] Login
+  - [ ] Play game
+  - [ ] Progress saves
+- [ ] No errors in backend logs (first 10 minutes)
+- [ ] No errors in frontend console (first 10 minutes)
+- [ ] Rollback plan documented (git commit hash to revert to)
+- [ ] Users notified of launch
+- [ ] Support email configured and working
+- [ ] Monitoring set up (basic log monitoring)
+
+**Execution log**:
+
+- [2026-01-31 23:00 UTC] Ticket created | Evidence: Not deployed yet
+
+**Evidence**:
+
+- Production check: `curl https://advay.com` - Connection refused or 404
+- Production check: `curl https://api.advay.com/health` - Connection refused or 404
+
+**Status updates**:
+
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting pre-launch verification completion
+
+**Prerequisites**:
+
+- TCK-20260131-001: Dependency Lock (DONE)
+- TCK-20260131-002: Build & Deploy Scripts (DONE)
+- TCK-20260131-003: Deployment Documentation (DONE)
+- TCK-20260131-004: Operations Runbook (DONE)
+- TCK-20260131-005: Pre-Launch Verification (DONE)
+
+**Related tickets**:
+
+- DEPLOYMENT_ROADMAP_v1.md Phase 4.2: "Launch" (TCK-20260129-091 in roadmap)
+- RESEARCH-011-DEPLOYMENT-DISTRIBUTION.md: App store deployment (Google Play, Apple App Store)
+
+**Risks/notes**:
+
+- Must have rollback plan ready before deploying
+- Monitor logs closely for first hour after launch
+- Be ready to address user feedback immediately
+- Coordinate with any marketing/announcement timing
+
+---
+
+## Deployment Readiness Summary
+
+### ✅ Already DONE (from worklog or codebase):
+
+1. **Environment & Secrets Configuration** ✅ (TCK-20260129-201)
+   - config.py has SECRET_KEY validation (min 32 chars, rejects weak defaults)
+   - .env.example exists and documented
+   - All secrets in environment variables
+
+2. **PostgreSQL Connection Setup** ✅ (TCK-20260129-202)
+   - session.py has PostgreSQL connection pooling configured
+   - .env.example uses postgresql+asyncpg protocol
+   - scripts/init-db.sh exists for database initialization
+
+3. **Health Checks & Monitoring** ✅ (TCK-20260129-086)
+   - health.py with database check and response_time_ms tracking
+   - /health endpoint registered in main.py
+   - Returns 503 if unhealthy, 200 if healthy
+
+### 🔵 OPEN (tickets created in ADDENDUM_v2):
+
+4. **Dependency Lock & Reproducible Builds** 🔵 (TCK-20260131-001)
+   - No requirements.txt exists
+   - Need to generate from pyproject.toml
+   - Estimated: 2 hours
+
+5. **Build & Deploy Scripts** 🔵 (TCK-20260131-002)
+   - No deploy.sh, build.sh exists
+   - Need to create production deployment scripts
+   - Estimated: 4 hours
+
+6. **Deployment Documentation** 🔵 (TCK-20260131-003)
+   - No DEPLOYMENT.md, ENVIRONMENT.md, TROUBLESHOOTING.md exists
+   - Only plan (DEPLOYMENT_ROADMAP_v1.md) exists
+   - Estimated: 4 hours
+
+7. **Operations Runbook** 🔵 (TCK-20260131-004)
+   - No RUNBOOK.md exists
+   - Need to document start/stop, backups, logs, incident response
+   - Estimated: 3 hours
+
+8. **Pre-Launch Verification** 🔵 (TCK-20260131-005)
+   - Checklist defined but not executed
+   - Need to run comprehensive verification
+   - Estimated: 4 hours
+
+9. **Production Launch** 🔵 (TCK-20260131-006)
+   - Not deployed yet
+   - Dependent on all above tickets
+   - Estimated: 2 hours
+
+### Total Estimated Work: ~19 hours (~2.5 days focused work)
+
+### Next Immediate Actions:
+
+1. **Generate requirements.txt** (TCK-20260131-001) - 2 hours
+2. **Create build/deploy scripts** (TCK-20260131-002) - 4 hours
+3. **Write deployment documentation** (TCK-20260131-003) - 4 hours
+4. **Write operations runbook** (TCK-20260131-004) - 3 hours
+5. **Run pre-launch verification** (TCK-20260131-005) - 4 hours
+6. **Deploy to production** (TCK-20260131-006) - 2 hours

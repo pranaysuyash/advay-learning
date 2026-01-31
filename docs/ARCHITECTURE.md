@@ -68,6 +68,19 @@ Camera → MediaPipe → Hand Landmarks → Drawing Canvas
                                     → API (save progress)
 ```
 
+**Input Methods**: The app supports 6 input methods (4 camera-based, 2 fallback):
+- Mode A: Button Toggle
+- Mode B: Pinch Gesture
+- Mode C: Dwell to Toggle (planned)
+- Mode D: Two-Handed Control (planned)
+- Method E: Mouse Click (fallback)
+- Method F: Touch Gestures (fallback)
+
+See [INPUT_METHODS_SPECIFICATION.md](INPUT_METHODS_SPECIFICATION.md) for complete details.
+
+**Camera Integration**: All games use MediaPipe hand tracking as primary input.  
+See [architecture/CAMERA_INTEGRATION_GUIDE.md](architecture/CAMERA_INTEGRATION_GUIDE.md) for implementation guide.
+
 ### 2. Progress Tracking
 ```
 User Action → Frontend Event → API Request → Database → Parent Dashboard
