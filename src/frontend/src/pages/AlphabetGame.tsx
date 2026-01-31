@@ -141,22 +141,19 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setAccuracy(0);
 
       // Initialize hand tracking using centralized hook
+      // Note: We don't check isHandTrackingReady synchronously after this call
+      // because React state doesn't update mid-function. A useEffect monitors it.
       if (!isHandTrackingReady) {
-        await initializeHandTracking();
+        setFeedback('Loading hand tracking...');
+        initializeHandTracking(); // Don't await - let useEffect handle the result
+      } else {
+        setFeedback('Camera ready!');
       }
 
       // Start wellness monitoring after game starts
       if (webcamRef.current?.video) {
         startPostureMonitoring(webcamRef.current.video);
         startAttentionMonitoring(webcamRef.current.video);
-      }
-
-      if (isHandTrackingReady) {
-        setFeedback('Camera ready!');
-      } else {
-        setFeedback(
-          'Camera tracking unavailable. You can still draw by touching the screen.',
-        );
       }
     } catch {
       setCameraPermission('denied');
@@ -285,6 +282,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   };
   // Mark as used for now (can be removed if feature not needed)
   void toggleHighContrast;
+
+  // Effect to update feedback when hand tracking becomes ready during gameplay
+  useEffect(() => {
+    if (isPlaying && isHandTrackingReady) {
+      setFeedback('Camera ready!');
+      console.log('[AlphabetGame] Hand tracking became ready during gameplay');
+    }
+  }, [isPlaying, isHandTrackingReady]);
 
   useEffect(() => {
     const hasCompletedTutorial =

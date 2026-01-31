@@ -1628,3 +1628,4 @@ Status: **IN_PROGRESS**
 Evidence: Audit complete - FingerNumberShow has hand tracking, LetterHunt has pinch. Starting Mode A/B verification.
 
 - [2026-02-02 00:05 IST] Created CameraPermissionTutorial.tsx (5-step tutorial) | Evidence: commit ready
+- [2026-02-02 00:10 IST] Fixed TypeScript error in CameraPermissionTutorial (removed unused import) | Evidence: type-check passes

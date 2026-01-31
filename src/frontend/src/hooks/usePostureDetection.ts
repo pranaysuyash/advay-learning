@@ -42,7 +42,7 @@ export function usePostureDetection(onAlert?: (alert: PostureAlert) => void) {
         
         const options: PoseLandmarkerOptions = {
           baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker/heavy/1/pose_landmarker_heavy.task',
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
             delegate: 'GPU',
           },
           runningMode: 'VIDEO',

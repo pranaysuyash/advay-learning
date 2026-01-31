@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UIIcon } from './ui/Icon';
 
 interface CameraPermissionTutorialProps {
   onDismiss: () => void;
