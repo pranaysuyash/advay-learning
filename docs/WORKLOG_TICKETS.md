@@ -28575,3 +28575,51 @@ AlphabetGame successfully refactored to use centralized hooks:
 
 Build: PASS
 Tests: 134/135 passing (1 pre-existing failure)
+
+---
+
+### TCK-20260131-146 :: Hand Tracking Centralization - Phase 5: Other Games
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-31 17:05 UTC
+Status: **OPEN**
+Priority: P1
+
+Description:
+Refactor remaining games (LetterHunt, FingerNumberShow) to use centralized hooks. This is optional for P0 - AlphabetGame already proves the concept.
+
+Parent Ticket: TCK-20260131-141
+
+Scope contract:
+- In-scope:
+  - Refactor LetterHunt.tsx to use useHandTracking hook
+  - Refactor FingerNumberShow.tsx to use useHandTracking hook
+  - Add consistent pinch detection with hysteresis
+  - Add frame skipping for performance
+- Out-of-scope:
+  - New features
+  - UI changes
+  - ConnectTheDots (separate ticket TCK-20260131-118)
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/LetterHunt.tsx (REFACTOR)
+  - src/frontend/src/games/FingerNumberShow.tsx (REFACTOR)
+- Branch/PR: main
+Git availability: YES
+
+Acceptance Criteria:
+- [ ] LetterHunt uses centralized hooks
+- [ ] FingerNumberShow uses centralized hooks
+- [ ] Both games still work correctly
+- [ ] Tests pass
+- [ ] Build passes
+
+Next actions:
+1. Refactor LetterHunt
+2. Refactor FingerNumberShow
+3. Test both games
+4. Mark complete
