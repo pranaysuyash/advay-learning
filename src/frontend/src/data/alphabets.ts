@@ -247,9 +247,31 @@ export const alphabets: Record<string, Alphabet> = {
   tamil: tamilAlphabet,
 };
 
-// Get alphabet by language
+// Language code mapping: 2-letter codes to full names
+// Profile store uses 2-letter codes, alphabet data uses full names
+const languageCodeMap: Record<string, string> = {
+  en: 'english',
+  hi: 'hindi',
+  kn: 'kannada',
+  te: 'telugu',
+  ta: 'tamil',
+  // Also support full names for backward compatibility
+  english: 'english',
+  hindi: 'hindi',
+  kannada: 'kannada',
+  telugu: 'telugu',
+  tamil: 'tamil',
+};
+
+// Normalize language code to full name
+export function normalizeLanguage(language: string): string {
+  return languageCodeMap[language.toLowerCase()] || 'english';
+}
+
+// Get alphabet by language (accepts both 2-letter codes and full names)
 export function getAlphabet(language: string): Alphabet {
-  return alphabets[language] || englishAlphabet;
+  const normalized = normalizeLanguage(language);
+  return alphabets[normalized] || englishAlphabet;
 }
 
 // Get letters for game

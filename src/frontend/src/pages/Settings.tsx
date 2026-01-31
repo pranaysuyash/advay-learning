@@ -17,9 +17,7 @@ export function Settings() {
   } = useProgressStore();
   const confirm = useConfirm();
   const toast = useToast();
-  const [cameraPermission, setCameraPermission] = useState<
-    'granted' | 'denied' | 'prompt'
-  >('prompt');
+  const cameraPermission = settings.cameraPermissionState;
   const [parentGatePassed, setParentGatePassed] = useState(false);
   const [holdingGate, setHoldingGate] = useState(false);
   const [holdDuration, setHoldDuration] = useState(0);
@@ -85,29 +83,25 @@ export function Settings() {
     };
   }, []);
 
-  // Check camera permission on mount
+  // Sync camera permission state on mount (only if unknown)
   useEffect(() => {
-    const checkCameraPermission = async () => {
+    if (cameraPermission !== 'unknown') return;
+    
+    const syncPermission = async () => {
       try {
         const result = await navigator.permissions.query({
           name: 'camera' as PermissionName,
         });
-        setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-
-        result.addEventListener('change', () => {
-          setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-        });
+        if (result.state === 'granted' || result.state === 'denied') {
+          settings.updateSettings({ cameraPermissionState: result.state });
+        }
       } catch {
-        // Fallback: try to get user media
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then(() => setCameraPermission('granted'))
-          .catch(() => setCameraPermission('denied'));
+        // API not supported, leave as unknown until user interacts
       }
     };
 
-    checkCameraPermission();
-  }, []);
+    syncPermission();
+  }, [cameraPermission, settings]);
 
   const handleCameraToggle = async () => {
     if (!settings.cameraEnabled) {
@@ -117,11 +111,9 @@ export function Settings() {
           video: true,
         });
         stream.getTracks().forEach((track) => track.stop());
-        settings.updateSettings({ cameraEnabled: true });
-        setCameraPermission('granted');
+        settings.updateSettings({ cameraEnabled: true, cameraPermissionState: 'granted' });
       } catch {
-        settings.updateSettings({ cameraEnabled: false });
-        setCameraPermission('denied');
+        settings.updateSettings({ cameraEnabled: false, cameraPermissionState: 'denied' });
         alert(
           'Camera permission denied. Please allow camera access in your browser settings.',
         );
@@ -209,11 +201,11 @@ export function Settings() {
                       aria-label='Application UI language'
                       className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
-                      <option value='english'>English</option>
-                      <option value='hindi'>Hindi (हिन्दी)</option>
-                      <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
-                      <option value='telugu'>Telugu (తెలుగు)</option>
-                      <option value='tamil'>Tamil (தமிழ்)</option>
+                      <option value='en'>English</option>
+                      <option value='hi'>Hindi (हिन्दी)</option>
+                      <option value='kn'>Kannada (ಕನ್ನಡ)</option>
+                      <option value='te'>Telugu (తెలుగు)</option>
+                      <option value='ta'>Tamil (தமிழ்)</option>
                     </select>
                   </div>
 
@@ -231,9 +223,11 @@ export function Settings() {
                       aria-label='Game content language'
                       className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
-                      <option value='english'>English</option>
-                      <option value='hindi'>Hindi (हिन्दी)</option>
-                      <option value='kannada'>Kannada (ಕನ್ನಡ)</option>
+                      <option value='en'>English</option>
+                      <option value='hi'>Hindi (हिन्दी)</option>
+                      <option value='kn'>Kannada (ಕನ್ನಡ)</option>
+                      <option value='te'>Telugu (తెలుగు)</option>
+                      <option value='ta'>Tamil (தமிழ்)</option>
                     </select>
                   </div>
 
@@ -322,35 +316,23 @@ export function Settings() {
                     </button>
                   </div>
 
-                  {/* Camera Permission Status */}
-                  <div
-                    className={`text-sm px-4 py-2 rounded-lg ${
-                      cameraPermission === 'granted'
-                        ? 'bg-green-500/20 text-green-400'
-                        : cameraPermission === 'denied'
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-yellow-500/20 text-yellow-400'
-                    }`}
-                  >
-                    {cameraPermission === 'granted' && (
+                  {/* Camera Permission Status - only show for granted or denied */}
+                  {cameraPermission === 'granted' && (
+                    <div className="text-sm px-4 py-2 rounded-lg bg-green-500/20 text-green-400">
                       <span className="flex items-center gap-2">
                         <UIIcon name="check" size={16} className="text-green-400" />
                         Camera permission granted
                       </span>
-                    )}
-                    {cameraPermission === 'denied' && (
+                    </div>
+                  )}
+                  {cameraPermission === 'denied' && (
+                    <div className="text-sm px-4 py-2 rounded-lg bg-red-500/20 text-red-400">
                       <span className="flex items-center gap-2">
                         <UIIcon name="warning" size={16} />
                         Camera permission denied - check browser settings
                       </span>
-                    )}
-                    {cameraPermission === 'prompt' && (
-                      <span className="flex items-center gap-2">
-                        <UIIcon name="warning" size={16} />
-                        Camera permission not requested yet
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Hand Tracking Delegate */}
                   <div>
@@ -446,6 +428,27 @@ export function Settings() {
                             : 'translate-x-0.5'
                         }`}
                       />
+                    </button>
+                  </div>
+
+                  <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
+                    <div>
+                      <div className='font-medium'>Show Tutorial Again</div>
+                      <div className='text-sm text-white/60'>
+                        Reset tutorial for next game session
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        settings.updateSettings({
+                          tutorialCompleted: false,
+                          onboardingCompleted: false,
+                        });
+                        toast.showToast('Tutorial will show on next game', 'success');
+                      }}
+                      className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition text-sm'
+                    >
+                      Reset Tutorial
                     </button>
                   </div>
                 </div>

@@ -240,3 +240,37 @@ Interpretation: The infinite loop was causing the debug logs to flood the consol
 
 Refs:
 - Ticket: TCK-20260130-015
+
+---
+
+### CLM-20260131-006 :: FingerNumberShow HMR/Fast Refresh Fix
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Fixed HMR warning by extracting countExtendedFingersFromLandmarks to separate file
+Evidence type: Observed
+
+Evidence:
+
+**Problem**: Vite/React Fast Refresh showed warning:
+```
+Could not Fast Refresh ("countExtendedFingersFromLandmarks" export is incompatible)
+```
+
+This happened because exporting non-component functions from a React component file breaks Fast Refresh.
+
+**Fix**: 
+1. Moved `countExtendedFingersFromLandmarks` to new file `src/games/fingerCounting.ts`
+2. Updated `FingerNumberShow.tsx` to import from the new file
+3. Updated test file `fingerCounting.test.ts` to import from new location
+
+**Files changed**:
+- Created: `src/frontend/src/games/fingerCounting.ts`
+- Modified: `src/frontend/src/games/FingerNumberShow.tsx`
+- Modified: `src/frontend/src/games/__tests__/fingerCounting.test.ts`
+
+**Result**: HMR warning eliminated, all 155 tests pass
+
+Refs:
+- Ticket: TCK-20260130-015

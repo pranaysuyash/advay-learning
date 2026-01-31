@@ -10,6 +10,9 @@ interface Settings {
   timeLimit: number;
   showHints: boolean;
   handTrackingDelegate: 'GPU' | 'CPU'; // NEW: Hand tracking delegate preference
+  cameraPermissionState: 'granted' | 'denied' | 'prompt' | 'unknown';
+  tutorialCompleted: boolean;
+  onboardingCompleted: boolean;
 }
 
 interface SettingsState extends Settings {
@@ -18,14 +21,17 @@ interface SettingsState extends Settings {
 }
 
 const defaultSettings: Settings = {
-  language: 'english',
-  gameLanguage: 'english', // NEW: Default game language
+  language: 'en',
+  gameLanguage: 'en', // Default game language (2-letter codes for consistency with profiles)
   difficulty: 'medium', // Default to medium (more letters than easy)
   cameraEnabled: false, // Default to off for privacy
   soundEnabled: true,
   timeLimit: 0, // No limit
   showHints: true,
   handTrackingDelegate: 'GPU', // NEW: Default to GPU for best performance
+  cameraPermissionState: 'unknown',
+  tutorialCompleted: false,
+  onboardingCompleted: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(

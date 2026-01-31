@@ -1,15 +1,20 @@
 import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuthStore } from '../store';
+import { useAuthStore, useSettingsStore } from '../store';
+import { OnboardingFlow } from '../components/OnboardingFlow';
 
 export function Home() {
   const { isAuthenticated } = useAuthStore();
+  const { onboardingCompleted } = useSettingsStore();
 
   // Redirect to dashboard if already logged in
   if (isAuthenticated) {
     return <Navigate to='/dashboard' replace />;
   }
+
   return (
+    <>
+      {!onboardingCompleted && <OnboardingFlow />}
     <div className='max-w-7xl mx-auto px-4 py-16'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -78,5 +83,6 @@ export function Home() {
         </div>
       </section>
     </div>
+    </>
   );
 }

@@ -7,8 +7,8 @@ describe('SettingsStore', () => {
   beforeEach(() => {
     // Reset store state before each test
     useSettingsStore.setState({
-      language: 'english',
-      gameLanguage: 'english',
+      language: 'en',
+      gameLanguage: 'en',
       difficulty: 'medium',
       cameraEnabled: false,
       soundEnabled: true,
@@ -24,8 +24,8 @@ describe('SettingsStore', () => {
   afterEach(() => {
     // Reset store state after each test
     useSettingsStore.setState({
-      language: 'english',
-      gameLanguage: 'english',
+      language: 'en',
+      gameLanguage: 'en',
       difficulty: 'medium',
       cameraEnabled: false,
       soundEnabled: true,
@@ -40,8 +40,8 @@ describe('SettingsStore', () => {
   describe('initial state', () => {
     it('should have default settings on mount', () => {
       const store = useSettingsStore.getState();
-      expect(store.language).toBe('english');
-      expect(store.gameLanguage).toBe('english');
+      expect(store.language).toBe('en');
+      expect(store.gameLanguage).toBe('en');
       expect(store.difficulty).toBe('medium');
       expect(store.cameraEnabled).toBe(false);
       expect(store.soundEnabled).toBe(true);
@@ -51,7 +51,7 @@ describe('SettingsStore', () => {
 
     it('should load settings from localStorage on mount', () => {
       const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
-      const mockSettings = { language: 'kannada', gameLanguage: 'kannada' };
+      const mockSettings = { language: 'kn', gameLanguage: 'kn' };
 
       getItemSpy.mockReturnValueOnce(JSON.stringify(mockSettings));
 
@@ -59,8 +59,8 @@ describe('SettingsStore', () => {
       create(
         persist(
           () => ({
-            language: 'english',
-            gameLanguage: 'english',
+            language: 'en',
+            gameLanguage: 'en',
             difficulty: 'medium',
             cameraEnabled: false,
             soundEnabled: true,
@@ -81,11 +81,11 @@ describe('SettingsStore', () => {
     it('should update language setting', () => {
       const store = useSettingsStore.getState();
 
-      store.updateSettings({ language: 'hindi' });
+      store.updateSettings({ language: 'hi' });
 
       const state = useSettingsStore.getState();
-      expect(state.language).toBe('hindi');
-      expect(state.gameLanguage).toBe('hindi');
+      expect(state.language).toBe('hi');
+      expect(state.gameLanguage).toBe('hi');
 
       // Persisted value should wrap the state (persist middleware uses { state, version })
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
@@ -185,8 +185,8 @@ describe('SettingsStore', () => {
       store.resetSettings();
 
       const state = useSettingsStore.getState();
-      expect(state.language).toBe('english');
-      expect(state.gameLanguage).toBe('english');
+      expect(state.language).toBe('en');
+      expect(state.gameLanguage).toBe('en');
       expect(state.difficulty).toBe('medium');
       expect(state.cameraEnabled).toBe(false);
       expect(state.soundEnabled).toBe(true);
@@ -206,11 +206,11 @@ describe('SettingsStore', () => {
     it('should apply both language and difficulty in one update', () => {
       const store = useSettingsStore.getState();
 
-      store.updateSettings({ language: 'kannada', difficulty: 'hard' });
+      store.updateSettings({ language: 'kn', difficulty: 'hard' });
 
       const state = useSettingsStore.getState();
-      expect(state.language).toBe('kannada');
-      expect(state.gameLanguage).toBe('kannada');
+      expect(state.language).toBe('kn');
+      expect(state.gameLanguage).toBe('kn');
       expect(state.difficulty).toBe('hard');
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];

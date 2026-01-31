@@ -43,7 +43,11 @@
 
 5. **Infinite Loop Fix** ✅
    - Fixed circular dependency causing infinite re-renders
-   - Removed currentCount from detectAndDraw dependency array  
+   - Removed currentCount from detectAndDraw dependency array
+
+6. **HMR/Fast Refresh Fix** ✅
+   - Extracted countExtendedFingersFromLandmarks to separate file
+   - Eliminated Vite HMR warning about inconsistent exports  
 
 ---
 

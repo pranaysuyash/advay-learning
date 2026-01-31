@@ -22,7 +22,7 @@ interface ReminderConfig {
 }
 
 const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
-  activeTime: _activeTime,
+  activeTime,
   inactiveTime,
   onDismiss,
   onPostpone,
@@ -80,7 +80,7 @@ const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
   // Check for applicable reminders
   useEffect(() => {
     const applicableReminder = reminderConfigs.find((config) =>
-      config.condition(_activeTime || 0, inactiveTime || 0),
+      config.condition(activeTime || 0, inactiveTime || 0),
     );
 
     if (applicableReminder && !showReminder) {
@@ -89,7 +89,7 @@ const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
     } else if (!applicableReminder) {
       setShowReminder(false);
     }
-  }, [_activeTime, inactiveTime, showReminder]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTime, inactiveTime, showReminder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!showReminder || !currentReminder) {
     return null;

@@ -1,14 +1,13 @@
  import { useState, useRef, useEffect, useCallback } from 'react';
  import { motion, AnimatePresence } from 'framer-motion';
  import Webcam from 'react-webcam';
- import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
  import { useTTS } from '../hooks/useTTS';
 import { getLettersForGame, Letter } from '../data/alphabets';
- 
- interface Point {
- x: number;
- y: number;
- }
+import { countExtendedFingersFromLandmarks } from './fingerCounting';
+// Centralized hand tracking
+import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameLoop } from '../hooks/useGameLoop';
+import type { Point, Landmark } from '../types/tracking';
  
  interface DifficultyLevel {
  name: string;
@@ -16,14 +15,10 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  maxNumber: number;
  rewardMultiplier: number;
  }
- 
- interface Landmark extends Point {
- z?: number;
- }
- 
- interface HandLandmarkerResult {
+
+interface HandLandmarkerResult {
  landmarks: Landmark[][];
- }
+}
  
  const NUMBER_NAMES = [
  'Zero',
@@ -56,93 +51,26 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  { name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
  ];
  
- export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
- const dist = (a: Point, b: Point) => {
- const dx = a.x - b.x;
- const dy = a.y - b.y;
- return Math.sqrt(dx * dx + dy * dy);
- };
- 
- const wrist = landmarks[0];
- const indexMcp = landmarks[5];
- const middleMcp = landmarks[9];
- const ringMcp = landmarks[13];
- const pinkyMcp = landmarks[17];
- 
- if (!wrist) return 0;
- 
- // Palm center is a stable reference even when the hand rotates (helps thumb).
- const palmPoints = [wrist, indexMcp, middleMcp, ringMcp, pinkyMcp].filter(Boolean) as Point[];
- const palmCenter =
- palmPoints.length > 0
- ? palmPoints.reduce(
- (acc, p) => ({ x: acc.x + p.x / palmPoints.length, y: acc.y + p.y / palmPoints.length }),
- { x: 0, y: 0 },
- )
- : wrist;
- 
- // Fingers (index/middle/ring/pinky):
- // Primary heuristic: tip is "up" relative to PIP (works for upright hands).
- // Fallback heuristic: tip is further from wrist than PIP (works for rotated/sideways hands).
- const fingerPairs = [
- { tip: 8, pip: 6 },
- { tip: 12, pip: 10 },
- { tip: 16, pip: 14 },
- { tip: 20, pip: 18 },
- ];
- 
- let count = 0;
- for (const pair of fingerPairs) {
- const tip = landmarks[pair.tip];
- const pip = landmarks[pair.pip];
- if (!tip || !pip) continue;
- const up = tip.y < pip.y;
- const further = dist(tip, wrist) > dist(pip, wrist) + 0.02;
- if (up || further) count++;
- }
- 
- // Thumb:
- // Improved detection for kids' hands - uses multiple heuristics for reliability.
- // Thumb is extended when:
- // 1. Thumb tip is further from palm center than thumb MCP (base)
- // 2. OR thumb tip is far from index finger base (spread position)
- // 3. OR thumb forms an angle with other fingers (not tucked in)
- const thumbTip = landmarks[4];
- const thumbIp = landmarks[3];
- const thumbMcp = landmarks[2];
- if (thumbTip && thumbIp && thumbMcp) {
- // Distance-based: tip should be further from palm center than MCP
- const tipToPalm = dist(thumbTip, palmCenter);
- const mcpToPalm = dist(thumbMcp, palmCenter);
- const thumbExtendedFromPalm = tipToPalm > mcpToPalm * 0.8; // More lenient threshold
- 
- // Spread-based: thumb tip should be away from index finger
- const thumbSpread = indexMcp ? dist(thumbTip, indexMcp) > 0.15 : true;
- 
- // Angle-based: thumb tip should not be too close to other fingers when closed
- const thumbTipToIndexTip = landmarks[8] ? dist(thumbTip, landmarks[8]) : 1;
- const thumbNotTucked = thumbTipToIndexTip > 0.08;
- 
- // Count thumb if majority of conditions pass (2 out of 3)
- let thumbConditions = 0;
- if (thumbExtendedFromPalm) thumbConditions++;
- if (thumbSpread) thumbConditions++;
- if (thumbNotTucked) thumbConditions++;
- 
- if (thumbConditions >= 2) count++;
- }
- 
- return count;
- }
- 
  export function FingerNumberShow() {
  const webcamRef = useRef<Webcam>(null);
  const canvasRef = useRef<HTMLCanvasElement>(null);
  const [isPlaying, setIsPlaying] = useState(false);
  const [score, setScore] = useState(0);
  const [streak, setStreak] = useState(0);
- const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
- const [isModelLoading, setIsModelLoading] = useState(false);
+ 
+ // Use centralized hand tracking hook
+ const {
+   landmarker: handLandmarker,
+   isLoading: isModelLoading,
+   isReady: isHandTrackingReady,
+ } = useHandTracking({
+   numHands: 4,
+   minDetectionConfidence: 0.3,
+   minHandPresenceConfidence: 0.3,
+   minTrackingConfidence: 0.3,
+   delegate: 'GPU',
+   enableFallback: true,
+ });
  const [currentCount, setCurrentCount] = useState<number>(0);
  const [handsDetected, setHandsDetected] = useState<number>(0);
  const [handsBreakdown, setHandsBreakdown] = useState<string>('');
@@ -179,7 +107,6 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  });
  
  const lastVideoTimeRef = useRef<number>(-1);
- const frameSkipRef = useRef<number>(0);
  const lastHandsSeenAtRef = useRef<number>(0);
  const targetBagRef = useRef<number[]>([]);
  const lastTargetRef = useRef<number | null>(null);
@@ -319,35 +246,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
    DIFFICULTY_LEVELS
  ]);
  
- useEffect(() => {
- const initializeHandLandmarker = async () => {
- setIsModelLoading(true);
- try {
- const vision = await FilesetResolver.forVisionTasks(
- 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
- );
- const landmarker = await HandLandmarker.createFromOptions(vision, {
- baseOptions: {
- modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
- delegate: 'GPU',
- },
- runningMode: 'VIDEO',
- numHands: 4,
- // Be more permissive so multiple hands register more reliably in real-world lighting/angles.
- minHandDetectionConfidence: 0.3,
- minHandPresenceConfidence: 0.3,
- minTrackingConfidence: 0.3,
- });
- setHandLandmarker(landmarker);
- } catch (error) {
- console.error('Failed to load hand landmarker:', error);
- setFeedback('Camera tracking not available. Try again later!');
- }
- setIsModelLoading(false);
- };
- 
- initializeHandLandmarker();
- }, []);
+ // Hand landmarker is now initialized by useHandTracking hook
  
  useEffect(() => {
  if (!isPlaying) return;
@@ -363,6 +262,17 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  hands: 0,
  breakdown: '',
  });
+ 
+ // Game loop using centralized hook
+ useGameLoop({
+   isRunning: isPlaying && isHandTrackingReady,
+   targetFps: 30,
+   onFrame: useCallback(() => {
+     detectAndDrawRef.current?.();
+   }, []),
+ });
+ 
+ const detectAndDrawRef = useRef<(() => void) | null>(null);
  
  const detectAndDraw = useCallback(() => {
  if (!webcamRef.current || !canvasRef.current || !handLandmarker || !isPlaying) return;
@@ -383,22 +293,14 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
  if (video.currentTime === lastVideoTimeRef.current) {
- requestAnimationFrame(detectAndDraw);
  return;
  }
  lastVideoTimeRef.current = video.currentTime;
- 
- frameSkipRef.current++;
- if (frameSkipRef.current % 2 !== 0) {
- requestAnimationFrame(detectAndDraw);
- return;
- }
  
  let results: HandLandmarkerResult | null = null;
  try {
  results = handLandmarker.detectForVideo(video, performance.now());
  } catch (e) {
- requestAnimationFrame(detectAndDraw);
  return;
  }
  
@@ -528,20 +430,18 @@ import { getLettersForGame, Letter } from '../data/alphabets';
    }
  }
  
-  requestAnimationFrame(detectAndDraw);
+  // Store reference for useGameLoop
+  detectAndDrawRef.current = detectAndDraw;
   }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, handsDetected, targetLetter]);
  
  useEffect(() => {
- if (isPlaying) {
- requestAnimationFrame(detectAndDraw);
- }
  return () => {
  if (promptTimeoutRef.current) {
  clearTimeout(promptTimeoutRef.current);
  promptTimeoutRef.current = null;
  }
  };
- }, [isPlaying, detectAndDraw]);
+ }, []);
  
  const startGame = () => {
  setIsPlaying(true);
