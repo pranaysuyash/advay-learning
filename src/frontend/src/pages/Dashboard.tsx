@@ -177,9 +177,9 @@ export const Dashboard = memo(function DashboardComponent() {
     const averageAccuracy =
       attemptsWithAccuracy.length > 0
         ? Math.round(
-            attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-              attemptsWithAccuracy.length,
-          )
+          attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
+          attemptsWithAccuracy.length,
+        )
         : 0;
 
     // Estimate time spent (5 minutes per attempt as rough estimate)
@@ -200,9 +200,9 @@ export const Dashboard = memo(function DashboardComponent() {
         const avgAcc =
           attempts.length > 0
             ? Math.round(
-                attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-                  attempts.length,
-              )
+              attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) /
+              attempts.length,
+            )
             : 0;
 
         const totalTime = langProg.reduce((sum, p) => sum + p.attempts, 0) * 2;
@@ -245,41 +245,41 @@ export const Dashboard = memo(function DashboardComponent() {
     () =>
       selectedChildData
         ? [
-            {
-              label: 'Literacy', // Was: Letters Learned
-              value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
-              iconName: 'letters' as const,
-              percent:
-                (selectedChildData.progress.lettersLearned /
-                  selectedChildData.progress.totalLetters) *
-                100,
-            },
-            {
-              label: 'Accuracy',
-              value: getStarRating(selectedChildData.progress.averageAccuracy)
-                .emoji,
-              iconName: 'target' as const,
-              percent: selectedChildData.progress.averageAccuracy,
-            },
-            {
-              label: 'Time',
-              value: formatTimeKidFriendly(
-                selectedChildData.progress.totalTime,
-              ),
-              iconName: 'timer' as const,
-              percent: Math.min(
-                (selectedChildData.progress.totalTime / 300) * 100,
-                100,
-              ),
-            },
-            // TODO: Add when FingerNumberShow tracking is implemented:
-            // {
-            //   label: 'Numeracy',
-            //   value: `${numbersMastered}/${totalNumbers}`,
-            //   iconName: 'hand' as const,
-            //   percent: (numbersMastered / totalNumbers) * 100,
-            // },
-          ]
+          {
+            label: 'Literacy', // Was: Letters Learned
+            value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
+            iconName: 'letters' as const,
+            percent:
+              (selectedChildData.progress.lettersLearned /
+                selectedChildData.progress.totalLetters) *
+              100,
+          },
+          {
+            label: 'Accuracy',
+            value: getStarRating(selectedChildData.progress.averageAccuracy)
+              .emoji,
+            iconName: 'target' as const,
+            percent: selectedChildData.progress.averageAccuracy,
+          },
+          {
+            label: 'Time',
+            value: formatTimeKidFriendly(
+              selectedChildData.progress.totalTime,
+            ),
+            iconName: 'timer' as const,
+            percent: Math.min(
+              (selectedChildData.progress.totalTime / 300) * 100,
+              100,
+            ),
+          },
+          // TODO: Add when FingerNumberShow tracking is implemented:
+          // {
+          //   label: 'Numeracy',
+          //   value: `${numbersMastered}/${totalNumbers}`,
+          //   iconName: 'hand' as const,
+          //   percent: (numbersMastered / totalNumbers) * 100,
+          // },
+        ]
         : [],
     [children, selectedChild, getStarRating, formatTimeKidFriendly],
   );
@@ -326,7 +326,7 @@ export const Dashboard = memo(function DashboardComponent() {
           <button
             onClick={handleExport}
             disabled={exporting || children.length === 0}
-            className='p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30'
+            className='p-2 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30'
             title='Export progress data'
           >
             {exporting ? (
@@ -344,18 +344,17 @@ export const Dashboard = memo(function DashboardComponent() {
               <div key={child.id} className='flex items-center'>
                 <button
                   onClick={() => setSelectedChild(child.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
-                    selectedChildData?.id === child.id
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${selectedChildData?.id === child.id
                       ? 'bg-pip-orange text-white shadow-soft'
                       : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
-                  }`}
+                    }`}
                 >
                   <span className='font-medium'>{child.name}</span>
                   <span className='opacity-70 text-xs'>({child.age})</span>
                 </button>
                 <button
                   onClick={() => handleOpenEditModal(child)}
-                  className='p-1.5 ml-0.5 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-md transition'
+                  className='p-1.5 ml-0.5 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-md transition'
                   aria-label={`Edit ${child.name}'s profile`}
                   title='Edit'
                 >
@@ -378,7 +377,7 @@ export const Dashboard = memo(function DashboardComponent() {
             <button
               type='button'
               onClick={() => setShowAddModal(true)}
-              className='flex items-center gap-1 px-2 py-1.5 text-sm text-text-muted hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30'
+              className='flex items-center gap-1 px-2 py-1.5 text-sm text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30'
               title='Add child'
             >
               <svg
@@ -407,9 +406,9 @@ export const Dashboard = memo(function DashboardComponent() {
                 <UIIcon
                   name={stat.iconName}
                   size={16}
-                  className='text-text-muted'
+                  className='text-slate-500'
                 />
-                <span className='text-sm text-text-secondary'>
+                <span className='text-sm text-slate-600'>
                   {stat.label}:
                 </span>
                 <span className='text-sm font-semibold text-text-primary'>
@@ -441,7 +440,7 @@ export const Dashboard = memo(function DashboardComponent() {
             <h2 className='text-2xl font-semibold mb-2'>
               No Children Added Yet
             </h2>
-            <p className='text-text-secondary mb-6'>
+            <p className='text-slate-600 mb-6'>
               Add a child profile to start tracking their learning progress.
             </p>
             <button
@@ -460,7 +459,7 @@ export const Dashboard = memo(function DashboardComponent() {
             <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <div className='flex justify-between items-center mb-4'>
                 <h2 className='text-xl font-semibold'>Learning Progress</h2>
-                <div className='text-sm px-3 py-1 bg-bg-tertiary text-text-secondary border border-border rounded-full'>
+                <div className='text-sm px-3 py-1 bg-bg-tertiary text-slate-600 border border-border rounded-full'>
                   {selectedChildData.preferredLanguage}
                 </div>
               </div>
@@ -484,11 +483,10 @@ export const Dashboard = memo(function DashboardComponent() {
                         className='flex items-center gap-4'
                       >
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
-                            learned
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${learned
                               ? 'bg-green-500/20 text-green-400'
-                              : 'bg-bg-tertiary text-text-muted border border-border'
-                          }`}
+                              : 'bg-bg-tertiary text-slate-500 border border-border'
+                            }`}
                         >
                           {letter.char}
                         </div>
@@ -504,7 +502,7 @@ export const Dashboard = memo(function DashboardComponent() {
                               />
                               {letter.name}
                             </span>
-                            <span className='text-sm text-text-secondary'>
+                            <span className='text-sm text-slate-600'>
                               {learned ? (
                                 <>
                                   <UIIcon
@@ -519,7 +517,7 @@ export const Dashboard = memo(function DashboardComponent() {
                                   <UIIcon
                                     name='circle'
                                     size={14}
-                                    className='inline mr-1 text-text-muted'
+                                    className='inline mr-1 text-slate-500'
                                   />
                                   {Math.round(accuracy)}% best
                                 </>
@@ -528,7 +526,7 @@ export const Dashboard = memo(function DashboardComponent() {
                                   <UIIcon
                                     name='circle'
                                     size={14}
-                                    className='inline mr-1 text-text-muted'
+                                    className='inline mr-1 text-slate-500'
                                   />
                                   Not started
                                 </>
@@ -574,7 +572,7 @@ export const Dashboard = memo(function DashboardComponent() {
                         <span className='font-medium capitalize'>
                           {langProg.language}
                         </span>
-                        <span className='text-sm text-text-secondary'>
+                        <span className='text-sm text-slate-600'>
                           {langProg.lettersLearned}/{langProg.totalLetters}{' '}
                           letters
                         </span>
@@ -602,7 +600,7 @@ export const Dashboard = memo(function DashboardComponent() {
                   ))}
                 </div>
               ) : (
-                <div className='text-center py-6 text-text-secondary'>
+                <div className='text-center py-6 text-slate-600'>
                   <p>No progress recorded in other languages yet.</p>
                   <p className='text-sm mt-2'>
                     Try switching languages in the game to start learning!
@@ -629,7 +627,7 @@ export const Dashboard = memo(function DashboardComponent() {
           <section className='mb-6'>
             <div className='flex items-center justify-between mb-2'>
               <h2 className='text-lg font-semibold'>Letter Journey</h2>
-              <span className='text-xs text-text-muted capitalize'>
+              <span className='text-xs text-slate-500 capitalize'>
                 {selectedChildData.preferredLanguage}
               </span>
             </div>
@@ -642,7 +640,7 @@ export const Dashboard = memo(function DashboardComponent() {
           <h2 className='text-lg font-semibold mb-3 text-vision-blue'>
             💡 Learning Tips
           </h2>
-          <ul className='space-y-2 text-text-secondary text-sm'>
+          <ul className='space-y-2 text-slate-600 text-sm'>
             <li>• Encourage your child to practice for 10-15 minutes daily</li>
             <li>• Celebrate achievements to keep motivation high</li>
             <li>• Use the tracing game to improve handwriting skills</li>
@@ -662,7 +660,7 @@ export const Dashboard = memo(function DashboardComponent() {
 
               <div className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                  <label className='block text-sm font-medium text-slate-600 mb-2'>
                     Child's Name *
                   </label>
                   <input
@@ -676,7 +674,7 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                  <label className='block text-sm font-medium text-slate-600 mb-2'>
                     Age (years)
                   </label>
                   <input
@@ -692,14 +690,14 @@ export const Dashboard = memo(function DashboardComponent() {
                     autoComplete='bday'
                     className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                   />
-                  <p className='text-xs text-text-secondary mt-1'>
+                  <p className='text-xs text-slate-600 mt-1'>
                     Use decimals for partial years (e.g., 2.5 for 2 years 6
                     months)
                   </p>
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                  <label className='block text-sm font-medium text-slate-600 mb-2'>
                     Preferred Language
                   </label>
                   <select
@@ -747,13 +745,13 @@ export const Dashboard = memo(function DashboardComponent() {
               className='bg-bg-secondary rounded-2xl p-6 w-full max-w-md shadow-soft-lg border border-border'
             >
               <h3 className='text-xl font-semibold mb-1'>Edit Profile</h3>
-              <p className='text-text-secondary text-sm mb-6'>
+              <p className='text-slate-600 text-sm mb-6'>
                 Update {editingProfile.name}'s information
               </p>
 
               <div className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                  <label className='block text-sm font-medium text-slate-600 mb-2'>
                     Child's Name
                   </label>
                   <input
@@ -766,7 +764,7 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
 
                 <div>
-                  <label className='block text-sm font-medium text-text-secondary mb-2'>
+                  <label className='block text-sm font-medium text-slate-600 mb-2'>
                     Preferred Language
                   </label>
                   <select
@@ -781,7 +779,7 @@ export const Dashboard = memo(function DashboardComponent() {
                     <option value='te'>🇮🇳 Telugu</option>
                     <option value='ta'>🇮🇳 Tamil</option>
                   </select>
-                  <p className='text-text-muted text-xs mt-2'>
+                  <p className='text-slate-500 text-xs mt-2'>
                     This will change the alphabet language in games
                   </p>
                 </div>

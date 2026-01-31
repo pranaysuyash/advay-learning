@@ -154,11 +154,10 @@ export function Settings() {
                 onMouseLeave={handleGateEnd}
                 onTouchStart={handleGateStart}
                 onTouchEnd={handleGateEnd}
-                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition ${
-                  holdingGate
-                    ? 'bg-red-500 text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                }`}
+                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition ${holdingGate
+                  ? 'bg-red-500 text-white'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+                  }`}
               >
                 {holdingGate
                   ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
@@ -201,7 +200,7 @@ export function Settings() {
 
                 <div className='space-y-4'>
                   <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                    <label className='block text-sm font-medium text-slate-700 mb-2'>
                       UI Language
                     </label>
                     <select
@@ -221,7 +220,7 @@ export function Settings() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                    <label className='block text-sm font-medium text-slate-700 mb-2'>
                       Game Language
                     </label>
                     <select
@@ -243,7 +242,7 @@ export function Settings() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                    <label className='block text-sm font-medium text-slate-700 mb-2'>
                       Difficulty
                     </label>
                     <select
@@ -261,11 +260,11 @@ export function Settings() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                    <label className='block text-sm font-medium text-slate-700 mb-2'>
                       Sound Effects
                     </label>
                     <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
-                      <span className='text-white/60'>Enable sounds</span>
+                      <span className='text-slate-600'>Enable sounds</span>
                       <button
                         onClick={() =>
                           settings.updateSettings({
@@ -277,16 +276,14 @@ export function Settings() {
                             ? 'Disable sound effects'
                             : 'Enable sound effects'
                         }
-                        className={`w-12 h-6 rounded-full transition ${
-                          settings.soundEnabled ? 'bg-red-500' : 'bg-white/20'
-                        }`}
+                        className={`w-12 h-6 rounded-full transition ${settings.soundEnabled ? 'bg-red-500' : 'bg-white/20'
+                          }`}
                       >
                         <div
-                          className={`w-5 h-5 bg-white rounded-full transition transform ${
-                            settings.soundEnabled
-                              ? 'translate-x-6'
-                              : 'translate-x-0.5'
-                          }`}
+                          className={`w-5 h-5 bg-white rounded-full transition transform ${settings.soundEnabled
+                            ? 'translate-x-6'
+                            : 'translate-x-0.5'
+                            }`}
                         />
                       </button>
                     </div>
@@ -304,7 +301,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Enable Camera</div>
-                      <div className='text-sm text-white/60'>
+                      <div className='text-sm text-slate-600'>
                         Required for hand tracking features
                       </div>
                     </div>
@@ -315,16 +312,14 @@ export function Settings() {
                           ? 'Disable camera access'
                           : 'Enable camera access'
                       }
-                      className={`w-12 h-6 rounded-full transition ${
-                        settings.cameraEnabled ? 'bg-red-500' : 'bg-white/20'
-                      }`}
+                      className={`w-12 h-6 rounded-full transition ${settings.cameraEnabled ? 'bg-red-500' : 'bg-white/20'
+                        }`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full transition transform ${
-                          settings.cameraEnabled
-                            ? 'translate-x-6'
-                            : 'translate-x-0.5'
-                        }`}
+                        className={`w-5 h-5 bg-white rounded-full transition transform ${settings.cameraEnabled
+                          ? 'translate-x-6'
+                          : 'translate-x-0.5'
+                          }`}
                       />
                     </button>
                   </div>
@@ -353,7 +348,7 @@ export function Settings() {
 
                   {/* Hand Tracking Delegate */}
                   <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
+                    <label className='block text-sm font-medium text-slate-700 mb-2'>
                       Hand Tracking Mode
                     </label>
                     <select
@@ -373,15 +368,15 @@ export function Settings() {
                         CPU (Compatible with all devices)
                       </option>
                     </select>
-                    <p className='text-sm text-slate-400 mt-2'>
+                    <p className='text-sm text-slate-500 mt-2'>
                       GPU mode is faster but may not work on all devices. The
                       app will automatically fall back to CPU if needed.
                     </p>
                   </div>
 
                   {/* Privacy Note */}
-                  <div className='text-sm text-slate-400 bg-white/10 rounded-lg p-3'>
-                    <strong className='text-slate-300'>Privacy:</strong> Camera
+                  <div className='text-sm text-slate-500 bg-white/10 rounded-lg p-3'>
+                    <strong className='text-slate-600'>Privacy:</strong> Camera
                     data is processed locally on your device. No video is sent
                     to our servers.
                   </div>
@@ -398,7 +393,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Daily Time Limit</div>
-                      <div className='text-sm text-slate-300'>
+                      <div className='text-sm text-slate-600'>
                         Limit play time per day
                       </div>
                     </div>
@@ -423,7 +418,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Show Letter Hints</div>
-                      <div className='text-sm text-slate-300'>
+                      <div className='text-sm text-slate-600'>
                         Display tracing guides
                       </div>
                     </div>
@@ -438,16 +433,14 @@ export function Settings() {
                           ? 'Hide letter hints'
                           : 'Show letter hints'
                       }
-                      className={`w-12 h-6 rounded-full transition ${
-                        settings.showHints ? 'bg-red-500' : 'bg-white/20'
-                      }`}
+                      className={`w-12 h-6 rounded-full transition ${settings.showHints ? 'bg-red-500' : 'bg-white/20'
+                        }`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full transition transform ${
-                          settings.showHints
-                            ? 'translate-x-6'
-                            : 'translate-x-0.5'
-                        }`}
+                        className={`w-5 h-5 bg-white rounded-full transition transform ${settings.showHints
+                          ? 'translate-x-6'
+                          : 'translate-x-0.5'
+                          }`}
                       />
                     </button>
                   </div>
@@ -455,7 +448,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Show Tutorial Again</div>
-                      <div className='text-sm text-slate-300'>
+                      <div className='text-sm text-slate-600'>
                         Reset tutorial for next game session
                       </div>
                     </div>
@@ -487,7 +480,7 @@ export function Settings() {
                 <div className='space-y-4'>
                   {/* Progress Summary */}
                   <div className='bg-white/10 rounded-lg p-4 shadow-sm'>
-                    <div className='text-sm text-slate-300 mb-2'>
+                    <div className='text-sm text-slate-600 mb-2'>
                       Alphabet Learning Progress
                     </div>
                     <div className='text-2xl font-bold'>
@@ -495,7 +488,7 @@ export function Settings() {
                       {getAlphabet(settings.language).letters.length} letters
                       mastered
                     </div>
-                    <div className='text-sm text-slate-300 mt-1'>
+                    <div className='text-sm text-slate-600 mt-1'>
                       Batch {getUnlockedBatches(settings.language)} unlocked
                     </div>
                   </div>
@@ -592,7 +585,7 @@ export function Settings() {
               </fieldset>
 
               {/* App Info */}
-              <div className='text-center text-slate-400 text-sm'>
+              <div className='text-center text-slate-500 text-sm'>
                 <p>Advay Learning App v1.0.0</p>
                 <p className='mt-1 flex items-center justify-center gap-1'>
                   Built with{' '}

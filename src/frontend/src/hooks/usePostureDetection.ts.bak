@@ -152,6 +152,11 @@ export function usePostureDetection(onAlert?: (alert: PostureAlert) => void) {
     const shoulderAlignment = Math.max(0, 1 - (shoulderDiff * 5)); // Normalize to 0-1
     
     // Calculate head position relative to shoulders
+    const headShoulderDistance = Math.sqrt(
+      Math.pow(nose.x - (leftShoulder.x + rightShoulder.x) / 2, 2) +
+      Math.pow(nose.y - (leftShoulder.y + rightShoulder.y) / 2, 2)
+    );
+    
     // Calculate spine straightness
     const shoulderMidpoint = { x: (leftShoulder.x + rightShoulder.x) / 2, y: (leftShoulder.y + rightShoulder.y) / 2 };
     const hipMidpoint = { x: (leftHip.x + rightHip.x) / 2, y: (leftHip.y + rightHip.y) / 2 };

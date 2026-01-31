@@ -40,6 +40,7 @@
 **Technology**: React 18 + TypeScript + Vite
 
 **Key Libraries**:
+
 - `@mediapipe/tasks-vision` - Hand/face tracking
 - `@tensorflow/tfjs` - ML models
 - `react-webcam` - Camera access
@@ -53,6 +54,7 @@
 **Technology**: Python 3.13+ + FastAPI
 
 **Key Components**:
+
 - FastAPI for REST API
 - SQLAlchemy 2.0 for ORM
 - Alembic for migrations
@@ -62,6 +64,7 @@
 ## Data Flow
 
 ### 1. Real-time Hand Tracking (Client-side)
+
 ```
 Camera → MediaPipe → Hand Landmarks → Drawing Canvas
                                     → Gesture Recognition
@@ -69,6 +72,7 @@ Camera → MediaPipe → Hand Landmarks → Drawing Canvas
 ```
 
 **Input Methods**: The app supports 6 input methods (4 camera-based, 2 fallback):
+
 - Mode A: Button Toggle
 - Mode B: Pinch Gesture
 - Mode C: Dwell to Toggle (planned)
@@ -82,6 +86,7 @@ See [INPUT_METHODS_SPECIFICATION.md](INPUT_METHODS_SPECIFICATION.md) for complet
 See [architecture/CAMERA_INTEGRATION_GUIDE.md](architecture/CAMERA_INTEGRATION_GUIDE.md) for implementation guide.
 
 ### 2. Progress Tracking
+
 ```
 User Action → Frontend Event → API Request → Database → Parent Dashboard
 ```
@@ -89,6 +94,7 @@ User Action → Frontend Event → API Request → Database → Parent Dashboard
 ## Security Architecture
 
 ### Authentication Flow
+
 1. Parent registers → Email verification
 2. Parent creates child profile(s)
 3. Child accesses via PIN/simple auth
@@ -96,6 +102,7 @@ User Action → Frontend Event → API Request → Database → Parent Dashboard
 5. Refresh token rotation
 
 ### Data Protection
+
 - Passwords: bcrypt hashing
 - Tokens: JWT with HS256
 - API: Rate limiting

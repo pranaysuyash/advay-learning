@@ -56,10 +56,14 @@ const animationFrameRef = useRef<number | null>(null);
 // Hand tracking state
 const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(false);
 const [isPinching, setIsPinching] = useState(false);
-const [handCursor, setHandCursor] = useState<{ x: number; y: number } | null>(null);
+const [handCursor, setHandCursor] = useState<{ x: number; y: number } | null>(
+  null,
+);
 
 // Camera permission state
-const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+const [cameraPermission, setCameraPermission] = useState<
+  'granted' | 'denied' | 'prompt'
+>('prompt');
 const [showPermissionWarning, setShowPermissionWarning] = useState(false);
 
 // Initialize hand tracking hook
@@ -89,11 +93,11 @@ useEffect(() => {
         name: 'camera' as PermissionName,
       });
       setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-      
+
       if (result.state === 'denied') {
         setShowPermissionWarning(true);
       }
-      
+
       result.addEventListener('change', () => {
         setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
         setShowPermissionWarning(result.state === 'denied');
@@ -102,7 +106,7 @@ useEffect(() => {
       console.warn('[YourGame] Camera permission check not supported', error);
     }
   };
-  
+
   checkCameraPermission();
 }, []);
 ```
@@ -146,29 +150,28 @@ const runHandTracking = useCallback(async () => {
 
     if (results?.landmarks && results.landmarks.length > 0) {
       const landmarks = results.landmarks[0] as Landmark[];
-      
+
       // Get index finger tip (landmark 8) for cursor
       const indexTip = landmarks[8];
       if (indexTip) {
         // Mirror X coordinate (webcam is mirrored)
         const mirroredX = 1 - indexTip.x;
-        
+
         // Map to your coordinate system (adjust for canvas/screen)
         const x = mirroredX * YOUR_WIDTH;
         const y = indexTip.y * YOUR_HEIGHT;
-        
+
         setHandCursor({ x, y });
-        
+
         // Detect pinch gesture
-        const pinchResult = detectPinch(
-          landmarks,
-          pinchStateRef.current,
-          { startThreshold: 0.05, releaseThreshold: 0.07 }
-        );
-        
+        const pinchResult = detectPinch(landmarks, pinchStateRef.current, {
+          startThreshold: 0.05,
+          releaseThreshold: 0.07,
+        });
+
         pinchStateRef.current = pinchResult.state;
         setIsPinching(pinchResult.state.isPinching);
-        
+
         // When pinching starts, perform action
         if (pinchResult.transition === 'start') {
           handlePinchAction(x, y);
@@ -211,21 +214,23 @@ useEffect(() => {
 In your render, add the webcam (hidden, used only for detection):
 
 ```tsx
-{isHandTrackingEnabled && (
-  <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
-    <Webcam
-      ref={webcamRef}
-      audio={false}
-      mirrored={true}
-      videoConstraints={{
-        facingMode: 'user',
-        width: 1280,
-        height: 720,
-      }}
-      className='w-full h-full object-cover'
-    />
-  </div>
-)}
+{
+  isHandTrackingEnabled && (
+    <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
+      <Webcam
+        ref={webcamRef}
+        audio={false}
+        mirrored={true}
+        videoConstraints={{
+          facingMode: 'user',
+          width: 1280,
+          height: 720,
+        }}
+        className='w-full h-full object-cover'
+      />
+    </div>
+  );
+}
 ```
 
 ### Step 8: Add Hand Cursor Visualization
@@ -233,31 +238,35 @@ In your render, add the webcam (hidden, used only for detection):
 Add visual feedback for the hand cursor:
 
 ```tsx
-{/* In your SVG or canvas overlay */}
-{handCursor && isHandTrackingEnabled && (
-  <g>
-    <circle
-      cx={handCursor.x}
-      cy={handCursor.y}
-      r={isPinching ? 15 : 12}
-      fill={isPinching ? '#FFFF00' : '#00D9FF'}
-      fillOpacity={0.7}
-      stroke='#FFFFFF'
-      strokeWidth='2'
-    />
-    {isPinching && (
+{
+  /* In your SVG or canvas overlay */
+}
+{
+  handCursor && isHandTrackingEnabled && (
+    <g>
       <circle
         cx={handCursor.x}
         cy={handCursor.y}
-        r={25}
-        fill='none'
-        stroke='#FFFF00'
+        r={isPinching ? 15 : 12}
+        fill={isPinching ? '#FFFF00' : '#00D9FF'}
+        fillOpacity={0.7}
+        stroke='#FFFFFF'
         strokeWidth='2'
-        opacity='0.5'
       />
-    )}
-  </g>
-)}
+      {isPinching && (
+        <circle
+          cx={handCursor.x}
+          cy={handCursor.y}
+          r={25}
+          fill='none'
+          stroke='#FFFF00'
+          strokeWidth='2'
+          opacity='0.5'
+        />
+      )}
+    </g>
+  );
+}
 ```
 
 ### Step 9: Add Mode Toggle Button
@@ -265,19 +274,21 @@ Add visual feedback for the hand cursor:
 Add UI control to enable/disable hand tracking:
 
 ```tsx
-{cameraPermission === 'granted' && (
-  <button
-    onClick={() => setIsHandTrackingEnabled(!isHandTrackingEnabled)}
-    className={`px-4 py-2 rounded-lg transition ${
-      isHandTrackingEnabled
-        ? 'bg-green-500 hover:bg-green-600 text-white'
-        : 'bg-white/10 hover:bg-white/20 backdrop-blur'
-    }`}
-  >
-    <UIIcon name={isHandTrackingEnabled ? 'camera' : 'eye'} size={16} />
-    {isHandTrackingEnabled ? 'Hand Mode' : 'Mouse Mode'}
-  </button>
-)}
+{
+  cameraPermission === 'granted' && (
+    <button
+      onClick={() => setIsHandTrackingEnabled(!isHandTrackingEnabled)}
+      className={`px-4 py-2 rounded-lg transition ${
+        isHandTrackingEnabled
+          ? 'bg-green-500 hover:bg-green-600 text-white'
+          : 'bg-white/10 hover:bg-white/20 backdrop-blur'
+      }`}
+    >
+      <UIIcon name={isHandTrackingEnabled ? 'camera' : 'eye'} size={16} />
+      {isHandTrackingEnabled ? 'Hand Mode' : 'Mouse Mode'}
+    </button>
+  );
+}
 ```
 
 ### Step 10: Add Status Indicators
@@ -285,14 +296,17 @@ Add UI control to enable/disable hand tracking:
 Show current input mode:
 
 ```tsx
-<div className={`px-3 py-1 rounded-full text-xs ${
-  isHandTrackingEnabled ? 'text-green-400' : 'text-blue-400'
-}`}>
+<div
+  className={`px-3 py-1 rounded-full text-xs ${
+    isHandTrackingEnabled ? 'text-green-400' : 'text-blue-400'
+  }`}
+>
   <UIIcon name={isHandTrackingEnabled ? 'hand' : 'target'} size={12} />
-  {isHandTrackingEnabled 
-    ? handCursor ? 'Hand Detected' : 'Show Hand'
-    : 'Mouse/Click Mode'
-  }
+  {isHandTrackingEnabled
+    ? handCursor
+      ? 'Hand Detected'
+      : 'Show Hand'
+    : 'Mouse/Click Mode'}
 </div>
 ```
 
@@ -301,14 +315,17 @@ Show current input mode:
 Show warning when camera denied:
 
 ```tsx
-{showPermissionWarning && cameraPermission === 'denied' && (
-  <div className='bg-amber-500/20 border border-amber-500/50 px-3 py-2 rounded-lg text-xs'>
-    <div className='font-semibold text-amber-400'>Camera Unavailable</div>
-    <div className='text-white/70'>
-      Using mouse/click mode. Enable camera in browser settings for hand tracking.
+{
+  showPermissionWarning && cameraPermission === 'denied' && (
+    <div className='bg-amber-500/20 border border-amber-500/50 px-3 py-2 rounded-lg text-xs'>
+      <div className='font-semibold text-amber-400'>Camera Unavailable</div>
+      <div className='text-white/70'>
+        Using mouse/click mode. Enable camera in browser settings for hand
+        tracking.
+      </div>
     </div>
-  </div>
-)}
+  );
+}
 ```
 
 ---
@@ -324,7 +341,7 @@ If your canvas has fixed internal dimensions (e.g., 800x600):
 ```typescript
 const canvas = canvasRef.current;
 const mirroredX = 1 - indexTip.x;
-const canvasX = mirroredX * canvas.width;  // e.g., 800
+const canvasX = mirroredX * canvas.width; // e.g., 800
 const canvasY = indexTip.y * canvas.height; // e.g., 600
 ```
 
@@ -353,6 +370,7 @@ const mirroredX = 1 - indexTip.x;
 ## Common Pitfalls
 
 ### ❌ DON'T: Forget to mirror X coordinate
+
 ```typescript
 // WRONG - hand moves opposite direction
 const x = indexTip.x * width;
@@ -364,6 +382,7 @@ const x = (1 - indexTip.x) * width;
 ```
 
 ### ❌ DON'T: Use video readyState without checking
+
 ```typescript
 // WRONG - may detect on black screen
 const results = landmarker.detectForVideo(video, performance.now());
@@ -378,6 +397,7 @@ if (video.readyState < 2) {
 ```
 
 ### ❌ DON'T: Forget to cleanup animation frame
+
 ```typescript
 // WRONG - memory leak, continues running after unmount
 useEffect(() => {
@@ -447,11 +467,13 @@ Hand tracking can be CPU/GPU intensive. Optimize:
 ## Reference Implementation
 
 **ConnectTheDots** (commit 6962ce7) is the reference implementation:
+
 - File: `src/frontend/src/pages/ConnectTheDots.tsx`
 - Lines: 639 total (camera integration added ~250 lines)
 - Features: Mode A + Mode B + mouse fallback
 
 **AlphabetGame** is the original implementation:
+
 - File: `src/frontend/src/pages/AlphabetGame.tsx`
 - Features: Full hand tracking with drawing, camera permissions
 
@@ -477,6 +499,7 @@ If you encounter issues:
 5. Check MediaPipe CDN availability (cdn.jsdelivr.net)
 
 **Common Errors**:
+
 - "Failed to load MediaPipe model" → Check network/CDN
 - "Camera not available" → Check permissions
 - "GPU delegate failed" → CPU fallback should activate

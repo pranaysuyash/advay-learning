@@ -22,7 +22,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const webcamRef = useRef<Webcam>(null);
   const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const animationFrameRef = useRef<number | null>(null);
-  
+
   const [dots, setDots] = useState<Dot[]>([]);
   const [currentDotIndex, setCurrentDotIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -33,7 +33,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>(
     'easy',
   );
-  
+
   // Hand tracking state
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
@@ -69,20 +69,23 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           name: 'camera' as PermissionName,
         });
         setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-        
+
         if (result.state === 'denied') {
           setShowPermissionWarning(true);
         }
-        
+
         result.addEventListener('change', () => {
           setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
           setShowPermissionWarning(result.state === 'denied');
         });
       } catch (error) {
-        console.warn('[ConnectTheDots] Camera permission check not supported', error);
+        console.warn(
+          '[ConnectTheDots] Camera permission check not supported',
+          error,
+        );
       }
     };
-    
+
     checkCameraPermission();
   }, []);
 
@@ -118,30 +121,29 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
       if (results?.landmarks && results.landmarks.length > 0) {
         const landmarks = results.landmarks[0] as Landmark[];
-        
+
         // Get index finger tip (landmark 8) for cursor
         const indexTip = landmarks[8];
         if (indexTip) {
           // Map from video coordinates (mirrored) to canvas coordinates
           // Mirror the x coordinate since webcam is mirrored
           const mirroredX = 1 - indexTip.x;
-          
+
           // Map to canvas internal coordinates (800x600)
           const canvasX = mirroredX * canvas.width;
           const canvasY = indexTip.y * canvas.height;
-          
+
           setHandCursor({ x: canvasX, y: canvasY });
-          
+
           // Detect pinch gesture (thumb tip + index tip)
-          const pinchResult = detectPinch(
-            landmarks,
-            pinchStateRef.current,
-            { startThreshold: 0.05, releaseThreshold: 0.07 }
-          );
-          
+          const pinchResult = detectPinch(landmarks, pinchStateRef.current, {
+            startThreshold: 0.05,
+            releaseThreshold: 0.07,
+          });
+
           pinchStateRef.current = pinchResult.state;
           setIsPinching(pinchResult.state.isPinching);
-          
+
           // When pinching, check if cursor is near current dot
           if (pinchResult.transition === 'start' && handCursor) {
             checkDotProximity(canvasX, canvasY);
@@ -171,22 +173,31 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
         animationFrameRef.current = null;
       }
     };
-  }, [gameStarted, isHandTrackingEnabled, isHandTrackingReady, runHandTracking]);
+  }, [
+    gameStarted,
+    isHandTrackingEnabled,
+    isHandTrackingReady,
+    runHandTracking,
+  ]);
 
   // Check if hand cursor is near the current dot
-  const checkDotProximity = useCallback((x: number, y: number) => {
-    if (!gameStarted || gameCompleted || currentDotIndex >= dots.length) return;
+  const checkDotProximity = useCallback(
+    (x: number, y: number) => {
+      if (!gameStarted || gameCompleted || currentDotIndex >= dots.length)
+        return;
 
-    const currentDot = dots[currentDotIndex];
-    const distance = Math.sqrt(
-      Math.pow(x - currentDot.x, 2) + Math.pow(y - currentDot.y, 2),
-    );
+      const currentDot = dots[currentDotIndex];
+      const distance = Math.sqrt(
+        Math.pow(x - currentDot.x, 2) + Math.pow(y - currentDot.y, 2),
+      );
 
-    const radius = 30; // Same as mouse click radius
-    if (distance <= radius) {
-      handleDotClick(currentDotIndex);
-    }
-  }, [dots, currentDotIndex, gameStarted, gameCompleted]);
+      const radius = 30; // Same as mouse click radius
+      if (distance <= radius) {
+        handleDotClick(currentDotIndex);
+      }
+    },
+    [dots, currentDotIndex, gameStarted, gameCompleted],
+  );
 
   // Initialize dots for the current level
   useEffect(() => {
@@ -498,7 +509,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                         </text>
                       </g>
                     ))}
-                    
+
                     {/* Hand cursor (when hand tracking enabled) */}
                     {handCursor && isHandTrackingEnabled && (
                       <g>
@@ -533,23 +544,32 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                   aria-label='Game controls'
                 >
                   <legend className='sr-only'>Game Controls</legend>
-                  
+
                   {/* Hand Tracking Toggle */}
                   {cameraPermission === 'granted' && (
                     <button
-                      onClick={() => setIsHandTrackingEnabled(!isHandTrackingEnabled)}
+                      onClick={() =>
+                        setIsHandTrackingEnabled(!isHandTrackingEnabled)
+                      }
                       className={`px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2 ${
                         isHandTrackingEnabled
                           ? 'bg-green-500 hover:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1'
                           : 'bg-white/10 border border-border hover:bg-white/20 backdrop-blur'
                       }`}
-                      title={isHandTrackingEnabled ? 'Disable hand tracking' : 'Enable hand tracking'}
+                      title={
+                        isHandTrackingEnabled
+                          ? 'Disable hand tracking'
+                          : 'Enable hand tracking'
+                      }
                     >
-                      <UIIcon name={isHandTrackingEnabled ? 'camera' : 'eye'} size={16} />
+                      <UIIcon
+                        name={isHandTrackingEnabled ? 'camera' : 'eye'}
+                        size={16}
+                      />
                       {isHandTrackingEnabled ? 'Hand Mode' : 'Mouse Mode'}
                     </button>
                   )}
-                  
+
                   <button
                     onClick={goToHome}
                     className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2'
@@ -571,18 +591,24 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                     <UIIcon name='target' size={14} />
                     Connect: {currentDotIndex + 1}
                   </div>
-                  
+
                   {/* Input Mode Indicator */}
-                  <div className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-medium border border-border flex items-center gap-1 ${
-                    isHandTrackingEnabled ? 'text-green-400' : 'text-blue-400'
-                  }`}>
-                    <UIIcon name={isHandTrackingEnabled ? 'hand' : 'target'} size={12} />
-                    {isHandTrackingEnabled 
-                      ? handCursor ? 'Hand Detected' : 'Show Hand'
-                      : 'Mouse/Click Mode'
-                    }
+                  <div
+                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-medium border border-border flex items-center gap-1 ${
+                      isHandTrackingEnabled ? 'text-green-400' : 'text-blue-400'
+                    }`}
+                  >
+                    <UIIcon
+                      name={isHandTrackingEnabled ? 'hand' : 'target'}
+                      size={12}
+                    />
+                    {isHandTrackingEnabled
+                      ? handCursor
+                        ? 'Hand Detected'
+                        : 'Show Hand'
+                      : 'Mouse/Click Mode'}
                   </div>
-                  
+
                   {/* Camera Permission Warning */}
                   {showPermissionWarning && cameraPermission === 'denied' && (
                     <div className='bg-amber-500/20 border border-amber-500/50 px-3 py-2 rounded-lg text-xs max-w-xs'>
@@ -590,7 +616,8 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                         Camera Unavailable
                       </div>
                       <div className='text-white/70'>
-                        Using mouse/click mode. Enable camera in browser settings for hand tracking.
+                        Using mouse/click mode. Enable camera in browser
+                        settings for hand tracking.
                       </div>
                     </div>
                   )}
@@ -606,10 +633,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
               </figure>
 
               <div className='mt-4 text-center text-white/60 text-sm font-medium'>
-                {isHandTrackingEnabled 
+                {isHandTrackingEnabled
                   ? 'Use your hand to point at dots and pinch (thumb + index finger) to connect them!'
-                  : 'Click on the numbered dots in sequence (1, 2, 3...) to connect them!'
-                }
+                  : 'Click on the numbered dots in sequence (1, 2, 3...) to connect them!'}
               </div>
             </div>
           )}
@@ -629,7 +655,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             <li>• Finish all 5 levels to win the game!</li>
             {cameraPermission === 'granted' && (
               <li>
-                • <strong className='text-green-400'>Hand Tracking:</strong> Toggle "Hand Mode" to use gestures. Point with your index finger and pinch to connect dots!
+                • <strong className='text-green-400'>Hand Tracking:</strong>{' '}
+                Toggle "Hand Mode" to use gestures. Point with your index finger
+                and pinch to connect dots!
               </li>
             )}
           </ul>

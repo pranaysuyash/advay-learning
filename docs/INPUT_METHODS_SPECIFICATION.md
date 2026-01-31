@@ -19,16 +19,19 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ### Camera-Based Modes (Primary - 4 Methods)
 
 #### Mode A: Button Toggle
+
 **Status**: ✅ IMPLEMENTED (TCK-20260128-009, TCK-20260201-012)
 
 **Description**: User clicks a UI button to start/stop drawing/interaction.
 
 **Implementation**:
+
 - Large "Start Drawing" / "Stop Drawing" button
 - Toggle state controls `isDrawing` boolean
 - Works with hand cursor or mouse
 
 **Games**:
+
 - AlphabetGame: ✅ Implemented
 - FingerNumberShow: ❓ Status unknown
 - LetterHunt: ❓ Status unknown
@@ -40,11 +43,13 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ---
 
 #### Mode B: Pinch to Draw
+
 **Status**: ✅ IMPLEMENTED (TCK-20260128-010, TCK-20260201-012)
 
 **Description**: User pinches thumb tip + index finger tip together to activate drawing/interaction.
 
 **Implementation**:
+
 - Detect landmarks 4 (thumb tip) and 8 (index finger tip)
 - Calculate Euclidean distance
 - Start threshold: 0.05 (5% of frame)
@@ -52,6 +57,7 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 - Visual feedback: cursor changes color/size when pinching
 
 **Games**:
+
 - AlphabetGame: ✅ Implemented
 - FingerNumberShow: ❓ Status unknown
 - LetterHunt: ❓ Status unknown
@@ -65,17 +71,20 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ---
 
 #### Mode C: Dwell to Toggle
+
 **Status**: ❌ NOT IMPLEMENTED (Planned)
 
 **Description**: User hovers hand cursor over a control area for 0.5-1.0 seconds to toggle drawing mode.
 
 **Specification** (from GAME_MECHANICS.md):
+
 - Dwell time: 0.5-1.0 seconds
 - Visual countdown indicator (circular progress)
 - No click required
 - Requires stable cursor position
 
 **Games**:
+
 - AlphabetGame: ❌ Not implemented
 - FingerNumberShow: ❌ Not implemented
 - LetterHunt: ❌ Not implemented
@@ -89,17 +98,20 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ---
 
 #### Mode D: Two-Handed Control
+
 **Status**: ❌ NOT IMPLEMENTED (Planned)
 
 **Description**: One hand controls the cursor, the other hand's pose (open/closed fist) starts/stops drawing.
 
 **Specification** (from GAME_MECHANICS.md):
+
 - Primary hand: cursor control (index finger tip)
 - Secondary hand: open palm = draw, closed fist = stop
 - Separates "control" from "drawing" action
 - Requires 2 hands in frame
 
 **Games**:
+
 - AlphabetGame: ❌ Not implemented
 - FingerNumberShow: ❌ Not implemented
 - LetterHunt: ❌ Not implemented
@@ -115,16 +127,19 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ### Touch/Mouse Fallback Modes (Accessibility - 2 Methods)
 
 #### Method E: Mouse Click
+
 **Status**: ✅ IMPLEMENTED (All games)
 
 **Description**: Traditional mouse/trackpad clicking when camera unavailable or denied.
 
 **Implementation**:
+
 - onClick handlers on interactive elements
 - Canvas coordinate mapping (CSS pixels → canvas pixels)
 - Always available as fallback
 
 **Games**:
+
 - AlphabetGame: ✅ Available
 - FingerNumberShow: ✅ Available
 - LetterHunt: ✅ Available
@@ -135,16 +150,19 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 ---
 
 #### Method F: Touch Gestures
+
 **Status**: ⚠️ PARTIALLY IMPLEMENTED
 
 **Description**: Touch screen tap, drag, and hold gestures on mobile/tablet devices.
 
 **Implementation**:
+
 - onTouchStart, onTouchMove, onTouchEnd handlers
 - Multi-touch support for advanced interactions
 - Gesture recognition (tap, drag, pinch-to-zoom)
 
 **Games**:
+
 - AlphabetGame: ⚠️ Basic touch support (needs verification)
 - FingerNumberShow: ⚠️ Basic touch support (needs verification)
 - LetterHunt: ⚠️ Basic touch support (needs verification)
@@ -158,14 +176,15 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 
 ## Implementation Status Matrix
 
-| Game | Mode A (Button) | Mode B (Pinch) | Mode C (Dwell) | Mode D (Two-hand) | Method E (Mouse) | Method F (Touch) |
-|------|----------------|----------------|----------------|-------------------|------------------|------------------|
-| AlphabetGame | ✅ | ✅ | ❌ | ❌ | ✅ | ⚠️ |
-| FingerNumberShow | ❓ | ❓ | ❌ | ❌ | ✅ | ⚠️ |
-| LetterHunt | ❓ | ❓ | ❌ | ❌ | ✅ | ⚠️ |
-| ConnectTheDots | ✅ | ✅ | ❌ | ❌ | ✅ | ⚠️ |
+| Game             | Mode A (Button) | Mode B (Pinch) | Mode C (Dwell) | Mode D (Two-hand) | Method E (Mouse) | Method F (Touch) |
+| ---------------- | --------------- | -------------- | -------------- | ----------------- | ---------------- | ---------------- |
+| AlphabetGame     | ✅              | ✅             | ❌             | ❌                | ✅               | ⚠️               |
+| FingerNumberShow | ❓              | ❓             | ❌             | ❌                | ✅               | ⚠️               |
+| LetterHunt       | ❓              | ❓             | ❌             | ❌                | ✅               | ⚠️               |
+| ConnectTheDots   | ✅              | ✅             | ❌             | ❌                | ✅               | ⚠️               |
 
 **Legend**:
+
 - ✅ Implemented and verified
 - ⚠️ Partially implemented / needs verification
 - ❓ Implementation status unknown
@@ -214,21 +233,25 @@ Every game MUST have:
 ## Implementation Priority
 
 ### Phase 1 (COMPLETE - Feb 2026)
+
 - ✅ Mode A (Button Toggle) - TCK-20260128-009
 - ✅ Mode B (Pinch Gesture) - TCK-20260128-010
 - ✅ ConnectTheDots camera integration - TCK-20260201-012
 
 ### Phase 2 (NEXT - High Priority)
+
 - ❌ Audit FingerNumberShow and LetterHunt for Modes A & B
 - ❌ Implement Mode C (Dwell) across all 4 games
 - ❌ Implement Mode D (Two-handed) across all 4 games
 
 ### Phase 3 (Medium Priority)
+
 - ⚠️ Enhance touch gesture support (Method F)
 - ⚠️ Add mode selector UI (let users choose preferred mode)
 - ⚠️ User preference persistence (LocalStorage/backend)
 
 ### Phase 4 (Low Priority - Polish)
+
 - Custom threshold tuning per age group
 - Gesture training tutorial
 - Analytics on mode usage patterns
@@ -242,6 +265,7 @@ Every game MUST have:
 MediaPipe provides 21 landmarks per hand (0-20):
 
 **Key landmarks for gestures**:
+
 - **4**: Thumb tip
 - **8**: Index finger tip
 - **12**: Middle finger tip
@@ -270,7 +294,7 @@ const canvasY = landmark.y * canvas.height;
 // Calculate distance between thumb tip (4) and index tip (8)
 const distance = Math.sqrt(
   Math.pow(landmarks[4].x - landmarks[8].x, 2) +
-  Math.pow(landmarks[4].y - landmarks[8].y, 2)
+    Math.pow(landmarks[4].y - landmarks[8].y, 2),
 );
 
 // Hysteresis prevents flickering
@@ -282,6 +306,7 @@ if (!isPinching && distance < START_THRESHOLD) {
 ```
 
 **Thresholds**:
+
 - Start: 0.05 (tighter - harder to start)
 - Release: 0.07 (looser - easier to stop)
 - This makes stopping more forgiving than starting
@@ -301,9 +326,9 @@ if (!isPinching && distance < START_THRESHOLD) {
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2026-02-01 | Initial specification documenting 6 input methods and implementation status |
+| Version | Date       | Changes                                                                     |
+| ------- | ---------- | --------------------------------------------------------------------------- |
+| 1.0     | 2026-02-01 | Initial specification documenting 6 input methods and implementation status |
 
 ---
 

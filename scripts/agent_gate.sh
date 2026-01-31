@@ -65,12 +65,12 @@ if echo "$changed_paths" | rg -q '^(src/|docs/audit/)'; then
 fi
 
 touches_worklog=false
-if echo "$changed_paths" | rg -q '^docs/WORKLOG_TICKETS\.md$'; then
+if echo "$changed_paths" | rg -q '^docs/WORKLOG_(TICKETS|ADDENDUM.*)\.md$'; then
   touches_worklog=true
 fi
 
 if [[ "$touches_code_or_audit" == true && "$touches_worklog" != true ]]; then
-  die "changes touch src/ or docs/audit/ but docs/WORKLOG_TICKETS.md is not updated (required)."
+  die "changes touch src/ or docs/audit/ but no worklog updated (need WORKLOG_TICKETS.md OR WORKLOG_ADDENDUM_*.md)."
 fi
 
 if echo "$changed_paths" | rg -q '^docs/audit/.*\.md$'; then

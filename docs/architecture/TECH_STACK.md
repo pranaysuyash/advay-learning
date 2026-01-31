@@ -3,15 +3,18 @@
 ## Core Technologies
 
 ### Language & Runtime
+
 - **Python 3.13+**: Modern Python with improved performance and type hints
 - **Type Hints**: Full type annotation for better code quality
 
 ### Package Management
+
 - **uv**: Fast Python package installer and resolver
 - **venv**: Standard library virtual environments
 - **pip-tools**: For requirements.txt generation if needed
 
 ### Computer Vision & AI
+
 - **OpenCV (opencv-python)**: Core computer vision operations
 - **MediaPipe**: Google's ML solutions for hand, face, and pose tracking
   - `mediapipe`: Hand landmark detection
@@ -19,21 +22,26 @@
 - **NumPy**: Numerical operations for image processing
 
 ### UI Framework (Decision Pending)
+
 Option A: **PyQt6**
+
 - Pros: Rich widgets, mature, good performance
 - Cons: Heavy dependency, licensing considerations
 
 Option B: **Tkinter + Custom Canvas**
+
 - Pros: Built-in, lightweight, simple
 - Cons: Limited styling, less polished
 
 Option C: **Dear PyGui**
+
 - Pros: GPU-accelerated, immediate mode
 - Cons: Less mature, smaller community
 
 **Recommendation**: Start with PyQt6 for rapid prototyping, can switch to lighter option if needed.
 
 ### Storage
+
 - **PostgreSQL**: Primary database (via `asyncpg` async driver)
   - Connection pooling: pool_size=10, max_overflow=20
   - Pool recycling every 30 minutes
@@ -43,10 +51,12 @@ Option C: **Dear PyGui**
 - **Alembic**: Database migrations
 
 ### Audio (Future)
+
 - **pygame.mixer**: Simple sound playback
 - **gTTS**: Google Text-to-Speech for pronunciation (offline alternatives: `pyttsx3`)
 
 ### Utilities
+
 - **Pillow (PIL)**: Image manipulation
 - **pydantic-settings**: Configuration management
 - **structlog**: Structured logging
@@ -55,18 +65,21 @@ Option C: **Dear PyGui**
 ## Development Tools
 
 ### Code Quality
+
 - **ruff**: Fast Python linter (replaces flake8, pylint, isort)
 - **black**: Code formatter
 - **mypy**: Static type checking
 - **pre-commit**: Git hooks for quality checks
 
 ### Testing
+
 - **pytest**: Test framework
 - **pytest-cov**: Coverage reporting
 - **pytest-asyncio**: For async tests if needed
 - **factory-boy**: Test data generation
 
 ### Documentation
+
 - **mkdocs**: Documentation site generator (future)
 - **pdoc**: API documentation from docstrings
 

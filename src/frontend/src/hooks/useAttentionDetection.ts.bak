@@ -229,6 +229,39 @@ export function useAttentionDetection(onAlert?: (alert: AttentionAlert) => void)
   };
 
   // Generate feedback based on attention data
+//  const generateAttentionFeedback = (attention: AttentionData): AttentionFeedback => {
+//    const { focusLevel } = attention;
+//    
+//    if (focusLevel > 0.7) {
+//      return {
+//        level: 'high',
+//        message: 'Great focus! Keep up the excellent concentration!',
+//        suggestions: [
+//          'You\'re doing wonderfully!',
+//          'Stay focused on the activity'
+//        ]
+//      };
+//    } else if (focusLevel > 0.4) {
+//      return {
+//        level: 'medium',
+//        message: 'Good job! Try to keep your focus a bit more',
+//        suggestions: [
+//          'Look at the screen',
+//          'Pay attention to the activity'
+//        ]
+//      };
+//    } else {
+//      return {
+//        level: 'low',
+//        message: 'It looks like you need to focus more on the activity',
+//        suggestions: [
+//          'Look at the screen',
+//          'Pay attention to what you\'re doing',
+//          'Take a deep breath and refocus'
+//        ]
+//      };
+    }
+  };
 
   return {
     startMonitoring,

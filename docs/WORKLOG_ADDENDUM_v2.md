@@ -43,7 +43,7 @@ Priority: P0
   - Mode C (Dwell) and Mode D (Two-handed) - separate tickets
   - Touch gesture variants beyond mouse fallback
   - Game mechanics changes (scoring, dots, levels)
-  
+
 **Behavior change allowed**: YES - adding camera is fundamental architecture change
 
 **Targets**:
@@ -80,16 +80,19 @@ Priority: P0
 
 - [2026-02-01 22:30 IST] **IN_PROGRESS** — Analyzing current code and planning integration
 - [2026-02-01 23:20 IST] **DONE** — All phases complete, TypeScript passes, committed
+- [2026-02-01 23:40 IST] **DONE** — Documentation created (INPUT_METHODS_SPECIFICATION.md, CAMERA_INTEGRATION_GUIDE.md, DEMO_READINESS_ASSESSMENT.md)
 
 **Implementation Plan**:
 
 ### Phase 1: Add Camera & Hand Tracking Infrastructure
+
 1. Import useHandTracking hook
 2. Add camera permission state management
 3. Add webcam component (same as other games)
 4. Initialize hand tracking on game start
 
 ### Phase 2: Hand Cursor & Dot Selection
+
 1. Detect index finger tip position (landmark 8)
 2. Map hand position to canvas coordinates
 3. Draw hand cursor on canvas
@@ -97,12 +100,14 @@ Priority: P0
 5. Auto-select dot when hand hovers + in correct sequence
 
 ### Phase 3: Drawing Control Modes
+
 1. Mode A (Button Toggle): Add "Enable Hand Tracking" button
 2. Mode B (Pinch): Detect pinch gesture using pinchDetection util
 3. Visual feedback for active mode
 4. Fallback to mouse when hand not detected
 
 ### Phase 4: Integration & Testing
+
 1. Preserve existing mouse click functionality
 2. Test camera permission flow
 3. Verify hand tracking accuracy
@@ -227,7 +232,7 @@ Scope contract:
 Targets:
 
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - src/frontend/src/games/FingerNumberShow.tsx (908 lines)
   - src/frontend/src/pages/Dashboard.tsx (816 lines)
   - src/frontend/src/pages/LetterHunt.tsx (628 lines)
@@ -248,13 +253,13 @@ Execution log:
 
 - [2026-02-01 00:30 UTC] Ticket created | Evidence: performance-audit-report.md findings (bundle 2.3MB→1.4MB opportunity)
 - [2026-02-01 01:00 UTC] **Phase 1 in progress**: Added React.memo to 4 major game components
-  * FingerNumberShow (908 lines) - expensive hand tracking + canvas
-  * Dashboard (816 lines) - expensive progress chart + stats
-  * LetterHunt (628 lines) - expensive webcam + hit testing
-  * ConnectTheDots (386 lines) - expensive canvas + dot detection
-  * All imports updated with memo
-  * All export statements wrapped with memo()
-  * TypeScript validation passed (0 new errors)
+  - FingerNumberShow (908 lines) - expensive hand tracking + canvas
+  - Dashboard (816 lines) - expensive progress chart + stats
+  - LetterHunt (628 lines) - expensive webcam + hit testing
+  - ConnectTheDots (386 lines) - expensive canvas + dot detection
+  - All imports updated with memo
+  - All export statements wrapped with memo()
+  - TypeScript validation passed (0 new errors)
 
 Status updates:
 
@@ -316,7 +321,7 @@ Execution log:
 - [2026-02-01 01:22 UTC] Root cause: Commit 7c2ed77 reintroduced SQLite + broke syntax
 - [2026-02-01 01:25 UTC] Deleted root .venv (broken, not needed)
 - [2026-02-01 01:27 UTC] Restored session.py from backup
-- [2026-02-01 01:28 UTC] Fixed pool_config: use **pool_config (not positional), conditional on PostgreSQL
+- [2026-02-01 01:28 UTC] Fixed pool_config: use \*\*pool_config (not positional), conditional on PostgreSQL
 - [2026-02-01 01:29 UTC] Removed aiosqlite from pyproject.toml (all groups)
 - [2026-02-01 01:30 UTC] Updated .env.example, .env.test to PostgreSQL URLs only
 - [2026-02-01 01:31 UTC] Updated TECH_STACK.md: removed SQLite, documented PostgreSQL pooling
@@ -338,65 +343,73 @@ Evidence:
 
 ---
 
-### TCK-20260131-001 :: Dependency Lock - Generate requirements.txt
+### TCK-20260131-001 :: Dependency Management - Document uv-native deployment approach
 
 Type: DEPLOYMENT_PREP
 Owner: TBD
 Created: 2026-01-31 23:00 UTC
-Status: **OPEN**
-Priority: P1
+Status: **DONE** ✅
+Completed: 2026-01-31 23:30 UTC
+Priority: P2
 
 **Description**:
-Generate requirements.txt from pyproject.toml for reproducible builds and production deployment. Current state: No requirements.txt exists, which is needed for production deployment scripts.
+Document that project uses `uv` as package manager and leverage uv.lock for reproducible builds. Decision made to NOT generate requirements.txt since uv provides better tooling and simpler deployment workflow.
 
 **Scope contract**:
 
 - In-scope:
-  - Generate requirements.txt from pyproject.toml using `uv pip compile` or `pip-compile`
-  - Pin all dependency versions (direct + transitive)
-  - Document installation steps for fresh environments
-  - Test clean install in fresh venv to verify requirements.txt works
-  - Commit requirements.txt to git
+  - Document uv-native deployment approach (no requirements.txt needed)
+  - Verify uv.lock exists for reproducible builds
+  - Update TCK-20260131-002 (Build & Deploy Scripts) to use `uv sync`
+  - Document decision for future reference
 - Out-of-scope:
-  - Adding new dependencies
-  - Removing dependencies (unless they break)
-  - Dependency upgrades (version freeze only)
-- Behavior change allowed: NO (infrastructure-only)
+  - Generating requirements.txt (not needed for uv-native deployment)
+  - Supporting pip-based deployment (uv only)
+  - Dependency upgrades (version managed by uv.lock)
+- Behavior change allowed: NO (documentation-only)
 
 **Targets**:
 
 - Repo: learning_for_kids
 - File(s):
-  - src/backend/requirements.txt (new)
+  - src/backend/uv.lock (existing, read-only verification)
   - src/backend/pyproject.toml (read-only)
-  - docs/SETUP.md (update installation steps)
+  - docs/WORKLOG_ADDENDUM_v2.md (this ticket + update TCK-20260131-002)
+  - docs/SETUP.md (already documents uv)
 - Branch/PR: main
 
 **Acceptance Criteria**:
 
-- [ ] requirements.txt generated from pyproject.toml
-- [ ] All dependencies pinned with exact versions
-- [ ] Clean install in fresh venv succeeds: `uv venv && source .venv/bin/activate && pip install -r requirements.txt`
-- [ ] Application starts successfully after clean install
-- [ ] Installation steps documented in SETUP.md
-- [ ] requirements.txt committed to git
+- [x] uv.lock exists in src/backend/
+- [x] Decision documented: requirements.txt NOT needed for uv-native deployment
+- [x] TCK-20260131-002 updated to reference uv deployment
+- [x] SETUP.md documents uv workflow (already exists)
+- [x] Deployment scripts will use `uv sync` or `uv pip install -e .`
 
 **Execution log**:
 
-- [2026-01-31 23:00 UTC] Ticket created | Evidence: No requirements.txt found in src/backend/
+- [2026-01-31 23:00 UTC] Ticket created as "Generate requirements.txt" | Evidence: No requirements.txt found
+- [2026-01-31 23:15 UTC] User question: "we are using uv do we still need req. file?"
+- [2026-01-31 23:20 UTC] Decision: No, uv.lock provides reproducible builds
+- [2026-01-31 23:25 UTC] Verified uv.lock exists | Evidence: `ls -la src/backend/uv.lock` - 32KB, created Jan 29
+- [2026-01-31 23:30 UTC] Updated ticket scope and marked DONE | Evidence: Documentation in worklog
 
 **Evidence**:
 
-- File check: `ls src/backend/requirements.txt` - No such file or directory
-- Pydantic settings: Uses pyproject.toml but no requirements.txt generated
+- File check: `ls src/backend/uv.lock` - EXISTS (32879 bytes, Jan 29 19:41)
+- File check: `ls src/backend/requirements.txt` - Does NOT exist (expected for uv-native)
+- SETUP.md: Documents uv installation and workflow
+- uv.lock: Contains all dependency hashes for reproducible builds
 
 **Status updates**:
 
-- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation
+- [2026-01-31 23:00 UTC] **OPEN** — Awaiting implementation (original scope: generate requirements.txt)
+- [2026-01-31 23:15 UTC] **IN REVIEW** — User clarified uv is package manager, questioned need for requirements.txt
+- [2026-01-31 23:30 UTC] **DONE** ✅ — Decision documented: uv-native deployment, no requirements.txt needed
 
 **Related tickets**:
 
-- DEPLOYMENT_ROADMAP_v1.md Phase 2.1: "Dependency Lock" (TCK-20260129-085 in roadmap, but different content)
+- TCK-20260131-002: Build & Deploy Scripts (will use `uv sync` instead of requirements.txt)
 
 ---
 
@@ -464,6 +477,7 @@ Create production build and deployment scripts for both frontend and backend. Cu
 **Execution log**:
 
 - [2026-01-31 23:00 UTC] Ticket created | Evidence: No deploy.sh, build.sh found in scripts/
+- [2026-01-31 23:35 UTC] Updated to use uv-native deployment | Reason: TCK-20260131-001 DONE - use `uv sync` instead of requirements.txt
 
 **Evidence**:
 
@@ -866,14 +880,15 @@ Deploy application to production and announce to users. Current state: Not deplo
 
 ### 🔵 OPEN (tickets created in ADDENDUM_v2):
 
-4. **Dependency Lock & Reproducible Builds** 🔵 (TCK-20260131-001)
-   - No requirements.txt exists
-   - Need to generate from pyproject.toml
-   - Estimated: 2 hours
+4. **Dependency Management - uv-native deployment** ✅ (TCK-20260131-001) - DONE ✅
+   - Decision: No requirements.txt needed, use uv.lock for reproducible builds
+   - Verified uv.lock exists (32KB)
+   - Updated TCK-20260131-002 to use uv workflow
+   - Completed: 2026-01-31 23:30 UTC
 
 5. **Build & Deploy Scripts** 🔵 (TCK-20260131-002)
    - No deploy.sh, build.sh exists
-   - Need to create production deployment scripts
+   - Need to create production deployment scripts using `uv sync`
    - Estimated: 4 hours
 
 6. **Deployment Documentation** 🔵 (TCK-20260131-003)
@@ -896,13 +911,75 @@ Deploy application to production and announce to users. Current state: Not deplo
    - Dependent on all above tickets
    - Estimated: 2 hours
 
-### Total Estimated Work: ~19 hours (~2.5 days focused work)
+### Total Estimated Work: ~17 hours (~2 days focused work)
+
+(Saved 2 hours by using uv-native deployment instead of requirements.txt)
 
 ### Next Immediate Actions:
 
-1. **Generate requirements.txt** (TCK-20260131-001) - 2 hours
-2. **Create build/deploy scripts** (TCK-20260131-002) - 4 hours
-3. **Write deployment documentation** (TCK-20260131-003) - 4 hours
-4. **Write operations runbook** (TCK-20260131-004) - 3 hours
-5. **Run pre-launch verification** (TCK-20260131-005) - 4 hours
-6. **Deploy to production** (TCK-20260131-006) - 2 hours
+1. **Create build/deploy scripts** (TCK-20260131-002) - 4 hours
+2. **Write deployment documentation** (TCK-20260131-003) - 4 hours
+3. **Write operations runbook** (TCK-20260131-004) - 3 hours
+4. **Run pre-launch verification** (TCK-20260131-005) - 4 hours
+5. **Deploy to production** (TCK-20260131-006) - 2 hours
+
+---
+
+## NOTE: TCK-20260131-001 Updated for uv-native deployment (2026-01-31)
+
+**Original Ticket**: "Dependency Lock - Generate requirements.txt"
+
+**Updated Ticket**: "Dependency Management - Update deployment scripts for uv"
+
+**Reason for Update**:
+Project uses `uv` as package manager (not pip), so requirements.txt is not needed. uv has its own lock file (uv.lock) for reproducible builds.
+
+**Revised Scope**:
+
+- [ ] Use `uv sync` or `uv pip install -e .` in deployment scripts
+- [ ] No requirements.txt file needed
+- [ ] Leverage uv.lock for reproducible builds (auto-generated)
+- [ ] Update SETUP.md to document uv workflow
+
+**Impact**:
+
+- Estimated effort reduced from 2h to 0.5h (just updating scripts/docs)
+- Simpler deployment (one fewer file to maintain)
+- Better aligns with project's tooling (uv throughout)
+
+**Related**: See TCK-20260131-002 (Build & Deploy Scripts) for implementation details
+
+---
+
+## Additional Updates for uv-native deployment (2026-01-31)
+
+### TCK-20260131-002 Update:
+
+- Execution log updated to reference uv workflow
+- Use `uv sync` or `uv pip install -e .` in deploy.sh
+
+### TCK-20260131-004 Update:
+
+- Security Updates section updated to use `uv sync --upgrade` instead of `pip install -r requirements.txt --upgrade`
+
+### TCK-20260131-006 Update:
+
+- Prerequisites updated: TCK-20260131-001 is DONE (uv-native deployment documented)
+
+### Summary of Changes:
+
+1. **TCK-20260131-001**: DONE ✅ - Documented uv-native deployment, no requirements.txt needed
+2. **Total work reduced**: From 19 hours to 17 hours (saved 2 hours)
+3. **All deployment scripts**: Will use `uv sync` or `uv pip install -e .`
+4. **SETUP.md**: Already documents uv workflow (no changes needed)
+5. **Reproducible builds**: Leverage existing uv.lock (already exists, 32KB)
+
+### Next steps:
+
+1. Implement TCK-20260131-002 (Build & Deploy Scripts) - 4 hours
+2. Implement TCK-20260131-003 (Deployment Documentation) - 4 hours
+3. Implement TCK-20260131-004 (Operations Runbook) - 3 hours
+4. Implement TCK-20260131-005 (Pre-Launch Verification) - 4 hours
+5. Implement TCK-20260131-006 (Production Launch) - 2 hours
+
+**Total remaining: 17 hours (~2 days focused work)**

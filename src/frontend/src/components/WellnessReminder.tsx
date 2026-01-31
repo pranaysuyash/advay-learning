@@ -98,7 +98,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
                 onClick={() => onDismiss(alert.id)}
                 className="text-white/50 hover:text-white/80 flex-shrink-0"
               >
-                <UIIcon name="x" size={16} />
+                <UIIcon name="close" size={16} />
               </button>
             </div>
           </motion.div>

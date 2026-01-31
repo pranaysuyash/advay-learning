@@ -4,9 +4,9 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 ## Start Here (Any Agent)
 
-1) Use: `prompts/workflow/agent-entrypoint-v1.0.md`
-2) Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
-3) Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
+1. Use: `prompts/workflow/agent-entrypoint-v1.0.md`
+2. Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
+3. Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
 ## 🚫 Critical Rules
 
@@ -17,12 +17,14 @@ This folder contains the reusable prompts that govern how agents work on this re
 ## Prompt Map (By Role / Job)
 
 ### Project Manager (PM)
+
 - Feature PRD + ticket split: `prompts/product/feature-prd-and-ticketing-v1.0.md`
 - Backlog grooming: `prompts/product/backlog-grooming-v1.0.md`
 - Next focus strategy (personas/SWOT/roadmap): `prompts/product/next-focus-strategy-v1.0.md`
 - Lightweight market scan (validation + insights): `prompts/product/lightweight-market-scan-v1.0.md`
 
 ### UI / UX
+
 - Repo-aware UX audit: `prompts/ui/repo-aware-ui-auditor-v1.0.md`
 - Generic UI review (artifact-based): `prompts/ui/generic-ui-reviewer-v1.0.md`
 - UI change spec writer: `prompts/ui/ui-change-spec-v1.0.md`
@@ -32,6 +34,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 - MediaPipe kids-app UX/QA audit pack (master + persona scenarios): `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md`
 
 ### Engineering (Dev)
+
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
 - Implement audit findings: `prompts/remediation/implementation-v1.6.1.md`
 - **Implementation planning (before coding)**: `prompts/planning/implementation-planning-v1.0.md`
@@ -45,38 +48,47 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Merge conflicts: `prompts/merge/merge-conflict-v1.2.md`
 
 ### Completeness / Delivery
+
 - Completeness check (PASS/FAIL gate): `prompts/review/completeness-check-v1.0.md`
 
 ### QA / Tester
+
 - Test plan (manual + automated): `prompts/qa/test-plan-v1.0.md`
 - Test execution report: `prompts/qa/test-execution-report-v1.0.md`
 - Regression hunt: `prompts/qa/regression-hunt-v1.0.md`
 
 ### Support / Feedback
+
 - Feedback/complaint intake → tickets: `prompts/support/feedback-intake-v1.0.md`
 - Issue triage → tickets or “need more info”: `prompts/support/issue-triage-v1.0.md`
 - QA findings → tickets: `prompts/triage/qa-findings-to-tickets-v1.0.md`
 
 ### Security / Privacy
+
 - Threat model: `prompts/security/threat-model-v1.0.md`
 - Privacy review (kid + camera): `prompts/security/privacy-review-v1.0.md`
 - Dependency audit: `prompts/security/dependency-audit-v1.0.md`
 
 ### Release / Ops
+
 - Release readiness: `prompts/release/release-readiness-v1.0.md`
 - Post-merge validation (general): `prompts/release/post-merge-validation-general-v1.0.md`
 
 ### Deployment / Incident Response
+
 - Deploy/runbook draft: `prompts/deployment/deploy-runbook-v1.0.md`
 - Incident response + follow-ups: `prompts/deployment/incident-response-v1.0.md`
 
 ### Stakeholder Comms
+
 - Stakeholder status update: `prompts/stakeholder/status-update-v1.0.md`
 
 ### Architecture / Tech Lead
+
 - ADR draft: `prompts/architecture/adr-draft-v1.0.md`
 
 ### Curriculum / Content
+
 - Learning module spec: `prompts/content/learning-module-spec-v1.0.md`
 - Kids microcopy & feedback pass: `prompts/content/kids-microcopy-and-feedback-v1.0.md`
 
@@ -90,6 +102,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ## AI-Native (Optional)
 
 Prompts and docs for building “AI-native” feature slices live under:
+
 - `prompts/ai-native/`
 - `docs/ai-native/`
 - Preservation-first upgrades (no parallel versions): `prompts/workflow/preservation-first-upgrade-v1.0.md`

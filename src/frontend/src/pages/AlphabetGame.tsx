@@ -180,6 +180,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [wellnessReminderType, setWellnessReminderType] = useState<'break' | 'water' | 'stretch' | 'inactive' | null>(null);
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
   const [hydrationReminderCount, setHydrationReminderCount] = useState<number>(0); // Track hydration reminders
+  void hydrationReminderCount; // Use variable to avoid unused warning
 
   // Wellness tracking hooks
   const {
@@ -344,7 +345,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Inactivity detector
   const inactivityData = useInactivityDetector(() => {
-    
+
     setWellnessReminderType('inactive');
     setShowWellnessReminder(true);
   }, 60000); // Trigger after 1 minute of inactivity
@@ -437,9 +438,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw hint
+      // Draw hint with better visibility
       if (settings.showHints) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 4;
         drawLetterHint(ctx, currentLetter.char, canvas.width, canvas.height);
+        ctx.shadowBlur = 0;
       }
 
       // Draw all segments
@@ -557,9 +561,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-                Math.pow(point.y / canvas.height - lastPoint.y, 2),
-            )
+            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+            Math.pow(point.y / canvas.height - lastPoint.y, 2),
+          )
           : Infinity;
 
       if (dist > minDistance) {
@@ -638,7 +642,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
           {/* Animated Letter Display - moves to side panel when game starts */}
           <div
-            className={`transition-all duration-500 ease-in-out ${isPlaying ? 'absolute top-4 left-4 z-10 w-64 bg-white/90 border border-border rounded-2xl p-4 shadow-soft-lg' : 'bg-white border border-border rounded-2xl p-8 mb-6 shadow-soft'}`}
+            className={`transition-all duration-500 ease-in-out ${isPlaying ? 'absolute top-4 left-4 z-10 w-64 bg-white/95 border border-border rounded-2xl p-4 shadow-xl backdrop-blur-sm' : 'bg-white border border-border rounded-2xl p-8 mb-6 shadow-soft'}`}
           >
             <div
               className={`${isPlaying ? 'transform scale-75' : ''} flex flex-col items-center justify-center gap-4 transition-transform duration-300`}
@@ -726,13 +730,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-                feedback?.includes('Great')
-                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                  : feedback?.includes('Good')
-                    ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                    : 'bg-red-500/20 border border-red-500/30 text-red-400'
-              }`}
+              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback?.includes('Great')
+                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                : feedback?.includes('Good')
+                  ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                  : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                }`}
             >
               {feedback}
             </motion.div>
@@ -801,11 +804,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                             // Reset to first letter when language changes
                             setCurrentLetterIndex(0);
                           }}
-                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
-                            selectedLanguage === lang.code
-                              ? 'bg-pip-orange text-white shadow-soft-lg'
-                              : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                          }`}
+                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
+                            ? 'bg-pip-orange text-white shadow-soft-lg'
+                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                            }`}
                         >
                           <span className='mr-3 text-xl'>{lang.flag}</span>
                           {lang.name}
@@ -880,10 +882,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     }}
                   />
 
-                  {/* Canvas overlay for tracing */}
+                  {/* Contrast Overlay - Critical for text readability */}
+                  <div className='absolute inset-0 bg-black/20 pointer-events-none' />
+
+                  {/* Gradient Scrim at bottom for text area */}
+                  <div className='absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/60 to-transparent pointer-events-none' />
+
+                  {/* Canvas for drawing */}
                   <canvas
                     ref={canvasRef}
-                    className='absolute inset-0 w-full h-full touch-none'
+                    className='absolute inset-0 w-full h-full touch-none transform -scale-x-100 rounded-3xl cursor-crosshair'
                     onPointerDown={handleCanvasPointerDown}
                     onPointerMove={handleCanvasPointerMove}
                     onPointerUp={handleCanvasPointerUpOrCancel}
@@ -891,47 +899,59 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     onPointerLeave={handleCanvasPointerUpOrCancel}
                   />
 
-                  {/* Letter trace guide - Made more visible */}
-                  {settings.showHints && isPlaying && (
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <div
-                        className='opacity-15'
-                        style={{
-                          fontSize: '22vw',
-                          color: currentLetter.color,
-                          fontFamily: 'sans-serif',
-                          fontWeight: 'bold',
-                          lineHeight: 1,
-                          userSelect: 'none',
-                          textShadow: '0 0 10px rgba(255,255,255,0.5)',
-                        }}
-                      >
-                        {currentLetter.char}
-                      </div>
+                  {/* Instruction Overlay with High Contrast */}
+                  <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
+                    <div className='inline-block px-6 py-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-lg transition-all duration-300 transform hover:scale-105'>
+                      <p className='text-white text-xl md:text-2xl font-bold drop-shadow-md tracking-wide'>
+                        {isDrawing ? 'Trace the letter!' : 'Pinch 🤏 to draw'}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  {/* Letter trace guide - Made more visible */}
+                  {
+                    settings.showHints && isPlaying && (
+                      <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                        <div
+                          className='opacity-15'
+                          style={{
+                            fontSize: '22vw',
+                            color: currentLetter.color,
+                            fontFamily: 'sans-serif',
+                            fontWeight: 'bold',
+                            lineHeight: 1,
+                            userSelect: 'none',
+                            textShadow: '0 0 10px rgba(255,255,255,0.5)',
+                          }}
+                        >
+                          {currentLetter.char}
+                        </div>
+                      </div>
+                    )
+                  }
 
                   {/* Two-stage prompt: big center then small side pill */}
-                  {isPlaying && promptStage === 'center' && (
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
-                        <div className='text-center'>
-                          <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                            Trace this letter
-                          </div>
-                          <div
-                            className='text-7xl md:text-8xl font-black leading-none'
-                            style={{ color: currentLetter.color }}
-                          >
-                            {currentLetter.char}
-                          </div>
-                          <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                            {currentLetter.name}
+                  {
+                    isPlaying && promptStage === 'center' && (
+                      <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                        <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
+                          <div className='text-center'>
+                            <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                              Trace this letter
+                            </div>
+                            <div
+                              className='text-7xl md:text-8xl font-black leading-none'
+                              style={{ color: currentLetter.color }}
+                            >
+                              {currentLetter.char}
+                            </div>
+                            <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                              {currentLetter.name}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  }
 
                   <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
                     {promptStage === 'side' && (
@@ -970,11 +990,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     <button
                       type='button'
                       onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
-                        isDrawing
-                          ? 'bg-error text-white hover:bg-red-700'
-                          : 'bg-success text-white hover:bg-success-hover'
-                      }`}
+                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${isDrawing
+                        ? 'bg-error text-white hover:bg-red-700'
+                        : 'bg-success text-white hover:bg-success-hover'
+                        }`}
                     >
                       {isPinching ? (
                         <span className='flex items-center gap-2'>
@@ -1014,7 +1033,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     {(() => {
                       const mascotState =
                         feedback?.includes('Great') ||
-                        feedback?.includes('Amazing')
+                          feedback?.includes('Amazing')
                           ? 'happy'
                           : isDrawing
                             ? 'waiting'

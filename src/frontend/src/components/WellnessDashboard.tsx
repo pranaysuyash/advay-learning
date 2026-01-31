@@ -35,8 +35,8 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
   });
 
   const [showDetails, setShowDetails] = useState(false);
-  const { lastPosture, isLoading: postureLoading } = usePostureDetection();
-  const { lastAttention, isLoading: attentionLoading } = useAttentionDetection();
+  const { lastPosture, isLoading: _postureLoading } = usePostureDetection();
+  const { lastAttention, isLoading: _attentionLoading } = useAttentionDetection();
 
   // Update metrics when posture or attention data changes
   useEffect(() => {
