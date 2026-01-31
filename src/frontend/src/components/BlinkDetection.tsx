@@ -151,7 +151,7 @@ const BlinkDetection: React.FC<BlinkDetectionProps> = ({
         ref={canvasRef} 
         className="hidden"
       />
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-slate-600">
         Blink Detection: {status} | Blinks: {blinkCount}
       </div>
     </div>

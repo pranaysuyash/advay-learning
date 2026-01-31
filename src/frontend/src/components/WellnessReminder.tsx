@@ -105,7 +105,7 @@ const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
       aria-labelledby='wellness-title'
     >
       <div
-        className={`bg-gradient-to-br ${reminder.color} rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-white/20`}
+        className={`bg-gradient-to-br ${reminder.color} rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-white/30`}
       >
         <div className='text-center'>
           <div className='w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6'>

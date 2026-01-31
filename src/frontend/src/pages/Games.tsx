@@ -71,7 +71,7 @@ export function Games() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Learning Games</h1>
-          <p className="text-white/60 mt-2">
+          <p className="text-slate-300 mt-2">
             Engaging activities to develop literacy, numeracy, and fine motor skills
           </p>
         </div>

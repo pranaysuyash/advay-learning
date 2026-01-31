@@ -884,7 +884,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
                   <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
                     {promptStage === 'side' && (
-                      <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/20 text-white shadow-soft'>
+                      <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
                         <span className='flex items-center gap-2'>
                           <UIIcon
                             name='target'

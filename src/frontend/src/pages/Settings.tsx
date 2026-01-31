@@ -138,7 +138,7 @@ export function Settings() {
           <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
               <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
               <h2 className='text-2xl font-bold mb-4'>Parent Gate</h2>
-              <p className='text-gray-600 mb-6'>
+              <p className='text-slate-600 mb-6'>
                 Hold button below for 3 seconds to access Settings. This
                 prevents children from accidentally changing settings.
               </p>
@@ -164,12 +164,12 @@ export function Settings() {
               <div className='flex gap-3 mt-6 justify-center'>
                 <button
                   onClick={handleCancelGate}
-                  className='px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition'
+                  className='px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium transition'
                   type='button'
                 >
                   ← Go Back
                 </button>
-                <div className='text-sm text-gray-500'>
+                <div className='text-sm text-slate-600'>
                   or press ESC to cancel
                 </div>
               </div>
@@ -352,15 +352,15 @@ export function Settings() {
                       <option value='GPU'>GPU (Faster, requires good graphics)</option>
                       <option value='CPU'>CPU (Compatible with all devices)</option>
                     </select>
-                    <p className='text-sm text-white/50 mt-2'>
+                    <p className='text-sm text-slate-400 mt-2'>
                       GPU mode is faster but may not work on all devices. 
                       The app will automatically fall back to CPU if needed.
                     </p>
                   </div>
 
                   {/* Privacy Note */}
-                  <div className='text-sm text-white/50 bg-white/10 rounded-lg p-3'>
-                    <strong className='text-white/70'>Privacy:</strong> Camera
+                  <div className='text-sm text-slate-400 bg-white/10 rounded-lg p-3'>
+                    <strong className='text-slate-300'>Privacy:</strong> Camera
                     data is processed locally on your device. No video is sent
                     to our servers.
                   </div>
@@ -377,7 +377,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Daily Time Limit</div>
-                      <div className='text-sm text-white/60'>
+                      <div className='text-sm text-slate-300'>
                         Limit play time per day
                       </div>
                     </div>
@@ -402,7 +402,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Show Letter Hints</div>
-                      <div className='text-sm text-white/60'>
+                      <div className='text-sm text-slate-300'>
                         Display tracing guides
                       </div>
                     </div>
@@ -434,7 +434,7 @@ export function Settings() {
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
                     <div>
                       <div className='font-medium'>Show Tutorial Again</div>
-                      <div className='text-sm text-white/60'>
+                      <div className='text-sm text-slate-300'>
                         Reset tutorial for next game session
                       </div>
                     </div>
@@ -461,7 +461,7 @@ export function Settings() {
                 <div className='space-y-4'>
                   {/* Progress Summary */}
                   <div className='bg-white/10 rounded-lg p-4 shadow-sm'>
-                    <div className='text-sm text-white/60 mb-2'>
+                    <div className='text-sm text-slate-300 mb-2'>
                       Alphabet Learning Progress
                     </div>
                     <div className='text-2xl font-bold'>
@@ -469,7 +469,7 @@ export function Settings() {
                       {getAlphabet(settings.language).letters.length} letters
                       mastered
                     </div>
-                    <div className='text-sm text-white/60 mt-1'>
+                    <div className='text-sm text-slate-300 mt-1'>
                       Batch {getUnlockedBatches(settings.language)} unlocked
                     </div>
                   </div>
@@ -560,7 +560,7 @@ export function Settings() {
               </fieldset>
 
               {/* App Info */}
-              <div className='text-center text-white/40 text-sm'>
+              <div className='text-center text-slate-400 text-sm'>
                 <p>Advay Learning App v1.0.0</p>
                 <p className='mt-1 flex items-center justify-center gap-1'>
                   Built with <UIIcon name="heart" size={14} className="text-red-400" /> for kids everywhere

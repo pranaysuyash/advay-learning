@@ -31,7 +31,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
   return (
     <div className="bg-white/10 border border-border rounded-xl p-6 shadow-sm">
       <h2 className="text-2xl font-bold mb-2">Letter Journey</h2>
-      <p className="text-white/60 mb-6">
+      <p className="text-slate-300 mb-6">
         Master 3 letters in each batch to unlock the next! 
         ({langProgress.filter(p => p.mastered).length} of {alphabet.letters.length} mastered)
       </p>
@@ -60,9 +60,9 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                 </div>
                 <span className="font-medium flex items-center gap-2">
                   Batch {batchIndex + 1}
-                  {!isUnlocked && <UIIcon name="lock" size={14} className="text-white/40" />}
+                  {!isUnlocked && <UIIcon name="lock" size={14} className="text-slate-400" />}
                 </span>
-                <span className="text-sm text-white/60">
+                <span className="text-sm text-slate-400">
                   {masteredCount}/3 to unlock
                 </span>
               </div>
@@ -109,7 +109,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                         <span className="text-xs text-green-400">★</span>
                       )}
                       {letterProg && !isMastered && (
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-slate-400">
                           {Math.round(letterProg.bestAccuracy)}%
                         </span>
                       )}
@@ -131,15 +131,15 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
       <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-green-500/30 border border-green-500" />
-          <span className="text-white/60">Mastered</span>
+          <span className="text-slate-400">Mastered</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-white/10 border border-border" />
-          <span className="text-white/60">Available</span>
+          <span className="text-slate-400">Available</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-white/10 border border-border opacity-50" />
-          <span className="text-white/60">Locked</span>
+          <span className="text-slate-400">Locked</span>
         </div>
       </div>
     </div>

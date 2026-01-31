@@ -119,7 +119,7 @@ const WellnessTimerComponent: React.FC<WellnessTimerProps> = (props) => {
           isHidden ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
         }`}
       >
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-4 shadow-xl border-2 border-white/20 min-w-[200px]">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-4 shadow-xl border-2 border-white/30 min-w-[200px]">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-white font-bold text-sm">Wellness Timer</h3>
             <button 

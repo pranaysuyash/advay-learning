@@ -1,7 +1,9 @@
  import { useState, useRef, useEffect, useCallback } from 'react';
  import { motion, AnimatePresence } from 'framer-motion';
+ import { useNavigate } from 'react-router-dom';
  import Webcam from 'react-webcam';
  import { useTTS } from '../hooks/useTTS';
+ import { UIIcon } from '../components/ui/Icon';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { countExtendedFingersFromLandmarks } from './fingerCounting';
 // Centralized hand tracking
@@ -52,6 +54,7 @@ interface HandLandmarkerResult {
  ];
  
  export function FingerNumberShow() {
+ const navigate = useNavigate();
  const webcamRef = useRef<Webcam>(null);
  const canvasRef = useRef<HTMLCanvasElement>(null);
  const [isPlaying, setIsPlaying] = useState(false);
@@ -459,6 +462,11 @@ interface HandLandmarkerResult {
  promptTimeoutRef.current = null;
  }
  };
+
+ const goToHome = () => {
+   stopGame();
+   navigate('/dashboard');
+ };
  
  const getLetterNumberValue = (letter: Letter | null): number => {
    if (!letter) return 0;
@@ -621,10 +629,11 @@ interface HandLandmarkerResult {
  <div className="flex justify-center gap-4">
  <button
  type="button"
- onClick={() => window.history.back()}
- className="px-6 py-3 bg-white border border-border rounded-lg font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition shadow-soft"
+ onClick={goToHome}
+ className="px-6 py-3 bg-white border border-border rounded-lg font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition shadow-soft flex items-center gap-2"
  >
- Back
+ <UIIcon name="home" size={16} />
+ Home
  </button>
  {isModelLoading ? (
  <div className="text-text-secondary px-6 py-3">Loading hand tracking...</div>
@@ -656,7 +665,7 @@ interface HandLandmarkerResult {
  {/* One-time big prompt (center) then moves to the side */}
  {promptStage === 'center' && (
  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
- <div className="bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg">
+ <div className="bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/30 text-white shadow-soft-lg">
  <div className="text-center">
  {gameMode === 'letters' && targetLetter ? (
  <>
@@ -693,7 +702,7 @@ interface HandLandmarkerResult {
  
  {/* Controls overlay */}
  <div className="absolute top-4 left-4 flex gap-2">
- <div className="bg-black/55 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+ <div className="bg-black/55 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white">
  {promptStage === 'side' ? (
  gameMode === 'letters' && targetLetter ? (
  <span>
@@ -719,14 +728,14 @@ interface HandLandmarkerResult {
  )}
  </div>
  <div
- className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white ${
+ className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white ${
  isDetectedMatch ? 'ring-2 ring-green-400/70' : ''
  }`}
  >
  Detected: {currentCount}
  {handsBreakdown ? <span className="opacity-80"> ({handsBreakdown})</span> : null}
  </div>
- <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white">
+ <div className="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white">
  Hands: {handsDetected}
  </div>
  {ttsAvailable && (
@@ -741,7 +750,7 @@ interface HandLandmarkerResult {
  : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
  void speak(prompt);
  }}
- className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/20 text-white hover:bg-black/60 transition ${
+ className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white hover:bg-black/60 transition ${
  ttsEnabled ? '' : 'opacity-60'
  }`}
  title={ttsEnabled ? 'Replay prompt' : 'Enable sound in Settings to hear prompts'}
@@ -764,10 +773,11 @@ interface HandLandmarkerResult {
  <div className="absolute top-4 right-4 flex gap-2">
  <button
  type="button"
- onClick={() => window.history.back()}
- className="px-4 py-2 bg-white/90 hover:bg-white text-text-primary border border-border rounded-lg transition text-sm font-semibold shadow-soft"
+ onClick={goToHome}
+ className="px-4 py-2 bg-white/90 hover:bg-white text-text-primary border border-border rounded-lg transition text-sm font-semibold shadow-soft flex items-center gap-2"
  >
- Back
+ <UIIcon name="home" size={16} />
+ Home
  </button>
  <button
  type="button"

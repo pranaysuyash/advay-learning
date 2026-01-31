@@ -378,7 +378,7 @@ export function LetterHunt() {
 
                 {/* Top HUD */}
                 <div className="absolute inset-x-0 top-0 p-4 flex items-start justify-between">
-                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white">
+                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/30 text-white">
                     <div className="text-xs opacity-80">Find this letter</div>
                     <div className="flex items-baseline gap-2">
                       <div

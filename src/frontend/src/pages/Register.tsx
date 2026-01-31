@@ -49,7 +49,7 @@ export function Register() {
         className='bg-white/10 border border-border rounded-xl p-8 shadow-sm' 
       >
         <h1 className='text-3xl font-bold text-center mb-2'>Create Account</h1>
-        <p className='text-white/60 text-center mb-8'>
+        <p className='text-slate-300 text-center mb-8'>
           Start your learning journey
         </p>
 
@@ -91,7 +91,7 @@ export function Register() {
               disabled={isLoading}
               minLength={8}
             />
-            <p className='text-xs text-white/40 mt-1'>
+            <p className='text-xs text-slate-400 mt-1'>
               Must be at least 8 characters
             </p>
           </div>
@@ -121,7 +121,7 @@ export function Register() {
           </button>
         </form>
 
-        <p className='text-center mt-6 text-white/60'>
+        <p className='text-center mt-6 text-slate-300'>
           Already have an account?{' '}
           <Link to='/login' className='text-red-400 hover:text-red-300'>
             Sign in
