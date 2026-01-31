@@ -35,7 +35,15 @@
 3. **Duo Mode (Multiplayer)** ✅
    - Supports up to 4 hands (was 2)
    - New difficulty level: 0-20 fingers
-   - Perfect for parent-child play  
+   - Perfect for parent-child play
+
+4. **Success Detection Fix** ✅
+   - Fixed letter mode comparing against wrong target (was using reset targetNumber=0)
+   - Now correctly compares against letter value (A=1, B=2, etc.)
+
+5. **Infinite Loop Fix** ✅
+   - Fixed circular dependency causing infinite re-renders
+   - Removed currentCount from detectAndDraw dependency array  
 
 ---
 

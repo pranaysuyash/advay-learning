@@ -201,3 +201,42 @@ Interpretation: The success detection now correctly compares finger count agains
 
 Refs:
 - Ticket: TCK-20260130-015
+
+---
+
+### CLM-20260131-005 :: FingerNumberShow Infinite Loop Fix
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Fixed infinite re-render loop caused by circular dependency in detectAndDraw callback
+Evidence type: Observed
+
+Evidence:
+
+**Problem**: `currentCount` was in the useCallback dependency array, but `setCurrentCount()` was called inside the callback, creating an infinite loop:
+1. setCurrentCount() updates state
+2. State update triggers callback recreation
+3. useEffect runs and calls detectAndDraw again
+4. Loop repeats infinitely
+
+**Fix**: Removed `currentCount` from dependency array (line 521):
+
+```typescript
+// BEFORE (caused infinite loop):
+}, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, 
+    setNextTarget, gameMode, currentCount, handsDetected, targetLetter, ...]);
+
+// AFTER (fixed):
+}, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, 
+    setNextTarget, gameMode, handsDetected, targetLetter]);
+```
+
+**Also removed**: `targetBagRef`, `lastTargetRef`, `lastSpokenTargetRef`, `lastSpokenAtRef`, `lastHandsSeenAtRef`, `lastVideoTimeRef`, `frameSkipRef` - these are refs and don't need to be in dependency arrays.
+
+**File**: src/frontend/src/games/FingerNumberShow.tsx (line 521)
+
+Interpretation: The infinite loop was causing the debug logs to flood the console and likely preventing proper success detection from working correctly.
+
+Refs:
+- Ticket: TCK-20260130-015

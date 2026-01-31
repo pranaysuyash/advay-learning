@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { countExtendedFingersFromLandmarks } from '../FingerNumberShow';
+import { countExtendedFingersFromLandmarks } from '../fingerCounting';
 
 type P = { x: number; y: number };
 

@@ -2,12 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
 import { hitTestRects } from '../utils/hitTest';
+// Centralized hand tracking
+import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameLoop } from '../hooks/useGameLoop';
+import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
+import type { PinchState } from '../types/tracking';
 
 interface LetterOption {
   id: number;
@@ -23,17 +27,29 @@ export function LetterHunt() {
   const webcamRef = useRef<Webcam>(null);
   const cameraAreaRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const rafIdRef = useRef<number | null>(null);
-  const lastPinchingRef = useRef<boolean>(false);
+  const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const lastSelectAtRef = useRef<number>(0);
 
-  const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
-  const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
-  const [trackingStatus, setTrackingStatus] = useState<'idle' | 'ready' | 'error'>('idle');
+  // Use centralized hand tracking hook
+  const {
+    landmarker: handLandmarker,
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    initialize: initializeHandTracking,
+  } = useHandTracking({
+    numHands: 1,
+    minDetectionConfidence: 0.3,
+    minHandPresenceConfidence: 0.3,
+    minTrackingConfidence: 0.3,
+    delegate: 'GPU',
+    enableFallback: true,
+  });
+
   const [useMouseFallback, setUseMouseFallback] = useState<boolean>(false);
   // Cursor coordinates are local to the camera container (CSS pixels).
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(null);
+  const [isPinching, setIsPinching] = useState<boolean>(false);
 
   const [score, setScore] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
@@ -49,34 +65,12 @@ export function LetterHunt() {
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
 
-  const initializeHandLandmarker = useCallback(async () => {
-    if (handLandmarker || isModelLoading) return;
-    setIsModelLoading(true);
-    try {
-      const vision = await FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
-      );
-      const landmarker = await HandLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-          delegate: 'GPU',
-        },
-        runningMode: 'VIDEO',
-        numHands: 1,
-        minHandDetectionConfidence: 0.3,
-        minHandPresenceConfidence: 0.3,
-        minTrackingConfidence: 0.3,
-      });
-      setHandLandmarker(landmarker);
-      setTrackingStatus('ready');
-    } catch (e) {
-      console.error('Failed to load hand landmarker:', e);
-      setTrackingStatus('error');
-    } finally {
-      setIsModelLoading(false);
+  // Initialize hand tracking when game starts
+  useEffect(() => {
+    if (gameStarted && !isHandTrackingReady && !isModelLoading) {
+      initializeHandTracking();
     }
-  }, [handLandmarker, isModelLoading]);
+  }, [gameStarted, isHandTrackingReady, isModelLoading, initializeHandTracking]);
 
   // Initialize a round
   useEffect(() => {
@@ -185,11 +179,14 @@ export function LetterHunt() {
     setTimeLeft(30);
     setCursor(null);
     setHoveredOptionIndex(null);
-    lastPinchingRef.current = false;
+    setIsPinching(false);
+    pinchStateRef.current = createDefaultPinchState();
     lastSelectAtRef.current = 0;
 
     // Camera-first: initialize tracking on game start.
-    initializeHandLandmarker();
+    if (!isHandTrackingReady && !isModelLoading) {
+      initializeHandTracking();
+    }
   };
 
   const resetGame = () => {
@@ -202,7 +199,8 @@ export function LetterHunt() {
     setFeedback(null);
     setCursor(null);
     setHoveredOptionIndex(null);
-    lastPinchingRef.current = false;
+    setIsPinching(false);
+    pinchStateRef.current = createDefaultPinchState();
     lastSelectAtRef.current = 0;
   };
 
@@ -210,96 +208,73 @@ export function LetterHunt() {
     navigate('/dashboard');
   };
 
-  const detectAndUpdateCursor = useCallback(() => {
-    if (!gameStarted || gameCompleted || feedback) {
-      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-      return;
-    }
+  // Game loop using centralized hook
+  useGameLoop({
+    isRunning: gameStarted && !gameCompleted && !feedback,
+    targetFps: 30,
+    onFrame: useCallback(() => {
+      const webcam = webcamRef.current;
+      const container = cameraAreaRef.current;
+      const video = webcam?.video;
 
-    const landmarker = handLandmarker as any;
-    const webcam = webcamRef.current as any;
-    const container = cameraAreaRef.current;
-    const video: HTMLVideoElement | undefined = webcam?.video;
+      if (!container || !video || !handLandmarker) return;
+      if (video.readyState < 2 || video.videoWidth === 0) return;
 
-    if (!container || !video || typeof landmarker?.detectForVideo !== 'function') {
-      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-      return;
-    }
-
-    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
-      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-      return;
-    }
-
-    let results: any = null;
-    try {
-      results = landmarker.detectForVideo(video, performance.now());
-    } catch {
-      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-      return;
-    }
-
-    const landmarks: any[] | undefined = results?.landmarks?.[0];
-    if (!landmarks || landmarks.length < 9) {
-      if (cursor !== null) setCursor(null);
-      if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
-      lastPinchingRef.current = false;
-      rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-      return;
-    }
-
-    const rect = container.getBoundingClientRect();
-    const indexTip = landmarks[8];
-    const thumbTip = landmarks[4];
-
-    const xNorm = indexTip?.x ?? 0.5;
-    const yNorm = indexTip?.y ?? 0.5;
-
-    // Mirror X to match the mirrored webcam view.
-    const localX = (1 - xNorm) * rect.width;
-    const localY = yNorm * rect.height;
-    const nextCursor = { x: localX, y: localY };
-    setCursor(nextCursor);
-
-    // Determine which option tile is currently "hovered" by the cursor.
-    const rects = optionRefs.current
-      .map((el) => (el ? el.getBoundingClientRect() : null))
-      .filter(Boolean) as DOMRect[];
-    const hitIndex = hitTestRects({ x: rect.left + localX, y: rect.top + localY }, rects);
-    if (hitIndex !== hoveredOptionIndex) setHoveredOptionIndex(hitIndex);
-
-    // Pinch detection (thumb tip to index tip).
-    const dx = (thumbTip?.x ?? 0) - (indexTip?.x ?? 0);
-    const dy = (thumbTip?.y ?? 0) - (indexTip?.y ?? 0);
-    const pinchDistance = Math.sqrt(dx * dx + dy * dy);
-    const pinchingNow = pinchDistance < 0.05;
-
-    const wasPinching = lastPinchingRef.current;
-    lastPinchingRef.current = pinchingNow;
-
-    // Select on pinch "down" edge (debounced).
-    if (pinchingNow && !wasPinching) {
-      const now = Date.now();
-      if (now - lastSelectAtRef.current > 450 && hitIndex != null && options[hitIndex]) {
-        lastSelectAtRef.current = now;
-        handleSelectOption(options[hitIndex]);
+      let results;
+      try {
+        results = handLandmarker.detectForVideo(video, performance.now());
+      } catch {
+        return;
       }
-    }
 
-    rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-  }, [feedback, gameCompleted, gameStarted, handLandmarker, handleSelectOption, hoveredOptionIndex, options]);
-
-  useEffect(() => {
-    if (!gameStarted) return;
-    if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
-    rafIdRef.current = requestAnimationFrame(detectAndUpdateCursor);
-    return () => {
-      if (rafIdRef.current != null) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
+      const landmarks = results?.landmarks?.[0];
+      if (!landmarks || landmarks.length < 9) {
+        if (cursor !== null) setCursor(null);
+        if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
+        if (isPinching) {
+          setIsPinching(false);
+          pinchStateRef.current = createDefaultPinchState();
+        }
+        return;
       }
-    };
-  }, [detectAndUpdateCursor, gameStarted]);
+
+      const rect = container.getBoundingClientRect();
+      const indexTip = landmarks[8];
+
+      const xNorm = indexTip?.x ?? 0.5;
+      const yNorm = indexTip?.y ?? 0.5;
+
+      // Mirror X to match the mirrored webcam view.
+      const localX = (1 - xNorm) * rect.width;
+      const localY = yNorm * rect.height;
+      const nextCursor = { x: localX, y: localY };
+      setCursor(nextCursor);
+
+      // Determine which option tile is currently "hovered" by the cursor.
+      const rects = optionRefs.current
+        .map((el) => (el ? el.getBoundingClientRect() : null))
+        .filter(Boolean) as DOMRect[];
+      const hitIndex = hitTestRects({ x: rect.left + localX, y: rect.top + localY }, rects);
+      if (hitIndex !== hoveredOptionIndex) setHoveredOptionIndex(hitIndex);
+
+      // Pinch detection with hysteresis
+      const pinchResult = detectPinch(landmarks, pinchStateRef.current);
+      pinchStateRef.current = pinchResult.state;
+
+      if (pinchResult.state.isPinching !== isPinching) {
+        setIsPinching(pinchResult.state.isPinching);
+      }
+
+      // Select on pinch "start" transition (debounced).
+      if (pinchResult.transition === 'start') {
+        const now = Date.now();
+        if (now - lastSelectAtRef.current > 450 && hitIndex != null && options[hitIndex]) {
+          lastSelectAtRef.current = now;
+          handleSelectOption(options[hitIndex]);
+        }
+      }
+    }, [handLandmarker, cursor, hoveredOptionIndex, isPinching, options, handleSelectOption]),
+  });
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
@@ -431,14 +406,12 @@ export function LetterHunt() {
                 </div>
 
                 {/* Tracking status */}
-                {trackingStatus !== 'ready' && (
+                {!isHandTrackingReady && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="bg-black/60 backdrop-blur px-4 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold">
                       {isModelLoading
                         ? 'Loading hand tracking…'
-                        : trackingStatus === 'error'
-                          ? 'Hand tracking unavailable. Enable mouse fallback below.'
-                          : 'Starting camera…'}
+                        : 'Hand tracking unavailable. Enable mouse fallback below.'}
                     </div>
                   </div>
                 )}
@@ -470,7 +443,7 @@ export function LetterHunt() {
                           }}
                           type="button"
                           onClick={
-                            useMouseFallback || trackingStatus === 'error'
+                            useMouseFallback || !isHandTrackingReady
                               ? () => handleSelectOption(option)
                               : undefined
                           }

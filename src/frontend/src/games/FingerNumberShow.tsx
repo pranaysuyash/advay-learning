@@ -486,35 +486,46 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
  const nowMs = Date.now();
- if (!eligibleMatch) {
- stableMatchRef.current = { startAt: null, target: null, count: null };
- } else {
- const stable = stableMatchRef.current;
- const same =
- stable.target === currentTargetNumber &&
- stable.count === totalFingers &&
- stable.startAt != null;
- if (!same) {
- stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers };
- } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
- // Lock immediately to avoid multi-frame double scoring.
- console.log('SUCCESS TRIGGERED!', { targetNumber, totalFingers, currentTargetNumber, gameMode });
- successLockRef.current = true;
- setShowCelebration(true);
- const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
- const points = Math.round(10 * level.rewardMultiplier);
- setScore((prev) => prev + points);
- setStreak((prev) => prev + 1);
- setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 
- setTimeout(() => {
- setShowCelebration(false);
- // Reset the success lock and stable match so the next success can be detected
- successLockRef.current = false;
- stableMatchRef.current = { startAt: null, target: null, count: null };
- setNextTarget(difficulty);
- }, 1800);
- }
+ // Only reset stable match if we had a match but now don't AND enough time has passed
+ // This prevents resetting the stable timer for minor fluctuations during a successful pose
+ const stable = stableMatchRef.current;
+ if (!eligibleMatch) {
+   if (stable.startAt !== null) {
+     // If we previously had a match but lost it, allow some tolerance time before resetting
+     const timeSinceMatch = nowMs - stable.startAt;
+     if (timeSinceMatch > 1000) { // Reset after 1 second of not matching
+       stableMatchRef.current = { startAt: null, target: null, count: null };
+     }
+   }
+ } else {
+   // We have a match
+   const same =
+     stable.target === currentTargetNumber &&
+     stable.count === totalFingers &&
+     stable.startAt != null;
+   if (!same) {
+     // New match - start the timer
+     stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers };
+   } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
+     // Success! Match has been stable for required time
+     console.log('SUCCESS TRIGGERED!', { targetNumber, totalFingers, currentTargetNumber, gameMode });
+     successLockRef.current = true;
+     setShowCelebration(true);
+     const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
+     const points = Math.round(10 * level.rewardMultiplier);
+     setScore((prev) => prev + points);
+     setStreak((prev) => prev + 1);
+     setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
+
+     setTimeout(() => {
+       setShowCelebration(false);
+       // Reset the success lock and stable match so the next success can be detected
+       successLockRef.current = false;
+       stableMatchRef.current = { startAt: null, target: null, count: null };
+       setNextTarget(difficulty);
+     }, 1800);
+   }
  }
  
   requestAnimationFrame(detectAndDraw);
