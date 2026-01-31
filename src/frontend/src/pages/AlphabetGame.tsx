@@ -51,6 +51,37 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const drawnPointsRef = useRef<Array<{ x: number; y: number }>>([]);
   const pointerDownRef = useRef(false);
   const lastPinchingRef = useRef(false);
+  const lastPinchTimeRef = useRef<number>(0);
+  const frameSkipRef = useRef<number>(0);
+
+  // Smooth points using moving average for better drawing quality
+  const smoothPoints = useCallback((points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> => {
+    if (points.length < 3) return points;
+
+    const smoothed: Array<{ x: number; y: number }> = [];
+    const windowSize = 3; // Average over 3 points
+
+    for (let i = 0; i < points.length; i++) {
+      let sumX = 0, sumY = 0, count = 0;
+
+      // Average over window centered at current point
+      for (let j = -Math.floor(windowSize / 2); j <= Math.floor(windowSize / 2); j++) {
+        const idx = i + j;
+        if (idx >= 0 && idx < points.length) {
+          sumX += points[idx].x;
+          sumY += points[idx].y;
+          count++;
+        }
+      }
+
+      smoothed.push({
+        x: sumX / count,
+        y: sumY / count
+      });
+    }
+
+    return smoothed;
+  }, []);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -423,6 +454,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       if (cancelled) return;
       frameCount++;
 
+      // Frame skipping for performance (process every 2nd frame)
+      frameSkipRef.current = (frameSkipRef.current + 1) % 2;
+      
       const landmarker = landmarkerRef.current as any;
       const webcam = webcamRef.current as any;
       const canvas = canvasRef.current;
@@ -478,7 +512,77 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         return;
       }
 
+      // Clear and redraw everything for smooth rendering with glow
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw hint outline if enabled
+      if (settings.showHints) {
+        ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.6}px sans-serif`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(currentLetter.char, canvas.width / 2, canvas.height / 2);
+
+        // Draw tracing guide circle
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.25, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Draw all points with smoothing and glow
+      if (drawnPointsRef.current.length > 0) {
+        // Build segments separated by break points (NaN values)
+        const segments: Array<Array<{ x: number; y: number }>> = [];
+        let currentSegment: Array<{ x: number; y: number }> = [];
+        
+        drawnPointsRef.current.forEach((point) => {
+          if (isNaN(point.x) || isNaN(point.y)) {
+            // Break point - save current segment and start new one
+            if (currentSegment.length > 0) {
+              segments.push(currentSegment);
+              currentSegment = [];
+            }
+          } else {
+            currentSegment.push(point);
+          }
+        });
+        // Don't forget the last segment
+        if (currentSegment.length > 0) {
+          segments.push(currentSegment);
+        }
+
+        ctx.beginPath();
+        ctx.strokeStyle = currentLetter.color;
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = currentLetter.color;
+        ctx.shadowBlur = 10; // Glow effect
+
+        // Draw each segment with smoothing
+        segments.forEach((segment) => {
+          if (segment.length === 0) return;
+          
+          // Apply smoothing for better visual quality
+          const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
+          
+          pointsToDraw.forEach((point, index) => {
+            if (index === 0) {
+              ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
+            } else {
+              ctx.lineTo(point.x * canvas.width, point.y * canvas.height);
+            }
+          });
+        });
+        
+        ctx.stroke();
+        ctx.shadowBlur = 0; // Reset shadow
+      }
+
       const landmarks: any[] | undefined = results?.landmarks?.[0];
+      
       if (!landmarks || landmarks.length < 9) {
         if (lastPinchingRef.current) {
           lastPinchingRef.current = false;
@@ -494,48 +598,56 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dx = (thumbTip.x ?? 0) - (indexTip.x ?? 0);
       const dy = (thumbTip.y ?? 0) - (indexTip.y ?? 0);
       const pinchDistance = Math.sqrt(dx * dx + dy * dy);
-      // Slightly more lenient pinch threshold for better usability
-      const pinchingNow = pinchDistance < 0.08;
+      
+      // HYSTERESIS: Different thresholds for start vs release
+      // Start pinch: < 0.05 (tighter), Release pinch: > 0.07 (looser)
+      // This makes it easier to stop drawing (more responsive)
+      const PINCH_START_THRESHOLD = 0.05;
+      const PINCH_RELEASE_THRESHOLD = 0.07;
+      
+      // Determine pinch state with hysteresis
+      let pinchingNow = lastPinchingRef.current;
+      if (!lastPinchingRef.current && pinchDistance < PINCH_START_THRESHOLD) {
+        pinchingNow = true;
+        lastPinchTimeRef.current = performance.now();
+      } else if (lastPinchingRef.current && pinchDistance > PINCH_RELEASE_THRESHOLD) {
+        pinchingNow = false;
+      }
 
       if (DEBUG_TRACKING && frameCount % 30 === 0) {
         console.log('[Tracing] Hand detected, pinch:', pinchingNow, 'distance:', pinchDistance.toFixed(3), 'isDrawing:', isDrawing);
       }
 
+      // Handle pinch state transitions
       if (pinchingNow !== lastPinchingRef.current) {
         lastPinchingRef.current = pinchingNow;
         setIsPinching(pinchingNow);
-        if (!pinchingNow) lastDrawPointRef.current = null;
+        
+        if (!pinchingNow) {
+          // Just released pinch - add break point to separate line segments
+          lastDrawPointRef.current = null;
+          drawnPointsRef.current.push({ x: NaN, y: NaN }); // Break point
+        }
       }
 
+      // Draw when pinching and drawing is enabled
       if (pinchingNow && isDrawing) {
-        const x = (1 - (indexTip.x ?? 0)) * canvas.width;
-        const y = (indexTip.y ?? 0) * canvas.height;
+        const x = (1 - (indexTip.x ?? 0));
+        const y = (indexTip.y ?? 0);
         const nextPoint = { x, y };
 
-        ctx.strokeStyle = currentLetter.color;
-        ctx.lineWidth = 10;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        if (!lastDrawPointRef.current) {
-          ctx.beginPath();
-          ctx.moveTo(nextPoint.x, nextPoint.y);
-          ctx.lineTo(nextPoint.x + 0.01, nextPoint.y + 0.01);
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.moveTo(lastDrawPointRef.current.x, lastDrawPointRef.current.y);
-          ctx.lineTo(nextPoint.x, nextPoint.y);
-          ctx.stroke();
-        }
-
-        lastDrawPointRef.current = nextPoint;
-        drawnPointsRef.current.push({
-          x: nextPoint.x / canvas.width,
-          y: nextPoint.y / canvas.height,
-        });
-        if (drawnPointsRef.current.length > 6000) {
-          drawnPointsRef.current.shift();
+        // Only add point if moved enough (prevent stacking at same position)
+        const lastPoint = drawnPointsRef.current[drawnPointsRef.current.length - 1];
+        const minDistance = 0.002; // Minimum movement to add new point
+        const dist = lastPoint && !isNaN(lastPoint.x) 
+          ? Math.sqrt(Math.pow(nextPoint.x - lastPoint.x, 2) + Math.pow(nextPoint.y - lastPoint.y, 2))
+          : Infinity;
+        
+        if (dist > minDistance) {
+          drawnPointsRef.current.push(nextPoint);
+          if (drawnPointsRef.current.length > 6000) {
+            drawnPointsRef.current.shift();
+          }
         }
       }
 
@@ -550,7 +662,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         rafIdRef.current = null;
       }
     };
-  }, [isPlaying, isDrawing, currentLetter.color]);
+  }, [isPlaying, isDrawing, currentLetter.color, settings.showHints, smoothPoints]);
 
   const getCanvasPointFromPointerEvent = useCallback(
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
@@ -572,61 +684,48 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
       if (!isPlaying || !isDrawing) return;
       const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d') ?? null;
       const point = getCanvasPointFromPointerEvent(e);
-      if (!canvas || !ctx || !point) return;
+      if (!canvas || !point) return;
 
       pointerDownRef.current = true;
       (e.currentTarget as any).setPointerCapture?.(e.pointerId);
 
-      ctx.strokeStyle = currentLetter.color;
-      ctx.lineWidth = 10;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(point.x, point.y);
-      ctx.lineTo(point.x + 0.01, point.y + 0.01);
-      ctx.stroke();
-
+      // Add first point - will be rendered by the main loop
       lastDrawPointRef.current = point;
       drawnPointsRef.current.push({
         x: point.x / canvas.width,
         y: point.y / canvas.height,
       });
     },
-    [currentLetter.color, getCanvasPointFromPointerEvent, isDrawing, isPlaying],
+    [getCanvasPointFromPointerEvent, isDrawing, isPlaying],
   );
 
   const handleCanvasPointerMove = useCallback(
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
       if (!isPlaying || !isDrawing || !pointerDownRef.current) return;
       const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d') ?? null;
       const point = getCanvasPointFromPointerEvent(e);
-      if (!canvas || !ctx || !point) return;
+      if (!canvas || !point) return;
 
-      ctx.strokeStyle = currentLetter.color;
-      ctx.lineWidth = 10;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      // Only add point if moved enough
+      const lastPoint = drawnPointsRef.current[drawnPointsRef.current.length - 1];
+      const minDistance = 0.002;
+      const dist = lastPoint && !isNaN(lastPoint.x)
+        ? Math.sqrt(Math.pow(point.x / canvas.width - lastPoint.x, 2) + Math.pow(point.y / canvas.height - lastPoint.y, 2))
+        : Infinity;
 
-      if (lastDrawPointRef.current) {
-        ctx.beginPath();
-        ctx.moveTo(lastDrawPointRef.current.x, lastDrawPointRef.current.y);
-        ctx.lineTo(point.x, point.y);
-        ctx.stroke();
-      }
-
-      lastDrawPointRef.current = point;
-      drawnPointsRef.current.push({
-        x: point.x / canvas.width,
-        y: point.y / canvas.height,
-      });
-      if (drawnPointsRef.current.length > 6000) {
-        drawnPointsRef.current.shift();
+      if (dist > minDistance) {
+        lastDrawPointRef.current = point;
+        drawnPointsRef.current.push({
+          x: point.x / canvas.width,
+          y: point.y / canvas.height,
+        });
+        if (drawnPointsRef.current.length > 6000) {
+          drawnPointsRef.current.shift();
+        }
       }
     },
-    [currentLetter.color, getCanvasPointFromPointerEvent, isDrawing, isPlaying],
+    [getCanvasPointFromPointerEvent, isDrawing, isPlaying],
   );
 
   const handleCanvasPointerUpOrCancel = useCallback(
@@ -634,6 +733,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       pointerDownRef.current = false;
       (e.currentTarget as any).releasePointerCapture?.(e.pointerId);
       lastDrawPointRef.current = null;
+      // Add break point to separate line segments
+      drawnPointsRef.current.push({ x: NaN, y: NaN });
     },
     [],
   );

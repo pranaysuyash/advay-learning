@@ -28214,3 +28214,15 @@ Completed 6 of 10 priority tickets:
 **Ready for Priority 7**: Add missing tests for modified components
 
 '
+### TCK-20260131-117-UPDATE :: Tracing Improvements Restored
+
+Date: 2026-01-31
+
+Restored lost tracing improvements:
+- smoothPoints() with 3-point moving average
+- Hysteresis for pinch detection (start 0.05, release 0.07)
+- Full canvas redraw with glow effect
+- Line break support (NaN points)
+- Frame skipping for performance
+- Minimum distance filtering
+
