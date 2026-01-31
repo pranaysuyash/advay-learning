@@ -2640,9 +2640,10 @@ Next actions:
 ### TCK-20260130-015 :: Add Language Selection to Finger Number Show (Feature)
 
 Type: FEATURE / UX
-Owner: UNASSIGNED
+Owner: AI Assistant
 Created: 2026-01-30 16:00 IST
-Status: **OPEN** 🔵
+Status: **IN_PROGRESS** 🟡
+Started: 2026-02-01 00:30 UTC
 Priority: P1 (High - Core Feature Gap)
 
 Description:
@@ -2702,6 +2703,12 @@ Next actions:
 - Test hand tracking with alphabet letters
 - Test language switching during gameplay
 - Update worklog with screenshots and testing evidence
+
+Execution log:
+
+- 00:30 UTC: Starting implementation
+- 00:35 UTC: Analyzing current FingerNumberShow.tsx structure
+- 00:40 UTC: Planning language selector integration
 
 Risks/notes:
 
@@ -26825,12 +26832,122 @@ Status updates:
 
 ---
 
-## Wellness Features Implementation - Jan 30, 2026
+### TCK-20260131-105 :: Analytics tracking MVP (all games)
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-31 06:02 UTC
+Status: **OPEN**
+Priority: P0
 
-- Implemented comprehensive wellness monitoring system
-- Added active time tracking and inactivity detection
-- Created wellness timer and reminder components
-- Integrated with AlphabetGame for seamless experience
-- Added advanced eye tracking using MediaPipe
-- Created documentation and worklogs for the features
+Description:
+Ship a minimal, privacy-safe analytics/progress tracking MVP that covers all shipped games (not only letter tracing), and surface it in Parent Dashboard / Progress views.
 
+Scope contract:
+- In-scope:
+  - Define canonical `activity_type` + `meta_data` schema for each game (AlphabetGame, FingerNumberShow, ConnectTheDots, LetterHunt).
+  - Use existing progress ingestion (`/progress` + `/progress/batch`) and `progressQueue` for offline-friendly sync.
+  - Update dashboard/progress aggregations to include non-letter games.
+- Out-of-scope:
+  - Any video/image storage, raw landmark storage, or biometric identification
+  - Third-party analytics SDKs
+  - Full BI dashboards / cohort analysis (later phase)
+- Behavior change allowed: YES (new activity types + additional progress records)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `docs/audit/ANALYTICS_TRACKING_AUDIT.md`
+  - `src/backend/app/api/v1/endpoints/progress.py`
+  - `src/backend/app/schemas/progress.py`
+  - `src/frontend/src/services/progressQueue.ts`
+  - Game pages/components that emit progress
+- Branch/PR: Unknown
+- Range: Unknown
+Git availability:
+- YES
+
+Acceptance Criteria:
+- [ ] Each game emits progress items via `progressQueue` with a stable `activity_type`.
+- [ ] Backend accepts and stores these items via `/progress/batch`.
+- [ ] Parent Dashboard/Progress surfaces cross-game summaries (at least counts + recent activity).
+- [ ] No raw media / landmarks stored; meta_data is learning-only and privacy-safe.
+
+Execution log:
+- [2026-01-31 06:02 UTC] Confirmed audits + existing ingestion primitives | Evidence:
+  - **Command**: `ls -la docs/audit/ANALYTICS_TRACKING_AUDIT.md docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`
+  - **Output**:
+    ```
+    -rw-r--r--@ 1 pranay  staff  9784 Jan 31 00:05 docs/audit/ANALYTICS_TRACKING_AUDIT.md
+    -rw-r--r--@ 1 pranay  staff  7215 Jan 31 00:16 docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md
+    ```
+  - **Command**: `rg -n "include_router\\(progress\\.router" src/backend/app/api/v1/api.py`
+  - **Output**:
+    ```
+    11:api_router.include_router(progress.router, prefix="/progress", tags=["progress"])
+    ```
+  - **Command**: `rg -n "class ProgressBase" src/backend/app/schemas/progress.py && rg -n "@router.post\\(\"/batch\"\\)" src/backend/app/api/v1/endpoints/progress.py`
+  - **Output**:
+    ```
+    9:class ProgressBase(BaseModel):
+    87:@router.post("/batch")
+    ```
+  - **Interpretation**: Observed — repo already has a progress schema + batch ingestion endpoint suitable for extending to other game activity types.
+
+Next actions:
+1) Use `docs/plans/TCK-20260131-105-implementation-plan.md` as implementation source-of-truth.
+2) Implement per-game emitters (one PR per game to keep scope tight).
+3) Update backend stats + dashboard UI to show cross-game summaries.
+
+Risks/notes:
+- Risk: `meta_data` could drift into sensitive data; enforce a strict whitelist.
+- Risk: Parent dashboard copy should stay simple (no metric overload).
+
+### TCK-20260131-106 :: Camera game UX standardization (overlay budget + prompts)
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-01-31 06:02 UTC
+Status: **OPEN**
+Priority: P0
+
+Description:
+Apply the “camera is the hero” UX standard consistently across AlphabetGame, LetterHunt, FingerNumberShow:
+- 2-stage goal prompt (big center once → small side)
+- overlay budget (≤3 persistent UI elements)
+- remove technical/flashy distractions
+
+Scope contract:
+- In-scope:
+  - Use `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md` as source-of-truth findings.
+  - Reduce persistent overlays and remove persistent pulse/tech status labels.
+  - Keep gameplay mechanics unchanged (UX-only).
+- Out-of-scope:
+  - New game mechanics or difficulty systems
+  - Redesign of non-camera screens
+- Behavior change allowed: YES (UX changes)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`
+  - `docs/plans/TCK-20260131-106-implementation-plan.md`
+  - `src/frontend/src/pages/AlphabetGame.tsx`
+  - `src/frontend/src/pages/LetterHunt.tsx`
+  - `src/frontend/src/games/FingerNumberShow.tsx`
+- Branch/PR: Unknown
+- Range: Unknown
+Git availability:
+- YES
+
+Acceptance Criteria:
+- [ ] Camera feed occupies ≥70% of active-play vertical space on each game screen.
+- [ ] During active play: ≤3 persistent UI elements (goal pill + one status + one primary action).
+- [ ] No persistent `animate-pulse`/“camera active” noise; keep only burst celebrations.
+- [ ] Prompts are readable by kids (large center prompt + optional TTS replay).
+
+Next actions:
+1) Use `docs/plans/TCK-20260131-106-implementation-plan.md` as implementation source-of-truth.
+2) Implement per-screen reductions (one PR per screen).
+3) Run `npm test` + `npm run build` after each PR and record evidence.
+
+Risks/notes:
+- Risk: Removing too much UI can hide needed actions; keep a single “More” entry if needed.

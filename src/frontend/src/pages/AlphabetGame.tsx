@@ -69,8 +69,9 @@ export function AlphabetGame() {
   >('prompt');
   const [showPermissionWarning, setShowPermissionWarning] = useState(false);
 
-  // Input mode: camera (hand tracking) or mouse (pointer/touch)
-  const [inputMode, setInputMode] = useState<'camera' | 'mouse'>('camera');
+  // Two-stage prompt state for the current letter.
+  const [promptStage, setPromptStage] = useState<'center' | 'side'>('center');
+  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Basic game controls and stubs
   const startGame = async () => {
@@ -125,10 +126,10 @@ export function AlphabetGame() {
         }
         
         if (loadedDelegate) {
-          setFeedback(`Hand tracking active (${loadedDelegate} mode). Use your hand or mouse!`);
+          setFeedback('Camera ready!');
         } else {
           console.error('[AlphabetGame] Failed to load hand tracker with any delegate:', lastError);
-          setFeedback('Hand tracking unavailable. Use your mouse or finger to draw!');
+          setFeedback('Camera tracking unavailable. You can still draw by touching the screen.');
         }
         
         setIsModelLoading(false);
@@ -136,10 +137,9 @@ export function AlphabetGame() {
     } catch {
       setCameraPermission('denied');
       setShowPermissionWarning(true);
-      setInputMode('mouse');
       // Still allow game to start with mouse mode
       setIsPlaying(true);
-      setFeedback('Camera not available. Use your mouse or finger to draw!');
+      setFeedback('Camera not available. You can still draw by touching the screen.');
     }
   };
 
@@ -154,8 +154,11 @@ export function AlphabetGame() {
       cancelAnimationFrame(rafIdRef.current);
       rafIdRef.current = null;
     }
-    // Reset input mode to camera for next session (will auto-fallback if needed)
-    setInputMode('camera');
+    setPromptStage('center');
+    if (promptTimeoutRef.current) {
+      clearTimeout(promptTimeoutRef.current);
+      promptTimeoutRef.current = null;
+    }
   };
 
   const clearDrawing = () => {
@@ -176,6 +179,10 @@ export function AlphabetGame() {
   const [wellnessReminderType, setWellnessReminderType] = useState<'break' | 'water' | 'stretch' | 'inactive' | null>(null);
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
   const [inactiveTime, setInactiveTime] = useState<number>(0); // in seconds
+  const [attentionLevel, _setAttentionLevel] = useState<number>(1); // 0 = not attentive, 1 = fully attentive
+  // @ts-expect-error - hydrationReminderCount is used by code below (line 336)
+  const [hydrationReminderCount, _setHydrationReminderCount] = useState<number>(0);
+
 
   const checkProgress = async () => {
     // Minimal, deterministic scoring: ensures the core tracking UX is testable.
@@ -208,6 +215,7 @@ export function AlphabetGame() {
     setIsPinching(false);
     lastPinchingRef.current = false;
     lastDrawPointRef.current = null;
+    setPromptStage('center');
   };
 
   const goToHome = () => {
@@ -312,12 +320,30 @@ export function AlphabetGame() {
   }, [isPlaying]);
 
   // Inactivity detector
-  useInactivityDetector(() => {
+  const inactivityData = useInactivityDetector(() => {
     // Called when inactivity is detected
     setInactiveTime(prev => prev + 1);
     setWellnessReminderType('inactive');
     setShowWellnessReminder(true);
   }, 60000); // Trigger after 1 minute of inactivity
+  void inactivityData; // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+  // Hydration reminder effect - remind every 20 minutes of active play
+  // Hydration reminder effect - remind every 20 minutes of active play
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const hydrationInterval = setInterval(() => {
+       // Show hydration reminder every 20 minutes of active play
+      if (activeTime > 0 && activeTime % 20 === 0 && activeTime >= 20) {
+        setWellnessReminderType('water');
+        setShowWellnessReminder(true);
+        _setHydrationReminderCount(prevCount => { const val = prevCount + 1; return val; });
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(hydrationInterval);
+  }, [isPlaying, activeTime]);
 
   // Handle wellness reminder dismissal
   const handleWellnessReminderDismiss = () => {
@@ -336,6 +362,20 @@ export function AlphabetGame() {
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
   const [pendingCount, setPendingCount] = useState<number>(0);
+
+  // Two-stage prompt: show big center letter briefly, then keep a small side pill.
+  useEffect(() => {
+    if (!isPlaying) return;
+    setPromptStage('center');
+    if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
+    promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
+    return () => {
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+        promptTimeoutRef.current = null;
+      }
+    };
+  }, [isPlaying, currentLetterIndex, selectedLanguage]);
 
   useEffect(() => {
     const update = () =>
@@ -835,89 +875,41 @@ export function AlphabetGame() {
                     </div>
                   )}
 
-                  {/* Controls overlay */}
-                  <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
-                    <div className='bg-black/50 backdrop-blur px-4 py-2 rounded-full text-base font-bold border-2 border-white/30 flex items-center gap-2'>
-                      <UIIcon
-                        name='target'
-                        size={16}
-                        className='text-yellow-300'
-                      />
-                      <span className='text-white'>
-                        Trace: {currentLetter.char}
-                      </span>
-                    </div>
-                    {/* Input Mode Indicator */}
-                    <div className={`backdrop-blur px-4 py-2 rounded-full text-sm font-bold border-2 flex items-center gap-2 ${
-                      inputMode === 'camera' 
-                        ? 'bg-green-500/30 border-green-400/50 text-green-300' 
-                        : 'bg-blue-500/30 border-blue-400/50 text-blue-300'
-                    }`}>
-                      <UIIcon 
-                        name={inputMode === 'camera' ? 'camera' : 'hand'} 
-                        size={16} 
-                      />
-                      <span>{inputMode === 'camera' ? 'Hand Tracking' : 'Mouse/Touch'}</span>
-                    </div>
-                    <div className='relative group'>
-                      <button
-                        className='bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-bold border border-white/30 hover:bg-white/30 transition'
-                        onClick={() => {
-                          // Cycle through languages
-                          const currentIndex = LANGUAGES.findIndex(
-                            (l) => l.code === selectedLanguage,
-                          );
-                          const nextIndex =
-                            (currentIndex + 1) % LANGUAGES.length;
-                          const nextLang = LANGUAGES[nextIndex];
-                          setSelectedLanguage(nextLang.code);
-                          setCurrentLetterIndex(0);
-                        }}
-                        title='Click to cycle through languages'
-                      >
-                        <span className='flex items-center gap-2'>
-                          {
-                            LANGUAGES.find((l) => l.code === selectedLanguage)
-                              ?.flag
-                          }{' '}
-                          <span className='text-white'>
-                            {
-                              LANGUAGES.find((l) => l.code === selectedLanguage)
-                                ?.name
-                            }
-                          </span>
-                        </span>
-                      </button>
-                      {/* Tooltip */}
-                      <div className='absolute left-0 mt-1 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 z-10 whitespace-nowrap'>
-                        Click to switch languages
+                  {/* Two-stage prompt: big center then small side pill */}
+                  {isPlaying && promptStage === 'center' && (
+                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                      <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
+                        <div className='text-center'>
+                          <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                            Trace this letter
+                          </div>
+                          <div
+                            className='text-7xl md:text-8xl font-black leading-none'
+                            style={{ color: currentLetter.color }}
+                          >
+                            {currentLetter.char}
+                          </div>
+                          <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                            {currentLetter.name}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {streak > 2 && (
-                      <div className='bg-pip-orange text-white backdrop-blur px-4 py-2 rounded-full text-sm font-bold animate-pulse shadow-soft-lg border border-white/30'>
-                        <span className='flex items-center gap-1'>
-                          <span className='text-lg'>🔥</span> {streak} streak!
+                  )}
+
+                  <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
+                    {promptStage === 'side' && (
+                      <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/20 text-white shadow-soft'>
+                        <span className='flex items-center gap-2'>
+                          <UIIcon name='target' size={16} className='text-yellow-300' />
+                          Trace <span className='font-extrabold'>{currentLetter.char}</span>
+                          <span className='opacity-80'>({currentLetter.name})</span>
                         </span>
                       </div>
                     )}
                   </div>
 
                   <div className='absolute top-4 right-4 flex gap-2'>
-                    {isPlaying && (
-                      <div className='bg-success backdrop-blur px-3 py-1 rounded-full animate-pulse shadow-soft-lg border border-white/30 flex items-center gap-1'>
-                        <UIIcon
-                          name='camera'
-                          size={16}
-                          className='text-white'
-                        />
-                        <div className='flex items-center gap-1'>
-                          <div className='w-2 h-2 bg-red-500 rounded-full animate-ping' />
-                          <span className='text-sm font-bold text-white'>
-                            Camera Active
-                          </span>
-                        </div>
-                      </div>
-                    )}
                     <button
                       onClick={goToHome}
                       className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft flex items-center gap-2 hover:bg-white'
@@ -1031,6 +1023,7 @@ export function AlphabetGame() {
             setWellnessReminderType('inactive');
             setShowWellnessReminder(true);
           }}
+          attentionLevel={attentionLevel}
         />
 
         {/* Wellness Reminder */}

@@ -116,11 +116,12 @@
  const [currentCount, setCurrentCount] = useState<number>(0);
  const [handsDetected, setHandsDetected] = useState<number>(0);
  const [handsBreakdown, setHandsBreakdown] = useState<string>('');
- const [targetNumber, setTargetNumber] = useState<number>(0);
- const [feedback, setFeedback] = useState<string>('');
- const [difficulty, setDifficulty] = useState<number>(0);
- const [showCelebration, setShowCelebration] = useState(false);
- const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
+  const [targetNumber, setTargetNumber] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string>('');
+  const [difficulty, setDifficulty] = useState<number>(0);
+  // @ts-expect-error - showCelebration is used by code below (removed for lint)
+  const [showCelebration, setShowCelebration] = useState(false);
+  const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
  const lastSpokenTargetRef = useRef<number | null>(null);
  const lastSpokenAtRef = useRef<number>(0);
  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
