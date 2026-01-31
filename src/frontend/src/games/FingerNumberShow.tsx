@@ -415,16 +415,16 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  const fingerCount = countExtendedFingers(landmarks);
  perHand.push(fingerCount);
  totalFingers += fingerCount;
- 
+
  const wrist = landmarks[0];
  const wristX = (1 - wrist.x) * canvas.width;
  const wristY = wrist.y * canvas.height;
- 
+
  ctx.beginPath();
  ctx.arc(wristX, wristY, 10, 0, 2 * Math.PI);
  ctx.fillStyle = handIndex === 0 ? '#4ade80' : '#60a5fa';
  ctx.fill();
- 
+
  ctx.fillStyle = '#ffffff';
  ctx.font = 'bold 24px sans-serif';
  ctx.textAlign = 'center';
@@ -446,15 +446,33 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  setHandsBreakdown(breakdown);
  }
  
- // For target 0: require a detected hand (closed fist) to avoid “no hands = success”.
+ // For target 0: require a detected hand (closed fist) to avoid "no hands = success".
  // Handle both number mode and letter mode
  const currentTargetNumber = gameMode === 'letters' && targetLetter
    ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
    : targetNumber;
  const canSucceedOnZero = currentTargetNumber === 0 ? detectedHands > 0 : true;
- 
- const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
- 
+
+ // For single hand games, we should check if any single hand matches the target
+ // rather than the total across all hands
+ let eligibleMatch = false;
+ if (totalFingers === currentTargetNumber && canSucceedOnZero) {
+   eligibleMatch = true;
+ } else if (detectedHands === 1 && perHand.length === 1 && perHand[0] === currentTargetNumber) {
+   // If only one hand is detected and it matches the target
+   eligibleMatch = true;
+ } else if (detectedHands === 2 && perHand.length === 2) {
+   // If two hands are detected, check if either hand matches (for targets <= 5)
+   // or if combined they match (for targets > 5)
+   if (currentTargetNumber <= 5) {
+     // For targets <= 5, either hand can match
+     eligibleMatch = perHand.some(handFingers => handFingers === currentTargetNumber);
+   } else {
+     // For targets > 5, check if combined matches
+     eligibleMatch = perHand.reduce((sum, fingers) => sum + fingers, 0) === currentTargetNumber;
+   }
+ }
+
  const nowMs = Date.now();
  if (!eligibleMatch) {
  stableMatchRef.current = { startAt: null, target: null, count: null };
@@ -462,10 +480,10 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  const stable = stableMatchRef.current;
  const same =
  stable.target === currentTargetNumber &&
- stable.count === totalFingers &&
+ stable.count === (detectedHands === 1 ? perHand[0] : totalFingers) &&
  stable.startAt != null;
  if (!same) {
- stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers };
+ stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: detectedHands === 1 ? perHand[0] : totalFingers };
  } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
  // Lock immediately to avoid multi-frame double scoring.
  successLockRef.current = true;
@@ -474,8 +492,10 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  const points = Math.round(10 * level.rewardMultiplier);
  setScore((prev) => prev + points);
  setStreak((prev) => prev + 1);
- setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
- 
+ // Use the actual detected count for feedback
+ const actualCount = detectedHands === 1 && perHand.length > 0 ? perHand[0] : totalFingers;
+ setFeedback(`Great! ${NUMBER_NAMES[actualCount]}! +${points} points`);
+
  setTimeout(() => {
  setShowCelebration(false);
  setNextTarget(difficulty);
@@ -484,7 +504,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
   requestAnimationFrame(detectAndDraw);
-  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, currentCount, handsDetected, targetLetter]);
+  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, currentCount, handsDetected, targetLetter, targetBagRef, lastTargetRef, lastSpokenTargetRef, lastSpokenAtRef, lastHandsSeenAtRef, lastVideoTimeRef, frameSkipRef]);
  
  useEffect(() => {
  if (isPlaying) {

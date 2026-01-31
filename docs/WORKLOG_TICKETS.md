@@ -28306,3 +28306,148 @@ Created: 2026-01-31 16:30 UTC
 Status: **DONE**
 
 Preserved uncommitted changes from parallel agent work.
+
+---
+
+### TCK-20260131-141 :: Hand Tracking Centralization - Master Ticket
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-31 16:35 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Centralize all hand tracking mechanics across camera-based games to eliminate code duplication, ensure consistent UX, and make improvements propagate automatically. Based on research from docs/RESEARCH_HAND_TRACKING_CENTRALIZATION.md which found 60% code duplication across games.
+
+Scope contract:
+- In-scope:
+  - Create useHandTracking hook with auto-fallback
+  - Create drawing utilities (smoothPoints, drawSegments, etc.)
+  - Create pinch detection utility with hysteresis
+  - Create useGameLoop hook
+  - Create TrackingCanvas component
+  - Refactor AlphabetGame to use new hooks
+  - Add frame skipping to all games
+  - Add GPU→CPU fallback to all games
+- Out-of-scope:
+  - New game features
+  - UI redesign
+  - Backend changes
+  - Adding hand tracking to non-camera games
+- Behavior change allowed: YES (improved performance/consistency)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/hooks/useHandTracking.ts (NEW)
+  - src/frontend/src/hooks/useGameLoop.ts (NEW)
+  - src/frontend/src/utils/drawing.ts (NEW)
+  - src/frontend/src/utils/pinchDetection.ts (NEW)
+  - src/frontend/src/components/TrackingCanvas.tsx (NEW)
+  - src/frontend/src/pages/AlphabetGame.tsx (REFACTOR)
+  - src/frontend/src/pages/LetterHunt.tsx (REFACTOR)
+  - src/frontend/src/games/FingerNumberShow.tsx (REFACTOR)
+- Branch/PR: main
+- Range: main
+Git availability: YES
+
+Acceptance Criteria:
+- [ ] useHandTracking hook works with auto GPU→CPU fallback
+- [ ] Drawing utilities provide smooth, anti-aliased lines with glow
+- [ ] Pinch detection has proper hysteresis (start 0.05, release 0.07)
+- [ ] All camera games use centralized hooks
+- [ ] Frame skipping (every 2nd frame) in all games
+- [ ] Consistent confidence thresholds (0.3) across games
+- [ ] Tests pass (npm test)
+- [ ] Build passes (npm run build)
+- [ ] No regressions in existing games
+
+Child Tickets:
+- TCK-20260131-142: Phase 1 - Core Hooks (useHandTracking, useGameLoop)
+- TCK-20260131-143: Phase 2 - Drawing Utilities
+- TCK-20260131-144: Phase 3 - Pinch Detection
+- TCK-20260131-145: Phase 4 - AlphabetGame Refactor
+- TCK-20260131-146: Phase 5 - Other Games Refactor
+
+Execution log:
+- [2026-01-31 16:35 UTC] Created master ticket and child tickets
+
+Status updates:
+- [2026-01-31 16:35 UTC] IN_PROGRESS - Starting implementation
+
+Next actions:
+1. Create implementation plan document
+2. Execute Phase 1 (Core Hooks)
+3. Execute Phase 2 (Drawing Utilities)
+4. Execute Phase 3 (Pinch Detection)
+5. Execute Phase 4 (AlphabetGame refactor)
+6. Execute Phase 5 (Other games)
+
+Risks/notes:
+- Risk: Breaking existing games during refactor
+- Mitigation: Incremental refactoring with tests after each phase
+
+---
+
+### TCK-20260131-142 :: Hand Tracking Centralization - Phase 1: Core Hooks
+
+Type: FEATURE
+Owner: AI Assistant
+Created: 2026-01-31 16:40 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Create foundational hooks for hand tracking centralization. useHandTracking manages MediaPipe initialization with auto-fallback, useGameLoop manages RAF game loops with FPS limiting.
+
+Parent Ticket: TCK-20260131-141
+
+Scope contract:
+- In-scope:
+  - Create useHandTracking hook with full options
+  - Create useGameLoop hook with FPS limiting
+  - Create shared types in types/tracking.ts
+  - Add unit tests for both hooks
+  - Document hook APIs
+- Out-of-scope:
+  - Integration with games
+  - Drawing utilities
+  - Pinch detection
+- Behavior change allowed: NO (new code only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/hooks/useHandTracking.ts (NEW)
+  - src/frontend/src/hooks/useGameLoop.ts (NEW)
+  - src/frontend/src/types/tracking.ts (NEW)
+  - src/frontend/src/hooks/__tests__/useHandTracking.test.ts (NEW)
+  - src/frontend/src/hooks/__tests__/useGameLoop.test.ts (NEW)
+- Branch/PR: main
+Git availability: YES
+
+Acceptance Criteria:
+- [ ] useHandTracking hook created with all options
+- [ ] useHandTracking has auto GPU→CPU fallback
+- [ ] useGameLoop hook created with FPS limiting
+- [ ] Unit tests for both hooks pass
+- [ ] Types exported and documented
+- [ ] Build passes
+
+Execution log:
+- [2026-01-31 16:40 UTC] Phase 1 started
+
+Status updates:
+- [2026-01-31 16:40 UTC] IN_PROGRESS - Creating core hooks
+
+Next actions:
+1. Create types/tracking.ts
+2. Create useHandTracking hook
+3. Create useGameLoop hook
+4. Write unit tests
+5. Verify build
+
+Risks/notes:
+- Risk: Hook APIs may need adjustment during integration
+- Mitigation: Design flexible interfaces with options
