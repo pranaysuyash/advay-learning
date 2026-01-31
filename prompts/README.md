@@ -124,5 +124,7 @@ Prompts and docs for building “AI-native” feature slices live under:
 
 - Overview: `docs/PROJECT_OVERVIEW.md`
 - Architecture: `docs/ARCHITECTURE.md`
+- **Input Methods (6 methods)**: `docs/INPUT_METHODS_SPECIFICATION.md`
+- **Camera Integration Guide**: `docs/architecture/CAMERA_INTEGRATION_GUIDE.md`
 - Security & privacy: `docs/security/SECURITY.md`
 - Roadmap: `docs/features/ROADMAP.md`
