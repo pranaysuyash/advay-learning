@@ -288,13 +288,13 @@ export function Dashboard() {
   };
 
   return (
-    <div className='max-w-7xl mx-auto px-4 py-8'>
+    <section className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header - Clean, single title */}
-        <div className='mb-6 flex justify-between items-center'>
+        <header className='mb-6 flex justify-between items-center'>
           <h1 className='text-2xl font-bold'>Dashboard</h1>
           <button
             onClick={handleExport}
@@ -304,7 +304,7 @@ export function Dashboard() {
           >
             {exporting ? <UIIcon name="hourglass" size={20} /> : <UIIcon name="download" size={20} />}
           </button>
-        </div>
+        </header>
 
         {/* Child Selector - Clean, minimal */}
         {children.length > 0 && (
@@ -397,8 +397,8 @@ export function Dashboard() {
 
         {/* Progress Chart */}
         {selectedChildData && (
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-            <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
+          <section className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
+            <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <div className='flex justify-between items-center mb-4'>
                 <h2 className='text-xl font-semibold'>Learning Progress</h2>
                 <div className='text-sm px-3 py-1 bg-bg-tertiary text-text-secondary border border-border rounded-full'>
@@ -488,10 +488,10 @@ export function Dashboard() {
                   });
                 })()}
               </div>
-            </div>
+            </article>
 
             {/* Multi-Language Progress */}
-            <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
+            <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <h2 className='text-xl font-semibold mb-4'>Multi-Language Progress</h2>
               {selectedChildData.languageProgress.length > 0 ? (
                 <div className='space-y-3'>
@@ -537,13 +537,13 @@ export function Dashboard() {
                   Play Games
                 </Link>
               </div>
-            </div>
-          </div>
+            </article>
+          </section>
         )}
 
         {/* Letter Journey - PROMINENT at top */}
         {selectedChildData && (
-          <div className='mb-6'>
+          <section className='mb-6'>
             <div className="flex items-center justify-between mb-2">
               <h2 className='text-lg font-semibold'>Letter Journey</h2>
               <span className="text-xs text-text-muted capitalize">
@@ -551,11 +551,11 @@ export function Dashboard() {
               </span>
             </div>
             <LetterJourney language={selectedChildData.preferredLanguage} />
-          </div>
+          </section>
         )}
 
         {/* Tips Section */}
-        <div className='bg-bg-secondary border border-border rounded-xl p-6 shadow-soft'>
+        <section className='bg-bg-secondary border border-border rounded-xl p-6 shadow-soft'>
           <h2 className='text-lg font-semibold mb-3 text-vision-blue'>
             💡 Learning Tips
           </h2>
@@ -565,7 +565,7 @@ export function Dashboard() {
             <li>• Use the tracing game to improve handwriting skills</li>
             <li>• Switch languages to build multilingual skills</li>
           </ul>
-        </div>
+        </section>
 
         {/* Add Child Modal */}
         {showAddModal && (
@@ -725,6 +725,6 @@ export function Dashboard() {
           </div>
         )}
       </motion.div>
-    </div>
+    </section>
   );
 }

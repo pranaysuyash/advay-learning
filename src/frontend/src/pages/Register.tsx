@@ -96,12 +96,12 @@ export function Register() {
             </p>
           </div>
 
-          <div>htmlFor='register-confirm-password-input' className='block text-sm font-medium text-white/80 mb-2'>
+          <div>
+            <label htmlFor='register-confirm-password-input' className='block text-sm font-medium text-white/80 mb-2'>
               Confirm Password
             </label>
             <input
-              id='register-confirm-password-input'l>
-            <input
+              id='register-confirm-password-input'
               type='password'
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

@@ -37,12 +37,23 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  'Eight',
  'Nine',
  'Ten',
+ 'Eleven',
+ 'Twelve',
+ 'Thirteen',
+ 'Fourteen',
+ 'Fifteen',
+ 'Sixteen',
+ 'Seventeen',
+ 'Eighteen',
+ 'Nineteen',
+ 'Twenty',
  ] as const;
  
  const DIFFICULTY_LEVELS: DifficultyLevel[] = [
  { name: 'Level 1', minNumber: 0, maxNumber: 2, rewardMultiplier: 1.2 },
  { name: 'Level 2', minNumber: 0, maxNumber: 5, rewardMultiplier: 1.0 },
  { name: 'Level 3', minNumber: 0, maxNumber: 10, rewardMultiplier: 0.8 },
+ { name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
  ];
  
  export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
@@ -91,16 +102,34 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
  // Thumb:
- // Use a distance-based heuristic (orientation-invariant) instead of relying on X direction.
- // Thumb is extended when thumb tip is notably further from palm center than thumb IP.
+ // Improved detection for kids' hands - uses multiple heuristics for reliability.
+ // Thumb is extended when:
+ // 1. Thumb tip is further from palm center than thumb MCP (base)
+ // 2. OR thumb tip is far from index finger base (spread position)
+ // 3. OR thumb forms an angle with other fingers (not tucked in)
  const thumbTip = landmarks[4];
  const thumbIp = landmarks[3];
- if (thumbTip && thumbIp) {
- const thumbFurther = dist(thumbTip, palmCenter) > dist(thumbIp, palmCenter) + 0.02;
- // Extra guard to reduce false positives when hand is partially occluded.
- const thumbFurtherFromIndex =
- indexMcp ? dist(thumbTip, indexMcp) > dist(thumbIp, indexMcp) + 0.01 : true;
- if (thumbFurther && thumbFurtherFromIndex) count++;
+ const thumbMcp = landmarks[2];
+ if (thumbTip && thumbIp && thumbMcp) {
+ // Distance-based: tip should be further from palm center than MCP
+ const tipToPalm = dist(thumbTip, palmCenter);
+ const mcpToPalm = dist(thumbMcp, palmCenter);
+ const thumbExtendedFromPalm = tipToPalm > mcpToPalm * 0.8; // More lenient threshold
+ 
+ // Spread-based: thumb tip should be away from index finger
+ const thumbSpread = indexMcp ? dist(thumbTip, indexMcp) > 0.15 : true;
+ 
+ // Angle-based: thumb tip should not be too close to other fingers when closed
+ const thumbTipToIndexTip = landmarks[8] ? dist(thumbTip, landmarks[8]) : 1;
+ const thumbNotTucked = thumbTipToIndexTip > 0.08;
+ 
+ // Count thumb if majority of conditions pass (2 out of 3)
+ let thumbConditions = 0;
+ if (thumbExtendedFromPalm) thumbConditions++;
+ if (thumbSpread) thumbConditions++;
+ if (thumbNotTucked) thumbConditions++;
+ 
+ if (thumbConditions >= 2) count++;
  }
  
  return count;
@@ -294,8 +323,8 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  delegate: 'GPU',
  },
  runningMode: 'VIDEO',
- numHands: 2,
- // Be more permissive so both hands register more reliably in real-world lighting/angles.
+ numHands: 4,
+ // Be more permissive so multiple hands register more reliably in real-world lighting/angles.
  minHandDetectionConfidence: 0.3,
  minHandPresenceConfidence: 0.3,
  minTrackingConfidence: 0.3,
@@ -794,7 +823,9 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  <p className="text-center text-text-secondary text-sm font-medium">
  {gameMode === 'letters'
  ? 'Hold up fingers for the letter position! A=1, B=2, C=3, and so on.'
- : 'Hold up your fingers to show numbers! Use both hands for numbers greater than 5.'}
+ : difficulty === 3
+   ? 'Duo Mode: Up to 4 people can play together! Show up to 20 fingers.'
+   : 'Hold up your fingers to show numbers! Use both hands for numbers greater than 5.'}
  </p>
  </div>
  )}

@@ -27761,3 +27761,23 @@ Status updates:
 
 '
 ````
+
+### PRESERVED WORK RECORD
+
+Date: 2026-01-31
+
+Preserved files from main branch work:
+- src/frontend/src/components/WellnessReminder.tsx
+- src/frontend/src/components/ui/ConfirmDialog.tsx
+- src/frontend/src/components/ui/Layout.tsx
+- src/frontend/src/games/FingerNumberShow.tsx
+- src/frontend/src/pages/AlphabetGame.tsx
+- src/frontend/src/pages/ConnectTheDots.tsx
+- src/frontend/src/pages/Dashboard.tsx
+- src/frontend/src/pages/Home.tsx
+- src/frontend/src/pages/LetterHunt.tsx
+- src/frontend/src/pages/Login.tsx
+- src/frontend/src/pages/Register.tsx
+- src/frontend/src/pages/Settings.tsx
+
+All work preserved - no files lost.

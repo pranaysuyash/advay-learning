@@ -302,27 +302,27 @@ export function LetterHunt() {
   }, [detectAndUpdateCursor, gameStarted]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <section className="max-w-7xl mx-auto px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <header className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Letter Hunt</h1>
             <p className="text-white/60">Find the target letter among the options!</p>
           </div>
           
           <div className="text-right">
-            <div className="text-2xl font-bold">Score: {score}</div>
+            <output className="block text-2xl font-bold">Score: {score}</output>
             <div className="flex items-center gap-4 text-sm text-white/60">
               <span>Level: {level}</span>
               <span>Round: {round}/{totalRounds}</span>
               <span>Time: {timeLeft}s</span>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Game Area */}
         <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
@@ -390,7 +390,7 @@ export function LetterHunt() {
           ) : (
             <div className="space-y-6">
               {/* Camera hero (main mechanic) */}
-              <div ref={cameraAreaRef} className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-soft">
+              <figure ref={cameraAreaRef} className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-soft m-0">
                 <div className="aspect-video w-full">
                   <Webcam
                     ref={webcamRef}
@@ -490,7 +490,8 @@ export function LetterHunt() {
                     </div>
                   </div>
                 </div>
-              </div>
+                <figcaption className="sr-only">Camera view for hand gesture tracking to select letters</figcaption>
+              </figure>
 
               {/* Feedback */}
               {feedback && (
@@ -508,7 +509,8 @@ export function LetterHunt() {
               )}
 
               {/* Game Controls */}
-              <div className="flex justify-between items-center">
+              <fieldset className="flex justify-between items-center border-0 p-0 m-0" aria-label="Game controls">
+                <legend className="sr-only">Game Controls</legend>
                 <button
                   onClick={goToHome}
                   className="px-4 py-2 bg-white border border-border rounded-lg font-semibold transition flex items-center gap-2 text-text-primary hover:bg-bg-tertiary shadow-soft"
@@ -539,7 +541,7 @@ export function LetterHunt() {
                     Reset
                   </button>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Mascot */}
               <div className="flex justify-center">
@@ -564,6 +566,6 @@ export function LetterHunt() {
           </ul>
         </div>
       </motion.div>
-    </div>
+    </section>
   );
 }

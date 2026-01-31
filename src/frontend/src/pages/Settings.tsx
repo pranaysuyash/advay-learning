@@ -137,7 +137,7 @@ export function Settings() {
   }; 
 
   return (
-    <div className='max-w-7xl mx-auto px-4 py-8'>
+    <section className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,10 +188,10 @@ export function Settings() {
 
             <div className='max-w-2xl space-y-6'>
               {/* Learning Preferences */}
-              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <h2 className='text-xl font-semibold mb-4'>
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>
                   Learning Preferences
-                </h2>
+                </legend>
 
                 <div className='space-y-4'>
                   <div>
@@ -284,11 +284,11 @@ export function Settings() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Camera Settings */}
-              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <h2 className='text-xl font-semibold mb-4'>Camera Settings</h2>
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>Camera Settings</legend>
 
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
@@ -380,13 +380,13 @@ export function Settings() {
                     to our servers.
                   </div>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Parental Controls */}
-              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <h2 className='text-xl font-semibold mb-4'>
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>
                   Parental Controls
-                </h2>
+                </legend>
 
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
@@ -446,11 +446,11 @@ export function Settings() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Parent Controls */}
-              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <h2 className='text-xl font-semibold mb-4'>Parent Controls</h2>
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>Parent Controls</legend>
 
                 <div className='space-y-4'>
                   {/* Progress Summary */}
@@ -512,11 +512,11 @@ export function Settings() {
                     Reset Letter Progress
                   </Button>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Data & Privacy */}
-              <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <h2 className='text-xl font-semibold mb-4'>Data & Privacy</h2>
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>Data & Privacy</legend>
 
                 <div className='space-y-3'>
                   <Button
@@ -551,7 +551,7 @@ export function Settings() {
                     Reset All Settings
                   </Button>
                 </div>
-              </div>
+              </fieldset>
 
               {/* App Info */}
               <div className='text-center text-white/40 text-sm'>
@@ -564,6 +564,6 @@ export function Settings() {
           </>
         )}
       </motion.div>
-    </div>
+    </section>
   );
 }

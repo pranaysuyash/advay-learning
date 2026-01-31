@@ -120,26 +120,26 @@ export function ConnectTheDots() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <section className="max-w-7xl mx-auto px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <header className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Connect The Dots</h1>
             <p className="text-white/60">Connect the numbered dots in sequence to reveal the picture!</p>
           </div>
           
           <div className="text-right">
-            <div className="text-2xl font-bold">Score: {score}</div>
+            <output className="block text-2xl font-bold">Score: {score}</output>
             <div className="flex items-center gap-4 text-sm text-white/60">
               <span>Level: {level}</span>
               <span>Time: {timeLeft}s</span>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Game Area */}
         <div className="bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm">
@@ -227,7 +227,7 @@ export function ConnectTheDots() {
             </div>
           ) : (
             <div className="relative">
-              <div className="relative bg-black rounded-xl overflow-hidden aspect-[4/3] shadow-2xl border-4 border-orange-400/30">
+              <figure className="relative bg-black rounded-xl overflow-hidden aspect-[4/3] shadow-2xl border-4 border-orange-400/30 m-0">
                 <canvas
                   ref={canvasRef}
                   width={800}
@@ -311,7 +311,8 @@ export function ConnectTheDots() {
                 )}
                 
                 {/* Game Controls Overlay */}
-                <div className="absolute top-4 right-4 flex gap-2">
+                <fieldset className="absolute top-4 right-4 flex gap-2 border-0 p-0 m-0" aria-label="Game controls">
+                  <legend className="sr-only">Game Controls</legend>
                   <button
                     onClick={goToHome}
                     className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2"
@@ -325,7 +326,7 @@ export function ConnectTheDots() {
                   >
                     Reset
                   </button>
-                </div>
+                </fieldset>
                 
                 {/* Current Target Indicator */}
                 <div className="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border flex items-center gap-1">
@@ -340,7 +341,7 @@ export function ConnectTheDots() {
                     message={`Connect to dot #${currentDotIndex + 1}`}
                   />
                 </div>
-              </div>
+              </figure>
               
               <div className="mt-4 text-center text-white/60 text-sm font-medium">
                 Click on the numbered dots in sequence (1, 2, 3...) to connect them!
@@ -360,6 +361,6 @@ export function ConnectTheDots() {
           </ul>
         </div>
       </motion.div>
-    </div>
+    </section>
   );
 }
