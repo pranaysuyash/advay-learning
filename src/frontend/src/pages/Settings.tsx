@@ -167,8 +167,7 @@ export function Settings() {
                 <progress
                   value={holdDuration}
                   max={3000}
-                  className='w-full h-1 mt-4 rounded-full'
-                  style={{ accentColor: '#ef4444' }}
+                  className='w-full h-1 mt-4 rounded-full progress-accent-red'
                 />
               )}
               <div className='flex gap-3 mt-6 justify-center'>

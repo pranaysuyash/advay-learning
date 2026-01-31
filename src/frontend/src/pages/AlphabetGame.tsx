@@ -8,6 +8,7 @@ import React, {
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import { GameLayout } from '../components/layout/GameLayout';
 import { getLettersForGame } from '../data/alphabets';
 import {
   useSettingsStore,
@@ -49,6 +50,31 @@ const LANGUAGES = [
   { code: 'te', name: 'Telugu', flag: '🇮🇳' },
   { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
 ] as const;
+
+const LETTER_COLOR_CLASS_MAP: Record<string, string> = {
+  '#ef4444': 'letter-color-ef4444',
+  '#dc2626': 'letter-color-dc2626',
+  '#3b82f6': 'letter-color-3b82f6',
+  '#f59e0b': 'letter-color-f59e0b',
+  '#10b981': 'letter-color-10b981',
+  '#8b5cf6': 'letter-color-8b5cf6',
+  '#06b6d4': 'letter-color-06b6d4',
+  '#84cc16': 'letter-color-84cc16',
+  '#f97316': 'letter-color-f97316',
+  '#ec4899': 'letter-color-ec4899',
+  '#eab308': 'letter-color-eab308',
+  '#6366f1': 'letter-color-6366f1',
+  '#64748b': 'letter-color-64748b',
+  '#a16207': 'letter-color-a16207',
+  '#a855f7': 'letter-color-a855f7',
+  '#16a34a': 'letter-color-16a34a',
+  '#1f2937': 'letter-color-1f2937',
+  '#ffffff': 'letter-color-ffffff',
+  '#fff': 'letter-color-ffffff',
+};
+
+const getLetterColorClass = (color: string) =>
+  LETTER_COLOR_CLASS_MAP[color.toLowerCase()] ?? 'text-text-primary';
 
 export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const location = useLocation();
@@ -373,6 +399,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setShowWellnessReminder(false);
     setWellnessReminderType(null);
   };
+  void handleWellnessReminderDismiss; // Use variable to avoid unused warning
 
   // Handle wellness reminder postpone (if applicable)
   const handleWellnessReminderPostpone = () => {
@@ -380,11 +407,19 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setShowWellnessReminder(false);
     setWellnessReminderType(null);
   };
+  void handleWellnessReminderPostpone; // Use variable to avoid unused warning
 
   const LETTERS = getLettersForGame(selectedLanguage);
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const letterColorClass = getLetterColorClass(currentLetter.color);
+  const accuracyColorClass =
+    accuracy >= 70
+      ? 'text-text-success'
+      : accuracy >= 40
+        ? 'text-text-warning'
+        : 'text-text-error';
 
   // Two-stage prompt: show big center letter briefly, then keep a small side pill.
   useEffect(() => {
@@ -649,10 +684,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             >
               <div className='text-center'>
                 <div
-                  className={`${isPlaying ? 'text-6xl' : 'text-9xl md:text-[12rem]'} font-extrabold mb-2`}
-                  style={{
-                    color: currentLetter.color,
-                  }}
+                  className={`${isPlaying ? 'text-6xl' : 'text-9xl md:text-[12rem]'} font-extrabold mb-2 ${letterColorClass}`}
                 >
                   {currentLetter.char}
                 </div>
@@ -702,17 +734,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 >
                   Tracing Accuracy
                 </label>
-                <span
-                  className='font-bold'
-                  style={{
-                    color:
-                      accuracy >= 70
-                        ? '#5A8A72' // text-success (WCAG AA 4.5:1)
-                        : accuracy >= 40
-                          ? '#B8956A' // text-warning (WCAG AA 4.5:1)
-                          : '#B54A32', // text-error (WCAG AA 4.6:1)
-                  }}
-                >
+                <span className={`font-bold ${accuracyColorClass}`}>
                   {accuracy}%
                 </span>
               </div>
@@ -855,49 +877,24 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               </div>
             ) : (
               <div className='space-y-4'>
-                <div className='relative bg-black rounded-2xl overflow-hidden aspect-video shadow-soft-lg border border-border'>
-                  {/* Decorative elements */}
-                  <div className='absolute inset-0 opacity-10'>
-                    <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-pip-orange blur-xl'></div>
-                    <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-vision-blue blur-xl'></div>
-                  </div>
-
-                  {/* Webcam video */}
-                  <Webcam
-                    ref={webcamRef}
-                    className={`absolute inset-0 w-full h-full object-cover ${highContrast ? 'opacity-70' : ''}`}
-                    mirrored
-                    videoConstraints={{ width: 640, height: 480 }}
-                    onUserMedia={() => {
-                      // Camera successfully started
-                      setCameraPermission('granted');
-                      setShowPermissionWarning(false);
-                    }}
-                    onUserMediaError={(err) => {
-                      // Camera failed to start
-                      console.error('[Game] Camera error:', err);
-                      setCameraPermission('denied');
-                      setShowPermissionWarning(true);
-                      setIsPlaying(false);
-                    }}
-                  />
-
-                  {/* Contrast Overlay - Critical for text readability */}
-                  <div className='absolute inset-0 bg-black/20 pointer-events-none' />
-
-                  {/* Gradient Scrim at bottom for text area */}
-                  <div className='absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/60 to-transparent pointer-events-none' />
-
-                  {/* Canvas for drawing */}
-                  <canvas
-                    ref={canvasRef}
-                    className='absolute inset-0 w-full h-full touch-none transform -scale-x-100 rounded-3xl cursor-crosshair'
-                    onPointerDown={handleCanvasPointerDown}
-                    onPointerMove={handleCanvasPointerMove}
-                    onPointerUp={handleCanvasPointerUpOrCancel}
-                    onPointerCancel={handleCanvasPointerUpOrCancel}
-                    onPointerLeave={handleCanvasPointerUpOrCancel}
-                  />
+                <GameLayout
+                  webcamRef={webcamRef}
+                  canvasRef={canvasRef}
+                  highContrast={highContrast}
+                  onCameraPermission={(state) => {
+                    setCameraPermission(state);
+                    setShowPermissionWarning(state === 'denied');
+                    if (state === 'denied') setIsPlaying(false);
+                  }}
+                  onCameraError={(err) => console.error('[Game] Camera error:', err)}
+                  canvasEvents={{
+                    onPointerDown: handleCanvasPointerDown,
+                    onPointerMove: handleCanvasPointerMove,
+                    onPointerUp: handleCanvasPointerUpOrCancel,
+                    onPointerCancel: handleCanvasPointerUpOrCancel,
+                    onPointerLeave: handleCanvasPointerUpOrCancel,
+                  }}
+                >
 
                   {/* Instruction Overlay with High Contrast */}
                   <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
@@ -912,16 +909,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     settings.showHints && isPlaying && (
                       <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
                         <div
-                          className='opacity-15'
-                          style={{
-                            fontSize: '22vw',
-                            color: currentLetter.color,
-                            fontFamily: 'sans-serif',
-                            fontWeight: 'bold',
-                            lineHeight: 1,
-                            userSelect: 'none',
-                            textShadow: '0 0 10px rgba(255,255,255,0.5)',
-                          }}
+                          className={`opacity-60 text-[28vw] font-bold leading-none select-none alphabet-hint-letter drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] ${letterColorClass}`}
                         >
                           {currentLetter.char}
                         </div>
@@ -939,8 +927,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                               Trace this letter
                             </div>
                             <div
-                              className='text-7xl md:text-8xl font-black leading-none'
-                              style={{ color: currentLetter.color }}
+                              className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
                             >
                               {currentLetter.char}
                             </div>
@@ -1049,7 +1036,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       );
                     })()}
                   </div>
-                </div>
+                </GameLayout>
 
                 {/* Action buttons - Positioned below camera when letter moves to side */}
                 <div
@@ -1124,6 +1111,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               }
             ]}
             onAcknowledge={(id) => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              void id; // Use id parameter to avoid unused warning
               setShowWellnessReminder(false);
               setWellnessReminderType(null);
             }}
@@ -1133,7 +1122,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             }}
           />
         )}
-      </section>
+      </section >
     </>
   );
 });

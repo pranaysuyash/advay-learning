@@ -274,6 +274,90 @@ p {
 .bg-secondary { background-color: var(--bg-secondary); }
 .bg-tertiary { background-color: var(--bg-tertiary); }
 
+/* Alphabet letter color utilities (avoid inline styles) */
+.letter-color-ef4444 { color: #ef4444; }
+.letter-color-dc2626 { color: #dc2626; }
+.letter-color-3b82f6 { color: #3b82f6; }
+.letter-color-f59e0b { color: #f59e0b; }
+.letter-color-10b981 { color: #10b981; }
+.letter-color-8b5cf6 { color: #8b5cf6; }
+.letter-color-06b6d4 { color: #06b6d4; }
+.letter-color-84cc16 { color: #84cc16; }
+.letter-color-f97316 { color: #f97316; }
+.letter-color-ec4899 { color: #ec4899; }
+.letter-color-eab308 { color: #eab308; }
+.letter-color-6366f1 { color: #6366f1; }
+.letter-color-64748b { color: #64748b; }
+.letter-color-a16207 { color: #a16207; }
+.letter-color-a855f7 { color: #a855f7; }
+.letter-color-16a34a { color: #16a34a; }
+.letter-color-1f2937 { color: #1f2937; }
+.letter-color-ffffff { color: #ffffff; }
+
+.letter-border-ef4444 { border-color: rgba(239, 68, 68, 0.25); }
+.letter-border-dc2626 { border-color: rgba(220, 38, 38, 0.25); }
+.letter-border-3b82f6 { border-color: rgba(59, 130, 246, 0.25); }
+.letter-border-f59e0b { border-color: rgba(245, 158, 11, 0.25); }
+.letter-border-10b981 { border-color: rgba(16, 185, 129, 0.25); }
+.letter-border-8b5cf6 { border-color: rgba(139, 92, 246, 0.25); }
+.letter-border-06b6d4 { border-color: rgba(6, 182, 212, 0.25); }
+.letter-border-84cc16 { border-color: rgba(132, 204, 22, 0.25); }
+.letter-border-f97316 { border-color: rgba(249, 115, 22, 0.25); }
+.letter-border-ec4899 { border-color: rgba(236, 72, 153, 0.25); }
+.letter-border-eab308 { border-color: rgba(234, 179, 8, 0.25); }
+.letter-border-6366f1 { border-color: rgba(99, 102, 241, 0.25); }
+.letter-border-64748b { border-color: rgba(100, 116, 139, 0.25); }
+.letter-border-a16207 { border-color: rgba(161, 98, 7, 0.25); }
+.letter-border-a855f7 { border-color: rgba(168, 85, 247, 0.25); }
+.letter-border-16a34a { border-color: rgba(22, 163, 74, 0.25); }
+.letter-border-1f2937 { border-color: rgba(31, 41, 55, 0.25); }
+.letter-border-ffffff { border-color: rgba(255, 255, 255, 0.25); }
+
+.progress-accent-red { accent-color: #ef4444; }
+.progress-accent-orange { accent-color: #E85D04; }
+.progress-accent-success { accent-color: #5A8A72; }
+.progress-accent-warning { accent-color: #B8956A; }
+.progress-accent-error { accent-color: #B54A32; }
+.progress-accent-purple { accent-color: #a855f7; }
+.progress-accent-blue { accent-color: #3b82f6; }
+
+.icon-size-16 { width: 16px; height: 16px; font-size: 11px; }
+.icon-size-20 { width: 20px; height: 20px; font-size: 14px; }
+.icon-size-24 { width: 24px; height: 24px; font-size: 17px; }
+.icon-size-28 { width: 28px; height: 28px; font-size: 20px; }
+.icon-size-32 { width: 32px; height: 32px; font-size: 22px; }
+.icon-size-36 { width: 36px; height: 36px; font-size: 25px; }
+.icon-size-40 { width: 40px; height: 40px; font-size: 28px; }
+.icon-size-48 { width: 48px; height: 48px; font-size: 34px; }
+.icon-size-64 { width: 64px; height: 64px; font-size: 45px; }
+
+.skeleton-w-60p { width: 60%; }
+.skeleton-w-40p { width: 40%; }
+.skeleton-w-80p { width: 80%; }
+.skeleton-w-100p { width: 100%; }
+.skeleton-w-48 { width: 48px; }
+.skeleton-w-80 { width: 80px; }
+.skeleton-w-60 { width: 60px; }
+.skeleton-w-40 { width: 40px; }
+.skeleton-w-32 { width: 32px; }
+.skeleton-w-20 { width: 20px; }
+.skeleton-w-16 { width: 16px; }
+.skeleton-w-12 { width: 12px; }
+.skeleton-w-8 { width: 8px; }
+
+.skeleton-h-48 { height: 48px; }
+.skeleton-h-40 { height: 40px; }
+.skeleton-h-32 { height: 32px; }
+.skeleton-h-20 { height: 20px; }
+.skeleton-h-16 { height: 16px; }
+.skeleton-h-12 { height: 12px; }
+.skeleton-h-8 { height: 8px; }
+
+.alphabet-hint-letter {
+  font-family: sans-serif;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 /* Touch target sizing (60px minimum for toddlers) */
 .touch-target {
   min-width: 60px;

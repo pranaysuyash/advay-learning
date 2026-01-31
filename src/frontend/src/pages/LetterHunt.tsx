@@ -21,6 +21,58 @@ interface LetterOption {
   isTarget: boolean;
 }
 
+const LETTER_COLOR_CLASS_MAP: Record<string, string> = {
+  '#ef4444': 'letter-color-ef4444',
+  '#dc2626': 'letter-color-dc2626',
+  '#3b82f6': 'letter-color-3b82f6',
+  '#f59e0b': 'letter-color-f59e0b',
+  '#10b981': 'letter-color-10b981',
+  '#8b5cf6': 'letter-color-8b5cf6',
+  '#06b6d4': 'letter-color-06b6d4',
+  '#84cc16': 'letter-color-84cc16',
+  '#f97316': 'letter-color-f97316',
+  '#ec4899': 'letter-color-ec4899',
+  '#eab308': 'letter-color-eab308',
+  '#6366f1': 'letter-color-6366f1',
+  '#64748b': 'letter-color-64748b',
+  '#a16207': 'letter-color-a16207',
+  '#a855f7': 'letter-color-a855f7',
+  '#16a34a': 'letter-color-16a34a',
+  '#1f2937': 'letter-color-1f2937',
+  '#fff': 'letter-color-ffffff',
+  '#ffffff': 'letter-color-ffffff',
+};
+
+const LETTER_BORDER_CLASS_MAP: Record<string, string> = {
+  '#ef4444': 'letter-border-ef4444',
+  '#dc2626': 'letter-border-dc2626',
+  '#3b82f6': 'letter-border-3b82f6',
+  '#f59e0b': 'letter-border-f59e0b',
+  '#10b981': 'letter-border-10b981',
+  '#8b5cf6': 'letter-border-8b5cf6',
+  '#06b6d4': 'letter-border-06b6d4',
+  '#84cc16': 'letter-border-84cc16',
+  '#f97316': 'letter-border-f97316',
+  '#ec4899': 'letter-border-ec4899',
+  '#eab308': 'letter-border-eab308',
+  '#6366f1': 'letter-border-6366f1',
+  '#64748b': 'letter-border-64748b',
+  '#a16207': 'letter-border-a16207',
+  '#a855f7': 'letter-border-a855f7',
+  '#16a34a': 'letter-border-16a34a',
+  '#1f2937': 'letter-border-1f2937',
+  '#fff': 'letter-border-ffffff',
+  '#ffffff': 'letter-border-ffffff',
+};
+
+const getLetterColorClass = (color?: string) =>
+  (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
+  'text-pip-orange';
+
+const getLetterBorderClass = (color?: string) =>
+  (color ? LETTER_BORDER_CLASS_MAP[color.toLowerCase()] : undefined) ??
+  'border-white/15';
+
 export const LetterHunt = memo(function LetterHuntComponent() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
@@ -309,6 +361,11 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     ]),
   });
 
+  const targetLetterMeta = alphabet.letters.find(
+    (letter) => letter.char === targetLetter,
+  );
+  const targetLetterColorClass = getLetterColorClass(targetLetterMeta?.color);
+
   return (
     <section className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
@@ -429,21 +486,12 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                     <div className='text-xs opacity-80'>Find this letter</div>
                     <div className='flex items-baseline gap-2'>
                       <div
-                        className='text-4xl font-extrabold leading-none'
-                        style={{
-                          color:
-                            alphabet.letters.find(
-                              (l) => l.char === targetLetter,
-                            )?.color ?? '#E85D04',
-                        }}
+                        className={`text-4xl font-extrabold leading-none ${targetLetterColorClass}`}
                       >
                         {targetLetter}
                       </div>
                       <div className='text-sm opacity-90'>
-                        {
-                          alphabet.letters.find((l) => l.char === targetLetter)
-                            ?.name
-                        }
+                        {targetLetterMeta?.name}
                       </div>
                     </div>
                   </div>
@@ -469,12 +517,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
 
                 {/* Cursor */}
                 {cursor && (
-                  <div
+                  <motion.div
                     className='absolute w-4 h-4 rounded-full bg-pip-orange shadow-soft-lg border-2 border-white/80'
-                    style={{
-                      left: cursor.x - 8,
-                      top: cursor.y - 8,
-                    }}
+                    animate={{ x: cursor.x - 8, y: cursor.y - 8 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
 
@@ -490,41 +536,39 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                       </span>
                     </div>
                     <div className='flex gap-2 justify-between'>
-                      {options.map((option, idx) => (
-                        <button
-                          key={option.id}
-                          ref={(el) => {
-                            optionRefs.current[idx] = el;
-                          }}
-                          type='button'
-                          onClick={
-                            useMouseFallback || !isHandTrackingReady
-                              ? () => handleSelectOption(option)
-                              : undefined
-                          }
-                          className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition ${
-                            hoveredOptionIndex === idx
-                              ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
-                              : 'border-white/15 bg-white/10 hover:bg-white/15'
-                          }`}
-                          style={{
-                            borderColor:
+                      {options.map((option, idx) => {
+                        const optionColorClass = getLetterColorClass(option.color);
+                        const optionBorderClass = getLetterBorderClass(option.color);
+
+                        return (
+                          <button
+                            key={option.id}
+                            ref={(el) => {
+                              optionRefs.current[idx] = el;
+                            }}
+                            type='button'
+                            onClick={
+                              useMouseFallback || !isHandTrackingReady
+                                ? () => handleSelectOption(option)
+                                : undefined
+                            }
+                            className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition ${
                               hoveredOptionIndex === idx
-                                ? '#fff'
-                                : option.color + '40',
-                          }}
-                        >
-                          <div
-                            className='text-3xl font-extrabold leading-none'
-                            style={{ color: option.color }}
+                                ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
+                                : `${optionBorderClass} bg-white/10 hover:bg-white/15`
+                            }`}
                           >
-                            {option.char}
-                          </div>
-                          <div className='text-[11px] text-white/80 truncate'>
-                            {option.name}
-                          </div>
-                        </button>
-                      ))}
+                            <div
+                              className={`text-3xl font-extrabold leading-none ${optionColorClass}`}
+                            >
+                              {option.char}
+                            </div>
+                            <div className='text-[11px] text-white/80 truncate'>
+                              {option.name}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

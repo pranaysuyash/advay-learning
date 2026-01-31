@@ -9,6 +9,32 @@ interface LetterJourneyProps {
   onLetterClick?: (letter: string) => void;
 }
 
+const LETTER_COLOR_CLASS_MAP: Record<string, string> = {
+  '#ef4444': 'letter-color-ef4444',
+  '#dc2626': 'letter-color-dc2626',
+  '#3b82f6': 'letter-color-3b82f6',
+  '#f59e0b': 'letter-color-f59e0b',
+  '#10b981': 'letter-color-10b981',
+  '#8b5cf6': 'letter-color-8b5cf6',
+  '#06b6d4': 'letter-color-06b6d4',
+  '#84cc16': 'letter-color-84cc16',
+  '#f97316': 'letter-color-f97316',
+  '#ec4899': 'letter-color-ec4899',
+  '#eab308': 'letter-color-eab308',
+  '#6366f1': 'letter-color-6366f1',
+  '#64748b': 'letter-color-64748b',
+  '#a16207': 'letter-color-a16207',
+  '#a855f7': 'letter-color-a855f7',
+  '#16a34a': 'letter-color-16a34a',
+  '#1f2937': 'letter-color-1f2937',
+  '#fff': 'letter-color-ffffff',
+  '#ffffff': 'letter-color-ffffff',
+};
+
+const getLetterColorClass = (color?: string) =>
+  (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
+  'text-white';
+
 export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
   const alphabet = getAlphabet(language);
   const { 
@@ -72,6 +98,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                 {batchLetters.map((letter) => {
                   const isMastered = isLetterMastered(language, letter.char);
                   const letterProg = langProgress.find(p => p.letter === letter.char);
+                  const letterColorClass = getLetterColorClass(letter.color);
                   
                   return (
                     <motion.button
@@ -95,7 +122,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                         }
                       `}
                     >
-                      <span className="text-xl font-bold" style={{ color: letter.color }}>
+                      <span className={`text-xl font-bold ${letterColorClass}`}>
                         {letter.char}
                       </span>
                       <Icon 

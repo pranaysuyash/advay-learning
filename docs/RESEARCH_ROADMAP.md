@@ -578,6 +578,53 @@ Explore B2B opportunities with schools, teachers, and educational institutions.
 
 ---
 
+### 3.16 RESEARCH-016: AR (Augmented Reality) Capabilities
+**Priority:** P1 - High
+**Category:** Technical/Product
+**Estimated Effort:** 2-3 days
+
+#### Objective
+Explore AR capabilities given our camera-based architecture, including dual camera setups and new AR learning experiences.
+
+#### Research Questions
+1. What WebAR technologies work best with our React + MediaPipe stack?
+2. Can we support dual cameras (laptop front + external) for AR?
+3. What new games become possible with AR?
+4. Which existing games could benefit from AR enhancements?
+5. What hardware setups are feasible for parents (external cameras)?
+6. How do we handle AR calibration for desk/table learning?
+7. What's the performance impact of AR features?
+8. What are the privacy implications of external/environment cameras?
+
+#### Deliverables
+- [ ] WebAR technology comparison and recommendation
+- [ ] Dual camera technical feasibility report
+- [ ] AR game concept document (new games + enhancements)
+- [ ] Hardware setup guide for parents
+- [ ] AR calibration system design
+- [ ] Performance impact analysis
+- [ ] Privacy/safety guidelines for AR cameras
+- [ ] Implementation roadmap for AR features
+
+#### Key Findings (Preliminary)
+- **Dual camera is feasible** in modern browsers via `enumerateDevices()` + `getUserMedia()`
+- **Recommended approach**: MediaPipe + Canvas overlay (works everywhere) + WebXR progressive enhancement
+- **New games enabled**: AR tracing on paper, virtual manipulatives, room scavenger hunts, AR science lab
+- **Hardware**: $50-100 external webcam, or phone on stand with DroidCam
+- **Performance**: Dual camera = 2x processing, requires optimization (frame skipping, resolution scaling)
+
+#### Sources to Research
+- WebXR Device API documentation
+- MediaPipe segmentation models
+- Existing AR learning apps (Osmo, Kaju, Wonderscope)
+- Dual camera browser implementations
+- WebRTC multi-stream handling
+- Parent willingness surveys (AR hardware adoption)
+
+**Full Research Document**: `docs/research/RESEARCH-016-AR-CAPABILITIES.md`
+
+---
+
 ## 4. Research Execution Plan
 
 ### 4.1 Prioritized Sequence
@@ -595,7 +642,8 @@ Phase 2: Product Design (Week 2)
 ├── RESEARCH-004: Accessibility Standards [P1]
 ├── RESEARCH-007: Parent Experience & Dashboard [P2]
 ├── RESEARCH-013: Offline Experience Design [P1]
-└── RESEARCH-014: Gamification & Motivation [P2]
+├── RESEARCH-014: Gamification & Motivation [P2]
+└── RESEARCH-016: AR Capabilities [P1]
 
 Phase 3: Content & Polish (Week 3)
 ├── RESEARCH-005: Sound & Music Production [P2]
@@ -626,8 +674,9 @@ Phase 4: Growth (Post-MVP)
 | RESEARCH-013 | Offline Experience | P1 | 1-2 days | RESEARCH-001 |
 | RESEARCH-014 | Gamification/Motivation | P2 | 1-2 days | RESEARCH-003 |
 | RESEARCH-015 | Teacher/School Integration | P3 | 1-2 days | RESEARCH-002, 008 |
+| RESEARCH-016 | AR Capabilities | P1 | 2-3 days | RESEARCH-001 |
 
-**Total Estimated Effort:** 22-30 days (can be parallelized to ~3 weeks)**
+**Total Estimated Effort:** 24-33 days (can be parallelized to ~3-4 weeks)**
 
 ### 4.3 Research Output Format
 

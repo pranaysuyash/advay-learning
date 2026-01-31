@@ -33,8 +33,8 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 **Games**:
 
 - AlphabetGame: ✅ Implemented
-- FingerNumberShow: ❓ Status unknown
-- LetterHunt: ❓ Status unknown
+- FingerNumberShow: ✅ Start/Stop buttons toggle camera-based interaction
+- LetterHunt: ⚠️ Mouse fallback toggle (no dedicated draw toggle)
 - ConnectTheDots: ✅ Implemented (as hand tracking toggle)
 
 **Pros**: Simple mentally; works without gesture recognition
@@ -59,8 +59,8 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 **Games**:
 
 - AlphabetGame: ✅ Implemented
-- FingerNumberShow: ❓ Status unknown
-- LetterHunt: ❓ Status unknown
+- FingerNumberShow: ❌ Not applicable (finger count recognition, no pinch interaction)
+- LetterHunt: ✅ Implemented (pinch to select)
 - ConnectTheDots: ✅ Implemented
 
 **Pros**: Natural gesture; no UI needed
@@ -179,8 +179,8 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 | Game             | Mode A (Button) | Mode B (Pinch) | Mode C (Dwell) | Mode D (Two-hand) | Method E (Mouse) | Method F (Touch) |
 | ---------------- | --------------- | -------------- | -------------- | ----------------- | ---------------- | ---------------- |
 | AlphabetGame     | ✅              | ✅             | ❌             | ❌                | ✅               | ⚠️               |
-| FingerNumberShow | ❓              | ❓             | ❌             | ❌                | ✅               | ⚠️               |
-| LetterHunt       | ❓              | ❓             | ❌             | ❌                | ✅               | ⚠️               |
+| FingerNumberShow | ✅              | ❌             | ❌             | ❌                | ✅               | ⚠️               |
+| LetterHunt       | ⚠️              | ✅             | ❌             | ❌                | ✅               | ⚠️               |
 | ConnectTheDots   | ✅              | ✅             | ❌             | ❌                | ✅               | ⚠️               |
 
 **Legend**:

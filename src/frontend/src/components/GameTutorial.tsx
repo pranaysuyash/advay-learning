@@ -12,6 +12,12 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
 
   const steps = [
     {
+      title: 'Allow Camera Access',
+      description:
+        'Click “Allow” when your browser asks for camera permission so hand tracking can work',
+      icon: <UIIcon name="camera" size={48} className="w-12 h-12" />,
+    },
+    {
       title: 'Show Your Hands',
       description: 'Hold your hands up so the camera can see them',
       icon: <UIIcon name="hand" size={48} className="w-12 h-12" />

@@ -25,6 +25,9 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
   childId,
   onWellnessAlert
 }) => {
+  // Use the props to avoid unused warnings
+  void childId;
+  void onWellnessAlert;
   const [metrics, setMetrics] = useState<WellnessMetrics>({
     postureScore: 85,
     attentionScore: 78,
@@ -37,6 +40,10 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const { lastPosture, isLoading: _postureLoading } = usePostureDetection();
   const { lastAttention, isLoading: _attentionLoading } = useAttentionDetection();
+
+  // Use variables to avoid unused warnings
+  void _postureLoading;
+  void _attentionLoading;
 
   // Update metrics when posture or attention data changes
   useEffect(() => {
@@ -103,13 +110,12 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
             </div>
           </div>
           <div className="text-3xl font-bold text-white mb-2">{metrics.postureScore}%</div>
-          <div className="w-full bg-white/10 rounded-full h-2.5">
-            <div 
-              className="h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" 
-              style={{ width: `${metrics.postureScore}%` }}
-            ></div>
-          </div>
-          {postureLoading && (
+          <progress
+            value={metrics.postureScore}
+            max={100}
+            className="w-full h-2.5 rounded-full progress-accent-purple"
+          />
+          {_postureLoading && (
             <div className="text-xs text-white/60 mt-2">Analyzing posture...</div>
           )}
         </div>
@@ -127,13 +133,12 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
             </div>
           </div>
           <div className="text-3xl font-bold text-white mb-2">{metrics.attentionScore}%</div>
-          <div className="w-full bg-white/10 rounded-full h-2.5">
-            <div 
-              className="h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500" 
-              style={{ width: `${metrics.attentionScore}%` }}
-            ></div>
-          </div>
-          {attentionLoading && (
+          <progress
+            value={metrics.attentionScore}
+            max={100}
+            className="w-full h-2.5 rounded-full progress-accent-blue"
+          />
+          {_attentionLoading && (
             <div className="text-xs text-white/60 mt-2">Measuring attention...</div>
           )}
         </div>

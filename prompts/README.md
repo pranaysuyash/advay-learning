@@ -71,6 +71,9 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 ### Release / Ops
 
+- **Demo Launch Strategy (portfolio showcase)**: `prompts/release/demo-launch-strategy-v1.0.md`
+- **VC Investment Evaluation (MediaPipe kids app)**: `prompts/investor/vc-investment-evaluation-v1.0.md`
+- **Angel Investor Evaluation (practical, founder-friendly)**: `prompts/investor/angel-investment-evaluation-v1.0.md`
 - Release readiness: `prompts/release/release-readiness-v1.0.md`
 - Post-merge validation (general): `prompts/release/post-merge-validation-general-v1.0.md`
 

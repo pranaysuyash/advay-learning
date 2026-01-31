@@ -83,12 +83,14 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
                   <button
                     onClick={() => onAcknowledge(alert.id)}
                     className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-xs font-medium hover:shadow-md transition"
+                    type="button"
                   >
                     Got it!
                   </button>
                   <button
                     onClick={() => onDismiss(alert.id)}
                     className="px-3 py-1.5 bg-white/10 border border-border text-white/80 rounded-lg text-xs font-medium hover:bg-white/20 transition"
+                    type="button"
                   >
                     Later
                   </button>
@@ -97,8 +99,13 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
               <button
                 onClick={() => onDismiss(alert.id)}
                 className="text-white/50 hover:text-white/80 flex-shrink-0"
+                aria-label="Dismiss alert"
+                title="Dismiss alert"
+                type="button"
               >
-                <UIIcon name="close" size={16} />
+                <span aria-hidden="true" className="text-lg leading-none">
+                  ×
+                </span>
               </button>
             </div>
           </motion.div>

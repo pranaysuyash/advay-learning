@@ -76,6 +76,12 @@ export const Dashboard = memo(function DashboardComponent() {
     return { stars: 0, emoji: '☆' };
   };
 
+  const getAccuracyProgressClass = (accuracy: number): string => {
+    if (accuracy >= 70) return 'progress-accent-success';
+    if (accuracy >= 40) return 'progress-accent-warning';
+    return 'progress-accent-error';
+  };
+
   // Helper function to format time kid-friendly
   const formatTimeKidFriendly = (minutes: number): string => {
     if (minutes < 60) return `${Math.floor(minutes)} minutes`;
@@ -418,8 +424,7 @@ export const Dashboard = memo(function DashboardComponent() {
                   <progress
                     value={stat.percent}
                     max={100}
-                    className='w-16 h-1.5 rounded-full'
-                    style={{ accentColor: '#E85D04' }}
+                    className='w-16 h-1.5 rounded-full progress-accent-orange'
                   />
                 )}
               </div>
@@ -536,17 +541,7 @@ export const Dashboard = memo(function DashboardComponent() {
                           <progress
                             value={accuracy}
                             max={100}
-                            className='w-full h-2 rounded-full'
-                            style={{
-                              accentColor:
-                                accuracy === 100
-                                  ? '#5A8A72'
-                                  : accuracy >= 70
-                                    ? '#5A8A72'
-                                    : accuracy >= 40
-                                      ? '#B8956A'
-                                      : '#B54A32',
-                            }}
+                            className={`w-full h-2 rounded-full ${getAccuracyProgressClass(accuracy)}`}
                           />
                         </div>
                       </div>
@@ -563,7 +558,17 @@ export const Dashboard = memo(function DashboardComponent() {
               </h2>
               {selectedChildData.languageProgress.length > 0 ? (
                 <div className='space-y-3'>
-                  {selectedChildData.languageProgress.map((langProg) => (
+                  {selectedChildData.languageProgress.map((langProg) => {
+                    const percent =
+                      langProg.totalLetters > 0
+                        ? Math.round(
+                            (langProg.lettersLearned /
+                              langProg.totalLetters) *
+                              100,
+                          )
+                        : 0;
+
+                    return (
                     <div
                       key={langProg.language}
                       className='border border-border rounded-lg p-3'
@@ -588,16 +593,14 @@ export const Dashboard = memo(function DashboardComponent() {
                           {langProg.totalTime % 60}m
                         </span>
                       </div>
-                      <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden mt-2'>
-                        <div
-                          className='h-full rounded-full bg-pip-orange'
-                          style={{
-                            width: `${(langProg.lettersLearned / langProg.totalLetters) * 100}%`,
-                          }}
-                        />
-                      </div>
+                      <progress
+                        value={percent}
+                        max={100}
+                        className='w-full h-2 rounded-full progress-accent-orange mt-2'
+                      />
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className='text-center py-6 text-slate-600'>

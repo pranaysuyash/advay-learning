@@ -216,6 +216,8 @@ export function Progress() {
               <select
                 value={selectedProfileId}
                 onChange={(e) => setSelectedProfileId(e.target.value)}
+                aria-label='Select child profile'
+                title='Select child profile'
                 className='px-4 py-2 bg-white/10 border border-border rounded-lg text-white shadow-sm'
               >
                 {profiles.map((profile) => (
@@ -296,12 +298,11 @@ export function Progress() {
                         <span>Completion:</span>
                         <span>{langProg.percentage}%</span>
                       </div>
-                      <div className='h-2 bg-white/10 rounded-full overflow-hidden mt-2'>
-                        <div
-                          className='h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500'
-                          style={{ width: `${langProg.percentage}%` }}
-                        />
-                      </div>
+                      <progress
+                        value={langProg.percentage}
+                        max={100}
+                        className='w-full h-2 rounded-full progress-accent-blue mt-2'
+                      />
                     </div>
                   ))}
                 </div>

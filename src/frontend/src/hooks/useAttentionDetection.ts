@@ -9,11 +9,11 @@ interface AttentionData {
   timestamp: number;
 }
 
-interface AttentionFeedback {
+/* interface AttentionFeedback {
   level: 'high' | 'medium' | 'low';
   message: string;
   suggestions: string[];
-}
+} */
 
 interface AttentionAlert {
   level: 'info' | 'warning' | 'critical';
