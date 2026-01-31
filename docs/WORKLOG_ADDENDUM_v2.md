@@ -22,6 +22,37 @@ This file holds:
 
 ---
 
+## TCK-20260201-013 :: Hand Tracking Feedback Regression Fix (REG-20260201-001)
+
+Type: BUG_FIX
+Owner: AI Assistant
+Created: 2026-02-01 00:05 IST
+Status: **DONE**
+Priority: P0
+
+**Root Cause Analysis**:
+Refactor commit a8575e7 (TCK-20260131-145: AlphabetGame uses centralized hooks) changed hand tracking from synchronous `loadedDelegate` local variable pattern to async `isHandTrackingReady` state. The state was checked synchronously after `initializeHandTracking()`, but React state doesn't update mid-function, causing "Camera tracking unavailable" to always display.
+
+**Fixes Applied**:
+1. `AlphabetGame.tsx`: Added `useEffect` to monitor `isHandTrackingReady` and update feedback when ready
+2. `useHandTracking.ts`: Reset `isInitializingRef` on unmount to fix React Strict Mode double-mount issue
+3. `usePostureDetection.ts`: Fixed 404 - changed to `pose_landmarker_lite.task` from non-existent `heavy` version
+
+**Evidence**:
+- Full analysis: `docs/REGRESSION_ANALYSIS_HAND_TRACKING.md`
+- Browser test confirmed "Camera ready!" now displays after model loads
+- Console log `[AlphabetGame] Hand tracking became ready during gameplay` appears
+
+**Prevention Recommendations**:
+1. Add E2E test for hand tracking feedback transition
+2. Pre-commit check for hand tracking feedback
+3. Document async state patterns in centralized hook implementations
+
+**Status updates**:
+- [2026-02-01 00:05 IST] **DONE** — Fix applied and verified in browser
+
+---
+
 ## TCK-20260201-012 :: Add Camera/Hand Tracking to ConnectTheDots
 
 Type: ARCHITECTURE_FIX

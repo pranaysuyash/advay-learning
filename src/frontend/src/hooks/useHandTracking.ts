@@ -58,8 +58,13 @@ export function useHandTracking(
   const isInitializingRef = useRef(false);
   
   useEffect(() => {
+    // Reset mounted state on remount (React Strict Mode)
+    isMountedRef.current = true;
+    
     return () => {
       isMountedRef.current = false;
+      // Reset initializing flag on unmount so remount can reinitialize
+      isInitializingRef.current = false;
     };
   }, []);
   

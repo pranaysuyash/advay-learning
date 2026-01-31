@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Advay." [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e11]:
+            - link "Games" [ref=e12] [cursor=pointer]:
+              - /url: /games
+          - listitem [ref=e13]:
+            - link "Progress" [ref=e14] [cursor=pointer]:
+              - /url: /progress
+          - listitem [ref=e15]:
+            - link "Settings" [ref=e16] [cursor=pointer]:
+              - /url: /settings
+  - main [ref=e17]:
+    - generic [ref=e19]:
+      - heading "Welcome Back" [level=1] [ref=e20]
+      - paragraph [ref=e21]: Sign in to continue learning
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Email
+          - textbox "Email" [ref=e25]:
+            - /placeholder: you@example.com
+        - generic [ref=e26]:
+          - generic [ref=e27]: Password
+          - textbox "Password" [ref=e28]:
+            - /placeholder: ••••••••
+        - button "Sign In" [ref=e29] [cursor=pointer]
+      - paragraph [ref=e30]:
+        - text: Don't have an account?
+        - link "Sign up" [ref=e31] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e32]:
+    - generic [ref=e33]:
+      - text: Built with
+      - img "heart" [ref=e34]
+      - text: for young learners everywhere
+```
