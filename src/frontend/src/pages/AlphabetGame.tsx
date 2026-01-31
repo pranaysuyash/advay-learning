@@ -414,9 +414,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   useEffect(() => {
     if (!isPlaying) return;
 
+    // Debug flag - enable for troubleshooting
+    const DEBUG_TRACKING = false;
+    let frameCount = 0;
+
     let cancelled = false;
     const loop = () => {
       if (cancelled) return;
+      frameCount++;
 
       const landmarker = landmarkerRef.current as any;
       const webcam = webcamRef.current as any;
@@ -430,6 +435,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         !ctx ||
         typeof landmarker?.detectForVideo !== 'function'
       ) {
+        if (DEBUG_TRACKING && frameCount % 60 === 0) {
+          console.log('[Tracing] Missing required elements:', {
+            hasCanvas: !!canvas,
+            hasVideo: !!video,
+            hasCtx: !!ctx,
+            hasLandmarker: typeof landmarker?.detectForVideo === 'function'
+          });
+        }
         rafIdRef.current = requestAnimationFrame(loop);
         return;
       }
@@ -449,12 +462,18 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       ) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        if (DEBUG_TRACKING) {
+          console.log('[Tracing] Canvas resized:', canvas.width, 'x', canvas.height);
+        }
       }
 
       let results: any = null;
       try {
         results = landmarker.detectForVideo(video, performance.now());
-      } catch {
+      } catch (err) {
+        if (DEBUG_TRACKING) {
+          console.log('[Tracing] Detection error:', err);
+        }
         rafIdRef.current = requestAnimationFrame(loop);
         return;
       }
@@ -477,6 +496,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const pinchDistance = Math.sqrt(dx * dx + dy * dy);
       // Slightly more lenient pinch threshold for better usability
       const pinchingNow = pinchDistance < 0.08;
+
+      if (DEBUG_TRACKING && frameCount % 30 === 0) {
+        console.log('[Tracing] Hand detected, pinch:', pinchingNow, 'distance:', pinchDistance.toFixed(3), 'isDrawing:', isDrawing);
+      }
 
       if (pinchingNow !== lastPinchingRef.current) {
         lastPinchingRef.current = pinchingNow;

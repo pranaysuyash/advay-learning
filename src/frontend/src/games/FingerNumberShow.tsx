@@ -246,7 +246,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
      }
      const nextLetter = letterBagRef.current.shift();
      if (!nextLetter) return;
-     
+
      lastLetterRef.current = nextLetter;
      setTargetLetter(nextLetter);
      setTargetNumber(0); // Reset number target
@@ -257,7 +257,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
      promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
      successLockRef.current = false;
      stableMatchRef.current = { startAt: null, target: null, count: null };
-     
+
      if (ttsEnabled) {
        const now = Date.now();
        const shouldSpeak =
@@ -274,15 +274,15 @@ import { getLettersForGame, Letter } from '../data/alphabets';
      if (!level) return;
      const { minNumber, maxNumber } = level;
      const nextKey = `${levelIndex}:${minNumber}-${maxNumber}`;
-     
+
      if (bagKeyRef.current !== nextKey || targetBagRef.current.length === 0) {
        bagKeyRef.current = nextKey;
        refillTargetBag(minNumber, maxNumber);
      }
-     
+
      const nextTarget = targetBagRef.current.shift();
      if (typeof nextTarget !== 'number') return;
-     
+
      lastTargetRef.current = nextTarget;
      setTargetNumber(nextTarget);
      setTargetLetter(null); // Reset letter target
@@ -296,7 +296,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
      promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
      successLockRef.current = false;
      stableMatchRef.current = { startAt: null, target: null, count: null };
-     
+
      if (ttsEnabled) {
        const now = Date.now();
        const shouldSpeak =
@@ -308,7 +308,16 @@ import { getLettersForGame, Letter } from '../data/alphabets';
        }
      }
    }
- }, [refillTargetBag, refillLetterBag, speak, ttsEnabled, gameMode, letters]);
+ }, [
+   gameMode,
+   refillTargetBag,
+   refillLetterBag,
+   speak,
+   ttsEnabled,
+   letters,
+   NUMBER_NAMES,
+   DIFFICULTY_LEVELS
+ ]);
  
  useEffect(() => {
  const initializeHandLandmarker = async () => {
@@ -342,9 +351,9 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  
  useEffect(() => {
  if (!isPlaying) return;
- 
+
  setNextTarget(difficulty);
- }, [isPlaying, difficulty, setNextTarget]);
+ }, [isPlaying, difficulty]);
  
  const countExtendedFingers = useCallback((landmarks: Point[]): number => {
  return countExtendedFingersFromLandmarks(landmarks);
@@ -470,7 +479,7 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
   requestAnimationFrame(detectAndDraw);
-  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget]);
+  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, currentCount, handsDetected, targetLetter]);
  
  useEffect(() => {
  if (isPlaying) {
