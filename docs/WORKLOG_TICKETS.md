@@ -1,16 +1,16 @@
-# Worklog Tickets - v1 (Active Work)
+# Worklog Tickets - v1 (Primary Reference)
 
-**Current reference for open and in-progress work only.**
+**Comprehensive record of all work — OPEN, IN_PROGRESS, BLOCKED, and DONE tickets.**
 
 **File Organization**:
 
-- **WORKLOG_TICKETS.md (this file)** — OPEN, IN_PROGRESS, BLOCKED tickets only (currently 900KB+, stays active while <30,000 lines)
-- **WORKLOG_ADDENDUM_v2.md** — DONE tickets, scope documentation, parallel work notes (create v3 when reaches 10,000 lines)
-- **WORKLOG_ADDENDUM_v3.md** (when created) — Overflow archive (create v4 when reaches 10,000 lines)
+- **WORKLOG_TICKETS.md (this file)** — PRIMARY reference. ALL tickets (OPEN, IN_PROGRESS, BLOCKED, DONE) are recorded here. Currently 900KB+, stays primary while <30,000 lines
+- **WORKLOG_ADDENDUM_v2.md** — NEW tickets created after v1 reached size threshold, PLUS scope documentation, parallel work notes (create v3 when v2 reaches 10,000 lines)
+- **WORKLOG_ADDENDUM_v3.md** (when created) — Additional NEW tickets (create when v3 reaches 10,000 lines)
 
-**Thresholds**: v1=30K lines, v2+=10K lines (manageable document size)
+**Thresholds**: v1 primary (all tickets), v2+ only for NEW tickets
 
-**Why split?** Keep active work visible and focused. Closed tickets move to addendum.
+**Why split?** v1 is comprehensive history of all work. v2+ keeps new work organized without losing historical context.
 
 > ⚠️ **CRITICAL REMINDER FOR ALL AGENTS**: When you complete work on a ticket, you **MUST** update the worklog to mark it as DONE immediately. Failure to do so causes other agents to waste time re-discovering already-completed work. See TCK-20260128-018 through TCK-20260128-020 for examples of the confusion caused by not updating ticket status.
 

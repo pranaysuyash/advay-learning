@@ -4,10 +4,10 @@
 
 This file holds:
 
-1. **DONE tickets** — Completed work (moved from v1 when status = DONE)
+1. **NEW tickets** — Tickets created after v1 reached size limit (these are NEW work, not moved from v1)
 2. **Scope documentation** — Intentional scope limitations, deferrals, follow-up work needed
 3. **Parallel work notes** — Multi-agent coordination, preserved changes, integration notes
-4. **Overflow** — When v2 reaches 10,000 lines
+4. **Overflow** — When v2 reaches 10,000 lines, create v3 for additional NEW tickets
 
 **Rules**:
 
