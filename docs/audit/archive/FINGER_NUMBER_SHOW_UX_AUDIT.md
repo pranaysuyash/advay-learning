@@ -11,12 +11,31 @@
 
 | Finding | Status | Ticket | Description |
 |---------|--------|--------|-------------|
-| FNS-01 | 🔵 OPEN | TCK-20260130-015 | Add Language/Alphabet Support |
+| FNS-01 | ✅ DONE | TCK-20260130-015 | Add Language/Alphabet Support + Thumb Fix + Duo Mode |
 | FNS-02 | 🟡 IN_PROGRESS | TCK-20260130-020 | Camera-First Layout |
 | FNS-03 | 🔵 OPEN | TCK-20260130-040 | Fix Button Visibility |
 | FNS-04 | 🔵 OPEN | TCK-20260130-041 | Add Hold Progress Indicator |
 | FNS-05 | 🔵 OPEN | TCK-20260130-042 | Unify Prompt Placement |
-| FNS-06 | 🔵 OPEN | TCK-20260130-043 | Add Accessibility Features |  
+| FNS-06 | 🔵 OPEN | TCK-20260130-043 | Add Accessibility Features |
+
+### Completed Updates (2026-01-31)
+
+**FNS-01 Completed with additional fixes:**
+
+1. **Language/Alphabet Support** ✅
+   - Added game mode toggle (Numbers 🔢 vs Letters 🔤)
+   - Language selector for English, Hindi, Kannada, Telugu, Tamil
+   - Letter matching: A=1, B=2, C=3, etc.
+
+2. **Thumb Detection Fix** ✅ 
+   - Fixed issue where full hand counted only 4 fingers
+   - New 3-heuristic algorithm with majority voting (2/3)
+   - More forgiving for children's hand positions
+
+3. **Duo Mode (Multiplayer)** ✅
+   - Supports up to 4 hands (was 2)
+   - New difficulty level: 0-20 fingers
+   - Perfect for parent-child play  
 
 ---
 

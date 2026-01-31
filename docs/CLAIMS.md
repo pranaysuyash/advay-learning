@@ -31,3 +31,135 @@ Refs:
 - Ticket: TCK-YYYYMMDD-###
 ```
 
+---
+
+### CLM-20260131-001 :: FingerNumberShow Thumb Detection Algorithm
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Thumb detection algorithm improved to use 3-heuristic majority voting for more reliable 5-finger counting
+Evidence type: Observed
+
+Evidence:
+
+**File**: src/frontend/src/games/FingerNumberShow.tsx (lines 102-130)
+
+**Code snippet**:
+```typescript
+// Thumb:
+// Improved detection for kids' hands - uses multiple heuristics for reliability.
+// Thumb is extended when:
+// 1. Thumb tip is further from palm center than thumb MCP (base)
+// 2. OR thumb tip is far from index finger base (spread position)
+// 3. OR thumb forms an angle with other fingers (not tucked in)
+const thumbTip = landmarks[4];
+const thumbIp = landmarks[3];
+const thumbMcp = landmarks[2];
+if (thumbTip && thumbIp && thumbMcp) {
+  // Distance-based: tip should be further from palm center than MCP
+  const tipToPalm = dist(thumbTip, palmCenter);
+  const mcpToPalm = dist(thumbMcp, palmCenter);
+  const thumbExtendedFromPalm = tipToPalm > mcpToPalm * 0.8; // More lenient threshold
+  
+  // Spread-based: thumb tip should be away from index finger
+  const thumbSpread = indexMcp ? dist(thumbTip, indexMcp) > 0.15 : true;
+  
+  // Angle-based: thumb tip should not be too close to other fingers when closed
+  const thumbTipToIndexTip = landmarks[8] ? dist(thumbTip, landmarks[8]) : 1;
+  const thumbNotTucked = thumbTipToIndexTip > 0.08;
+  
+  // Count thumb if majority of conditions pass (2 out of 3)
+  let thumbConditions = 0;
+  if (thumbExtendedFromPalm) thumbConditions++;
+  if (thumbSpread) thumbConditions++;
+  if (thumbNotTucked) thumbConditions++;
+  
+  if (thumbConditions >= 2) count++;
+}
+```
+
+Interpretation: The new algorithm uses three independent heuristics and requires only 2 of 3 to pass, making it more forgiving for children's hand positions compared to the previous strict 2-condition requirement.
+
+Refs:
+- Ticket: TCK-20260130-015
+
+---
+
+### CLM-20260131-002 :: FingerNumberShow Multiplayer Support (4 Hands)
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Game now supports up to 4 hands (20 fingers) for multiplayer mode
+Evidence type: Observed
+
+Evidence:
+
+**File**: src/frontend/src/games/FingerNumberShow.tsx
+
+**Changes**:
+1. MediaPipe config (line 326):
+```typescript
+numHands: 4,  // was 2
+```
+
+2. New difficulty level (line 56):
+```typescript
+{ name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
+```
+
+3. Extended number names (lines 39-59):
+```typescript
+const NUMBER_NAMES = [
+  'Zero', 'One', 'Two', ..., 'Ten',
+  'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+  'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty',
+] as const;
+```
+
+Interpretation: The game now detects up to 4 hands simultaneously and supports counting up to 20 fingers in the new "Duo Mode" difficulty level.
+
+Refs:
+- Ticket: TCK-20260130-015
+
+---
+
+### CLM-20260131-003 :: FingerNumberShow Language Selection Feature
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Game now supports Letters mode with 5-language selection (English, Hindi, Kannada, Telugu, Tamil)
+Evidence type: Observed
+
+Evidence:
+
+**File**: src/frontend/src/games/FingerNumberShow.tsx
+
+**Key additions**:
+1. Language configuration (lines 137-143):
+```typescript
+const LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
+  { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+  { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+  { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+] as const;
+```
+
+2. Game mode state (lines 146-149):
+```typescript
+type GameMode = 'numbers' | 'letters';
+const [gameMode, setGameMode] = useState<GameMode>('numbers');
+const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+const [targetLetter, setTargetLetter] = useState<Letter | null>(null);
+```
+
+3. Letter matching logic - uses getLetterNumberValue() to map A=1, B=2, etc.
+
+Interpretation: Users can now switch between Numbers mode and Letters mode, with Letters mode supporting all 5 languages using the existing alphabet data from alphabets.ts.
+
+Refs:
+- Ticket: TCK-20260130-015
