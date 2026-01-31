@@ -22,6 +22,47 @@ This file holds:
 
 ---
 
+## TCK-20260201-014 :: Pre-Commit Regression Detection System
+
+Type: INFRASTRUCTURE
+Owner: AI Assistant
+Created: 2026-02-01 00:10 IST
+Status: **DONE**
+Priority: P1
+
+**Description**:
+Implemented comprehensive pre-commit regression detection system to prevent regressions like REG-20260201-001.
+
+**Components Created**:
+1. `scripts/regression_check.sh`: Main regression check script
+   - Runs all frontend tests (vitest)
+   - Compares exports between HEAD and staged changes
+   - Runs TypeScript validation
+   - Classifies changes (BUG_FIX, FEATURE, REFACTOR, etc.)
+   - ~300 lines of bash
+
+2. `.githooks/pre-commit`: Enhanced to call regression check
+   - Runs after agent_gate.sh (worklog enforcement)
+   - Can be skipped with `SKIP_REGRESSION_CHECK=1`
+
+3. `docs/templates/CHANGE_CLASSIFICATION.md`: Template for documenting significant changes
+   - Required for REFACTOR and BREAKING changes
+   - Includes regression risk assessment, rollback plan
+
+**Verification**:
+- Script tested successfully: 19 test files, 155 tests passed
+- TypeScript validation integrated
+- Export comparison working (warns on removed exports)
+
+**Evidence**:
+- Command: `./scripts/regression_check.sh --staged`
+- Output: "🎉 All regression checks passed!"
+
+**Status updates**:
+- [2026-02-01 00:10 IST] **DONE** — System implemented and verified
+
+---
+
 ## TCK-20260201-013 :: Hand Tracking Feedback Regression Fix (REG-20260201-001)
 
 Type: BUG_FIX

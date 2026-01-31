@@ -90,7 +90,6 @@ export function Mascot({
     // Trigger celebration on state change to 'happy' or 'celebrating'
     useEffect(() => {
         if ((state === 'happy' || state === 'celebrating') && enableVideo && isVideoLoaded) {
-            console.log('[Mascot] Triggering video for state:', state);
             setShowVideo(true);
             // Small delay to ensure DOM is ready
             setTimeout(() => {

@@ -405,38 +405,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     const eligibleMatch =
       totalFingers === currentTargetNumber && canSucceedOnZero;
 
-    // DEBUG logging for both modes
-    if (gameMode === 'letters' && targetLetter) {
-      console.log('DEBUG Letter mode:', {
-        letter: targetLetter?.char,
-        letterValue: targetLetter
-          ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
-          : null,
-        currentTargetNumber,
-        totalFingers,
-        detectedHands,
-        perHand,
-        eligibleMatch,
-        canSucceedOnZero,
-        stableTarget: stableMatchRef.current.target,
-        stableCount: stableMatchRef.current.count,
-        stableStartAt: stableMatchRef.current.startAt,
-      });
-    } else if (gameMode === 'numbers') {
-      console.log('DEBUG Number mode:', {
-        targetNumber,
-        currentTargetNumber,
-        totalFingers,
-        detectedHands,
-        perHand,
-        eligibleMatch,
-        canSucceedOnZero,
-        stableTarget: stableMatchRef.current.target,
-        stableCount: stableMatchRef.current.count,
-        stableStartAt: stableMatchRef.current.startAt,
-      });
-    }
-
     const nowMs = Date.now();
 
     // Only reset stable match if we had a match but now don't AND enough time has passed
@@ -469,12 +437,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         nowMs - (stable.startAt ?? nowMs) >= 450
       ) {
         // Success! Match has been stable for required time
-        console.log('SUCCESS TRIGGERED!', {
-          targetNumber,
-          totalFingers,
-          currentTargetNumber,
-          gameMode,
-        });
         successLockRef.current = true;
         setShowCelebration(true);
         const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
