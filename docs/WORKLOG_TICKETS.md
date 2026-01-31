@@ -1,6 +1,16 @@
-# Worklog Tickets
+# Worklog Tickets - v1 (Active Work)
 
-**Single source of truth for all work tracking.**
+**Current reference for open and in-progress work only.**
+
+**File Organization**:
+
+- **WORKLOG_TICKETS.md (this file)** — OPEN, IN_PROGRESS, BLOCKED tickets only (currently 900KB+, stays active while <30,000 lines)
+- **WORKLOG_ADDENDUM_v2.md** — DONE tickets, scope documentation, parallel work notes (create v3 when reaches 10,000 lines)
+- **WORKLOG_ADDENDUM_v3.md** (when created) — Overflow archive (create v4 when reaches 10,000 lines)
+
+**Thresholds**: v1=30K lines, v2+=10K lines (manageable document size)
+
+**Why split?** Keep active work visible and focused. Closed tickets move to addendum.
 
 > ⚠️ **CRITICAL REMINDER FOR ALL AGENTS**: When you complete work on a ticket, you **MUST** update the worklog to mark it as DONE immediately. Failure to do so causes other agents to waste time re-discovering already-completed work. See TCK-20260128-018 through TCK-20260128-020 for examples of the confusion caused by not updating ticket status.
 
@@ -8,12 +18,14 @@
 
 1. **NEVER create new git branches unless explicitly asked by the user.** Work on the current branch (main).
 2. **NEVER delete or revert files with unrecognized changes.** Unrecognized changes may be from parallel agents working on the same file. Only modify/delete files you are explicitly working on.
-3. **Append-only discipline** - Never rewrite history in this file.
-4. **One file only** - This is the single source of truth for work tracking.
-5. **Every agent run updates this file** - especially when completing work.
-6. Link to all evidence.
-7. Status must be clear: OPEN | IN_PROGRESS | DONE | BLOCKED | DROPPED.
-8. **When work is done**: Update status to DONE, add completion timestamp, and reference the commit/PR.
+3. **Always use `git add -A`** — stage ALL changes (new, modified, deleted) unless user explicitly requests partial staging. This preserves parallel work.
+4. **Append-only discipline** - Never rewrite history in any worklog file.
+5. **Ticket lifecycle**: OPEN → IN_PROGRESS → DONE (move to ADDENDUM_v2 when closed)
+6. **Reference closed tickets** in ADDENDUM_v2, not in v1 (keep v1 clean for active work).
+7. **Every agent run updates worklog** - especially when completing work.
+8. Link to all evidence.
+9. Status must be clear: OPEN | IN_PROGRESS | DONE | BLOCKED | DROPPED.
+10. **When work is done**: Update status to DONE, add completion timestamp, reference the commit/PR, then note "See ADDENDUM_v2 for full details".
 
 ---
 
@@ -2731,14 +2743,14 @@ Artifact Created:
 
 Remediation Tickets Created:
 
-| Finding | Ticket           | Status      | Description                   |
-| ------- | ---------------- | ----------- | ----------------------------- |
+| Finding | Ticket           | Status      | Description                                          |
+| ------- | ---------------- | ----------- | ---------------------------------------------------- |
 | FNS-01  | TCK-20260130-015 | ✅ DONE     | Add Language/Alphabet Support + Thumb Fix + Duo Mode |
-| FNS-02  | TCK-20260130-020 | IN_PROGRESS | Camera-First Layout           |
-| FNS-03  | TCK-20260130-040 | OPEN        | Fix Button Visibility         |
-| FNS-04  | TCK-20260130-041 | OPEN        | Add Hold Progress Indicator   |
-| FNS-05  | TCK-20260130-042 | OPEN        | Unify Prompt Placement        |
-| FNS-06  | TCK-20260130-043 | OPEN        | Add Accessibility Features    |
+| FNS-02  | TCK-20260130-020 | IN_PROGRESS | Camera-First Layout                                  |
+| FNS-03  | TCK-20260130-040 | OPEN        | Fix Button Visibility                                |
+| FNS-04  | TCK-20260130-041 | OPEN        | Add Hold Progress Indicator                          |
+| FNS-05  | TCK-20260130-042 | OPEN        | Unify Prompt Placement                               |
+| FNS-06  | TCK-20260130-043 | OPEN        | Add Accessibility Features                           |
 
 Audit Document: `docs/audit/archive/FINGER_NUMBER_SHOW_UX_AUDIT.md`
 
@@ -2972,6 +2984,7 @@ $ npm run build
 ```
 
 **Files Modified**:
+
 - `src/frontend/src/games/FingerNumberShow.tsx` - Main implementation
 
 **Implementation Details**:
@@ -28098,7 +28111,7 @@ Files Updated:
 
 3. **Dashboard.tsx** (Stats Bar, Line 360):
    - Before: Custom styled stat progress divs
-   - After: `<progress value={stat.percent} max={100}>` 
+   - After: `<progress value={stat.percent} max={100}>`
    - Changes: 1 progress element
 
 4. **Settings.tsx** (Parent Gate, Line 164):
@@ -28340,7 +28353,7 @@ Execution log:
   - **Expected**: 1 extended finger
   - **Received**: 2 extended fingers
   - **Test data**: One sideways index finger (extended), middle/ring/pinky/thumb folded
-  
+
 - [2026-01-31 22:15 UTC] Starting debug | Evidence:
   - Test landmarks defined:
     - Wrist (0): x=0.2, y=0.5
@@ -29832,16 +29845,16 @@ Execution log:
 - [2026-01-31 23:05 UTC] Audit discovery | Evidence:
   - Command: file_search docs/audit/*.md
   - Result: 39 audit files found
-  
+
 - [2026-01-31 23:10 UTC] Ticket reference extraction | Evidence:
   - Command: grep -roh 'TCK-[0-9]\{8\}-[0-9]\{3\}' docs/audit/*.md | sort -u
   - Result: 25 unique ticket IDs
-  
+
 - [2026-01-31 23:12 UTC] Worklog backup created | Evidence:
   - Command: cp docs/WORKLOG_TICKETS.md docs/audit/archive/WORKLOG_TICKETS_backup_20260131_211304.md
   - Result: Backup file 928KB in docs/audit/archive/
   - Purpose: Preserve state before ticket extraction
-  
+
 - [2026-01-31 23:15 UTC] Tickets appended to worklog | Evidence:
   - Script: /tmp/append_tickets.py (3 tickets)
   - Script: /tmp/append_remaining_tickets.py (19 tickets)
@@ -29959,3 +29972,4 @@ Execution log:
 
 Status updates:
 - [2026-02-01 00:15 UTC] **DONE** — All changes complete
+````

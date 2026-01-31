@@ -50,11 +50,13 @@ This document governs how AI agents (including myself and others) work on the Ad
 ### 6. Branch and Parallel Work Preservation (CRITICAL)
 
 **🚫 NEVER create new git branches unless explicitly asked by the user.**
+
 - Always work on the current branch (main)
 - If a feature branch already exists, the user created it - work there
 - Do not create `feature/`, `fix/`, `hotfix/`, or any other branches
 
 **🚫 NEVER delete or revert files with unrecognized changes.**
+
 - Unrecognized changes may be from parallel agents working simultaneously
 - If you see changes you do not recognize, PRESERVE them
 - Only modify/delete files you are explicitly tasked to work on
@@ -134,49 +136,57 @@ A critical gap identified: Audit reports contain comprehensive findings but ~90%
 When reading audit documents and finding actionable issues:
 
 1. **Immediate Action:**
+
    ```bash
    # Check if worklog ticket exists for the issue
    grep "TCK-YYYYMMDD-NNN" docs/WORKLOG_TICKETS.md
-   
+
    # If NOT found, CREATE IT IMMEDIATELY
    # Even if status is OPEN - getting it tracked is priority over perfecting
-   
+
    # Document the audit source and finding ID
    ```
 
 2. **Ticket Creation Template:**
+
    ```markdown
    ### TCK-YYYYMMDD-NNN :: [Descriptive Title]
-   
+
    Type: [AUDIT_FINDING | BUG | FEATURE | IMPROVEMENT]
    Owner: [Agent Name]
    Created: [Date]
    Status: **OPEN**
    Priority: [P0 | P1 | P2 | P3]
-   
+
    Scope contract:
+
    - In-scope: [specific scope]
    - Out-of-scope: [what's not included]
    - Behavior change allowed: [YES/NO]
-   
+
    Targets:
+
    - Repo: learning_for_kids
    - File(s): [files to modify]
    - Branch/PR: main
-   
+
    Acceptance Criteria:
+
    - [ ] [specific acceptance criteria]
    - [ ] [more criteria...]
-   
+
    Source:
+
    - Audit file: `docs/audit/[file-name].md`
    - Finding ID: Issue #[X] or Finding X from audit
    - Evidence: [Quote or specific reference]
-   
+
    Execution log:
+
    - [timestamp] [action] | Evidence: [evidence]
-   
+
    Status updates:
+
    - [timestamp] **OPEN** — Ticket created, awaiting implementation
    ```
 
@@ -190,6 +200,7 @@ When reading audit documents and finding actionable issues:
 ### Regular Audit Review
 
 Use the provided audit review script:
+
 ```bash
 # Weekly task: Review audit docs for untracked findings
 ./scripts/audit_review.sh
@@ -332,6 +343,7 @@ cd src/frontend && npm install
 ### Heredoc Corruption in Multi-Line Input
 
 **Problem**: Pasting or echoing multi-line git commit messages (especially via heredoc) into terminal can cause:
+
 - Cursor contamination and terminal state corruption
 - Display shows mangled "cmdand heredoc>" prompts
 - Actual file operations may succeed despite corrupted output
@@ -341,21 +353,25 @@ cd src/frontend && npm install
 **Solution - Three Safe Methods** (in order of preference):
 
 1. **Quoted heredoc (BEST for complex messages)**:
+
    ```bash
    git commit -F - <<'DELIMITER'
    Subject line here
-   
+
    Multi-line body text here
    More details...
    DELIMITER
    ```
+
    The single quotes around `'DELIMITER'` prevent shell expansion.
 
 2. **File-based message**:
+
    ```bash
    echo "commit message" > /tmp/msg.txt
    git commit -F /tmp/msg.txt
    ```
+
    Avoids terminal input entirely.
 
 3. **Configure git editor**:
@@ -371,6 +387,7 @@ cd src/frontend && npm install
 **Principle**: Multiple agents may work simultaneously on the same branch. Never discard unrecognized changes.
 
 **Rules**:
+
 - **Preserve all staged/unstaged changes** from other agents
 - **Never git reset/revert** without explicit user approval
 - **When committing**, include all staged changes (use `git add -A` before committing)
@@ -378,6 +395,7 @@ cd src/frontend && npm install
 - **Only unstage specific files** if explicitly instructed
 
 **Example Scenario**:
+
 ```bash
 # You see git status shows:
 M  docs/WORKLOG_TICKETS.md       # Your work
@@ -746,11 +764,11 @@ Risks/notes:
 
 ## Version History
 
-| Version | Date       | Changes         |
-| ------- | ---------- | --------------- |
+| Version | Date       | Changes                                                                                                            |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes |
-| 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001 |
-| 1.0     | 2024-01-28 | Initial version |
+| 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001                 |
+| 1.0     | 2024-01-28 | Initial version                                                                                                    |
 
 ---
 

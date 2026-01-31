@@ -36,10 +36,7 @@ import {
   addBreakPoint,
   shouldAddPoint,
 } from '../utils/drawing';
-import {
-  detectPinch,
-  createDefaultPinchState,
-} from '../utils/pinchDetection';
+import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
 import type { PinchState, Point } from '../types/tracking';
 
 // Available languages for the game
@@ -119,7 +116,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       if (!isHandTrackingReady) {
         await initializeHandTracking();
       }
-      
+
       if (isHandTrackingReady) {
         setFeedback('Camera ready!');
       } else {
@@ -394,17 +391,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const webcam = webcamRef.current;
       const canvas = canvasRef.current;
       const video = webcam?.video;
-      
+
       if (!canvas || !video || !landmarker) return;
-      
+
       // Setup canvas dimensions
       setupCanvas(canvas, video);
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      
+
       // Check video ready
       if (video.readyState < 2 || video.videoWidth === 0) return;
-      
+
       // Detect hands
       let results;
       try {
@@ -412,15 +409,15 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       } catch {
         return;
       }
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Draw hint
       if (settings.showHints) {
         drawLetterHint(ctx, currentLetter.char, canvas.width, canvas.height);
       }
-      
+
       // Draw all segments
       if (drawnPointsRef.current.length > 0) {
         const segments = buildSegments(drawnPointsRef.current);
@@ -431,29 +428,37 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           glowBlur: 10,
         });
       }
-      
+
       // Process pinch detection
       const landmarks = results?.landmarks?.[0];
       if (landmarks && landmarks.length >= 9) {
         const pinchResult = detectPinch(landmarks, pinchStateRef.current);
         pinchStateRef.current = pinchResult.state;
-        
+
         // Update pinch state UI
         if (pinchResult.state.isPinching !== isPinching) {
           setIsPinching(pinchResult.state.isPinching);
         }
-        
+
         // Handle transitions
         if (pinchResult.transition === 'release') {
           lastDrawPointRef.current = null;
           addBreakPoint(drawnPointsRef.current);
-        } else if (pinchResult.transition === 'start' || pinchResult.transition === 'continue') {
+        } else if (
+          pinchResult.transition === 'start' ||
+          pinchResult.transition === 'continue'
+        ) {
           if (isDrawing) {
             const x = 1 - landmarks[8].x;
             const y = landmarks[8].y;
             const nextPoint: Point = { x, y };
-            
-            if (shouldAddPoint(drawnPointsRef.current[drawnPointsRef.current.length - 1], nextPoint)) {
+
+            if (
+              shouldAddPoint(
+                drawnPointsRef.current[drawnPointsRef.current.length - 1],
+                nextPoint,
+              )
+            ) {
               drawnPointsRef.current.push(nextPoint);
               if (drawnPointsRef.current.length > 6000) {
                 drawnPointsRef.current.shift();
@@ -468,7 +473,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           pinchStateRef.current = createDefaultPinchState();
         }
       }
-    }, [landmarker, isDrawing, isPinching, currentLetter.color, currentLetter.char, settings.showHints]),
+    }, [
+      landmarker,
+      isDrawing,
+      isPinching,
+      currentLetter.color,
+      currentLetter.char,
+      settings.showHints,
+    ]),
   });
 
   const getCanvasPointFromPointerEvent = useCallback(
@@ -515,11 +527,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       if (!canvas || !point) return;
 
       // Only add point if moved enough
-      const lastPoint = drawnPointsRef.current[drawnPointsRef.current.length - 1];
+      const lastPoint =
+        drawnPointsRef.current[drawnPointsRef.current.length - 1];
       const minDistance = 0.002;
-      const dist = lastPoint && !isNaN(lastPoint.x)
-        ? Math.sqrt(Math.pow(point.x / canvas.width - lastPoint.x, 2) + Math.pow(point.y / canvas.height - lastPoint.y, 2))
-        : Infinity;
+      const dist =
+        lastPoint && !isNaN(lastPoint.x)
+          ? Math.sqrt(
+              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+                Math.pow(point.y / canvas.height - lastPoint.y, 2),
+            )
+          : Infinity;
 
       if (dist > minDistance) {
         lastDrawPointRef.current = point;
@@ -651,7 +668,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
             >
               <div className='flex justify-between items-center mb-2'>
-                <label htmlFor='accuracy-progress' className='text-text-secondary'>Tracing Accuracy</label>
+                <label
+                  htmlFor='accuracy-progress'
+                  className='text-text-secondary'
+                >
+                  Tracing Accuracy
+                </label>
                 <span
                   className='font-bold'
                   style={{
@@ -666,7 +688,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   {accuracy}%
                 </span>
               </div>
-              <progress id='accuracy-progress' value={accuracy} max={100} className='w-full h-3 rounded-full' />
+              <progress
+                id='accuracy-progress'
+                value={accuracy}
+                max={100}
+                className='w-full h-3 rounded-full'
+              />
             </motion.div>
           )}
 

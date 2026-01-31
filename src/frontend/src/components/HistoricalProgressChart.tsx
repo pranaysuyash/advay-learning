@@ -20,7 +20,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 interface HistoricalDataPoint {
@@ -34,13 +34,16 @@ interface HistoricalProgressChartProps {
   language: string;
 }
 
-const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data, language }) => {
+const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({
+  data,
+  language,
+}) => {
   const chartData = {
-    labels: data.map(point => point.date),
+    labels: data.map((point) => point.date),
     datasets: [
       {
         label: 'Letters Learned',
-        data: data.map(point => point.lettersLearned),
+        data: data.map((point) => point.lettersLearned),
         borderColor: '#EF4444',
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
         tension: 0.4,
@@ -48,7 +51,7 @@ const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data,
       },
       {
         label: 'Accuracy (%)',
-        data: data.map(point => point.accuracy),
+        data: data.map((point) => point.accuracy),
         borderColor: '#10B981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
@@ -123,7 +126,7 @@ const HistoricalProgressChart: React.FC<HistoricalProgressChartProps> = ({ data,
   };
 
   return (
-    <div className="h-80 w-full">
+    <div className='h-80 w-full'>
       <Line data={chartData} options={options} />
     </div>
   );

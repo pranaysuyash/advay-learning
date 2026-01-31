@@ -46,7 +46,7 @@ export function Register() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='bg-white/10 border border-border rounded-xl p-8 shadow-sm' 
+        className='bg-white/10 border border-border rounded-xl p-8 shadow-sm'
       >
         <h1 className='text-3xl font-bold text-center mb-2'>Create Account</h1>
         <p className='text-slate-300 text-center mb-8'>
@@ -61,7 +61,10 @@ export function Register() {
 
         <form onSubmit={handleSubmit} className='space-y-6'>
           <div>
-            <label htmlFor='register-email-input' className='block text-sm font-medium text-white/80 mb-2'>
+            <label
+              htmlFor='register-email-input'
+              className='block text-sm font-medium text-white/80 mb-2'
+            >
               Email
             </label>
             <input
@@ -77,7 +80,10 @@ export function Register() {
           </div>
 
           <div>
-            <label htmlFor='register-password-input' className='block text-sm font-medium text-white/80 mb-2'>
+            <label
+              htmlFor='register-password-input'
+              className='block text-sm font-medium text-white/80 mb-2'
+            >
               Password
             </label>
             <input
@@ -97,7 +103,10 @@ export function Register() {
           </div>
 
           <div>
-            <label htmlFor='register-confirm-password-input' className='block text-sm font-medium text-white/80 mb-2'>
+            <label
+              htmlFor='register-confirm-password-input'
+              className='block text-sm font-medium text-white/80 mb-2'
+            >
               Confirm Password
             </label>
             <input

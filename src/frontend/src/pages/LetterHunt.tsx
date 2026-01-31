@@ -48,7 +48,9 @@ export function LetterHunt() {
   const [useMouseFallback, setUseMouseFallback] = useState<boolean>(false);
   // Cursor coordinates are local to the camera container (CSS pixels).
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-  const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(null);
+  const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(
+    null,
+  );
   const [isPinching, setIsPinching] = useState<boolean>(false);
 
   const [score, setScore] = useState<number>(0);
@@ -58,7 +60,10 @@ export function LetterHunt() {
   const [gameCompleted, setGameCompleted] = useState<boolean>(false);
   const [targetLetter, setTargetLetter] = useState<string>('');
   const [options, setOptions] = useState<LetterOption[]>([]);
-  const [feedback, setFeedback] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [feedback, setFeedback] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
   const [round, setRound] = useState<number>(1);
   const [totalRounds] = useState<number>(10); // 10 rounds per level
 
@@ -70,7 +75,12 @@ export function LetterHunt() {
     if (gameStarted && !isHandTrackingReady && !isModelLoading) {
       initializeHandTracking();
     }
-  }, [gameStarted, isHandTrackingReady, isModelLoading, initializeHandTracking]);
+  }, [
+    gameStarted,
+    isHandTrackingReady,
+    isModelLoading,
+    initializeHandTracking,
+  ]);
 
   // Initialize a round
   useEffect(() => {
@@ -83,14 +93,14 @@ export function LetterHunt() {
 
     // Create options - 1 target + 4 distractors
     const newOptions: LetterOption[] = [];
-    
+
     // Add target letter
     newOptions.push({
       id: 0,
       char: target,
       name: alphabet.letters[randomIndex].name,
       color: alphabet.letters[randomIndex].color,
-      isTarget: true
+      isTarget: true,
     });
 
     // Add 4 distractors
@@ -100,14 +110,14 @@ export function LetterHunt() {
       do {
         randomIdx = Math.floor(Math.random() * alphabet.letters.length);
       } while (usedIndices.has(randomIdx));
-      
+
       usedIndices.add(randomIdx);
       newOptions.push({
         id: i,
         char: alphabet.letters[randomIdx].char,
         name: alphabet.letters[randomIdx].name,
         color: alphabet.letters[randomIdx].color,
-        isTarget: false
+        isTarget: false,
       });
     }
 
@@ -120,7 +130,7 @@ export function LetterHunt() {
     if (!gameStarted || timeLeft <= 0 || gameCompleted) return;
 
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           handleTimeout();
@@ -134,27 +144,36 @@ export function LetterHunt() {
   }, [gameStarted, timeLeft, gameCompleted]);
 
   const handleTimeout = () => {
-    setFeedback({ message: `Time's up! The target was ${targetLetter}`, type: 'error' });
+    setFeedback({
+      message: `Time's up! The target was ${targetLetter}`,
+      type: 'error',
+    });
     setTimeout(nextRound, 1500);
   };
 
-  const handleSelectOption = useCallback((option: LetterOption) => {
-    if (option.isTarget) {
-      // Correct answer
-      setScore(prev => prev + timeLeft * 5); // More points for faster answers
-      setFeedback({ message: 'Correct! Great job!', type: 'success' });
-      setTimeout(nextRound, 1500);
-    } else {
-      // Wrong answer
-      setFeedback({ message: `Oops! That was ${option.char}, not ${targetLetter}`, type: 'error' });
-      setTimeout(nextRound, 1500);
-    }
-  }, [targetLetter, timeLeft]);
+  const handleSelectOption = useCallback(
+    (option: LetterOption) => {
+      if (option.isTarget) {
+        // Correct answer
+        setScore((prev) => prev + timeLeft * 5); // More points for faster answers
+        setFeedback({ message: 'Correct! Great job!', type: 'success' });
+        setTimeout(nextRound, 1500);
+      } else {
+        // Wrong answer
+        setFeedback({
+          message: `Oops! That was ${option.char}, not ${targetLetter}`,
+          type: 'error',
+        });
+        setTimeout(nextRound, 1500);
+      }
+    },
+    [targetLetter, timeLeft],
+  );
 
   const nextRound = () => {
     setFeedback(null);
     setTimeLeft(30);
-    
+
     if (round >= totalRounds) {
       // Level completed
       if (level >= 3) {
@@ -162,11 +181,11 @@ export function LetterHunt() {
         setGameCompleted(true);
       } else {
         // Move to next level
-        setLevel(prev => prev + 1);
+        setLevel((prev) => prev + 1);
         setRound(1);
       }
     } else {
-      setRound(prev => prev + 1);
+      setRound((prev) => prev + 1);
     }
   };
 
@@ -254,7 +273,10 @@ export function LetterHunt() {
       const rects = optionRefs.current
         .map((el) => (el ? el.getBoundingClientRect() : null))
         .filter(Boolean) as DOMRect[];
-      const hitIndex = hitTestRects({ x: rect.left + localX, y: rect.top + localY }, rects);
+      const hitIndex = hitTestRects(
+        { x: rect.left + localX, y: rect.top + localY },
+        rects,
+      );
       if (hitIndex !== hoveredOptionIndex) setHoveredOptionIndex(hitIndex);
 
       // Pinch detection with hysteresis
@@ -268,138 +290,167 @@ export function LetterHunt() {
       // Select on pinch "start" transition (debounced).
       if (pinchResult.transition === 'start') {
         const now = Date.now();
-        if (now - lastSelectAtRef.current > 450 && hitIndex != null && options[hitIndex]) {
+        if (
+          now - lastSelectAtRef.current > 450 &&
+          hitIndex != null &&
+          options[hitIndex]
+        ) {
           lastSelectAtRef.current = now;
           handleSelectOption(options[hitIndex]);
         }
       }
-    }, [handLandmarker, cursor, hoveredOptionIndex, isPinching, options, handleSelectOption]),
+    }, [
+      handLandmarker,
+      cursor,
+      hoveredOptionIndex,
+      isPinching,
+      options,
+      handleSelectOption,
+    ]),
   });
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-8">
+    <section className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <header className="flex justify-between items-center mb-6">
+        <header className='flex justify-between items-center mb-6'>
           <div>
-            <h1 className="text-3xl font-bold">Letter Hunt</h1>
-            <p className="text-white/60">Find the target letter among the options!</p>
+            <h1 className='text-3xl font-bold'>Letter Hunt</h1>
+            <p className='text-white/60'>
+              Find the target letter among the options!
+            </p>
           </div>
-          
-          <div className="text-right">
-            <output className="block text-2xl font-bold">Score: {score}</output>
-            <div className="flex items-center gap-4 text-sm text-white/60">
+
+          <div className='text-right'>
+            <output className='block text-2xl font-bold'>Score: {score}</output>
+            <div className='flex items-center gap-4 text-sm text-white/60'>
               <span>Level: {level}</span>
-              <span>Round: {round}/{totalRounds}</span>
+              <span>
+                Round: {round}/{totalRounds}
+              </span>
               <span>Time: {timeLeft}s</span>
             </div>
           </div>
         </header>
 
         {/* Game Area */}
-        <div className="bg-white border border-border rounded-xl p-6 mb-6 shadow-soft">
+        <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
           {!gameStarted ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-24 h-24 mx-auto mb-6">
+            <div className='flex flex-col items-center justify-center py-12'>
+              <div className='w-24 h-24 mx-auto mb-6'>
                 <img
-                  src="/assets/images/letter-hunt.svg"
-                  alt="Letter Hunt"
-                  className="w-full h-full object-contain"
+                  src='/assets/images/letter-hunt.svg'
+                  alt='Letter Hunt'
+                  className='w-full h-full object-contain'
                 />
               </div>
-              
-              <h2 className="text-2xl font-semibold mb-4">Letter Hunt Challenge</h2>
-              <p className="text-text-secondary mb-6 max-w-md text-center">
-                Use your camera to control a cursor with your index finger, then pinch (thumb + index) to select the matching letter.
-                Complete all rounds to advance to the next level.
+
+              <h2 className='text-2xl font-semibold mb-4'>
+                Letter Hunt Challenge
+              </h2>
+              <p className='text-text-secondary mb-6 max-w-md text-center'>
+                Use your camera to control a cursor with your index finger, then
+                pinch (thumb + index) to select the matching letter. Complete
+                all rounds to advance to the next level.
               </p>
 
-              <div className="flex gap-4">
+              <div className='flex gap-4'>
                 <button
                   onClick={goToHome}
-                  className="px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft flex items-center gap-2 text-text-primary hover:bg-bg-tertiary"
+                  className='px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft flex items-center gap-2 text-text-primary hover:bg-bg-tertiary'
                 >
-                  <UIIcon name="home" size={20} />
+                  <UIIcon name='home' size={20} />
                   Home
                 </button>
                 <button
                   onClick={startGame}
-                  className="px-8 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg"
+                  className='px-8 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg'
                 >
                   Start Game
                 </button>
               </div>
             </div>
           ) : gameCompleted ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-24 h-24 mx-auto mb-6">
+            <div className='flex flex-col items-center justify-center py-12'>
+              <div className='w-24 h-24 mx-auto mb-6'>
                 <img
-                  src="/assets/images/trophy.svg"
-                  alt="Trophy"
-                  className="w-full h-full object-contain"
+                  src='/assets/images/trophy.svg'
+                  alt='Trophy'
+                  className='w-full h-full object-contain'
                 />
               </div>
-              
-              <h2 className="text-3xl font-bold text-green-400 mb-2">Congratulations!</h2>
-              <p className="text-xl mb-6">You completed all levels!</p>
-              <div className="text-2xl font-bold mb-8">Final Score: {score}</div>
-              
-              <div className="flex gap-4">
+
+              <h2 className='text-3xl font-bold text-green-400 mb-2'>
+                Congratulations!
+              </h2>
+              <p className='text-xl mb-6'>You completed all levels!</p>
+              <div className='text-2xl font-bold mb-8'>
+                Final Score: {score}
+              </div>
+
+              <div className='flex gap-4'>
                 <button
                   onClick={resetGame}
-                  className="px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg"
+                  className='px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg'
                 >
                   Play Again
                 </button>
                 <button
                   onClick={goToHome}
-                  className="px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft text-text-primary hover:bg-bg-tertiary"
+                  className='px-6 py-3 bg-white border border-border rounded-lg font-semibold transition shadow-soft text-text-primary hover:bg-bg-tertiary'
                 >
                   Home
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className='space-y-6'>
               {/* Camera hero (main mechanic) */}
-              <figure ref={cameraAreaRef} className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-soft m-0">
-                <div className="aspect-video w-full">
+              <figure
+                ref={cameraAreaRef}
+                className='relative overflow-hidden rounded-2xl border border-border bg-black shadow-soft m-0'
+              >
+                <div className='aspect-video w-full'>
                   <Webcam
                     ref={webcamRef}
                     audio={false}
                     mirrored
-                    className="h-full w-full object-cover"
+                    className='h-full w-full object-cover'
                     videoConstraints={{ facingMode: 'user' }}
                   />
                 </div>
 
                 {/* Top HUD */}
-                <div className="absolute inset-x-0 top-0 p-4 flex items-start justify-between">
-                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/30 text-white">
-                    <div className="text-xs opacity-80">Find this letter</div>
-                    <div className="flex items-baseline gap-2">
+                <div className='absolute inset-x-0 top-0 p-4 flex items-start justify-between'>
+                  <div className='bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/30 text-white'>
+                    <div className='text-xs opacity-80'>Find this letter</div>
+                    <div className='flex items-baseline gap-2'>
                       <div
-                        className="text-4xl font-extrabold leading-none"
+                        className='text-4xl font-extrabold leading-none'
                         style={{
                           color:
-                            alphabet.letters.find((l) => l.char === targetLetter)?.color ??
-                            '#E85D04',
+                            alphabet.letters.find(
+                              (l) => l.char === targetLetter,
+                            )?.color ?? '#E85D04',
                         }}
                       >
                         {targetLetter}
                       </div>
-                      <div className="text-sm opacity-90">
-                        {alphabet.letters.find((l) => l.char === targetLetter)?.name}
+                      <div className='text-sm opacity-90'>
+                        {
+                          alphabet.letters.find((l) => l.char === targetLetter)
+                            ?.name
+                        }
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white text-right">
-                    <div className="text-sm font-bold">Score: {score}</div>
-                    <div className="text-xs opacity-80">
+                  <div className='bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white text-right'>
+                    <div className='text-sm font-bold'>Score: {score}</div>
+                    <div className='text-xs opacity-80'>
                       Level {level} · Round {round}/{totalRounds} · {timeLeft}s
                     </div>
                   </div>
@@ -407,8 +458,8 @@ export function LetterHunt() {
 
                 {/* Tracking status */}
                 {!isHandTrackingReady && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black/60 backdrop-blur px-4 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold">
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <div className='bg-black/60 backdrop-blur px-4 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold'>
                       {isModelLoading
                         ? 'Loading hand tracking…'
                         : 'Hand tracking unavailable. Enable mouse fallback below.'}
@@ -419,7 +470,7 @@ export function LetterHunt() {
                 {/* Cursor */}
                 {cursor && (
                   <div
-                    className="absolute w-4 h-4 rounded-full bg-pip-orange shadow-soft-lg border-2 border-white/80"
+                    className='absolute w-4 h-4 rounded-full bg-pip-orange shadow-soft-lg border-2 border-white/80'
                     style={{
                       left: cursor.x - 8,
                       top: cursor.y - 8,
@@ -428,20 +479,24 @@ export function LetterHunt() {
                 )}
 
                 {/* Options overlay */}
-                <div className="absolute inset-x-0 bottom-0 p-4">
-                  <div className="bg-black/45 backdrop-blur rounded-2xl border border-white/15 p-3">
-                    <div className="text-xs text-white/80 mb-2 flex items-center justify-between">
-                      <span>Point with your index finger · Pinch to select</span>
-                      <span className="opacity-80">{useMouseFallback ? 'Mouse fallback ON' : ''}</span>
+                <div className='absolute inset-x-0 bottom-0 p-4'>
+                  <div className='bg-black/45 backdrop-blur rounded-2xl border border-white/15 p-3'>
+                    <div className='text-xs text-white/80 mb-2 flex items-center justify-between'>
+                      <span>
+                        Point with your index finger · Pinch to select
+                      </span>
+                      <span className='opacity-80'>
+                        {useMouseFallback ? 'Mouse fallback ON' : ''}
+                      </span>
                     </div>
-                    <div className="flex gap-2 justify-between">
+                    <div className='flex gap-2 justify-between'>
                       {options.map((option, idx) => (
                         <button
                           key={option.id}
                           ref={(el) => {
                             optionRefs.current[idx] = el;
                           }}
-                          type="button"
+                          type='button'
                           onClick={
                             useMouseFallback || !isHandTrackingReady
                               ? () => handleSelectOption(option)
@@ -452,18 +507,30 @@ export function LetterHunt() {
                               ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
                               : 'border-white/15 bg-white/10 hover:bg-white/15'
                           }`}
-                          style={{ borderColor: hoveredOptionIndex === idx ? '#fff' : option.color + '40' }}
+                          style={{
+                            borderColor:
+                              hoveredOptionIndex === idx
+                                ? '#fff'
+                                : option.color + '40',
+                          }}
                         >
-                          <div className="text-3xl font-extrabold leading-none" style={{ color: option.color }}>
+                          <div
+                            className='text-3xl font-extrabold leading-none'
+                            style={{ color: option.color }}
+                          >
                             {option.char}
                           </div>
-                          <div className="text-[11px] text-white/80 truncate">{option.name}</div>
+                          <div className='text-[11px] text-white/80 truncate'>
+                            {option.name}
+                          </div>
                         </button>
                       ))}
                     </div>
                   </div>
                 </div>
-                <figcaption className="sr-only">Camera view for hand gesture tracking to select letters</figcaption>
+                <figcaption className='sr-only'>
+                  Camera view for hand gesture tracking to select letters
+                </figcaption>
               </figure>
 
               {/* Feedback */}
@@ -482,34 +549,41 @@ export function LetterHunt() {
               )}
 
               {/* Game Controls */}
-              <fieldset className="flex justify-between items-center border-0 p-0 m-0" aria-label="Game controls">
-                <legend className="sr-only">Game Controls</legend>
+              <fieldset
+                className='flex justify-between items-center border-0 p-0 m-0'
+                aria-label='Game controls'
+              >
+                <legend className='sr-only'>Game Controls</legend>
                 <button
                   onClick={goToHome}
-                  className="px-4 py-2 bg-white border border-border rounded-lg font-semibold transition flex items-center gap-2 text-text-primary hover:bg-bg-tertiary shadow-soft"
+                  className='px-4 py-2 bg-white border border-border rounded-lg font-semibold transition flex items-center gap-2 text-text-primary hover:bg-bg-tertiary shadow-soft'
                 >
-                  <UIIcon name="home" size={16} />
+                  <UIIcon name='home' size={16} />
                   Home
                 </button>
-                
-                <div className="text-center">
-                  <div className="text-sm text-text-secondary">Round {round} of {totalRounds}</div>
-                  <div className="text-sm text-text-secondary">Level {level}</div>
+
+                <div className='text-center'>
+                  <div className='text-sm text-text-secondary'>
+                    Round {round} of {totalRounds}
+                  </div>
+                  <div className='text-sm text-text-secondary'>
+                    Level {level}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <label className="text-xs text-text-secondary flex items-center gap-2 select-none">
+                <div className='flex items-center gap-3'>
+                  <label className='text-xs text-text-secondary flex items-center gap-2 select-none'>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={useMouseFallback}
                       onChange={(e) => setUseMouseFallback(e.target.checked)}
-                      className="accent-pip-orange"
+                      className='accent-pip-orange'
                     />
                     Mouse fallback
                   </label>
                   <button
                     onClick={resetGame}
-                    className="px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition shadow-soft text-text-primary"
+                    className='px-4 py-2 bg-white border border-border rounded-lg hover:bg-bg-tertiary transition shadow-soft text-text-primary'
                   >
                     Reset
                   </button>
@@ -517,20 +591,30 @@ export function LetterHunt() {
               </fieldset>
 
               {/* Mascot */}
-              <div className="flex justify-center">
-                <Mascot 
-                  state={feedback?.type === 'success' ? 'happy' : feedback?.type === 'error' ? 'thinking' : 'idle'} 
-                  message={feedback?.message || `Find the letter "${targetLetter}"!`}
+              <div className='flex justify-center'>
+                <Mascot
+                  state={
+                    feedback?.type === 'success'
+                      ? 'happy'
+                      : feedback?.type === 'error'
+                        ? 'thinking'
+                        : 'idle'
+                  }
+                  message={
+                    feedback?.message || `Find the letter "${targetLetter}"!`
+                  }
                 />
               </div>
             </div>
           )}
         </div>
-        
+
         {/* Game Instructions */}
-        <div className="bg-white border border-border rounded-xl p-6 shadow-soft">
-          <h2 className="text-lg font-semibold mb-3 text-advay-slate">How to Play</h2>
-          <ul className="space-y-2 text-text-secondary text-sm">
+        <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
+          <h2 className='text-lg font-semibold mb-3 text-advay-slate'>
+            How to Play
+          </h2>
+          <ul className='space-y-2 text-text-secondary text-sm'>
             <li>• A target letter appears on the camera screen</li>
             <li>• Move your index finger to control the cursor</li>
             <li>• Pinch (thumb + index) while hovering a tile to select it</li>

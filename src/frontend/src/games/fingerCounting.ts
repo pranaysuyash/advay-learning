@@ -23,11 +23,16 @@ export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
   if (!wrist) return 0;
 
   // Palm center is a stable reference even when the hand rotates (helps thumb).
-  const palmPoints = [wrist, indexMcp, middleMcp, ringMcp, pinkyMcp].filter(Boolean) as Point[];
+  const palmPoints = [wrist, indexMcp, middleMcp, ringMcp, pinkyMcp].filter(
+    Boolean,
+  ) as Point[];
   const palmCenter =
     palmPoints.length > 0
       ? palmPoints.reduce(
-          (acc, p) => ({ x: acc.x + p.x / palmPoints.length, y: acc.y + p.y / palmPoints.length }),
+          (acc, p) => ({
+            x: acc.x + p.x / palmPoints.length,
+            y: acc.y + p.y / palmPoints.length,
+          }),
           { x: 0, y: 0 },
         )
       : wrist;
@@ -72,7 +77,9 @@ export function countExtendedFingersFromLandmarks(landmarks: Point[]): number {
       const thumbSpread = indexMcp ? dist(thumbTip, indexMcp) > 0.15 : true;
 
       // Angle-based: thumb tip should not be too close to other fingers when closed
-      const thumbTipToIndexTip = landmarks[8] ? dist(thumbTip, landmarks[8]) : 1;
+      const thumbTipToIndexTip = landmarks[8]
+        ? dist(thumbTip, landmarks[8])
+        : 1;
       const thumbNotTucked = thumbTipToIndexTip > 0.08;
 
       // Count thumb if majority of conditions pass (2 out of 3)

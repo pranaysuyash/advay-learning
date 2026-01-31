@@ -1,154 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { UIIcon } from '../components/ui/Icon';
 
-interface WellnessReminderProps {
-  activeTime?: number; // in minutes
-  inactiveTime?: number; // in seconds
-  onDismiss: () => void;
-  onPostpone?: () => void;
-}
-
-interface ReminderConfig {
-  type: 'break' | 'water' | 'stretch' | 'inactive';
-  title: string;
+interface WellnessAlert {
+  id: string;
+  type: 'posture' | 'attention' | 'break' | 'hydration' | 'stretch' | 'screen_time';
   message: string;
-  icon: string;
-  color: string;
-  showAfter: number; // minutes of active time or seconds of inactivity
-  condition: (
-    activeTime: number | undefined,
-    inactiveTime: number | undefined,
-  ) => boolean;
+  timestamp: number;
+  acknowledged: boolean;
 }
 
-const WellnessReminderComponent: React.FC<WellnessReminderProps> = ({
-  activeTime,
-  inactiveTime,
+interface WellnessReminderProps {
+  alerts: WellnessAlert[];
+  onAcknowledge: (id: string) => void;
+  onDismiss: (id: string) => void;
+  childName?: string;
+}
+
+const WellnessReminder: React.FC<WellnessReminderProps> = ({ 
+  alerts, 
+  onAcknowledge, 
   onDismiss,
-  onPostpone,
+  childName = 'Little Learner'
 }) => {
-  const [currentReminder, setCurrentReminder] = useState<ReminderConfig | null>(
-    null,
-  );
-  const [showReminder, setShowReminder] = useState<boolean>(false);
+  const [visibleAlerts, setVisibleAlerts] = useState<WellnessAlert[]>([]);
 
-  const reminderConfigs: ReminderConfig[] = [
-    {
-      type: 'break',
-      title: 'Take a Break!',
-      message:
-        "You've been learning for a while. Take a 5-minute break to rest your eyes and stretch.",
-      icon: 'coffee',
-      color: 'from-yellow-500 to-orange-500',
-      showAfter: 15,
-      condition: (activeTime) =>
-        (activeTime || 0) >= 15 && (activeTime || 0) < 30,
-    },
-    {
-      type: 'water',
-      title: 'Hydrate!',
-      message:
-        'Time for a drink of water. Staying hydrated helps you focus better.',
-      icon: 'drop',
-      color: 'from-blue-500 to-cyan-500',
-      showAfter: 20,
-      condition: (activeTime) =>
-        (activeTime || 0) >= 20 && (activeTime || 0) < 40,
-    },
-    {
-      type: 'stretch',
-      title: 'Stretch Time!',
-      message:
-        'Time to stretch your body. Reach for the sky and touch your toes!',
-      icon: 'body',
-      color: 'from-green-500 to-emerald-500',
-      showAfter: 30,
-      condition: (activeTime) => (activeTime || 0) >= 30,
-    },
-    {
-      type: 'inactive',
-      title: 'Are You Still There?',
-      message:
-        "We noticed you haven't been active for a while. Are you still playing?",
-      icon: 'eye',
-      color: 'from-red-500 to-pink-500',
-      showAfter: 60,
-      condition: (_activeTime, inactiveTime) => (inactiveTime || 0) >= 60,
-    },
-  ];
-
-  // Check for applicable reminders
+  // Update visible alerts when alerts change
   useEffect(() => {
-    const applicableReminder = reminderConfigs.find((config) =>
-      config.condition(activeTime || 0, inactiveTime || 0),
-    );
+    // Only show non-acknowledged alerts
+    const newVisibleAlerts = alerts.filter(alert => !alert.acknowledged);
+    setVisibleAlerts(newVisibleAlerts);
+  }, [alerts]);
 
-    if (applicableReminder && !showReminder) {
-      setCurrentReminder(applicableReminder);
-      setShowReminder(true);
-    } else if (!applicableReminder) {
-      setShowReminder(false);
+  // Get icon and color based on alert type
+  const getAlertConfig = (type: string) => {
+    switch (type) {
+      case 'posture':
+        return { icon: 'body', color: 'text-purple-400', bgColor: 'bg-purple-500/10', borderColor: 'border-purple-500/20' };
+      case 'attention':
+        return { icon: 'eye', color: 'text-blue-400', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' };
+      case 'break':
+        return { icon: 'coffee', color: 'text-yellow-400', bgColor: 'bg-yellow-500/10', borderColor: 'border-yellow-500/20' };
+      case 'hydration':
+        return { icon: 'drop', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/20' };
+      case 'stretch':
+        return { icon: 'body', color: 'text-green-400', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/20' };
+      case 'screen_time':
+        return { icon: 'monitor', color: 'text-orange-400', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/20' };
+      default:
+        return { icon: 'alert-circle', color: 'text-gray-400', bgColor: 'bg-gray-500/10', borderColor: 'border-gray-500/20' };
     }
-  }, [activeTime, inactiveTime, showReminder]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
 
-  if (!showReminder || !currentReminder) {
+  if (visibleAlerts.length === 0) {
     return null;
   }
 
-  const reminder = currentReminder!;
-
   return (
-    <dialog
-      open
-      className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4'
-      aria-modal='true'
-      aria-labelledby='wellness-title'
-    >
-      <div
-        className={`bg-gradient-to-br ${reminder.color} rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-white/30`}
-      >
-        <div className='text-center'>
-          <div className='w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6'>
-            <UIIcon
-              name={reminder.icon as any}
-              size={48}
-              className='text-white'
-            />
-          </div>
-
-          <h2
-            id='wellness-title'
-            className='text-2xl font-bold text-white mb-3'
+    <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm">
+      {visibleAlerts.map((alert) => {
+        const config = getAlertConfig(alert.type);
+        return (
+          <motion.div
+            key={alert.id}
+            initial={{ opacity: 0, y: -50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 0.8 }}
+            className={`bg-white/10 backdrop-blur-sm border ${config.borderColor} rounded-xl p-4 shadow-lg w-full max-w-xs`}
           >
-            {reminder.title}
-          </h2>
-
-          <p className='text-white/90 mb-8 text-lg'>{reminder.message}</p>
-
-          <div className='flex flex-col sm:flex-row gap-3'>
-            {onPostpone && (
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                <UIIcon name={config.icon as any} size={20} className={config.color} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-white text-sm mb-1">
+                  {alert.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Alert
+                </h4>
+                <p className="text-white/80 text-sm mb-3">
+                  {alert.message.replace('{childName}', childName)}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onAcknowledge(alert.id)}
+                    className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-xs font-medium hover:shadow-md transition"
+                  >
+                    Got it!
+                  </button>
+                  <button
+                    onClick={() => onDismiss(alert.id)}
+                    className="px-3 py-1.5 bg-white/10 border border-border text-white/80 rounded-lg text-xs font-medium hover:bg-white/20 transition"
+                  >
+                    Later
+                  </button>
+                </div>
+              </div>
               <button
-                type='button'
-                onClick={onPostpone}
-                className='flex-1 px-6 py-3 bg-white/20 text-white rounded-xl font-semibold hover:bg-white/30 transition backdrop-blur-sm'
+                onClick={() => onDismiss(alert.id)}
+                className="text-white/50 hover:text-white/80 flex-shrink-0"
               >
-                Remind Me Later
+                <UIIcon name="x" size={16} />
               </button>
-            )}
-            <button
-              type='button'
-              onClick={onDismiss}
-              className='flex-1 px-6 py-3 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition'
-            >
-              {currentReminder.type === 'inactive'
-                ? "Yes, I'm here!"
-                : "OK, I'll do it!"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </dialog>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 };
 
-export default React.memo(WellnessReminderComponent);
+export default WellnessReminder;

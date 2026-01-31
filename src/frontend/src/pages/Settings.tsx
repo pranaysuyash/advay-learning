@@ -86,7 +86,7 @@ export function Settings() {
   // Sync camera permission state on mount (only if unknown)
   useEffect(() => {
     if (cameraPermission !== 'unknown') return;
-    
+
     const syncPermission = async () => {
       try {
         const result = await navigator.permissions.query({
@@ -111,9 +111,15 @@ export function Settings() {
           video: true,
         });
         stream.getTracks().forEach((track) => track.stop());
-        settings.updateSettings({ cameraEnabled: true, cameraPermissionState: 'granted' });
+        settings.updateSettings({
+          cameraEnabled: true,
+          cameraPermissionState: 'granted',
+        });
       } catch {
-        settings.updateSettings({ cameraEnabled: false, cameraPermissionState: 'denied' });
+        settings.updateSettings({
+          cameraEnabled: false,
+          cameraPermissionState: 'denied',
+        });
         alert(
           'Camera permission denied. Please allow camera access in your browser settings.',
         );
@@ -126,7 +132,7 @@ export function Settings() {
 
   const handleReset = () => {
     settings.resetSettings();
-  }; 
+  };
 
   return (
     <section className='max-w-7xl mx-auto px-4 py-8'>
@@ -136,7 +142,7 @@ export function Settings() {
       >
         {!parentGatePassed && (
           <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
-              <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
+            <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
               <h2 className='text-2xl font-bold mb-4'>Parent Gate</h2>
               <p className='text-slate-600 mb-6'>
                 Hold button below for 3 seconds to access Settings. This
@@ -159,7 +165,12 @@ export function Settings() {
                   : '👆 Hold to Access Settings (3s)'}
               </button>
               {holdingGate && (
-                <progress value={holdDuration} max={3000} className='w-full h-1 mt-4 rounded-full' style={{accentColor: '#ef4444'}} />
+                <progress
+                  value={holdDuration}
+                  max={3000}
+                  className='w-full h-1 mt-4 rounded-full'
+                  style={{ accentColor: '#ef4444' }}
+                />
               )}
               <div className='flex gap-3 mt-6 justify-center'>
                 <button
@@ -285,7 +296,9 @@ export function Settings() {
 
               {/* Camera Settings */}
               <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <legend className='text-xl font-semibold mb-4'>Camera Settings</legend>
+                <legend className='text-xl font-semibold mb-4'>
+                  Camera Settings
+                </legend>
 
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between bg-white/10 border border-border rounded-lg px-4 py-3 shadow-sm'>
@@ -318,17 +331,21 @@ export function Settings() {
 
                   {/* Camera Permission Status - only show for granted or denied */}
                   {cameraPermission === 'granted' && (
-                    <div className="text-sm px-4 py-2 rounded-lg bg-green-500/20 text-green-400">
-                      <span className="flex items-center gap-2">
-                        <UIIcon name="check" size={16} className="text-green-400" />
+                    <div className='text-sm px-4 py-2 rounded-lg bg-green-500/20 text-green-400'>
+                      <span className='flex items-center gap-2'>
+                        <UIIcon
+                          name='check'
+                          size={16}
+                          className='text-green-400'
+                        />
                         Camera permission granted
                       </span>
                     </div>
                   )}
                   {cameraPermission === 'denied' && (
-                    <div className="text-sm px-4 py-2 rounded-lg bg-red-500/20 text-red-400">
-                      <span className="flex items-center gap-2">
-                        <UIIcon name="warning" size={16} />
+                    <div className='text-sm px-4 py-2 rounded-lg bg-red-500/20 text-red-400'>
+                      <span className='flex items-center gap-2'>
+                        <UIIcon name='warning' size={16} />
                         Camera permission denied - check browser settings
                       </span>
                     </div>
@@ -349,12 +366,16 @@ export function Settings() {
                       aria-label='Hand tracking processing mode'
                       className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
                     >
-                      <option value='GPU'>GPU (Faster, requires good graphics)</option>
-                      <option value='CPU'>CPU (Compatible with all devices)</option>
+                      <option value='GPU'>
+                        GPU (Faster, requires good graphics)
+                      </option>
+                      <option value='CPU'>
+                        CPU (Compatible with all devices)
+                      </option>
                     </select>
                     <p className='text-sm text-slate-400 mt-2'>
-                      GPU mode is faster but may not work on all devices. 
-                      The app will automatically fall back to CPU if needed.
+                      GPU mode is faster but may not work on all devices. The
+                      app will automatically fall back to CPU if needed.
                     </p>
                   </div>
 
@@ -444,7 +465,10 @@ export function Settings() {
                           tutorialCompleted: false,
                           onboardingCompleted: false,
                         });
-                        toast.showToast('Tutorial will show on next game', 'success');
+                        toast.showToast(
+                          'Tutorial will show on next game',
+                          'success',
+                        );
                       }}
                       className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition text-sm'
                     >
@@ -456,7 +480,9 @@ export function Settings() {
 
               {/* Parent Controls */}
               <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <legend className='text-xl font-semibold mb-4'>Parent Controls</legend>
+                <legend className='text-xl font-semibold mb-4'>
+                  Parent Controls
+                </legend>
 
                 <div className='space-y-4'>
                   {/* Progress Summary */}
@@ -475,19 +501,21 @@ export function Settings() {
                   </div>
 
                   <Button
-                    variant="success"
+                    variant='success'
                     fullWidth
-                    icon="unlock"
+                    icon='unlock'
                     onClick={async () => {
                       const confirmed = await confirm({
                         title: 'Unlock All Letters?',
-                        message: 'This will unlock all letters immediately. Your child will skip the progressive learning experience.',
+                        message:
+                          'This will unlock all letters immediately. Your child will skip the progressive learning experience.',
                         confirmText: 'Yes, Unlock All',
                         cancelText: 'Cancel',
                         type: 'warning',
                       });
                       if (confirmed) {
-                        const totalLetters = getAlphabet(settings.language).letters.length;
+                        const totalLetters = getAlphabet(settings.language)
+                          .letters.length;
                         const totalBatches = Math.ceil(totalLetters / 5);
                         unlockAllBatches(settings.language, totalBatches);
                         toast.showToast('All letters unlocked!', 'success');
@@ -498,13 +526,14 @@ export function Settings() {
                   </Button>
 
                   <Button
-                    variant="secondary"
+                    variant='secondary'
                     fullWidth
-                    icon="warning"
+                    icon='warning'
                     onClick={async () => {
                       const confirmed = await confirm({
                         title: 'Reset Letter Progress?',
-                        message: 'This will reset all letter progress. This cannot be undone.',
+                        message:
+                          'This will reset all letter progress. This cannot be undone.',
                         confirmText: 'Yes, Reset',
                         cancelText: 'Cancel',
                         type: 'danger',
@@ -522,13 +551,15 @@ export function Settings() {
 
               {/* Data & Privacy */}
               <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
-                <legend className='text-xl font-semibold mb-4'>Data & Privacy</legend>
+                <legend className='text-xl font-semibold mb-4'>
+                  Data & Privacy
+                </legend>
 
                 <div className='space-y-3'>
                   <Button
-                    variant="secondary"
+                    variant='secondary'
                     fullWidth
-                    icon="download"
+                    icon='download'
                     onClick={() => {
                       toast.showToast('Export feature coming soon!', 'info');
                     }}
@@ -537,13 +568,14 @@ export function Settings() {
                   </Button>
 
                   <Button
-                    variant="secondary"
+                    variant='secondary'
                     fullWidth
-                    icon="warning"
+                    icon='warning'
                     onClick={async () => {
                       const confirmed = await confirm({
                         title: 'Reset All Settings?',
-                        message: 'This will reset all settings to default. This cannot be undone.',
+                        message:
+                          'This will reset all settings to default. This cannot be undone.',
                         confirmText: 'Yes, Reset',
                         cancelText: 'Cancel',
                         type: 'danger',
@@ -563,7 +595,9 @@ export function Settings() {
               <div className='text-center text-slate-400 text-sm'>
                 <p>Advay Learning App v1.0.0</p>
                 <p className='mt-1 flex items-center justify-center gap-1'>
-                  Built with <UIIcon name="heart" size={14} className="text-red-400" /> for kids everywhere
+                  Built with{' '}
+                  <UIIcon name='heart' size={14} className='text-red-400' /> for
+                  kids everywhere
                 </p>
               </div>
             </div>

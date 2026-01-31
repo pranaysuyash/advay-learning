@@ -3,7 +3,12 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useAuthStore, useProfileStore, useProgressStore, useSettingsStore } from '../../store';
+import {
+  useAuthStore,
+  useProfileStore,
+  useProgressStore,
+  useSettingsStore,
+} from '../../store';
 import { Home } from '../../pages/Home';
 import { AlphabetGame } from '../../pages/AlphabetGame';
 import { Dashboard } from '../../pages/Dashboard';
@@ -102,9 +107,7 @@ beforeEach(() => {
     resetSettings: vi.fn(),
   } as any);
   useProfileStore.setState({
-    profiles: [
-      { id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' },
-    ],
+    profiles: [{ id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' }],
     fetchProfiles: vi.fn(),
     createProfile: vi.fn(),
     updateProfile: vi.fn(),
@@ -133,7 +136,7 @@ describe('Semantic HTML Accessibility', () => {
           <Home />
         </Layout>,
       );
-      
+
       // Check for landmarks
       expect(container.querySelector('header')).toBeTruthy();
       expect(container.querySelector('nav')).toBeTruthy();
@@ -147,10 +150,10 @@ describe('Semantic HTML Accessibility', () => {
           <Home />
         </Layout>,
       );
-      
+
       const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
       expect(headings.length).toBeGreaterThan(0);
-      
+
       // Check heading levels (should not jump H1 -> H3)
       let lastLevel = 0;
       Array.from(headings).forEach((heading) => {
@@ -169,7 +172,7 @@ describe('Semantic HTML Accessibility', () => {
           <Home />
         </Layout>,
       );
-      
+
       const articles = container.querySelectorAll('article');
       // Home has feature cards as articles
       expect(articles.length).toBeGreaterThan(0);
@@ -182,14 +185,13 @@ describe('Semantic HTML Accessibility', () => {
         user: { id: 'u1', email: 'a@b.com', role: 'parent', is_active: true },
         isAuthenticated: true,
       });
-      const { container } = renderWithRouter(
-        <AlphabetGame />,
-        [{ pathname: '/game', state: { profileId: 'p1' } }],
-      );
+      const { container } = renderWithRouter(<AlphabetGame />, [
+        { pathname: '/game', state: { profileId: 'p1' } },
+      ]);
       await act(async () => {
         await flushPromises();
       });
-      
+
       const section = container.querySelector('section');
       expect(section).toBeTruthy();
     });
@@ -199,14 +201,13 @@ describe('Semantic HTML Accessibility', () => {
         user: { id: 'u1', email: 'a@b.com', role: 'parent', is_active: true },
         isAuthenticated: true,
       });
-      const { container } = renderWithRouter(
-        <AlphabetGame />,
-        [{ pathname: '/game', state: { profileId: 'p1' } }],
-      );
+      const { container } = renderWithRouter(<AlphabetGame />, [
+        { pathname: '/game', state: { profileId: 'p1' } },
+      ]);
       await act(async () => {
         await flushPromises();
       });
-      
+
       const header = container.querySelector('section header');
       expect(header).toBeTruthy();
     });
@@ -216,14 +217,13 @@ describe('Semantic HTML Accessibility', () => {
         user: { id: 'u1', email: 'a@b.com', role: 'parent', is_active: true },
         isAuthenticated: true,
       });
-      const { container } = renderWithRouter(
-        <AlphabetGame />,
-        [{ pathname: '/game', state: { profileId: 'p1' } }],
-      );
+      const { container } = renderWithRouter(<AlphabetGame />, [
+        { pathname: '/game', state: { profileId: 'p1' } },
+      ]);
       await act(async () => {
         await flushPromises();
       });
-      
+
       const output = container.querySelector('output');
       expect(output).toBeTruthy();
     });
@@ -233,10 +233,9 @@ describe('Semantic HTML Accessibility', () => {
         user: { id: 'u1', email: 'a@b.com', role: 'parent', is_active: true },
         isAuthenticated: true,
       });
-      const { container } = renderWithRouter(
-        <AlphabetGame />,
-        [{ pathname: '/game', state: { profileId: 'p1' } }],
-      );
+      const { container } = renderWithRouter(<AlphabetGame />, [
+        { pathname: '/game', state: { profileId: 'p1' } },
+      ]);
       await act(async () => {
         await flushPromises();
       });
@@ -247,10 +246,10 @@ describe('Semantic HTML Accessibility', () => {
         fireEvent.click(startButton);
         await flushPromises();
       });
-      
+
       const fieldset = container.querySelector('fieldset');
       expect(fieldset).toBeTruthy();
-      
+
       // Fieldset should have legend
       const legend = fieldset?.querySelector('legend');
       expect(legend).toBeTruthy();
@@ -261,10 +260,9 @@ describe('Semantic HTML Accessibility', () => {
         user: { id: 'u1', email: 'a@b.com', role: 'parent', is_active: true },
         isAuthenticated: true,
       });
-      const { container } = renderWithRouter(
-        <AlphabetGame />,
-        [{ pathname: '/game', state: { profileId: 'p1' } }],
-      );
+      const { container } = renderWithRouter(<AlphabetGame />, [
+        { pathname: '/game', state: { profileId: 'p1' } },
+      ]);
       await act(async () => {
         await flushPromises();
       });
@@ -282,10 +280,10 @@ describe('Semantic HTML Accessibility', () => {
         fireEvent.click(checkButton);
         await flushPromises();
       });
-      
+
       const progress = container.querySelector('progress');
       expect(progress).toBeTruthy();
-      
+
       // Progress should have value and max attributes
       expect(progress?.getAttribute('max')).toBe('100');
     });
@@ -294,28 +292,28 @@ describe('Semantic HTML Accessibility', () => {
   describe('Dashboard page', () => {
     it('should have section wrapper with semantic layout', () => {
       const { container } = renderWithRouter(<Dashboard />);
-      
+
       const sections = container.querySelectorAll('section');
       expect(sections.length).toBeGreaterThan(0);
     });
 
     it('should have article elements for content cards', () => {
       const { container } = renderWithRouter(<Dashboard />);
-      
+
       const articles = container.querySelectorAll('article');
       expect(articles.length).toBeGreaterThan(0);
     });
 
     it('should have header for dashboard title', () => {
       const { container } = renderWithRouter(<Dashboard />);
-      
+
       const header = container.querySelector('section header');
       expect(header).toBeTruthy();
     });
 
     it('should have progress elements for learning tracking', () => {
       const { container } = renderWithRouter(<Dashboard />);
-      
+
       const progressBars = container.querySelectorAll('progress');
       expect(progressBars.length).toBeGreaterThan(0);
     });
@@ -338,7 +336,7 @@ describe('Semantic HTML Accessibility', () => {
         vi.runOnlyPendingTimers();
       });
       vi.useRealTimers();
-      
+
       const section = container.querySelector('section');
       expect(section).toBeTruthy();
     });
@@ -359,10 +357,10 @@ describe('Semantic HTML Accessibility', () => {
         vi.runOnlyPendingTimers();
       });
       vi.useRealTimers();
-      
+
       const fieldsets = container.querySelectorAll('fieldset');
       expect(fieldsets.length).toBeGreaterThan(0);
-      
+
       // Each fieldset should have a legend
       fieldsets.forEach((fieldset) => {
         const legend = fieldset.querySelector('legend');
@@ -386,7 +384,7 @@ describe('Semantic HTML Accessibility', () => {
         vi.runOnlyPendingTimers();
       });
       vi.useRealTimers();
-      
+
       const labels = container.querySelectorAll('label');
       expect(labels.length).toBeGreaterThan(0);
     });
@@ -399,10 +397,10 @@ describe('Semantic HTML Accessibility', () => {
           <div>Test</div>
         </Layout>,
       );
-      
+
       const header = container.querySelector('header');
       expect(header).toBeTruthy();
-      
+
       const nav = header?.querySelector('nav');
       expect(nav).toBeTruthy();
     });
@@ -413,11 +411,11 @@ describe('Semantic HTML Accessibility', () => {
           <div>Test</div>
         </Layout>,
       );
-      
+
       const nav = container.querySelector('nav');
       const ul = nav?.querySelector('ul');
       expect(ul).toBeTruthy();
-      
+
       const listItems = ul?.querySelectorAll('li');
       expect(listItems && listItems.length > 0).toBeTruthy();
     });
@@ -428,7 +426,7 @@ describe('Semantic HTML Accessibility', () => {
           <div>Test</div>
         </Layout>,
       );
-      
+
       const main = container.querySelector('main');
       expect(main).toBeTruthy();
     });
@@ -439,7 +437,7 @@ describe('Semantic HTML Accessibility', () => {
           <div>Test</div>
         </Layout>,
       );
-      
+
       const footer = container.querySelector('footer');
       expect(footer).toBeTruthy();
     });
