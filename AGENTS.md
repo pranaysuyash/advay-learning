@@ -4,7 +4,7 @@
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.2  
+**Version**: 1.3  
 **Last Updated**: 2026-01-31  
 **Applies To**: All AI agents working on this codebase
 
@@ -46,6 +46,19 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Always stage changes with: `git add -A`
 - Do not “selectively stage” unless the user explicitly asks.
 - Do not use staging as a mechanism to “drop” other agents’ work.
+
+### 6. Branch and Parallel Work Preservation (CRITICAL)
+
+**🚫 NEVER create new git branches unless explicitly asked by the user.**
+- Always work on the current branch (main)
+- If a feature branch already exists, the user created it - work there
+- Do not create `feature/`, `fix/`, `hotfix/`, or any other branches
+
+**🚫 NEVER delete or revert files with unrecognized changes.**
+- Unrecognized changes may be from parallel agents working simultaneously
+- If you see changes you do not recognize, PRESERVE them
+- Only modify/delete files you are explicitly tasked to work on
+- When in doubt, ask the user before removing anything
 
 ---
 

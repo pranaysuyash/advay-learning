@@ -33,6 +33,9 @@ You are NOT:
 4) **Preservation-first**: do not delete other agents’ work/artifacts unless the user explicitly asks or explicitly approves it (recorded in the active ticket). Prefer archiving + pointer notes.
 5) **Staging policy**: default to `git add -A` (unless the user explicitly requests partial staging).
 
+6) **NEVER create new git branches** unless explicitly asked by the user. Work on `main` (or existing user-created feature branch).
+7) **NEVER delete/revert files with unrecognized changes** - these may be from parallel agents. Preserve all changes you did not create.
+
 ---
 
 ## WORK TYPE SELECTION (pick exactly one)

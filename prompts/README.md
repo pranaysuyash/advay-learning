@@ -8,6 +8,12 @@ This folder contains the reusable prompts that govern how agents work on this re
 2) Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
 3) Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
+## 🚫 Critical Rules
+
+**NEVER create new git branches unless explicitly asked by the user.** Work on `main` (or existing feature branch if user created it).
+
+**NEVER delete or revert files with unrecognized changes.** Unrecognized changes may be from parallel agents - always preserve them.
+
 ## Prompt Map (By Role / Job)
 
 ### Project Manager (PM)
