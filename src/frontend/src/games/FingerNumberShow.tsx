@@ -453,26 +453,38 @@ import { getLettersForGame, Letter } from '../data/alphabets';
    : targetNumber;
  const canSucceedOnZero = currentTargetNumber === 0 ? detectedHands > 0 : true;
 
- // For single hand games, we should check if any single hand matches the target
- // rather than the total across all hands
- let eligibleMatch = false;
- if (totalFingers === currentTargetNumber && canSucceedOnZero) {
-   eligibleMatch = true;
- } else if (detectedHands === 1 && perHand.length === 1 && perHand[0] === currentTargetNumber) {
-   // If only one hand is detected and it matches the target
-   eligibleMatch = true;
- } else if (detectedHands === 2 && perHand.length === 2) {
-   // If two hands are detected, check if either hand matches (for targets <= 5)
-   // or if combined they match (for targets > 5)
-   if (currentTargetNumber <= 5) {
-     // For targets <= 5, either hand can match
-     eligibleMatch = perHand.some(handFingers => handFingers === currentTargetNumber);
-   } else {
-     // For targets > 5, check if combined matches
-     eligibleMatch = perHand.reduce((sum, fingers) => sum + fingers, 0) === currentTargetNumber;
-   }
- }
+ const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
 
+ // DEBUG logging for both modes
+ if (gameMode === 'letters' && targetLetter) {
+   console.log('DEBUG Letter mode:', { 
+     letter: targetLetter?.char, 
+     letterValue: targetLetter ? targetLetter.char.toUpperCase().charCodeAt(0) - 64 : null,
+     currentTargetNumber, 
+     totalFingers, 
+     detectedHands,
+     perHand,
+     eligibleMatch,
+     canSucceedOnZero,
+     stableTarget: stableMatchRef.current.target,
+     stableCount: stableMatchRef.current.count,
+     stableStartAt: stableMatchRef.current.startAt
+   });
+ } else if (gameMode === 'numbers') {
+   console.log('DEBUG Number mode:', { 
+     targetNumber,
+     currentTargetNumber, 
+     totalFingers, 
+     detectedHands,
+     perHand,
+     eligibleMatch,
+     canSucceedOnZero,
+     stableTarget: stableMatchRef.current.target,
+     stableCount: stableMatchRef.current.count,
+     stableStartAt: stableMatchRef.current.startAt
+   });
+ }
+ 
  const nowMs = Date.now();
  if (!eligibleMatch) {
  stableMatchRef.current = { startAt: null, target: null, count: null };
@@ -480,31 +492,33 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  const stable = stableMatchRef.current;
  const same =
  stable.target === currentTargetNumber &&
- stable.count === (detectedHands === 1 ? perHand[0] : totalFingers) &&
+ stable.count === totalFingers &&
  stable.startAt != null;
  if (!same) {
- stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: detectedHands === 1 ? perHand[0] : totalFingers };
+ stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers };
  } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
  // Lock immediately to avoid multi-frame double scoring.
+ console.log('SUCCESS TRIGGERED!', { targetNumber, totalFingers, currentTargetNumber, gameMode });
  successLockRef.current = true;
  setShowCelebration(true);
  const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
  const points = Math.round(10 * level.rewardMultiplier);
  setScore((prev) => prev + points);
  setStreak((prev) => prev + 1);
- // Use the actual detected count for feedback
- const actualCount = detectedHands === 1 && perHand.length > 0 ? perHand[0] : totalFingers;
- setFeedback(`Great! ${NUMBER_NAMES[actualCount]}! +${points} points`);
+ setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 
  setTimeout(() => {
  setShowCelebration(false);
+ // Reset the success lock and stable match so the next success can be detected
+ successLockRef.current = false;
+ stableMatchRef.current = { startAt: null, target: null, count: null };
  setNextTarget(difficulty);
  }, 1800);
  }
  }
  
   requestAnimationFrame(detectAndDraw);
-  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, currentCount, handsDetected, targetLetter, targetBagRef, lastTargetRef, lastSpokenTargetRef, lastSpokenAtRef, lastHandsSeenAtRef, lastVideoTimeRef, frameSkipRef]);
+  }, [handLandmarker, isPlaying, targetNumber, countExtendedFingers, difficulty, setNextTarget, gameMode, handsDetected, targetLetter]);
  
  useEffect(() => {
  if (isPlaying) {

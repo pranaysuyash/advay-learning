@@ -8,7 +8,6 @@ import React, {
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { getLettersForGame } from '../data/alphabets';
 import {
   useSettingsStore,
@@ -26,6 +25,22 @@ import { GameTutorial } from '../components/GameTutorial';
 import WellnessTimer from '../components/WellnessTimer';
 import WellnessReminder from '../components/WellnessReminder';
 import useInactivityDetector from '../hooks/useInactivityDetector';
+// Centralized hand tracking hooks
+import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameLoop } from '../hooks/useGameLoop';
+import {
+  buildSegments,
+  drawSegments,
+  setupCanvas,
+  drawLetterHint,
+  addBreakPoint,
+  shouldAddPoint,
+} from '../utils/drawing';
+import {
+  detectPinch,
+  createDefaultPinchState,
+} from '../utils/pinchDetection';
+import type { PinchState, Point } from '../types/tracking';
 
 // Available languages for the game
 const LANGUAGES = [
@@ -45,43 +60,25 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const landmarkerRef = useRef<HandLandmarker | null>(null);
-  const rafIdRef = useRef<number | null>(null);
   const lastDrawPointRef = useRef<{ x: number; y: number } | null>(null);
   const drawnPointsRef = useRef<Array<{ x: number; y: number }>>([]);
   const pointerDownRef = useRef(false);
-  const lastPinchingRef = useRef(false);
-  const lastPinchTimeRef = useRef<number>(0);
-  const frameSkipRef = useRef<number>(0);
+  const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
 
-  // Smooth points using moving average for better drawing quality
-  const smoothPoints = useCallback((points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> => {
-    if (points.length < 3) return points;
-
-    const smoothed: Array<{ x: number; y: number }> = [];
-    const windowSize = 3; // Average over 3 points
-
-    for (let i = 0; i < points.length; i++) {
-      let sumX = 0, sumY = 0, count = 0;
-
-      // Average over window centered at current point
-      for (let j = -Math.floor(windowSize / 2); j <= Math.floor(windowSize / 2); j++) {
-        const idx = i + j;
-        if (idx >= 0 && idx < points.length) {
-          sumX += points[idx].x;
-          sumY += points[idx].y;
-          count++;
-        }
-      }
-
-      smoothed.push({
-        x: sumX / count,
-        y: sumY / count
-      });
-    }
-
-    return smoothed;
-  }, []);
+  // Use centralized hand tracking hook
+  const {
+    landmarker,
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    initialize: initializeHandTracking,
+  } = useHandTracking({
+    numHands: 2,
+    minDetectionConfidence: 0.3,
+    minHandPresenceConfidence: 0.3,
+    minTrackingConfidence: 0.3,
+    delegate: 'GPU',
+    enableFallback: true,
+  });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -89,8 +86,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
-  // Model & drawing state (was missing after recent edits)
-  const [isModelLoading, setIsModelLoading] = useState(false);
+  // Drawing state
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
 
@@ -106,7 +102,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Basic game controls and stubs
   const startGame = async () => {
-    setIsModelLoading(false);
     // Auto-enable drawing mode when game starts for better UX
     setIsDrawing(true);
 
@@ -120,64 +115,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setFeedback(null);
       setAccuracy(0);
 
-      // Lazy-load hand tracking model on first start with fallback.
-      if (!landmarkerRef.current) {
-        setIsModelLoading(true);
-        const preferredDelegate = settings.handTrackingDelegate || 'GPU';
-
-        // Try preferred delegate first, then fallback
-        const delegatesToTry: Array<'GPU' | 'CPU'> =
-          preferredDelegate === 'GPU' ? ['GPU', 'CPU'] : ['CPU', 'GPU'];
-
-        let lastError: Error | null = null;
-        let loadedDelegate: 'GPU' | 'CPU' | null = null;
-
-        for (const delegate of delegatesToTry) {
-          try {
-            console.log(
-              `[AlphabetGame] Trying to load hand tracker with ${delegate} delegate...`,
-            );
-            const vision = await FilesetResolver.forVisionTasks(
-              'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
-            );
-            const landmarker = await HandLandmarker.createFromOptions(vision, {
-              baseOptions: {
-                modelAssetPath:
-                  'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-                delegate,
-              },
-              runningMode: 'VIDEO',
-              numHands: 2,
-            });
-            landmarkerRef.current = landmarker;
-            loadedDelegate = delegate;
-            console.log(
-              `[AlphabetGame] Successfully loaded hand tracker with ${delegate} delegate`,
-            );
-            break; // Success, exit loop
-          } catch (e) {
-            lastError = e as Error;
-            console.warn(
-              `[AlphabetGame] Failed to load with ${delegate} delegate:`,
-              e,
-            );
-            // Continue to try next delegate
-          }
-        }
-
-        if (loadedDelegate) {
-          setFeedback('Camera ready!');
-        } else {
-          console.error(
-            '[AlphabetGame] Failed to load hand tracker with any delegate:',
-            lastError,
-          );
-          setFeedback(
-            'Camera tracking unavailable. You can still draw by touching the screen.',
-          );
-        }
-
-        setIsModelLoading(false);
+      // Initialize hand tracking using centralized hook
+      if (!isHandTrackingReady) {
+        await initializeHandTracking();
+      }
+      
+      if (isHandTrackingReady) {
+        setFeedback('Camera ready!');
+      } else {
+        setFeedback(
+          'Camera tracking unavailable. You can still draw by touching the screen.',
+        );
       }
     } catch {
       setCameraPermission('denied');
@@ -195,17 +143,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setIsDrawing(false);
     setIsPinching(false);
     pointerDownRef.current = false;
-    lastPinchingRef.current = false;
+    pinchStateRef.current = createDefaultPinchState();
     lastDrawPointRef.current = null;
-    if (rafIdRef.current != null) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
     setPromptStage('center');
     if (promptTimeoutRef.current) {
       clearTimeout(promptTimeoutRef.current);
       promptTimeoutRef.current = null;
     }
+    // Don't reset hand tracking here - let it persist for quick restarts
   };
 
   const clearDrawing = () => {
@@ -263,7 +208,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setAccuracy(0);
     setFeedback(null);
     setIsPinching(false);
-    lastPinchingRef.current = false;
+    pinchStateRef.current = createDefaultPinchState();
     lastDrawPointRef.current = null;
     setPromptStage('center');
   };
@@ -441,228 +386,90 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     return unsubscribe;
   }, [profileId]);
 
-  // Hand tracking + pinch drawing loop (starts only while playing).
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    // Debug flag - enable for troubleshooting
-    const DEBUG_TRACKING = false;
-    let frameCount = 0;
-
-    let cancelled = false;
-    const loop = () => {
-      if (cancelled) return;
-      frameCount++;
-
-      // Frame skipping for performance (process every 2nd frame)
-      frameSkipRef.current = (frameSkipRef.current + 1) % 2;
-      
-      const landmarker = landmarkerRef.current as any;
-      const webcam = webcamRef.current as any;
+  // Game loop using centralized hook
+  useGameLoop({
+    isRunning: isPlaying,
+    targetFps: 30,
+    onFrame: useCallback(() => {
+      const webcam = webcamRef.current;
       const canvas = canvasRef.current;
-      const video: HTMLVideoElement | undefined = webcam?.video;
-      const ctx = canvas?.getContext('2d') ?? null;
-
-      if (
-        !canvas ||
-        !video ||
-        !ctx ||
-        typeof landmarker?.detectForVideo !== 'function'
-      ) {
-        if (DEBUG_TRACKING && frameCount % 60 === 0) {
-          console.log('[Tracing] Missing required elements:', {
-            hasCanvas: !!canvas,
-            hasVideo: !!video,
-            hasCtx: !!ctx,
-            hasLandmarker: typeof landmarker?.detectForVideo === 'function'
-          });
-        }
-        rafIdRef.current = requestAnimationFrame(loop);
-        return;
-      }
-
-      if (
-        video.readyState < 2 ||
-        video.videoWidth === 0 ||
-        video.videoHeight === 0
-      ) {
-        rafIdRef.current = requestAnimationFrame(loop);
-        return;
-      }
-
-      if (
-        canvas.width !== video.videoWidth ||
-        canvas.height !== video.videoHeight
-      ) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        if (DEBUG_TRACKING) {
-          console.log('[Tracing] Canvas resized:', canvas.width, 'x', canvas.height);
-        }
-      }
-
-      let results: any = null;
+      const video = webcam?.video;
+      
+      if (!canvas || !video || !landmarker) return;
+      
+      // Setup canvas dimensions
+      setupCanvas(canvas, video);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // Check video ready
+      if (video.readyState < 2 || video.videoWidth === 0) return;
+      
+      // Detect hands
+      let results;
       try {
         results = landmarker.detectForVideo(video, performance.now());
-      } catch (err) {
-        if (DEBUG_TRACKING) {
-          console.log('[Tracing] Detection error:', err);
-        }
-        rafIdRef.current = requestAnimationFrame(loop);
+      } catch {
         return;
       }
-
-      // Clear and redraw everything for smooth rendering with glow
+      
+      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw hint outline if enabled
+      
+      // Draw hint
       if (settings.showHints) {
-        ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.6}px sans-serif`;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(currentLetter.char, canvas.width / 2, canvas.height / 2);
-
-        // Draw tracing guide circle
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.25, 0, 2 * Math.PI);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        drawLetterHint(ctx, currentLetter.char, canvas.width, canvas.height);
       }
-
-      // Draw all points with smoothing and glow
+      
+      // Draw all segments
       if (drawnPointsRef.current.length > 0) {
-        // Build segments separated by break points (NaN values)
-        const segments: Array<Array<{ x: number; y: number }>> = [];
-        let currentSegment: Array<{ x: number; y: number }> = [];
-        
-        drawnPointsRef.current.forEach((point) => {
-          if (isNaN(point.x) || isNaN(point.y)) {
-            // Break point - save current segment and start new one
-            if (currentSegment.length > 0) {
-              segments.push(currentSegment);
-              currentSegment = [];
-            }
-          } else {
-            currentSegment.push(point);
-          }
+        const segments = buildSegments(drawnPointsRef.current);
+        drawSegments(ctx, segments, canvas.width, canvas.height, {
+          color: currentLetter.color,
+          lineWidth: 12,
+          enableGlow: true,
+          glowBlur: 10,
         });
-        // Don't forget the last segment
-        if (currentSegment.length > 0) {
-          segments.push(currentSegment);
-        }
-
-        ctx.beginPath();
-        ctx.strokeStyle = currentLetter.color;
-        ctx.lineWidth = 12;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.shadowColor = currentLetter.color;
-        ctx.shadowBlur = 10; // Glow effect
-
-        // Draw each segment with smoothing
-        segments.forEach((segment) => {
-          if (segment.length === 0) return;
-          
-          // Apply smoothing for better visual quality
-          const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
-          
-          pointsToDraw.forEach((point, index) => {
-            if (index === 0) {
-              ctx.moveTo(point.x * canvas.width, point.y * canvas.height);
-            } else {
-              ctx.lineTo(point.x * canvas.width, point.y * canvas.height);
-            }
-          });
-        });
-        
-        ctx.stroke();
-        ctx.shadowBlur = 0; // Reset shadow
       }
-
-      const landmarks: any[] | undefined = results?.landmarks?.[0];
       
-      if (!landmarks || landmarks.length < 9) {
-        if (lastPinchingRef.current) {
-          lastPinchingRef.current = false;
+      // Process pinch detection
+      const landmarks = results?.landmarks?.[0];
+      if (landmarks && landmarks.length >= 9) {
+        const pinchResult = detectPinch(landmarks, pinchStateRef.current);
+        pinchStateRef.current = pinchResult.state;
+        
+        // Update pinch state UI
+        if (pinchResult.state.isPinching !== isPinching) {
+          setIsPinching(pinchResult.state.isPinching);
+        }
+        
+        // Handle transitions
+        if (pinchResult.transition === 'release') {
+          lastDrawPointRef.current = null;
+          addBreakPoint(drawnPointsRef.current);
+        } else if (pinchResult.transition === 'start' || pinchResult.transition === 'continue') {
+          if (isDrawing) {
+            const x = 1 - landmarks[8].x;
+            const y = landmarks[8].y;
+            const nextPoint: Point = { x, y };
+            
+            if (shouldAddPoint(drawnPointsRef.current[drawnPointsRef.current.length - 1], nextPoint)) {
+              drawnPointsRef.current.push(nextPoint);
+              if (drawnPointsRef.current.length > 6000) {
+                drawnPointsRef.current.shift();
+              }
+            }
+          }
+        }
+      } else {
+        // No hand detected
+        if (isPinching) {
           setIsPinching(false);
-          lastDrawPointRef.current = null;
-        }
-        rafIdRef.current = requestAnimationFrame(loop);
-        return;
-      }
-
-      const thumbTip = landmarks[4];
-      const indexTip = landmarks[8];
-      const dx = (thumbTip.x ?? 0) - (indexTip.x ?? 0);
-      const dy = (thumbTip.y ?? 0) - (indexTip.y ?? 0);
-      const pinchDistance = Math.sqrt(dx * dx + dy * dy);
-      
-      // HYSTERESIS: Different thresholds for start vs release
-      // Start pinch: < 0.05 (tighter), Release pinch: > 0.07 (looser)
-      // This makes it easier to stop drawing (more responsive)
-      const PINCH_START_THRESHOLD = 0.05;
-      const PINCH_RELEASE_THRESHOLD = 0.07;
-      
-      // Determine pinch state with hysteresis
-      let pinchingNow = lastPinchingRef.current;
-      if (!lastPinchingRef.current && pinchDistance < PINCH_START_THRESHOLD) {
-        pinchingNow = true;
-        lastPinchTimeRef.current = performance.now();
-      } else if (lastPinchingRef.current && pinchDistance > PINCH_RELEASE_THRESHOLD) {
-        pinchingNow = false;
-      }
-
-      if (DEBUG_TRACKING && frameCount % 30 === 0) {
-        console.log('[Tracing] Hand detected, pinch:', pinchingNow, 'distance:', pinchDistance.toFixed(3), 'isDrawing:', isDrawing);
-      }
-
-      // Handle pinch state transitions
-      if (pinchingNow !== lastPinchingRef.current) {
-        lastPinchingRef.current = pinchingNow;
-        setIsPinching(pinchingNow);
-        
-        if (!pinchingNow) {
-          // Just released pinch - add break point to separate line segments
-          lastDrawPointRef.current = null;
-          drawnPointsRef.current.push({ x: NaN, y: NaN }); // Break point
+          pinchStateRef.current = createDefaultPinchState();
         }
       }
-
-      // Draw when pinching and drawing is enabled
-      if (pinchingNow && isDrawing) {
-        const x = (1 - (indexTip.x ?? 0));
-        const y = (indexTip.y ?? 0);
-        const nextPoint = { x, y };
-
-        // Only add point if moved enough (prevent stacking at same position)
-        const lastPoint = drawnPointsRef.current[drawnPointsRef.current.length - 1];
-        const minDistance = 0.002; // Minimum movement to add new point
-        const dist = lastPoint && !isNaN(lastPoint.x) 
-          ? Math.sqrt(Math.pow(nextPoint.x - lastPoint.x, 2) + Math.pow(nextPoint.y - lastPoint.y, 2))
-          : Infinity;
-        
-        if (dist > minDistance) {
-          drawnPointsRef.current.push(nextPoint);
-          if (drawnPointsRef.current.length > 6000) {
-            drawnPointsRef.current.shift();
-          }
-        }
-      }
-
-      rafIdRef.current = requestAnimationFrame(loop);
-    };
-
-    rafIdRef.current = requestAnimationFrame(loop);
-    return () => {
-      cancelled = true;
-      if (rafIdRef.current != null) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
-    };
-  }, [isPlaying, isDrawing, currentLetter.color, settings.showHints, smoothPoints]);
+    }, [landmarker, isDrawing, isPinching, currentLetter.color, currentLetter.char, settings.showHints]),
+  });
 
   const getCanvasPointFromPointerEvent = useCallback(
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
