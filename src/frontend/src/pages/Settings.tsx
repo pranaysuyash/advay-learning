@@ -166,6 +166,9 @@ export function Settings() {
                   ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
                   : '👆 Hold to Access Settings (3s)'}
               </button>
+              {holdingGate && (
+                <progress value={holdDuration} max={3000} className='w-full h-1 mt-4 rounded-full' style={{accentColor: '#ef4444'}} />
+              )}
               <div className='flex gap-3 mt-6 justify-center'>
                 <button
                   onClick={handleCancelGate}

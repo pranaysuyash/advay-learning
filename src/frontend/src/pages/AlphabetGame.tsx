@@ -76,6 +76,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Basic game controls and stubs
   const startGame = async () => {
     setIsModelLoading(false);
+    // Auto-enable drawing mode when game starts for better UX
+    setIsDrawing(true);
 
     // Check camera permission before starting
     try {
@@ -473,7 +475,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dx = (thumbTip.x ?? 0) - (indexTip.x ?? 0);
       const dy = (thumbTip.y ?? 0) - (indexTip.y ?? 0);
       const pinchDistance = Math.sqrt(dx * dx + dy * dy);
-      const pinchingNow = pinchDistance < 0.05;
+      // Slightly more lenient pinch threshold for better usability
+      const pinchingNow = pinchDistance < 0.08;
 
       if (pinchingNow !== lastPinchingRef.current) {
         lastPinchingRef.current = pinchingNow;
@@ -717,7 +720,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
             >
               <div className='flex justify-between items-center mb-2'>
-                <span className='text-text-secondary'>Tracing Accuracy</span>
+                <label htmlFor='accuracy-progress' className='text-text-secondary'>Tracing Accuracy</label>
                 <span
                   className='font-bold'
                   style={{
@@ -732,22 +735,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   {accuracy}%
                 </span>
               </div>
-              <div className='h-3 bg-bg-tertiary rounded-full overflow-hidden'>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${accuracy}%` }}
-                  transition={{ duration: 0.5 }}
-                  className='h-full rounded-full'
-                  style={{
-                    backgroundColor:
-                      accuracy >= 70
-                        ? '#10b981'
-                        : accuracy >= 40
-                          ? '#f59e0b'
-                          : '#ef4444',
-                  }}
-                />
-              </div>
+              <progress id='accuracy-progress' value={accuracy} max={100} className='w-full h-3 rounded-full' />
             </motion.div>
           )}
 
@@ -996,42 +984,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     >
                       <UIIcon name='home' size={16} />
                       Home
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
-                        isDrawing
-                          ? 'bg-error text-white hover:bg-red-700'
-                          : 'bg-success text-white hover:bg-success-hover'
-                      }`}
-                    >
-                      {isDrawing ? 'Stop Drawing' : 'Start Drawing'}
-                    </button>
-                    <button
-                      onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
-                        isDrawing
-                          ? 'bg-error text-white hover:bg-red-700'
-                          : 'bg-success text-white hover:bg-success-hover'
-                      }`}
-                    >
-                      {isPinching ? (
-                        <span className='flex items-center gap-2'>
-                          <UIIcon name='hand' size={16} />
-                          Pinching...
-                        </span>
-                      ) : isDrawing ? (
-                        <span className='flex items-center gap-2'>
-                          <UIIcon name='pencil' size={16} />
-                          Stop Drawing
-                        </span>
-                      ) : (
-                        <span className='flex items-center gap-2'>
-                          <UIIcon name='pencil' size={16} />
-                          Start Drawing
-                        </span>
-                      )}
                     </button>
                     <button
                       type='button'

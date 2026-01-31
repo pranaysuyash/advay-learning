@@ -357,12 +357,7 @@ export function Dashboard() {
                 <span className="text-sm text-text-secondary">{stat.label}:</span>
                 <span className="text-sm font-semibold text-text-primary">{stat.value}</span>
                 {stat.percent > 0 && (
-                  <div className='w-16 h-1.5 bg-bg-tertiary rounded-full overflow-hidden'>
-                    <div
-                      className='h-full bg-pip-orange rounded-full'
-                      style={{ width: `${stat.percent}%` }}
-                    />
-                  </div>
+                  <progress value={stat.percent} max={100} className='w-16 h-1.5 rounded-full' style={{accentColor: '#f97316'}} />
                 )}
               </div>
             ))}
@@ -468,20 +463,7 @@ export function Dashboard() {
                                   )}
                             </span>
                           </div>
-                          <div className='h-2 bg-bg-tertiary rounded-full overflow-hidden'>
-                            <div
-                              className={`h-full rounded-full transition-all ${
-                                accuracy === 100
-                                  ? 'bg-green-500'
-                                  : accuracy >= 70
-                                    ? 'bg-blue-500'
-                                    : accuracy >= 40
-                                      ? 'bg-yellow-500'
-                                      : 'bg-red-500'
-                              }`}
-                              style={{ width: `${accuracy}%` }}
-                            />
-                          </div>
+                          <progress value={accuracy} max={100} className='w-full h-2 rounded-full' style={{accentColor: accuracy === 100 ? '#10b981' : accuracy >= 70 ? '#3b82f6' : accuracy >= 40 ? '#eab308' : '#ef4444'}} />
                         </div>
                       </div>
                     );
