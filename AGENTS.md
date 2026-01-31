@@ -4,8 +4,8 @@
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.3  
-**Last Updated**: 2026-01-31  
+**Version**: 1.4  
+**Last Updated**: 2026-02-01  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -32,14 +32,22 @@ This document governs how AI agents (including myself and others) work on the Ad
 - One PR = One audit remediation OR one hardening scope
 - No scope creep without explicit approval
 
-### 4. Preservation First
+### 4. Preservation First + Implementation Over Deletion
 
+**Principle:** Don't just delete unused code. Understand why it exists, see if it can make the app better, and implement functionality rather than delete.
+
+**Guidelines:**
 - Never discard contributor code unless clearly inferior
 - Keep meaningful comments/tests/docs unless incorrect
 - Prefer merging both sides when resolving conflicts
-- **No deletions without explicit approval**:
+- **Investigate before deleting**: When you find unused code, investigate its history and purpose
+- **Prefer activation**: If code is 70%+ complete and adds value, complete it rather than delete
+- **See**: `docs/process/CODE_PRESERVATION_GUIDELINES.md` for detailed workflow
+
+**No deletions without explicit approval**:
   - Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
   - If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
+  - **Exception**: Deletion is acceptable after completing the investigation workflow in CODE_PRESERVATION_GUIDELINES.md and documenting why deletion was chosen over implementation.
 
 ### 5. Staging Is Always Comprehensive
 
@@ -670,6 +678,7 @@ prompts/
 
 - `docs/WORKLOG_TICKETS.md` - Work tracking
 - `docs/audit/*.md` - Audit artifacts
+- `docs/process/CODE_PRESERVATION_GUIDELINES.md` - When to delete vs. implement unused code
 - `docs/ARCHITECTURE.md` - System design
 - `docs/SECURITY.md` - Security guidelines
 - `docs/SETUP.md` - Environment setup

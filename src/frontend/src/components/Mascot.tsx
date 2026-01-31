@@ -117,22 +117,20 @@ export function Mascot({
     // Preload video on mount and set loaded state
     useEffect(() => {
         if (enableVideo) {
-            console.log('[Mascot] Preloading video...');
             // Create a hidden video element to preload
             const preloadVideo = document.createElement('video');
             preloadVideo.src = MASCOT_VIDEO_SRC;
             preloadVideo.preload = 'auto';
-            
+
             preloadVideo.onloadeddata = () => {
-                console.log('[Mascot] Video preloaded successfully');
                 setIsVideoLoaded(true);
             };
-            
+
             preloadVideo.onerror = (e) => {
                 console.error('[Mascot] Video preload failed:', e);
                 setIsVideoLoaded(false);
             };
-            
+
             preloadVideo.load();
         }
     }, [enableVideo]);

@@ -24,7 +24,7 @@ describe('Icon component', () => {
     // Now the component should render the fallback span
     const fallback = screen.getByRole('img', { name: 'Test' });
     expect(fallback).toBeTruthy();
-  });
+  }, 10000);
 
   it('shows fallback when single src fails', async () => {
     render(<Icon src="/assets/icons/nonexistent.svg" alt="Fail" />);

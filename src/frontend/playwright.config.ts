@@ -19,4 +19,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  // Auto-start dev server before tests
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:6173',
+    reuseExistingServer: true, // Use existing server if already running
+    timeout: 120_000, // 2 minutes for server to start
+  },
 });

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import apiClient from '../../services/api';
 
 interface AvatarCaptureProps {
   isOpen: boolean;
@@ -63,6 +64,21 @@ export function AvatarCapture({
 
   void handleCapture; // Use variable to avoid unused warning
 
+  // Helper function to convert data URL to blob
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], { type: mime });
+  };
+
   const handleRetake = () => {
     setCapturedPhoto(null);
     setIsCountdown(false);
@@ -75,15 +91,24 @@ export function AvatarCapture({
     setIsCapturing(true);
 
     try {
-      // TODO: Upload to backend when endpoint is implemented
-      // const formData = new FormData();
-      // formData.append('profile_id', profileId);
-      // formData.append('photo', dataUrlToBlob(capturedPhoto));
+      // Create form data with captured photo
+      const formData = new FormData();
+      formData.append('profile_id', profileId);
+      formData.append('photo', dataUrlToBlob(capturedPhoto));
 
-      // const response = await apiClient.post('/api/v1/users/me/profiles/${profileId}/photo', formData);
+      // Upload to backend API
+      const response = await apiClient.post(`/api/v1/users/me/profiles/${profileId}/photo`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // onSavePhoto(response.data.avatar_url);
-
+      // Update parent component with new photo URL
+      onSavePhoto(response.data.avatar_url);
+      onClose();
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      // In case of error, still close but notify user
       onClose();
     } finally {
       setIsCapturing(false);

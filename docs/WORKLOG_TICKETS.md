@@ -2,6 +2,8 @@
 
 **Comprehensive record of all work — OPEN, IN_PROGRESS, BLOCKED, and DONE tickets.**
 
+> **Hand Tracing Dual Investor Evaluation (TCK-20260202-001)**: Comprehensive audit + VC + Angel evaluations of hand tracing feature. Playwright E2E tests created + fixed. See WORKLOG_ADDENDUM_v2.md for details.
+
 > **ConnectTheDots camera integration (TCK-20260201-012)**: Added MediaPipe hand tracking + pinch gesture. See WORKLOG_ADDENDUM_v2.md for details. DEMO_READINESS_ASSESSMENT.md created.
 
 > **Infrastructure fix (TCK-20260201-011)**: Removed SQLite regression (session.py restored, pool config fixed), deleted broken root venv. See WORKLOG_ADDENDUM_v2.md for details.
