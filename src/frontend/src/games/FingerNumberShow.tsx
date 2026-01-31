@@ -4,7 +4,6 @@
  import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
  import { useTTS } from '../hooks/useTTS';
 import { getLettersForGame, Letter } from '../data/alphabets';
-import { getLettersForGame, Letter } from '../data/alphabets';
  
  interface Point {
  x: number;
@@ -448,9 +447,14 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  }
  
  // For target 0: require a detected hand (closed fist) to avoid “no hands = success”.
- const canSucceedOnZero = targetNumber === 0 ? detectedHands > 0 : true;
+ // Handle both number mode and letter mode
+ const currentTargetNumber = gameMode === 'letters' && targetLetter
+   ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
+   : targetNumber;
+ const canSucceedOnZero = currentTargetNumber === 0 ? detectedHands > 0 : true;
  
- const eligibleMatch = totalFingers === targetNumber && canSucceedOnZero;
+ const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
+ 
  const nowMs = Date.now();
  if (!eligibleMatch) {
  stableMatchRef.current = { startAt: null, target: null, count: null };

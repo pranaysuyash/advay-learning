@@ -163,3 +163,41 @@ Interpretation: Users can now switch between Numbers mode and Letters mode, with
 
 Refs:
 - Ticket: TCK-20260130-015
+
+---
+
+### CLM-20260131-004 :: FingerNumberShow Success Detection Fix for Letter Mode
+
+Date: 2026-01-31
+Owner: AI Assistant
+Scope: src/frontend/src/games/FingerNumberShow.tsx
+Claim: Fixed success detection in detectAndDraw callback to handle letter mode correctly
+Evidence type: Observed
+
+Evidence:
+
+**Problem**: In letter mode, `targetNumber` is reset to 0, but the `eligibleMatch` logic only compared against `targetNumber`, causing the game to never register success in letter mode.
+
+**Fix**: Added `currentTargetNumber` calculation that uses either the letter value (A=1, B=2) or the number target:
+
+```typescript
+// For target 0: require a detected hand (closed fist) to avoid "no hands = success".
+// Handle both number mode and letter mode
+const currentTargetNumber = gameMode === 'letters' && targetLetter
+  ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
+  : targetNumber;
+const canSucceedOnZero = currentTargetNumber === 0 ? detectedHands > 0 : true;
+
+const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
+```
+
+**Also updated**:
+- `stable.target === currentTargetNumber` comparison
+- `stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers }` assignment
+
+**File**: src/frontend/src/games/FingerNumberShow.tsx (lines 450-464)
+
+Interpretation: The success detection now correctly compares finger count against the letter value in letter mode (A=1, B=2, etc.) instead of the reset targetNumber (0).
+
+Refs:
+- Ticket: TCK-20260130-015
