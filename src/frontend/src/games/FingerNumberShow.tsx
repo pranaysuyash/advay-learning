@@ -4,6 +4,7 @@
  import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
  import { useTTS } from '../hooks/useTTS';
 import { getLettersForGame, Letter } from '../data/alphabets';
+import { getLettersForGame, Letter } from '../data/alphabets';
  
  interface Point {
  x: number;
@@ -456,11 +457,11 @@ import { getLettersForGame, Letter } from '../data/alphabets';
  } else {
  const stable = stableMatchRef.current;
  const same =
- stable.target === targetNumber &&
+ stable.target === currentTargetNumber &&
  stable.count === totalFingers &&
  stable.startAt != null;
  if (!same) {
- stableMatchRef.current = { startAt: nowMs, target: targetNumber, count: totalFingers };
+ stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers };
  } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
  // Lock immediately to avoid multi-frame double scoring.
  successLockRef.current = true;

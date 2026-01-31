@@ -28214,6 +28214,73 @@ Completed 6 of 10 priority tickets:
 **Ready for Priority 7**: Add missing tests for modified components
 
 '
+
+---
+
+## TCK-20260131-131 :: Accessibility Testing - Semantic HTML
+
+Type: VERIFICATION
+Owner: AI Assistant
+Created: 2026-01-31 22:00 UTC
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Verify that semantic HTML refactoring (all 3 phases) provides proper accessibility benefits through landmark navigation, heading hierarchy, and form accessibility testing.
+
+Scope contract:
+
+- In-scope:
+  - Landmark navigation testing (VoiceOver header/nav/main/footer discovery)
+  - Section/article navigation
+  - Heading hierarchy verification
+  - Form field accessibility (Tab order, labels, required fields)
+  - Dialog accessibility (ESC to close, focus management)
+  - Output element accessibility (Screen reader announcement)
+  - Progress element accessibility (Value/max attributes)
+- Out-of-scope: Visual styling, functionality changes, performance
+
+Targets:
+
+- Repo: learning_for_kids
+- Files tested:
+  - src/frontend/src/pages/Home.tsx
+  - src/frontend/src/pages/AlphabetGame.tsx
+  - src/frontend/src/pages/LetterHunt.tsx
+  - src/frontend/src/pages/ConnectTheDots.tsx
+  - src/frontend/src/pages/Dashboard.tsx
+  - src/frontend/src/pages/Settings.tsx
+  - src/frontend/src/components/ui/Layout.tsx
+- Branch/PR: main
+
+Testing Plan:
+
+**Method: VoiceOver Web Rotor (macOS)**
+
+1. **Landmarks Test**: Header, Nav, Main, Footer, Sections all discoverable in Web Rotor
+2. **Heading Hierarchy**: No skipped levels (H1→H2→H3, not H1→H3)
+3. **Form Accessibility**: All fields have labels, Tab order logical
+4. **Output Elements**: Score/progress values announced to screen reader
+5. **Progress Elements**: Value and max announced correctly
+6. **Dialog Accessibility**: ESC closes, focus management correct
+
+Execution log:
+
+- [2026-01-31 22:00 UTC] Accessibility testing ticket created | Evidence:
+  - 6 verification areas identified
+  - Testing plan prepared
+  - Ready to run VoiceOver tests
+
+Status updates:
+
+- [2026-01-31 22:00 UTC] **IN_PROGRESS** — Accessibility testing started | Evidence:
+  - Testing plan prepared with 6 areas
+  - VoiceOver Web Rotor method selected
+  - All 3 phases ready for verification
+
+Findings (as testing progresses):
+
+- TBD (will be documented during testing)
 ### TCK-20260131-117-UPDATE :: Tracing Improvements Restored
 
 Date: 2026-01-31
