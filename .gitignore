@@ -79,3 +79,40 @@ storage/drawings/*
 *.key
 *.pem
 secrets/
+
+# Node & package managers
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build & test artifacts
+src/frontend/.cache/
+src/frontend/coverage/
+src/frontend/test-results/
+src/frontend/playwright-report/
+src/frontend/.playwright/
+src/frontend/.vite/
+src/frontend/.turbo/
+src/frontend/dist/
+src/frontend/.parcel-cache/
+
+# Vitest & coverage
+.vitest/
+coverage/
+.nyc_output/
+
+# Playwright artifacts (global)
+playwright-report/
+test-results/
+screenshots/
+videos/
+
+# IDE / Editor
+*.iml
+.idea/
+.vscode/
+
+# OS
+.DS_Store
