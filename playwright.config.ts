@@ -1,4 +1,7 @@
-import { defineConfig, devices } from './src/frontend/node_modules/@playwright/test';
+import {
+  defineConfig,
+  devices,
+} from './src/frontend/node_modules/@playwright/test';
 
 export default defineConfig({
   testDir: './src/frontend/src/**/*.e2e.test.ts',

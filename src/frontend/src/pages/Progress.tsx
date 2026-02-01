@@ -33,7 +33,9 @@ export function Progress() {
   const [error, setError] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [syncing, setSyncing] = useState<boolean>(false);
-  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'all'>('all');
+  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'all'>(
+    'all',
+  );
 
   useEffect(() => {
     const update = () =>
@@ -134,7 +136,7 @@ export function Progress() {
       return progress;
     }
 
-    return progress.filter(item => {
+    return progress.filter((item) => {
       const itemDate = new Date(item.completed_at);
       return itemDate >= periodAgo && itemDate <= now;
     });
@@ -143,23 +145,31 @@ export function Progress() {
   const periodProgress = calculatePeriodProgress();
   const periodStats = {
     activities: periodProgress.length,
-    avgAccuracy: periodProgress.length > 0
-      ? Math.round(periodProgress.reduce((sum, item) => sum + item.score, 0) / periodProgress.length)
-      : 0,
-    newLetters: periodProgress.filter(p => p.activity_type === 'letter_tracing').length
+    avgAccuracy:
+      periodProgress.length > 0
+        ? Math.round(
+            periodProgress.reduce((sum, item) => sum + item.score, 0) /
+              periodProgress.length,
+          )
+        : 0,
+    newLetters: periodProgress.filter(
+      (p) => p.activity_type === 'letter_tracing',
+    ).length,
   };
 
   // Get progress by language
-  const languageProgress = Object.entries(localLetterProgress).map(([lang, progress]) => {
-    const mastered = progress.filter(p => p.mastered).length;
-    const total = getAlphabet(lang).letters.length;
-    return {
-      language: lang,
-      mastered,
-      total,
-      percentage: total > 0 ? Math.round((mastered / total) * 100) : 0
-    };
-  });
+  const languageProgress = Object.entries(localLetterProgress).map(
+    ([lang, progress]) => {
+      const mastered = progress.filter((p) => p.mastered).length;
+      const total = getAlphabet(lang).letters.length;
+      return {
+        language: lang,
+        mastered,
+        total,
+        percentage: total > 0 ? Math.round((mastered / total) * 100) : 0,
+      };
+    },
+  );
 
   return (
     <div className='max-w-7xl mx-auto px-4 py-8'>
@@ -191,7 +201,7 @@ export function Progress() {
             {/* Pending indicator */}
             {pendingCount > 0 && (
               <div className='inline-flex items-center gap-2 bg-warning/20 border border-warning/30 text-text-warning px-3 py-1 rounded-full text-sm font-semibold'>
-                <UIIcon name="warning" size={14} />
+                <UIIcon name='warning' size={14} />
                 Pending ({pendingCount})
               </div>
             )}
@@ -238,9 +248,9 @@ export function Progress() {
           <div className='text-center py-12'>
             <div className='w-16 h-16 mx-auto mb-4'>
               <img
-                src="/assets/images/loading-pip.svg"
-                alt="Loading"
-                className="w-full h-full object-contain"
+                src='/assets/images/loading-pip.svg'
+                alt='Loading'
+                className='w-full h-full object-contain'
               />
             </div>
             <p className='text-white/60'>Loading progress...</p>
@@ -261,7 +271,9 @@ export function Progress() {
                 <div className='text-3xl font-bold'>
                   {periodStats.activities}
                 </div>
-                <div className='text-white/60'>Activities in {reportPeriod}</div>
+                <div className='text-white/60'>
+                  Activities in {reportPeriod}
+                </div>
               </div>
               <div className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'>
                 <div className='text-3xl font-bold'>
@@ -283,13 +295,20 @@ export function Progress() {
 
             {/* Multi-Language Progress */}
             <div className='bg-white/10 border border-border rounded-xl p-6 mb-8 shadow-sm'>
-              <h2 className='text-xl font-semibold mb-4'>Multi-Language Progress</h2>
+              <h2 className='text-xl font-semibold mb-4'>
+                Multi-Language Progress
+              </h2>
               {languageProgress.length > 0 ? (
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                   {languageProgress.map((langProg) => (
-                    <div key={langProg.language} className='border border-border rounded-lg p-3'>
+                    <div
+                      key={langProg.language}
+                      className='border border-border rounded-lg p-3'
+                    >
                       <div className='flex justify-between items-center mb-2'>
-                        <span className='font-medium capitalize'>{langProg.language}</span>
+                        <span className='font-medium capitalize'>
+                          {langProg.language}
+                        </span>
                         <span className='text-sm text-white/60'>
                           {langProg.mastered}/{langProg.total} letters
                         </span>
@@ -339,17 +358,21 @@ export function Progress() {
                       <div className='text-sm text-white/60 flex items-center gap-1'>
                         {item.status === 'completed' ? (
                           <>
-                            <UIIcon name="check" size={12} className="text-text-success" />
+                            <UIIcon
+                              name='check'
+                              size={12}
+                              className='text-text-success'
+                            />
                             Done
                           </>
                         ) : item.status === 'in_progress' ? (
                           <>
-                            <UIIcon name="circle" size={12} />
+                            <UIIcon name='circle' size={12} />
                             Learning
                           </>
                         ) : (
                           <>
-                            <UIIcon name="lock" size={12} />
+                            <UIIcon name='lock' size={12} />
                             Locked
                           </>
                         )}

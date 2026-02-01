@@ -16,7 +16,7 @@ export function CameraPermissionTutorial({
     {
       title: '📹 Camera Permission Needed',
       description:
-        "Advay uses your camera to detect your hand and finger movements for interactive learning. We never store or send video anywhere—only process hand positions in real-time.",
+        'Advay uses your camera to detect your hand and finger movements for interactive learning. We never store or send video anywhere—only process hand positions in real-time.',
       icon: 'video',
       emoji: '📹',
     },
@@ -30,7 +30,7 @@ export function CameraPermissionTutorial({
     {
       title: '🎮 Game Modes',
       description:
-        'Some games let you toggle between Hand Mode and Mouse Mode using the button. Try hand mode for a fun, hands-on experience—or use mouse clicks if hand tracking isn\'t working.',
+        "Some games let you toggle between Hand Mode and Mouse Mode using the button. Try hand mode for a fun, hands-on experience—or use mouse clicks if hand tracking isn't working.",
       icon: 'gamepad',
       emoji: '🎮',
     },
@@ -150,11 +150,15 @@ export function CameraPermissionTutorial({
                 )}
                 {currentStep === 3 && (
                   <div className='text-center space-y-3'>
-                    <p className='text-sm font-bold text-blue-600'>✅ Processing</p>
+                    <p className='text-sm font-bold text-blue-600'>
+                      ✅ Processing
+                    </p>
                     <p className='text-sm text-gray-600'>
                       Hand position processed locally on your device
                     </p>
-                    <p className='text-sm font-bold text-red-600'>❌ NOT Stored</p>
+                    <p className='text-sm font-bold text-red-600'>
+                      ❌ NOT Stored
+                    </p>
                     <p className='text-sm text-gray-600'>
                       No video saved or sent to servers
                     </p>

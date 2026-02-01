@@ -199,10 +199,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [feedback, setFeedback] = useState<string | null>(null);
 
   // Wellness tracking state
-  const [showWellnessReminder, setShowWellnessReminder] = useState<boolean>(false);
-  const [wellnessReminderType, setWellnessReminderType] = useState<'break' | 'water' | 'stretch' | 'inactive' | null>(null);
+  const [showWellnessReminder, setShowWellnessReminder] =
+    useState<boolean>(false);
+  const [wellnessReminderType, setWellnessReminderType] = useState<
+    'break' | 'water' | 'stretch' | 'inactive' | null
+  >(null);
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
-  const [hydrationReminderCount, setHydrationReminderCount] = useState<number>(0); // Track hydration reminders
+  const [hydrationReminderCount, setHydrationReminderCount] =
+    useState<number>(0); // Track hydration reminders
   void hydrationReminderCount; // Use variable to avoid unused warning
 
   // Wellness tracking hooks
@@ -376,7 +380,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Inactivity detector
   const inactivityData = useInactivityDetector(() => {
-
     setWellnessReminderType('inactive');
     setShowWellnessReminder(true);
   }, 60000); // Trigger after 1 minute of inactivity
@@ -601,9 +604,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-            Math.pow(point.y / canvas.height - lastPoint.y, 2),
-          )
+              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+                Math.pow(point.y / canvas.height - lastPoint.y, 2),
+            )
           : Infinity;
 
       if (dist > minDistance) {
@@ -757,12 +760,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback?.includes('Great')
-                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                : feedback?.includes('Good')
-                  ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                  : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                }`}
+              className={`rounded-xl p-4 mb-6 text-center font-semibold ${
+                feedback?.includes('Great')
+                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                  : feedback?.includes('Good')
+                    ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                    : 'bg-red-500/20 border border-red-500/30 text-red-400'
+              }`}
             >
               {feedback}
             </motion.div>
@@ -831,10 +835,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                             // Reset to first letter when language changes
                             setCurrentLetterIndex(0);
                           }}
-                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
-                            ? 'bg-pip-orange text-white shadow-soft-lg'
-                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                            }`}
+                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
+                            selectedLanguage === lang.code
+                              ? 'bg-pip-orange text-white shadow-soft-lg'
+                              : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                          }`}
                         >
                           <span className='mr-3 text-xl'>{lang.flag}</span>
                           {lang.name}
@@ -891,7 +896,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     setShowPermissionWarning(state === 'denied');
                     if (state === 'denied') setIsPlaying(false);
                   }}
-                  onCameraError={(err) => console.error('[Game] Camera error:', err)}
+                  onCameraError={(err) =>
+                    console.error('[Game] Camera error:', err)
+                  }
                   canvasEvents={{
                     onPointerDown: handleCanvasPointerDown,
                     onPointerMove: handleCanvasPointerMove,
@@ -900,7 +907,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     onPointerLeave: handleCanvasPointerUpOrCancel,
                   }}
                 >
-
                   {/* Instruction Overlay with High Contrast */}
                   <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
                     <div className='inline-block px-6 py-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-lg transition-all duration-300 transform hover:scale-105'>
@@ -910,40 +916,36 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     </div>
                   </div>
                   {/* Letter trace guide - Made more visible */}
-                  {
-                    settings.showHints && isPlaying && (
-                      <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                        <div
-                          className={`opacity-60 text-[28vw] font-bold leading-none select-none alphabet-hint-letter drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] ${letterColorClass}`}
-                        >
-                          {currentLetter.char}
-                        </div>
+                  {settings.showHints && isPlaying && (
+                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                      <div
+                        className={`opacity-60 text-[28vw] font-bold leading-none select-none alphabet-hint-letter drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] ${letterColorClass}`}
+                      >
+                        {currentLetter.char}
                       </div>
-                    )
-                  }
+                    </div>
+                  )}
 
                   {/* Two-stage prompt: big center then small side pill */}
-                  {
-                    isPlaying && promptStage === 'center' && (
-                      <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                        <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
-                          <div className='text-center'>
-                            <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                              Trace this letter
-                            </div>
-                            <div
-                              className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
-                            >
-                              {currentLetter.char}
-                            </div>
-                            <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                              {currentLetter.name}
-                            </div>
+                  {isPlaying && promptStage === 'center' && (
+                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                      <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
+                        <div className='text-center'>
+                          <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                            Trace this letter
+                          </div>
+                          <div
+                            className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
+                          >
+                            {currentLetter.char}
+                          </div>
+                          <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                            {currentLetter.name}
                           </div>
                         </div>
                       </div>
-                    )
-                  }
+                    </div>
+                  )}
 
                   <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
                     {promptStage === 'side' && (
@@ -982,10 +984,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     <button
                       type='button'
                       onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${isDrawing
-                        ? 'bg-error text-white hover:bg-red-700'
-                        : 'bg-success text-white hover:bg-success-hover'
-                        }`}
+                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
+                        isDrawing
+                          ? 'bg-error text-white hover:bg-red-700'
+                          : 'bg-success text-white hover:bg-success-hover'
+                      }`}
                     >
                       {isPinching ? (
                         <span className='flex items-center gap-2'>
@@ -1025,7 +1028,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     {(() => {
                       const mascotState =
                         feedback?.includes('Great') ||
-                          feedback?.includes('Amazing')
+                        feedback?.includes('Amazing')
                           ? 'happy'
                           : isDrawing
                             ? 'waiting'
@@ -1104,16 +1107,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               {
                 id: '1',
                 type: wellnessReminderType as any,
-                message: wellnessReminderType === 'break'
-                  ? 'Time for a break! Rest your eyes and stretch.'
-                  : wellnessReminderType === 'water'
-                    ? 'Time for a drink of water!'
-                    : wellnessReminderType === 'stretch'
-                      ? 'Time to stretch your body!'
-                      : 'Are you still there?',
+                message:
+                  wellnessReminderType === 'break'
+                    ? 'Time for a break! Rest your eyes and stretch.'
+                    : wellnessReminderType === 'water'
+                      ? 'Time for a drink of water!'
+                      : wellnessReminderType === 'stretch'
+                        ? 'Time to stretch your body!'
+                        : 'Are you still there?',
                 timestamp: Date.now(),
-                acknowledged: false
-              }
+                acknowledged: false,
+              },
             ]}
             onAcknowledge={(id) => {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1127,7 +1131,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             }}
           />
         )}
-      </section >
+      </section>
     </>
   );
 });

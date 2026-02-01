@@ -66,17 +66,17 @@ export function Skeleton({
 // Pre-built skeleton layouts
 export function SkeletonCard() {
   return (
-    <div className="bg-white/10 border border-border rounded-2xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
+    <div className='bg-white/10 border border-border rounded-2xl p-6 shadow-sm'>
+      <div className='flex items-start gap-4'>
         <Skeleton width={48} height={48} circle />
-        <div className="flex-1 space-y-2">
-          <Skeleton width="60%" height={20} />
-          <Skeleton width="40%" height={16} />
+        <div className='flex-1 space-y-2'>
+          <Skeleton width='60%' height={20} />
+          <Skeleton width='40%' height={16} />
         </div>
       </div>
-      <div className="mt-4 space-y-2">
-        <Skeleton width="100%" height={12} />
-        <Skeleton width="80%" height={12} />
+      <div className='mt-4 space-y-2'>
+        <Skeleton width='100%' height={12} />
+        <Skeleton width='80%' height={12} />
       </div>
     </div>
   );
@@ -84,16 +84,16 @@ export function SkeletonCard() {
 
 export function SkeletonStat() {
   return (
-    <div className="bg-white/10 border border-border rounded-2xl p-6 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
+    <div className='bg-white/10 border border-border rounded-2xl p-6 shadow-sm'>
+      <div className='flex items-start justify-between'>
+        <div className='space-y-2'>
           <Skeleton width={80} height={16} />
           <Skeleton width={60} height={32} />
         </div>
         <Skeleton width={40} height={40} circle />
       </div>
-      <div className="mt-4">
-        <Skeleton width="100%" height={8} />
+      <div className='mt-4'>
+        <Skeleton width='100%' height={8} />
       </div>
     </div>
   );
@@ -111,9 +111,9 @@ export function SkeletonText({
   width?: string | string[];
 }) {
   const widths = Array.isArray(width) ? width : Array(lines).fill(width);
-  
+
   return (
-    <div className="space-y-2">
+    <div className='space-y-2'>
       {widths.map((w, i) => (
         <Skeleton key={i} width={w} height={16} />
       ))}

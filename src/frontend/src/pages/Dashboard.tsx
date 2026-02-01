@@ -183,9 +183,9 @@ export const Dashboard = memo(function DashboardComponent() {
     const averageAccuracy =
       attemptsWithAccuracy.length > 0
         ? Math.round(
-          attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-          attemptsWithAccuracy.length,
-        )
+            attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
+              attemptsWithAccuracy.length,
+          )
         : 0;
 
     // Estimate time spent (5 minutes per attempt as rough estimate)
@@ -206,9 +206,9 @@ export const Dashboard = memo(function DashboardComponent() {
         const avgAcc =
           attempts.length > 0
             ? Math.round(
-              attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-              attempts.length,
-            )
+                attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) /
+                  attempts.length,
+              )
             : 0;
 
         const totalTime = langProg.reduce((sum, p) => sum + p.attempts, 0) * 2;
@@ -251,41 +251,41 @@ export const Dashboard = memo(function DashboardComponent() {
     () =>
       selectedChildData
         ? [
-          {
-            label: 'Literacy', // Was: Letters Learned
-            value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
-            iconName: 'letters' as const,
-            percent:
-              (selectedChildData.progress.lettersLearned /
-                selectedChildData.progress.totalLetters) *
-              100,
-          },
-          {
-            label: 'Accuracy',
-            value: getStarRating(selectedChildData.progress.averageAccuracy)
-              .emoji,
-            iconName: 'target' as const,
-            percent: selectedChildData.progress.averageAccuracy,
-          },
-          {
-            label: 'Time',
-            value: formatTimeKidFriendly(
-              selectedChildData.progress.totalTime,
-            ),
-            iconName: 'timer' as const,
-            percent: Math.min(
-              (selectedChildData.progress.totalTime / 300) * 100,
-              100,
-            ),
-          },
-          // TODO: Add when FingerNumberShow tracking is implemented:
-          // {
-          //   label: 'Numeracy',
-          //   value: `${numbersMastered}/${totalNumbers}`,
-          //   iconName: 'hand' as const,
-          //   percent: (numbersMastered / totalNumbers) * 100,
-          // },
-        ]
+            {
+              label: 'Literacy', // Was: Letters Learned
+              value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
+              iconName: 'letters' as const,
+              percent:
+                (selectedChildData.progress.lettersLearned /
+                  selectedChildData.progress.totalLetters) *
+                100,
+            },
+            {
+              label: 'Accuracy',
+              value: getStarRating(selectedChildData.progress.averageAccuracy)
+                .emoji,
+              iconName: 'target' as const,
+              percent: selectedChildData.progress.averageAccuracy,
+            },
+            {
+              label: 'Time',
+              value: formatTimeKidFriendly(
+                selectedChildData.progress.totalTime,
+              ),
+              iconName: 'timer' as const,
+              percent: Math.min(
+                (selectedChildData.progress.totalTime / 300) * 100,
+                100,
+              ),
+            },
+            // TODO: Add when FingerNumberShow tracking is implemented:
+            // {
+            //   label: 'Numeracy',
+            //   value: `${numbersMastered}/${totalNumbers}`,
+            //   iconName: 'hand' as const,
+            //   percent: (numbersMastered / totalNumbers) * 100,
+            // },
+          ]
         : [],
     [children, selectedChild, getStarRating, formatTimeKidFriendly],
   );
@@ -350,10 +350,11 @@ export const Dashboard = memo(function DashboardComponent() {
               <div key={child.id} className='flex items-center'>
                 <button
                   onClick={() => setSelectedChild(child.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${selectedChildData?.id === child.id
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
+                    selectedChildData?.id === child.id
                       ? 'bg-pip-orange text-white shadow-soft'
                       : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
-                    }`}
+                  }`}
                 >
                   <span className='font-medium'>{child.name}</span>
                   <span className='opacity-70 text-xs'>({child.age})</span>
@@ -414,9 +415,7 @@ export const Dashboard = memo(function DashboardComponent() {
                   size={16}
                   className='text-slate-500'
                 />
-                <span className='text-sm text-slate-600'>
-                  {stat.label}:
-                </span>
+                <span className='text-sm text-slate-600'>{stat.label}:</span>
                 <span className='text-sm font-semibold text-text-primary'>
                   {stat.value}
                 </span>
@@ -488,10 +487,11 @@ export const Dashboard = memo(function DashboardComponent() {
                         className='flex items-center gap-4'
                       >
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${learned
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
+                            learned
                               ? 'bg-green-500/20 text-green-400'
                               : 'bg-bg-tertiary text-slate-500 border border-border'
-                            }`}
+                          }`}
                         >
                           {letter.char}
                         </div>
@@ -562,44 +562,43 @@ export const Dashboard = memo(function DashboardComponent() {
                     const percent =
                       langProg.totalLetters > 0
                         ? Math.round(
-                            (langProg.lettersLearned /
-                              langProg.totalLetters) *
+                            (langProg.lettersLearned / langProg.totalLetters) *
                               100,
                           )
                         : 0;
 
                     return (
-                    <div
-                      key={langProg.language}
-                      className='border border-border rounded-lg p-3'
-                    >
-                      <div className='flex justify-between items-center mb-2'>
-                        <span className='font-medium capitalize'>
-                          {langProg.language}
-                        </span>
-                        <span className='text-sm text-slate-600'>
-                          {langProg.lettersLearned}/{langProg.totalLetters}{' '}
-                          letters
-                        </span>
+                      <div
+                        key={langProg.language}
+                        className='border border-border rounded-lg p-3'
+                      >
+                        <div className='flex justify-between items-center mb-2'>
+                          <span className='font-medium capitalize'>
+                            {langProg.language}
+                          </span>
+                          <span className='text-sm text-slate-600'>
+                            {langProg.lettersLearned}/{langProg.totalLetters}{' '}
+                            letters
+                          </span>
+                        </div>
+                        <div className='flex justify-between text-sm mb-1'>
+                          <span>Avg. Accuracy:</span>
+                          <span>{langProg.averageAccuracy}%</span>
+                        </div>
+                        <div className='flex justify-between text-sm'>
+                          <span>Time Spent:</span>
+                          <span>
+                            {Math.floor(langProg.totalTime / 60)}h{' '}
+                            {langProg.totalTime % 60}m
+                          </span>
+                        </div>
+                        <progress
+                          value={percent}
+                          max={100}
+                          className='w-full h-2 rounded-full progress-accent-orange mt-2'
+                        />
                       </div>
-                      <div className='flex justify-between text-sm mb-1'>
-                        <span>Avg. Accuracy:</span>
-                        <span>{langProg.averageAccuracy}%</span>
-                      </div>
-                      <div className='flex justify-between text-sm'>
-                        <span>Time Spent:</span>
-                        <span>
-                          {Math.floor(langProg.totalTime / 60)}h{' '}
-                          {langProg.totalTime % 60}m
-                        </span>
-                      </div>
-                      <progress
-                        value={percent}
-                        max={100}
-                        className='w-full h-2 rounded-full progress-accent-orange mt-2'
-                      />
-                    </div>
-                  );
+                    );
                   })}
                 </div>
               ) : (

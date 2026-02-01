@@ -154,10 +154,11 @@ export function Settings() {
                 onMouseLeave={handleGateEnd}
                 onTouchStart={handleGateStart}
                 onTouchEnd={handleGateEnd}
-                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition ${holdingGate
-                  ? 'bg-red-500 text-white'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white'
-                  }`}
+                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition ${
+                  holdingGate
+                    ? 'bg-red-500 text-white'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
               >
                 {holdingGate
                   ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
@@ -275,14 +276,16 @@ export function Settings() {
                             ? 'Disable sound effects'
                             : 'Enable sound effects'
                         }
-                        className={`w-12 h-6 rounded-full transition ${settings.soundEnabled ? 'bg-red-500' : 'bg-white/20'
-                          }`}
+                        className={`w-12 h-6 rounded-full transition ${
+                          settings.soundEnabled ? 'bg-red-500' : 'bg-white/20'
+                        }`}
                       >
                         <div
-                          className={`w-5 h-5 bg-white rounded-full transition transform ${settings.soundEnabled
-                            ? 'translate-x-6'
-                            : 'translate-x-0.5'
-                            }`}
+                          className={`w-5 h-5 bg-white rounded-full transition transform ${
+                            settings.soundEnabled
+                              ? 'translate-x-6'
+                              : 'translate-x-0.5'
+                          }`}
                         />
                       </button>
                     </div>
@@ -311,14 +314,16 @@ export function Settings() {
                           ? 'Disable camera access'
                           : 'Enable camera access'
                       }
-                      className={`w-12 h-6 rounded-full transition ${settings.cameraEnabled ? 'bg-red-500' : 'bg-white/20'
-                        }`}
+                      className={`w-12 h-6 rounded-full transition ${
+                        settings.cameraEnabled ? 'bg-red-500' : 'bg-white/20'
+                      }`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full transition transform ${settings.cameraEnabled
-                          ? 'translate-x-6'
-                          : 'translate-x-0.5'
-                          }`}
+                        className={`w-5 h-5 bg-white rounded-full transition transform ${
+                          settings.cameraEnabled
+                            ? 'translate-x-6'
+                            : 'translate-x-0.5'
+                        }`}
                       />
                     </button>
                   </div>
@@ -432,14 +437,16 @@ export function Settings() {
                           ? 'Hide letter hints'
                           : 'Show letter hints'
                       }
-                      className={`w-12 h-6 rounded-full transition ${settings.showHints ? 'bg-red-500' : 'bg-white/20'
-                        }`}
+                      className={`w-12 h-6 rounded-full transition ${
+                        settings.showHints ? 'bg-red-500' : 'bg-white/20'
+                      }`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full transition transform ${settings.showHints
-                          ? 'translate-x-6'
-                          : 'translate-x-0.5'
-                          }`}
+                        className={`w-5 h-5 bg-white rounded-full transition transform ${
+                          settings.showHints
+                            ? 'translate-x-6'
+                            : 'translate-x-0.5'
+                        }`}
                       />
                     </button>
                   </div>

@@ -537,8 +537,12 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                     </div>
                     <div className='flex gap-2 justify-between'>
                       {options.map((option, idx) => {
-                        const optionColorClass = getLetterColorClass(option.color);
-                        const optionBorderClass = getLetterBorderClass(option.color);
+                        const optionColorClass = getLetterColorClass(
+                          option.color,
+                        );
+                        const optionBorderClass = getLetterBorderClass(
+                          option.color,
+                        );
 
                         return (
                           <button
