@@ -45,9 +45,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: 'px-4 py-3 text-sm gap-1.5 min-h-[44px]', // WCAG: 44x44px minimum touch target
-      md: 'px-5 py-3.5 text-sm gap-2 min-h-[44px]', // WCAG: 44x44px minimum touch target
-      lg: 'px-6 py-4 text-base gap-2 min-h-[48px]', // Enhanced for young children
+      sm: 'px-4 py-3 text-sm gap-1.5 min-h-[44px]', // WCAG: 44x44px minimum touch target (adult)
+      md: 'px-5 py-4 text-sm gap-2 min-h-[52px]', // Larger for kids (52px)
+      lg: 'px-6 py-4 text-base gap-2 min-h-[60px]', // Kid-friendly large (60px)
     };
 
     const iconSizes = {

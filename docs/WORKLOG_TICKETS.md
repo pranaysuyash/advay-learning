@@ -35,6 +35,380 @@
 
 ---
 
+### TCK-20260201-001 :: Fix Login Form Validation Flapping
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-01
+Status: **IN_PROGRESS**
+Priority: P0
+
+Execution log:
+
+- [2026-02-01] **IN_PROGRESS** — Started implementation: Add client-side submit-driven validation, accessible inline error reporting, unit and e2e tests. Prompt used: `prompts/remediation/implementation-v1.6.1.md`.
+
+Scope contract:
+- In-scope: Fix frontend login form to not show transient "Field required" messages when inputs are valid; ensure validation only triggers on explicit submit; add accessible inline error reporting (aria-live); add unit/E2E test reproducing the issue (login flow with provided test credentials).
+- Out-of-scope: Backend auth logic changes.
+
+Targets:
+- Files: `src/frontend/src/pages/Login.tsx`, `src/frontend/src/store/authStore.ts`, `src/frontend/src/components/ui/Toast.tsx`, tests in `src/frontend/src/__tests__`.
+
+Acceptance Criteria:
+- Automated E2E test logs in with provided credentials `pranay.suyash@gmail.com`/`pranaysuyash` without intermittent "Field required" messages.
+- Inline errors are announced via `aria-live="polite"` and visible when validation fails.
+- No regressions in login tests.
+
+---
+
+### TCK-20260201-002 :: Guest Demo Mode (Continue as Guest)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+- In-scope: Implement a guest/demo mode allowing unauthenticated users to play a limited demo (local-only profile), add CTA on Home -> "Try Demo" to launch guest session, update `ProtectedRoute` or add demo guard for `/game` and `Games` flow; add Playwright test coverage for demo flow.
+- Out-of-scope: Persisting guest data to server.
+
+Targets:
+- Files: `src/frontend/src/pages/Home.tsx`, `src/frontend/src/pages/Games.tsx`, `src/frontend/src/store/profileStore.ts`, `src/frontend/src/components/ui/ProtectedRoute.tsx`.
+
+Acceptance Criteria:
+- Unauthenticated user can start a demo session from Home with default demo profile and play `Finger Number Show` and a demo `Alphabet Tracing` session.
+- Demo session does not require server-side account creation.
+- Tests verify access and that demo state is cleared on refresh.
+
+---
+
+### TCK-20260201-003 :: Onboarding Camera Troubleshooting & Recovery
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Improve `OnboardingFlow` camera error UI — add clear troubleshooting steps, "Test camera again" button, and a "Continue without camera" option that lets users proceed to a limited experience. Add telemetry events for camera permission failures for diagnostics.
+- Out-of-scope: Implementing browser/device-level instruction videos.
+
+Targets:
+- Files: `src/frontend/src/components/OnboardingFlow.tsx`, `src/frontend/src/hooks/useCameraUtils.ts` (create helper for tests), tests.
+
+Acceptance Criteria:
+- When camera access is denied, the onboarding shows specific tips and a functioning "Test again" CTA.
+- Users can choose to continue without camera and reach Games/Demo flows.
+- Playwright test covers camera denied + recover flows.
+
+---
+
+### TCK-20260201-004 :: Profile Selection State Propagation (Dashboard → Games)
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+- In-scope: Ensure that selecting a child profile in `Dashboard` sets `profileStore.currentProfile` and that `Games.tsx` reads `currentProfile` to enable language-specific CTAs; add tests and a small banner in `Games` showing selected child.
+- Out-of-scope: Changes to server-side profiles API.
+
+Targets:
+- Files: `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/pages/Games.tsx`, `src/frontend/src/store/profileStore.ts`.
+
+Acceptance Criteria:
+- Selecting a child in dashboard updates `currentProfile` globally.
+- Games page shows selected profile and `Play in <Language>` button becomes active.
+- Unit tests and Playwright coverage validate the flow.
+
+---
+
+### TCK-20260201-005 :: Simplify AlphabetGame Overlays (Reduce Cognitive Load)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Reduce the number of simultaneous overlays in `AlphabetGame` to at most 3 states (Instruction, Canvas, Minimal Controls). Implement a consistent overlay component or use existing `TutorialOverlay` for instructions and success UI.
+- Out-of-scope: Redesign of core mechanics.
+
+Targets:
+- Files: `src/frontend/src/pages/AlphabetGame.tsx`, `src/frontend/src/components/TutorialOverlay.tsx`, `src/frontend/src/utils/drawing.ts`.
+
+Acceptance Criteria:
+- Gameplay shows no more than 3 overlays at once; instruction overlay is dismissible; success uses mascot feedback.
+- Usability test (manual or Playwright) shows improved user focus on the canvas (no overlay overlap) and no regressions in drawing detection.
+
+---
+
+### TCK-20260201-006 :: Design Tokens + Button Component Standardization
+
+Type: TECH_DEBT
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Add centralized tokens (`src/frontend/src/styles/tokens/*`), create a `Button` component with `primary/secondary/ghost` variants, migrate core pages (`Home`, `Games`, `Dashboard`) to use the new Button within 1 week (incremental rollout), update `StyleTest` to document tokens.
+- Out-of-scope: Full visual redesign.
+
+Targets:
+- Files: Add `src/frontend/src/styles/tokens/colors.ts`, `spacing.ts`, `type-scale.ts`; add `src/frontend/src/components/ui/Button.tsx`; migrate uses in `Home.tsx`, `Games.tsx`, `Dashboard.tsx`.
+
+Acceptance Criteria:
+- Buttons across migrated pages use token-based classes and have consistent sizing/spacing.
+- No visual regressions in existing screenshots (update screenshot test baseline).
+
+---
+
+### TCK-20260201-007 :: Consolidate Duplicate Icon Components
+
+Type: TECH_DEBT
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Replace duplicate `components/Icon.tsx` and `components/ui/Icon.tsx` with a single `UIIcon` API, update imports across the repo, and add unit tests for icon rendering.
+- Out-of-scope: Icon asset redesign.
+
+Targets:
+- Files: `src/frontend/src/components/Icon.tsx`, `src/frontend/src/components/ui/Icon.tsx`, update imports in `Games.tsx`, `Dashboard.tsx`, `AlphabetGame.tsx`.
+
+Acceptance Criteria:
+- All icon uses reference a single `UIIcon` component; snapshots updated and no missing icon regressions.
+
+---
+
+### TCK-20260201-008 :: Accessibility Pass — ARIA, Focus Management, Reduced Motion
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+- In-scope: Run an accessibility audit (axe or manual checks) and fix the top-priority issues: missing ARIA labels, focus traps, skip links, reduced-motion support for Framer Motion animations, and `aria-live` for status messages.
+- Out-of-scope: Translate content (i18n) or full a11y retrofitting of every component.
+
+Targets:
+- Files: `src/frontend/src/components/*` and core pages (`Home.tsx`, `Games.tsx`, `AlphabetGame.tsx`, `Dashboard.tsx`).
+
+Acceptance Criteria:
+- Automated a11y scan passes with zero critical violations; keyboard-only navigation allows full flow; reduced-motion preference disables non-essential animations.
+
+---
+
+### TCK-20260201-009 :: Split `AlphabetGame.tsx` into Presentational + Hooks
+
+Type: TECH_DEBT
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Extract game logic (hand tracking, drawing loop, pinch detection) into hooks (e.g., `useAlphabetGame`, `useDrawingCanvas`) and reduce `AlphabetGame.tsx` file size; add unit tests for hooks.
+- Out-of-scope: Behavior changes beyond refactor; UI remains functionally identical.
+
+Targets:
+- Files: `src/frontend/src/pages/AlphabetGame.tsx` → split into `src/frontend/src/hooks/useAlphabetGame.ts`, `src/frontend/src/components/AlphabetGameView.tsx`.
+
+Acceptance Criteria:
+- Code coverage for new hooks has unit tests; existing integration tests for the game still pass.
+
+---
+
+### TCK-20260201-010 :: Playwright Screenshot Suite + CI Integration
+
+Type: TOOLING
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Add Playwright tests to capture canonical screenshots for desktop/tablet/mobile for core pages and key states (onboarding camera, dashboard, games, finger number in-play) and add a CI job to generate/compare snapshots. Reuse `capture-screenshots.js` as reference.
+- Out-of-scope: Full e2e test coverage for every page.
+
+Targets:
+- Files: `src/frontend/e2e/` add `visual.suite.spec.ts`, update `playwright.config.ts`, add `scripts/capture-screens.sh`.
+
+Acceptance Criteria:
+- Suite runs in CI, produces `screenshots/` artifacts, and a baseline comparison step flags visual regressions.
+
+---
+
+### TCK-20260201-011 :: Story Engine: Central `storyStore` & Map data model
+
+Type: DESIGN
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+- In-scope: Add a `storyStore` to track quests, unlocked islands, badges and current quest state (Zustand persisted). Design minimal data model and unit tests.
+- Out-of-scope: Full narrative content localization and asset creation.
+
+Targets:
+- Files: `src/frontend/src/store/storyStore.ts`, tests in `src/frontend/src/store/__tests__`.
+
+Acceptance Criteria:
+- A simple persistent store exists with `currentQuest`, `unlockedIslands[]`, `badges[]`, and `startQuest()`/`completeQuest()` actions.
+
+---
+
+### TCK-20260201-012 :: Prototype Map UI on `Dashboard` (Map skeleton)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Add a small `Map` component that renders a static SVG placeholder on the `Dashboard` and links to `storyStore` state. Provide a `Start First Quest` CTA to unlock the first island for the prototype.
+- Out-of-scope: Full map artwork or drag/zoom behavior.
+
+Targets:
+- Files: `src/frontend/src/components/Map.tsx`, update `Dashboard.tsx` to include the map.
+
+Acceptance Criteria:
+- Map appears on Dashboard and the CTA toggles `storyStore` state; an integrated Playwright visual test captures the map before/after unlocking.
+
+---
+
+### TCK-20260201-013 :: Mascot Celebrations (Pip modal & feedback)
+
+Type: DESIGN
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Add small `StoryModal` component that uses existing `Mascot` (or pip image) to celebrate quest completion (title, badge, small confetti animation). Hook into `storyStore.completeQuest()` for prototype demonstration.
+- Out-of-scope: Full sound asset recording.
+
+Targets:
+- Files: `src/frontend/src/components/StoryModal.tsx`, `src/frontend/src/components/Mascot.tsx` (small export/update if needed).
+
+Acceptance Criteria:
+- Clicking `Start First Quest` then `Complete` triggers the modal and updates `storyStore` badges and unlocked islands.
+
+---
+
+### TCK-20260201-014 :: Story Content: Alphabet Lighthouse (content item)
+
+Type: CONTENT
+Owner: Product
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Draft short in-game copy lines for Alphabet Lighthouse (intro, success, low-confidence guidance) and wire into `AlphabetGame` placeholders.
+- Out-of-scope: Localization or voice recordings.
+
+Targets:
+- Files: `docs/story/ALPHABET_LIGHTHOUSE.md`, placeholder strings in `AlphabetGame.tsx`.
+
+Acceptance Criteria:
+- Story copy present in docs and referenced in code as constants; easy to switch to localized copy later.
+
+---
+
+### TCK-20260201-015 :: Story Content: Number Festival
+
+Type: CONTENT
+Owner: Product
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Create short lines and assets list for Finger Number Show festival theme; implement one UI copy change in `FingerNumberShow.tsx`.
+- Out-of-scope: Voice assets.
+
+Targets:
+- Files: `docs/story/NUMBER_FESTIVAL.md`, `FingerNumberShow.tsx` copy constant.
+
+Acceptance Criteria:
+- Content doc present and one in-app copy updated for demonstration.
+
+---
+
+### TCK-20260201-016 :: Story Content: Treasure Trails & Letter Hunt
+
+Type: CONTENT
+Owner: Product
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Add story briefs for Connect the Dots (Treasure Trails) and Letter Hunt (Forest Search) and add placeholder UI hooks to show reward badges after a session.
+- Out-of-scope: Full asset design.
+
+Targets:
+- Files: `docs/story/TREASURE_TRAILS.md`, `docs/story/FOREST_SEARCH.md`.
+
+Acceptance Criteria:
+- Briefs added and hooks available in game components for demo.
+
+---
+
+### TCK-20260201-017 :: Visual Tests for Story States (Playwright)
+
+Type: TESTING
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+- In-scope: Add Playwright visual test `e2e/story.visual.spec.ts` that captures Dashboard map state and StoryModal celebration after completing a demo quest. Integrate in CI or local script.
+- Out-of-scope: Full cross-browser visual regression at this stage.
+
+Targets:
+- Files: `src/frontend/e2e/story.visual.spec.ts`, update `playwright.config.ts` if needed.
+
+Acceptance Criteria:
+- Test runs locally and outputs screenshots in `src/frontend/screenshots/story-*`.
+
+---
+
+### TCK-20260201-018 :: Prototype PR & Verifier Pack
+
+Type: IMPLEMENTATION
+Owner: Pranay
+Created: 2026-02-01
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope: Implement the prototype (tickets TCK-20260201-011 → TCK-20260201-013) with minimal assets and wire Playwright test; produce a VERIFIER PACK with screenshots and test outputs.
+- Out-of-scope: Large visual assets; keep it minimal and mock where necessary.
+
+Targets:
+- Files: changes across `src/frontend/src/components/*`, `src/frontend/src/store/*`, and e2e tests.
+
+Acceptance Criteria:
+- Small PR merges to main with tests passing and a verifier pack in docs.
+
+---
+
 ### TCK-20260130-028 :: Research Roadmap Planning
 
 Type: PLANNING

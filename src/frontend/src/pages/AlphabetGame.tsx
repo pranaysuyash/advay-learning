@@ -5,9 +5,10 @@ import React, {
   useCallback,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import confetti from 'canvas-confetti';
 import { GameLayout } from '../components/layout/GameLayout';
 import { getLettersForGame } from '../data/alphabets';
 import {
@@ -25,6 +26,9 @@ import { Icon } from '../components/Icon';
 import { GameTutorial } from '../components/GameTutorial';
 import WellnessTimer from '../components/WellnessTimer';
 import WellnessReminder from '../components/WellnessReminder';
+import CameraRecoveryModal from '../components/CameraRecoveryModal';
+import ExitConfirmationModal from '../components/ExitConfirmationModal';
+import { StoryModal } from '../components/StoryModal';
 import useInactivityDetector from '../hooks/useInactivityDetector';
 import { usePostureDetection } from '../hooks/usePostureDetection';
 import { useAttentionDetection } from '../hooks/useAttentionDetection';
@@ -121,6 +125,21 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   >('prompt');
   const [showPermissionWarning, setShowPermissionWarning] = useState(false);
 
+  // Pause/Recovery state
+  const [isPaused, setIsPaused] = useState(false);
+  const [showCameraErrorModal, setShowCameraErrorModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [cameraErrorMessage, setCameraErrorMessage] = useState<string>('Camera connection lost');
+  const [useMouseMode, setUseMouseMode] = useState(false);
+
+  // Story celebration modal state
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationTitle, setCelebrationTitle] = useState('Hooray!');
+  const [celebrationBadge, setCelebrationBadge] = useState<string | null>(null);
+
+  // Session persistence state moved below after core state declarations
+  // (moved to avoid referencing variables before they are declared)
+
   // Two-stage prompt state for the current letter.
   const [promptStage, setPromptStage] = useState<'center' | 'side'>('center');
   const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -161,7 +180,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Still allow game to start with mouse mode
       setIsPlaying(true);
       setFeedback(
-        'Camera not available. You can still draw by touching the screen.',
+        "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
       );
     }
   };
@@ -246,9 +265,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setAccuracy(nextAccuracy);
 
     if (nextAccuracy >= 70) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
       setFeedback('Great job! 🎉');
       setScore((s) => s + Math.round(nextAccuracy));
       setStreak((s) => s + 1);
+      setCelebrationTitle(`You traced ${currentLetter.name}!`);
+      setCelebrationBadge(`${currentLetter.char} Master`);
+      setShowCelebration(true);
     } else {
       setFeedback('Good start — try to trace the full shape!');
       setStreak(0);
@@ -270,6 +297,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     stopGame();
     navigate('/dashboard');
   };
+
+  // Camera error handler
+  // Recovery & exit handlers moved below where session helpers are defined (avoids TDZ issues)
+
+  // Keyboard handler for pause and escape moved below where exit handlers are initialized
 
   const handleTutorialComplete = () => {
     setTutorialCompleted(true);
@@ -429,6 +461,134 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         ? 'text-text-warning'
         : 'text-text-error';
 
+  const loadSessionState = useCallback(() => {
+    try {
+      const saved = localStorage.getItem('alphabetGameSession');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+          return data;
+        }
+      }
+    } catch {
+      // Ignore parse/localStorage errors
+    }
+    return null;
+  }, []);
+
+  // Restore session on mount (if valid)
+  useEffect(() => {
+    const data = loadSessionState();
+    if (data) {
+      if (typeof data.currentLetterIndex === 'number') {
+        setCurrentLetterIndex(data.currentLetterIndex);
+      }
+      if (typeof data.score === 'number') setScore(data.score);
+      if (typeof data.streak === 'number') setStreak(data.streak);
+      if (typeof data.selectedLanguage === 'string') setSelectedLanguage(data.selectedLanguage);
+      if (typeof data.useMouseMode === 'boolean') setUseMouseMode(data.useMouseMode);
+    }
+  }, [loadSessionState]);
+
+  // Save session periodically while playing
+  useEffect(() => {
+    if (isPlaying) {
+      const sessionData = {
+        currentLetterIndex,
+        score,
+        streak,
+        selectedLanguage,
+        useMouseMode,
+        timestamp: Date.now(),
+      };
+      try {
+        localStorage.setItem('alphabetGameSession', JSON.stringify(sessionData));
+      } catch {
+        // Ignore localStorage errors in test environments
+      }
+    }
+  }, [isPlaying, currentLetterIndex, score, streak, selectedLanguage, useMouseMode]);
+
+  // Recovery handlers (moved here so session functions are available)
+  const handleCameraError = useCallback((error: Error | string | DOMException) => {
+    const message = error instanceof Error ? error.message : String(error);
+    setCameraErrorMessage(message);
+    setShowCameraErrorModal(true);
+    setIsPaused(true);
+  }, []);
+
+  // Recovery handlers
+  const handleRetryCamera = useCallback(() => {
+    setShowCameraErrorModal(false);
+    setIsPaused(false);
+    setUseMouseMode(false);
+    initializeHandTracking();
+  }, [initializeHandTracking]);
+
+  const handleContinueWithMouse = useCallback(() => {
+    setShowCameraErrorModal(false);
+    setIsPaused(false);
+    setUseMouseMode(true);
+    setFeedback('Mouse/Touch mode active! You can still draw.');
+  }, []);
+
+  // Exit handlers - using empty deps since stopGame and navigate are stable
+  const handleSaveAndExit = useCallback(() => {
+    setShowCameraErrorModal(false);
+    localStorage.removeItem('alphabetGameSession');
+    stopGame();
+    navigate('/dashboard');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Exit confirmation handlers
+  const handleConfirmExit = useCallback(() => {
+    setShowExitModal(false);
+    const sessionData = {
+      currentLetterIndex,
+      score,
+      streak,
+      selectedLanguage,
+      useMouseMode,
+      timestamp: Date.now(),
+    };
+    try {
+      localStorage.setItem('alphabetGameSession', JSON.stringify(sessionData));
+    } catch {
+      // Ignore localStorage errors
+    }
+    stopGame();
+    navigate('/dashboard');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCancelExit = useCallback(() => {
+    setShowExitModal(false);
+  }, []);
+
+  // Keyboard handler for pause and escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isPlaying) return;
+
+      if (e.key === 'Escape') {
+        if (showExitModal) {
+          setShowExitModal(false);
+        } else if (!showCameraErrorModal) {
+          setShowExitModal(true);
+        }
+      } else if ((e.key === 'p' || e.key === 'P') && !showExitModal && !showCameraErrorModal) {
+        setIsPaused((prev) => !prev);
+        if (!isPaused) {
+          setFeedback('Game paused. Take a break!');
+        } else {
+          setFeedback('Welcome back! Continue where you left off.');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, showExitModal, showCameraErrorModal, isPaused]);
+
   // Two-stage prompt: show big center letter briefly, then keep a small side pill.
   useEffect(() => {
     if (!isPlaying) return;
@@ -441,7 +601,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         promptTimeoutRef.current = null;
       }
     };
-  }, [isPlaying, currentLetterIndex, selectedLanguage]);
+  }, [isPlaying]);
 
   useEffect(() => {
     const update = () =>
@@ -774,17 +934,24 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
           {/* Game Area - Full focus on camera when playing */}
           <div className={`${isPlaying ? 'mt-0' : '-mt-4'}`}>
-            {/* Permission Warning - With Mouse Fallback */}
+            {/* Permission Warning - Kid-Friendly Fallback */}
             {showPermissionWarning && (
-              <div className='bg-amber-500/20 border border-amber-500/30 rounded-xl p-4 mb-4 text-center'>
-                <div className='flex items-center justify-center gap-2 text-amber-400 font-semibold'>
-                  <UIIcon name='warning' size={20} />
-                  <span>Camera not available - Mouse/Touch Mode Active</span>
+              <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 mb-4 text-center shadow-lg'>
+                <div className='flex items-center justify-center gap-3 text-blue-300 font-bold text-lg'>
+                  <span className='text-2xl'>✋</span>
+                  <span>Using Finger Magic Mode!</span>
                 </div>
-                <p className='text-amber-300/80 text-sm mt-1'>
-                  You can still play using your mouse or finger to draw! Allow
-                  camera access in browser settings for hand tracking.
+                <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
+                  Pip can't see your hand right now (the Forgetfulness Fog is blocking the camera), 
+                  but that's okay! You can use your finger on the screen to draw and rescue letters!
                 </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className='mt-3 px-4 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 rounded-lg text-sm font-semibold transition'
+                  type='button'
+                >
+                  Try Hand Magic Again 🔄
+                </button>
               </div>
             )}
 
@@ -896,9 +1063,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     setShowPermissionWarning(state === 'denied');
                     if (state === 'denied') setIsPlaying(false);
                   }}
-                  onCameraError={(err) =>
-                    console.error('[Game] Camera error:', err)
-                  }
+                  onCameraError={handleCameraError}
                   canvasEvents={{
                     onPointerDown: handleCanvasPointerDown,
                     onPointerMove: handleCanvasPointerMove,
@@ -968,23 +1133,32 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     )}
                   </div>
 
-                  <fieldset
-                    className='absolute top-4 right-4 flex gap-2'
-                    aria-label='Game controls'
-                  >
-                    <legend className='sr-only'>Game Controls</legend>
-                    <button
-                      type='button'
-                      onClick={goToHome}
-                      className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft flex items-center gap-2 hover:bg-white'
-                    >
-                      <UIIcon name='home' size={16} />
-                      Home
-                    </button>
+                   <fieldset
+                     className='absolute top-4 right-4 flex gap-3'
+                     aria-label='Game controls'
+                   >
+                     <legend className='sr-only'>Game Controls</legend>
+                     {/* Pause Button */}
+                     <button
+                       type='button'
+                       onClick={() => setIsPaused(true)}
+                       className='px-5 py-3 bg-yellow-500 text-white border border-yellow-600 rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-yellow-600 min-h-[56px]'
+                     >
+                       <UIIcon name='timer' size={20} />
+                       Pause
+                     </button>
+                     <button
+                       type='button'
+                       onClick={() => setShowExitModal(true)}
+                       className='px-5 py-3 bg-white/90 text-advay-slate border border-border rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-white min-h-[56px]'
+                     >
+                       <UIIcon name='home' size={20} />
+                       Home
+                     </button>
                     <button
                       type='button'
                       onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-4 py-2 rounded-xl transition text-sm font-bold shadow-soft ${
+                      className={`px-5 py-3 rounded-xl transition text-base font-bold shadow-soft min-h-[56px] ${
                         isDrawing
                           ? 'bg-error text-white hover:bg-red-700'
                           : 'bg-success text-white hover:bg-success-hover'
@@ -992,32 +1166,32 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     >
                       {isPinching ? (
                         <span className='flex items-center gap-2'>
-                          <UIIcon name='hand' size={16} />
+                          <UIIcon name='hand' size={20} />
                           Pinching...
                         </span>
                       ) : isDrawing ? (
                         <span className='flex items-center gap-2'>
-                          <UIIcon name='pencil' size={16} />
-                          Stop Drawing
+                          <UIIcon name='pencil' size={20} />
+                          Stop
                         </span>
                       ) : (
                         <span className='flex items-center gap-2'>
-                          <UIIcon name='pencil' size={16} />
-                          Start Drawing
+                          <UIIcon name='pencil' size={20} />
+                          Draw
                         </span>
                       )}
                     </button>
                     <button
                       type='button'
                       onClick={clearDrawing}
-                      className='px-4 py-2 bg-vision-blue text-white border border-blue-700/20 rounded-xl transition text-sm font-bold shadow-soft hover:bg-blue-700'
+                      className='px-5 py-3 bg-vision-blue text-white border border-blue-700/20 rounded-xl transition text-base font-bold shadow-soft hover:bg-blue-700 min-h-[56px]'
                     >
                       Clear
                     </button>
                     <button
                       type='button'
                       onClick={stopGame}
-                      className='px-4 py-2 bg-white/90 text-advay-slate border border-border rounded-xl transition text-sm font-bold shadow-soft hover:bg-white'
+                      className='px-5 py-3 bg-white/90 text-advay-slate border border-border rounded-xl transition text-base font-bold shadow-soft hover:bg-white min-h-[56px]'
                     >
                       Stop
                     </button>
@@ -1100,7 +1274,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           screenTimeThreshold={30}
         />
 
-        {/* Wellness Reminder */}
+         {/* Wellness Reminder */}
         {showWellnessReminder && wellnessReminderType && (
           <WellnessReminder
             alerts={[
@@ -1120,8 +1294,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               },
             ]}
             onAcknowledge={(id) => {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              void id; // Use id parameter to avoid unused warning
+              void id;
               setShowWellnessReminder(false);
               setWellnessReminderType(null);
             }}
@@ -1131,6 +1304,90 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             }}
           />
         )}
+
+        {/* Pause Modal */}
+        <AnimatePresence>
+          {isPaused && !showExitModal && !showCameraErrorModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
+              >
+                <div className='flex justify-center mb-6'>
+                  <Mascot
+                    state='waiting'
+                    message="Paused! Take a breather."
+                  />
+                </div>
+                <div className='text-center mb-6'>
+                  <h2 className='text-2xl font-bold text-advay-slate mb-2'>
+                    Game Paused
+                  </h2>
+                  <p className='text-text-secondary'>
+                    Your progress is saved. Ready to continue?
+                  </p>
+                </div>
+                <div className='space-y-4'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setIsPaused(false);
+                      setFeedback('Welcome back! Continue where you left off.');
+                    }}
+                    className='w-full px-6 py-4 bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] flex items-center justify-center gap-3'
+                  >
+                    <UIIcon name='check' size={24} />
+                    Resume Game
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setIsPaused(false);
+                      setShowExitModal(true);
+                    }}
+                    className='w-full px-6 py-4 bg-white text-text-primary border-2 border-border rounded-2xl font-bold text-lg hover:bg-bg-tertiary transition-all flex items-center justify-center gap-3'
+                  >
+                    <UIIcon name='home' size={24} />
+                    Exit to Home
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Camera Error Modal */}
+        <CameraRecoveryModal
+          isOpen={showCameraErrorModal}
+          errorMessage={cameraErrorMessage}
+          onRetryCamera={handleRetryCamera}
+          onContinueWithMouse={handleContinueWithMouse}
+          onSaveAndExit={handleSaveAndExit}
+        />
+
+        {/* Exit Confirmation Modal */}
+        <ExitConfirmationModal
+          isOpen={showExitModal}
+          onConfirmExit={handleConfirmExit}
+          onCancelExit={handleCancelExit}
+          progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
+        />
+
+        {/* Story Celebration Modal */}
+        <StoryModal
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          title={celebrationTitle}
+          badge={celebrationBadge ?? undefined}
+          message="Amazing work! Keep it up!"
+        />
       </section>
     </>
   );

@@ -13,6 +13,9 @@ import { LetterJourney } from '../components/LetterJourney';
 import { Icon } from '../components/Icon';
 import { UIIcon } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
+import { AdventureMap } from '../components/Map';
+import { StoryModal } from '../components/StoryModal';
+import { useStoryStore } from '../store/storyStore';
 
 interface LanguageProgress {
   language: string;
@@ -65,6 +68,10 @@ export const Dashboard = memo(function DashboardComponent() {
   const [editName, setEditName] = useState('');
   const [editLanguage, setEditLanguage] = useState('en');
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Story/Map prototype state
+  const { startQuest, completeQuest } = useStoryStore();
+  const [showStoryModal, setShowStoryModal] = useState(false);
 
   // Helper function to get star rating from percentage
   const getStarRating = (
@@ -361,12 +368,12 @@ export const Dashboard = memo(function DashboardComponent() {
                 </button>
                 <button
                   onClick={() => handleOpenEditModal(child)}
-                  className='p-1.5 ml-0.5 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-md transition'
+                  className='p-2 ml-1 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition min-h-[36px] min-w-[36px] flex items-center justify-center'
                   aria-label={`Edit ${child.name}'s profile`}
                   title='Edit'
                 >
                   <svg
-                    className='w-3.5 h-3.5'
+                    className='w-5 h-5'
                     fill='none'
                     viewBox='0 0 24 24'
                     stroke='currentColor'
@@ -384,11 +391,11 @@ export const Dashboard = memo(function DashboardComponent() {
             <button
               type='button'
               onClick={() => setShowAddModal(true)}
-              className='flex items-center gap-1 px-2 py-1.5 text-sm text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30'
+              className='flex items-center gap-2 px-4 py-2.5 text-base text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30 min-h-[44px]'
               title='Add child'
             >
               <svg
-                className='w-4 h-4'
+                className='w-5 h-5'
                 fill='none'
                 viewBox='0 0 24 24'
                 stroke='currentColor'
@@ -610,6 +617,23 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
               )}
 
+              {/* Map Prototype */}
+              <div className='mt-4'>
+                <AdventureMap />
+                <div className='mt-3 flex gap-2'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      startQuest('demo-quest');
+                      setShowStoryModal(true);
+                    }}
+                    className='px-3 py-2 bg-pip-orange text-white rounded-md font-semibold'
+                  >
+                    Start Demo Quest
+                  </button>
+                </div>
+              </div>
+
               {/* Play Games Button */}
               <div className='mt-6 pt-6 border-t border-border'>
                 <Link
@@ -810,6 +834,21 @@ export const Dashboard = memo(function DashboardComponent() {
             </motion.div>
           </div>
         )}
+
+        {/* Story Modal */}
+        {showStoryModal && (
+          <StoryModal
+            open={true}
+            onClose={() => {
+              completeQuest('demo-quest');
+              setShowStoryModal(false);
+              toast.showToast('Quest completed! Badge earned 🎉', 'success');
+            }}
+            title='Quest Complete'
+            badge='Explorer Badge'
+          />
+        )}
+
       </motion.div>
     </section>
   );

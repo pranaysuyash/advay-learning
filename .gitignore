@@ -109,6 +109,10 @@ test-results/
 screenshots/
 videos/
 
+# Generated screenshots and test artifacts
+audit-screenshots/
+docs/audit/screenshots/
+
 # IDE / Editor
 *.iml
 .idea/

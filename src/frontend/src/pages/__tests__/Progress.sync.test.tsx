@@ -38,11 +38,9 @@ describe('Progress sync', () => {
     progressQueue.enqueue(pendingItem);
 
     // Mock apiClient.post to respond with success
-    const postSpy = vi
-      .spyOn(apiClient, 'post')
-      .mockResolvedValue({
-        data: { results: [{ idempotency_key: 'k-sync-1', status: 'ok' }] },
-      });
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      data: { results: [{ idempotency_key: 'k-sync-1', status: 'ok' }] },
+    });
 
     render(<Progress />);
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store';
+import { Mascot } from '../components/Mascot';
 
 export function Register() {
   const [email, setEmail] = useState('');
@@ -48,94 +49,102 @@ export function Register() {
         animate={{ opacity: 1, y: 0 }}
         className='bg-white/10 border border-border rounded-xl p-8 shadow-sm'
       >
-        <h1 className='text-3xl font-bold text-center mb-2'>Create Account</h1>
-        <p className='text-slate-300 text-center mb-8'>
-          Start your learning journey
-        </p>
+        <Mascot
+          state='idle'
+          message="Creating your adventurer's profile! What's their name?"
+          className='absolute top-0 left-0 -translate-x-8'
+        />
 
-        {error && (
-          <div className='bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-6'>
-            {error}
-          </div>
-        )}
+        <div className='pl-48'>
+          <h1 className='text-3xl font-bold text-center mb-2'>Create Account</h1>
+          <p className='text-slate-300 text-center mb-8'>
+            Start your learning journey
+          </p>
 
-        <form onSubmit={handleSubmit} className='space-y-6'>
-          <div>
-            <label
-              htmlFor='register-email-input'
-              className='block text-sm font-medium text-white/80 mb-2'
-            >
-              Email
-            </label>
-            <input
-              id='register-email-input'
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-              placeholder='you@example.com'
-              required
-              disabled={isLoading}
-            />
-          </div>
+          {error && (
+            <div className='bg-red-500/20 border border-red-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-6'>
+              {error}
+            </div>
+          )}
 
-          <div>
-            <label
-              htmlFor='register-password-input'
-              className='block text-sm font-medium text-white/80 mb-2'
-            >
-              Password
-            </label>
-            <input
-              id='register-password-input'
-              type='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-              placeholder='••••••••'
-              required
-              disabled={isLoading}
-              minLength={8}
-            />
+          <form onSubmit={handleSubmit} className='space-y-6'>
+            <div>
+              <label
+                htmlFor='register-email-input'
+                className='block text-sm font-medium text-white/80 mb-2'
+              >
+                Email
+              </label>
+              <input
+                id='register-email-input'
+                type='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                placeholder='you@example.com'
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor='register-password-input'
+                className='block text-sm font-medium text-white/80 mb-2'
+              >
+                Password
+              </label>
+              <input
+                id='register-password-input'
+                type='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                placeholder='•••••••••••••'
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor='register-confirm-password-input'
+                className='block text-sm font-medium text-white/80 mb-2'
+              >
+                Confirm Password
+              </label>
+              <input
+                id='register-confirm-password-input'
+                type='password'
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
+                placeholder='••••••••••••'
+                required
+                disabled={isLoading}
+              />
+            </div>
+
             <p className='text-xs text-slate-400 mt-1'>
               Must be at least 8 characters
             </p>
-          </div>
 
-          <div>
-            <label
-              htmlFor='register-confirm-password-input'
-              className='block text-sm font-medium text-white/80 mb-2'
-            >
-              Confirm Password
-            </label>
-            <input
-              id='register-confirm-password-input'
-              type='password'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-              placeholder='••••••••'
-              required
+            <button
+              type='submit'
               disabled={isLoading}
-            />
-          </div>
+              className='w-full py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {isLoading ? 'Creating account...' : 'Create Account'}
+            </button>
+          </form>
 
-          <button
-            type='submit'
-            disabled={isLoading}
-            className='w-full py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {isLoading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className='text-center mt-6 text-slate-300'>
-          Already have an account?{' '}
-          <Link to='/login' className='text-red-400 hover:text-red-300'>
-            Sign in
-          </Link>
-        </p>
+          <p className='text-center mt-6 text-slate-300'>
+            Already have an account?{' '}
+            <Link to='/login' className='text-red-400 hover:text-red-300'>
+              Sign in
+            </Link>
+          </p>
+        </div>
       </motion.div>
     </div>
   );
