@@ -27,39 +27,37 @@ export function AdventureMap() {
     : [];
 
   return (
-    <div className="bg-white/5 border border-border rounded-xl p-4">
+    <div className="bg-[#FDF8F3] border border-stone-200 rounded-xl p-4 shadow-sm">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-bold text-white">Pip's Adventure Map</h3>
-        <div className="flex items-center gap-2 text-amber-400">
+        <h3 className="text-lg font-bold text-slate-800">Pip's Adventure Map</h3>
+        <div className="flex items-center gap-2 text-amber-500">
           <span>⭐</span>
           <span className="font-bold">{totalXp} XP</span>
         </div>
       </div>
 
-      <p className="text-sm text-white/70 mb-3">
+      <p className="text-sm text-slate-600 mb-3">
         Complete quests to unlock new islands!
       </p>
 
       {/* Map SVG */}
-      <div className="relative bg-slate-900 rounded-lg p-4 mb-3 overflow-hidden">
+      <div className="relative rounded-lg overflow-hidden border border-stone-100 shadow-inner">
         <svg
           width="100%"
-          height="200"
-          viewBox="0 0 400 200"
-          className="w-full"
+          height="100%"
+          viewBox="0 0 1024 1024"
+          className="w-full aspect-square"
           role="img"
           aria-label="Adventure map showing four islands"
         >
           <title>Adventure Map</title>
-          
-          {/* Path connecting islands */}
-          <path
-            d="M 60 100 Q 120 80 180 70 Q 240 60 320 100 Q 360 130 240 150"
-            fill="none"
-            stroke="#475569"
-            strokeWidth="3"
-            strokeDasharray="8 4"
-            className="opacity-50"
+
+          {/* Map Background Image */}
+          <image
+            href="/assets/images/adventure-map.png"
+            width="1024"
+            height="1024"
+            preserveAspectRatio="xMidYMid slice"
           />
 
           {/* Island markers */}
@@ -78,7 +76,7 @@ export function AdventureMap() {
                   <motion.circle
                     cx={island.position.x}
                     cy={island.position.y}
-                    r={unlocked ? 35 : 25}
+                    r={unlocked ? 90 : 65}
                     fill={island.color}
                     opacity={0.2}
                     animate={{
@@ -97,10 +95,10 @@ export function AdventureMap() {
                 <motion.circle
                   cx={island.position.x}
                   cy={island.position.y}
-                  r={isSelected ? 32 : unlocked ? 28 : 24}
+                  r={isSelected ? 80 : unlocked ? 70 : 60}
                   fill={unlocked ? island.color : island.lockedColor}
                   stroke={isSelected ? '#fff' : 'none'}
-                  strokeWidth={3}
+                  strokeWidth={8}
                   className="cursor-pointer transition-all"
                   onClick={() => handleIslandClick(island.id)}
                   whileHover={{ scale: 1.1 }}
@@ -110,11 +108,12 @@ export function AdventureMap() {
                 {/* Island label */}
                 <text
                   x={island.position.x}
-                  y={island.position.y + 50}
+                  y={island.position.y + 130}
                   textAnchor="middle"
-                  fontSize="11"
-                  fill="#fff"
-                  className="font-medium"
+                  fontSize="28"
+                  fill="#1e293b" // Dark text for contrast
+                  className="font-bold"
+                  style={{ textShadow: '0px 2px 4px rgba(255,255,255,0.8)' }}
                 >
                   {island.name}
                 </text>
@@ -123,16 +122,18 @@ export function AdventureMap() {
                 {unlocked && completedCount > 0 && (
                   <g>
                     <circle
-                      cx={island.position.x + 20}
-                      cy={island.position.y - 20}
-                      r={12}
+                      cx={island.position.x + 50}
+                      cy={island.position.y - 50}
+                      r={30}
                       fill="#f59e0b"
+                      stroke="#fff"
+                      strokeWidth={4}
                     />
                     <text
-                      x={island.position.x + 20}
-                      y={island.position.y - 16}
+                      x={island.position.x + 50}
+                      y={island.position.y - 40}
                       textAnchor="middle"
-                      fontSize="10"
+                      fontSize="24"
                       fill="#fff"
                       fontWeight="bold"
                     >
@@ -147,15 +148,15 @@ export function AdventureMap() {
                     <circle
                       cx={island.position.x}
                       cy={island.position.y}
-                      r={24}
+                      r={60}
                       fill="#1e293b"
                       opacity={0.8}
                     />
                     <text
                       x={island.position.x}
-                      y={island.position.y + 5}
+                      y={island.position.y + 15}
                       textAnchor="middle"
-                      fontSize="16"
+                      fontSize="40"
                     >
                       🔒
                     </text>
@@ -194,18 +195,16 @@ export function AdventureMap() {
               return (
                 <div
                   key={quest.id}
-                  className={`flex items-center justify-between p-2 rounded ${
-                    isCompleted
-                      ? 'bg-green-500/20 border border-green-500/30'
-                      : 'bg-white/5'
-                  }`}
+                  className={`flex items-center justify-between p-2 rounded ${isCompleted
+                    ? 'bg-green-500/20 border border-green-500/30'
+                    : 'bg-white/5'
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span>{isCompleted ? '✅' : '📍'}</span>
                     <span
-                      className={`text-sm ${
-                        isCompleted ? 'text-green-400' : 'text-white/80'
-                      }`}
+                      className={`text-sm ${isCompleted ? 'text-green-400' : 'text-white/80'
+                        }`}
                     >
                       {quest.title}
                     </span>

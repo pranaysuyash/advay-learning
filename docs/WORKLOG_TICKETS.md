@@ -33095,3 +33095,92 @@ Execution log:
 
 Status updates:
 - [2026-02-02 UTC] **DONE** — Planning prompt captured and registered.
+
+
+### TCK-20260202-037 :: Holistic Progress Page - Complete Redesign
+
+Type: FEATURE / REDESIGN
+Owner: Qwen-Coder
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P0
+
+Description:
+Redesign the Progress page to be truly holistic, accurate, and engaging for both parents and kids. The current implementation has multiple critical issues:
+- Data is misleading (wrong calculations, mixing different metrics)
+- No unified model across activities
+- Poor UX with weak hierarchy and confusing states
+- No engaging visualization for kids
+- Incorrect statistics and unreliable data
+
+Scope contract:
+- In-scope:
+  - Implement unified progress model across all activities
+  - Create holistic stats that aggregate meaningfully across activities
+  - Add engaging plant growth visualization
+  - Fix all data calculation issues (sorting, accuracy, etc.)
+  - Create parent-focused summary with clear next actions
+  - Create kid-focused rewards section
+  - Implement proper sync status and error handling
+  - Add recommendations engine
+- Out-of-scope:
+  - Backend schema changes (work with existing data model)
+  - Major API changes
+- Behavior change allowed: YES (major UX improvement)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): 
+  - src/frontend/src/pages/Progress.tsx (complete rewrite)
+  - src/frontend/src/components/progress/GrowthGarden.tsx (NEW - plant visualization)
+  - src/frontend/src/components/progress/SkillRadar.tsx (NEW - skill visualization)
+  - src/frontend/src/components/progress/ActivityBreakdown.tsx (NEW - per-activity view)
+  - src/frontend/src/utils/progressCalculations.ts (NEW - unified calculations)
+- Branch: main
+
+Acceptance Criteria:
+- [ ] All data calculations fixed (sorting, unique counts, proper averages)
+- [ ] Unified progress model across all activities
+- [ ] Engaging plant growth visualization implemented
+- [ ] Parent-focused summary with clear next actions
+- [ ] Kid-focused rewards section
+- [ ] Proper sync status and error handling
+- [ ] Recommendations engine providing next activity suggestions
+- [ ] Improved visual hierarchy and layout
+- [ ] Better empty states with clear CTAs
+- [ ] TypeScript compilation passes
+- [ ] All tests pass
+
+Dependencies:
+- None
+
+Related Audit Findings:
+- Progress page data integrity issues
+- Lack of holistic progress model
+- Poor UX hierarchy and layout
+- Missing kid engagement elements
+
+Evidence:
+- Current Progress.tsx has incorrect calculations and misleading metrics
+- No unified model across activities
+- Static, unengaging visualization
+
+Next actions:
+1. Create unified progress calculation utilities
+2. Implement GrowthGarden component
+3. Rewrite Progress.tsx with new holistic approach
+4. Add recommendations engine
+5. Test all calculations and visualizations
+6. Verify sync status and error handling
+
+Risks/notes:
+- Need to maintain compatibility with existing data model
+- Calculations must be mathematically sound and not misleading
+- Visualization should be meaningful, not just decorative
+- Performance with large datasets needs consideration
+
+Status updates:
+- [2026-02-02 00:00 UTC] **OPEN** — Ticket created to address holistic progress page issues
+- [2026-02-02 22:50 UTC] **IN_PROGRESS** — Started implementation of progress page redesign and adventure map assets
+
+
