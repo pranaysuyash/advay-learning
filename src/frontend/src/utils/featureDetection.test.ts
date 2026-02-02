@@ -23,11 +23,6 @@ const mockNavigator = {
   mediaDevices: mockMediaDevices,
 };
 
-const mockWindow = {
-  isSecureContext: true,
-  Hands: vi.fn(),
-};
-
 // Store original values for restoration
 let originalNavigator: any;
 let originalIsSecureContext: boolean;
@@ -126,10 +121,10 @@ describe('FeatureDetection', () => {
     });
 
     it('should return false when window is undefined (SSR)', () => {
-      const originalWindow = global.window;
-      delete (global as any).window;
+      const originalWindow = globalThis.window;
+      delete (globalThis as any).window;
       expect(detectMediaPipeSupport()).toBe(false);
-      global.window = originalWindow;
+      globalThis.window = originalWindow;
     });
   });
 
@@ -144,10 +139,10 @@ describe('FeatureDetection', () => {
     });
 
     it('should return false when window is undefined (SSR)', () => {
-      const originalWindow = global.window;
-      delete (global as any).window;
+      const originalWindow = globalThis.window;
+      delete (globalThis as any).window;
       expect(detectWebGLSupport()).toBe(false);
-      global.window = originalWindow;
+      globalThis.window = originalWindow;
     });
   });
 
@@ -195,10 +190,10 @@ describe('FeatureDetection', () => {
     });
 
     it('should return false when window is undefined (SSR)', () => {
-      const originalWindow = global.window;
-      delete (global as any).window;
+      const originalWindow = globalThis.window;
+      delete (globalThis as any).window;
       expect(detectSecureContext()).toBe(false);
-      global.window = originalWindow;
+      globalThis.window = originalWindow;
     });
   });
 

@@ -17,6 +17,8 @@ import { StoryModal } from '../components/StoryModal';
 import { useStoryStore } from '../store/storyStore';
 import { QUESTS, getQuestsByIsland, isIslandUnlocked } from '../data/quests';
 import { EmptyState, TipsSection, StatsBar, AddChildModal, EditProfileModal } from '../components/dashboard';
+import { DemoInterface } from '../components/demo/DemoInterface';
+import { hasBasicCameraSupport } from '../utils/featureDetection';
 
 interface LanguageProgress {
   language: string;
@@ -53,7 +55,7 @@ export const Dashboard = memo(function DashboardComponent() {
   const { profiles, fetchProfiles, createProfile, updateProfile, setCurrentProfile } =
     useProfileStore();
   const toast = useToast();
-  useSettingsStore();
+  const { setDemoMode, demoMode } = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -354,6 +356,19 @@ export const Dashboard = memo(function DashboardComponent() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
+        {/* Demo Interface - Show when in demo mode without camera support */}
+        {demoMode && !hasBasicCameraSupport() && (
+          <DemoInterface
+            onComplete={() => {
+              toast.showToast('Demo completed! Ready to try with camera?', 'success');
+            }}
+            onExit={() => {
+              setDemoMode(false);
+              navigate('/');
+            }}
+          />
+        )}
+
         {/* Header - Clean, single title */}
         <header className='mb-6 flex justify-between items-center'>
           <h1 className='text-2xl font-bold'>Dashboard</h1>

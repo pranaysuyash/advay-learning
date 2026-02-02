@@ -30,7 +30,7 @@ export interface FeatureDetectionResult {
 export function detectCameraSupport(): boolean {
   return !!(
     navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia &&
+    (navigator.mediaDevices as any).getUserMedia &&
     navigator.mediaDevices.enumerateDevices
   );
 }

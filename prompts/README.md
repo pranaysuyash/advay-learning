@@ -25,6 +25,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 ### UI / UX
 
+- **User flow analysis (friction/journey audit)**: `prompts/ux/ux-flow-analysis-v1.0.md`
 - Repo-aware UX audit: `prompts/ui/repo-aware-ui-auditor-v1.0.md`
 - Generic UI review (artifact-based): `prompts/ui/generic-ui-reviewer-v1.0.md`
 - UI change spec writer: `prompts/ui/ui-change-spec-v1.0.md`
