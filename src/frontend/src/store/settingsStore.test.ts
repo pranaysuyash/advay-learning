@@ -14,6 +14,7 @@ describe('SettingsStore', () => {
       soundEnabled: true,
       timeLimit: 0,
       showHints: true,
+      demoMode: false,
     });
 
     // Clear localStorage spies between tests so counts are deterministic
@@ -31,6 +32,7 @@ describe('SettingsStore', () => {
       soundEnabled: true,
       timeLimit: 0,
       showHints: true,
+      demoMode: false,
     });
   });
 
@@ -57,6 +59,7 @@ describe('SettingsStore', () => {
       expect(store.soundEnabled).toBe(true);
       expect(store.timeLimit).toBe(0);
       expect(store.showHints).toBe(true);
+      expect(store.demoMode).toBe(false);
     });
 
     it('should load settings from localStorage on mount', () => {
@@ -167,6 +170,39 @@ describe('SettingsStore', () => {
       const persisted = JSON.parse(lastCall[1]);
       expect(persisted.state).toEqual(stripTransient(state));
     });
+
+    it('should update demoMode setting', () => {
+      const store = useSettingsStore.getState();
+
+      store.setDemoMode(true);
+
+      const state = useSettingsStore.getState();
+      expect(state.demoMode).toBe(true);
+
+      // demoMode should not be persisted (transient)
+      const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
+      const persisted = JSON.parse(lastCall[1]);
+      expect(persisted.state).toEqual(stripTransient(state));
+      expect(persisted.state.demoMode).toBeUndefined();
+    });
+
+    it('should reset demoMode to false', () => {
+      const store = useSettingsStore.getState();
+
+      store.setDemoMode(true);
+      expect(useSettingsStore.getState().demoMode).toBe(true);
+
+      store.setDemoMode(false);
+
+      const state = useSettingsStore.getState();
+      expect(state.demoMode).toBe(false);
+
+      // demoMode should not be persisted (transient)
+      const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
+      const persisted = JSON.parse(lastCall[1]);
+      expect(persisted.state).toEqual(stripTransient(state));
+      expect(persisted.state.demoMode).toBeUndefined();
+    });
   });
 
   describe('resetSettings action', () => {
@@ -183,6 +219,7 @@ describe('SettingsStore', () => {
       expect(state.soundEnabled).toBe(true);
       expect(state.timeLimit).toBe(0);
       expect(state.showHints).toBe(true);
+      expect(state.demoMode).toBe(false);
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);

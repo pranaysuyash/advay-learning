@@ -1,11 +1,21 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useSettingsStore } from '../../store';
+import { Button } from './Button';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const { demoMode, setDemoMode } = useSettingsStore();
+
+  const exitDemo = () => {
+    setDemoMode(false);
+    // Navigate to home page
+    window.location.href = '/';
+  };
+
   return (
     <div className='min-h-screen flex flex-col bg-bg-primary text-text-primary'>
       <a
@@ -14,6 +24,23 @@ export function Layout({ children }: LayoutProps) {
       >
         Skip to content
       </a>
+
+      {/* Demo Mode Banner */}
+      {demoMode && (
+        <div className='bg-pip-orange text-white py-2 px-4 flex justify-between items-center text-sm font-medium'>
+          <span>🎮 Demo Mode - Try the full experience with camera access</span>
+          <Button
+            size='sm'
+            variant='secondary'
+            onClick={exitDemo}
+            className='bg-white/20 hover:bg-white/30 text-white border-white/30'
+            aria-label='Exit demo mode'
+          >
+            Exit Demo
+          </Button>
+        </div>
+      )}
+
       <header className='bg-white/70 backdrop-blur border-b border-border'>
         <div className='max-w-7xl mx-auto px-4 py-4 flex justify-between items-center'>
           <Link
