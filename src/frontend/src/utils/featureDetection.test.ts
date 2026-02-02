@@ -61,9 +61,9 @@ describe('FeatureDetection', () => {
 
     // Mock successful camera API
     mockMediaDevices.getUserMedia = vi.fn().mockResolvedValue({});
-    mockMediaDevices.enumerateDevices = vi.fn().mockResolvedValue([
-      { kind: 'videoinput', deviceId: '1' },
-    ]);
+    mockMediaDevices.enumerateDevices = vi
+      .fn()
+      .mockResolvedValue([{ kind: 'videoinput', deviceId: '1' }]);
 
     // Mock MediaPipe availability
     (window as any).Hands = vi.fn();
@@ -154,9 +154,9 @@ describe('FeatureDetection', () => {
 
     it('should return false when no camera devices are found', async () => {
       const originalEnumerateDevices = mockMediaDevices.enumerateDevices;
-      mockMediaDevices.enumerateDevices = vi.fn().mockResolvedValue([
-        { kind: 'audioinput', deviceId: '1' },
-      ]);
+      mockMediaDevices.enumerateDevices = vi
+        .fn()
+        .mockResolvedValue([{ kind: 'audioinput', deviceId: '1' }]);
       const result = await detectCameraHardware();
       expect(result).toBe(false);
       mockMediaDevices.enumerateDevices = originalEnumerateDevices;
@@ -172,7 +172,9 @@ describe('FeatureDetection', () => {
 
     it('should return false when enumerateDevices throws an error', async () => {
       const originalEnumerateDevices = mockMediaDevices.enumerateDevices;
-      mockMediaDevices.enumerateDevices = vi.fn().mockRejectedValue(new Error('Permission denied'));
+      mockMediaDevices.enumerateDevices = vi
+        .fn()
+        .mockRejectedValue(new Error('Permission denied'));
       const result = await detectCameraHardware();
       expect(result).toBe(false);
       mockMediaDevices.enumerateDevices = originalEnumerateDevices;
@@ -293,7 +295,9 @@ describe('FeatureDetection', () => {
       const originalGetContext = HTMLCanvasElement.prototype.getContext;
 
       // Simulate all features unavailable
-      mockMediaDevices.enumerateDevices = vi.fn().mockRejectedValue(new Error());
+      mockMediaDevices.enumerateDevices = vi
+        .fn()
+        .mockRejectedValue(new Error());
       delete (window as any).Hands;
       HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null);
       (window as any).isSecureContext = false;

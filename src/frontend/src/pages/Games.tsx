@@ -33,7 +33,7 @@ export function Games() {
       title: 'Alphabet Tracing',
       description:
         'Trace letters with your finger to learn alphabets. Features celebration animations and phonics sounds!',
-      path: '/game',
+      path: '/games/alphabet-tracing',
       icon: 'letters',
       ageRange: '3-8 years',
       category: 'Alphabets',
@@ -85,12 +85,26 @@ export function Games() {
     return labels[code] || 'English';
   };
 
-  const handlePlayAlphabetGame = () => {
+  const [selectedGamePath, setSelectedGamePath] = useState<string | null>(null);
+
+  const handlePlayGame = async (gamePath: string) => {
+    setSelectedGamePath(gamePath);
     if (currentProfile) {
-      navigate('/game', { state: { profileId: currentProfile.id } });
-    } else {
-      // Show profile picker modal instead of redirecting
+      navigate(gamePath, { state: { profileId: currentProfile.id } });
+    } else if (profiles.length > 0) {
+      // If there are profiles but none is selected, show picker
       setShowProfilePicker(true);
+    } else {
+      // If no profiles exist, go directly to game and let it handle profile creation
+      navigate(gamePath);
+    }
+  };
+
+  const handleProfileSelect = (profile: Profile) => {
+    setCurrentProfile(profile);
+    setShowProfilePicker(false);
+    if (selectedGamePath) {
+      navigate(selectedGamePath, { state: { profileId: profile.id } });
     }
   };
 
@@ -141,8 +155,10 @@ export function Games() {
               </div>
             )}
             {currentProfile && (
-              <div className="flex items-center gap-4 mt-4">
-                <div className="text-sm text-text-secondary">Switch profile:</div>
+              <div className='flex items-center gap-4 mt-4'>
+                <div className='text-sm text-text-secondary'>
+                  Switch profile:
+                </div>
                 <ProfileSelector currentProfile={currentProfile} />
               </div>
             )}
@@ -160,15 +176,9 @@ export function Games() {
               buttonText={
                 game.id === 'alphabet-tracing' && currentProfile
                   ? `Play in ${getLanguageLabel(currentProfile.preferred_language)}`
-                  : game.id === 'alphabet-tracing'
-                    ? 'Select Profile First'
-                    : 'Play Game'
+                  : 'Play Game'
               }
-              onPlay={
-                game.id === 'alphabet-tracing'
-                  ? handlePlayAlphabetGame
-                  : undefined
-              }
+              onPlay={() => handlePlayGame(game.path)}
               reducedMotion={!!reducedMotion}
             />
           ))}
@@ -290,11 +300,7 @@ export function Games() {
                   {profiles.map((profile: Profile) => (
                     <button
                       key={profile.id}
-                      onClick={() => {
-                        setCurrentProfile(profile);
-                        setShowProfilePicker(false);
-                        navigate('/game', { state: { profileId: profile.id } });
-                      }}
+                      onClick={() => handleProfileSelect(profile)}
                       className='w-full flex items-center gap-4 p-4 bg-bg-secondary hover:bg-bg-tertiary border border-border rounded-xl transition text-left'
                     >
                       <div className='w-12 h-12 rounded-full bg-pip-orange text-white flex items-center justify-center text-xl font-bold'>

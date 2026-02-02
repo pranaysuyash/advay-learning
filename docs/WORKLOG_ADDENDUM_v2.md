@@ -2575,7 +2575,6 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
 - 2026-02-01 09:30 IST | Explore frontend codebase structure
   - Evidence: Identified 12 routes, component architecture
   - Files reviewed: App.tsx, routing configuration
-  
 - 2026-02-01 09:45 IST | Verify running servers
   - Evidence: Frontend on :6173, Backend on :8001 (Python processes confirmed)
   - Command: lsof -i :6173, lsof -i :8001
@@ -2585,7 +2584,6 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
 - 2026-02-01 10:00 IST | Create screenshot capture scripts
   - Evidence: Created `ui-audit-screenshots.cjs` and `auth-screenshots.cjs`
   - 27 public page screenshots captured successfully
-  
 - 2026-02-01 10:15 IST | Authenticated screenshot capture
   - Evidence: Login with test credentials (pranay.suyash@gmail.com)
   - 30 protected page screenshots captured successfully
@@ -2596,7 +2594,6 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
 - 2026-02-01 10:20 IST | Page-by-page critique
   - Evidence: Analyzed Home, Login, Dashboard, Games, Alphabet Game
   - Key findings: Mascot presence strong, but design too corporate/minimalist
-  
 - 2026-02-01 10:30 IST | Component system audit
   - Evidence: Dual icon systems, button inconsistencies, missing form components
   - Files: Button.tsx, Card.tsx, Layout.tsx analyzed
@@ -2618,12 +2615,14 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
 **Key Findings**:
 
 **Executive Verdict:**
+
 - Kid App Feel: 6/10 (functional but not delightful)
 - Modern Polish: 7/10 (clean, professional)
 - Biggest Risk: Camera permission friction, missing password reset
 - Biggest Opportunity: Visual celebration effects, audio feedback
 
 **The "Soul Gap":**
+
 1. No multi-sensory celebration (silent success)
 2. Mascot is a prop, not a friend (no reactions to user actions)
 3. No narrative context (letters presented as curriculum, not adventure)
@@ -2631,12 +2630,14 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
 5. Emotional neutrality (neither punishing nor particularly encouraging)
 
 **Critical Blockers:**
+
 1. Missing "Forgot Password" flow
 2. Camera permission UX confusing for kids
 3. Touch targets too small (32-44px vs needed 60px+)
 4. No standardized Input/Form components
 
 **Top 5 Quick Wins (1 day each):**
+
 1. Add victory sound + confetti on letter complete
 2. Enlarge all touch targets to 60px minimum
 3. Fix flag emoji rendering (use SVGs)
@@ -2676,7 +2677,6 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
    - 27 public pages (desktop/tablet/mobile)
    - 30 authenticated pages (dashboard, games, alphabet, progress, settings)
 
-
 ---
 
 ## TCK-20260201-014 :: Add Password Reset Flow
@@ -2693,6 +2693,7 @@ Implement complete password reset flow including "Forgot Password" link on login
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **User Impact**:
+
 - Users who forget passwords cannot recover accounts
 - High friction for returning users
 - Trust issue for parents creating accounts for children
@@ -2764,12 +2765,14 @@ Redesign camera permission flow to be child-friendly with clear explanations, vi
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **User Impact**:
+
 - Children get stuck on permission prompts
 - Parents don't understand why camera is needed
 - "Camera not available" message is anxiety-inducing
 - 30% of users likely abandon at this step (industry standard)
 
 **Current State**:
+
 - Code: `AlphabetGame.tsx:119-122` - basic permission state
 - Code: `AlphabetGame.tsx:778-789` - amber warning banner
 - Message: "Camera not available - Mouse/Touch Mode Active"
@@ -2813,7 +2816,7 @@ Redesign camera permission flow to be child-friendly with clear explanations, vi
 ```
 [Pip waving] "Hi! I can see your hands move! 📹"
 
-"To play together, I need to see your hand 
+"To play together, I need to see your hand
 so I can follow your finger as you draw!
 
 ✨ Don't worry - I only look at your hand
@@ -2847,6 +2850,7 @@ Create reusable Form component library with Input, Label, ErrorMessage, and Form
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - Login.tsx implements inputs differently than Register.tsx
 - Dashboard modals duplicate form logic
 - No consistent validation error display
@@ -2944,6 +2948,7 @@ Merge the two competing icon systems (UIIcon + Icon) into a single comprehensive
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - `components/ui/Icon.tsx` exports UIIcon (name-based system)
 - `components/Icon.tsx` exports Icon (image src-based)
 - Both used interchangeably creating confusion
@@ -2985,10 +2990,10 @@ Merge the two competing icon systems (UIIcon + Icon) into a single comprehensive
 <Icon src="/assets/images/logo.svg" size={32} />
 
 // With fallback
-<Icon 
-  src="/assets/images/child-avatar.jpg" 
-  fallback="user" 
-  size={48} 
+<Icon
+  src="/assets/images/child-avatar.jpg"
+  fallback="user"
+  size={48}
 />
 ```
 
@@ -3003,6 +3008,7 @@ Merge the two competing icon systems (UIIcon + Icon) into a single comprehensive
 - [ ] Documentation updated
 
 **Migration List** (from grep analysis):
+
 - Dashboard.tsx: uses both UIIcon and Icon
 - Games.tsx: uses UIIcon
 - AlphabetGame.tsx: uses both
@@ -3031,6 +3037,7 @@ Implement comprehensive celebration system for successful letter tracing with vi
 **Source**: UI/UX Audit Finding (TCK-20260201-013) - Soul Analysis
 
 **Current State**:
+
 - Success = text only: "Great job! 🎉"
 - No visual celebration
 - No audio feedback
@@ -3100,6 +3107,7 @@ T=1.5s:  Star flies to progress bar (visual)
 **Estimation**: 2-3 days
 
 **Dependencies**:
+
 - TCK-20260201-017 (Icon consolidation) - for mascot animations
 
 **Status updates**:
@@ -3122,6 +3130,7 @@ Increase all interactive elements to minimum 60px touch targets (44px absolute m
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - Button sizes vary: 32px (small), 44px (medium), some only 28px
 - Game controls clustered and small (top-right of AlphabetGame)
 - Dashboard edit icons are 14px (tiny)
@@ -3162,7 +3171,7 @@ lg: 48px   →    lg: 60px (kid-friendly)
 **Specific Changes**:
 
 1. **Button.tsx**: Update size variants
-2. **AlphabetGame.tsx**: 
+2. **AlphabetGame.tsx**:
    - Home button: 44px → 60px
    - Draw/Stop buttons: 40px → 56px
    - Clear button: 40px → 56px
@@ -3211,6 +3220,7 @@ Replace flag emojis (🇬🇧 🇮🇳) in language selector with SVG flag icons
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - Dashboard language selector uses emoji flags
 - Windows renders emoji flags as "GB" "IN" text (not flags)
 - Older Android shows generic globe instead of flags
@@ -3259,7 +3269,7 @@ Replace flag emojis (🇬🇧 🇮🇳) in language selector with SVG flag icons
 
 **Resources**:
 
-- Use `flag-icons` npm package or 
+- Use `flag-icons` npm package or
 - Source from `https://flagcdn.com/` or
 - Create custom simplified flags
 
@@ -3285,6 +3295,7 @@ Redesign empty states (no children, no progress, first login) to include mascot 
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - "No children added" is plain text
 - "No progress yet" is discouraging
 - Empty dashboard is a missed opportunity for delight
@@ -3335,16 +3346,16 @@ Redesign empty states (no children, no progress, first login) to include mascot 
 
 ```tsx
 <EmptyState
-  mascot="lonely"
-  title="Pip is lonely!"
+  mascot='lonely'
+  title='Pip is lonely!'
   description="Let's add your first friend to play with!"
   action={{
-    label: "Add Child",
-    onClick: openAddModal
+    label: 'Add Child',
+    onClick: openAddModal,
   }}
   secondaryAction={{
-    label: "Learn More",
-    onClick: showHelp
+    label: 'Learn More',
+    onClick: showHelp,
   }}
 />
 ```
@@ -3363,6 +3374,7 @@ Redesign empty states (no children, no progress, first login) to include mascot 
 **Estimation**: 1-2 days
 
 **Dependencies**:
+
 - TCK-20260201-017 (Icon consolidation) - for mascot display
 
 **Status updates**:
@@ -3385,8 +3397,9 @@ Transform Pip from static mascot into reactive companion that responds to user a
 **Source**: UI/UX Audit Finding (TCK-20260201-013) - Soul Analysis
 
 **Current State**:
+
 - Pip has states (idle, happy, thinking, waiting, celebrating)
-- But doesn't react to *specific* user actions
+- But doesn't react to _specific_ user actions
 - No contextual awareness
 - Generic responses only
 - Evidence: Mascot.tsx - state changes but no context
@@ -3417,16 +3430,16 @@ Transform Pip from static mascot into reactive companion that responds to user a
 
 **Reaction Triggers**:
 
-| Action | Pip Reaction | Dialogue Example |
-|--------|--------------|------------------|
-| Pinch detected | Happy bounce | "I see your fingers! Good job!" |
-| Tracing 25% | Encouraging | "You're making the line! Keep going!" |
-| Tracing 50% | Excited | "Halfway there! You're doing great!" |
-| Tracing 75% | Supportive | "Almost done! Don't stop!" |
-| Success | Celebration | "You did it! I'm so proud of you!" |
-| Struggle (3 attempts) | Helpful | "This one is tricky. Want a hint?" |
-| Inactivity (30s) | Curious | "Are you still there?" |
-| Camera denied | Supportive | "No worries! Let's use touch instead!" |
+| Action                | Pip Reaction | Dialogue Example                       |
+| --------------------- | ------------ | -------------------------------------- |
+| Pinch detected        | Happy bounce | "I see your fingers! Good job!"        |
+| Tracing 25%           | Encouraging  | "You're making the line! Keep going!"  |
+| Tracing 50%           | Excited      | "Halfway there! You're doing great!"   |
+| Tracing 75%           | Supportive   | "Almost done! Don't stop!"             |
+| Success               | Celebration  | "You did it! I'm so proud of you!"     |
+| Struggle (3 attempts) | Helpful      | "This one is tricky. Want a hint?"     |
+| Inactivity (30s)      | Curious      | "Are you still there?"                 |
+| Camera denied         | Supportive   | "No worries! Let's use touch instead!" |
 
 **Acceptance Criteria**:
 
@@ -3445,31 +3458,32 @@ Transform Pip from static mascot into reactive companion that responds to user a
 ```typescript
 const pipDialogues = {
   pinchDetected: [
-    "I see your fingers! Good pinch!",
-    "Nice claw! Ready to draw?",
-    "Gotcha! Let's trace!"
+    'I see your fingers! Good pinch!',
+    'Nice claw! Ready to draw?',
+    "Gotcha! Let's trace!",
   ],
   tracingProgress: [
     "You're making the line!",
-    "Keep following the path!",
-    "So close! Don't stop!"
+    'Keep following the path!',
+    "So close! Don't stop!",
   ],
   success: [
-    "You did it! Amazing!",
-    "That was perfect!",
-    "You're getting so good at this!"
+    'You did it! Amazing!',
+    'That was perfect!',
+    "You're getting so good at this!",
   ],
   struggle: [
-    "This one is tricky. Want a hint?",
-    "I had trouble with this one too!",
-    "Try starting from the top dot!"
-  ]
+    'This one is tricky. Want a hint?',
+    'I had trouble with this one too!',
+    'Try starting from the top dot!',
+  ],
 };
 ```
 
 **Estimation**: 2-3 days
 
 **Dependencies**:
+
 - TCK-20260201-017 (Icon consolidation)
 - TCK-20260201-018 (Celebration system) - for coordination
 
@@ -3493,6 +3507,7 @@ Create reusable Modal component with backdrop, focus trap, keyboard support (ESC
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - Dashboard implements 2 modals inline (Add Child, Edit Profile)
 - No focus trap (accessibility issue)
 - No consistent backdrop/positioning
@@ -3557,6 +3572,7 @@ Create reusable Modal component with backdrop, focus trap, keyboard support (ESC
 **Estimation**: 1-2 days
 
 **Dependencies**:
+
 - TCK-20260201-016 (Form components) - for modal forms
 
 **Status updates**:
@@ -3579,6 +3595,7 @@ Split Dashboard.tsx (817 lines) into smaller, focused components: DashboardLayou
 **Source**: UI/UX Audit Finding (TCK-20260201-013)
 
 **Current Issues**:
+
 - File is 817 lines (too large)
 - Multiple responsibilities (data fetching, presentation, modals)
 - Hard to test
@@ -3641,6 +3658,7 @@ Dashboard.tsx (50-100 lines)
 **Estimation**: 2-3 days
 
 **Dependencies**:
+
 - TCK-20260201-016 (Form components)
 - TCK-20260201-023 (Modal system)
 
@@ -3662,6 +3680,7 @@ Priority: P0
 Create detailed worklog tickets from the comprehensive UI/UX audit findings documented in `docs/UI_UX_AUDIT_REPORT.md`. The audit evaluated the app across 4 lenses: Kids App Design, Parent Trust, Design System, and Implementation Quality. 57 screenshots captured across 3 viewports (desktop, tablet, mobile).
 
 **Audit Summary**:
+
 - **Total Pages Audited**: 12 routes
 - **Screenshots Captured**: 57 (desktop, tablet, mobile)
 - **Issues Found**: 30+ across 7 categories
@@ -3671,6 +3690,7 @@ Create detailed worklog tickets from the comprehensive UI/UX audit findings docu
 **Evidence**: `docs/UI_UX_AUDIT_REPORT.md` (42KB, 1050+ lines)
 
 **Screenshots Location**: `docs/audit/screenshots/`
+
 - desktop/ (12 pages × 2 states)
 - tablet/ (12 pages × 2 states)
 - mobile/ (12 pages × 2 states)
@@ -3700,6 +3720,7 @@ When camera fails during a game session, users must refresh the page. No pause, 
 **Source**: UI/UX Audit - Section 6 (Workflow Audit - Recovery Paths)
 
 **Current State**:
+
 - Camera stops working mid-game → User stuck
 - No "pause" button visible
 - No auto-recovery
@@ -3707,6 +3728,7 @@ When camera fails during a game session, users must refresh the page. No pause, 
 - Evidence: `src/components/layout/GameLayout.tsx` (no recovery logic)
 
 **Impact**:
+
 - Rage-quit risk (children get frustrated)
 - Lost progress (session not saved)
 - Bad review potential ("app keeps crashing")
@@ -3746,6 +3768,7 @@ When camera fails during a game session, users must refresh the page. No pause, 
 - [ ] All 4 game pages implement pause flow
 
 **Validation**:
+
 - Manual testing: Trigger camera failure mid-game
 - Verify pause button visible
 - Verify recovery options work
@@ -3754,6 +3777,7 @@ When camera fails during a game session, users must refresh the page. No pause, 
 **Estimation**: 2-3 days
 
 **Dependencies**:
+
 - TCK-20260201-023 (Modal component)
 
 ---
@@ -3772,12 +3796,14 @@ Parent gate only supports 3-second hold. No alternative authentication method. T
 **Source**: UI/UX Audit - Section 4 (Page: Settings)
 
 **Current State**:
+
 - Only hold-to-confirm (3 seconds)
 - No PIN/password option
 - No biometric option
 - Evidence: `src/pages/Settings.tsx:21-76`
 
 **Impact**:
+
 - Parent frustration (frequent adjustments needed)
 - Settings rarely accessed
 - Poor parent experience
@@ -3811,6 +3837,7 @@ Parent gate only supports 3-second hold. No alternative authentication method. T
 - [ ] All accessibility labels updated
 
 **Validation**:
+
 - Manual testing: Configure PIN
 - Manual testing: Access settings with PIN
 - Manual testing: Access settings with hold
@@ -3834,6 +3861,7 @@ No exit confirmation when leaving a game. Navigation back to dashboard works wit
 **Source**: UI/UX Audit - Section 6 (Workflow Audit - Switching/Navigation Safety)
 
 **Current State**:
+
 - Browser back button works
 - No "unsaved changes" warning
 - Exiting game returns to Dashboard without confirmation
@@ -3841,6 +3869,7 @@ No exit confirmation when leaving a game. Navigation back to dashboard works wit
 - Evidence: All game pages (no confirm dialogs)
 
 **Impact**:
+
 - Lost progress (child exits accidentally)
 - Frustration (have to start over)
 - Poor experience ("why didn't it save?")
@@ -3877,6 +3906,7 @@ No exit confirmation when leaving a game. Navigation back to dashboard works wit
 - [ ] All 4 games implement this flow
 
 **Validation**:
+
 - Manual testing: Start game, exit with modal
 - Verify progress saved
 - Verify resume option appears
@@ -3900,12 +3930,14 @@ Completing a letter currently shows simple text feedback. Adding confetti, anima
 **Source**: UI/UX Audit - Section 4 (Page: AlphabetGame) + Section 9 (Make It Feel Like a Real Kids Product)
 
 **Current State**:
+
 - Success = text only: "Great job! 🎉"
 - No visual celebration
 - No animation
 - Evidence: `src/pages/AlphabetGame.tsx` (completion logic)
 
 **Impact**:
+
 - High delight for low effort
 - Creates emotional peak moments
 - Motivates continued engagement
@@ -3941,6 +3973,7 @@ Completing a letter currently shows simple text feedback. Adding confetti, anima
 - [ ] Mobile: Works on touch devices
 
 **Validation**:
+
 - Manual testing: Complete letter tracing
 - Verify celebration appears
 - Verify no performance impact
@@ -3949,6 +3982,7 @@ Completing a letter currently shows simple text feedback. Adding confetti, anima
 **Estimation**: 1 day
 
 **Dependencies**:
+
 - None (uses existing Mascot states)
 
 ---
@@ -3967,12 +4001,14 @@ Home page uses dark gradient theme (`bg-gradient-to-r from-red-400 to-red-600`) 
 **Source**: UI/UX Audit - Section 4 (Page: Home)
 
 **Current State**:
+
 - Home: Dark gradient background
 - Dashboard: Cream background
 - Games: Cream background
 - Evidence: `src/pages/Home.tsx:24` and `src/frontend/src/index.css:12`
 
 **Impact**:
+
 - Brand inconsistency
 - Disorienting user experience
 - Not kid-friendly (dark themes less engaging for children)
@@ -4005,6 +4041,7 @@ Home page uses dark gradient theme (`bg-gradient-to-r from-red-400 to-red-600`) 
 - [ ] Responsive on all viewports
 
 **Validation**:
+
 - Visual inspection: Compare Home to Dashboard
 - Contrast checker: Verify text readability
 - Screenshot comparison: Before/after
@@ -4027,6 +4064,7 @@ No EmptyState component exists. Pages show bare states ("No children added", "No
 **Source**: UI/UX Audit - Section 5 (Component System Audit - Missing Components)
 
 **Current State**:
+
 - Empty states are text only
 - No illustrations
 - No encouraging messaging
@@ -4034,6 +4072,7 @@ No EmptyState component exists. Pages show bare states ("No children added", "No
 - Evidence: Dashboard, Games, Progress pages
 
 **Impact**:
+
 - Lost opportunity for delight
 - Empty states feel broken, not intentional
 - No guidance on what to do next
@@ -4072,12 +4111,12 @@ interface EmptyStateProps {
 }
 
 // Usage examples:
-<EmptyState 
-  title="No children added yet"
-  description="Add a child profile to get started"
-  illustration="no-data"
-  action={{ label: "Add Child", onClick: () => setShowAddModal(true) }}
-/>
+<EmptyState
+  title='No children added yet'
+  description='Add a child profile to get started'
+  illustration='no-data'
+  action={{ label: 'Add Child', onClick: () => setShowAddModal(true) }}
+/>;
 ```
 
 **Acceptance Criteria**:
@@ -4091,6 +4130,7 @@ interface EmptyStateProps {
 - [ ] A11y: proper ARIA labels
 
 **Validation**:
+
 - Visual inspection: Each empty state shows illustration
 - Click action buttons work
 - No console errors
@@ -4113,12 +4153,14 @@ Mascot (Pip) only appears in games. Adding Pip to the header on every page creat
 **Source**: UI/UX Audit - Section 9 (10 Changes to Increase Kid App Feel)
 
 **Current State**:
+
 - Mascot only in game pages
 - Header is plain text/logo
 - No character presence on Dashboard, Games, Progress, Settings
 - Evidence: `src/components/ui/Layout.tsx`
 
 **Impact**:
+
 - Low kid appeal
 - No emotional connection outside games
 - Missed branding opportunity
@@ -4152,6 +4194,7 @@ Mascot (Pip) only appears in games. Adding Pip to the header on every page creat
 - [ ] Performance: No impact on load time
 
 **Validation**:
+
 - Visual inspection: Pip visible on all pages
 - Hover: Wave animation plays
 - Click: Tooltip appears
@@ -4174,12 +4217,14 @@ Navigation uses text links (Home, Games, Progress, Settings). Young children can
 **Source**: UI/UX Audit - Section 4 (Page: Dashboard) + Section 9 (Kid App Changes)
 
 **Current State**:
+
 - Nav: "Home" | "Games" | "Progress" | "Settings"
 - Text-based
 - No icons
 - Evidence: `src/components/ui/Layout.tsx:21-55`
 
 **Impact**:
+
 - Young children can't navigate independently
 - Less engaging
 - Doesn't match kid-app standards
@@ -4213,6 +4258,7 @@ Navigation uses text links (Home, Games, Progress, Settings). Young children can
 - [ ] Responsive: icons scale on mobile
 
 **Validation**:
+
 - Visual inspection: Icons visible
 - Touch testing: All targets ≥60px
 - Mobile: Icons scale appropriately
@@ -4235,12 +4281,14 @@ App is completely silent. Adding sound effects (hover pop, success chime, naviga
 **Source**: UI/UX Audit - Section 9 (Kid App Changes)
 
 **Current State**:
+
 - No audio feedback
 - Silent interactions
 - Only visual feedback
 - Evidence: Codebase (no audio implementation)
 
 **Impact**:
+
 - Lower engagement
 - Missing sensory feedback
 - Less immersive experience
@@ -4269,6 +4317,7 @@ App is completely silent. Adding sound effects (hover pop, success chime, naviga
   - All game pages (success sounds)
 
 **Sound Effects Design**:
+
 - Hover: Soft "pop" (100ms)
 - Click: Gentle "boop" (150ms)
 - Success: Victory chime (500ms)
@@ -4285,6 +4334,7 @@ App is completely silent. Adding sound effects (hover pop, success chime, naviga
 - [ ] Sounds don't overlap/clip
 
 **Validation**:
+
 - Manual testing: Hover, click, success
 - Verify mute works
 - Verify no sound on mute
@@ -4308,12 +4358,14 @@ Colors are defined in 3 places: CSS variables, Tailwind config, and inline Tailw
 **Source**: UI/UX Audit - Section 5 (Component System Audit - Inconsistencies)
 
 **Current State**:
+
 - CSS variables: `--bg-primary`, `--brand-primary` in index.css
 - Tailwind config: `bg-bg-primary`, `bg-pip-orange` in tailwind.config.js
 - Inline: `bg-red-500/20` directly in components
 - Evidence: Games.tsx:90 uses inline colors
 
 **Impact**:
+
 - Inconsistent styling
 - Hard to maintain
 - Easy to introduce bugs
@@ -4343,6 +4395,7 @@ Colors are defined in 3 places: CSS variables, Tailwind config, and inline Tailw
   - Any file using inline color classes
 
 **Token Mapping**:
+
 ```
 Inline → Semantic Token
 bg-red-500/20 → bg-brand-primary/20
@@ -4354,13 +4407,14 @@ text-white/70 → text-text-secondary
 **Acceptance Criteria**:
 
 - [ ] Single source of truth for all colors
-- [ ] No inline color classes (bg-*, text-*, border-*)
+- [ ] No inline color classes (bg-_, text-_, border-\*)
 - [ ] All colors use semantic tokens
 - [ ] CSS variables generated from Tailwind
 - [ ] Visual regression: identical appearance
 - [ ] 0 lint warnings for inline colors
 
 **Validation**:
+
 - Grep search for inline color patterns
 - Visual comparison: Before/after
 - Screenshot diff: No visual changes
@@ -4383,12 +4437,14 @@ Game cards use inline Tailwind classes for category/difficulty badges. Creating 
 **Source**: UI/UX Audit - Section 5 (Component System Audit - Missing Components)
 
 **Current State**:
+
 - Badge styles inline: `text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full`
 - No reusable component
 - Inconsistent styling across pages
 - Evidence: `src/pages/Games.tsx:96-104`
 
 **Impact**:
+
 - Inconsistent badge appearance
 - Hard to update styling
 - Code duplication
@@ -4440,6 +4496,7 @@ interface BadgeProps {
 - [ ] No inline badge styles remain
 
 **Validation**:
+
 - Visual inspection: Badges consistent
 - Props testing: Variants work
 - A11y: Proper ARIA labels
@@ -4462,12 +4519,14 @@ No ProgressBar component. HTML `<progress>` element used directly with inline st
 **Source**: UI/UX Audit - Section 5 (Component System Audit - Missing Components)
 
 **Current State**:
+
 - HTML `<progress>` element
 - Inline styling for colors
 - No animation
 - Evidence: Dashboard.tsx, Progress.tsx
 
 **Impact**:
+
 - Inconsistent styling
 - No animated transitions
 - Limited customization
@@ -4506,7 +4565,7 @@ interface ProgressBarProps {
 }
 
 // Usage:
-<ProgressBar value={75} showLabel animated variant="success" />
+<ProgressBar value={75} showLabel animated variant='success' />;
 ```
 
 **Acceptance Criteria**:
@@ -4520,6 +4579,7 @@ interface ProgressBarProps {
 - [ ] Progress uses ProgressBar
 
 **Validation**:
+
 - Visual inspection: Progress bars animate
 - Value updates: Smooth transitions
 - Variants: Correct colors
@@ -4542,12 +4602,14 @@ No "Skip to main content" links for keyboard users. Screen readers and keyboard 
 **Source**: UI/UX Audit - Section 7 (Accessibility Issues)
 
 **Current State**:
+
 - No skip links
 - Focus management poor on route changes
 - Keyboard users disoriented after navigation
 - Evidence: `src/components/ui/Layout.tsx` (no skip links)
 
 **Impact**:
+
 - Accessibility violations
 - Poor experience for keyboard users
 - Screen reader users frustrated
@@ -4581,6 +4643,7 @@ No "Skip to main content" links for keyboard users. Screen readers and keyboard 
 - [ ] Passes basic keyboard navigation test
 
 **Validation**:
+
 - Keyboard testing: Tab to skip link
 - Screen reader testing: Skip link announced
 - Focus testing: Focus management works
@@ -4603,12 +4666,14 @@ Some text colors don't meet WCAG AA contrast requirements, particularly on dark 
 **Source**: UI/UX Audit - Section 7 (Accessibility Issues)
 
 **Current State**:
+
 - `text-white/70` on dark backgrounds
 - `text-slate-300` on cream backgrounds
 - May not pass WCAG AA
 - Evidence: Games.tsx, Dashboard.tsx
 
 **Impact**:
+
 - Accessibility violations
 - Hard to read for some users
 - Poor contrast reduces usability
@@ -4634,6 +4699,7 @@ Some text colors don't meet WCAG AA contrast requirements, particularly on dark 
   - `src/frontend/tailwind.config.js` (if tokens)
 
 **Audit Checklist**:
+
 - [ ] Home page: All text on dark background
 - [ ] Dashboard: Text on cream background
 - [ ] Games: Badges and text on colored backgrounds
@@ -4649,6 +4715,7 @@ Some text colors don't meet WCAG AA contrast requirements, particularly on dark 
 - [ ] No visual regression (changes subtle)
 
 **Validation**:
+
 - Contrast checker tool on all pages
 - Before/after screenshots
 - A11y audit pass
@@ -4671,12 +4738,14 @@ Dashboard shows dense information (5+ cards, stats, progress bars). Creating a "
 **Source**: UI/UX Audit - Section 4 (Page: Dashboard) + Section 9 (Kid App Changes)
 
 **Current State**:
+
 - Dashboard: 5+ cards, multiple stats, charts
 - No visual hierarchy
 - Children overwhelmed
 - Evidence: `desktop/dashboard-full.png` and `src/pages/Dashboard.tsx`
 
 **Impact**:
+
 - Children can't parse complexity
 - Poor first impression
 - Kids disengage quickly
@@ -4702,6 +4771,7 @@ Dashboard shows dense information (5+ cards, stats, progress bars). Creating a "
   - `src/frontend/src/components/Mascot.tsx` (positioning)
 
 **Kid Mode Design**:
+
 ```
 ┌─────────────────────────┐
 │    [Pip Mascot]         │
@@ -4729,6 +4799,7 @@ Dashboard shows dense information (5+ cards, stats, progress bars). Creating a "
 - [ ] All ages can navigate Kid Mode
 
 **Validation**:
+
 - Visual inspection: Kid Mode simplified
 - Child testing (if possible): Can navigate
 - Parent Mode: No regression
@@ -4751,12 +4822,14 @@ Progress page is chart-heavy and not kid-friendly. Creating an illustrated summa
 **Source**: UI/UX Audit - Section 4 (Page: Progress)
 
 **Current State**:
+
 - Progress page: Charts only
 - Children can't understand charts
 - No celebration of achievements
 - Evidence: `desktop/progress-charts.png` and `src/pages/Progress.tsx`
 
 **Impact**:
+
 - Progress feels abstract to kids
 - No motivation from seeing progress
 - Lost engagement opportunity
@@ -4782,6 +4855,7 @@ Progress page is chart-heavy and not kid-friendly. Creating an illustrated summa
   - `src/frontend/src/components/ui/ProgressIllustration.tsx` (create)
 
 **Child View Design**:
+
 ```
 📚 Your Learning Journey
 
@@ -4802,6 +4876,7 @@ A 🐻  B 🐝  C 🐱  D 🐶  E 🐘  F 🦊  G 🦁  H 🐵
 - [ ] Smooth toggle transition
 
 **Validation**:
+
 - Visual inspection: Illustrated progress visible
 - Toggle works both directions
 - No regression on parent data
@@ -4824,12 +4899,14 @@ Loading states use generic spinner. Creating a branded LoadingSpinner with masco
 **Source**: UI/UX Audit - Section 2 (Polish gaps)
 
 **Current State**:
+
 - Generic spinner: `animate-spin rounded-full h-12 w-12 border-b-2`
 - No branding
 - No variety
 - Evidence: `src/App.tsx:23-27`
 
 **Impact**:
+
 - Missed branding opportunity
 - Generic feel
 - No delight in waiting
@@ -4878,6 +4955,7 @@ interface LoadingSpinnerProps {
 - [ ] PageLoader uses LoadingSpinner
 
 **Validation**:
+
 - Visual inspection: Branded spinner visible
 - All variants render correctly
 - Message appears below
@@ -4900,6 +4978,7 @@ Animation timings are inconsistent across components (0.2s, 0.3s, spring physics
 **Source**: UI/UX Audit - Section 5 (Component System Audit - Inconsistencies)
 
 **Current State**:
+
 - Button: `duration-200`
 - Card: `spring` (400, 30)
 - Modal: varies
@@ -4907,6 +4986,7 @@ Animation timings are inconsistent across components (0.2s, 0.3s, spring physics
 - Evidence: Component code review
 
 **Impact**:
+
 - Inconsistent feel
 - Hard to maintain
 - Unprofessional polish
@@ -4962,6 +5042,7 @@ export const animationTokens = {
 - [ ] Documentation in design system
 
 **Validation**:
+
 - Visual inspection: Consistent timing
 - No broken animations
 - Developer can use tokens
@@ -4984,12 +5065,14 @@ index.css contains many unused utility classes (`letter-color-*`, skeleton utili
 **Source**: UI/UX Audit - Section 8 (UI Debt Hotspots)
 
 **Current State**:
+
 - 60+ letter-color utility classes
 - Skeleton width/height classes
 - Some may not be used
 - Evidence: `src/frontend/src/index.css:326-630`
 
 **Impact**:
+
 - Larger CSS bundle
 - Slower load times
 - Code confusion
@@ -5015,6 +5098,7 @@ index.css contains many unused utility classes (`letter-color-*`, skeleton utili
 5. Verify no visual changes
 
 **Unused Patterns to Audit**:
+
 - `letter-color-*` (26 classes)
 - `letter-border-*` (26 classes)
 - `skeleton-w-*` (10 classes)
@@ -5029,6 +5113,7 @@ index.css contains many unused utility classes (`letter-color-*`, skeleton utili
 - [ ] All used classes preserved
 
 **Validation**:
+
 - Grep count: Verify removed
 - Bundle size: Measure
 - Visual: Screenshot comparison
@@ -5051,12 +5136,14 @@ No design system documentation exists. Creating docs/DESIGN_SYSTEM.md helps deve
 **Source**: UI/UX Audit - Section 5 (Missing - Design System Documentation)
 
 **Current State**:
+
 - Tokens exist in code
 - Components exist in code
 - No documentation
 - Evidence: docs/ folder (no DESIGN_SYSTEM.md)
 
 **Impact**:
+
 - Developers guess patterns
 - Inconsistent implementations
 - Onboarding difficulty
@@ -5089,23 +5176,28 @@ No design system documentation exists. Creating docs/DESIGN_SYSTEM.md helps deve
 # Design System
 
 ## Colors
+
 - Primary: ...
 - Secondary: ...
 - Semantic: ...
 
 ## Typography
+
 - Font family
 - Type scale
 
 ## Spacing
+
 - Scale
 
 ## Components
+
 - Button
 - Card
 - ...
 
 ## Patterns
+
 - Loading states
 - Empty states
 - Error handling
@@ -5122,6 +5214,7 @@ No design system documentation exists. Creating docs/DESIGN_SYSTEM.md helps deve
 - [ ] Linked from other docs
 
 **Validation**:
+
 - Readability: Clear and understandable
 - Completeness: Covers all tokens/components
 - Accuracy: Matches code implementation
@@ -5132,33 +5225,31 @@ No design system documentation exists. Creating docs/DESIGN_SYSTEM.md helps deve
 
 ## Ticket Summary
 
-| Ticket | Type | Priority | Title | Estimate |
-|--------|------|----------|-------|----------|
-| TCK-20260202-025 | AUDIT | DONE | Create worklog tickets from audit | 1 day |
-| TCK-20260202-026 | BUG | P0 | Camera failure no recovery | 2-3 days |
-| TCK-20260202-027 | UX | P0 | Parent gate friction | 1-2 days |
-| TCK-20260202-028 | UX | P0 | Kids accidentally exit games | 2 days |
-| TCK-20260202-029 | FEATURE | P1 | Confetti celebration | 1 day |
-| TCK-20260202-030 | BUG | P1 | Home page brand inconsistency | 4-6 hours |
-| TCK-20260202-031 | COMPONENT | P1 | EmptyState component | 1 day |
-| TCK-20260202-032 | FEATURE | P1 | Mascot in header | 4-6 hours |
-| TCK-20260202-033 | UX | P1 | Icon navigation | 4-6 hours |
-| TCK-20260202-034 | FEATURE | P1 | Sound effects | 1-2 days |
-| TCK-20260202-035 | REFACTOR | P1 | Unify color tokens | 1-2 days |
-| TCK-20260202-036 | COMPONENT | P2 | Badge component | 4-6 hours |
-| TCK-20260202-037 | COMPONENT | P2 | ProgressBar component | 4-6 hours |
-| TCK-20260202-038 | ACCESSIBILITY | P2 | Skip links | 2-4 hours |
-| TCK-20260202-039 | ACCESSIBILITY | P2 | Color contrast fix | 4-6 hours |
-| TCK-20260202-040 | FEATURE | P2 | Kid Mode dashboard | 2 days |
-| TCK-20260202-041 | FEATURE | P2 | Illustrated progress | 2 days |
-| TCK-20260202-042 | COMPONENT | P3 | LoadingSpinner | 4-6 hours |
-| TCK-20260202-043 | DESIGN_SYSTEM | P3 | Animation tokens | 1 day |
-| TCK-20260202-044 | CLEANUP | P3 | Remove unused CSS | 2-4 hours |
-| TCK-20260202-045 | DOCUMENTATION | P3 | Design system docs | 1-2 days |
+| Ticket           | Type          | Priority | Title                             | Estimate  |
+| ---------------- | ------------- | -------- | --------------------------------- | --------- |
+| TCK-20260202-025 | AUDIT         | DONE     | Create worklog tickets from audit | 1 day     |
+| TCK-20260202-026 | BUG           | P0       | Camera failure no recovery        | 2-3 days  |
+| TCK-20260202-027 | UX            | P0       | Parent gate friction              | 1-2 days  |
+| TCK-20260202-028 | UX            | P0       | Kids accidentally exit games      | 2 days    |
+| TCK-20260202-029 | FEATURE       | P1       | Confetti celebration              | 1 day     |
+| TCK-20260202-030 | BUG           | P1       | Home page brand inconsistency     | 4-6 hours |
+| TCK-20260202-031 | COMPONENT     | P1       | EmptyState component              | 1 day     |
+| TCK-20260202-032 | FEATURE       | P1       | Mascot in header                  | 4-6 hours |
+| TCK-20260202-033 | UX            | P1       | Icon navigation                   | 4-6 hours |
+| TCK-20260202-034 | FEATURE       | P1       | Sound effects                     | 1-2 days  |
+| TCK-20260202-035 | REFACTOR      | P1       | Unify color tokens                | 1-2 days  |
+| TCK-20260202-036 | COMPONENT     | P2       | Badge component                   | 4-6 hours |
+| TCK-20260202-037 | COMPONENT     | P2       | ProgressBar component             | 4-6 hours |
+| TCK-20260202-038 | ACCESSIBILITY | P2       | Skip links                        | 2-4 hours |
+| TCK-20260202-039 | ACCESSIBILITY | P2       | Color contrast fix                | 4-6 hours |
+| TCK-20260202-040 | FEATURE       | P2       | Kid Mode dashboard                | 2 days    |
+| TCK-20260202-041 | FEATURE       | P2       | Illustrated progress              | 2 days    |
+| TCK-20260202-042 | COMPONENT     | P3       | LoadingSpinner                    | 4-6 hours |
+| TCK-20260202-043 | DESIGN_SYSTEM | P3       | Animation tokens                  | 1 day     |
+| TCK-20260202-044 | CLEANUP       | P3       | Remove unused CSS                 | 2-4 hours |
+| TCK-20260202-045 | DOCUMENTATION | P3       | Design system docs                | 1-2 days  |
 
 **Total**: 21 tickets (1 DONE, 3 P0, 6 P1, 6 P2, 5 P3)
-
-
 
 ---
 
@@ -5223,9 +5314,11 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None
 
 Risks/notes:
+
 - Requires careful copywriting for kid-friendly + parent-trustworthy language
 - Need to handle "don't show again" preference correctly
 - Must work on mobile browsers with different permission dialogs
@@ -5283,10 +5376,12 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - May require backend ticket for profile creation during registration
 - Depends on existing `useProfileStore` hooks
 
 Risks/notes:
+
 - Need to handle case where parent has multiple children (allow creation of first child only during registration, add more in Dashboard)
 - May need "Add another child" button in Dashboard after registration
 
@@ -5343,13 +5438,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (independent feature)
 
 Risks/notes:
+
 - Button placement critical: must not block game area or letter tracing
 - May need to move to GameLayout component for consistency across games
 - Consider adding "Mute" button in same overlay
-
 
 ---
 
@@ -5403,9 +5499,11 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (independent feature)
 
 Risks/notes:
+
 - Performance impact: ensure confetti doesn't lag on low-end devices
 - Don't overuse: confetti should feel special, not spammy
 - Bundle size impact: `canvas-confetti` is small (~3KB gzipped)
@@ -5458,9 +5556,11 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (independent fix)
 
 Risks/notes:
+
 - Simple color change, low risk
 - May need to test in all 3 viewport sizes to ensure contrast holds
 - Consider adding automated contrast test in CI
@@ -5519,10 +5619,12 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - May require backend API ticket for password reset endpoints
 - Depends on auth API integration (`authApi`)
 
 Risks/notes:
+
 - Need to handle token expiration gracefully
 - Consider security: tokens should have short expiry (15-30 minutes)
 - Email templates for password reset need kid-friendly copy
@@ -5578,10 +5680,12 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Requires `progressStore` to track `lastPlayedGame` (may need new field)
 - Depends on game session management
 
 Risks/notes:
+
 - Need to handle multi-child scenario: continue last game for selected child only
 - If no games played, show "Start Your First Adventure" with link to Games
 
@@ -5639,10 +5743,12 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on `useSettingsStore` for mute/camera state
 - May integrate with existing parent gate from Settings
 
 Risks/notes:
+
 - Placement critical: must not block game area
 - Consider auto-collapse during gameplay to avoid distraction
 - May need to show on pause/game-over states prominently
@@ -5700,15 +5806,16 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (internal refactoring)
 
 Estimation: 2-3 days
 
 Risks/notes:
+
 - Complex refactoring; need careful testing to ensure no bugs introduced
 - Consider creating visual regression tests before and after
 - May need to extract more than initially planned (break down further if still >150 lines)
-
 
 ---
 
@@ -5762,11 +5869,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (internal refactoring)
 
 Estimation: 1-2 days
 
 Risks/notes:
+
 - Simpler refactoring than AlphabetGame
 - Modal extraction may need to handle close/dismiss logic carefully
 - Consider creating shared modal component if pattern repeats
@@ -5822,12 +5931,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - May need to add new button variants (gradient, link-as-button)
 - Depends on existing `Button` component
 
 Estimation: 2 days
 
 Risks/notes:
+
 - Need to ensure all button behaviors (onClick, disabled, loading) are preserved
 - Some pages may have unique button styles not covered by current variants
 - Visual regression testing recommended
@@ -5882,12 +5993,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - May need to add new card variants (glassmorphism, different paddings)
 - Depends on existing `Card` component
 
 Estimation: 1 day
 
 Risks/notes:
+
 - Simpler than button migration (less complex card patterns)
 - Need to ensure all card behaviors (onClick, hover) are preserved
 - Visual regression testing recommended
@@ -5946,11 +6059,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (new component)
 
 Estimation: 1 day
 
 Risks/notes:
+
 - Keep it simple first; don't over-engineer
 - Consider password variant with show/hide toggle
 - May need to add validation props (minLength, maxLength, pattern)
@@ -6004,15 +6119,16 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on TCK-20260201-037 (Input component creation)
 
 Estimation: 0.5 day
 
 Risks/notes:
+
 - Simple migration if Input component is well-designed
 - Visual regression testing recommended
 - May need to handle Register form (name, email, password, confirm password)
-
 
 ---
 
@@ -6066,12 +6182,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Requires video production (separate effort)
 - May need backend asset hosting
 
 Estimation: 1-2 days
 
 Risks/notes:
+
 - Video file size impact (need optimization, <500KB per video)
 - Browser autoplay policies (may need user interaction first)
 - Mobile battery consideration (don't autoplay on mobile)
@@ -6127,12 +6245,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on progress data from `useProgressStore`
 - May need algorithm for gap detection (simple: low accuracy letters)
 
 Estimation: 1 day
 
 Risks/notes:
+
 - Gap detection algorithm may be complex (keep simple first)
 - Recommendations may feel repetitive if progress doesn't change
 - Consider adding "random new game" if all caught up
@@ -6190,11 +6310,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on existing `Mascot` component
 
 Estimation: 2-3 days
 
 Risks/notes:
+
 - May add visual clutter if too prominent
 - Consider hiding on mobile if layout constrained
 - Don't make interactive on non-game pages (keep simple)
@@ -6251,11 +6373,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (independent feature)
 
 Estimation: 2-3 days
 
 Risks/notes:
+
 - Audio autoplay policies may block sounds without user interaction first
 - Need high-quality but small audio files (<50KB each)
 - Consider adding sound preference in Settings
@@ -6309,11 +6433,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on existing `framer-motion` (already installed)
 
 Estimation: 1 day
 
 Risks/notes:
+
 - Keep transitions subtle (don't overwhelm)
 - Test on low-end devices for performance
 - May cause scroll-to-top issues (handle carefully)
@@ -6369,12 +6495,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - May require backend API for badge tracking
 - May require backend ticket for badge storage
 
 Estimation: 3-5 days
 
 Risks/notes:
+
 - Badge icons need to be high-quality
 - Don't create too many badges at once (start with 5-6)
 - Consider adding "secret" badges for surprise
@@ -6427,11 +6555,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on `useProfileStore`
 
 Estimation: 2-3 days
 
 Risks/notes:
+
 - Simple but impactful change
 - Consider adding child avatar alongside name
 - Handle edge case: no child selected (parent-only view)
@@ -6484,12 +6614,14 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - Depends on `useProfileStore`
 - Depends on game data having age ranges (already exists)
 
 Estimation: 1-2 days
 
 Risks/notes:
+
 - Simple filtering (match age range to child's age)
 - Consider +/- 1 year flexibility (show games for slightly older/younger)
 - Don't hide games completely (allow browsing all games)
@@ -6544,11 +6676,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (optimization work)
 
 Estimation: 2-3 days
 
 Risks/notes:
+
 - Image conversion to WebP may require tooling (sharp, imagemin)
 - Code-splitting heavy libraries requires careful import analysis
 - May need to add loading states for lazy-loaded chunks
@@ -6603,11 +6737,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (internal refactoring)
 
 Estimation: 1 day
 
 Risks/notes:
+
 - Simple extraction (already well-defined in Settings)
 - Consider using for other sensitive actions (delete profile, reset progress)
 
@@ -6657,11 +6793,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (simple removal)
 
 Estimation: 0.5 day
 
 Risks/notes:
+
 - Very low risk (simple removal)
 - Consider adding demo to footer or separate "Demo" link (optional)
 - May reduce discovery for users who want to try before registering
@@ -6710,11 +6848,13 @@ Status updates:
 - [2026-02-01 10:35 UTC] **OPEN** — Ticket created, awaiting implementation
 
 Dependencies:
+
 - None (simple removal)
 
 Estimation: 0.1 day
 
 Risks/notes:
+
 - Very low risk (dev-only route)
 - Keep StyleTest component file (may be useful for development)
 - Consider adding build flag to only show in dev mode
@@ -6726,6 +6866,7 @@ Risks/notes:
 **Total Tickets Created in This Batch**: 26 (TCK-20260201-025 to TCK-20260201-050)
 
 **Priority Distribution:**
+
 - P0 (Blockers): 3 tickets (TCK-20260201-025 to TCK-20260201-027)
   - Camera Permission Onboarding (2-3 days)
   - Child Profile Creation in Registration (1-2 days)
@@ -6760,16 +6901,19 @@ Risks/notes:
 **Total Estimated Effort**: 33-45 days (6-8 weeks)
 
 **Recommended Execution Phases:**
+
 - Phase 1 (Week 1): Blockers - Remove friction, enable core flows
 - Phase 2 (Week 1-2): High Impact Quick Wins - Add magic, increase engagement
 - Phase 3 (Week 2-4): MVP Polish - Refactor, consolidate, improve discoverability
 - Phase 4 (Week 5-8): Product-Level Upgrades - Gamification, personalization, performance, cleanup
 
 **Dependencies:**
+
 - TCK-20260201-037 (Input component) → TCK-20260201-038 (Migration to Input)
 - TCK-20260201-032 (Parent Quick Controls) should align with TCK-20260201-027 (Stop Camera button)
 
 **Evidence References:**
+
 - All tickets reference `docs/audit/frontend__ui_ux_design_audit.md`
 - Each ticket includes specific finding ID, quote, and line number evidence
 - Scope contracts clearly define in-scope, out-of-scope, and behavior changes
@@ -6795,6 +6939,7 @@ Create comprehensive narrative framework that transforms the app from "education
 **Key Narrative Elements Created**:
 
 **1. The World: "Pip's Playful Paradise"**
+
 - Letter Forest (tracing)
 - Number Nook (counting)
 - Dot Mountain (connect the dots)
@@ -6802,41 +6947,49 @@ Create comprehensive narrative framework that transforms the app from "education
 - Star Studio (progress)
 
 **2. Character System**
+
 - Pip's full personality with 7 states
 - Voice lines for every situation (positive, encouragement, milestone, goodbye)
 - Letter Friend characters (A=Alex Antelope, B=Bella Butterfly, etc.)
 - Supporting characters (Professor Owl, Chef Bear, Captain Star, Gardener Giraffe)
 
 **3. Game Narratives**
+
 - Alphabet Tracing: "Rescue the Letter Friends"
 - Finger Numbers: "Count for the Friends"
 - Connect the Dots: "Draw the Constellations"
 - Letter Hunt: "Find the Letter Friends"
 
 **4. Progress as Story**
+
 - "Pip's Travel Journal" instead of charts
 - Milestones with story titles ("The Beginning of an Adventure", "Making New Friends")
 - Rewards with narrative meaning (badges as stickers, treasures)
 
 **5. Parent Experience as "Base Camp"**
+
 - Settings → "Base Camp" (⛺)
 - Progress → "Adventure Journal" (📖)
 - Dashboard → "Adventure Hub" (🗺️)
 - Game selection → "Choose Your Path" (🛤️)
 
 **6. Onboarding as Arrival**
+
 - 4-scene story: Arrival → Tour → Tutorial → Invitation
 - Pip as guide throughout
 
 **7. Daily Rituals**
+
 - Welcome back scenarios (first login, after break, streak maintained)
 - Session end as wellness story ("Even heroes need rest")
 
 **8. Sound Design Specification**
+
 - Ambience, hover, success, celebration, hint, error, reward, exit sounds
 - All tied to narrative moments
 
 **9. Implementation Roadmap**
+
 - Phase 1 (Week 1-2): Quick wins (Pip header, icons, confetti, sounds)
 - Phase 2 (Week 3-4): Narrative integration
 - Phase 3 (Week 5-6): Deep story
@@ -6864,12 +7017,14 @@ Transform Alphabet Tracing from a functional activity into "Rescue the Letter Fr
 **Source**: `docs/NARRATIVE_FRAMEWORK.md` Section 3.1
 
 **Current State**:
+
 - Letter appears, child traces, "Great job!" message, move to next
 - No story context
 - No emotional connection
 - No visual progression
 
 **Target State**:
+
 - Story intro: "Oh no! Letter A is lost in the mist!"
 - Visual: Letter appears dim/trapped
 - Action: Tracing beams of light that "free" the letter
@@ -6905,9 +7060,24 @@ interface LetterFriend {
 
 // Examples:
 const letterFriends = {
-  'A': { name: 'Alex', animal: '🦒 Giraffe', personality: 'energetic', catchphrase: "A is for Adventure!" },
-  'B': { name: 'Bella', animal: '🦋 Butterfly', personality: 'gentle', catchphrase: "Flutter by for fun!" },
-  'C': { name: 'Carl', animal: '🦀 Crab', personality: 'shy', catchphrase: "Clack clack! Good morning!" },
+  A: {
+    name: 'Alex',
+    animal: '🦒 Giraffe',
+    personality: 'energetic',
+    catchphrase: 'A is for Adventure!',
+  },
+  B: {
+    name: 'Bella',
+    animal: '🦋 Butterfly',
+    personality: 'gentle',
+    catchphrase: 'Flutter by for fun!',
+  },
+  C: {
+    name: 'Carl',
+    animal: '🦀 Crab',
+    personality: 'shy',
+    catchphrase: 'Clack clack! Good morning!',
+  },
   // ... all 26 letters
 };
 ```
@@ -6981,9 +7151,11 @@ Letter Parade (Bottom)
 - [ ] Progress persists (refresh doesn't lose parade)
 
 **Dependencies**:
+
 - TCK-20260202-029 (Confetti celebration)
 
 **Validation**:
+
 - Manual testing: Complete 5 letters, verify celebration
 - Visual: Screenshot parade after 10 letters
 - TTS: Verify voice lines match narrative
@@ -7006,12 +7178,14 @@ Transform Finger Number Show from a counting exercise into "Count for the Friend
 **Source**: `docs/NARRATIVE_FRAMEWORK.md` Section 3.2
 
 **Current State**:
+
 - Number appears, child shows fingers, "Correct!" message
 - No story
 - No characters
 - No emotional context
 
 **Target State**:
+
 - Story intro: "Bunny wants a snack! How many carrots?"
 - Visual: Cute animal with empty bowl
 - Action: Child shows number with fingers
@@ -7023,19 +7197,49 @@ Transform Finger Number Show from a counting exercise into "Count for the Friend
 ```typescript
 interface AnimalFriend {
   name: string;
-  animal: string;      // Emoji or icon
-  treat: string;       // What they eat
-  treatEmoji: string;  // Visual
-  voice: string;       // TTS voice line on success
+  animal: string; // Emoji or icon
+  treat: string; // What they eat
+  treatEmoji: string; // Visual
+  voice: string; // TTS voice line on success
 }
 
 // Examples:
 const animalFriends = [
-  { name: 'Bunny', animal: '🐰', treat: 'carrots', treatEmoji: '🥕', voice: "Yum! I love carrots!" },
-  { name: 'Puppy', animal: '🐶', treat: 'bones', treatEmoji: '🦴', voice: "Woof! Tasty bone!" },
-  { name: 'Birdie', animal: '🐦', treat: 'seeds', treatEmoji: '🌱', voice: "Chirp! Seeds are yummy!" },
-  { name: 'Kitty', animal: '🐱', treat: 'fish', treatEmoji: '🐟', voice: "Meow! Fish for me!" },
-  { name: 'Bear', animal: '🐻', treat: 'honey', treatEmoji: '🍯', voice: "Roar! Sweet honey!" },
+  {
+    name: 'Bunny',
+    animal: '🐰',
+    treat: 'carrots',
+    treatEmoji: '🥕',
+    voice: 'Yum! I love carrots!',
+  },
+  {
+    name: 'Puppy',
+    animal: '🐶',
+    treat: 'bones',
+    treatEmoji: '🦴',
+    voice: 'Woof! Tasty bone!',
+  },
+  {
+    name: 'Birdie',
+    animal: '🐦',
+    treat: 'seeds',
+    treatEmoji: '🌱',
+    voice: 'Chirp! Seeds are yummy!',
+  },
+  {
+    name: 'Kitty',
+    animal: '🐱',
+    treat: 'fish',
+    treatEmoji: '🐟',
+    voice: 'Meow! Fish for me!',
+  },
+  {
+    name: 'Bear',
+    animal: '🐻',
+    treat: 'honey',
+    treatEmoji: '🍯',
+    voice: 'Roar! Sweet honey!',
+  },
 ];
 ```
 
@@ -7110,10 +7314,12 @@ Scene 3: Happy Animal
 - [ ] After 5 correct: "You fed all the friends!" celebration
 
 **Dependencies**:
+
 - TCK-20260202-029 (Confetti celebration)
 - TCK-20260202-034 (Sound effects)
 
 **Validation**:
+
 - Manual testing: Feed 3 different animals
 - Visual: Verify treat animation
 - TTS: Verify animal voices
@@ -7136,12 +7342,14 @@ Transform Connect the Dots from a drawing exercise into "Draw the Constellations
 **Source**: `docs/NARRATIVE_FRAMEWORK.md` Section 3.3
 
 **Current State**:
+
 - Dots appear with numbers, child connects them, line appears
 - No story
 - No context
 - Dots look like plain circles
 
 **Target State**:
+
 - Visual: Night sky with twinkling stars
 - Story: "The stars are hiding secret pictures! Connect them to reveal what they are!"
 - Action: Connecting stars draws magical lines
@@ -7178,7 +7386,7 @@ const constellations = {
     category: 'shapes',
     // ... star shape
     revealAnimation: 'twinkle-burst',
-    funFact: "Stars are actually suns from very far away!",
+    funFact: 'Stars are actually suns from very far away!',
   },
 };
 ```
@@ -7230,6 +7438,7 @@ Scene 3: Constellation Reveal
 ```
 
 **Special Effects**:
+
 - Stars twinkle before connecting
 - Connecting creates magical trail (glowing line)
 - On completion: Burst of sparkles, constellation glows
@@ -7255,10 +7464,12 @@ Scene 3: Constellation Reveal
 - [ ] TTS plays appropriate narration
 
 **Dependencies**:
+
 - TCK-20260202-029 (Confetti celebration)
 - TCK-20260202-034 (Sound effects)
 
 **Validation**:
+
 - Manual testing: Complete 3 constellations
 - Visual: Verify star twinkling and reveal animation
 - TTS: Verify fun facts are narrated
@@ -7281,12 +7492,14 @@ Transform Letter Hunt from a visual search into "Find the Letter Friends" — a 
 **Source**: `docs/NARRATIVE_FRAMEWORK.md` Section 3.4
 
 **Current State**:
+
 - Grid of letters appears, child taps target letter
 - No story
 - Static grid
 - No character
 
 **Target State**:
+
 - Story: "The Letter Friends are playing hide and seek! Can you find [Letter A]?"
 - Visual: Lively scene (garden, forest, sky) with hiding spots
 - Action: Child taps letter
@@ -7299,7 +7512,7 @@ Transform Letter Hunt from a visual search into "Find the Letter Friends" — a 
 interface HidingSpot {
   name: string;
   environment: 'garden' | 'forest' | 'sky' | 'beach';
-  props: string[];  // What's in the scene
+  props: string[]; // What's in the scene
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
@@ -7379,16 +7592,16 @@ Scene 3: Letter Joins the Group
 
 ```typescript
 interface LetterReaction {
-  finding: string;   // What Pip says
-  greeting: string;  // What the letter says
+  finding: string; // What Pip says
+  greeting: string; // What the letter says
   animation: string; // How the letter appears
 }
 
 // Examples:
 const letterReactions = {
-  finding: "You found A! Great eyes!",
+  finding: 'You found A! Great eyes!',
   greeting: "Hi! I'm A! I'm for Adventure!",
-  animation: "jump-out",
+  animation: 'jump-out',
 };
 ```
 
@@ -7412,10 +7625,12 @@ const letterReactions = {
 - [ ] Difficulty progression (more hiding spots, faster animations)
 
 **Dependencies**:
+
 - TCK-20260202-029 (Confetti celebration)
 - TCK-20260202-034 (Sound effects)
 
 **Validation**:
+
 - Manual testing: Find 5 letters in different environments
 - Visual: Verify hiding spots and reveal animation
 - TTS: Verify finding announcement and letter greeting
@@ -7426,39 +7641,40 @@ const letterReactions = {
 
 ## Ticket Summary - Complete
 
-| Ticket | Type | Priority | Title | Status | Estimate |
-|--------|------|----------|-------|--------|----------|
-| TCK-20260202-025 | AUDIT | DONE | Create worklog tickets from audit | DONE | 1 day |
-| TCK-20260202-026 | BUG | P0 | Camera failure no recovery | OPEN | 2-3 days |
-| TCK-20260202-027 | UX | P0 | Parent gate friction | OPEN | 1-2 days |
-| TCK-20260202-028 | UX | P0 | Kids accidentally exit games | OPEN | 2 days |
-| TCK-20260202-029 | FEATURE | P1 | Confetti celebration | OPEN | 1 day |
-| TCK-20260202-030 | BUG | P1 | Home page brand inconsistency | OPEN | 4-6 hours |
-| TCK-20260202-031 | COMPONENT | P1 | EmptyState component | OPEN | 1 day |
-| TCK-20260202-032 | FEATURE | P1 | Mascot in header | OPEN | 4-6 hours |
-| TCK-20260202-033 | UX | P1 | Icon navigation | OPEN | 4-6 hours |
-| TCK-20260202-034 | FEATURE | P1 | Sound effects | OPEN | 1-2 days |
-| TCK-20260202-035 | REFACTOR | P1 | Unify color tokens | OPEN | 1-2 days |
-| TCK-20260202-036 | COMPONENT | P2 | Badge component | OPEN | 4-6 hours |
-| TCK-20260202-037 | COMPONENT | P2 | ProgressBar component | OPEN | 4-6 hours |
-| TCK-20260202-038 | ACCESSIBILITY | P2 | Skip links | OPEN | 2-4 hours |
-| TCK-20260202-039 | ACCESSIBILITY | P2 | Color contrast fix | OPEN | 4-6 hours |
-| TCK-20260202-040 | FEATURE | P2 | Kid Mode dashboard | OPEN | 2 days |
-| TCK-20260202-041 | FEATURE | P2 | Illustrated progress | OPEN | 2 days |
-| TCK-20260202-042 | COMPONENT | P3 | LoadingSpinner | OPEN | 4-6 hours |
-| TCK-20260202-043 | DESIGN_SYSTEM | P3 | Animation tokens | OPEN | 1 day |
-| TCK-20260202-044 | CLEANUP | P3 | Remove unused CSS | OPEN | 2-4 hours |
-| TCK-20260202-045 | DOCUMENTATION | P3 | Design system docs | OPEN | 1-2 days |
-| TCK-20260202-046 | NARRATIVE | P2 | Narrative framework | DONE | 1 day |
-| TCK-20260202-047 | NARRATIVE | P2 | Create narrative tickets | OPEN | 2 hours |
-| TCK-20260202-048 | NARRATIVE | P2 | Alphabet Game: Rescue the Letter Friends | OPEN | 3-4 days |
-| TCK-20260202-049 | NARRATIVE | P2 | Finger Numbers: Count for the Friends | OPEN | 2-3 days |
-| TCK-20260202-050 | NARRATIVE | P2 | Connect the Dots: Draw the Constellations | OPEN | 3-4 days |
-| TCK-20260202-051 | NARRATIVE | P2 | Letter Hunt: Find the Letter Friends | OPEN | 3-4 days |
+| Ticket           | Type          | Priority | Title                                     | Status | Estimate  |
+| ---------------- | ------------- | -------- | ----------------------------------------- | ------ | --------- |
+| TCK-20260202-025 | AUDIT         | DONE     | Create worklog tickets from audit         | DONE   | 1 day     |
+| TCK-20260202-026 | BUG           | P0       | Camera failure no recovery                | OPEN   | 2-3 days  |
+| TCK-20260202-027 | UX            | P0       | Parent gate friction                      | OPEN   | 1-2 days  |
+| TCK-20260202-028 | UX            | P0       | Kids accidentally exit games              | OPEN   | 2 days    |
+| TCK-20260202-029 | FEATURE       | P1       | Confetti celebration                      | OPEN   | 1 day     |
+| TCK-20260202-030 | BUG           | P1       | Home page brand inconsistency             | OPEN   | 4-6 hours |
+| TCK-20260202-031 | COMPONENT     | P1       | EmptyState component                      | OPEN   | 1 day     |
+| TCK-20260202-032 | FEATURE       | P1       | Mascot in header                          | OPEN   | 4-6 hours |
+| TCK-20260202-033 | UX            | P1       | Icon navigation                           | OPEN   | 4-6 hours |
+| TCK-20260202-034 | FEATURE       | P1       | Sound effects                             | OPEN   | 1-2 days  |
+| TCK-20260202-035 | REFACTOR      | P1       | Unify color tokens                        | OPEN   | 1-2 days  |
+| TCK-20260202-036 | COMPONENT     | P2       | Badge component                           | OPEN   | 4-6 hours |
+| TCK-20260202-037 | COMPONENT     | P2       | ProgressBar component                     | OPEN   | 4-6 hours |
+| TCK-20260202-038 | ACCESSIBILITY | P2       | Skip links                                | OPEN   | 2-4 hours |
+| TCK-20260202-039 | ACCESSIBILITY | P2       | Color contrast fix                        | OPEN   | 4-6 hours |
+| TCK-20260202-040 | FEATURE       | P2       | Kid Mode dashboard                        | OPEN   | 2 days    |
+| TCK-20260202-041 | FEATURE       | P2       | Illustrated progress                      | OPEN   | 2 days    |
+| TCK-20260202-042 | COMPONENT     | P3       | LoadingSpinner                            | OPEN   | 4-6 hours |
+| TCK-20260202-043 | DESIGN_SYSTEM | P3       | Animation tokens                          | OPEN   | 1 day     |
+| TCK-20260202-044 | CLEANUP       | P3       | Remove unused CSS                         | OPEN   | 2-4 hours |
+| TCK-20260202-045 | DOCUMENTATION | P3       | Design system docs                        | OPEN   | 1-2 days  |
+| TCK-20260202-046 | NARRATIVE     | P2       | Narrative framework                       | DONE   | 1 day     |
+| TCK-20260202-047 | NARRATIVE     | P2       | Create narrative tickets                  | OPEN   | 2 hours   |
+| TCK-20260202-048 | NARRATIVE     | P2       | Alphabet Game: Rescue the Letter Friends  | OPEN   | 3-4 days  |
+| TCK-20260202-049 | NARRATIVE     | P2       | Finger Numbers: Count for the Friends     | OPEN   | 2-3 days  |
+| TCK-20260202-050 | NARRATIVE     | P2       | Connect the Dots: Draw the Constellations | OPEN   | 3-4 days  |
+| TCK-20260202-051 | NARRATIVE     | P2       | Letter Hunt: Find the Letter Friends      | OPEN   | 3-4 days  |
 
 **Grand Total**: 27 tickets (2 DONE, 3 P0, 6 P1, 11 P2, 5 P3)
 
 **Estimated Timeline**:
+
 - Week 1: Blockers (P0) + Quick Wins (P1)
 - Week 2-3: MVP Polish (P2) + Narrative Games
 - Week 4+: Product Upgrades (P3)
@@ -7479,11 +7695,13 @@ Create specific implementation tickets from the narrative framework for the 4 ga
 **Source**: `docs/NARRATIVE_FRAMEWORK.md` Section 3 (Game Narratives)
 
 **Current State**:
+
 - Games have functional mechanics only
 - No story context
 - Children don't understand "why" they're doing the activity
 
 **Target State**:
+
 - Each game has a narrative wrapper
 - Children understand they're on a mission
 - Activities have emotional meaning
@@ -7530,12 +7748,12 @@ Create specific implementation tickets from the narrative framework for the 4 ga
 - [ ] All tickets reference NARRATIVE_FRAMEWORK.md
 
 **Dependencies**:
+
 - TCK-20260202-046 (NARRATIVE_FRAMEWORK.md created)
 
 **Status updates**:
 
 - [2026-02-02 16:30 IST] **OPEN** — Creating narrative implementation tickets
-
 
 ---
 
@@ -7553,12 +7771,14 @@ Created comprehensive story and narrative analysis transforming app from "tool-f
 **Source**: UI/UX Audit + Story Analysis brainstorming
 
 **Current State**:
+
 - Tool-first: "Here are games, play them, track progress"
 - Pip appears inconsistently
 - No world-building or journey context
 - Progress framed as statistics, not story advancement
 
 **Proposed State**:
+
 - Story-first: "You're exploring Pip's Magical World of Learning with Pip as your companion"
 - Pip as consistent guide (not decoration)
 - Games as quests in magical worlds
@@ -7566,16 +7786,19 @@ Created comprehensive story and narrative analysis transforming app from "tool-f
 - Parents as co-adventurers (not monitors)
 
 **Key Frameworks**:
+
 1. "Pip's World of Discovery" - 6 chapters from onboarding to mastery
 2. Story Layers: Visual, Mascot, Progress, Parent
 3. Game-specific narratives: Growing Forest, Number Cave, Secret Meadow, Hidden Treasures
 4. Campaign: Pip's Learning Journey (4 phases: Awakening → Exploration → Mastery → Champion)
 
 **Implementation**:
+
 - All 26 audit tickets (TCK-20260201-025 to TCK-20260201-050) map to story implementation
 - Phased approach: Week 1 (foundation), Week 2 (games), Week 3-4 (story layers), Week 5+ (polish)
 
 **Core Story Pillars**:
+
 - Adventure Over Tool: You're on a journey
 - Companionship: Pip is your guide and friend
 - Growth Mindset: Skills are powers you unlock
@@ -7583,37 +7806,45 @@ Created comprehensive story and narrative analysis transforming app from "tool-f
 - Celebration: Wins are magical moments
 
 **Deliverable**:
+
 - File: `docs/STORY_NARRATIVE_ANALYSIS.md`
 - Size: ~35KB
 - Sections: 10 major sections
 - Story touchpoints mapped (Onboarding, First Game, Progress, Success, Struggle, Milestone, Parent View, Multi-Language)
 
 **Impact**:
+
 - Transforms functional app into engaging story-driven experience
 - No new features required—just reframing existing features as emotional journey
 - Pip becomes consistent guide vs. occasional decoration
 - Parents become co-adventurers vs. monitors
 
 **Evidence**:
+
 - Document created with comprehensive narrative framework
 - All audit tickets mapped to story implementation phases
 - Game-specific story concepts defined for each activity
 - Parent role redefined as co-adventurer
 
 **Execution log**:
+
 - [2026-02-01 11:30 UTC] **DONE** — Story analysis document created | Evidence: `docs/STORY_NARRATIVE_ANALYSIS.md` (1,128 lines)
 
 Status updates:
+
 - [2026-02-01 11:30 UTC] **DONE** — Analysis complete, ready for implementation
 
 **Dependencies**:
+
 - None (independent strategic work)
 
 **Next Actions**:
+
 - Implement tickets TCK-20260201-025 to TCK-20260201-050 using story framework
 - Use `STORY_NARRATIVE_ANALYSIS.md` as narrative guide for each ticket
 
 Risks/notes:
+
 - Requires consistent narrative execution across all tickets
 - Pip's personality must stay consistent
 - Story layers must integrate (visual + mascot + progress + parent)
@@ -7629,6 +7860,7 @@ Risks/notes:
 
 **Problem:**  
 Touch targets were too small for children to reliably tap:
+
 - Game controls: ~32-36px (too small)
 - Dashboard edit icon: 14px (unusable!)
 - Add Child button: ~28px (too small)
@@ -7666,6 +7898,7 @@ Increased all touch targets to meet 44px WCAG minimum, 52-60px for kid-friendly:
    - Text: text-sm → **text-base**
 
 **Impact:**
+
 - ✅ Children ages 4+ can now reliably tap all buttons
 - ✅ Meets WCAG 2.1 AA touch target requirements (44x44px)
 - ✅ Exceeds for kid-specific UI (52-60px recommended)
@@ -7682,6 +7915,7 @@ Increased all touch targets to meet 44px WCAG minimum, 52-60px for kid-friendly:
 | Add Child | ~28px | **44px** | +57% |
 
 **Testing Needed:**
+
 - [ ] Test on iPad with 4-year-old
 - [ ] Test on Android tablet
 - [ ] Verify no accidental taps
@@ -7753,6 +7987,7 @@ Status updates:
 
 **Problem:**  
 Camera permission flow was technical and scary for kids:
+
 - Adult-oriented tutorial with technical language
 - "Camera not available" warning sounded like an error
 - No narrative context (why does camera matter?)
@@ -7790,16 +8025,17 @@ Complete rewrite to fit "Lost Letters" narrative with kid-friendly language:
 
 **Copy Transformation Examples:**
 
-| Before | After |
-|--------|-------|
-| "Camera Permission Needed" | "Pip Needs Your Help! 🐾" |
+| Before                                            | After                                                  |
+| ------------------------------------------------- | ------------------------------------------------------ |
+| "Camera Permission Needed"                        | "Pip Needs Your Help! 🐾"                              |
 | "Advay uses your camera to detect hand movements" | "Pip can see your hands move—but only if you let him!" |
-| "No video is stored or sent" | "Pip only looks at your hand—like a magic mirror!" |
-| "Allow camera access" | "Let Pip See Me! ✨" |
-| "Skip" | "Use Touch Instead" |
-| "Camera not available - Mouse/Touch Mode Active" | "Using Finger Magic Mode! ✋" |
+| "No video is stored or sent"                      | "Pip only looks at your hand—like a magic mirror!"     |
+| "Allow camera access"                             | "Let Pip See Me! ✨"                                   |
+| "Skip"                                            | "Use Touch Instead"                                    |
+| "Camera not available - Mouse/Touch Mode Active"  | "Using Finger Magic Mode! ✋"                          |
 
 **Visual Improvements:**
+
 - Gradient background (magical feel)
 - Mascot present on every step
 - Larger touch targets (56px buttons)
@@ -7807,6 +8043,7 @@ Complete rewrite to fit "Lost Letters" narrative with kid-friendly language:
 - Visual demos for hand gestures
 
 **Impact:**
+
 - ✅ Kid-friendly language (ages 4+ understand)
 - ✅ Narrative context (Pip needs help, not "app needs camera")
 - ✅ Validates touch mode (not a "fallback" but a "choice")
@@ -7814,17 +8051,20 @@ Complete rewrite to fit "Lost Letters" narrative with kid-friendly language:
 - ✅ Maintains privacy clarity (explained simply)
 
 **Expected Results:**
+
 - Drop-off rate: 30% → 15% (estimated 50% reduction)
 - Camera approval rate: +25%
 - Touch mode usage: +40% (now presented as valid option)
 
 **Testing Needed:**
+
 - [ ] Test with 4-6 year olds
 - [ ] A/B test vs old version
 - [ ] Measure time-to-permission decision
 - [ ] Track touch mode vs hand mode usage
 
 **Related Work:**
+
 - Depends on: Touch target fixes (completed)
 - Next: Celebration system for successful letter rescue
 
@@ -7843,6 +8083,7 @@ Complete rewrite to fit "Lost Letters" narrative with kid-friendly language:
 
 **Problem:**  
 Users who forgot their passwords had no way to recover their accounts. This is a critical gap for:
+
 - Parents creating accounts for children
 - Users who don't use the app daily
 - Trust issue: "What if I forget my password?"
@@ -7853,6 +8094,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 **Implementation:**
 
 **Backend (Already Existed - Verified Working):**
+
 - ✅ POST `/api/v1/auth/forgot-password` - Request reset email
 - ✅ POST `/api/v1/auth/reset-password` - Confirm with token
 - ✅ Secure token generation (24hr expiry)
@@ -7891,6 +8133,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
    - No auth required (public routes)
 
 **Security Features:**
+
 - Tokens expire in 24 hours
 - Tokens are single-use (cleared after reset)
 - Rate limiting prevents abuse
@@ -7899,6 +8142,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 - Secure token generation (URL-safe random strings)
 
 **User Flow:**
+
 1. User clicks "Forgot password?" on login
 2. Enters email on /forgot-password page
 3. Receives email with reset link (http://localhost:5173/reset-password?token=xyz)
@@ -7909,12 +8153,14 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 **Copy/UI Details:**
 
 **Forgot Password Page:**
+
 - Header: "Forgot Your Password? 🔐"
 - Subtext: "No worries! We'll help you get back into your account."
 - Success: "Check your email! If an account exists for [email], we've sent password reset instructions."
 - Button: "Send Reset Link"
 
 **Reset Password Page:**
+
 - Header: "Create New Password 🔑"
 - Password strength indicator (color-coded bar)
 - Requirements: "Must be at least 8 characters with uppercase, lowercase, and number"
@@ -7922,6 +8168,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 - Error: "Invalid or expired token. Please request a new reset link."
 
 **Testing Checklist:**
+
 - [ ] Request reset for valid email
 - [ ] Request reset for invalid email (should still show success message)
 - [ ] Click reset link from email (or simulate with token)
@@ -7934,6 +8181,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 - [ ] Test expired token (wait 24hrs or manipulate DB)
 
 **Files Created/Modified:**
+
 - ✅ Created: `src/frontend/src/pages/ForgotPassword.tsx`
 - ✅ Created: `src/frontend/src/pages/ResetPassword.tsx`
 - ✅ Modified: `src/frontend/src/App.tsx` (added routes)
@@ -7941,6 +8189,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 - ✅ Backend: Already existed and tested working
 
 **Impact:**
+
 - ✅ Users can now recover forgotten passwords
 - ✅ Reduces account abandonment
 - ✅ Increases parent trust (safety net)
@@ -7948,6 +8197,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 - ✅ ~2-3 day implementation (completed in 1 hour!)
 
 **Next Steps:**
+
 - [ ] Test email sending in production (configure SendGrid/AWS SES)
 - [ ] Add email template HTML styling
 - [ ] Monitor reset success rates
@@ -7997,13 +8247,15 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 
 ### Changes to Dashboard.tsx:
 
-**Before:**  
+**Before:**
+
 - StatsBar: 25 lines of inline JSX
-- EmptyState: 25 lines of inline JSX  
+- EmptyState: 25 lines of inline JSX
 - TipsSection: 15 lines of inline JSX
 - **Total: 65 lines of presentational JSX mixed with logic**
 
-**After:**  
+**After:**
+
 - StatsBar: `<StatsBar stats={stats} />` (1 line)
 - EmptyState: `<EmptyState onAddChild={() => setShowAddModal(true)} />` (1 line)
 - TipsSection: `<TipsSection />` (1 line)
@@ -8016,7 +8268,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 ✅ **Same animations** - Motion components preserved  
 ✅ **Same TypeScript types** - Interfaces maintained  
 ✅ **Same imports** - UIIcon, motion, etc. all present  
-✅ **Same accessibility** - aria-labels, roles maintained  
+✅ **Same accessibility** - aria-labels, roles maintained
 
 ### Impact:
 
@@ -8029,15 +8281,18 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 ### Next Phases (Future Work):
 
 **Phase 2: Modal Extractions**
+
 - AddChildModal (complex form state)
 - EditProfileModal (complex form state)
 
 **Phase 3: Complex Sections**
+
 - ChildSelector (interaction patterns)
 - LearningProgressCard (data transformation)
 - MultiLanguageProgressCard (data display)
 
 **Phase 4: Final Polish**
+
 - DashboardHeader (simple wrapper)
 - Extract shared types to `types/dashboard.ts`
 
@@ -8105,7 +8360,8 @@ Extracted 2 complex modal components with form state and validation:
 **Add Child Modal - Before:**  
 86 lines of inline JSX with form inputs, validation, buttons
 
-**Add Child Modal - After:**  
+**Add Child Modal - After:**
+
 ```tsx
 <AddChildModal
   isOpen={showAddModal}
@@ -8124,7 +8380,8 @@ Extracted 2 complex modal components with form state and validation:
 **Edit Profile Modal - Before:**  
 71 lines of inline JSX with form inputs, validation, buttons
 
-**Edit Profile Modal - After:**  
+**Edit Profile Modal - After:**
+
 ```tsx
 <EditProfileModal
   isOpen={showEditModal}
@@ -8145,6 +8402,7 @@ Extracted 2 complex modal components with form state and validation:
 ### Phase 1 + Phase 2 Combined Results:
 
 **Dashboard.tsx line count:**
+
 - Original: 855 lines
 - After Phase 1: 846 lines (-9 lines)
 - After Phase 2: 750 lines (-105 lines total)
@@ -8152,6 +8410,7 @@ Extracted 2 complex modal components with form state and validation:
 **Total reduction: 105 lines (-12.3%)**
 
 **Components extracted:** 5 total
+
 1. EmptyState (Phase 1)
 2. TipsSection (Phase 1)
 3. StatsBar (Phase 1)
@@ -8167,7 +8426,7 @@ Extracted 2 complex modal components with form state and validation:
 ✅ **Same animations** - Motion.div with initial/animate preserved  
 ✅ **Same accessibility** - Labels properly associated with inputs  
 ✅ **Same error handling** - Form validation and disabled states preserved  
-✅ **Type safety maintained** - TypeScript interfaces for all props  
+✅ **Type safety maintained** - TypeScript interfaces for all props
 
 ### Impact:
 
@@ -8180,11 +8439,13 @@ Extracted 2 complex modal components with form state and validation:
 ### Code Quality Improvements:
 
 **Before (in Dashboard.tsx):**
+
 - Mixed concerns: data fetching, state management, AND form markup
 - 855 lines made it hard to navigate
 - Modals buried in main component
 
 **After:**
+
 - Dashboard.tsx focuses on: data fetching, state management, composition
 - Modals in separate files with clear responsibilities
 - Each component < 100 lines and focused
@@ -8203,16 +8464,19 @@ Extracted 2 complex modal components with form state and validation:
 ### Files Created/Modified:
 
 **Created:**
+
 - ✅ `src/frontend/src/components/dashboard/AddChildModal.tsx`
 - ✅ `src/frontend/src/components/dashboard/EditProfileModal.tsx`
 
 **Modified:**
+
 - ✅ `src/frontend/src/components/dashboard/index.ts` (added exports)
 - ✅ `src/frontend/src/pages/Dashboard.tsx` (imports + 2 component replacements)
 
 **Status:** Phase 2 complete, ready for testing ✅
 
 **Next Phases (Future):**
+
 - Phase 3: Complex sections (ChildSelector, LearningProgressCard, MultiLanguageProgressCard)
 - Phase 4: Final cleanup (DashboardHeader, type extraction)
 
@@ -8233,6 +8497,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 ### 🔴 CRITICAL (Must Fix Immediately)
 
 **1. Game Navigation Broken (Alphabet Game)**
+
 - **Problem:** Clicking "Play Game" redirects to Dashboard if no profile selected
 - **Impact:** Kids confused, can't start game, poor UX
 - **File:** `src/frontend/src/pages/Games.tsx:78-84`
@@ -8240,6 +8505,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 - **Effort:** 1-2 days
 
 **2. Connect The Dots - No Camera Gameplay**
+
 - **Problem:** Hand tracking disabled by default, kids don't know to enable it
 - **Impact:** Main feature (hand tracking) not working
 - **File:** `src/frontend/src/pages/ConnectTheDots.tsx:54`
@@ -8249,6 +8515,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 ### 🟡 HIGH (Fix This Week)
 
 **3. Game UI Inconsistency & Full Screen**
+
 - **Problem:** Letter Hunt polished, others inconsistent; no full screen mode
 - **Impact:** Unprofessional, inconsistent experience
 - **Files:** All game files
@@ -8256,6 +8523,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 - **Effort:** 2-3 days
 
 **4. Button Polish Needed**
+
 - **Problem:** Inconsistent button sizes, colors, placement across games
 - **Impact:** Visual inconsistency
 - **Solution:** Standardize 56px buttons, consistent styling
@@ -8264,6 +8532,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 ### 🟡 MEDIUM (Fix Next Week)
 
 **5. Wellness Timer Visual Design**
+
 - **Problem:** Purple gradient doesn't match app theme
 - **Impact:** Looks out of place
 - **File:** `src/frontend/src/components/WellnessTimer.tsx`
@@ -8271,6 +8540,7 @@ During user testing, 5 critical UX issues were identified that significantly imp
 - **Effort:** 2-3 hours
 
 **6. Dashboard Navigation Friction**
+
 - **Problem:** Too many clicks to start playing
 - **Impact:** Kids lose interest before reaching game
 - **Solution:** Quick Play option, resume last game
@@ -8283,6 +8553,7 @@ Full analysis in: `docs/URGENT_UX_ISSUES_TICKETS.md`
 ### Immediate Action Required
 
 **Start with:**
+
 1. Fix Connect The Dots hand tracking (30 min fix)
 2. Fix Game Navigation (1-2 days)
 3. Standardize Full Screen mode (2-3 days)
@@ -8290,7 +8561,6 @@ Full analysis in: `docs/URGENT_UX_ISSUES_TICKETS.md`
 These 3 issues are blocking a good user experience for kids.
 
 ---
-
 
 ---
 
@@ -8315,11 +8585,13 @@ Fixed 4 critical UX issues that were blocking good user experience for kids:
 **Time:** 5 minutes
 
 **Before:**
+
 ```typescript
 const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(false);
 ```
 
 **After:**
+
 ```typescript
 const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
 ```
@@ -8335,6 +8607,7 @@ const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
 **Time:** 45 minutes
 
 **Changes:**
+
 1. Added `useState` import for managing modal state
 2. Added `AnimatePresence` for smooth modal animations
 3. Extended `useProfileStore` to include `profiles` and `setCurrentProfile`
@@ -8348,6 +8621,7 @@ const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
    - Click-outside-to-close
 
 **User Flow - Before:**
+
 1. Click "Play Game" on Alphabet Tracing
 2. Redirected to Dashboard (confusing!)
 3. Must select profile there
@@ -8355,6 +8629,7 @@ const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
 5. Click game again
 
 **User Flow - After:**
+
 1. Click "Play Game" on Alphabet Tracing
 2. Modal appears: "Who's Playing?"
 3. Select profile (or add new)
@@ -8371,16 +8646,19 @@ const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
 **Time:** 5 minutes
 
 **Before:**
+
 ```tsx
 <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5...">
 ```
 
 **After:**
+
 ```tsx
 <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5...">
 ```
 
 Also changed toggle button:
+
 - Before: `bg-indigo-600`
 - After: `bg-orange-500`
 
@@ -8395,6 +8673,7 @@ Also changed toggle button:
 **Time:** 2 hours
 
 **Components Created:**
+
 1. `EmptyState.tsx` - No children added screen
 2. `TipsSection.tsx` - Learning tips display
 3. `StatsBar.tsx` - Compact stats row
@@ -8402,6 +8681,7 @@ Also changed toggle button:
 5. `EditProfileModal.tsx` - Edit profile form
 
 **Results:**
+
 - Dashboard.tsx: 855 → 750 lines (-105 lines, -12.3%)
 - Each component focused and testable
 - Zero functional regression
@@ -8411,12 +8691,14 @@ Also changed toggle button:
 ### ⏳ REMAINING ISSUES (Not Started)
 
 **Issue #5: Full Screen Mode Standardization**
+
 - Finger Number Show has proper full-screen
 - Other games have headers/footers wasting space
 - **Effort:** 2-3 days
 - **Priority:** High
 
 **Issue #6: Button Styling Consistency**
+
 - Different sizes, colors across games
 - Need 56px minimum, consistent styling
 - **Effort:** 1 day
@@ -8427,11 +8709,13 @@ Also changed toggle button:
 ## Files Modified
 
 ### Critical Fixes:
+
 1. ✅ `src/frontend/src/pages/ConnectTheDots.tsx` (line 54)
 2. ✅ `src/frontend/src/pages/Games.tsx` (profile picker modal)
 3. ✅ `src/frontend/src/components/WellnessTimer.tsx` (colors)
 
 ### Refactoring:
+
 4. ✅ `src/frontend/src/pages/Dashboard.tsx` (component integration)
 5. ✅ `src/frontend/src/components/dashboard/EmptyState.tsx` (new)
 6. ✅ `src/frontend/src/components/dashboard/TipsSection.tsx` (new)
@@ -8445,12 +8729,14 @@ Also changed toggle button:
 ## Testing Required
 
 ### For Connect The Dots:
+
 - [ ] Hand tracking starts automatically
 - [ ] Camera view visible
 - [ ] Hand cursor appears
 - [ ] Can connect dots with pinch
 
 ### For Game Navigation:
+
 - [ ] Click "Play" with no profile → shows picker modal
 - [ ] Can select existing profile
 - [ ] Can add new profile
@@ -8458,11 +8744,13 @@ Also changed toggle button:
 - [ ] Cancel button works
 
 ### For Wellness Timer:
+
 - [ ] Shows orange/amber gradient (not purple)
 - [ ] Toggle button matches theme
 - [ ] All timer functions work
 
 ### For Dashboard Refactor:
+
 - [ ] EmptyState shows when no children
 - [ ] StatsBar displays correctly
 - [ ] TipsSection visible
@@ -8475,18 +8763,21 @@ Also changed toggle button:
 ## Impact Summary
 
 **Before Fixes:**
+
 - ❌ Connect The Dots: No hand tracking
 - ❌ Game Navigation: Confusing dashboard redirect
 - ❌ Wellness Timer: Purple (off-theme)
 - ❌ Dashboard: 855 lines, unmaintainable
 
 **After Fixes:**
+
 - ✅ Connect The Dots: Hand tracking enabled by default
 - ✅ Game Navigation: Inline profile picker, no redirects
 - ✅ Wellness Timer: Orange gradient matches app
 - ✅ Dashboard: 750 lines, component-based architecture
 
 **User Experience:**
+
 - Kids can start games immediately
 - No confusing redirects
 - Consistent visual design
@@ -8502,8 +8793,8 @@ Also changed toggle button:
 **Status:** Ready for testing ✅
 
 ---
-EOF
 
+EOF
 
 ---
 
@@ -8533,9 +8824,11 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ### Standardization Components Created
 
 #### 1. GameContainer.tsx
+
 **Location:** `src/frontend/src/components/GameContainer.tsx`
 
 **Features:**
+
 - Fixed 56px header with gradient background
 - Home button (left)
 - Score display with star icon (center-right)
@@ -8545,9 +8838,10 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 - Dark background for focus
 
 **Usage:**
+
 ```tsx
 <GameContainer
-  title="Alphabet Tracing"
+  title='Alphabet Tracing'
   score={score}
   level={level}
   onHome={() => navigate('/games')}
@@ -8559,9 +8853,11 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ```
 
 #### 2. GameControls.tsx
+
 **Location:** `src/frontend/src/components/GameControls.tsx`
 
 **Features:**
+
 - 56px minimum button height (kid-friendly)
 - Consistent variants: primary, secondary, danger, success
 - Active state highlighting (orange)
@@ -8571,6 +8867,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 - Shadow effects for depth
 
 **Usage:**
+
 ```tsx
 <GameControls
   controls={[
@@ -8589,7 +8886,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
       variant: 'secondary',
     },
   ]}
-  position="bottom-right"
+  position='bottom-right'
 />
 ```
 
@@ -8629,6 +8926,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ### Before vs After
 
 #### Before (Inconsistent):
+
 - ❌ Different header heights across games
 - ❌ Buttons ranging from 32px to 48px
 - ❌ Inconsistent colors and styling
@@ -8636,6 +8934,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 - ❌ Controls in different positions
 
 #### After (Standardized):
+
 - ✅ All games: 56px header
 - ✅ All buttons: 56px minimum
 - ✅ Consistent orange/white/red/green colors
@@ -8647,10 +8946,12 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ### Files Modified
 
 **New Components:**
+
 1. ✅ `src/frontend/src/components/GameContainer.tsx`
 2. ✅ `src/frontend/src/components/GameControls.tsx`
 
 **Games Updated:**
+
 1. ✅ `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
 2. ✅ `src/frontend/src/pages/ConnectTheDots.tsx`
 3. ✅ `src/frontend/src/pages/LetterHunt.tsx`
@@ -8676,18 +8977,21 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ### User Experience Impact
 
 **For Kids:**
+
 - Consistent interface across all games
 - Larger, easier-to-tap buttons (56px)
 - No confusion about where controls are
 - Full-screen focus on the game
 
 **For Parents:**
+
 - Professional, polished appearance
 - Consistent navigation (Home button always in same place)
 - Clear score display
 - Easy settings access
 
 **For Developers:**
+
 - Reusable components
 - Consistent patterns
 - Easier maintenance
@@ -8731,6 +9035,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 ### Next Steps
 
 All critical UX issues have been resolved! The app now has:
+
 - ✅ Working hand tracking in all games
 - ✅ Intuitive navigation (no confusing redirects)
 - ✅ Consistent visual design
@@ -9034,6 +9339,88 @@ Next actions:
 
 - UX audit remediation completed successfully
 - Progress page now meets accessibility standards for contrast and visibility
+
+---
+
+## TCK-20260202-049 :: AlphabetGamePage.tsx Single-File Audit
+
+Type: AUDIT
+Owner: AI Assistant (GitHub Copilot)
+Created: 2026-02-02 12:00 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+**Description**:
+Comprehensive single-file audit of AlphabetGamePage.tsx (1664 lines), the most complex component in the codebase. Focus on code quality, performance, accessibility, and maintainability issues.
+
+**User Request**:
+"what next?" after completing Progress page UX remediation and code quality verification.
+
+**Scope Contract**:
+
+- In-scope:
+  - Complete single-file audit using prompts/audit/audit-v1.5.1.md
+  - Identify HIGH/MEDIUM/LOW priority issues
+  - Document code patterns, architecture decisions
+  - Assess performance implications (1664 lines is complex)
+  - Check accessibility compliance
+  - Evaluate test coverage and testing approach
+  - Create remediation plan with prioritized fixes
+- Out-of-scope:
+  - Implementing fixes (audit only)
+  - Changing game mechanics or features
+  - Performance optimization unless critical
+- Behavior change allowed: NO (audit only)
+
+**Targets**:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` (audit target)
+  - `docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md` (audit artifact)
+- Branch/PR: main
+
+**Inputs**:
+
+- Prompt used: `prompts/audit/audit-v1.5.1.md`
+- File stats: 1664 lines, most complex component
+- Dependencies: useHandTracking, progressStore, settingsStore, TTS, MediaPipe
+- Context: Core game functionality, camera integration, progress tracking
+
+**Plan**:
+
+1. **Discovery Phase**: Read file, understand architecture, identify key patterns
+2. **Code Analysis**: Review imports, state management, effects, rendering logic
+3. **Performance Assessment**: Evaluate re-renders, memory usage, canvas operations
+4. **Accessibility Audit**: Check ARIA labels, keyboard navigation, screen reader support
+5. **Security Review**: Camera permissions, data handling, user input validation
+6. **Testing Coverage**: Assess unit tests, integration tests, edge cases
+7. **Architecture Evaluation**: Component structure, separation of concerns, maintainability
+8. **Findings Documentation**: Categorize issues HIGH/MEDIUM/LOW with evidence
+9. **Remediation Planning**: Create actionable tickets for identified issues
+
+**Execution Log**:
+
+- [2026-02-02 12:00 IST] Ticket created | Evidence: AlphabetGamePage.tsx identified as next audit target (most complex, 1664 lines)
+- [2026-02-02 12:05 IST] **IN_PROGRESS** — Starting audit process
+
+**Status Updates**:
+
+- [2026-02-02 12:00 IST] **IN_PROGRESS** — Audit initiated, following prompts/audit/audit-v1.5.1.md workflow
+
+**Next Actions**:
+
+1. Execute single-file audit using established prompt
+2. Document findings in audit artifact
+3. Create remediation tickets for HIGH priority issues
+4. Update worklog with completion status
+
+**Risks/Notes**:
+
+- File is 1664 lines - comprehensive audit may take significant time
+- Core game component - issues could impact user experience
+- Camera and MediaPipe integration adds complexity
+- Performance critical for smooth hand tracking experience
 
 ---
 

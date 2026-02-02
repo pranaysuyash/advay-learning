@@ -35,6 +35,20 @@
 
 ---
 
+### Prompt & Persona Usage Table
+
+Every ticket or artifact must include a prompt/persona usage table (reference `docs/PROCESS_PROMPTS.md` for canonical combos). Capture the prompts used (single, chained, or sequential), the persona(s)/lens, the audit axis, and the evidence link(s) so downstream agents can reproduce the workflow.
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `prompts/...` | e.g., Child learning expert | UX | Linked to `docs/audit/...` |
+
+Weekly `./scripts/audit_review.sh` runs must also log the prompts/personas that powered the audit pass.
+
+Plan docs (e.g., `docs/PLAN_DOC.md`) must include the same table near the top so reviewers can see which prompts shaped the strategy.
+
+---
+
 ### TCK-20260201-001 :: Fix Login Form Validation Flapping
 
 Type: BUG
@@ -44,19 +58,23 @@ Status: **DONE**
 Priority: P0
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-02-01] **IN_PROGRESS** — Started implementation: Add client-side submit-driven validation, accessible inline error reporting, unit and e2e tests. Prompt used: `prompts/remediation/implementation-v1.6.1.md`.
 
 Scope contract:
+
 - In-scope: Fix frontend login form to not show transient "Field required" messages when inputs are valid; ensure validation only triggers on explicit submit; add accessible inline error reporting (aria-live); add unit/E2E test reproducing the issue (login flow with provided test credentials).
 - Out-of-scope: Backend auth logic changes.
 
 Targets:
+
 - Files: `src/frontend/src/pages/Login.tsx`, `src/frontend/src/store/authStore.ts`, `src/frontend/src/components/ui/Toast.tsx`, tests in `src/frontend/src/__tests__`.
 
 Acceptance Criteria:
+
 - Automated E2E test logs in with provided credentials `pranay.suyash@gmail.com`/`pranaysuyash` without intermittent "Field required" messages.
 - Inline errors are announced via `aria-live="polite"` and visible when validation fails.
 - No regressions in login tests.
@@ -72,13 +90,16 @@ Status: **DONE**
 Priority: P0
 
 Scope contract:
+
 - In-scope: Implement a guest/demo mode allowing unauthenticated users to play a limited demo (local-only profile), add CTA on Home -> "Try Demo" to launch guest session, update `ProtectedRoute` or add demo guard for `/game` and `Games` flow; add Playwright test coverage for demo flow.
 - Out-of-scope: Persisting guest data to server.
 
 Targets:
+
 - Files: `src/frontend/src/pages/Home.tsx`, `src/frontend/src/pages/Games.tsx`, `src/frontend/src/store/profileStore.ts`, `src/frontend/src/components/ui/ProtectedRoute.tsx`.
 
 Acceptance Criteria:
+
 - Unauthenticated user can start a demo session from Home with default demo profile and play `Finger Number Show` and a demo `Alphabet Tracing` session.
 - Demo session does not require server-side account creation.
 - Tests verify access and that demo state is cleared on refresh.
@@ -95,13 +116,16 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Improve `OnboardingFlow` camera error UI — add clear troubleshooting steps, "Test camera again" button, and a "Continue without camera" option that lets users proceed to a limited experience. Add telemetry events for camera permission failures for diagnostics.
 - Out-of-scope: Implementing browser/device-level instruction videos.
 
 Targets:
+
 - Files: `src/frontend/src/components/OnboardingFlow.tsx`, `src/frontend/src/hooks/useCameraUtils.ts` (create helper for tests), tests.
 
 Acceptance Criteria:
+
 - When camera access is denied, the onboarding shows specific tips and a functioning "Test again" CTA.
 - Users can choose to continue without camera and reach Games/Demo flows.
 - Playwright test covers camera denied + recover flows.
@@ -118,13 +142,16 @@ Status: **DONE**
 Priority: P0
 
 Scope contract:
+
 - In-scope: Ensure that selecting a child profile in `Dashboard` sets `profileStore.currentProfile` and that `Games.tsx` reads `currentProfile` to enable language-specific CTAs; add tests and a small banner in `Games` showing selected child.
 - Out-of-scope: Changes to server-side profiles API.
 
 Targets:
+
 - Files: `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/pages/Games.tsx`, `src/frontend/src/store/profileStore.ts`.
 
 Acceptance Criteria:
+
 - Selecting a child in dashboard updates `currentProfile` globally.
 - Games page shows selected profile and `Play in <Language>` button becomes active.
 - Unit tests and Playwright coverage validate the flow.
@@ -141,18 +168,22 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Reduce the number of simultaneous overlays in `AlphabetGame` to at most 3 states (Instruction, Canvas, Minimal Controls). Implement a consistent overlay component or use existing `TutorialOverlay` for instructions and success UI.
 - Out-of-scope: Redesign of core mechanics.
 
 Targets:
+
 - Files: `src/frontend/src/pages/AlphabetGame.tsx`, `src/frontend/src/components/TutorialOverlay.tsx`, `src/frontend/src/utils/drawing.ts`.
 
 Acceptance Criteria:
+
 - Gameplay shows no more than 3 overlays at once; instruction overlay is dismissible; success uses mascot feedback.
 - Usability test (manual or Playwright) shows improved user focus on the canvas (no overlay overlap) and no regressions in drawing detection.
 - Support for Lumi companion character to provide simplified guidance during gameplay.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -160,6 +191,7 @@ Execution log:
 - 2026-02-02 12:24 — Added semantic `fieldset` + `legend` wrapper for in-game controls (a11y + cognitive grouping) | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 12:30 **DONE** — Overlay stack is simplified and non-overlapping in `AlphabetGame` UI; controls are grouped semantically.
@@ -180,19 +212,23 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Add centralized tokens (`src/frontend/src/styles/tokens/*`), create a `Button` component with `primary/secondary/ghost` variants, migrate core pages (`Home`, `Games`, `Dashboard`) to use the new Button within 1 week (incremental rollout), update `StyleTest` to document tokens.
 - Out-of-scope: Full visual redesign.
 
 Targets:
+
 - Files: Add `src/frontend/src/styles/tokens/colors.ts`, `spacing.ts`, `type-scale.ts`; add `src/frontend/src/components/ui/Button.tsx`; migrate uses in `Home.tsx`, `Games.tsx`, `Dashboard.tsx`.
 
 Acceptance Criteria:
+
 - Buttons across migrated pages use token-based classes and have consistent sizing/spacing.
 - No visual regressions in existing screenshots (update screenshot test baseline).
 - Support for Lumi companion character button interactions.
 - Integration with existing PIP mascot system for consistent UI patterns.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -201,6 +237,7 @@ Execution log:
 - 2026-02-02 12:28 — UI token enforcement check validated | Evidence: `scripts/check_ui_design_tokens.sh`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 12:30 **DONE** — Tokens + canonical button/link patterns are in place for core pages; enforcement script added and passing.
@@ -221,18 +258,22 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Replace duplicate `components/Icon.tsx` and `components/ui/Icon.tsx` with a single `UIIcon` API, update imports across the repo, and add unit tests for icon rendering.
 - Out-of-scope: Icon asset redesign.
 
 Targets:
+
 - Files: `src/frontend/src/components/Icon.tsx`, `src/frontend/src/components/ui/Icon.tsx`, update imports in `Games.tsx`, `Dashboard.tsx`, `AlphabetGame.tsx`.
 
 Acceptance Criteria:
+
 - All icon uses reference a single `UIIcon` component; snapshots updated and no missing icon regressions.
 - Support for Lumi companion character icon interactions.
 - Integration with existing PIP mascot system icon patterns.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -240,6 +281,7 @@ Execution log:
 - 2026-02-02 12:27 — Migrated app surfaces to use `UIIcon` (including asset icons) for consistency | Evidence: `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/components/LetterJourney.tsx`, `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 12:30 **DONE** — App icon usage is unified under `UIIcon` API (named UI icons + asset icons via `src`).
@@ -260,18 +302,22 @@ Status: **DONE**
 Priority: P0
 
 Scope contract:
+
 - In-scope: Run an accessibility audit (axe or manual checks) and fix the top-priority issues: missing ARIA labels, focus traps, skip links, reduced-motion support for Framer Motion animations, and `aria-live` for status messages.
 - Out-of-scope: Translate content (i18n) or full a11y retrofitting of every component.
 
 Targets:
+
 - Files: `src/frontend/src/components/*` and core pages (`Home.tsx`, `Games.tsx`, `AlphabetGame.tsx`, `Dashboard.tsx`).
 
 Acceptance Criteria:
+
 - Automated a11y scan passes with zero critical violations; keyboard-only navigation allows full flow; reduced-motion preference disables non-essential animations.
 - Support for Lumi companion character accessibility features.
 - Integration with existing PIP mascot system for consistent accessibility patterns.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -280,6 +326,7 @@ Execution log:
 - 2026-02-02 12:24 — Added semantic grouping for in-game controls (`fieldset` + `legend`) and ensured accessibility tests cover the flow | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`, `src/frontend/src/utils/__tests__/semanticHtmlAccess.test.tsx`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 12:30 **DONE** — Key a11y guardrails landed (skip link, focus management, reduced motion, semantic controls); automated semantic checks pass.
@@ -300,18 +347,22 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Extract game logic (hand tracking, drawing loop, pinch detection) into hooks (e.g., `useAlphabetGame`, `useDrawingCanvas`) and reduce `AlphabetGame.tsx` file size; add unit tests for hooks.
 - Out-of-scope: Behavior changes beyond refactor; UI remains functionally identical.
 
 Targets:
+
 - Files: `src/frontend/src/pages/AlphabetGame.tsx` → split into `src/frontend/src/hooks/useAlphabetGame.ts`, `src/frontend/src/components/AlphabetGameView.tsx`.
 
 Acceptance Criteria:
+
 - Code coverage for new hooks has unit tests; existing integration tests for the game still pass.
 - Support for Lumi companion character hook integration.
 - Integration with existing PIP mascot system for consistent game logic patterns.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -319,6 +370,7 @@ Execution log:
 - 2026-02-02 12:24 — Added semantic controls grouping and stabilized test expectations for “check my tracing” UX | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`, `src/frontend/src/utils/__tests__/semanticHtmlAccess.test.tsx`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 12:30 **IN_PROGRESS** — File split into subpage is complete and verified; hook extraction into `useAlphabetGame` + `AlphabetGameView` remains to fully satisfy this ticket’s intended refactor.
@@ -339,13 +391,16 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Add Playwright tests to capture canonical screenshots for desktop/tablet/mobile for core pages and key states (onboarding camera, dashboard, games, finger number in-play) and add a CI job to generate/compare snapshots. Reuse `capture-screenshots.js` as reference.
 - Out-of-scope: Full e2e test coverage for every page.
 
 Targets:
+
 - Files: `src/frontend/e2e/` add `visual.suite.spec.ts`, update `playwright.config.ts`, add `scripts/capture-screens.sh`.
 
 Acceptance Criteria:
+
 - Suite runs in CI, produces `screenshots/` artifacts, and a baseline comparison step flags visual regressions.
 - Support for Lumi companion character screenshot testing.
 - Integration with existing PIP mascot system screenshot verification.
@@ -361,13 +416,16 @@ Status: **DONE**
 Priority: P0
 
 Scope contract:
+
 - In-scope: Add a `storyStore` to track quests, unlocked islands, badges and current quest state (Zustand persisted). Design minimal data model and unit tests.
 - Out-of-scope: Full narrative content localization and asset creation.
 
 Targets:
+
 - Files: `src/frontend/src/store/storyStore.ts`, tests in `src/frontend/src/store/__tests__`.
 
 Acceptance Criteria:
+
 - A simple persistent store exists with `currentQuest`, `unlockedIslands[]`, `badges[]`, and `startQuest()`/`completeQuest()` actions.
 - Support for companion character interactions (Lumi) for multiplayer and special lesson scenarios.
 - Integration with existing PIP mascot system for main guidance.
@@ -383,13 +441,16 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Add a small `Map` component that renders a static SVG placeholder on the `Dashboard` and links to `storyStore` state. Provide a `Start First Quest` CTA to unlock the first island for the prototype.
 - Out-of-scope: Full map artwork or drag/zoom behavior.
 
 Targets:
+
 - Files: `src/frontend/src/components/Map.tsx`, update `Dashboard.tsx` to include the map.
 
 Acceptance Criteria:
+
 - Map appears on Dashboard and the CTA toggles `storyStore` state; an integrated Playwright visual test captures the map before/after unlocking.
 - Support for Lumi companion character to guide through map exploration.
 - Integration with existing PIP mascot system for main map guidance.
@@ -405,17 +466,19 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Add small `StoryModal` component that uses existing `Mascot` (or pip image) to celebrate quest completion (title, badge, small confetti animation). Hook into `storyStore.completeQuest()` for prototype demonstration.
 - Out-of-scope: Full sound asset recording.
 
 Targets:
+
 - Files: `src/frontend/src/components/StoryModal.tsx`, `src/frontend/src/components/Mascot.tsx` (small export/update if needed).
 
 Acceptance Criteria:
+
 - Clicking `Start First Quest` then `Complete` triggers the modal and updates `storyStore` badges and unlocked islands.
 - Support for Lumi companion character to join celebrations for special achievements.
 - Integration with existing PIP mascot feedback system.
-
 
 ### TCK-20260202-014 :: Home Landing Page — P0 Improvements (Onboarding gating + Demo CTA + Mascot)
 
@@ -426,6 +489,7 @@ Status: **DONE**
 Priority: P0
 
 Scope contract:
+
 - In-scope: Implement immediate landing-page improvements:
   - Make onboarding gating robust (store hydration guard + optional/skip behavior).
   - Add a primary "Try Demo" CTA (no auth / no-camera demo) + secondary "Create Parent Account" CTA.
@@ -433,24 +497,27 @@ Scope contract:
 - Out-of-scope: Full branding rewrite or new mascot artwork.
 
 Targets:
+
 - Files: `src/frontend/src/pages/Home.tsx`, `src/frontend/src/components/Mascot.tsx`, `src/frontend/src/components/OnboardingFlow.tsx`, tests in `src/frontend/src/pages/__tests__`.
 
 Acceptance Criteria:
+
 - Onboarding only shows when required or user chooses it; store hydration prevents flash-on-first-render.
 - "Try Demo" launches a local demo session without registration; "Create Parent Account" routes to `/register`.
 - Mascot is non-overlapping on mobile (hidden on small screens) and anchored to page container.
 - Add unit tests and a small Playwright scenario verifying demo flow and onboarding skip.
 
 Plan & prompts:
+
 - Implementation prompt: `prompts/remediation/home-landing-implementation-v1.0.md` (created)
 - Test plan prompt: `prompts/qa/test-plan-v1.0.md`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created and initial prompt & test skeleton files added by GitHub Copilot (agent). Work items: audit artifact, prompt, test skeleton, and implementation notes created.
-- [2026-02-02] **NEXT** — Implementation planning prompt available at `prompts/remediation/home-landing-implementation-v1.0.md`. 
-
+- [2026-02-02] **NEXT** — Implementation planning prompt available at `prompts/remediation/home-landing-implementation-v1.0.md`.
 
 ### TCK-20260202-015 :: Home Landing — Tests & Docs
 
@@ -461,18 +528,22 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Add unit and integration tests for Home changes, update README/docs with the new demo flow and onboarding behavior, add Playwright visual test to ensure mascot isn't overlapping CTAs on mobile.
 - Out-of-scope: Full e2e coverage of all onboarding steps.
 
 Targets:
+
 - Files: `src/frontend/src/pages/__tests__/Home.*`, `docs/IMPLEMENTATION_HOME.md`, `src/frontend/e2e/home-landing.spec.ts`.
 
 Acceptance Criteria:
+
 - Unit tests asserting CTA presence, onboarding gating behavior, mascot visibility on small screens.
 - Playwright screenshot asserts mascot not overlapping CTA on mobile viewport.
 - Documentation updated with a "Demo flow" section and copying privacy hints where applicable.
 
 Plan & prompts:
+
 - Test plan prompt: `prompts/qa/test-plan-v1.0.md`
 - Documentation prompt: `prompts/workflow/completion-report-v1.0.md`
 
@@ -487,13 +558,16 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Draft short in-game copy lines for Alphabet Lighthouse (intro, success, low-confidence guidance) and wire into `AlphabetGame` placeholders.
 - Out-of-scope: Localization or voice recordings.
 
 Targets:
+
 - Files: `docs/story/ALPHABET_LIGHTHOUSE.md`, placeholder strings in `AlphabetGame.tsx`.
 
 Acceptance Criteria:
+
 - Story copy present in docs and referenced in code as constants; easy to switch to localized copy later.
 - Support for Lumi companion character to provide additional guidance during lessons.
 - Integration with existing PIP mascot system for main feedback.
@@ -509,13 +583,16 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Create short lines and assets list for Finger Number Show festival theme; implement one UI copy change in `FingerNumberShow.tsx`.
 - Out-of-scope: Voice assets.
 
 Targets:
+
 - Files: `docs/story/NUMBER_FESTIVAL.md`, `FingerNumberShow.tsx` copy constant.
 
 Acceptance Criteria:
+
 - Content doc present and one in-app copy updated for demonstration.
 - Support for Lumi companion character to join festival celebrations.
 - Integration with existing PIP mascot system for main feedback.
@@ -531,13 +608,16 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Add story briefs for Connect the Dots (Treasure Trails) and Letter Hunt (Forest Search) and add placeholder UI hooks to show reward badges after a session.
 - Out-of-scope: Full asset design.
 
 Targets:
+
 - Files: `docs/story/TREASURE_TRAILS.md`, `docs/story/FOREST_SEARCH.md`.
 
 Acceptance Criteria:
+
 - Briefs added and hooks available in game components for demo.
 - Support for Lumi companion character to guide through treasure trails.
 - Integration with existing PIP mascot system for main guidance.
@@ -553,13 +633,16 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Add Playwright visual test `e2e/story.visual.spec.ts` that captures Dashboard map state and StoryModal celebration after completing a demo quest. Integrate in CI or local script.
 - Out-of-scope: Full cross-browser visual regression at this stage.
 
 Targets:
+
 - Files: `src/frontend/e2e/story.visual.spec.ts`, update `playwright.config.ts` if needed.
 
 Acceptance Criteria:
+
 - Test runs locally and outputs screenshots in `src/frontend/screenshots/story-*`.
 - Support for Lumi companion character visual testing.
 - Integration with existing PIP mascot system visual verification.
@@ -575,13 +658,16 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope: Implement the prototype (tickets TCK-20260201-011 → TCK-20260201-013) with minimal assets and wire Playwright test; produce a VERIFIER PACK with screenshots and test outputs.
 - Out-of-scope: Large visual assets; keep it minimal and mock where necessary.
 
 Targets:
+
 - Files: changes across `src/frontend/src/components/*`, `src/frontend/src/store/*`, and e2e tests.
 
 Acceptance Criteria:
+
 - Small PR merges to main with tests passing and a verifier pack in docs.
 - Support for both PIP main guidance and Lumi companion character interactions.
 - Integration with existing PIP mascot system and new Lumi companion features.
@@ -639,6 +725,7 @@ Research Areas Planned:
 10. RESEARCH-010: Analytics & Data Strategy (P2)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 14:30 UTC] **DONE** — Research roadmap complete | Evidence: `docs/RESEARCH_ROADMAP.md`
@@ -682,6 +769,7 @@ Acceptance Criteria:
 - [x] Brand pillars defined (Magic, Movement, Mastery, Meaning)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -693,6 +781,7 @@ Execution log:
   - Defined brand pillars and positioning
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 14:15 UTC] **DONE** — Brand guidelines analysis complete | Evidence: `docs/BRAND_GUIDELINES_ANALYSIS.md`
@@ -749,6 +838,7 @@ Acceptance Criteria:
 - [x] Implementation reference with TypeScript interface
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -763,6 +853,7 @@ Execution log:
   - Implementation specifications
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 13:45 UTC] **DONE** — Comprehensive mascot guide complete | Evidence:
@@ -812,6 +903,7 @@ Acceptance Criteria:
 - [x] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -926,6 +1018,7 @@ Acceptance Criteria:
 - [ ] Frontend tests and production build pass.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 12:51 UTC] **DONE** — Prompt overlay enlarged; `0` now “make a fist” (hand required); TTS prompt added + replay button | Evidence:
@@ -1118,6 +1211,7 @@ Acceptance Criteria:
 - [x] 12-week implementation roadmap
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1132,6 +1226,7 @@ Execution log:
   - 12-week implementation roadmap (6 phases)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 13:15 UTC] **DONE** — Brand guidelines analysis complete | Evidence:
@@ -1181,6 +1276,7 @@ Acceptance Criteria:
 - [ ] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1204,6 +1300,7 @@ Next actions:
 3. Verify tests/build and mark DONE.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 12:22 UTC] **DONE** — Thumb counting implemented + regression tests added; frontend test/build verified | Evidence:
@@ -1265,6 +1362,7 @@ Acceptance Criteria:
 - [x] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1346,6 +1444,7 @@ Acceptance Criteria:
 - [ ] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1363,6 +1462,7 @@ Next actions:
 2. Re-run tests/build and mark DONE with evidence.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1400,6 +1500,7 @@ Acceptance Criteria:
 - [x] `cd src/frontend && npm run build` passes.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 11:53 UTC] DONE - Fixed target=0 success; gated on recent hand detection; verified tests + build.
@@ -1446,6 +1547,7 @@ Acceptance Criteria:
 - [ ] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1464,6 +1566,7 @@ Next actions:
 2. Run tests/build and mark DONE with evidence.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1501,6 +1604,7 @@ Acceptance Criteria:
 - [x] `cd src/frontend && npm run build` passes.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 11:59 UTC] DONE - Shuffled target bag implemented; verified tests + build.
@@ -1547,6 +1651,7 @@ Acceptance Criteria:
 - [ ] `cd src/frontend && npm run build` passes.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1567,6 +1672,7 @@ Next actions:
 3. Run `npm test` and `npm run build`, then mark DONE with evidence.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1605,6 +1711,7 @@ Acceptance Criteria:
 - [x] `cd src/frontend && npm run build` passes.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 11:49 UTC] DONE - Camera-first layout applied to FingerNumberShow; tests + build verified.
@@ -1651,6 +1758,7 @@ Acceptance Criteria:
 - [ ] Frontend typecheck/lint/tests pass (or failures documented as pre-existing).
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1683,6 +1791,7 @@ Risks/notes:
 - Risk: There may be other pages still using gradient-heavy styles; explicitly out-of-scope for this ticket.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1723,6 +1832,7 @@ Acceptance Criteria:
 - [x] Frontend typecheck/lint/tests pass (documented warnings only).
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 11:44 UTC] DONE - Brand-aligned UI refresh applied; frontend tests + production build verified.
@@ -1762,6 +1872,7 @@ Acceptance Criteria:
 - [x] Backend server starts successfully on port 8001
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1788,6 +1899,7 @@ Execution log:
   - **Interpretation**: Observed — Server starts successfully without NameError
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 16:35 UTC] **DONE** — ProfileUpdate import fixed; backend server starts successfully | Evidence: Import and server startup commands successful
@@ -1832,6 +1944,7 @@ Acceptance Criteria:
 - [x] Frontend builds successfully
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -1859,6 +1972,7 @@ Execution log:
   - **Interpretation**: Observed — All tests passing
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 17:15 UTC] **DONE** — Fixed selectedChildData initialization bug | Evidence: Build + tests successful
@@ -1910,6 +2024,7 @@ Source:
 - Evidence: Screenshot showing warning visible on Settings screen when camera is active
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
@@ -1965,6 +2080,7 @@ Source:
 - Evidence: "Kid A (2–3 years): Doesn't understand 'Pinch', just waves hand."
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
@@ -2023,6 +2139,7 @@ Source:
 - Evidence: "Kid A (2–3 years): Cannot read 'Start Game'. Needs a big Green 'Play' button."
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 17:30 UTC] **OPEN** — Ticket created, awaiting implementation
@@ -2110,6 +2227,7 @@ Inputs:
 - Tool: `tools/contrast_calculator.py` (created for this audit)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2127,6 +2245,7 @@ Key Findings:
 - **Highest Risk:** White text on brand buttons (2.95:1, needs 4.5:1)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 15:40 UTC: Started audit
@@ -2227,6 +2346,7 @@ Plan:
 7. Create verification script for contrast ratios
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2243,6 +2363,7 @@ Execution log:
 - 16:38 UTC: Committed changes to branch
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 16:00 UTC: IN_PROGRESS - Starting implementation
@@ -2325,6 +2446,7 @@ Status: **DONE** ✅
 Completed: 2026-01-31 01:40 UTC
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2368,6 +2490,7 @@ Targets:
 - Files to change: `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/pages/Progress.tsx`, `src/frontend/src/pages/Game.tsx`, `src/frontend/src/components/LetterJourney.tsx`, and small fixes in `src/frontend/src/components/ui/*`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2423,6 +2546,7 @@ Inputs:
 - Tests: unit + integration + Playwright e2e
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2487,6 +2611,7 @@ Targets:
 - Files: `src/frontend/src/pages/AlphabetGame.tsx`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2580,6 +2705,7 @@ Targets:
 - Files: `src/frontend/src/store/settingsStore.ts`, `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/AlphabetGame.tsx`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2766,6 +2892,7 @@ Plan:
 8. Verify builds and functionality preserved
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2781,6 +2908,7 @@ Execution log:
 - 18:45 UTC: Verified frontend build success, documented final results
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 18:00 UTC: Started remediation (1799+ errors)
@@ -2836,6 +2964,7 @@ Plan:
 4. Verify ruff still works correctly
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2844,6 +2973,7 @@ Execution log:
 - 12:05 UTC: Verified no deprecation warnings, ruff functionality intact
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 12:00 UTC: Started fix
@@ -2901,6 +3031,7 @@ Plan:
 4. Create project management prompt for future exploration
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -2912,6 +3043,7 @@ Execution log:
 - 13:11 UTC: Added prioritization matrices and usage guidelines
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 13:00 UTC: Started exploration
@@ -2964,6 +3096,7 @@ Targets:
 - Files changed: `docs/BRAND_DECISION.md`, `docs/BRAND_NAMING_EXPLORATION.md`, `README.md`, `docs/WORKLOG_TICKETS.md`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3024,6 +3157,7 @@ Plan:
 6. Create comprehensive audit artifact
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3034,6 +3168,7 @@ Execution log:
 - 16:15 UTC: Completed audit artifact and worklog update
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 16:00 UTC: Started child-focused audit
@@ -3086,6 +3221,7 @@ Targets:
 - Files changed: `src/frontend/src/components/LetterJourney.tsx`, `src/frontend/src/components/ui/Layout.tsx`, `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/games/FingerNumberShow.tsx`, `src/frontend/src/pages/Login.tsx`, `src/frontend/src/pages/Register.tsx`, `src/frontend/src/pages/Progress.tsx`, `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/components/StyleTest.tsx`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3150,6 +3286,7 @@ Plan:
 7. Update worklog with findings
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3162,6 +3299,7 @@ Execution log:
 - 15:30 UTC: Updated worklog and completed audit
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 15:00 UTC: Started UI audit
@@ -3226,6 +3364,7 @@ Evidence of Completion:
 - ✅ Authentication flow complete (register/login/refresh)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3279,6 +3418,7 @@ Evidence of Completion:
 - ✅ Token refresh automatic
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3325,6 +3465,7 @@ Targets:
 - Branch: main
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3536,6 +3677,7 @@ $ grep -n "numHands: 4\|Duo Mode\|thumbExtendedFromPalm" src/games/FingerNumberS
 ```
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3869,6 +4011,7 @@ Acceptance Criteria:
 - [x] Smoothing applied to reduce jitter
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3888,6 +4031,7 @@ Execution log:
 - 2026-01-29 08:50 UTC: Created follow-up ticket TCK-20260129-001 for React Hooks code quality issue
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 08:46 UTC: Started discovery
@@ -3955,6 +4099,7 @@ Acceptance Criteria:
 - [ ] All tests pass
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -3972,6 +4117,7 @@ Execution log:
 - 2026-01-29 08:57 UTC: BLOCKED - Requires extensive refactor time and careful testing
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 08:55 UTC: Started investigation
@@ -4040,6 +4186,7 @@ Acceptance Criteria:
 - \[x\] Refactor plan documented \(see execution log\)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4176,6 +4323,7 @@ Acceptance Criteria:
 - [ ] Ready to execute test plan
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4511,6 +4659,7 @@ Acceptance Criteria:
 - [x] Progress tracked per language
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4536,6 +4685,7 @@ Execution log:
 - 2026-01-29 09:15 UTC: All acceptance criteria verified
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 09:10 UTC: Started discovery
@@ -4624,6 +4774,7 @@ Acceptance Criteria:
 - [x] Streaks tracked correctly
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4645,6 +4796,7 @@ Execution log:
 - 2026-01-29 09:10 UTC: All acceptance criteria verified as met
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 09:05 UTC: Started discovery
@@ -4735,6 +4887,7 @@ Description:
 Add tests for frontend components and stores.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4757,6 +4910,7 @@ Execution log:
 - 2026-01-29 20:48 UTC: All acceptance criteria met
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 20:00 UTC: Started test implementation for frontend
@@ -4911,6 +5065,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -4967,6 +5122,7 @@ Evidence of Completion:
 - ✅ Security recommendations with priorities
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5023,6 +5179,7 @@ Evidence of Completion:
 - ✅ User messaging recommendations included
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5079,6 +5236,7 @@ Evidence of Completion:
 - ✅ 3 remediation tickets recommended
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5117,6 +5275,7 @@ Acceptance Criteria:
 - [x] Run npm audit --audit-level=moderate (should pass)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5129,6 +5288,7 @@ Execution log:
 - 2026-01-29 08:40 UTC: All acceptance criteria met
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 08:30 UTC: Started fixing frontend vulnerabilities
@@ -5261,6 +5421,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5316,6 +5477,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5371,6 +5533,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5426,6 +5589,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5481,6 +5645,7 @@ Evidence of Completion:
 - ✅ Test scenarios and refactor suggestions provided
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5647,6 +5812,7 @@ Acceptance Criteria:
 - [x] Worklog template includes Git availability guidance
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5671,6 +5837,7 @@ Execution log:
   - **Interpretation**: Observed — prompts include explicit handling for non-git workspaces and avoid commit-SHA claims.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 14:05 IST] DONE - Prompts support both git+PR and non-git environments
@@ -5720,6 +5887,7 @@ Acceptance Criteria:
 - [x] `prompts/README.md` indexes all of the above
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5733,6 +5901,7 @@ Execution log:
   - **Interpretation**: Observed — new prompts exist at the expected paths.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 14:12 IST] DONE - Added implementation/completeness/regression/success prompts and indexed them
@@ -5786,6 +5955,7 @@ Acceptance Criteria:
 - [x] All are indexed in `prompts/README.md`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5806,6 +5976,7 @@ Execution log:
   - **Interpretation**: Observed — prompts are discoverable via the index.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 14:18 IST] DONE - Added QA findings→tickets + support/deploy/stakeholder prompts and indexed them
@@ -5855,6 +6026,7 @@ Acceptance Criteria:
 - [x] `docs/AUDIT_BACKLOG.md` exists (referenced by `prompts/triage/out-of-scope-v1.0.md`)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5885,6 +6057,7 @@ Execution log:
 - [2026-01-28 14:14 IST] Added `docs/AUDIT_BACKLOG.md` - Audit backlog tracking doc
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 13:57 IST] IN_PROGRESS
@@ -5914,6 +6087,7 @@ Risks/notes:
 - Existing prompts assume a git/PR workflow; this workspace is not a git repository (Observed). New prompts should include an explicit “repo access / git available” declaration and downgrade git-derived facts to Unknown when needed.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -5940,11 +6114,13 @@ Acceptance Criteria (final):
 - [x] `docs/AUDIT_BACKLOG.md` exists (referenced by `prompts/triage/out-of-scope-v1.0.md`)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 14:02 IST] DONE ✅ - Added missing role prompts + prompt index + audit backlog file
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -6111,6 +6287,7 @@ Acceptance Criteria:
 - [x] Both prompts use file paths/code anchors, not git/PR language
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -6124,6 +6301,7 @@ Execution log:
 - [2026-01-28 14:25 IST] Appended ticket to WORKLOG_TICKETS.md
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 14:25 IST] DONE
@@ -6712,6 +6890,7 @@ Plan:
 3. Run frontend verification commands and capture output
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 19:05 IST] Started investigation and captured initial evidence
@@ -6728,6 +6907,7 @@ Evidence:
 - **Interpretation**: `Observed` - Frontend typecheck passes with the updated `Game.tsx`.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 19:10 IST] Implemented ref-based drawing loop to avoid per-frame React rerenders
@@ -6766,6 +6946,7 @@ Plan:
 3. Run backend tests from the project environment and capture output
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 19:12 IST] Verified `sqlalchemy` is importable from `src/backend/.venv/bin/python` (v2.0.46)
@@ -7102,6 +7283,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -7151,6 +7333,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -7194,6 +7377,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -7238,6 +7422,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -7285,6 +7470,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -7328,6 +7514,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -7371,6 +7558,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -7416,6 +7604,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -7458,6 +7647,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -7504,6 +7694,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -7546,6 +7737,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -7587,6 +7779,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -7947,6 +8140,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -7996,6 +8190,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -8039,6 +8234,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -8083,6 +8279,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -8130,6 +8327,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -8173,6 +8371,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -8216,6 +8415,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -8261,6 +8461,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -8303,6 +8504,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -8349,6 +8551,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -8391,6 +8594,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -8432,6 +8636,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -8792,6 +8997,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -8841,6 +9047,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -8884,6 +9091,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -8928,6 +9136,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -8975,6 +9184,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -9018,6 +9228,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -9061,6 +9272,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -9106,6 +9318,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -9148,6 +9361,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -9194,6 +9408,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -9236,6 +9451,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -9277,6 +9493,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -9637,6 +9854,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -9686,6 +9904,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -9729,6 +9948,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -9773,6 +9993,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -9820,6 +10041,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -9863,6 +10085,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -9906,6 +10129,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -9951,6 +10175,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -9993,6 +10218,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -10039,6 +10265,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -10081,6 +10308,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -10122,6 +10350,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -10482,6 +10711,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -10531,6 +10761,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -10574,6 +10805,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -10618,6 +10850,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -10665,6 +10898,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -10708,6 +10942,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -10751,6 +10986,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -10796,6 +11032,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -10838,6 +11075,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -10884,6 +11122,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -10926,6 +11165,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -10967,6 +11207,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -11327,6 +11568,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -11376,6 +11618,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -11419,6 +11662,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -11463,6 +11707,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -11510,6 +11755,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -11553,6 +11799,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -11596,6 +11843,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -11641,6 +11889,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -11683,6 +11932,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -11729,6 +11979,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -11771,6 +12022,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -11812,6 +12064,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -12172,6 +12425,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:05 IST] Created prompts and updated prompt index
@@ -12221,6 +12475,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt files exist in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:10 IST] Started prompt additions
@@ -12264,6 +12519,7 @@ Evidence:
 - **Interpretation**: `Observed` - Creative/curiosity modules are documented and cross-referenced.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:35 IST] Started doc expansion request
@@ -12308,6 +12564,7 @@ Evidence:
 - **Interpretation**: `Observed` - Numbers and puzzle loops are documented in the curriculum and mechanics.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 20:55 IST] Started numbers/puzzles expansion
@@ -12355,6 +12612,7 @@ Evidence:
 - **Interpretation**: `Observed` - Issues workflow docs and prompts exist in the intended locations.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 22:40 IST] Started adding issue-sync workflow prompts
@@ -12398,6 +12656,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pre-flight prompt and process reminder doc exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:20 IST] Started anti-drift pre-flight work
@@ -12441,6 +12700,7 @@ Evidence:
 - **Interpretation**: `Observed` - Tech debt handling prompt and ownership policy doc exist.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:33 IST] Started ownership/tech-debt workflow additions
@@ -12486,6 +12746,7 @@ Evidence:
 - **Interpretation**: `Observed` - Prompt curation/QA artifacts exist in repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-28 23:50 IST] Started prompt curation/quality gate additions
@@ -12528,6 +12789,7 @@ Evidence:
 - **Interpretation**: `Observed` - New product strategy prompts exist in the repo.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:05 IST] Started “what next” product strategy prompt additions
@@ -12574,6 +12836,7 @@ Evidence:
 - **Interpretation**: `Observed` - New workflow prompts exist and are indexable.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:20 IST] Started workflow prompt additions
@@ -12616,6 +12879,7 @@ Evidence:
 - **Interpretation**: `Observed` - Command toolkit exists.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:40 IST] Started rg-first command standardization
@@ -12657,6 +12921,7 @@ Evidence:
 - **Interpretation**: `Observed` - Pause/reassess prompt exists in the intended location.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 00:55 IST] Started pause/reassess prompt addition
@@ -12762,6 +13027,7 @@ Plan:
 4. Ensure systematic methodology for future exploration
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -12772,6 +13038,7 @@ Execution log:
 - 13:15 UTC: Verified prompts work for both generic and specific use cases
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 13:00 UTC: Started prompt creation
@@ -12838,6 +13105,7 @@ Plan:
 4. Update worklog with evidence
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -12846,6 +13114,7 @@ Execution log:
 - 13:25 UTC: Audit backlog remains empty, identified next audit target
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 13:20 UTC: Starting triage process
@@ -12910,6 +13179,7 @@ Plan:
 5. Create audit artifact
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -12918,6 +13188,7 @@ Execution log:
 - 13:35 UTC: Created audit artifact docs/audit/src**backend**app**core**email.py.md
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 13:30 UTC: Beginning audit process
@@ -12982,6 +13253,7 @@ Plan:
 5. Create audit artifact
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -12990,6 +13262,7 @@ Execution log:
 - 13:45 UTC: Created audit artifact docs/audit/src**backend**app**core**rate_limit.py.md
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 13:40 UTC: Beginning audit process
@@ -13053,6 +13326,7 @@ Acceptance Criteria:
 - [x] Verifier pack included for HIGH/MED findings
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13064,6 +13338,7 @@ Execution log:
 - [2026-01-29 13:45 UTC] Completed audit, all acceptance criteria met
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 13:40 UTC] IN_PROGRESS - Discovery and analysis complete, creating artifact
@@ -13118,17 +13393,20 @@ Acceptance Criteria:
 - [ ] Prompt explicitly forbids implementation and enforces evidence-first reporting
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 04:06 UTC] Created ticket and began implementation
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 04:06 UTC] IN_PROGRESS - Adding prompt + updating index
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13137,6 +13415,7 @@ Execution log:
 - [2026-01-29 04:07 UTC] Verified via `ls -la` and `rg` on prompt index
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 04:07 UTC] DONE - Prompt added and indexed (no code changes)
@@ -13181,6 +13460,7 @@ Plan:
 4. Create audit artifact
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13189,6 +13469,7 @@ Execution log:
 - 14:05 UTC: Created audit artifact docs/audit/ui**src**frontend**src**main.tsx.md
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 14:00 UTC: Beginning UI audit process
@@ -13249,6 +13530,7 @@ Plan:
 4. Create audit artifact
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13257,6 +13539,7 @@ Execution log:
 - 14:15 UTC: Created audit artifact docs/audit/ui**src**frontend**src**store\_\_gameStore.ts.md
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 14:10 UTC: Beginning UI audit process
@@ -13323,6 +13606,7 @@ Plan:
 5. Verify build and tests
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13334,6 +13618,7 @@ Execution log:
 - 09:45 UTC: Build successful, tests passing
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 09:30 UTC: Started F-002 implementation
@@ -13422,6 +13707,7 @@ Inputs:
 - Source: Vercel blog post “Introducing React best practices” (2026-01-14)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13487,6 +13773,7 @@ Plan:
 5. Verify build still succeeds
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13497,6 +13784,7 @@ Execution log:
 - 10:00 UTC: Fixed failing tests, all 55 passing
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 09:50 UTC: Started test implementation
@@ -13601,6 +13889,7 @@ Plan:
 7. Update documentation
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -13989,6 +14278,7 @@ Targets:
   - prompts/README.md
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -14219,12 +14509,14 @@ Plan:
 3. Commit using `git commit -F`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - 2026-01-29 :: Started ticket | Evidence: `git status --porcelain` (see terminal log)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -14278,6 +14570,7 @@ Acceptance criteria:
 4. Setup docs and scripts ensure hooks are enabled via `git config core.hooksPath .githooks`.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -14312,6 +14605,7 @@ Next actions:
 `agent-gate: audit artifact docs/audit/_gate_test.md must reference a ticket id (TCK-YYYYMMDD-###).`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -14356,6 +14650,7 @@ Next actions:
 Contains: `ARCHITECTURE.md`, `SAFETY_GUIDELINES.md`, `README.md`, `FEATURE_SPECS.md`, `ROADMAP.md`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -14392,6 +14687,7 @@ Targets:
 Includes `README.md` and the `ai-feature-*-v1.0.md` prompt pack.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -15070,6 +15366,7 @@ Plan:
 7. Present to user for approval
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -15118,6 +15415,7 @@ Implementation Phases:
 **Phase 8 (Weeks 4-5):** Letter Creatures - Collectible characters
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 17:50 IST: Status OPEN - Planning complete, awaiting user approval
@@ -15220,9 +15518,10 @@ Status: **DONE**
 - Source artifacts: Existing audit files in `docs/audit/`
 - Discovery commands: git, rg, file reads
 
-**Execution log:
+\*\*Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
-- [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching**
+- [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching\*\*
 
 - 16:30 UTC: Started audit process
 - 16:35 UTC: Completed discovery phase (git history, references, tests)
@@ -15796,9 +16095,10 @@ Status: **DONE**
 - Source artifacts: Existing health-related files
 - Discovery commands: git, rg, file reads
 
-**Execution log:
+\*\*Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
-- [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching**
+- [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching\*\*
 
 - 18:30 UTC: Started health system audit
 - 18:45 UTC: Completed discovery phase
@@ -16480,6 +16780,7 @@ Plan:
 6. Test with child
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -16497,6 +16798,7 @@ Execution log:
 - 19:30 IST: Build successful - all TypeScript errors resolved
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 18:00 IST: Status IN_PROGRESS - Starting P0 implementation
@@ -16565,6 +16867,7 @@ Plan:
 5. Replace LetterJourney in Dashboard
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 18:00 IST: Status OPEN - Waiting for P0 completion
@@ -16620,6 +16923,7 @@ Plan:
 5. Test with child
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 18:00 IST: Status OPEN - Waiting for P0 completion
@@ -16668,6 +16972,7 @@ Plan:
 5. Test with child
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 18:00 IST: Status OPEN - Waiting for P1 completion
@@ -16718,6 +17023,7 @@ Plan:
 5. Test with child
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 18:00 IST: Status OPEN - Waiting for P1 completion
@@ -16777,6 +17083,7 @@ Dependencies:
 - None (this is the parent ticket)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -16790,6 +17097,7 @@ Execution log:
   - **Interpretation**: Observed — All Week 1-4 tickets ready for implementation
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Master plan created, Phase 1 tickets ready
@@ -16873,12 +17181,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -16952,12 +17262,14 @@ Dependencies:
 - TCK-20260129-100 (Particle Effects System) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-100
@@ -17030,12 +17342,14 @@ Dependencies:
 - None (can proceed in parallel with TCK-20260129-100, TCK-20260129-101)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -17107,12 +17421,14 @@ Dependencies:
 - None (data structure work)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -17186,12 +17502,14 @@ Dependencies:
 - TCK-20260129-103 (Achievement Types) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-103
@@ -17267,12 +17585,14 @@ Dependencies:
 - TCK-20260129-104 (Achievement Detection) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by 4 dependencies
@@ -17345,12 +17665,14 @@ Dependencies:
 - TCK-20260129-105 (Celebration Triggers) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
@@ -17425,12 +17747,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -17507,12 +17831,14 @@ Dependencies:
 - TCK-20260129-103 (Achievement Types) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by TCK-20260129-103
@@ -17590,12 +17916,14 @@ Dependencies:
 - TCK-20260129-108 (Badge Display) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
@@ -17675,12 +18003,14 @@ Dependencies:
 - TCK-20260129-107 (XP/Level System) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by 4 dependencies
@@ -17757,12 +18087,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -17841,12 +18173,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -17924,12 +18258,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Ready for implementation
@@ -18004,12 +18340,14 @@ Dependencies:
 - TCK-20260129-105 (Celebration Triggers) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 22:00 UTC] OPEN - Blocked by 2 dependencies
@@ -18704,6 +19042,7 @@ Implement components in order, with approval at each step:
 8. Sound Integration
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -18756,6 +19095,7 @@ Key Principles:
 - Charcoal instead of black
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 19:15 IST: Status IN_PROGRESS - Component 1 proposed, awaiting approval
@@ -18879,6 +19219,7 @@ Targets:
 Line contains the explicit instruction.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -18919,6 +19260,7 @@ Acceptance criteria:
 3. Local workflow gate passes (`./scripts/agent_gate.sh --staged`) before committing.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -18942,6 +19284,7 @@ Entry exists in `prompts/README.md` under UI/UX.
 `OK`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-01-29 :: OPEN -> IN_PROGRESS
@@ -19167,6 +19510,7 @@ No additional schema changes required at this time. The Age→Float change was t
 ---
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -19179,6 +19523,7 @@ Execution log:
 - 23:15 IST: Marked as DONE
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 23:00 IST: Status: IN_PROGRESS
@@ -19392,6 +19737,7 @@ To reach 100+ games:
 ---
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -19404,6 +19750,7 @@ Execution log:
 - 23:45 IST: Updated worklog, marked as DONE
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 23:15 IST: Status: IN_PROGRESS
@@ -19696,6 +20043,7 @@ interface Brush {
 ---
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -19708,6 +20056,7 @@ Execution log:
 - 00:15 IST: Updated worklog, marked as DONE
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 23:45 IST: Status: IN_PROGRESS
@@ -19783,6 +20132,7 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -19847,6 +20197,7 @@ Execution log:
   - **Interpretation**: Comprehensive research document created for future implementation reference.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:00 UTC] OPEN - Research started
@@ -20204,12 +20555,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20295,12 +20648,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20390,12 +20745,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20489,12 +20846,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20590,12 +20949,14 @@ Dependencies:
 - TCK-20260129-103 (Achievement Types) - For unlock conditions
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20691,12 +21052,14 @@ Dependencies:
 - TCK-20260129-120 (Avatar System Structure) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Blocked by TCK-20260129-120
@@ -20790,12 +21153,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -20892,12 +21257,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:45 UTC] OPEN - Ready for implementation
@@ -21168,6 +21535,7 @@ Dependencies:
 - None (research and documentation)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -21177,6 +21545,7 @@ Execution log:
   - **Interpretation**: This ticket will create foundation for all camera-based educational features
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:50 UTC] OPEN - Research started
@@ -21286,12 +21655,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:00 UTC] OPEN - Ready for implementation
@@ -21408,12 +21779,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:00 UTC] OPEN - Ready for implementation
@@ -21508,12 +21881,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:05 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:05 UTC] OPEN - Ready for implementation
@@ -21605,12 +21980,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:10 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:10 UTC] OPEN - Ready for implementation
@@ -21705,12 +22082,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:15 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:15 UTC] OPEN - Ready for implementation
@@ -21800,12 +22179,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:20 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:20 UTC] OPEN - Ready for implementation
@@ -21901,12 +22282,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:25 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:25 UTC] OPEN - Ready for implementation
@@ -22004,12 +22387,14 @@ Dependencies:
 - None (can proceed in parallel)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:30 UTC] OPEN - Ready for implementation
@@ -22109,12 +22494,14 @@ Dependencies:
 - TCK-20260129-110 through TCK-20260129-113 (Brush System) - MUST COMPLETE FIRST
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:35 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:35 UTC] OPEN - Blocked by Phase 1 brush tickets
@@ -22220,12 +22607,14 @@ Dependencies:
 - None (can proceed independently)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:30 UTC] OPEN - Ready for implementation
@@ -22263,6 +22652,7 @@ Risks/notes:
 ### TCK-20260129-150 :: Document MediaPipe Capabilities & Educational Features
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-29 23:55 UTC] IN_PROGRESS - Research started
@@ -22305,6 +22695,7 @@ Evidence of Completion:
   - **Interpretation**: Complete research foundation for educational features
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:50 UTC] DONE - All deliverables complete
@@ -22409,12 +22800,14 @@ Dependencies:
 - None (can proceed independently)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-30 00:30 UTC] OPEN - Ready for implementation
@@ -22512,6 +22905,7 @@ Findings Summary:
 - Playground mode missing
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -22523,6 +22917,7 @@ Execution log:
 - 10:50 IST: All artifacts verified and documented in worklog
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 10:45 IST: Started audit documentation
@@ -22612,6 +23007,7 @@ Acceptance Criteria:
 - [x] Icon paths follow consistent structure (/assets/icons/\*.svg)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -22623,6 +23019,7 @@ Execution log:
 - 11:00 IST: All acceptance criteria verified ✅
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 10:55 IST: Started documentation
@@ -22722,6 +23119,7 @@ Acceptance Criteria:
 - [x] 109 icons available in assets folder
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -22734,6 +23132,7 @@ Execution log:
 - 23:15 IST: Ticket completed ✅
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 22:55 IST: Started investigation
@@ -23259,12 +23658,14 @@ Dependencies:
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:00 UTC] OPEN - Ready for implementation
@@ -23358,12 +23759,14 @@ Dependencies:
 - TCK-20260129-211 (Lowercase Letters) - MUST COMPLETE FIRST (to ensure Hindi mixed case support)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-31 00:05 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:05 UTC] OPEN - Ready for implementation
@@ -23444,12 +23847,14 @@ Dependencies:
 - TCK-20260129-211 (Lowercase Letters) - BLOCKS this decision
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
 - [2026-01-31 00:10 UTC] Created ticket | Status: OPEN
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:10 UTC] OPEN - Research phase
@@ -23594,6 +23999,7 @@ Acceptance Criteria:
 - [x] SVG files optimized for web (inline CSS, no external refs)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -23608,6 +24014,7 @@ Execution log:
 - 23:35 IST: Ticket completed ✅
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 22:30 IST: Started asset creation
@@ -23720,6 +24127,7 @@ Acceptance Criteria:
 - [x] Asset Inventory updated
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -23735,6 +24143,7 @@ Execution log:
 - 00:15 IST: Ticket completed ✅
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 23:40 IST: Started comprehensive emoji replacement
@@ -23906,6 +24315,7 @@ Acceptance Criteria:
 - [x] Build succeeds
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -23920,6 +24330,7 @@ Execution log:
 - 01:00 IST: Ticket completed ✅
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 00:20 IST: Started UI component library
@@ -24060,6 +24471,7 @@ Dependencies:
 - None (can proceed independently)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -24068,6 +24480,7 @@ Execution log:
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:00 UTC] OPEN - Ready for implementation
@@ -24169,6 +24582,7 @@ Dependencies:
 - None (can proceed independently)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -24177,6 +24591,7 @@ Execution log:
 - [2026-01-31 00:00 UTC] Checked worklog for existing accessibility tickets - none found
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:00 UTC] OPEN - Ready for implementation
@@ -24278,6 +24693,7 @@ Dependencies:
 - None (can proceed independently)
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -24287,6 +24703,7 @@ Execution log:
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-01-31 00:00 UTC] OPEN - Ready for implementation
@@ -24369,6 +24786,7 @@ Acceptance Criteria:
 - [x] No console errors related to permissions
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -31541,6 +31959,7 @@ const cameras = devices.filter((d) => d.kind === 'videoinput');
 - Phase 4: Advanced AR (Week 7-8) - WebXR, segmentation
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - [2026-02-01 15:00 UTC] **DONE** — Comprehensive AR research completed
@@ -31573,7 +31992,8 @@ Description:
 Implement Lumi as a complementary companion character to PIP, focusing on social-emotional learning for multiplayer activities and lessons about sharing, caring, cooperation, and friendship.
 
 Scope contract:
-- In-scope: 
+
+- In-scope:
   - Extend Mascot component for multi-character support (PIP + Lumi)
   - Create Lumi visual assets and animations
   - Implement Lumi response system for social learning
@@ -31581,14 +32001,15 @@ Scope contract:
   - Build multiplayer session management
   - Integrate with existing games for collaborative play
   - Add social metrics tracking
-- Out-of-scope: 
+- Out-of-scope:
   - Major UI redesigns
   - New multiplayer infrastructure (assume local multiplayer for now)
   - Advanced AI social coaching
 
 Targets:
+
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - `src/frontend/src/components/Mascot.tsx` (extend for multi-character)
   - `src/frontend/src/components/LumiCompanion.tsx` (new)
   - `src/frontend/src/data/lumiResponses.ts` (new)
@@ -31598,6 +32019,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] Lumi character visually implemented with unique appearance
 - [x] Multi-character display mode working (PIP + Lumi together)
 - [x] Social learning activities functional (sharing, caring scenarios)
@@ -31607,10 +32029,12 @@ Acceptance Criteria:
 - [x] VERIFIER PACK with social activity screenshots and test outputs
 
 Inputs:
+
 - Prompt used: User request for Lumi companion implementation
 - Source artifacts: `docs/LUMI_COMPANION_CHARACTER_PLAN.md`
 
 Plan:
+
 1. **Phase 1 (Week 1-2):** Core Lumi character implementation
    - Create Lumi visual assets
    - Extend Mascot component for character switching
@@ -31636,6 +32060,7 @@ Plan:
    - Testing and refinement
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-01] **OPEN** — Ticket created with detailed implementation plan | Evidence: `docs/LUMI_COMPANION_CHARACTER_PLAN.md`
@@ -31643,11 +32068,13 @@ Execution log:
 - [2026-02-01] **DONE** — Core Lumi implementation completed: All core components implemented, TypeScript compilation verified, tests passing | Evidence: `npm run type-check` passed with 0 errors, `npm test` passed 159/159 tests
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-01] **IN_PROGRESS** — Phase 1 (Core Lumi Character) 80% complete - Lumi response system, social store, companion component, activity templates, and social learning hook implemented. Ready for visual assets and integration testing.
 - [2026-02-01] **DONE** — All core Lumi components implemented and verified. TypeScript compilation clean, all tests passing. Ready for visual asset creation and game integration.
 
 Next actions:
+
 1. Create Lumi visual assets (images, animations) - BLOCKED: Need design assets
 2. Extend Mascot component for multi-character support - READY: Code ready for testing
 3. Integrate with existing games for collaborative play - READY: Hook and templates ready
@@ -31655,6 +32082,7 @@ Next actions:
 5. Create VERIFIER PACK with social activity screenshots - PENDING: Need UI integration first
 
 Risks/notes:
+
 - **Technical:** Character switching performance, TTS coordination for dual characters
 - **Educational:** Balance between academic and social learning focus
 - **Scope:** Start with local multiplayer, expand to networked later if needed
@@ -31673,6 +32101,7 @@ Description:
 Create visual assets for Lumi companion character including sprites, animations, and expressions to complement the existing PIP mascot system.
 
 Scope contract:
+
 - In-scope:
   - Lumi character sprites (idle, happy, caring, thinking, celebrating states)
   - Animation sequences for social interactions
@@ -31685,6 +32114,7 @@ Scope contract:
   - Video assets or cinematics
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `assets/images/lumi/` (new directory)
@@ -31697,6 +32127,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Lumi character sprites created in 5 emotional states
 - [ ] Animation sequences for social interactions
 - [ ] Visual consistency with PIP mascot design language
@@ -31705,11 +32136,13 @@ Acceptance Criteria:
 - [ ] Accessibility considerations (high contrast, clear expressions)
 
 Inputs:
+
 - Source: Lumi companion character implementation (TCK-20260201-015)
 - Design reference: Existing PIP mascot in `assets/images/pip/`
 - Style guide: `docs/BRAND_ARCHITECTURE.md`
 
 Plan:
+
 1. **Asset Creation (Week 1):** Design and create base Lumi sprites
    - Sketch character concept and expressions
    - Create 5 core emotional states
@@ -31727,15 +32160,18 @@ Plan:
    - Test integration with LumiCompanion component
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created for Lumi visual asset creation | Evidence: Follows from TCK-20260201-015 completion
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02] **OPEN** — Ready for design work, assets needed to complete Lumi character implementation
 
 Next actions:
+
 1. Review existing PIP mascot assets for style consistency
 2. Create Lumi character concept and expression sketches
 3. Design and implement sprite assets
@@ -31743,6 +32179,7 @@ Next actions:
 5. Optimize and integrate with component
 
 Risks/notes:
+
 - **Design:** Maintaining visual consistency with PIP while creating distinct personality
 - **Technical:** Asset optimization for web performance
 - **Timeline:** Design work may require external resources if not handled internally
@@ -31761,6 +32198,7 @@ Description:
 Extend the existing Mascot component to support multi-character display mode, enabling PIP and Lumi to appear together and switch between characters seamlessly.
 
 Scope contract:
+
 - In-scope:
   - Modify Mascot component for character switching
   - Add dual-character display mode (PIP + Lumi side-by-side)
@@ -31773,6 +32211,7 @@ Scope contract:
   - Voice/TTS coordination (handled separately)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/components/Mascot.tsx` (extend existing)
@@ -31780,6 +32219,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Mascot component supports single and dual character modes
 - [ ] Smooth character switching animations
 - [ ] PIP and Lumi can display simultaneously
@@ -31789,11 +32229,13 @@ Acceptance Criteria:
 - [ ] Unit tests for new functionality
 
 Inputs:
+
 - Source: Lumi companion character implementation (TCK-20260201-015)
 - Base component: Existing `Mascot.tsx`
 - Social store: `socialStore.ts` for character state
 
 Plan:
+
 1. **Component Analysis (Day 1):** Review existing Mascot component structure
    - Understand current single-character implementation
    - Identify extension points for multi-character support
@@ -31811,15 +32253,18 @@ Plan:
    - Performance testing for animations
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created for Mascot component extension | Evidence: Core Lumi components ready, need UI integration
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02] **OPEN** — Ready for implementation, code framework exists from TCK-20260201-015
 
 Next actions:
+
 1. Analyze existing Mascot component structure
 2. Implement multi-character display mode
 3. Add character switching animations
@@ -31827,6 +32272,7 @@ Next actions:
 5. Add unit tests and verify functionality
 
 Risks/notes:
+
 - **Technical:** Maintaining performance with dual character animations
 - **Compatibility:** Ensuring backward compatibility with existing usage
 - **State:** Proper coordination between character states
@@ -31845,6 +32291,7 @@ Description:
 Integrate social learning activities and Lumi companion character with existing games (Alphabet, Numbers, Connect-the-Dots) to enable collaborative multiplayer experiences.
 
 Scope contract:
+
 - In-scope:
   - Add social activity overlays to existing games
   - Implement turn-taking mechanics in games
@@ -31857,6 +32304,7 @@ Scope contract:
   - Networked multiplayer (local multiplayer only)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/pages/AlphabetGame.tsx` (extend)
@@ -31866,6 +32314,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Social activities integrated with at least 2 existing games
 - [ ] Turn-taking mechanics functional in games
 - [ ] Lumi appears during collaborative gameplay
@@ -31874,11 +32323,13 @@ Acceptance Criteria:
 - [ ] E2E tests for social game integration
 
 Inputs:
+
 - Source: Lumi companion character implementation (TCK-20260201-015)
 - Games: Existing Alphabet, Numbers, Connect-the-Dots games
 - Social framework: `useSocialLearning` hook and social store
 
 Plan:
+
 1. **Game Analysis (Day 1):** Review existing game structures
    - Understand current single-player implementations
    - Identify integration points for social features
@@ -31896,15 +32347,18 @@ Plan:
    - Performance testing
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created for game integration | Evidence: Social framework ready, games need extension
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02] **OPEN** — Ready for implementation, social templates and hooks available
 
 Next actions:
+
 1. Analyze existing game structures for integration points
 2. Implement turn-taking mechanics in Alphabet and Numbers games
 3. Add Lumi character appearances during collaborative play
@@ -31912,6 +32366,7 @@ Next actions:
 5. Create E2E tests for social game features
 
 Risks/notes:
+
 - **Balance:** Maintaining educational focus while adding social elements
 - **Performance:** Game performance with additional social features
 - **Complexity:** Keeping game logic clean with social additions
@@ -31930,6 +32385,7 @@ Description:
 Create comprehensive unit and E2E tests for social learning features, including Lumi companion interactions, social store functionality, and multiplayer session management.
 
 Scope contract:
+
 - In-scope:
   - Unit tests for social store functions
   - Component tests for LumiCompanion
@@ -31942,6 +32398,7 @@ Scope contract:
   - Accessibility testing (separate ticket)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/stores/__tests__/socialStore.test.ts` (new)
@@ -31951,6 +32408,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Unit test coverage >80% for social store
 - [ ] Component tests for LumiCompanion interactions
 - [ ] E2E tests for complete social activity flows
@@ -31959,11 +32417,13 @@ Acceptance Criteria:
 - [ ] All tests passing in CI
 
 Inputs:
+
 - Source: Lumi companion character implementation (TCK-20260201-015)
 - Testing framework: Existing Vitest + Playwright setup
 - Components: Social store, LumiCompanion, useSocialLearning hook
 
 Plan:
+
 1. **Unit Testing (Day 1-2):** Test core social functionality
    - Social store unit tests
    - Hook unit tests
@@ -31980,15 +32440,18 @@ Plan:
    - Character interaction tests
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created for social features testing | Evidence: Framework ready, need comprehensive test coverage
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02] **OPEN** — Ready for implementation, social components available for testing
 
 Next actions:
+
 1. Create unit tests for social store functions
 2. Add component tests for LumiCompanion
 3. Implement E2E tests for social activity flows
@@ -31996,6 +32459,7 @@ Next actions:
 5. Add test utilities and verify CI passing
 
 Risks/notes:
+
 - **Coverage:** Ensuring comprehensive test scenarios for social interactions
 - **Maintenance:** Keeping tests updated with social feature changes
 - **Performance:** Test execution time with social scenario complexity
@@ -32014,6 +32478,7 @@ Description:
 Create comprehensive VERIFIER PACK with screenshots, test outputs, and documentation demonstrating social learning features and Lumi companion character functionality.
 
 Scope contract:
+
 - In-scope:
   - Screenshots of Lumi character in different states
   - Social activity flow screenshots
@@ -32026,6 +32491,7 @@ Scope contract:
   - Comparative analysis with other systems
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `docs/verifier-packs/social-learning-v1.0/` (new directory)
@@ -32035,6 +32501,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Complete screenshot gallery of Lumi character states
 - [ ] Social activity flow documentation with images
 - [ ] Test execution results documented
@@ -32043,11 +32510,13 @@ Acceptance Criteria:
 - [ ] VERIFIER PACK v1.0 format compliance
 
 Inputs:
+
 - Source: Lumi companion character implementation (TCK-20260201-015)
 - Template: Existing VERIFIER PACK format from other features
 - Components: All social learning features and Lumi character
 
 Plan:
+
 1. **Content Collection (Day 1):** Gather verification materials
    - Capture screenshots of Lumi character states
    - Document social activity flows
@@ -32064,15 +32533,18 @@ Plan:
    - Final formatting and organization
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02] **OPEN** — Ticket created for VERIFIER PACK creation | Evidence: Social features implemented, need documentation
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02] **OPEN** — Ready for creation, all social features available for documentation
 
 Next actions:
+
 1. Capture screenshots of Lumi character states and interactions
 2. Document social activity flows with visual examples
 3. Collect and organize test outputs and performance metrics
@@ -32080,6 +32552,7 @@ Next actions:
 5. Format as VERIFIER PACK v1.0 compliant documentation
 
 Risks/notes:
+
 - **Completeness:** Ensuring all social features are properly documented
 - **Clarity:** Making verification instructions clear for future reference
 - **Maintenance:** Keeping documentation updated with feature changes
@@ -32147,7 +32620,6 @@ Evidence:
 - Tests: 164 passed
 - Build: ✓ built in 2.07s
 
-
 ---
 
 ### TCK-20260202-001 :: Add Logout Button to Settings Page
@@ -32181,6 +32653,7 @@ Source:
 - Related: MED-FUNC-003 from auth.py audit
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32194,6 +32667,7 @@ Files Modified:
 - `src/frontend/src/pages/Settings.tsx` - Added Account section with logout button
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 09:58 **DONE** — Logout button added to Settings page
@@ -32244,6 +32718,7 @@ Acceptance Criteria:
 - No code changes were made (report-only run).
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32252,6 +32727,7 @@ Execution log:
 - 2026-02-02 12:45 — Drafted Standard Spec, compliance matrix, top issues, migration plan, and enforcement checklists per prompt | Evidence: Final audit report delivered in this run.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 13:10 **DONE** — Single-axis UI design system audit report completed per prompt, evidence cited, enforcement plan added.
@@ -32304,6 +32780,7 @@ Acceptance Criteria:
 - Verification commands are run with recorded output.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32318,6 +32795,7 @@ Execution log:
 - 2026-02-02 14:12 — Follow-up remediation completed under `TCK-20260202-023`; the type-check issues were resolved by investigation + preservation-first handling, and `npm run type-check` now passes.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 13:52 — **DONE** — UI audit findings remediated for scoped files; enforcement guard added; type-check failure remains in unrelated pre-existing files.
@@ -32371,6 +32849,7 @@ Acceptance Criteria:
   - `cd src/frontend && npm test`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32383,6 +32862,7 @@ Execution log:
   - `cd src/frontend && npm test` (23 passed / 168 tests)
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **IN_PROGRESS** — Code changes landed + automated verification green; awaiting manual smoothness confirmation.
@@ -32432,6 +32912,7 @@ Acceptance Criteria:
   - `cd src/frontend && npm test`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32444,6 +32925,7 @@ Execution log:
   - Snapshot: `src/frontend/e2e/alphabet_tracing_in_game.visual.spec.ts-snapshots/alphabet-game-in-game-chromium-darwin.png`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **IN_PROGRESS** — Investigation started.
@@ -32481,6 +32963,7 @@ Acceptance Criteria:
 - Running `bash scripts/audit_review.sh` completes without syntax errors when there are 0 tracked/untracked items.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32489,6 +32972,7 @@ Execution log:
 - 2026-02-02 — Verification run | Evidence: Command: `bash scripts/audit_review.sh` → Output: completes (no crash).
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **DONE** — Script runs without count/percent arithmetic errors.
@@ -32528,6 +33012,7 @@ Acceptance Criteria:
   - `cd src/frontend && npm test`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32541,6 +33026,7 @@ Execution log:
   - Command: `cd src/frontend && npm test` → Output: `23 passed / 168 tests`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **IN_PROGRESS** — Implementation started.
@@ -32585,6 +33071,7 @@ Acceptance Criteria:
     - `cd src/frontend && npm test`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32597,6 +33084,7 @@ Execution log:
   - Command: `cd src/frontend && npx playwright test e2e/alphabet_tracing_in_game.visual.spec.ts --update-snapshots` → Output: `1 passed`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **IN_PROGRESS** — Investigation started.
@@ -32639,6 +33127,7 @@ Acceptance Criteria:
   - `cd src/frontend && npm test`
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32649,6 +33138,7 @@ Execution log:
   - Command: `cd src/frontend && npm test` → Output: `23 passed / 168 tests`
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 **IN_PROGRESS** — Implementation started.
@@ -32693,6 +33183,7 @@ Acceptance Criteria:
 - Worklog updated with evidence.
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
@@ -32701,6 +33192,7 @@ Execution log:
 - 2026-02-02 14:12 — Re-ran type-check after preservation-first verification | Evidence: `npm run type-check` from `src/frontend` returned success.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 
 - 2026-02-02 14:12 — **DONE** — No variable deletions required; current code already preserves intent and passes type-check.
@@ -32723,6 +33215,7 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope:
   - Redesign Dashboard empty state when no children exist
   - Add large illustration of mascot (Pip)
@@ -32733,14 +33226,17 @@ Scope contract:
   - Empty states for other pages (Progress, Settings)
 
 Targets:
+
 - Files: `src/frontend/src/pages/Dashboard.tsx`
 
 Acceptance Criteria:
+
 - Empty state shows Pip mascot with welcoming message
 - "Add Child" button is prominent and easy to tap
 - Empty state is delightful and encourages first action
 
 Source:
+
 - Audit: `docs/audit/ui_ux_comprehensive_audit_2026-02-01.md`
 - Finding: Lines 285-289 recommend redesign of empty state
 - Evidence: Dashboard.tsx lines 435-458 show plain empty state
@@ -32863,7 +33359,7 @@ Source:
 
 - Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
 - Finding: H3 - "Progressive disclosure for Coming Soon"
-- Evidence: games_desktop_*.png - all cards look identical
+- Evidence: games*desktop*\*.png - all cards look identical
 
 ---
 
@@ -32947,11 +33443,9 @@ Source:
 
 ---
 
-
 Feb 2, 2026: Fixed test mocks for ToastContext and ConfirmContext to prevent test failures
 
 Feb 2, 2026: Fixed test mocks for ToastContext and ConfirmContext to prevent test failures
-
 
 ### TCK-20260202-036 :: Fix Profile Switching - Connect Dashboard Selection to Global State
 
@@ -32967,6 +33461,7 @@ Currently, when selecting a child profile on the Dashboard via the child selecto
 Additionally, there's no convenient way to switch profiles directly from the Games page if a profile is already selected - users must go back to Dashboard to switch profiles.
 
 Scope contract:
+
 - In-scope:
   - Connect the dashboard child selector to call `setCurrentProfile` when a child is selected
   - Add profile switching capability to the Games page (similar to the profile picker modal)
@@ -32978,14 +33473,16 @@ Scope contract:
 - Behavior change allowed: YES (improved UX)
 
 Targets:
+
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - src/frontend/src/pages/Dashboard.tsx (update setSelectedChild to also call setCurrentProfile)
   - src/frontend/src/pages/Games.tsx (add profile switching dropdown/button)
   - src/frontend/src/components/ui/ProfileSelector.tsx (NEW - reusable component)
 - Branch: main
 
 Acceptance Criteria:
+
 - [ ] When selecting a child on Dashboard, the global currentProfile is updated
 - [ ] Games page allows switching profiles even when one is already selected
 - [ ] Profile selection persists when navigating between pages
@@ -32994,17 +33491,21 @@ Acceptance Criteria:
 - [ ] All tests pass
 
 Dependencies:
+
 - None
 
 Related Audit Findings:
+
 - Dashboard profile selection disconnect
 - Games page profile switching limitation
 
 Evidence:
+
 - Dashboard.tsx: Local selectedChild state not connected to global currentProfile
 - Games.tsx: Profile picker only appears when no profile is selected
 
 Next actions:
+
 1. Update Dashboard.tsx to connect local selection to global state
 2. Create reusable ProfileSelector component
 3. Add profile switching to Games page
@@ -33012,14 +33513,15 @@ Next actions:
 5. Verify no regressions
 
 Risks/notes:
+
 - Need to ensure setCurrentProfile properly updates the global state
 - Profile switching should be intuitive and not disrupt user flow
 - Consider mobile responsiveness for profile selector dropdown
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02 00:00 UTC] **OPEN** — Ticket created to address profile switching issues
-
 
 ### TCK-20260202-037 :: Add external feedback verification and exploratory QA prompts
 
@@ -33030,6 +33532,7 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope:
   - Capture the provided External Feedback Verification & Integration prompt as a repo-native prompt with the required structure and non-negotiable rules.
   - Capture the provided Randomized Exploratory Testing prompt pack (structured checks + persona walks) with the required format.
@@ -33039,27 +33542,31 @@ Scope contract:
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): `prompts/support/external-feedback-verification-integration-v1.0.md`, `prompts/qa/randomized-exploratory-testing-pack-v1.0.md`, `prompts/README.md`, `docs/WORKLOG_TICKETS.md`
 
 Acceptance Criteria:
+
 - [ ] External Feedback prompt exists with purpose, inputs, obligatory steps (Normalize, Choose axis, etc.), and output template matching the provided format.
 - [ ] Randomized Exploratory Testing prompt exists describing structured checks, persona method, action logs, and SINGLE RUN OUTPUT FORMAT.
 - [ ] README references both prompts under the appropriate sections.
 - [ ] Worklog ticket and evidence note the addition.
 
 Dependencies:
+
 - None
 
 Execution log:
+
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 - [2026-02-02 UTC] **DONE** — Added both prompts plus README entry and recorded ticket updates; evidence: new prompt files and README link.
 
 Status updates:
+
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
 - [2026-02-02 UTC] **DONE** — Work completed, no further actions pending.
-
 
 ### TCK-20260202-038 :: Capture planning-first product + engineering prompt
 
@@ -33070,6 +33577,7 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope:
   - Capture the provided Planning-First Product + Engineering Agent prompt into `prompts/planning/`.
   - Ensure the prompt enforces the seven planning phases, output structure, and constraints described.
@@ -33079,23 +33587,96 @@ Scope contract:
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): `prompts/planning/planning-first-product-engineering-agent-v1.0.md`, `prompts/README.md`, `docs/WORKLOG_TICKETS.md`
 
 Acceptance Criteria:
+
 - [ ] Prompt file exists with sections covering purpose, input, phases 0–7, constraints, and required output order.
 - [ ] README references the new prompt under planning/engineering prompts.
 - [ ] Worklog documents the prompt addition.
 
 Dependencies:
+
 - None
 
 Execution log:
+
 - [2026-02-02 UTC] **DONE** — Added plan-first prompt, linked it in README, recorded ticket updates.
 
 Status updates:
+
 - [2026-02-02 UTC] **DONE** — Planning prompt captured and registered.
 
+
+### TCK-20260202-039 :: Track prompts + personas in documentation
+
+Type: PROCESS
+Owner: Pranay
+Created: 2026-02-02
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+- In-scope:
+  - Update `AGENTS.md` (Phase 3 documentation rules) to require recording prompts, audit axes, and personas used for each analysis run.
+  - Ensure this metadata is added to worklog entries, plan docs, and other artifacts going forward.
+- Out-of-scope:
+  - Retrofitting existing artifacts beyond the current run.
+- Behavior change allowed: YES (better traceability).
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `AGENTS.md`, `docs/WORKLOG_TICKETS.md`
+
+Acceptance Criteria:
+- [ ] AGENTS instructions include the new rule.
+- [ ] Worklog ticket documents the change.
+
+Dependencies:
+- None
+
+Execution log:
+- [2026-02-02 UTC] **DONE** — Added prompt/persona traceability requirement to AGENTS and recorded the ticket.
+
+Status updates:
+- [2026-02-02 UTC] **DONE** — Instruction change completed.
+### TCK-20260202-040 :: Expand process docs with prompt registry & templates
+
+Type: PROCESS
+Owner: Pranay
+Created: 2026-02-02
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+- In-scope:
+  - Create a prompt/persona registry (`docs/PROCESS_PROMPTS.md`) that lists approved prompts, personas, axes, and cadence reminders.
+  - Require every ticket/plan to include a prompt/persona usage table and note this template in `docs/WORKLOG_TICKETS.md` and `docs/PLAN_DOC.md`.
+  - Extend the prompt style guide with an evidence-snippet template enforcing Observed/Inferred/Unknown labeling.
+- Out-of-scope:
+  - Retrofitting all existing artifacts beyond this run.
+- Behavior change allowed: YES (better documentation).
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `docs/PROCESS_PROMPTS.md`, `docs/WORKLOG_TICKETS.md`, `docs/PLAN_DOC.md`, `docs/process/PROMPT_STYLE_GUIDE.md`, `AGENTS.md`
+
+Acceptance Criteria:
+- [ ] Process prompts doc references canonical prompts/personas and weekly `./scripts/audit_review.sh` cadence.
+- [ ] Worklog and plan docs include prompt/persona table instructions.
+- [ ] Prompt style guide documents the evidence snippet requirement.
+- [ ] AGENTS README references the new doc.
+
+Dependencies:
+- None
+
+Execution log:
+- [2026-02-02 UTC] **DONE** — Added registry, updated docs, logged instructions, captured ticket.
+
+Status updates:
+- [2026-02-02 UTC] **DONE** — Process documentation improvements complete.
 
 ### TCK-20260202-037 :: Holistic Progress Page - Complete Redesign
 
@@ -33107,6 +33688,7 @@ Priority: P0
 
 Description:
 Redesign the Progress page to be truly holistic, accurate, and engaging for both parents and kids. The current implementation has multiple critical issues:
+
 - Data is misleading (wrong calculations, mixing different metrics)
 - No unified model across activities
 - Poor UX with weak hierarchy and confusing states
@@ -33114,6 +33696,7 @@ Redesign the Progress page to be truly holistic, accurate, and engaging for both
 - Incorrect statistics and unreliable data
 
 Scope contract:
+
 - In-scope:
   - Implement unified progress model across all activities
   - Create holistic stats that aggregate meaningfully across activities
@@ -33129,8 +33712,9 @@ Scope contract:
 - Behavior change allowed: YES (major UX improvement)
 
 Targets:
+
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - src/frontend/src/pages/Progress.tsx (complete rewrite)
   - src/frontend/src/components/progress/GrowthGarden.tsx (NEW - plant visualization)
   - src/frontend/src/components/progress/SkillRadar.tsx (NEW - skill visualization)
@@ -33139,6 +33723,7 @@ Targets:
 - Branch: main
 
 Acceptance Criteria:
+
 - [ ] All data calculations fixed (sorting, unique counts, proper averages)
 - [ ] Unified progress model across all activities
 - [ ] Engaging plant growth visualization implemented
@@ -33152,20 +33737,24 @@ Acceptance Criteria:
 - [ ] All tests pass
 
 Dependencies:
+
 - None
 
 Related Audit Findings:
+
 - Progress page data integrity issues
 - Lack of holistic progress model
 - Poor UX hierarchy and layout
 - Missing kid engagement elements
 
 Evidence:
+
 - Current Progress.tsx has incorrect calculations and misleading metrics
 - No unified model across activities
 - Static, unengaging visualization
 
 Next actions:
+
 1. Create unified progress calculation utilities
 2. Implement GrowthGarden component
 3. Rewrite Progress.tsx with new holistic approach
@@ -33174,12 +33763,14 @@ Next actions:
 6. Verify sync status and error handling
 
 Risks/notes:
+
 - Need to maintain compatibility with existing data model
 - Calculations must be mathematically sound and not misleading
 - Visualization should be meaningful, not just decorative
 - Performance with large datasets needs consideration
 
 Status updates:
+
 - [2026-02-02 00:00 UTC] **OPEN** — Ticket created to address holistic progress page issues
 - [2026-02-02 22:50 UTC] **IN_PROGRESS** — Started implementation of progress page redesign and adventure map assets
 
@@ -33771,7 +34362,7 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - tests/accessibility/demo-accessibility.test.tsx - NEW tests
-  - src/frontend/src/components/* - Accessibility fixes as needed
+  - src/frontend/src/components/\* - Accessibility fixes as needed
 - Branch: main
 
 Acceptance Criteria:
@@ -34224,4 +34815,92 @@ Status updates:
 
 - [2026-02-02 23:00 UTC] **OPEN** — Ticket created as part of demo flow improvement plan
 
+---
 
+### TCK-20260203-001 :: AlphabetGamePage.tsx Multi-Persona Audit & Critical Issues
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Comprehensive audit of AlphabetGamePage.tsx (1664 lines) using 5 different persona prompts
+- Out-of-scope: Implementation of fixes (separate tickets), other game components
+- Behavior change allowed: NO (audit only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Multi-persona audit completed (Technical, Child-Centered UX, MediaPipe, UI/UX Design, Code Review)
+- [ ] Critical issues identified and prioritized (P0, P1, P2)
+- [ ] Audit artifact created: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- [ ] Implementation plan provided with phases
+- [ ] Verifier pack included for validation
+
+Source:
+
+- Audit file: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- Finding ID: Multi-Persona Audit - Component Complexity Analysis
+- Evidence: File size (1664 lines), state complexity (25+ variables), dependency analysis
+
+Execution log:
+
+- [2026-02-03 12:00 UTC] Multi-persona audit completed combining 5 different persona prompts
+- [2026-02-03 12:00 UTC] Critical issues identified: component size violation, missing error boundaries, overwhelming complexity for children
+
+Status updates:
+
+- [2026-02-03 12:00 UTC] **OPEN** — Audit completed, findings documented, ready for remediation planning
+
+---
+
+### TCK-20260203-001 :: AlphabetGamePage.tsx Multi-Persona Audit & Critical Issues
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Comprehensive audit of AlphabetGamePage.tsx (1664 lines) using 5 different persona prompts
+- Out-of-scope: Implementation of fixes (separate tickets), other game components
+- Behavior change allowed: NO (audit only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Multi-persona audit completed (Technical, Child-Centered UX, MediaPipe, UI/UX Design, Code Review)
+- [ ] Critical issues identified and prioritized (P0, P1, P2)
+- [ ] Audit artifact created: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- [ ] Implementation plan provided with phases
+- [ ] Verifier pack included for validation
+
+Source:
+
+- Audit file: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- Finding ID: Multi-Persona Audit - Component Complexity Analysis
+- Evidence: File size (1664 lines), state complexity (25+ variables), dependency analysis
+
+Execution log:
+
+- [2026-02-03 12:00 UTC] Multi-persona audit completed combining 5 different persona prompts
+- [2026-02-03 12:00 UTC] Critical issues identified: component size violation, missing error boundaries, overwhelming complexity for children
+
+Status updates:
+
+- [2026-02-03 12:00 UTC] **OPEN** — Audit completed, findings documented, ready for remediation planning

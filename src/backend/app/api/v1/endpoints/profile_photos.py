@@ -1,25 +1,13 @@
-# Implementation Log - Phase 2: Profile Photo Storage
-
-**Date**: 2026-01-31  
-**Phase**: Phase 2 - Profile Photo Storage  
-**Status**: IN_PROGRESS  
-**Priority**: P0
-
----
-
-## Backend: API Endpoints
-
-### Step 1: Create Upload Endpoint<tool_call>write<arg_key>content</arg_key><arg_value>"""
+"""
 Profile photo upload endpoint implementation
 
 Uploads photo files, validates size, stores to local filesystem (MVP approach)
 S3 integration planned for Phase 3.
 """
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import UploadFile, File
-from sqlalchemy.orm import Session
-from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 from typing import Optional
 import shutil
@@ -27,16 +15,22 @@ from datetime import datetime
 
 # Import models and schemas
 from app.db.models.profile import Profile
+from app.db.models.user import User
 from app.schemas.profile import ProfileCreate, ProfileResponse, ProfilePhotoResponse
+
+# Import dependencies
+from app.api.deps import get_current_user, get_db
+
+router = APIRouter()
 
 # Constants
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
 ALLOWED_EXTENSIONS = ['image/jpeg', 'image/png']
-TARGET_RESOLUTION = 640 480
+TARGET_RESOLUTION = (640, 480)
 LOCAL_STORAGE_DIR = Path("public/profile_photos")
 
 
-def get_db_session():
+def get_db_session() -> AsyncSession:
     """Get database session for dependency injection"""
     return Depends(get_db)
 
@@ -46,8 +40,8 @@ async def upload_profile_photo(
     profile_id: str,
     photo: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+    db: AsyncSession = Depends(get_db)
+) -> ProfilePhotoResponse:
         """Upload and associate a photo with a child profile."""
         # Verify ownership
         profile = db.query(Profile).filter(Profile.id == profile_id).first()
@@ -110,8 +104,8 @@ async def upload_profile_photo(
 async def get_profile_photo(
     profile_id: str,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+    db: AsyncSession = Depends(get_db)
+) -> ProfilePhotoResponse:
         """Get a child's profile photo URL (avatar_url first, fall back to profile_photo)."""
         profile = db.query(Profile).filter(Profile.id == profile_id).first()
         
@@ -135,8 +129,8 @@ async def get_profile_photo(
 async def delete_profile_photo(
     profile_id: str,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+    db: AsyncSession = Depends(get_db)
+) -> dict:
         """Delete a child's profile photo (both avatar_url and profile_photo)."""
         profile = db.query(Profile).filter(Profile.id == profile_id).first()
         

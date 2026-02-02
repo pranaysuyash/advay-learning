@@ -130,6 +130,7 @@ Every work unit MUST produce:
 5. **Docs updates** when you change behavior or workflow:
    - If you add or change prompts, update `prompts/README.md`.
    - If you add tooling/scripts/hooks, update `docs/SETUP.md` (and `scripts/setup.sh` if applicable).
+6. **Prompt & persona traceability**: In every artifact (worklog entry, plan doc, reality check, audit, etc.) note which prompt(s) were used—single, combined, or sequential—along with the audit axis, personas, or lenses that guided the analysis so future agents can reproduce the reasoning.
 
 ---
 
@@ -682,6 +683,7 @@ prompts/
 - `docs/ARCHITECTURE.md` - System design
 - `docs/SECURITY.md` - Security guidelines
 - `docs/SETUP.md` - Environment setup
+- `docs/PROCESS_PROMPTS.md` - Prompt/persona registry + review cadence reminders
 
 ---
 

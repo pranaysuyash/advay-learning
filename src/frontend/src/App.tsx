@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/ui/Layout';
 import { ProtectedRoute } from './components/ui/ProtectedRoute';
 import { ToastProvider } from './components/ui/Toast';
@@ -48,10 +48,14 @@ function App() {
                 <Layout><Dashboard /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/game" element={
+            <Route path="/games/alphabet-tracing" element={
               <ProtectedRoute>
                 <AlphabetGame />
               </ProtectedRoute>
+            } />
+            {/* Redirect from old route to new route for backward compatibility */}
+            <Route path="/game" element={
+              <Navigate to="/games/alphabet-tracing" replace />
             } />
             <Route path="/games" element={
               <ProtectedRoute>

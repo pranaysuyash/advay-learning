@@ -31,6 +31,19 @@ This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 - Prompts that don’t demand verification evidence
 - Copy/pasting external prompts verbatim (use patterns, not phrasing)
 
+## Evidence Snippet Template
+- Every prompt-driven artifact must include an evidence snippet (e.g., in the plan, worklog, reality check) that labels the most consequential claims as **Observed**, **Inferred**, or **Unknown**.
+- Template:
+
+```
+**Evidence snippet**:
+- **Observed**: [fact, e.g., "Home.tsx renders DemoCTA when user is unauthenticated"]
+- **Inferred**: [logical deduction, e.g., "User flow will hit DemoCTA before onboarding"]
+- **Unknown**: [gaps, e.g., "Browser behavior when camera denied is unknown"]
+```
+
+- Place this snippet near the conclusion or findings section so reviewers know what evidence supports each assertion. Refer back to this guide when authoring new prompts to keep the evidence discipline consistent.
+
 ## Related Prompts
 - Pre-flight: `prompts/workflow/pre-flight-check-v1.0.md`
 - Clean-room gate: `prompts/workflow/pre-merge-clean-room-check-v1.0.md`

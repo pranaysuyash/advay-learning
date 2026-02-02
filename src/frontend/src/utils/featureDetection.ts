@@ -51,7 +51,8 @@ export function detectWebGLSupport(): boolean {
 
   try {
     const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const gl =
+      canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     return !!gl;
   } catch {
     return false;
@@ -66,7 +67,7 @@ export async function detectCameraHardware(): Promise<boolean> {
 
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.some(device => device.kind === 'videoinput');
+    return devices.some((device) => device.kind === 'videoinput');
   } catch {
     return false;
   }
@@ -93,7 +94,9 @@ export function detectModernCameraAPI(): boolean {
 /**
  * Determines the progressive enhancement level based on detected features
  */
-export function calculateEnhancementLevel(result: FeatureDetectionResult): 'none' | 'basic' | 'full' {
+export function calculateEnhancementLevel(
+  result: FeatureDetectionResult,
+): 'none' | 'basic' | 'full' {
   if (!result.cameraSupported || !result.isSecureContext) {
     return 'none';
   }
@@ -113,17 +116,13 @@ export function calculateEnhancementLevel(result: FeatureDetectionResult): 'none
  * Comprehensive feature detection for progressive enhancement
  */
 export async function detectFeatures(): Promise<FeatureDetectionResult> {
-  const [
-    cameraSupported,
-    mediaPipeSupported,
-    webGLSupported,
-    hasCamera,
-  ] = await Promise.all([
-    Promise.resolve(detectCameraSupport()),
-    Promise.resolve(detectMediaPipeSupport()),
-    Promise.resolve(detectWebGLSupport()),
-    detectCameraHardware(),
-  ]);
+  const [cameraSupported, mediaPipeSupported, webGLSupported, hasCamera] =
+    await Promise.all([
+      Promise.resolve(detectCameraSupport()),
+      Promise.resolve(detectMediaPipeSupport()),
+      Promise.resolve(detectWebGLSupport()),
+      detectCameraHardware(),
+    ]);
 
   const isSecureContext = detectSecureContext();
   const modernCameraAPI = detectModernCameraAPI();
@@ -155,5 +154,10 @@ export function hasBasicCameraSupport(): boolean {
  * Checks if full MediaPipe functionality is available
  */
 export function hasFullEnhancementSupport(): boolean {
-  return detectCameraSupport() && detectMediaPipeSupport() && detectWebGLSupport() && detectSecureContext();
+  return (
+    detectCameraSupport() &&
+    detectMediaPipeSupport() &&
+    detectWebGLSupport() &&
+    detectSecureContext()
+  );
 }

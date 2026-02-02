@@ -77,6 +77,7 @@ export const useSettingsStore = create<SettingsState>()(
       name: 'advay-settings',
       // Do not persist transient demoMode or setter functions
       partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { demoMode, setDemoMode, setHydrated, ...rest } = state as any;
         return rest as Partial<SettingsState>;
       },

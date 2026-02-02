@@ -1,13 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
-import Home from '../Home'
-import { useAuthStore, useSettingsStore } from '../../store'
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import Home from '../Home';
+import { useAuthStore, useSettingsStore } from '../../store';
 
 beforeEach(() => {
   // Reset stores to deterministic state
   useAuthStore.setState({ isAuthenticated: false });
-  useSettingsStore.setState({ hydrated: true, onboardingCompleted: false, demoMode: false });
-})
+  useSettingsStore.setState({
+    hydrated: true,
+    onboardingCompleted: false,
+    demoMode: false,
+  });
+});
 
 describe('Home landing', () => {
   it('renders Try Demo CTA and Get Started', () => {
@@ -18,9 +22,13 @@ describe('Home landing', () => {
 
   it('clicking Try Demo sets demoMode and does not request camera permission', async () => {
     // Mock getUserMedia to fail loudly if called
-    const mockGetUserMedia = vi.fn(() => Promise.reject(new Error('should not be called')));
+    const mockGetUserMedia = vi.fn(() =>
+      Promise.reject(new Error('should not be called')),
+    );
     // @ts-ignore - define minimal mediaDevices
-    (globalThis as any).navigator = { mediaDevices: { getUserMedia: mockGetUserMedia } };
+    (globalThis as any).navigator = {
+      mediaDevices: { getUserMedia: mockGetUserMedia },
+    };
 
     render(<Home />);
 

@@ -36,15 +36,18 @@ A lightweight audit of the Home landing page identified several high-priority UX
 ## Recommendations
 
 P0 (High priority):
+
 - Implement a hydration guard when deciding whether to show the onboarding modal/overlay to eliminate flash.
 - Add a prominent "Try Demo" CTA (primary or secondary depending on design) which launches a no-camera demo session. Ensure route or component triggers a demo-mode store flag (e.g., `sessionStore.demoMode = true`) that avoids camera permission prompts.
 - Anchor mascot to the page container and apply responsive rules (hide on small screens or move below fold). Ensure it is aria-hidden and does not obstruct interactive elements.
 
 P1 (Medium priority):
+
 - Add a short trust strip near the demo CTA: "Try the demo — no camera or sign-up required".
 - Add aria-hidden to decorative mascot and ensure CTAs have text labels at all breakpoints.
 
 ## Acceptance criteria (for P0):
+
 - Onboarding does not flash before hydration completes (testable by simulating immediate rehydration and verifying no flash).
 - "Try Demo" CTA is visible and launches an in-page demo without request for camera or auth; landing demo completes and shows first-screen content.
 - Mascot non-overlapping on small screens (Playwright screenshot assertion for mobile viewport).
@@ -62,14 +65,16 @@ P1 (Medium priority):
   - Flow: click Try Demo -> ensure no camera permission requested -> show demo scene.
 
 ## Files to modify
+
 - `src/frontend/src/pages/Home.tsx` (core)
 - `src/frontend/src/components/Mascot.tsx` (anchor + aria-hidden)
 - `src/frontend/src/components/OnboardingFlow.tsx` (hydrate guard)
 - Add tests in `src/frontend/src/pages/__tests__/Home.*` and Playwright e2e under `src/frontend/e2e/home-landing.spec.ts`
 
 ## Notes
+
 - Follow the repo audit-to-ticket policy: create a TCK ticket before making implementation changes. See `docs/AGENTS.md` for the ticket template and workflow.
 
 ---
 
-*Audit artifact created by GitHub Copilot. Evidence labels: Observed / Inferred as noted above.*
+_Audit artifact created by GitHub Copilot. Evidence labels: Observed / Inferred as noted above._

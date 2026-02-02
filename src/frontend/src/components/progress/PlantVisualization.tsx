@@ -9,7 +9,7 @@ interface PlantVisualizationProps {
 export function PlantVisualization({
   progressPercentage,
   growthStage,
-  className = ''
+  className = '',
 }: PlantVisualizationProps) {
   // Plant growth stages with SVG paths
   const getPlantPath = (stage: string) => {
@@ -31,9 +31,12 @@ export function PlantVisualization({
 
   const getFlowerCount = (stage: string) => {
     switch (stage) {
-      case 'blooming': return 3;
-      case 'mature': return 1;
-      default: return 0;
+      case 'blooming':
+        return 3;
+      case 'mature':
+        return 1;
+      default:
+        return 0;
     }
   };
 
@@ -43,24 +46,24 @@ export function PlantVisualization({
   return (
     <div className={`relative ${className}`}>
       {/* Soil */}
-      <div className="w-full h-4 bg-amber-600 rounded-b-lg mb-2" />
+      <div className='w-full h-4 bg-amber-600 rounded-b-lg mb-2' />
 
       {/* Plant stem and leaves */}
       <svg
-        viewBox="0 0 100 100"
-        className="w-full h-32"
+        viewBox='0 0 100 100'
+        className='w-full h-32'
         style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
       >
         {/* Main stem */}
         <motion.path
           d={plantPath}
-          stroke="#22c55e"
-          strokeWidth="3"
-          fill="none"
-          strokeLinecap="round"
+          stroke='#22c55e'
+          strokeWidth='3'
+          fill='none'
+          strokeLinecap='round'
           initial={{ pathLength: 0 }}
           animate={{ pathLength: progressPercentage / 100 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          transition={{ duration: 1.5, ease: 'easeInOut' }}
         />
 
         {/* Flowers */}
@@ -71,8 +74,8 @@ export function PlantVisualization({
                 key={i}
                 cx={60 + i * 10}
                 cy={10 + i * 5}
-                r="3"
-                fill="#fbbf24"
+                r='3'
+                fill='#fbbf24'
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 1 + i * 0.2, duration: 0.5 }}
@@ -83,19 +86,17 @@ export function PlantVisualization({
       </svg>
 
       {/* Progress indicator */}
-      <div className="text-center mt-2">
-        <div className="text-sm text-white/80 mb-1">
-          Growth Progress
-        </div>
-        <div className="w-full bg-white/30 rounded-full h-2">
+      <div className='text-center mt-2'>
+        <div className='text-sm text-white/80 mb-1'>Growth Progress</div>
+        <div className='w-full bg-white/30 rounded-full h-2'>
           <motion.div
-            className="bg-green-500 h-2 rounded-full"
+            className='bg-green-500 h-2 rounded-full'
             initial={{ width: 0 }}
             animate={{ width: `${progressPercentage}%` }}
             transition={{ duration: 1, delay: 0.5 }}
           />
         </div>
-        <div className="text-xs text-white/60 mt-1">
+        <div className='text-xs text-white/60 mt-1'>
           {progressPercentage}% Complete
         </div>
       </div>

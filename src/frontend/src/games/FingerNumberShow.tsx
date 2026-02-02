@@ -662,7 +662,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
                             : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
                         }`}
                       >
-                        <span>{lang.flagIcon}</span>
+                        <img src={lang.flagIcon} alt={`${lang.name} flag`} className="w-4 h-4" />
                         <span>{lang.name}</span>
                       </button>
                     ))}

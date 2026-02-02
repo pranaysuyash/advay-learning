@@ -14,11 +14,11 @@ export function Home() {
   const reducedMotion = useReducedMotion();
 
   const startDemo = () => {
-    // Start a no-camera demo session and navigate to dashboard (transient)
+    // Start a no-camera demo session and navigate to games (transient)
     setDemoMode(true);
     // Ensure camera remains disabled for privacy in demo
     // (the demo route/component should respect this setting and not request permission)
-    navigate('/dashboard');
+    navigate('/games');
   };
 
   // Redirect to dashboard if already logged in
@@ -39,21 +39,27 @@ export function Home() {
             Learn with Your Hands
           </h1>
           <p className='text-xl text-text-secondary mb-8 max-w-2xl mx-auto'>
-            An AI-powered educational platform where children can learn alphabets,
-            words, and objects through interactive hand tracking and drawing.
+            An AI-powered educational platform where children can learn
+            alphabets, words, and objects through interactive hand tracking and
+            drawing.
           </p>
 
-          <div className='flex gap-4 justify-center mb-8'>
+          <div className='flex flex-col sm:flex-row gap-4 justify-center mb-8'>
             <Button
               size='lg'
               icon='sparkles'
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/games')}
             >
-              Get Started
+              Play Games
             </Button>
 
-            <Button size='lg' variant='secondary' onClick={startDemo} aria-label='Try demo - no camera required'>
-              Try Demo
+            <Button
+              size='lg'
+              variant='primary'
+              onClick={startDemo}
+              aria-label='Try demo - no account required'
+            >
+              ⚡ Start Playing
             </Button>
           </div>
         </motion.div>
@@ -96,7 +102,11 @@ export function Home() {
                         className='text-pip-orange'
                       />
                     ) : (
-                      <UIIcon name='trophy' size={28} className='text-warning' />
+                      <UIIcon
+                        name='trophy'
+                        size={28}
+                        className='text-warning'
+                      />
                     )
                   }
                 />

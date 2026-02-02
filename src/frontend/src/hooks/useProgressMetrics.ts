@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import { useProgressStore } from '../store';
-import { calculateUnifiedMetrics, calculateHolisticScorecard, calculateHonestStats, calculatePlantGrowth } from '../utils/progressCalculations';
+import {
+  calculateUnifiedMetrics,
+  calculateHolisticScorecard,
+  calculateHonestStats,
+  calculatePlantGrowth,
+} from '../utils/progressCalculations';
 import { ProgressItem } from '../types/progress';
 
 export function useProgressMetrics(progress: ProgressItem[]) {
@@ -28,6 +33,6 @@ export function useProgressMetrics(progress: ProgressItem[]) {
     scorecard,
     honestStats,
     plantGrowth,
-    letterProgress
+    letterProgress,
   };
 }

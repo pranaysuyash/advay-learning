@@ -63,56 +63,65 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
     return () => window.removeEventListener('resize', resizeCanvas);
   }, [shouldShowDemo, currentLetter]);
 
-  const getCanvasCoordinates = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+  const getCanvasCoordinates = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return { x: 0, y: 0 };
 
-    const rect = canvas.getBoundingClientRect();
-    let clientX: number, clientY: number;
+      const rect = canvas.getBoundingClientRect();
+      let clientX: number, clientY: number;
 
-    if ('touches' in e) {
-      clientX = e.touches[0]?.clientX || e.changedTouches[0]?.clientX || 0;
-      clientY = e.touches[0]?.clientY || e.changedTouches[0]?.clientY || 0;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
+      if ('touches' in e) {
+        clientX = e.touches[0]?.clientX || e.changedTouches[0]?.clientX || 0;
+        clientY = e.touches[0]?.clientY || e.changedTouches[0]?.clientY || 0;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
 
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  }, []);
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+      };
+    },
+    [],
+  );
 
-  const startDrawing = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
-    setIsDrawing(true);
-    const coords = getCanvasCoordinates(e);
-    setTouchPoints([{ x: coords.x, y: coords.y, timestamp: Date.now() }]);
-  }, [getCanvasCoordinates]);
+  const startDrawing = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      e.preventDefault();
+      setIsDrawing(true);
+      const coords = getCanvasCoordinates(e);
+      setTouchPoints([{ x: coords.x, y: coords.y, timestamp: Date.now() }]);
+    },
+    [getCanvasCoordinates],
+  );
 
-  const draw = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
-    if (!isDrawing) return;
+  const draw = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      e.preventDefault();
+      if (!isDrawing) return;
 
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (!canvas || !ctx) return;
 
-    const coords = getCanvasCoordinates(e);
-    const newPoint = { x: coords.x, y: coords.y, timestamp: Date.now() };
+      const coords = getCanvasCoordinates(e);
+      const newPoint = { x: coords.x, y: coords.y, timestamp: Date.now() };
 
-    // Draw line
-    ctx.beginPath();
-    if (touchPoints.length > 0) {
-      const lastPoint = touchPoints[touchPoints.length - 1];
-      ctx.moveTo(lastPoint.x, lastPoint.y);
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
-    }
+      // Draw line
+      ctx.beginPath();
+      if (touchPoints.length > 0) {
+        const lastPoint = touchPoints[touchPoints.length - 1];
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(coords.x, coords.y);
+        ctx.stroke();
+      }
 
-    setTouchPoints(prev => [...prev, newPoint]);
-  }, [isDrawing, getCanvasCoordinates, touchPoints]);
+      setTouchPoints((prev) => [...prev, newPoint]);
+    },
+    [isDrawing, getCanvasCoordinates, touchPoints],
+  );
 
   const stopDrawing = useCallback(() => {
     if (!isDrawing) return;
@@ -120,8 +129,8 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
 
     // Simple scoring based on number of touch points (more points = better attempt)
     const attemptScore = Math.min(touchPoints.length / 10, 10); // Max 10 points
-    setScore(prev => prev + Math.round(attemptScore));
-    setAttempts(prev => prev + 1);
+    setScore((prev) => prev + Math.round(attemptScore));
+    setAttempts((prev) => prev + 1);
 
     // Clear touch points after a delay
     setTimeout(() => {
@@ -168,14 +177,14 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="max-w-4xl mx-auto p-6 space-y-6"
+        className='max-w-4xl mx-auto p-6 space-y-6'
       >
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-text-primary">
+        <div className='text-center space-y-2'>
+          <h2 className='text-3xl font-bold text-text-primary'>
             Touch & Draw Demo
           </h2>
-          <p className="text-text-secondary">
+          <p className='text-text-secondary'>
             Practice letter tracing with touch gestures
           </p>
         </div>
@@ -187,15 +196,15 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+              className='bg-blue-50 border border-blue-200 rounded-lg p-4'
             >
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-blue-900 flex items-center gap-2">
-                    <UIIcon name="sparkles" size={20} />
+              <div className='flex justify-between items-start'>
+                <div className='space-y-2'>
+                  <h3 className='font-semibold text-blue-900 flex items-center gap-2'>
+                    <UIIcon name='sparkles' size={20} />
                     How to Play
                   </h3>
-                  <ul className="text-sm text-blue-800 space-y-1">
+                  <ul className='text-sm text-blue-800 space-y-1'>
                     <li>• Touch and drag on the canvas to draw the letter</li>
                     <li>• Try to trace the shape of the current letter</li>
                     <li>• Longer traces earn more points!</li>
@@ -203,12 +212,12 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
                   </ul>
                 </div>
                 <Button
-                  size="sm"
-                  variant="ghost"
+                  size='sm'
+                  variant='ghost'
                   onClick={() => setShowInstructions(false)}
-                  aria-label="Hide instructions"
+                  aria-label='Hide instructions'
                 >
-                  <UIIcon name="x" size={16} />
+                  <UIIcon name='x' size={16} />
                 </Button>
               </div>
             </motion.div>
@@ -216,22 +225,22 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
         </AnimatePresence>
 
         {/* Current Letter Display */}
-        <div className="text-center">
-          <div className="inline-block bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 shadow-lg">
-            <span className="text-8xl font-bold text-gray-800 select-none">
+        <div className='text-center'>
+          <div className='inline-block bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 shadow-lg'>
+            <span className='text-8xl font-bold text-gray-800 select-none'>
               {currentLetter}
             </span>
           </div>
-          <p className="mt-4 text-text-secondary">
+          <p className='mt-4 text-text-secondary'>
             Trace this letter by touching and dragging on the canvas below
           </p>
         </div>
 
         {/* Drawing Canvas */}
-        <div className="relative">
+        <div className='relative'>
           <canvas
             ref={canvasRef}
-            className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg bg-white touch-none"
+            className='w-full h-64 border-2 border-dashed border-gray-300 rounded-lg bg-white touch-none'
             style={{ touchAction: 'none' }}
             onMouseDown={startDrawing}
             onMouseMove={draw}
@@ -241,7 +250,7 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
             aria-label={`Drawing canvas for letter ${currentLetter}`}
-            role="img"
+            role='img'
           />
 
           {/* Touch indicator */}
@@ -249,7 +258,7 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium"
+              className='absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium'
             >
               Drawing...
             </motion.div>
@@ -257,75 +266,78 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
         </div>
 
         {/* Score and Progress */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm border">
-            <div className="text-2xl font-bold text-blue-600">{score}</div>
-            <div className="text-sm text-text-secondary">Points</div>
+        <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+            <div className='text-2xl font-bold text-blue-600'>{score}</div>
+            <div className='text-sm text-text-secondary'>Points</div>
           </div>
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm border">
-            <div className="text-2xl font-bold text-green-600">{attempts}</div>
-            <div className="text-sm text-text-secondary">Attempts</div>
+          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+            <div className='text-2xl font-bold text-green-600'>{attempts}</div>
+            <div className='text-sm text-text-secondary'>Attempts</div>
           </div>
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm border">
-            <div className="text-2xl font-bold text-purple-600">
+          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+            <div className='text-2xl font-bold text-purple-600'>
               {letters.indexOf(currentLetter) + 1}
             </div>
-            <div className="text-sm text-text-secondary">Letter</div>
+            <div className='text-sm text-text-secondary'>Letter</div>
           </div>
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm border">
-            <div className="text-2xl font-bold text-orange-600">
-              {Math.round((letters.indexOf(currentLetter) + 1) / letters.length * 100)}%
+          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+            <div className='text-2xl font-bold text-orange-600'>
+              {Math.round(
+                ((letters.indexOf(currentLetter) + 1) / letters.length) * 100,
+              )}
+              %
             </div>
-            <div className="text-sm text-text-secondary">Progress</div>
+            <div className='text-sm text-text-secondary'>Progress</div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Button
             onClick={nextLetter}
             disabled={attempts === 0}
-            className="flex-1 sm:flex-none"
+            className='flex-1 sm:flex-none'
           >
-            <UIIcon name="chevron-down" size={16} className="mr-2" />
+            <UIIcon name='chevron-down' size={16} className='mr-2' />
             Next Letter
           </Button>
 
           <Button
-            variant="secondary"
+            variant='secondary'
             onClick={resetDemo}
-            className="flex-1 sm:flex-none"
+            className='flex-1 sm:flex-none'
           >
-            <UIIcon name="rotate-ccw" size={16} className="mr-2" />
+            <UIIcon name='rotate-ccw' size={16} className='mr-2' />
             Reset
           </Button>
 
           {!showInstructions && (
             <Button
-              variant="ghost"
+              variant='ghost'
               onClick={() => setShowInstructions(true)}
-              className="flex-1 sm:flex-none"
+              className='flex-1 sm:flex-none'
             >
-              <UIIcon name="sparkles" size={16} className="mr-2" />
+              <UIIcon name='sparkles' size={16} className='mr-2' />
               Show Help
             </Button>
           )}
 
           <Button
-            variant="secondary"
+            variant='secondary'
             onClick={onExit}
-            className="flex-1 sm:flex-none"
+            className='flex-1 sm:flex-none'
           >
-            <UIIcon name="x" size={16} className="mr-2" />
+            <UIIcon name='x' size={16} className='mr-2' />
             Exit Demo
           </Button>
         </div>
 
         {/* Accessibility note */}
-        <div className="text-center text-sm text-text-secondary">
+        <div className='text-center text-sm text-text-secondary'>
           <p>
-            This demo works entirely with touch input - no camera required!
-            Try it on your phone or tablet for the best experience.
+            This demo works entirely with touch input - no camera required! Try
+            it on your phone or tablet for the best experience.
           </p>
         </div>
       </motion.div>

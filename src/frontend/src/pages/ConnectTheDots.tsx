@@ -98,8 +98,13 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   useEffect(() => {
     const checkCameraPermission = async () => {
       try {
-        if (!navigator.permissions || typeof navigator.permissions.query !== 'function') {
-          console.warn('[ConnectTheDots] navigator.permissions.query not available');
+        if (
+          !navigator.permissions ||
+          typeof navigator.permissions.query !== 'function'
+        ) {
+          console.warn(
+            '[ConnectTheDots] navigator.permissions.query not available',
+          );
         } else {
           const result = await navigator.permissions.query({
             name: 'camera' as PermissionName,
@@ -191,12 +196,14 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
     // FPS throttle for vision processing (15 fps = ~66ms intervals)
     if (now - lastProcessedAtRef.current < 1000 / 15) {
-      if (loopActiveRef.current) animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      if (loopActiveRef.current)
+        animationFrameRef.current = requestAnimationFrame(runHandTracking);
       return;
     }
 
     if (video.readyState < 2) {
-      if (loopActiveRef.current) animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      if (loopActiveRef.current)
+        animationFrameRef.current = requestAnimationFrame(runHandTracking);
       return;
     }
 

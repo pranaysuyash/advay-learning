@@ -16,7 +16,13 @@ import { AdventureMap } from '../components/Map';
 import { StoryModal } from '../components/StoryModal';
 import { useStoryStore } from '../store/storyStore';
 import { QUESTS, getQuestsByIsland, isIslandUnlocked } from '../data/quests';
-import { EmptyState, TipsSection, StatsBar, AddChildModal, EditProfileModal } from '../components/dashboard';
+import {
+  EmptyState,
+  TipsSection,
+  StatsBar,
+  AddChildModal,
+  EditProfileModal,
+} from '../components/dashboard';
 import { DemoInterface } from '../components/demo/DemoInterface';
 import { hasBasicCameraSupport } from '../utils/featureDetection';
 
@@ -52,8 +58,13 @@ interface LanguageProgress {
 
 export const Dashboard = memo(function DashboardComponent() {
   useAuthStore();
-  const { profiles, fetchProfiles, createProfile, updateProfile, setCurrentProfile } =
-    useProfileStore();
+  const {
+    profiles,
+    fetchProfiles,
+    createProfile,
+    updateProfile,
+    setCurrentProfile,
+  } = useProfileStore();
   const toast = useToast();
   const { setDemoMode, demoMode } = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
@@ -73,7 +84,14 @@ export const Dashboard = memo(function DashboardComponent() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Story/Map prototype state
-  const { startQuest, completeQuest, totalXp, badges, completedQuests, unlockedIslands } = useStoryStore();
+  const {
+    startQuest,
+    completeQuest,
+    totalXp,
+    badges,
+    completedQuests,
+    unlockedIslands,
+  } = useStoryStore();
   const [showStoryModal, setShowStoryModal] = useState(false);
   const navigate = useNavigate();
 
@@ -82,10 +100,16 @@ export const Dashboard = memo(function DashboardComponent() {
     const totalQuests = QUESTS.length;
     const completedCount = completedIds.size;
     const unlockedCount = unlockedIslands.length;
-    const currentIslandId = unlockedIslands[unlockedIslands.length - 1] ?? 'alphabet-lighthouse';
+    const currentIslandId =
+      unlockedIslands[unlockedIslands.length - 1] ?? 'alphabet-lighthouse';
     const currentIslandQuests = getQuestsByIsland(currentIslandId);
-    const nextUnlockableIslandId = ['number-nook', 'treasure-bay', 'star-studio'].find(
-      (id) => isIslandUnlocked(id, unlockedIslands) && !unlockedIslands.includes(id),
+    const nextUnlockableIslandId = [
+      'number-nook',
+      'treasure-bay',
+      'star-studio',
+    ].find(
+      (id) =>
+        isIslandUnlocked(id, unlockedIslands) && !unlockedIslands.includes(id),
     );
     return {
       completedCount,
@@ -360,7 +384,10 @@ export const Dashboard = memo(function DashboardComponent() {
         {demoMode && !hasBasicCameraSupport() && (
           <DemoInterface
             onComplete={() => {
-              toast.showToast('Demo completed! Ready to try with camera?', 'success');
+              toast.showToast(
+                'Demo completed! Ready to try with camera?',
+                'success',
+              );
             }}
             onExit={() => {
               setDemoMode(false);
@@ -393,12 +420,12 @@ export const Dashboard = memo(function DashboardComponent() {
               <div key={child.id} className='flex items-center'>
                 <button
                   onClick={() => {
-  const profile = profiles.find(p => p.id === child.id);
-  if (profile) {
-    setCurrentProfile(profile);
-  }
-  setSelectedChild(child.id);
-}}
+                    const profile = profiles.find((p) => p.id === child.id);
+                    if (profile) {
+                      setCurrentProfile(profile);
+                    }
+                    setSelectedChild(child.id);
+                  }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
                     selectedChildData?.id === child.id
                       ? 'bg-pip-orange text-white shadow-soft'
@@ -467,11 +494,13 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
                 <div>
                   <h3 className='font-bold text-white'>Continue Learning</h3>
-                  <p className='text-sm text-white/70'>Pick up where you left off!</p>
+                  <p className='text-sm text-white/70'>
+                    Pick up where you left off!
+                  </p>
                 </div>
               </div>
               <Link
-                to='/game'
+                to='/games/alphabet-tracing'
                 className='px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-105 transition-transform'
               >
                 Play Now →
@@ -526,13 +555,13 @@ export const Dashboard = memo(function DashboardComponent() {
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
                             <span className='text-sm flex items-center gap-2'>
-                                <UIIcon
-                                  src={letter.icon}
-                                  alt={letter.name}
-                                  size={16}
-                                  className='opacity-80'
-                                  fallback={letter.emoji || '✨'}
-                                />
+                              <UIIcon
+                                src={letter.icon}
+                                alt={letter.name}
+                                size={16}
+                                className='opacity-80'
+                                fallback={letter.emoji || '✨'}
+                              />
                               {letter.name}
                             </span>
                             <span className='text-sm text-slate-600'>
@@ -647,28 +676,33 @@ export const Dashboard = memo(function DashboardComponent() {
                   </h2>
                   <div className='flex items-center gap-2 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full'>
                     <span className='text-amber-400'>⭐</span>
-                    <span className='text-amber-400 font-bold text-sm'>{totalXp} XP</span>
+                    <span className='text-amber-400 font-bold text-sm'>
+                      {totalXp} XP
+                    </span>
                   </div>
                 </div>
 
-                  <AdventureMap />
+                <AdventureMap />
 
-                  <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
-                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                      Quests: {questSummary.completedCount}/{questSummary.totalQuests}
+                <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
+                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                    Quests: {questSummary.completedCount}/
+                    {questSummary.totalQuests}
+                  </span>
+                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                    Islands: {questSummary.unlockedCount}
+                  </span>
+                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                    Current island quests:{' '}
+                    {questSummary.currentIslandQuestCount}
+                  </span>
+                  {questSummary.nextUnlockableIslandId && (
+                    <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
+                      Next island available:{' '}
+                      {questSummary.nextUnlockableIslandId}
                     </span>
-                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                      Islands: {questSummary.unlockedCount}
-                    </span>
-                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                      Current island quests: {questSummary.currentIslandQuestCount}
-                    </span>
-                    {questSummary.nextUnlockableIslandId && (
-                      <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
-                        Next island available: {questSummary.nextUnlockableIslandId}
-                      </span>
-                    )}
-                  </div>
+                  )}
+                </div>
 
                 {/* Quick Actions */}
                 <div className='mt-4 flex gap-2'>
@@ -676,25 +710,27 @@ export const Dashboard = memo(function DashboardComponent() {
                     type='button'
                     onClick={() => {
                       startQuest('quest-a-to-z');
-                      navigate('/game?quest=quest-a-to-z');
+                      navigate('/games/alphabet-tracing?quest=quest-a-to-z');
                     }}
                     className='flex-1 px-3 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-[1.02] transition-transform'
                   >
                     Start Alphabet Quest
                   </button>
-                    <Link
-                      to='/games'
-                      className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
-                    >
-                      <UIIcon name='search' size={16} />
-                      All Games
-                    </Link>
+                  <Link
+                    to='/games'
+                    className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
+                  >
+                    <UIIcon name='search' size={16} />
+                    All Games
+                  </Link>
                 </div>
 
                 {/* Badges Summary */}
                 {badges.length > 0 && (
                   <div className='mt-4 p-3 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl'>
-                    <p className='text-xs text-amber-400 font-semibold mb-2'>🏆 Badges Earned</p>
+                    <p className='text-xs text-amber-400 font-semibold mb-2'>
+                      🏆 Badges Earned
+                    </p>
                     <div className='flex flex-wrap gap-1'>
                       {badges.slice(0, 6).map((badge) => (
                         <span
@@ -787,7 +823,6 @@ export const Dashboard = memo(function DashboardComponent() {
             badge='Explorer Badge'
           />
         )}
-
       </motion.div>
     </section>
   );

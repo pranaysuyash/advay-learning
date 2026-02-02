@@ -25,17 +25,18 @@ describe('ConnectTheDots component - regression', () => {
     expect(canvas).toBeTruthy();
 
     // Ensure bounding rect matches the canvas internal resolution used by the component
-    canvas.getBoundingClientRect = () => ({
-      left: 0,
-      top: 0,
-      width: 800,
-      height: 600,
-      right: 800,
-      bottom: 600,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+    canvas.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width: 800,
+        height: 600,
+        right: 800,
+        bottom: 600,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      }) as DOMRect;
 
     // Locate the circle for dot 1 via its text's parent <g>
     const group = firstDotText.closest('g');
@@ -81,17 +82,18 @@ describe('ConnectTheDots component - regression', () => {
     const cy = Number(circle.getAttribute('cy'));
 
     const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-    canvas.getBoundingClientRect = () => ({
-      left: 0,
-      top: 0,
-      width: 800,
-      height: 600,
-      right: 800,
-      bottom: 600,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+    canvas.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width: 800,
+        height: 600,
+        right: 800,
+        bottom: 600,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      }) as DOMRect;
 
     // Fire multiple quick clicks at the same position
     fireEvent.click(canvas, { clientX: cx, clientY: cy });

@@ -1,14 +1,17 @@
 # Prompt: Implement Home Landing P0 Improvements (v1.0)
 
 ## Goal
+
 Implement the P0 items from the Home landing audit: hydration-guarded onboarding, "Try Demo" CTA (no-camera demo flow), responsive mascot anchoring and accessibility fixes. Add unit tests and a Playwright check.
 
 ## Scope
+
 - Modify: `src/pages/Home.tsx`, `src/components/Mascot.tsx`, `src/components/OnboardingFlow.tsx`
 - Add tests: `src/pages/__tests__/Home.*`, Playwright e2e under `src/e2e/home-landing.spec.ts`
 - Update docs: `docs/IMPLEMENTATION_HOME.md` with a short change summary and verification steps
 
 ## Implementation plan
+
 1. Create small ticket and link this prompt: TCK-20260202-014 (already created).
 2. Add store hydration guard in `OnboardingFlow` so it only renders after store.hydrated or explicit user click.
 3. Add `Try Demo` CTA component; clicking it should set `sessionStore.startDemo()` (or `sessionStore.demoMode = true`) and navigate to the demo route (or render demo inline) without requesting camera permissions.
@@ -23,14 +26,16 @@ Implement the P0 items from the Home landing audit: hydration-guarded onboarding
 7. Document changes in `docs/IMPLEMENTATION_HOME.md`.
 
 ## Commands & verification
+
 - Run unit tests: `pnpm vitest -r` (or configured runner)
 - Run Playwright test: `pnpm playwright test e2e/home-landing.spec.ts`
 - Type-check & lint: `pnpm -w run typecheck && pnpm -w run lint`
 
 ## Acceptance criteria
+
 - All tests pass and Playwright assertions succeed.
 - No onboarding flash on cold load; demo CTA works without camera permission requests; mascot not overlapping CTAs on mobile.
 
 ---
 
-*Use this prompt to drive an implementation PR. Keep changes small and test-driven; follow the repo's preservation-first policy in `docs/AGENTS.md`.*
+_Use this prompt to drive an implementation PR. Keep changes small and test-driven; follow the repo's preservation-first policy in `docs/AGENTS.md`._

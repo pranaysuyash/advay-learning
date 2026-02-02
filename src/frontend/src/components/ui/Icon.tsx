@@ -2,11 +2,37 @@ import { useState } from 'react';
 import { Icon as AssetIcon } from '../Icon';
 
 export type IconName =
-  | 'letters' | 'target' | 'timer' | 'flame' | 'hand' | 'pencil' | 'home'
-  | 'check' | 'lock' | 'unlock' | 'warning' | 'download' | 'hourglass'
-  | 'circle' | 'sparkles' | 'heart' | 'star' | 'camera' | 'trophy'
-  | 'coffee' | 'drop' | 'body' | 'eye' | 'eye-off' | 'back' | 'x'
-  | 'play' | 'search' | 'rotate-ccw' | 'mouse-pointer' | 'chevron-down';
+  | 'letters'
+  | 'target'
+  | 'timer'
+  | 'flame'
+  | 'hand'
+  | 'pencil'
+  | 'home'
+  | 'check'
+  | 'lock'
+  | 'unlock'
+  | 'warning'
+  | 'download'
+  | 'hourglass'
+  | 'circle'
+  | 'sparkles'
+  | 'heart'
+  | 'star'
+  | 'camera'
+  | 'trophy'
+  | 'coffee'
+  | 'drop'
+  | 'body'
+  | 'eye'
+  | 'eye-off'
+  | 'back'
+  | 'x'
+  | 'play'
+  | 'search'
+  | 'rotate-ccw'
+  | 'mouse-pointer'
+  | 'chevron-down';
 
 type UIIconNamedProps = {
   name: IconName;
