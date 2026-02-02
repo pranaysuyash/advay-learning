@@ -31536,7 +31536,307 @@ Evidence:
 - `docs/process/UI_DESIGN_SYSTEM_ENFORCEMENT.md`
 - Command: `cd src/frontend && npm run type-check` → Output: success
 - Command: `cd src/frontend && npm test` → Output: `23 passed (167 tests)`
+
+---
+
+### TCK-20260202-024 :: AlphabetGame tracing regression — restore proven smoothing improvements
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-02
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope:
+  - Identify the specific tracing smoothness/quality improvements that existed in prior commits and were expected to carry forward into the refactored `AlphabetGame` route.
+  - Re-apply those proven improvements to the current refactor entrypoint (`src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`) without introducing new mechanics.
+  - Add deterministic verification artifacts (tests and/or reproducible local steps) to prove tracing behavior is restored.
+- Out-of-scope:
+  - Redesigning the entire scoring algorithm or adding new features unrelated to smoothness/regression.
+  - Non-AlphabetGame gameplay changes (other games).
+- Behavior change allowed: YES (bug/regression fix to restore prior tracing quality).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` (primary), plus minimal related utilities/tests as needed.
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- “Old improvements” are identified with concrete evidence (git commit(s) + excerpt(s)) and mapped to code changes in the refactor.
+- Tracing is visibly smoother and less jittery during real play (manual repro steps documented).
+- Automated checks pass:
+  - `cd src/frontend && npm run type-check`
+  - `cd src/frontend && npm test`
+
+Execution log:
+
+- 2026-02-02 — Ticket created from user-reported regression: tracing quality in refactored AlphabetGame does not match previously improved behavior.
+- 2026-02-02 — Located prior “proven” tracing improvements in commit `5742d1c` (“Restore lost tracing improvements”): requestAnimationFrame loop + per-segment moving-average smoothing | Evidence: `git show 5742d1c:src/frontend/src/pages/AlphabetGame.tsx` (see `smoothPoints` + rAF loop).
+- 2026-02-02 — Re-applied improvements to refactor: drawing smoothing is now applied in shared `drawSegments()` and AlphabetGame now uses rAF loop (not FPS-limited `useGameLoop`) | Evidence: `src/frontend/src/utils/drawing.ts`, `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`.
+- 2026-02-02 — Added deterministic test proving smoothing is applied when drawing segments | Evidence: `src/frontend/src/utils/__tests__/drawing.test.ts`.
+- 2026-02-02 — Verification run | Evidence:
+  - `cd src/frontend && npm run type-check` (success)
+  - `cd src/frontend && npm test` (23 passed / 168 tests)
+
+Status updates:
+
+- 2026-02-02 **IN_PROGRESS** — Code changes landed + automated verification green; awaiting manual smoothness confirmation.
+
+Manual verification (required before marking DONE):
+
+1. Run: `cd src/frontend && npm run dev`
+2. Go to: `/dashboard` → pick a child → `/games` → “Alphabet Tracing”
+3. Start game and trace with camera pinch; verify:
+   - Stroke appears visually smoothed (less jagged “polyline” look)
+   - Motion feels continuous (no obvious stutter from loop timing)
+   - Releasing pinch cleanly breaks the stroke (no stray lines)
+
+---
+
+### TCK-20260202-025 :: AlphabetGame visual regression — overlays/letter hint obscures gameplay
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-02
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope:
+  - Fix AlphabetGame visual/UI regressions where overlays or the letter hint make gameplay unusable (e.g., center prompt/letter remains visible while playing, duplicated/overlapping controls, etc.).
+  - Add a Playwright screenshot check to capture the in-game UI overlay state (without relying on a real camera stream).
+- Out-of-scope:
+  - Refactoring the entire GameLayout system.
+  - Redesigning game mechanics or scoring.
+- Behavior change allowed: YES (UI fixes to restore correct gameplay visibility).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`, `src/frontend/src/components/layout/GameLayout.tsx` (if needed), and Playwright test(s).
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- In-game overlay state shows only the intended UI elements (no persistent giant letter prompt obscuring the camera view during play).
+- Controls do not visually overlap/conflict.
+- Proof:
+  - Playwright screenshot(s) captured for the in-game state
+  - `cd src/frontend && npm run type-check`
+  - `cd src/frontend && npm test`
+
+Execution log:
+
+- 2026-02-02 — Ticket created from user-provided screenshot showing AlphabetGame UI is visually broken (giant letter overlay obscuring gameplay).
+- 2026-02-02 — Root cause identified: DOM-based giant hint letter overlay rendered inside in-game view (`.alphabet-hint-letter`) | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` (removed block previously rendering `text-[28vw]` overlay).
+- 2026-02-02 — Fix: remove DOM hint overlay and keep hinting via canvas only; canvas hint is outline-only (less obstructive) | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`, `src/frontend/src/utils/drawing.ts`.
+- 2026-02-02 — Fix: camera denied/no-device now falls back to mouse/touch without forcing exit or showing recovery modal (enables in-game state without a real camera) | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` (`handleCameraError`, `onCameraPermission`, rAF loop draws even without video).
+- 2026-02-02 — Proof: Playwright visual regression test added + snapshot captured | Evidence:
+  - Command: `cd src/frontend && npx playwright test e2e/alphabet_tracing_in_game.visual.spec.ts --update-snapshots` → Output: `1 passed`
+  - Snapshot: `src/frontend/e2e/alphabet_tracing_in_game.visual.spec.ts-snapshots/alphabet-game-in-game-chromium-darwin.png`
+
+Status updates:
+
+- 2026-02-02 **IN_PROGRESS** — Investigation started.
 - Command: `cd src/frontend && npm run audit:ui-design` → Output: `UI design token check passed.`
+- 2026-02-02 **DONE** — Overlay regression fixed + Playwright visual proof captured + fallback path stabilized (mouse/touch works without camera).
+
+---
+
+### TCK-20260202-026 :: Fix audit review script crash (zero findings / grep count)
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-02
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Fix `scripts/audit_review.sh` crash when findings counts are zero / grep exits non-zero.
+  - Keep script behavior otherwise unchanged.
+- Out-of-scope:
+  - Improving the matching logic accuracy (string-match false negatives/positives).
+  - Auto-creating tickets.
+- Behavior change allowed: YES (script bug fix only).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `scripts/audit_review.sh`
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Running `bash scripts/audit_review.sh` completes without syntax errors when there are 0 tracked/untracked items.
+
+Execution log:
+
+- 2026-02-02 — Observed crash: `syntax error in expression` from `TRACKED_COUNT=$(grep -c ... || echo "0")` producing `0 0` | Evidence: command output from `bash scripts/audit_review.sh` (pre-fix).
+- 2026-02-02 — Fix applied: use `|| true` (avoid double-output) + guard divide-by-zero | Evidence: `scripts/audit_review.sh`.
+- 2026-02-02 — Verification run | Evidence: Command: `bash scripts/audit_review.sh` → Output: completes (no crash).
+
+Status updates:
+
+- 2026-02-02 **DONE** — Script runs without count/percent arithmetic errors.
+
+---
+
+### TCK-20260202-027 :: Make in-game camera view the hero surface (fullscreen, not card-sized)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-02
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope:
+  - Ensure camera/gameplay surface is visually primary during play (fullscreen hero), not reduced by “card” styling like `aspect-video`, rounded corners, borders, and shadows.
+  - Keep existing overlays (header/controls) but do not shrink the camera feed to a secondary panel.
+- Out-of-scope:
+  - Redesigning the entire HUD/overlay system.
+  - Changing core gameplay mechanics.
+- Behavior change allowed: YES (UI layout/visual emphasis).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/layout/GameLayout.tsx`, camera-based game pages using `GameLayout`.
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- During active gameplay, the camera feed fills the available viewport (hero) rather than being constrained to an `aspect-video` “card”.
+- Playwright visual checks update accordingly (if snapshots exist).
+- Frontend checks pass:
+  - `cd src/frontend && npm run type-check`
+  - `cd src/frontend && npm test`
+
+Execution log:
+
+- 2026-02-02 — Ticket created from user feedback: camera/game surface should be hero, not reduced to secondary by making it small.
+- 2026-02-02 — Implemented `GameLayout` hero variant (removes `aspect-video` card constraint + removes rounded/border/shadow) and applied to AlphabetGame in-game view | Evidence: `src/frontend/src/components/layout/GameLayout.tsx`, `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`.
+- 2026-02-02 — Updated Playwright visual proof selector to stable `data-testid="game-layout"` and regenerated snapshot after layout change | Evidence:
+  - Command: `cd src/frontend && npx playwright test e2e/alphabet_tracing_in_game.visual.spec.ts --update-snapshots` → Output: `1 passed`
+  - Snapshot: `src/frontend/e2e/alphabet_tracing_in_game.visual.spec.ts-snapshots/alphabet-game-in-game-chromium-darwin.png`
+- 2026-02-02 — Verification run | Evidence:
+  - Command: `cd src/frontend && npm run type-check` → Output: success
+  - Command: `cd src/frontend && npm test` → Output: `23 passed / 168 tests`
+
+Status updates:
+
+- 2026-02-02 **IN_PROGRESS** — Implementation started.
+- 2026-02-02 **DONE** — In-game camera view is now full-screen hero (not card-constrained) with updated Playwright visual proof.
+
+---
+
+### TCK-20260202-028 :: Fix AlphabetGame tracing direction inverted (mirror mismatch vs finger movement)
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-02
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope:
+  - Make tracing direction match the user’s visible finger movement during gameplay (no left-right inversion).
+  - Ensure both camera pinch tracing and mouse/touch tracing move in the same direction as the on-screen video/hand.
+  - Base behavior on the previously proven implementation in `src/frontend/src/pages/AlphabetGame.tsx` (commit `5742d1c`).
+- Out-of-scope:
+  - Changing pinch detection thresholds/logic (unless required to fix direction).
+  - Redesigning the camera/game UI.
+- Behavior change allowed: YES (bug fix).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/layout/GameLayout.tsx`, `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`, plus tests/snapshots as needed.
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Camera pinch tracing follows the user’s finger in the mirrored video (move right → stroke moves right).
+- Mouse/touch tracing follows the user’s finger (drag right → stroke moves right).
+- Proof:
+  - Code alignment evidence to old implementation (commit `5742d1c` excerpt).
+  - Playwright screenshot updated if necessary.
+  - Frontend checks pass:
+    - `cd src/frontend && npm run type-check`
+    - `cd src/frontend && npm test`
+
+Execution log:
+
+- 2026-02-02 — Ticket created from user report: tracing is opposite to finger movement, suggesting mirror/coordinate mismatch.
+- 2026-02-02 — Evidence from prior proven implementation (commit `5742d1c`): webcam is mirrored, canvas is NOT mirrored, and pinch x is inverted (`x = 1 - indexTip.x`) so strokes align with the mirrored video | Evidence: `git show 5742d1c:src/frontend/src/pages/AlphabetGame.tsx` (see `mirrored` webcam around line ~1009 and pinch x inversion around line ~635).
+- 2026-02-02 — Fix applied: remove canvas CSS mirroring from `GameLayout` (it caused double-mirroring with the existing pinch x inversion), keeping behavior consistent with old implementation | Evidence: `src/frontend/src/components/layout/GameLayout.tsx`.
+- 2026-02-02 — Verification run | Evidence:
+  - Command: `cd src/frontend && npm run type-check` → Output: success
+  - Command: `cd src/frontend && npm test` → Output: `23 passed / 168 tests`
+  - Command: `cd src/frontend && npx playwright test e2e/alphabet_tracing_in_game.visual.spec.ts --update-snapshots` → Output: `1 passed`
+
+Status updates:
+
+- 2026-02-02 **IN_PROGRESS** — Investigation started.
+- 2026-02-02 **IN_PROGRESS** — Code fix landed; awaiting manual confirmation that real camera tracing direction matches finger movement.
+
+---
+
+### TCK-20260202-029 :: Improve pinch UX feedback + smoothing (cursor indicator + stabler pinch state)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-02
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope:
+  - Restore/implement “pinch feedback” UX comparable to the old AlphabetGame: clear in-game indicator when the hand is detected but not pinching, and when pinching is active.
+  - Add additional smoothing to reduce jitter in pinch-drawn strokes (without changing the scoring model).
+  - Keep changes localized to AlphabetGame (avoid global behavior changes across all games).
+- Out-of-scope:
+  - Redesigning the entire HUD.
+  - Changing MediaPipe model settings or swapping landmarks.
+- Behavior change allowed: YES (UX + drawing input smoothing).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` (primary).
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- When a hand is visible but not pinching: the user sees a clear “ready to pinch” indicator and/or fingertip cursor moving with the hand.
+- When pinching: the indicator changes to “pinching/drawing” state and the cursor reflects it.
+- Stroke jitter is reduced (manual verification).
+- Frontend checks pass:
+  - `cd src/frontend && npm run type-check`
+  - `cd src/frontend && npm test`
+
+Execution log:
+
+- 2026-02-02 — Ticket created from user report: pinch detection UX still feels wrong; missing indicator when not pinched; needs more smoothing.
+- 2026-02-02 — Implemented fingertip cursor indicator + pinch status pill (hand seen → pinch to draw; pinching → drawing) and added exponential smoothing to pinch point input to reduce jitter | Evidence: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`.
+- 2026-02-02 — Verification run | Evidence:
+  - Command: `cd src/frontend && npm run type-check` → Output: success
+  - Command: `cd src/frontend && npm test` → Output: `23 passed / 168 tests`
+
+Status updates:
+
+- 2026-02-02 **IN_PROGRESS** — Implementation started.
+- 2026-02-02 **IN_PROGRESS** — Code changes landed; awaiting manual confirmation that pinch feels stable and smoothing is improved.
 
 ---
 
@@ -31594,3 +31894,237 @@ Evidence:
 - `npm run type-check` output (pass)
 - Command: `cd src/frontend && npm run type-check` → Output: success
 - Command: `cd src/frontend && npm test` → Output: `23 passed (167 tests)`
+
+### TCK-20260202-030 :: Improve Dashboard Empty State (illustrations + mascot)
+
+Type: UI_IMPROVEMENT
+Owner: AI Assistant
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+- In-scope:
+  - Redesign Dashboard empty state when no children exist
+  - Add large illustration of mascot (Pip)
+  - Add encouraging copy ("Let's add your first learner!")
+  - Add prominent CTA button ("Add Child")
+- Out-of-scope:
+  - Changes to AddChildModal functionality
+  - Empty states for other pages (Progress, Settings)
+
+Targets:
+- Files: `src/frontend/src/pages/Dashboard.tsx`
+
+Acceptance Criteria:
+- Empty state shows Pip mascot with welcoming message
+- "Add Child" button is prominent and easy to tap
+- Empty state is delightful and encourages first action
+
+Source:
+- Audit: `docs/audit/ui_ux_comprehensive_audit_2026-02-01.md`
+- Finding: Lines 285-289 recommend redesign of empty state
+- Evidence: Dashboard.tsx lines 435-458 show plain empty state
+
+---
+
+### TCK-20260202-031 :: Add Animated Hand Tutorial for Games (Blocker B1)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P0 (Blocker)
+
+Scope contract:
+
+- In-scope:
+  - Create AnimatedHand component showing tracing motion
+  - Add tutorial overlay to AlphabetGame.tsx before first trace
+  - 3-second animation demonstrating finger tracing
+- Out-of-scope:
+  - Sound effects (separate ticket)
+  - Other games (FingerNumberShow, ConnectTheDots)
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/components/game/AnimatedHand.tsx (new), src/frontend/src/pages/Game.tsx
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Animated hand shows tracing motion before first letter
+- [ ] Animation is 3 seconds or less
+- [ ] Tutorial can be dismissed by touching
+- [ ] Mascot (Pip) accompanies with welcoming message
+
+Source:
+
+- Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
+- Finding: B1 - "No visual game tutorial - Kids can't start"
+- Evidence: Game page shows text instruction "Trace letters with your finger!" which toddlers can't read
+
+---
+
+### TCK-20260202-032 :: Add Celebration Animation on Letter Completion (High Impact H1)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope:
+  - Create CelebrationOverlay component with confetti
+  - Trigger celebration when letter tracing is completed
+  - Add mascot celebration state
+- Out-of-scope:
+  - Sound effects (separate ticket)
+  - Milestone badges
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/components/game/CelebrationOverlay.tsx (new), src/frontend/src/pages/Game.tsx
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Confetti animation plays on each letter completion
+- [ ] Mascot shows celebrating state
+- [ ] Celebration lasts 2-3 seconds
+- [ ] Smooth transition to next letter
+
+Source:
+
+- Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
+- Finding: H1 - "Add celebration animation for engagement"
+- Evidence: Current success feedback is subtle (should celebrate)
+
+---
+
+### TCK-20260202-033 :: Progressive Disclosure for Coming Soon Games (Quick Win H3)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Visually differentiate Coming Soon game cards
+  - Add "Coming Soon" badge overlay
+  - Reduce visual weight of unavailable games
+- Out-of-scope:
+  - Game preview thumbnails (separate ticket)
+  - Removing games from grid
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/Games.tsx
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Coming Soon games have grayed/smaller appearance
+- [ ] Clear "Coming Soon" badge on affected cards
+- [ ] Playable games are visually distinct
+- [ ] Clicking Coming Soon shows friendly message
+
+Source:
+
+- Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
+- Finding: H3 - "Progressive disclosure for Coming Soon"
+- Evidence: games_desktop_*.png - all cards look identical
+
+---
+
+### TCK-20260202-034 :: Loading State with Pip Animation (Quick Win H4)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Replace text loading state with animated Pip
+  - Add "getting ready" animation during hand tracking load
+  - Keep child engaged during model load
+- Out-of-scope:
+  - LoadingSpinner component for other contexts
+  - Sound effects
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/Game.tsx
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Loading state shows animated Pip instead of text
+- [ ] Pip has "thinking" or "preparing" animation
+- [ ] Loading message is child-friendly
+- [ ] Maintains engagement during 2-5 second load
+
+Source:
+
+- Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
+- Finding: H4 - "Loading state with Pip animation"
+- Evidence: "Loading hand tracking..." text-only loading state
+
+---
+
+### TCK-20260202-035 :: Sound Effects System (MVP Polish M5)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Create sound effects module with presets (pops, whooshes, celebrations)
+  - Add global mute toggle in settings
+  - Trigger sounds on key interactions (success, error, hover)
+- Out-of-scope:
+  - Background music
+  - Achievement sounds per milestone
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/utils/sounds.ts (new), src/frontend/src/pages/Game.tsx, src/frontend/src/pages/Settings.tsx
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Sound effects play on letter completion (celebration)
+- [ ] Sound effects play on button interactions
+- [ ] Mute toggle in Settings works
+- [ ] Sounds can be disabled by default
+
+Source:
+
+- Audit: `docs/audit/UI_UX_AUDIT_2026_02_01.md`
+- Finding: M5 - "Sound effects system"
+- Evidence: No audio feedback currently implemented
+
+---
+

@@ -1,8 +1,12 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameCard } from '../components/GameCard';
 import { useProfileStore } from '../store';
+import { Icon } from '../components/Icon';
+import { getLanguageByCode } from '../data/languages';
 import type { IconName } from '../components/ui/Icon';
+import type { Profile } from '../store';
 
 interface Game {
   id: string;
@@ -19,13 +23,15 @@ interface Game {
 export function Games() {
   const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
-  const { currentProfile } = useProfileStore();
+  const { currentProfile, profiles, setCurrentProfile } = useProfileStore();
+  const [showProfilePicker, setShowProfilePicker] = useState(false);
 
   const availableGames: Game[] = [
     {
       id: 'alphabet-tracing',
       title: 'Alphabet Tracing',
-      description: 'Trace letters with your finger to learn alphabets. Features celebration animations and phonics sounds!',
+      description:
+        'Trace letters with your finger to learn alphabets. Features celebration animations and phonics sounds!',
       path: '/game',
       icon: 'letters',
       ageRange: '3-8 years',
@@ -35,7 +41,8 @@ export function Games() {
     {
       id: 'finger-number-show',
       title: 'Finger Number Show',
-      description: 'Show numbers with your fingers and the app will count them! Supports up to 20 fingers with Duo Mode.',
+      description:
+        'Show numbers with your fingers and the app will count them! Supports up to 20 fingers with Duo Mode.',
       path: '/games/finger-number-show',
       icon: 'hand',
       ageRange: '4-7 years',
@@ -45,7 +52,8 @@ export function Games() {
     {
       id: 'connect-the-dots',
       title: 'Connect the Dots',
-      description: 'Connect numbered dots in sequence to complete levels. Use mouse or hand tracking gestures!',
+      description:
+        'Connect numbered dots in sequence to complete levels. Use mouse or hand tracking gestures!',
       path: '/games/connect-the-dots',
       icon: 'target',
       ageRange: '4-6 years',
@@ -55,7 +63,8 @@ export function Games() {
     {
       id: 'letter-hunt',
       title: 'Letter Hunt',
-      description: 'Find the target letter among distractors using hand gestures. Fast answers score more points!',
+      description:
+        'Find the target letter among distractors using hand gestures. Fast answers score more points!',
       path: '/games/letter-hunt',
       icon: 'target',
       ageRange: '3-6 years',
@@ -79,22 +88,23 @@ export function Games() {
     if (currentProfile) {
       navigate('/game', { state: { profileId: currentProfile.id } });
     } else {
-      navigate('/dashboard');
+      // Show profile picker modal instead of redirecting
+      setShowProfilePicker(true);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className='max-w-7xl mx-auto px-4 py-8'>
       <motion.div
         initial={reducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <header className="mb-8">
+        <header className='mb-8'>
           <motion.h1
             initial={reducedMotion ? false : { opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-3xl sm:text-4xl font-bold text-text-primary"
+            className='text-3xl sm:text-4xl font-bold text-text-primary'
           >
             Learning Games
           </motion.h1>
@@ -102,9 +112,10 @@ export function Games() {
             initial={reducedMotion ? false : { opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={reducedMotion ? { duration: 0.01 } : { delay: 0.1 }}
-            className="text-text-secondary mt-2"
+            className='text-text-secondary mt-2'
           >
-            Engaging activities to develop literacy, numeracy, and fine motor skills
+            Engaging activities to develop literacy, numeracy, and fine motor
+            skills
           </motion.p>
 
           {/* Quick stats */}
@@ -112,22 +123,27 @@ export function Games() {
             initial={reducedMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={reducedMotion ? { duration: 0.01 } : { delay: 0.2 }}
-            className="flex gap-4 mt-4"
+            className='flex gap-4 mt-4'
           >
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
-              <span className="text-pip-orange font-bold">{availableGames.length}</span>
+            <div className='flex items-center gap-2 text-sm text-text-secondary'>
+              <span className='text-pip-orange font-bold'>
+                {availableGames.length}
+              </span>
               Games Available
             </div>
             {currentProfile && (
-              <div className="flex items-center gap-2 text-sm text-text-secondary">
-                Playing as <span className="text-pip-orange font-bold">{currentProfile.name}</span>
+              <div className='flex items-center gap-2 text-sm text-text-secondary'>
+                Playing as{' '}
+                <span className='text-pip-orange font-bold'>
+                  {currentProfile.name}
+                </span>
               </div>
             )}
           </motion.div>
         </header>
 
         {/* Games Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12'>
           {availableGames.map((game, index) => (
             <GameCard
               key={game.id}
@@ -141,43 +157,47 @@ export function Games() {
                     ? 'Select Profile First'
                     : 'Play Game'
               }
-              onPlay={game.id === 'alphabet-tracing' ? handlePlayAlphabetGame : undefined}
+              onPlay={
+                game.id === 'alphabet-tracing'
+                  ? handlePlayAlphabetGame
+                  : undefined
+              }
               reducedMotion={!!reducedMotion}
             />
           ))}
         </div>
 
         {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           {/* About Our Games */}
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={reducedMotion ? { duration: 0.01 } : { delay: 0.5 }}
-            className="bg-white border border-border rounded-2xl p-6 shadow-soft"
+            className='bg-white border border-border rounded-2xl p-6 shadow-soft'
           >
-            <h2 className="text-xl font-semibold mb-4 text-text-primary flex items-center gap-2">
+            <h2 className='text-xl font-semibold mb-4 text-text-primary flex items-center gap-2'>
               <span>🎮</span> About Our Games
             </h2>
-            <ul className="space-y-2 text-text-secondary text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-text-success">✓</span>
+            <ul className='space-y-2 text-text-secondary text-sm'>
+              <li className='flex items-start gap-2'>
+                <span className='text-text-success'>✓</span>
                 Designed specifically for young learners (ages 3-8)
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-text-success">✓</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-text-success'>✓</span>
                 Uses hand tracking technology for engaging interaction
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-text-success">✓</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-text-success'>✓</span>
                 Multilingual support for diverse learning needs
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-text-success">✓</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-text-success'>✓</span>
                 Progressive difficulty to match learning pace
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-text-success">✓</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-text-success'>✓</span>
                 Safe, ad-free environment for children
               </li>
             </ul>
@@ -188,26 +208,26 @@ export function Games() {
             initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={reducedMotion ? { duration: 0.01 } : { delay: 0.6 }}
-            className="bg-white border border-border rounded-2xl p-6 shadow-soft"
+            className='bg-white border border-border rounded-2xl p-6 shadow-soft'
           >
-            <h2 className="text-xl font-semibold mb-4 text-text-primary flex items-center gap-2">
+            <h2 className='text-xl font-semibold mb-4 text-text-primary flex items-center gap-2'>
               <span>💡</span> How It Works
             </h2>
-            <ul className="space-y-2 text-text-secondary text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-pip-orange font-bold">1.</span>
+            <ul className='space-y-2 text-text-secondary text-sm'>
+              <li className='flex items-start gap-2'>
+                <span className='text-pip-orange font-bold'>1.</span>
                 Alphabet Tracing uses the language from your child's profile
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-pip-orange font-bold">2.</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-pip-orange font-bold'>2.</span>
                 Change language in Settings or by editing the profile
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-pip-orange font-bold">3.</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-pip-orange font-bold'>3.</span>
                 Progress is tracked separately for each language
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-pip-orange font-bold">4.</span>
+              <li className='flex items-start gap-2'>
+                <span className='text-pip-orange font-bold'>4.</span>
                 Allow camera access for hand tracking features
               </li>
             </ul>
@@ -221,16 +241,106 @@ export function Games() {
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={reducedMotion ? { duration: 0.01 } : { delay: 0.8 }}
-            className="mt-6 text-center"
+            className='mt-6 text-center'
           >
             <a
-              href="/test/mediapipe"
-              className="text-sm text-text-secondary hover:text-text-primary underline"
+              href='/test/mediapipe'
+              className='text-sm text-text-secondary hover:text-text-primary underline'
             >
               🔧 MediaPipe Test Page (Dev)
             </a>
           </motion.div>
         )}
+
+        {/* Profile Picker Modal */}
+        <AnimatePresence>
+          {showProfilePicker && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'
+              onClick={() => setShowProfilePicker(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className='bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl'
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className='text-center mb-6'>
+                  <div className='text-4xl mb-2'>👋</div>
+                  <h2 className='text-2xl font-bold text-text-primary'>
+                    Who's Playing?
+                  </h2>
+                  <p className='text-text-secondary mt-2'>
+                    Select a profile to start playing
+                  </p>
+                </div>
+
+                <div className='space-y-3'>
+                  {profiles.map((profile: Profile) => (
+                    <button
+                      key={profile.id}
+                      onClick={() => {
+                        setCurrentProfile(profile);
+                        setShowProfilePicker(false);
+                        navigate('/game', { state: { profileId: profile.id } });
+                      }}
+                      className='w-full flex items-center gap-4 p-4 bg-bg-secondary hover:bg-bg-tertiary border border-border rounded-xl transition text-left'
+                    >
+                      <div className='w-12 h-12 rounded-full bg-pip-orange text-white flex items-center justify-center text-xl font-bold'>
+                        {profile.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className='font-semibold text-text-primary'>
+                          {profile.name}
+                        </p>
+                        <p className='text-sm text-text-secondary'>
+                          {(() => {
+                            const lang = getLanguageByCode(
+                              profile.preferred_language,
+                            );
+                            return lang ? (
+                              <span className='flex items-center gap-1'>
+                                <Icon
+                                  src={lang.flagIcon}
+                                  alt={lang.name}
+                                  size={16}
+                                />
+                                {lang.nativeName}
+                              </span>
+                            ) : (
+                              profile.preferred_language
+                            );
+                          })()}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      setShowProfilePicker(false);
+                      navigate('/dashboard');
+                    }}
+                    className='w-full p-4 border-2 border-dashed border-border hover:border-pip-orange rounded-xl text-text-secondary hover:text-pip-orange transition'
+                  >
+                    + Add New Profile
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowProfilePicker(false)}
+                  className='w-full mt-4 py-3 text-text-secondary hover:text-text-primary transition'
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );

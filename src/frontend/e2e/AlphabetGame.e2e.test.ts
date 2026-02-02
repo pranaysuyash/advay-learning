@@ -1,4 +1,4 @@
-import { test, expect, Page, Browser } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Playwright E2E Tests for AlphabetGame Hand Tracing
@@ -173,11 +173,6 @@ test.describe('AlphabetGame Hand Tracing', () => {
       waitUntil: 'domcontentloaded',
     });
     await page.waitForTimeout(1000);
-
-    // Look for any status or feedback elements
-    const statusElements = page
-      .locator('[role="status"]')
-      .or(page.locator('[aria-live]'));
 
     // Or just verify the page has meaningful content
     const bodyText = await page.locator('body').textContent();

@@ -24,6 +24,8 @@ interface GameLayoutProps {
     };
     /** Content to render on top of the camera (e.g., game UI, hints) */
     children?: ReactNode;
+    /** Layout variant: card (default) or full-screen hero */
+    variant?: 'card' | 'hero';
     /** Additional class name for the container */
     className?: string;
 }
@@ -48,20 +50,33 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
             highContrast = false,
             canvasEvents = {},
             children,
+            variant = 'card',
             className = '',
         },
         ref
     ) => {
+        const containerBase =
+            variant === 'hero'
+                ? 'relative bg-black overflow-hidden w-full h-full'
+                : 'relative bg-black rounded-2xl overflow-hidden aspect-video shadow-soft-lg border border-border';
+        const canvasBase =
+            variant === 'hero'
+                ? 'absolute inset-0 w-full h-full touch-none cursor-crosshair z-30'
+                : 'absolute inset-0 w-full h-full touch-none rounded-3xl cursor-crosshair z-30';
+
         return (
             <div
                 ref={ref}
-                className={`relative bg-black rounded-2xl overflow-hidden aspect-video shadow-soft-lg border border-border ${className}`}
+                data-testid="game-layout"
+                className={`${containerBase} ${className}`}
             >
-                {/* Decorative blurred elements for "magic" feel */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none z-0">
-                    <div className="absolute top-10 left-10 w-16 h-16 rounded-full bg-pip-orange blur-xl" />
-                    <div className="absolute bottom-20 right-16 w-24 h-24 rounded-full bg-vision-blue blur-xl" />
-                </div>
+                {/* Decorative blurred elements for "magic" feel (card mode only) */}
+                {variant === 'card' && (
+                    <div className="absolute inset-0 opacity-10 pointer-events-none z-0">
+                        <div className="absolute top-10 left-10 w-16 h-16 rounded-full bg-pip-orange blur-xl" />
+                        <div className="absolute bottom-20 right-16 w-24 h-24 rounded-full bg-vision-blue blur-xl" />
+                    </div>
+                )}
 
                 {/* Webcam Layer (base) */}
                 <Webcam
@@ -91,7 +106,7 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
                 {/* Canvas Layer - For drawing (above vignette for visibility) */}
                 <canvas
                     ref={canvasRef}
-                    className="absolute inset-0 w-full h-full touch-none transform -scale-x-100 rounded-3xl cursor-crosshair z-30"
+                    className={canvasBase}
                     onPointerDown={canvasEvents.onPointerDown}
                     onPointerMove={canvasEvents.onPointerMove}
                     onPointerUp={canvasEvents.onPointerUp}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { FilesetResolver, FaceLandmarker } from '@mediapipe/tasks-vision';
 
 interface EyeTrackingResults {
@@ -19,19 +19,21 @@ const useEyeTracking = (
     minFacePresenceConfidence?: number;
     runningMode?: 'IMAGE' | 'VIDEO';
     numFaces?: number;
-  } = {}
+  } = {},
 ) => {
   const {
     modelAssetPath = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
     delegate = 'GPU',
     minFaceDetectionConfidence = 0.5,
-    minFaceTrackingConfidence = 0.5,
     minFacePresenceConfidence = 0.5,
     runningMode = 'VIDEO',
     numFaces = 1,
   } = options;
 
-  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(null);
+  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
+    null,
+  );
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<EyeTrackingResults>({
@@ -39,14 +41,17 @@ const useEyeTracking = (
     leftEyeClosed: false,
     rightEyeClosed: false,
     blinkCount: 0,
-    lastBlinkTime: null
+    lastBlinkTime: null,
   });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const animationFrameRef = useRef<number>(0);
   const lastBlinkTimeRef = useRef<number>(0);
   const blinkCountRef = useRef<number>(0);
-  const previousEyeStates = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
+  const previousEyeStates = useRef<{ left: boolean; right: boolean }>({
+    left: false,
+    right: false,
+  });
 
   // Initialize FaceLandmarker
   useEffect(() => {
@@ -54,23 +59,22 @@ const useEyeTracking = (
       try {
         setIsLoading(true);
         const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
         );
-        
+
         const landmarker = await FaceLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath,
             delegate,
           },
-          outputFaceBlendshapes: true,
-          outputFacialTransformationMatrixes: true,
           runningMode,
           numFaces,
           minFaceDetectionConfidence,
           minFacePresenceConfidence,
         });
-        
+
         setFaceLandmarker(landmarker);
+        faceLandmarkerRef.current = landmarker;
         setError(null);
       } catch (err) {
         console.error('Failed to initialize face landmarker:', err);
@@ -83,45 +87,88 @@ const useEyeTracking = (
     initializeFaceLandmarker();
 
     return () => {
-      if (faceLandmarker) {
-        faceLandmarker.close();
+      if (faceLandmarkerRef.current) {
+        faceLandmarkerRef.current.close();
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [modelAssetPath, delegate, minFaceDetectionConfidence, minFaceTrackingConfidence, minFacePresenceConfidence, runningMode, numFaces]);
+  }, [
+    modelAssetPath,
+    delegate,
+    minFaceDetectionConfidence,
+    minFacePresenceConfidence,
+    runningMode,
+    numFaces,
+  ]);
 
   // Process video frames for eye tracking
-  const processVideoFrame = () => {
-    if (!faceLandmarker || !videoRef.current || !videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+  const processVideoFrame = useCallback(() => {
+    if (!faceLandmarkerRef.current) return;
+
+    if (
+      !faceLandmarkerRef.current ||
+      !videoRef.current ||
+      !videoRef.current.videoWidth ||
+      !videoRef.current.videoHeight
+    ) {
       animationFrameRef.current = requestAnimationFrame(processVideoFrame);
       return;
     }
 
     try {
       const startTime = performance.now();
-      const faceLandmarkerResult = faceLandmarker.detectForVideo(videoRef.current, startTime);
+      const faceLandmarkerResult = faceLandmarkerRef.current.detectForVideo(
+        videoRef.current,
+        startTime,
+      );
       const face = faceLandmarkerResult.faceLandmarks?.[0]; // Get first detected face
 
       if (face) {
         // Get eye landmark indices (based on MediaPipe face landmark definitions)
         // Left eye indices: [33, 160, 158, 133, 153, 144]
         // Right eye indices: [362, 385, 387, 263, 373, 380]
-        
-        const leftEyePoints = [face[33], face[160], face[158], face[133], face[153], face[144]];
-        const rightEyePoints = [face[362], face[385], face[387], face[263], face[373], face[380]];
+
+        const leftEyePoints = [
+          face[33],
+          face[160],
+          face[158],
+          face[133],
+          face[153],
+          face[144],
+        ];
+        const rightEyePoints = [
+          face[362],
+          face[385],
+          face[387],
+          face[263],
+          face[373],
+          face[380],
+        ];
 
         // Calculate eye aspect ratio (EAR) to detect blinking
         const calculateEAR = (eyePoints: any[]) => {
           if (eyePoints.length < 6) return 1; // Return open if not enough points
 
           // Vertical distances
-          const A = Math.sqrt(Math.pow(eyePoints[1].x - eyePoints[5].x, 2) + Math.pow(eyePoints[1].y - eyePoints[5].y, 2));
-          const B = Math.sqrt(Math.pow(eyePoints[2].x - eyePoints[4].x, 2) + Math.pow(eyePoints[2].y - eyePoints[4].y, 2));
-          
+          const A = Math.sqrt(
+            Math.pow(eyePoints[1].x - eyePoints[5].x, 2) +
+              Math.pow(eyePoints[1].y - eyePoints[5].y, 2),
+          );
+          const B = Math.sqrt(
+            Math.pow(eyePoints[2].x - eyePoints[4].x, 2) +
+              Math.pow(eyePoints[2].y - eyePoints[4].y, 2),
+          );
+
           // Horizontal distance
-          const C = Math.sqrt(Math.pow(eyePoints[0].x - eyePoints[3].x, 2) + Math.pow(eyePoints[0].y - eyePoints[3].y, 2));
+          const C = Math.sqrt(
+            Math.pow(eyePoints[0].x - eyePoints[3].x, 2) +
+              Math.pow(eyePoints[0].y - eyePoints[3].y, 2),
+          );
+
+          // Guard against division by zero
+          if (C < 1e-6) return 1; // Treat as open if horizontal distance is too small
 
           return (A + B) / (2.0 * C);
         };
@@ -134,7 +181,8 @@ const useEyeTracking = (
         const leftEyeClosed = leftEAR < BLINK_THRESHOLD;
         const rightEyeClosed = rightEAR < BLINK_THRESHOLD;
         const isBlinking = leftEyeClosed && rightEyeClosed;
-        const wasOpen = !previousEyeStates.current.left && !previousEyeStates.current.right;
+        const wasOpen =
+          !previousEyeStates.current.left && !previousEyeStates.current.right;
 
         // Detect blink transition (both eyes were open, now both are closed)
         const isTransitionToBlink = wasOpen && isBlinking;
@@ -150,14 +198,17 @@ const useEyeTracking = (
           }
         }
 
-        previousEyeStates.current = { left: leftEyeClosed, right: rightEyeClosed };
+        previousEyeStates.current = {
+          left: leftEyeClosed,
+          right: rightEyeClosed,
+        };
 
         setResults({
           isBlinking,
           leftEyeClosed,
           rightEyeClosed,
           blinkCount: blinkCountRef.current,
-          lastBlinkTime: lastBlinkTimeRef.current
+          lastBlinkTime: lastBlinkTimeRef.current,
         });
       }
     } catch (err) {
@@ -165,7 +216,7 @@ const useEyeTracking = (
     }
 
     animationFrameRef.current = requestAnimationFrame(processVideoFrame);
-  };
+  }, [onBlinkDetected]);
 
   // Start video processing when face landmarker is ready
   useEffect(() => {
@@ -178,7 +229,7 @@ const useEyeTracking = (
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [faceLandmarker]);
+  }, [faceLandmarker, processVideoFrame]);
 
   return {
     results,
@@ -188,12 +239,12 @@ const useEyeTracking = (
     resetBlinkCount: () => {
       blinkCountRef.current = 0;
       lastBlinkTimeRef.current = 0;
-      setResults(prev => ({
+      setResults((prev) => ({
         ...prev,
         blinkCount: 0,
-        lastBlinkTime: null
+        lastBlinkTime: null,
       }));
-    }
+    },
   };
 };
 

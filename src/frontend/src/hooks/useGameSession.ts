@@ -13,13 +13,11 @@ export interface GameSessionState {
 interface UseGameSessionProps {
   isPlaying: boolean;
   sessionData: GameSessionState;
-  onResume?: (state: GameSessionState) => void;
 }
 
 export function useGameSession({
   isPlaying,
   sessionData,
-  onResume: _onResume,
 }: UseGameSessionProps) {
   const STORAGE_KEY = 'alphabetGameSession';
 

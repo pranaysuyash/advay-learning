@@ -6,7 +6,7 @@ import React, {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import confetti from 'canvas-confetti';
 import { GameLayout } from '../../components/layout/GameLayout';
@@ -23,7 +23,9 @@ import { Mascot } from '../../components/Mascot';
 import { progressQueue } from '../../services/progressQueue';
 import { getAllIcons } from '../../utils/iconUtils';
 import { UIIcon } from '../../components/ui/Icon';
-import { GameHeader } from '../../components/GameHeader';
+import { GameContainer } from '../../components/GameContainer';
+import { GameControls } from '../../components/GameControls';
+import type { GameControl } from '../../components/GameControls';
 import { GameTutorial } from '../../components/GameTutorial';
 import WellnessTimer from '../../components/WellnessTimer';
 import WellnessReminder from '../../components/WellnessReminder';
@@ -37,7 +39,6 @@ import { useSoundEffects } from '../../hooks/useSoundEffects';
 import { usePhonics } from '../../hooks/usePhonics';
 // Centralized hand tracking hooks
 import { useHandTracking } from '../../hooks/useHandTracking';
-import { useGameLoop } from '../../hooks/useGameLoop';
 import {
   buildSegments,
   drawSegments,
@@ -46,7 +47,10 @@ import {
   addBreakPoint,
   shouldAddPoint,
 } from '../../utils/drawing';
-import { detectPinch, createDefaultPinchState } from '../../utils/pinchDetection';
+import {
+  detectPinch,
+  createDefaultPinchState,
+} from '../../utils/pinchDetection';
 import { getLetterColorClass } from '../../utils/letterColorClass';
 import type { PinchState, Point } from '../../types/tracking';
 
@@ -68,10 +72,14 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafIdRef = useRef<number | null>(null);
   const lastDrawPointRef = useRef<{ x: number; y: number } | null>(null);
   const drawnPointsRef = useRef<Array<{ x: number; y: number }>>([]);
   const pointerDownRef = useRef(false);
   const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
+  const smoothedTipRef = useRef<Point | null>(null);
+  const [isHandPresent, setIsHandPresent] = useState(false);
+  const isHandPresentRef = useRef(isHandPresent);
 
   // Use centralized hand tracking hook
   const {
@@ -101,6 +109,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Drawing state
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
+  const isDrawingRef = useRef(isDrawing);
+  const isPinchingRef = useRef(isPinching);
+  useEffect(() => {
+    isDrawingRef.current = isDrawing;
+  }, [isDrawing]);
+  useEffect(() => {
+    isPinchingRef.current = isPinching;
+  }, [isPinching]);
+  useEffect(() => {
+    isHandPresentRef.current = isHandPresent;
+  }, [isHandPresent]);
 
   // Camera permission state
   const [cameraPermission, setCameraPermission] = useState<
@@ -112,7 +131,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [isPaused, setIsPaused] = useState(false);
   const [showCameraErrorModal, setShowCameraErrorModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
-  const [cameraErrorMessage, setCameraErrorMessage] = useState<string>('Camera connection lost');
+  const [cameraErrorMessage, setCameraErrorMessage] = useState<string>(
+    'Camera connection lost',
+  );
   const [useMouseMode, setUseMouseMode] = useState(false);
 
   // Story celebration modal state
@@ -137,6 +158,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       stream.getTracks().forEach((track) => track.stop());
       setCameraPermission('granted');
       setShowPermissionWarning(false);
+      setUseMouseMode(false);
       setIsPlaying(true);
       setFeedback(null);
       setAccuracy(0);
@@ -159,6 +181,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     } catch {
       setCameraPermission('denied');
       setShowPermissionWarning(true);
+      setUseMouseMode(true);
       // Still allow game to start with mouse mode
       setIsPlaying(true);
       setFeedback(
@@ -214,7 +237,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     startMonitoring: startPostureMonitoring,
     stopMonitoring: stopPostureMonitoring,
   } = usePostureDetection(
-    (alert: { level: 'info' | 'warning' | 'critical'; message: string; timestamp: number }) => {
+    (alert: {
+      level: 'info' | 'warning' | 'critical';
+      message: string;
+      timestamp: number;
+    }) => {
       // Handle posture alerts
       setWellnessReminderType('break'); // Use break type for posture alerts
       setShowWellnessReminder(true);
@@ -226,7 +253,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     startMonitoring: startAttentionMonitoring,
     stopMonitoring: stopAttentionMonitoring,
   } = useAttentionDetection(
-    (alert: { level: 'info' | 'warning' | 'critical'; message: string; timestamp: number }) => {
+    (alert: {
+      level: 'info' | 'warning' | 'critical';
+      message: string;
+      timestamp: number;
+    }) => {
       // Handle attention alerts
       if (alert.level === 'critical') {
         setWellnessReminderType('inactive'); // Use inactive type for attention alerts
@@ -379,12 +410,26 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const profileId = (location.state as any)?.profileId as string | undefined;
 
   // Get profile for display (name, etc.) - NOT for language
-  const { profiles } = useProfileStore();
-  const profile = profileId
-    ? profiles.find((p: Profile) => p.id === profileId)
+  const {
+    profiles,
+    currentProfile,
+    isLoading: isProfilesLoading,
+    fetchProfiles,
+  } = useProfileStore();
+  const resolvedProfileId = profileId ?? currentProfile?.id;
+  const profile = resolvedProfileId
+    ? profiles.find((p: Profile) => p.id === resolvedProfileId)
     : undefined;
   // Profile available for future use (e.g., displaying child's name)
   void profile;
+
+  // If the route didn't provide a profileId, fetch profiles so we can fall back to currentProfile.
+  useEffect(() => {
+    if (resolvedProfileId) return;
+    if (profiles.length > 0) return;
+    if (isProfilesLoading) return;
+    fetchProfiles();
+  }, [fetchProfiles, isProfilesLoading, profiles.length, resolvedProfileId]);
 
   // Game language is determined by profile's preferred_language
   // This ensures consistency across the app
@@ -478,8 +523,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       }
       if (typeof data.score === 'number') setScore(data.score);
       if (typeof data.streak === 'number') setStreak(data.streak);
-      if (typeof data.selectedLanguage === 'string') setSelectedLanguage(data.selectedLanguage);
-      if (typeof data.useMouseMode === 'boolean') setUseMouseMode(data.useMouseMode);
+      if (typeof data.selectedLanguage === 'string')
+        setSelectedLanguage(data.selectedLanguage);
+      if (typeof data.useMouseMode === 'boolean')
+        setUseMouseMode(data.useMouseMode);
     }
   }, [loadSessionState]);
 
@@ -495,20 +542,55 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         timestamp: Date.now(),
       };
       try {
-        localStorage.setItem('alphabetGameSession', JSON.stringify(sessionData));
+        localStorage.setItem(
+          'alphabetGameSession',
+          JSON.stringify(sessionData),
+        );
       } catch {
         // Ignore localStorage errors in test environments
       }
     }
-  }, [isPlaying, currentLetterIndex, score, streak, selectedLanguage, useMouseMode]);
+  }, [
+    isPlaying,
+    currentLetterIndex,
+    score,
+    streak,
+    selectedLanguage,
+    useMouseMode,
+  ]);
 
   // Recovery handlers (moved here so session functions are available)
-  const handleCameraError = useCallback((error: Error | string | DOMException) => {
-    const message = error instanceof Error ? error.message : String(error);
-    setCameraErrorMessage(message);
-    setShowCameraErrorModal(true);
-    setIsPaused(true);
-  }, []);
+  const handleCameraError = useCallback(
+    (error: Error | string | DOMException) => {
+      const errorName =
+        typeof error === 'object' && error != null && 'name' in error
+          ? String((error as any).name)
+          : '';
+      const message = error instanceof Error ? error.message : String(error);
+
+      const isPermissionOrNoDevice =
+        errorName === 'NotAllowedError' ||
+        errorName === 'NotFoundError' ||
+        /permission|denied|notallowed|notfound/i.test(message);
+
+      if (isPermissionOrNoDevice) {
+        setCameraPermission('denied');
+        setShowPermissionWarning(true);
+        setUseMouseMode(true);
+        setFeedback(
+          "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
+        );
+        setShowCameraErrorModal(false);
+        setIsPaused(false);
+        return;
+      }
+
+      setCameraErrorMessage(message);
+      setShowCameraErrorModal(true);
+      setIsPaused(true);
+    },
+    [],
+  );
 
   // Recovery handlers
   const handleRetryCamera = useCallback(() => {
@@ -531,7 +613,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     localStorage.removeItem('alphabetGameSession');
     stopGame();
     navigate('/dashboard');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Exit confirmation handlers
   const handleConfirmExit = useCallback(() => {
@@ -551,7 +633,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     }
     stopGame();
     navigate('/dashboard');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCancelExit = useCallback(() => {
     setShowExitModal(false);
@@ -568,7 +650,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         } else if (!showCameraErrorModal) {
           setShowExitModal(true);
         }
-      } else if ((e.key === 'p' || e.key === 'P') && !showExitModal && !showCameraErrorModal) {
+      } else if (
+        (e.key === 'p' || e.key === 'P') &&
+        !showExitModal &&
+        !showCameraErrorModal
+      ) {
         setIsPaused((prev) => !prev);
         if (!isPaused) {
           setFeedback('Game paused. Take a break!');
@@ -598,37 +684,55 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   useEffect(() => {
     const update = () =>
-      setPendingCount(progressQueue.getPending(profileId || '').length);
+      setPendingCount(progressQueue.getPending(resolvedProfileId || '').length);
     update();
     const unsubscribe = progressQueue.subscribe(update);
     return unsubscribe;
-  }, [profileId]);
+  }, [resolvedProfileId]);
 
-  // Game loop using centralized hook
-  useGameLoop({
-    isRunning: isPlaying,
-    targetFps: 30,
-    onFrame: useCallback(() => {
+  // Hand tracking + pinch drawing loop (requestAnimationFrame; restores prior smooth tracing behavior)
+  useEffect(() => {
+    if (!isPlaying || isPaused) return;
+
+    let cancelled = false;
+
+    const loop = () => {
+      if (cancelled) return;
+
       const webcam = webcamRef.current;
       const canvas = canvasRef.current;
       const video = webcam?.video;
 
-      if (!canvas || !video || !landmarker) return;
+      if (!canvas) {
+        rafIdRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        rafIdRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const hasVideoFrame =
+        !!video &&
+        video.readyState >= 2 &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0;
 
       // Setup canvas dimensions
-      setupCanvas(canvas, video);
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Check video ready
-      if (video.readyState < 2 || video.videoWidth === 0) return;
-
-      // Detect hands
-      let results;
-      try {
-        results = landmarker.detectForVideo(video, performance.now());
-      } catch {
-        return;
+      if (hasVideoFrame && video) {
+        setupCanvas(canvas, video);
+      } else {
+        const rect = canvas.getBoundingClientRect();
+        const dpr =
+          typeof window !== 'undefined' ? (window.devicePixelRatio ?? 1) : 1;
+        const nextWidth = Math.max(1, Math.round(rect.width * dpr));
+        const nextHeight = Math.max(1, Math.round(rect.height * dpr));
+        if (nextWidth !== canvas.width || nextHeight !== canvas.height) {
+          canvas.width = nextWidth;
+          canvas.height = nextHeight;
+        }
       }
 
       // Clear canvas
@@ -642,7 +746,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         ctx.shadowBlur = 0;
       }
 
-      // Draw all segments
+      // Draw all segments (now smoothed in drawSegments)
       if (drawnPointsRef.current.length > 0) {
         const segments = buildSegments(drawnPointsRef.current);
         drawSegments(ctx, segments, canvas.width, canvas.height, {
@@ -653,59 +757,151 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         });
       }
 
-      // Process pinch detection
-      const landmarks = results?.landmarks?.[0];
-      if (landmarks && landmarks.length >= 9) {
-        const pinchResult = detectPinch(landmarks, pinchStateRef.current);
-        pinchStateRef.current = pinchResult.state;
-
-        // Update pinch state UI
-        if (pinchResult.state.isPinching !== isPinching) {
-          setIsPinching(pinchResult.state.isPinching);
+      // Process pinch detection (skip when in mouse/touch fallback or when video/model isn't ready)
+      if (!useMouseMode && hasVideoFrame && video && landmarker) {
+        let results: any;
+        try {
+          results = landmarker.detectForVideo(video, performance.now());
+        } catch {
+          rafIdRef.current = requestAnimationFrame(loop);
+          return;
         }
 
-        // Handle transitions
-        if (pinchResult.transition === 'release') {
-          lastDrawPointRef.current = null;
-          addBreakPoint(drawnPointsRef.current);
-        } else if (
-          pinchResult.transition === 'start' ||
-          pinchResult.transition === 'continue'
-        ) {
-          if (isDrawing) {
-            const x = 1 - landmarks[8].x;
-            const y = landmarks[8].y;
-            const nextPoint: Point = { x, y };
+        const landmarks = results?.landmarks?.[0];
+        if (landmarks && landmarks.length >= 9) {
+          if (!isHandPresentRef.current) {
+            isHandPresentRef.current = true;
+            setIsHandPresent(true);
+          }
 
-            if (
-              shouldAddPoint(
-                drawnPointsRef.current[drawnPointsRef.current.length - 1],
-                nextPoint,
-              )
-            ) {
-              drawnPointsRef.current.push(nextPoint);
-              if (drawnPointsRef.current.length > 6000) {
-                drawnPointsRef.current.shift();
+          const pinchResult = detectPinch(landmarks, pinchStateRef.current);
+          pinchStateRef.current = pinchResult.state;
+
+          if (pinchResult.state.isPinching !== isPinchingRef.current) {
+            isPinchingRef.current = pinchResult.state.isPinching;
+            setIsPinching(pinchResult.state.isPinching);
+          }
+
+          // Compute fingertip point in normalized space (mirrored video, so invert X)
+          const rawX = Math.min(1, Math.max(0, 1 - (landmarks[8]?.x ?? 0)));
+          const rawY = Math.min(1, Math.max(0, landmarks[8]?.y ?? 0));
+          const nextTip: Point = { x: rawX, y: rawY };
+
+          // Exponential smoothing for cursor + drawing input to reduce jitter
+          // alpha closer to 1 = more responsive; closer to 0 = smoother.
+          const alpha = 0.35;
+          if (!smoothedTipRef.current) {
+            smoothedTipRef.current = nextTip;
+          } else {
+            smoothedTipRef.current = {
+              x:
+                smoothedTipRef.current.x +
+                (nextTip.x - smoothedTipRef.current.x) * alpha,
+              y:
+                smoothedTipRef.current.y +
+                (nextTip.y - smoothedTipRef.current.y) * alpha,
+            };
+          }
+
+          // Draw a fingertip cursor so kids can see "ready" vs "pinching" feedback.
+          // This matches the old game's clearer pinch feedback (even before drawing).
+          if (smoothedTipRef.current) {
+            const cx = smoothedTipRef.current.x * canvas.width;
+            const cy = smoothedTipRef.current.y * canvas.height;
+            const radius = Math.max(
+              6,
+              Math.round(Math.min(canvas.width, canvas.height) * 0.012),
+            );
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            if (pinchResult.state.isPinching) {
+              ctx.fillStyle = currentLetter.color;
+              ctx.shadowColor = currentLetter.color;
+              ctx.shadowBlur = 10;
+              ctx.fill();
+            } else {
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+              ctx.lineWidth = 3;
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+              ctx.shadowBlur = 6;
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+
+          if (pinchResult.transition === 'release') {
+            lastDrawPointRef.current = null;
+            addBreakPoint(drawnPointsRef.current);
+          } else if (
+            pinchResult.transition === 'start' ||
+            pinchResult.transition === 'continue'
+          ) {
+            if (isDrawingRef.current) {
+              const nextPoint: Point = smoothedTipRef.current ?? nextTip;
+
+              if (
+                shouldAddPoint(
+                  drawnPointsRef.current[drawnPointsRef.current.length - 1],
+                  nextPoint,
+                )
+              ) {
+                drawnPointsRef.current.push(nextPoint);
+                if (drawnPointsRef.current.length > 6000) {
+                  drawnPointsRef.current.shift();
+                }
               }
             }
           }
+        } else {
+          // No hand detected
+          if (isPinchingRef.current) {
+            isPinchingRef.current = false;
+            setIsPinching(false);
+            pinchStateRef.current = createDefaultPinchState();
+            lastDrawPointRef.current = null;
+          }
+          if (isHandPresentRef.current) {
+            isHandPresentRef.current = false;
+            setIsHandPresent(false);
+          }
+          smoothedTipRef.current = null;
         }
-      } else {
-        // No hand detected
-        if (isPinching) {
-          setIsPinching(false);
-          pinchStateRef.current = createDefaultPinchState();
+      } else if (isPinchingRef.current) {
+        // Ensure pinch UI resets when falling back to mouse mode
+        isPinchingRef.current = false;
+        setIsPinching(false);
+        pinchStateRef.current = createDefaultPinchState();
+        lastDrawPointRef.current = null;
+        if (isHandPresentRef.current) {
+          isHandPresentRef.current = false;
+          setIsHandPresent(false);
         }
+        smoothedTipRef.current = null;
       }
-    }, [
-      landmarker,
-      isDrawing,
-      isPinching,
-      currentLetter.color,
-      currentLetter.char,
-      settings.showHints,
-    ]),
-  });
+
+      rafIdRef.current = requestAnimationFrame(loop);
+    };
+
+    rafIdRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      cancelled = true;
+      if (rafIdRef.current != null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [
+    isPlaying,
+    isPaused,
+    landmarker,
+    currentLetter.char,
+    currentLetter.color,
+    settings.showHints,
+    useMouseMode,
+  ]);
 
   const getCanvasPointFromPointerEvent = useCallback(
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
@@ -741,7 +937,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         y: point.y / canvas.height,
       });
     },
-    [getCanvasPointFromPointerEvent, isDrawing, isPlaying, resetInactivityTimer],
+    [
+      getCanvasPointFromPointerEvent,
+      isDrawing,
+      isPlaying,
+      resetInactivityTimer,
+    ],
   );
 
   const handleCanvasPointerMove = useCallback(
@@ -759,9 +960,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-            Math.pow(point.y / canvas.height - lastPoint.y, 2),
-          )
+              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+                Math.pow(point.y / canvas.height - lastPoint.y, 2),
+            )
           : Infinity;
 
       if (dist > minDistance) {
@@ -775,7 +976,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         }
       }
     },
-    [getCanvasPointFromPointerEvent, isDrawing, isPlaying, resetInactivityTimer],
+    [
+      getCanvasPointFromPointerEvent,
+      isDrawing,
+      isPlaying,
+      resetInactivityTimer,
+    ],
   );
 
   const handleCanvasPointerUpOrCancel = useCallback(
@@ -789,10 +995,76 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     [],
   );
 
-  // Redirect to dashboard if no profile selected
-  if (!profileId) {
-    return <Navigate to='/dashboard' replace />;
+  // If no profile is available yet, show a loading state (prevents redirect loops during initial fetch).
+  if (!resolvedProfileId) {
+    return (
+      <section className='min-h-[60vh] flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4' />
+          <p className='text-text-secondary'>
+            Loading your child&apos;s profile...
+          </p>
+          {!isProfilesLoading && profiles.length === 0 && (
+            <button
+              type='button'
+              onClick={() => navigate('/dashboard')}
+              className='mt-4 px-5 py-3 bg-white border border-border rounded-xl font-bold text-advay-slate shadow-soft hover:bg-bg-tertiary transition'
+            >
+              Go to Dashboard
+            </button>
+          )}
+        </div>
+      </section>
+    );
   }
+
+  // Define game controls
+  const gameControls: GameControl[] = [
+    {
+      id: 'clear',
+      icon: 'x',
+      label: 'Clear',
+      onClick: clearDrawing,
+      variant: 'danger',
+    },
+    {
+      id: 'check',
+      icon: 'check',
+      label: 'Check',
+      onClick: checkProgress,
+      variant: 'success',
+    },
+    {
+      id: 'skip',
+      icon: 'play',
+      label: 'Skip',
+      onClick: nextLetter,
+      variant: 'primary',
+    },
+  ];
+
+  // Define menu controls
+  const menuControls: GameControl[] = [
+    {
+      id: 'home',
+      icon: 'home',
+      label: 'Home',
+      onClick: goToHome,
+      variant: 'secondary',
+    },
+    {
+      id: 'start',
+      icon: isModelLoading ? 'timer' : 'sparkles',
+      label: isModelLoading
+        ? 'Loading hand tracking...'
+        : cameraPermission === 'denied'
+          ? 'Play with Mouse/Touch'
+          : 'Start Learning!',
+      onClick: startGame,
+      variant: 'success',
+      disabled: isModelLoading,
+    },
+  ];
 
   return (
     <>
@@ -802,132 +1074,270 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           onSkip={handleSkipTutorial}
         />
       )}
-      <section className='max-w-7xl mx-auto px-4 py-8'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+
+      {/* Game Area - Full Screen Mode */}
+      {isPlaying ? (
+        <GameContainer
+          title={`${LANGUAGES.find((l) => l.code === selectedLanguage)?.name} Alphabet`}
+          score={score}
+          level={currentLetterIndex + 1}
+          onHome={() => setShowExitModal(true)}
+          onPause={() => setIsPaused(!isPaused)}
         >
-          {/* Header - Reduced spacing */}
-          <header className='flex justify-between items-start mb-4'>
-            <div>
-              <h1 className='text-2xl md:text-3xl font-bold'>Learning Game</h1>
-              <p className='text-text-secondary text-sm md:text-base'>
-                Trace letters with your finger!
-              </p>
-            </div>
-            <div className='text-right'>
-              <output className='text-xl md:text-2xl font-bold text-text-primary block'>
-                Score: {score}
-              </output>
-              <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm text-text-secondary mt-1'>
-                <span className='flex items-center gap-1 min-w-fit'>
-                  <UIIcon name='flame' size={14} className='text-pip-orange' />
-                  Streak: {streak}
-                </span>
-                <span className='min-w-fit'>
-                  Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1} of{' '}
-                  {Math.ceil(LETTERS.length / BATCH_SIZE)}
-                </span>
-                {pendingCount > 0 && (
-                  <div className='inline-flex items-center gap-1 bg-bg-tertiary border border-border text-text-secondary px-2 py-0.5 rounded-full text-xs font-semibold'>
-                    <UIIcon name='warning' size={12} />
-                    Pending ({pendingCount})
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-
-          {/* Animated Letter Display - moves to side panel when game starts */}
-          <div
-            className={`transition-all duration-500 ease-in-out ${isPlaying ? 'absolute top-4 left-4 z-10 w-64 bg-white/95 border border-border rounded-2xl p-4 shadow-xl backdrop-blur-sm' : 'bg-white border border-border rounded-2xl p-8 mb-6 shadow-soft'}`}
-          >
-            <div
-              className={`${isPlaying ? 'transform scale-75' : ''} flex flex-col items-center justify-center gap-4 transition-transform duration-300`}
+          <div className='relative w-full h-full'>
+            <GameLayout
+              webcamRef={webcamRef}
+              canvasRef={canvasRef}
+              highContrast={highContrast}
+              variant='hero'
+              className='w-full h-full'
+              onCameraPermission={(state: 'granted' | 'denied' | 'prompt') => {
+                setCameraPermission(state);
+                if (state === 'denied') {
+                  setShowPermissionWarning(true);
+                  setUseMouseMode(true);
+                  setFeedback(
+                    "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
+                  );
+                } else {
+                  setShowPermissionWarning(false);
+                }
+              }}
+              onCameraError={handleCameraError}
+              canvasEvents={{
+                onPointerDown: handleCanvasPointerDown,
+                onPointerMove: handleCanvasPointerMove,
+                onPointerUp: handleCanvasPointerUpOrCancel,
+                onPointerCancel: handleCanvasPointerUpOrCancel,
+                onPointerLeave: handleCanvasPointerUpOrCancel,
+              }}
             >
-              <div className='text-center'>
-                <div
-                  className={`${isPlaying ? 'text-6xl' : 'text-9xl md:text-[12rem]'} font-extrabold mb-2 ${letterColorClass}`}
-                >
-                  {currentLetter.char}
+              {/* Instruction Overlay with High Contrast */}
+              <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
+                <div className='inline-block px-6 py-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-lg transition-all duration-300 transform hover:scale-105'>
+                  <p className='text-white text-xl md:text-2xl font-bold drop-shadow-md tracking-wide'>
+                    {isDrawing ? 'Trace the letter!' : 'Pinch 🤏 to draw'}
+                  </p>
                 </div>
-                {currentLetter.transliteration && (
-                  <div className='text-base md:text-xl text-text-secondary mt-2 font-medium'>
-                    {currentLetter.transliteration}
+              </div>
+
+              {/* Pinch Status (matches old "Pinching…" feedback; hidden in mouse mode) */}
+              {!useMouseMode && (
+                <div className='absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
+                  <div className='px-4 py-2 rounded-full bg-black/55 backdrop-blur border border-white/25 text-white shadow-soft text-sm md:text-base font-bold'>
+                    {isHandPresent ? (
+                      isPinching ? (
+                        <span className='flex items-center gap-2'>
+                          <span className='inline-block w-2.5 h-2.5 rounded-full bg-pip-orange shadow-[0_0_10px_rgba(255,153,51,0.9)]' />
+                          Pinching… Draw!
+                        </span>
+                      ) : (
+                        <span className='flex items-center gap-2'>
+                          <span className='inline-block w-2.5 h-2.5 rounded-full bg-white/80 shadow-[0_0_10px_rgba(255,255,255,0.35)]' />
+                          Hand seen — pinch 🤏 to draw
+                        </span>
+                      )
+                    ) : (
+                      <span className='flex items-center gap-2 opacity-90'>
+                        <span className='inline-block w-2.5 h-2.5 rounded-full bg-white/40' />
+                        Show your hand to start
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Two-stage prompt: big center then small side pill */}
+              {isPlaying && promptStage === 'center' && (
+                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                  <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
+                    <div className='text-center'>
+                      <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                        Trace this letter
+                      </div>
+                      <div
+                        className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
+                      >
+                        {currentLetter.char}
+                      </div>
+                      <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                        {currentLetter.name}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
+                {promptStage === 'side' && (
+                  <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
+                    <span className='flex items-center gap-2'>
+                      <UIIcon
+                        name='target'
+                        size={16}
+                        className='text-yellow-300'
+                      />
+                      Trace{' '}
+                      <span className='font-extrabold'>
+                        {currentLetter.char}
+                      </span>
+                      <span className='opacity-80'>({currentLetter.name})</span>
+                    </span>
                   </div>
                 )}
               </div>
-	              <div className={`${isPlaying ? 'w-12 h-12' : 'w-24 h-24'} mb-2`}>
-	                <UIIcon
-	                  src={getAllIcons(currentLetter)}
-	                  alt={currentLetter.name}
-	                  size={isPlaying ? 48 : 96}
-	                  className='w-full h-full object-contain drop-shadow-lg'
-	                  fallback={currentLetter.emoji || '✨'}
-	                />
-	              </div>
-              <div className='text-center'>
-                <div
-                  className={`${isPlaying ? 'text-lg' : 'text-3xl'} font-bold text-text-primary`}
-                >
-                  {currentLetter.name}
-                </div>
-                {currentLetter.pronunciation && (
-                  <div
-                    className={`${isPlaying ? 'text-sm' : 'text-lg'} text-text-secondary mt-2 italic`}
-                  >
-                    "{currentLetter.pronunciation}"
-                  </div>
-                )}
+
+              {/* In-Game Mascot */}
+              <div className='absolute bottom-4 left-4 z-20'>
+                {(() => {
+                  const mascotState =
+                    feedback?.includes('Great') || feedback?.includes('Amazing')
+                      ? 'happy'
+                      : isDrawing
+                        ? 'waiting'
+                        : 'idle';
+                  return (
+                    <Mascot
+                      state={mascotState}
+                      message={
+                        feedback ||
+                        (isDrawing ? 'Keep going!' : 'Trace the letter!')
+                      }
+                    />
+                  );
+                })()}
               </div>
-            </div>
+
+              {/* Standardized Game Controls - Bottom Right */}
+              <GameControls controls={gameControls} position='bottom-right' />
+            </GameLayout>
           </div>
-
-          {/* Accuracy Bar */}
-          {accuracy > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
-            >
-              <div className='flex justify-between items-center mb-2'>
-                <label
-                  htmlFor='accuracy-progress'
-                  className='text-text-secondary'
-                >
-                  Tracing Accuracy
-                </label>
-                <span className={`font-bold ${accuracyColorClass}`}>
-                  {accuracy}%
-                </span>
+        </GameContainer>
+      ) : (
+        /* Pre-Game UI - Menu Screen */
+        <section className='max-w-7xl mx-auto px-4 py-8'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {/* Header */}
+            <header className='flex justify-between items-start mb-4'>
+              <div>
+                <h1 className='text-2xl md:text-3xl font-bold'>
+                  Learning Game
+                </h1>
+                <p className='text-text-secondary text-sm md:text-base'>
+                  Trace letters with your finger!
+                </p>
               </div>
-              <progress
-                id='accuracy-progress'
-                value={accuracy}
-                max={100}
-                className='w-full h-3 rounded-full'
-              />
-            </motion.div>
-          )}
+              <div className='text-right'>
+                <output className='text-xl md:text-2xl font-bold text-text-primary block'>
+                  Score: {score}
+                </output>
+                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm text-text-secondary mt-1'>
+                  <span className='flex items-center gap-1 min-w-fit'>
+                    <UIIcon
+                      name='flame'
+                      size={14}
+                      className='text-pip-orange'
+                    />
+                    Streak: {streak}
+                  </span>
+                  <span className='min-w-fit'>
+                    Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1} of{' '}
+                    {Math.ceil(LETTERS.length / BATCH_SIZE)}
+                  </span>
+                  {pendingCount > 0 && (
+                    <div className='inline-flex items-center gap-1 bg-bg-tertiary border border-border text-text-secondary px-2 py-0.5 rounded-full text-xs font-semibold'>
+                      <UIIcon name='warning' size={12} />
+                      Pending ({pendingCount})
+                    </div>
+                  )}
+                </div>
+              </div>
+            </header>
 
-          {/* Feedback */}
-          {feedback && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback?.includes('Great')
-                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                : feedback?.includes('Good')
-                  ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                  : 'bg-red-500/20 border border-red-500/30 text-red-400'
+            {/* Animated Letter Display */}
+            <div className='bg-white border border-border rounded-2xl p-8 mb-6 shadow-soft'>
+              <div className='flex flex-col items-center justify-center gap-4'>
+                <div className='text-center'>
+                  <div
+                    className={`text-9xl md:text-[12rem] font-extrabold mb-2 ${letterColorClass}`}
+                  >
+                    {currentLetter.char}
+                  </div>
+                  {currentLetter.transliteration && (
+                    <div className='text-base md:text-xl text-text-secondary mt-2 font-medium'>
+                      {currentLetter.transliteration}
+                    </div>
+                  )}
+                </div>
+                <div className='w-24 h-24 mb-2'>
+                  <UIIcon
+                    src={getAllIcons(currentLetter)}
+                    alt={currentLetter.name}
+                    size={96}
+                    className='w-full h-full object-contain drop-shadow-lg'
+                    fallback={currentLetter.emoji || '✨'}
+                  />
+                </div>
+                <div className='text-center'>
+                  <div className='text-3xl font-bold text-text-primary'>
+                    {currentLetter.name}
+                  </div>
+                  {currentLetter.pronunciation && (
+                    <div className='text-lg text-text-secondary mt-2 italic'>
+                      "{currentLetter.pronunciation}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Accuracy Bar */}
+            {accuracy > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
+              >
+                <div className='flex justify-between items-center mb-2'>
+                  <label
+                    htmlFor='accuracy-progress'
+                    className='text-text-secondary'
+                  >
+                    Tracing Accuracy
+                  </label>
+                  <span className={`font-bold ${accuracyColorClass}`}>
+                    {accuracy}%
+                  </span>
+                </div>
+                <progress
+                  id='accuracy-progress'
+                  value={accuracy}
+                  max={100}
+                  className='w-full h-3 rounded-full'
+                />
+              </motion.div>
+            )}
+
+            {/* Feedback */}
+            {feedback && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`rounded-xl p-4 mb-6 text-center font-semibold ${
+                  feedback?.includes('Great')
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                    : feedback?.includes('Good')
+                      ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
                 }`}
-            >
-              {feedback}
-            </motion.div>
-          )}
+              >
+                {feedback}
+              </motion.div>
+            )}
 
-          {/* Game Area - Full focus on camera when playing */}
-          <div className={`${isPlaying ? 'mt-0' : '-mt-4'}`}>
             {/* Permission Warning - Kid-Friendly Fallback */}
             {showPermissionWarning && (
               <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 mb-4 text-center shadow-lg'>
@@ -936,8 +1346,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   <span>Using Finger Magic Mode!</span>
                 </div>
                 <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
-                  Pip can't see your hand right now (the Forgetfulness Fog is blocking the camera),
-                  but that's okay! You can use your finger on the screen to draw and rescue letters!
+                  Pip can't see your hand right now (the Forgetfulness Fog is
+                  blocking the camera), but that's okay! You can use your finger
+                  on the screen to draw and rescue letters!
                 </p>
                 <button
                   onClick={() => window.location.reload()}
@@ -949,413 +1360,235 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               </div>
             )}
 
-            {!isPlaying ? (
-              <div className='bg-white border border-border rounded-2xl p-12 text-center relative overflow-hidden shadow-soft-lg'>
-                {/* Decorative elements */}
-                <div className='absolute inset-0 opacity-20'>
-                  <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
-                  <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
-                  <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
-                </div>
+            {/* Menu Screen */}
+            <div className='bg-white border border-border rounded-2xl p-12 text-center relative overflow-hidden shadow-soft-lg'>
+              {/* Decorative elements */}
+              <div className='absolute inset-0 opacity-20'>
+                <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
+                <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
+                <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
+              </div>
 
-                {/* Mascot Preview */}
-                <div className='absolute -bottom-8 -left-8 opacity-70 pointer-events-none'>
-                  <Mascot state='happy' />
-                </div>
+              {/* Mascot Preview */}
+              <div className='absolute -bottom-8 -left-8 opacity-70 pointer-events-none'>
+                <Mascot state='happy' />
+              </div>
 
-                <div className='w-32 h-32 mx-auto mb-6'>
-                  <img
-                    src='/assets/images/onboarding-hand.svg'
-                    alt='Hand tracking'
-                    className='w-full h-full object-contain drop-shadow-2xl'
-                  />
-                </div>
-                <h2 className='text-3xl font-bold mb-4 text-advay-slate'>
-                  Ready to Learn?
-                </h2>
-                <p className='text-text-secondary mb-6 max-w-md mx-auto text-lg'>
-                  Use your hand to trace letters! The camera will track your
-                  finger movements.
-                </p>
-                {/* Language Selector */}
-                <div className='mb-8'>
-                  <label
-                    className='block text-lg font-bold text-text-primary mb-4'
-                    htmlFor='alphabet-select'
-                  >
-                    Choose Your Alphabet
-                  </label>
-                  <form onSubmit={(e) => e.preventDefault()}>
-                    <div className='flex flex-wrap gap-3'>
-                      {LANGUAGES.map((lang) => (
-                        <button
-                          type='button'
-                          key={lang.code}
-                          onClick={() => {
-                            setSelectedLanguage(lang.code);
-                            // Reset to first letter when language changes
-                            setCurrentLetterIndex(0);
-                          }}
-                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
+              <div className='w-32 h-32 mx-auto mb-6'>
+                <img
+                  src='/assets/images/onboarding-hand.svg'
+                  alt='Hand tracking'
+                  className='w-full h-full object-contain drop-shadow-2xl'
+                />
+              </div>
+              <h2 className='text-3xl font-bold mb-4 text-advay-slate'>
+                Ready to Learn?
+              </h2>
+              <p className='text-text-secondary mb-6 max-w-md mx-auto text-lg'>
+                Use your hand to trace letters! The camera will track your
+                finger movements.
+              </p>
+
+              {/* Language Selector */}
+              <div className='mb-8'>
+                <label
+                  className='block text-lg font-bold text-text-primary mb-4'
+                  htmlFor='alphabet-select'
+                >
+                  Choose Your Alphabet
+                </label>
+                <form onSubmit={(e) => e.preventDefault()}>
+                  <div className='flex flex-wrap gap-3'>
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        type='button'
+                        key={lang.code}
+                        onClick={() => {
+                          setSelectedLanguage(lang.code);
+                          setCurrentLetterIndex(0);
+                        }}
+                        className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
+                          selectedLanguage === lang.code
                             ? 'bg-pip-orange text-white shadow-soft-lg'
                             : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                            }`}
-                        >
-                          <span className='mr-3 text-xl'>{lang.flag}</span>
-                          {lang.name}
-                        </button>
-                      ))}
-                    </div>
-                  </form>
-                </div>
-                <p className='text-center text-text-secondary mt-4 text-base'>
-                  Progress is tracked separately for each language
-                </p>
-
-                <div className='text-lg text-text-secondary mb-8'>
-                  Difficulty:{' '}
-                  <span className='text-text-primary font-bold capitalize'>
-                    {settings.difficulty}
-                  </span>
-                </div>
-                <div className='flex justify-center gap-6'>
-                  <button
-                    type='button'
-                    onClick={goToHome}
-                    className='px-6 py-4 bg-white border border-border rounded-xl font-bold text-lg text-advay-slate transition hover:bg-bg-tertiary shadow-soft flex items-center gap-3'
-                  >
-                    <UIIcon name='home' size={24} />
-                    Home
-                  </button>
-                  {isModelLoading ? (
-                    <div className='text-text-secondary px-8 py-4 text-lg font-bold'>
-                      Loading hand tracking...
-                    </div>
-                  ) : (
-                    <button
-                      type='submit'
-                      onClick={startGame}
-                      className='px-8 py-4 bg-pip-orange rounded-xl font-bold text-lg text-white hover:bg-pip-rust transition-all transform hover:scale-105 shadow-soft-lg flex items-center gap-3'
-                    >
-                      <UIIcon name='sparkles' size={24} />
-                      {cameraPermission === 'denied'
-                        ? 'Play with Mouse/Touch'
-                        : 'Start Learning!'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className='w-screen h-screen bg-black overflow-hidden fixed top-0 left-0 right-0 bottom-0 z-40 flex flex-col'>
-                <GameLayout
-                  webcamRef={webcamRef}
-                  canvasRef={canvasRef}
-                  highContrast={highContrast}
-                  onCameraPermission={(state: 'granted' | 'denied' | 'prompt') => {
-                    setCameraPermission(state);
-                    setShowPermissionWarning(state === 'denied');
-                    if (state === 'denied') setIsPlaying(false);
-                  }}
-                  onCameraError={handleCameraError}
-                  canvasEvents={{
-                    onPointerDown: handleCanvasPointerDown,
-                    onPointerMove: handleCanvasPointerMove,
-                    onPointerUp: handleCanvasPointerUpOrCancel,
-                    onPointerCancel: handleCanvasPointerUpOrCancel,
-                    onPointerLeave: handleCanvasPointerUpOrCancel,
-                  }}
-                >
-                  <div className="absolute top-0 left-0 right-0 z-50 p-4 pointer-events-none">
-                    <GameHeader
-                      title={LANGUAGES.find(l => l.code === selectedLanguage)?.name + ' Alphabet'}
-                      subtitle={`Letter ${currentLetter.char}`}
-                      score={undefined}
-                      level={currentLetterIndex + 1}
-                      showBackButton={true}
-                      onBack={() => setShowExitModal(true)}
-                      primaryAction={{
-                        label: isPaused ? 'Resume' : 'Pause',
-                        onClick: () => setIsPaused(!isPaused),
-                        icon: isPaused ? 'play' : 'timer',
-                      }}
-                      secondaryAction={{
-                        label: 'Debug',
-                        onClick: () => setIsDrawing(!isDrawing),
-                        icon: isDrawing ? 'eye-off' : 'eye',
-                      }}
-                    />
-                  </div>
-                  {/* Instruction Overlay with High Contrast */}
-                  <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
-                    <div className='inline-block px-6 py-3 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-lg transition-all duration-300 transform hover:scale-105'>
-                      <p className='text-white text-xl md:text-2xl font-bold drop-shadow-md tracking-wide'>
-                        {isDrawing ? 'Trace the letter!' : 'Pinch 🤏 to draw'}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Letter trace guide - Made more visible */}
-                  {settings.showHints && isPlaying && (
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <div
-                        className={`opacity-60 text-[28vw] font-bold leading-none select-none alphabet-hint-letter drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] ${letterColorClass}`}
+                        }`}
                       >
-                        {currentLetter.char}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Two-stage prompt: big center then small side pill */}
-                  {isPlaying && promptStage === 'center' && (
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
-                        <div className='text-center'>
-                          <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                            Trace this letter
-                          </div>
-                          <div
-                            className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
-                          >
-                            {currentLetter.char}
-                          </div>
-                          <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                            {currentLetter.name}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
-                    {promptStage === 'side' && (
-                      <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
-                        <span className='flex items-center gap-2'>
-                          <UIIcon
-                            name='target'
-                            size={16}
-                            className='text-yellow-300'
-                          />
-                          Trace{' '}
-                          <span className='font-extrabold'>
-                            {currentLetter.char}
-                          </span>
-                          <span className='opacity-80'>
-                            ({currentLetter.name})
-                          </span>
-                        </span>
-                      </div>
-                    )}
+                        <span className='mr-3 text-xl'>{lang.flag}</span>
+                        {lang.name}
+                      </button>
+                    ))}
                   </div>
-
-                  {/* Clear Button - Top Right Overlay */}
-                  <button
-                    type='button'
-                    onClick={clearDrawing}
-                    className='absolute top-4 right-4 px-4 py-2 bg-vision-blue/80 backdrop-blur text-white border border-white/20 rounded-xl transition font-bold shadow-soft hover:bg-vision-blue flex items-center gap-2'
-                  >
-                    <UIIcon name='x' size={18} />
-                    Clear
-                  </button>
-
-                  {/* In-Game Mascot */}
-                  <div className='absolute bottom-4 left-4 z-20'>
-                    {(() => {
-                      const mascotState =
-                        feedback?.includes('Great') ||
-                          feedback?.includes('Amazing')
-                          ? 'happy'
-                          : isDrawing
-                            ? 'waiting'
-                            : 'idle';
-                      return (
-                        <Mascot
-                          state={mascotState}
-                          message={
-                            feedback ||
-                            (isDrawing ? 'Keep going!' : 'Trace the letter!')
-                          }
-                        />
-                      );
-                    })()}
-                  </div>
-	                  {/* Check / Skip Controls Overlay */}
-	                  <fieldset className='absolute bottom-8 right-8 pointer-events-auto z-50'>
-	                    <legend className='sr-only'>Game controls</legend>
-	                    <div className='flex gap-4'>
-	                      <button
-	                        type='button'
-	                        aria-label='Check my tracing'
-	                        onClick={checkProgress}
-	                        className='px-6 py-4 bg-success text-white rounded-full font-bold shadow-lg hover:scale-105 transition flex items-center gap-2 transform active:scale-95'
-	                      >
-	                        <UIIcon name='check' size={24} />
-	                        Check
-	                      </button>
-	                      <button
-	                        type='button'
-	                        onClick={nextLetter}
-	                        className='px-6 py-4 bg-vision-blue text-white rounded-full font-bold shadow-lg hover:scale-105 transition flex items-center gap-2 transform active:scale-95'
-	                      >
-	                        <UIIcon name='play' size={24} />
-	                        Skip
-	                      </button>
-	                    </div>
-	                  </fieldset>
-	                </GameLayout>
-
+                </form>
               </div>
-            )}
-          </div>
-        </motion.div>
+              <p className='text-center text-text-secondary mt-4 text-base'>
+                Progress is tracked separately for each language
+              </p>
 
-        {/* Wellness Timer */}
-        <WellnessTimer
-          onBreakReminder={() => {
-            setWellnessReminderType('break');
-            setShowWellnessReminder(true);
-          }}
-          onHydrationReminder={() => {
-            setWellnessReminderType('water');
-            setShowWellnessReminder(true);
-          }}
-          onStretchReminder={() => {
-            setWellnessReminderType('stretch');
-            setShowWellnessReminder(true);
-          }}
-          activeThreshold={15}
-          hydrationThreshold={10}
-          stretchThreshold={20}
-          screenTimeThreshold={30}
-        />
+              <div className='text-lg text-text-secondary mb-8'>
+                Difficulty:{' '}
+                <span className='text-text-primary font-bold capitalize'>
+                  {settings.difficulty}
+                </span>
+              </div>
 
-        {/* Wellness Reminder */}
-        {showWellnessReminder &&
-          wellnessReminderType &&
-          !showCelebration &&
+              {/* Standardized Menu Controls */}
+              <div className='pb-8'>
+                {' '}
+                {/* Spacer to ensure content doesn't overlap absolute controls */}
+                <GameControls
+                  controls={menuControls}
+                  position='bottom-center'
+                />
+              </div>
+            </div>
+          </motion.div>
+        </section>
+      )}
+
+      {/* Wellness Timer */}
+      <WellnessTimer
+        onBreakReminder={() => {
+          setWellnessReminderType('break');
+          setShowWellnessReminder(true);
+        }}
+        onHydrationReminder={() => {
+          setWellnessReminderType('water');
+          setShowWellnessReminder(true);
+        }}
+        onStretchReminder={() => {
+          setWellnessReminderType('stretch');
+          setShowWellnessReminder(true);
+        }}
+        activeThreshold={15}
+        hydrationThreshold={10}
+        stretchThreshold={20}
+        screenTimeThreshold={30}
+      />
+
+      {/* Wellness Reminder */}
+      {showWellnessReminder &&
+        wellnessReminderType &&
+        !showCelebration &&
+        !showExitModal &&
+        !showCameraErrorModal &&
+        !isPaused && (
+          <WellnessReminder
+            alerts={[
+              {
+                id: '1',
+                type: wellnessReminderType as any,
+                message:
+                  wellnessReminderType === 'break'
+                    ? 'Time for a break! Rest your eyes and stretch.'
+                    : wellnessReminderType === 'water'
+                      ? hydrationReminderCount > 1
+                        ? `Time for a drink of water! (You've had ${hydrationReminderCount} water reminders.)`
+                        : 'Time for a drink of water!'
+                      : wellnessReminderType === 'stretch'
+                        ? 'Time to stretch your body!'
+                        : 'Are you still there?',
+                timestamp: Date.now(),
+                acknowledged: false,
+              },
+            ]}
+            onAcknowledge={() => handleWellnessReminderDismiss()}
+            onDismiss={() => handleWellnessReminderDismiss()}
+          />
+        )}
+
+      {/* Pause Modal */}
+      <AnimatePresence>
+        {isPaused &&
           !showExitModal &&
           !showCameraErrorModal &&
-          !isPaused && (
-            <WellnessReminder
-              alerts={[
-                {
-                  id: '1',
-                  type: wellnessReminderType as any,
-                  message:
-                    wellnessReminderType === 'break'
-                      ? 'Time for a break! Rest your eyes and stretch.'
-                      : wellnessReminderType === 'water'
-                        ? hydrationReminderCount > 1
-                          ? `Time for a drink of water! (You’ve had ${hydrationReminderCount} water reminders.)`
-                          : 'Time for a drink of water!'
-                        : wellnessReminderType === 'stretch'
-                          ? 'Time to stretch your body!'
-                          : 'Are you still there?',
-                  timestamp: Date.now(),
-                  acknowledged: false,
-                },
-              ]}
-              onAcknowledge={(_id: string) => handleWellnessReminderDismiss()}
-              onDismiss={(_id: string) => handleWellnessReminderDismiss()}
-            />
-          )}
-
-        {/* Pause Modal */}
-        <AnimatePresence>
-          {isPaused &&
-            !showExitModal &&
-            !showCameraErrorModal &&
-            !showWellnessReminder &&
-            !showCelebration && (
+          !showWellnessReminder &&
+          !showCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
+            >
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
               >
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
-                >
-                  <div className='flex justify-center mb-6'>
-                    <Mascot
-                      state='waiting'
-                      message="Paused! Take a breather."
-                    />
-                  </div>
-                  <div className='text-center mb-6'>
-                    <h2 className='text-2xl font-bold text-advay-slate mb-2'>
-                      Game Paused
-                    </h2>
-                    <p className='text-text-secondary'>
-                      Your progress is saved. Ready to continue?
-                    </p>
-                  </div>
-                  <div className='space-y-4'>
-                    <button
-                      type='button'
-                      onClick={() => {
-                        setIsPaused(false);
-                        setFeedback('Welcome back! Continue where you left off.');
-                      }}
-                      className='w-full px-6 py-4 bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] flex items-center justify-center gap-3'
-                    >
-                      <UIIcon name='check' size={24} />
-                      Resume Game
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() => {
-                        setIsPaused(false);
-                        setShowExitModal(true);
-                      }}
-                      className='w-full px-6 py-4 bg-white text-text-primary border-2 border-border rounded-2xl font-bold text-lg hover:bg-bg-tertiary transition-all flex items-center justify-center gap-3'
-                    >
-                      <UIIcon name='home' size={24} />
-                      Exit to Home
-                    </button>
-                  </div>
-                </motion.div>
+                <div className='flex justify-center mb-6'>
+                  <Mascot state='waiting' message='Paused! Take a breather.' />
+                </div>
+                <div className='text-center mb-6'>
+                  <h2 className='text-2xl font-bold text-advay-slate mb-2'>
+                    Game Paused
+                  </h2>
+                  <p className='text-text-secondary'>
+                    Your progress is saved. Ready to continue?
+                  </p>
+                </div>
+                <div className='space-y-4'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setIsPaused(false);
+                      setFeedback('Welcome back! Continue where you left off.');
+                    }}
+                    className='w-full px-6 py-4 min-h-[56px] bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] flex items-center justify-center gap-3'
+                  >
+                    <UIIcon name='check' size={24} />
+                    Resume Game
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setIsPaused(false);
+                      setShowExitModal(true);
+                    }}
+                    className='w-full px-6 py-4 min-h-[56px] bg-white text-text-primary border-2 border-border rounded-2xl font-bold text-lg hover:bg-bg-tertiary transition-all flex items-center justify-center gap-3'
+                  >
+                    <UIIcon name='home' size={24} />
+                    Exit to Home
+                  </button>
+                </div>
               </motion.div>
-            )}
-        </AnimatePresence>
+            </motion.div>
+          )}
+      </AnimatePresence>
 
-        {/* Camera Error Modal */}
-        <CameraRecoveryModal
-          isOpen={showCameraErrorModal}
-          errorMessage={cameraErrorMessage}
-          onRetryCamera={handleRetryCamera}
-          onContinueWithMouse={handleContinueWithMouse}
-          onSaveAndExit={handleSaveAndExit}
-        />
+      {/* Camera Error Modal */}
+      <CameraRecoveryModal
+        isOpen={showCameraErrorModal}
+        errorMessage={cameraErrorMessage}
+        onRetryCamera={handleRetryCamera}
+        onContinueWithMouse={handleContinueWithMouse}
+        onSaveAndExit={handleSaveAndExit}
+      />
 
-        {/* Exit Confirmation Modal */}
-        <ExitConfirmationModal
-          isOpen={showExitModal}
-          onConfirmExit={handleConfirmExit}
-          onCancelExit={handleCancelExit}
-          progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
-        />
+      {/* Exit Confirmation Modal */}
+      <ExitConfirmationModal
+        isOpen={showExitModal}
+        onConfirmExit={handleConfirmExit}
+        onCancelExit={handleCancelExit}
+        progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
+      />
 
-        {/* Celebration Overlay */}
-        <CelebrationOverlay
-          show={
-            showCelebration &&
-            !showExitModal &&
-            !showCameraErrorModal &&
-            !isPaused &&
-            !showWellnessReminder
-          }
-          letter={currentLetter.char}
-          accuracy={accuracy}
-          message={celebrationTitle}
-          onComplete={() => {
-            setShowCelebration(false);
-            // Auto-advance to next letter after celebration
-            nextLetter();
-          }}
-        />
-      </section >
+      {/* Celebration Overlay */}
+      <CelebrationOverlay
+        show={
+          showCelebration &&
+          !showExitModal &&
+          !showCameraErrorModal &&
+          !isPaused &&
+          !showWellnessReminder
+        }
+        letter={currentLetter.char}
+        accuracy={accuracy}
+        message={celebrationTitle}
+        onComplete={() => {
+          setShowCelebration(false);
+          nextLetter();
+        }}
+      />
     </>
   );
 });

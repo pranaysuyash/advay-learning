@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '../components/ui/Button';
+import { authApi } from '../services/api';
+import { UIIcon } from '../components/ui/Icon';
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -10,15 +11,13 @@ export function ResetPassword() {
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'invalid'>('idle');
   const [error, setError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Validate token exists
   useEffect(() => {
     if (!token) {
-      setError('Invalid or missing reset token. Please request a new password reset link.');
+      setStatus('invalid');
     }
   }, [token]);
 
@@ -43,52 +42,6 @@ export function ResetPassword() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    // Validate passwords match
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    // Validate password strength
-    if (!validatePassword(newPassword)) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('/api/v1/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, new_password: newPassword }),
-      });
-
-      if (response.ok) {
-        setIsSuccess(true);
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-      } else {
-        const data = await response.json();
-        if (response.status === 400) {
-          setError(data.detail || 'Invalid or expired token. Please request a new reset link.');
-        } else {
-          setError(data.detail || 'Something went wrong. Please try again.');
-        }
-      }
-    } catch (err) {
-      setError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Password strength indicator
   const getPasswordStrength = (password: string): { strength: number; label: string; color: string } => {
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -97,7 +50,6 @@ export function ResetPassword() {
     if (/[a-z]/.test(password)) strength++;
     if (/\d/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-
     if (strength <= 2) return { strength: 1, label: 'Weak', color: 'bg-red-500' };
     if (strength <= 4) return { strength: 2, label: 'Medium', color: 'bg-yellow-500' };
     return { strength: 3, label: 'Strong', color: 'bg-green-500' };
@@ -105,98 +57,155 @@ export function ResetPassword() {
 
   const passwordStrength = getPasswordStrength(newPassword);
 
-  return (
-    <div className='min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900'>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className='w-full max-w-md'
-      >
-        <div className='bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-2xl'>
-          {/* Header */}
-          <div className='text-center mb-8'>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className='text-6xl mb-4'
-            >
-              🔑
-            </motion.div>
-            <h1 className='text-3xl font-bold text-white mb-2'>
-              Create New Password
-            </h1>
-            <p className='text-white/70'>
-              Enter your new password below.
-            </p>
-          </div>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-          {isSuccess ? (
-            // Success State
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className='text-center space-y-6'
-            >
-              <div className='text-6xl mb-4'>🎉</div>
-              <div className='bg-green-500/20 border border-green-500/30 rounded-xl p-4'>
-                <p className='text-green-300 font-semibold mb-2'>
-                  Password Reset Successful!
-                </p>
-                <p className='text-green-200/80 text-sm'>
-                  Your password has been updated. Redirecting you to login...
-                </p>
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (!validatePassword(newPassword)) {
+      return;
+    }
+
+    setStatus('loading');
+
+    try {
+      await authApi.resetPassword(token!, newPassword);
+      setStatus('success');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (err: unknown) {
+      setStatus('idle');
+      const errorMsg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setError(errorMsg || 'Failed to reset password. The link may have expired.');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <div className='min-h-screen flex flex-col'>
+        <header className='px-4 py-4'>
+          <Link
+            to='/login'
+            className='inline-flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-medium'
+          >
+            <UIIcon name='back' size={16} />
+            Back to login
+          </Link>
+        </header>
+
+        <main className='flex-1 flex items-center justify-center px-4 py-8'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='w-full max-w-md text-center'
+          >
+            <div className='bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl'>
+              <div className='w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <UIIcon name='check' size={32} className='text-green-400' />
               </div>
+              <h1 className='text-2xl font-bold text-white mb-2'>Password Reset!</h1>
+              <p className='text-slate-400 mb-6'>Your password has been updated. Redirecting to login...</p>
               <Link
                 to='/login'
-                className='block text-center text-pip-orange hover:text-pip-orange/80 font-semibold'
+                className='inline-flex items-center justify-center gap-2 w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition'
               >
                 Go to Login Now
               </Link>
-            </motion.div>
-          ) : !token ? (
-            // Invalid Token State
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className='text-center space-y-6'
-            >
-              <div className='text-6xl mb-4'>⚠️</div>
-              <div className='bg-red-500/20 border border-red-500/30 rounded-xl p-4'>
-                <p className='text-red-300 font-semibold mb-2'>
-                  Invalid Reset Link
-                </p>
-                <p className='text-red-200/80 text-sm'>
-                  This password reset link is invalid or has expired. 
-                  Please request a new one.
-                </p>
+            </div>
+          </motion.div>
+        </main>
+      </div>
+    );
+  }
+
+  if (status === 'invalid') {
+    return (
+      <div className='min-h-screen flex flex-col'>
+        <header className='px-4 py-4'>
+          <Link
+            to='/login'
+            className='inline-flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-medium'
+          >
+            <UIIcon name='back' size={16} />
+            Back to login
+          </Link>
+        </header>
+
+        <main className='flex-1 flex items-center justify-center px-4 py-8'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='w-full max-w-md text-center'
+          >
+            <div className='bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl'>
+              <div className='w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <UIIcon name='warning' size={32} className='text-red-400' />
               </div>
-              <Button
-                variant='primary'
-                fullWidth
-                onClick={() => navigate('/forgot-password')}
+              <h1 className='text-2xl font-bold text-white mb-2'>Invalid Reset Link</h1>
+              <p className='text-slate-400 mb-6'>
+                This password reset link is invalid or has expired. Please request a new one.
+              </p>
+              <Link
+                to='/forgot-password'
+                className='inline-flex items-center justify-center gap-2 w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition'
               >
                 Request New Link
-              </Button>
-            </motion.div>
-          ) : (
-            // Form State
-            <form onSubmit={handleSubmit} className='space-y-6'>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className='bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm'
-                >
-                  {error}
-                </motion.div>
-              )}
+              </Link>
+            </div>
+          </motion.div>
+        </main>
+      </div>
+    );
+  }
 
-              {/* New Password */}
+  return (
+    <div className='min-h-screen flex flex-col'>
+      <header className='px-4 py-4'>
+        <Link
+          to='/login'
+          className='inline-flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-medium'
+        >
+          <UIIcon name='back' size={16} />
+          Back to login
+        </Link>
+      </header>
+
+      <main className='flex-1 flex items-center justify-center px-4 py-8'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='w-full max-w-md'
+        >
+          <div className='bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl'>
+            <div className='text-center mb-8'>
+              <div className='w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <UIIcon name='lock' size={28} className='text-orange-400' />
+              </div>
+              <h1 className='text-2xl font-bold text-white mb-2'>Create New Password</h1>
+              <p className='text-slate-400'>
+                Enter your new password below.
+              </p>
+            </div>
+
+            {error && (
+              <div className='bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6'>
+                <div className='flex items-center gap-2'>
+                  <UIIcon name='warning' size={18} />
+                  {error}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className='space-y-5'>
               <div>
                 <label
                   htmlFor='newPassword'
-                  className='block text-sm font-medium text-white/80 mb-2'
+                  className='block text-sm font-medium text-slate-300 mb-2'
                 >
                   New Password
                 </label>
@@ -208,17 +217,19 @@ export function ResetPassword() {
                     setNewPassword(e.target.value);
                     if (passwordError) validatePassword(e.target.value);
                   }}
-                  className='w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-pip-orange transition text-lg'
+                  className='w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg 
+                    text-white placeholder-slate-500
+                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent 
+                    transition'
                   placeholder='Enter new password'
                   required
-                  disabled={isLoading}
+                  disabled={status === 'loading'}
                 />
                 
-                {/* Password Strength Indicator */}
                 {newPassword && (
                   <div className='mt-2'>
                     <div className='flex items-center gap-2 mb-1'>
-                      <div className='flex-1 h-2 bg-white/20 rounded-full overflow-hidden'>
+                      <div className='flex-1 h-2 bg-slate-700 rounded-full overflow-hidden'>
                         <div
                           className={`h-full ${passwordStrength.color} transition-all duration-300`}
                           style={{ width: `${(passwordStrength.strength / 3) * 100}%` }}
@@ -231,9 +242,6 @@ export function ResetPassword() {
                         {passwordStrength.label}
                       </span>
                     </div>
-                    <p className='text-white/50 text-xs'>
-                      Must be at least 8 characters with uppercase, lowercase, and number
-                    </p>
                   </div>
                 )}
                 {passwordError && (
@@ -241,11 +249,10 @@ export function ResetPassword() {
                 )}
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label
                   htmlFor='confirmPassword'
-                  className='block text-sm font-medium text-white/80 mb-2'
+                  className='block text-sm font-medium text-slate-300 mb-2'
                 >
                   Confirm Password
                 </label>
@@ -254,48 +261,43 @@ export function ResetPassword() {
                   type='password'
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className='w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-pip-orange transition text-lg'
+                  className='w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg 
+                    text-white placeholder-slate-500
+                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent 
+                    transition'
                   placeholder='Confirm new password'
                   required
-                  disabled={isLoading}
+                  disabled={status === 'loading'}
                 />
                 {confirmPassword && newPassword !== confirmPassword && (
                   <p className='text-red-400 text-sm mt-1'>Passwords do not match</p>
                 )}
               </div>
 
-              <Button
+              <button
                 type='submit'
-                variant='primary'
-                size='lg'
-                fullWidth
-                isLoading={isLoading}
-                disabled={!newPassword || !confirmPassword || newPassword !== confirmPassword || isLoading}
+                disabled={status === 'loading' || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                className='w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg 
+                  font-semibold transition-all
+                  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800
+                  disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                {isLoading ? 'Resetting...' : 'Reset Password'}
-              </Button>
-
-              <div className='text-center pt-4 border-t border-white/10'>
-                <p className='text-white/60 text-sm'>
-                  Remember your password?{' '}
-                  <Link
-                    to='/login'
-                    className='text-pip-orange hover:text-pip-orange/80 font-semibold'
-                  >
-                    Sign in
-                  </Link>
-                </p>
-              </div>
+                {status === 'loading' ? (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='animate-spin h-5 w-5' viewBox='0 0 24 24' fill='none'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                    </svg>
+                    Resetting...
+                  </span>
+                ) : (
+                  'Reset Password'
+                )}
+              </button>
             </form>
-          )}
-        </div>
-
-        {/* Security Note */}
-        <p className='text-center text-white/40 text-xs mt-6'>
-          For your security, this reset link will expire in 24 hours. 
-          Never share your password with anyone.
-        </p>
-      </motion.div>
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 }

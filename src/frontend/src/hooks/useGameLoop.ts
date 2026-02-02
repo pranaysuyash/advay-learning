@@ -1,175 +1,196 @@
 /**
  * useGameLoop hook - Centralized game loop with FPS limiting
- * 
+ *
  * Manages requestAnimationFrame loops with consistent timing,
- * FPS limiting, and automatic cleanup.
- * 
+ * FPS limiting via frame skipping, and automatic cleanup.
+ *
+ * Uses CONTROLLED mode: parent owns isRunning state. The hook follows
+ * the prop and exposes requestStart/requestStop for signaling intent.
+ *
  * @see docs/RESEARCH_HAND_TRACKING_CENTRALIZATION.md
  * @ticket TCK-20260131-142
- * 
+ *
  * @example
  * ```tsx
- * const { fps, isRunning, start, stop } = useGameLoop({
+ * const [gameRunning, setGameRunning] = useState(false);
+ * const { fps, requestStart, requestStop } = useGameLoop({
  *   onFrame: (deltaTime, fps) => {
- *     // Update game state
+ *     // deltaTime is in milliseconds
  *   },
- *   isRunning: gameStarted,
+ *   isRunning: gameRunning,
+ *   onRunningChange: setGameRunning, // Parent controls state
  *   targetFps: 30,
  * });
  * ```
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import type { UseGameLoopOptions, UseGameLoopReturn } from '../types/tracking';
 
 const DEFAULT_TARGET_FPS = 30;
 const FPS_HISTORY_SIZE = 10;
+const FPS_UPDATE_INTERVAL_MS = 1000;
 
 /**
- * Hook for managing a game loop with consistent timing
- * 
+ * Hook for managing a game loop with consistent timing (CONTROLLED mode)
+ *
+ * The parent component owns isRunning state. This hook follows the prop
+ * and calls onRunningChange when start/stop is requested internally.
+ *
  * @param options - Configuration options
  * @returns Game loop state and controls
  */
 export function useGameLoop(options: UseGameLoopOptions): UseGameLoopReturn {
-  const { onFrame, isRunning: initialRunning, targetFps = DEFAULT_TARGET_FPS } = options;
-  
-  const [isRunning, setIsRunning] = useState(initialRunning);
-  const [fps, setFps] = useState(0);
-  const [averageFps, setAverageFps] = useState(0);
-  
-  // Refs for loop state
+  const {
+    onFrame,
+    isRunning,
+    targetFps = DEFAULT_TARGET_FPS,
+    onRunningChange,
+  } = options;
+
+  // Refs for stable callback access (avoids loop recreation)
+  const onFrameRef = useRef(onFrame);
+  const onRunningChangeRef = useRef(onRunningChange);
+  const targetFpsRef = useRef(targetFps);
+
+  // Loop timing refs
   const rafIdRef = useRef<number | null>(null);
-  const lastTimeRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
+  const accumulatorRef = useRef<number>(0);
+
+  // FPS tracking refs
   const frameCountRef = useRef<number>(0);
   const lastFpsUpdateRef = useRef<number>(0);
   const fpsHistoryRef = useRef<number[]>([]);
-  const isRunningRef = useRef(isRunning);
-  
-  // Keep refs in sync with state
+  const currentFpsRef = useRef<number>(0);
+  const averageFpsRef = useRef<number>(0);
+
+  // Keep refs in sync with latest values
   useEffect(() => {
-    isRunningRef.current = isRunning;
-  }, [isRunning]);
-  
-  // Update running state when prop changes
+    onFrameRef.current = onFrame;
+  }, [onFrame]);
+
   useEffect(() => {
-    setIsRunning(initialRunning);
-  }, [initialRunning]);
-  
+    onRunningChangeRef.current = onRunningChange;
+  }, [onRunningChange]);
+
+  useEffect(() => {
+    targetFpsRef.current = targetFps;
+  }, [targetFps]);
+
   /**
-   * Calculate average FPS from history
+   * Request to start the loop (signals parent via onRunningChange)
    */
-  const updateAverageFps = useCallback((currentFps: number) => {
-    fpsHistoryRef.current.push(currentFps);
-    if (fpsHistoryRef.current.length > FPS_HISTORY_SIZE) {
-      fpsHistoryRef.current.shift();
+  const requestStart = useCallback(() => {
+    if (onRunningChangeRef.current) {
+      onRunningChangeRef.current(true);
     }
-    const avg = fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length;
-    setAverageFps(Math.round(avg));
   }, []);
-  
+
   /**
-   * The game loop
+   * Request to stop the loop (signals parent via onRunningChange)
    */
-  const loop = useCallback((currentTime: number) => {
-    if (!isRunningRef.current) return;
-    
-    // Calculate delta time
-    const deltaTime = lastTimeRef.current > 0 
-      ? currentTime - lastTimeRef.current 
-      : 0;
-    
-    lastTimeRef.current = currentTime;
-    frameCountRef.current++;
-    
-    // Update FPS every second
-    if (currentTime - lastFpsUpdateRef.current >= 1000) {
-      const currentFps = frameCountRef.current;
-      setFps(currentFps);
-      updateAverageFps(currentFps);
-      frameCountRef.current = 0;
-      lastFpsUpdateRef.current = currentTime;
+  const requestStop = useCallback(() => {
+    if (onRunningChangeRef.current) {
+      onRunningChangeRef.current(false);
     }
-    
-    // Call the frame callback
-    onFrame(deltaTime, fps);
-    
-    // Schedule next frame with FPS limiting
-    if (isRunningRef.current) {
-      const frameInterval = 1000 / targetFps;
-      const nextFrameTime = lastTimeRef.current + frameInterval;
-      const delay = Math.max(0, nextFrameTime - performance.now());
-      
-      if (delay > 0) {
-        // Use setTimeout for precise timing when limiting FPS
-        setTimeout(() => {
-          if (isRunningRef.current) {
-            rafIdRef.current = requestAnimationFrame(loop);
-          }
-        }, delay);
-      } else {
-        rafIdRef.current = requestAnimationFrame(loop);
+  }, []);
+
+  /**
+   * Core loop effect - runs when isRunning changes
+   * Uses accumulator pattern for stable FPS limiting without setTimeout
+   */
+  useEffect(() => {
+    if (!isRunning) {
+      // Cleanup when stopped
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
+      return;
     }
-  }, [onFrame, fps, targetFps, updateAverageFps]);
-  
-  /**
-   * Start the game loop
-   */
-  const start = useCallback(() => {
-    if (isRunningRef.current) return;
-    
-    console.log('[useGameLoop] Starting loop');
-    setIsRunning(true);
-    isRunningRef.current = true;
-    lastTimeRef.current = 0;
+
+    // Reset timing state on start
+    lastFrameTimeRef.current = 0;
+    accumulatorRef.current = 0;
     frameCountRef.current = 0;
-    lastFpsUpdateRef.current = performance.now();
+    lastFpsUpdateRef.current = 0;
     fpsHistoryRef.current = [];
-    
-    rafIdRef.current = requestAnimationFrame(loop);
-  }, [loop]);
-  
-  /**
-   * Stop the game loop
-   */
-  const stop = useCallback(() => {
-    console.log('[useGameLoop] Stopping loop');
-    setIsRunning(false);
-    isRunningRef.current = false;
-    
-    if (rafIdRef.current !== null) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-    
-    lastTimeRef.current = 0;
-    frameCountRef.current = 0;
-  }, []);
-  
-  // Auto-start/stop based on isRunning prop
-  useEffect(() => {
-    if (isRunning && !rafIdRef.current) {
+    currentFpsRef.current = 0;
+    averageFpsRef.current = 0;
+
+    /**
+     * The game loop - always runs via rAF, skips work when not enough time passed
+     */
+    const loop = (currentTime: number): void => {
+      // Initialize timing on first frame
+      if (lastFrameTimeRef.current === 0) {
+        lastFrameTimeRef.current = currentTime;
+        lastFpsUpdateRef.current = currentTime;
+        rafIdRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const deltaTime = currentTime - lastFrameTimeRef.current;
+      lastFrameTimeRef.current = currentTime;
+
+      // Accumulator pattern: stable FPS limiting without setTimeout
+      const frameInterval = 1000 / targetFpsRef.current;
+      accumulatorRef.current += deltaTime;
+
+      // Only execute frame when enough time has accumulated
+      if (accumulatorRef.current >= frameInterval) {
+        // Consume the interval (handles catch-up if we fell behind)
+        const executedDeltaTime = accumulatorRef.current;
+        accumulatorRef.current = accumulatorRef.current % frameInterval;
+
+        // Track frame for FPS calculation
+        frameCountRef.current++;
+
+        // Update FPS metrics once per second
+        if (currentTime - lastFpsUpdateRef.current >= FPS_UPDATE_INTERVAL_MS) {
+          const measuredFps = frameCountRef.current;
+          currentFpsRef.current = measuredFps;
+
+          // Update moving average
+          fpsHistoryRef.current.push(measuredFps);
+          if (fpsHistoryRef.current.length > FPS_HISTORY_SIZE) {
+            fpsHistoryRef.current.shift();
+          }
+          averageFpsRef.current = Math.round(
+            fpsHistoryRef.current.reduce((a, b) => a + b, 0) /
+              fpsHistoryRef.current.length,
+          );
+
+          frameCountRef.current = 0;
+          lastFpsUpdateRef.current = currentTime;
+        }
+
+        // Call the frame callback with actual delta and current FPS
+        onFrameRef.current(executedDeltaTime, currentFpsRef.current);
+      }
+
+      // Always schedule next rAF (frame skipping, not timer juggling)
       rafIdRef.current = requestAnimationFrame(loop);
-    } else if (!isRunning && rafIdRef.current) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-    
+    };
+
+    rafIdRef.current = requestAnimationFrame(loop);
+
+    // Cleanup on unmount or when isRunning becomes false
     return () => {
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
     };
-  }, [isRunning, loop]);
-  
+  }, [isRunning]);
+
   return {
-    fps,
-    averageFps,
+    fps: currentFpsRef.current,
+    averageFps: averageFpsRef.current,
     isRunning,
-    start,
-    stop,
+    requestStart,
+    requestStop,
   };
 }
 

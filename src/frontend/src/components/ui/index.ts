@@ -9,10 +9,12 @@ export { UIIcon } from './Icon';
 export type { IconName } from './Icon';
 
 // Toast System
-export { ToastProvider, useToast } from './Toast';
+export { ToastProvider } from './Toast';
+export { useToast } from './useToast';
 
 // Confirm Dialog
-export { ConfirmProvider, useConfirm } from './ConfirmDialog';
+export { ConfirmProvider } from './ConfirmDialog';
+export { useConfirm } from './useConfirm';
 
 // Layout
 export { Layout } from './Layout';

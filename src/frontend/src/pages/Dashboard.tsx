@@ -11,12 +11,12 @@ import {
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 import { UIIcon } from '../components/ui';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../components/ui/useToast';
 import { AdventureMap } from '../components/Map';
 import { StoryModal } from '../components/StoryModal';
 import { useStoryStore } from '../store/storyStore';
 import { QUESTS, getQuestsByIsland, isIslandUnlocked } from '../data/quests';
-import { EmptyState, TipsSection, StatsBar } from '../components/dashboard';
+import { EmptyState, TipsSection, StatsBar, AddChildModal, EditProfileModal } from '../components/dashboard';
 
 interface LanguageProgress {
   language: string;
@@ -436,6 +436,29 @@ export const Dashboard = memo(function DashboardComponent() {
         {/* Compact Stats Bar */}
         {selectedChildData && <StatsBar stats={stats} />}
 
+        {/* Quick Play Card - Continue Learning */}
+        {selectedChildData && (
+          <div className='mt-4 p-4 bg-gradient-to-r from-pip-orange/20 to-pip-rust/10 border border-pip-orange/30 rounded-xl'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                <div className='w-12 h-12 bg-gradient-to-br from-pip-orange to-pip-rust rounded-xl flex items-center justify-center'>
+                  <UIIcon name='play' size={24} className='text-white' />
+                </div>
+                <div>
+                  <h3 className='font-bold text-white'>Continue Learning</h3>
+                  <p className='text-sm text-white/70'>Pick up where you left off!</p>
+                </div>
+              </div>
+              <Link
+                to='/game'
+                className='px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-105 transition-transform'
+              >
+                Play Now →
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
         {children.length === 0 && (
           <EmptyState onAddChild={() => setShowAddModal(true)} />
@@ -482,13 +505,13 @@ export const Dashboard = memo(function DashboardComponent() {
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
                             <span className='text-sm flex items-center gap-2'>
-	                              <UIIcon
-	                                src={letter.icon}
-	                                alt={letter.name}
-	                                size={16}
-	                                className='opacity-80'
-	                                fallback={letter.emoji || '✨'}
-	                              />
+                                <UIIcon
+                                  src={letter.icon}
+                                  alt={letter.name}
+                                  size={16}
+                                  className='opacity-80'
+                                  fallback={letter.emoji || '✨'}
+                                />
                               {letter.name}
                             </span>
                             <span className='text-sm text-slate-600'>
@@ -607,24 +630,24 @@ export const Dashboard = memo(function DashboardComponent() {
                   </div>
                 </div>
 
-	                <AdventureMap />
+                  <AdventureMap />
 
-	                <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
-	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-	                    Quests: {questSummary.completedCount}/{questSummary.totalQuests}
-	                  </span>
-	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-	                    Islands: {questSummary.unlockedCount}
-	                  </span>
-	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-	                    Current island quests: {questSummary.currentIslandQuestCount}
-	                  </span>
-	                  {questSummary.nextUnlockableIslandId && (
-	                    <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
-	                      Next island available: {questSummary.nextUnlockableIslandId}
-	                    </span>
-	                  )}
-	                </div>
+                  <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
+                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                      Quests: {questSummary.completedCount}/{questSummary.totalQuests}
+                    </span>
+                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                      Islands: {questSummary.unlockedCount}
+                    </span>
+                    <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+                      Current island quests: {questSummary.currentIslandQuestCount}
+                    </span>
+                    {questSummary.nextUnlockableIslandId && (
+                      <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
+                        Next island available: {questSummary.nextUnlockableIslandId}
+                      </span>
+                    )}
+                  </div>
 
                 {/* Quick Actions */}
                 <div className='mt-4 flex gap-2'>
@@ -638,13 +661,13 @@ export const Dashboard = memo(function DashboardComponent() {
                   >
                     Start Alphabet Quest
                   </button>
-	                  <Link
-	                    to='/games'
-	                    className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
-	                  >
-	                    <UIIcon name='search' size={16} />
-	                    All Games
-	                  </Link>
+                    <Link
+                      to='/games'
+                      className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
+                    >
+                      <UIIcon name='search' size={16} />
+                      All Games
+                    </Link>
                 </div>
 
                 {/* Badges Summary */}
@@ -701,165 +724,34 @@ export const Dashboard = memo(function DashboardComponent() {
         <TipsSection />
 
         {/* Add Child Modal */}
-        {showAddModal && (
-          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className='bg-white border border-border rounded-xl p-6 max-w-md w-full shadow-soft-lg'
-            >
-              <h2 className='text-2xl font-bold mb-4'>Add Child Profile</h2>
-
-              <div className='space-y-4'>
-                <div>
-                  <label className='block text-sm font-medium text-slate-600 mb-2'>
-                    Child's Name *
-                  </label>
-                  <input
-                    type='text'
-                    value={newChildName}
-                    onChange={(e) => setNewChildName(e.target.value)}
-                    placeholder="Child's name"
-                    autoComplete='name'
-                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-slate-600 mb-2'>
-                    Age (years)
-                  </label>
-                  <input
-                    type='number'
-                    min={2}
-                    max={12}
-                    step={0.1}
-                    value={newChildAge}
-                    onChange={(e) =>
-                      setNewChildAge(parseFloat(e.target.value) || 5)
-                    }
-                    placeholder='Age (2-12 years)'
-                    autoComplete='bday'
-                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  />
-                  <p className='text-xs text-slate-600 mt-1'>
-                    Use decimals for partial years (e.g., 2.5 for 2 years 6
-                    months)
-                  </p>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-slate-600 mb-2'>
-                    Preferred Language
-                  </label>
-                  <select
-                    value={newChildLanguage}
-                    onChange={(e) => setNewChildLanguage(e.target.value)}
-                    aria-label='Choose language'
-                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  >
-                    <option value='en'>🇬🇳 English</option>
-                    <option value='hi'>🇮🇳 Hindi</option>
-                    <option value='kn'>🇮🇳 Kannada</option>
-                    <option value='te'>🇮🇳 Telugu</option>
-                    <option value='ta'>🇮🇳 Tamil</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className='flex gap-3 mt-6'>
-                <button
-                  type='button'
-                  onClick={() => setShowAddModal(false)}
-                  className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='button'
-                  onClick={handleCreateProfile}
-                  disabled={!newChildName.trim() || isCreating}
-                  className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  {isCreating ? 'Creating...' : 'Add Child'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+        <AddChildModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          childName={newChildName}
+          onChildNameChange={setNewChildName}
+          childAge={newChildAge}
+          onChildAgeChange={setNewChildAge}
+          childLanguage={newChildLanguage}
+          onChildLanguageChange={setNewChildLanguage}
+          onSubmit={handleCreateProfile}
+          isSubmitting={isCreating}
+        />
 
         {/* Edit Profile Modal */}
-        {showEditModal && editingProfile && (
-          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className='bg-bg-secondary rounded-2xl p-6 w-full max-w-md shadow-soft-lg border border-border'
-            >
-              <h3 className='text-xl font-semibold mb-1'>Edit Profile</h3>
-              <p className='text-slate-600 text-sm mb-6'>
-                Update {editingProfile.name}'s information
-              </p>
-
-              <div className='space-y-4'>
-                <div>
-                  <label className='block text-sm font-medium text-slate-600 mb-2'>
-                    Child's Name
-                  </label>
-                  <input
-                    type='text'
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Enter child's name"
-                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-slate-600 mb-2'>
-                    Preferred Language
-                  </label>
-                  <select
-                    value={editLanguage}
-                    onChange={(e) => setEditLanguage(e.target.value)}
-                    aria-label='Choose language'
-                    className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                  >
-                    <option value='en'>🇬🇧 English</option>
-                    <option value='hi'>🇮🇳 Hindi</option>
-                    <option value='kn'>🇮🇳 Kannada</option>
-                    <option value='te'>🇮🇳 Telugu</option>
-                    <option value='ta'>🇮🇳 Tamil</option>
-                  </select>
-                  <p className='text-slate-500 text-xs mt-2'>
-                    This will change the alphabet language in games
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex gap-3 mt-6'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditingProfile(null);
-                  }}
-                  className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='button'
-                  onClick={handleUpdateProfile}
-                  disabled={!editName.trim() || isUpdating}
-                  className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  {isUpdating ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+        <EditProfileModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingProfile(null);
+          }}
+          profile={editingProfile}
+          editName={editName}
+          onEditNameChange={setEditName}
+          editLanguage={editLanguage}
+          onEditLanguageChange={setEditLanguage}
+          onSubmit={handleUpdateProfile}
+          isSubmitting={isUpdating}
+        />
 
         {/* Story Modal */}
         {showStoryModal && (

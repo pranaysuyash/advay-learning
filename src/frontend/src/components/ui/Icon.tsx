@@ -6,7 +6,7 @@ export type IconName =
   | 'check' | 'lock' | 'unlock' | 'warning' | 'download' | 'hourglass'
   | 'circle' | 'sparkles' | 'heart' | 'star' | 'camera' | 'trophy'
   | 'coffee' | 'drop' | 'body' | 'eye' | 'eye-off' | 'back' | 'x'
-  | 'play' | 'search';
+  | 'play' | 'search' | 'rotate-ccw' | 'mouse-pointer';
 
 type UIIconNamedProps = {
   name: IconName;
@@ -54,6 +54,8 @@ const iconPaths: Record<IconName, string> = {
   x: '/assets/icons/ui/x.svg',
   play: '/assets/icons/ui/play.svg',
   search: '/assets/icons/ui/search.svg',
+  'rotate-ccw': '/assets/icons/ui/rotate-ccw.svg',
+  'mouse-pointer': '/assets/icons/ui/mouse-pointer.svg',
 };
 
 export function UIIcon(props: UIIconProps) {

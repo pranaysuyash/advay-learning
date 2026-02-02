@@ -1,14 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('UI/UX Audit Screenshots', () => {
-
   const pages = [
     { path: '/', name: 'home' },
     { path: '/login', name: 'login' },
     { path: '/register', name: 'register' },
     { path: '/dashboard', name: 'dashboard', auth: true },
     { path: '/games', name: 'games', auth: true },
-    { path: '/games/finger-number-show', name: 'finger-number-show', auth: true },
+    {
+      path: '/games/finger-number-show',
+      name: 'finger-number-show',
+      auth: true,
+    },
     { path: '/games/connect-the-dots', name: 'connect-the-dots', auth: true },
     { path: '/games/letter-hunt', name: 'letter-hunt', auth: true },
     { path: '/progress', name: 'progress', auth: true },
@@ -18,13 +21,13 @@ test.describe('UI/UX Audit Screenshots', () => {
   const viewports = [
     { name: 'desktop', width: 1440, height: 900 },
     { name: 'tablet', width: 834, height: 1112 },
-    { name: 'mobile', width: 390, height: 844 }
+    { name: 'mobile', width: 390, height: 844 },
   ];
 
-  pages.forEach(pageInfo => {
+  pages.forEach((pageInfo) => {
     test.describe(`Page: ${pageInfo.name}`, () => {
-      viewports.forEach(vp => {
-        test(`Capture ${vp.name} view`, async ({ page, context }) => {
+      viewports.forEach((vp) => {
+        test(`Capture ${vp.name} view`, async ({ page }) => {
           // Set viewport
           await page.setViewportSize({ width: vp.width, height: vp.height });
 
@@ -38,10 +41,19 @@ test.describe('UI/UX Audit Screenshots', () => {
           if (pageInfo.auth) {
             // Check if already authenticated by checking URL or auth state
             const currentUrl = page.url();
-            if (currentUrl.includes('/login') || currentUrl === 'http://localhost:6173/login') {
+            if (
+              currentUrl.includes('/login') ||
+              currentUrl === 'http://localhost:6173/login'
+            ) {
               // Auto-login for screenshot purposes
-              await page.fill('input[name="email"], input[type="email"]', 'pranay.suyash@gmail.com');
-              await page.fill('input[name="password"], input[type="password"]', 'pranaysuyash');
+              await page.fill(
+                'input[name="email"], input[type="email"]',
+                'pranay.suyash@gmail.com',
+              );
+              await page.fill(
+                'input[name="password"], input[type="password"]',
+                'pranaysuyash',
+              );
               await page.click('button[type="submit"]');
               await page.waitForLoadState('networkidle', { timeout: 15000 });
               // Navigate back to intended page
@@ -50,8 +62,14 @@ test.describe('UI/UX Audit Screenshots', () => {
             } else if (currentUrl === 'http://localhost:6173/') {
               // Navigate to login first
               await page.goto('/login');
-              await page.fill('input[name="email"], input[type="email"]', 'pranay.suyash@gmail.com');
-              await page.fill('input[name="password"], input[type="password"]', 'pranaysuyash');
+              await page.fill(
+                'input[name="email"], input[type="email"]',
+                'pranay.suyash@gmail.com',
+              );
+              await page.fill(
+                'input[name="password"], input[type="password"]',
+                'pranaysuyash',
+              );
               await page.click('button[type="submit"]');
               await page.waitForLoadState('networkidle', { timeout: 15000 });
               // Navigate to intended page
@@ -66,13 +84,13 @@ test.describe('UI/UX Audit Screenshots', () => {
           // Capture full page screenshot
           await page.screenshot({
             path: `docs/audit/screenshots/${pageInfo.name}-${vp.name}-full.png`,
-            fullPage: true
+            fullPage: true,
           });
 
           // Capture above the fold
           await page.screenshot({
             path: `docs/audit/screenshots/${pageInfo.name}-${vp.name}-above-fold.png`,
-            fullPage: false
+            fullPage: false,
           });
 
           console.log(`Captured ${pageInfo.name} - ${vp.name}`);
@@ -93,7 +111,7 @@ test.describe('UI/UX Audit Screenshots', () => {
       for (let i = 0; i < Math.min(buttons.length, 3); i++) {
         await buttons[i].hover();
         await page.screenshot({
-          path: `docs/audit/screenshots/home-button-${i}-hover.png`
+          path: `docs/audit/screenshots/home-button-${i}-hover.png`,
         });
       }
     });
@@ -104,7 +122,7 @@ test.describe('UI/UX Audit Screenshots', () => {
       await page.waitForLoadState('networkidle', { timeout: 10000 });
       await page.screenshot({
         path: `docs/audit/screenshots/dashboard-empty.png`,
-        fullPage: true
+        fullPage: true,
       });
     });
   });
@@ -117,11 +135,14 @@ test.describe('UI/UX Audit Screenshots', () => {
       await page.waitForLoadState('networkidle', { timeout: 10000 });
 
       // Look for tutorial or onboarding
-      const hasTutorial = await page.locator('[class*="tutorial"], [class*="onboarding"]').count() > 0;
+      const hasTutorial =
+        (await page
+          .locator('[class*="tutorial"], [class*="onboarding"]')
+          .count()) > 0;
       if (hasTutorial) {
         await page.screenshot({
           path: `docs/audit/screenshots/home-tutorial-overlay.png`,
-          fullPage: true
+          fullPage: true,
         });
       }
     });

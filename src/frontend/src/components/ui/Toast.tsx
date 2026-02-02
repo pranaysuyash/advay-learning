@@ -1,4 +1,4 @@
-import { useState, useCallback, createContext, useContext, ReactNode } from 'react';
+import { useState, useCallback, createContext, ReactNode } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './Icon';
 
@@ -18,23 +18,28 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+export { ToastContext };
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info', duration = 4000) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
+  const showToast = useCallback(
+    (message: string, type: ToastType = 'info', duration = 4000) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      setToasts((prev) => [...prev, { id, message, type, duration }]);
 
-    if (duration > 0) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, duration);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      if (duration > 0) {
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, duration);
+      }
+    },
+    [],
+  );
 
   const hideToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
@@ -44,15 +49,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-}
-
-function ToastContainer({ toasts, onHide }: { toasts: Toast[]; onHide: (id: string) => void }) {
+function ToastContainer({
+  toasts,
+  onHide,
+}: {
+  toasts: Toast[];
+  onHide: (id: string) => void;
+}) {
   const reducedMotion = useReducedMotion();
 
   const getToastStyles = (type: ToastType) => {
@@ -83,29 +86,43 @@ function ToastContainer({ toasts, onHide }: { toasts: Toast[]; onHide: (id: stri
 
   return (
     <div
-      className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
-      aria-live="polite"
-      aria-atomic="true"
+      className='fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none'
+      aria-live='polite'
+      aria-atomic='true'
     >
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode='popLayout'>
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
             layout
             initial={reducedMotion ? false : { opacity: 0, x: 100, scale: 0.8 }}
-            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 100, scale: 0.8 }}
-            transition={reducedMotion ? { duration: 0.01 } : { type: 'spring', stiffness: 400, damping: 30 }}
+            animate={
+              reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }
+            }
+            exit={
+              reducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, x: 100, scale: 0.8 }
+            }
+            transition={
+              reducedMotion
+                ? { duration: 0.01 }
+                : { type: 'spring', stiffness: 400, damping: 30 }
+            }
             className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-sm shadow-lg min-w-[300px] max-w-[400px] ${getToastStyles(toast.type)}`}
-            role={toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'}
+            role={
+              toast.type === 'error' || toast.type === 'warning'
+                ? 'alert'
+                : 'status'
+            }
           >
             <UIIcon name={getIcon(toast.type)} size={20} />
-            <span className="flex-1 text-sm font-medium">{toast.message}</span>
+            <span className='flex-1 text-sm font-medium'>{toast.message}</span>
             <button
-              type="button"
+              type='button'
               onClick={() => onHide(toast.id)}
-              className="opacity-60 hover:opacity-100 transition p-1"
-              aria-label="Dismiss notification"
+              className='opacity-60 hover:opacity-100 transition p-1'
+              aria-label='Dismiss notification'
             >
               ×
             </button>

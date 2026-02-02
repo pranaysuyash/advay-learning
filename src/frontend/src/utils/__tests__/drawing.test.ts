@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   smoothPoints,
   buildSegments,
+  drawSegments,
   distance,
   shouldAddPoint,
   addBreakPoint,
@@ -69,6 +70,46 @@ describe('drawing utilities', () => {
       const segments = buildSegments(points);
       
       expect(segments).toHaveLength(3);
+    });
+  });
+
+  describe('drawSegments', () => {
+    it('applies smoothing for longer segments', () => {
+      const calls: Array<[string, ...Array<number | string>]> = [];
+      const ctx: any = {
+        save: () => {},
+        restore: () => {},
+        beginPath: () => calls.push(['beginPath']),
+        moveTo: (x: number, y: number) => calls.push(['moveTo', x, y]),
+        lineTo: (x: number, y: number) => calls.push(['lineTo', x, y]),
+        stroke: () => calls.push(['stroke']),
+        strokeStyle: '',
+        lineWidth: 0,
+        lineCap: '',
+        lineJoin: '',
+        shadowColor: '',
+        shadowBlur: 0,
+      };
+
+      const segment = [
+        { x: 0, y: 0 },
+        { x: 0.1, y: 0 },
+        { x: 0.9, y: 0 }, // outlier spike that smoothing should dampen
+        { x: 0.2, y: 0 },
+        { x: 0.3, y: 0 },
+      ];
+
+      drawSegments(ctx, [segment], 100, 100, { color: '#fff', lineWidth: 10 });
+
+      const lineTos = calls.filter(([name]) => name === 'lineTo');
+      const xValues = lineTos.map(([, x]) => x as number);
+
+      // Without smoothing we'd expect a lineTo at x=90. With smoothing that spike should be reduced.
+      expect(xValues).not.toContain(90);
+
+      // The smoothed center point (avg of 0.1, 0.9, 0.2) => 0.4, so x ~= 40 should exist.
+      const hasNear40 = xValues.some((x) => Math.abs(x - 40) < 0.0001);
+      expect(hasNear40).toBe(true);
     });
   });
   

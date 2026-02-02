@@ -129,15 +129,18 @@ export function drawSegments(
   // Draw each segment
   for (const segment of segments) {
     if (segment.length === 0) continue;
+
+    // Apply smoothing for better visual quality (matches prior in-game behavior)
+    const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
     
     ctx.beginPath();
     
     // Move to first point
-    ctx.moveTo(segment[0].x * canvasWidth, segment[0].y * canvasHeight);
+    ctx.moveTo(pointsToDraw[0].x * canvasWidth, pointsToDraw[0].y * canvasHeight);
     
     // Draw lines to remaining points
-    for (let i = 1; i < segment.length; i++) {
-      ctx.lineTo(segment[i].x * canvasWidth, segment[i].y * canvasHeight);
+    for (let i = 1; i < pointsToDraw.length; i++) {
+      ctx.lineTo(pointsToDraw[i].x * canvasWidth, pointsToDraw[i].y * canvasHeight);
     }
     
     ctx.stroke();
@@ -188,10 +191,15 @@ export function drawLetterHint(
   
   ctx.save();
   ctx.font = `bold ${fontSize}px sans-serif`;
-  ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+  ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.02));
+  // Outline-only hint (less visually blocking than filled text)
+  // Keep the letter readable while allowing the camera feed + strokes to be primary.
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(letter, canvasWidth / 2, canvasHeight / 2);
+  ctx.strokeText(letter, canvasWidth / 2, canvasHeight / 2);
   
   // Draw guide circle
   ctx.beginPath();
@@ -203,7 +211,7 @@ export function drawLetterHint(
     2 * Math.PI
   );
   ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.6})`;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.004));
   ctx.stroke();
   
   ctx.restore();

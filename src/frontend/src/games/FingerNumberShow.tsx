@@ -5,9 +5,12 @@ import Webcam from 'react-webcam';
 import { useTTS } from '../hooks/useTTS';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { UIIcon } from '../components/ui/Icon';
-import { GameHeader } from '../components/GameHeader';
+import { GameContainer } from '../components/GameContainer';
+import { GameControls } from '../components/GameControls';
+import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { getLettersForGame, Letter } from '../data/alphabets';
+import { LANGUAGES } from '../data/languages';
 import { countExtendedFingersFromLandmarks } from './fingerCounting';
 // Centralized hand tracking
 import { useHandTracking } from '../hooks/useHandTracking';
@@ -79,7 +82,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   });
   const [currentCount, setCurrentCount] = useState<number>(0);
   const [handsDetected, setHandsDetected] = useState<number>(0);
-  const [handsBreakdown, setHandsBreakdown] = useState<string>('');
   const [targetNumber, setTargetNumber] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [difficulty, setDifficulty] = useState<number>(0);
@@ -89,14 +91,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const { playCelebration } = useSoundEffects();
 
   // Language and mode selection
-  const LANGUAGES = [
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-    { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
-    { code: 'te', name: 'Telugu', flag: '🇮🇳' },
-    { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
-  ] as const;
-
   type GameMode = 'numbers' | 'letters';
   const [gameMode, setGameMode] = useState<GameMode>('numbers');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
@@ -386,15 +380,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
 
     setCurrentCount(totalFingers);
 
-    const breakdown = perHand.length > 0 ? perHand.join(' + ') : '';
     const lastUi = lastHandsUiRef.current;
     if (lastUi.hands !== detectedHands) {
       lastUi.hands = detectedHands;
       setHandsDetected(detectedHands);
-    }
-    if (lastUi.breakdown !== breakdown) {
-      lastUi.breakdown = breakdown;
-      setHandsBreakdown(breakdown);
     }
 
     // For target 0: require a detected hand (closed fist) to avoid "no hands = success".
@@ -444,7 +433,11 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         successLockRef.current = true;
         playCelebration(); // Play celebration sound
         setShowCelebration(true);
-        setCelebrationValue(gameMode === 'letters' && targetLetter ? targetLetter.char : String(totalFingers));
+        setCelebrationValue(
+          gameMode === 'letters' && targetLetter
+            ? targetLetter.char
+            : String(totalFingers),
+        );
         const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
         const points = Math.round(10 * level.rewardMultiplier);
         setScore((prev) => prev + points);
@@ -517,289 +510,364 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const isDetectedMatch =
     gameMode === 'letters'
       ? targetLetter &&
-      currentCount === getLetterNumberValue(targetLetter) &&
-      handsDetected > 0
+        currentCount === getLetterNumberValue(targetLetter) &&
+        handsDetected > 0
       : targetNumber === 0
         ? currentCount === 0 && handsDetected > 0
         : currentCount === targetNumber;
   const isPromptFeedback =
     feedback.startsWith('Show me ') || feedback.startsWith('Make a fist ');
 
+  // Define game controls for bottom-right positioning
+  const gameControls: GameControl[] = [
+    {
+      id: 'repeat',
+      icon: 'play',
+      label: 'Repeat',
+      onClick: () => {
+        if (!ttsEnabled || !ttsAvailable) {
+          setFeedback('Voice is not available on this device.');
+          return;
+        }
+        const prompt =
+          gameMode === 'letters' && targetLetter
+            ? `Show me the letter ${targetLetter.name}!`
+            : targetNumber === 0
+              ? 'Make a fist for zero.'
+              : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
+        void speak(prompt);
+      },
+      variant: 'primary',
+    },
+    {
+      id: 'stop',
+      icon: 'x',
+      label: 'Stop',
+      onClick: stopGame,
+      variant: 'danger',
+    },
+  ];
+
+  // Menu screen controls
+  const menuControls: GameControl[] = [
+    {
+      id: 'home',
+      icon: 'home',
+      label: 'Home',
+      onClick: goToHome,
+      variant: 'secondary',
+    },
+  ];
+
+  // Start button is separate since it has loading state
+  const startButtonControl: GameControl = {
+    id: 'start',
+    icon: 'play',
+    label: 'Start Game',
+    onClick: startGame,
+    variant: 'success',
+    disabled: isModelLoading,
+  };
+
   return (
-    <div className='max-w-7xl mx-auto px-4 py-8'>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {/* Header */}
-        <div className='flex justify-between items-center mb-6'>
-          <div>
-            <h1 className='text-3xl font-bold'>
-              {gameMode === 'letters'
-                ? 'Letter Finger Show'
-                : 'Finger Number Show'}
-            </h1>
-            <p className='text-text-secondary'>
-              {gameMode === 'letters'
-                ? 'Show letters by counting with your fingers!'
-                : 'Show numbers with your fingers!'}
-            </p>
-          </div>
-          <div className='text-right'>
-            <div className='text-2xl font-bold text-text-primary'>
-              Score: {score}
-            </div>
-            <div className='flex items-center justify-end gap-4 text-sm text-text-secondary'>
-              <span>🔥 Streak: {streak}</span>
-              <span>
-                {(DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0]).name}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Mode Selection */}
-        {!isPlaying && (
-          <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
-            <div className='text-sm font-medium text-text-secondary mb-3'>
-              Choose Game Mode
-            </div>
-            <div className='flex gap-2 mb-4'>
-              <button
-                type='button'
-                onClick={() => setGameMode('numbers')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${gameMode === 'numbers'
-                  ? 'bg-pip-orange text-white shadow-soft'
-                  : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                  }`}
-              >
-                🔢 Numbers
-              </button>
-              <button
-                type='button'
-                onClick={() => setGameMode('letters')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${gameMode === 'letters'
-                  ? 'bg-pip-orange text-white shadow-soft'
-                  : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                  }`}
-              >
-                🔤 Letters
-              </button>
-            </div>
-
-            {gameMode === 'letters' && (
-              <>
-                <div className='text-sm font-medium text-text-secondary mb-2'>
-                  Choose Language
+    <>
+      {!isPlaying ? (
+        /* Pre-Game Menu Screen */
+        <section className='max-w-7xl mx-auto px-4 py-8'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {/* Header */}
+            <header className='flex justify-between items-start mb-4'>
+              <div>
+                <h1 className='text-2xl md:text-3xl font-bold'>
+                  {gameMode === 'letters'
+                    ? 'Letter Finger Show'
+                    : 'Finger Number Show'}
+                </h1>
+                <p className='text-text-secondary text-sm md:text-base'>
+                  {gameMode === 'letters'
+                    ? 'Show letters by counting with your fingers!'
+                    : 'Show numbers with your fingers!'}
+                </p>
+              </div>
+              <div className='text-right'>
+                <output className='text-xl md:text-2xl font-bold text-text-primary block'>
+                  Score: {score}
+                </output>
+                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm text-text-secondary mt-1'>
+                  <span className='flex items-center gap-1 min-w-fit'>
+                    <span className='text-pip-orange'>🔥</span>
+                    Streak: {streak}
+                  </span>
+                  <span className='min-w-fit'>
+                    {
+                      (DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0])
+                        .name
+                    }
+                  </span>
                 </div>
-                <div className='flex flex-wrap gap-2'>
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.code}
-                      type='button'
-                      onClick={() => setSelectedLanguage(lang.code)}
-                      className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${selectedLanguage === lang.code
-                        ? 'bg-success/20 border border-success/30 text-text-success'
-                        : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+              </div>
+            </header>
+
+            {/* Mode Selection */}
+            <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
+              <div className='text-sm font-medium text-text-secondary mb-3'>
+                Choose Game Mode
+              </div>
+              <div className='flex gap-2 mb-4'>
+                <button
+                  type='button'
+                  onClick={() => setGameMode('numbers')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    gameMode === 'numbers'
+                      ? 'bg-pip-orange text-white shadow-soft'
+                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                  }`}
+                >
+                  🔢 Numbers
+                </button>
+                <button
+                  type='button'
+                  onClick={() => setGameMode('letters')}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                    gameMode === 'letters'
+                      ? 'bg-pip-orange text-white shadow-soft'
+                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                  }`}
+                >
+                  🔤 Letters
+                </button>
+              </div>
+
+              {gameMode === 'letters' && (
+                <>
+                  <div className='text-sm font-medium text-text-secondary mb-2'>
+                    Choose Language
+                  </div>
+                  <div className='flex flex-wrap gap-2'>
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        type='button'
+                        onClick={() => setSelectedLanguage(lang.code)}
+                        className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+                          selectedLanguage === lang.code
+                            ? 'bg-success/20 border border-success/30 text-text-success'
+                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
                         }`}
+                      >
+                        <span>{lang.flagIcon}</span>
+                        <span>{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Difficulty Selection */}
+            {!isPlaying && gameMode === 'numbers' && (
+              <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
+                <div className='text-sm font-medium text-text-secondary mb-2'>
+                  Choose Difficulty
+                </div>
+                <div className='flex gap-2'>
+                  {DIFFICULTY_LEVELS.map((level, levelIndex) => (
+                    <button
+                      key={level.name}
+                      type='button'
+                      onClick={() => setDifficulty(levelIndex)}
+                      className={`px-4 py-2 rounded-lg font-medium transition ${
+                        difficulty === levelIndex
+                          ? 'bg-pip-orange text-white shadow-soft'
+                          : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                      }`}
                     >
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
+                      {level.name} ({level.minNumber}-{level.maxNumber})
                     </button>
                   ))}
                 </div>
-              </>
+              </div>
             )}
-          </div>
-        )}
 
-        {/* Difficulty Selection */}
-        {!isPlaying && gameMode === 'numbers' && (
-          <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
-            <div className='text-sm font-medium text-text-secondary mb-2'>
-              Choose Difficulty
-            </div>
-            <div className='flex gap-2'>
-              {DIFFICULTY_LEVELS.map((level, levelIndex) => (
-                <button
-                  key={level.name}
-                  type='button'
-                  onClick={() => setDifficulty(levelIndex)}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${difficulty === levelIndex
-                    ? 'bg-pip-orange text-white shadow-soft'
-                    : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                    }`}
+            {/* Feedback */}
+            <AnimatePresence>
+              {feedback && (!isPlaying || !isPromptFeedback) && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className={`rounded-xl p-4 mb-6 text-center font-semibold ${
+                    feedback.includes('Great') || feedback.includes('Amazing')
+                      ? 'bg-success/20 border border-success/30 text-text-success'
+                      : 'bg-white border border-border text-text-secondary'
+                  }`}
                 >
-                  {level.name} ({level.minNumber}-{level.maxNumber})
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+                  {feedback}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* Feedback */}
-        <AnimatePresence>
-          {feedback && (!isPlaying || !isPromptFeedback) && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback.includes('Great') || feedback.includes('Amazing')
-                ? 'bg-success/20 border border-success/30 text-text-success'
-                : 'bg-white border border-border text-text-secondary'
-                }`}
-            >
-              {feedback}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {/* Game Area */}
+            <div className='bg-white border border-border rounded-2xl p-12 text-center relative overflow-hidden shadow-soft-lg'>
+              {/* Decorative elements */}
+              <div className='absolute inset-0 opacity-20'>
+                <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
+                <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
+                <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
+              </div>
 
-        {/* Game Area */}
-        <div className='relative'>
-          {!isPlaying ? (
-            <div className='bg-white border border-border rounded-xl p-12 text-center shadow-soft'>
               <div className='text-6xl mb-4'>
                 {gameMode === 'letters' ? '🔤' : '🤚'}
               </div>
-              <h2 className='text-2xl font-semibold mb-4'>
+              <h2 className='text-3xl font-bold mb-4 text-advay-slate'>
                 {gameMode === 'letters'
                   ? 'Ready to Learn Letters?'
                   : 'Ready to Count?'}
               </h2>
-              <p className='text-text-secondary mb-8 max-w-md mx-auto'>
+              <p className='text-text-secondary mb-8 max-w-md mx-auto text-lg'>
                 {gameMode === 'letters'
                   ? 'Show me letters by holding up the right number of fingers! A=1 finger, B=2 fingers, and so on.'
                   : "Hold up your fingers to show numbers! The camera will count how many fingers you're showing."}
               </p>
-              <div className='flex justify-center gap-4'>
-                <button
-                  type='button'
-                  onClick={goToHome}
-                  className='px-6 py-3 bg-white border border-border rounded-lg font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition shadow-soft flex items-center gap-2'
-                >
-                  <UIIcon name='home' size={16} />
-                  Home
-                </button>
-                {isModelLoading ? (
-                  <div className='text-text-secondary px-6 py-3'>
-                    Loading hand tracking...
-                  </div>
-                ) : (
-                  <button
-                    type='button'
-                    onClick={startGame}
-                    className='px-8 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition shadow-soft hover:shadow-soft-lg'
-                  >
-                    Start Game
-                  </button>
-                )}
-              </div>
+
+              {/* Controls positioned at bottom-right like other games */}
+              {/* Standardized Menu Controls */}
+              <GameControls
+                controls={[
+                  ...menuControls,
+                  {
+                    id: 'start',
+                    icon: 'play',
+                    label: isModelLoading ? 'Loading...' : 'Start Game',
+                    onClick: startButtonControl.onClick,
+                    variant: 'success',
+                    disabled: startButtonControl.disabled,
+                  },
+                ]}
+                position='bottom-center'
+              />
             </div>
-          ) : (
-            <div className='w-screen h-screen bg-black overflow-hidden fixed top-0 left-0 right-0 bottom-0 z-40'>
-              <div className='relative w-full h-full'>
-                <div className="absolute top-0 left-0 right-0 z-50 p-4 pointer-events-none">
-                  <GameHeader
-                    title={gameMode === 'letters' ? 'Finger Letters' : 'Finger Counting'}
-                    subtitle={`Show: ${gameMode === 'letters' && targetLetter ? targetLetter.char : targetNumber}`}
-                    score={score}
-                    streak={streak}
-                    level={difficulty + 1}
-	                      infoItems={[
-	                        { label: 'Target', value: gameMode === 'letters' && targetLetter ? targetLetter.char : targetNumber },
-	                        { label: 'Detected', value: currentCount },
-	                        { label: 'Hands', value: handsDetected },
-	                        { label: 'Breakdown', value: handsBreakdown || '—' },
-	                        { label: 'Match', value: isDetectedMatch ? 'Yes' : 'No' },
-	                      ]}
-                    showBackButton={true}
-                    onBack={stopGame}
-                    secondaryAction={{
-                      label: '',
-                      icon: 'play',
-	                        onClick: () => {
-	                          if (!ttsEnabled || !ttsAvailable) {
-	                            setFeedback('Voice is not available on this device.');
-	                            return;
-	                          }
-	                          const prompt = gameMode === 'letters' && targetLetter
-	                            ? `Show me the letter ${targetLetter.name}!`
-	                            : targetNumber === 0
-	                              ? 'Make a fist for zero.'
-	                              : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
-	                          void speak(prompt);
-	                        }
-	                      }}
-                  />
+          </motion.div>
+        </section>
+      ) : (
+        /* Active Game - Full Screen with GameContainer */
+        <GameContainer
+          title={
+            gameMode === 'letters' ? 'Letter Finger Show' : 'Finger Number Show'
+          }
+          score={score}
+          level={difficulty + 1}
+          onHome={goToHome}
+        >
+          <div className='relative w-full h-full'>
+            <Webcam
+              ref={webcamRef}
+              className='absolute inset-0 w-full h-full object-cover'
+              mirrored
+              videoConstraints={{ width: 640, height: 480 }}
+            />
+            <canvas
+              ref={canvasRef}
+              className='absolute inset-0 w-full h-full'
+            />
+
+            {/* Side Prompt */}
+            {promptStage === 'side' && (
+              <div className='absolute top-4 left-4 flex gap-2 flex-wrap pointer-events-none'>
+                <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
+                  <span className='flex items-center gap-2'>
+                    <UIIcon
+                      name='target'
+                      size={16}
+                      className='text-yellow-300'
+                    />
+                    Show{' '}
+                    <span className='font-extrabold'>
+                      {gameMode === 'letters' && targetLetter
+                        ? targetLetter.char
+                        : targetNumber}
+                    </span>
+                    {gameMode === 'letters' && targetLetter && (
+                      <span className='opacity-80'>({targetLetter.name})</span>
+                    )}
+                  </span>
                 </div>
-                <Webcam
-                  ref={webcamRef}
-                  className='absolute inset-0 w-full h-full object-cover'
-                  mirrored
-                  videoConstraints={{ width: 640, height: 480 }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  className='absolute inset-0 w-full h-full'
-                />
-
-                {/* One-time big prompt (center) then moves to the side */}
-                {promptStage === 'center' && (
-                  <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                    <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/30 text-white shadow-soft-lg'>
-                      <div className='text-center'>
-                        {gameMode === 'letters' && targetLetter ? (
-                          <>
-                            <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                              Show me
-                            </div>
-                            <div className='text-7xl md:text-8xl font-black leading-none'>
-                              {targetLetter.char}
-                            </div>
-                            <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                              {targetLetter.name}
-                            </div>
-                            <div className='text-sm opacity-70 mt-1'>
-                              ({targetLetter.pronunciation})
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                              {targetNumber === 0 ? 'Make a fist' : 'Show'}
-                            </div>
-                            <div className='text-7xl md:text-8xl font-black leading-none'>
-                              {targetNumber}
-                            </div>
-                            <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                              {NUMBER_NAMES[targetNumber]}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Controls overlay */}
-                {/* Overlays removed - moved to GameHeader */}
               </div>
+            )}
 
+            {/* Detection Status */}
+            <div className='absolute top-4 right-4 pointer-events-none'>
+              <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
+                <span className='flex items-center gap-2'>
+                  <span
+                    className={`inline-block w-2.5 h-2.5 rounded-full ${isDetectedMatch ? 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.9)]' : 'bg-white/40'}`}
+                  />
+                  {handsDetected > 0 ? `${currentCount} fingers` : 'No hands'}
+                </span>
+              </div>
             </div>
-          )}
-    </div>
-      </motion.div >
 
-  {/* Celebration Overlay */ }
-  < CelebrationOverlay
-show = { showCelebration }
-letter = { celebrationValue }
-accuracy = { 100}
-message = { gameMode === 'letters' ? `You showed ${celebrationValue}!` : `Great! ${NUMBER_NAMES[parseInt(celebrationValue) || 0]}!`}
-onComplete = {() => {
-  setShowCelebration(false);
-}}
+            {/* One-time big prompt (center) then moves to the side */}
+            {promptStage === 'center' && (
+              <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/30 text-white shadow-soft-lg'>
+                  <div className='text-center'>
+                    {gameMode === 'letters' && targetLetter ? (
+                      <>
+                        <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                          Show me
+                        </div>
+                        <div className='text-7xl md:text-8xl font-black leading-none'>
+                          {targetLetter.char}
+                        </div>
+                        <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                          {targetLetter.name}
+                        </div>
+                        <div className='text-sm opacity-70 mt-1'>
+                          ({targetLetter.pronunciation})
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
+                          {targetNumber === 0 ? 'Make a fist' : 'Show'}
+                        </div>
+                        <div className='text-7xl md:text-8xl font-black leading-none'>
+                          {targetNumber}
+                        </div>
+                        <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
+                          {NUMBER_NAMES[targetNumber]}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Standardized Game Controls - Bottom Right */}
+            <GameControls controls={gameControls} position='bottom-right' />
+          </div>
+        </GameContainer>
+      )}
+
+      {/* Celebration Overlay */}
+      <CelebrationOverlay
+        show={showCelebration}
+        letter={celebrationValue}
+        accuracy={100}
+        message={
+          gameMode === 'letters'
+            ? `You showed ${celebrationValue}!`
+            : `Great! ${NUMBER_NAMES[parseInt(celebrationValue) || 0]}!`
+        }
+        onComplete={() => {
+          setShowCelebration(false);
+        }}
       />
-    </div >
+    </>
   );
 });

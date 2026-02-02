@@ -5,16 +5,22 @@ import { vi } from 'vitest';
 vi.mock('@mediapipe/tasks-vision', () => {
   const createStubLandmarker = (resultKey: string) => ({
     // minimal methods used by hooks
-    detectForVideo: (_video: any, _ts?: number) => ({ [resultKey]: [] }),
+    detectForVideo: () => ({ [resultKey]: [] }),
     close: () => {},
   });
 
   return {
     FilesetResolver: {
-      forVisionTasks: async (_url: string) => ({})
+      forVisionTasks: async () => ({}),
     },
-    PoseLandmarker: { createFromOptions: async () => createStubLandmarker('landmarks') },
-    FaceLandmarker: { createFromOptions: async () => createStubLandmarker('faceLandmarks') },
-    HandLandmarker: { createFromOptions: async () => createStubLandmarker('handLandmarks') },
+    PoseLandmarker: {
+      createFromOptions: async () => createStubLandmarker('landmarks'),
+    },
+    FaceLandmarker: {
+      createFromOptions: async () => createStubLandmarker('faceLandmarks'),
+    },
+    HandLandmarker: {
+      createFromOptions: async () => createStubLandmarker('handLandmarks'),
+    },
   };
 });

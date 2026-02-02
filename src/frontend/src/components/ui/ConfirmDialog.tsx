@@ -4,7 +4,6 @@ import {
   useEffect,
   useRef,
   createContext,
-  useContext,
   ReactNode,
 } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -28,6 +27,8 @@ interface ConfirmContextType {
 }
 
 const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined);
+
+export { ConfirmContext };
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [dialog, setDialog] = useState<ConfirmDialogState>({
@@ -79,14 +80,6 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useConfirm() {
-  const context = useContext(ConfirmContext);
-  if (!context) {
-    throw new Error('useConfirm must be used within a ConfirmProvider');
-  }
-  return context.confirm;
-}
-
 function ConfirmDialog({
   dialog,
   onConfirm,
@@ -116,14 +109,16 @@ function ConfirmDialog({
         e.preventDefault();
         onCancel();
       }
-      
+
       // Focus trap
       if (e.key === 'Tab' && dialogRef.current) {
         const focusableElements = dialogRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        const lastElement = focusableElements[
+          focusableElements.length - 1
+        ] as HTMLElement;
 
         if (e.shiftKey && document.activeElement === firstElement) {
           e.preventDefault();
@@ -189,8 +184,14 @@ function ConfirmDialog({
               initial={
                 reducedMotion ? false : { opacity: 0, scale: 0.9, y: 20 }
               }
-              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              animate={
+                reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }
+              }
+              exit={
+                reducedMotion
+                  ? { opacity: 0 }
+                  : { opacity: 0, scale: 0.9, y: 20 }
+              }
               transition={
                 reducedMotion
                   ? { duration: 0.01 }

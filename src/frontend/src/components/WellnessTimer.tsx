@@ -88,7 +88,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
           isHidden ? 'opacity-0 translate-y-4 scale-95' : 'opacity-100 translate-y-0 scale-100'
         }`}
       >
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 shadow-xl border-2 border-white/20 min-w-[220px]">
+        <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 shadow-xl border-2 border-white/20 min-w-[220px]">
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-bold text-white text-sm">Wellness Timer</h3>
             <button 
@@ -164,7 +164,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
       {isHidden && (
         <button 
           onClick={toggleVisibility}
-          className="bg-indigo-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-indigo-700 transition border-2 border-white/20"
+          className="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-orange-600 transition border-2 border-white/20"
         >
           ⏰
         </button>

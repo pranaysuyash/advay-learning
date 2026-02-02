@@ -85,11 +85,15 @@ fi
 echo -e "\n${GREEN}=== Audit Review Summary ===${NC}\n"
 
 if [ -f "$FINDINGS_FILE" ]; then
-  TRACKED_COUNT=$(grep -c "\[TRACKED\]" "$FINDINGS_FILE" || echo "0")
-  NOT_TRACKED_COUNT=$(grep -c "\[NOT TRACKED\]" "$FINDINGS_FILE" || echo "0")
+  TRACKED_COUNT=$(grep -c "\[TRACKED\]" "$FINDINGS_FILE" || true)
+  NOT_TRACKED_COUNT=$(grep -c "\[NOT TRACKED\]" "$FINDINGS_FILE" || true)
   
   TOTAL=$((TRACKED_COUNT + NOT_TRACKED_COUNT))
-  PERCENT=$((TRACKED_COUNT * 100 / TOTAL))
+  if [ "$TOTAL" -gt 0 ]; then
+    PERCENT=$((TRACKED_COUNT * 100 / TOTAL))
+  else
+    PERCENT=0
+  fi
   
   echo -e "Total Findings Reviewed: ${TOTAL}"
   echo -e "${GREEN}Already Tracked: ${TRACKED_COUNT}${NC} (${PERCENT}%)"

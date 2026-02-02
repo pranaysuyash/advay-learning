@@ -76,12 +76,14 @@ export interface UseHandTrackingReturn {
 
 /** Options for useGameLoop hook */
 export interface UseGameLoopOptions {
-  /** Callback for each frame */
+  /** Callback for each frame (deltaTime in milliseconds) */
   onFrame: (deltaTime: number, fps: number) => void;
-  /** Whether the loop is running */
+  /** Whether the loop is running (CONTROLLED: parent owns this state) */
   isRunning: boolean;
   /** Target FPS (default: 30) */
   targetFps?: number;
+  /** Callback when hook requests running state change (for controlled mode) */
+  onRunningChange?: (running: boolean) => void;
 }
 
 /** Return value of useGameLoop hook */
@@ -92,10 +94,10 @@ export interface UseGameLoopReturn {
   averageFps: number;
   /** Whether the loop is currently running */
   isRunning: boolean;
-  /** Start the loop */
-  start: () => void;
-  /** Stop the loop */
-  stop: () => void;
+  /** Request to start the loop (signals parent via onRunningChange) */
+  requestStart: () => void;
+  /** Request to stop the loop (signals parent via onRunningChange) */
+  requestStop: () => void;
 }
 
 /** Options for drawing utilities */
@@ -127,6 +129,6 @@ export type PointSegment = Point[];
 
 /** Compressed point for storage */
 export interface CompressedPoint {
-  x: number;  // 0-1 normalized
-  y: number;  // 0-1 normalized
+  x: number; // 0-1 normalized
+  y: number; // 0-1 normalized
 }
