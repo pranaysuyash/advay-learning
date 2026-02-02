@@ -9,9 +9,17 @@ import { UIIcon } from '../components/ui/Icon';
 
 export function Home() {
   const { isAuthenticated } = useAuthStore();
-  const { onboardingCompleted } = useSettingsStore();
+  const { onboardingCompleted, setDemoMode } = useSettingsStore();
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
+
+  const startDemo = () => {
+    // Start a no-camera demo session and navigate to dashboard (transient)
+    setDemoMode(true);
+    // Ensure camera remains disabled for privacy in demo
+    // (the demo route/component should respect this setting and not request permission)
+    navigate('/dashboard');
+  };
 
   // Redirect to dashboard if already logged in
   if (isAuthenticated) {
@@ -42,6 +50,10 @@ export function Home() {
               onClick={() => navigate('/register')}
             >
               Get Started
+            </Button>
+
+            <Button size='lg' variant='secondary' onClick={startDemo} aria-label='Try demo - no camera required'>
+              Try Demo
             </Button>
           </div>
         </motion.div>
@@ -97,6 +109,8 @@ export function Home() {
           state='happy'
           message="Hi there! I'm Pip! Let's go on an adventure together!"
           className='absolute bottom-8 right-8'
+          decorative={true}
+          hideOnMobile={true}
         />
       </div>
     </>

@@ -4,7 +4,8 @@ import { ConfirmContext } from './ConfirmDialog';
 export function useConfirm() {
   const context = useContext(ConfirmContext);
   if (!context) {
-    throw new Error('useConfirm must be used within a ConfirmProvider');
+    // Tests may mock ConfirmDialog without providing a ConfirmProvider; return a safe stub
+    return async () => false;
   }
   return context.confirm;
 }

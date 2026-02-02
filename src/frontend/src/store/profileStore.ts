@@ -84,6 +84,25 @@ export const useProfileStore = create<ProfileState>()((set) => ({
     }
   },
 
+  deleteProfile: async (profileId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await profileApi.deleteProfile(profileId);
+      set((state) => ({
+        profiles: state.profiles.filter(p => p.id !== profileId),
+        currentProfile: state.currentProfile?.id === profileId 
+          ? null 
+          : state.currentProfile,
+        isLoading: false,
+      }));
+    } catch (error: any) {
+      set({
+        error: error.response?.data?.detail || 'Failed to delete profile',
+        isLoading: false,
+      });
+    }
+  },
+
   setCurrentProfile: (profile) => set({ currentProfile: profile }),
   clearError: () => set({ error: null }),
 }));

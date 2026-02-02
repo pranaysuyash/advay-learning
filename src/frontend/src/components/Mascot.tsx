@@ -11,6 +11,10 @@ interface MascotProps {
     speakMessage?: boolean;
     /** Language code for TTS (default: 'en') */
     language?: string;
+    /** Decorative mode (hides from assistive tech) */
+    decorative?: boolean;
+    /** Hide on small screens (mobile) */
+    hideOnMobile?: boolean;
 }
 
 const MASCOT_IMAGE_SRC = '/assets/images/red_panda_no_bg.png';
@@ -26,7 +30,9 @@ export function Mascot({
     className = '',
     enableVideo = true,
     speakMessage = true,
-    language = 'en'
+    language = 'en',
+    decorative = false,
+    hideOnMobile = false,
 }: MascotProps) {
     const [bounce, setBounce] = useState(false);
     const [showVideo, setShowVideo] = useState(false);
@@ -230,7 +236,7 @@ export function Mascot({
             <motion.div
                 variants={containerVariants}
                 animate={state}
-                className="relative cursor-pointer w-32 h-32"
+                className={`relative cursor-pointer w-32 h-32 ${hideOnMobile ? 'hidden sm:flex' : ''}`}
                 onClick={() => {
                     // If TTS is blocked by autoplay policies, this click provides the required user gesture.
                     if (ttsEnabled && message) {
@@ -282,7 +288,8 @@ export function Mascot({
                 {!showVideo && (
                     <motion.img
                         src={MASCOT_IMAGE_SRC}
-                        alt="Pip the Red Panda"
+                        alt={decorative ? '' : 'Pip the Red Panda'}
+                        aria-hidden={decorative ? true : undefined}
                         className="w-full h-full object-contain drop-shadow-lg"
                         animate={bounce ? {
                             y: [0, -15, 0, -8, 0],

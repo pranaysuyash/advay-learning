@@ -5,6 +5,7 @@ import { useProfileStore } from '../../store';
 import { progressQueue } from '../../services/progressQueue';
 import apiClient from '../../services/api';
 import { Progress } from '../Progress';
+import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('@mediapipe/tasks-vision', () => ({
   FilesetResolver: { forVisionTasks: async () => ({}) },
@@ -42,7 +43,11 @@ describe('Progress sync', () => {
       data: { results: [{ idempotency_key: 'k-sync-1', status: 'ok' }] },
     });
 
-    render(<Progress />);
+    render(
+      <MemoryRouter>
+        <Progress />
+      </MemoryRouter>,
+    );
 
     // Pending shown
     expect(await screen.findByText(/Pending \(1\)/i)).toBeTruthy();

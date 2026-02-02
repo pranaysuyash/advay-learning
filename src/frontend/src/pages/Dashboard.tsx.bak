@@ -50,7 +50,7 @@ interface LanguageProgress {
 
 export const Dashboard = memo(function DashboardComponent() {
   useAuthStore();
-  const { profiles, fetchProfiles, createProfile, updateProfile, setCurrentProfile } =
+  const { profiles, fetchProfiles, createProfile, updateProfile } =
     useProfileStore();
   const toast = useToast();
   useSettingsStore();
@@ -377,13 +377,7 @@ export const Dashboard = memo(function DashboardComponent() {
             {children.map((child) => (
               <div key={child.id} className='flex items-center'>
                 <button
-                  onClick={() => {
-  const profile = profiles.find(p => p.id === child.id);
-  if (profile) {
-    setCurrentProfile(profile);
-  }
-  setSelectedChild(child.id);
-}}
+                  onClick={() => setSelectedChild(child.id)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
                     selectedChildData?.id === child.id
                       ? 'bg-pip-orange text-white shadow-soft'

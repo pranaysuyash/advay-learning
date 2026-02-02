@@ -11,10 +11,10 @@ interface OnboardingFlowProps {
 type Step = 'welcome' | 'camera' | 'gesture';
 
 export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
-  const { onboardingCompleted, updateSettings } = useSettingsStore();
+  const { hydrated, onboardingCompleted, updateSettings } = useSettingsStore();
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [cameraStatus, setCameraStatus] = useState<'pending' | 'success' | 'error'>('pending');
-  const [visible, setVisible] = useState(!onboardingCompleted);
+  const [visible, setVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -77,10 +77,15 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   }, [cleanup]);
 
   useEffect(() => {
+    // Only show onboarding after store has been hydrated to avoid flash of UI on first render
+    if (hydrated && !onboardingCompleted) {
+      setVisible(true);
+    }
+
     if (onboardingCompleted) {
       setVisible(false);
     }
-  }, [onboardingCompleted]);
+  }, [hydrated, onboardingCompleted]);
 
   if (!visible) return null;
 

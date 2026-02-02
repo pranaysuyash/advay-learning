@@ -98,23 +98,31 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   useEffect(() => {
     const checkCameraPermission = async () => {
       try {
-        const result = await navigator.permissions.query({
-          name: 'camera' as PermissionName,
-        });
-        setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-
-        if (result.state === 'denied') {
-          setShowPermissionWarning(true);
-        }
-
-        // Store handler reference and PermissionStatus for cleanup
-        permissionHandlerRef.current = () => {
+        if (!navigator.permissions || typeof navigator.permissions.query !== 'function') {
+          console.warn('[ConnectTheDots] navigator.permissions.query not available');
+        } else {
+          const result = await navigator.permissions.query({
+            name: 'camera' as PermissionName,
+          });
           setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-          setShowPermissionWarning(result.state === 'denied');
-        };
 
-        permissionStatusRef.current = result;
-        result.addEventListener('change', permissionHandlerRef.current);
+          if (result.state === 'denied') {
+            setShowPermissionWarning(true);
+          }
+
+          // Store PermissionStatus first and create a handler that reads the current state
+          permissionStatusRef.current = result;
+          permissionHandlerRef.current = () => {
+            const state = permissionStatusRef.current?.state as
+              | 'granted'
+              | 'denied'
+              | 'prompt';
+            setCameraPermission(state);
+            setShowPermissionWarning(state === 'denied');
+          };
+
+          result.addEventListener('change', permissionHandlerRef.current);
+        }
       } catch (error) {
         console.warn(
           '[ConnectTheDots] Camera permission check not supported',
@@ -152,33 +160,47 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   }, [gameStarted, isHandTrackingEnabled, landmarker, initializeHandTracking]);
 
   // Hand tracking loop with FPS throttling and single-instance guard
+  // Controls whether the loop should continue scheduling frames. This is
+  // toggled by the start/stop effect to avoid race conditions where a
+  // scheduled callback keeps re-arming after the loop was stopped.
+  const loopActiveRef = useRef<boolean>(false);
+
   const runHandTracking = useCallback(async () => {
-    if (
-      !webcamRef.current?.video ||
-      !landmarker ||
-      !isHandTrackingReady ||
-      !isHandTrackingEnabled ||
-      !canvasRef.current ||
-      isProcessingRef.current // Prevent concurrent processing ticks
-    ) {
+    // Bail early if the loop has been deactivated
+    if (!loopActiveRef.current) return;
+
+    // If a tick is already in flight, do nothing - avoid double-scheduling
+    if (isProcessingRef.current) return;
+
+    // If hand mode was disabled while scheduled, bail immediately
+    if (!isHandTrackingEnabled) return;
+
+    const video = webcamRef.current?.video;
+    const canvas = canvasRef.current;
+
+    // If core prerequisites are missing (webcam, model, canvas, readiness),
+    // schedule a retry only when the loop should be active.
+    if (!video || !landmarker || !isHandTrackingReady || !canvas) {
+      if (loopActiveRef.current) {
+        animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      }
       return;
     }
 
-    const video = webcamRef.current.video;
-    const canvas = canvasRef.current;
     const now = performance.now();
 
     // FPS throttle for vision processing (15 fps = ~66ms intervals)
     if (now - lastProcessedAtRef.current < 1000 / 15) {
-      animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      if (loopActiveRef.current) animationFrameRef.current = requestAnimationFrame(runHandTracking);
       return;
     }
 
     if (video.readyState < 2) {
-      animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      if (loopActiveRef.current) animationFrameRef.current = requestAnimationFrame(runHandTracking);
       return;
     }
 
+    // Guard to indicate work in-flight
     isProcessingRef.current = true;
     lastProcessedAtRef.current = now;
 
@@ -230,24 +252,35 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
       }
     } catch (error) {
       console.error('[ConnectTheDots] Hand tracking error:', error);
-    }
+    } finally {
+      // Mark tick completed
+      isProcessingRef.current = false;
 
-    isProcessingRef.current = false;
-    animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      // Only schedule the next frame if the loop is still intended to be active
+      if (loopActiveRef.current && isHandTrackingEnabled) {
+        animationFrameRef.current = requestAnimationFrame(runHandTracking);
+      } else {
+        animationFrameRef.current = null;
+      }
+    }
   }, [landmarker, isHandTrackingReady, isHandTrackingEnabled]);
 
   // Start/stop hand tracking loop with proper cleanup
   useEffect(() => {
-    // Only start a new loop if there is not already an animation frame scheduled (loop active)
+    // Manage the loopActive gate and schedule the first animation frame when
+    // conditions are met. Use requestAnimationFrame to let refs (e.g., webcam)
+    // initialize in the first paint.
     if (
       gameStarted &&
       isHandTrackingEnabled &&
       isHandTrackingReady &&
       animationFrameRef.current == null
     ) {
-      runHandTracking();
-    } else if (!gameStarted || !isHandTrackingEnabled || !isHandTrackingReady) {
+      loopActiveRef.current = true;
+      animationFrameRef.current = requestAnimationFrame(runHandTracking);
+    } else {
       // Stop the loop
+      loopActiveRef.current = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -255,14 +288,20 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
       isProcessingRef.current = false;
       setHandCursor(null);
       setIsPinching(false);
+      // Reset pinch detection state so re-enabling starts fresh
+      pinchStateRef.current = createDefaultPinchState();
     }
 
     return () => {
+      // Comprehensive cleanup
+      loopActiveRef.current = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
       isProcessingRef.current = false;
+      // Ensure pinch state cleared on unmount as well
+      pinchStateRef.current = createDefaultPinchState();
     };
   }, [
     gameStarted,
@@ -366,20 +405,16 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
   // Timer effect
   useEffect(() => {
-    if (!gameStarted || timeLeft <= 0 || gameCompleted) return;
+    if (!gameStarted || gameCompleted) return;
 
+    // Start a single interval for the duration of the game; use functional
+    // updates to avoid depending on `timeLeft` and to minimize churn.
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, timeLeft, gameCompleted]);
+  }, [gameStarted, gameCompleted]);
 
   // Check if level is completed with proper timeout cleanup
   useEffect(() => {
@@ -412,23 +447,38 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     setGameCompleted(false);
     setScore(0);
     setLevel(1);
-    setTimeLeft(60);
+    // timeLeft will be set by the dots initialization effect based on difficulty
   };
 
   const handleDotClick = (dotId: number) => {
-    if (!gameStarted || gameCompleted) return;
+    // Use ref-based guards so both mouse and tracking paths behave consistently
+    if (!gameStartedRef.current || gameCompletedRef.current) return;
 
-    // Check if clicked the correct next dot
-    if (dotId === currentDotIndex) {
-      playPop(); // Play pop sound on successful connection
-      const updatedDots = [...dots];
-      updatedDots[dotId] = { ...updatedDots[dotId], connected: true };
-      setDots(updatedDots);
+    // Validate against the live ref index - avoids stale closure mismatches
+    if (dotId !== currentDotIndexRef.current) return;
 
-      if (currentDotIndex < dots.length - 1) {
-        setCurrentDotIndex((prev) => prev + 1);
-      }
+    try {
+      playPop(); // Play pop - guard in case audio unavailable
+    } catch (err) {
+      /* ignore audio errors in test/env */
     }
+
+    // Update dots using functional update to avoid captured-state races
+    setDots((prevDots) => {
+      if (dotId < 0 || dotId >= prevDots.length) return prevDots;
+      const next = [...prevDots];
+      next[dotId] = { ...next[dotId], connected: true };
+      // Keep dotsRef in sync immediately so the tracking loop sees the change
+      dotsRef.current = next;
+      return next;
+    });
+
+    // Advance currentDotIndex using functional update and keep ref synced
+    setCurrentDotIndex((prev) => {
+      const next = prev < dotsRef.current.length - 1 ? prev + 1 : prev;
+      currentDotIndexRef.current = next;
+      return next;
+    });
   };
 
   const resetGame = () => {

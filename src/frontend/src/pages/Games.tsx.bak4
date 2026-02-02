@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { ProfileSelector } from './components/ui/ProfileSelector';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameCard } from '../components/GameCard';
 import { useProfileStore } from '../store';
 import { Icon } from '../components/Icon';
-import { ProfileSelector } from '../components/ui/ProfileSelector';
 import { getLanguageByCode } from '../data/languages';
 import type { IconName } from '../components/ui/Icon';
 import type { Profile } from '../store';
@@ -138,12 +138,6 @@ export function Games() {
                 <span className='text-pip-orange font-bold'>
                   {currentProfile.name}
                 </span>
-              </div>
-            )}
-            {currentProfile && (
-              <div className="flex items-center gap-4 mt-4">
-                <div className="text-sm text-text-secondary">Switch profile:</div>
-                <ProfileSelector currentProfile={currentProfile} />
               </div>
             )}
           </motion.div>

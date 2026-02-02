@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useProfileStore, useProgressStore } from '../store';
 import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
@@ -24,7 +25,8 @@ interface ProgressStats {
 }
 
 export function Progress() {
-  const { profiles } = useProfileStore();
+  const navigate = useNavigate();
+  const { profiles, isLoading: isLoadingProfiles, fetchProfiles } = useProfileStore();
   const { letterProgress: localLetterProgress } = useProgressStore();
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [progress, setProgress] = useState<ProgressItem[]>([]);
@@ -36,6 +38,11 @@ export function Progress() {
   const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'all'>(
     'all',
   );
+
+  // Fetch profiles on mount
+  useEffect(() => {
+    fetchProfiles();
+  }, [fetchProfiles]);
 
   useEffect(() => {
     const update = () =>
@@ -54,7 +61,11 @@ export function Progress() {
 
   // Fetch progress when profile changes
   useEffect(() => {
-    if (!selectedProfileId) return;
+    // If no profile selected, don't show loading - either show "no profiles" or wait for selection
+    if (!selectedProfileId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchProgress = async () => {
       setLoading(true);
@@ -186,6 +197,7 @@ export function Progress() {
               {(['week', 'month', 'all'] as const).map((period) => (
                 <button
                   key={period}
+                  type="button"
                   onClick={() => setReportPeriod(period)}
                   className={`px-3 py-1 rounded-md text-sm capitalize ${
                     reportPeriod === period
@@ -207,6 +219,7 @@ export function Progress() {
             )}
 
             <button
+              type="button"
               onClick={async () => {
                 setSyncing(true);
                 try {
@@ -243,6 +256,57 @@ export function Progress() {
             )}
           </div>
         </div>
+
+        {/* Loading Profiles */}
+        {isLoadingProfiles && (
+          <div className='text-center py-12'>
+            <div className='w-16 h-16 mx-auto mb-4'>
+              <img
+                src='/assets/images/loading-pip.svg'
+                alt='Loading'
+                className='w-full h-full object-contain'
+              />
+            </div>
+            <p className='text-white/60'>Loading profiles...</p>
+          </div>
+        )}
+
+        {/* Empty State - No Profiles */}
+        {!isLoadingProfiles && !loading && profiles.length === 0 && (
+          <div className='text-center py-16'>
+            <div className='w-24 h-24 mx-auto mb-6 bg-white/10 rounded-full flex items-center justify-center'>
+              <UIIcon name='star' size={48} className='text-white/60' />
+            </div>
+            <h3 className='text-xl font-semibold text-white mb-2'>
+              No Profiles Yet
+            </h3>
+            <p className='text-white/60 mb-6 max-w-md mx-auto'>
+              Add a child profile to start tracking their learning progress and see their achievements here.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className='px-6 py-3 bg-pip-orange text-white rounded-xl font-semibold hover:bg-pip-rust transition'
+              type="button"
+            >
+              Go to Dashboard to Add Profile
+            </button>
+          </div>
+        )}
+
+        {/* Empty State - No Profile Selected */}
+        {!isLoadingProfiles && !loading && profiles.length > 0 && !selectedProfileId && (
+          <div className='text-center py-16'>
+            <div className='w-24 h-24 mx-auto mb-6 bg-white/10 rounded-full flex items-center justify-center'>
+              <UIIcon name='heart' size={48} className='text-white/60' />
+            </div>
+            <h3 className='text-xl font-semibold text-white mb-2'>
+              Select a Profile
+            </h3>
+            <p className='text-white/60 max-w-md mx-auto'>
+              Choose a child profile from the dropdown above to view their learning progress.
+            </p>
+          </div>
+        )}
 
         {loading && (
           <div className='text-center py-12'>

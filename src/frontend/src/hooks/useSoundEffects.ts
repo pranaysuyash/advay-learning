@@ -12,7 +12,17 @@ export function useSoundEffects() {
   // Initialize AudioContext on first interaction
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (typeof AC !== 'function') {
+        // Not supported in this environment (e.g., JSDOM)
+        return null as unknown as AudioContext;
+      }
+      try {
+        audioContextRef.current = new AC();
+      } catch (e) {
+        console.warn('AudioContext initialization failed:', e);
+        return null as unknown as AudioContext;
+      }
     }
     return audioContextRef.current;
   }, []);
@@ -20,8 +30,14 @@ export function useSoundEffects() {
   // Resume context if suspended (browser autoplay policy)
   const ensureContextResumed = useCallback(async () => {
     const ctx = getAudioContext();
+    if (!ctx) return null;
     if (ctx.state === 'suspended') {
-      await ctx.resume();
+      try {
+        await ctx.resume();
+      } catch (e) {
+        console.warn('Failed to resume audio context:', e);
+        return null;
+      }
     }
     return ctx;
   }, [getAudioContext]);
@@ -37,6 +53,7 @@ export function useSoundEffects() {
     
     try {
       const ctx = await ensureContextResumed();
+      if (!ctx) return;
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
       
@@ -64,6 +81,7 @@ export function useSoundEffects() {
     
     try {
       const ctx = await ensureContextResumed();
+      if (!ctx) return;
       const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 (major chord)
       
       notes.forEach((freq, i) => {
@@ -110,6 +128,7 @@ export function useSoundEffects() {
     
     try {
       const ctx = await ensureContextResumed();
+      if (!ctx) return;
       // Fanfare: G4, C5, E5, G5 (up), then G5, E5, C5, G4 (down)
       const notes = [
         { freq: 392.00, time: 0, dur: 0.15 },     // G4

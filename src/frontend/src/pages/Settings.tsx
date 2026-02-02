@@ -81,20 +81,21 @@ export function Settings() {
 
   return (
     <section className='max-w-7xl mx-auto px-4 py-8'>
+      {/* Parent Gate - Render outside motion wrapper to avoid stacking context issues */}
+      {!parentGatePassed && (
+        <ParentGate
+          isOpen={!parentGatePassed}
+          onUnlock={() => setParentGatePassed(true)}
+          onCancel={handleCancelGate}
+          title="Parent Gate"
+          message="Hold the button below for 3 seconds to access Settings. This prevents children from accidentally changing settings."
+        />
+      )}
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {!parentGatePassed && (
-          <ParentGate
-            isOpen={!parentGatePassed}
-            onUnlock={() => setParentGatePassed(true)}
-            onCancel={handleCancelGate}
-            title="Parent Gate"
-            message="Hold the button below for 3 seconds to access Settings. This prevents children from accidentally changing settings."
-          />
-        )}
-
         {parentGatePassed && (
           <>
             <h1 className='text-3xl font-bold mb-8'>Settings</h1>

@@ -10,18 +10,24 @@ export interface GameControl {
   variant?: 'primary' | 'secondary' | 'danger' | 'success';
   disabled?: boolean;
   isActive?: boolean;
+  ariaLabel?: string;
 }
 
 interface GameControlsProps {
   controls: GameControl[];
-  position?: 'bottom-left' | 'bottom-right' | 'bottom-center' | 'top-left' | 'top-right';
+  position?:
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'bottom-center'
+    | 'top-left'
+    | 'top-right';
   className?: string;
 }
 
 /**
  * Standardized game controls component.
  * Provides consistent button placement and styling across all games.
- * 
+ *
  * All buttons are 56px minimum for kid-friendly touch targets.
  */
 export const GameControls: React.FC<GameControlsProps> = ({
@@ -38,12 +44,13 @@ export const GameControls: React.FC<GameControlsProps> = ({
   };
 
   const getVariantClasses = (variant?: string, isActive?: boolean) => {
-    const baseClasses = 'flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all min-h-[56px] shadow-lg';
-    
+    const baseClasses =
+      'flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all min-h-[56px] shadow-lg';
+
     if (isActive) {
       return `${baseClasses} bg-pip-orange text-white shadow-pip-orange/30`;
     }
-    
+
     switch (variant) {
       case 'primary':
         return `${baseClasses} bg-white/90 text-advay-slate border border-border hover:bg-white`;
@@ -64,20 +71,24 @@ export const GameControls: React.FC<GameControlsProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className={`absolute ${positionClasses[position]} flex flex-wrap gap-3 pointer-events-auto z-50 ${className}`}
     >
-      {controls.map((control) => (
-        <motion.button
-          key={control.id}
-          onClick={control.onClick}
-          disabled={control.disabled}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={getVariantClasses(control.variant, control.isActive)}
-          type="button"
-        >
-          <UIIcon name={control.icon} size={20} />
-          <span className="hidden sm:inline">{control.label}</span>
-        </motion.button>
-      ))}
+      <fieldset aria-label='Game controls'>
+        <legend className='sr-only'>Game Controls</legend>
+        {controls.map((control) => (
+          <motion.button
+            key={control.id}
+            onClick={control.onClick}
+            disabled={control.disabled}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={getVariantClasses(control.variant, control.isActive)}
+            type='button'
+            aria-label={control.ariaLabel}
+          >
+            <UIIcon name={control.icon} size={20} />
+            <span className='hidden sm:inline'>{control.label}</span>
+          </motion.button>
+        ))}
+      </fieldset>
     </motion.div>
   );
 };

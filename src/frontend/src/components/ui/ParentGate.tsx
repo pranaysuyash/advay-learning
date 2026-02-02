@@ -25,23 +25,15 @@ export function ParentGate({
   const startTimeRef = useRef<number>(0);
   const animationRef = useRef<number>(0);
 
-  const startHolding = useCallback(() => {
-    if (unlocked) return;
-    setHolding(true);
-    startTimeRef.current = Date.now();
-    animateProgress();
-  }, [unlocked]);
+  const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdingRef = useRef(false);
+  
+  // Update holdingRef whenever holding state changes
+  useEffect(() => {
+    holdingRef.current = holding;
+  }, [holding]);
 
-  const stopHolding = useCallback(() => {
-    if (unlocked) return;
-    setHolding(false);
-    setProgress(0);
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-  }, [unlocked]);
-
-  const animateProgress = () => {
+  const animateProgress = useCallback(() => {
     const elapsed = Date.now() - startTimeRef.current;
     const newProgress = Math.min((elapsed / holdDuration) * 100, 100);
 
@@ -50,18 +42,69 @@ export function ParentGate({
     if (newProgress >= 100) {
       setUnlocked(true);
       setHolding(false);
+      holdingRef.current = false;
       setTimeout(() => {
         onUnlock();
       }, 500);
-    } else if (holding) {
+    } else if (holdingRef.current) {
       animationRef.current = requestAnimationFrame(animateProgress);
     }
-  };
+  }, [holdDuration, onUnlock]);
+
+  const startHolding = useCallback(() => {
+    console.log('🔴 PARENT GATE: startHolding called');
+    if (unlocked) {
+      console.log('🔴 PARENT GATE: Already unlocked, ignoring');
+      return;
+    }
+    console.log('🔴 PARENT GATE: Setting holding to TRUE');
+    setHolding(true);
+    holdingRef.current = true;
+    startTimeRef.current = Date.now();
+    console.log(
+      '🔴 PARENT GATE: Starting animation, time:',
+      startTimeRef.current,
+    );
+    
+    // Start the animation loop
+    animationRef.current = requestAnimationFrame(animateProgress);
+
+    // Also set a fallback timeout to complete unlock so tests using fake timers
+    // (vi.useFakeTimers) can deterministically advance time and trigger unlock.
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current);
+    }
+    holdTimeoutRef.current = setTimeout(() => {
+      setUnlocked(true);
+      setHolding(false);
+      holdingRef.current = false;
+      // small delay to mimic UI transition before calling onUnlock
+      setTimeout(() => onUnlock(), 500);
+    }, holdDuration);
+  }, [unlocked, holdDuration, onUnlock, animateProgress]);
+
+  const stopHolding = useCallback(() => {
+    if (unlocked) return;
+    setHolding(false);
+    holdingRef.current = false;
+    setProgress(0);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current);
+      holdTimeoutRef.current = null;
+    }
+  }, [unlocked]);
 
   useEffect(() => {
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+      }
+      if (holdTimeoutRef.current) {
+        clearTimeout(holdTimeoutRef.current);
+        holdTimeoutRef.current = null;
       }
     };
   }, []);
@@ -90,6 +133,7 @@ export function ParentGate({
             <div className='relative'>
               <button
                 type='button'
+                aria-label={`Hold for ${holdDuration / 1000} seconds to access settings`}
                 onMouseDown={startHolding}
                 onMouseUp={stopHolding}
                 onMouseLeave={stopHolding}

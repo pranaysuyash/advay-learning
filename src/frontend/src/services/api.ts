@@ -91,6 +91,7 @@ export const profileApi = {
     apiClient.post('/users/me/profiles', data),
   updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string }>) =>
     apiClient.patch(`/users/me/profiles/${profileId}`, data),
+  deleteProfile: (profileId: string) => apiClient.delete(`/users/me/profiles/${profileId}`),
 };
 
 // Progress API

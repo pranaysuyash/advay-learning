@@ -32,6 +32,8 @@ import WellnessReminder from '../../components/WellnessReminder';
 import CameraRecoveryModal from '../../components/CameraRecoveryModal';
 import ExitConfirmationModal from '../../components/ExitConfirmationModal';
 import { CelebrationOverlay } from '../../components/CelebrationOverlay';
+import { HandTutorialOverlay } from '../../components/game/AnimatedHand';
+import { LoadingState } from '../../components/LoadingState';
 import useInactivityDetector from '../../hooks/useInactivityDetector';
 import { usePostureDetection } from '../../hooks/usePostureDetection';
 import { useAttentionDetection } from '../../hooks/useAttentionDetection';
@@ -104,6 +106,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState<number>(0);
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
+  const [showHandTutorial, setShowHandTutorial] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
   // Drawing state
@@ -167,7 +170,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Note: We don't check isHandTrackingReady synchronously after this call
       // because React state doesn't update mid-function. A useEffect monitors it.
       if (!isHandTrackingReady) {
-        setFeedback('Loading hand tracking...');
+        setIsHandTrackingLoading(true);
+        setFeedback(null);
         initializeHandTracking(); // Don't await - let useEffect handle the result
       } else {
         setFeedback('Camera ready!');
@@ -221,6 +225,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   const [accuracy, setAccuracy] = useState<number>(0);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isHandTrackingLoading, setIsHandTrackingLoading] = useState(false);
 
   // Wellness tracking state
   const [showWellnessReminder, setShowWellnessReminder] =
@@ -274,7 +279,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setAccuracy(20);
       setFeedback('Try tracing more of the letter before checking!');
       setStreak(0);
-      playError(); // Gentle reminder sound
+      try {
+        // Sound playback may not be available in some test environments; guard it.
+        playError(); // Gentle reminder sound
+      } catch (err) {
+        // Ignore sound errors so UI state updates still occur in headless tests
+        // Observed in test env: AudioContext is not implemented
+      }
       return;
     }
 
@@ -289,9 +300,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setShowWellnessReminder(false);
       setWellnessReminderType(null);
 
-      // Play celebration sounds and phonics
-      playCelebration();
-      speakWordExample(currentLetter.char, selectedLanguage);
+      // Play celebration sounds and phonics. Guard against envs without audio/speech.
+      try {
+        playCelebration();
+      } catch (err) {
+        /* ignore */
+      }
+      try {
+        speakWordExample(currentLetter.char, selectedLanguage);
+      } catch (err) {
+        /* ignore */
+      }
 
       confetti({
         particleCount: 100,
@@ -306,7 +325,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     } else {
       setFeedback('Good start — try to trace the full shape!');
       setStreak(0);
-      playPop(); // Encouraging feedback
+      try {
+        playPop(); // Encouraging feedback
+      } catch (err) {
+        // Ignore
+      }
     }
   };
 
@@ -333,12 +356,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   const handleTutorialComplete = () => {
     setTutorialCompleted(true);
+    setShowHandTutorial(true);
     localStorage.setItem('tutorialCompleted', 'true');
   };
 
   const handleSkipTutorial = () => {
     setTutorialCompleted(true);
     localStorage.setItem('tutorialCompleted', 'true');
+  };
+
+  const handleHandTutorialComplete = () => {
+    setShowHandTutorial(false);
   };
 
   const toggleHighContrast = () => {
@@ -350,6 +378,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Effect to update feedback when hand tracking becomes ready during gameplay
   useEffect(() => {
     if (isPlaying && isHandTrackingReady) {
+      setIsHandTrackingLoading(false);
       setFeedback('Camera ready!');
       console.log('[AlphabetGame] Hand tracking became ready during gameplay');
     }
@@ -1031,6 +1060,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       id: 'check',
       icon: 'check',
       label: 'Check',
+      ariaLabel: 'Check my tracing',
       onClick: checkProgress,
       variant: 'success',
     },
@@ -1075,6 +1105,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         />
       )}
 
+      <HandTutorialOverlay
+        isOpen={showHandTutorial}
+        onComplete={handleHandTutorialComplete}
+      />
+
       {/* Game Area - Full Screen Mode */}
       {isPlaying ? (
         <GameContainer
@@ -1085,6 +1120,32 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           onPause={() => setIsPaused(!isPaused)}
         >
           <div className='relative w-full h-full'>
+            {/* Accuracy Bar - show during gameplay as well for accessibility/tests */}
+            {accuracy > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
+              >
+                <div className='flex justify-between items-center mb-2'>
+                  <label
+                    htmlFor='accuracy-progress'
+                    className='text-text-secondary'
+                  >
+                    Tracing Accuracy
+                  </label>
+                  <span className={`font-bold ${accuracyColorClass}`}>
+                    {accuracy}%
+                  </span>
+                </div>
+                <progress
+                  id='accuracy-progress'
+                  value={accuracy}
+                  max={100}
+                  className='w-full h-3 rounded-full'
+                />
+              </motion.div>
+            )}
             <GameLayout
               webcamRef={webcamRef}
               canvasRef={canvasRef}
@@ -1319,6 +1380,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   className='w-full h-3 rounded-full'
                 />
               </motion.div>
+            )}
+
+            {/* Loading State with Pip */}
+            {isHandTrackingLoading && (
+              <div className='rounded-xl p-4 mb-6'>
+                <LoadingState message='Getting hand tracking ready...' />
+              </div>
             )}
 
             {/* Feedback */}

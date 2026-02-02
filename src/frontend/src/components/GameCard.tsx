@@ -98,7 +98,7 @@ export const GameCard = memo(function GameCard({
                 initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay, duration: 0.3 }}
-                className="h-full"
+                className={`h-full ${comingSoon ? 'opacity-60 grayscale' : ''}`}
             >
             {/* Preview Image or Icon Header */}
             <div className="relative h-32 bg-bg-tertiary overflow-hidden border-b border-border">
@@ -120,6 +120,13 @@ export const GameCard = memo(function GameCard({
                 {isNew && (
                     <div className="absolute top-3 left-3 px-2 py-1 bg-success text-white text-xs font-bold rounded-full shadow-soft">
                         NEW
+                    </div>
+                )}
+
+                {/* COMING SOON badge */}
+                {comingSoon && (
+                    <div className="absolute top-3 left-3 px-2 py-1 bg-text-muted text-white text-xs font-bold rounded-full shadow-soft">
+                        COMING SOON
                     </div>
                 )}
 

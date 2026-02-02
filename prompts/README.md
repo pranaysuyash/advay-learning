@@ -39,7 +39,9 @@ This folder contains the reusable prompts that govern how agents work on this re
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
 - Single-axis whole-app auditor (report-only, one axis per run): `prompts/audit/single-axis-app-auditor-v1.0.md`
 - Implement audit findings: `prompts/remediation/implementation-v1.6.1.md`
+- Home landing P0 improvements (hydration guard, Try Demo CTA, mascot anchor): `prompts/remediation/home-landing-implementation-v1.0.md`
 - **Implementation planning (before coding)**: `prompts/planning/implementation-planning-v1.0.md`
+- Planning-first product + engineering agent prompt: `prompts/planning/planning-first-product-engineering-agent-v1.0.md`
 - Implement a feature slice (non-audit): `prompts/implementation/feature-implementation-v1.0.md`
 - Hardening (one scope): `prompts/hardening/hardening-v1.1.md`
 - React best practices (Vercel-aligned): `prompts/hardening/react-best-practices-v1.0.md`
@@ -58,12 +60,14 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Test plan (manual + automated): `prompts/qa/test-plan-v1.0.md`
 - Test execution report: `prompts/qa/test-execution-report-v1.0.md`
 - Regression hunt: `prompts/qa/regression-hunt-v1.0.md`
+- Randomized exploratory testing pack (structured checks + persona walks): `prompts/qa/randomized-exploratory-testing-pack-v1.0.md`
 
 ### Support / Feedback
 
 - Feedback/complaint intake → tickets: `prompts/support/feedback-intake-v1.0.md`
 - Issue triage → tickets or “need more info”: `prompts/support/issue-triage-v1.0.md`
 - QA findings → tickets: `prompts/triage/qa-findings-to-tickets-v1.0.md`
+- External feedback verification & integration: `prompts/support/external-feedback-verification-integration-v1.0.md`
 
 ### Security / Privacy
 

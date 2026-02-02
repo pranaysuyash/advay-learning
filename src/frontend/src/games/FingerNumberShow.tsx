@@ -72,6 +72,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     landmarker: handLandmarker,
     isLoading: isModelLoading,
     isReady: isHandTrackingReady,
+    initialize: initializeHandTracking,
   } = useHandTracking({
     numHands: 4,
     minDetectionConfidence: 0.3,
@@ -279,7 +280,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     ],
   );
 
-  // Hand landmarker is now initialized by useHandTracking hook
+  // Initialize hand tracking on mount
+  useEffect(() => {
+    initializeHandTracking();
+  }, [initializeHandTracking]);
 
   useEffect(() => {
     if (!isPlaying) return;

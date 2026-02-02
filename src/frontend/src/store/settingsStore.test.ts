@@ -37,6 +37,16 @@ describe('SettingsStore', () => {
   const localStorageGetItem = vi.spyOn(Storage.prototype, 'getItem');
   const localStorageSetItem = vi.spyOn(Storage.prototype, 'setItem');
 
+  function stripTransient(s: any) {
+    const p = { ...s } as any;
+    delete p.updateSettings;
+    delete p.resetSettings;
+    delete p.demoMode;
+    delete p.setDemoMode;
+    delete p.setHydrated;
+    return p;
+  }
+
   describe('initial state', () => {
     it('should have default settings on mount', () => {
       const store = useSettingsStore.getState();
@@ -90,11 +100,7 @@ describe('SettingsStore', () => {
       // Persisted value should wrap the state (persist middleware uses { state, version })
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      // remove functions before comparing to persisted state
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should update difficulty setting', () => {
@@ -107,10 +113,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should update cameraEnabled setting', () => {
@@ -123,10 +126,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should update soundEnabled setting', () => {
@@ -139,10 +139,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should update timeLimit setting', () => {
@@ -155,10 +152,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should update showHints setting', () => {
@@ -171,10 +165,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
   });
 
@@ -195,10 +186,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
   });
 
@@ -215,10 +203,7 @@ describe('SettingsStore', () => {
 
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state));
     });
 
     it('should persist changes across store updates', () => {
@@ -240,10 +225,7 @@ describe('SettingsStore', () => {
       // Ensure the persisted value matches the final state
       const lastCall = localStorageSetItem.mock.calls.slice(-1)[0];
       const persisted = JSON.parse(lastCall[1]);
-      const plainState = { ...state2 } as any;
-      delete plainState.updateSettings;
-      delete plainState.resetSettings;
-      expect(persisted.state).toEqual(plainState);
+      expect(persisted.state).toEqual(stripTransient(state2));
     });
   });
 });

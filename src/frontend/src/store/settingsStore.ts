@@ -34,16 +34,30 @@ const defaultSettings: Settings = {
   onboardingCompleted: false,
 };
 
+interface SettingsState extends Settings {
+  hydrated: boolean; // whether persisted state has been rehydrated
+  setHydrated: () => void;
+  demoMode: boolean; // transient demo mode (not persisted)
+  setDemoMode: (v: boolean) => void;
+  updateSettings: (settings: Partial<Settings>) => void;
+  resetSettings: () => void;
+}
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       ...defaultSettings,
+      hydrated: false,
+      demoMode: false,
+
+      setHydrated: () => set({ hydrated: true }),
+      setDemoMode: (v: boolean) => set({ demoMode: v }),
 
       updateSettings: (newSettings) => {
         set((state) => {
           // If language is updated and gameLanguage isn't explicitly provided,
           // keep gameLanguage in sync with language for game content localization.
-          const merged = { ...state, ...newSettings };
+          const merged = { ...state, ...newSettings } as SettingsState;
           if (newSettings.language && newSettings.gameLanguage === undefined) {
             merged.gameLanguage = newSettings.language;
           }
@@ -52,11 +66,24 @@ export const useSettingsStore = create<SettingsState>()(
       },
 
       resetSettings: () => {
-        set(defaultSettings);
+        set({
+          ...defaultSettings,
+          hydrated: true, // preserve hydrated when resetting
+          demoMode: false,
+        });
       },
     }),
     {
       name: 'advay-settings',
+      // Do not persist transient demoMode or setter functions
+      partialize: (state) => {
+        const { demoMode, setDemoMode, setHydrated, ...rest } = state as any;
+        return rest as Partial<SettingsState>;
+      },
+      onRehydrateStorage: () => (state) => {
+        // When rehydration completes, mark the store as hydrated
+        state?.setHydrated?.();
+      },
     },
   ),
 );

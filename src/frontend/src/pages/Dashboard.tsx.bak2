@@ -50,7 +50,7 @@ interface LanguageProgress {
 
 export const Dashboard = memo(function DashboardComponent() {
   useAuthStore();
-  const { profiles, fetchProfiles, createProfile, updateProfile, setCurrentProfile } =
+  const { profiles, fetchProfiles, createProfile, updateProfile } =
     useProfileStore();
   const toast = useToast();
   useSettingsStore();

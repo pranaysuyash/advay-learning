@@ -329,7 +329,7 @@ describe('Semantic HTML Accessibility', () => {
       const { container } = render(
         <MemoryRouter>
           <Settings />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       const holdButton = screen.getByRole('button', {
         name: /hold.*3 seconds.*access settings/i,
@@ -354,7 +354,7 @@ describe('Semantic HTML Accessibility', () => {
       const { container } = render(
         <MemoryRouter>
           <Settings />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       const holdButton = screen.getByRole('button', {
         name: /hold.*3 seconds.*access settings/i,
@@ -385,7 +385,7 @@ describe('Semantic HTML Accessibility', () => {
       const { container } = render(
         <MemoryRouter>
           <Settings />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       const holdButton = screen.getByRole('button', {
         name: /hold.*3 seconds.*access settings/i,
