@@ -53,8 +53,11 @@ const useEyeTracking = (
     right: false,
   });
 
+  // Note: Throttling can be added here if needed for performance optimization
+
   // Initialize FaceLandmarker
   useEffect(() => {
+    let isMounted = true;
     const initializeFaceLandmarker = async () => {
       try {
         setIsLoading(true);
@@ -73,20 +76,27 @@ const useEyeTracking = (
           minFacePresenceConfidence,
         });
 
-        setFaceLandmarker(landmarker);
-        faceLandmarkerRef.current = landmarker;
-        setError(null);
+        if (isMounted) {
+          setFaceLandmarker(landmarker);
+          faceLandmarkerRef.current = landmarker;
+          setError(null);
+        }
       } catch (err) {
         console.error('Failed to initialize face landmarker:', err);
-        setError('Failed to initialize eye tracking. Please try again.');
+        if (isMounted) {
+          setError('Failed to initialize eye tracking. Please try again.');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeFaceLandmarker();
 
     return () => {
+      isMounted = false;
       if (faceLandmarkerRef.current) {
         faceLandmarkerRef.current.close();
       }

@@ -67,9 +67,13 @@ vi.mock('../../components/ui/Icon', () => ({
 }));
 vi.mock('../../components/ui/ConfirmDialog', () => ({
   useConfirm: () => vi.fn(async () => true),
+  // Provide ConfirmContext so modules importing it don't fail under partial mocks
+  ConfirmContext: {},
 }));
 vi.mock('../../components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
+  // Provide ToastContext so modules importing it don't fail under partial mocks
+  ToastContext: {},
 }));
 
 const renderWithRouter = (ui: ReactElement, entries: any[] = ['/']) =>
