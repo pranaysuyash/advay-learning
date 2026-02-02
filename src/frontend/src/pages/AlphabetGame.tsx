@@ -29,9 +29,12 @@ import WellnessReminder from '../components/WellnessReminder';
 import CameraRecoveryModal from '../components/CameraRecoveryModal';
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 import { StoryModal } from '../components/StoryModal';
+import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import useInactivityDetector from '../hooks/useInactivityDetector';
 import { usePostureDetection } from '../hooks/usePostureDetection';
 import { useAttentionDetection } from '../hooks/useAttentionDetection';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import { usePhonics } from '../hooks/usePhonics';
 // Centralized hand tracking hooks
 import { useHandTracking } from '../hooks/useHandTracking';
 import { useGameLoop } from '../hooks/useGameLoop';
@@ -108,6 +111,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     delegate: 'GPU',
     enableFallback: true,
   });
+
+  // Sound effects and phonics hooks
+  const { playSuccess, playCelebration, playPop, playError } = useSoundEffects();
+  const { speakLetterSound, speakWordExample, getPhonemeInfo } = usePhonics();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -258,6 +265,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setAccuracy(20);
       setFeedback('Try tracing more of the letter before checking!');
       setStreak(0);
+      playError(); // Gentle reminder sound
       return;
     }
 
@@ -265,6 +273,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setAccuracy(nextAccuracy);
 
     if (nextAccuracy >= 70) {
+      // Play celebration sounds and phonics
+      playCelebration();
+      speakWordExample(currentLetter.char, selectedLanguage);
+
       confetti({
         particleCount: 100,
         spread: 70,
@@ -279,6 +291,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     } else {
       setFeedback('Good start — try to trace the full shape!');
       setStreak(0);
+      playPop(); // Encouraging feedback
     }
   };
 
@@ -764,9 +777,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-                Math.pow(point.y / canvas.height - lastPoint.y, 2),
-            )
+            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+            Math.pow(point.y / canvas.height - lastPoint.y, 2),
+          )
           : Infinity;
 
       if (dist > minDistance) {
@@ -920,13 +933,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-                feedback?.includes('Great')
-                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                  : feedback?.includes('Good')
-                    ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                    : 'bg-red-500/20 border border-red-500/30 text-red-400'
-              }`}
+              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback?.includes('Great')
+                ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                : feedback?.includes('Good')
+                  ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                  : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                }`}
             >
               {feedback}
             </motion.div>
@@ -942,7 +954,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   <span>Using Finger Magic Mode!</span>
                 </div>
                 <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
-                  Pip can't see your hand right now (the Forgetfulness Fog is blocking the camera), 
+                  Pip can't see your hand right now (the Forgetfulness Fog is blocking the camera),
                   but that's okay! You can use your finger on the screen to draw and rescue letters!
                 </p>
                 <button
@@ -1002,11 +1014,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                             // Reset to first letter when language changes
                             setCurrentLetterIndex(0);
                           }}
-                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
-                            selectedLanguage === lang.code
-                              ? 'bg-pip-orange text-white shadow-soft-lg'
-                              : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                          }`}
+                          className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
+                            ? 'bg-pip-orange text-white shadow-soft-lg'
+                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                            }`}
                         >
                           <span className='mr-3 text-xl'>{lang.flag}</span>
                           {lang.name}
@@ -1133,36 +1144,35 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     )}
                   </div>
 
-                   <fieldset
-                     className='absolute top-4 right-4 flex gap-3'
-                     aria-label='Game controls'
-                   >
-                     <legend className='sr-only'>Game Controls</legend>
-                     {/* Pause Button */}
-                     <button
-                       type='button'
-                       onClick={() => setIsPaused(true)}
-                       className='px-5 py-3 bg-yellow-500 text-white border border-yellow-600 rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-yellow-600 min-h-[56px]'
-                     >
-                       <UIIcon name='timer' size={20} />
-                       Pause
-                     </button>
-                     <button
-                       type='button'
-                       onClick={() => setShowExitModal(true)}
-                       className='px-5 py-3 bg-white/90 text-advay-slate border border-border rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-white min-h-[56px]'
-                     >
-                       <UIIcon name='home' size={20} />
-                       Home
-                     </button>
+                  <fieldset
+                    className='absolute top-4 right-4 flex gap-3'
+                    aria-label='Game controls'
+                  >
+                    <legend className='sr-only'>Game Controls</legend>
+                    {/* Pause Button */}
+                    <button
+                      type='button'
+                      onClick={() => setIsPaused(true)}
+                      className='px-5 py-3 bg-yellow-500 text-white border border-yellow-600 rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-yellow-600 min-h-[56px]'
+                    >
+                      <UIIcon name='timer' size={20} />
+                      Pause
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setShowExitModal(true)}
+                      className='px-5 py-3 bg-white/90 text-advay-slate border border-border rounded-xl transition text-base font-bold shadow-soft flex items-center gap-2 hover:bg-white min-h-[56px]'
+                    >
+                      <UIIcon name='home' size={20} />
+                      Home
+                    </button>
                     <button
                       type='button'
                       onClick={() => setIsDrawing(!isDrawing)}
-                      className={`px-5 py-3 rounded-xl transition text-base font-bold shadow-soft min-h-[56px] ${
-                        isDrawing
-                          ? 'bg-error text-white hover:bg-red-700'
-                          : 'bg-success text-white hover:bg-success-hover'
-                      }`}
+                      className={`px-5 py-3 rounded-xl transition text-base font-bold shadow-soft min-h-[56px] ${isDrawing
+                        ? 'bg-error text-white hover:bg-red-700'
+                        : 'bg-success text-white hover:bg-success-hover'
+                        }`}
                     >
                       {isPinching ? (
                         <span className='flex items-center gap-2'>
@@ -1202,7 +1212,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     {(() => {
                       const mascotState =
                         feedback?.includes('Great') ||
-                        feedback?.includes('Amazing')
+                          feedback?.includes('Amazing')
                           ? 'happy'
                           : isDrawing
                             ? 'waiting'
@@ -1274,7 +1284,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           screenTimeThreshold={30}
         />
 
-         {/* Wellness Reminder */}
+        {/* Wellness Reminder */}
         {showWellnessReminder && wellnessReminderType && (
           <WellnessReminder
             alerts={[
@@ -1380,13 +1390,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
         />
 
-        {/* Story Celebration Modal */}
-        <StoryModal
-          open={showCelebration}
-          onClose={() => setShowCelebration(false)}
-          title={celebrationTitle}
-          badge={celebrationBadge ?? undefined}
-          message="Amazing work! Keep it up!"
+        {/* Celebration Overlay */}
+        <CelebrationOverlay
+          show={showCelebration}
+          letter={currentLetter.char}
+          accuracy={accuracy}
+          message={celebrationTitle}
+          onComplete={() => {
+            setShowCelebration(false);
+            // Auto-advance to next letter after celebration
+            nextLetter();
+          }}
         />
       </section>
     </>

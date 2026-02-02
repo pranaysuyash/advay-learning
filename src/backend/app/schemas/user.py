@@ -28,13 +28,13 @@ def validate_password_strength(password: str) -> str:
     if len(password) < 8:
         raise ValueError("Password must be at least 8 characters long")
 
-    if not re.search(r'[A-Z]', password):
+    if not re.search(r"[A-Z]", password):
         raise ValueError("Password must contain at least one uppercase letter")
 
-    if not re.search(r'[a-z]', password):
+    if not re.search(r"[a-z]", password):
         raise ValueError("Password must contain at least one lowercase letter")
 
-    if not re.search(r'\d', password):
+    if not re.search(r"\d", password):
         raise ValueError("Password must contain at least one digit")
 
     return password
@@ -42,6 +42,7 @@ def validate_password_strength(password: str) -> str:
 
 class UserBase(BaseModel):
     """Base user schema."""
+
     email: EmailStr
     is_active: bool = True
     role: str = "parent"
@@ -50,9 +51,10 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """User creation schema."""
+
     password: str
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
         """Validate password strength."""
@@ -61,11 +63,12 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     """User update schema."""
+
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: Optional[str]) -> Optional[str]:
         """Validate password strength if provided."""
@@ -76,6 +79,7 @@ class UserUpdate(BaseModel):
 
 class User(UserBase):
     """User response schema."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str
@@ -85,9 +89,42 @@ class User(UserBase):
 
 class UserInDB(UserBase):
     """User in database schema."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str
     hashed_password: str
     created_at: datetime
     updated_at: datetime
+
+
+class PasswordResetRequest(BaseModel):
+    """Password reset request schema."""
+
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    """Password reset confirmation schema."""
+
+    token: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password strength."""
+        return validate_password_strength(v)
+
+
+class PasswordResetToken(BaseModel):
+    """Password reset token schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    user_id: str
+    token: str
+    expires_at: datetime
+    used: bool = False
+    created_at: datetime

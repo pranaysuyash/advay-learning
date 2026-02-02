@@ -150,6 +150,14 @@ export function Login() {
                 required
                 disabled={isLoading}
               />
+              <div className='flex justify-end mt-2'>
+                <Link
+                  to='/forgot-password'
+                  className='text-sm text-white/50 hover:text-white/80 transition'
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <button

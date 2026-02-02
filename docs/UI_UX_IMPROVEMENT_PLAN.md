@@ -43,20 +43,21 @@ Based on comprehensive analysis of the codebase and existing UX documentation, t
 
 ---
 
-## Design Vision: "Pip's Letter Adventure"
+## Design Vision: "Pip's Letter Adventure" with Lumi Companion
 
 ### Core Transformation
 
 **From:** Educational software with gamification  
-**To:** A magical world where Pip and the child go on a letter adventure together
+**To:** A magical world where Pip guides the child and Lumi joins for special adventures
 
 ### Key Principles (from `UX_VISION_CLAUDE.md`)
 
-1. **Pip is the Interface** - Everything flows through Pip, not buttons
-2. **Sound is 50% of the Experience** - Every action needs audio
-3. **Show, Don't Tell** - Replace percentages with stars, text with animations
-4. **Failure is Funny, Not Scary** - Pip giggles at mistakes
-5. **Collectibles Create Commitment** - Letter creatures to collect
+1. **Pip is the Main Guide** - PIP handles core tracking and guidance
+2. **Lumi is the Companion** - Joins for multiplayer, lessons, and story progression
+3. **Sound is 50% of the Experience** - Every action needs audio
+4. **Show, Don't Tell** - Replace percentages with stars, text with animations
+5. **Failure is Funny, Not Scary** - Pip giggles at mistakes, Lumi offers encouragement
+6. **Collectibles Create Commitment** - Letter creatures to collect with both characters
 
 ### Target Age Bands
 
@@ -68,7 +69,25 @@ Based on comprehensive analysis of the codebase and existing UX documentation, t
 
 ---
 
-## Detailed Implementation Plan
+### Character Integration Strategy
+
+#### PIP (Main Guide)
+- **Role:** Core hand tracking, main navigation, primary feedback
+- **Location:** Always present in camera view
+- **Features:** Hand tracking, gesture recognition, star ratings, TTS feedback
+
+#### Lumi (Companion Character)
+- **Role:** Joins for special lessons, multiplayer, story progression
+- **Location:** Appears in story modal, adventure map, celebration scenes
+- **Features:** Additional guidance, emotional support, character interactions
+
+#### When Lumi Appears:
+- Multiplayer games (sharing, turn-taking)
+- Special lessons (social skills, collaboration)
+- Story progression (cutscenes, celebrations)
+- Advanced challenges (Lumi provides hints)
+
+---
 
 ### Phase 1: Visual Foundation (Week 1) 🎨
 
@@ -123,13 +142,13 @@ Replace single dark background with themed zones:
 
 ### Phase 2: The Adventure Map (Week 1-2) 🗺️
 
-Replace `LetterJourney` grid with visual path through themed zones.
+Replace `LetterJourney` grid with visual path through themed zones with PIP and Lumi.
 
 #### Current vs New
 
 ```
 CURRENT (Grid):
-┌─────────────────────────┐
+┌──────────────────────────────────┐
 │ Batch 1                 │
 │ ┌───┬───┬───┬───┬───┐  │
 │ │ A │ B │ C │ D │ E │  │
@@ -138,26 +157,28 @@ CURRENT (Grid):
 │ ┌───┬───┬───┬───┬───┐  │
 │ │ F │ G │ H │ I │ J │  │
 │ └───┴───┴───┴───┴───┘  │
-└─────────────────────────┘
+└──────────────────────────────────┘
 
-NEW (Adventure Path):
+NEW (Adventure Path with PIP & Lumi):
          ☁️ ☁️ ☁️ (locked)
-            ╲│╱
-    🌸 ──A──B──C──D──E── 🦋  (Meadow)
+            ⎛⎝
+    🌸 ──A──B──C──D──E── 🦀  (Meadow)
               │
-    🏖️ ──F──G──H──I──J── 🦀  (Beach)
+    🏖 ──F──G──H──I──J── 🦀  (Beach)
                   │
-    🌲 ──K──L──M──N──O── 🦉  (Forest)
+    🌲 ──K──L──M──N──O── 🦀  (Forest)
     
-    Pip stands on current letter!
+    PIP stands on current letter!
+    Lumi appears for special lessons 👋
 ```
 
 #### Component Changes
 
 **New: `AdventureMap.tsx`**
-- SVG path winding through screen
+- SVG path winding through screen with PIP and Lumi positions
 - Letter nodes positioned along path
-- Pip character positioned at current letter
+- PIP character positioned at current letter (camera view)
+- Lumi character appears at special lesson nodes
 - Cloud overlay for locked zones
 - Creature icons for mastered letters
 
@@ -165,6 +186,7 @@ NEW (Adventure Path):
 - Replace grid with AdventureMap
 - Keep batch unlock logic
 - Add zone theme switching
+- Support for both PIP and Lumi interactions
 
 ---
 
@@ -174,30 +196,33 @@ NEW (Adventure Path):
 
 #### Sound Inventory
 
-| Sound | Trigger | Priority | Source |
-|-------|---------|----------|--------|
-| Success "ding-ding!" | Accuracy ≥ 70% | P0 | Asset or Web Audio API |
-| Letter pronunciation | Letter appears | P0 | Web Speech API or assets |
-| Pop | Button tap | P0 | Asset |
-| Pip giggle | Success celebration | P1 | Asset |
-| Sparkle | Star appears | P1 | Asset |
-| Encouragement | Low accuracy | P1 | Asset |
-| Background music | During play | P2 | Asset |
+| Sound | Trigger | Priority | Source | Character |
+|-------|---------|----------|--------|-----------|
+| Success "ding-ding!" | Accuracy ≥ 70% | P0 | Asset or Web Audio API | PIP & Lumi |
+| Letter pronunciation | Letter appears | P0 | Web Speech API or assets | PIP |
+| Pop | Button tap | P0 | Asset | PIP |
+| Pip giggle | Success celebration | P1 | Asset | PIP |
+| Lumi cheer | Special achievements | P1 | Asset | Lumi |
+| Sparkle | Star appears | P1 | Asset | PIP |
+| Encouragement | Low accuracy | P1 | Asset | Lumi |
+| Background music | During play | P2 | Asset | Both |
 
 #### Technical Implementation
 
 **New: `useAudio.ts` hook**
 ```typescript
 interface UseAudioReturn {
-  play: (soundName: string) => void;
-  speak: (text: string) => void;
+  play: (soundName: string, character?: 'pip' | 'lumi') => void;
+  speak: (text: string, character?: 'pip' | 'lumi') => void;
   isMuted: boolean;
   toggleMute: () => void;
 }
 ```
 
 **Features:**
-- Preload critical sounds
+- Preload critical sounds for both PIP and Lumi
+- Character-specific audio cues
+- Cross-character harmony for celebrations
 - Respect `soundEnabled` setting
 - Fallback to Web Speech API for letters
 - Volume control
@@ -236,17 +261,20 @@ T+2000ms: Auto-advance to next letter
 
 **Visual:**
 1. Letter wobbles (ticklish animation)
-2. Pip tilts head (thinking pose)
-3. Encouraging gesture from Pip
+2. PIP tilts head (thinking pose)
+3. LUMI offers encouragement
+4. Encouraging gesture from both characters
 
 **Audio:**
 1. Gentle sound (not harsh buzzer)
-2. Encouragement voice ("Try again!")
+2. PIP encouragement voice ("Try again!")
+3. LUMI supportive voice ("You've got this!")
 
 **New Components:**
 - `Celebration.tsx` - Confetti and particles
 - `StarRating.tsx` - 1-3 star display
 - `FeedbackOverlay.tsx` - Combined visual feedback
+- `CharacterFeedback.tsx` - PIP & LUMI reactions
 
 ---
 
@@ -273,17 +301,19 @@ T+2000ms: Auto-advance to next letter
 │                                         │
 │    ┌─────────────────────────┐          │
 │    │                         │          │
-│    │    [Camera + Canvas]    │  ← Full  │
-│    │    (ghost letter hint)  │     size │
-│    │                         │          │
-│    │    👆 (finger cursor)   │          │
+│    │    PIP (camera)        │          │
+│    │    guiding hand       │          │
+│    │    tracking           │          │
 │    │                         │          │
 │    └─────────────────────────┘          │
 │                                         │
-│        [  ✋ Show Pip!  ]               │
-│        Big, colorful, bouncy button     │
-│                                         │
-│  🦊 Pip: "Trace the letter A!"          │
+│    ┌─────────────────────────┐          │
+│    │                         │          │
+│    │    LUMI (story)        │          │
+│    │    companion guide     │          │
+│    │    appears for         │          │
+│    │    special lessons    │          │
+│    └─────────────────────────┘          │
 │                                         │
 └─────────────────────────────────────────┘
 ```
@@ -294,11 +324,17 @@ T+2000ms: Auto-advance to next letter
 2. **Ghost letter overlay** - Enhanced visibility for hints
 3. **Big primary button** - "Show Pip!" or "I'm Done!"
 4. **Star count** - Replaces score number
-5. **Pip in corner** - Always visible, reacting to drawing
-6. **Minimal text** - Voice + visuals over text
+5. **PIP always visible** - Reacting to drawing in camera view
+6. **LUMI appears contextually** - For special lessons and story progression
+7. **Minimal text** - Voice + visuals over text
 
 **Files to modify:**
 - `Game.tsx` - Complete layout redesign
+- `AdventureMap.tsx` - PIP and LUMI positioning
+
+---
+
+### Phase 6: Child-Friendly Navigation (Week 3) 🧭
 
 ---
 
@@ -317,14 +353,19 @@ Home  Play  Stars  Me
 
 #### Pip as Guide
 
-- Idle state: Pip waves from corner
-- Recommendation: Pip points to next action
+- Idle state: PIP waves from corner (camera view)
+- LUMI appears for special onboarding moments
+- Recommendation: PIP points to next action
 - "Pip wants to play!" → Bounce toward Play
 - "See your stars!" → Bounce toward Stars
 
 **Files to modify:**
-- `Layout.tsx` - Icon-based nav
-- `Mascot.tsx` - Guide animations
+- `Layout.tsx` - Icon-based nav with PIP & LUMI
+- `Mascot.tsx` - Guide animations for both characters
+
+---
+
+### Phase 7: Onboarding Experience (Week 4) 👋
 
 ---
 
@@ -364,15 +405,22 @@ Step 5: First Letter
 - Big "A" appears
 - "This is letter A!"
 - "A for Apple!" 🍎
+- PIP demonstrates
+- LUMI appears for extra encouragement
 
 Step 6: Guided Trace
-- Pip encourages throughout
+- PIP encourages throughout
 - "Start at the top!"
 - "Great job!"
+- LUMI joins for celebration
 ```
 
 **New Component:**
-- `Onboarding.tsx` - Step-based tutorial
+- `Onboarding.tsx` - Step-based tutorial with PIP & LUMI
+
+---
+
+### Phase 8: Letter Creatures Collection (Week 4-5) 🦊🍎🐱
 
 ---
 
@@ -426,15 +474,17 @@ Each letter becomes a collectible creature friend:
 | Replace % with stars | 2h | HIGH | `Game.tsx` |
 | Add success sound | 4h | HIGH | New `useAudio.ts` |
 | Add confetti | 4h | HIGH | New `Celebration.tsx` |
+| PIP & LUMI character integration | 4h | HIGH | `Mascot.tsx`, new components |
 
 ### P1 - Core Experience (Weeks 2-3)
 | Item | Effort | Impact | Files |
 |------|--------|--------|-------|
 | Adventure Map | 8h | HIGH | `LetterJourney.tsx` |
-| Enhanced Pip animations | 6h | HIGH | `Mascot.tsx` |
+| Enhanced PIP animations | 6h | HIGH | `Mascot.tsx` |
 | Game screen redesign | 8h | HIGH | `Game.tsx` |
 | Letter sounds | 4h | MEDIUM | Audio assets |
 | Icon navigation | 4h | MEDIUM | `Layout.tsx` |
+| LUMI companion integration | 6h | HIGH | New components |
 
 ### P2 - Differentiation (Weeks 4-5)
 | Item | Effort | Impact | Files |
@@ -442,6 +492,7 @@ Each letter becomes a collectible creature friend:
 | Letter creatures | 12h | HIGH | New components |
 | Onboarding flow | 8h | HIGH | New `Onboarding.tsx` |
 | Themed backgrounds | 6h | MEDIUM | CSS themes |
+| PIP & LUMI story progression | 8h | HIGH | Story system |
 
 ### P3 - Polish (Week 6+)
 | Item | Effort | Impact |
@@ -449,7 +500,7 @@ Each letter becomes a collectible creature friend:
 | Anti-frustration detection | 8h | MEDIUM |
 | Parent mode separation | 6h | MEDIUM |
 | Background music | 4h | MEDIUM |
-| Multi-language Pip | 8h | MEDIUM |
+| Multi-language PIP & LUMI | 8h | MEDIUM |
 
 ---
 

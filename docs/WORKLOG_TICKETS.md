@@ -80,6 +80,7 @@ Acceptance Criteria:
 - Unauthenticated user can start a demo session from Home with default demo profile and play `Finger Number Show` and a demo `Alphabet Tracing` session.
 - Demo session does not require server-side account creation.
 - Tests verify access and that demo state is cleared on refresh.
+- Support for Lumi companion character in demo mode for enhanced guidance.
 
 ---
 
@@ -102,6 +103,7 @@ Acceptance Criteria:
 - When camera access is denied, the onboarding shows specific tips and a functioning "Test again" CTA.
 - Users can choose to continue without camera and reach Games/Demo flows.
 - Playwright test covers camera denied + recover flows.
+- Support for Lumi companion character to provide guidance during camera troubleshooting.
 
 ---
 
@@ -124,6 +126,7 @@ Acceptance Criteria:
 - Selecting a child in dashboard updates `currentProfile` globally.
 - Games page shows selected profile and `Play in <Language>` button becomes active.
 - Unit tests and Playwright coverage validate the flow.
+- Support for Lumi companion character to adapt to selected child profile.
 
 ---
 
@@ -145,6 +148,7 @@ Targets:
 Acceptance Criteria:
 - Gameplay shows no more than 3 overlays at once; instruction overlay is dismissible; success uses mascot feedback.
 - Usability test (manual or Playwright) shows improved user focus on the canvas (no overlay overlap) and no regressions in drawing detection.
+- Support for Lumi companion character to provide simplified guidance during gameplay.
 
 ---
 
@@ -166,6 +170,8 @@ Targets:
 Acceptance Criteria:
 - Buttons across migrated pages use token-based classes and have consistent sizing/spacing.
 - No visual regressions in existing screenshots (update screenshot test baseline).
+- Support for Lumi companion character button interactions.
+- Integration with existing PIP mascot system for consistent UI patterns.
 
 ---
 
@@ -186,6 +192,8 @@ Targets:
 
 Acceptance Criteria:
 - All icon uses reference a single `UIIcon` component; snapshots updated and no missing icon regressions.
+- Support for Lumi companion character icon interactions.
+- Integration with existing PIP mascot system icon patterns.
 
 ---
 
@@ -206,6 +214,8 @@ Targets:
 
 Acceptance Criteria:
 - Automated a11y scan passes with zero critical violations; keyboard-only navigation allows full flow; reduced-motion preference disables non-essential animations.
+- Support for Lumi companion character accessibility features.
+- Integration with existing PIP mascot system for consistent accessibility patterns.
 
 ---
 
@@ -226,6 +236,8 @@ Targets:
 
 Acceptance Criteria:
 - Code coverage for new hooks has unit tests; existing integration tests for the game still pass.
+- Support for Lumi companion character hook integration.
+- Integration with existing PIP mascot system for consistent game logic patterns.
 
 ---
 
@@ -246,6 +258,8 @@ Targets:
 
 Acceptance Criteria:
 - Suite runs in CI, produces `screenshots/` artifacts, and a baseline comparison step flags visual regressions.
+- Support for Lumi companion character screenshot testing.
+- Integration with existing PIP mascot system screenshot verification.
 
 ---
 
@@ -266,6 +280,8 @@ Targets:
 
 Acceptance Criteria:
 - A simple persistent store exists with `currentQuest`, `unlockedIslands[]`, `badges[]`, and `startQuest()`/`completeQuest()` actions.
+- Support for companion character interactions (Lumi) for multiplayer and special lesson scenarios.
+- Integration with existing PIP mascot system for main guidance.
 
 ---
 
@@ -286,6 +302,8 @@ Targets:
 
 Acceptance Criteria:
 - Map appears on Dashboard and the CTA toggles `storyStore` state; an integrated Playwright visual test captures the map before/after unlocking.
+- Support for Lumi companion character to guide through map exploration.
+- Integration with existing PIP mascot system for main map guidance.
 
 ---
 
@@ -306,6 +324,8 @@ Targets:
 
 Acceptance Criteria:
 - Clicking `Start First Quest` then `Complete` triggers the modal and updates `storyStore` badges and unlocked islands.
+- Support for Lumi companion character to join celebrations for special achievements.
+- Integration with existing PIP mascot feedback system.
 
 ---
 
@@ -326,6 +346,8 @@ Targets:
 
 Acceptance Criteria:
 - Story copy present in docs and referenced in code as constants; easy to switch to localized copy later.
+- Support for Lumi companion character to provide additional guidance during lessons.
+- Integration with existing PIP mascot system for main feedback.
 
 ---
 
@@ -346,6 +368,8 @@ Targets:
 
 Acceptance Criteria:
 - Content doc present and one in-app copy updated for demonstration.
+- Support for Lumi companion character to join festival celebrations.
+- Integration with existing PIP mascot system for main feedback.
 
 ---
 
@@ -366,6 +390,8 @@ Targets:
 
 Acceptance Criteria:
 - Briefs added and hooks available in game components for demo.
+- Support for Lumi companion character to guide through treasure trails.
+- Integration with existing PIP mascot system for main guidance.
 
 ---
 
@@ -386,6 +412,8 @@ Targets:
 
 Acceptance Criteria:
 - Test runs locally and outputs screenshots in `src/frontend/screenshots/story-*`.
+- Support for Lumi companion character visual testing.
+- Integration with existing PIP mascot system visual verification.
 
 ---
 
@@ -406,6 +434,8 @@ Targets:
 
 Acceptance Criteria:
 - Small PR merges to main with tests passing and a verifier pack in docs.
+- Support for both PIP main guidance and Lumi companion character interactions.
+- Integration with existing PIP mascot system and new Lumi companion features.
 
 ---
 
@@ -30784,3 +30814,411 @@ Risks/notes:
 - **Scope:** Start with local multiplayer, expand to networked later if needed
 
 ---
+
+### TCK-20260202-016 :: Create Lumi Visual Assets
+
+Type: DESIGN
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P1
+
+Description:
+Create visual assets for Lumi companion character including sprites, animations, and expressions to complement the existing PIP mascot system.
+
+Scope contract:
+- In-scope:
+  - Lumi character sprites (idle, happy, caring, thinking, celebrating states)
+  - Animation sequences for social interactions
+  - Expression variations for different social contexts
+  - Consistent visual style with PIP mascot
+  - Multiple sizes for different UI contexts
+- Out-of-scope:
+  - PIP mascot redesign or modifications
+  - Advanced 3D models or complex animations
+  - Video assets or cinematics
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `assets/images/lumi/` (new directory)
+  - `assets/images/lumi/idle.png`
+  - `assets/images/lumi/happy.png`
+  - `assets/images/lumi/caring.png`
+  - `assets/images/lumi/thinking.png`
+  - `assets/images/lumi/celebrating.png`
+  - `assets/images/lumi/animations/` (animation frames)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Lumi character sprites created in 5 emotional states
+- [ ] Animation sequences for social interactions
+- [ ] Visual consistency with PIP mascot design language
+- [ ] Multiple size variants for different UI contexts
+- [ ] Assets optimized for web delivery (PNG/WebP formats)
+- [ ] Accessibility considerations (high contrast, clear expressions)
+
+Inputs:
+- Source: Lumi companion character implementation (TCK-20260201-015)
+- Design reference: Existing PIP mascot in `assets/images/pip/`
+- Style guide: `docs/BRAND_ARCHITECTURE.md`
+
+Plan:
+1. **Asset Creation (Week 1):** Design and create base Lumi sprites
+   - Sketch character concept and expressions
+   - Create 5 core emotional states
+   - Establish color palette and style consistency
+
+2. **Animation Development (Week 2):** Build interaction animations
+   - Idle breathing animation
+   - Expression transition animations
+   - Social interaction gestures
+   - Celebration sequences
+
+3. **Optimization & Integration (Week 3):** Prepare for implementation
+   - Optimize file sizes and formats
+   - Create multiple size variants
+   - Test integration with LumiCompanion component
+
+Execution log:
+- [2026-02-02] **OPEN** — Ticket created for Lumi visual asset creation | Evidence: Follows from TCK-20260201-015 completion
+
+Status updates:
+- [2026-02-02] **OPEN** — Ready for design work, assets needed to complete Lumi character implementation
+
+Next actions:
+1. Review existing PIP mascot assets for style consistency
+2. Create Lumi character concept and expression sketches
+3. Design and implement sprite assets
+4. Create animation sequences
+5. Optimize and integrate with component
+
+Risks/notes:
+- **Design:** Maintaining visual consistency with PIP while creating distinct personality
+- **Technical:** Asset optimization for web performance
+- **Timeline:** Design work may require external resources if not handled internally
+
+---
+
+### TCK-20260202-017 :: Extend Mascot Component for Multi-Character Support
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P1
+
+Description:
+Extend the existing Mascot component to support multi-character display mode, enabling PIP and Lumi to appear together and switch between characters seamlessly.
+
+Scope contract:
+- In-scope:
+  - Modify Mascot component for character switching
+  - Add dual-character display mode (PIP + Lumi side-by-side)
+  - Implement character transition animations
+  - Maintain backward compatibility with single character mode
+  - Add character state management
+- Out-of-scope:
+  - New character creation (Lumi component already exists)
+  - Major UI redesigns
+  - Voice/TTS coordination (handled separately)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/Mascot.tsx` (extend existing)
+  - `src/frontend/src/stores/socialStore.ts` (integration)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Mascot component supports single and dual character modes
+- [ ] Smooth character switching animations
+- [ ] PIP and Lumi can display simultaneously
+- [ ] Backward compatibility maintained
+- [ ] Character state properly managed
+- [ ] TypeScript compilation clean
+- [ ] Unit tests for new functionality
+
+Inputs:
+- Source: Lumi companion character implementation (TCK-20260201-015)
+- Base component: Existing `Mascot.tsx`
+- Social store: `socialStore.ts` for character state
+
+Plan:
+1. **Component Analysis (Day 1):** Review existing Mascot component structure
+   - Understand current single-character implementation
+   - Identify extension points for multi-character support
+   - Plan state management integration
+
+2. **Multi-Character Implementation (Day 2-3):** Add dual character support
+   - Implement character switching logic
+   - Add dual display layout
+   - Create transition animations
+   - Integrate with social store
+
+3. **Testing & Refinement (Day 4):** Verify functionality
+   - Unit tests for new features
+   - Integration testing with Lumi component
+   - Performance testing for animations
+
+Execution log:
+- [2026-02-02] **OPEN** — Ticket created for Mascot component extension | Evidence: Core Lumi components ready, need UI integration
+
+Status updates:
+- [2026-02-02] **OPEN** — Ready for implementation, code framework exists from TCK-20260201-015
+
+Next actions:
+1. Analyze existing Mascot component structure
+2. Implement multi-character display mode
+3. Add character switching animations
+4. Integrate with social store state
+5. Add unit tests and verify functionality
+
+Risks/notes:
+- **Technical:** Maintaining performance with dual character animations
+- **Compatibility:** Ensuring backward compatibility with existing usage
+- **State:** Proper coordination between character states
+
+---
+
+### TCK-20260202-018 :: Integrate Social Learning with Existing Games
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P1
+
+Description:
+Integrate social learning activities and Lumi companion character with existing games (Alphabet, Numbers, Connect-the-Dots) to enable collaborative multiplayer experiences.
+
+Scope contract:
+- In-scope:
+  - Add social activity overlays to existing games
+  - Implement turn-taking mechanics in games
+  - Enable Lumi character appearance during gameplay
+  - Add social feedback for collaborative actions
+  - Track social metrics during game sessions
+- Out-of-scope:
+  - New game creation
+  - Major game mechanic changes
+  - Networked multiplayer (local multiplayer only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/AlphabetGame.tsx` (extend)
+  - `src/frontend/src/pages/NumbersGame.tsx` (extend)
+  - `src/frontend/src/pages/ConnectTheDotsGame.tsx` (extend)
+  - `src/frontend/src/hooks/useSocialLearning.ts` (integration)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Social activities integrated with at least 2 existing games
+- [ ] Turn-taking mechanics functional in games
+- [ ] Lumi appears during collaborative gameplay
+- [ ] Social metrics tracked and displayed
+- [ ] Backward compatibility maintained
+- [ ] E2E tests for social game integration
+
+Inputs:
+- Source: Lumi companion character implementation (TCK-20260201-015)
+- Games: Existing Alphabet, Numbers, Connect-the-Dots games
+- Social framework: `useSocialLearning` hook and social store
+
+Plan:
+1. **Game Analysis (Day 1):** Review existing game structures
+   - Understand current single-player implementations
+   - Identify integration points for social features
+   - Plan turn-taking mechanics
+
+2. **Social Integration (Day 2-4):** Add social features to games
+   - Implement turn-taking in selected games
+   - Add Lumi character appearances
+   - Integrate social activity templates
+   - Add social metrics tracking
+
+3. **Testing & Balancing (Day 5):** Verify social gameplay
+   - E2E tests for social game features
+   - Balance social vs academic focus
+   - Performance testing
+
+Execution log:
+- [2026-02-02] **OPEN** — Ticket created for game integration | Evidence: Social framework ready, games need extension
+
+Status updates:
+- [2026-02-02] **OPEN** — Ready for implementation, social templates and hooks available
+
+Next actions:
+1. Analyze existing game structures for integration points
+2. Implement turn-taking mechanics in Alphabet and Numbers games
+3. Add Lumi character appearances during collaborative play
+4. Integrate social metrics tracking
+5. Create E2E tests for social game features
+
+Risks/notes:
+- **Balance:** Maintaining educational focus while adding social elements
+- **Performance:** Game performance with additional social features
+- **Complexity:** Keeping game logic clean with social additions
+
+---
+
+### TCK-20260202-019 :: Add Social Features Testing Suite
+
+Type: QA
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P2
+
+Description:
+Create comprehensive unit and E2E tests for social learning features, including Lumi companion interactions, social store functionality, and multiplayer session management.
+
+Scope contract:
+- In-scope:
+  - Unit tests for social store functions
+  - Component tests for LumiCompanion
+  - E2E tests for social activity flows
+  - Integration tests for character switching
+  - Test utilities for social scenarios
+- Out-of-scope:
+  - Visual regression tests (handled separately)
+  - Performance/load testing
+  - Accessibility testing (separate ticket)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/stores/__tests__/socialStore.test.ts` (new)
+  - `src/frontend/src/components/__tests__/LumiCompanion.test.tsx` (new)
+  - `src/frontend/src/hooks/__tests__/useSocialLearning.test.ts` (new)
+  - `tests/e2e/social-learning.spec.ts` (new)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Unit test coverage >80% for social store
+- [ ] Component tests for LumiCompanion interactions
+- [ ] E2E tests for complete social activity flows
+- [ ] Integration tests for character switching
+- [ ] Test utilities for social scenario mocking
+- [ ] All tests passing in CI
+
+Inputs:
+- Source: Lumi companion character implementation (TCK-20260201-015)
+- Testing framework: Existing Vitest + Playwright setup
+- Components: Social store, LumiCompanion, useSocialLearning hook
+
+Plan:
+1. **Unit Testing (Day 1-2):** Test core social functionality
+   - Social store unit tests
+   - Hook unit tests
+   - Utility function tests
+
+2. **Component Testing (Day 3):** Test UI components
+   - LumiCompanion component tests
+   - Character switching tests
+   - Animation tests
+
+3. **E2E Testing (Day 4-5):** Test complete flows
+   - Social activity E2E scenarios
+   - Multiplayer session flows
+   - Character interaction tests
+
+Execution log:
+- [2026-02-02] **OPEN** — Ticket created for social features testing | Evidence: Framework ready, need comprehensive test coverage
+
+Status updates:
+- [2026-02-02] **OPEN** — Ready for implementation, social components available for testing
+
+Next actions:
+1. Create unit tests for social store functions
+2. Add component tests for LumiCompanion
+3. Implement E2E tests for social activity flows
+4. Create integration tests for character switching
+5. Add test utilities and verify CI passing
+
+Risks/notes:
+- **Coverage:** Ensuring comprehensive test scenarios for social interactions
+- **Maintenance:** Keeping tests updated with social feature changes
+- **Performance:** Test execution time with social scenario complexity
+
+---
+
+### TCK-20260202-020 :: Create Social Learning VERIFIER PACK
+
+Type: QA
+Owner: Pranay
+Created: 2026-02-02
+Status: **OPEN**
+Priority: P2
+
+Description:
+Create comprehensive VERIFIER PACK with screenshots, test outputs, and documentation demonstrating social learning features and Lumi companion character functionality.
+
+Scope contract:
+- In-scope:
+  - Screenshots of Lumi character in different states
+  - Social activity flow screenshots
+  - Test output documentation
+  - Performance metrics
+  - User experience documentation
+- Out-of-scope:
+  - Video demonstrations
+  - External user testing
+  - Comparative analysis with other systems
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `docs/verifier-packs/social-learning-v1.0/` (new directory)
+  - `docs/verifier-packs/social-learning-v1.0/README.md`
+  - `docs/verifier-packs/social-learning-v1.0/screenshots/` (images)
+  - `docs/verifier-packs/social-learning-v1.0/test-outputs/` (logs)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Complete screenshot gallery of Lumi character states
+- [ ] Social activity flow documentation with images
+- [ ] Test execution results documented
+- [ ] Performance metrics included
+- [ ] Clear setup and verification instructions
+- [ ] VERIFIER PACK v1.0 format compliance
+
+Inputs:
+- Source: Lumi companion character implementation (TCK-20260201-015)
+- Template: Existing VERIFIER PACK format from other features
+- Components: All social learning features and Lumi character
+
+Plan:
+1. **Content Collection (Day 1):** Gather verification materials
+   - Capture screenshots of Lumi character states
+   - Document social activity flows
+   - Collect test outputs and metrics
+
+2. **Documentation (Day 2):** Create VERIFIER PACK
+   - Structure documentation following v1.0 format
+   - Add setup and verification instructions
+   - Include performance and quality metrics
+
+3. **Review & Finalization (Day 3):** Complete pack
+   - Review completeness and clarity
+   - Add any missing documentation
+   - Final formatting and organization
+
+Execution log:
+- [2026-02-02] **OPEN** — Ticket created for VERIFIER PACK creation | Evidence: Social features implemented, need documentation
+
+Status updates:
+- [2026-02-02] **OPEN** — Ready for creation, all social features available for documentation
+
+Next actions:
+1. Capture screenshots of Lumi character states and interactions
+2. Document social activity flows with visual examples
+3. Collect and organize test outputs and performance metrics
+4. Create comprehensive README with verification instructions
+5. Format as VERIFIER PACK v1.0 compliant documentation
+
+Risks/notes:
+- **Completeness:** Ensuring all social features are properly documented
+- **Clarity:** Making verification instructions clear for future reference
+- **Maintenance:** Keeping documentation updated with feature changes
