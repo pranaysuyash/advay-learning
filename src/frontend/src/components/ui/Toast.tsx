@@ -1,5 +1,5 @@
 import { useState, useCallback, createContext, useContext, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './Icon';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -53,6 +53,8 @@ export function useToast() {
 }
 
 function ToastContainer({ toasts, onHide }: { toasts: Toast[]; onHide: (id: string) => void }) {
+  const reducedMotion = useReducedMotion();
+
   const getToastStyles = (type: ToastType) => {
     switch (type) {
       case 'success':
@@ -80,23 +82,30 @@ function ToastContainer({ toasts, onHide }: { toasts: Toast[]; onHide: (id: stri
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div
+      className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
             layout
-            initial={{ opacity: 0, x: 100, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 100, scale: 0.8 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            initial={reducedMotion ? false : { opacity: 0, x: 100, scale: 0.8 }}
+            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 100, scale: 0.8 }}
+            transition={reducedMotion ? { duration: 0.01 } : { type: 'spring', stiffness: 400, damping: 30 }}
             className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-sm shadow-lg min-w-[300px] max-w-[400px] ${getToastStyles(toast.type)}`}
+            role={toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'}
           >
             <UIIcon name={getIcon(toast.type)} size={20} />
             <span className="flex-1 text-sm font-medium">{toast.message}</span>
             <button
+              type="button"
               onClick={() => onHide(toast.id)}
               className="opacity-60 hover:opacity-100 transition p-1"
+              aria-label="Dismiss notification"
             >
               ×
             </button>

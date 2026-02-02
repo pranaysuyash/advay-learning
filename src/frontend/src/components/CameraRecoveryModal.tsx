@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './ui/Icon';
 import { Mascot } from './Mascot';
 import confetti from 'canvas-confetti';
@@ -20,6 +20,44 @@ export function CameraRecoveryModal({
   errorMessage = 'Camera connection lost',
 }: CameraRecoveryModalProps) {
   const [isRetrying, setIsRetrying] = useState(false);
+  const reducedMotion = useReducedMotion();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const primaryButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      primaryButtonRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusableElements = dialogRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      const firstElement = focusableElements[0] as HTMLElement | undefined;
+      const lastElement = focusableElements[
+        focusableElements.length - 1
+      ] as HTMLElement | undefined;
+
+      if (!firstElement || !lastElement) return;
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handleRetryCamera = useCallback(async () => {
     setIsRetrying(true);
@@ -47,16 +85,21 @@ export function CameraRecoveryModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={reducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            initial={reducedMotion ? false : { scale: 0.9, opacity: 0 }}
+            animate={reducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+            exit={reducedMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
             className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='camera-recovery-title'
+            aria-describedby='camera-recovery-desc'
+            ref={dialogRef}
           >
             {/* Mascot with concerned state */}
             <div className='flex justify-center mb-6'>
@@ -68,10 +111,10 @@ export function CameraRecoveryModal({
 
             {/* Error message */}
             <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-advay-slate mb-2'>
+              <h2 id='camera-recovery-title' className='text-2xl font-bold text-advay-slate mb-2'>
                 Camera Needs Help
               </h2>
-              <p className='text-text-secondary'>
+              <p id='camera-recovery-desc' className='text-text-secondary'>
                 {errorMessage}. Don't worry — you can still play! Choose an option below:
               </p>
             </div>
@@ -83,6 +126,7 @@ export function CameraRecoveryModal({
                 type="button"
                 onClick={handleRetryCamera}
                 disabled={isRetrying}
+                ref={primaryButtonRef}
                 className='w-full px-6 py-4 bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3'
               >
                 {isRetrying ? (

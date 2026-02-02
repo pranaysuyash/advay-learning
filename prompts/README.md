@@ -37,6 +37,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### Engineering (Dev)
 
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
+- Single-axis whole-app auditor (report-only, one axis per run): `prompts/audit/single-axis-app-auditor-v1.0.md`
 - Implement audit findings: `prompts/remediation/implementation-v1.6.1.md`
 - **Implementation planning (before coding)**: `prompts/planning/implementation-planning-v1.0.md`
 - Implement a feature slice (non-audit): `prompts/implementation/feature-implementation-v1.0.md`

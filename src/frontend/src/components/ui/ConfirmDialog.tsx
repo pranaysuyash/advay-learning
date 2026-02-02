@@ -1,11 +1,13 @@
 import {
   useState,
   useCallback,
+  useEffect,
+  useRef,
   createContext,
   useContext,
   ReactNode,
 } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './Icon';
 
 interface ConfirmOptions {
@@ -94,6 +96,49 @@ function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const reducedMotion = useReducedMotion();
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // Focus cancel button when dialog opens
+  useEffect(() => {
+    if (dialog.isOpen) {
+      cancelButtonRef.current?.focus();
+    }
+  }, [dialog.isOpen]);
+
+  // Handle Esc key and focus trapping
+  useEffect(() => {
+    if (!dialog.isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+      
+      // Focus trap
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusableElements = dialogRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [dialog.isOpen, onCancel]);
+
   const getTypeStyles = () => {
     switch (dialog.type) {
       case 'danger':
@@ -127,23 +172,30 @@ function ConfirmDialog({
       {dialog.isOpen && (
         <>
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={reducedMotion ? { opacity: 0 } : { opacity: 0 }}
             className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50'
             onClick={onCancel}
           />
           <dialog
+            ref={dialogRef}
             open
             className='fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md'
             aria-modal='true'
             aria-labelledby='confirm-dialog-title'
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              initial={
+                reducedMotion ? false : { opacity: 0, scale: 0.9, y: 20 }
+              }
+              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              transition={
+                reducedMotion
+                  ? { duration: 0.01 }
+                  : { type: 'spring', stiffness: 400, damping: 30 }
+              }
               className='bg-[#1a1a2e] border border-border rounded-2xl p-6 shadow-2xl mx-4'
             >
               <div className='flex items-start gap-4 mb-6'>
@@ -169,16 +221,17 @@ function ConfirmDialog({
 
               <div className='flex gap-3 justify-end'>
                 <button
+                  ref={cancelButtonRef}
                   type='button'
                   onClick={onCancel}
-                  className='px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm font-medium'
+                  className='px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50'
                 >
                   {dialog.cancelText}
                 </button>
                 <button
                   type='button'
                   onClick={onConfirm}
-                  className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition border-b-4 active:border-b-0 active:translate-y-1 ${styles.confirmBtn}`}
+                  className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition border-b-4 active:border-b-0 active:translate-y-1 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#1a1a2e] ${styles.confirmBtn}`}
                 >
                   {dialog.confirmText}
                 </button>

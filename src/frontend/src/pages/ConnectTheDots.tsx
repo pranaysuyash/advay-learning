@@ -3,8 +3,11 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { UIIcon } from '../components/ui/Icon';
+import { GameHeader } from '../components/GameHeader';
 import { Mascot } from '../components/Mascot';
+import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useHandTracking } from '../hooks/useHandTracking';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
 import type { PinchState, Landmark } from '../types/tracking';
 
@@ -15,6 +18,16 @@ interface Dot {
   connected: boolean;
   number: number;
 }
+
+const GAME_COLORS = {
+  path: 'var(--text-error)',
+  dotConnected: 'var(--success)',
+  dotPending: 'var(--text-error)',
+  dotStroke: 'var(--text-inverse)',
+  dotLabel: 'var(--text-inverse)',
+  cursorIdle: 'var(--brand-secondary)',
+  cursorPinch: 'var(--warning)',
+} as const;
 
 export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const navigate = useNavigate();
@@ -33,8 +46,11 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>(
     'easy',
   );
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  // Hand tracking state
+  // Sound effects
+  const { playCelebration, playPop } = useSoundEffects();
+
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
   const [handCursor, setHandCursor] = useState<{ x: number; y: number } | null>(
@@ -244,18 +260,21 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   // Check if level is completed
   useEffect(() => {
     if (dots.length > 0 && dots.every((dot) => dot.connected)) {
-      // Level completed
+      // Level completed - play celebration!
+      playCelebration();
+      setShowCelebration(true);
       setScore((prev) => prev + timeLeft * 10); // Bonus points for remaining time
       setTimeout(() => {
+        setShowCelebration(false);
         if (level >= 5) {
           setGameCompleted(true);
         } else {
           setLevel((prev) => prev + 1);
           setTimeLeft(60); // Reset timer for next level
         }
-      }, 2000);
+      }, 2500); // Match CelebrationOverlay timing
     }
-  }, [dots, timeLeft, level]);
+  }, [dots, timeLeft, level, playCelebration]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -270,6 +289,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
     // Check if clicked the correct next dot
     if (dotId === currentDotIndex) {
+      playPop(); // Play pop sound on successful connection
       const updatedDots = [...dots];
       updatedDots[dotId] = { ...updatedDots[dotId], connected: true };
       setDots(updatedDots);
@@ -318,6 +338,22 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           </div>
         </header>
 
+        {showPermissionWarning && (
+          <div
+            role='alert'
+            className='mb-4 flex items-start gap-3 bg-white/10 border border-border rounded-xl p-4 shadow-soft'
+          >
+            <UIIcon name='warning' size={20} className='text-text-warning mt-0.5' />
+            <div className='text-sm text-white/80'>
+              <p className='font-semibold text-white'>Camera permission denied</p>
+              <p>
+                You can still play with mouse/touch. Enable camera permission to
+                use hand tracking controls.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Game Area */}
         <div className='bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm'>
           {!gameStarted ? (
@@ -347,11 +383,10 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                     <button
                       key={diff}
                       onClick={() => setDifficulty(diff)}
-                      className={`px-4 py-2 rounded-lg font-medium transition ${
-                        difficulty === diff
-                          ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
-                          : 'bg-white/10 text-white/80 hover:bg-white/20'
-                      }`}
+                      className={`px-4 py-2 rounded-lg font-medium transition ${difficulty === diff
+                        ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+                        : 'bg-white/10 text-white/80 hover:bg-white/20'
+                        }`}
                     >
                       {diff.charAt(0).toUpperCase() + diff.slice(1)}
                     </button>
@@ -409,233 +444,180 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
               </div>
             </div>
           ) : (
-            <div className='relative'>
-              <figure className='relative bg-black rounded-xl overflow-hidden aspect-[4/3] shadow-2xl border-4 border-orange-400/30 m-0'>
-                <canvas
-                  ref={canvasRef}
-                  width={800}
-                  height={600}
-                  className='w-full h-full'
-                  onClick={(e) => {
-                    if (!canvasRef.current) return;
+            <div className='w-screen h-screen bg-black overflow-hidden fixed top-0 left-0 right-0 bottom-0 z-40'>
+              <div className='relative'>
+                <div className="absolute top-0 left-0 right-0 z-50 p-4 pointer-events-none">
+                  <GameHeader
+                    title="Connect the Dots"
+                    subtitle="Find the hidden shape"
+                    score={score}
+                    level={level}
+                    timeLeft={timeLeft}
+                    infoItems={[
+                      { label: 'Next Dot', value: currentDotIndex + 1 },
+                      { label: 'Mode', value: isHandTrackingEnabled ? 'Hand' : 'Mouse' }
+                    ]}
+                    onBack={goToHome}
+                    secondaryAction={{
+                      label: 'Reset',
+                      icon: 'home',
+                      onClick: resetGame
+                    }}
+                    primaryAction={{
+                      label: isHandTrackingEnabled ? 'Mouse Mode' : 'Hand Mode',
+                      icon: isHandTrackingEnabled ? 'pencil' : 'hand',
+                      onClick: () => setIsHandTrackingEnabled(!isHandTrackingEnabled)
+                    }}
+                  />
+                </div>
+                <div className="relative w-full h-full">
+                  <canvas
+                    ref={canvasRef}
+                    width={800}
+                    height={600}
+                    className='w-full h-full'
+                    onClick={(e) => {
+                      if (!canvasRef.current) return;
 
-                    const rect = canvasRef.current.getBoundingClientRect();
-                    // Canvas internal coordinates are fixed (800x600). The element is responsive,
-                    // so map from CSS pixels → canvas pixels to keep hit-testing correct.
-                    const scaleX = canvasRef.current.width / rect.width;
-                    const scaleY = canvasRef.current.height / rect.height;
-                    const x = (e.clientX - rect.left) * scaleX;
-                    const y = (e.clientY - rect.top) * scaleY;
+                      const rect = canvasRef.current.getBoundingClientRect();
+                      // Canvas internal coordinates are fixed (800x600). The element is responsive,
+                      // so map from CSS pixels → canvas pixels to keep hit-testing correct.
+                      const scaleX = canvasRef.current.width / rect.width;
+                      const scaleY = canvasRef.current.height / rect.height;
+                      const x = (e.clientX - rect.left) * scaleX;
+                      const y = (e.clientY - rect.top) * scaleY;
 
-                    // Find the closest dot within a certain radius
-                    const radius = 30;
-                    for (let i = 0; i < dots.length; i++) {
-                      const dot = dots[i];
-                      const distance = Math.sqrt(
-                        Math.pow(x - dot.x, 2) + Math.pow(y - dot.y, 2),
-                      );
-
-                      if (distance <= radius) {
-                        handleDotClick(i);
-                        break;
-                      }
-                    }
-                  }}
-                />
-
-                {/* Webcam for hand tracking (hidden, used for detection only) */}
-                {isHandTrackingEnabled && (
-                  <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
-                    <Webcam
-                      ref={webcamRef}
-                      audio={false}
-                      mirrored={true}
-                      videoConstraints={{
-                        facingMode: 'user',
-                        width: 1280,
-                        height: 720,
-                      }}
-                      className='w-full h-full object-cover'
-                    />
-                  </div>
-                )}
-
-                {/* Draw dots and lines */}
-                {dots.length > 0 && (
-                  <svg
-                    className='absolute top-0 left-0 w-full h-full pointer-events-none'
-                    width='800'
-                    height='600'
-                  >
-                    {/* Draw connecting lines */}
-                    {dots.slice(0, -1).map((dot, index) => {
-                      if (dot.connected && dots[index + 1].connected) {
-                        return (
-                          <line
-                            key={`line-${index}`}
-                            x1={dot.x}
-                            y1={dot.y}
-                            x2={dots[index + 1].x}
-                            y2={dots[index + 1].y}
-                            stroke='#EF4444'
-                            strokeWidth='3'
-                          />
+                      // Find the closest dot within a certain radius
+                      const radius = 30;
+                      for (let i = 0; i < dots.length; i++) {
+                        const dot = dots[i];
+                        const distance = Math.sqrt(
+                          Math.pow(x - dot.x, 2) + Math.pow(y - dot.y, 2),
                         );
+
+                        if (distance <= radius) {
+                          handleDotClick(i);
+                          break;
+                        }
                       }
-                      return null;
-                    })}
+                    }}
+                  />
 
-                    {/* Draw dots */}
-                    {dots.map((dot) => (
-                      <g key={dot.id}>
-                        <circle
-                          cx={dot.x}
-                          cy={dot.y}
-                          r={dot.id === currentDotIndex ? 20 : 15}
-                          fill={dot.connected ? '#10B981' : '#EF4444'}
-                          stroke='#FFFFFF'
-                          strokeWidth='2'
-                        />
-                        <text
-                          x={dot.x}
-                          y={dot.y}
-                          textAnchor='middle'
-                          dominantBaseline='middle'
-                          fill='#FFFFFF'
-                          fontSize='14'
-                          fontWeight='bold'
-                        >
-                          {dot.number}
-                        </text>
-                      </g>
-                    ))}
+                  {/* Webcam for hand tracking (hidden, used for detection only) */}
+                  {isHandTrackingEnabled && (
+                    <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
+                      <Webcam
+                        ref={webcamRef}
+                        audio={false}
+                        mirrored={true}
+                        videoConstraints={{
+                          facingMode: 'user',
+                          width: 1280,
+                          height: 720,
+                        }}
+                        className='w-full h-full object-cover'
+                      />
+                    </div>
+                  )}
 
-                    {/* Hand cursor (when hand tracking enabled) */}
-                    {handCursor && isHandTrackingEnabled && (
-                      <g>
-                        <circle
-                          cx={handCursor.x}
-                          cy={handCursor.y}
-                          r={isPinching ? 15 : 12}
-                          fill={isPinching ? '#FFFF00' : '#00D9FF'}
-                          fillOpacity={0.7}
-                          stroke='#FFFFFF'
-                          strokeWidth='2'
-                        />
-                        {isPinching && (
+                  {/* Draw dots and lines */}
+                  {dots.length > 0 && (
+                    <svg
+                      className='absolute top-0 left-0 w-full h-full pointer-events-none'
+                      width='800'
+                      height='600'
+                    >
+                      {/* Draw connecting lines */}
+                      {dots.slice(0, -1).map((dot, index) => {
+                        if (dot.connected && dots[index + 1].connected) {
+                          return (
+                            <line
+                              key={`line-${index}`}
+                              x1={dot.x}
+                              y1={dot.y}
+                              x2={dots[index + 1].x}
+                              y2={dots[index + 1].y}
+                              stroke={GAME_COLORS.path}
+                              strokeWidth='3'
+                            />
+                          );
+                        }
+                        return null;
+                      })}
+
+                      {/* Draw dots */}
+                      {dots.map((dot) => (
+                        <g key={dot.id}>
+                          <circle
+                            cx={dot.x}
+                            cy={dot.y}
+                            r={dot.id === currentDotIndex ? 20 : 15}
+                            fill={
+                              dot.connected
+                                ? GAME_COLORS.dotConnected
+                                : GAME_COLORS.dotPending
+                            }
+                            stroke={GAME_COLORS.dotStroke}
+                            strokeWidth='2'
+                          />
+                          <text
+                            x={dot.x}
+                            y={dot.y}
+                            textAnchor='middle'
+                            dominantBaseline='middle'
+                            fill={GAME_COLORS.dotLabel}
+                            fontSize='14'
+                            fontWeight='bold'
+                          >
+                            {dot.number}
+                          </text>
+                        </g>
+                      ))}
+
+                      {/* Hand cursor (when hand tracking enabled) */}
+                      {handCursor && isHandTrackingEnabled && (
+                        <g>
                           <circle
                             cx={handCursor.x}
                             cy={handCursor.y}
-                            r={25}
-                            fill='none'
-                            stroke='#FFFF00'
+                            r={isPinching ? 15 : 12}
+                            fill={
+                              isPinching
+                                ? GAME_COLORS.cursorPinch
+                                : GAME_COLORS.cursorIdle
+                            }
+                            fillOpacity={0.7}
+                            stroke={GAME_COLORS.dotStroke}
                             strokeWidth='2'
-                            opacity='0.5'
                           />
-                        )}
-                      </g>
-                    )}
-                  </svg>
-                )}
-
-                {/* Game Controls Overlay */}
-                <fieldset
-                  className='absolute top-4 right-4 flex gap-2 border-0 p-0 m-0'
-                  aria-label='Game controls'
-                >
-                  <legend className='sr-only'>Game Controls</legend>
-
-                  {/* Hand Tracking Toggle */}
-                  {cameraPermission === 'granted' && (
-                    <button
-                      onClick={() =>
-                        setIsHandTrackingEnabled(!isHandTrackingEnabled)
-                      }
-                      className={`px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2 ${
-                        isHandTrackingEnabled
-                          ? 'bg-green-500 hover:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1'
-                          : 'bg-white/10 border border-border hover:bg-white/20 backdrop-blur'
-                      }`}
-                      title={
-                        isHandTrackingEnabled
-                          ? 'Disable hand tracking'
-                          : 'Enable hand tracking'
-                      }
-                    >
-                      <UIIcon
-                        name={isHandTrackingEnabled ? 'camera' : 'eye'}
-                        size={16}
-                      />
-                      {isHandTrackingEnabled ? 'Hand Mode' : 'Mouse Mode'}
-                    </button>
+                          {isPinching && (
+                            <circle
+                              cx={handCursor.x}
+                              cy={handCursor.y}
+                              r={25}
+                              fill='none'
+                              stroke={GAME_COLORS.cursorPinch}
+                              strokeWidth='2'
+                              opacity='0.5'
+                            />
+                          )}
+                        </g>
+                      )}
+                    </svg>
                   )}
 
-                  <button
-                    onClick={goToHome}
-                    className='px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:translate-y-1 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2'
-                  >
-                    <UIIcon name='home' size={16} />
-                    Home
-                  </button>
-                  <button
-                    onClick={resetGame}
-                    className='px-4 py-2 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition text-sm font-semibold backdrop-blur'
-                  >
-                    Reset
-                  </button>
-                </fieldset>
+                  {/* Game Controls Overlay */}
+                  {/* Overlays removed - moved to GameHeader */}
 
-                {/* Current Target Indicator */}
-                <div className='absolute top-4 left-4 space-y-2'>
-                  <div className='bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border flex items-center gap-1'>
-                    <UIIcon name='target' size={14} />
-                    Connect: {currentDotIndex + 1}
-                  </div>
-
-                  {/* Input Mode Indicator */}
-                  <div
-                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-medium border border-border flex items-center gap-1 ${
-                      isHandTrackingEnabled ? 'text-green-400' : 'text-blue-400'
-                    }`}
-                  >
-                    <UIIcon
-                      name={isHandTrackingEnabled ? 'hand' : 'target'}
-                      size={12}
+                  {/* Mascot */}
+                  <div className='absolute bottom-4 left-4 z-20'>
+                    <Mascot
+                      state={currentDotIndex === 0 ? 'idle' : 'happy'}
+                      message={`Connect to dot #${currentDotIndex + 1}`}
                     />
-                    {isHandTrackingEnabled
-                      ? handCursor
-                        ? 'Hand Detected'
-                        : 'Show Hand'
-                      : 'Mouse/Click Mode'}
                   </div>
-
-                  {/* Camera Permission Warning */}
-                  {showPermissionWarning && cameraPermission === 'denied' && (
-                    <div className='bg-amber-500/20 border border-amber-500/50 px-3 py-2 rounded-lg text-xs max-w-xs'>
-                      <div className='font-semibold text-amber-400 mb-1'>
-                        Camera Unavailable
-                      </div>
-                      <div className='text-white/70'>
-                        Using mouse/click mode. Enable camera in browser
-                        settings for hand tracking.
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* Mascot */}
-                <div className='absolute bottom-4 left-4 z-20'>
-                  <Mascot
-                    state={currentDotIndex === 0 ? 'idle' : 'happy'}
-                    message={`Connect to dot #${currentDotIndex + 1}`}
-                  />
-                </div>
-              </figure>
-
-              <div className='mt-4 text-center text-white/60 text-sm font-medium'>
-                {isHandTrackingEnabled
-                  ? 'Use your hand to point at dots and pinch (thumb + index finger) to connect them!'
-                  : 'Click on the numbered dots in sequence (1, 2, 3...) to connect them!'}
               </div>
             </div>
           )}
@@ -663,6 +645,15 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           </ul>
         </div>
       </motion.div>
+
+      {/* Celebration Overlay */}
+      <CelebrationOverlay
+        show={showCelebration}
+        letter={String(level)}
+        accuracy={100}
+        message={level >= 5 ? "Amazing! All levels complete! 🏆" : `Level ${level} Complete!`}
+        onComplete={() => setShowCelebration(false)}
+      />
     </section>
   );
 });

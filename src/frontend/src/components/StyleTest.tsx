@@ -1,118 +1,118 @@
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { UIIcon } from './ui/Icon';
+
 /**
  * Style Test Component
- * 
- * This component displays all the design system elements
- * so you can verify borders, colors, and typography visually.
- * 
- * Access at: http://localhost:5173/style-test (after adding route)
- * Or import into any page for testing
+ *
+ * Visual sanity check for the UI token system and canonical components.
+ * Route is wired at `/style-test`.
  */
-
 export function StyleTest() {
   return (
-    <div className="p-8 space-y-8">
-      <h1 className="text-h1">Design System Test</h1>
-      
-      {/* Color Swatches */}
-      <section>
-        <h2 className="text-h2">Background Colors</h2>
+    <div className="p-8 space-y-10">
+      <header>
+        <h1 className="text-h1 text-text-primary">Design System Test</h1>
+        <p className="text-text-secondary mt-2">
+          Verify tokens, contrast, focus states, and touch targets.
+        </p>
+      </header>
+
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Background Tokens</h2>
         <div className="flex gap-4 flex-wrap">
-          <div className="p-4 bg-bg-primary border-2 border-border-strong rounded-lg">
-            <p className="text-primary font-bold">bg-primary</p>
-            <p className="text-small">#FDF8F3</p>
-          </div>
-          <div className="p-4 bg-bg-secondary border-2 border-border-strong rounded-lg">
-            <p className="text-primary font-bold">bg-secondary</p>
-            <p className="text-small">#E8F4F8</p>
-          </div>
-          <div className="p-4 bg-bg-tertiary border-2 border-border-strong rounded-lg">
-            <p className="text-primary font-bold">bg-tertiary</p>
-            <p className="text-small">#F5F0E8</p>
-          </div>
+          <Card padding="sm" className="w-56 bg-bg-primary">
+            <p className="text-text-primary font-bold">bg-bg-primary</p>
+            <p className="text-text-secondary text-sm">Used as app base</p>
+          </Card>
+          <Card padding="sm" className="w-56 bg-bg-secondary">
+            <p className="text-text-primary font-bold">bg-bg-secondary</p>
+            <p className="text-text-secondary text-sm">Soft contrast sections</p>
+          </Card>
+          <Card padding="sm" className="w-56 bg-bg-tertiary">
+            <p className="text-text-primary font-bold">bg-bg-tertiary</p>
+            <p className="text-text-secondary text-sm">Pills, icon chips</p>
+          </Card>
         </div>
       </section>
 
-      {/* Text Colors */}
-      <section>
-        <h2 className="text-h2">Text Colors</h2>
-        <div className="space-y-2 bg-white p-4 rounded-lg border-2 border-border">
-          <p className="text-primary text-lg">text-primary: #1F2937 (should be very dark/clear)</p>
-          <p className="text-secondary text-lg">text-secondary: #4B5563 (should be clearly readable)</p>
-          <p className="text-muted text-lg">text-muted: #9CA3AF (should be lighter)</p>
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Text Tokens</h2>
+        <Card>
+          <p className="text-text-primary text-lg">
+            text-text-primary (primary reading)
+          </p>
+          <p className="text-text-secondary text-lg">
+            text-text-secondary (supporting copy)
+          </p>
+          <p className="text-text-muted text-lg">
+            text-text-muted (quiet metadata)
+          </p>
+        </Card>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Buttons (Canonical)</h2>
+        <div className="flex gap-4 flex-wrap items-center">
+          <Button variant="primary" icon="sparkles">Primary</Button>
+          <Button variant="secondary" icon="letters">Secondary</Button>
+          <Button variant="success" icon="check">Success</Button>
+          <Button variant="ghost" icon="target">Ghost</Button>
+          <Button variant="danger" icon="warning">Danger</Button>
+          <Button variant="primary" size="lg" fullWidth className="max-w-xs">
+            Large (Kid-friendly)
+          </Button>
         </div>
       </section>
 
-      {/* Border Test */}
-      <section>
-        <h2 className="text-h2">Border Test</h2>
-        <p className="mb-4">Each box below should have a visible 2px border:</p>
-        <div className="flex gap-4 flex-wrap">
-          <div className="p-6 bg-white border-2 border-border rounded-lg">
-            <p className="text-primary font-bold">2px border (default)</p>
-            <p className="text-secondary">Should be visible</p>
-          </div>
-          <div className="p-6 bg-white border-2 border-border-strong rounded-lg">
-            <p className="text-primary font-bold">2px border-strong</p>
-            <p className="text-secondary">Should be darker/more visible</p>
-          </div>
-          <div className="p-6 bg-white border-2 border-border-focus rounded-lg">
-            <p className="text-primary font-bold">2px border-focus</p>
-            <p className="text-secondary">Should be blue</p>
-          </div>
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Cards</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <h3 className="text-h3 text-text-primary">Default Card</h3>
+            <p className="text-text-secondary">
+              Border + shadow should be consistent across the app.
+            </p>
+          </Card>
+          <Card hover>
+            <h3 className="text-h3 text-text-primary">Hover Card</h3>
+            <p className="text-text-secondary">Hover elevation should feel gentle.</p>
+          </Card>
         </div>
       </section>
 
-      {/* Buttons */}
-      <section>
-        <h2 className="text-h2">Buttons</h2>
-        <div className="flex gap-4 flex-wrap">
-          <button className="btn btn-primary">Primary Button</button>
-          <button className="btn btn-secondary">Secondary Button</button>
-          <button className="btn btn-success">Success Button</button>
-          <button className="btn btn-ghost">Ghost Button</button>
-        </div>
-      </section>
-
-      {/* Cards */}
-      <section>
-        <h2 className="text-h2">Cards (with 2px borders)</h2>
-        <div className="flex gap-4 flex-wrap">
-          <div className="card">
-            <h3 className="text-h3">Card Title</h3>
-            <p>This card should have a sharp 2px border</p>
-          </div>
-          <div className="card card-hover">
-            <h3 className="text-h3">Hover Card</h3>
-            <p>Hover to see shadow effect</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Typography */}
-      <section>
-        <h2 className="text-h2">Typography</h2>
-        <div className="space-y-4 bg-white p-6 rounded-lg border-2 border-border">
-          <h1 className="text-display">Display (6rem)</h1>
-          <h1 className="text-h1">Heading 1 (2rem, weight 800)</h1>
-          <h2 className="text-h2">Heading 2 (1.5rem, weight 800)</h2>
-          <h3 className="text-h3">Heading 3 (1.25rem, weight 800)</h3>
-          <p className="text-body">Body text (1.125rem, weight 600) - should be bold and clear</p>
-          <p className="text-small">Small text (1rem, weight 600)</p>
-        </div>
-      </section>
-
-      {/* Touch Targets */}
-      <section>
-        <h2 className="text-h2">Touch Targets (60px minimum)</h2>
-        <div className="flex gap-4">
-          <button className="btn btn-primary touch-target w-16 h-16 p-0 flex items-center justify-center text-2xl">
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Touch Targets (60px)</h2>
+        <div className="flex gap-4 flex-wrap items-center">
+          <button
+            type="button"
+            className="touch-target w-16 h-16 bg-pip-orange text-white rounded-2xl shadow-soft flex items-center justify-center text-2xl"
+            aria-label="Touch target example 1"
+          >
             🎯
           </button>
-          <button className="btn btn-secondary touch-target w-16 h-16 p-0 flex items-center justify-center text-2xl">
+          <button
+            type="button"
+            className="touch-target w-16 h-16 bg-bg-tertiary text-text-primary border border-border rounded-2xl shadow-soft flex items-center justify-center text-2xl"
+            aria-label="Touch target example 2"
+          >
             👆
           </button>
+          <div className="text-text-secondary text-sm">
+            Buttons should be easy for kids to hit.
+          </div>
         </div>
-        <p className="text-secondary mt-2">Above buttons should be 60x60px minimum</p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-h2 text-text-primary">Icons</h2>
+        <div className="flex gap-3 flex-wrap items-center">
+          <UIIcon name="home" size={24} className="text-text-secondary" />
+          <UIIcon name="hand" size={24} className="text-vision-blue" />
+          <UIIcon name="letters" size={24} className="text-pip-orange" />
+          <UIIcon name="warning" size={24} className="text-text-error" />
+          <UIIcon name="check" size={24} className="text-text-success" />
+        </div>
       </section>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   useAuthStore,
   useProfileStore,
@@ -10,12 +10,13 @@ import {
 } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
-import { Icon } from '../components/Icon';
 import { UIIcon } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { AdventureMap } from '../components/Map';
 import { StoryModal } from '../components/StoryModal';
 import { useStoryStore } from '../store/storyStore';
+import { QUESTS, getQuestsByIsland, isIslandUnlocked } from '../data/quests';
+import { EmptyState, TipsSection, StatsBar } from '../components/dashboard';
 
 interface LanguageProgress {
   language: string;
@@ -70,8 +71,28 @@ export const Dashboard = memo(function DashboardComponent() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Story/Map prototype state
-  const { startQuest, completeQuest } = useStoryStore();
+  const { startQuest, completeQuest, totalXp, badges, completedQuests, unlockedIslands } = useStoryStore();
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const navigate = useNavigate();
+
+  const questSummary = useMemo(() => {
+    const completedIds = new Set(completedQuests.map((q) => q.questId));
+    const totalQuests = QUESTS.length;
+    const completedCount = completedIds.size;
+    const unlockedCount = unlockedIslands.length;
+    const currentIslandId = unlockedIslands[unlockedIslands.length - 1] ?? 'alphabet-lighthouse';
+    const currentIslandQuests = getQuestsByIsland(currentIslandId);
+    const nextUnlockableIslandId = ['number-nook', 'treasure-bay', 'star-studio'].find(
+      (id) => isIslandUnlocked(id, unlockedIslands) && !unlockedIslands.includes(id),
+    );
+    return {
+      completedCount,
+      totalQuests,
+      unlockedCount,
+      currentIslandQuestCount: currentIslandQuests.length,
+      nextUnlockableIslandId,
+    };
+  }, [completedQuests, unlockedIslands]);
 
   // Helper function to get star rating from percentage
   const getStarRating = (
@@ -413,55 +434,11 @@ export const Dashboard = memo(function DashboardComponent() {
         )}
 
         {/* Compact Stats Bar */}
-        {selectedChildData && (
-          <div className='mb-6 flex flex-wrap items-center gap-4 py-3 px-4 bg-white border border-border rounded-xl shadow-soft'>
-            {stats.map((stat, i) => (
-              <div key={i} className='flex items-center gap-2'>
-                <UIIcon
-                  name={stat.iconName}
-                  size={16}
-                  className='text-slate-500'
-                />
-                <span className='text-sm text-slate-600'>{stat.label}:</span>
-                <span className='text-sm font-semibold text-text-primary'>
-                  {stat.value}
-                </span>
-                {stat.percent > 0 && (
-                  <progress
-                    value={stat.percent}
-                    max={100}
-                    className='w-16 h-1.5 rounded-full progress-accent-orange'
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        {selectedChildData && <StatsBar stats={stats} />}
 
         {/* Empty State */}
         {children.length === 0 && (
-          <div className='bg-white border border-border rounded-xl p-12 text-center mb-8 shadow-soft'>
-            <div className='w-24 h-24 mx-auto mb-4'>
-              <img
-                src='/assets/images/empty-no-children.svg'
-                alt='No children'
-                className='w-full h-full object-contain'
-              />
-            </div>
-            <h2 className='text-2xl font-semibold mb-2'>
-              No Children Added Yet
-            </h2>
-            <p className='text-slate-600 mb-6'>
-              Add a child profile to start tracking their learning progress.
-            </p>
-            <button
-              type='button'
-              onClick={() => setShowAddModal(true)}
-              className='px-6 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust shadow-soft hover:shadow-soft-lg transition'
-            >
-              Add Child Profile
-            </button>
-          </div>
+          <EmptyState onAddChild={() => setShowAddModal(true)} />
         )}
 
         {/* Progress Chart */}
@@ -505,13 +482,13 @@ export const Dashboard = memo(function DashboardComponent() {
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
                             <span className='text-sm flex items-center gap-2'>
-                              <Icon
-                                src={letter.icon}
-                                alt={letter.name}
-                                size={16}
-                                className='opacity-80'
-                                fallback={letter.emoji || '✨'}
-                              />
+	                              <UIIcon
+	                                src={letter.icon}
+	                                alt={letter.name}
+	                                size={16}
+	                                className='opacity-80'
+	                                fallback={letter.emoji || '✨'}
+	                              />
                               {letter.name}
                             </span>
                             <span className='text-sm text-slate-600'>
@@ -617,21 +594,80 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
               )}
 
-              {/* Map Prototype */}
-              <div className='mt-4'>
-                <AdventureMap />
-                <div className='mt-3 flex gap-2'>
+              {/* Adventure Map Section */}
+              <div className='mt-6 pt-6 border-t border-border'>
+                <div className='flex items-center justify-between mb-4'>
+                  <h2 className='text-lg font-semibold flex items-center gap-2'>
+                    <span>🗺️</span>
+                    Adventure Map
+                  </h2>
+                  <div className='flex items-center gap-2 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full'>
+                    <span className='text-amber-400'>⭐</span>
+                    <span className='text-amber-400 font-bold text-sm'>{totalXp} XP</span>
+                  </div>
+                </div>
+
+	                <AdventureMap />
+
+	                <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
+	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+	                    Quests: {questSummary.completedCount}/{questSummary.totalQuests}
+	                  </span>
+	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+	                    Islands: {questSummary.unlockedCount}
+	                  </span>
+	                  <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
+	                    Current island quests: {questSummary.currentIslandQuestCount}
+	                  </span>
+	                  {questSummary.nextUnlockableIslandId && (
+	                    <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
+	                      Next island available: {questSummary.nextUnlockableIslandId}
+	                    </span>
+	                  )}
+	                </div>
+
+                {/* Quick Actions */}
+                <div className='mt-4 flex gap-2'>
                   <button
                     type='button'
                     onClick={() => {
-                      startQuest('demo-quest');
-                      setShowStoryModal(true);
+                      startQuest('quest-a-to-z');
+                      navigate('/game?quest=quest-a-to-z');
                     }}
-                    className='px-3 py-2 bg-pip-orange text-white rounded-md font-semibold'
+                    className='flex-1 px-3 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-[1.02] transition-transform'
                   >
-                    Start Demo Quest
+                    Start Alphabet Quest
                   </button>
+	                  <Link
+	                    to='/games'
+	                    className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
+	                  >
+	                    <UIIcon name='search' size={16} />
+	                    All Games
+	                  </Link>
                 </div>
+
+                {/* Badges Summary */}
+                {badges.length > 0 && (
+                  <div className='mt-4 p-3 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl'>
+                    <p className='text-xs text-amber-400 font-semibold mb-2'>🏆 Badges Earned</p>
+                    <div className='flex flex-wrap gap-1'>
+                      {badges.slice(0, 6).map((badge) => (
+                        <span
+                          key={badge}
+                          className='px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-xs text-amber-300'
+                        >
+                          {badge.replace('badge:', '')}
+                        </span>
+                      ))}
+                      {badges.length > 6 && (
+                        <span className='px-2 py-1 text-xs text-amber-400/70'>
+                          +{badges.length - 6} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Play Games Button */}
@@ -662,17 +698,7 @@ export const Dashboard = memo(function DashboardComponent() {
         )}
 
         {/* Tips Section */}
-        <section className='bg-bg-secondary border border-border rounded-xl p-6 shadow-soft'>
-          <h2 className='text-lg font-semibold mb-3 text-vision-blue'>
-            💡 Learning Tips
-          </h2>
-          <ul className='space-y-2 text-slate-600 text-sm'>
-            <li>• Encourage your child to practice for 10-15 minutes daily</li>
-            <li>• Celebrate achievements to keep motivation high</li>
-            <li>• Use the tracing game to improve handwriting skills</li>
-            <li>• Switch languages to build multilingual skills</li>
-          </ul>
-        </section>
+        <TipsSection />
 
         {/* Add Child Modal */}
         {showAddModal && (

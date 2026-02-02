@@ -61,7 +61,7 @@ interface PhonicsHook {
 }
 
 export function usePhonics(): PhonicsHook {
-  const { speak, isSupported } = useTTS();
+  const { speak, isAvailable } = useTTS();
   
   const getPhonemeInfo = useCallback((letter: string) => {
     const upperLetter = letter.toUpperCase();
@@ -69,7 +69,7 @@ export function usePhonics(): PhonicsHook {
   }, []);
   
   const speakLetterSound = useCallback((letter: string, language: string = 'en') => {
-    if (!isSupported) return;
+    if (!isAvailable) return;
     
     const upperLetter = letter.toUpperCase();
     
@@ -94,10 +94,10 @@ export function usePhonics(): PhonicsHook {
       // Other languages: just say the letter
       speak(letter, { rate: 0.8 });
     }
-  }, [speak, isSupported]);
+  }, [speak, isAvailable]);
   
   const speakWordExample = useCallback((letter: string, language: string = 'en') => {
-    if (!isSupported) return;
+    if (!isAvailable) return;
     
     const upperLetter = letter.toUpperCase();
     
@@ -111,13 +111,13 @@ export function usePhonics(): PhonicsHook {
       // For other languages, just congratulate
       speak(`Great job with ${letter}!`, { rate: 0.9 });
     }
-  }, [speak, isSupported]);
+  }, [speak, isAvailable]);
   
   return {
     speakLetterSound,
     speakWordExample,
     getPhonemeInfo,
-    isEnabled: isSupported,
+    isEnabled: isAvailable,
   };
 }
 

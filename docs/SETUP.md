@@ -152,6 +152,9 @@ uv run pytest
 # Frontend
 cd src/frontend
 npm test
+
+# UI design-system consistency guard (audit scope files)
+npm run audit:ui-design
 ```
 
 ## IDE Setup

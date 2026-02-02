@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
+import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 import { hitTestRects } from '../utils/hitTest';
 // Centralized hand tracking
 import { useHandTracking } from '../hooks/useHandTracking';
@@ -118,6 +120,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   } | null>(null);
   const [round, setRound] = useState<number>(1);
   const [totalRounds] = useState<number>(10); // 10 rounds per level
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // Sound effects
+  const { playCelebration, playSuccess, playError } = useSoundEffects();
 
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
@@ -207,11 +213,13 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     (option: LetterOption) => {
       if (option.isTarget) {
         // Correct answer
+        playSuccess(); // Play success sound
         setScore((prev) => prev + timeLeft * 5); // More points for faster answers
         setFeedback({ message: 'Correct! Great job!', type: 'success' });
         setTimeout(nextRound, 1500);
       } else {
         // Wrong answer
+        playError(); // Play error sound
         setFeedback({
           message: `Oops! That was ${option.char}, not ${targetLetter}`,
           type: 'error',
@@ -219,7 +227,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
         setTimeout(nextRound, 1500);
       }
     },
-    [targetLetter, timeLeft],
+    [targetLetter, timeLeft, playSuccess, playError],
   );
 
   const nextRound = () => {
@@ -227,14 +235,22 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     setTimeLeft(30);
 
     if (round >= totalRounds) {
-      // Level completed
+      // Level completed - play celebration!
+      playCelebration();
+      setShowCelebration(true);
       if (level >= 3) {
         // Game completed
-        setGameCompleted(true);
+        setTimeout(() => {
+          setShowCelebration(false);
+          setGameCompleted(true);
+        }, 2500);
       } else {
         // Move to next level
-        setLevel((prev) => prev + 1);
-        setRound(1);
+        setTimeout(() => {
+          setShowCelebration(false);
+          setLevel((prev) => prev + 1);
+          setRound(1);
+        }, 2500);
       }
     } else {
       setRound((prev) => prev + 1);
@@ -556,11 +572,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                                 ? () => handleSelectOption(option)
                                 : undefined
                             }
-                            className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition ${
-                              hoveredOptionIndex === idx
-                                ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
-                                : `${optionBorderClass} bg-white/10 hover:bg-white/15`
-                            }`}
+                            className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition ${hoveredOptionIndex === idx
+                              ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
+                              : `${optionBorderClass} bg-white/10 hover:bg-white/15`
+                              }`}
                           >
                             <div
                               className={`text-3xl font-extrabold leading-none ${optionColorClass}`}
@@ -586,11 +601,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`rounded-xl p-4 text-center font-semibold ${
-                    feedback.type === 'success'
-                      ? 'bg-success/20 border border-success/30 text-success'
-                      : 'bg-error/10 border border-error/20 text-error'
-                  }`}
+                  className={`rounded-xl p-4 text-center font-semibold ${feedback.type === 'success'
+                    ? 'bg-success/20 border border-success/30 text-success'
+                    : 'bg-error/10 border border-error/20 text-error'
+                    }`}
                 >
                   {feedback.message}
                 </motion.div>
@@ -671,6 +685,15 @@ export const LetterHunt = memo(function LetterHuntComponent() {
           </ul>
         </div>
       </motion.div>
+
+      {/* Celebration Overlay */}
+      <CelebrationOverlay
+        show={showCelebration}
+        letter={targetLetter}
+        accuracy={100}
+        message={level >= 3 ? "Amazing! All levels complete! 🏆" : `Level ${level} Complete!`}
+        onComplete={() => setShowCelebration(false)}
+      />
     </section>
   );
 });

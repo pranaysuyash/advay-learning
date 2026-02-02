@@ -1,6 +1,6 @@
 // UI Components
-export { Button, PrimaryButton, SecondaryButton, DangerButton, SuccessButton, GhostButton } from './Button';
-export type { ButtonProps } from './Button';
+export { Button, ButtonLink, PrimaryButton, SecondaryButton, DangerButton, SuccessButton, GhostButton } from './Button';
+export type { ButtonProps, ButtonLinkProps } from './Button';
 
 export { Card, CardHeader, CardFooter, StatCard, FeatureCard } from './Card';
 export { Tooltip, HelpTooltip } from './Tooltip';

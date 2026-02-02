@@ -1,12 +1,17 @@
-import { Link, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useAuthStore, useSettingsStore } from '../store';
 import { OnboardingFlow } from '../components/OnboardingFlow';
 import { Mascot } from '../components/Mascot';
+import { Button } from '../components/ui/Button';
+import { FeatureCard } from '../components/ui/Card';
+import { UIIcon } from '../components/ui/Icon';
 
 export function Home() {
   const { isAuthenticated } = useAuthStore();
   const { onboardingCompleted } = useSettingsStore();
+  const navigate = useNavigate();
+  const reducedMotion = useReducedMotion();
 
   // Redirect to dashboard if already logged in
   if (isAuthenticated) {
@@ -18,25 +23,26 @@ export function Home() {
       {!onboardingCompleted && <OnboardingFlow />}
       <div className='max-w-7xl mx-auto px-4 py-16'>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className='text-center'
         >
-          <h1 className='text-5xl font-bold mb-6 bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent'>
+          <h1 className='text-5xl font-bold mb-6 text-text-primary'>
             Learn with Your Hands
           </h1>
-          <p className='text-xl text-white/80 mb-8 max-w-2xl mx-auto'>
+          <p className='text-xl text-text-secondary mb-8 max-w-2xl mx-auto'>
             An AI-powered educational platform where children can learn alphabets,
             words, and objects through interactive hand tracking and drawing.
           </p>
 
           <div className='flex gap-4 justify-center mb-8'>
-            <Link
-              to='/register'
-              className='px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition'
+            <Button
+              size='lg'
+              icon='sparkles'
+              onClick={() => navigate('/register')}
             >
               Get Started
-            </Link>
+            </Button>
           </div>
         </motion.div>
 
@@ -46,36 +52,42 @@ export function Home() {
             {[
               {
                 id: 'feature-hand-tracking',
-                icon: '/assets/images/feature-hand-tracking.svg',
                 title: 'Hand Tracking',
                 description: 'Draw and interact using natural hand gestures',
               },
               {
                 id: 'feature-multilang',
-                icon: '/assets/images/feature-multilang.svg',
                 title: 'Multi-Language',
                 description: 'Learn English, Hindi, Kannada and more alphabets',
               },
               {
                 id: 'feature-gamified',
-                icon: '/assets/images/feature-gamified.svg',
                 title: 'Gamified',
                 description: 'Earn rewards and track your progress',
               },
-            ].map((feature, i) => (
-              <article
-                key={i}
-                className='bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm'
-              >
-                <figure className='w-20 h-20 mx-auto mb-4'>
-                  <img
-                    src={feature.icon}
-                    alt={feature.title}
-                    className='w-full h-full object-contain'
-                  />
-                </figure>
-                <h3 className='text-xl font-semibold mb-2'>{feature.title}</h3>
-                <p className='text-white/70'>{feature.description}</p>
+            ].map((feature) => (
+              <article key={feature.id}>
+                <FeatureCard
+                  title={feature.title}
+                  description={feature.description}
+                  icon={
+                    feature.id === 'feature-hand-tracking' ? (
+                      <UIIcon
+                        name='hand'
+                        size={28}
+                        className='text-vision-blue'
+                      />
+                    ) : feature.id === 'feature-multilang' ? (
+                      <UIIcon
+                        name='letters'
+                        size={28}
+                        className='text-pip-orange'
+                      />
+                    ) : (
+                      <UIIcon name='trophy' size={28} className='text-warning' />
+                    )
+                  }
+                />
               </article>
             ))}
           </div>

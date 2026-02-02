@@ -322,9 +322,13 @@ describe('Semantic HTML Accessibility', () => {
   describe('Settings page', () => {
     it('should have section wrapper', () => {
       vi.useFakeTimers();
-      const { container } = render(<Settings />);
+      const { container } = render(
+        <MemoryRouter>
+          <Settings />
+        </MemoryRouter>
+      );
       const holdButton = screen.getByRole('button', {
-        name: /hold to access settings/i,
+        name: /hold.*3 seconds.*access settings/i,
       });
       act(() => {
         fireEvent.mouseDown(holdButton);
@@ -343,9 +347,13 @@ describe('Semantic HTML Accessibility', () => {
 
     it('should have fieldset with legend for each settings group', () => {
       vi.useFakeTimers();
-      const { container } = render(<Settings />);
+      const { container } = render(
+        <MemoryRouter>
+          <Settings />
+        </MemoryRouter>
+      );
       const holdButton = screen.getByRole('button', {
-        name: /hold to access settings/i,
+        name: /hold.*3 seconds.*access settings/i,
       });
       act(() => {
         fireEvent.mouseDown(holdButton);
@@ -370,9 +378,13 @@ describe('Semantic HTML Accessibility', () => {
 
     it('should have form labels for inputs', () => {
       vi.useFakeTimers();
-      const { container } = render(<Settings />);
+      const { container } = render(
+        <MemoryRouter>
+          <Settings />
+        </MemoryRouter>
+      );
       const holdButton = screen.getByRole('button', {
-        name: /hold to access settings/i,
+        name: /hold.*3 seconds.*access settings/i,
       });
       act(() => {
         fireEvent.mouseDown(holdButton);

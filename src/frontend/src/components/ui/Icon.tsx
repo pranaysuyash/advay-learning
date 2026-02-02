@@ -1,17 +1,29 @@
 import { useState } from 'react';
+import { Icon as AssetIcon } from '../Icon';
 
 export type IconName =
   | 'letters' | 'target' | 'timer' | 'flame' | 'hand' | 'pencil' | 'home'
   | 'check' | 'lock' | 'unlock' | 'warning' | 'download' | 'hourglass'
   | 'circle' | 'sparkles' | 'heart' | 'star' | 'camera' | 'trophy'
-  | 'coffee' | 'drop' | 'body' | 'eye' | 'x';
+  | 'coffee' | 'drop' | 'body' | 'eye' | 'eye-off' | 'back' | 'x'
+  | 'play' | 'search';
 
-interface UIIconProps {
+type UIIconNamedProps = {
   name: IconName;
   size?: number;
   className?: string;
   color?: string;
-}
+};
+
+type UIIconSrcProps = {
+  src: string | string[];
+  alt?: string;
+  size?: number;
+  className?: string;
+  fallback?: string;
+};
+
+type UIIconProps = UIIconNamedProps | UIIconSrcProps;
 
 const iconPaths: Record<IconName, string> = {
   letters: '/assets/icons/ui/letters.svg',
@@ -37,15 +49,33 @@ const iconPaths: Record<IconName, string> = {
   drop: '/assets/icons/ui/drop.svg',
   body: '/assets/icons/ui/body.svg',
   eye: '/assets/icons/ui/eye.svg',
+  'eye-off': '/assets/icons/ui/eye-off.svg',
+  back: '/assets/icons/ui/back.svg',
   x: '/assets/icons/ui/x.svg',
+  play: '/assets/icons/ui/play.svg',
+  search: '/assets/icons/ui/search.svg',
 };
 
-export function UIIcon({ name, size = 24, className = '', color = 'currentColor' }: UIIconProps) {
+export function UIIcon(props: UIIconProps) {
+  if ('src' in props) {
+    const { src, alt = '', size = 24, className = '', fallback } = props;
+    return (
+      <AssetIcon
+        src={src}
+        alt={alt}
+        size={size}
+        className={className}
+        fallback={fallback}
+      />
+    );
+  }
+
+  const { name, size = 24, className = '', color = 'currentColor' } = props;
   const [hasError, setHasError] = useState(false);
-  
+
   if (hasError) {
     return (
-      <span 
+      <span
         className={`inline-flex items-center justify-center ${className}`}
         style={{ width: size, height: size, fontSize: size * 0.7 }}
       >
@@ -53,7 +83,7 @@ export function UIIcon({ name, size = 24, className = '', color = 'currentColor'
       </span>
     );
   }
-  
+
   return (
     <img
       src={iconPaths[name]}

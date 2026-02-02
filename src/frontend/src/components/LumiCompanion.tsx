@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useSocialStore } from '../stores/socialStore';
 import { Mascot } from './Mascot';
 
@@ -30,12 +30,14 @@ export function LumiCompanion({
   className = '',
   socialContext,
 }: LumiCompanionProps) {
+  const reducedMotion = useReducedMotion();
   const [showGlow, setShowGlow] = useState(false);
   const [isGlowing, setIsGlowing] = useState(false);
   const { recordSocialAction, activeCharacters } = useSocialStore();
 
   // Gentle glow effect for caring moments
   useEffect(() => {
+    if (reducedMotion) return;
     if (state === 'caring' || state === 'celebrating') {
       setShowGlow(true);
       setIsGlowing(true);
@@ -47,7 +49,7 @@ export function LumiCompanion({
 
       return () => clearTimeout(timer);
     }
-  }, [state]);
+  }, [state, reducedMotion]);
 
   // Record social actions when appropriate
   useEffect(() => {
@@ -79,13 +81,13 @@ export function LumiCompanion({
       <AnimatePresence>
         {showGlow && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
             animate={{
               opacity: isGlowing ? 0.6 : 0,
               scale: isGlowing ? 1.2 : 0.8
             }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.5 }}
+            transition={reducedMotion ? { duration: 0.01 } : { duration: 0.5 }}
             className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-200 to-purple-200 blur-xl"
           />
         )}
@@ -94,9 +96,9 @@ export function LumiCompanion({
       {/* Lumi Character */}
       <motion.div
         animate={state}
-        className="relative cursor-pointer"
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        className="relative"
+        whileHover={reducedMotion ? undefined : { scale: 1.03 }}
+        whileTap={reducedMotion ? undefined : { scale: 0.97 }}
       >
         {/* Lumi's orb body */}
         <div className="relative w-24 h-24 mx-auto">
@@ -121,7 +123,7 @@ export function LumiCompanion({
 
         {/* Gentle floating particles */}
         <AnimatePresence>
-          {(state === 'happy' || state === 'celebrating') && (
+          {!reducedMotion && (state === 'happy' || state === 'celebrating') && (
             <>
               {[...Array(3)].map((_, i) => (
                 <motion.div
@@ -158,7 +160,9 @@ export function LumiCompanion({
           animate={{ scale: 1 }}
           className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-pink-300 border-2 border-white flex items-center justify-center"
         >
-          <span className="text-xs text-white font-bold">🤝</span>
+          <span className="text-xs text-white font-bold" role="img" aria-label="Social action">
+            🤝
+          </span>
         </motion.div>
       )}
     </div>

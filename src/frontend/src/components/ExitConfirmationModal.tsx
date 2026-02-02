@@ -1,4 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import { UIIcon } from './ui/Icon';
 import { Mascot } from './Mascot';
 
@@ -16,21 +17,72 @@ export function ExitConfirmationModal({
   progressLabel = 'your progress',
 }: ExitConfirmationModalProps) {
   void progressLabel; // Displayed in parent UI
+  const reducedMotion = useReducedMotion();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      cancelButtonRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancelExit();
+        return;
+      }
+
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusableElements = dialogRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        const firstElement = focusableElements[0] as HTMLElement | undefined;
+        const lastElement = focusableElements[
+          focusableElements.length - 1
+        ] as HTMLElement | undefined;
+
+        if (!firstElement || !lastElement) return;
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onCancelExit]);
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={reducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
+          onClick={onCancelExit}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            initial={reducedMotion ? false : { scale: 0.9, opacity: 0 }}
+            animate={reducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+            exit={reducedMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
             className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='exit-confirm-title'
+            aria-describedby='exit-confirm-desc'
+            onClick={(e) => e.stopPropagation()}
+            ref={dialogRef}
           >
             {/* Mascot */}
             <div className='flex justify-center mb-6'>
@@ -42,10 +94,10 @@ export function ExitConfirmationModal({
 
             {/* Message */}
             <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-advay-slate mb-2'>
+              <h2 id='exit-confirm-title' className='text-2xl font-bold text-advay-slate mb-2'>
                 Save Progress?
               </h2>
-              <p className='text-text-secondary'>
+              <p id='exit-confirm-desc' className='text-text-secondary'>
                 You've made great progress! Would you like to save before leaving?
               </p>
             </div>
@@ -64,6 +116,7 @@ export function ExitConfirmationModal({
 
               {/* Cancel (Continue Playing) */}
               <button
+                ref={cancelButtonRef}
                 type='button'
                 onClick={onCancelExit}
                 className='w-full px-6 py-4 bg-bg-tertiary text-text-primary border border-border rounded-2xl font-bold text-lg hover:bg-white transition-all flex items-center justify-center gap-3'

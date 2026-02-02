@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useProgressStore, BATCH_SIZE } from '../store';
 import { getAlphabet } from '../data/alphabets';
-import { Icon } from './Icon';
 import { UIIcon } from './ui/Icon';
 
 interface LetterJourneyProps {
@@ -141,7 +140,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                       <span className={`text-xl font-bold ${letterColorClass}`}>
                         {letter.char}
                       </span>
-                      <Icon
+                      <UIIcon
                         src={letter.icon}
                         alt={letter.name}
                         size={24}

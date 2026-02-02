@@ -254,6 +254,24 @@ module.exports = {
 
 ---
 
+## 9. UI Design-System Guardrail
+
+To prevent regressions in audited UI files, run:
+
+```bash
+cd src/frontend
+npm run audit:ui-design
+```
+
+This command checks for:
+- inline hex colors in remediated UI files
+- low-contrast Home hero patterns from prior audit findings
+- canonical `Button` usage on Home
+
+Reference: `docs/process/UI_DESIGN_SYSTEM_ENFORCEMENT.md`
+
+---
+
 ## 9. Common Issues and Solutions
 
 ### TypeScript Errors

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useSettingsStore, useProgressStore } from '../store';
+import { useSettingsStore, useProgressStore, useAuthStore } from '../store';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
 import { Button } from '../components/ui';
@@ -8,7 +9,9 @@ import { useConfirm } from '../components/ui/ConfirmDialog';
 import { useToast } from '../components/ui/Toast';
 
 export function Settings() {
+  const navigate = useNavigate();
   const settings = useSettingsStore();
+  const { logout, user } = useAuthStore();
   const {
     unlockAllBatches,
     resetProgress,
@@ -21,6 +24,21 @@ export function Settings() {
   const [parentGatePassed, setParentGatePassed] = useState(false);
   const [holdingGate, setHoldingGate] = useState(false);
   const [holdDuration, setHoldDuration] = useState(0);
+  
+  // Alternative method: math challenge for accessibility
+  const [showMathChallenge, setShowMathChallenge] = useState(false);
+  const [mathAnswer, setMathAnswer] = useState('');
+  const mathProblem = useMemo(() => {
+    const a = Math.floor(Math.random() * 10) + 5;
+    const b = Math.floor(Math.random() * 10) + 5;
+    return { a, b, answer: a + b };
+  }, []);
+  
+  // Refs for focus management
+  const gateDialogRef = useRef<HTMLDivElement>(null);
+  const holdButtonRef = useRef<HTMLButtonElement>(null);
+  const goBackButtonRef = useRef<HTMLButtonElement>(null);
+  const mathInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let interval: number | undefined;
@@ -55,24 +73,63 @@ export function Settings() {
   const handleCancelGate = useCallback(() => {
     setHoldingGate(false);
     setHoldDuration(0);
-    // Navigate back to dashboard
+    setShowMathChallenge(false);
+    setMathAnswer('');
     window.history.back();
   }, []);
 
+  const handleMathSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (parseInt(mathAnswer, 10) === mathProblem.answer) {
+      setParentGatePassed(true);
+      setShowMathChallenge(false);
+    } else {
+      setMathAnswer('');
+      mathInputRef.current?.focus();
+    }
+  };
+
+  // Focus management for modal
   useEffect(() => {
-    const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !parentGatePassed) {
+    if (!parentGatePassed) {
+      if (showMathChallenge) {
+        mathInputRef.current?.focus();
+      } else {
+        holdButtonRef.current?.focus();
+      }
+    }
+  }, [parentGatePassed, showMathChallenge]);
+
+  // Esc key and focus trapping
+  useEffect(() => {
+    if (parentGatePassed) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         handleCancelGate();
+        return;
+      }
+
+      // Focus trap within modal
+      if (e.key === 'Tab' && gateDialogRef.current) {
+        const focusable = gateDialogRef.current.querySelectorAll<HTMLElement>(
+          'button, input, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
       }
     };
 
-    if (!parentGatePassed) {
-      document.addEventListener('keydown', handleEscKey);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [parentGatePassed, handleCancelGate]);
 
   useEffect(() => {
@@ -80,6 +137,8 @@ export function Settings() {
       setParentGatePassed(false);
       setHoldingGate(false);
       setHoldDuration(0);
+      setShowMathChallenge(false);
+      setMathAnswer('');
     };
   }, []);
 
@@ -141,47 +200,115 @@ export function Settings() {
         animate={{ opacity: 1, y: 0 }}
       >
         {!parentGatePassed && (
-          <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='bg-white rounded-2xl p-8 max-w-md text-center'>
-              <h2 className='text-2xl font-bold mb-4'>Parent Gate</h2>
-              <p className='text-slate-600 mb-6'>
-                Hold button below for 3 seconds to access Settings. This
-                prevents children from accidentally changing settings.
-              </p>
-              <button
-                onMouseDown={handleGateStart}
-                onMouseUp={handleGateEnd}
-                onMouseLeave={handleGateEnd}
-                onTouchStart={handleGateStart}
-                onTouchEnd={handleGateEnd}
-                className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition ${
-                  holdingGate
-                    ? 'bg-red-500 text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                }`}
-              >
-                {holdingGate
-                  ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
-                  : '👆 Hold to Access Settings (3s)'}
-              </button>
-              {holdingGate && (
-                <progress
-                  value={holdDuration}
-                  max={3000}
-                  className='w-full h-1 mt-4 rounded-full progress-accent-red'
-                />
+          <div 
+            className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='parent-gate-title'
+            aria-describedby='parent-gate-desc'
+          >
+            <div 
+              ref={gateDialogRef}
+              className='bg-white rounded-2xl p-8 max-w-md text-center mx-4'
+            >
+              <h2 id='parent-gate-title' className='text-2xl font-bold mb-4'>
+                Parent Gate
+              </h2>
+              
+              {!showMathChallenge ? (
+                <>
+                  <p id='parent-gate-desc' className='text-slate-600 mb-6'>
+                    Hold the button below for 3 seconds to access Settings. This
+                    prevents children from accidentally changing settings.
+                  </p>
+                  <button
+                    ref={holdButtonRef}
+                    onMouseDown={handleGateStart}
+                    onMouseUp={handleGateEnd}
+                    onMouseLeave={handleGateEnd}
+                    onTouchStart={handleGateStart}
+                    onTouchEnd={handleGateEnd}
+                    aria-label={holdingGate 
+                      ? `Holding, ${(holdDuration / 1000).toFixed(1)} seconds elapsed` 
+                      : 'Press and hold for 3 seconds to access settings'}
+                    className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                      holdingGate
+                        ? 'bg-red-500 text-white'
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
+                  >
+                    {holdingGate
+                      ? `Holding... ${(holdDuration / 1000).toFixed(1)}s`
+                      : '👆 Hold to Access Settings (3s)'}
+                  </button>
+                  {holdingGate && (
+                    <progress
+                      value={holdDuration}
+                      max={3000}
+                      aria-label={`Progress: ${Math.round((holdDuration / 3000) * 100)}%`}
+                      className='w-full h-1 mt-4 rounded-full progress-accent-red'
+                    />
+                  )}
+                  
+                  <div className='mt-6 pt-4 border-t border-slate-200'>
+                    <button
+                      onClick={() => setShowMathChallenge(true)}
+                      className='text-sm text-slate-500 hover:text-slate-700 underline transition'
+                      type='button'
+                    >
+                      Can't hold the button? Try an alternative method
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p id='parent-gate-desc' className='text-slate-600 mb-6'>
+                    Solve this math problem to verify you're an adult.
+                  </p>
+                  <form onSubmit={handleMathSubmit} className='space-y-4'>
+                    <div className='text-3xl font-bold text-slate-800'>
+                      {mathProblem.a} + {mathProblem.b} = ?
+                    </div>
+                    <input
+                      ref={mathInputRef}
+                      type='number'
+                      inputMode='numeric'
+                      value={mathAnswer}
+                      onChange={(e) => setMathAnswer(e.target.value)}
+                      placeholder='Enter answer'
+                      className='w-full px-4 py-3 text-center text-2xl border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent'
+                      aria-label={`What is ${mathProblem.a} plus ${mathProblem.b}?`}
+                    />
+                    <button
+                      type='submit'
+                      disabled={!mathAnswer}
+                      className='w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
+                    >
+                      Submit
+                    </button>
+                  </form>
+                  <button
+                    onClick={() => setShowMathChallenge(false)}
+                    className='mt-4 text-sm text-slate-500 hover:text-slate-700 underline transition'
+                    type='button'
+                  >
+                    ← Back to hold button
+                  </button>
+                </>
               )}
+              
               <div className='flex gap-3 mt-6 justify-center'>
                 <button
+                  ref={goBackButtonRef}
                   onClick={handleCancelGate}
-                  className='px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium transition'
+                  className='px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium transition focus:outline-none focus:ring-2 focus:ring-slate-400 rounded'
                   type='button'
                 >
                   ← Go Back
                 </button>
-                <div className='text-sm text-slate-600'>
+                <span className='text-sm text-slate-400' aria-hidden='true'>
                   or press ESC to cancel
-                </div>
+                </span>
               </div>
             </div>
           </div>
@@ -548,6 +675,44 @@ export function Settings() {
                 </div>
               </fieldset>
 
+              {/* Account */}
+              <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+                <legend className='text-xl font-semibold mb-4'>
+                  Account
+                </legend>
+
+                <div className='space-y-4'>
+                  {user && (
+                    <div className='bg-white/10 rounded-lg p-4 shadow-sm'>
+                      <div className='text-sm text-slate-600 mb-1'>Signed in as</div>
+                      <div className='font-medium'>
+                        {user.email.replace(/^(.)[^@]*(@.*)$/, '$1***$2')}
+                      </div>
+                    </div>
+                  )}
+
+                  <Button
+                    variant='secondary'
+                    fullWidth
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        title: 'Sign Out?',
+                        message: 'Are you sure you want to sign out?',
+                        confirmText: 'Sign Out',
+                        cancelText: 'Cancel',
+                        type: 'warning',
+                      });
+                      if (confirmed) {
+                        await logout();
+                        navigate('/login');
+                      }
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              </fieldset>
+
               {/* Data & Privacy */}
               <fieldset className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
                 <legend className='text-xl font-semibold mb-4'>
@@ -590,14 +755,9 @@ export function Settings() {
                 </div>
               </fieldset>
 
-              {/* App Info */}
+              {/* App Info - version only, main footer is in Layout */}
               <div className='text-center text-slate-500 text-sm'>
                 <p>Advay Learning App v1.0.0</p>
-                <p className='mt-1 flex items-center justify-center gap-1'>
-                  Built with{' '}
-                  <UIIcon name='heart' size={14} className='text-red-400' /> for
-                  kids everywhere
-                </p>
               </div>
             </div>
           </>

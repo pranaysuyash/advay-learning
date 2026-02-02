@@ -1,20 +1,23 @@
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, UIIcon } from '../components/ui';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { GameCard } from '../components/GameCard';
 import { useProfileStore } from '../store';
+import type { IconName } from '../components/ui/Icon';
 
 interface Game {
   id: string;
   title: string;
   description: string;
   path: string;
-  icon: string;
+  icon: IconName;
   ageRange: string;
   category: string;
   difficulty: string;
+  isNew?: boolean;
 }
 
 export function Games() {
+  const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const { currentProfile } = useProfileStore();
 
@@ -22,168 +25,212 @@ export function Games() {
     {
       id: 'alphabet-tracing',
       title: 'Alphabet Tracing',
-      description: 'Trace letters with your finger to learn alphabets in multiple languages',
+      description: 'Trace letters with your finger to learn alphabets. Features celebration animations and phonics sounds!',
       path: '/game',
       icon: 'letters',
       ageRange: '3-8 years',
       category: 'Alphabets',
-      difficulty: 'Beginner to Advanced'
+      difficulty: 'Easy to Advanced',
     },
     {
       id: 'finger-number-show',
       title: 'Finger Number Show',
-      description: 'Show numbers with your fingers and the app will count them!',
+      description: 'Show numbers with your fingers and the app will count them! Supports up to 20 fingers with Duo Mode.',
       path: '/games/finger-number-show',
       icon: 'hand',
       ageRange: '4-7 years',
       category: 'Numeracy',
-      difficulty: 'Easy to Hard'
+      difficulty: 'Easy to Hard',
     },
-    // Placeholder for future games
     {
       id: 'connect-the-dots',
       title: 'Connect the Dots',
-      description: 'Connect numbered dots to form letters, numbers, and shapes',
+      description: 'Connect numbered dots in sequence to complete levels. Use mouse or hand tracking gestures!',
       path: '/games/connect-the-dots',
       icon: 'target',
       ageRange: '4-6 years',
       category: 'Fine Motor',
-      difficulty: 'Easy to Medium'
+      difficulty: 'Easy to Medium',
     },
     {
       id: 'letter-hunt',
       title: 'Letter Hunt',
-      description: 'Find the target letter among distractors',
+      description: 'Find the target letter among distractors using hand gestures. Fast answers score more points!',
       path: '/games/letter-hunt',
       icon: 'target',
       ageRange: '3-6 years',
       category: 'Alphabets',
-      difficulty: 'Beginner to Advanced'
-    }
+      difficulty: 'Easy to Medium',
+    },
   ];
+
+  const getLanguageLabel = (code: string) => {
+    const labels: Record<string, string> = {
+      en: 'English',
+      hi: 'Hindi',
+      kn: 'Kannada',
+      te: 'Telugu',
+      ta: 'Tamil',
+    };
+    return labels[code] || 'English';
+  };
+
+  const handlePlayAlphabetGame = () => {
+    if (currentProfile) {
+      navigate('/game', { state: { profileId: currentProfile.id } });
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={reducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Learning Games</h1>
-          <p className="text-slate-300 mt-2">
+        <header className="mb-8">
+          <motion.h1
+            initial={reducedMotion ? false : { opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl sm:text-4xl font-bold text-text-primary"
+          >
+            Learning Games
+          </motion.h1>
+          <motion.p
+            initial={reducedMotion ? false : { opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={reducedMotion ? { duration: 0.01 } : { delay: 0.1 }}
+            className="text-text-secondary mt-2"
+          >
             Engaging activities to develop literacy, numeracy, and fine motor skills
-          </p>
-        </div>
+          </motion.p>
+
+          {/* Quick stats */}
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0.01 } : { delay: 0.2 }}
+            className="flex gap-4 mt-4"
+          >
+            <div className="flex items-center gap-2 text-sm text-text-secondary">
+              <span className="text-pip-orange font-bold">{availableGames.length}</span>
+              Games Available
+            </div>
+            {currentProfile && (
+              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                Playing as <span className="text-pip-orange font-bold">{currentProfile.name}</span>
+              </div>
+            )}
+          </motion.div>
+        </header>
 
         {/* Games Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {availableGames.map((game, index) => (
-            <motion.div
+            <GameCard
               key={game.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="h-full flex flex-col">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="p-3 bg-red-500/20 rounded-lg">
-                    <UIIcon name={game.icon as any} size={24} className="text-red-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold">{game.title}</h3>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full">
-                        {game.category}
-                      </span>
-                      <span className="text-xs px-2 py-1 bg-green-500/20 text-green-300 rounded-full">
-                        {game.ageRange}
-                      </span>
-                      <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full">
-                        {game.difficulty}
-                      </span>
-                      {game.id === 'alphabet-tracing' && currentProfile && (
-                        <span className="text-xs px-2 py-1 bg-red-500/20 text-red-300 rounded-full">
-                          {currentProfile.preferred_language === 'en' ? 'English' :
-                           currentProfile.preferred_language === 'hi' ? 'Hindi' :
-                           currentProfile.preferred_language === 'kn' ? 'Kannada' :
-                           currentProfile.preferred_language === 'te' ? 'Telugu' :
-                           currentProfile.preferred_language === 'ta' ? 'Tamil' : 'English'} Alphabet
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-white/70 mb-4 flex-1">
-                  {game.description}
-                </p>
-                
-                <div className="mt-auto">
-                  {game.path.startsWith('#') ? (
-                    <button
-                      className="w-full px-4 py-3 bg-white/10 border border-border rounded-lg text-white/50 cursor-not-allowed"
-                      disabled
-                    >
-                      Coming Soon
-                    </button>
-                  ) : (
-                    game.id === 'alphabet-tracing' ? (
-                      <button
-                        onClick={() => {
-                          if (currentProfile) {
-                            navigate(game.path, { state: { profileId: currentProfile.id } });
-                          } else {
-                            // If no profile is selected, redirect to dashboard to select one
-                            navigate('/dashboard');
-                          }
-                        }}
-                        className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center"
-                      >
-                        {currentProfile
-                          ? `Play in ${currentProfile.preferred_language === 'en' ? 'English' :
-                             currentProfile.preferred_language === 'hi' ? 'Hindi' :
-                             currentProfile.preferred_language === 'kn' ? 'Kannada' :
-                             currentProfile.preferred_language === 'te' ? 'Telugu' :
-                             currentProfile.preferred_language === 'ta' ? 'Tamil' : 'English'}`
-                          : 'Select Profile First'}
-                      </button>
-                    ) : (
-                      <Link
-                        to={game.path}
-                        className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition text-center block"
-                      >
-                        Play Game
-                      </Link>
-                    )
-                  )}
-                </div>
-              </Card>
-            </motion.div>
+              {...game}
+              animationDelay={index * 0.1}
+              isNew={game.id === 'letter-hunt'}
+              buttonText={
+                game.id === 'alphabet-tracing' && currentProfile
+                  ? `Play in ${getLanguageLabel(currentProfile.preferred_language)}`
+                  : game.id === 'alphabet-tracing'
+                    ? 'Select Profile First'
+                    : 'Play Game'
+              }
+              onPlay={game.id === 'alphabet-tracing' ? handlePlayAlphabetGame : undefined}
+              reducedMotion={!!reducedMotion}
+            />
           ))}
         </div>
 
-        {/* Info Section */}
-        <div className="mt-12 bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-3 text-blue-400">About Our Games</h2>
-          <ul className="space-y-2 text-white/70">
-            <li>• Designed specifically for young learners (ages 3-8)</li>
-            <li>• Uses hand tracking technology for engaging interaction</li>
-            <li>• Multilingual support for diverse learning needs</li>
-            <li>• Progressive difficulty to match learning pace</li>
-            <li>• Safe, ad-free environment for children</li>
-          </ul>
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* About Our Games */}
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0.01 } : { delay: 0.5 }}
+            className="bg-white border border-border rounded-2xl p-6 shadow-soft"
+          >
+            <h2 className="text-xl font-semibold mb-4 text-text-primary flex items-center gap-2">
+              <span>🎮</span> About Our Games
+            </h2>
+            <ul className="space-y-2 text-text-secondary text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-text-success">✓</span>
+                Designed specifically for young learners (ages 3-8)
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-text-success">✓</span>
+                Uses hand tracking technology for engaging interaction
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-text-success">✓</span>
+                Multilingual support for diverse learning needs
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-text-success">✓</span>
+                Progressive difficulty to match learning pace
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-text-success">✓</span>
+                Safe, ad-free environment for children
+              </li>
+            </ul>
+          </motion.div>
+
+          {/* How It Works */}
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0.01 } : { delay: 0.6 }}
+            className="bg-white border border-border rounded-2xl p-6 shadow-soft"
+          >
+            <h2 className="text-xl font-semibold mb-4 text-text-primary flex items-center gap-2">
+              <span>💡</span> How It Works
+            </h2>
+            <ul className="space-y-2 text-text-secondary text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-pip-orange font-bold">1.</span>
+                Alphabet Tracing uses the language from your child's profile
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-pip-orange font-bold">2.</span>
+                Change language in Settings or by editing the profile
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-pip-orange font-bold">3.</span>
+                Progress is tracked separately for each language
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-pip-orange font-bold">4.</span>
+                Allow camera access for hand tracking features
+              </li>
+            </ul>
+          </motion.div>
         </div>
 
-        {/* Game Selection Info */}
-        <div className="mt-6 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
-          <h3 className="font-medium text-yellow-400 mb-2">How Game Selection Works</h3>
-          <ul className="text-white/70 text-sm space-y-1">
-            <li>• The Alphabet Tracing game uses the language set in your child's profile</li>
-            <li>• You can change the language in Settings or by editing your child's profile</li>
-            <li>• Progress is tracked separately for each language</li>
-          </ul>
-        </div>
+        {/* Test Link (dev only) */}
+        {/* @ts-expect-error - Vite env types might be missing in this context */}
+        {import.meta.env.DEV && (
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={reducedMotion ? { duration: 0.01 } : { delay: 0.8 }}
+            className="mt-6 text-center"
+          >
+            <a
+              href="/test/mediapipe"
+              className="text-sm text-text-secondary hover:text-text-primary underline"
+            >
+              🔧 MediaPipe Test Page (Dev)
+            </a>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

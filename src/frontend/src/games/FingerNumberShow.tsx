@@ -3,7 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { useTTS } from '../hooks/useTTS';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 import { UIIcon } from '../components/ui/Icon';
+import { GameHeader } from '../components/GameHeader';
+import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { countExtendedFingersFromLandmarks } from './fingerCounting';
 // Centralized hand tracking
@@ -80,9 +83,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [targetNumber, setTargetNumber] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [difficulty, setDifficulty] = useState<number>(0);
-  // @ts-expect-error - showCelebration is used by code below (removed for lint)
   const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
+  const { playCelebration } = useSoundEffects();
 
   // Language and mode selection
   const LANGUAGES = [
@@ -438,7 +442,9 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       ) {
         // Success! Match has been stable for required time
         successLockRef.current = true;
+        playCelebration(); // Play celebration sound
         setShowCelebration(true);
+        setCelebrationValue(gameMode === 'letters' && targetLetter ? targetLetter.char : String(totalFingers));
         const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
         const points = Math.round(10 * level.rewardMultiplier);
         setScore((prev) => prev + points);
@@ -451,7 +457,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
           successLockRef.current = false;
           stableMatchRef.current = { startAt: null, target: null, count: null };
           setNextTarget(difficulty);
-        }, 1800);
+        }, 2500); // Match CelebrationOverlay timing
       }
     }
 
@@ -511,8 +517,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const isDetectedMatch =
     gameMode === 'letters'
       ? targetLetter &&
-        currentCount === getLetterNumberValue(targetLetter) &&
-        handsDetected > 0
+      currentCount === getLetterNumberValue(targetLetter) &&
+      handsDetected > 0
       : targetNumber === 0
         ? currentCount === 0 && handsDetected > 0
         : currentCount === targetNumber;
@@ -562,22 +568,20 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
               <button
                 type='button'
                 onClick={() => setGameMode('numbers')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  gameMode === 'numbers'
-                    ? 'bg-pip-orange text-white shadow-soft'
-                    : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${gameMode === 'numbers'
+                  ? 'bg-pip-orange text-white shadow-soft'
+                  : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                  }`}
               >
                 🔢 Numbers
               </button>
               <button
                 type='button'
                 onClick={() => setGameMode('letters')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  gameMode === 'letters'
-                    ? 'bg-pip-orange text-white shadow-soft'
-                    : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${gameMode === 'letters'
+                  ? 'bg-pip-orange text-white shadow-soft'
+                  : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                  }`}
               >
                 🔤 Letters
               </button>
@@ -594,11 +598,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
                       key={lang.code}
                       type='button'
                       onClick={() => setSelectedLanguage(lang.code)}
-                      className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                        selectedLanguage === lang.code
-                          ? 'bg-success/20 border border-success/30 text-text-success'
-                          : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                      }`}
+                      className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${selectedLanguage === lang.code
+                        ? 'bg-success/20 border border-success/30 text-text-success'
+                        : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                        }`}
                     >
                       <span>{lang.flag}</span>
                       <span>{lang.name}</span>
@@ -622,11 +625,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
                   key={level.name}
                   type='button'
                   onClick={() => setDifficulty(levelIndex)}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    difficulty === levelIndex
-                      ? 'bg-pip-orange text-white shadow-soft'
-                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${difficulty === levelIndex
+                    ? 'bg-pip-orange text-white shadow-soft'
+                    : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                    }`}
                 >
                   {level.name} ({level.minNumber}-{level.maxNumber})
                 </button>
@@ -642,11 +644,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-                feedback.includes('Great') || feedback.includes('Amazing')
-                  ? 'bg-success/20 border border-success/30 text-text-success'
-                  : 'bg-white border border-border text-text-secondary'
-              }`}
+              className={`rounded-xl p-4 mb-6 text-center font-semibold ${feedback.includes('Great') || feedback.includes('Amazing')
+                ? 'bg-success/20 border border-success/30 text-text-success'
+                : 'bg-white border border-border text-text-secondary'
+                }`}
             >
               {feedback}
             </motion.div>
@@ -695,8 +696,42 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
               </div>
             </div>
           ) : (
-            <div className='space-y-4'>
-              <div className='relative bg-black rounded-xl overflow-hidden aspect-video shadow-soft-lg border border-border'>
+            <div className='w-screen h-screen bg-black overflow-hidden fixed top-0 left-0 right-0 bottom-0 z-40'>
+              <div className='relative w-full h-full'>
+                <div className="absolute top-0 left-0 right-0 z-50 p-4 pointer-events-none">
+                  <GameHeader
+                    title={gameMode === 'letters' ? 'Finger Letters' : 'Finger Counting'}
+                    subtitle={`Show: ${gameMode === 'letters' && targetLetter ? targetLetter.char : targetNumber}`}
+                    score={score}
+                    streak={streak}
+                    level={difficulty + 1}
+	                      infoItems={[
+	                        { label: 'Target', value: gameMode === 'letters' && targetLetter ? targetLetter.char : targetNumber },
+	                        { label: 'Detected', value: currentCount },
+	                        { label: 'Hands', value: handsDetected },
+	                        { label: 'Breakdown', value: handsBreakdown || '—' },
+	                        { label: 'Match', value: isDetectedMatch ? 'Yes' : 'No' },
+	                      ]}
+                    showBackButton={true}
+                    onBack={stopGame}
+                    secondaryAction={{
+                      label: '',
+                      icon: 'play',
+	                        onClick: () => {
+	                          if (!ttsEnabled || !ttsAvailable) {
+	                            setFeedback('Voice is not available on this device.');
+	                            return;
+	                          }
+	                          const prompt = gameMode === 'letters' && targetLetter
+	                            ? `Show me the letter ${targetLetter.name}!`
+	                            : targetNumber === 0
+	                              ? 'Make a fist for zero.'
+	                              : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
+	                          void speak(prompt);
+	                        }
+	                      }}
+                  />
+                </div>
                 <Webcam
                   ref={webcamRef}
                   className='absolute inset-0 w-full h-full object-cover'
@@ -747,124 +782,24 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
                 )}
 
                 {/* Controls overlay */}
-                <div className='absolute top-4 left-4 flex gap-2'>
-                  <div className='bg-black/55 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white'>
-                    {promptStage === 'side' ? (
-                      gameMode === 'letters' && targetLetter ? (
-                        <span>
-                          Show{' '}
-                          <span className='font-extrabold'>
-                            {targetLetter.name}
-                          </span>{' '}
-                          <span className='opacity-80'>
-                            ({targetLetter.char})
-                          </span>
-                        </span>
-                      ) : (
-                        <span>
-                          Show{' '}
-                          <span className='font-extrabold'>{targetNumber}</span>{' '}
-                          <span className='opacity-80'>
-                            ({NUMBER_NAMES[targetNumber]})
-                          </span>
-                        </span>
-                      )
-                    ) : gameMode === 'letters' && targetLetter ? (
-                      <span>
-                        Target:{' '}
-                        <span className='font-extrabold'>
-                          {targetLetter.char}
-                        </span>
-                      </span>
-                    ) : (
-                      <span>
-                        Target:{' '}
-                        <span className='font-extrabold'>{targetNumber}</span>
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white ${
-                      isDetectedMatch ? 'ring-2 ring-green-400/70' : ''
-                    }`}
-                  >
-                    Detected: {currentCount}
-                    {handsBreakdown ? (
-                      <span className='opacity-80'> ({handsBreakdown})</span>
-                    ) : null}
-                  </div>
-                  <div className='bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white'>
-                    Hands: {handsDetected}
-                  </div>
-                  {ttsAvailable && (
-                    <button
-                      type='button'
-                      onClick={() => {
-                        const prompt =
-                          gameMode === 'letters' && targetLetter
-                            ? `Show me the letter ${targetLetter.name}!`
-                            : targetNumber === 0
-                              ? 'Make a fist for zero.'
-                              : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
-                        void speak(prompt);
-                      }}
-                      className={`bg-black/50 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-white/30 text-white hover:bg-black/60 transition ${
-                        ttsEnabled ? '' : 'opacity-60'
-                      }`}
-                      title={
-                        ttsEnabled
-                          ? 'Replay prompt'
-                          : 'Enable sound in Settings to hear prompts'
-                      }
-                    >
-                      🔊
-                    </button>
-                  )}
-                  {gameMode === 'numbers' && (
-                    <div className='bg-bg-tertiary/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold border border-border text-text-primary'>
-                      {
-                        (DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0])
-                          .name
-                      }
-                    </div>
-                  )}
-                  {streak > 2 && (
-                    <div className='bg-pip-orange/90 text-white backdrop-blur px-3 py-1 rounded-full text-sm font-bold animate-pulse shadow-soft'>
-                      🔥 {streak} streak!
-                    </div>
-                  )}
-                </div>
-
-                <div className='absolute top-4 right-4 flex gap-2'>
-                  <button
-                    type='button'
-                    onClick={goToHome}
-                    className='px-4 py-2 bg-white/90 hover:bg-white text-text-primary border border-border rounded-lg transition text-sm font-semibold shadow-soft flex items-center gap-2'
-                  >
-                    <UIIcon name='home' size={16} />
-                    Home
-                  </button>
-                  <button
-                    type='button'
-                    onClick={stopGame}
-                    className='px-4 py-2 bg-error/90 border border-text-error/30 text-white rounded-lg hover:bg-text-error transition text-sm font-semibold shadow-soft'
-                  >
-                    Stop
-                  </button>
-                </div>
+                {/* Overlays removed - moved to GameHeader */}
               </div>
 
-              <p className='text-center text-text-secondary text-sm font-medium'>
-                {gameMode === 'letters'
-                  ? 'Hold up fingers for the letter position! A=1, B=2, C=3, and so on.'
-                  : difficulty === 3
-                    ? 'Duo Mode: Up to 4 people can play together! Show up to 20 fingers.'
-                    : 'Hold up your fingers to show numbers! Use both hands for numbers greater than 5.'}
-              </p>
             </div>
           )}
-        </div>
-      </motion.div>
     </div>
+      </motion.div >
+
+  {/* Celebration Overlay */ }
+  < CelebrationOverlay
+show = { showCelebration }
+letter = { celebrationValue }
+accuracy = { 100}
+message = { gameMode === 'letters' ? `You showed ${celebrationValue}!` : `Great! ${NUMBER_NAMES[parseInt(celebrationValue) || 0]}!`}
+onComplete = {() => {
+  setShowCelebration(false);
+}}
+      />
+    </div >
   );
 });

@@ -1,25 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store';
 import { authApi } from '../services/api';
-import { Mascot } from '../components/Mascot';
+import { UIIcon } from '../components/ui/Icon';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const navigate = useNavigate();
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const { login, error, clearError, isLoading } = useAuthStore();
 
   // Clear error when component mounts
   useEffect(() => {
     clearError();
+    // Focus email input on mount for accessibility
+    emailInputRef.current?.focus();
   }, [clearError]);
 
   const [inlineError, setInlineError] = useState('');
+
+  // Check if form is valid for button state
+  const isFormValid = email.trim().length > 0 && password.trim().length > 0;
+
+  // Detect caps lock
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.getModifierState('CapsLock')) {
+      setCapsLockOn(true);
+    } else {
+      setCapsLockOn(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +49,10 @@ export function Login() {
     // Basic client-side validation only on explicit submit
     if (!email.trim() || !password.trim()) {
       setInlineError('Please enter your email and password.');
-      // Focus first missing field
       if (!email.trim()) {
-        const el = document.getElementById('login-email-input');
-        el?.focus();
+        emailInputRef.current?.focus();
       } else {
-        const el = document.getElementById('login-password-input');
-        el?.focus();
+        passwordInputRef.current?.focus();
       }
       return;
     }
@@ -45,9 +60,9 @@ export function Login() {
     try {
       await login(email, password);
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if error is due to unverified email
-      const errorMsg = error.response?.data?.detail || '';
+      const errorMsg = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || '';
       if (
         errorMsg.toLowerCase().includes('not verified') ||
         errorMsg.toLowerCase().includes('verify')
@@ -62,7 +77,7 @@ export function Login() {
       const response = await authApi.resendVerification(email);
       setResendMessage(response.data.message);
       setShowResend(false);
-    } catch (error) {
+    } catch {
       setResendMessage(
         'Failed to resend verification email. Please try again.',
       );
@@ -70,113 +85,218 @@ export function Login() {
   };
 
   return (
-    <div className='max-w-md mx-auto px-4 py-16'>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className='bg-white/10 border border-border rounded-xl p-8 shadow-sm'
-      >
-        <Mascot
-          state='happy'
-          message="Welcome back, [Parent Name]! Ready for another adventure?"
-          className='absolute top-0 left-0 -translate-x-8'
-        />
+    <div className='min-h-screen flex flex-col'>
+      {/* Minimal header - just back link */}
+      <header className='px-4 py-4'>
+        <Link
+          to='/'
+          className='inline-flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-medium'
+        >
+          <UIIcon name='back' size={16} />
+          Back to home
+        </Link>
+      </header>
 
-        <div className='pl-48'>
-          <h1 className='text-3xl font-bold text-center mb-2'>Welcome Back</h1>
-          <p className='text-white/60 text-center mb-8'>
-            Sign in to continue learning
-          </p>
+      {/* Main content - centered */}
+      <main className='flex-1 flex items-center justify-center px-4 py-8'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='w-full max-w-md'
+        >
+          {/* Form card */}
+          <div className='bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl'>
+            {/* Single clear headline */}
+            <div className='text-center mb-8'>
+              <h1 className='text-2xl font-bold text-white mb-2'>
+                Sign in to Advay Learning
+              </h1>
+              <p className='text-slate-400'>
+                Continue your child's learning journey
+              </p>
+            </div>
 
-          {error && (
-            <div className='bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-6'>
-              {error}
-              {showResend && (
-                <button
-                  type='button'
-                  onClick={handleResendVerification}
-                  className='block mt-2 text-red-400 hover:text-red-300 underline'
+            {/* Error display */}
+            {(error || inlineError) && (
+              <div 
+                className='bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6'
+                role='alert'
+                aria-live='assertive'
+              >
+                <div className='flex items-start gap-2'>
+                  <UIIcon name='warning' size={18} className='mt-0.5 flex-shrink-0' />
+                  <div>
+                    <p>{inlineError || error}</p>
+                    {showResend && (
+                      <button
+                        type='button'
+                        onClick={handleResendVerification}
+                        className='mt-2 text-red-300 hover:text-red-200 underline text-sm font-medium'
+                      >
+                        Resend verification email
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success message for resend */}
+            {resendMessage && (
+              <div 
+                className='bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg mb-6'
+                role='status'
+                aria-live='polite'
+              >
+                <div className='flex items-center gap-2'>
+                  <UIIcon name='check' size={18} />
+                  {resendMessage}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className='space-y-5' noValidate>
+              {/* Email field */}
+              <div>
+                <label
+                  htmlFor='login-email'
+                  className='block text-sm font-medium text-slate-300 mb-2'
                 >
-                  Resend verification email
-                </button>
-              )}
-            </div>
-          )}
+                  Email address
+                </label>
+                <input
+                  ref={emailInputRef}
+                  id='login-email'
+                  type='email'
+                  name='email'
+                  autoComplete='email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className='w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg 
+                    text-white placeholder-slate-500
+                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent 
+                    transition disabled:opacity-50 disabled:cursor-not-allowed'
+                  placeholder='parent@example.com'
+                  required
+                  disabled={isLoading}
+                  aria-describedby={inlineError ? 'login-error' : undefined}
+                />
+              </div>
 
-          {resendMessage && (
-            <div className='bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg mb-6'>
-              {resendMessage}
-            </div>
-          )}
+              {/* Password field */}
+              <div>
+                <label
+                  htmlFor='login-password'
+                  className='block text-sm font-medium text-slate-300 mb-2'
+                >
+                  Password
+                </label>
+                <div className='relative'>
+                  <input
+                    ref={passwordInputRef}
+                    id='login-password'
+                    type={showPassword ? 'text' : 'password'}
+                    name='password'
+                    autoComplete='current-password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className='w-full px-4 py-3 pr-12 bg-slate-900 border border-slate-600 rounded-lg 
+                      text-white placeholder-slate-500
+                      focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent 
+                      transition disabled:opacity-50 disabled:cursor-not-allowed'
+                    placeholder='Enter your password'
+                    required
+                    disabled={isLoading}
+                    aria-describedby={capsLockOn ? 'caps-lock-warning' : undefined}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowPassword(!showPassword)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition p-1'
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <UIIcon name={showPassword ? 'eye-off' : 'eye'} size={20} />
+                  </button>
+                </div>
+                
+                {/* Caps lock warning */}
+                {capsLockOn && (
+                  <p id='caps-lock-warning' className='mt-2 text-sm text-yellow-400 flex items-center gap-1'>
+                    <UIIcon name='warning' size={14} />
+                    Caps Lock is on
+                  </p>
+                )}
+                
+                {/* Forgot password link */}
+                <div className='flex justify-end mt-2'>
+                  <Link
+                    to='/forgot-password'
+                    className='text-sm text-slate-400 hover:text-orange-400 transition font-medium'
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
 
-          <div id='login-error' role='status' aria-live='polite' className='sr-only'>
-            {inlineError || error}
+              {/* Hidden error announcement for screen readers */}
+              <div id='login-error' role='status' aria-live='polite' className='sr-only'>
+                {inlineError || error}
+              </div>
+
+              {/* Submit button */}
+              <button
+                type='submit'
+                disabled={isLoading || !isFormValid}
+                className='w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg 
+                  font-semibold transition-all
+                  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-orange-500'
+              >
+                {isLoading ? (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='animate-spin h-5 w-5' viewBox='0 0 24 24' fill='none'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+
+            {/* Sign up link - clear secondary action */}
+            <p className='text-center mt-6 text-slate-400'>
+              Don't have an account?{' '}
+              <Link 
+                to='/register' 
+                className='text-orange-400 hover:text-orange-300 font-medium transition'
+              >
+                Create account
+              </Link>
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className='space-y-6' noValidate>
-            <div>
-              <label
-                htmlFor='login-email-input'
-                className='block text-sm font-medium text-white/80 mb-2'
-              >
-                Email
-              </label>
-              <input
-                id='login-email-input'
-                type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                placeholder='you@example.com'
-                required
-                disabled={isLoading}
-              />
+          {/* Trust/privacy footer */}
+          <div className='mt-6 text-center'>
+            <p className='text-slate-500 text-sm mb-3'>
+              🔒 Your data is encrypted and never shared
+            </p>
+            <div className='flex items-center justify-center gap-4 text-sm'>
+              <Link to='/privacy' className='text-slate-400 hover:text-white transition'>
+                Privacy Policy
+              </Link>
+              <span className='text-slate-600'>•</span>
+              <Link to='/terms' className='text-slate-400 hover:text-white transition'>
+                Terms of Service
+              </Link>
             </div>
-
-            <div>
-              <label
-                htmlFor='login-password-input'
-                className='block text-sm font-medium text-white/80 mb-2'
-              >
-                Password
-              </label>
-              <input
-                id='login-password-input'
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className='w-full px-4 py-3 bg-white/10 border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
-                placeholder='••••••••••••'
-                required
-                disabled={isLoading}
-              />
-              <div className='flex justify-end mt-2'>
-                <Link
-                  to='/forgot-password'
-                  className='text-sm text-white/50 hover:text-white/80 transition'
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
-
-            <button
-              type='submit'
-              disabled={isLoading}
-              className='w-full py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-
-          <p className='text-center mt-6 text-white/60'>
-            Don't have an account?{' '}
-            <Link to='/register' className='text-red-400 hover:text-red-300'>
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 }
