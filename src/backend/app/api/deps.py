@@ -15,7 +15,7 @@ from app.schemas.token import TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
-    auto_error=False  # Don't auto-error, we'll check cookies too
+    auto_error=False,  # Don't auto-error, we'll check cookies too
 )
 
 # Cookie name constants

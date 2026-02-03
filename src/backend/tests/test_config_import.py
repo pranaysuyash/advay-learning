@@ -1,7 +1,6 @@
 """Test configuration import resilience."""
 
 
-
 def test_import_app_with_test_env():
     """Test that app can be imported with test environment.
 
@@ -16,6 +15,7 @@ def test_import_app_with_test_env():
 
     # Verify settings are accessible
     from app.core.config import get_settings
+
     settings = get_settings()
 
     assert settings.APP_ENV == "test"

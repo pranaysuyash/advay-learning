@@ -14,8 +14,13 @@ echo -e "${GREEN}🚀 Starting development mode...${NC}"
 # Check if virtual environment is activated
 if [[ -z "${VIRTUAL_ENV}" ]]; then
     echo -e "${YELLOW}Virtual environment not activated. Activating...${NC}"
-    if [ -d ".venv" ]; then
+    # Check for backend venv first (most common case)
+    if [ -d "src/backend/.venv" ]; then
+        source src/backend/.venv/bin/activate
+        echo -e "${GREEN}Activated backend virtual environment${NC}"
+    elif [ -d ".venv" ]; then
         source .venv/bin/activate
+        echo -e "${GREEN}Activated root virtual environment${NC}"
     else
         echo "Error: Virtual environment not found. Run ./scripts/setup.sh first."
         exit 1
@@ -32,5 +37,6 @@ echo "Running code checks..."
 ./scripts/check.sh --quick
 
 # Run the application
-echo -e "${GREEN}Starting application...${NC}"
-python -m src.main "$@"
+echo -e "${GREEN}Starting backend server...${NC}"
+cd src/backend
+python start.py "$@"

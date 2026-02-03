@@ -22,22 +22,28 @@ class RefreshTokenService:
         # Generate a unique token
         token_uuid = str(uuid4())
         token = jwt.encode(
-            {"sub": user_id, "jti": token_uuid, "exp": datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)},
+            {
+                "sub": user_id,
+                "jti": token_uuid,
+                "exp": datetime.utcnow()
+                + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            },
             settings.SECRET_KEY,
-            algorithm="HS256"
+            algorithm="HS256",
         )
 
         # Create refresh token record
         refresh_token = RefreshToken(
             token=token,
             user_id=user_id,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+            expires_at=datetime.utcnow()
+            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
-        
+
         db.add(refresh_token)
         await db.commit()
         await db.refresh(refresh_token)
-        
+
         return refresh_token
 
     @staticmethod
@@ -46,8 +52,8 @@ class RefreshTokenService:
         result = await db.execute(
             select(RefreshToken)
             .where(RefreshToken.token == token)
-            .where(RefreshToken.is_active == True)
-            .where(RefreshToken.is_revoked == False)
+            .where(RefreshToken.is_active)
+            .where(~RefreshToken.is_revoked)
             .where(RefreshToken.expires_at > datetime.now(timezone.utc))
         )
         return result.scalar_one_or_none()
@@ -62,7 +68,7 @@ class RefreshTokenService:
         refresh_token.is_revoked = True
         refresh_token.is_active = False
         refresh_token.revoked_at = datetime.now(timezone.utc)
-        
+
         await db.commit()
         return True
 
@@ -72,18 +78,18 @@ class RefreshTokenService:
         result = await db.execute(
             select(RefreshToken)
             .where(RefreshToken.user_id == user_id)
-            .where(RefreshToken.is_active == True)
-            .where(RefreshToken.is_revoked == False)
+            .where(RefreshToken.is_active)
+            .where(~RefreshToken.is_revoked)
         )
         tokens = result.scalars().all()
-        
+
         count = 0
         for token in tokens:
             token.is_revoked = True
             token.is_active = False
             token.revoked_at = datetime.now(timezone.utc)
             count += 1
-        
+
         await db.commit()
         return count
 

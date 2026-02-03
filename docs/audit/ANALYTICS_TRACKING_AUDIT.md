@@ -3,6 +3,7 @@
 **Date:** 2026-01-31  
 **Status:** Critical Gap Analysis  
 **Problem:** Dashboard only tracks "letters" - ignores all other games
+**Ticket:** TCK-20260203-030
 
 ---
 

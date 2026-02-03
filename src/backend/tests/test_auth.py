@@ -8,10 +8,7 @@ class TestAuth:
         """Test successful user registration."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={
-                "email": "newuser@example.com",
-                "password": "Password123"
-            }
+            json={"email": "newuser@example.com", "password": "Password123"},
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
         data = response.json()
@@ -23,10 +20,7 @@ class TestAuth:
         """Test registration with duplicate email fails."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={
-                "email": test_user["email"],
-                "password": "Password123"
-            }
+            json={"email": test_user["email"], "password": "Password123"},
         )
         assert response.status_code == 400
         assert "already registered" in response.json()["detail"].lower()
@@ -35,10 +29,7 @@ class TestAuth:
         """Test successful login sets cookies."""
         response = await client.post(
             "/api/v1/auth/login",
-            data={
-                "username": test_user["email"],
-                "password": test_user["password"]
-            }
+            data={"username": test_user["email"], "password": test_user["password"]},
         )
         assert response.status_code == 200
         data = response.json()
@@ -55,10 +46,7 @@ class TestAuth:
         """Test login with invalid credentials fails."""
         response = await client.post(
             "/api/v1/auth/login",
-            data={
-                "username": "wrong@example.com",
-                "password": "wrongpassword"
-            }
+            data={"username": "wrong@example.com", "password": "wrongpassword"},
         )
         assert response.status_code == 401
 

@@ -37,10 +37,19 @@ echo "✅ Database ready"
 # Change to backend directory
 cd "$(dirname "$0")/../src/backend"
 
+# Activate virtual environment
+if [ -d ".venv" ]; then
+    source .venv/bin/activate
+    echo "✅ Activated backend virtual environment"
+else
+    echo "❌ Backend virtual environment not found. Run setup first."
+    exit 1
+fi
+
 # Check if alembic is installed
 if ! command -v alembic &> /dev/null; then
     echo "Installing alembic..."
-    pip install alembic
+    uv pip install alembic
 fi
 
 # Run migrations

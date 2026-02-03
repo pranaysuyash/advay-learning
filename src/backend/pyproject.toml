@@ -59,37 +59,6 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
 
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = false
-warn_unused_configs = false
-disallow_untyped_defs = false
-check_untyped_defs = false
-no_error_summary = true
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
-    "cv2.*",
-    "mediapipe.*",
-    "pygame.*",
-    "pyttsx3.*",
-    "fastapi.*",
-    "sqlalchemy.*",
-    "alembic.*",
-    "pydantic.*",
-    "python_jose.*",
-    "passlib.*",
-    "boto3.*",
-    "bcrypt.*",
-    "slowapi.*",
-    "asyncpg.*",
-    "redis.*",
-    "httpx.*",
-    "app.*",
-]
-ignore_missing_imports = true
-
 [dependency-groups]
 dev = [
     "greenlet>=3.3.1",

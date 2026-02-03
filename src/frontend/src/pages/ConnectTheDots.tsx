@@ -8,6 +8,7 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { Mascot } from '../components/Mascot';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { OptionChips } from '../components/game/OptionChips';
 import { useHandTracking } from '../hooks/useHandTracking';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
@@ -844,24 +845,19 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                   </p>
 
                   <div className='mb-6 w-full max-w-md'>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
-                      Difficulty
-                    </label>
-                    <div className='flex gap-2'>
-                      {(['easy', 'medium', 'hard'] as const).map((diff) => (
-                        <button
-                          key={diff}
-                          onClick={() => setDifficulty(diff)}
-                          className={`px-4 py-2 min-h-[56px] rounded-lg font-medium transition ${
-                            difficulty === diff
-                              ? 'bg-pip-orange text-white shadow-lg'
-                              : 'bg-white/10 text-white/80 hover:bg-white/20'
-                          }`}
-                        >
-                          {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                        </button>
-                      ))}
-                    </div>
+                    <OptionChips
+                      label='Difficulty'
+                      theme='dark'
+                      options={(['easy', 'medium', 'hard'] as const).map(
+                        (diff) => ({
+                          id: diff,
+                          label: diff.charAt(0).toUpperCase() + diff.slice(1),
+                        }),
+                      )}
+                      selectedId={difficulty}
+                      onSelect={(id) => setDifficulty(id as typeof difficulty)}
+                      buttonMinHeightClassName='min-h-[56px]'
+                    />
                   </div>
 
                   {/* Standardized Menu Controls */}

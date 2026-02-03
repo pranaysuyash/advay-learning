@@ -58,7 +58,7 @@ class UserService:
         result = await db.execute(
             select(User).where(
                 User.email_verification_token == token,
-                User.email_verification_expires > datetime.now(timezone.utc)
+                User.email_verification_expires > datetime.now(timezone.utc),
             )
         )
         return result.scalar_one_or_none()
@@ -74,12 +74,14 @@ class UserService:
         return user
 
     @staticmethod
-    async def get_by_password_reset_token(db: AsyncSession, token: str) -> Optional[User]:
+    async def get_by_password_reset_token(
+        db: AsyncSession, token: str
+    ) -> Optional[User]:
         """Get user by password reset token."""
         result = await db.execute(
             select(User).where(
                 User.password_reset_token == token,
-                User.password_reset_expires > datetime.now(timezone.utc)
+                User.password_reset_expires > datetime.now(timezone.utc),
             )
         )
         return result.scalar_one_or_none()
@@ -87,7 +89,7 @@ class UserService:
     @staticmethod
     async def create_password_reset_token(db: AsyncSession, user: User) -> str:
         """Create a password reset token for user."""
-        token = EmailService.generate_verification_token()
+        token: str = EmailService.generate_verification_token()
         user.password_reset_token = token
         user.password_reset_expires = EmailService.get_verification_expiry()  # 24 hours
         await db.commit()
@@ -97,6 +99,7 @@ class UserService:
     async def reset_password(db: AsyncSession, user: User, new_password: str) -> User:
         """Reset user's password and clear reset token."""
         from app.core.security import get_password_hash
+
         user.hashed_password = get_password_hash(new_password)
         user.password_reset_token = None
         user.password_reset_expires = None
@@ -110,7 +113,9 @@ class UserService:
         update_data = user_in.model_dump(exclude_unset=True)
 
         if "password" in update_data:
-            update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
+            update_data["hashed_password"] = get_password_hash(
+                update_data.pop("password")
+            )
 
         for field, value in update_data.items():
             setattr(user, field, value)
@@ -126,7 +131,9 @@ class UserService:
         await db.commit()
 
     @staticmethod
-    async def authenticate(db: AsyncSession, email: str, password: str) -> Optional[User]:
+    async def authenticate(
+        db: AsyncSession, email: str, password: str
+    ) -> Optional[User]:
         """Authenticate user with constant-time comparison to prevent timing attacks."""
         user = await UserService.get_by_email(db, email)
 
@@ -134,7 +141,9 @@ class UserService:
             # Perform dummy verification to maintain constant time
             # This prevents user enumeration via timing analysis
             # Using a valid bcrypt hash that will never match any real password
-            verify_password(password, "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW")
+            verify_password(
+                password, "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
+            )
             return None
 
         if not verify_password(password, user.hashed_password):

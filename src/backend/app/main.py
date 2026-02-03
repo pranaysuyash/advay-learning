@@ -1,7 +1,6 @@
 """Main FastAPI application entry point."""
 
 import logging
-import os
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -37,14 +36,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         # Permissions policy (disable unused features)
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
 
         return response
 
 
 def validate_cors_configuration(settings_instance: Settings) -> None:
     """Validate CORS configuration for security."""
-    if "*" in settings_instance.ALLOWED_ORIGINS and settings_instance.CORS_ALLOW_CREDENTIALS:
+    if (
+        "*" in settings_instance.ALLOWED_ORIGINS
+        and settings_instance.CORS_ALLOW_CREDENTIALS
+    ):
         if settings_instance.APP_ENV == "production":
             raise RuntimeError(
                 "SECURITY ERROR: CORS ALLOWED_ORIGINS contains wildcard '*' "
@@ -135,10 +139,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     status = await get_health_status(db)
 
     if status["status"] != "healthy":
-        raise HTTPException(
-            status_code=HTTP_503_SERVICE_UNAVAILABLE,
-            detail=status
-        )
+        raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=status)
 
     return status  # type: ignore
 
@@ -146,6 +147,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
 if __name__ == "__main__":
     # Use python -m uvicorn for better multiprocessing support in Python 3.13+
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",

@@ -3,6 +3,7 @@ UI_FILE_AUDIT_RESULT={
 "version": "1.0",
 "file_path": "src/frontend/src/pages/Login.tsx",
 "framework_guess": "React with TypeScript",
+**Ticket:** TCK-20260203-034
 "imports_reviewed": ["react", "react-router-dom", "framer-motion", "zustand store"],
 "unknowns": ["store implementation details", "styling tokens"]
 },

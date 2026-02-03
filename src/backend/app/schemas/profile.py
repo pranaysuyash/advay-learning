@@ -10,12 +10,13 @@ from app.core.validation import ValidationError, validate_age, validate_language
 
 class ProfileBase(BaseModel):
     """Base profile schema."""
+
     name: str
     age: Optional[float] = None
     preferred_language: str = "en"
     settings: Dict[str, Any] = {}
 
-    @field_validator('age')
+    @field_validator("age")
     @classmethod
     def validate_age_range(cls, v: Optional[float]) -> Optional[float]:
         """Validate age is between 0 and 18."""
@@ -26,7 +27,7 @@ class ProfileBase(BaseModel):
                 raise ValueError(str(e))
         return v
 
-    @field_validator('preferred_language')
+    @field_validator("preferred_language")
     @classmethod
     def validate_language(cls, v: str) -> str:
         """Validate language code is supported."""
@@ -39,11 +40,13 @@ class ProfileBase(BaseModel):
 
 class ProfileCreate(ProfileBase):
     """Profile creation schema."""
+
     pass
 
 
 class ProfileUpdate(BaseModel):
     """Profile update schema."""
+
     name: Optional[str] = None
     age: Optional[float] = None
     preferred_language: Optional[str] = None
@@ -52,6 +55,7 @@ class ProfileUpdate(BaseModel):
 
 class Profile(ProfileBase):
     """Profile response schema."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str

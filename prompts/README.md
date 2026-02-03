@@ -26,9 +26,11 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### UI / UX
 
 - **User flow analysis (friction/journey audit)**: `prompts/ux/ux-flow-analysis-v1.0.md`
+- Video-based kids app auditor (demo video): `prompts/ux/video-based-kids-app-auditor-v1.0.md`
 - Repo-aware UX audit: `prompts/ui/repo-aware-ui-auditor-v1.0.md`
 - Generic UI review (artifact-based): `prompts/ui/generic-ui-reviewer-v1.0.md`
 - UI change spec writer: `prompts/ui/ui-change-spec-v1.0.md`
+- Game setup system (shared setup components): `prompts/ui/game-setup-system-v1.0.md`
 - Single UI file audit: `prompts/ui/ui-file-audit-v1.0.md`
 - Child-centered UX audit (learning expert lens): `prompts/ui/child-centered-ux-audit-v1.0.md`
 - Kids playtest protocol (lightweight): `prompts/ui/kids-playtest-protocol-v1.0.md`
@@ -38,6 +40,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### Engineering (Dev)
 
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
+- Camera game multi-persona audit (single game file): `prompts/audit/camera-game-multipersona-audit-v1.0.md`
 - Single-axis whole-app auditor (report-only, one axis per run): `prompts/audit/single-axis-app-auditor-v1.0.md`
 - Implement audit findings: `prompts/remediation/implementation-v1.6.1.md`
 - Home landing P0 improvements (hydration guard, Try Demo CTA, mascot anchor): `prompts/remediation/home-landing-implementation-v1.0.md`

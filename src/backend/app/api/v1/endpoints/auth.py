@@ -1,6 +1,5 @@
 """Authentication endpoints."""
 
-
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -33,7 +32,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         value=access_token,
         httponly=True,  # Not accessible via JavaScript
         secure=COOKIE_SECURE,
-        samesite=COOKIE_SAMESITE,
+        samesite=COOKIE_SAMESITE,  # type: ignore
         path=COOKIE_PATH,
         domain=COOKIE_DOMAIN,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
@@ -45,7 +44,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         value=refresh_token,
         httponly=True,
         secure=COOKIE_SECURE,
-        samesite=COOKIE_SAMESITE,
+        samesite=COOKIE_SAMESITE,  # type: ignore
         path=COOKIE_PATH,
         domain=COOKIE_DOMAIN,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
@@ -61,9 +60,7 @@ def clear_auth_cookies(response: Response) -> None:
 @router.post("/register", response_model=User)
 @limiter.limit(RateLimits.AUTH_STRICT)
 async def register(
-    request: Request,
-    user_in: UserCreate,
-    db: AsyncSession = Depends(get_db)
+    request: Request, user_in: UserCreate, db: AsyncSession = Depends(get_db)
 ) -> User:
     """Register a new user."""
     # Check if user already exists
@@ -85,7 +82,7 @@ async def login(
     request: Request,
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Login and set authentication cookies."""
     # Authenticate user
@@ -126,12 +123,14 @@ async def login(
             "id": user.id,
             "email": user.email,
             "role": user.role,
-        }
+        },
     }
 
 
 @router.post("/logout")
-async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)) -> dict:
+async def logout(
+    request: Request, response: Response, db: AsyncSession = Depends(get_db)
+) -> dict:
     """Logout and clear authentication cookies, revoke refresh token."""
     # Get refresh token from cookie to revoke it
     refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
@@ -144,10 +143,7 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
 
 
 @router.post("/verify-email")
-async def verify_email(
-    token: str,
-    db: AsyncSession = Depends(get_db)
-) -> dict:
+async def verify_email(token: str, db: AsyncSession = Depends(get_db)) -> dict:
     """Verify email address using verification token."""
     user = await UserService.get_by_verification_token(db, token)
     if not user:
@@ -161,10 +157,7 @@ async def verify_email(
 
 
 @router.post("/resend-verification")
-async def resend_verification(
-    email: str,
-    db: AsyncSession = Depends(get_db)
-) -> dict:
+async def resend_verification(email: str, db: AsyncSession = Depends(get_db)) -> dict:
     """Resend email verification link."""
     user = await UserService.get_by_email(db, email)
     if not user:
@@ -176,12 +169,15 @@ async def resend_verification(
 
     # Generate new verification token
     from app.core.email import EmailService
+
     user.email_verification_token = EmailService.generate_verification_token()
     user.email_verification_expires = EmailService.get_verification_expiry()
     await db.commit()
 
     # Send verification email
-    await EmailService.send_verification_email(user.email, user.email_verification_token)
+    await EmailService.send_verification_email(
+        user.email, user.email_verification_token
+    )
 
     return {"message": "If an account exists, a verification email has been sent."}
 
@@ -189,22 +185,23 @@ async def resend_verification(
 @router.post("/forgot-password")
 @limiter.limit(RateLimits.AUTH_MEDIUM)
 async def forgot_password(
-    request: Request,
-    email: str,
-    db: AsyncSession = Depends(get_db)
+    request: Request, email: str, db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Request password reset email."""
     user = await UserService.get_by_email(db, email)
 
     if not user:
         # Return success even if user not found (prevents user enumeration)
-        return {"message": "If an account exists, a password reset email has been sent."}
+        return {
+            "message": "If an account exists, a password reset email has been sent."
+        }
 
     # Generate password reset token
     token = await UserService.create_password_reset_token(db, user)
 
     # Send password reset email
     from app.core.email import EmailService
+
     await EmailService.send_password_reset_email(user.email, token)
 
     return {"message": "If an account exists, a password reset email has been sent."}
@@ -213,10 +210,7 @@ async def forgot_password(
 @router.post("/reset-password")
 @limiter.limit(RateLimits.AUTH_MEDIUM)
 async def reset_password(
-    request: Request,
-    token: str,
-    new_password: str,
-    db: AsyncSession = Depends(get_db)
+    request: Request, token: str, new_password: str, db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Reset password using reset token."""
     user = await UserService.get_by_password_reset_token(db, token)
@@ -236,19 +230,17 @@ async def reset_password(
     # Reset password
     await UserService.reset_password(db, user, new_password)
 
-    return {"message": "Password reset successfully. You can now log in with your new password."}
+    return {
+        "message": "Password reset successfully. You can now log in with your new password."
+    }
 
 
 @router.post("/refresh")
 @limiter.limit(RateLimits.AUTH_MEDIUM)
 async def refresh_token(
-    request: Request,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
+    request: Request, response: Response, db: AsyncSession = Depends(get_db)
 ) -> dict:
     """Refresh access token using refresh cookie with rotation."""
-    from jose import JWTError, jwt
-
     # Get refresh token from cookie
     refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
     if not refresh_token:
@@ -307,12 +299,9 @@ async def refresh_token(
 
 @router.get("/me", response_model=User)
 async def get_current_user_info(
-    request: Request,
-    db: AsyncSession = Depends(get_db)
+    request: Request, db: AsyncSession = Depends(get_db)
 ) -> User:
     """Get current user info from access token cookie."""
-    from jose import JWTError, jwt
-
     # Get access token from cookie
     access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
     if not access_token:

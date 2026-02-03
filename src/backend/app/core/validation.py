@@ -7,6 +7,7 @@ from uuid import UUID
 
 class ValidationError(Exception):
     """Validation error with message."""
+
     pass
 
 
@@ -49,14 +50,16 @@ def validate_email_format(email: str) -> str:
         raise ValidationError("email is required")
 
     # Basic email regex pattern
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     if not re.match(pattern, email):
         raise ValidationError("email format is invalid")
 
     return email
 
 
-def validate_age(age: Optional[float], min_age: float = 0, max_age: float = 18) -> Optional[float]:
+def validate_age(
+    age: Optional[float], min_age: float = 0, max_age: float = 18
+) -> Optional[float]:
     """Validate age is within acceptable range.
 
     Args:
@@ -97,9 +100,17 @@ def validate_language_code(language: Optional[str]) -> Optional[str]:
     if language is None:
         return None
 
-    supported_languages = {"en", "hi", "kn", "te", "ta"}  # English, Hindi, Kannada, Telugu, Tamil
+    supported_languages = {
+        "en",
+        "hi",
+        "kn",
+        "te",
+        "ta",
+    }  # English, Hindi, Kannada, Telugu, Tamil
 
     if language not in supported_languages:
-        raise ValidationError(f"language must be one of: {', '.join(sorted(supported_languages))}")
+        raise ValidationError(
+            f"language must be one of: {', '.join(sorted(supported_languages))}"
+        )
 
     return language

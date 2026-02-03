@@ -18,7 +18,9 @@ class Achievement(Base):
 
     __tablename__ = "achievements"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid4())
+    )
     profile_id: Mapped[str] = mapped_column(
         ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
     )

@@ -88,33 +88,36 @@ class TestValidationUtilities:
 class TestProfileIdValidation:
     """Test profile_id validation in API endpoints."""
 
-    async def test_get_progress_invalid_uuid(self, client: AsyncClient, auth_headers: dict):
+    async def test_get_progress_invalid_uuid(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test get_progress with invalid UUID returns 422."""
         response = await client.get(
-            "/api/v1/progress/?profile_id=invalid-uuid",
-            headers=auth_headers
+            "/api/v1/progress/?profile_id=invalid-uuid", headers=auth_headers
         )
         assert response.status_code == 422
-        assert "profile_id" in response.json()["detail"].lower() or "uuid" in response.json()["detail"].lower()
+        assert (
+            "profile_id" in response.json()["detail"].lower()
+            or "uuid" in response.json()["detail"].lower()
+        )
 
-    async def test_save_progress_invalid_uuid(self, client: AsyncClient, auth_headers: dict):
+    async def test_save_progress_invalid_uuid(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test save_progress with invalid UUID returns 422."""
         response = await client.post(
             "/api/v1/progress/?profile_id=not-a-uuid",
             headers=auth_headers,
-            json={
-                "activity_type": "tracing",
-                "content_id": "A",
-                "score": 85
-            }
+            json={"activity_type": "tracing", "content_id": "A", "score": 85},
         )
         assert response.status_code == 422
 
-    async def test_get_stats_invalid_uuid(self, client: AsyncClient, auth_headers: dict):
+    async def test_get_stats_invalid_uuid(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test get_progress_stats with invalid UUID returns 422."""
         response = await client.get(
-            "/api/v1/progress/stats?profile_id=bad-uuid",
-            headers=auth_headers
+            "/api/v1/progress/stats?profile_id=bad-uuid", headers=auth_headers
         )
         assert response.status_code == 422
 
@@ -124,12 +127,12 @@ class TestUserIdValidation:
 
     async def test_get_user_invalid_uuid(self, client: AsyncClient, auth_headers: dict):
         """Test get_user with invalid UUID returns 422."""
-        response = await client.get(
-            "/api/v1/users/invalid-uuid",
-            headers=auth_headers
-        )
+        response = await client.get("/api/v1/users/invalid-uuid", headers=auth_headers)
         assert response.status_code == 422
-        assert "user_id" in response.json()["detail"].lower() or "uuid" in response.json()["detail"].lower()
+        assert (
+            "user_id" in response.json()["detail"].lower()
+            or "uuid" in response.json()["detail"].lower()
+        )
 
 
 class TestPasswordValidation:
@@ -138,10 +141,10 @@ class TestPasswordValidation:
     def test_validate_password_valid(self):
         """Test valid passwords pass validation."""
         valid_passwords = [
-            "Password123",      # Basic valid
-            "MyP@ssw0rd",       # With special char
-            "A1b2C3d4",         # Mixed
-            "SecurePass1",      # Long enough
+            "Password123",  # Basic valid
+            "MyP@ssw0rd",  # With special char
+            "A1b2C3d4",  # Mixed
+            "SecurePass1",  # Long enough
         ]
         for pwd in valid_passwords:
             result = validate_password_strength(pwd)
@@ -177,8 +180,8 @@ class TestPasswordValidation:
             "/api/v1/auth/register",
             json={
                 "email": "weakpass@test.com",
-                "password": "weak"  # Too short, no uppercase, no digit
-            }
+                "password": "weak",  # Too short, no uppercase, no digit
+            },
         )
         assert response.status_code == 422
         error_msg = str(response.json()).lower()
@@ -188,10 +191,7 @@ class TestPasswordValidation:
         """Test registration with valid password succeeds."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={
-                "email": "strongpass@test.com",
-                "password": "StrongPass123"
-            }
+            json={"email": "strongpass@test.com", "password": "StrongPass123"},
         )
         assert response.status_code == 200
 
@@ -199,54 +199,49 @@ class TestPasswordValidation:
 class TestProfileSchemaValidation:
     """Test profile schema validation."""
 
-    async def test_create_profile_invalid_age(self, client: AsyncClient, auth_headers: dict):
+    async def test_create_profile_invalid_age(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test creating profile with invalid age returns 422."""
         response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={
-                "name": "Test Child",
-                "age": 25  # Too high
-            }
+            json={"name": "Test Child", "age": 25},  # Too high
         )
         assert response.status_code == 422
         assert "age" in str(response.json()).lower()
 
-    async def test_create_profile_negative_age(self, client: AsyncClient, auth_headers: dict):
+    async def test_create_profile_negative_age(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test creating profile with negative age returns 422."""
         response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={
-                "name": "Test Child",
-                "age": -5
-            }
+            json={"name": "Test Child", "age": -5},
         )
         assert response.status_code == 422
 
-    async def test_create_profile_invalid_language(self, client: AsyncClient, auth_headers: dict):
+    async def test_create_profile_invalid_language(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test creating profile with invalid language returns 422."""
         response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={
-                "name": "Test Child",
-                "preferred_language": "fr"  # Not supported
-            }
+            json={"name": "Test Child", "preferred_language": "fr"},  # Not supported
         )
         assert response.status_code == 422
         assert "language" in str(response.json()).lower()
 
-    async def test_create_profile_valid_data(self, client: AsyncClient, auth_headers: dict):
+    async def test_create_profile_valid_data(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test creating profile with valid data succeeds."""
         response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={
-                "name": "Valid Child",
-                "age": 5,
-                "preferred_language": "en"
-            }
+            json={"name": "Valid Child", "age": 5, "preferred_language": "en"},
         )
         assert response.status_code == 200
         data = response.json()

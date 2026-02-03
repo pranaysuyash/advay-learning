@@ -16,13 +16,15 @@ os.environ["TESTING"] = "true"
 
 # Import and patch BEFORE creating app instance
 # ruff: noqa: E402 - Intentional imports after environment setup for test mocking
+from app.core.config import settings
 from app.db import session as db_session_module
 from app.db.base_class import Base
 
 # Create test engine (uses PostgreSQL test database from .env.test)
-from app.core.config import settings
 test_engine = create_async_engine(settings.DATABASE_URL, echo=False)
-test_async_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+test_async_session = async_sessionmaker(
+    test_engine, class_=AsyncSession, expire_on_commit=False
+)
 
 # Monkey-patch the session module
 db_session_module.engine = test_engine
@@ -63,7 +65,9 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture(scope="function")
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as test_client:
         yield test_client
 
 

@@ -10,7 +10,7 @@ class TestProgress:
         profile_response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={"name": "Test Child", "age": 5}
+            json={"name": "Test Child", "age": 5},
         )
         profile_id = profile_response.json()["id"]
 
@@ -23,8 +23,8 @@ class TestProgress:
                 "content_id": "A",
                 "score": 85,
                 "duration_seconds": 30,
-                "meta_data": {"accuracy": 90}
-            }
+                "meta_data": {"accuracy": 90},
+            },
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
         data = response.json()
@@ -37,7 +37,7 @@ class TestProgress:
         profile_response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={"name": "Test Child", "age": 5}
+            json={"name": "Test Child", "age": 5},
         )
         profile_id = profile_response.json()["id"]
 
@@ -49,14 +49,12 @@ class TestProgress:
                 "activity_type": "letter_tracing",
                 "content_id": "A",
                 "score": 85,
-                "duration_seconds": 30
-            }
+                "duration_seconds": 30,
+            },
         )
 
         response = await client.get(
-            "/api/v1/progress/",
-            headers=auth_headers,
-            params={"profile_id": profile_id}
+            "/api/v1/progress/", headers=auth_headers, params={"profile_id": profile_id}
         )
         assert response.status_code == 200
         data = response.json()
@@ -69,7 +67,7 @@ class TestProgress:
         profile_response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={"name": "Test Child", "age": 5}
+            json={"name": "Test Child", "age": 5},
         )
         profile_id = profile_response.json()["id"]
 
@@ -83,14 +81,14 @@ class TestProgress:
                     "activity_type": "letter_tracing",
                     "content_id": letter,
                     "score": 80 + ord(letter) - ord("A"),
-                    "duration_seconds": 25
-                }
+                    "duration_seconds": 25,
+                },
             )
 
         response = await client.get(
             "/api/v1/progress/stats",
             headers=auth_headers,
-            params={"profile_id": profile_id}
+            params={"profile_id": profile_id},
         )
         assert response.status_code == 200
         data = response.json()

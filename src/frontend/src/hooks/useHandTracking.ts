@@ -28,6 +28,8 @@ import type {
   UseHandTrackingReturn,
 } from '../types/tracking';
 
+const IS_DEV = Boolean((import.meta as any)?.env?.DEV);
+
 const DEFAULT_OPTIONS: Required<UseHandTrackingOptions> = {
   numHands: 2,
   minDetectionConfidence: 0.3,
@@ -97,7 +99,9 @@ export function useHandTracking(
       
       for (const delegate of delegatesToTry) {
         try {
-          console.log(`[useHandTracking] Trying ${delegate} delegate...`);
+          if (IS_DEV) {
+            console.log(`[useHandTracking] Trying ${delegate} delegate...`);
+          }
           
           const lm = await HandLandmarker.createFromOptions(vision, {
             baseOptions: {
@@ -113,7 +117,9 @@ export function useHandTracking(
           });
           
           loadedLandmarker = lm;
-          console.log(`[useHandTracking] Successfully loaded with ${delegate}`);
+          if (IS_DEV) {
+            console.log(`[useHandTracking] Successfully loaded with ${delegate}`);
+          }
           break;
         } catch (e) {
           lastError = e as Error;
@@ -171,7 +177,9 @@ export function useHandTracking(
   useEffect(() => {
     return () => {
       if (landmarker) {
-        console.log('[useHandTracking] Cleaning up landmarker');
+        if (IS_DEV) {
+          console.log('[useHandTracking] Cleaning up landmarker');
+        }
         landmarker.close();
       }
     };

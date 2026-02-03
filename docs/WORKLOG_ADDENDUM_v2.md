@@ -8798,6 +8798,303 @@ EOF
 
 ---
 
+### TCK-20260203-018 :: Dev UX Hardening — Avoid CORS via Vite Proxy + Hide Technical Hand-Tracking Logs
+
+Type: HARDENING
+Owner: Pranay (human owner, Codex executing)
+Created: 2026-02-03 16:45 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope:
+  - Ensure frontend uses Vite proxy (`/api` -> backend) by default in dev to avoid CORS
+  - Suppress verbose technical hand-tracking console logs outside dev (kids app hygiene)
+- Out-of-scope:
+  - Changing backend auth semantics or deployment config
+  - Removing warnings/errors that are needed for debugging failures
+- Behavior change allowed: YES (dev config + log hygiene)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/.env`
+  - `src/frontend/src/hooks/useHandTracking.ts`
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Frontend dev calls `http://localhost:6173/api/...` (proxy) rather than `http://localhost:8001/...`
+- [ ] No CORS errors in browser when backend is running
+- [ ] Hand-tracking delegate logs do not spam production console
+
+Execution log:
+
+- [2026-02-03 16:45 UTC] Adjusted dev API base to prefer proxy by default and gated delegate logs to DEV only. | Evidence:
+  - `src/frontend/.env` (set `VITE_API_BASE_URL=` for dev default)
+  - `src/frontend/src/hooks/useHandTracking.ts` (guard `console.log` behind DEV)
+
+
+---
+
+### TCK-20260203-009 :: Re-apply Camera Game Stability + Shared Setup Components (FingerNumberShow + ConnectTheDots)
+
+Type: HARDENING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 14:30 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Re-apply and harden the camera-game improvements for FingerNumberShow + shared setup UI to reduce regressions and improve family play (up to 4 hands).
+
+Scope contract:
+
+- In-scope:
+  - FingerNumberShow: scheduling + initialization hardening; family play max-hands support
+  - Shared setup UI primitives for mode/language/difficulty (reusable across games)
+  - Adopt shared setup UI in at least 2 games (FingerNumberShow + ConnectTheDots)
+  - Add small unit tests (config mapping + setup component behavior)
+- Out-of-scope (explicitly allowed by user on 2026-02-03):
+  - Extra refactors if they make the app better
+- Behavior change allowed: YES (bugfix + UX hardening; preserve core learning loop)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/games/FingerNumberShow.tsx`
+  - `src/frontend/src/games/finger-number-show/*` (new components)
+  - `src/frontend/src/components/game/*` (new shared setup primitives)
+  - `src/frontend/src/pages/ConnectTheDots.tsx`
+  - `src/frontend/src/utils/landmarkUtils.ts` (normalization helper)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] FingerNumberShow does not initialize the model until the game starts
+- [ ] FingerNumberShow uses a single scheduler (no nested `requestAnimationFrame`)
+- [ ] FingerNumberShow supports up to 4 hands for family play scenarios
+- [ ] Setup UI primitives reused in at least 2 games
+- [ ] `cd src/frontend && npm run type-check` passes
+- [ ] Targeted vitest tests pass for new modules
+
+Inputs:
+
+- Prompt used: `prompts/workflow/agent-entrypoint-v1.0.md` + `prompts/hardening/hardening-v1.1.md` + `prompts/ui/game-setup-system-v1.0.md`
+
+Execution log:
+
+- [2026-02-03 16:19 UTC] Implemented shared setup primitives + adopted in FingerNumberShow and ConnectTheDots | Evidence:
+  - Files: `src/frontend/src/components/game/GameSetupCard.tsx`, `src/frontend/src/components/game/OptionChips.tsx`, `src/frontend/src/games/finger-number-show/FingerNumberShowMenu.tsx`, `src/frontend/src/pages/ConnectTheDots.tsx`
+- [2026-02-03 16:19 UTC] Hardened FingerNumberShow scheduling + model init + 4-hand support | Evidence:
+  - Files: `src/frontend/src/games/FingerNumberShow.tsx`, `src/frontend/src/games/finger-number-show/FingerNumberShowHud.tsx`, `src/frontend/src/games/finger-number-show/handTrackingConfig.ts`
+- [2026-02-03 16:19 UTC] Added normalization helper + tests | Evidence:
+  - Files: `src/frontend/src/utils/landmarkUtils.ts`, `src/frontend/src/utils/__tests__/landmarkUtils.test.ts`
+- [2026-02-03 16:19 UTC] Verified frontend compile | Evidence:
+  - Command: `cd src/frontend && npm run type-check`
+  - Output: `tsc --noEmit`
+- [2026-02-03 16:19 UTC] Verified targeted unit tests | Evidence:
+  - Command: `cd src/frontend && npx vitest run src/utils/__tests__/landmarkUtils.test.ts`
+  - Output: `✓ src/utils/__tests__/landmarkUtils.test.ts (4 tests)`
+  - Command: `cd src/frontend && npx vitest run src/games/finger-number-show/handTrackingConfig.test.ts`
+  - Output: `✓ src/games/finger-number-show/handTrackingConfig.test.ts (2 tests)`
+  - Command: `cd src/frontend && npx vitest run src/components/game/__tests__/OptionChips.test.tsx`
+  - Output: `✓ src/components/game/__tests__/OptionChips.test.tsx (1 test)`
+
+Notes:
+
+- Process correction: a mirror of this ticket exists in `docs/WORKLOG_TICKETS.md` due to an earlier mistake; canonical updates should be appended here (ADDENDUM_v2) going forward.
+
+### TCK-20260203-009 :: Status Update (2026-02-03 16:30 UTC)
+
+Status updates:
+
+- [2026-02-03 16:30 UTC] IN_PROGRESS — Canonical ticket tracking moved to ADDENDUM_v2; v1 entry is a mirror only. No further detailed updates should be appended to `docs/WORKLOG_TICKETS.md` for this ticket.
+
+Execution log:
+
+- [2026-02-03 16:20 UTC] Reference: v1 has a detailed status update block for this ticket; future updates belong here | Evidence:
+  - Mirror location: `docs/WORKLOG_TICKETS.md` (see the `TCK-20260203-009 :: Status Update (2026-02-03 16:20 UTC)` section)
+
+---
+
+### TCK-20260203-012 :: Camera-First Game Audit Campaign (Multi-Persona, One File Per Game)
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:45 UTC
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope:
+  - Audit each camera-first game route as a single audited file + single audit artifact
+  - Use combined personas/lenses (child UX, parent UX, MediaPipe/CV, accessibility, privacy/safety, engineering quality)
+  - Create follow-up tickets for actionable findings (one issue = one ticket)
+- Out-of-scope:
+  - Implementing fixes (audit only)
+  - Backend refactors (unless strictly required to audit a game’s behavior)
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- Game files (audit units):
+  - `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
+  - `src/frontend/src/games/FingerNumberShow.tsx`
+  - `src/frontend/src/pages/ConnectTheDots.tsx`
+  - `src/frontend/src/pages/LetterHunt.tsx`
+  - (Dev page) `src/frontend/src/pages/MediaPipeTest.tsx` (label as dev-only in audit)
+- Audit artifacts (one per file): `docs/audit/<sanitized-file>.md`
+
+Inputs:
+
+- Product constraint (user): All games are **camera-first** (MediaPipe/CV is primary), mouse/touch is secondary fallback.
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md` + `prompts/audit/audit-v1.5.1.md` + `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md`
+
+Acceptance Criteria:
+
+- [ ] Each game has exactly one audit artifact (one file audited per artifact)
+- [ ] Each audit includes evidence logs + persona/lens findings
+- [ ] Each actionable issue is ticketed (append-only) with references
+
+Execution log:
+
+- [2026-02-03 16:45 UTC] Campaign ticket created; audit queue established. | Evidence: routes discovered in `src/frontend/src/App.tsx`.
+
+### TCK-20260203-013 :: Multi-Persona Game Audit — FingerNumberShow.tsx
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:46 UTC
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Audit `src/frontend/src/games/FingerNumberShow.tsx` with camera-first + multi-persona lenses
+- Out-of-scope: Implementing fixes (separate remediation ticket(s))
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/games/FingerNumberShow.tsx`
+  - `docs/audit/src__frontend__src__games__FingerNumberShow.tsx.md`
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md`
+
+### TCK-20260203-014 :: Multi-Persona Game Audit — ConnectTheDots.tsx
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:46 UTC
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Audit `src/frontend/src/pages/ConnectTheDots.tsx` with camera-first + multi-persona lenses
+- Out-of-scope: Implementing fixes (separate remediation ticket(s))
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/ConnectTheDots.tsx`
+  - `docs/audit/src__frontend__src__pages__ConnectTheDots.tsx.md`
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md`
+
+### TCK-20260203-015 :: Multi-Persona Game Audit — LetterHunt.tsx
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:46 UTC
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Audit `src/frontend/src/pages/LetterHunt.tsx` with camera-first + multi-persona lenses
+- Out-of-scope: Implementing fixes (separate remediation ticket(s))
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/LetterHunt.tsx`
+  - `docs/audit/src__frontend__src__pages__LetterHunt.tsx.md`
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md`
+
+### TCK-20260203-016 :: Multi-Persona Game Audit — AlphabetGamePage.tsx
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:46 UTC
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Audit `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` with camera-first + multi-persona lenses
+- Out-of-scope: Implementing fixes (separate remediation ticket(s))
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
+  - `docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md`
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md`
+
+### TCK-20260203-017 :: Multi-Persona Page Audit — MediaPipeTest.tsx (Dev-Only)
+
+Type: AUDIT_FINDING
+Owner: Codex (GPT-5)
+Created: 2026-02-03 16:46 UTC
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Audit `src/frontend/src/pages/MediaPipeTest.tsx` as a dev-only diagnostic surface (avoid leaking into kid UX)
+- Out-of-scope: Implementing fixes (separate remediation ticket(s))
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/MediaPipeTest.tsx`
+  - `docs/audit/src__frontend__src__pages__MediaPipeTest.tsx.md`
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md`
+
+
+
+---
+
 ## GAME UI STANDARDIZATION COMPLETED - 2026-02-02
 
 **Status:** ✅ COMPLETED  
@@ -9421,6 +9718,1019 @@ Comprehensive single-file audit of AlphabetGamePage.tsx (1664 lines), the most c
 - Core game component - issues could impact user experience
 - Camera and MediaPipe integration adds complexity
 - Performance critical for smooth hand tracking experience
+
+---
+
+EOF
+
+### TCK-20260203-019 :: Improve Dashboard Metric Legibility
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Increase font size and ensure WCAG AA contrast for dashboard metrics (Literacy, Accuracy, Time)
+- Out-of-scope: Changes to metric calculation or layout structure
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): DashboardSummaryBar component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Font size is minimum 16px
+- Contrast ratio meets 4.5:1 against #FFFFFF
+- Font-weight increased to medium (500)
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-001
+- Evidence: 00:00 - Dashboard header metrics bar
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-020 :: Expand Add Child Button Hit Area
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Increase hit area of Add Child button to 48x48px and add visual background
+- Out-of-scope: Changes to button icon or position
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ChildProfileSwitcher component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Minimum hit area is 48x48px
+- Button has a background hover/active state
+- Visually separated from adjacent text
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-002
+- Evidence: 00:01 - Profile switcher area
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-021 :: Add Audio Narration to Letter Hunt Tutorial
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Implement auto-playing visual animation and audio-readout for tutorial instructions
+- Out-of-scope: Changes to tutorial text content
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): GameTutorialModal component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Tutorial contains at least one looping GIF/video demo
+- Tutorial includes a 'Play Sound' button for text blocks
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-003
+- Evidence: 00:05 - Text-heavy How to Play screen
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-022 :: Add Native Script Labels to Language Selection
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Add native script characters as primary labels for language buttons
+- Out-of-scope: Changes to available languages
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): LanguageSelectionGrid component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Button labels display the language name in its native script (e.g., தமிழ்) as well as English
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-004
+- Evidence: 00:12 - Language pill buttons
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-023 :: Add Progress Tooltip for Locked Adventure Map Areas
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Add progress bar overlay or tooltip showing unlock requirements for locked map zones
+- Out-of-scope: Changes to map design or unlock logic
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): AdventureMap component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Tapping a locked map zone triggers a UI response explaining the specific unlock requirement (e.g., 'Level 5 required')
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-005
+- Evidence: 00:15 - Locked island in Pip's Adventure Map
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-024 :: Add Pedagogical Descriptions to Difficulty Levels
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Add sub-text to difficulty buttons describing the numeric range or speed
+- Out-of-scope: Changes to difficulty logic
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): DifficultySelection component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Difficulty selection buttons include descriptive text of the learning scope (e.g., Numbers 0-10)
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-006
+- Evidence: 00:20 - Difficulty selector buttons
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-025 :: Add Branded Loading Screen for Game Transitions
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Implement branded splash screen or progress spinner for game transitions
+- Out-of-scope: Changes to transition timing
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): GameTransitionLoader component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- No blank screen state exceeds 500ms during internal route changes
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-007
+- Evidence: 00:27 - Full white frame during transition
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-026 :: Replace Text Loading with Visual Hand Icon
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Use visual hand-waving icon or animation for camera initialization
+- Out-of-scope: Changes to initialization logic
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): HandTrackingLoader component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Camera initialization is communicated via a visual icon or animation, not text
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-008
+- Evidence: 00:31 - Centered loading text
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-027 :: Add Glow Effect to Tracking Cursor
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Add white outer stroke or high-contrast glow to the red tracking dot
+- Out-of-scope: Changes to cursor size or color
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): TrackingCursor component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Cursor remains visible over skin tones and dark hair (verified by internal contrast checker)
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-009
+- Evidence: 00:34 - Dot over user's hand
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-028 :: Extend Success Feedback Duration
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Extend success feedback duration to 2.0 seconds minimum
+- Out-of-scope: Changes to feedback content
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): SuccessFeedback component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Success feedback (visual toast) stays visible for exactly 2 seconds before the next round starts
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-010
+- Evidence: 00:35 - Success bubble flicker
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-029 :: Center Target Letter Prompt in Gameplay
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Show target letter in centered modal for 800ms before showing choices
+- Out-of-scope: Changes to choice layout
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): LetterHuntTargetDisplay component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Target letter prompt renders in the center of the viewport for 800ms before answer options slide into view
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-011
+- Evidence: 00:37 - Split attention layout
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-030 :: Add Audio Correction for Errors
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Ensure auditory correction plays identifying the mis-clicked letter
+- Out-of-scope: Changes to visual error feedback
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ErrorFeedback component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Error states include a text-to-speech component identifying the mis-clicked letter
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-012
+- Evidence: 00:44 - Red error toast
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-031 :: Implement Animated Score Updates
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Implement counting/ticking score animation over 300ms–500ms
+- Out-of-scope: Changes to score calculation
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ScoreDisplay component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Score updates animate linearly over 300ms–500ms per round
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-013
+- Evidence: 00:54 - Static score change
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-032 :: Add Large Mouse Mode Toggle Button
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Display large overlay button for input mode switching when tracking fails
+- Out-of-scope: Changes to tracking logic
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): InputModeToggle component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Input mode toggle has a minimum hit area of 44x44px and uses distinct icons for Hand vs Mouse
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-014
+- Evidence: 01:02 - Top right mode toggle
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-033 :: Improve Home Button Affordance
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Use solid color button with text label for exit navigation
+- Out-of-scope: Changes to button position
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): NavigationFooter component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Global exit buttons have a solid background color and minimum label size of 14px
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-015
+- Evidence: 01:08 - Top left Home icon
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-034 :: Debounce Language Switching Updates
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Debounce language switching or use skeleton loader for text fields
+- Out-of-scope: Changes to language data
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): LanguageSwitcher component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Localized UI strings update within 100ms of language selection without layout shift
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-016
+- Evidence: 01:14 - Latency in label translation update
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-035 :: Add Visual Hand Silhouette for Calibration
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Add transparent ghost hand silhouette overlay on camera feed
+- Out-of-scope: Changes to calibration timing
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): HandCalibration component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Calibration phase displays a visual silhouette indicating optimal hand position
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-017
+- Evidence: 01:16 - Text-only camera calibration prompt
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-036 :: Apply Coordinate Smoothing to Tracing Lines
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Apply low-pass smoothing filter or Bezier curve interpolation to coordinate stream
+- Out-of-scope: Changes to tracing logic
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): TracingCanvas component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Rendered line path uses a minimum 3-frame coordinate moving average; line segments are smoothed via canvas curveTo
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-018
+- Evidence: 01:22 - Jagged red line on the letter 'A'
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-037 :: Color-Code Game Action Buttons
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Use green for Check and red for Clear with matching iconography
+- Out-of-scope: Changes to button layout
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): GameActionFooter component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Buttons have distinct background-color attributes; 'Check' uses checkmark icon; 'Clear' uses trash/undo icon
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-019
+- Evidence: 01:43 - Bottom right button cluster
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-038 :: Redesign Exit Modal for Icon-Based Navigation
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Replace text with icons for exit choices (Home vs Resume)
+- Out-of-scope: Changes to modal timing
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): GameExitModal component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Exit modal choices are decipherable by a non-reading child through icons
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-020
+- Evidence: 01:52 - Modal popup layout
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-039 :: Fix Progress Data Sync on Game Exit
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Force state re-fetch or use optimistic local updates on route change
+- Out-of-scope: Changes to data persistence
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ProgressDashboard component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Scores increment on the Progress dashboard within 1s of the route change from /play to /progress
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-021
+- Evidence: 01:56 - Mastery cards showing zero data
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-040 :: Add Visual Progress Feedback to Parent Gate
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Implement radial or linear progress fill on button during hold
+- Out-of-scope: Changes to hold duration
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ParentGateButton component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Button displays a linear or radial progress bar that completes over exactly 3000ms of continuous holding
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: VID-022
+- Evidence: 02:01 - Static button during hold
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+EOF
+
+### TCK-20260203-041 :: Iconographic Navigation & Multi-State Action Buttons
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: M
+
+Scope contract:
+
+- In-scope: Replace text-only nav with icon + text, Color-code Game Action Footer (Green/Red), Standardize hit areas to 48px min
+- Out-of-scope: Re-skinning the entire dashboard theme, Animated Lottie icons
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): Global navigation components, Game action footers
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Primary nav uses 24px icons
+- Exit modal uses icons for 'Go' vs 'Stay'
+- Game controls are color-coded (Green/Red)
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: TKT-001
+- Evidence: Mapped from VID-002, VID-015, VID-019, VID-035
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-042 :: Tracing Coordinate Smoothing & Path Interpolation
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: S
+
+Scope contract:
+
+- In-scope: Implementation of coordinate buffering system, Path smoothing for Canvas API, Latency optimization for pose-estimation
+- Out-of-scope: Gesture recognition improvements, Alternative stylus support
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): TracingCanvas component
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- The rendered line follows a smooth curve without sharp angles
+- Render latency is under 150ms
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: TKT-002
+- Evidence: Mapped from VID-018, VID-026
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260203-043 :: Progress Data Persistence & Dashboard Sync
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-02-03
+Status: **OPEN**
+Priority: L
+
+Scope contract:
+
+- In-scope: Audit of game-end save API, Implementation of state re-fetch on Dashboard mount, Progress Garden growth logic trigger
+- Out-of-scope: Offline caching, Database performance tuning
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): ProgressDashboard component, Backend progress API
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- Progress cards update within 1s of returning from a game session
+- Garden graphic displays state level 1 (sprout) upon first save
+
+Source:
+
+- Audit file: Video demo audit
+- Finding ID: TKT-003
+- Evidence: Mapped from VID-021, VID-033, VID-034
+
+Execution log:
+
+- 2026-02-03 | Ticket created from video audit analysis
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
 
 ---
 

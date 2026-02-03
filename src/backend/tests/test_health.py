@@ -1,6 +1,5 @@
 """Tests for health endpoint."""
 
-
 import pytest
 from httpx import AsyncClient
 
@@ -28,12 +27,13 @@ async def test_health_db_down(client: AsyncClient):
             "status": "unhealthy",
             "components": {
                 "database": {"status": "unhealthy", "error": "Connection failed"}
-            }
+            },
         }
 
     # Override the health check
     original_health = get_health_status
     import app.main
+
     app.main.get_health_status = mock_unhealthy_status
 
     try:

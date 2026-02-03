@@ -1,8 +1,11 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
+const env = (import.meta as any).env ?? {};
+const API_VERSION = env.VITE_API_VERSION || 'v1';
 const API_BASE_URL =
-  (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8001';
-const API_VERSION = (import.meta as any).env?.VITE_API_VERSION || 'v1';
+  env.VITE_API_BASE_URL ??
+  // In dev, prefer same-origin + Vite proxy (`/api` -> backend) to avoid CORS.
+  (env.DEV ? '' : 'http://localhost:8001');
 
 export const API_URL = `${API_BASE_URL}/api/${API_VERSION}`;
 

@@ -22,10 +22,12 @@ class ProfileService:
     async def get_by_parent(db: AsyncSession, parent_id: str) -> List[Profile]:
         """Get profiles by parent ID."""
         result = await db.execute(select(Profile).where(Profile.parent_id == parent_id))
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
-    async def create(db: AsyncSession, parent_id: str, profile_in: ProfileCreate) -> Profile:
+    async def create(
+        db: AsyncSession, parent_id: str, profile_in: ProfileCreate
+    ) -> Profile:
         """Create new profile."""
         profile = Profile(
             parent_id=parent_id,
@@ -40,7 +42,9 @@ class ProfileService:
         return profile
 
     @staticmethod
-    async def update(db: AsyncSession, profile: Profile, profile_in: ProfileUpdate) -> Profile:
+    async def update(
+        db: AsyncSession, profile: Profile, profile_in: ProfileUpdate
+    ) -> Profile:
         """Update profile."""
         update_data = profile_in.model_dump(exclude_unset=True)
 

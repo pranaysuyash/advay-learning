@@ -20,9 +20,7 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=User)
-async def get_me(
-    current_user: User = Depends(get_current_user)
-) -> User:
+async def get_me(current_user: User = Depends(get_current_user)) -> User:
     """Get current user info."""
     return current_user
 
@@ -31,7 +29,7 @@ async def get_me(
 async def get_user(
     user_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     """Get user by ID."""
     # Validate user_id format
@@ -63,7 +61,7 @@ async def get_user(
 async def update_me(
     user_in: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     """Update current user."""
     user = await UserService.update(db, current_user, user_in)
@@ -75,7 +73,7 @@ async def delete_my_account(
     request: Request,
     delete_req: DeleteAccountRequest,
     current_user: UserModel = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> None:
     """Delete current user account with parent verification.
 
@@ -129,8 +127,7 @@ async def delete_my_account(
 # Profile endpoints (nested under users)
 @router.get("/me/profiles", response_model=List[Profile])
 async def get_my_profiles(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ) -> List[Profile]:
     """Get current user's profiles (children)."""
     profiles = await ProfileService.get_by_parent(db, current_user.id)
@@ -141,7 +138,7 @@ async def get_my_profiles(
 async def create_profile(
     profile_in: ProfileCreate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Profile:
     """Create a new profile (child) for current user."""
     profile = await ProfileService.create(db, current_user.id, profile_in)
@@ -152,7 +149,7 @@ async def create_profile(
 async def get_profile(
     profile_id: str,
     current_user: UserModel = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Profile:
     """Get a specific profile by ID."""
     # Validate profile_id format
@@ -187,7 +184,7 @@ async def update_profile(
     profile_id: str,
     profile_in: ProfileUpdate,
     current_user: UserModel = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Profile:
     """Update a child's profile (name, age, preferred_language, settings).
 
@@ -242,7 +239,7 @@ async def delete_profile(
     profile_id: str,
     delete_req: DeleteProfileRequest,
     current_user: UserModel = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> None:
     """Delete a child's profile with parent verification.
 

@@ -3,6 +3,7 @@
 **Scope**: auth (backend authentication endpoints)  
 **Target File**: `src/backend/app/api/v1/endpoints/auth.py`  
 **Assumptions**: Local-only deployment, parent accounts only, no cloud sync, SQLite storage
+**Ticket:** TCK-20260203-029
 
 ---
 

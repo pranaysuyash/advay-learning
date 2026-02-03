@@ -15,7 +15,7 @@ class TestTimingAttackPrevention:
         # First register a user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "timing@test.com", "password": "SecurePassword123"}
+            json={"email": "timing@test.com", "password": "SecurePassword123"},
         )
 
         # Measure time for existing user with wrong password
@@ -24,7 +24,7 @@ class TestTimingAttackPrevention:
             start = time.perf_counter()
             await client.post(
                 "/api/v1/auth/login",
-                data={"username": "timing@test.com", "password": "wrongpassword"}
+                data={"username": "timing@test.com", "password": "wrongpassword"},
             )
             existing_user_times.append(time.perf_counter() - start)
 
@@ -34,7 +34,7 @@ class TestTimingAttackPrevention:
             start = time.perf_counter()
             await client.post(
                 "/api/v1/auth/login",
-                data={"username": "nonexistent@user.com", "password": "anypassword"}
+                data={"username": "nonexistent@user.com", "password": "anypassword"},
             )
             nonexistent_user_times.append(time.perf_counter() - start)
 
@@ -45,7 +45,9 @@ class TestTimingAttackPrevention:
         # The difference should be small (less than 50% variation)
         # This is a heuristic - in practice, the timing should be very similar
         max_allowed_ratio = 1.5
-        ratio = max(existing_median, nonexistent_median) / min(existing_median, nonexistent_median)
+        ratio = max(existing_median, nonexistent_median) / min(
+            existing_median, nonexistent_median
+        )
 
         assert ratio < max_allowed_ratio, (
             f"Timing difference detected: existing user median={existing_median:.4f}s, "
@@ -64,7 +66,7 @@ class TestPasswordSecurity:
         # Register user
         register_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "hash@test.com", "password": password}
+            json={"email": "hash@test.com", "password": password},
         )
         assert register_response.status_code == 200
 
@@ -79,14 +81,14 @@ class TestPasswordSecurity:
         # Login should work
         login_response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "hash@test.com", "password": password}
+            data={"username": "hash@test.com", "password": password},
         )
         assert login_response.status_code == 200
 
         # Wrong password should fail
         wrong_login = await client.post(
             "/api/v1/auth/login",
-            data={"username": "hash@test.com", "password": "wrongpassword"}
+            data={"username": "hash@test.com", "password": "wrongpassword"},
         )
         assert wrong_login.status_code == 401
 
@@ -99,14 +101,14 @@ class TestEmailVerification:
         # Register a new user (email not verified by default)
         register_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "unverified@test.com", "password": "testPassword123"}
+            json={"email": "unverified@test.com", "password": "testPassword123"},
         )
         assert register_response.status_code == 200
 
         # Try to login without verifying email
         login_response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "unverified@test.com", "password": "testPassword123"}
+            data={"username": "unverified@test.com", "password": "testPassword123"},
         )
         assert login_response.status_code == 403
         assert "not verified" in login_response.json()["detail"].lower()
@@ -116,7 +118,7 @@ class TestEmailVerification:
         # Register user
         register_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "verify@test.com", "password": "testPassword123"}
+            json={"email": "verify@test.com", "password": "testPassword123"},
         )
         assert register_response.status_code == 200
 
@@ -130,8 +132,7 @@ class TestEmailVerification:
 
         # Verify email with token
         verify_response = await client.post(
-            "/api/v1/auth/verify-email",
-            params={"token": token}
+            "/api/v1/auth/verify-email", params={"token": token}
         )
         assert verify_response.status_code == 200
         assert "verified successfully" in verify_response.json()["message"].lower()
@@ -139,7 +140,7 @@ class TestEmailVerification:
         # Now login should work and set cookies
         login_response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "verify@test.com", "password": "testPassword123"}
+            data={"username": "verify@test.com", "password": "testPassword123"},
         )
         assert login_response.status_code == 200
         assert login_response.json()["message"] == "Login successful"
@@ -151,8 +152,7 @@ class TestEmailVerification:
     async def test_invalid_verification_token(self, client: AsyncClient):
         """Verify invalid tokens are rejected."""
         response = await client.post(
-            "/api/v1/auth/verify-email",
-            params={"token": "invalid-token"}
+            "/api/v1/auth/verify-email", params={"token": "invalid-token"}
         )
         assert response.status_code == 400
         assert "invalid" in response.json()["detail"].lower()
@@ -162,13 +162,12 @@ class TestEmailVerification:
         # Register user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "resend@test.com", "password": "testPassword123"}
+            json={"email": "resend@test.com", "password": "testPassword123"},
         )
 
         # Resend verification
         resend_response = await client.post(
-            "/api/v1/auth/resend-verification",
-            params={"email": "resend@test.com"}
+            "/api/v1/auth/resend-verification", params={"email": "resend@test.com"}
         )
         assert resend_response.status_code == 200
         # Should return generic message (prevents user enumeration)
@@ -183,7 +182,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset@test.com", "password": "oldPassword123"}
+            json={"email": "reset@test.com", "password": "oldPassword123"},
         )
 
         from app.db.session import async_session
@@ -195,8 +194,7 @@ class TestPasswordReset:
 
         # Request password reset
         response = await client.post(
-            "/api/v1/auth/forgot-password",
-            params={"email": "reset@test.com"}
+            "/api/v1/auth/forgot-password", params={"email": "reset@test.com"}
         )
         assert response.status_code == 200
         assert "if an account exists" in response.json()["message"].lower()
@@ -212,7 +210,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset2@test.com", "password": "oldPassword123"}
+            json={"email": "reset2@test.com", "password": "oldPassword123"},
         )
 
         from app.db.session import async_session
@@ -226,7 +224,7 @@ class TestPasswordReset:
         # Reset password
         response = await client.post(
             "/api/v1/auth/reset-password",
-            params={"token": token, "new_password": "newpassword456"}
+            params={"token": token, "new_password": "newpassword456"},
         )
         assert response.status_code == 200
         assert "reset successfully" in response.json()["message"].lower()
@@ -234,14 +232,14 @@ class TestPasswordReset:
         # Old password should not work
         old_login = await client.post(
             "/api/v1/auth/login",
-            data={"username": "reset2@test.com", "password": "oldPassword123"}
+            data={"username": "reset2@test.com", "password": "oldPassword123"},
         )
         assert old_login.status_code == 401
 
         # New password should work
         new_login = await client.post(
             "/api/v1/auth/login",
-            data={"username": "reset2@test.com", "password": "newpassword456"}
+            data={"username": "reset2@test.com", "password": "newpassword456"},
         )
         assert new_login.status_code == 200
 
@@ -249,7 +247,7 @@ class TestPasswordReset:
         """Test password reset with invalid token fails."""
         response = await client.post(
             "/api/v1/auth/reset-password",
-            params={"token": "invalid-token", "new_password": "newpassword456"}
+            params={"token": "invalid-token", "new_password": "newpassword456"},
         )
         assert response.status_code == 400
         assert "invalid" in response.json()["detail"].lower()
@@ -259,7 +257,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset3@test.com", "password": "oldPassword123"}
+            json={"email": "reset3@test.com", "password": "oldPassword123"},
         )
 
         from app.db.session import async_session
@@ -273,7 +271,7 @@ class TestPasswordReset:
         # Try to reset with short password
         response = await client.post(
             "/api/v1/auth/reset-password",
-            params={"token": token, "new_password": "short"}
+            params={"token": token, "new_password": "short"},
         )
         assert response.status_code == 400
         assert "at least 8 characters" in response.json()["detail"].lower()
@@ -281,8 +279,7 @@ class TestPasswordReset:
     async def test_forgot_password_nonexistent_user(self, client: AsyncClient):
         """Test forgot password for non-existent user returns generic message."""
         response = await client.post(
-            "/api/v1/auth/forgot-password",
-            params={"email": "nonexistent@user.com"}
+            "/api/v1/auth/forgot-password", params={"email": "nonexistent@user.com"}
         )
         assert response.status_code == 200
         # Should return same message to prevent user enumeration
@@ -297,7 +294,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "cookie@test.com", "password": "testPassword123"}
+            json={"email": "cookie@test.com", "password": "testPassword123"},
         )
 
         from app.db.session import async_session
@@ -310,7 +307,7 @@ class TestCookieAuthentication:
         # Login
         response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "cookie@test.com", "password": "testPassword123"}
+            data={"username": "cookie@test.com", "password": "testPassword123"},
         )
         assert response.status_code == 200
 
@@ -329,7 +326,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "logout@test.com", "password": "testPassword123"}
+            json={"email": "logout@test.com", "password": "testPassword123"},
         )
 
         from app.db.session import async_session
@@ -342,7 +339,7 @@ class TestCookieAuthentication:
         # Login to set cookies
         await client.post(
             "/api/v1/auth/login",
-            data={"username": "logout@test.com", "password": "testPassword123"}
+            data={"username": "logout@test.com", "password": "testPassword123"},
         )
 
         # Logout
@@ -360,7 +357,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "protected@test.com", "password": "testPassword123"}
+            json={"email": "protected@test.com", "password": "testPassword123"},
         )
 
         from app.db.session import async_session
@@ -373,7 +370,7 @@ class TestCookieAuthentication:
         # Login (sets cookies in client session)
         await client.post(
             "/api/v1/auth/login",
-            data={"username": "protected@test.com", "password": "testPassword123"}
+            data={"username": "protected@test.com", "password": "testPassword123"},
         )
 
         # Access protected endpoint (cookies automatically sent)
@@ -400,7 +397,7 @@ class TestAuthRateLimiting:
         # Just verify endpoints work (rate limits are high in test mode)
         response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "test@test.com", "password": "wrong"}
+            data={"username": "test@test.com", "password": "wrong"},
         )
         # Should get 401 (unauthorized), not 500 (server error)
         # This confirms the rate limiter is processing the request
@@ -410,7 +407,7 @@ class TestAuthRateLimiting:
         """Verify rate limit headers are present in responses."""
         response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "test@test.com", "password": "wrong"}
+            data={"username": "test@test.com", "password": "wrong"},
         )
 
         # Check for rate limit headers (slowapi adds these)

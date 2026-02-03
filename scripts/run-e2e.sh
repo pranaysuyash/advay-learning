@@ -11,7 +11,17 @@ TMP_DIR="$ROOT_DIR/.tmp"
 mkdir -p "$LOGS_DIR" "$TMP_DIR"
 
 echo "[e2e] Activating venv and installing frontend dev deps (if needed)"
-. .venv/bin/activate
+# Check for backend venv first (most common case)
+if [ -d "src/backend/.venv" ]; then
+  . src/backend/.venv/bin/activate
+  echo "[e2e] Activated backend virtual environment"
+elif [ -d ".venv" ]; then
+  . .venv/bin/activate
+  echo "[e2e] Activated root virtual environment"
+else
+  echo "[e2e] Error: Virtual environment not found"
+  exit 1
+fi
 
 # Ensure Playwright browsers installed
 cd "$ROOT_DIR/src/frontend"
@@ -32,7 +42,8 @@ else
   echo "[e2e] Starting backend (logs -> $LOGS_DIR/backend-e2e.log)"
   cd "$ROOT_DIR/src/backend"
   mkdir -p "$LOGS_DIR"
-  . "$ROOT_DIR/.venv/bin/activate"
+  # Use backend's venv
+  . "$ROOT_DIR/src/backend/.venv/bin/activate"
   uv run python start.py > "$LOGS_DIR/backend-e2e.log" 2>&1 &
   BACKEND_PID=$!
   echo $BACKEND_PID > "$TMP_DIR/backend-e2e.pid"

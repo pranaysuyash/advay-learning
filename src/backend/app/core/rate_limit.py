@@ -19,10 +19,7 @@ if TESTING:
 else:
     DEFAULT_LIMITS = ["100/minute"]  # Default: 100 requests per minute per IP
 
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=DEFAULT_LIMITS  # type: ignore
-)
+limiter = Limiter(key_func=get_remote_address, default_limits=DEFAULT_LIMITS)  # type: ignore
 
 
 def get_rate_limit_exceeded_handler() -> Any:
@@ -36,16 +33,24 @@ class RateLimits:
 
     # Authentication endpoints - strict limits to prevent brute force
     # In testing, use high limits; in production, use strict limits
-    AUTH_STRICT = "10000/minute" if TESTING else "5/minute"      # Login, register attempts
-    AUTH_MEDIUM = "10000/minute" if TESTING else "10/minute"     # Email verification, password reset
+    AUTH_STRICT = "10000/minute" if TESTING else "5/minute"  # Login, register attempts
+    AUTH_MEDIUM = (
+        "10000/minute" if TESTING else "10/minute"
+    )  # Email verification, password reset
 
     # General API endpoints
-    API_GENERAL = "10000/minute" if TESTING else "100/minute"    # Most API operations
-    API_HEAVY = "10000/minute" if TESTING else "20/minute"       # Heavy operations (stats, exports)
+    API_GENERAL = "10000/minute" if TESTING else "100/minute"  # Most API operations
+    API_HEAVY = (
+        "10000/minute" if TESTING else "20/minute"
+    )  # Heavy operations (stats, exports)
 
     # Progress tracking - higher limits for game interactions
-    PROGRESS_WRITE = "10000/minute" if TESTING else "60/minute"  # Saving progress (1 per second)
-    PROGRESS_READ = "10000/minute" if TESTING else "120/minute"  # Reading progress/stats
+    PROGRESS_WRITE = (
+        "10000/minute" if TESTING else "60/minute"
+    )  # Saving progress (1 per second)
+    PROGRESS_READ = (
+        "10000/minute" if TESTING else "120/minute"
+    )  # Reading progress/stats
 
 
 def setup_rate_limiting(app: Any) -> None:

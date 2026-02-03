@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def main() -> int:
     """Main application entry point.
-    
+
     Returns:
         Exit code (0 for success, non-zero for error)
     """

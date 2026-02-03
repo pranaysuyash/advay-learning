@@ -19,7 +19,7 @@ router = APIRouter()
 async def get_progress(
     profile_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> List[Progress]:
     """Get learning progress for a profile."""
     # Validate profile_id format
@@ -54,7 +54,7 @@ async def save_progress(
     progress_in: ProgressCreate,
     profile_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Progress:
     """Save learning progress."""
     # Validate profile_id format
@@ -88,14 +88,14 @@ async def save_progress(
 async def save_progress_batch(
     payload: dict,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Batch save progress items. Expects body: { profile_id: string, items: [ { idempotency_key, activity_type, content_id, score, duration_seconds?, meta_data?, timestamp } ] }
 
     Simple dedupe by idempotency_key implemented at service layer if available.
     """
-    profile_id = payload.get('profile_id')
-    items = payload.get('items') or []
+    profile_id = payload.get("profile_id")
+    items = payload.get("items") or []
 
     # Basic validation
     try:
@@ -121,29 +121,39 @@ async def save_progress_batch(
 
     results = []
     for it in items:
-        key = it.get('idempotency_key')
+        key = it.get("idempotency_key")
         try:
             # Try to create; ProgressService.create will raise DuplicateProgressError if duplicate
             progress = await ProgressService.create(db, profile_id, it)
-            results.append({ 'idempotency_key': key, 'status': 'ok', 'server_id': str(progress.id) })
+            results.append(
+                {"idempotency_key": key, "status": "ok", "server_id": str(progress.id)}
+            )
         except Exception as e:
             # Handle duplicate specifically
             if isinstance(e, DuplicateProgressError):
                 # Attempt to get existing id if available
-                existing_id = getattr(e, 'existing_id', None)
-                results.append({ 'idempotency_key': key, 'status': 'duplicate', 'server_id': existing_id })
+                existing_id = getattr(e, "existing_id", None)
+                results.append(
+                    {
+                        "idempotency_key": key,
+                        "status": "duplicate",
+                        "server_id": existing_id,
+                    }
+                )
             else:
                 # Other errors reported as error for that item
-                results.append({ 'idempotency_key': key, 'status': 'error', 'error': str(e) })
+                results.append(
+                    {"idempotency_key": key, "status": "error", "error": str(e)}
+                )
 
-    return { 'results': results }
+    return {"results": results}
 
 
 @router.get("/stats")
 async def get_progress_stats(
     profile_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Get progress statistics for a profile."""
     # Validate profile_id format

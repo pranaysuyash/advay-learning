@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { useTTS } from '../hooks/useTTS';
 import { useSoundEffects } from '../hooks/useSoundEffects';
-import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -15,6 +13,10 @@ import { countExtendedFingersFromLandmarks } from './fingerCounting';
 // Centralized hand tracking
 import { useHandTracking } from '../hooks/useHandTracking';
 import { useGameLoop } from '../hooks/useGameLoop';
+import { getHandLandmarkLists } from '../utils/landmarkUtils';
+import { getMaxHandsForDifficultyIndex } from './finger-number-show/handTrackingConfig';
+import { FingerNumberShowMenu } from './finger-number-show/FingerNumberShowMenu';
+import { FingerNumberShowHud } from './finger-number-show/FingerNumberShowHud';
 import type { Point, Landmark } from '../types/tracking';
 
 interface DifficultyLevel {
@@ -66,6 +68,11 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [difficulty, setDifficulty] = useState<number>(0);
+
+  const desiredMaxHands = getMaxHandsForDifficultyIndex(difficulty);
+  const activeMaxHandsRef = useRef<number>(desiredMaxHands);
+  const reinitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Use centralized hand tracking hook
   const {
@@ -73,8 +80,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     isLoading: isModelLoading,
     isReady: isHandTrackingReady,
     initialize: initializeHandTracking,
+    reset: resetHandTracking,
   } = useHandTracking({
-    numHands: 4,
+    // Default to 2 hands for stability; allow up to 4 in Duo Mode.
+    numHands: desiredMaxHands,
     minDetectionConfidence: 0.3,
     minHandPresenceConfidence: 0.3,
     minTrackingConfidence: 0.3,
@@ -85,7 +94,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [handsDetected, setHandsDetected] = useState<number>(0);
   const [targetNumber, setTargetNumber] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
-  const [difficulty, setDifficulty] = useState<number>(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
@@ -112,7 +120,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     count: null,
   });
 
-  const lastVideoTimeRef = useRef<number>(-1);
   const lastHandsSeenAtRef = useRef<number>(0);
   const targetBagRef = useRef<number[]>([]);
   const lastTargetRef = useRef<number | null>(null);
@@ -280,10 +287,46 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     ],
   );
 
-  // Initialize hand tracking on mount
   useEffect(() => {
+    if (!isPlaying) return;
+    if (isHandTrackingReady || isModelLoading) return;
+    activeMaxHandsRef.current = desiredMaxHands;
     initializeHandTracking();
-  }, [initializeHandTracking]);
+  }, [
+    desiredMaxHands,
+    initializeHandTracking,
+    isHandTrackingReady,
+    isModelLoading,
+    isPlaying,
+  ]);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      if (reinitTimerRef.current) {
+        clearTimeout(reinitTimerRef.current);
+        reinitTimerRef.current = null;
+      }
+      return;
+    }
+
+    if (activeMaxHandsRef.current === desiredMaxHands) return;
+
+    // Reinitialize the model to apply the new max-hands value. The hook's
+    // initialize() short-circuits when an instance exists, so we must reset.
+    resetHandTracking();
+    if (reinitTimerRef.current) clearTimeout(reinitTimerRef.current);
+    reinitTimerRef.current = setTimeout(() => {
+      activeMaxHandsRef.current = desiredMaxHands;
+      initializeHandTracking();
+    }, 0);
+
+    return () => {
+      if (reinitTimerRef.current) {
+        clearTimeout(reinitTimerRef.current);
+        reinitTimerRef.current = null;
+      }
+    };
+  }, [desiredMaxHands, initializeHandTracking, isPlaying, resetHandTracking]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -300,6 +343,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     breakdown: '',
   });
 
+  const detectAndDrawRef = useRef<(() => void) | null>(null);
+
   // Game loop using centralized hook
   useGameLoop({
     isRunning: isPlaying && isHandTrackingReady,
@@ -308,8 +353,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       detectAndDrawRef.current?.();
     }, []),
   });
-
-  const detectAndDrawRef = useRef<(() => void) | null>(null);
 
   const detectAndDraw = useCallback(() => {
     if (
@@ -330,7 +373,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       video.videoWidth === 0 ||
       video.videoHeight === 0
     ) {
-      requestAnimationFrame(detectAndDraw);
       return;
     }
 
@@ -338,11 +380,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
     }
-
-    if (video.currentTime === lastVideoTimeRef.current) {
-      return;
-    }
-    lastVideoTimeRef.current = video.currentTime;
 
     let results: HandLandmarkerResult | null = null;
     try {
@@ -357,10 +394,12 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     const perHand: number[] = [];
     let detectedHands = 0;
 
-    if (results && results.landmarks && results.landmarks.length > 0) {
+    const landmarksList = getHandLandmarkLists(results);
+
+    if (landmarksList.length > 0) {
       lastHandsSeenAtRef.current = Date.now();
-      detectedHands = results.landmarks.length;
-      results.landmarks.forEach((landmarks: Landmark[], handIndex: number) => {
+      detectedHands = landmarksList.length;
+      landmarksList.forEach((landmarks: Landmark[], handIndex: number) => {
         const fingerCount = countExtendedFingers(landmarks);
         perHand.push(fingerCount);
         totalFingers += fingerCount;
@@ -458,8 +497,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       }
     }
 
-    // Store reference for useGameLoop
-    detectAndDrawRef.current = detectAndDraw;
   }, [
     handLandmarker,
     isPlaying,
@@ -471,6 +508,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     handsDetected,
     targetLetter,
   ]);
+
+  useEffect(() => {
+    detectAndDrawRef.current = detectAndDraw;
+  }, [detectAndDraw]);
 
   useEffect(() => {
     return () => {
@@ -576,186 +617,23 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   return (
     <>
       {!isPlaying ? (
-        /* Pre-Game Menu Screen */
-        <section className='max-w-7xl mx-auto px-4 py-8'>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {/* Header */}
-            <header className='flex justify-between items-start mb-4'>
-              <div>
-                <h1 className='text-2xl md:text-3xl font-bold'>
-                  {gameMode === 'letters'
-                    ? 'Letter Finger Show'
-                    : 'Finger Number Show'}
-                </h1>
-                <p className='text-text-secondary text-sm md:text-base'>
-                  {gameMode === 'letters'
-                    ? 'Show letters by counting with your fingers!'
-                    : 'Show numbers with your fingers!'}
-                </p>
-              </div>
-              <div className='text-right'>
-                <output className='text-xl md:text-2xl font-bold text-text-primary block'>
-                  Score: {score}
-                </output>
-                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm text-text-secondary mt-1'>
-                  <span className='flex items-center gap-1 min-w-fit'>
-                    <span className='text-pip-orange'>🔥</span>
-                    Streak: {streak}
-                  </span>
-                  <span className='min-w-fit'>
-                    {
-                      (DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0])
-                        .name
-                    }
-                  </span>
-                </div>
-              </div>
-            </header>
-
-            {/* Mode Selection */}
-            <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
-              <div className='text-sm font-medium text-text-secondary mb-3'>
-                Choose Game Mode
-              </div>
-              <div className='flex gap-2 mb-4'>
-                <button
-                  type='button'
-                  onClick={() => setGameMode('numbers')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    gameMode === 'numbers'
-                      ? 'bg-pip-orange text-white shadow-soft'
-                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                  }`}
-                >
-                  🔢 Numbers
-                </button>
-                <button
-                  type='button'
-                  onClick={() => setGameMode('letters')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    gameMode === 'letters'
-                      ? 'bg-pip-orange text-white shadow-soft'
-                      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                  }`}
-                >
-                  🔤 Letters
-                </button>
-              </div>
-
-              {gameMode === 'letters' && (
-                <>
-                  <div className='text-sm font-medium text-text-secondary mb-2'>
-                    Choose Language
-                  </div>
-                  <div className='flex flex-wrap gap-2'>
-                    {LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        type='button'
-                        onClick={() => setSelectedLanguage(lang.code)}
-                        className={`px-3 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                          selectedLanguage === lang.code
-                            ? 'bg-success/20 border border-success/30 text-text-success'
-                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                        }`}
-                      >
-                        <img src={lang.flagIcon} alt={`${lang.name} flag`} className="w-4 h-4" />
-                        <span>{lang.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Difficulty Selection */}
-            {!isPlaying && gameMode === 'numbers' && (
-              <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
-                <div className='text-sm font-medium text-text-secondary mb-2'>
-                  Choose Difficulty
-                </div>
-                <div className='flex gap-2'>
-                  {DIFFICULTY_LEVELS.map((level, levelIndex) => (
-                    <button
-                      key={level.name}
-                      type='button'
-                      onClick={() => setDifficulty(levelIndex)}
-                      className={`px-4 py-2 rounded-lg font-medium transition ${
-                        difficulty === levelIndex
-                          ? 'bg-pip-orange text-white shadow-soft'
-                          : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                      }`}
-                    >
-                      {level.name} ({level.minNumber}-{level.maxNumber})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Feedback */}
-            <AnimatePresence>
-              {feedback && (!isPlaying || !isPromptFeedback) && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-                    feedback.includes('Great') || feedback.includes('Amazing')
-                      ? 'bg-success/20 border border-success/30 text-text-success'
-                      : 'bg-white border border-border text-text-secondary'
-                  }`}
-                >
-                  {feedback}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Game Area */}
-            <div className='bg-white border border-border rounded-2xl p-12 text-center relative overflow-hidden shadow-soft-lg'>
-              {/* Decorative elements */}
-              <div className='absolute inset-0 opacity-20'>
-                <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
-                <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
-                <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
-              </div>
-
-              <div className='text-6xl mb-4'>
-                {gameMode === 'letters' ? '🔤' : '🤚'}
-              </div>
-              <h2 className='text-3xl font-bold mb-4 text-advay-slate'>
-                {gameMode === 'letters'
-                  ? 'Ready to Learn Letters?'
-                  : 'Ready to Count?'}
-              </h2>
-              <p className='text-text-secondary mb-8 max-w-md mx-auto text-lg'>
-                {gameMode === 'letters'
-                  ? 'Show me letters by holding up the right number of fingers! A=1 finger, B=2 fingers, and so on.'
-                  : "Hold up your fingers to show numbers! The camera will count how many fingers you're showing."}
-              </p>
-
-              {/* Controls positioned at bottom-right like other games */}
-              {/* Standardized Menu Controls */}
-              <GameControls
-                controls={[
-                  ...menuControls,
-                  {
-                    id: 'start',
-                    icon: 'play',
-                    label: isModelLoading ? 'Loading...' : 'Start Game',
-                    onClick: startButtonControl.onClick,
-                    variant: 'success',
-                    disabled: startButtonControl.disabled,
-                  },
-                ]}
-                position='bottom-center'
-              />
-            </div>
-          </motion.div>
-        </section>
+        <FingerNumberShowMenu
+          gameMode={gameMode}
+          onGameModeChange={setGameMode}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+          difficulty={difficulty}
+          onDifficultyChange={setDifficulty}
+          score={score}
+          streak={streak}
+          isModelLoading={isModelLoading}
+          feedback={feedback}
+          isPromptFeedback={isPromptFeedback}
+          menuControls={menuControls}
+          startGame={startButtonControl.onClick}
+          languages={LANGUAGES}
+          difficultyLevels={DIFFICULTY_LEVELS}
+        />
       ) : (
         /* Active Game - Full Screen with GameContainer */
         <GameContainer
@@ -778,79 +656,16 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
               className='absolute inset-0 w-full h-full'
             />
 
-            {/* Side Prompt */}
-            {promptStage === 'side' && (
-              <div className='absolute top-4 left-4 flex gap-2 flex-wrap pointer-events-none'>
-                <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
-                  <span className='flex items-center gap-2'>
-                    <UIIcon
-                      name='target'
-                      size={16}
-                      className='text-yellow-300'
-                    />
-                    Show{' '}
-                    <span className='font-extrabold'>
-                      {gameMode === 'letters' && targetLetter
-                        ? targetLetter.char
-                        : targetNumber}
-                    </span>
-                    {gameMode === 'letters' && targetLetter && (
-                      <span className='opacity-80'>({targetLetter.name})</span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Detection Status */}
-            <div className='absolute top-4 right-4 pointer-events-none'>
-              <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
-                <span className='flex items-center gap-2'>
-                  <span
-                    className={`inline-block w-2.5 h-2.5 rounded-full ${isDetectedMatch ? 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.9)]' : 'bg-white/40'}`}
-                  />
-                  {handsDetected > 0 ? `${currentCount} fingers` : 'No hands'}
-                </span>
-              </div>
-            </div>
-
-            {/* One-time big prompt (center) then moves to the side */}
-            {promptStage === 'center' && (
-              <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/30 text-white shadow-soft-lg'>
-                  <div className='text-center'>
-                    {gameMode === 'letters' && targetLetter ? (
-                      <>
-                        <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                          Show me
-                        </div>
-                        <div className='text-7xl md:text-8xl font-black leading-none'>
-                          {targetLetter.char}
-                        </div>
-                        <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                          {targetLetter.name}
-                        </div>
-                        <div className='text-sm opacity-70 mt-1'>
-                          ({targetLetter.pronunciation})
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                          {targetNumber === 0 ? 'Make a fist' : 'Show'}
-                        </div>
-                        <div className='text-7xl md:text-8xl font-black leading-none'>
-                          {targetNumber}
-                        </div>
-                        <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                          {NUMBER_NAMES[targetNumber]}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            <FingerNumberShowHud
+              promptStage={promptStage}
+              gameMode={gameMode}
+              targetNumber={targetNumber}
+              targetLetter={targetLetter}
+              currentCount={currentCount}
+              handsDetected={handsDetected}
+              isDetectedMatch={!!isDetectedMatch}
+              numberNames={NUMBER_NAMES}
+            />
 
             {/* Standardized Game Controls - Bottom Right */}
             <GameControls controls={gameControls} position='bottom-right' />

@@ -20,7 +20,9 @@ class Profile(Base):
 
     __tablename__ = "profiles"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid4())
+    )
     parent_id: Mapped[str] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -38,8 +40,14 @@ class Profile(Base):
     # Relationships
     parent: Mapped["User"] = relationship("User", back_populates="profiles")
     progress: Mapped[list["Progress"]] = relationship(
-        "Progress", back_populates="profile", lazy="selectin", cascade="all, delete-orphan"
+        "Progress",
+        back_populates="profile",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )
     achievements: Mapped[list["Achievement"]] = relationship(
-        "Achievement", back_populates="profile", lazy="selectin", cascade="all, delete-orphan"
+        "Achievement",
+        back_populates="profile",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )

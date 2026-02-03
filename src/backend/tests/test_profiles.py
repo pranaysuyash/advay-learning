@@ -9,11 +9,7 @@ class TestProfiles:
         response = await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={
-                "name": "Test Child",
-                "age": 5,
-                "preferred_language": "en"
-            }
+            json={"name": "Test Child", "age": 5, "preferred_language": "en"},
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
         data = response.json()
@@ -27,7 +23,7 @@ class TestProfiles:
         await client.post(
             "/api/v1/users/me/profiles",
             headers=auth_headers,
-            json={"name": "Test Child", "age": 5}
+            json={"name": "Test Child", "age": 5},
         )
 
         response = await client.get("/api/v1/users/me/profiles", headers=auth_headers)
@@ -39,23 +35,19 @@ class TestProfiles:
     async def test_create_profile_no_auth(self, client: AsyncClient):
         """Test creating profile without auth fails."""
         response = await client.post(
-            "/api/v1/users/me/profiles",
-            json={"name": "Test Child", "age": 5}
+            "/api/v1/users/me/profiles", json={"name": "Test Child", "age": 5}
         )
         assert response.status_code == 401
 
-    async def test_create_multiple_profiles(self, client: AsyncClient, auth_headers: dict):
+    async def test_create_multiple_profiles(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test creating multiple profiles for same user."""
-        profiles = [
-            {"name": "Child 1", "age": 4},
-            {"name": "Child 2", "age": 6}
-        ]
+        profiles = [{"name": "Child 1", "age": 4}, {"name": "Child 2", "age": 6}]
 
         for profile in profiles:
             response = await client.post(
-                "/api/v1/users/me/profiles",
-                headers=auth_headers,
-                json=profile
+                "/api/v1/users/me/profiles", headers=auth_headers, json=profile
             )
             assert response.status_code == 200  # Endpoint returns 200, not 201
 

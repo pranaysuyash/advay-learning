@@ -14,7 +14,9 @@ class AuditLog(Base):
 
     __tablename__ = "audit_logs"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid4())
+    )
 
     # Who performed the action
     user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
@@ -42,4 +44,6 @@ class AuditLog(Base):
     # e.g., "password_reauth", "email_confirmation"
 
     # Timestamp
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, index=True
+    )

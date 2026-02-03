@@ -6,8 +6,16 @@ from app.schemas.token import Token, TokenPayload
 from app.schemas.user import User, UserCreate, UserInDB, UserUpdate
 
 __all__ = [
-    "User", "UserCreate", "UserUpdate", "UserInDB",
-    "Profile", "ProfileCreate", "ProfileUpdate",
-    "Progress", "ProgressCreate", "ProgressUpdate",
-    "Token", "TokenPayload",
+    "User",
+    "UserCreate",
+    "UserUpdate",
+    "UserInDB",
+    "Profile",
+    "ProfileCreate",
+    "ProfileUpdate",
+    "Progress",
+    "ProgressCreate",
+    "ProgressUpdate",
+    "Token",
+    "TokenPayload",
 ]

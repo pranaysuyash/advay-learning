@@ -18,16 +18,13 @@ async def check_database(db: AsyncSession) -> Dict[str, Any]:
         # Lightweight DB check
         await db.execute(text("SELECT 1"))
         response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
-        return {
-            "status": "healthy",
-            "response_time_ms": round(response_time, 2)
-        }
+        return {"status": "healthy", "response_time_ms": round(response_time, 2)}
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
         return {
             "status": "unhealthy",
             "error": str(e),
-            "response_time_ms": round(response_time, 2)
+            "response_time_ms": round(response_time, 2),
         }
 
 
@@ -38,7 +35,7 @@ async def get_health_status(db: AsyncSession) -> Dict[str, Any]:
         Dict with overall status, component statuses, and performance metrics
     """
     overall_start = time.time()
-    
+
     db_status = await check_database(db)
 
     # Overall status is healthy only if all components are healthy
@@ -48,11 +45,9 @@ async def get_health_status(db: AsyncSession) -> Dict[str, Any]:
     return {
         "status": overall_status,
         "response_time_ms": round(overall_response_time, 2),
-        "components": {
-            "database": db_status
-        },
+        "components": {"database": db_status},
         "metadata": {
-            "checks_performed": 1,  # Database only for now
-            "timestamp": time.time()
-        }
+            "checks_performed": 1,
+            "timestamp": time.time(),
+        },  # Database only for now
     }

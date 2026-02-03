@@ -3,6 +3,7 @@ UI_FILE_AUDIT_RESULT={
 "version": "1.0",
 "file_path": "src/frontend/src/components/ui/Layout.tsx",
 "framework_guess": "React with TypeScript",
+**Ticket:** TCK-20260203-032
 "imports_reviewed": ["react", "react-router-dom"],
 "unknowns": ["accessibility of navigation", "mobile responsiveness"]
 },
