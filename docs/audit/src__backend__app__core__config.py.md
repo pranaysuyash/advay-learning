@@ -1,9 +1,19 @@
+
 # AUDIT v1.5.1 :: src/backend/app/core/config.py
+
+**Prompt file:** prompts/audit/audit-v1.5.1.md
+**Persona / lens:** Security Reviewer
+**Audit area/focus:** Backend configuration, secrets, and environment management
+
+| Prompt file | Persona / lens      | Audit axis         | Evidence link / notes |
+|-------------|---------------------|--------------------|----------------------|
+| prompts/audit/audit-v1.5.1.md | Security Reviewer | Security, config, env | This artifact       |
 
 **Date:** 2026-01-28
 **Audited file:** `src/backend/app/core/config.py`
 **Base commit SHA:** Unknown (git not available in environment)
 **Auditor:** GitHub Copilot
+**Ticket:** TCK-20260203-011
 
 ---
 

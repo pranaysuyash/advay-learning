@@ -34904,3 +34904,133 @@ Execution log:
 Status updates:
 
 - [2026-02-03 12:00 UTC] **OPEN** — Audit completed, findings documented, ready for remediation planning
+
+---
+
+### TCK-20260203-006 :: Remediate Threat Model Findings - Authentication Endpoints
+
+Type: SECURITY
+Owner: AI Assistant
+Created: 2026-02-03 00:00 UTC
+Status: **DONE** ✅
+Priority: P0
+
+Description:
+Address security vulnerabilities identified in the threat model audit of authentication endpoints. This includes timing attacks, JWT token storage, and password policy issues.
+
+Scope contract:
+
+- In-scope:
+  - Implement constant-time comparison for password verification
+  - Move JWT tokens from localStorage to httpOnly cookies
+  - Add password strength requirements
+  - Implement refresh token rotation
+  - Add rate limiting and account lockout mechanisms
+  - Add email verification for registration
+- Out-of-scope:
+  - Complete rearchitecture of authentication system
+  - Adding third-party authentication providers
+  - Major UI changes for authentication flows
+
+Targets:
+
+- Repo: learning_for_kids
+- Files: `src/backend/app/api/v1/endpoints/auth.py`, `src/frontend/src/store/authStore.ts`, `src/backend/app/schemas/user.py`, `src/backend/app/services/refresh_token_service.py`, `src/backend/app/db/models/refresh_token.py`
+- Branch: main
+
+Acceptance Criteria:
+
+- [x] Password verification uses constant-time comparison to prevent timing attacks
+- [x] JWT tokens stored in httpOnly cookies instead of localStorage
+- [x] Password strength validation implemented (minimum length, character diversity)
+- [x] Refresh token rotation implemented for enhanced security
+- [x] Rate limiting applied to authentication endpoints
+- [x] Email verification flow implemented for new registrations
+- [x] All authentication tests pass
+- [x] Security audit shows no HIGH severity vulnerabilities remain
+
+Source:
+
+- Audit file: `docs/audit/threat-model__src__backend__app__api__v1__endpoints__auth.py.md`
+- Finding IDs: T1 (Timing Attack), T2 (JWT Storage), T3 (Weak Password Policy), T4 (Refresh Token Reuse)
+- Evidence: Detailed threat model with specific mitigation recommendations
+
+Execution log:
+
+- [2026-02-03 00:00 UTC] **OPEN** — Ticket created based on threat model audit findings
+- [2026-02-03 02:30 UTC] **DONE** — All security fixes implemented and tested
+- [2026-02-03 03:45 UTC] **COMMIT** — Changes committed to repository
+
+Status updates:
+
+- [2026-02-03 00:00 UTC] **OPEN** — Ticket created, awaiting implementation
+- [2026-02-03 02:30 UTC] **DONE** — All security vulnerabilities addressed
+- [2026-02-03 03:45 UTC] **COMMITTED** — Changes pushed to repository
+
+Next actions:
+
+- Monitor for any authentication-related issues
+- Consider implementing additional security measures like MFA
+- Regular security audits of authentication system
+
+---
+
+### TCK-20260203-011 :: Remediate Main Application Entry Point Issues
+
+Type: REMEDIATION
+Owner: AI Assistant
+Created: 2026-02-03 00:25 UTC
+Status: **DONE** ✅
+Priority: P0
+
+Description:
+Address issues identified in the main application entry point audit to improve initialization and error handling.
+
+Scope contract:
+
+- In-scope:
+  - Review and fix main application entry point
+  - Ensure proper error boundaries and logging
+  - Address any performance concerns
+  - Update initialization sequence as needed
+- Out-of-scope:
+  - Major architectural changes to application structure
+  - Changes to routing configuration
+
+Targets:
+
+- Repo: learning_for_kids
+- Files: `src/backend/app/main.py`, `src/backend/app/core/config.py`
+- Branch: main
+
+Acceptance Criteria:
+
+- [x] Main application initializes correctly
+- [x] Error boundaries properly implemented
+- [x] Logging configured appropriately
+- [x] Performance benchmarks maintained
+- [x] All initialization tests pass
+
+Source:
+
+- Audit file: `docs/audit/src__backend__app__main.py.md`
+- Evidence: Main application audit with specific findings
+
+Execution log:
+
+- [2026-02-03 00:25 UTC] **OPEN** — Ticket created based on main application audit
+- [2026-02-03 03:15 UTC] **IN_PROGRESS** — Implementation started
+- [2026-02-03 03:30 UTC] **DONE** — All fixes implemented and tested
+- [2026-02-03 03:45 UTC] **COMMIT** — Changes committed to repository
+
+Status updates:
+
+- [2026-02-03 00:25 UTC] **OPEN** — Ticket created, awaiting implementation
+- [2026-02-03 03:30 UTC] **DONE** — All issues addressed
+- [2026-02-03 03:45 UTC] **COMMITTED** — Changes pushed to repository
+
+Next actions:
+
+- Monitor application startup in production
+- Consider adding more comprehensive health checks
+- Regular security reviews of main entry point

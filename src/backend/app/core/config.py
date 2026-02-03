@@ -54,6 +54,7 @@ class Settings(BaseSettings):
 
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:6173", "http://localhost:3000"]
+    CORS_ALLOW_CREDENTIALS: bool = True
 
     # Frontend URL (for email links)
     FRONTEND_URL: str = "http://localhost:6173"

@@ -1,9 +1,19 @@
+
 # AUDIT v1.5.1 :: src/backend/app/main.py
+
+**Prompt file:** prompts/audit/audit-v1.5.1.md
+**Persona / lens:** Security Reviewer
+**Audit area/focus:** Backend API entrypoint, middleware, health, and CORS
+
+| Prompt file | Persona / lens      | Audit axis         | Evidence link / notes |
+|-------------|---------------------|--------------------|----------------------|
+| prompts/audit/audit-v1.5.1.md | Security Reviewer | Security, API, CORS, health | This artifact       |
 
 **Date:** 2026-01-28
 **Audited file:** `src/backend/app/main.py`
 **Base commit SHA:** Unknown (git not available in environment)
 **Auditor:** GitHub Copilot
+**Ticket:** TCK-20260203-011
 
 ---
 

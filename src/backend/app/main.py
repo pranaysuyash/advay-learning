@@ -1,6 +1,7 @@
 """Main FastAPI application entry point."""
 
 import logging
+import os
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -11,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
 from app.api.v1.api import api_router
-from app.core.config import settings
+from app.core.config import Settings, get_settings
 from app.core.health import get_health_status
 from app.core.rate_limit import setup_rate_limiting
 from app.db.session import get_db
@@ -40,8 +41,40 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         return response
 
+
+def validate_cors_configuration(settings_instance: Settings) -> None:
+    """Validate CORS configuration for security."""
+    if "*" in settings_instance.ALLOWED_ORIGINS and settings_instance.CORS_ALLOW_CREDENTIALS:
+        if settings_instance.APP_ENV == "production":
+            raise RuntimeError(
+                "SECURITY ERROR: CORS ALLOWED_ORIGINS contains wildcard '*' "
+                "combined with allow_credentials=True in production. "
+                "This is insecure and will not be allowed. "
+                "Either remove '*' from ALLOWED_ORIGINS or set CORS_ALLOW_CREDENTIALS=False."
+            )
+        else:
+            logger.warning(
+                "SECURITY WARNING: CORS ALLOWED_ORIGINS contains wildcard '*' "
+                "combined with allow_credentials=True. "
+                "This is insecure when combined with allow_credentials=True. "
+                "See docs/security/SECURITY.md#cors-cross-origin-resource-sharing-policy"
+            )
+
+
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Validate settings before creating app to catch issues early
+try:
+    settings = get_settings()
+    validate_cors_configuration(settings)
+except Exception as e:
+    # Provide helpful error message for missing environment variables
+    print(f"Configuration Error: {str(e)}")
+    print("Please ensure all required environment variables are set.")
+    print("Required: SECRET_KEY, DATABASE_URL")
+    print("Optional: APP_ENV, DEBUG, ALLOWED_ORIGINS, etc.")
+    raise
 
 app = FastAPI(
     title="Advay Vision Learning API",
@@ -68,19 +101,11 @@ if settings.APP_ENV == "production":
     if allowed_hosts:
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
-# CORS Security Check
-if "*" in settings.ALLOWED_ORIGINS:
-    logger.warning(
-        "SECURITY WARNING: CORS ALLOWED_ORIGINS contains wildcard '*'. "
-        "This is insecure when combined with allow_credentials=True. "
-        "See docs/security/SECURITY.md#cors-cross-origin-resource-sharing-policy"
-    )
-
-# CORS
+# CORS - now with security validation
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,  # Use setting instead of hardcoded True
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
     max_age=600,  # Cache preflight for 10 minutes

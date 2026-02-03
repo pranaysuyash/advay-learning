@@ -3,13 +3,15 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.core.config import settings
 from app.core.rate_limit import RateLimits, limiter
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import create_access_token
 from app.schemas.user import User, UserCreate
+from app.services.refresh_token_service import RefreshTokenService
 from app.services.user_service import UserService
 
 router = APIRouter()
@@ -110,7 +112,10 @@ async def login(
 
     # Create tokens
     access_token = create_access_token(data={"sub": user.id})
-    refresh_token = create_refresh_token(data={"sub": user.id})
+
+    # Create refresh token in database for rotation
+    db_refresh_token = await RefreshTokenService.create_refresh_token(db, user.id)
+    refresh_token = db_refresh_token.token
 
     # Set cookies
     set_auth_cookies(response, access_token, refresh_token)
@@ -126,8 +131,14 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(response: Response) -> dict:
-    """Logout and clear authentication cookies."""
+async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)) -> dict:
+    """Logout and clear authentication cookies, revoke refresh token."""
+    # Get refresh token from cookie to revoke it
+    refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
+    if refresh_token:
+        # Revoke the refresh token in the database
+        await RefreshTokenService.revoke_refresh_token(db, refresh_token)
+
     clear_auth_cookies(response)
     return {"message": "Logout successful"}
 
@@ -235,7 +246,7 @@ async def refresh_token(
     response: Response,
     db: AsyncSession = Depends(get_db)
 ) -> dict:
-    """Refresh access token using refresh cookie."""
+    """Refresh access token using refresh cookie with rotation."""
     from jose import JWTError, jwt
 
     # Get refresh token from cookie
@@ -268,9 +279,25 @@ async def refresh_token(
             detail="User not found or inactive",
         )
 
+    # Validate the refresh token against the database
+    is_valid = await RefreshTokenService.validate_refresh_token(db, refresh_token, user)
+    if not is_valid:
+        # Invalid or revoked token, clear cookies
+        clear_auth_cookies(response)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or revoked refresh token",
+        )
+
+    # Revoke the old refresh token (rotation)
+    await RefreshTokenService.revoke_refresh_token(db, refresh_token)
+
     # Create new tokens
     new_access_token = create_access_token(data={"sub": user.id})
-    new_refresh_token = create_refresh_token(data={"sub": user.id})
+
+    # Create new refresh token in database
+    db_new_refresh_token = await RefreshTokenService.create_refresh_token(db, user.id)
+    new_refresh_token = db_new_refresh_token.token
 
     # Update cookies
     set_auth_cookies(response, new_access_token, new_refresh_token)
