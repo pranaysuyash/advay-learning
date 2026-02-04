@@ -254,10 +254,12 @@ Acceptance Criteria:
 Evidence:
 
 - Command: `git diff -- src/frontend/src/components/dashboard/StatsBar.tsx src/frontend/src/pages/Dashboard.tsx`
+- Command: `git diff -- src/frontend/src/components/LetterJourney.tsx`
 
 Execution log:
 
 - [2026-02-04 05:12 UTC] Added ARIA labels for StatsBar icon/progress + Dashboard "All Games" icon | Evidence: `git diff -- src/frontend/src/components/dashboard/StatsBar.tsx src/frontend/src/pages/Dashboard.tsx`
+- [2026-02-04 05:13 UTC] Added ARIA label for completed batch icon in LetterJourney | Evidence: `git diff -- src/frontend/src/components/LetterJourney.tsx`
 
 Status updates:
 

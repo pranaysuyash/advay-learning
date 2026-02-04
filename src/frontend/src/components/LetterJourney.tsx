@@ -88,7 +88,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                   }`}
                 >
                   {isCompleted ? (
-                    <UIIcon name='check' size={16} />
+                    <UIIcon name='check' size={16} aria-label='Batch completed' />
                   ) : (
                     batchIndex + 1
                   )}
