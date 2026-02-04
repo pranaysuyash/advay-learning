@@ -96,7 +96,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                 <span className='font-medium flex items-center gap-2'>
                   Batch {batchIndex + 1}
                   {!isUnlocked && (
-                    <UIIcon name='lock' size={14} className='text-slate-400' />
+                    <UIIcon name='lock' size={14} className='text-slate-400' aria-label='Locked - complete previous batch to unlock' />
                   )}
                 </span>
                 <span className='text-sm text-slate-400'>
