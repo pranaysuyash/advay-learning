@@ -12,18 +12,21 @@ class TestAuth:
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
         data = response.json()
-        assert data["email"] == "newuser@example.com"
-        assert "id" in data
-        assert "password" not in data
+        assert "if an account is eligible" in data["message"].lower()
 
     async def test_register_duplicate_email(self, client: AsyncClient, test_user: dict):
-        """Test registration with duplicate email fails."""
-        response = await client.post(
+        """Test duplicate registration returns same generic success response."""
+        first_response = await client.post(
             "/api/v1/auth/register",
             json={"email": test_user["email"], "password": "Password123"},
         )
-        assert response.status_code == 400
-        assert "already registered" in response.json()["detail"].lower()
+        second_response = await client.post(
+            "/api/v1/auth/register",
+            json={"email": test_user["email"], "password": "Password123"},
+        )
+        assert first_response.status_code == 200
+        assert second_response.status_code == 200
+        assert first_response.json()["message"] == second_response.json()["message"]
 
     async def test_login_success(self, client: AsyncClient, test_user: dict):
         """Test successful login sets cookies."""

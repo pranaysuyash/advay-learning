@@ -1,15 +1,17 @@
 """Authentication endpoints."""
-
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.core.config import settings
+from app.core.email import EmailService
 from app.core.rate_limit import RateLimits, limiter
 from app.core.security import create_access_token
 from app.schemas.user import User, UserCreate
+from app.services.account_lockout_service import AccountLockoutService
 from app.services.refresh_token_service import RefreshTokenService
 from app.services.user_service import UserService
 
@@ -22,6 +24,9 @@ COOKIE_SECURE = settings.APP_ENV == "production"  # Secure in production
 COOKIE_SAMESITE = "lax"  # CSRF protection
 ACCESS_TOKEN_COOKIE = "access_token"
 REFRESH_TOKEN_COOKIE = "refresh_token"
+REGISTRATION_SUCCESS_MESSAGE = (
+    "If an account is eligible, a verification email has been sent."
+)
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
@@ -57,23 +62,32 @@ def clear_auth_cookies(response: Response) -> None:
     response.delete_cookie(key=REFRESH_TOKEN_COOKIE, path=COOKIE_PATH)
 
 
-@router.post("/register", response_model=User)
+@router.post("/register")
 @limiter.limit(RateLimits.AUTH_STRICT)
 async def register(
     request: Request, user_in: UserCreate, db: AsyncSession = Depends(get_db)
-) -> User:
-    """Register a new user."""
-    # Check if user already exists
+) -> dict:
+    """Register a new user with account enumeration protection."""
+    # Always return the same message to prevent account enumeration.
     existing_user = await UserService.get_by_email(db, user_in.email)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
+        if not existing_user.email_verified:
+            existing_user.email_verification_token = EmailService.generate_verification_token()
+            existing_user.email_verification_expires = EmailService.get_verification_expiry()
+            await db.commit()
+            await EmailService.send_verification_email(
+                existing_user.email, existing_user.email_verification_token
+            )
+        return {"message": REGISTRATION_SUCCESS_MESSAGE}
 
-    # Create new user
-    user = await UserService.create(db, user_in)
-    return user
+    try:
+        await UserService.create(db, user_in)
+    except IntegrityError:
+        # Concurrent registration can race with uniqueness checks.
+        # Roll back and return the same generic response to avoid leaking account existence.
+        await db.rollback()
+
+    return {"message": REGISTRATION_SUCCESS_MESSAGE}
 
 
 @router.post("/login")
@@ -84,15 +98,43 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Login and set authentication cookies."""
+    """Login and set authentication cookies with account lockout protection."""
+    email = form_data.username
+
+    # Check if account is locked
+    if await AccountLockoutService.is_account_locked(email):
+        remaining_time = await AccountLockoutService.get_remaining_lockout_time(email)
+        if remaining_time:
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail=f"Account temporarily locked due to multiple failed login attempts. Try again in {remaining_time} seconds.",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail="Account temporarily locked due to multiple failed login attempts. Please try again later.",
+            )
+
     # Authenticate user
-    user = await UserService.authenticate(db, form_data.username, form_data.password)
+    user = await UserService.authenticate(db, email, form_data.password)
     if not user:
+        # Record failed attempt
+        should_lock = await AccountLockoutService.record_failed_attempt(email)
+
+        if should_lock:
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail="Account locked due to multiple failed login attempts. Please try again later.",
+            )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Clear failed attempts on successful login
+    await AccountLockoutService.clear_failed_attempts(email)
 
     if not user.is_active:
         raise HTTPException(

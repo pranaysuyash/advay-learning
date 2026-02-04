@@ -10734,4 +10734,64 @@ Status updates:
 
 ---
 
+### TCK-20260203-050 :: Adopt Centralized `getHandLandmarkLists()` Utility in All Game Files
+
+Type: REFACTOR
+Owner: Pranay
+Created: 2026-02-03 23:45 IST
+Status: **OPEN**
+Priority: P2
+
+**Description**:
+Update all game files that access MediaPipe hand landmark results to use the centralized `getHandLandmarkLists()` utility from `src/frontend/src/utils/landmarkUtils.ts` instead of inline normalization patterns.
+
+**Background**:
+- `FingerNumberShow.tsx` already uses the centralized utility
+- Other game files still use inline `results?.landmarks?.[0]` pattern which doesn't handle API shape drift
+- Codex worktree (now deleted) attempted to fix this by inlining duplicate code; main's centralized approach is superior
+
+Scope contract:
+
+- In-scope:
+  - Update `LetterHunt.tsx` to import and use `getHandLandmarkLists()`
+  - Update `ConnectTheDots.tsx` to import and use `getHandLandmarkLists()`
+  - Update `AlphabetGamePage.tsx` to import and use `getHandLandmarkLists()`
+  - Update `MediaPipeTest.tsx` to import and use `getHandLandmarkLists()`
+- Out-of-scope:
+  - Changing game logic or behavior
+  - Modifying the utility itself
+- Behavior change allowed: NO (pure refactor)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/LetterHunt.tsx`
+  - `src/frontend/src/pages/ConnectTheDots.tsx`
+  - `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
+  - `src/frontend/src/pages/MediaPipeTest.tsx`
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] All 4 files import `getHandLandmarkLists` from `../utils/landmarkUtils` (or correct relative path)
+- [ ] All inline `results?.landmarks` patterns replaced with utility call
+- [ ] `npm run type-check` passes
+- [ ] No regressions in hand tracking behavior
+
+Source:
+
+- Discovery: Codex worktree analysis (worktree removed, inferior duplicate code)
+- Evidence: `grep` showing 4 files still using old pattern
+
+Execution log:
+
+- 2026-02-03 23:45 IST | Ticket created from worktree analysis | Evidence: Codex worktree had inline duplicates, main has centralized utility
+
+Status updates:
+
+- 2026-02-03 **OPEN** — Ticket created, awaiting implementation
+
+---
+
 EOF

@@ -15,6 +15,9 @@ def validate_password_strength(password: str) -> str:
     - At least one uppercase letter
     - At least one lowercase letter
     - At least one digit
+    - At least one special character
+    - Not in common passwords list
+    - Not based on user email
 
     Args:
         password: The password to validate
@@ -36,6 +39,24 @@ def validate_password_strength(password: str) -> str:
 
     if not re.search(r"\d", password):
         raise ValueError("Password must contain at least one digit")
+
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        raise ValueError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>")
+
+    # Check against common passwords
+    common_passwords = {
+        "password", "123456", "12345678", "qwerty", "abc123", "password123",
+        "admin", "letmein", "welcome", "monkey", "dragon", "master", "hello",
+        "freedom", "whatever", "trustno1", "princess", "shadow", "sunshine",
+        "123321", "superman", "1234567890", "1234567", "12345", "555555",
+        "lovely", "666666", "welcome123", "iloveyou", "1q2w3e4r", "000000"
+    }
+
+    if password.lower() in common_passwords:
+        raise ValueError("Password is too common and easily guessable")
+
+    # Check if password is based on email (if email is provided in context)
+    # This would be checked in the validator method that has access to email
 
     return password
 

@@ -1120,32 +1120,30 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           onPause={() => setIsPaused(!isPaused)}
         >
           <div className='relative w-full h-full'>
-            {/* Accuracy Bar - show during gameplay as well for accessibility/tests */}
-            {accuracy > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
-              >
-                <div className='flex justify-between items-center mb-2'>
-                  <label
-                    htmlFor='accuracy-progress'
-                    className='text-text-secondary'
-                  >
-                    Tracing Accuracy
-                  </label>
-                  <span className={`font-bold ${accuracyColorClass}`}>
-                    {accuracy}%
-                  </span>
-                </div>
-                <progress
-                  id='accuracy-progress'
-                  value={accuracy}
-                  max={100}
-                  className='w-full h-3 rounded-full'
-                />
-              </motion.div>
-            )}
+            {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
+            >
+              <div className='flex justify-between items-center mb-2'>
+                <label
+                  htmlFor='accuracy-progress'
+                  className='text-text-secondary'
+                >
+                  Tracing Accuracy
+                </label>
+                <span className={`font-bold ${accuracyColorClass}`}>
+                  {accuracy}%
+                </span>
+              </div>
+              <progress
+                id='accuracy-progress'
+                value={accuracy}
+                max={100}
+                className='w-full h-3 rounded-full'
+              />
+            </motion.div>
             <GameLayout
               webcamRef={webcamRef}
               canvasRef={canvasRef}
@@ -1355,32 +1353,30 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               </div>
             </div>
 
-            {/* Accuracy Bar */}
-            {accuracy > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
-              >
-                <div className='flex justify-between items-center mb-2'>
-                  <label
-                    htmlFor='accuracy-progress'
-                    className='text-text-secondary'
-                  >
-                    Tracing Accuracy
-                  </label>
-                  <span className={`font-bold ${accuracyColorClass}`}>
-                    {accuracy}%
-                  </span>
-                </div>
-                <progress
-                  id='accuracy-progress'
-                  value={accuracy}
-                  max={100}
-                  className='w-full h-3 rounded-full'
-                />
-              </motion.div>
-            )}
+            {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
+            >
+              <div className='flex justify-between items-center mb-2'>
+                <label
+                  htmlFor='accuracy-progress'
+                  className='text-text-secondary'
+                >
+                  Tracing Accuracy
+                </label>
+                <span className={`font-bold ${accuracyColorClass}`}>
+                  {accuracy}%
+                </span>
+              </div>
+              <progress
+                id='accuracy-progress'
+                value={accuracy}
+                max={100}
+                className='w-full h-3 rounded-full'
+              />
+            </motion.div>
 
             {/* Loading State with Pip */}
             {isHandTrackingLoading && (

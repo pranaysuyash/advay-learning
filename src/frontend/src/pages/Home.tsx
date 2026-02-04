@@ -118,9 +118,10 @@ export function Home() {
         <Mascot
           state='happy'
           message="Hi there! I'm Pip! Let's go on an adventure together!"
-          className='absolute bottom-8 right-8'
+          className='fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-10'
           decorative={true}
-          hideOnMobile={true}
+          hideOnMobile={false}
+          responsiveSize='auto'
         />
       </div>
     </>

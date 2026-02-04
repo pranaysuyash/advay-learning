@@ -40,6 +40,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### Engineering (Dev)
 
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
+- Master audit agent prompt (full coverage + research runway; two-pass): `prompts/audit/master-audit-agent-v1.0.md`
 - Camera game multi-persona audit (single game file): `prompts/audit/camera-game-multipersona-audit-v1.0.md`
 - Single-axis whole-app auditor (report-only, one axis per run): `prompts/audit/single-axis-app-auditor-v1.0.md`
 - Implement audit findings: `prompts/remediation/implementation-v1.6.1.md`

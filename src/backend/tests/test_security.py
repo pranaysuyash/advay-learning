@@ -174,6 +174,24 @@ class TestEmailVerification:
         assert "if an account exists" in resend_response.json()["message"].lower()
 
 
+class TestRegistrationEnumerationProtection:
+    """Test registration responses do not reveal account existence."""
+
+    async def test_register_returns_same_response_for_existing_email(
+        self, client: AsyncClient
+    ):
+        """Verify register endpoint returns identical response for new and existing accounts."""
+        payload = {"email": "enum@test.com", "password": "StrongPassword123!"}
+
+        first_response = await client.post("/api/v1/auth/register", json=payload)
+        second_response = await client.post("/api/v1/auth/register", json=payload)
+
+        assert first_response.status_code == 200
+        assert second_response.status_code == 200
+        assert first_response.json() == second_response.json()
+        assert "if an account is eligible" in first_response.json()["message"].lower()
+
+
 class TestPasswordReset:
     """Test password reset functionality."""
 

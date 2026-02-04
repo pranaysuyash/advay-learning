@@ -41,6 +41,7 @@ You are NOT:
 ## WORK TYPE SELECTION (pick exactly one)
 
 - AUDIT (one file) → use `prompts/audit/audit-v1.5.1.md`
+- AUDIT (full repo, two-pass + external research) → use `prompts/audit/master-audit-agent-v1.0.md`
 - REMEDIATION (from an audit) → use `prompts/remediation/implementation-v1.6.1.md`
 - HARDENING (one scope area) → use `prompts/hardening/hardening-v1.1.md`
 - REVIEW (PR review) → use `prompts/review/pr-review-v1.6.1.md`

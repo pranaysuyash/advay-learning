@@ -3,6 +3,7 @@ UI_FILE_AUDIT_RESULT={
 "version": "1.0",
 "file_path": "src/frontend/src/pages/Progress.tsx",
 "framework_guess": "React with TypeScript",
+**Ticket:** TCK-20260203-035
 "imports_reviewed": ["framer-motion"],
 "unknowns": ["real progress data integration", "API connection status"]
 },

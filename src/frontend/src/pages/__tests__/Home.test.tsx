@@ -55,7 +55,7 @@ describe('Home landing', () => {
     expect(mockGetUserMedia).not.toHaveBeenCalled();
   });
 
-  it('mascot is decorative (aria-hidden) and has hidden class for mobile', () => {
+  it('mascot is decorative (aria-hidden) and not hidden on mobile', () => {
     const { container } = render(
       <MemoryRouter>
         <Home />
@@ -66,9 +66,8 @@ describe('Home landing', () => {
     const ariaHiddenEl = container.querySelector('[aria-hidden="true"]');
     expect(ariaHiddenEl).toBeTruthy();
 
-    // the mascot wrapper uses the 'hidden' class on small screens
-    // check ancestor for hidden class
+    // mascot is now visible on mobile (it used to be `.hidden` on small screens)
     const hiddenAncestor = ariaHiddenEl?.closest('.hidden');
-    expect(hiddenAncestor).toBeTruthy();
+    expect(hiddenAncestor).toBeNull();
   });
 });

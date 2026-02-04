@@ -398,7 +398,7 @@ export const Dashboard = memo(function DashboardComponent() {
 
         {/* Header - Clean, single title */}
         <header className='mb-6 flex justify-between items-center'>
-          <h1 className='text-2xl font-bold'>Dashboard</h1>
+          <h1 className='text-4xl font-bold'>Dashboard</h1>
           <button
             onClick={handleExport}
             disabled={exporting || children.length === 0}
@@ -426,14 +426,14 @@ export const Dashboard = memo(function DashboardComponent() {
                     }
                     setSelectedChild(child.id);
                   }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-sm ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-base ${
                     selectedChildData?.id === child.id
                       ? 'bg-pip-orange text-white shadow-soft'
                       : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
                   }`}
                 >
-                  <span className='font-medium'>{child.name}</span>
-                  <span className='opacity-70 text-xs'>({child.age})</span>
+                  <span className='font-medium text-lg'>{child.name}</span>
+                  <span className='opacity-70 text-sm'>({child.age})</span>
                 </button>
                 <button
                   onClick={() => handleOpenEditModal(child)}
@@ -460,7 +460,7 @@ export const Dashboard = memo(function DashboardComponent() {
             <button
               type='button'
               onClick={() => setShowAddModal(true)}
-              className='flex items-center gap-2 px-4 py-2.5 text-base text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30 min-h-[44px]'
+              className='flex items-center gap-2 px-4 py-2.5 text-lg text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30 min-h-[44px]'
               title='Add child'
             >
               <svg
@@ -493,15 +493,15 @@ export const Dashboard = memo(function DashboardComponent() {
                   <UIIcon name='play' size={24} className='text-white' />
                 </div>
                 <div>
-                  <h3 className='font-bold text-white'>Continue Learning</h3>
-                  <p className='text-sm text-white/70'>
+                  <h3 className='font-bold text-white text-lg'>Continue Learning</h3>
+                  <p className='text-base text-white/70'>
                     Pick up where you left off!
                   </p>
                 </div>
               </div>
               <Link
                 to='/games/alphabet-tracing'
-                className='px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-105 transition-transform'
+                className='px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-base hover:scale-105 transition-transform'
               >
                 Play Now →
               </Link>
@@ -519,8 +519,8 @@ export const Dashboard = memo(function DashboardComponent() {
           <section className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
             <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
               <div className='flex justify-between items-center mb-4'>
-                <h2 className='text-xl font-semibold'>Learning Progress</h2>
-                <div className='text-sm px-3 py-1 bg-bg-tertiary text-slate-600 border border-border rounded-full'>
+                <h2 className='text-2xl font-semibold'>Learning Progress</h2>
+                <div className='text-base px-3 py-1 bg-bg-tertiary text-slate-600 border border-border rounded-full'>
                   {selectedChildData.preferredLanguage}
                 </div>
               </div>
@@ -544,7 +544,7 @@ export const Dashboard = memo(function DashboardComponent() {
                         className='flex items-center gap-4'
                       >
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
+                          className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${
                             learned
                               ? 'bg-green-500/20 text-green-400'
                               : 'bg-bg-tertiary text-slate-500 border border-border'
@@ -554,17 +554,17 @@ export const Dashboard = memo(function DashboardComponent() {
                         </div>
                         <div className='flex-1'>
                           <div className='flex justify-between mb-1'>
-                            <span className='text-sm flex items-center gap-2'>
+                            <span className='text-base flex items-center gap-2'>
                               <UIIcon
                                 src={letter.icon}
                                 alt={letter.name}
-                                size={16}
+                                size={20}
                                 className='opacity-80'
                                 fallback={letter.emoji || '✨'}
                               />
                               {letter.name}
                             </span>
-                            <span className='text-sm text-slate-600'>
+                            <span className='text-base text-slate-600'>
                               {learned ? (
                                 <>
                                   <UIIcon
@@ -610,7 +610,7 @@ export const Dashboard = memo(function DashboardComponent() {
 
             {/* Multi-Language Progress */}
             <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
-              <h2 className='text-xl font-semibold mb-4'>
+              <h2 className='text-2xl font-semibold mb-4'>
                 Multi-Language Progress
               </h2>
               {selectedChildData.languageProgress.length > 0 ? (
@@ -630,19 +630,19 @@ export const Dashboard = memo(function DashboardComponent() {
                         className='border border-border rounded-lg p-3'
                       >
                         <div className='flex justify-between items-center mb-2'>
-                          <span className='font-medium capitalize'>
+                          <span className='font-medium capitalize text-lg'>
                             {langProg.language}
                           </span>
-                          <span className='text-sm text-slate-600'>
+                          <span className='text-base text-slate-600'>
                             {langProg.lettersLearned}/{langProg.totalLetters}{' '}
                             letters
                           </span>
                         </div>
-                        <div className='flex justify-between text-sm mb-1'>
+                        <div className='flex justify-between text-base mb-1'>
                           <span>Avg. Accuracy:</span>
                           <span>{langProg.averageAccuracy}%</span>
                         </div>
-                        <div className='flex justify-between text-sm'>
+                        <div className='flex justify-between text-base'>
                           <span>Time Spent:</span>
                           <span>
                             {Math.floor(langProg.totalTime / 60)}h{' '}
@@ -660,8 +660,8 @@ export const Dashboard = memo(function DashboardComponent() {
                 </div>
               ) : (
                 <div className='text-center py-6 text-slate-600'>
-                  <p>No progress recorded in other languages yet.</p>
-                  <p className='text-sm mt-2'>
+                  <p className='text-lg'>No progress recorded in other languages yet.</p>
+                  <p className='text-base mt-2'>
                     Try switching languages in the game to start learning!
                   </p>
                 </div>
@@ -670,13 +670,13 @@ export const Dashboard = memo(function DashboardComponent() {
               {/* Adventure Map Section */}
               <div className='mt-6 pt-6 border-t border-border'>
                 <div className='flex items-center justify-between mb-4'>
-                  <h2 className='text-lg font-semibold flex items-center gap-2'>
+                  <h2 className='text-xl font-semibold flex items-center gap-2'>
                     <span>🗺️</span>
                     Adventure Map
                   </h2>
                   <div className='flex items-center gap-2 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full'>
                     <span className='text-amber-400'>⭐</span>
-                    <span className='text-amber-400 font-bold text-sm'>
+                    <span className='text-amber-400 font-bold text-base'>
                       {totalXp} XP
                     </span>
                   </div>
@@ -684,7 +684,7 @@ export const Dashboard = memo(function DashboardComponent() {
 
                 <AdventureMap />
 
-                <div className='mt-4 flex flex-wrap items-center gap-2 text-xs text-white/70'>
+                <div className='mt-4 flex flex-wrap items-center gap-2 text-sm text-white/70'>
                   <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
                     Quests: {questSummary.completedCount}/
                     {questSummary.totalQuests}
@@ -712,13 +712,13 @@ export const Dashboard = memo(function DashboardComponent() {
                       startQuest('quest-a-to-z');
                       navigate('/games/alphabet-tracing?quest=quest-a-to-z');
                     }}
-                    className='flex-1 px-3 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-sm hover:scale-[1.02] transition-transform'
+                    className='flex-1 px-3 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-base hover:scale-[1.02] transition-transform'
                   >
                     Start Alphabet Quest
                   </button>
                   <Link
                     to='/games'
-                    className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-sm hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
+                    className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-base hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
                   >
                     <UIIcon name='search' size={16} />
                     All Games
@@ -728,20 +728,20 @@ export const Dashboard = memo(function DashboardComponent() {
                 {/* Badges Summary */}
                 {badges.length > 0 && (
                   <div className='mt-4 p-3 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl'>
-                    <p className='text-xs text-amber-400 font-semibold mb-2'>
+                    <p className='text-sm text-amber-400 font-semibold mb-2'>
                       🏆 Badges Earned
                     </p>
                     <div className='flex flex-wrap gap-1'>
                       {badges.slice(0, 6).map((badge) => (
                         <span
                           key={badge}
-                          className='px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-xs text-amber-300'
+                          className='px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-sm text-amber-300'
                         >
                           {badge.replace('badge:', '')}
                         </span>
                       ))}
                       {badges.length > 6 && (
-                        <span className='px-2 py-1 text-xs text-amber-400/70'>
+                        <span className='px-2 py-1 text-sm text-amber-400/70'>
                           +{badges.length - 6} more
                         </span>
                       )}
@@ -754,9 +754,9 @@ export const Dashboard = memo(function DashboardComponent() {
               <div className='mt-6 pt-6 border-t border-border'>
                 <Link
                   to='/games'
-                  className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-pip-orange text-white rounded-lg font-semibold hover:bg-pip-rust transition text-center'
+                  className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-pip-orange text-white rounded-lg font-semibold text-lg hover:bg-pip-rust transition text-center'
                 >
-                  <UIIcon name='hand' size={20} />
+                  <UIIcon name='hand' size={24} />
                   Play Games
                 </Link>
               </div>
@@ -768,8 +768,8 @@ export const Dashboard = memo(function DashboardComponent() {
         {selectedChildData && (
           <section className='mb-6'>
             <div className='flex items-center justify-between mb-2'>
-              <h2 className='text-lg font-semibold'>Letter Journey</h2>
-              <span className='text-xs text-slate-500 capitalize'>
+              <h2 className='text-xl font-semibold'>Letter Journey</h2>
+              <span className='text-sm text-slate-500 capitalize'>
                 {selectedChildData.preferredLanguage}
               </span>
             </div>

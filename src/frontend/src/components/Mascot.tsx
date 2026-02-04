@@ -15,6 +15,8 @@ interface MascotProps {
   decorative?: boolean;
   /** Hide on small screens (mobile) */
   hideOnMobile?: boolean;
+  /** Responsive sizing (auto scales for screen size) */
+  responsiveSize?: 'xs' | 'sm' | 'md' | 'lg' | 'auto';
 }
 
 const MASCOT_IMAGE_SRC = '/assets/images/red_panda_no_bg.png';
@@ -33,6 +35,7 @@ export function Mascot({
   language = 'en',
   decorative = false,
   hideOnMobile = false,
+  responsiveSize = 'auto',
 }: MascotProps) {
   const [bounce, setBounce] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -53,6 +56,21 @@ export function Mascot({
     // Remove emojis for cleaner TTS (keep the text human-readable)
     return text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
   }, []);
+
+  // Responsive size mapping
+  const getSizeClasses = () => {
+    if (responsiveSize === 'auto') {
+      // Auto responsive: xs on mobile, sm on tablet, md on desktop
+      return 'w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40';
+    }
+    const sizeMap = {
+      xs: 'w-16 h-16', // 64px
+      sm: 'w-20 h-20', // 80px
+      md: 'w-32 h-32', // 128px (original)
+      lg: 'w-40 h-40', // 160px
+    };
+    return sizeMap[responsiveSize];
+  };
 
   // Track first user gesture (helps browsers that block autoplay TTS).
   useEffect(() => {
@@ -250,7 +268,7 @@ export function Mascot({
       <motion.div
         variants={containerVariants}
         animate={state}
-        className={`relative cursor-pointer w-32 h-32 ${hideOnMobile ? 'hidden sm:flex' : ''}`}
+        className={`relative cursor-pointer ${getSizeClasses()} ${hideOnMobile ? 'hidden sm:flex' : ''}`}
         onClick={() => {
           // If TTS is blocked by autoplay policies, this click provides the required user gesture.
           if (ttsEnabled && message) {
