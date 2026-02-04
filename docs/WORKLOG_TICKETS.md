@@ -220,6 +220,55 @@ Status updates:
 
 - [2026-02-04 12:35 UTC] **DONE** — Master audit completed and captured in `docs/audit/repo__learning_for_kids__master-audit__2026-02-04.md`.
 
+### TCK-20260204-004 :: Add ARIA labels for Dashboard/StatsBar icons + progress
+
+Type: IMPROVEMENT
+Owner: AI Assistant
+Created: 2026-02-04 05:12 UTC
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Add accessible labels for icon-only UI elements in the dashboard StatsBar and Dashboard "All Games" affordance.
+  - Ensure progress indicators have an accessible name (screen readers).
+- Out-of-scope:
+  - Broader accessibility audits, screen reader walkthroughs, or automated a11y tooling setup.
+- Behavior change allowed: YES (accessibility improvements only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/dashboard/StatsBar.tsx`
+  - `src/frontend/src/pages/Dashboard.tsx`
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Icons rendered without adjacent text have an accessible name via `aria-label`.
+- [x] Dashboard stats progress indicators have an accessible name via `aria-label`.
+- [x] Frontend tests and TypeScript typecheck pass.
+
+Evidence:
+
+- Command: `git diff -- src/frontend/src/components/dashboard/StatsBar.tsx src/frontend/src/pages/Dashboard.tsx`
+
+Execution log:
+
+- [2026-02-04 05:12 UTC] Added ARIA labels for StatsBar icon/progress + Dashboard "All Games" icon | Evidence: `git diff -- src/frontend/src/components/dashboard/StatsBar.tsx src/frontend/src/pages/Dashboard.tsx`
+
+Status updates:
+
+- [2026-02-04 05:12 UTC] **DONE** — Labels added to improve screen reader output without changing product flows.
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| None | Accessibility implementer | A11y | Scoped UI labeling improvements for icon-only controls and progress indicators. |
+
 ### TCK-20260201-001 :: Fix Login Form Validation Flapping
 
 Type: BUG

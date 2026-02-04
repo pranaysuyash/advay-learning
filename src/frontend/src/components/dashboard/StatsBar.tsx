@@ -24,6 +24,12 @@ export function StatsBar({ stats }: StatsBarProps) {
             name={stat.iconName}
             size={16}
             className='text-slate-500'
+            aria-label={
+              stat.iconName === 'letters' ? 'Letters learned' :
+              stat.iconName === 'target' ? 'Target accuracy goal' :
+              stat.iconName === 'timer' ? 'Time spent learning' :
+              stat.iconName === 'hand' ? 'Hand tracking activity' : 'Statistics icon'
+            }
           />
           <span className='text-sm text-slate-600'>{stat.label}:</span>
           <span className='text-sm font-semibold text-text-primary'>
@@ -34,6 +40,12 @@ export function StatsBar({ stats }: StatsBarProps) {
               value={stat.percent}
               max={100}
               className='w-16 h-1.5 rounded-full progress-accent-orange'
+              aria-label={
+                stat.iconName === 'letters' ? `Letters learned: ${stat.value}` :
+                stat.iconName === 'target' ? `Accuracy goal: ${stat.value}` :
+                stat.iconName === 'timer' ? `Time spent: ${stat.value}` :
+                stat.iconName === 'hand' ? `Hand tracking: ${stat.value}` : `Progress: ${stat.value}`
+              }
             />
           )}
         </div>

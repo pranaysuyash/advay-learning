@@ -721,7 +721,7 @@ export const Dashboard = memo(function DashboardComponent() {
                     to='/games'
                     className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-base hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
                   >
-                    <UIIcon name='search' size={16} />
+                    <UIIcon name='search' size={16} aria-label='Browse all games' />
                     All Games
                   </Link>
                 </div>
@@ -757,7 +757,7 @@ export const Dashboard = memo(function DashboardComponent() {
                   to='/games'
                   className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-pip-orange text-white rounded-lg font-semibold text-lg hover:bg-pip-rust transition text-center'
                 >
-                  <UIIcon name='hand' size={24} />
+                  <UIIcon name='hand' size={24} aria-label='Play games with hand tracking' />
                   Play Games
                 </Link>
               </div>
