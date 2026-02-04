@@ -404,11 +404,12 @@ export const Dashboard = memo(function DashboardComponent() {
             disabled={exporting || children.length === 0}
             className='p-2 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30'
             title='Export progress data'
+            aria-label={exporting ? 'Export in progress' : 'Export progress data'}
           >
             {exporting ? (
-              <UIIcon name='hourglass' size={20} />
+              <UIIcon name='hourglass' size={20} aria-hidden="true" />
             ) : (
-              <UIIcon name='download' size={20} />
+              <UIIcon name='download' size={20} aria-hidden="true" />
             )}
           </button>
         </header>
@@ -490,7 +491,7 @@ export const Dashboard = memo(function DashboardComponent() {
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-3'>
                 <div className='w-12 h-12 bg-gradient-to-br from-pip-orange to-pip-rust rounded-xl flex items-center justify-center'>
-                  <UIIcon name='play' size={24} className='text-white' />
+                  <UIIcon name='play' size={24} className='text-white' aria-label='Play game' />
                 </div>
                 <div>
                   <h3 className='font-bold text-white text-lg'>Continue Learning</h3>

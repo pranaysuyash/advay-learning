@@ -61,13 +61,17 @@ export function CameraPermissionPrompt({
       // Permission granted
       onPermissionGranted();
     } catch (err) {
-      const errorName = (err as any)?.name || '';
-      const errorMessage = (err as any)?.message || 'Unknown error';
+      const errorNameRaw =
+        (err as any)?.name || (err as any)?.constructor?.name || '';
+      const errorMessage = String((err as any)?.message || 'Unknown error');
+      const errorName = String(errorNameRaw);
+      const msgLower = errorMessage.toLowerCase();
 
       // Handle specific error cases - check both instanceof and name property
       if (
-        err instanceof DOMException ||
-        errorName === 'NotAllowedError'
+        errorName === 'NotAllowedError' ||
+        msgLower.includes('permission denied') ||
+        msgLower.includes('notallowed')
       ) {
         setError('Camera permission was denied. You can still play with touch!');
       } else if (
@@ -80,6 +84,8 @@ export function CameraPermissionPrompt({
         setError(
           'Your camera is being used by another app. Close it and try again, or play with touch!',
         );
+      } else if (errorName === 'SecurityError' || msgLower.includes('security')) {
+        setError('Camera access is not allowed in this context. You can still play with touch!');
       } else if (err instanceof DOMException) {
         setError(`Camera error: ${errorMessage}. You can still play with touch!`);
       } else {
