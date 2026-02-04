@@ -132,6 +132,22 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Test Database Setup
+
+Before running backend tests, set up the test database:
+
+```bash
+# Run the test database bootstrap script
+./scripts/test-db-bootstrap.sh
+```
+
+This script:
+- Checks if PostgreSQL is running
+- Creates `advay_learning_test` database if it doesn't exist
+- Runs alembic migrations on the test database
+
+**Note**: Test database is separate from development database.
+
 ## Verify Installation
 
 - Backend: http://localhost:8001/health

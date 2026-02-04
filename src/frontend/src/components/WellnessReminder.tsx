@@ -98,7 +98,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
   }
 
   return (
-    <div className='fixed top-4 right-4 z-50 space-y-3 max-w-sm'>
+    <div className='fixed top-20 right-4 z-50 space-y-3 max-w-sm'>
       {visibleAlerts.map((alert) => {
         const config = getAlertConfig(alert.type);
         return (
@@ -107,7 +107,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
             initial={{ opacity: 0, y: -50, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.8 }}
-            className={`bg-white/10 backdrop-blur-sm border ${config.borderColor} rounded-xl p-4 shadow-lg w-full max-w-xs`}
+            className={`bg-white border ${config.borderColor} rounded-2xl p-4 shadow-soft-lg w-full max-w-xs`}
           >
             <div className='flex items-start gap-3'>
               <div
@@ -120,26 +120,26 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
                 />
               </div>
               <div className='flex-1 min-w-0'>
-                <h4 className='font-semibold text-white text-sm mb-1'>
+                <h4 className='font-semibold text-text-primary text-sm mb-1'>
                   {alert.type
                     .replace('_', ' ')
                     .replace(/\b\w/g, (l) => l.toUpperCase())}{' '}
                   Alert
                 </h4>
-                <p className='text-white/80 text-sm mb-3'>
+                <p className='text-text-secondary text-sm mb-3'>
                   {alert.message.replace('{childName}', childName)}
                 </p>
                 <div className='flex gap-2'>
                   <button
                     onClick={() => onAcknowledge(alert.id)}
-                    className='px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-xs font-medium hover:shadow-md transition'
+                    className='px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold hover:bg-brand-primary-hover transition shadow-soft'
                     type='button'
                   >
                     Got it!
                   </button>
                   <button
                     onClick={() => onDismiss(alert.id)}
-                    className='px-3 py-1.5 bg-white/10 border border-border text-white/80 rounded-lg text-xs font-medium hover:bg-white/20 transition'
+                    className='px-3 py-1.5 bg-bg-tertiary border border-border text-text-primary rounded-lg text-xs font-bold hover:bg-white transition'
                     type='button'
                   >
                     Later
@@ -148,7 +148,7 @@ const WellnessReminder: React.FC<WellnessReminderProps> = ({
               </div>
               <button
                 onClick={() => onDismiss(alert.id)}
-                className='text-white/50 hover:text-white/80 flex-shrink-0'
+                className='text-text-muted hover:text-text-primary flex-shrink-0'
                 aria-label='Dismiss alert'
                 title='Dismiss alert'
                 type='button'

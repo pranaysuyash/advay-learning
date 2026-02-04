@@ -53,7 +53,7 @@ We will adopt a **local-first architecture** where:
 
 ## Related Decisions
 - ADR 002: Python and PyQt6 for UI
-- ADR 003: SQLite for Local Storage
+- ADR 003: Storage Strategy (PostgreSQL)
 
 ## Notes
 This decision prioritizes child safety and privacy over convenience features. Cloud sync can be added later as an opt-in feature.

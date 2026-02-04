@@ -1,3 +1,6 @@
+---
+**Ticket**: TCK-20260204-033
+
 # Functional Audit Artifact: src**backend**app**api**v1**endpoints**auth.py
 
 **Audit Version**: functional-audit-v1.0  

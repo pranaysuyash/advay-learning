@@ -1,3 +1,6 @@
+---
+**Ticket**: TCK-20260204-028
+
 # Audit Artifact: src**backend**app**services**user_service.py
 
 **Audit Version**: v1.5.1  

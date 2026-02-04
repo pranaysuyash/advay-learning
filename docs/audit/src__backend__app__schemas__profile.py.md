@@ -1,3 +1,6 @@
+---
+**Ticket**: TCK-20260204-031
+
 # Technical Audit: src/backend/app/schemas/profile.py
 
 **Audit Version:** v1.5.1

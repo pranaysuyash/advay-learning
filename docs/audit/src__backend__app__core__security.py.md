@@ -1,3 +1,6 @@
+---
+**Ticket**: TCK-20260204-029
+
 # AUDIT v1.5.1 :: src/backend/app/core/security.py
 
 **Date:** 2026-01-28

@@ -1274,13 +1274,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         </GameContainer>
       ) : (
         /* Pre-Game UI - Menu Screen */
-        <section className='max-w-7xl mx-auto px-4 py-8'>
+        <section className='max-w-7xl mx-auto px-4 py-6 md:py-8'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             {/* Header */}
-            <header className='flex justify-between items-start mb-4'>
+            <header className='flex flex-col sm:flex-row justify-between items-start gap-4 mb-6'>
               <div>
                 <h1 className='text-2xl md:text-3xl font-bold'>
                   Learning Game
@@ -1289,8 +1289,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   Trace letters with your finger!
                 </p>
               </div>
-              <div className='text-right'>
-                <output className='text-xl md:text-2xl font-bold text-text-primary block'>
+              <div className='bg-white border border-border rounded-2xl px-4 py-3 shadow-soft w-full sm:w-auto'>
+                <output className='text-xl md:text-2xl font-extrabold text-text-primary block text-left sm:text-right'>
                   Score: {score}
                 </output>
                 <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-sm text-text-secondary mt-1'>
@@ -1316,193 +1316,200 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               </div>
             </header>
 
-            {/* Animated Letter Display */}
-            <div className='bg-white border border-border rounded-2xl p-8 mb-6 shadow-soft'>
-              <div className='flex flex-col items-center justify-center gap-4'>
-                <div className='text-center'>
-                  <div
-                    className={`text-9xl md:text-[12rem] font-extrabold mb-2 ${letterColorClass}`}
-                  >
-                    {currentLetter.char}
-                  </div>
-                  {currentLetter.transliteration && (
-                    <div className='text-base md:text-xl text-text-secondary mt-2 font-medium'>
-                      {currentLetter.transliteration}
-                    </div>
-                  )}
-                </div>
-                <div className='w-24 h-24 mb-2'>
-                  <UIIcon
-                    src={getAllIcons(currentLetter)}
-                    alt={currentLetter.name}
-                    size={96}
-                    className='w-full h-full object-contain drop-shadow-lg'
-                    fallback={currentLetter.emoji || '✨'}
-                  />
-                </div>
-                <div className='text-center'>
-                  <div className='text-3xl font-bold text-text-primary'>
-                    {currentLetter.name}
-                  </div>
-                  {currentLetter.pronunciation && (
-                    <div className='text-lg text-text-secondary mt-2 italic'>
-                      "{currentLetter.pronunciation}"
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-white border border-border rounded-xl p-4 mb-6 shadow-soft'
-            >
-              <div className='flex justify-between items-center mb-2'>
-                <label
-                  htmlFor='accuracy-progress'
-                  className='text-text-secondary'
-                >
-                  Tracing Accuracy
-                </label>
-                <span className={`font-bold ${accuracyColorClass}`}>
-                  {accuracy}%
-                </span>
-              </div>
-              <progress
-                id='accuracy-progress'
-                value={accuracy}
-                max={100}
-                className='w-full h-3 rounded-full'
-              />
-            </motion.div>
-
-            {/* Loading State with Pip */}
-            {isHandTrackingLoading && (
-              <div className='rounded-xl p-4 mb-6'>
-                <LoadingState message='Getting hand tracking ready...' />
-              </div>
-            )}
-
-            {/* Feedback */}
-            {feedback && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className={`rounded-xl p-4 mb-6 text-center font-semibold ${
-                  feedback?.includes('Great')
-                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                    : feedback?.includes('Good')
-                      ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                }`}
-              >
-                {feedback}
-              </motion.div>
-            )}
-
-            {/* Permission Warning - Kid-Friendly Fallback */}
-            {showPermissionWarning && (
-              <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 mb-4 text-center shadow-lg'>
-                <div className='flex items-center justify-center gap-3 text-blue-300 font-bold text-lg'>
-                  <span className='text-2xl'>✋</span>
-                  <span>Using Finger Magic Mode!</span>
-                </div>
-                <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
-                  Pip can't see your hand right now (the Forgetfulness Fog is
-                  blocking the camera), but that's okay! You can use your finger
-                  on the screen to draw and rescue letters!
-                </p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className='mt-3 px-4 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 rounded-lg text-sm font-semibold transition'
-                  type='button'
-                >
-                  Try Hand Magic Again 🔄
-                </button>
-              </div>
-            )}
-
-            {/* Menu Screen */}
-            <div className='bg-white border border-border rounded-2xl p-12 text-center relative overflow-hidden shadow-soft-lg'>
-              {/* Decorative elements */}
-              <div className='absolute inset-0 opacity-20'>
-                <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
-                <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
-                <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
-              </div>
-
-              {/* Mascot Preview */}
-              <div className='absolute -bottom-8 -left-8 opacity-70 pointer-events-none'>
-                <Mascot state='happy' />
-              </div>
-
-              <div className='w-32 h-32 mx-auto mb-6'>
-                <img
-                  src='/assets/images/onboarding-hand.svg'
-                  alt='Hand tracking'
-                  className='w-full h-full object-contain drop-shadow-2xl'
-                />
-              </div>
-              <h2 className='text-3xl font-bold mb-4 text-advay-slate'>
-                Ready to Learn?
-              </h2>
-              <p className='text-text-secondary mb-6 max-w-md mx-auto text-lg'>
-                Use your hand to trace letters! The camera will track your
-                finger movements.
-              </p>
-
-              {/* Language Selector */}
-              <div className='mb-8'>
-                <label
-                  className='block text-lg font-bold text-text-primary mb-4'
-                  htmlFor='alphabet-select'
-                >
-                  Choose Your Alphabet
-                </label>
-                <form onSubmit={(e) => e.preventDefault()}>
-                  <div className='flex flex-wrap gap-3'>
-                    {LANGUAGES.map((lang) => (
-                      <button
-                        type='button'
-                        key={lang.code}
-                        onClick={() => {
-                          setSelectedLanguage(lang.code);
-                          setCurrentLetterIndex(0);
-                        }}
-                        className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
-                          selectedLanguage === lang.code
-                            ? 'bg-pip-orange text-white shadow-soft-lg'
-                            : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
-                        }`}
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 items-start'>
+              {/* Left column: current letter + status */}
+              <div className='space-y-6'>
+                {/* Animated Letter Display */}
+                <div className='bg-white border border-border rounded-2xl p-6 md:p-8 shadow-soft'>
+                  <div className='flex flex-col items-center justify-center gap-4'>
+                    <div className='text-center'>
+                      <div
+                        className={`text-9xl md:text-[12rem] font-extrabold mb-2 ${letterColorClass}`}
                       >
-                        <span className='mr-3 text-xl'>{lang.flag}</span>
-                        {lang.name}
-                      </button>
-                    ))}
+                        {currentLetter.char}
+                      </div>
+                      {currentLetter.transliteration && (
+                        <div className='text-base md:text-xl text-text-secondary mt-2 font-medium'>
+                          {currentLetter.transliteration}
+                        </div>
+                      )}
+                    </div>
+                    <div className='w-24 h-24 mb-2'>
+                      <UIIcon
+                        src={getAllIcons(currentLetter)}
+                        alt={currentLetter.name}
+                        size={96}
+                        className='w-full h-full object-contain drop-shadow-lg'
+                        fallback={currentLetter.emoji || '✨'}
+                      />
+                    </div>
+                    <div className='text-center'>
+                      <div className='text-3xl font-bold text-text-primary'>
+                        {currentLetter.name}
+                      </div>
+                      {currentLetter.pronunciation && (
+                        <div className='text-lg text-text-secondary mt-2 italic'>
+                          "{currentLetter.pronunciation}"
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </form>
-              </div>
-              <p className='text-center text-text-secondary mt-4 text-base'>
-                Progress is tracked separately for each language
-              </p>
+                </div>
 
-              <div className='text-lg text-text-secondary mb-8'>
-                Difficulty:{' '}
-                <span className='text-text-primary font-bold capitalize'>
-                  {settings.difficulty}
-                </span>
+                {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className='bg-white border border-border rounded-xl p-4 shadow-soft'
+                >
+                  <div className='flex justify-between items-center mb-2'>
+                    <label
+                      htmlFor='accuracy-progress'
+                      className='text-text-secondary'
+                    >
+                      Tracing Accuracy
+                    </label>
+                    <span className={`font-bold ${accuracyColorClass}`}>
+                      {accuracy}%
+                    </span>
+                  </div>
+                  <progress
+                    id='accuracy-progress'
+                    value={accuracy}
+                    max={100}
+                    className='w-full h-3 rounded-full'
+                  />
+                </motion.div>
+
+                {/* Loading State with Pip */}
+                {isHandTrackingLoading && (
+                  <div className='bg-white border border-border rounded-xl p-4 shadow-soft'>
+                    <LoadingState message='Getting hand tracking ready...' />
+                  </div>
+                )}
+
+                {/* Feedback */}
+                {feedback && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`rounded-xl p-4 text-center font-semibold ${
+                      feedback?.includes('Great')
+                        ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                        : feedback?.includes('Good')
+                          ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                          : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                    }`}
+                  >
+                    {feedback}
+                  </motion.div>
+                )}
+
+                {/* Permission Warning - Kid-Friendly Fallback */}
+                {showPermissionWarning && (
+                  <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 text-center shadow-lg'>
+                    <div className='flex items-center justify-center gap-3 text-blue-300 font-bold text-lg'>
+                      <span className='text-2xl'>✋</span>
+                      <span>Using Finger Magic Mode!</span>
+                    </div>
+                    <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
+                      Pip can't see your hand right now (the Forgetfulness Fog is
+                      blocking the camera), but that's okay! You can use your finger
+                      on the screen to draw and rescue letters!
+                    </p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className='mt-3 px-4 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 rounded-lg text-sm font-semibold transition'
+                      type='button'
+                    >
+                      Try Hand Magic Again 🔄
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Standardized Menu Controls */}
-              <div className='pb-8'>
-                {' '}
-                {/* Spacer to ensure content doesn't overlap absolute controls */}
-                <GameControls
-                  controls={menuControls}
-                  position='bottom-center'
-                />
+              {/* Right column: setup + start */}
+              <div className='space-y-6'>
+                {/* Menu Screen */}
+                <div className='bg-white border border-border rounded-2xl p-6 md:p-10 text-center relative overflow-hidden shadow-soft-lg'>
+                  {/* Decorative elements */}
+                  <div className='absolute inset-0 opacity-20'>
+                    <div className='absolute top-10 left-10 w-16 h-16 rounded-full bg-brand-accent blur-xl'></div>
+                    <div className='absolute bottom-20 right-16 w-24 h-24 rounded-full bg-pip-orange blur-xl'></div>
+                    <div className='absolute top-1/2 right-1/4 w-12 h-12 rounded-full bg-vision-blue blur-xl'></div>
+                  </div>
+
+                  {/* Mascot Preview */}
+                  <div className='absolute -bottom-8 -left-8 opacity-70 pointer-events-none'>
+                    <Mascot state='happy' />
+                  </div>
+
+                  <div className='w-28 h-28 mx-auto mb-5'>
+                    <img
+                      src='/assets/images/onboarding-hand.svg'
+                      alt='Hand tracking'
+                      className='w-full h-full object-contain drop-shadow-2xl'
+                    />
+                  </div>
+                  <h2 className='text-3xl font-bold mb-3 text-advay-slate'>
+                    Ready to Learn?
+                  </h2>
+                  <p className='text-text-secondary mb-6 max-w-md mx-auto text-lg'>
+                    Use your hand to trace letters! The camera will track your
+                    finger movements.
+                  </p>
+
+                  {/* Language Selector */}
+                  <div className='mb-8'>
+                    <label
+                      className='block text-lg font-bold text-text-primary mb-4'
+                      htmlFor='alphabet-select'
+                    >
+                      Choose Your Alphabet
+                    </label>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                      <div className='flex flex-wrap gap-3 justify-center'>
+                        {LANGUAGES.map((lang) => (
+                          <button
+                            type='button'
+                            key={lang.code}
+                            onClick={() => {
+                              setSelectedLanguage(lang.code);
+                              setCurrentLetterIndex(0);
+                            }}
+                            className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
+                              selectedLanguage === lang.code
+                                ? 'bg-pip-orange text-white shadow-soft-lg'
+                                : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                            }`}
+                          >
+                            <span className='mr-3 text-xl'>{lang.flag}</span>
+                            {lang.name}
+                          </button>
+                        ))}
+                      </div>
+                    </form>
+                  </div>
+                  <p className='text-center text-text-secondary mt-4 text-base'>
+                    Progress is tracked separately for each language
+                  </p>
+
+                  <div className='text-lg text-text-secondary mb-8'>
+                    Difficulty:{' '}
+                    <span className='text-text-primary font-bold capitalize'>
+                      {settings.difficulty}
+                    </span>
+                  </div>
+
+                  {/* Standardized Menu Controls */}
+                  <div className='pb-10'>
+                    {/* Spacer to ensure content doesn't overlap absolute controls */}
+                    <GameControls
+                      controls={menuControls}
+                      position='bottom-center'
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

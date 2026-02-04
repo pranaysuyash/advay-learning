@@ -9,6 +9,7 @@ interface WellnessTimerProps {
   hydrationThreshold?: number; // Time in minutes before hydration reminder (default 10)
   stretchThreshold?: number; // Time in minutes before stretch reminder (default 20)
   screenTimeThreshold?: number; // Time in minutes before screen time reminder (default 30)
+  defaultHidden?: boolean; // If true, start collapsed to avoid covering primary UI
 }
 
 const WellnessTimer: React.FC<WellnessTimerProps> = ({
@@ -18,14 +19,15 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   activeThreshold = 15,
   hydrationThreshold = 10,
   stretchThreshold = 20,
-  screenTimeThreshold = 30
+  screenTimeThreshold = 30,
+  defaultHidden = true,
 }) => {
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
   const [showBreakReminder, setShowBreakReminder] = useState<boolean>(false);
   const [showHydrationReminder, setShowHydrationReminder] = useState<boolean>(false);
   const [showStretchReminder, setShowStretchReminder] = useState<boolean>(false);
   const [showScreenTimeReminder, setShowScreenTimeReminder] = useState<boolean>(false);
-  const [isHidden, setIsHidden] = useState<boolean>(false);
+  const [isHidden, setIsHidden] = useState<boolean>(defaultHidden);
   
   const activeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -83,19 +85,25 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div 
+      <div
         className={`transition-all duration-300 ease-in-out ${
-          isHidden ? 'opacity-0 translate-y-4 scale-95' : 'opacity-100 translate-y-0 scale-100'
+          isHidden
+            ? 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+            : 'opacity-100 translate-y-0 scale-100'
         }`}
+        aria-hidden={isHidden}
       >
         <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 shadow-xl border-2 border-white/20 min-w-[220px]">
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-bold text-white text-sm">Wellness Timer</h3>
-            <button 
+            <button
               onClick={toggleVisibility}
-              className="text-white/70 hover:text-white text-lg"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition"
+              aria-label="Hide wellness timer"
+              title="Hide"
+              type="button"
             >
-              {isHidden ? '👁️' : '👁️‍🗨️'}
+              <UIIcon name="eye-off" size={18} className="text-white/90" />
             </button>
           </div>
           
@@ -162,11 +170,14 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
       
       {/* Floating reminder when hidden */}
       {isHidden && (
-        <button 
+        <button
           onClick={toggleVisibility}
           className="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-orange-600 transition border-2 border-white/20"
+          aria-label="Show wellness timer"
+          title="Show wellness timer"
+          type="button"
         >
-          ⏰
+          <UIIcon name="timer" size={20} className="text-white" />
         </button>
       )}
     </div>

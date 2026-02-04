@@ -178,6 +178,23 @@ Store in `tests/assets/`:
 - Mock data files (JSON)
 - Test databases (SQLite)
 
+## Test Database Setup
+
+Before running tests, ensure the test database exists and migrations are applied:
+
+```bash
+# Run the test database bootstrap script
+./scripts/test-db-bootstrap.sh
+```
+
+This script:
+- Checks if PostgreSQL is running
+- Creates `advay_learning_test` database if it doesn't exist
+- Runs alembic migrations on the test database
+- Sets up the database with the latest schema
+
+**Note**: The test database is separate from the development database (`advay_learning`).
+
 ## Running Tests
 
 ### Commands

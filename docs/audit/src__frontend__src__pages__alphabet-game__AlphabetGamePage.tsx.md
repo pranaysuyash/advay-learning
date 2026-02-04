@@ -204,3 +204,83 @@
 4. Plan phased refactoring approach
 5. Implement comprehensive testing strategy
 
+---
+
+# 2026-02-04 Addendum — Persona-Driven UI/UX Audit (Pre-game + Overlays)
+
+**Ticket:** TCK-20260204-008  
+**Prompts used:**
+- `prompts/ui/child-centered-ux-audit-v1.0.md`
+- `prompts/ui/ui-ux-design-audit-v1.0.0.md`
+- `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md`
+
+## 1) Persona + Context
+
+- **Kid persona (primary)**: 3–5 years old, **pre-reader**, tablet/phone, short attention span, taps randomly.
+- **Parent persona**: wants to validate “does it work?” quickly; will abandon if camera/login friction is high.
+- **Teacher persona**: needs fast setup and a clear learning objective; avoids account creation during class.
+
+## 2) Evidence
+
+### Screenshot index (Observed)
+
+- `audit-screenshots/2026-02-04-ui-audit/desktop-game-pre.png` — `/game` while unauthenticated (Observed redirect to Login UI)
+- `audit-screenshots/2026-02-04-ui-audit/mobile-game-pre.png` — `/game` while unauthenticated (Observed redirect to Login UI)
+
+### User-provided evidence (Observed)
+
+- Screenshot from user message (2026-02-04) shows **wellness overlays covering core UI** (wellness timer bottom-right; reminder top-right overlapping header/score).
+
+### Code anchors (Observed in AlphabetGamePage.tsx)
+
+- Pre-game stack contains multiple simultaneous attention grabbers:
+  - `/* Animated Letter Display */`
+  - `/* Accuracy Bar */`
+  - `/* Feedback */`
+  - `/* Permission Warning - Kid-Friendly Fallback */`
+  - `/* Menu Screen */`
+- Wellness UI is mounted from this page:
+  - `/* Wellness Timer */` followed by `<WellnessTimer ... />`
+  - `/* Wellness Reminder */` followed by `<WellnessReminder ... />`
+
+## 3) Findings (ranked)
+
+### KUX-101 — **BLOCKER**: Unauthenticated `/game` path blocks “first fun”
+
+- **Evidence**: **Observed** `/game` loads the Login UI instead of a playable/demo state (see screenshot index above).
+- **Why it matters**:
+  - **Parent**: can’t validate the core activity quickly; high chance of bounce.
+  - **Kid**: cannot proceed at all without adult input.
+  - **Teacher**: classroom “quick start” is blocked.
+- **Root cause**: **Unknown** from `AlphabetGamePage.tsx` alone (likely routing/auth guard outside this file).
+- **Recommendation**:
+  - Provide a “Try Demo” path when arriving unauthenticated (either at `/game` or via the Login page).
+  - If login is required, show a brief explanation (“we save your child’s progress”) and a low-friction demo.
+- **Validation plan**:
+  - Incognito: visit `/game` and confirm a demo/preview can be reached in ≤1 click.
+
+### KUX-102 — **HIGH**: Overlay collisions reduce clarity (wellness timer/reminders cover important HUD)
+
+- **Evidence**:
+  - **Observed** in user screenshot (2026-02-04): overlay blocks header/score region.
+  - **Observed** in code: AlphabetGamePage mounts WellnessTimer + WellnessReminder on this screen (exact positioning is **Unknown** without reading their component files).
+- **Why it matters (child lens)**: Anything covering the main “what to do next” area increases confusion; overlays should never obscure primary controls or score/progress.
+- **Recommendation**:
+  - Default overlays to non-blocking placement (below header, outside main content), collapse by default, and ensure z-index layering doesn’t obscure the HUD.
+- **Validation plan**:
+  - Desktop + mobile: trigger a wellness reminder and confirm header + primary CTA remain visible.
+
+### KUX-103 — **HIGH**: Cognitive overload risk in pre-game composition (too many concurrent elements)
+
+- **Evidence**: **Observed** in code: multiple sections can render in the pre-game state (letter display, accuracy, feedback, permission warning, large menu card) with multiple text blocks and controls.
+- **Why it matters**: For 3–5 year olds, too many simultaneous stimuli makes “what do I do now?” unclear. Parents end up coaching more than necessary.
+- **Recommendation**:
+  - Progressive disclosure: show 1 primary instruction + 1 primary action (“Start”) and tuck secondary stats (accuracy) behind a small expandable panel.
+  - Treat permission warning as a modal/banner that temporarily replaces other content, instead of stacking with all other sections.
+- **Validation plan**:
+  - Kid test: can a pre-reader point to the “start” action in under 3 seconds without being told?
+
+## 4) Next steps (audit-only)
+
+1. If you want this to be “user persona correct”, start with the funnel: fix/demo the unauthenticated entry into `/game` (separate remediation ticket).
+2. Then run a second persona audit with **authenticated gameplay screenshots** (camera prompt, permission denied, in-game, pause, reminder).

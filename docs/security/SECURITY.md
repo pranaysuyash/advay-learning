@@ -18,9 +18,9 @@ This application is designed for a child (Advay) and prioritizes **safety, priva
 
 | Data | Purpose | Storage |
 |------|---------|---------|
-| Learning progress | Track advancement | Local SQLite |
-| Game scores | Gamification | Local SQLite |
-| Settings/preferences | User experience | Local SQLite |
+| Learning progress | Track advancement | PostgreSQL (backend) |
+| Game scores | Gamification | PostgreSQL (backend) |
+| Settings/preferences | User experience | PostgreSQL (backend) |
 | Error logs | Debugging | Local file (rotated) |
 
 ### What We DON'T Collect
@@ -64,11 +64,13 @@ Landmarks Used for Interaction
 
 ## Storage Security
 
-### Local Database
+### Backend Database
 
-- **Location**: `~/.advay_learning/app.db` (platform-specific)
-- **Encryption**: SQLCipher for database encryption (optional)
-- **Backup**: Encrypted backups to parent-specified location
+- **Type**: PostgreSQL
+- **Location**: Backend server (managed database)
+- **Encryption**: Transport encryption (TLS); at-rest encryption per database provider
+- **Backup**: Database-managed backups; custom backup strategy in ADR 003
+- **Access**: Authenticated via API with JWT tokens
 
 ### Data Retention
 
@@ -202,8 +204,8 @@ If online features are added (e.g., pronunciation audio):
 |---------|---------|-------------|
 | MediaPipe | Hand/face tracking | Local processing only |
 | OpenCV | Image processing | Local processing only |
-| PyQt6 | UI framework | None |
-| SQLite | Local storage | Local file only |
+| SQLAlchemy | Database ORM | PostgreSQL via API |
+| PostgreSQL | Backend storage | Structured data (users, progress, profiles) |
 
 ### Dependency Security
 

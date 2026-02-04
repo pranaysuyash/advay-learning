@@ -306,8 +306,8 @@ export const Dashboard = memo(function DashboardComponent() {
       selectedChildData
         ? [
             {
-              label: 'Literacy', // Was: Letters Learned
-              value: `${selectedChildData.progress.lettersLearned}/${selectedChildData.progress.totalLetters}`,
+              label: 'Letters', // Kid-friendly: "Letters" instead of "Literacy"
+              value: `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters}`,
               iconName: 'letters' as const,
               percent:
                 (selectedChildData.progress.lettersLearned /
@@ -316,16 +316,15 @@ export const Dashboard = memo(function DashboardComponent() {
             },
             {
               label: 'Accuracy',
-              value: getStarRating(selectedChildData.progress.averageAccuracy)
-                .emoji,
+              value: `${getStarRating(selectedChildData.progress.averageAccuracy).emoji} (${selectedChildData.progress.averageAccuracy}%)`,
               iconName: 'target' as const,
               percent: selectedChildData.progress.averageAccuracy,
             },
             {
-              label: 'Time',
-              value: formatTimeKidFriendly(
-                selectedChildData.progress.totalTime,
-              ),
+              label: 'Time Played',
+              value: selectedChildData.progress.totalTime < 60
+                ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of learning!`
+                : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of learning!`,
               iconName: 'timer' as const,
               percent: Math.min(
                 (selectedChildData.progress.totalTime / 300) * 100,
@@ -640,14 +639,15 @@ export const Dashboard = memo(function DashboardComponent() {
                           </span>
                         </div>
                         <div className='flex justify-between text-base mb-1'>
-                          <span>Avg. Accuracy:</span>
-                          <span>{langProg.averageAccuracy}%</span>
+                          <span>Accuracy:</span>
+                          <span>{getStarRating(langProg.averageAccuracy).emoji} ({langProg.averageAccuracy}%)</span>
                         </div>
                         <div className='flex justify-between text-base'>
-                          <span>Time Spent:</span>
+                          <span>Time Played:</span>
                           <span>
-                            {Math.floor(langProg.totalTime / 60)}h{' '}
-                            {langProg.totalTime % 60}m
+                            {langProg.totalTime < 60
+                              ? `${Math.floor(langProg.totalTime)} minutes`
+                              : `${Math.floor(langProg.totalTime / 60)}h ${langProg.totalTime % 60}m`}
                           </span>
                         </div>
                         <progress
