@@ -460,3 +460,147 @@ Status updates:
 - [2026-02-05 11:30 IST] **DONE** — Audit complete with recommendations
 
 ---
+
+## TCK-20260205-001 :: Games UX, Age-Group UI Components & Analytics Audit
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-05 13:47 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+**Description**:
+Comprehensive multi-persona audit of the games system, age-group UI component adaptation, and analytics tracking infrastructure. Focus areas:
+
+1. **Games System UX** - How games are presented, selected, and played across age groups (2-3yr, 4-6yr, 7-9yr)
+2. **Age-Group UI Components** - How buttons, instructions, modals vary across age cohorts; consistency of patterns
+3. **Analytics Tracking** - How gameplay events, progress, and engagement data is captured and visible to parents/teachers
+
+Scope contract:
+
+- In-scope:
+  - All games in `src/frontend/src/pages/` (AlphabetGame, ConnectTheDots, LetterHunt, FingerNumberShow)
+  - Game component hierarchy in `src/frontend/src/components/game/`
+  - Analytics endpoints in `src/backend/app/api/v1/endpoints/progress.py`
+  - UI components in `src/frontend/src/components/ui/` and their usage patterns
+  - Profile age configuration in `src/frontend/src/store/profileStore.ts`
+  - Progress tracking types in `src/frontend/src/types/progress.ts`
+  - Game configuration in `src/frontend/src/pages/Games.tsx`
+
+- Out-of-scope:
+  - Backend API design/refactoring (separate audit)
+  - Camera/hand-tracing mechanics (separate axis)
+  - Complete landing page redesign
+  - Code refactoring/implementation
+  - Offline caching/storage optimization
+  - Performance optimization at infrastructure level
+
+- Behavior change allowed: NO - This is discovery/audit only
+
+Targets:
+
+- Repo: learning_for_kids
+- Primary files:
+  - `src/frontend/src/pages/Games.tsx` (game list + age-range config)
+  - `src/frontend/src/pages/AlphabetGame.tsx`, `ConnectTheDots.tsx`, `LetterHunt.tsx` (game implementations)
+  - `src/frontend/src/components/GameCard.tsx` (game card presentation)
+  - `src/backend/app/api/v1/endpoints/progress.py` (analytics backend)
+  - `src/backend/app/db/models/progress.py` (progress model/tracking schema)
+  - `src/frontend/src/components/game/` (game UI components)
+  - `src/frontend/src/store/profileStore.ts` (age tracking)
+  - `src/frontend/src/types/progress.ts` (tracking types)
+  - `src/frontend/src/pages/Progress.tsx` (parent/child progress view)
+
+- Branch: main
+
+Inputs:
+
+- Prompt used: `prompts/audit/camera-game-multipersona-audit-v1.0.md` (adapted)
+- Persona source: `docs/FRESH_35_PERSONA_AUDIT_2026-02-05.md` (35-persona framework)
+
+**Phase 1: Discovery (COMPLETED)**
+
+Evidence gathered:
+
+**Observed**: Games system structure and configuration
+- Command: `find src/frontend/src -type d | grep -E "game|component"` + manual file inspection
+- **Finding**: 4 games currently implemented:
+  1. `AlphabetGame` (Draw Letters) - ageRange: "2-8 years", category: Alphabets, difficulty: Easy
+  2. `FingerNumberShow` (Finger Counting) - ageRange: "3-7 years", category: Numbers, difficulty: Easy
+  3. `ConnectTheDots` - ageRange: "3-6 years", category: Drawing, difficulty: Easy
+  4. `LetterHunt` (Find the Letter) - ageRange: "2-6 years", category: Alphabets, difficulty: Easy
+- All games configured in `src/frontend/src/pages/Games.tsx` with hardcoded ageRange strings
+- No granular difficulty levels implemented (all marked "Easy")
+- Game cards display ageRange as string; no dynamic filtering by child age
+
+**Observed**: Progress/Analytics tracking infrastructure
+- Backend model: `src/backend/app/db/models/progress.py`
+  - Tracks: `activity_type` (drawing, recognition, game), `content_id`, `score`, `duration_seconds`, `meta_data`, `idempotency_key`
+  - Records: completion timestamp, profile_id, batch/dedupe support
+- API endpoints in `src/backend/app/api/v1/endpoints/progress.py`
+  - GET `/` - Retrieve progress for profile
+  - POST `/` - Save single progress item
+  - POST `/batch` - Batch save with idempotency support
+  - GET `/stats` - Basic stats (total activities, score, avg, completed content)
+- Batch endpoint includes deduplication logic via idempotency keys
+- No game-specific event tracking observed in backend (only activity_type + content_id)
+
+**Observed**: UI component patterns for games
+- `GameCard.tsx` - Shows: title, description, ageRange (string), category, difficulty, optional stars/playCount/progress
+  - Category colors map: Alphabets, Numeracy, Fine Motor (Tailwind classes)
+  - Difficulty colors map: Easy, Medium, Hard (all use same Tailwind classes - no visual distinction)
+  - No age-based component adaptation visible in styling
+- `GameSetupCard.tsx` - Generic setup card used in game pre-screens
+  - Simple component with title, description, children slot
+  - No age-based styling or text adaptation
+- `ProfileStore.ts` - Tracks `age?: number` per profile but no age-based component rendering logic visible
+
+**Inferred**: Age-group UI component adaptation gaps
+- Profile store tracks age but games.tsx doesn't use it to filter/customize game difficulty
+- Games hardcode ageRange strings; no dynamic difficulty gating or age-appropriate content selection
+- No persona-specific button sizes, text complexity, or visual hierarchy changes observed in source
+- Difficulty color mappings are identical for Easy/Medium/Hard - no visual distinction in UI
+
+**Unknown**: 
+- How are games actually presenting UI to different age groups during gameplay? (Need playtest evidence)
+- Is analytics data being actively captured during gameplay or only on completion?
+- How parents/teachers view progress analytics? (Completeness + accuracy of parent dashboard)
+- Whether games have internal difficulty progression or fixed difficulty levels
+- How well age-range recommendations match actual child engagement (need persona playtest data)
+- Whether analytics events capture enough metadata (e.g., attempts, errors, time-on-task) for learning insights
+
+Plan:
+
+- [ ] Phase 2: Persona Selection - Define 12+ personas from 35-persona framework + game-specific additions
+- [ ] Phase 3: Audit Execution - Test each game with each persona, capture evidence
+  - [ ] Playtest AlphabetGame (2-3yr, 4-6yr, 7-9yr child personas + parent/teacher)
+  - [ ] Playtest FingerNumberShow
+  - [ ] Playtest ConnectTheDots
+  - [ ] Playtest LetterHunt
+  - [ ] Verify analytics event capture (network/console)
+  - [ ] Check parent progress dashboard (data visibility, accuracy)
+  - [ ] Assess UI component adaptation per age group
+- [ ] Phase 4: Analysis - Synthesize findings, identify patterns (good + problematic)
+- [ ] Phase 5: Cross-Model Verification (if clarifications needed)
+- [ ] Phase 6: Create audit artifact + remediation tickets
+
+Execution log:
+
+- 2026-02-05 13:47 IST | **PHASE 1 DISCOVERY** - Explored codebase structure
+  - Evidence: 4 games identified, hardcoded age ranges found, analytics backend schema reviewed
+  - Discovery: Limited age-group UI adaptation in current implementation; analytics backend exists but needs playtest verification
+  - Unknown: Actual gameplay UX experience across age groups, real analytics capture during play, parent dashboard completeness
+
+Status updates:
+
+- 2026-02-05 13:47 IST **OPEN** → **IN_PROGRESS** - Phase 1 discovery complete, proceeding to Phase 2 persona selection
+
+Next actions:
+
+1. Phase 2: Select and define 12+ personas from 35-persona framework
+2. Phase 3: Execute playtest audit with evidence capture (screenshots, console logs, behavior notes)
+3. Phase 4: Analyze patterns and create findings report
+4. Create remediation tickets for HIGH/MEDIUM priority findings
+5. Follow-up audits: Backend analytics completeness, parent dashboard UX
+
+---

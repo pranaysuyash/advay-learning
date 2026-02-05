@@ -80,6 +80,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const pointerDownRef = useRef(false);
   const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const smoothedTipRef = useRef<Point | null>(null);
+  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isHandPresent, setIsHandPresent] = useState(false);
   const isHandPresentRef = useRef(isHandPresent);
 
@@ -187,9 +188,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setUseMouseMode(true);
       // Still allow game to start with mouse mode
       setIsPlaying(true);
-      setFeedback(
-        "Let's use your finger to draw! 👆",
-      );
+      setFeedback("Let's use your finger to draw! 👆");
     }
   };
 
@@ -606,9 +605,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         setCameraPermission('denied');
         setShowPermissionWarning(true);
         setUseMouseMode(true);
-        setFeedback(
-          "Let's use your finger to draw! 👆",
-        );
+        setFeedback("Let's use your finger to draw! 👆");
         setShowCameraErrorModal(false);
         setIsPaused(false);
         return;
@@ -1155,9 +1152,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 if (state === 'denied') {
                   setShowPermissionWarning(true);
                   setUseMouseMode(true);
-                  setFeedback(
-                    "Let's use your finger to draw! 👆",
-                  );
+                  setFeedback("Let's use your finger to draw! 👆");
                 } else {
                   setShowPermissionWarning(false);
                 }
@@ -1226,7 +1221,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                           {currentLetter.name}
                         </span>
                         {currentLetter.icon && (
-                          <span className='text-xl mt-1'>{currentLetter.icon}</span>
+                          <span className='text-xl mt-1'>
+                            {currentLetter.icon}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -1401,9 +1398,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       <span>Using Finger Magic Mode!</span>
                     </div>
                     <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
-                      Pip can't see your hand right now (the Forgetfulness Fog is
-                      blocking the camera), but that's okay! You can use your finger
-                      on the screen to draw and rescue letters!
+                      Pip can't see your hand right now (the Forgetfulness Fog
+                      is blocking the camera), but that's okay! You can use your
+                      finger on the screen to draw and rescue letters!
                     </p>
                     <button
                       onClick={() => window.location.reload()}

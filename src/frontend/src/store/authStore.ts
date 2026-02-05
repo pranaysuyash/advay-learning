@@ -2,12 +2,35 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authApi } from '../services/api';
 
+export enum UserRole {
+  PARENT = 'parent',
+  ADMIN = 'admin',
+  GUEST = 'guest',
+}
+
 interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   is_active: boolean;
   email_verified?: boolean;
+}
+
+interface GuestSession {
+  id: string;
+  childProfile: {
+    id: string;
+    name: string;
+    age: number;
+    preferredLanguage: string;
+  };
+  progress: {
+    lettersLearned: number;
+    totalLetters: number;
+    averageAccuracy: number;
+    totalTime: number;
+  };
+  createdAt: number;
 }
 
 interface AuthState {
@@ -15,6 +38,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isGuest: boolean;
+  guestSession: GuestSession | null;
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
@@ -23,6 +48,8 @@ interface AuthState {
   fetchUser: () => Promise<void>;
   clearError: () => void;
   checkAuth: () => Promise<void>;
+  loginAsGuest: () => void;
+  clearGuestSession: () => void;
 }
 
 // Helper to extract error message from various error formats
@@ -57,6 +84,8 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      isGuest: false,
+      guestSession: null,
 
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
@@ -101,18 +130,66 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try {
-          // Call logout endpoint to clear cookies on server
-          await authApi.logout();
-        } catch (error) {
-          // Ignore errors, still clear local state
-          console.error('Logout error:', error);
+        const { isGuest } = get();
+        
+        if (!isGuest) {
+          try {
+            // Call logout endpoint to clear cookies on server
+            await authApi.logout();
+          } catch (error) {
+            // Ignore errors, still clear local state
+            console.error('Logout error:', error);
+          }
         }
 
         set({
           user: null,
           isAuthenticated: false,
+          isGuest: false,
+          guestSession: null,
           error: null,
+        });
+      },
+
+      loginAsGuest: () => {
+        // Create a temporary guest session for demo/trial
+        const guestSession: GuestSession = {
+          id: `guest-${Date.now()}`,
+          childProfile: {
+            id: `guest-child-${Date.now()}`,
+            name: 'Guest Player',
+            age: 5,
+            preferredLanguage: 'english',
+          },
+          progress: {
+            lettersLearned: 0,
+            totalLetters: 26,
+            averageAccuracy: 0,
+            totalTime: 0,
+          },
+          createdAt: Date.now(),
+        };
+
+        set({
+          isGuest: true,
+          isAuthenticated: true,
+          guestSession,
+          user: {
+            id: guestSession.id,
+            email: 'guest@demo.local',
+            role: UserRole.GUEST,
+            is_active: true,
+          },
+          error: null,
+        });
+      },
+
+      clearGuestSession: () => {
+        set({
+          isGuest: false,
+          guestSession: null,
+          isAuthenticated: false,
+          user: null,
         });
       },
 
@@ -149,6 +226,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        isGuest: state.isGuest,
+        guestSession: state.guestSession,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

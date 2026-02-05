@@ -37029,3 +37029,87 @@ Risks/notes:
 - Need to verify color contrast and focus management across components
 
 ---
+
+### TCK-20250205-013 :: Add User Role Enum + Admin Role Management
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2025-02-05
+Status: **OPEN**
+Priority: P1
+
+Description:
+Implement proper user role management with type-safe enums and admin endpoints for managing user roles. This follows the "implementation over deletion" principle - the codebase has role fields but lacks proper backend support.
+
+Scope contract:
+
+- In-scope:
+  - Add UserRole enum to backend (parent, admin) with type safety
+  - Update User model to use enum instead of plain string
+  - Update user schemas to use enum
+  - Add admin-only endpoint to update user roles
+  - Update frontend authStore to use enum type
+- Out-of-scope:
+  - Frontend UI for role management (admin dashboard)
+  - Role-based access control beyond admin endpoints
+- Behavior change allowed: YES (adds new functionality, no breaking changes to existing data)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/backend/app/db/models/user.py
+  - src/backend/app/schemas/user.py
+  - src/backend/app/api/v1/endpoints/users.py
+  - src/frontend/src/store/authStore.ts
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] UserRole enum exists with parent and admin values
+- [ ] User model uses enum for role field
+- [ ] Admin endpoint exists to update user roles (PUT /api/v1/users/{user_id}/role)
+- [ ] Frontend authStore uses enum type for role
+- [ ] Database migration created to update existing string roles to enum
+- [ ] Tests pass for new functionality
+
+Execution log:
+
+- [2025-02-05] Discovery | Evidence:
+  - **Command**: `rg -n "role.*parent|parent.*admin" src/backend/app/`
+  - **Output**:
+    ```
+    src/backend/app/db/models/user.py:28:    role: Mapped[str] = mapped_column(String, default="parent")  # parent, admin
+    src/backend/app/schemas/user.py:69:    role: str = "parent"
+    ```
+  - **Interpretation**: Observed — Backend has role fields as plain strings without enum type safety
+
+- [2025-02-05] Discovery | Evidence:
+  - **Command**: `grep -rn "admin" src/backend/app/api/v1/endpoints/users.py`
+  - **Output**: No admin role management endpoints found
+  - **Interpretation**: Observed — No admin endpoints exist for managing user roles
+
+- [2025-02-05] **OPEN** — Ticket created for implementing user role enum and admin role management
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `prompts/remediation/implementation-v1.6.1.md` | Backend engineer | Type safety + admin functionality | Implementation of enum and admin endpoints |
+
+Next actions:
+
+1. Create UserRole enum in backend
+2. Update User model to use enum
+3. Update user schemas
+4. Add admin role management endpoint
+5. Create database migration
+6. Update frontend authStore
+7. Run tests
+
+Risks/notes:
+
+- Need to ensure database migration handles existing string role values correctly
+- Admin endpoint must be properly secured (only superusers can update roles)
+
+---

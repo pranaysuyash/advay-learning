@@ -10,7 +10,7 @@ from app.core.security import verify_password
 from app.core.validation import ValidationError, validate_uuid
 from app.db.models.user import User as UserModel
 from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
-from app.schemas.user import User, UserUpdate
+from app.schemas.user import User, UserUpdate, UserRoleUpdate
 from app.schemas.verification import DeleteAccountRequest, DeleteProfileRequest
 from app.services.audit_service import AuditService
 from app.services.profile_service import ProfileService
@@ -308,3 +308,59 @@ async def delete_profile(
 
     # Delete profile (cascade will delete progress)
     await ProfileService.delete(db, profile)
+
+
+@router.put("/{user_id}/role", response_model=User)
+async def update_user_role(
+    user_id: str,
+    role_update: UserRoleUpdate,
+    current_user: UserModel = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Update a user's role (admin only).
+
+    Only superusers can update user roles.
+    """
+    # Verify current user is superuser
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only superusers can update user roles",
+        )
+
+    # Validate user_id format
+    try:
+        validate_uuid(user_id, "user_id")
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        )
+
+    # Get target user
+    target_user = await UserService.get_by_id(db, user_id)
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Update role
+    target_user.role = role_update.role
+    await db.commit()
+    await db.refresh(target_user)
+
+    # Log the action
+    await AuditService.log_action(
+        db,
+        user_id=current_user.id,
+        user_email=current_user.email,
+        action="user_role_update",
+        resource_type="user",
+        resource_id=user_id,
+        details=f"User role changed to {role_update.role.value}",
+        ip_address=None,
+        user_agent=None,
+    )
+
+    return target_user

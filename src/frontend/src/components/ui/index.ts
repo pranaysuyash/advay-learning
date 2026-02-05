@@ -8,6 +8,9 @@ export { Skeleton, SkeletonCard, SkeletonStat, SkeletonAvatar, SkeletonText, Loa
 export { UIIcon } from './Icon';
 export type { IconName } from './Icon';
 
+// Voice Prompt for Pre-Readers
+export { VoiceButton } from './VoiceButton';
+
 // Toast System
 export { ToastProvider } from './Toast';
 export { useToast } from './useToast';

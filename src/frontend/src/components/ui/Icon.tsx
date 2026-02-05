@@ -32,7 +32,9 @@ export type IconName =
   | 'search'
   | 'rotate-ccw'
   | 'mouse-pointer'
-  | 'chevron-down';
+  | 'chevron-down'
+  | 'volume'
+  | 'volume-off';
 
 type UIIconNamedProps = {
   name: IconName;
@@ -83,6 +85,8 @@ const iconPaths: Record<IconName, string> = {
   'rotate-ccw': '/assets/icons/ui/rotate-ccw.svg',
   'mouse-pointer': '/assets/icons/ui/mouse-pointer.svg',
   'chevron-down': '/assets/icons/ui/chevron-down.svg',
+  'volume': '/assets/icons/ui/volume.svg',
+  'volume-off': '/assets/icons/ui/volume-off.svg',
 };
 
 export function UIIcon(props: UIIconProps) {

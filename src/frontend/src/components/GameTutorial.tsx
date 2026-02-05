@@ -1,21 +1,26 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UIIcon } from './ui/Icon';
+import { VoiceButton } from './ui/VoiceButton';
 
 interface GameTutorialProps {
   onComplete: () => void;
   onSkip: () => void;
+  onSkipCamera?: () => void; // New: Allow playing without camera
 }
 
-export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
+export function GameTutorial({ onComplete, onSkip, onSkipCamera }: GameTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
     {
       title: 'Allow Camera Access',
       description:
-        'Click “Allow” when your browser asks for camera permission so hand tracking can work',
+        'Click "Allow" when your browser asks for camera permission so hand tracking can work',
+      alternativeDescription: 'Or play with your finger on the screen!',
       icon: <UIIcon name='camera' size={48} className='w-12 h-12' />,
+      // Step 0 has alternative option for camera-less play
+      hasAlternative: true,
     },
     {
       title: 'Show Your Hands',
@@ -46,6 +51,17 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
     onSkip();
   };
 
+  const handleSkipCamera = () => {
+    if (onSkipCamera) {
+      onSkipCamera();
+    } else {
+      // Fallback: just skip tutorial
+      onSkip();
+    }
+  };
+
+  const currentStepData = steps[currentStep];
+
   return (
     <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
       <AnimatePresence>
@@ -74,15 +90,43 @@ export function GameTutorial({ onComplete, onSkip }: GameTutorialProps) {
                         Step {currentStep}
                       </span>
                     )}
-                    {steps[currentStep].title}
+                    {currentStepData.title}
                   </div>
                 </div>
                 <p className='text-text-primary text-lg leading-relaxed'>
-                  {steps[currentStep].description}
+                  {currentStepData.description}
                 </p>
-                <div className='flex items-center justify-center mb-4'>
+                
+                {/* Voice prompt for pre-readers */}
+                <div className='mt-3'>
+                  <VoiceButton
+                    text={`${currentStepData.title}. ${currentStepData.description}`}
+                    label='🔊 Listen'
+                    size='md'
+                    variant='secondary'
+                    autoPlay={currentStep === 0} // Auto-play first step
+                  />
+                </div>
+                
+                {/* Show alternative option for camera step */}
+                {'hasAlternative' in currentStepData && currentStepData.hasAlternative && (
+                  <div className='mt-4 p-4 bg-surface-secondary rounded-xl border border-border'>
+                    <p className='text-text-secondary text-sm mb-2'>
+                      {currentStepData.alternativeDescription}
+                    </p>
+                    <button
+                      onClick={handleSkipCamera}
+                      className='px-4 py-2 bg-success hover:bg-success-hover text-white rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 mx-auto'
+                    >
+                      <UIIcon name='hand' size={16} />
+                      Play with Touch/Mouse
+                    </button>
+                  </div>
+                )}
+                
+                <div className='flex items-center justify-center mb-4 mt-4'>
                   <div className='text-brand-primary'>
-                    {steps[currentStep].icon}
+                    {currentStepData.icon}
                   </div>
                 </div>
               </div>

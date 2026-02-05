@@ -174,15 +174,15 @@ export const Dashboard = memo(function DashboardComponent() {
   };
 
   // Handle opening the edit modal
-  const handleOpenEditModal = (child: ChildProfile) => {
-    // Find the actual Profile from profiles array
-    const profile = profiles.find((p) => p.id === child.id);
-    if (!profile) return;
-    setEditingProfile(profile);
-    setEditName(profile.name);
-    setEditLanguage(profile.preferred_language || 'en');
-    setShowEditModal(true);
-  };
+  // const handleOpenEditModal = (child: ChildProfile) => {
+  //   // Find the actual Profile from profiles array
+  //   const profile = profiles.find((p) => p.id === child.id);
+  //   if (!profile) return;
+  //   setEditingProfile(profile);
+  //   setEditName(profile.name);
+  //   setEditLanguage(profile.preferred_language || 'en');
+  //   setShowEditModal(true);
+  // };
 
   // Handle updating profile
   const handleUpdateProfile = async () => {
@@ -308,7 +308,10 @@ export const Dashboard = memo(function DashboardComponent() {
         ? [
             {
               label: 'Letters', // Kid-friendly: "Letters" instead of "Literacy"
-              value: `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters}`,
+              // Child-centered: Show encouraging message for zero-state instead of "0 of 26"
+              value: selectedChildData.progress.lettersLearned === 0
+                ? "Ready to start! 🎉"
+                : `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters} learned`,
               iconName: 'letters' as const,
               percent:
                 (selectedChildData.progress.lettersLearned /
@@ -317,15 +320,21 @@ export const Dashboard = memo(function DashboardComponent() {
             },
             {
               label: 'Stars Earned',
-              value: getStarRating(selectedChildData.progress.averageAccuracy).emoji,
+              // Child-centered: Show encouraging message for new users
+              value: selectedChildData.progress.lettersLearned === 0
+                ? "Ready to earn! ⭐"
+                : getStarRating(selectedChildData.progress.averageAccuracy).emoji,
               iconName: 'target' as const,
               percent: selectedChildData.progress.averageAccuracy,
             },
             {
               label: 'Time Played',
-              value: selectedChildData.progress.totalTime < 60
-                ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of fun!`
-                : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of fun!`,
+              // Child-centered: Positive framing for zero-state
+              value: selectedChildData.progress.totalTime === 0
+                ? "Let's begin! 🚀"
+                : selectedChildData.progress.totalTime < 60
+                  ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of fun!`
+                  : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of fun!`,
               iconName: 'timer' as const,
               percent: Math.min(
                 (selectedChildData.progress.totalTime / 300) * 100,
@@ -404,12 +413,14 @@ export const Dashboard = memo(function DashboardComponent() {
             disabled={exporting || children.length === 0}
             className='p-2 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30'
             title='Export progress data'
-            aria-label={exporting ? 'Export in progress' : 'Export progress data'}
+            aria-label={
+              exporting ? 'Export in progress' : 'Export progress data'
+            }
           >
             {exporting ? (
-              <UIIcon name='hourglass' size={20} aria-hidden="true" />
+              <UIIcon name='hourglass' size={20} aria-hidden='true' />
             ) : (
-              <UIIcon name='download' size={20} aria-hidden="true" />
+              <UIIcon name='download' size={20} aria-hidden='true' />
             )}
           </button>
         </header>
@@ -432,7 +443,7 @@ export const Dashboard = memo(function DashboardComponent() {
                       ? 'bg-pip-orange text-white shadow-soft'
                       : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
                   }`}
-                 >
+                >
                   <span className='font-medium text-lg'>{child.name}</span>
                   <span className='opacity-70 text-sm'>({child.age})</span>
                 </button>
@@ -462,16 +473,23 @@ export const Dashboard = memo(function DashboardComponent() {
           </div>
         )}
 
-         {/* PRIMARY SECTION 1: Quick Play Card - Continue Learning */}
+        {/* PRIMARY SECTION 1: Quick Play Card - Continue Learning */}
         {selectedChildData && (
           <div className='mb-4 p-4 bg-gradient-to-r from-pip-orange/20 to-pip-rust/10 border border-pip-orange/30 rounded-xl'>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-3'>
                 <div className='w-12 h-12 bg-gradient-to-br from-pip-orange to-pip-rust rounded-xl flex items-center justify-center'>
-                  <UIIcon name='play' size={24} className='text-white' aria-label='Play game' />
+                  <UIIcon
+                    name='play'
+                    size={24}
+                    className='text-white'
+                    aria-label='Play game'
+                  />
                 </div>
                 <div>
-                  <h3 className='font-bold text-white text-lg'>Continue Learning 🎯</h3>
+                  <h3 className='font-bold text-white text-lg'>
+                    Continue Learning 🎯
+                  </h3>
                   <p className='text-base text-white/70'>
                     Pick up where you left off!
                   </p>
@@ -490,7 +508,9 @@ export const Dashboard = memo(function DashboardComponent() {
         {/* PRIMARY SECTION 2: Quick Stats (compact) */}
         <div className='mb-4 bg-white border border-border rounded-xl p-4 shadow-soft'>
           <div className='flex items-center justify-between mb-3'>
-            <h3 className='text-lg font-semibold text-text-primary'>Your Progress 📊</h3>
+            <h3 className='text-lg font-semibold text-text-primary'>
+              Your Progress 📊
+            </h3>
           </div>
           <StatsBar stats={stats} />
         </div>
@@ -520,20 +540,17 @@ export const Dashboard = memo(function DashboardComponent() {
 
             <div className='mt-4 flex flex-wrap items-center gap-2 text-sm text-white/70'>
               <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                Quests: {questSummary.completedCount}/
-                {questSummary.totalQuests}
+                Quests: {questSummary.completedCount}/{questSummary.totalQuests}
               </span>
               <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
                 Islands: {questSummary.unlockedCount}
               </span>
               <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                Current island quests:{' '}
-                {questSummary.currentIslandQuestCount}
+                Current island quests: {questSummary.currentIslandQuestCount}
               </span>
               {questSummary.nextUnlockableIslandId && (
                 <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
-                  Next island available:{' '}
-                  {questSummary.nextUnlockableIslandId}
+                  Next island available: {questSummary.nextUnlockableIslandId}
                 </span>
               )}
             </div>
@@ -587,8 +604,8 @@ export const Dashboard = memo(function DashboardComponent() {
 
         {/* COLLAPSIBLE: Explore More 🌟 - Advanced sections */}
         <CollapsibleSection
-          title="Explore More 🌟"
-          icon="🔍"
+          title='Explore More 🌟'
+          icon='🔍'
           defaultOpen={false}
         >
           {selectedChildData && (
@@ -596,7 +613,9 @@ export const Dashboard = memo(function DashboardComponent() {
               {/* Learning Progress - Detailed */}
               <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
                 <div className='flex justify-between items-center mb-4'>
-                  <h2 className='text-2xl font-semibold'>Letters Progress 📝</h2>
+                  <h2 className='text-2xl font-semibold'>
+                    Letters Progress 📝
+                  </h2>
                   <div className='text-base px-3 py-1 bg-bg-tertiary text-slate-600 border border-border rounded-full'>
                     {selectedChildData.preferredLanguage}
                   </div>
@@ -695,7 +714,8 @@ export const Dashboard = memo(function DashboardComponent() {
                       const percent =
                         langProg.totalLetters > 0
                           ? Math.round(
-                              (langProg.lettersLearned / langProg.totalLetters) *
+                              (langProg.lettersLearned /
+                                langProg.totalLetters) *
                                 100,
                             )
                           : 0;
@@ -716,7 +736,9 @@ export const Dashboard = memo(function DashboardComponent() {
                           </div>
                           <div className='flex justify-between text-base mb-1'>
                             <span>Stars:</span>
-                            <span>{getStarRating(langProg.averageAccuracy).emoji}</span>
+                            <span>
+                              {getStarRating(langProg.averageAccuracy).emoji}
+                            </span>
                           </div>
                           <div className='flex justify-between text-base'>
                             <span>Time Played:</span>
@@ -737,7 +759,9 @@ export const Dashboard = memo(function DashboardComponent() {
                   </div>
                 ) : (
                   <div className='text-center py-6 text-slate-600'>
-                    <p className='text-lg'>Start learning in more languages! 🌍</p>
+                    <p className='text-lg'>
+                      Start learning in more languages! 🌍
+                    </p>
                     <p className='text-base mt-2'>
                       Try switching languages to start learning! 🎓
                     </p>

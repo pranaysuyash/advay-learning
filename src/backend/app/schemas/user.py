@@ -2,9 +2,17 @@
 
 import re
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+
+
+class UserRole(str, Enum):
+    """User roles in the system."""
+
+    PARENT = "parent"
+    ADMIN = "admin"
 
 
 def validate_password_strength(password: str) -> str:
@@ -41,15 +49,43 @@ def validate_password_strength(password: str) -> str:
         raise ValueError("Password must contain at least one digit")
 
     if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        raise ValueError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>")
+        raise ValueError(
+            'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>'
+        )
 
     # Check against common passwords
     common_passwords = {
-        "password", "123456", "12345678", "qwerty", "abc123", "password123",
-        "admin", "letmein", "welcome", "monkey", "dragon", "master", "hello",
-        "freedom", "whatever", "trustno1", "princess", "shadow", "sunshine",
-        "123321", "superman", "1234567890", "1234567", "12345", "555555",
-        "lovely", "666666", "welcome123", "iloveyou", "1q2w3e4r", "000000"
+        "password",
+        "123456",
+        "12345678",
+        "qwerty",
+        "abc123",
+        "password123",
+        "admin",
+        "letmein",
+        "welcome",
+        "monkey",
+        "dragon",
+        "master",
+        "hello",
+        "freedom",
+        "whatever",
+        "trustno1",
+        "princess",
+        "shadow",
+        "sunshine",
+        "123321",
+        "superman",
+        "1234567890",
+        "1234567",
+        "12345",
+        "555555",
+        "lovely",
+        "666666",
+        "welcome123",
+        "iloveyou",
+        "1q2w3e4r",
+        "000000",
     }
 
     if password.lower() in common_passwords:
@@ -66,7 +102,7 @@ class UserBase(BaseModel):
 
     email: EmailStr
     is_active: bool = True
-    role: str = "parent"
+    role: UserRole = UserRole.PARENT
     email_verified: bool = False
 
 
@@ -96,6 +132,12 @@ class UserUpdate(BaseModel):
         if v is not None:
             return validate_password_strength(v)
         return v
+
+
+class UserRoleUpdate(BaseModel):
+    """User role update schema (admin only)."""
+
+    role: UserRole
 
 
 class User(UserBase):

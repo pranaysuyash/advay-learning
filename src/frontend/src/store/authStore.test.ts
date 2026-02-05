@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useAuthStore } from './authStore';
+import { useAuthStore, UserRole } from './authStore';
 import { authApi } from '../services/api';
 
 // Mock the API
@@ -33,7 +33,7 @@ describe('AuthStore', () => {
       const mockUser = {
         id: '1',
         email: 'test@example.com',
-        role: 'parent',
+        role: UserRole.PARENT,
         is_active: true,
       };
 
@@ -136,7 +136,7 @@ describe('AuthStore', () => {
     it('should clear user and auth state on logout', async () => {
       // Set initial authenticated state
       useAuthStore.setState({
-        user: { id: '1', email: 'test@example.com', role: 'parent', is_active: true },
+        user: { id: '1', email: 'test@example.com', role: UserRole.PARENT, is_active: true },
         isAuthenticated: true,
       });
 
@@ -153,7 +153,7 @@ describe('AuthStore', () => {
 
     it('should clear state even if logout API fails', async () => {
       useAuthStore.setState({
-        user: { id: '1', email: 'test@example.com', role: 'parent', is_active: true },
+        user: { id: '1', email: 'test@example.com', role: UserRole.PARENT, is_active: true },
         isAuthenticated: true,
       });
 
@@ -173,7 +173,7 @@ describe('AuthStore', () => {
       const mockUser = {
         id: '1',
         email: 'test@example.com',
-        role: 'parent',
+        role: UserRole.PARENT,
         is_active: true,
       };
       vi.mocked(authApi.getMe).mockResolvedValueOnce({ data: mockUser } as any);
@@ -187,7 +187,7 @@ describe('AuthStore', () => {
 
     it('should clear auth state on failed fetch', async () => {
       useAuthStore.setState({
-        user: { id: '1', email: 'test@example.com', role: 'parent', is_active: true },
+        user: { id: '1', email: 'test@example.com', role: UserRole.PARENT, is_active: true },
         isAuthenticated: true,
       });
 
@@ -207,7 +207,7 @@ describe('AuthStore', () => {
       const mockUser = {
         id: '1',
         email: 'test@example.com',
-        role: 'parent',
+        role: UserRole.PARENT,
         is_active: true,
       };
       vi.mocked(authApi.getMe).mockResolvedValueOnce({ data: mockUser } as any);
@@ -229,7 +229,7 @@ describe('AuthStore', () => {
       // First set authenticated state
       useAuthStore.setState({
         isAuthenticated: true,
-        user: { id: '1', email: 'test@example.com', role: 'parent', is_active: true },
+        user: { id: '1', email: 'test@example.com', role: UserRole.PARENT, is_active: true },
       });
 
       // Call fetchUser directly (which checkAuth calls)
