@@ -23,40 +23,42 @@ Conduct a comprehensive **multi-persona audit** of:
 
 ## Workplan
 
-- [x] **Phase 1: Discovery** - Explore games folder structure and analytics code
-  - [x] List all games and their age-group targeting
+- [x] **Phase 1: Discovery** - Explore games folder structure and analytics code ✅ DONE
+  - [x] List all games and their age-group targeting (4 found initially)
   - [x] Find analytics tracking code (event logging, progress storage)
   - [x] Identify UI component patterns used per age group
   - [x] Create ticket: TCK-20260205-001
 
-- [ ] **Phase 2: Persona Selection** - Curate personas from existing 35-persona pack
-  - [ ] Game Designer persona (objective assessment)
-  - [ ] Parent/Guardian personas (3 per age cohort: 2-3yr, 4-6yr, 7-9yr)
-  - [ ] Child learner personas (1 per age cohort)
-  - [ ] Teacher/Educator persona
-  - [ ] Total: ~12 active personas for this audit
+- [ ] **Phase 2: Comprehensive Discovery + Multi-Model Analysis** - EXPANDED SCOPE
+  - [ ] Part A: Find ALL games/activities (not just 4)
+    - [ ] Grep codebase for game components, activities, lessons, mini-games, exercises
+    - [ ] Catalog all activity types (games, drawings, recognitions, etc.)
+    - [ ] Find WIP/hidden activities or placeholder components
+    - [ ] Map activity types to backend tracking schema
+  
+  - [ ] Part B: Code Quality & Architecture Review (Multi-Model)
+    - [ ] Analyze game component patterns (Claude vs GPT vs Gemini)
+    - [ ] Review analytics schema design (consensus check)
+    - [ ] Audit UI component consistency (multiple models)
+    - [ ] Identify code duplication/refactoring opportunities
+    - [ ] Get improvement suggestions from 3+ models
+  
+  - [ ] Part C: UX Pattern Analysis (Multi-Model)
+    - [ ] How are games structured for age groups? (analysis across models)
+    - [ ] UI adaptation patterns - consistency and gaps
+    - [ ] Analytics instrumentation - completeness check
+    - [ ] Engagement loop design assessment
+  
+  - [ ] Part D: Cross-Model Consensus
+    - [ ] Compare findings from Claude, GPT, Gemini
+    - [ ] Identify areas of agreement vs disagreement
+    - [ ] Document conflicting recommendations with reasoning
+    - [ ] Synthesize best ideas from all models
 
-- [ ] **Phase 3: Audit Execution** - Run multi-persona audit with evidence-first discipline
-  - [ ] Test each game with each relevant persona
-  - [ ] Capture UI component usage patterns
-  - [ ] Verify analytics events are firing
-  - [ ] Document observations with evidence (screenshots, code references, console logs)
-  - [ ] Check accessibility/inclusivity per age group
-
-- [ ] **Phase 4: Analysis & Reporting**
-  - [ ] Synthesize findings across personas
-  - [ ] Identify patterns (good and problematic)
-  - [ ] Map findings to specific game files and components
-  - [ ] Create audit artifact with actionable recommendations
-
-- [ ] **Phase 5: Cross-Model Verification** (optional, per user request)
-  - [ ] If findings are unclear, consult alternative models (Claude, GPT, Gemini) for second opinions
-  - [ ] Document model consensus or disagreements
-
-- [ ] **Phase 6: Ticketing & Documentation**
-  - [ ] Update WORKLOG_TICKETS.md with discovery findings
-  - [ ] Link audit artifact to worklog ticket
-  - [ ] Queue next audit or remediation ticket
+- [ ] **Phase 3: Playtest Audit (After Multi-Model Analysis)** - Test persona-based with evidence from analysis
+- [ ] **Phase 4: Analysis & Reporting** - Synthesize all findings
+- [ ] **Phase 5: Cross-Model Verification** - Validate audit findings with models
+- [ ] **Phase 6: Ticketing & Documentation** - Create remediation tickets
 
 ## Scope & Constraints
 
