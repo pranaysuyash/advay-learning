@@ -62,3 +62,11 @@ class Profile(ProfileBase):
     parent_id: str
     created_at: datetime
     updated_at: datetime
+
+
+class ProfilePhotoResponse(BaseModel):
+    """Profile photo upload response schema."""
+
+    avatar_url: Optional[str] = None
+    profile_photo: Optional[str] = None
+    photo_updated_at: Optional[str] = None

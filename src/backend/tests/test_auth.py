@@ -8,7 +8,7 @@ class TestAuth:
         """Test successful user registration."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "newuser@example.com", "password": "Password123"},
+            json={"email": "newuser@example.com", "password": "Password123!"},
         )
         assert response.status_code == 200  # Endpoint returns 200, not 201
         data = response.json()
@@ -18,11 +18,11 @@ class TestAuth:
         """Test duplicate registration returns same generic success response."""
         first_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": test_user["email"], "password": "Password123"},
+            json={"email": test_user["email"], "password": "Password123!"},
         )
         second_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": test_user["email"], "password": "Password123"},
+            json={"email": test_user["email"], "password": "Password123!"},
         )
         assert first_response.status_code == 200
         assert second_response.status_code == 200

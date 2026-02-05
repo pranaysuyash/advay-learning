@@ -141,10 +141,10 @@ class TestPasswordValidation:
     def test_validate_password_valid(self):
         """Test valid passwords pass validation."""
         valid_passwords = [
-            "Password123",  # Basic valid
+            "Password123!",  # Basic valid
             "MyP@ssw0rd",  # With special char
-            "A1b2C3d4",  # Mixed
-            "SecurePass1",  # Long enough
+            "A1b2C3d4!",  # Mixed with special
+            "SecurePass1!,",  # Long enough with special char
         ]
         for pwd in valid_passwords:
             result = validate_password_strength(pwd)
@@ -191,7 +191,7 @@ class TestPasswordValidation:
         """Test registration with valid password succeeds."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "strongpass@test.com", "password": "StrongPass123"},
+            json={"email": "strongpass@test.com", "password": "StrongPass123!"},
         )
         assert response.status_code == 200
 

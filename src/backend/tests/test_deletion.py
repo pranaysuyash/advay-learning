@@ -45,7 +45,7 @@ class TestProfileDeletion:
         delete_response = await client.request(
             "DELETE",
             f"/api/v1/users/me/profiles/{profile_id}",
-            json={"password": "WrongPassword123"},
+            json={"password": "WrongPassword123!!"},
             headers=auth_headers,
         )
         assert delete_response.status_code == 401
@@ -88,7 +88,7 @@ class TestProfileDeletion:
         delete_response = await client.request(
             "DELETE",
             "/api/v1/users/me/profiles/invalid-uuid",
-            json={"password": "SomePassword123"},
+            json={"password": "SomePassword123!!"},
             headers=auth_headers,
         )
         assert delete_response.status_code == 422
@@ -114,7 +114,7 @@ class TestAccountDeletion:
         delete_response = await client.request(
             "DELETE",
             "/api/v1/users/me",
-            json={"password": "WrongPassword123"},
+            json={"password": "WrongPassword123!!"},
             headers=auth_headers,
         )
         assert delete_response.status_code == 401
@@ -196,7 +196,7 @@ class TestAuditLogging:
         await client.request(
             "DELETE",
             f"/api/v1/users/me/profiles/{profile_id}",
-            json={"password": "WrongPassword123"},
+            json={"password": "WrongPassword123!!"},
             headers=auth_headers,
         )
 

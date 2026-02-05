@@ -29,14 +29,19 @@ env/
 .coverage
 htmlcov/
 .tox/
+.vitest/
+coverage/
+.nyc_output/
 
-# IDEs
+# IDEs & Editors
 .vscode/
 .idea/
+.cursor/
+.windsurfrc/
 *.swp
 *.swo
 *~
-.DS_Store
+*.iml
 
 # Frontend
 src/frontend/node_modules/
@@ -45,13 +50,31 @@ src/frontend/yarn-debug.log*
 src/frontend/yarn-error.log*
 src/frontend/pnpm-debug.log*
 src/frontend/dist/
+src/frontend/.cache/
+src/frontend/coverage/
+src/frontend/test-results/
+src/frontend/playwright-report/
+src/frontend/.playwright/
+src/frontend/.vite/
+src/frontend/.turbo/
+src/frontend/.parcel-cache/
 *.local
 .eslintrc.cjs
+
+# Node & package managers (global)
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Database
 *.db
@@ -63,6 +86,7 @@ logs/
 *.log
 
 # OS
+.DS_Store
 Thumbs.db
 
 # Project specific
@@ -80,29 +104,6 @@ storage/drawings/*
 *.pem
 secrets/
 
-# Node & package managers
-node_modules/
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Frontend build & test artifacts
-src/frontend/.cache/
-src/frontend/coverage/
-src/frontend/test-results/
-src/frontend/playwright-report/
-src/frontend/.playwright/
-src/frontend/.vite/
-src/frontend/.turbo/
-src/frontend/dist/
-src/frontend/.parcel-cache/
-
-# Vitest & coverage
-.vitest/
-coverage/
-.nyc_output/
-
 # Playwright artifacts (global)
 playwright-report/
 test-results/
@@ -113,10 +114,13 @@ videos/
 audit-screenshots/
 docs/audit/screenshots/
 
-# IDE / Editor
-*.iml
-.idea/
-.vscode/
+# CI/CD artifacts
+coverage.xml
+junit.xml
+*.junit
 
-# OS
-.DS_Store
+# Framework builds
+.next/
+.nuxt/
+.terraform/
+.serverless/

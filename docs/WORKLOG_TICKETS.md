@@ -67,7 +67,7 @@ Targets:
   - src/frontend/src/components/WellnessReminder.tsx
 - Branch/PR: main
 - Range: Unknown (uncommitted worktree)
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
@@ -129,21 +129,24 @@ Execution log:
   - **Interpretation**: Observed — Vitest passes (some console warnings from existing tests remain).
 
 Status updates:
+
 - [2026-02-04 11:09 IST] **IN_PROGRESS** — Started UI polish work scoped to AlphabetGame pre-game screen and wellness overlays.
 - [2026-02-04 11:21 IST] **IN_PROGRESS** — UI changes implemented and tests pass; awaiting visual verification in browser.
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/workflow/agent-entrypoint-v1.0.md` | Workflow steward | Process | Ensures discovery + worklog discipline before implementation. |
-| `prompts/remediation/implementation-v1.6.1.md` | Frontend engineer | UX/UI | Used as remediation workflow for implementing scoped UI improvements. |
+| Prompt file                                    | Persona / lens    | Audit axis | Evidence link / notes                                                 |
+| ---------------------------------------------- | ----------------- | ---------- | --------------------------------------------------------------------- |
+| `prompts/workflow/agent-entrypoint-v1.0.md`    | Workflow steward  | Process    | Ensures discovery + worklog discipline before implementation.         |
+| `prompts/remediation/implementation-v1.6.1.md` | Frontend engineer | UX/UI      | Used as remediation workflow for implementing scoped UI improvements. |
 
 Next actions:
+
 1. Manually verify AlphabetGame pre-game screen layout visually (desktop + mobile widths).
 2. If needed, tweak spacing/typography based on a post-change screenshot.
 
 Risks/notes:
+
 - UI adjustments may change perceived layout; keep changes limited to presentation and preserve existing functionality.
 - Wellness overlays are currently global/fixed; ensure positioning does not cover critical controls on common viewports.
 
@@ -178,11 +181,11 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
-  - docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+  - docs/audit/src**frontend**src**pages**alphabet-game\_\_AlphabetGamePage.tsx.md
 - Route(s): `/game`
 - Branch/PR: main
 - Range: Unknown (uncommitted worktree)
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
@@ -220,21 +223,24 @@ Execution log:
   - **Interpretation**: Observed — Persona-driven addendum appended to the existing AlphabetGamePage audit artifact.
 
 Status updates:
+
 - [2026-02-04 11:24 IST] **IN_PROGRESS** — Started persona-driven audit; evidence capture complete.
 - [2026-02-04 11:37 IST] **DONE** — Persona-driven addendum written with screenshot references + code anchors.
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/ui/child-centered-ux-audit-v1.0.md` | Child learning expert (3–5, pre-reader) | Kids UX | Findings structure for cognitive load, feedback loops, exploration safety. |
-| `prompts/ui/ui-ux-design-audit-v1.0.0.md` | UI/UX auditor + frontend reviewer | Visual design + implementation | Evidence-first format with screenshot index + prioritized backlog. |
-| `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md` | Parent + teacher + kid personas | Persona simulation | Persona sections + “top 10 issues” framing for camera app experiences. |
+| Prompt file                                              | Persona / lens                          | Audit axis                     | Evidence link / notes                                                      |
+| -------------------------------------------------------- | --------------------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `prompts/ui/child-centered-ux-audit-v1.0.md`             | Child learning expert (3–5, pre-reader) | Kids UX                        | Findings structure for cognitive load, feedback loops, exploration safety. |
+| `prompts/ui/ui-ux-design-audit-v1.0.0.md`                | UI/UX auditor + frontend reviewer       | Visual design + implementation | Evidence-first format with screenshot index + prioritized backlog.         |
+| `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md` | Parent + teacher + kid personas         | Persona simulation             | Persona sections + “top 10 issues” framing for camera app experiences.     |
 
 Next actions:
+
 1. If you want authenticated gameplay screenshots, re-run audit with a logged-in session and capture: permission prompt, denied flow, in-game HUD, and overlay triggers.
 
 Risks/notes:
+
 - Screenshot evidence is taken from the running local dev server; some states (camera granted/denied, in-game) may require manual interaction and may be marked Unknown if not reproducible headlessly.
 
 ---
@@ -268,11 +274,11 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/Login.tsx
-  - docs/audit/ui__src__frontend__src__pages__Login.tsx.md
+  - docs/audit/ui**src**frontend**src**pages\_\_Login.tsx.md
 - Route(s): `/login` (and the `/game` redirect as observed evidence)
 - Branch/PR: main
 - Range: Unknown (uncommitted worktree)
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
@@ -299,31 +305,33 @@ Execution log:
   - **Interpretation**: Observed — Persona-driven addendum appended to the existing Login audit artifact with screenshot index + recommendations.
 
 Status updates:
+
 - [2026-02-04 11:32 IST] **IN_PROGRESS** — Started persona-driven Login audit; screenshots captured.
 - [2026-02-04 11:37 IST] **DONE** — Persona-driven addendum written with screenshot index + code anchors.
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/ui/child-centered-ux-audit-v1.0.md` | Parent facilitator lens (kid 3–5) | Kids onboarding UX | Focus on “time to first fun” and reducing reading burden for the child. |
-| `prompts/ui/ui-ux-design-audit-v1.0.0.md` | UI/UX auditor + frontend reviewer | Visual polish | Requires screenshot index + specific recs. |
-| `prompts/ui/ui-file-audit-v1.0.md` | UI implementation auditor | Maintainability/a11y | Adds code-level risks and test suggestions for Login.tsx. |
+| Prompt file                                  | Persona / lens                    | Audit axis           | Evidence link / notes                                                   |
+| -------------------------------------------- | --------------------------------- | -------------------- | ----------------------------------------------------------------------- |
+| `prompts/ui/child-centered-ux-audit-v1.0.md` | Parent facilitator lens (kid 3–5) | Kids onboarding UX   | Focus on “time to first fun” and reducing reading burden for the child. |
+| `prompts/ui/ui-ux-design-audit-v1.0.0.md`    | UI/UX auditor + frontend reviewer | Visual polish        | Requires screenshot index + specific recs.                              |
+| `prompts/ui/ui-file-audit-v1.0.md`           | UI implementation auditor         | Maintainability/a11y | Adds code-level risks and test suggestions for Login.tsx.               |
 
 Next actions:
+
 1. If you want, I can create a remediation ticket for the top 1–2 funnel blockers (demo access + contrast) and implement it as a tightly-scoped PR.
 
 Risks/notes:
-- Existing Login audit artifact appears stale and partially malformed; preserve prior content and append a dated addendum rather than rewriting history.
 
+- Existing Login audit artifact appears stale and partially malformed; preserve prior content and append a dated addendum rather than rewriting history.
 
 ### Prompt & Persona Usage Table
 
 Every ticket or artifact must include a prompt/persona usage table (reference `docs/PROCESS_PROMPTS.md` for canonical combos). Capture the prompts used (single, chained, or sequential), the persona(s)/lens, the audit axis, and the evidence link(s) so downstream agents can reproduce the workflow.
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/...` | e.g., Child learning expert | UX | Linked to `docs/audit/...` |
+| Prompt file   | Persona / lens              | Audit axis | Evidence link / notes      |
+| ------------- | --------------------------- | ---------- | -------------------------- |
+| `prompts/...` | e.g., Child learning expert | UX         | Linked to `docs/audit/...` |
 
 Weekly `./scripts/audit_review.sh` runs must also log the prompts/personas that powered the audit pass.
 
@@ -380,11 +388,11 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/workflow/agent-entrypoint-v1.0.md` | Workflow steward | Process onboarding | Guided compliant entry into this work effort. |
-| `prompts/workflow/prompt-library-curation-v1.0.md` | Prompt curator | Process hygiene | Ensured README and registry updates matched standards. |
-| `prompts/audit/master-audit-agent-v1.0.md` | Audit architect | Repository coverage | The new artifact released for future audit agents. |
+| Prompt file                                        | Persona / lens   | Audit axis          | Evidence link / notes                                  |
+| -------------------------------------------------- | ---------------- | ------------------- | ------------------------------------------------------ |
+| `prompts/workflow/agent-entrypoint-v1.0.md`        | Workflow steward | Process onboarding  | Guided compliant entry into this work effort.          |
+| `prompts/workflow/prompt-library-curation-v1.0.md` | Prompt curator   | Process hygiene     | Ensured README and registry updates matched standards. |
+| `prompts/audit/master-audit-agent-v1.0.md`         | Audit architect  | Repository coverage | The new artifact released for future audit agents.     |
 
 Next actions:
 
@@ -440,11 +448,11 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/workflow/agent-entrypoint-v1.0.md` | Workflow steward | Process onboarding | Updated to reference the new full-repo audit option. |
-| `prompts/audit/master-audit-agent-v1.0.md` | Audit architect | Repository coverage | Updated with lockstep maintenance rule for future revisions. |
-| `prompts/workflow/prompt-library-curation-v1.0.md` | Prompt curator | Process hygiene | Ensured prompt index/entrypoint/worklog stay aligned. |
+| Prompt file                                        | Persona / lens   | Audit axis          | Evidence link / notes                                        |
+| -------------------------------------------------- | ---------------- | ------------------- | ------------------------------------------------------------ |
+| `prompts/workflow/agent-entrypoint-v1.0.md`        | Workflow steward | Process onboarding  | Updated to reference the new full-repo audit option.         |
+| `prompts/audit/master-audit-agent-v1.0.md`         | Audit architect  | Repository coverage | Updated with lockstep maintenance rule for future revisions. |
+| `prompts/workflow/prompt-library-curation-v1.0.md` | Prompt curator   | Process hygiene     | Ensured prompt index/entrypoint/worklog stay aligned.        |
 
 ### TCK-20260204-003 :: Master Audit Run (Full Repo) + Roadmap
 
@@ -494,9 +502,9 @@ Execution log:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/audit/master-audit-agent-v1.0.md` | Senior staff auditor | Full repo | Two-pass audit (comprehension then findings/research/roadmap). |
+| Prompt file                                | Persona / lens       | Audit axis | Evidence link / notes                                          |
+| ------------------------------------------ | -------------------- | ---------- | -------------------------------------------------------------- |
+| `prompts/audit/master-audit-agent-v1.0.md` | Senior staff auditor | Full repo  | Two-pass audit (comprehension then findings/research/roadmap). |
 
 Status updates:
 
@@ -550,9 +558,9 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| None | Accessibility implementer | A11y | Scoped UI labeling improvements for icon-only controls and progress indicators. |
+| Prompt file | Persona / lens            | Audit axis | Evidence link / notes                                                           |
+| ----------- | ------------------------- | ---------- | ------------------------------------------------------------------------------- |
+| None        | Accessibility implementer | A11y       | Scoped UI labeling improvements for icon-only controls and progress indicators. |
 
 ### TCK-20260201-001 :: Fix Login Form Validation Flapping
 
@@ -6199,7 +6207,7 @@ _None currently_
 Type: [AUDIT|REMEDIATION|HARDENING|REVIEW|VERIFICATION|POST_MERGE|TRIAGE|IMPLEMENTATION|FEATURE|TESTING]
 Owner: [Agent Name or UNASSIGNED]
 Created: [YYYY-MM-DD HH:MM UTC]
-Status: [OPEN|IN_PROGRESS|DONE|BLOCKED|DROPPED]
+Status: **OPEN**|IN_PROGRESS|DONE|BLOCKED|DROPPED]
 Priority: [P0|P1|P2|P3]
 
 Description:
@@ -6711,7 +6719,7 @@ Targets:
 Execution Log:
 
 - [2026-01-28 14:15 IST] Discovered doc/script drift | Evidence collected above
-- [2026-01-28 14:15 IST] Created ticket TCK-20260128-002 | Status: OPEN
+- [2026-01-28 14:15 IST] Created ticket TCK-20260128-002 | Status: **OPEN**
 
 Status Updates:
 
@@ -17690,7 +17698,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -17771,7 +17779,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -17851,7 +17859,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -17930,7 +17938,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18011,7 +18019,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18094,7 +18102,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18174,7 +18182,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18256,7 +18264,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18340,7 +18348,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18425,7 +18433,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18512,7 +18520,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18596,7 +18604,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18682,7 +18690,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18767,7 +18775,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -18849,7 +18857,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 22:00 UTC] Created ticket | Status: OPEN
+- [2026-01-29 22:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21064,7 +21072,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21157,7 +21165,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21254,7 +21262,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21355,7 +21363,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21458,7 +21466,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21561,7 +21569,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21662,7 +21670,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -21766,7 +21774,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-29 23:45 UTC] Created ticket | Status: OPEN
+- [2026-01-29 23:45 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22164,7 +22172,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22288,7 +22296,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22390,7 +22398,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:05 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:05 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22489,7 +22497,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:10 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:10 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22591,7 +22599,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:15 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:15 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22688,7 +22696,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:20 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:20 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22791,7 +22799,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:25 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:25 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -22896,7 +22904,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:30 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -23003,7 +23011,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:35 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:35 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -23116,7 +23124,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:30 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -23309,7 +23317,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-30 00:30 UTC] Created ticket | Status: OPEN
+- [2026-01-30 00:30 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -24167,7 +24175,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -24268,7 +24276,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:05 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:05 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -24356,7 +24364,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:10 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:10 UTC] Created ticket | Status: **OPEN**
 
 Status updates:
 
@@ -24921,7 +24929,7 @@ Risks/notes:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Accessibility Compliance)
 
 Scope contract:
@@ -24980,7 +24988,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed ui_design_audit.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
 
@@ -25026,7 +25034,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Accessibility Compliance)
 
 Scope contract:
@@ -25091,7 +25099,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed ui_design_audit.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing accessibility tickets - none found
 
@@ -25143,7 +25151,7 @@ Evidence:
 Type: FEATURE/REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Child-Centered UX)
 
 Scope contract:
@@ -25202,7 +25210,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed child_usability_audit.md findings
 - [2026-01-31 00:00 UTC] Reviewed ux_feedback_v1.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
@@ -25495,7 +25503,7 @@ Risks/notes:
 - Existing UI overload may be due to mixed design system usage across screens (Observed in prior audits).
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Kids/Parent Facing Screen)
 
 Scope contract:
@@ -25557,7 +25565,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx (565 lines)
 - [2026-01-31 00:00 UTC] Identified 10 key issues across UX, accessibility, readability
 - [2026-01-31 00:00 UTC] Created comprehensive audit document: ui__src__frontend__src__pages__Dashboard.tsx.md
@@ -25686,7 +25694,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx audit findings
 - [2026-01-31 00:00 UTC] Moved ticket to IN_PROGRESS
 
@@ -25750,7 +25758,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Readability Impact)
 
 Scope contract:
@@ -25801,7 +25809,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Identified typography issues from audit
 - [2026-01-31 00:00 UTC] Found p-6 = 16px which is too small for main UI text
 - [2026-01-31 00:00 UTC] Found text-white/60 has poor contrast on light backgrounds
@@ -25851,7 +25859,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Accessibility Violation)
 
 Scope contract:
@@ -25908,7 +25916,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Found 5 icons without aria-label in Dashboard
 - [2026-01-31 00:00 UTC] Icons: letters, target, timer, flame, check, circle
 - [2026-01-31 00:00 UTC] All have aria-hidden="true" - completely inaccessible to screen readers
@@ -25969,7 +25977,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Child/Parent Usability)
 
 Scope contract:
@@ -26026,7 +26034,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Identified abstract statistics display
 - [2026-01-31 00:00 UTC] Found fraction format "5/26" - confusing for parents
 - [2026-01-31 00:00 UTC] Found percentage "75%" - meaningless to kids
@@ -26087,7 +26095,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - WCAG Violation)
 
 Scope contract:
@@ -26145,7 +26153,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Found autoFocus on line 501 (child name input)
 - [2026-01-31 00:00 UTC] Found autoFocus on line 510 (age input)
 - [2026-01-31 00:00 UTC] No autocomplete attributes found on any inputs
@@ -26265,7 +26273,7 @@ Execution log:
 - [2026-02-03 05:00 UTC] Increased text sizes throughout Dashboard.tsx for better readability
 - [2026-02-03 05:15 UTC] Updated child selectors from text-sm to text-base, increased heading sizes, updated progress indicators
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Identified typography issues
 - [2026-02-03 05:15 UTC] **DONE** - All typography improvements implemented
 
@@ -26353,7 +26361,7 @@ Execution log:
 - [2026-02-04 05:45 UTC] Updated export button with proper aria-label and icon accessibility
 - [2026-02-04 06:00 UTC] Updated game navigation icons with appropriate aria-labels
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Found 5 icons without aria-label
 - [2026-02-04 06:00 UTC] **DONE** - All accessibility improvements implemented
 
@@ -26469,7 +26477,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Identified abstract statistics
 
 Status updates:
@@ -26505,7 +26513,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - WCAG Violation)
 
 Scope contract:
@@ -26559,7 +26567,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Found autoFocus on inputs
 - [2026-01-31 00:00 UTC] No autocomplete attributes
 
@@ -26597,7 +26605,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Critical for Parents Understanding Progress)
 
 Scope contract:
@@ -26652,7 +26660,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] Completed user persona review
 - [2026-01-31 00:30 UTC] Found statistics abstraction as #1 issue
 - [2026-01-31 00:30 UTC] Identified parent needs meaningful feedback
@@ -26700,7 +26708,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Accessibility Compliance)
 
 Scope contract:
@@ -26764,7 +26772,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed ui_design_audit.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing accessibility tickets - none found
 
@@ -26813,7 +26821,7 @@ Evidence:
 Type: FEATURE/REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Child-Centered UX)
 
 Scope contract:
@@ -26871,7 +26879,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed child_usability_audit.md findings
 - [2026-01-31 00:00 UTC] Reviewed ux_feedback_v1.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
@@ -26919,7 +26927,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Kids/Parent Facing Screen)
 
 Scope contract:
@@ -26981,7 +26989,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx (565 lines)
 - [2026-01-31 00:00 UTC] Identified 10 key issues across UX, accessibility, readability
 - [2026-01-31 00:00 UTC] Created comprehensive audit document: ui__src__frontend__src__pages__Dashboard.tsx.md
@@ -27110,7 +27118,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx audit findings
 - [2026-01-31 00:00 UTC] Moved ticket to IN_PROGRESS
 
@@ -27174,7 +27182,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Critical Parent Understanding)
 
 Scope contract:
@@ -27230,7 +27238,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed - DASHBOARD_USER_REVIEW.md
 - [2026-01-31 00:30 UTC] Identified statistics abstraction as #1 issue
 - [2026-01-31 00:30 UTC] User feedback: "I can't tell if my kids are doing well"
@@ -27291,7 +27299,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - WCAG Accessibility Violation)
 
 Scope contract:
@@ -27352,7 +27360,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed
 - [2026-01-31 00:30 UTC] Identified icons without ARIA labels
 - [2026-01-31 00:30 UTC] User feedback: "I see icons but I don't know what they represent. As a regular user I can't tell. If I needed to explain this to someone (like a babysitter or grandparent), I couldn't"
@@ -27425,7 +27433,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Readability for All Users)
 
 Scope contract:
@@ -27484,7 +27492,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed
 - [2026-01-31 00:30 UTC] User feedback: "I have to squint or hold my phone closer to read comfortably. As an older parent with declining eyesight, this is a real problem."
  - Impact: HIGH - Multiple users struggle with readability
@@ -27554,7 +27562,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Accessibility Compliance)
 
 Scope contract:
@@ -27618,7 +27626,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed ui_design_audit.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing accessibility tickets - none found
 
@@ -27667,7 +27675,7 @@ Evidence:
 Type: FEATURE/REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (High - Child-Centered UX)
 
 Scope contract:
@@ -27725,7 +27733,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed child_usability_audit.md findings
 - [2026-01-31 00:00 UTC] Reviewed ux_feedback_v1.md findings
 - [2026-01-31 00:00 UTC] Checked worklog for existing tickets - none found
@@ -27773,7 +27781,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Kids/Parent Facing Screen)
 
 Scope contract:
@@ -27835,7 +27843,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx (565 lines)
 - [2026-01-31 00:00 UTC] Identified 10 key issues across UX, accessibility, readability
 - [2026-01-31 00:00 UTC] Created comprehensive audit document: ui__src__frontend__src__pages__Dashboard.tsx.md
@@ -27964,7 +27972,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Reviewed Dashboard.tsx audit findings
 - [2026-01-31 00:00 UTC] Moved ticket to IN_PROGRESS
 
@@ -28028,7 +28036,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Critical Parent Understanding)
 
 Scope contract:
@@ -28084,7 +28092,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed - DASHBOARD_USER_REVIEW.md
 - [2026-01-31 00:30 UTC] Identified statistics abstraction as #1 issue
 - [2026-01-31 00:30 UTC] User feedback: "I can't tell if my kids are doing well"
@@ -28145,7 +28153,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - WCAG Accessibility Violation)
 
 Scope contract:
@@ -28206,7 +28214,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed
 - [2026-01-31 00:30 UTC] Identified icons without ARIA labels
 - [2026-01-31 00:30 UTC] User feedback: "I see icons but I don't know what they represent. As a regular user I can't tell. If I needed to explain this to someone (like a babysitter or grandparent), I couldn't"
@@ -28279,7 +28287,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Readability for All Users)
 
 Scope contract:
@@ -28338,7 +28346,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:30 UTC] User persona review completed
 - [2026-01-31 00:30 UTC] User feedback: "I have to squint or hold my phone closer to read comfortably. As an older parent with declining eyesight, this is a real problem."
  - Impact: HIGH - Multiple users struggle with readability
@@ -28408,7 +28416,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Reduces Game Access)
 
 Scope contract:
@@ -28465,7 +28473,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Completed Games page audit (parent persona)
 - [2026-01-31 00:00 UTC] Identified 3 "Coming Soon" games with no context
 - [2026-01-31 00:00 UTC] Found evidence at lines 82-165
@@ -28527,7 +28535,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (Medium - Reduces User Confusion)
 
 Scope contract:
@@ -28580,7 +28588,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Completed Games page audit (parent persona)
 - [2026-01-31 00:00 UTC] Found inconsistent button labels causing confusion
 - [2026-01-31 00:00 UTC] User feedback: "Play in [Language]" vs "Play Game" confusion
@@ -28627,7 +28635,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (Medium - Prevents Wrong Game Launches)
 
 Scope contract:
@@ -28685,7 +28693,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Completed Games page audit (parent persona)
 - [2026-01-31 00:00 UTC] Found confusion when no child is selected
 - [2026-01-31 00:00 UTC] User feedback: "My 4-year-old might not understand and get frustrated. I have to go back and select a child, then navigate to game again. This creates a frustrating loop."
@@ -28733,7 +28741,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P2 (Low - Adds Game Information)
 
 Scope contract:
@@ -28790,7 +28798,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Completed Games page audit
 - [2026-01-31 00:00 UTC] Found "Coming Soon" games with no descriptions (lines 41-58, 48-70, 52-71)
 - [2026-01-31 00:00 UTC] User feedback: "The card titles are the only information I have."
@@ -28844,7 +28852,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Prevents User Frustration)
 
 Scope contract:
@@ -28904,7 +28912,7 @@ Execution log:
 - [2026-02-02 17:30 UTC] Implemented profile selector component and updated Dashboard.tsx to connect local selection to global state
 - [2026-02-02 17:35 UTC] Added ProfileSelector component to Games.tsx to allow profile switching
 
-- [2026-01-31 00:00 UTC] Created ticket | Status: OPEN
+- [2026-01-31 00:00 UTC] Created ticket | Status: **OPEN**
 - [2026-01-31 00:00 UTC] Completed Games page audit
 - [2026-01-31 00:00 UTC] Found disabled buttons with no feedback (lines 26-27, 24-28, 33-45, 47-60)
 - [2026-01-31 00:00 UTC] User feedback: "My kids might click buttons and get no response. They'll be confused why nothing happens."
@@ -28958,7 +28966,7 @@ Evidence:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Readability Impact)
 
 ### TCK-20260131-007 :: Add ARIA Labels to Dashboard Icons
@@ -28990,7 +28998,7 @@ Priority: P0 (High - Critical for Parents Understanding Progress)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Critical for Parents Understanding Progress)
 
 ### TCK-20260131-009 :: Fix Dashboard Form Accessibility Issues
@@ -28998,7 +29006,7 @@ Priority: P0 (High - Critical for Parents Understanding Progress)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - WCAG Accessibility Violation)
 
 ### TCK-20260131-100 :: Remove "Coming Soon" Games from Games Page
@@ -29006,7 +29014,7 @@ Priority: P0 (High - WCAG Accessibility Violation)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (High - Reduces Game Access)
 
 ### TCK-20260131-101 :: Standardize Game Button Labels
@@ -29014,7 +29022,7 @@ Priority: P0 (High - Reduces Game Access)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (Medium - Reduces User Confusion)
 
 ### TCK-20260131-102 :: Add Descriptions to "Coming Soon" Games
@@ -29022,7 +29030,7 @@ Priority: P1 (Medium - Reduces User Confusion)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 :00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P2 (Low - Improves Game Information)
 
 ### TCK-20260131-103 :: Add Child Selection Visual Indicator on Games Page
@@ -29030,7 +29038,7 @@ Priority: P2 (Low - Improves Game Information)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P1 (Medium - Prevents Wrong Game Launches)
 
 ### TCK-20260131-104 :: Improve Disabled State Feedback for Game Buttons
@@ -29038,7 +29046,7 @@ Priority: P1 (Medium - Prevents Wrong Game Launches)
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-01-31 00:00 UTC
-Status: OPEN
+Status: **OPEN**
 Priority: P0 (Critical - Prevents User Frustration)
 
 ---
@@ -32197,7 +32205,7 @@ Execution log:
   - Before: 28,732 lines
   - After: 29,776 lines (+1,044 lines)
   - Format: All tickets use ### TCK-YYYYMMDD-### format
-  - Status: All marked OPEN with audit source references
+  - Status: **OPEN** with audit source references
 
 Status updates:
 - [2026-02-02 17:45 UTC] **DONE** — All implementations completed and tested- [2026-02-02 17:35 UTC] **IN_PROGRESS** — Implementation complete, testing required
@@ -34158,7 +34166,6 @@ Status updates:
 
 - [2026-02-02 UTC] **DONE** — Planning prompt captured and registered.
 
-
 ### TCK-20260202-039 :: Track prompts + personas in documentation
 
 Type: PROCESS
@@ -34168,6 +34175,7 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope:
   - Update `AGENTS.md` (Phase 3 documentation rules) to require recording prompts, audit axes, and personas used for each analysis run.
   - Ensure this metadata is added to worklog entries, plan docs, and other artifacts going forward.
@@ -34176,21 +34184,27 @@ Scope contract:
 - Behavior change allowed: YES (better traceability).
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): `AGENTS.md`, `docs/WORKLOG_TICKETS.md`
 
 Acceptance Criteria:
+
 - [ ] AGENTS instructions include the new rule.
 - [ ] Worklog ticket documents the change.
 
 Dependencies:
+
 - None
 
 Execution log:
+
 - [2026-02-02 UTC] **DONE** — Added prompt/persona traceability requirement to AGENTS and recorded the ticket.
 
 Status updates:
+
 - [2026-02-02 UTC] **DONE** — Instruction change completed.
+
 ### TCK-20260202-040 :: Expand process docs with prompt registry & templates
 
 Type: PROCESS
@@ -34200,6 +34214,7 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope:
   - Create a prompt/persona registry (`docs/PROCESS_PROMPTS.md`) that lists approved prompts, personas, axes, and cadence reminders.
   - Require every ticket/plan to include a prompt/persona usage table and note this template in `docs/WORKLOG_TICKETS.md` and `docs/PLAN_DOC.md`.
@@ -34209,22 +34224,27 @@ Scope contract:
 - Behavior change allowed: YES (better documentation).
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): `docs/PROCESS_PROMPTS.md`, `docs/WORKLOG_TICKETS.md`, `docs/PLAN_DOC.md`, `docs/process/PROMPT_STYLE_GUIDE.md`, `AGENTS.md`
 
 Acceptance Criteria:
+
 - [ ] Process prompts doc references canonical prompts/personas and weekly `./scripts/audit_review.sh` cadence.
 - [ ] Worklog and plan docs include prompt/persona table instructions.
 - [ ] Prompt style guide documents the evidence snippet requirement.
 - [ ] AGENTS README references the new doc.
 
 Dependencies:
+
 - None
 
 Execution log:
+
 - [2026-02-02 UTC] **DONE** — Added registry, updated docs, logged instructions, captured ticket.
 
 Status updates:
+
 - [2026-02-02 UTC] **DONE** — Process documentation improvements complete.
 
 ### TCK-20260202-037 :: Holistic Progress Page - Complete Redesign
@@ -34232,7 +34252,7 @@ Status updates:
 Type: FEATURE / REDESIGN
 Owner: Qwen-Coder
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Description:
@@ -34330,7 +34350,7 @@ Status updates:
 Type: IMPLEMENTATION
 Owner: GitHub Copilot
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -34450,13 +34470,16 @@ Related Audit Findings:
 Evidence:
 
 **Command**: Verified featureDetection.ts existence and completeness
+
 ```
 ls -la src/frontend/src/utils/featureDetection.ts
 cat src/frontend/src/utils/featureDetection.ts | grep "detectCameraSupport\|detectMediaPipeSupport\|detectWebGLSupport"
 ```
+
 **Output**: File exists with 164 lines of comprehensive feature detection code
 
 **Implementation Summary**:
+
 1. **Observed**: featureDetection.ts already provides:
    - detectCameraSupport() - checks navigator.mediaDevices.getUserMedia
    - detectMediaPipeSupport() - checks for global Hands object
@@ -34474,7 +34497,7 @@ cat src/frontend/src/utils/featureDetection.ts | grep "detectCameraSupport\|dete
 
 3. **Created NoCameraFallback component**:
    - Friendly UI for cameras not available
-   - CameraRequired wrapper component  
+   - CameraRequired wrapper component
    - Customizable title, description, action button
    - Full-screen and inline modes
    - ~110 lines
@@ -34511,7 +34534,7 @@ Status updates:
 Type: IMPLEMENTATION
 Owner: GitHub Copilot
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -34667,7 +34690,9 @@ Evidence:
 **Integration Pattern**:
 
 Games can use in 3 ways:
+
 1. Simple wrapper:
+
    ```tsx
    <CameraPermissionWrapper onCameraGranted={() => startGame()}>
      <GameComponent />
@@ -34675,6 +34700,7 @@ Games can use in 3 ways:
    ```
 
 2. With hook:
+
    ```tsx
    const { status, requestPermission } = useCameraPermission();
    // Manually call requestPermission() in game start logic
@@ -34691,6 +34717,7 @@ Games can use in 3 ways:
 **Next Implementation Steps**:
 
 To integrate into games (next phase):
+
 1. Import CameraPermissionWrapper in AlphabetGamePage.tsx
 2. Wrap game component with <CameraPermissionWrapper>
 3. Remove inline getUserMedia call from startGame()
@@ -34724,14 +34751,12 @@ Risks/notes:
 
 ---
 
-
-
 ## TCK-20260202-042 :: Create Guided Demo Onboarding Flow
 
 Type: IMPLEMENTATION
 Owner: GitHub Copilot
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -34876,6 +34901,7 @@ Evidence:
 **Migration Guide**:
 
 Existing code using fixed size still works:
+
 ```tsx
 // Old (still works - defaults to auto)
 <Mascot state='happy' />
@@ -34979,6 +35005,7 @@ Evidence:
    - BROWSER_ERRORS: UNSUPPORTED_BROWSER, WEBGL_NOT_SUPPORTED, STORAGE_FULL
 
 2. **Error Message Structure**:
+
    ```typescript
    {
      title: string;        // Main message (with emoji)
@@ -35019,8 +35046,8 @@ Evidence:
 3. **Example Usage**:
    ```tsx
    <ErrorDisplay
-     errorCode="NotAllowedError"
-     variant="modal"
+     errorCode='NotAllowedError'
+     variant='modal'
      onRetry={() => requestCameraPermission()}
      onDismiss={() => useTouchMode()}
    />
@@ -35052,6 +35079,7 @@ Evidence:
 **Integration Pattern** (Ready for implementation):
 
 Games can show errors with:
+
 ```tsx
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 
@@ -35063,27 +35091,29 @@ try {
 }
 
 // In render:
-{error && (
-  <ErrorDisplay
-    errorCode={error.name}
-    error={error}
-    variant="modal"
-    onRetry={handleRetry}
-    onDismiss={handleDismiss}
-  />
-)}
+{
+  error && (
+    <ErrorDisplay
+      errorCode={error.name}
+      error={error}
+      variant='modal'
+      onRetry={handleRetry}
+      onDismiss={handleDismiss}
+    />
+  );
+}
 ```
 
 **Sample Error Messages**:
 
-| Technical | User-Friendly |
-|-----------|---------------|
-| NotAllowedError | Camera Permission Needed 📷 |
-| NotFoundError | No Camera Detected 🔍 |
-| NotReadableError | Camera is Busy 🚫 |
-| NetworkError | No Internet Connection 📡 |
-| WebGL Error | Graphics Features Not Supported 🎨 |
-| Storage Quota | Storage Space Running Low 💾 |
+| Technical        | User-Friendly                      |
+| ---------------- | ---------------------------------- |
+| NotAllowedError  | Camera Permission Needed 📷        |
+| NotFoundError    | No Camera Detected 🔍              |
+| NotReadableError | Camera is Busy 🚫                  |
+| NetworkError     | No Internet Connection 📡          |
+| WebGL Error      | Graphics Features Not Supported 🎨 |
+| Storage Quota    | Storage Space Running Low 💾       |
 
 **Quality Metrics**:
 
@@ -35122,14 +35152,12 @@ Risks/notes:
 
 ---
 
-
-
 ## TCK-20260202-045 :: Comprehensive Cross-Device Testing
 
 Type: TESTING
 Owner: GitHub Copilot
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -35198,7 +35226,7 @@ Status updates:
 Type: TESTING
 Owner: GitHub Copilot
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -35414,7 +35442,7 @@ Status updates:
 Type: IMPLEMENTATION
 Owner: Pranay
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Scope contract:
@@ -35458,7 +35486,7 @@ Status updates:
 Type: IMPLEMENTATION
 Owner: Pranay
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Scope contract:
@@ -35502,7 +35530,7 @@ Status updates:
 Type: IMPLEMENTATION
 Owner: Pranay
 Created: 2026-02-02
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Scope contract:
@@ -35687,7 +35715,7 @@ Status updates:
 Type: AUDIT_FINDING
 Owner: Pranay
 Created: 2026-02-03
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -35706,13 +35734,13 @@ Acceptance Criteria:
 
 - [ ] Multi-persona audit completed (Technical, Child-Centered UX, MediaPipe, UI/UX Design, Code Review)
 - [ ] Critical issues identified and prioritized (P0, P1, P2)
-- [ ] Audit artifact created: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- [ ] Audit artifact created: docs/audit/src**frontend**src**pages**alphabet-game\_\_AlphabetGamePage.tsx.md
 - [ ] Implementation plan provided with phases
 - [ ] Verifier pack included for validation
 
 Source:
 
-- Audit file: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- Audit file: docs/audit/src**frontend**src**pages**alphabet-game\_\_AlphabetGamePage.tsx.md
 - Finding ID: Multi-Persona Audit - Component Complexity Analysis
 - Evidence: File size (1664 lines), state complexity (25+ variables), dependency analysis
 
@@ -35732,7 +35760,7 @@ Status updates:
 Type: AUDIT_FINDING
 Owner: Pranay
 Created: 2026-02-03
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Scope contract:
@@ -35751,13 +35779,13 @@ Acceptance Criteria:
 
 - [ ] Multi-persona audit completed (Technical, Child-Centered UX, MediaPipe, UI/UX Design, Code Review)
 - [ ] Critical issues identified and prioritized (P0, P1, P2)
-- [ ] Audit artifact created: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- [ ] Audit artifact created: docs/audit/src**frontend**src**pages**alphabet-game\_\_AlphabetGamePage.tsx.md
 - [ ] Implementation plan provided with phases
 - [ ] Verifier pack included for validation
 
 Source:
 
-- Audit file: docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md
+- Audit file: docs/audit/src**frontend**src**pages**alphabet-game\_\_AlphabetGamePage.tsx.md
 - Finding ID: Multi-Persona Audit - Component Complexity Analysis
 - Evidence: File size (1664 lines), state complexity (25+ variables), dependency analysis
 
@@ -36019,10 +36047,10 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/audit/master-audit-agent-v1.0.md` | Senior staff auditor | Architecture | Finding ARCH-001 identified SQLite vs PostgreSQL conflict |
-| `prompts/remediation/implementation-v1.6.1.md` | Documentation engineer | Documentation consistency | Updated docs to match actual implementation |
+| Prompt file                                    | Persona / lens         | Audit axis                | Evidence link / notes                                     |
+| ---------------------------------------------- | ---------------------- | ------------------------- | --------------------------------------------------------- |
+| `prompts/audit/master-audit-agent-v1.0.md`     | Senior staff auditor   | Architecture              | Finding ARCH-001 identified SQLite vs PostgreSQL conflict |
+| `prompts/remediation/implementation-v1.6.1.md` | Documentation engineer | Documentation consistency | Updated docs to match actual implementation               |
 
 Next actions:
 
@@ -36111,10 +36139,10 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/audit/master-audit-agent-v1.0.md` | Senior staff auditor | Test infrastructure | Finding TEST-001 identified missing test DB bootstrap |
-| `prompts/remediation/implementation-v1.6.1.md` | Infrastructure engineer | Developer experience | Created bootstrap script for one-command test setup |
+| Prompt file                                    | Persona / lens          | Audit axis           | Evidence link / notes                                 |
+| ---------------------------------------------- | ----------------------- | -------------------- | ----------------------------------------------------- |
+| `prompts/audit/master-audit-agent-v1.0.md`     | Senior staff auditor    | Test infrastructure  | Finding TEST-001 identified missing test DB bootstrap |
+| `prompts/remediation/implementation-v1.6.1.md` | Infrastructure engineer | Developer experience | Created bootstrap script for one-command test setup   |
 
 Next actions:
 
@@ -36129,6 +36157,7 @@ Risks/notes:
 - Script uses default postgres user; production may need different credentials
 
 ---
+
 ---
 
 ### TCK-20260204-026 :: Remediate Game Page Issues
@@ -36136,7 +36165,7 @@ Risks/notes:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:00 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36175,10 +36204,12 @@ Source:
 Execution log:
 
 - [2026-02-04 08:00 UTC] **OPEN** — Ticket created based on Game page audit
+- [2026-02-04 09:30 UTC] **OPEN** — Audit file updated with ticket reference, implementation pending
 
 Status updates:
 
 - [2026-02-04 08:00 UTC] **OPEN** — Ticket created, awaiting implementation
+- [2026-02-04 09:30 UTC] **OPEN** — Audit file linked to ticket, implementation still pending
 
 Next actions:
 
@@ -36194,7 +36225,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:05 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36233,10 +36264,12 @@ Source:
 Execution log:
 
 - [2026-02-04 08:05 UTC] **OPEN** — Ticket created based on progress service audit
+- [2026-02-04 09:35 UTC] **OPEN** — Audit file updated with ticket reference, implementation pending
 
 Status updates:
 
 - [2026-02-04 08:05 UTC] **OPEN** — Ticket created, awaiting implementation
+- [2026-02-04 09:35 UTC] **OPEN** — Audit file linked to ticket, implementation still pending
 
 Next actions:
 
@@ -36252,7 +36285,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:10 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36310,7 +36343,7 @@ Next actions:
 Type: SECURITY
 Owner: AI Assistant
 Created: 2026-02-04 08:15 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Description:
@@ -36368,7 +36401,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:20 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36426,7 +36459,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:25 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P2
 
 Description:
@@ -36484,7 +36517,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:30 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36542,7 +36575,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:35 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P0
 
 Description:
@@ -36600,7 +36633,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:40 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36658,7 +36691,7 @@ Next actions:
 Type: REMEDIATION
 Owner: AI Assistant
 Created: 2026-02-04 08:45 UTC
-Status: **OPEN**
+Status: **OPEN\*\***
 Priority: P1
 
 Description:
@@ -36791,8 +36824,8 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                  | Persona / lens                               | Audit axis                                                                   | Evidence link / notes                                       |
+| -------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | `prompts/ui/child-centered-ux-audit-v1.0.md` | Child learning expert (early childhood + UX) | Cognitive load, motivation, exploration safety, accessibility, learning flow | 11 findings covering dashboard games flow for 4-6 year olds |
 
 Next actions:
@@ -36807,5 +36840,192 @@ Risks/notes:
 - Progress metrics redesign (KUX-002) is critical for child comprehension
 - Edit profile accessibility (KUX-006) is security concern for parent oversight
 - All recommendations preserve existing functionality, just enhance child experience
+
+---
+
+### TCK-20260204-010 :: Documentation and Audit Maintenance
+
+Type: MAINTENANCE
+Owner: Pranay
+Created: 2026-02-04 11:54 IST
+Status: **DONE**
+Priority: P2
+
+Description:
+Update documentation files and add new audit artifacts for improved project maintainability and compliance tracking.
+
+Scope contract:
+
+- In-scope:
+  - Update SETUP.md with current environment requirements
+  - Update WORKLOG_TICKETS.md with recent work tracking
+  - Update security documentation
+  - Add new audit files for backend services and frontend components
+  - Add test database bootstrap script
+  - Minor component updates for WellnessReminder, WellnessTimer, Dashboard, and AlphabetGamePage
+- Out-of-scope:
+  - Any functional code changes beyond minor UI adjustments
+  - Breaking changes to existing APIs or interfaces
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/SETUP.md
+  - docs/WORKLOG_TICKETS.md
+  - docs/security/SECURITY.md
+  - docs/audit/\*.md (new files)
+  - scripts/test-db-bootstrap.sh
+  - src/frontend/src/components/WellnessReminder.tsx
+  - src/frontend/src/components/WellnessTimer.tsx
+  - src/frontend/src/pages/Dashboard.tsx
+  - src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Documentation files updated with current information
+- [x] New audit artifacts created for code review tracking
+- [x] Test bootstrap script added for development setup
+- [x] Minor component improvements applied
+- [x] All changes pass regression tests and type checking
+
+Execution log:
+
+- [2026-02-04 11:54 IST] Implementation | Evidence: All documentation and audit files updated successfully
+- [2026-02-04 11:54 IST] Verification | Evidence: Regression tests passed (338/338), TypeScript validation passed
+
+Status updates:
+
+- [2026-02-04 11:54 IST] **DONE** — Documentation maintenance completed and committed
+
+Next actions:
+
+1. Continue with Phase 2 implementation (TCK-20260204-007 and related UI polish tickets)
+
+Risks/notes:
+
+- Documentation updates are non-functional and preserve all existing behavior
+- Audit files provide better tracking for future maintenance work
+
+### TCK-20260204-012 :: Accessibility Audit - Frontend (Axis E)
+
+Type: AUDIT
+Owner: AI Assistant
+Created: 2026-02-04 18:05 UTC
+Status: **OPEN**
+Priority: P1
+
+Description:
+Run single-axis app auditor focused on Accessibility (Axis E) for frontend. This is a MediaPipe-based, camera-driven learning web app where accessibility is critical for kids with diverse abilities (motor, visual, cognitive).
+
+Scope contract:
+
+- In-scope:
+  - Audit axis E: Accessibility (keyboard, focus, contrast, reduced motion, ARIA)
+  - Target surface: frontend (pages, components)
+  - Evidence-first audit: every non-trivial claim backed by file path + code excerpt, command output
+  - Compliance matrix with Compliant/Partial/Non-compliant marking
+  - App-wide accessibility standard with principles and patterns
+  - Migration + enforcement plan
+  - No code changes (report-only)
+- Out-of-scope:
+  - Backend accessibility
+  - Individual game component audits (AlphabetGame, ConnectTheDots, etc.)
+  - Individual hook audits
+  - Color contrast verification (without automated tools)
+- Behavior change allowed: NO (report-only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/App.tsx
+  - src/frontend/src/pages/Dashboard.tsx
+  - src/frontend/src/pages/Games.tsx
+  - src/frontend/src/pages/Home.tsx
+  - src/frontend/src/components/ui/ParentGate.tsx
+  - src/frontend/src/components/ui/Icon.tsx
+  - src/frontend/src/components/ui/ProtectedRoute.tsx
+  - src/frontend/src/components/ui/ConfirmDialog.tsx
+  - src/frontend/src/components/ui/Card.tsx
+- Branch/PR: main
+- Base: main@2372125
+
+Acceptance Criteria:
+
+- [x] Audit axis E: Accessibility defined and documented
+- [x] Evidence map built from code scans
+- [x] Compliance matrix completed for pages/components
+- [x] App-wide accessibility standard defined with principles and patterns
+- [x] Top issues ranked by severity and fix directions
+- [x] Migration plan with quick wins, core refactor, hardening
+- [x] Enforcement mechanisms proposed (lint rules, automated tests)
+- [x] One best way forward proposed with trade-offs
+- [x] No code changes made in audit (report-only)
+
+Source:
+
+- Prompt: prompts/audit/single-axis-app-auditor-v1.0.md
+- Axis: E) Accessibility (keyboard, focus, contrast, reduced motion, ARIA)
+
+Execution log:
+
+- [2026-02-04 18:05 UTC] **OPEN** — Ticket created for accessibility audit
+- [2026-02-04 18:08 UTC] **IN_PROGRESS** — Scanning frontend for accessibility patterns
+
+Status updates:
+
+- [2026-02-04 18:05 UTC] **OPEN** — Ticket created
+- [2026-02-04 18:08 UTC] **IN_PROGRESS** — Analysis in progress
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `prompts/audit/single-axis-app-auditor-v1.0.md` | Accessibility specialist | Accessibility (keyboard, focus, contrast, reduced motion, ARIA) | Kids learning app (4-6 years) requiring accessible design |
+
+Next actions:
+
+1. Complete accessibility audit artifact with findings
+2. Identify gaps in ARIA labels, keyboard navigation, focus management, reduced motion support
+3. Create migration plan for improving accessibility
+4. Document accessibility principles for kids apps
+
+Risks/notes:
+
+- Many .bak files suggest potential file history/backup issues
+- Reduced motion implementation exists in Games.tsx (good pattern found)
+- ParentGate has proper aria-label (good accessibility practice)
+- Need to verify color contrast and focus management across components
+
+---
+
+Status updates:
+
+- [2026-02-04 18:05 UTC] **OPEN** — Ticket created for accessibility audit
+- [2026-02-04 18:08 UTC] **IN_PROGRESS** — Analysis in progress
+- [2026-02-04 18:11 UTC] **DONE** — Accessibility audit complete: 5 files analyzed, 2 HIGH, 3 MED, 1 LOW issues
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `prompts/audit/single-axis-app-auditor-v1.0.md` | Accessibility specialist | Accessibility (keyboard, focus, contrast, reduced motion, ARIA) | Kids learning app (4-6 years) requiring accessible design |
+
+Next actions:
+
+1. Review accessibility audit findings
+2. Prioritize quick wins: ARIA labels (ACC-002), loading states (ACC-006)
+3. Evaluate if keyboard navigation (ACC-001) or error boundaries (ACC-005) are critical blockers
+4. Continue with next audit in sequence
+
+Risks/notes:
+
+- Many .bak files suggest potential file history/backup issues
+- Reduced motion implementation exists in Games.tsx (good pattern found)
+- ParentGate has proper aria-label (good accessibility practice)
+- Need to verify color contrast and focus management across components
 
 ---

@@ -18,7 +18,7 @@ class RefreshToken(Base):
         String, primary_key=True, default=lambda: str(uuid4())
     )
     token: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_revoked: Mapped[bool] = mapped_column(Boolean, default=False)

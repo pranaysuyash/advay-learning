@@ -146,9 +146,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Session persistence state moved below after core state declarations
   // (moved to avoid referencing variables before they are declared)
 
-  // Two-stage prompt state for the current letter.
-  const [promptStage, setPromptStage] = useState<'center' | 'side'>('center');
-  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Single consistent prompt - no more two-stage (was confusing for children)
+  const [showLetterPrompt, setShowLetterPrompt] = useState(true);
 
   // Basic game controls and stubs
   const startGame = async () => {
@@ -174,7 +173,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         setFeedback(null);
         initializeHandTracking(); // Don't await - let useEffect handle the result
       } else {
-        setFeedback('Camera ready!');
+        setFeedback('Pip can see you! 📷');
       }
 
       // Start wellness monitoring after game starts
@@ -189,7 +188,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Still allow game to start with mouse mode
       setIsPlaying(true);
       setFeedback(
-        "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
+        "Let's use your finger to draw! 👆",
       );
     }
   };
@@ -198,10 +197,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setIsPlaying(false);
     setIsDrawing(false);
     setIsPinching(false);
+    setShowLetterPrompt(true);
     pointerDownRef.current = false;
     pinchStateRef.current = createDefaultPinchState();
     lastDrawPointRef.current = null;
-    setPromptStage('center');
+    setShowLetterPrompt(true);
     if (promptTimeoutRef.current) {
       clearTimeout(promptTimeoutRef.current);
       promptTimeoutRef.current = null;
@@ -277,7 +277,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     const points = drawnPointsRef.current.length;
     if (points < 20) {
       setAccuracy(20);
-      setFeedback('Try tracing more of the letter before checking!');
+      setFeedback('Draw more of the letter first! ✏️');
       setStreak(0);
       try {
         // Sound playback may not be available in some test environments; guard it.
@@ -317,13 +317,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         spread: 70,
         origin: { y: 0.6 },
       });
-      setFeedback('Great job! 🎉');
+      setFeedback('Amazing! Pip is so proud! 🎉');
       setScore((s) => s + Math.round(nextAccuracy));
       setStreak((s) => s + 1);
       setCelebrationTitle(`You traced ${currentLetter.name}!`);
       setShowCelebration(true);
     } else {
-      setFeedback('Good start — try to trace the full shape!');
+      setFeedback('Good try! Draw the whole letter! 🌟');
       setStreak(0);
       try {
         playPop(); // Encouraging feedback
@@ -341,7 +341,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setIsPinching(false);
     pinchStateRef.current = createDefaultPinchState();
     lastDrawPointRef.current = null;
-    setPromptStage('center');
+    setShowLetterPrompt(true);
   };
 
   const goToHome = () => {
@@ -379,7 +379,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   useEffect(() => {
     if (isPlaying && isHandTrackingReady) {
       setIsHandTrackingLoading(false);
-      setFeedback('Camera ready!');
+      setFeedback('Pip can see you! 📷');
       console.log('[AlphabetGame] Hand tracking became ready during gameplay');
     }
   }, [isPlaying, isHandTrackingReady]);
@@ -607,7 +607,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         setShowPermissionWarning(true);
         setUseMouseMode(true);
         setFeedback(
-          "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
+          "Let's use your finger to draw! 👆",
         );
         setShowCameraErrorModal(false);
         setIsPaused(false);
@@ -633,7 +633,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setShowCameraErrorModal(false);
     setIsPaused(false);
     setUseMouseMode(true);
-    setFeedback('Mouse/Touch mode active! You can still draw.');
+    setFeedback('Use your finger to draw! 👆');
   }, []);
 
   // Exit handlers - using empty deps since stopGame and navigate are stable
@@ -686,9 +686,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       ) {
         setIsPaused((prev) => !prev);
         if (!isPaused) {
-          setFeedback('Game paused. Take a break!');
+          setFeedback('Time for a break! Pip is waiting for you! 🐼');
         } else {
-          setFeedback('Welcome back! Continue where you left off.');
+          setFeedback("Welcome back! Let's draw more letters! 🎨");
         }
       }
     };
@@ -700,9 +700,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Two-stage prompt: show big center letter briefly, then keep a small side pill.
   useEffect(() => {
     if (!isPlaying) return;
-    setPromptStage('center');
+    setShowLetterPrompt(true);
     if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
-    promptTimeoutRef.current = setTimeout(() => setPromptStage('side'), 1800);
+
     return () => {
       if (promptTimeoutRef.current) {
         clearTimeout(promptTimeoutRef.current);
@@ -1156,7 +1156,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   setShowPermissionWarning(true);
                   setUseMouseMode(true);
                   setFeedback(
-                    "The Fog is blocking Pip's sight! But no worries—you can use your finger magic to draw! ✨",
+                    "Let's use your finger to draw! 👆",
                   );
                 } else {
                   setShowPermissionWarning(false);
@@ -1206,45 +1206,33 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 </div>
               )}
 
-              {/* Two-stage prompt: big center then small side pill */}
-              {isPlaying && promptStage === 'center' && (
-                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                  <div className='bg-black/65 backdrop-blur px-8 py-6 rounded-3xl border border-white/25 text-white shadow-soft-lg'>
-                    <div className='text-center'>
-                      <div className='text-sm md:text-base opacity-85 font-semibold mb-2'>
-                        Trace this letter
-                      </div>
+              {/* Consistent letter prompt - stays in one place, no confusing transitions */}
+              {isPlaying && showLetterPrompt && (
+                <div className='absolute top-4 left-4 z-10'>
+                  <div className='bg-black/65 backdrop-blur px-5 py-4 rounded-2xl border border-white/25 text-white shadow-soft-lg'>
+                    <div className='flex items-center gap-4'>
+                      {/* Big letter */}
                       <div
-                        className={`text-7xl md:text-8xl font-black leading-none ${letterColorClass}`}
+                        className={`text-5xl md:text-6xl font-black leading-none ${letterColorClass}`}
                       >
                         {currentLetter.char}
                       </div>
-                      <div className='text-base md:text-lg opacity-90 font-semibold mt-2'>
-                        {currentLetter.name}
+                      {/* Letter name and instruction */}
+                      <div className='flex flex-col'>
+                        <span className='text-xs md:text-sm opacity-75 font-medium'>
+                          Draw this letter
+                        </span>
+                        <span className='text-base md:text-lg font-bold'>
+                          {currentLetter.name}
+                        </span>
+                        {currentLetter.icon && (
+                          <span className='text-xl mt-1'>{currentLetter.icon}</span>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               )}
-
-              <div className='absolute top-4 left-4 flex gap-2 flex-wrap'>
-                {promptStage === 'side' && (
-                  <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
-                    <span className='flex items-center gap-2'>
-                      <UIIcon
-                        name='target'
-                        size={16}
-                        className='text-yellow-300'
-                      />
-                      Trace{' '}
-                      <span className='font-extrabold'>
-                        {currentLetter.char}
-                      </span>
-                      <span className='opacity-80'>({currentLetter.name})</span>
-                    </span>
-                  </div>
-                )}
-              </div>
 
               {/* In-Game Mascot */}
               <div className='absolute bottom-4 left-4 z-20'>
@@ -1602,7 +1590,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     type='button'
                     onClick={() => {
                       setIsPaused(false);
-                      setFeedback('Welcome back! Continue where you left off.');
+                      setFeedback("Welcome back! Let's draw more letters! 🎨");
                     }}
                     className='w-full px-6 py-4 min-h-[56px] bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] flex items-center justify-center gap-3'
                   >

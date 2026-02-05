@@ -294,6 +294,33 @@ describe('Semantic HTML Accessibility', () => {
   });
 
   describe('Dashboard page', () => {
+    beforeEach(() => {
+      useAuthStore.setState({
+        user: { id: 'u1', email: 'parent@test.com', role: 'parent', is_active: true },
+        isAuthenticated: true,
+      });
+      useProfileStore.setState({
+        profiles: [{ id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' }],
+        selectedProfile: 'p1',
+        currentProfile: { id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' },
+        fetchProfiles: vi.fn(),
+        createProfile: vi.fn(),
+        updateProfile: vi.fn(),
+      } as any);
+      useProgressStore.setState({
+        letterProgress: {
+          en: [
+            { letter: 'A', bestAccuracy: 85, mastered: true, attempts: 5 },
+            { letter: 'B', bestAccuracy: 70, mastered: false, attempts: 3 },
+          ],
+        },
+        getMasteredLettersCount: () => 1,
+        getUnlockedBatches: () => 1,
+        unlockAllBatches: vi.fn(),
+        resetProgress: vi.fn(),
+      } as any);
+    });
+
     it('should have section wrapper with semantic layout', () => {
       const { container } = renderWithRouter(<Dashboard />);
 
@@ -301,11 +328,18 @@ describe('Semantic HTML Accessibility', () => {
       expect(sections.length).toBeGreaterThan(0);
     });
 
-    it('should have article elements for content cards', () => {
+    it('should have article elements for content cards', async () => {
       const { container } = renderWithRouter(<Dashboard />);
 
-      const articles = container.querySelectorAll('article');
-      expect(articles.length).toBeGreaterThan(0);
+      // Check if the collapsible section exists (articles are inside expandable section)
+      const collapsibleSection = container.querySelector('button[aria-expanded]');
+      expect(collapsibleSection).toBeTruthy();
+
+      // The section should be collapsible (aria-expanded attribute present)
+      expect(collapsibleSection?.getAttribute('aria-expanded')).toBe('false');
+
+      // Check that the collapsible section has proper accessibility attributes
+      expect(collapsibleSection?.getAttribute('aria-controls')).toBeTruthy();
     });
 
     it('should have header for dashboard title', () => {

@@ -15,7 +15,7 @@ class TestTimingAttackPrevention:
         # First register a user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "timing@test.com", "password": "SecurePassword123"},
+            json={"email": "timing@test.com", "password": "SecurePassword123!!"},
         )
 
         # Measure time for existing user with wrong password
@@ -61,7 +61,7 @@ class TestPasswordSecurity:
 
     async def test_password_hashing(self, client: AsyncClient):
         """Verify passwords are properly hashed (not stored plaintext)."""
-        password = "MySecretPassword123"
+        password = "MySecretPassword123!"
 
         # Register user
         register_response = await client.post(
@@ -101,14 +101,14 @@ class TestEmailVerification:
         # Register a new user (email not verified by default)
         register_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "unverified@test.com", "password": "testPassword123"},
+            json={"email": "unverified@test.com", "password": "testPassword123!!"},
         )
         assert register_response.status_code == 200
 
         # Try to login without verifying email
         login_response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "unverified@test.com", "password": "testPassword123"},
+            data={"username": "unverified@test.com", "password": "testPassword123!!"},
         )
         assert login_response.status_code == 403
         assert "not verified" in login_response.json()["detail"].lower()
@@ -118,7 +118,7 @@ class TestEmailVerification:
         # Register user
         register_response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "verify@test.com", "password": "testPassword123"},
+            json={"email": "verify@test.com", "password": "testPassword123!!"},
         )
         assert register_response.status_code == 200
 
@@ -140,7 +140,7 @@ class TestEmailVerification:
         # Now login should work and set cookies
         login_response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "verify@test.com", "password": "testPassword123"},
+            data={"username": "verify@test.com", "password": "testPassword123!!"},
         )
         assert login_response.status_code == 200
         assert login_response.json()["message"] == "Login successful"
@@ -162,7 +162,7 @@ class TestEmailVerification:
         # Register user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "resend@test.com", "password": "testPassword123"},
+            json={"email": "resend@test.com", "password": "testPassword123!!"},
         )
 
         # Resend verification
@@ -181,7 +181,7 @@ class TestRegistrationEnumerationProtection:
         self, client: AsyncClient
     ):
         """Verify register endpoint returns identical response for new and existing accounts."""
-        payload = {"email": "enum@test.com", "password": "StrongPassword123!"}
+        payload = {"email": "enum@test.com", "password": "StrongPassword123!!"}
 
         first_response = await client.post("/api/v1/auth/register", json=payload)
         second_response = await client.post("/api/v1/auth/register", json=payload)
@@ -200,7 +200,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset@test.com", "password": "oldPassword123"},
+            json={"email": "reset@test.com", "password": "oldPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -228,7 +228,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset2@test.com", "password": "oldPassword123"},
+            json={"email": "reset2@test.com", "password": "oldPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -250,7 +250,7 @@ class TestPasswordReset:
         # Old password should not work
         old_login = await client.post(
             "/api/v1/auth/login",
-            data={"username": "reset2@test.com", "password": "oldPassword123"},
+            data={"username": "reset2@test.com", "password": "oldPassword123!!"},
         )
         assert old_login.status_code == 401
 
@@ -275,7 +275,7 @@ class TestPasswordReset:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "reset3@test.com", "password": "oldPassword123"},
+            json={"email": "reset3@test.com", "password": "oldPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -312,7 +312,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "cookie@test.com", "password": "testPassword123"},
+            json={"email": "cookie@test.com", "password": "testPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -325,7 +325,7 @@ class TestCookieAuthentication:
         # Login
         response = await client.post(
             "/api/v1/auth/login",
-            data={"username": "cookie@test.com", "password": "testPassword123"},
+            data={"username": "cookie@test.com", "password": "testPassword123!!"},
         )
         assert response.status_code == 200
 
@@ -344,7 +344,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "logout@test.com", "password": "testPassword123"},
+            json={"email": "logout@test.com", "password": "testPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -357,7 +357,7 @@ class TestCookieAuthentication:
         # Login to set cookies
         await client.post(
             "/api/v1/auth/login",
-            data={"username": "logout@test.com", "password": "testPassword123"},
+            data={"username": "logout@test.com", "password": "testPassword123!!"},
         )
 
         # Logout
@@ -375,7 +375,7 @@ class TestCookieAuthentication:
         # Register and verify user
         await client.post(
             "/api/v1/auth/register",
-            json={"email": "protected@test.com", "password": "testPassword123"},
+            json={"email": "protected@test.com", "password": "testPassword123!!"},
         )
 
         from app.db.session import async_session
@@ -388,7 +388,7 @@ class TestCookieAuthentication:
         # Login (sets cookies in client session)
         await client.post(
             "/api/v1/auth/login",
-            data={"username": "protected@test.com", "password": "testPassword123"},
+            data={"username": "protected@test.com", "password": "testPassword123!!"},
         )
 
         # Access protected endpoint (cookies automatically sent)
