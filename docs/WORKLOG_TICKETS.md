@@ -37151,3 +37151,77 @@ Risks/notes:
 - Admin endpoint must be properly secured (only superusers can update roles)
 
 ---
+
+### TCK-20250205-014 :: Document Free-Floating UI Concept
+
+Type: DOCUMENTATION
+Owner: Pranay
+Created: 2025-02-05
+Status: **DONE**
+Priority: P3
+
+Description:
+Documented opinion and design recommendations for free-floating, gesture-based UI concept where games float in space and are "caught" with hand gestures.
+
+Scope contract:
+
+- In-scope:
+  - Document vision and potential benefits
+  - Identify critical concerns (accessibility, reliability, fatigue)
+  - Provide design recommendations with implementation sequence
+  - Archive for future reference
+- Out-of-scope:
+  - Implementation (concept only, no code changes)
+  - Frontend modifications
+- Behavior change allowed: NO (documentation only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): docs/ui/CONCEPT_free_floating_ui.md, prompts/README.md
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Concept documented with vision overview
+- [x] Concerns identified (accessibility, reliability, fatigue, discovery)
+- [x] Design recommendations provided (Hybrid approach recommended)
+- [x] Implementation sequence outlined
+- [x] Documented in prompts/README.md for future reference
+- [x] Key principle stated: "Novelty without breaking accessibility"
+
+Execution log:
+
+- [2025-02-05 13:05 UTC] Documentation: Created concept document | Evidence:
+  - **File**: docs/ui/CONCEPT_free_floating_ui.md
+  - **Content**: Vision, potential benefits, critical concerns, design recommendations (Options A, B, C)
+  - **Interpretation**: Observed — Comprehensive concept documentation created
+
+- [2025-02-05 13:10 UTC] Documentation: Updated prompts registry | Evidence:
+  - **File**: prompts/README.md
+  - **Change**: Added UI/UX Design & Vision section with reference to concept document
+  - **Interpretation**: Observed — Concept now discoverable in prompt registry
+
+- [2025-02-05 13:10 UTC] **DONE** — Documentation complete
+
+Status updates:
+
+- [2025-02-05 13:10 UTC] **DONE** — Concept archived for future reference
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| N/A | UI/UX Designer + Accessibility Specialist | Concept design | Vision: Magic gesture-based playground; Recommendation: Hybrid approach for safety |
+
+Next actions:
+
+None (documentation complete, awaiting decision on implementation)
+
+Risks/notes:
+
+- Recommendation: Implement as enhancement (Magic Mode toggle), not replacement
+- Critical to maintain accessibility as primary navigation method
+- Consider A/B testing before full rollout
+
+---

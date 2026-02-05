@@ -101,10 +101,46 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 - ADR draft: `prompts/architecture/adr-draft-v1.0.md`
 
+### UI / UX Design & Vision
+
+- Free-floating gesture-based UI concept: `docs/ui/CONCEPT_free_floating_ui.md`
+  - Vision: Infinite canvas with games as floating entities, caught via hand gestures
+  - Recommendation: Hybrid approach (standard UI + optional "Magic Mode")
+  - Key principle: Novelty without breaking accessibility
+
 ### Curriculum / Content
 
 - Learning module spec: `prompts/content/learning-module-spec-v1.0.md`
 - Kids microcopy & feedback pass: `prompts/content/kids-microcopy-and-feedback-v1.0.md`
+
+### Exploration / Research
+
+- Research deep dive (thorough research with citations): `prompts/exploration/research-deep-dive-v1.0.md`
+- Technology evaluation (evaluate tech for adoption): `prompts/exploration/technology-evaluation-v1.0.md`
+
+### Agent Coordination
+
+- Agent delegation (delegate work to sub-agents): `prompts/coordination/agent-delegation-v1.0.md`
+- Agent handoff protocol (standardize handoffs): `prompts/coordination/agent-handoff-protocol-v1.0.md`
+
+### Documentation
+
+- Documentation writer (clear docs): `prompts/documentation/documentation-writer-v1.0.md`
+- Changelog writer (user-focused changelogs): `prompts/documentation/changelog-writer-v1.0.md`
+
+### Mentoring / Learning
+
+- Technical tutor (teach with active learning): `prompts/mentoring/technical-tutor-v1.0.md`
+- Concept explainer (build intuition): `prompts/mentoring/concept-explainer-v1.0.md`
+
+### Guidance
+
+- Debugging guide (systematic debugging): `prompts/guidance/debugging-guide-v1.0.md`
+- Architecture decision record (document decisions): `prompts/guidance/architecture-decision-record-v1.0.md`
+
+### Deep Audit
+
+- Codebase audit + improvement planner (Top 10 improvements): `prompts/audit/codebase-audit-improvement-planner-v1.0.md`
 
 ## Workflow / Tracking
 
