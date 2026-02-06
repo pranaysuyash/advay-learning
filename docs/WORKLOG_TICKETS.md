@@ -37225,3 +37225,270 @@ Risks/notes:
 - Consider A/B testing before full rollout
 
 ---
+
+### TCK-20260206-001 :: Batch 1 Games Implementation + Shared Hand-Tracking Runtime
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-06 17:32 UTC
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Implement a first game batch that uses a shared MediaPipe hand-tracking runtime (base tracking + per-game customization), add new camera games from documented ideas, and validate with tests and docs.
+
+Scope contract:
+- In-scope:
+  - Add a shared hand-tracking frame runtime hook for game-level customization
+  - Refactor at least one existing game to use the shared runtime
+  - Implement new batch games (camera-first) using the shared runtime
+  - Wire routes + game catalog entries for implemented games
+  - Add/extend frontend tests for runtime and game logic
+  - Add batch implementation documentation + update catalog references
+- Out-of-scope:
+  - Full migration of every existing game to shared runtime in this run
+  - Backend schema/API changes for game metadata
+  - MediaPipe Face/Pose pipeline unification (hand-tracking scope only)
+- Behavior change allowed: YES
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/hooks/*
+  - src/frontend/src/pages/*
+  - src/frontend/src/games/*
+  - src/frontend/src/utils/*
+  - src/frontend/src/App.tsx
+  - src/frontend/src/pages/Games.tsx
+  - docs/*
+- Branch/PR: main
+- Range: 893fa98d063cc4f3834e1b623ea624819a9d2a31..WORKTREE
+Git availability:
+- YES
+
+Acceptance Criteria:
+- [ ] Shared base hand-tracking runtime exists and exposes normalized per-frame data + pinch transitions for game callbacks
+- [ ] At least one existing game uses the shared runtime
+- [ ] At least two batch games are implemented and playable via routes
+- [ ] Implemented games use shared runtime with game-specific logic adapters
+- [ ] Relevant frontend tests pass for runtime/game logic additions
+- [ ] Documentation updated for batch scope, architecture usage, and verification
+
+Execution log:
+- [2026-02-06 17:32 UTC] Discovery: checked repo and workflow prerequisites | Evidence:
+  - **Command**: `git status --porcelain=v1 -uall`
+  - **Output**:
+    ```
+    M docs/ARCHITECTURE.md
+    M docs/WORKLOG_ADDENDUM_v2.md
+    M prompts/README.md
+    M src/backend/app/api/v1/api.py
+    M src/backend/app/schemas/__init__.py
+    M src/frontend/src/pages/ConnectTheDots.tsx
+    M src/frontend/src/pages/Dashboard.tsx
+    M src/frontend/src/pages/LetterHunt.tsx
+    M src/frontend/src/pages/MediaPipeTest.tsx
+    M src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
+    ?? docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md
+    ?? docs/MUSIC_LEARNING_AR_GAMES.md
+    ?? docs/architecture/GAME_ARCHITECTURE_PRINCIPLES.md
+    ?? docs/architecture/HAND_TRACKING_ARCHITECTURE.md
+    ... (additional untracked prompt/docs/backend files)
+    ```
+  - **Interpretation**: Observed — Worktree contains substantial pre-existing parallel changes; preservation discipline required.
+
+- [2026-02-06 17:32 UTC] Discovery: checked required prompt map and architecture/game docs | Evidence:
+  - **Command**: `sed -n '1,220p' prompts/README.md && sed -n '1,260p' docs/GAME_CATALOG.md && sed -n '1,260p' docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md`
+  - **Output**:
+    ```
+    prompts/README.md includes feature implementation and hardening prompts.
+    docs/GAME_CATALOG.md lists interaction primitives + games including music and steady-hand ideas.
+    docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md lists implemented games and new game ideas.
+    ```
+  - **Interpretation**: Observed — Documented game inventory is sufficient to pick a scoped batch.
+
+- [2026-02-06 17:32 UTC] Discovery: environment checks | Evidence:
+  - **Command**: `git config core.hooksPath && python --version && uv --version && node --version && ls -la .venv >/dev/null 2>&1 && echo 'venv exists' || echo 'venv missing' && lsof -i :6173 >/dev/null 2>&1 && echo 'frontend server running on 6173' || echo 'frontend server not running' && lsof -i :8001 >/dev/null 2>&1 && echo 'backend server running on 8001' || echo 'backend server not running'`
+  - **Output**:
+    ```
+    .githooks
+    Python 3.11.12
+    uv 0.7.8 (0ddcc1905 2025-05-23)
+    v23.11.0
+    venv exists
+    frontend server running on 6173
+    backend server running on 8001
+    ```
+  - **Interpretation**: Observed — Hooks path is configured; local servers are active; Python version differs from AGENTS target (3.13+), risk noted.
+
+Status updates:
+- [2026-02-06 17:32 UTC] **IN_PROGRESS** — Scope locked; implementation starting
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Shared runtime + game slice implementation | Used to define one bounded implementation batch with tests/docs |
+| `prompts/workflow/worklog-v1.0.md` | Workflow tracking | Ticket discipline + evidence logging | Used for append-only ticket creation and evidence format |
+
+Next actions:
+1. Implement shared hand-tracking frame runtime hook + tests.
+2. Refactor an existing hand game to runtime.
+3. Implement two new runtime-based games (music + steady-hand).
+4. Wire routes and Games catalog cards.
+5. Run frontend tests/type-check and capture outputs.
+6. Add batch documentation and finalize ticket status.
+
+Risks/notes:
+- Pre-existing uncommitted changes must be preserved; avoid touching unrelated modified files where possible.
+- Python version mismatch (3.11 vs expected 3.13+) is out-of-scope for this frontend batch.
+
+### TCK-20250205-015 :: Implement Games Management API (Day 1)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2025-02-05
+Status: **IN_PROGRESS**
+Priority: P0 (Production Critical)
+
+Description:
+Implement Games/Activities Management API to enable dynamic game configuration without code deployment. This is the biggest production gap identified in backend audit.
+
+Scope contract:
+
+- In-scope:
+  - Create Game database model with metrics tracking
+  - Create Game schemas (Base, Create, Update, List, Filter)
+  - Create database migration (games table)
+  - Create GameService with full CRUD operations
+  - Create Games API endpoints (list, get by slug/ID, create, update, delete)
+  - Admin access control (superuser OR ADMIN role) for game management
+  - Export initial game data (4 games from frontend) for seeding
+  - Update API router to include games endpoints
+  - Update schema registry to export game schemas
+- Out-of-scope:
+  - Activity/level model (can add later for structured game content)
+  - Frontend integration (Day 2 or 3)
+  - Backend tests (Day 2)
+  - Seeding script (can add later)
+  - Game metrics calculation hooks (can add later with progress integration)
+- Behavior change allowed: YES (adds new API, no breaking changes to existing data)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/backend/app/db/models/game.py
+  - src/backend/app/schemas/game.py
+  - src/backend/app/api/v1/endpoints/games.py
+  - src/backend/app/services/game_service.py
+  - src/backend/app/api/v1/api.py
+  - src/backend/app/data/games_data.py
+  - src/backend/app/schemas/__init__.py
+  - src/backend/alembic/versions/005_add_games_table.py
+  - src/backend/app/api/v1/endpoints/users.py (role update endpoint only)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Game model created with all required fields
+- [ ] Game schemas with validation
+- [ ] Game service with CRUD operations (get_all, get_by_slug, get_by_id, create, update, delete)
+- [ ] Games API endpoints registered (list, get, create, update, delete)
+- [ ] Admin access control enforced (superuser OR ADMIN role)
+- [ ] Database migration created and applied
+- [ ] Initial game data exported (4 games)
+- [ ] API router updated to include games endpoints
+- [ ] Schema registry updated to export game schemas
+- [ ] Users.py role update endpoint updated to allow ADMIN role
+- [ ] Backend tests passing
+- [ ] Frontend updated to use API instead of hardcoded data
+- [ ] Database seeded with initial games
+
+Execution log:
+
+- [2025-02-05 14:00 UTC] Discovery: Backend audit identified missing Games Management API as P0 | Evidence:
+  - **File**: docs/BACKEND_MISSING_FEATURES.md
+  - **Finding**: Games hardcoded in frontend, need CRUD endpoints
+  - **Interpretation**: Observed — This is the biggest production gap
+
+- [2025-02-05 14:10 UTC] Planning: Created implementation plan | Evidence:
+  - **File**: docs/IMPLEMENTATION_GAMES_MANAGEMENT_API.md
+  - **Content**: 3-day implementation plan with 8-16 hours estimate
+  - **Interpretation**: Observed — Comprehensive plan documented with all phases
+
+- [2025-02-05 14:30 UTC] Implementation: Created Game model | Evidence:
+  - **File**: src/backend/app/db/models/game.py
+  - **Content**: Game model with id, title, slug, category, age ranges, difficulty, metrics (total_plays, avg_score, completion_rate)
+  - **Interpretation**: Observed — Full model created with relationships
+
+- [2025-02-05 14:35 UTC] Implementation: Created Game schemas | Evidence:
+  - **File**: src/backend/app/schemas/game.py
+  - **Content**: GameBase, GameCreate, GameUpdate, Game, GameList, GameFilter with validation
+  - **Interpretation**: Observed — All schemas created with proper validation
+
+- [2025-02-05 14:40 UTC] Implementation: Created migration | Evidence:
+  - **File**: src/backend/alembic/versions/005_add_games_table.py
+  - **Content**: Creates games table and adds game_id FK to achievements
+  - **Interpretation**: Observed — Migration file created (upgrade + downgrade)
+
+- [2025-02-05 14:45 UTC] Implementation: Created game data export | Evidence:
+  - **File**: src/backend/app/data/games_data.py
+  - **Content**: INITIAL_GAMES with 4 games (alphabet-tracing, finger-number-show, connect-the-dots, letter-hunt)
+  - **Interpretation**: Observed — Exported games from frontend for seeding
+
+- [2025-02-05 14:50 UTC] Implementation: Created Game service | Evidence:
+  - **File**: src/backend/app/services/game_service.py
+  - **Content**: GameService with full CRUD (get_all with filters/pagination, get_by_slug, get_by_id, create, update, delete)
+  - **Interpretation**: Observed — Service layer complete with all operations
+
+- [2025-02-05 14:55 UTC] Implementation: Created Games API endpoints | Evidence:
+  - **File**: src/backend/app/api/v1/endpoints/games.py
+  - **Content**: GET /, GET /{slug}, GET /{id}, POST /, PUT /{id}, DELETE /{id} with admin access control
+  - **Interpretation**: Observed — All CRUD endpoints created, admin access updated to allow superuser OR ADMIN
+
+- [2025-02-05 14:57 UTC] Implementation: Updated API router | Evidence:
+  - **File**: src/backend/app/api/v1/api.py
+  - **Change**: Added games router to include_router list
+  - **Interpretation**: Observed — Games endpoints registered at /games prefix
+
+- [2025-02-05 15:00 UTC] Implementation: Updated schema registry | Evidence:
+  - **File**: src/backend/app/schemas/__init__.py
+  - **Change**: Added game schemas to __all__ export list
+  - **Interpretation**: Observed — Game schemas now exported for import
+
+- [2025-02-05 15:05 UTC] Implementation: Updated user role endpoint | Evidence:
+  - **File**: src/backend/app/api/v1/endpoints/users.py
+  - **Change**: Updated role update endpoint to allow superuser OR ADMIN role
+  - **Interpretation**: Observed — Access control now allows both superusers and admin role users to update roles
+
+- [2025-02-05 15:10 UTC] Staged all changes | Evidence:
+  - **Command**: git add -A src/backend/app/... && git status --short
+  - **Output**: All 9 files staged (game model, schemas, service, endpoints, API router, migration, data export, schema init, users.py)
+  - **Interpretation**: Observed — All Games Management API files staged
+
+Status updates:
+
+- [2025-02-05 15:00 UTC] **IN_PROGRESS** — Day 1 implementation complete, proceeding to Day 2 (tests + frontend integration)
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+| --- | --- | --- | --- |
+| `docs/IMPLEMENTATION_GAMES_MANAGEMENT_API.md` | Backend engineer | API development | Implementing Games Management API following 3-day plan |
+
+Next actions:
+
+1. Run database migration: alembic upgrade head
+2. Create seed script to load initial games into database
+3. (Day 2) Create backend tests for games API
+4. (Day 2) Create frontend game API service
+5. (Day 2) Update Games.tsx to use API
+6. (Day 3) Frontend integration and E2E tests
+
+Risks/notes:
+
+- Need to run migration before API will work (games table doesn't exist)
+- Admin access control uses ADMIN role which was just added in TCK-20250205-013
+- Frontend not yet updated (planned for Day 2 or 3)
+
+---

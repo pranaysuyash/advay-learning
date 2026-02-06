@@ -319,13 +319,13 @@ async def update_user_role(
 ) -> User:
     """Update a user's role (admin only).
 
-    Only superusers can update user roles.
+    Only superusers or admin role can update user roles.
     """
-    # Verify current user is superuser
-    if not current_user.is_superuser:
+    # Verify current user is superuser or admin
+    if not (current_user.is_superuser or current_user.role == UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only superusers can update user roles",
+            detail="Only superusers or admins can update user roles",
         )
 
     # Validate user_id format
