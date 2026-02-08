@@ -12,9 +12,11 @@ import { useSettingsStore } from '../store';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { hitTestRects } from '../utils/hitTest';
 import { useHandTracking } from '../hooks/useHandTracking';
-import { useGameLoop } from '../hooks/useGameLoop';
-import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
-import type { PinchState } from '../types/tracking';
+import {
+  useHandTrackingRuntime,
+  type HandTrackingRuntimeMeta,
+} from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface LetterOption {
   id: number;
@@ -82,7 +84,6 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   const webcamRef = useRef<Webcam>(null);
   const cameraAreaRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const lastSelectAtRef = useRef<number>(0);
 
   // Use centralized hand tracking hook
@@ -256,7 +257,6 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     setCursor(null);
     setHoveredOptionIndex(null);
     setIsPinching(false);
-    pinchStateRef.current = createDefaultPinchState();
     lastSelectAtRef.current = 0;
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -275,7 +275,6 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     setCursor(null);
     setHoveredOptionIndex(null);
     setIsPinching(false);
-    pinchStateRef.current = createDefaultPinchState();
     lastSelectAtRef.current = 0;
   };
 
@@ -283,44 +282,22 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     navigate('/dashboard');
   };
 
-  // Game loop
-  useGameLoop({
-    isRunning: gameStarted && !gameCompleted && !feedback,
-    targetFps: 30,
-    onFrame: useCallback(() => {
-      const webcam = webcamRef.current;
+  const handleTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
       const container = cameraAreaRef.current;
-      const video = webcam?.video;
+      if (!container) return;
 
-      if (!container || !video || !handLandmarker) return;
-      if (video.readyState < 2 || video.videoWidth === 0) return;
-
-      let results;
-      try {
-        results = handLandmarker.detectForVideo(video, performance.now());
-      } catch {
-        return;
-      }
-
-      const landmarks = results?.landmarks?.[0];
-      if (!landmarks || landmarks.length < 9) {
+      const tip = frame.indexTip;
+      if (!tip) {
         if (cursor !== null) setCursor(null);
         if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
-        if (isPinching) {
-          setIsPinching(false);
-          pinchStateRef.current = createDefaultPinchState();
-        }
+        if (isPinching) setIsPinching(false);
         return;
       }
 
       const rect = container.getBoundingClientRect();
-      const indexTip = landmarks[8];
-
-      const xNorm = indexTip?.x ?? 0.5;
-      const yNorm = indexTip?.y ?? 0.5;
-
-      const localX = (1 - xNorm) * rect.width;
-      const localY = yNorm * rect.height;
+      const localX = tip.x * rect.width;
+      const localY = tip.y * rect.height;
       const nextCursor = { x: localX, y: localY };
       setCursor(nextCursor);
 
@@ -333,14 +310,11 @@ export const LetterHunt = memo(function LetterHuntComponent() {
       );
       if (hitIndex !== hoveredOptionIndex) setHoveredOptionIndex(hitIndex);
 
-      const pinchResult = detectPinch(landmarks, pinchStateRef.current);
-      pinchStateRef.current = pinchResult.state;
-
-      if (pinchResult.state.isPinching !== isPinching) {
-        setIsPinching(pinchResult.state.isPinching);
+      if (frame.pinch.state.isPinching !== isPinching) {
+        setIsPinching(frame.pinch.state.isPinching);
       }
 
-      if (pinchResult.transition === 'start') {
+      if (frame.pinch.transition === 'start') {
         const now = Date.now();
         if (
           now - lastSelectAtRef.current > 450 &&
@@ -351,15 +325,34 @@ export const LetterHunt = memo(function LetterHuntComponent() {
           handleSelectOption(options[hitIndex]);
         }
       }
-    }, [
-      handLandmarker,
-      cursor,
-      hoveredOptionIndex,
-      isPinching,
-      options,
-      handleSelectOption,
-    ]),
+    },
+    [cursor, hoveredOptionIndex, isPinching, options, handleSelectOption],
+  );
+
+  useHandTrackingRuntime({
+    isRunning:
+      gameStarted &&
+      !gameCompleted &&
+      !feedback &&
+      !useMouseFallback &&
+      isHandTrackingReady,
+    handLandmarker,
+    webcamRef,
+    targetFps: 30,
+    onFrame: handleTrackingFrame,
+    onNoVideoFrame: () => {
+      if (cursor !== null) setCursor(null);
+      if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
+      if (isPinching) setIsPinching(false);
+    },
   });
+
+  useEffect(() => {
+    if (!useMouseFallback) return;
+    setCursor(null);
+    setHoveredOptionIndex(null);
+    setIsPinching(false);
+  }, [useMouseFallback]);
 
   const targetLetterMeta = alphabet.letters.find(
     (letter) => letter.char === targetLetter,

@@ -27,6 +27,8 @@ import { GameContainer } from '../../components/GameContainer';
 import { GameControls } from '../../components/GameControls';
 import type { GameControl } from '../../components/GameControls';
 import { GameTutorial } from '../../components/GameTutorial';
+import { CameraPermissionScreen } from '../../components/CameraPermissionScreen';
+import { SimpleTutorial } from '../../components/SimpleTutorial';
 import WellnessTimer from '../../components/WellnessTimer';
 import WellnessReminder from '../../components/WellnessReminder';
 import CameraRecoveryModal from '../../components/CameraRecoveryModal';
@@ -53,6 +55,7 @@ import {
   detectPinch,
   createDefaultPinchState,
 } from '../../utils/pinchDetection';
+import { getHandLandmarkLists } from '../../utils/landmarkUtils';
 import { getLetterColorClass } from '../../utils/letterColorClass';
 import type { PinchState, Point } from '../../types/tracking';
 
@@ -109,6 +112,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const [showHandTutorial, setShowHandTutorial] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  
+  // New permission flow state
+  const [showPermissionScreen, setShowPermissionScreen] = useState(false);
+  const [showSimpleTutorial, setShowSimpleTutorial] = useState(false);
+  const [playMode, setPlayMode] = useState<'camera' | 'touch'>('camera');
 
   // Drawing state
   const [isDrawing, setIsDrawing] = useState(false);
@@ -353,6 +361,36 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Keyboard handler for pause and escape moved below where exit handlers are initialized
 
+  // New permission flow handlers
+  const handleAllowCamera = () => {
+    setPlayMode('camera');
+    setShowPermissionScreen(false);
+    setShowSimpleTutorial(true);
+  };
+
+  const handleUseTouchMode = () => {
+    setPlayMode('touch');
+    setUseMouseMode(true);
+    setShowPermissionScreen(false);
+    setShowSimpleTutorial(true);
+  };
+
+  const handleSimpleTutorialComplete = () => {
+    setShowSimpleTutorial(false);
+    setTutorialCompleted(true);
+    setShowHandTutorial(true);
+    localStorage.setItem('tutorialCompleted', 'true');
+    localStorage.setItem('playMode', playMode);
+  };
+
+  const handleSimpleTutorialSkip = () => {
+    setShowSimpleTutorial(false);
+    setTutorialCompleted(true);
+    localStorage.setItem('tutorialCompleted', 'true');
+    localStorage.setItem('playMode', playMode);
+  };
+
+  // Legacy handlers (for backwards compatibility)
   const handleTutorialComplete = () => {
     setTutorialCompleted(true);
     setShowHandTutorial(true);
@@ -391,23 +429,27 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     // Fetch profiles to ensure we have the latest data
     useProfileStore.getState().fetchProfiles();
 
-    // Check camera permission on mount
+    // Check if we need to show permission screen
+    if (!hasCompletedTutorial) {
+      // Show new permission screen first
+      setShowPermissionScreen(true);
+    }
+
+    // Check camera permission status
     const checkCameraPermission = async () => {
       try {
-        // Try using the Permissions API first
         const result = await navigator.permissions.query({
           name: 'camera' as PermissionName,
         });
         setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
         setShowPermissionWarning(result.state === 'denied');
 
-        // Listen for permission changes
         result.addEventListener('change', () => {
           setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
           setShowPermissionWarning(result.state === 'denied');
         });
       } catch {
-        // Fallback: try to get user media to check permission, but guard for test envs
+        // Fallback for environments without Permissions API
         if (
           navigator.mediaDevices &&
           typeof navigator.mediaDevices.getUserMedia === 'function'
@@ -424,7 +466,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               setShowPermissionWarning(true);
             });
         } else {
-          // No mediaDevices available (e.g., in headless test environment) — assume denied
           setCameraPermission('denied');
           setShowPermissionWarning(true);
         }
@@ -793,7 +834,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           return;
         }
 
-        const landmarks = results?.landmarks?.[0];
+        const landmarks = getHandLandmarkLists(results)[0];
         if (landmarks && landmarks.length >= 9) {
           if (!isHandPresentRef.current) {
             isHandPresentRef.current = true;
@@ -1095,7 +1136,26 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   return (
     <>
-      {!tutorialCompleted && (
+      {/* New Permission Flow */}
+      {showPermissionScreen && (
+        <CameraPermissionScreen
+          onAllowCamera={handleAllowCamera}
+          onUseTouchMode={handleUseTouchMode}
+          mascotName='Pip'
+        />
+      )}
+
+      {/* Simple 2-Step Tutorial */}
+      {showSimpleTutorial && (
+        <SimpleTutorial
+          mode={playMode}
+          onComplete={handleSimpleTutorialComplete}
+          onSkip={handleSimpleTutorialSkip}
+        />
+      )}
+
+      {/* Legacy Tutorial (fallback) */}
+      {!tutorialCompleted && !showPermissionScreen && !showSimpleTutorial && (
         <GameTutorial
           onComplete={handleTutorialComplete}
           onSkip={handleSkipTutorial}

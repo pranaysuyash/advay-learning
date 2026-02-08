@@ -108,3 +108,39 @@ User Action → Frontend Event → API Request → Database → Parent Dashboard
 - API: Rate limiting
 - Camera: Explicit permission
 - Storage: Encrypted at rest
+
+
+## Related Architecture Documents
+
+### Core Architecture
+- [Game Architecture Principles](architecture/GAME_ARCHITECTURE_PRINCIPLES.md) - **KEY READ**
+  - No "main game" philosophy (all games are equal peers)
+  - Shared infrastructure principles
+  - Centralized services architecture
+  
+- [Hand Tracking Architecture](architecture/HAND_TRACKING_ARCHITECTURE.md) - **KEY READ**
+  - Centralized hand tracking service
+  - Migration from decentralized implementations
+  - Hand data standard and coordinate system
+  - Gesture detection (future)
+  - Fallback strategies
+
+- [Camera Integration Guide](architecture/CAMERA_INTEGRATION_GUIDE.md)
+  - MediaPipe integration details
+  - Camera permission handling
+  - Video processing pipeline
+
+- [Input Methods Specification](INPUT_METHODS_SPECIFICATION.md)
+  - 6 input methods (4 camera-based, 2 fallback)
+  - Mode selection and switching
+  - Accessibility considerations
+
+### Vision & Strategy
+- [Complete Body Interaction Vision](../COMPLETE_BODY_INTERACTION_VISION.md) - Future vision
+- [UI/UX Reality Check](../UI_UX_REALITY_CHECK.md) - Current gaps assessment
+- [Spatial Gesture UI Concept](../ui/CONCEPT_spatial_gesture_ui.md) - Future UI concept
+
+---
+
+**Document Version:** 1.1  
+**Last Updated:** 2026-02-05

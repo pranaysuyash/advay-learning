@@ -68,6 +68,72 @@ export function Games() {
       category: 'Alphabets',
       difficulty: 'Easy',
     },
+    {
+      id: 'music-pinch-beat',
+      title: 'Music Pinch Beat',
+      description: 'Pinch on glowing lanes to play child-friendly rhythm beats! 🎵',
+      path: '/games/music-pinch-beat',
+      icon: 'sparkles',
+      ageRange: '3-7 years',
+      category: 'Music',
+      difficulty: 'Easy',
+      isNew: true,
+    },
+    {
+      id: 'steady-hand-lab',
+      title: 'Steady Hand Lab',
+      description: 'Hold your fingertip steady inside the target ring to build control! 🎯',
+      path: '/games/steady-hand-lab',
+      icon: 'circle',
+      ageRange: '4-7 years',
+      category: 'Motor Skills',
+      difficulty: 'Medium',
+      isNew: true,
+    },
+    {
+      id: 'shape-pop',
+      title: 'Shape Pop',
+      description: 'Pop glowing shapes with a pinch for quick reaction fun! ✨',
+      path: '/games/shape-pop',
+      icon: 'sparkles',
+      ageRange: '3-7 years',
+      category: 'Shapes',
+      difficulty: 'Easy',
+      isNew: true,
+    },
+    {
+      id: 'color-match-garden',
+      title: 'Color Match Garden',
+      description: 'Pinch the flower with the asked color before time runs out! 🌸',
+      path: '/games/color-match-garden',
+      icon: 'drop',
+      ageRange: '3-7 years',
+      category: 'Colors',
+      difficulty: 'Medium',
+      isNew: true,
+    },
+    {
+      id: 'number-tap-trail',
+      title: 'Number Tap Trail',
+      description: 'Pinch numbers in sequence and clear each level trail! 🔢',
+      path: '/games/number-tap-trail',
+      icon: 'circle',
+      ageRange: '4-8 years',
+      category: 'Numbers',
+      difficulty: 'Medium',
+      isNew: true,
+    },
+    {
+      id: 'shape-sequence',
+      title: 'Shape Sequence',
+      description: 'Follow the shape order and pinch each one correctly! 🧩',
+      path: '/games/shape-sequence',
+      icon: 'sparkles',
+      ageRange: '4-8 years',
+      category: 'Memory',
+      difficulty: 'Medium',
+      isNew: true,
+    },
   ];
 
   const getLanguageLabel = (code: string) => {
@@ -168,7 +234,7 @@ export function Games() {
               key={game.id}
               {...game}
               animationDelay={index * 0.1}
-              isNew={game.id === 'letter-hunt'}
+              isNew={game.isNew}
               buttonText={
                 game.id === 'alphabet-tracing' && currentProfile
                   ? `Play in ${getLanguageLabel(currentProfile.preferred_language)}`

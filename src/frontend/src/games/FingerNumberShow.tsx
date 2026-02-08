@@ -12,22 +12,21 @@ import { LANGUAGES } from '../data/languages';
 import { countExtendedFingersFromLandmarks } from './fingerCounting';
 // Centralized hand tracking
 import { useHandTracking } from '../hooks/useHandTracking';
-import { useGameLoop } from '../hooks/useGameLoop';
-import { getHandLandmarkLists } from '../utils/landmarkUtils';
+import {
+  useHandTrackingRuntime,
+  type HandTrackingRuntimeMeta,
+} from '../hooks/useHandTrackingRuntime';
 import { getMaxHandsForDifficultyIndex } from './finger-number-show/handTrackingConfig';
 import { FingerNumberShowMenu } from './finger-number-show/FingerNumberShowMenu';
 import { FingerNumberShowHud } from './finger-number-show/FingerNumberShowHud';
 import type { Point, Landmark } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface DifficultyLevel {
   name: string;
   minNumber: number;
   maxNumber: number;
   rewardMultiplier: number;
-}
-
-interface HandLandmarkerResult {
-  landmarks: Landmark[][];
 }
 
 const NUMBER_NAMES = [
@@ -343,175 +342,158 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     breakdown: '',
   });
 
-  const detectAndDrawRef = useRef<(() => void) | null>(null);
+  const handleTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
+      if (!canvasRef.current || !isPlaying) return;
 
-  // Game loop using centralized hook
-  useGameLoop({
-    isRunning: isPlaying && isHandTrackingReady,
-    targetFps: 30,
-    onFrame: useCallback(() => {
-      detectAndDrawRef.current?.();
-    }, []),
-  });
+      const video = meta.video;
+      if (!video) return;
 
-  const detectAndDraw = useCallback(() => {
-    if (
-      !webcamRef.current ||
-      !canvasRef.current ||
-      !handLandmarker ||
-      !isPlaying
-    )
-      return;
-
-    const video = webcamRef.current.video;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    if (!video || !ctx) return;
+      if (!ctx) return;
 
-    if (
-      video.readyState < 2 ||
-      video.videoWidth === 0 ||
-      video.videoHeight === 0
-    ) {
-      return;
-    }
+      if (
+        video.readyState < 2 ||
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+      ) {
+        return;
+      }
 
-    if (canvas.width !== video.videoWidth) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-    }
+      if (canvas.width !== video.videoWidth) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
 
-    let results: HandLandmarkerResult | null = null;
-    try {
-      results = handLandmarker.detectForVideo(video, performance.now());
-    } catch (e) {
-      return;
-    }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let totalFingers = 0;
+      let detectedHands = 0;
 
-    let totalFingers = 0;
-    const perHand: number[] = [];
-    let detectedHands = 0;
+      const landmarksList = frame.hands;
+      if (landmarksList.length > 0) {
+        lastHandsSeenAtRef.current = Date.now();
+        detectedHands = landmarksList.length;
+        landmarksList.forEach((landmarks: Landmark[], handIndex: number) => {
+          const fingerCount = countExtendedFingers(landmarks);
+          totalFingers += fingerCount;
 
-    const landmarksList = getHandLandmarkLists(results);
+          const wrist = landmarks[0];
+          if (!wrist) return;
+          const wristX = (1 - wrist.x) * canvas.width;
+          const wristY = wrist.y * canvas.height;
 
-    if (landmarksList.length > 0) {
-      lastHandsSeenAtRef.current = Date.now();
-      detectedHands = landmarksList.length;
-      landmarksList.forEach((landmarks: Landmark[], handIndex: number) => {
-        const fingerCount = countExtendedFingers(landmarks);
-        perHand.push(fingerCount);
-        totalFingers += fingerCount;
+          ctx.beginPath();
+          ctx.arc(wristX, wristY, 10, 0, 2 * Math.PI);
+          ctx.fillStyle = handIndex === 0 ? '#4ade80' : '#60a5fa';
+          ctx.fill();
 
-        const wrist = landmarks[0];
-        const wristX = (1 - wrist.x) * canvas.width;
-        const wristY = wrist.y * canvas.height;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(fingerCount.toString(), wristX, wristY);
+        });
+      }
 
-        ctx.beginPath();
-        ctx.arc(wristX, wristY, 10, 0, 2 * Math.PI);
-        ctx.fillStyle = handIndex === 0 ? '#4ade80' : '#60a5fa';
-        ctx.fill();
+      setCurrentCount(totalFingers);
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(fingerCount.toString(), wristX, wristY);
-      });
-    }
+      const lastUi = lastHandsUiRef.current;
+      if (lastUi.hands !== detectedHands) {
+        lastUi.hands = detectedHands;
+        setHandsDetected(detectedHands);
+      }
 
-    setCurrentCount(totalFingers);
+      // For target 0: require a detected hand (closed fist) to avoid "no hands = success".
+      // Handle both number mode and letter mode.
+      const currentTargetNumber =
+        gameMode === 'letters' && targetLetter
+          ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
+          : targetNumber;
+      const canSucceedOnZero =
+        currentTargetNumber === 0 ? detectedHands > 0 : true;
 
-    const lastUi = lastHandsUiRef.current;
-    if (lastUi.hands !== detectedHands) {
-      lastUi.hands = detectedHands;
-      setHandsDetected(detectedHands);
-    }
+      const eligibleMatch =
+        totalFingers === currentTargetNumber && canSucceedOnZero;
 
-    // For target 0: require a detected hand (closed fist) to avoid "no hands = success".
-    // Handle both number mode and letter mode
-    const currentTargetNumber =
-      gameMode === 'letters' && targetLetter
-        ? targetLetter.char.toUpperCase().charCodeAt(0) - 64
-        : targetNumber;
-    const canSucceedOnZero =
-      currentTargetNumber === 0 ? detectedHands > 0 : true;
+      const nowMs = Date.now();
 
-    const eligibleMatch =
-      totalFingers === currentTargetNumber && canSucceedOnZero;
+      // Only reset stable match if we had a match but now don't AND enough time has passed.
+      // This prevents resetting the stable timer for minor fluctuations during a successful pose.
+      const stable = stableMatchRef.current;
+      if (!eligibleMatch) {
+        if (stable.startAt !== null) {
+          const timeSinceMatch = nowMs - stable.startAt;
+          if (timeSinceMatch > 1000) {
+            stableMatchRef.current = {
+              startAt: null,
+              target: null,
+              count: null,
+            };
+          }
+        }
+      } else {
+        const same =
+          stable.target === currentTargetNumber &&
+          stable.count === totalFingers &&
+          stable.startAt != null;
+        if (!same) {
+          stableMatchRef.current = {
+            startAt: nowMs,
+            target: currentTargetNumber,
+            count: totalFingers,
+          };
+        } else if (
+          !successLockRef.current &&
+          nowMs - (stable.startAt ?? nowMs) >= 450
+        ) {
+          successLockRef.current = true;
+          playCelebration();
+          setShowCelebration(true);
+          setCelebrationValue(
+            gameMode === 'letters' && targetLetter
+              ? targetLetter.char
+              : String(totalFingers),
+          );
+          const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
+          const points = Math.round(10 * level.rewardMultiplier);
+          setScore((prev) => prev + points);
+          setStreak((prev) => prev + 1);
+          setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 
-    const nowMs = Date.now();
-
-    // Only reset stable match if we had a match but now don't AND enough time has passed
-    // This prevents resetting the stable timer for minor fluctuations during a successful pose
-    const stable = stableMatchRef.current;
-    if (!eligibleMatch) {
-      if (stable.startAt !== null) {
-        // If we previously had a match but lost it, allow some tolerance time before resetting
-        const timeSinceMatch = nowMs - stable.startAt;
-        if (timeSinceMatch > 1000) {
-          // Reset after 1 second of not matching
-          stableMatchRef.current = { startAt: null, target: null, count: null };
+          setTimeout(() => {
+            setShowCelebration(false);
+            successLockRef.current = false;
+            stableMatchRef.current = {
+              startAt: null,
+              target: null,
+              count: null,
+            };
+            setNextTarget(difficulty);
+          }, 2500);
         }
       }
-    } else {
-      // We have a match
-      const same =
-        stable.target === currentTargetNumber &&
-        stable.count === totalFingers &&
-        stable.startAt != null;
-      if (!same) {
-        // New match - start the timer
-        stableMatchRef.current = {
-          startAt: nowMs,
-          target: currentTargetNumber,
-          count: totalFingers,
-        };
-      } else if (
-        !successLockRef.current &&
-        nowMs - (stable.startAt ?? nowMs) >= 450
-      ) {
-        // Success! Match has been stable for required time
-        successLockRef.current = true;
-        playCelebration(); // Play celebration sound
-        setShowCelebration(true);
-        setCelebrationValue(
-          gameMode === 'letters' && targetLetter
-            ? targetLetter.char
-            : String(totalFingers),
-        );
-        const level = DIFFICULTY_LEVELS[difficulty] ?? DIFFICULTY_LEVELS[0];
-        const points = Math.round(10 * level.rewardMultiplier);
-        setScore((prev) => prev + points);
-        setStreak((prev) => prev + 1);
-        setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
+    },
+    [
+      isPlaying,
+      targetNumber,
+      countExtendedFingers,
+      difficulty,
+      setNextTarget,
+      gameMode,
+      targetLetter,
+      playCelebration,
+    ],
+  );
 
-        setTimeout(() => {
-          setShowCelebration(false);
-          // Reset the success lock and stable match so the next success can be detected
-          successLockRef.current = false;
-          stableMatchRef.current = { startAt: null, target: null, count: null };
-          setNextTarget(difficulty);
-        }, 2500); // Match CelebrationOverlay timing
-      }
-    }
-
-  }, [
+  useHandTrackingRuntime({
+    isRunning: isPlaying && isHandTrackingReady,
     handLandmarker,
-    isPlaying,
-    targetNumber,
-    countExtendedFingers,
-    difficulty,
-    setNextTarget,
-    gameMode,
-    handsDetected,
-    targetLetter,
-  ]);
-
-  useEffect(() => {
-    detectAndDrawRef.current = detectAndDraw;
-  }, [detectAndDraw]);
+    webcamRef,
+    targetFps: 30,
+    onFrame: handleTrackingFrame,
+  });
 
   useEffect(() => {
     return () => {

@@ -16,6 +16,12 @@ const AlphabetGame = lazy(() => import('./pages/AlphabetGame').then(module => ({
 const Games = lazy(() => import('./pages/Games').then(module => ({ default: module.Games })));
 const ConnectTheDots = lazy(() => import('./pages/ConnectTheDots').then(module => ({ default: module.ConnectTheDots })));
 const LetterHunt = lazy(() => import('./pages/LetterHunt').then(module => ({ default: module.LetterHunt })));
+const MusicPinchBeat = lazy(() => import('./pages/MusicPinchBeat').then(module => ({ default: module.MusicPinchBeat })));
+const SteadyHandLab = lazy(() => import('./pages/SteadyHandLab').then(module => ({ default: module.SteadyHandLab })));
+const ShapePop = lazy(() => import('./pages/ShapePop').then(module => ({ default: module.ShapePop })));
+const ColorMatchGarden = lazy(() => import('./pages/ColorMatchGarden').then(module => ({ default: module.ColorMatchGarden })));
+const NumberTapTrail = lazy(() => import('./pages/NumberTapTrail').then(module => ({ default: module.NumberTapTrail })));
+const ShapeSequence = lazy(() => import('./pages/ShapeSequence').then(module => ({ default: module.ShapeSequence })));
 const Progress = lazy(() => import('./pages/Progress').then(module => ({ default: module.Progress })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const StyleTest = lazy(() => import('./components/StyleTest').then(module => ({ default: module.StyleTest })));
@@ -75,6 +81,36 @@ function App() {
             <Route path="/games/letter-hunt" element={
               <ProtectedRoute>
                 <LetterHunt />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/music-pinch-beat" element={
+              <ProtectedRoute>
+                <MusicPinchBeat />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/steady-hand-lab" element={
+              <ProtectedRoute>
+                <SteadyHandLab />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/shape-pop" element={
+              <ProtectedRoute>
+                <ShapePop />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/color-match-garden" element={
+              <ProtectedRoute>
+                <ColorMatchGarden />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/number-tap-trail" element={
+              <ProtectedRoute>
+                <NumberTapTrail />
+              </ProtectedRoute>
+            } />
+            <Route path="/games/shape-sequence" element={
+              <ProtectedRoute>
+                <ShapeSequence />
               </ProtectedRoute>
             } />
             <Route path="/progress" element={

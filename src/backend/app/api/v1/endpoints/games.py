@@ -9,7 +9,7 @@ from app.api.deps import get_current_user, get_db
 from app.db.models.game import Game
 from app.db.models.user import User as UserModel
 from app.schemas.user import User, UserRole
-from app.schemas.game import Game, GameCreate, GameFilter, GameList
+from app.schemas.game import Game, GameCreate, GameUpdate, GameFilter, GameList
 from app.services.game_service import GameService
 
 router = APIRouter()

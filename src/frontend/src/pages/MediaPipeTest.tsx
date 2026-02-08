@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { FilesetResolver, FaceLandmarker, PoseLandmarker, HandLandmarker } from '@mediapipe/tasks-vision';
 import { UIIcon } from '../components/ui/Icon';
 import { GestureRecognizer, GestureType } from '../utils/gestureRecognizer';
+import { getHandLandmarkLists } from '../utils/landmarkUtils';
 
 type FeatureTab = 'hands' | 'face' | 'posture' | 'gestures';
 
@@ -264,11 +265,12 @@ export function MediaPipeTest() {
             if ((activeTab === 'hands' || activeTab === 'gestures') && handLandmarkerRef.current) {
                 const results = handLandmarkerRef.current.detectForVideo(video, startTime);
 
-                if (results?.landmarks && results.landmarks.length > 0) {
-                    setHandsDetected(results.landmarks.length);
+                const handLandmarks = getHandLandmarkLists(results);
+                if (handLandmarks.length > 0) {
+                    setHandsDetected(handLandmarks.length);
 
                     let totalFingers = 0;
-                    results.landmarks.forEach((landmarks: any[], handIndex: number) => {
+                    handLandmarks.forEach((landmarks: any[], handIndex: number) => {
                         const fingers = countFingers(landmarks);
                         totalFingers += fingers;
 

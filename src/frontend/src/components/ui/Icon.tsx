@@ -34,7 +34,10 @@ export type IconName =
   | 'mouse-pointer'
   | 'chevron-down'
   | 'volume'
-  | 'volume-off';
+  | 'volume-off'
+  | 'shield'
+  | 'video'
+  | 'arrow-right';
 
 type UIIconNamedProps = {
   name: IconName;
@@ -87,6 +90,9 @@ const iconPaths: Record<IconName, string> = {
   'chevron-down': '/assets/icons/ui/chevron-down.svg',
   'volume': '/assets/icons/ui/volume.svg',
   'volume-off': '/assets/icons/ui/volume-off.svg',
+  'shield': '/assets/icons/ui/shield.svg',
+  'video': '/assets/icons/ui/video.svg',
+  'arrow-right': '/assets/icons/ui/arrow-right.svg',
 };
 
 export function UIIcon(props: UIIconProps) {

@@ -8,6 +8,8 @@ import {
   useProgressStore,
   type Profile,
 } from '../store';
+import { progressApi } from '../services/api';
+import { progressQueue } from '../services/progressQueue';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 import { UIIcon } from '../components/ui';
@@ -145,8 +147,17 @@ export const Dashboard = memo(function DashboardComponent() {
   };
   const [isCreating, setIsCreating] = useState(false);
 
+  // Sync progress and refresh stats on mount
   useEffect(() => {
-    fetchProfiles();
+    const syncAndFetch = async () => {
+      // First sync any pending progress to backend
+      await progressQueue.syncAll(progressApi);
+      
+      // Then fetch fresh profile data
+      await fetchProfiles();
+    };
+    
+    syncAndFetch();
   }, [fetchProfiles]);
 
   const handleCreateProfile = async () => {

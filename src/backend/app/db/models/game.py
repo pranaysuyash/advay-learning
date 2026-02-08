@@ -44,7 +44,3 @@ class Game(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     created_by: Mapped[str] = mapped_column(String, nullable=True)
-
-    achievements: Mapped[List["Achievement"]] = relationship(
-        "Achievement", back_populates="game", cascade="all, delete-orphan"
-    )

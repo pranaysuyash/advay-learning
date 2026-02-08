@@ -10,9 +10,12 @@ import { Mascot } from '../components/Mascot';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { OptionChips } from '../components/game/OptionChips';
 import { useHandTracking } from '../hooks/useHandTracking';
+import {
+  useHandTrackingRuntime,
+  type HandTrackingRuntimeMeta,
+} from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
-import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
-import type { PinchState, Landmark } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface Dot {
   id: number;
@@ -36,10 +39,6 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
-  const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
-  const animationFrameRef = useRef<number | null>(null);
-  const isProcessingRef = useRef(false); // true while a processing tick is running
-  const lastProcessedAtRef = useRef(0);
   const lastUIUpdateAtRef = useRef(0);
   const permissionHandlerRef = useRef<
     ((this: PermissionStatus, ev: Event) => any) | null
@@ -165,158 +164,68 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     }
   }, [gameStarted, isHandTrackingEnabled, landmarker, initializeHandTracking]);
 
-  // Hand tracking loop with FPS throttling and single-instance guard
-  // Controls whether the loop should continue scheduling frames. This is
-  // toggled by the start/stop effect to avoid race conditions where a
-  // scheduled callback keeps re-arming after the loop was stopped.
-  const loopActiveRef = useRef<boolean>(false);
+  const handleTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-  const runHandTracking = useCallback(async () => {
-    // Bail early if the loop has been deactivated
-    if (!loopActiveRef.current) return;
+      const now = performance.now();
+      const tip = frame.indexTip;
 
-    // If a tick is already in flight, do nothing - avoid double-scheduling
-    if (isProcessingRef.current) return;
-
-    // If hand mode was disabled while scheduled, bail immediately
-    if (!isHandTrackingEnabled) return;
-
-    const video = webcamRef.current?.video;
-    const canvas = canvasRef.current;
-
-    // If core prerequisites are missing (webcam, model, canvas, readiness),
-    // schedule a retry only when the loop should be active.
-    if (!video || !landmarker || !isHandTrackingReady || !canvas) {
-      if (loopActiveRef.current) {
-        animationFrameRef.current = requestAnimationFrame(runHandTracking);
-      }
-      return;
-    }
-
-    const now = performance.now();
-
-    // FPS throttle for vision processing (15 fps = ~66ms intervals)
-    if (now - lastProcessedAtRef.current < 1000 / 15) {
-      if (loopActiveRef.current)
-        animationFrameRef.current = requestAnimationFrame(runHandTracking);
-      return;
-    }
-
-    if (video.readyState < 2) {
-      if (loopActiveRef.current)
-        animationFrameRef.current = requestAnimationFrame(runHandTracking);
-      return;
-    }
-
-    // Guard to indicate work in-flight
-    isProcessingRef.current = true;
-    lastProcessedAtRef.current = now;
-
-    try {
-      const results = landmarker.detectForVideo(video, now);
-
-      if (results?.landmarks && results.landmarks.length > 0) {
-        const landmarks = results.landmarks[0] as Landmark[];
-
-        // Get index finger tip (landmark 8) for cursor
-        const indexTip = landmarks[8];
-        if (indexTip) {
-          // Map from video coordinates (mirrored) to canvas coordinates
-          // Mirror the x coordinate since webcam is mirrored
-          const mirroredX = 1 - indexTip.x;
-
-          // Map to canvas internal coordinates (800x600)
-          const canvasX = mirroredX * canvas.width;
-          const canvasY = indexTip.y * canvas.height;
-
-          // Detect pinch gesture (thumb tip + index tip)
-          const pinchResult = detectPinch(landmarks, pinchStateRef.current, {
-            startThreshold: 0.05,
-            releaseThreshold: 0.07,
-          });
-
-          pinchStateRef.current = pinchResult.state;
-
-          // Throttle UI updates so both cursor & pinch update together (10 fps)
-          const needsUIUpdate = now - lastUIUpdateAtRef.current >= 1000 / 10;
-          if (needsUIUpdate) {
-            setHandCursor({ x: canvasX, y: canvasY });
-            setIsPinching(pinchResult.state.isPinching);
-            lastUIUpdateAtRef.current = now;
-          }
-
-          // When pinching starts, check if cursor is near current dot (uses ref-based checker)
-          if (pinchResult.transition === 'start') {
-            checkDotProximityRef(canvasX, canvasY);
-          }
-        }
-      } else {
-        // No hand detected - throttle these updates too
+      if (!tip) {
         if (now - lastUIUpdateAtRef.current >= 1000 / 10) {
           setHandCursor(null);
           setIsPinching(false);
           lastUIUpdateAtRef.current = now;
         }
+        return;
       }
-    } catch (error) {
-      console.error('[ConnectTheDots] Hand tracking error:', error);
-    } finally {
-      // Mark tick completed
-      isProcessingRef.current = false;
 
-      // Only schedule the next frame if the loop is still intended to be active
-      if (loopActiveRef.current && isHandTrackingEnabled) {
-        animationFrameRef.current = requestAnimationFrame(runHandTracking);
-      } else {
-        animationFrameRef.current = null;
+      const canvasX = tip.x * canvas.width;
+      const canvasY = tip.y * canvas.height;
+      const needsUIUpdate = now - lastUIUpdateAtRef.current >= 1000 / 10;
+      if (needsUIUpdate) {
+        setHandCursor({ x: canvasX, y: canvasY });
+        setIsPinching(frame.pinch.state.isPinching);
+        lastUIUpdateAtRef.current = now;
       }
-    }
-  }, [landmarker, isHandTrackingReady, isHandTrackingEnabled]);
 
-  // Start/stop hand tracking loop with proper cleanup
-  useEffect(() => {
-    // Manage the loopActive gate and schedule the first animation frame when
-    // conditions are met. Use requestAnimationFrame to let refs (e.g., webcam)
-    // initialize in the first paint.
-    if (
+      if (frame.pinch.transition === 'start') {
+        checkDotProximityRef(canvasX, canvasY);
+      }
+    },
+    [],
+  );
+
+  useHandTrackingRuntime({
+    isRunning:
       gameStarted &&
       isHandTrackingEnabled &&
       isHandTrackingReady &&
-      animationFrameRef.current == null
-    ) {
-      loopActiveRef.current = true;
-      animationFrameRef.current = requestAnimationFrame(runHandTracking);
-    } else {
-      // Stop the loop
-      loopActiveRef.current = false;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
+      !gameCompleted,
+    handLandmarker: landmarker,
+    webcamRef,
+    targetFps: 15,
+    onFrame: handleTrackingFrame,
+    onNoVideoFrame: () => {
+      const now = performance.now();
+      if (now - lastUIUpdateAtRef.current >= 1000 / 10) {
+        setHandCursor(null);
+        setIsPinching(false);
+        lastUIUpdateAtRef.current = now;
       }
-      isProcessingRef.current = false;
+    },
+    onError: (error) => {
+      console.error('[ConnectTheDots] Hand tracking error:', error);
+    },
+  });
+
+  useEffect(() => {
+    if (!isHandTrackingEnabled) {
       setHandCursor(null);
       setIsPinching(false);
-      // Reset pinch detection state so re-enabling starts fresh
-      pinchStateRef.current = createDefaultPinchState();
     }
-
-    return () => {
-      // Comprehensive cleanup
-      loopActiveRef.current = false;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      isProcessingRef.current = false;
-      // Ensure pinch state cleared on unmount as well
-      pinchStateRef.current = createDefaultPinchState();
-    };
-  }, [
-    gameStarted,
-    isHandTrackingEnabled,
-    isHandTrackingReady,
-    runHandTracking,
-  ]);
+  }, [isHandTrackingEnabled]);
 
   // Proximity check moved to `checkDotProximityRef` (reads live refs) to avoid stale closures in the tracking loop.
 

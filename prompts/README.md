@@ -39,6 +39,10 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 ### Engineering (Dev)
 
+- **Reality-First repo auditor** (docs vs code verification): `prompts/audit/reality-first-repo-auditor-v1.0.md`
+  - Core principle: "Docs are hypotheses. Code is ground truth."
+  - 7-phase process: orientation → standards discovery → docs inventory → code verification → discrepancy handling → doc debt closure → readiness assessment
+  - Use for: comprehensive audits, readiness checks, documentation debt identification
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
 - Master audit agent prompt (full coverage + research runway; two-pass): `prompts/audit/master-audit-agent-v1.0.md`
 - Camera game multi-persona audit (single game file): `prompts/audit/camera-game-multipersona-audit-v1.0.md`
@@ -101,7 +105,69 @@ This folder contains the reusable prompts that govern how agents work on this re
 
 - ADR draft: `prompts/architecture/adr-draft-v1.0.md`
 
+**Architecture Documentation (in `docs/architecture/`):**
+- **Game Architecture Principles**: `docs/architecture/GAME_ARCHITECTURE_PRINCIPLES.md`
+  - No "main game" philosophy (all games are equal peers)
+  - Shared infrastructure principles (centralized hand tracking, progress, camera)
+  - Game development guidelines
+  - ADR-001 and ADR-002
+  
+- **Hand Tracking Architecture**: `docs/architecture/HAND_TRACKING_ARCHITECTURE.md`
+  - Centralized hand tracking service design
+  - Migration plan from decentralized implementations
+  - Hand data standard and coordinate system
+  - Future: `useHandTracking` hook specification
+
+- **Camera Integration Guide**: `docs/architecture/CAMERA_INTEGRATION_GUIDE.md`
+  - MediaPipe integration
+  - Permission handling
+  - Fallback strategies
+
+### Intent-First Philosophy Library (Codebase-First Edition)
+
+**Core Principle:** "Investigate intent before acting" - adapted from MVP mindset to **Codebase-First** mindset (enhance existing code before starting fresh).
+
+**Quick Start:**
+- **Overview**: `prompts/intent-first/meta/intent-first-handbook-overview-v1.0.md`
+- **Cheatsheet**: `prompts/intent-first/meta/intent-first-cheatsheet-v1.0.md`
+- **Implementation Guide**: `prompts/intent-first/meta/intent-first-implementation-guide-v1.0.md`
+
+**Development & Technical:**
+- Development: `prompts/intent-first/development/intent-first-development-v1.0.md`
+- Testing: `prompts/intent-first/development/intent-first-testing-v1.0.md`
+- UX Design: `prompts/intent-first/development/intent-first-ux-design-v1.0.md`
+- Code Review: `prompts/intent-first/development/intent-first-code-review-v1.0.md`
+- Deployment: `prompts/intent-first/development/intent-first-deployment-v1.0.md`
+- Data: `prompts/intent-first/development/intent-first-data-v1.0.md`
+- Security: `prompts/intent-first/development/intent-first-security-v1.0.md`
+- Performance: `prompts/intent-first/development/intent-first-performance-v1.0.md`
+- Documentation: `prompts/intent-first/development/intent-first-documentation-v1.0.md`
+
+**Product & Strategy:**
+- Product: `prompts/intent-first/product/intent-first-product-v1.0.md`
+- Content: `prompts/intent-first/product/intent-first-content-v1.0.md`
+
+**Operations:**
+- Customer Success: `prompts/intent-first/operations/intent-first-customer-success-v1.0.md`
+- Sales: `prompts/intent-first/operations/intent-first-sales-v1.0.md`
+- Operations: `prompts/intent-first/operations/intent-first-operations-v1.0.md`
+
+**Leadership & Personal:**
+- Leadership: `prompts/intent-first/leadership/intent-first-leadership-v1.0.md`
+- Communication: `prompts/intent-first/leadership/intent-first-communication-v1.0.md`
+- Decision-Making: `prompts/intent-first/leadership/intent-first-decision-making-v1.0.md`
+- Creativity: `prompts/intent-first/leadership/intent-first-creativity-v1.0.md`
+- Learning: `prompts/intent-first/leadership/intent-first-learning-v1.0.md`
+- Wellbeing: `prompts/intent-first/leadership/intent-first-wellbeing-v1.0.md`
+- Relationships: `prompts/intent-first/leadership/intent-first-relationships-v1.0.md`
+
 ### UI / UX Design & Vision
+
+- **Spatial Gesture-Based UI Concept**: `docs/ui/CONCEPT_spatial_gesture_ui.md`
+  - Vision: Infinite canvas where games float in space, caught with hand gestures
+  - Key insight: "Smaller kids can't read or click precisely - that's why we need this"
+  - Interaction: Wave to browse, point+hover to preview, pinch+pull to select
+  - Verdict: **Cautiously enthusiastic** - build as "Magic Mode" toggle alongside standard UI
 
 - Free-floating gesture-based UI concept: `docs/ui/CONCEPT_free_floating_ui.md`
   - Vision: Infinite canvas with games as floating entities, caught via hand gestures
@@ -141,6 +207,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ### Deep Audit
 
 - Codebase audit + improvement planner (Top 10 improvements): `prompts/audit/codebase-audit-improvement-planner-v1.0.md`
+- Reality-first auditor (verify docs vs code, find missing standards): `prompts/audit/reality-first-auditor-v1.0.md`
 
 ## Workflow / Tracking
 
@@ -187,6 +254,8 @@ Prompts and docs for building “AI-native” feature slices live under:
 
 - Overview: `docs/PROJECT_OVERVIEW.md`
 - Architecture: `docs/ARCHITECTURE.md`
+- **Game Architecture Principles**: `docs/architecture/GAME_ARCHITECTURE_PRINCIPLES.md` - Core principles including "no main game"
+- **Hand Tracking Architecture**: `docs/architecture/HAND_TRACKING_ARCHITECTURE.md` - Centralized service design
 - **Input Methods (6 methods)**: `docs/INPUT_METHODS_SPECIFICATION.md`
 - **Camera Integration Guide**: `docs/architecture/CAMERA_INTEGRATION_GUIDE.md`
 - Security & privacy: `docs/security/SECURITY.md`

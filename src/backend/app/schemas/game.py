@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.user import UserRole
 
@@ -19,13 +19,21 @@ class GameBase(BaseModel):
 
     category: str
     age_range_min: int = Field(ge=2, le=12)
-    age_range_max: int = Field(ge=2, le=12, gt=lambda v: v.age_range_min)
+    age_range_max: int = Field(ge=2, le=12)
     difficulty: str
-    duration_minutes: Optional[int] = Field(gt=0)
+    duration_minutes: Optional[int] = Field(gt=0, default=None)
     game_path: str
     is_published: bool = True
     is_featured: bool = False
     config_json: Optional[dict] = None
+
+    @model_validator(mode="after")
+    def validate_age_range(cls, values):
+        """Ensure age_range_max > age_range_min."""
+        if values.get("age_range_min") and values.get("age_range_max"):
+            if values["age_range_max"] <= values["age_range_min"]:
+                raise ValueError("age_range_max must be greater than age_range_min")
+        return values
 
 
 class GameCreate(GameBase):
