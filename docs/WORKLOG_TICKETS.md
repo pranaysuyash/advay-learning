@@ -38036,3 +38036,49 @@ Status updates:
 Next actions:
 1. Decide: populate empty dirs with migrated code OR update docs to match reality
 2. Preference: Update docs to match src/backend/ and src/frontend/ structure (lower risk)
+
+---
+
+### TCK-20260217-001 :: Untrack committed test artifacts (src/frontend/test-results)
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-17 09:00 IST
+Status: **DONE**
+Priority: P3
+
+Description:
+Remove Playwright / Vitest test artifact files that were previously committed under `src/frontend/test-results/` and ensure `.gitignore` prevents future commits of these artifacts.
+
+Scope contract:
+
+- In-scope: Untrack files from current HEAD and record worklog evidence.
+- Out-of-scope: Rewriting git history to purge prior commits (separate ticket if required).
+
+Targets:
+
+- Repo: learning_for_kids
+- Files: `src/frontend/test-results/*`
+- Branch: main
+
+Acceptance Criteria:
+
+- [x] Files under `src/frontend/test-results/` are no longer tracked in HEAD
+- [x] `.gitignore` contains `src/frontend/test-results/` (observed)
+- [x] New commit recorded removing the tracked file(s)
+
+Execution log:
+
+- [2026-02-17 09:00 IST] Untrack | Evidence:
+  - **Command**: `git rm --cached -r src/frontend/test-results`
+  - **Output**: `rm 'src/frontend/test-results/.last-run.json'` (Observed)
+- [2026-02-17 09:01 IST] Worklog updated | Evidence: this ticket entry added to `docs/WORKLOG_TICKETS.md`
+
+Status updates:
+
+- [2026-02-17 09:01 IST] **DONE** — Test artifacts untracked from HEAD; commit pending (will follow).
+
+Next actions:
+
+1. Commit the staged deletion (done programmatically after this entry).
+2. If history purge is desired, create TCK-20260217-002 to plan and execute a rewrite (force-push required).
