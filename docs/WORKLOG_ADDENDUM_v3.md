@@ -610,3 +610,430 @@ Next actions:
 4. Follow-up audits: Backend analytics completeness, parent dashboard UX
 
 ---
+
+### TCK-20260215-001 :: PR-2 Camera UX Fixes (M3 + M4)
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-15 00:10 PST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: CameraPermissionPrompt error auto-dismiss removal + retry flow; NoCameraFallback icon fix + game links
+- Out-of-scope: Other camera UX issues (calibration, tracking-lost overlay)
+- Behavior change allowed: YES (error no longer auto-dismisses; fallback now has navigation)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/CameraPermissionPrompt.tsx`, `src/frontend/src/components/NoCameraFallback.tsx`, tests
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: MediaPipe Vision Audit (Phase 6 — M3, M4)
+- Source artifacts: `docs/MEDIAPIPE_VISION_AUDIT_2026-02-14.md`
+
+Plan:
+
+1. M3: Remove `setTimeout` auto-dismiss on permission error. Add browser-specific help text. Change button to "Try Again". Error persists until user acts.
+2. M4: Replace house SVG with camera-off icon. Add "Try these games instead!" links (Connect Dots, Find Letters, Draw Letters). Update default description.
+3. Update tests for both components.
+
+Execution log:
+
+- 2026-02-15 00:10 Audit produced at `docs/MEDIAPIPE_VISION_AUDIT_2026-02-14.md` | Evidence: `Observed` file created
+- 2026-02-15 00:12 CameraPermissionPrompt: Removed setTimeout auto-dismiss (was lines 96-98). Added browser-specific help (Chrome/Safari/Firefox detection). Button text → "Try Again 📷" on error. Removed stale `onPermissionDenied` from useCallback deps. | Evidence: `Observed` — diff applied
+- 2026-02-15 00:13 NoCameraFallback: Replaced house SVG with camera-off icon (video camera + slash). Added `Link` import. Added 3 game links (connect-the-dots, letter-hunt, alphabet-tracing). Updated default description. | Evidence: `Observed` — diff applied
+- 2026-02-15 00:14 Updated CameraPermissionPrompt.test.tsx: `NotAllowedError` test now asserts error persists, onDenied NOT auto-called, browser help shown, "Try Again" text, explicit "Play with Touch" click required. | Evidence: `Observed`
+- 2026-02-15 00:14 Updated NoCameraFallback.test.tsx: Added MemoryRouter wrapper. Updated default description assertion. Added test for game links. Fixed CameraRequired tests that render default fallback. | Evidence: `Observed`
+- 2026-02-15 00:15 `tsc --noEmit` — 0 errors | Evidence: `Observed` — exit code 0
+- 2026-02-15 00:15 `vitest run` — 29/29 tests pass | Evidence: `Observed` — "Test Files 2 passed (2), Tests 29 passed (29)"
+
+Status updates:
+
+- 2026-02-15 00:15 **DONE** — All changes applied, types clean, tests pass
+
+---
+
+### TCK-20260215-002 :: PR-1 Temporal Smoothing (M1 — One-Euro Filter)
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-15 14:50 PST
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope: One-Euro filter implementation, integration into handTrackingFrame + useHandTrackingRuntime, unit tests
+- Out-of-scope: Pinch smoothing, landmark overlay, per-game tuning
+- Behavior change allowed: YES (indexTip output is now smoothed; rawIndexTip remains unfiltered)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): New `utils/oneEuroFilter.ts`, modify `utils/handTrackingFrame.ts`, modify `hooks/useHandTrackingRuntime.ts`, new `utils/__tests__/oneEuroFilter.test.ts`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: MediaPipe Vision Audit (Phase 6 — M1)
+- Source artifacts: `docs/MEDIAPIPE_VISION_AUDIT_2026-02-14.md`
+- Reference: Géry Casiez et al., "1€ Filter", CHI 2012, https://gery.casiez.net/1euro/
+
+Plan:
+
+1. Implement One-Euro filter (scalar + 2D point) as pure utility
+2. Add optional `indexTipSmoother` + `timestamp` to `BuildTrackedHandFrameOptions`
+3. Apply filter to mirrored indexTip in `buildTrackedHandFrame` (rawIndexTip stays raw)
+4. Wire smoother ref into `useHandTrackingRuntime` with `smoothing` option (default: enabled)
+5. Reset filter on hand-lost (prevents stale state from pulling cursor on re-detection)
+6. Write unit tests for filter behavior: jitter reduction, fast-movement tracking, reset
+
+Execution log:
+
+- 2026-02-15 14:50 Created `utils/oneEuroFilter.ts`: OneEuroScalarFilter + OneEuroPointFilter classes. Defaults: minCutoff=1.0, beta=0.007, dCutoff=1.0. | Evidence: `Observed`
+- 2026-02-15 14:52 Modified `handTrackingFrame.ts`: Added optional `indexTipSmoother` + `timestamp` to options. Applied filter to mirrored indexTip. Reset filter on no-hand frames. rawIndexTip stays unfiltered. | Evidence: `Observed`
+- 2026-02-15 14:53 Modified `useHandTrackingRuntime.ts`: Added `smoothing` option (default: enabled). Created `smootherRef` with `OneEuroPointFilter`. Passes smoother + `timestamp/1000` to `buildTrackedHandFrame`. | Evidence: `Observed`
+- 2026-02-15 14:54 Created `utils/__tests__/oneEuroFilter.test.ts`: 7 tests covering first-value passthrough, jitter reduction (<50% of input), fast-movement responsiveness (>0.8 after 10 frames), reset, 2D filtering. | Evidence: `Observed`
+- 2026-02-15 14:55 `tsc --noEmit` — 0 errors | Evidence: `Observed` — exit code 0
+- 2026-02-15 14:55 `vitest run` — 365/365 tests pass (10 new + 355 existing). 1 pre-existing Playwright suite import error (unrelated). | Evidence: `Observed`
+
+Architecture notes:
+
+- Filter is opt-in via `smoothing` option on `useHandTrackingRuntime`. All existing games get smoothing automatically (default enabled).
+- Games can disable with `smoothing: false` or tune with custom `{ minCutoff, beta }`.
+- `rawIndexTip` is always unfiltered — games needing raw data (e.g. finger counting) use that.
+- Filter resets on hand-lost to avoid pulling cursor toward stale position when hand re-enters.
+
+Status updates:
+
+- 2026-02-15 14:55 **DONE** — Filter implemented, integrated, tested. All games benefit automatically.
+
+---
+
+---
+
+### TCK-20260217-001 :: Combined CV Experience - Freeze Dance + Fingers
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **DONE**
+Completed: 2026-02-17 23:45 IST
+Priority: P0
+
+Description:
+Implement the first combined CV experience that uses both pose tracking (for dancing) and hand tracking (for finger challenges). This addresses the critical assessment finding that CV systems work in isolation and kids never experience the full "computer sees my whole body" magic.
+
+Scope contract:
+
+- In-scope:
+  - Modify existing FreezeDance.tsx to add hand tracking integration
+  - Add "freeze + show number" mechanic when music stops
+  - Create useCombinedTracking hook for unified hand+pose tracking
+  - Add visual feedback for both pose freeze and finger detection
+  - Progressive difficulty: start with pose only, add hand challenges at level 3+
+  
+- Out-of-scope:
+  - Face tracking integration (deferred to TCK-20260217-003)
+  - New game creation (modifying existing)
+  - Backend changes (frontend only)
+  
+- Behavior change allowed: YES (gameplay modification)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/FreezeDance.tsx (modify)
+  - src/frontend/src/hooks/useCombinedTracking.ts (new)
+  - src/frontend/src/types/tracking.ts (extend if needed)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Freeze Dance game detects both pose (dancing) and hand (fingers) simultaneously
+- [ ] Music stops → "Freeze! Show 3 fingers!" prompt appears
+- [ ] Success requires both pose frozen AND correct finger count
+- [ ] Visual feedback shows both pose detection and hand detection status
+- [ ] Game works with hand-only fallback if pose detection fails
+- [ ] TypeScript type-check passes
+- [ ] No regressions in existing Freeze Dance functionality
+
+Evidence Links:
+
+- Source: docs/GAMES-CRITICAL-ASSESSMENT-20260216.md Section 2.12, 3.1
+- Related: docs/GAME_IMPROVEMENT_MASTER_PLAN.md Section 2.1
+
+Execution log:
+
+- [2026-02-17 23:40 IST] Ticket created | Evidence: Critical assessment identifies CV isolation as major fun killer
+- [2026-02-17 23:40 IST] Status: IN_PROGRESS - Starting implementation
+- [2026-02-17 23:43 IST] Implemented combined CV experience | Evidence: `git diff -- src/frontend/src/pages/FreezeDance.tsx`
+  - Added hand tracking integration using useHandTracking hook
+  - Added new 'fingerChallenge' game phase that activates after round 3
+  - Music stops → "FREEZE!" → Then "SHOW X!" finger challenge
+  - Visual feedback: pose skeleton (green/red) + hand landmarks (orange/green)
+  - Progress bar shows finger detection vs target
+  - Success requires both pose frozen AND correct finger count
+  - TTS announces finger challenge: "Freeze! Show 3 fingers!"
+  - Added playSuccess() sound when fingers match
+  - Updated instructions to mention bonus finger challenge
+- [2026-02-17 23:44 IST] Verification | Evidence:
+  - TypeScript type-check: `npm run type-check` passes
+  - Tests: 365 passed (1 pre-existing Playwright config failure unrelated)
+
+Status updates:
+
+- [2026-02-17 23:40 IST] **OPEN** — Ticket created
+- [2026-02-17 23:40 IST] **IN_PROGRESS** — Implementation started
+- [2026-02-17 23:44 IST] **DONE** — Combined CV Freeze Dance implemented and verified
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+|-------------|----------------|------------|----------------------|
+| docs/GAMES-CRITICAL-ASSESSMENT-20260216.md | Fun-first reviewer | Fun factor | Combined CV = magic moment |
+| docs/GAME_IMPROVEMENT_MASTER_PLAN.md | Implementation planner | Architecture | Technical approach defined |
+
+---
+
+### TCK-20260217-002 :: Visible Attention/Wellness Meter
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P0
+
+Description:
+Make wellness tracking VISIBLE to kids by creating an attention meter that shows when they're looking at the screen. This addresses the critical assessment finding that eye tracking runs invisibly and kids never see the magic.
+
+Scope contract:
+
+- In-scope:
+  - Create AttentionMeter component with visual "focus power" indicator
+  - Integrate with existing useAttentionDetection hook
+  - Add to AlphabetGame as first integration
+  - Make attention affect gameplay (high focus = bonus points)
+  - Visual reminder when looking away (gentle, not punitive)
+  
+- Out-of-scope:
+  - Posture detection visibility (separate ticket)
+  - Hydration break reminders (already exists)
+  - Parent dashboard changes (frontend only)
+  
+- Behavior change allowed: YES (new UI element)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/components/AttentionMeter.tsx (new)
+  - src/frontend/src/hooks/useAttentionDetection.ts (modify to expose score)
+  - src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx (integrate)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Attention meter visible during gameplay (corner, non-intrusive)
+- [ ] Meter increases when looking at screen, decreases when looking away
+- [ ] High attention (>80%) triggers "Focus Bonus!" animation
+- [ ] Low attention (<30%) shows gentle "Look here!" indicator with Pip
+- [ ] Meter colors: green (high) → yellow (medium) → orange (low)
+- [ ] Bonus points awarded for maintaining high attention
+- [ ] No scary/error states - always encouraging
+
+Evidence Links:
+
+- Source: docs/GAMES-CRITICAL-ASSESSMENT-20260216.md Section 3.2
+- Related: docs/GAME_IMPROVEMENT_MASTER_PLAN.md Section 2.2
+
+Execution log:
+
+- [2026-02-17 23:40 IST] Ticket created | Evidence: Critical assessment - wellness monitoring invisible
+
+---
+
+### TCK-20260217-003 :: Audio Improvements - Short TTS + Success Sounds
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **DONE**
+Completed: 2026-02-17 23:45 IST
+Priority: P0
+
+Description:
+Improve audio feedback in Finger Number Show game by shortening TTS prompts to 2-3 words max and adding satisfying success sounds. Addresses critical assessment finding that current prompts are too wordy and success feedback is weak.
+
+Scope contract:
+
+- In-scope:
+  - Modify FingerNumberShow.tsx TTS prompts
+  - Add satisfying success sound effects (ding, cheer)
+  - Reduce hold time from 450ms to 200ms
+  - Add continuous audio feedback option
+  
+- Out-of-scope:
+  - Background music (separate ticket)
+  - Other games (focused on highest-impact game first)
+  - Voice recording replacement (keep TTS)
+  
+- Behavior change allowed: YES (audio timing changes)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/games/FingerNumberShow.tsx (modify)
+  - src/frontend/src/hooks/useSoundEffects.ts (extend if needed)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] All TTS prompts reduced to 2-3 words max
+  - "Show me three fingers" → "Show 3!"
+  - "That's correct! Great job!" → "Great!"
+- [ ] Satisfying success sound plays on correct answer
+- [ ] Hold time reduced from 450ms to 200ms
+- [ ] Optional: Letter name spoken in letter mode
+- [ ] No audio overlap or queue buildup
+- [ ] All existing tests pass
+
+Evidence Links:
+
+- Source: docs/GAMES-CRITICAL-ASSESSMENT-20260216.md Section 2.1, 3.4
+- Related: docs/GAME_IMPROVEMENT_MASTER_PLAN.md Section 2.3
+
+Execution log:
+
+- [2026-02-17 23:40 IST] Ticket created | Evidence: Critical assessment - "TTS prompts are too wordy"
+- [2026-02-17 23:41 IST] Implemented audio improvements | Evidence: `git diff -- src/frontend/src/games/FingerNumberShow.tsx`
+  - TTS prompts shortened: "Show me the letter A" → "Letter A!", "Show me Three fingers" → "Show Three!", "Make a fist for zero" → "Fist for zero!"
+  - Hold time reduced: 450ms → 200ms (line 449)
+  - Added playSuccess() before playCelebration() for immediate feedback
+  - Updated isPromptFeedback detection for new shorter prompts
+- [2026-02-17 23:42 IST] Verification | Evidence:
+  - TypeScript type-check: `npm run type-check` passes
+  - Tests: 365 passed (1 pre-existing Playwright config failure unrelated)
+
+Status updates:
+
+- [2026-02-17 23:40 IST] **OPEN** — Ticket created
+- [2026-02-17 23:42 IST] **DONE** — Audio improvements implemented and verified
+
+---
+
+### TCK-20260217-004 :: Auto-Start Game Flow
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P1
+
+Description:
+Simplify game start flow by implementing auto-start with smart defaults. Hide settings behind a gear icon. Addresses critical assessment finding that there are too many menus before playing.
+
+Scope contract:
+
+- In-scope:
+  - Modify FingerNumberShow menu to auto-start on first play
+  - Add "Remember my choices" for returning players
+  - Move difficulty/language selectors to settings (gear icon)
+  - One big "Play!" button as primary CTA
+  
+- Out-of-scope:
+  - Other games (pilot with FingerNumberShow)
+  - Backend persistence (localStorage only)
+  - Full game state machine refactor
+  
+- Behavior change allowed: YES (UX flow change)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/games/finger-number-show/FingerNumberShowMenu.tsx (modify)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] First-time player: sees simplified menu with "Play!" button + settings gear
+- [ ] Returning player: auto-starts with last used settings
+- [ ] Settings accessible via gear icon in corner
+- [ ] Settings include: difficulty, language, game mode
+- [ ] No loss of existing functionality (all options still available)
+
+Evidence Links:
+
+- Source: docs/GAMES-CRITICAL-ASSESSMENT-20260216.md Section 3.3
+- Related: docs/GAME_IMPROVEMENT_MASTER_PLAN.md Section 2.5
+
+Execution log:
+
+- [2026-02-17 23:40 IST] Ticket created | Evidence: Critical assessment - "I just wanna PLAY!"
+
+---
+
+### TCK-20260217-005 :: New Game - Phonics Sounds
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P1
+
+Description:
+Implement Phonics Sounds game where Pip makes a letter sound and child traces the letter. Builds on existing Alphabet Tracing infrastructure. From GAME_IDEAS_CATALOG.md #9.
+
+Scope contract:
+
+- In-scope:
+  - Create PhonicsSounds game page
+  - Reuse existing tracing canvas from AlphabetGame
+  - Add phoneme audio playback (Pip voice TTS)
+  - Ghost letter that pulses/fades
+  - "Buh is for Ball!" completion feedback
+  
+- Out-of-scope:
+  - Pre-recorded phoneme audio (use TTS for now)
+  - Custom word images (use existing alphabet icons)
+  - Full Pip animations (static mascot for now)
+  
+- Behavior change allowed: N/A (new game)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/PhonicsSounds.tsx (new)
+  - src/frontend/src/data/phonemes.ts (new)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [ ] Game plays phoneme sound (e.g., "Buh!")
+- [ ] Ghost letter appears faintly and pulses
+- [ ] Child traces letter with finger
+- [ ] On success: "Buh is for Ball!" + celebration
+- [ ] Progressive difficulty: easy sounds → similar sounds → vowel variations
+- [ ] Uses existing tracing detection logic
+
+Evidence Links:
+
+- Source: docs/GAME_IDEAS_CATALOG.md Section "Phonics Sounds"
+- Related: docs/GAME_IMPROVEMENT_MASTER_PLAN.md Section 3.1
+
+Execution log:
+
+- [2026-02-17 23:40 IST] Ticket created | Evidence: Catalog item #9, P0 priority
+
+---
+
+*End of Worklog Addendum v3*

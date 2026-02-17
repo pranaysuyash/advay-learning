@@ -32,10 +32,15 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 
 **Games**:
 
-- AlphabetGame: ✅ Implemented
-- FingerNumberShow: ✅ Start/Stop buttons toggle camera-based interaction
-- LetterHunt: ⚠️ Mouse fallback toggle (no dedicated draw toggle)
-- ConnectTheDots: ✅ Implemented (as hand tracking toggle)
+- AlphabetGame: ✅ Implemented (Start/Stop drawing buttons)
+- ConnectTheDots: ✅ Implemented (Start Game + Hand Mode toggle)
+- LetterHunt: ✅ Implemented (Start Game + pinch to select)
+- ColorMatchGarden: ✅ Implemented
+- MusicPinchBeat: ✅ Implemented (pinch is core mechanic)
+- NumberTapTrail: ✅ Implemented
+- ShapePop: ✅ Implemented
+- ShapeSequence: ✅ Implemented
+- SteadyHandLab: ✅ Implemented (button start + hold steady mechanic)
 
 **Pros**: Simple mentally; works without gesture recognition
 **Cons**: Requires clicking without breaking flow
@@ -59,9 +64,14 @@ Advay Vision Learning is a **gesture-based learning app** using MediaPipe and co
 **Games**:
 
 - AlphabetGame: ✅ Implemented
-- FingerNumberShow: ❌ Not applicable (finger count recognition, no pinch interaction)
-- LetterHunt: ✅ Implemented (pinch to select)
 - ConnectTheDots: ✅ Implemented
+- LetterHunt: ✅ Implemented (pinch to select letters)
+- ColorMatchGarden: ✅ Implemented
+- MusicPinchBeat: ✅ Implemented (core mechanic)
+- NumberTapTrail: ✅ Implemented
+- ShapePop: ✅ Implemented
+- ShapeSequence: ✅ Implemented
+- SteadyHandLab: ❌ Not applicable (uses "hold steady" mechanic instead)
 
 **Pros**: Natural gesture; no UI needed
 **Cons**: Requires good detection; threshold tuning for kids

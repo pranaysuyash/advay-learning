@@ -8,8 +8,6 @@ import {
   useProgressStore,
   type Profile,
 } from '../store';
-import { progressApi } from '../services/api';
-import { progressQueue } from '../services/progressQueue';
 import { getAlphabet } from '../data/alphabets';
 import { LetterJourney } from '../components/LetterJourney';
 import { UIIcon } from '../components/ui';
@@ -147,17 +145,8 @@ export const Dashboard = memo(function DashboardComponent() {
   };
   const [isCreating, setIsCreating] = useState(false);
 
-  // Sync progress and refresh stats on mount
   useEffect(() => {
-    const syncAndFetch = async () => {
-      // First sync any pending progress to backend
-      await progressQueue.syncAll(progressApi);
-      
-      // Then fetch fresh profile data
-      await fetchProfiles();
-    };
-    
-    syncAndFetch();
+    fetchProfiles();
   }, [fetchProfiles]);
 
   const handleCreateProfile = async () => {
@@ -320,9 +309,10 @@ export const Dashboard = memo(function DashboardComponent() {
             {
               label: 'Letters', // Kid-friendly: "Letters" instead of "Literacy"
               // Child-centered: Show encouraging message for zero-state instead of "0 of 26"
-              value: selectedChildData.progress.lettersLearned === 0
-                ? "Ready to start! 🎉"
-                : `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters} learned`,
+              value:
+                selectedChildData.progress.lettersLearned === 0
+                  ? 'Ready to start! 🎉'
+                  : `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters} learned`,
               iconName: 'letters' as const,
               percent:
                 (selectedChildData.progress.lettersLearned /
@@ -332,20 +322,23 @@ export const Dashboard = memo(function DashboardComponent() {
             {
               label: 'Stars Earned',
               // Child-centered: Show encouraging message for new users
-              value: selectedChildData.progress.lettersLearned === 0
-                ? "Ready to earn! ⭐"
-                : getStarRating(selectedChildData.progress.averageAccuracy).emoji,
+              value:
+                selectedChildData.progress.lettersLearned === 0
+                  ? 'Ready to earn! ⭐'
+                  : getStarRating(selectedChildData.progress.averageAccuracy)
+                      .emoji,
               iconName: 'target' as const,
               percent: selectedChildData.progress.averageAccuracy,
             },
             {
               label: 'Time Played',
               // Child-centered: Positive framing for zero-state
-              value: selectedChildData.progress.totalTime === 0
-                ? "Let's begin! 🚀"
-                : selectedChildData.progress.totalTime < 60
-                  ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of fun!`
-                  : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of fun!`,
+              value:
+                selectedChildData.progress.totalTime === 0
+                  ? "Let's begin! 🚀"
+                  : selectedChildData.progress.totalTime < 60
+                    ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of fun!`
+                    : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of fun!`,
               iconName: 'timer' as const,
               percent: Math.min(
                 (selectedChildData.progress.totalTime / 300) * 100,

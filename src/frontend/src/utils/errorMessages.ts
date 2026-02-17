@@ -18,15 +18,17 @@ export const CAMERA_ERRORS = {
   NOT_ALLOWED: {
     title: 'Camera Permission Needed 📷',
     description:
-      "We need permission to use your camera so you can use hand gestures in the game. You can change this in your device settings.",
-    action: 'Grant camera permission in Settings > Apps > [App Name] > Permissions',
+      'We need permission to use your camera so you can use hand gestures in the game. You can change this in your device settings.',
+    action:
+      'Grant camera permission in Settings > Apps > [App Name] > Permissions',
     emoji: '📷',
   },
   NOT_FOUND: {
     title: 'No Camera Detected 🔍',
     description:
       "Your device doesn't seem to have a camera, or it's not connected properly.",
-    action: 'Use touch mode - you can still play with your finger or mouse! Just tap the game to start.',
+    action:
+      'Use touch mode - you can still play with your finger or mouse! Just tap the game to start.',
     emoji: '🖱️',
   },
   NOT_READABLE: {
@@ -39,14 +41,16 @@ export const CAMERA_ERRORS = {
     title: 'Security: Camera Access Blocked 🔒',
     description:
       'Your device blocked camera access because of security settings. This happens on some devices or networks.',
-    action: 'Try playing with touch mode instead, or check your security settings.',
+    action:
+      'Try playing with touch mode instead, or check your security settings.',
     emoji: '🛡️',
   },
   GENERIC_ERROR: {
     title: 'Camera Problem 🤔',
     description:
       'Something went wrong with the camera. This sometimes happens if too much is happening at once.',
-    action: 'Try refreshing the page and starting again. You can always play with touch!',
+    action:
+      'Try refreshing the page and starting again. You can always play with touch!',
     emoji: '🔄',
   },
 } as const;
@@ -81,27 +85,31 @@ export const GAME_ERRORS = {
   LEVEL_LOAD_FAILED: {
     title: 'Level Took Too Long to Load ⏱️',
     description: 'The level is taking longer than expected to load.',
-    action: 'Check your internet and try again. If it keeps happening, try a different level.',
+    action:
+      'Check your internet and try again. If it keeps happening, try a different level.',
     emoji: '⚡',
   },
   SAVE_FAILED: {
-    title: 'Progress Save Didn\'t Work 💾',
+    title: "Progress Save Didn't Work 💾",
     description:
       'Your progress might not have been saved because of a connection issue.',
-    action: 'Check your internet connection and try again. Your progress should resume from the last checkpoint.',
+    action:
+      'Check your internet connection and try again. Your progress should resume from the last checkpoint.',
     emoji: '📡',
   },
   AUDIO_FAILED: {
     title: 'Sound Not Working 🔇',
     description:
       "We couldn't play the sound or voice. It might be a device volume setting or browser issue.",
-    action: 'Check your device volume, or try with sound off. The game still works without audio!',
+    action:
+      'Check your device volume, or try with sound off. The game still works without audio!',
     emoji: '📴',
   },
   ASSET_LOAD_FAILED: {
     title: 'Image or Video Took Too Long ⏳',
     description: 'An image or video in the game is taking a long time to load.',
-    action: 'Check your internet connection. If it keeps happening, try refreshing the page.',
+    action:
+      'Check your internet connection. If it keeps happening, try refreshing the page.',
     emoji: '🖼️',
   },
 } as const;
@@ -110,7 +118,8 @@ export const GAME_ERRORS = {
 export const NETWORK_ERRORS = {
   NO_CONNECTION: {
     title: 'No Internet Connection 📡',
-    description: 'Check if your device is connected to WiFi or mobile internet.',
+    description:
+      'Check if your device is connected to WiFi or mobile internet.',
     action: 'Connect to WiFi or check your internet and try again.',
     emoji: '📱',
   },
@@ -118,12 +127,14 @@ export const NETWORK_ERRORS = {
     title: 'Slow Internet Connection 🐢',
     description:
       'Your internet is slower than usual. The game might be slow or games might take longer to load.',
-    action: 'Try moving closer to your WiFi router, or wait for a faster connection.',
+    action:
+      'Try moving closer to your WiFi router, or wait for a faster connection.',
     emoji: '⚡',
   },
   SERVER_ERROR: {
     title: 'Server Having Trouble 🔧',
-    description: 'Something is wrong with our servers. This is temporary and we\'re working on it!',
+    description:
+      "Something is wrong with our servers. This is temporary and we're working on it!",
     action: 'Try again in a few minutes. Your progress is safe!',
     emoji: '🛠️',
   },
@@ -134,21 +145,22 @@ export const BROWSER_ERRORS = {
   UNSUPPORTED_BROWSER: {
     title: 'Browser Not Supported 🌐',
     description:
-      'This browser is too old or doesn\'t support the features we need. Try using a newer browser.',
+      "This browser is too old or doesn't support the features we need. Try using a newer browser.",
     action: 'Use Chrome, Safari, Edge, or Firefox (latest versions).',
     emoji: '🌐',
   },
   WEBGL_NOT_SUPPORTED: {
     title: 'Graphics Features Not Supported 🎨',
     description:
-      'Your browser can\'t support the graphics we use. This is rare on modern devices.',
+      "Your browser can't support the graphics we use. This is rare on modern devices.",
     action: 'Try a different browser or update your current one.',
     emoji: '🎮',
   },
   STORAGE_FULL: {
     title: 'Storage Space Running Low 💾',
     description: 'Your device is running low on storage space.',
-    action: 'Close other apps or delete old files to free up space, then try again.',
+    action:
+      'Close other apps or delete old files to free up space, then try again.',
     emoji: '🗑️',
   },
 } as const;
@@ -180,8 +192,10 @@ export function getErrorMessage(
   }
 
   if (errorStr.includes('hand') || errorStr.includes('mediapipe')) {
-    if (errorStr.includes('load')) return HAND_TRACKING_ERRORS.MODEL_LOAD_FAILED;
-    if (errorStr.includes('init')) return HAND_TRACKING_ERRORS.INITIALIZATION_FAILED;
+    if (errorStr.includes('load'))
+      return HAND_TRACKING_ERRORS.MODEL_LOAD_FAILED;
+    if (errorStr.includes('init'))
+      return HAND_TRACKING_ERRORS.INITIALIZATION_FAILED;
     return HAND_TRACKING_ERRORS.RUNTIME_ERROR;
   }
 
@@ -225,7 +239,10 @@ export function getErrorMessage(
  * Format error message for display
  * Returns a user-friendly error message with title, description, and action
  */
-export function formatErrorMessage(errorCode: string, error?: Error | null): string {
+export function formatErrorMessage(
+  errorCode: string,
+  error?: Error | null,
+): string {
   const msg = getErrorMessage(errorCode, error);
   return `${msg.emoji ? msg.emoji + ' ' : ''}${msg.title}\n\n${msg.description}\n\n👉 ${msg.action}`;
 }

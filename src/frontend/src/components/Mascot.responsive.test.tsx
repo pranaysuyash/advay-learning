@@ -51,9 +51,7 @@ describe('Mascot - Responsive Sizing', () => {
     });
 
     it('renders with explicit xs size', () => {
-      const { container } = render(
-        <Mascot state='idle' responsiveSize='xs' />,
-      );
+      const { container } = render(<Mascot state='idle' responsiveSize='xs' />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('w-16');
@@ -61,9 +59,7 @@ describe('Mascot - Responsive Sizing', () => {
     });
 
     it('renders with explicit sm size', () => {
-      const { container } = render(
-        <Mascot state='idle' responsiveSize='sm' />,
-      );
+      const { container } = render(<Mascot state='idle' responsiveSize='sm' />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('w-20');
@@ -71,9 +67,7 @@ describe('Mascot - Responsive Sizing', () => {
     });
 
     it('renders with explicit md size (original)', () => {
-      const { container } = render(
-        <Mascot state='idle' responsiveSize='md' />,
-      );
+      const { container } = render(<Mascot state='idle' responsiveSize='md' />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('w-32');
@@ -81,9 +75,7 @@ describe('Mascot - Responsive Sizing', () => {
     });
 
     it('renders with explicit lg size', () => {
-      const { container } = render(
-        <Mascot state='idle' responsiveSize='lg' />,
-      );
+      const { container } = render(<Mascot state='idle' responsiveSize='lg' />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('w-40');
@@ -110,9 +102,7 @@ describe('Mascot - Responsive Sizing', () => {
 
   describe('hideOnMobile Behavior', () => {
     it('hides Mascot on mobile by default when hideOnMobile=true', () => {
-      const { container } = render(
-        <Mascot state='idle' hideOnMobile={true} />,
-      );
+      const { container } = render(<Mascot state='idle' hideOnMobile={true} />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('hidden');
@@ -159,9 +149,7 @@ describe('Mascot - Responsive Sizing', () => {
 
     it('xs size meets 44px minimum for touch', () => {
       // w-16 = 64px > 44px minimum
-      const { container } = render(
-        <Mascot state='idle' responsiveSize='xs' />,
-      );
+      const { container } = render(<Mascot state='idle' responsiveSize='xs' />);
 
       const motionDiv = getMascotContainerMotionDiv(container);
       expect(motionDiv?.className).toContain('cursor-pointer');
@@ -171,11 +159,7 @@ describe('Mascot - Responsive Sizing', () => {
   describe('Message Bubbles with Responsive Sizing', () => {
     it('renders message bubble with responsive mascot', () => {
       const { container } = render(
-        <Mascot
-          state='happy'
-          message='Great job!'
-          responsiveSize='sm'
-        />,
+        <Mascot state='happy' message='Great job!' responsiveSize='sm' />,
       );
 
       // Should contain both message and mascot
@@ -196,11 +180,7 @@ describe('Mascot - Responsive Sizing', () => {
 
       sizes.forEach((size) => {
         const { unmount } = render(
-          <Mascot
-            state='happy'
-            message='Test message'
-            responsiveSize={size}
-          />,
+          <Mascot state='happy' message='Test message' responsiveSize={size} />,
         );
 
         expect(screen.getByText('Test message')).toBeInTheDocument();

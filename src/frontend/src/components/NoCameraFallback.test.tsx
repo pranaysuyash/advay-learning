@@ -1,17 +1,31 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { NoCameraFallback, CameraRequired } from './NoCameraFallback';
+
+function renderWithRouter(ui: React.ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
 
 describe('NoCameraFallback', () => {
   it('should render default message when camera is not available', () => {
-    render(<NoCameraFallback />);
+    renderWithRouter(<NoCameraFallback />);
 
     expect(screen.getByText('Camera Not Available')).toBeInTheDocument();
-    expect(screen.getByText(/This game requires a camera to play/)).toBeInTheDocument();
+    expect(screen.getByText(/No camera\? No problem!/)).toBeInTheDocument();
+  });
+
+  it('should render camera-free game links', () => {
+    renderWithRouter(<NoCameraFallback />);
+
+    expect(screen.getByText('Try these games instead! 🎮')).toBeInTheDocument();
+    expect(screen.getByText('Connect Dots')).toBeInTheDocument();
+    expect(screen.getByText('Find Letters')).toBeInTheDocument();
+    expect(screen.getByText('Draw Letters')).toBeInTheDocument();
   });
 
   it('should render custom title and description', () => {
-    render(
+    renderWithRouter(
       <NoCameraFallback
         title="Custom Title"
         description="Custom description text"
@@ -24,7 +38,7 @@ describe('NoCameraFallback', () => {
 
   it('should render action button with callback', () => {
     const mockCallback = vi.fn();
-    render(
+    renderWithRouter(
       <NoCameraFallback
         actionLabel="Custom Button"
         onAction={mockCallback}
@@ -39,7 +53,7 @@ describe('NoCameraFallback', () => {
   });
 
   it('should not render button if onAction is not provided', () => {
-    render(
+    renderWithRouter(
       <NoCameraFallback
         actionLabel="Go Back"
       />
@@ -49,7 +63,7 @@ describe('NoCameraFallback', () => {
   });
 
   it('should render as inline message when fullScreen is false', () => {
-    const { container } = render(
+    const { container } = renderWithRouter(
       <NoCameraFallback fullScreen={false} />
     );
 
@@ -57,8 +71,8 @@ describe('NoCameraFallback', () => {
     expect(wrapper).toHaveClass('border', 'border-gray-200', 'rounded-lg');
   });
 
-  it('should render camera icon SVG', () => {
-    const { container } = render(<NoCameraFallback />);
+  it('should render camera-off icon SVG', () => {
+    const { container } = renderWithRouter(<NoCameraFallback />);
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass('w-16', 'h-16');
@@ -126,7 +140,7 @@ describe('CameraRequired', () => {
       configurable: true,
     });
 
-    render(
+    renderWithRouter(
       <CameraRequired>
         <div>Camera Game Content</div>
       </CameraRequired>
@@ -146,7 +160,7 @@ describe('CameraRequired', () => {
       configurable: true,
     });
 
-    render(
+    renderWithRouter(
       <CameraRequired onNoCameraDetected={mockCallback}>
         <div>Camera Game Content</div>
       </CameraRequired>

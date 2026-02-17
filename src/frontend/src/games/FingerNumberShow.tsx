@@ -96,7 +96,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
-  const { playCelebration } = useSoundEffects();
+  const { playCelebration, playSuccess } = useSoundEffects();
 
   // Language and mode selection
   type GameMode = 'numbers' | 'letters';
@@ -204,7 +204,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         lastLetterRef.current = nextLetter;
         setTargetLetter(nextLetter);
         setTargetNumber(0); // Reset number target
-        const prompt = `Show me the letter ${nextLetter.name}!`;
+        const prompt = `Letter ${nextLetter.name}!`;
         setFeedback(prompt);
         setPromptStage('center');
         if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
@@ -249,8 +249,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         setTargetLetter(null); // Reset letter target
         const prompt =
           nextTarget === 0
-            ? 'Make a fist for zero.'
-            : `Show me ${NUMBER_NAMES[nextTarget]} fingers.`;
+            ? 'Fist for zero!'
+            : `Show ${NUMBER_NAMES[nextTarget]}!`;
         setFeedback(prompt);
         setPromptStage('center');
         if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
@@ -446,10 +446,11 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
           };
         } else if (
           !successLockRef.current &&
-          nowMs - (stable.startAt ?? nowMs) >= 450
+          nowMs - (stable.startAt ?? nowMs) >= 200
         ) {
           successLockRef.current = true;
-          playCelebration();
+          void playSuccess();
+          setTimeout(() => playCelebration(), 400);
           setShowCelebration(true);
           setCelebrationValue(
             gameMode === 'letters' && targetLetter
@@ -460,7 +461,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
           const points = Math.round(10 * level.rewardMultiplier);
           setScore((prev) => prev + points);
           setStreak((prev) => prev + 1);
-          setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
+          setFeedback(`${NUMBER_NAMES[totalFingers]}! Great!`);
 
           setTimeout(() => {
             setShowCelebration(false);
@@ -543,7 +544,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         ? currentCount === 0 && handsDetected > 0
         : currentCount === targetNumber;
   const isPromptFeedback =
-    feedback.startsWith('Show me ') || feedback.startsWith('Make a fist ');
+    feedback.startsWith('Show ') || feedback.startsWith('Letter ') || feedback.startsWith('Fist ');
 
   // Define game controls for bottom-right positioning
   const gameControls: GameControl[] = [
@@ -558,10 +559,10 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
         }
         const prompt =
           gameMode === 'letters' && targetLetter
-            ? `Show me the letter ${targetLetter.name}!`
+            ? `Letter ${targetLetter.name}!`
             : targetNumber === 0
-              ? 'Make a fist for zero.'
-              : `Show me ${NUMBER_NAMES[targetNumber]} fingers.`;
+              ? 'Fist for zero!'
+              : `Show ${NUMBER_NAMES[targetNumber]}!`;
         void speak(prompt);
       },
       variant: 'primary',

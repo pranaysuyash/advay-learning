@@ -6,6 +6,7 @@ import type {
   Point,
 } from '../types/tracking';
 import { createDefaultPinchState, detectPinch } from './pinchDetection';
+import type { OneEuroPointFilter } from './oneEuroFilter';
 
 export interface TrackedHandFrame {
   hands: Landmark[][];
@@ -21,6 +22,10 @@ export interface BuildTrackedHandFrameOptions {
   previousPinchState?: PinchState | null;
   pinchOptions?: PinchOptions;
   resetPinchOnNoHand?: boolean;
+  /** Optional One-Euro filter for smoothing indexTip. Caller owns the instance. */
+  indexTipSmoother?: OneEuroPointFilter | null;
+  /** Timestamp in seconds for the smoother (e.g. performance.now() / 1000) */
+  timestamp?: number;
 }
 
 function toPoint(landmark?: Landmark): Point | null {
@@ -71,9 +76,12 @@ export function buildTrackedHandFrame(
     previousPinchState = null,
     pinchOptions,
     resetPinchOnNoHand = true,
+    indexTipSmoother = null,
+    timestamp,
   } = options;
 
   if (!hands.length) {
+    indexTipSmoother?.reset();
     return buildNoHandFrame(
       previousPinchState,
       pinchOptions,
@@ -83,6 +91,7 @@ export function buildTrackedHandFrame(
 
   const primaryHand = hands[0] ?? null;
   if (!primaryHand || primaryHand.length < 9) {
+    indexTipSmoother?.reset();
     return buildNoHandFrame(
       previousPinchState,
       pinchOptions,
@@ -92,12 +101,18 @@ export function buildTrackedHandFrame(
 
   const pinch = detectPinch(primaryHand, previousPinchState, pinchOptions);
 
+  const mirroredTip = toMirroredPoint(primaryHand[8]);
+  const smoothedTip =
+    mirroredTip && indexTipSmoother && timestamp != null
+      ? indexTipSmoother.filter(mirroredTip, timestamp)
+      : mirroredTip;
+
   return {
     hands,
     handCount: hands.length,
     primaryHand,
     rawIndexTip: toPoint(primaryHand[8]),
-    indexTip: toMirroredPoint(primaryHand[8]),
+    indexTip: smoothedTip,
     pinch,
   };
 }

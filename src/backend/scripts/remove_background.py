@@ -26,21 +26,18 @@ def remove_white_background(input_path, output_path):
 
 
 if __name__ == "__main__":
-    # Paths relative to src/backend
-    input_p = "../../src/frontend/public/assets/images/pip_mascot_original.png"
-    output_p = "../../src/frontend/public/assets/images/pip_mascot.png"
-
-    # Resolve absolute paths just in case
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    # Script is in src/backend/scripts
-    # So base is src/backend/scripts
-    # We want to go up 3 levels to root? No, relative path from execution dir (src/backend)
-
-    # Let's use absolute paths to be safe
-    # We are running from src/backend usually
+    import sys
+    
+    # Check for CLI args
+    if len(sys.argv) > 2:
+        input_p = sys.argv[1]
+        output_p = sys.argv[2]
+    else:
+        # Defaults
+        input_p = "../../src/frontend/public/assets/images/pip_mascot_original.png"
+        output_p = "../../src/frontend/public/assets/images/pip_mascot.png"
 
     cwd = os.getcwd()
     print(f"Current working directory: {cwd}")
 
-    # Assuming we run from src/backend
     remove_white_background(input_p, output_p)

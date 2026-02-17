@@ -92,14 +92,11 @@ export function CameraPermissionPrompt({
         setError('Unable to access camera. You can still play with touch!');
       }
 
-      // After showing error, let user continue without camera
-      setTimeout(() => {
-        onPermissionDenied();
-      }, 2000);
+
     } finally {
       setIsRequesting(false);
     }
-  }, [onPermissionGranted, onPermissionDenied]);
+  }, [onPermissionGranted]);
 
   const content = (
     <motion.div
@@ -148,6 +145,15 @@ export function CameraPermissionPrompt({
             className='bg-red-50 border border-red-200 rounded-lg p-3 mb-6'
           >
             <p className='text-sm text-red-700'>{error}</p>
+            <p className='text-xs text-red-600 mt-2'>
+              {/chrome/i.test(navigator.userAgent) && !(/edg/i.test(navigator.userAgent))
+                ? '💡 Chrome: Settings → Privacy → Site Settings → Camera'
+                : /safari/i.test(navigator.userAgent) && !(/chrome/i.test(navigator.userAgent))
+                  ? '💡 Safari: Safari menu → Settings → Websites → Camera'
+                  : /firefox/i.test(navigator.userAgent)
+                    ? '💡 Firefox: Click the camera icon in the address bar'
+                    : '💡 Check your browser settings to allow camera access'}
+            </p>
           </motion.div>
         )}
 
@@ -160,7 +166,7 @@ export function CameraPermissionPrompt({
             className='w-full'
             aria-label='Request camera permission'
           >
-            {isRequesting ? 'Requesting Permission...' : 'Use Camera 📷'}
+            {isRequesting ? 'Requesting Permission...' : error ? 'Try Again 📷' : 'Use Camera 📷'}
           </Button>
 
           <Button

@@ -146,7 +146,6 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
-exclude = ["src/backend/.*"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -156,12 +155,6 @@ module = [
     "pyttsx3.*",
 ]
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-    "src.backend.app.*",
-]
-ignore_errors = true
 
 # Pytest Configuration
 [tool.pytest.ini_options]

@@ -9,6 +9,10 @@ import {
 } from '../utils/handTrackingFrame';
 import { getHandLandmarkLists } from '../utils/landmarkUtils';
 import { useGameLoop } from './useGameLoop';
+import {
+  OneEuroPointFilter,
+  type OneEuroFilterOptions,
+} from '../utils/oneEuroFilter';
 
 type HandLandmarkerLike = {
   detectForVideo: (video: HTMLVideoElement, timestamp: number) => unknown;
@@ -31,6 +35,8 @@ export interface UseHandTrackingRuntimeOptions {
   targetFps?: number;
   pinchOptions?: PinchOptions;
   resetPinchOnNoHand?: boolean;
+  /** Options for One-Euro smoothing on indexTip. Set to false to disable. Default: enabled. */
+  smoothing?: OneEuroFilterOptions | false;
 }
 
 export interface UseHandTrackingRuntimeReturn {
@@ -61,12 +67,16 @@ export function useHandTrackingRuntime(
     targetFps = 30,
     pinchOptions,
     resetPinchOnNoHand = true,
+    smoothing,
   } = options;
 
   const onFrameRef = useRef(onFrame);
   const onNoVideoFrameRef = useRef(onNoVideoFrame);
   const onErrorRef = useRef(onError);
   const pinchStateRef = useRef(createDefaultPinchState(pinchOptions));
+  const smootherRef = useRef<OneEuroPointFilter | null>(
+    smoothing === false ? null : new OneEuroPointFilter(smoothing),
+  );
 
   useEffect(() => {
     onFrameRef.current = onFrame;
@@ -111,6 +121,8 @@ export function useHandTrackingRuntime(
             previousPinchState: pinchStateRef.current,
             pinchOptions,
             resetPinchOnNoHand,
+            indexTipSmoother: smootherRef.current,
+            timestamp: timestamp / 1000,
           });
 
           pinchStateRef.current = frame.pinch.state;

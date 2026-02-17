@@ -133,7 +133,7 @@ describe('CameraPermissionPrompt', () => {
       });
     });
 
-    it('handles NotAllowedError gracefully', async () => {
+    it('handles NotAllowedError gracefully and persists error', async () => {
       mockGetUserMedia.mockRejectedValueOnce(
         Object.assign(new Error('Permission denied'), {
           name: 'NotAllowedError',
@@ -162,12 +162,19 @@ describe('CameraPermissionPrompt', () => {
         { timeout: 3000 },
       );
 
-      await waitFor(
-        () => {
-          expect(onDenied).toHaveBeenCalled();
-        },
-        { timeout: 3000 },
-      );
+      // Error persists — onDenied is NOT auto-called (no more setTimeout)
+      expect(onDenied).not.toHaveBeenCalled();
+
+      // Browser-specific help text is shown
+      expect(screen.getByText(/💡/)).toBeInTheDocument();
+
+      // Button text changes to "Try Again"
+      expect(screen.getByText(/Try Again/)).toBeInTheDocument();
+
+      // User must explicitly click "Play with Touch" to dismiss
+      const touchButton = screen.getByLabelText('Skip camera and play with touch');
+      fireEvent.click(touchButton);
+      expect(onDenied).toHaveBeenCalled();
     });
 
     it('handles NotFoundError gracefully', async () => {

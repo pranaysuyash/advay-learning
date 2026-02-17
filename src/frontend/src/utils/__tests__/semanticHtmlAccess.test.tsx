@@ -296,13 +296,25 @@ describe('Semantic HTML Accessibility', () => {
   describe('Dashboard page', () => {
     beforeEach(() => {
       useAuthStore.setState({
-        user: { id: 'u1', email: 'parent@test.com', role: 'parent', is_active: true },
+        user: {
+          id: 'u1',
+          email: 'parent@test.com',
+          role: 'parent',
+          is_active: true,
+        },
         isAuthenticated: true,
       });
       useProfileStore.setState({
-        profiles: [{ id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' }],
+        profiles: [
+          { id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' },
+        ],
         selectedProfile: 'p1',
-        currentProfile: { id: 'p1', name: 'Kid One', age: 6, preferred_language: 'en' },
+        currentProfile: {
+          id: 'p1',
+          name: 'Kid One',
+          age: 6,
+          preferred_language: 'en',
+        },
         fetchProfiles: vi.fn(),
         createProfile: vi.fn(),
         updateProfile: vi.fn(),
@@ -332,7 +344,9 @@ describe('Semantic HTML Accessibility', () => {
       const { container } = renderWithRouter(<Dashboard />);
 
       // Check if the collapsible section exists (articles are inside expandable section)
-      const collapsibleSection = container.querySelector('button[aria-expanded]');
+      const collapsibleSection = container.querySelector(
+        'button[aria-expanded]',
+      );
       expect(collapsibleSection).toBeTruthy();
 
       // The section should be collapsible (aria-expanded attribute present)

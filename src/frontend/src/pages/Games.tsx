@@ -71,7 +71,8 @@ export function Games() {
     {
       id: 'music-pinch-beat',
       title: 'Music Pinch Beat',
-      description: 'Pinch on glowing lanes to play child-friendly rhythm beats! 🎵',
+      description:
+        'Pinch on glowing lanes to play child-friendly rhythm beats! 🎵',
       path: '/games/music-pinch-beat',
       icon: 'sparkles',
       ageRange: '3-7 years',
@@ -82,7 +83,8 @@ export function Games() {
     {
       id: 'steady-hand-lab',
       title: 'Steady Hand Lab',
-      description: 'Hold your fingertip steady inside the target ring to build control! 🎯',
+      description:
+        'Hold your fingertip steady inside the target ring to build control! 🎯',
       path: '/games/steady-hand-lab',
       icon: 'circle',
       ageRange: '4-7 years',
@@ -104,7 +106,8 @@ export function Games() {
     {
       id: 'color-match-garden',
       title: 'Color Match Garden',
-      description: 'Pinch the flower with the asked color before time runs out! 🌸',
+      description:
+        'Pinch the flower with the asked color before time runs out! 🌸',
       path: '/games/color-match-garden',
       icon: 'drop',
       ageRange: '3-7 years',
@@ -132,6 +135,41 @@ export function Games() {
       ageRange: '4-8 years',
       category: 'Memory',
       difficulty: 'Medium',
+      isNew: true,
+    },
+    {
+      id: 'yoga-animals',
+      title: 'Yoga Animals',
+      description:
+        'Copy animal poses with your body and hold them to win! 🦁🌳',
+      path: '/games/yoga-animals',
+      icon: 'sparkles',
+      ageRange: '3-8 years',
+      category: 'Movement',
+      difficulty: 'Easy',
+      isNew: true,
+    },
+    {
+      id: 'freeze-dance',
+      title: 'Freeze Dance',
+      description: 'Dance when the music plays, FREEZE when it stops! 💃❄️',
+      path: '/games/freeze-dance',
+      icon: 'sparkles',
+      ageRange: '3-8 years',
+      category: 'Movement',
+      difficulty: 'Easy',
+      isNew: true,
+    },
+    {
+      id: 'simon-says',
+      title: 'Simon Says',
+      description:
+        'Do body actions like Simon says - touch head, wave, arms up! 🧠👆',
+      path: '/games/simon-says',
+      icon: 'sparkles',
+      ageRange: '3-8 years',
+      category: 'Movement',
+      difficulty: 'Easy',
       isNew: true,
     },
   ];

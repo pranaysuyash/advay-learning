@@ -327,7 +327,8 @@ export function Login() {
                 </span>
               </button>
               <p className='text-center text-xs text-slate-500 mt-2'>
-                ⚠️ Guest progress won't be saved. Create an account to keep your achievements!
+                ⚠️ Guest progress won't be saved. Create an account to keep your
+                achievements!
               </p>
             </form>
 
