@@ -172,6 +172,18 @@ export function Games() {
       difficulty: 'Easy',
       isNew: true,
     },
+    {
+      id: 'chemistry-lab',
+      title: 'Chemistry Lab',
+      description:
+        'Mix chemicals in the virtual lab and discover amazing reactions! 🧪⚗️',
+      path: '/games/chemistry-lab',
+      icon: 'sparkles',
+      ageRange: '4-8 years',
+      category: 'Science',
+      difficulty: 'Easy',
+      isNew: true,
+    },
   ];
 
   const getLanguageLabel = (code: string) => {

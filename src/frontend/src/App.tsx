@@ -105,6 +105,11 @@ const FingerNumberShow = lazy(() =>
     default: module.FingerNumberShow,
   })),
 );
+const VirtualChemistryLab = lazy(() =>
+  import('./pages/VirtualChemistryLab').then((module) => ({
+    default: module.VirtualChemistryLab,
+  })),
+);
 const MediaPipeTest = lazy(() =>
   import('./pages/MediaPipeTest').then((module) => ({
     default: module.MediaPipeTest,
@@ -265,6 +270,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SimonSays />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/chemistry-lab'
+              element={
+                <ProtectedRoute>
+                  <VirtualChemistryLab />
                 </ProtectedRoute>
               }
             />
