@@ -1,4 +1,5 @@
 # Intent-First Code Review Philosophy v1.0
+
 ## "Understand Before You Judge"
 
 **Core Principle:** Before requesting changes or approving code, investigate the problem the code solves, the constraints the author faced, and the broader system context to provide valuable, actionable feedback.
@@ -10,12 +11,14 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Understand the problem** (read linked issues, requirements, or user stories)
 2. **Review the approach** (understand the solution strategy and alternatives considered)
 3. **Check system impact** (how does this change affect other parts of the system?)
 4. **Assess constraints** (time, technical, or business limitations that influenced decisions)
 
 ### Phase 2: Intent Analysis
+
 - What user or business problem is this solving?
 - What constraints or requirements influenced the implementation?
 - How does this fit into the larger system architecture?
@@ -23,6 +26,7 @@
 - **Does this follow or enhance existing codebase patterns?**
 
 ### Phase 3: Review Prioritization
+
 - **Correctness Impact**: Functional reliability and data integrity
 - **Security Impact**: Potential vulnerabilities or exposure
 - **Performance Impact**: Efficiency, scalability, resource usage
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip deep review unless one is true:
+
 - Touches authentication, authorization, payment, or data handling
 - Changes high-traffic or high-risk code paths
 - Introduces a new architectural pattern
@@ -62,12 +67,14 @@ Skip deep review unless one is true:
 ## Codebase-First Review Rule
 
 Always ensure the PR passes these core checks before approval:
+
 1. **Security** – No vulnerabilities or unsafe handling of data
 2. **Correctness** – Code works as intended and passes all tests
 3. **Maintainability** – Readable, follows team conventions, won't create unnecessary debt
 4. **Consistency** – Follows existing codebase patterns unless there's compelling reason not to
 
 **Additional checks for enhancements:**
+
 - Does it preserve existing behavior?
 - Does it integrate cleanly with current architecture?
 - Are there existing utilities/functions that could be reused?

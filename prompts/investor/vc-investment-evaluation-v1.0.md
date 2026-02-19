@@ -11,10 +11,12 @@
 You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven learning web app for kids ages 2-6.
 
 **Product Access:**
-- URL: http://localhost:6173
+
+- URL: <http://localhost:6173>
 - **CRITICAL**: Must explore hands-on. Do NOT restart anything. Do NOT install anything. Do NOT change code.
 
 **Evaluation Constraints:**
+
 - You are evaluating BOTH product potential AND company quality (inferred from current state)
 - This is NOT a UX audit - it's an investment viability assessment
 - Distinguish between: A) What you observed, B) What you infer (label as "Inference")
@@ -66,9 +68,10 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### Step 1: 10-Minute Product Tour
 
-**Open http://localhost:6173 and explore systematically:**
+**Open <http://localhost:6173> and explore systematically:**
 
 **Time Allocation:**
+
 - 0:00-2:00: Landing page + onboarding (first impression)
 - 2:00-4:00: Core gameplay loop (how it feels to play)
 - 4:00-6:00: Unique features enabled by camera (what makes it special)
@@ -109,6 +112,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **If fewer exist**: Explore all repeatedly, testing different modes/levels
 
 **For each activity:**
+
 - What's the educational objective?
 - How does the camera enhance learning?
 - Is there a repeatable engagement loop?
@@ -148,6 +152,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 ### Step 6: Evaluate "Product Readiness"
 
 **Answer:**
+
 - Does this feel like an investable product direction or just a prototype?
 - Be brutal: Would you put your firm's brand on this in 6 months?
 - What's the minimum viable product vs what's actually built?
@@ -158,9 +163,10 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### #1: Investment Headline (ONE sentence)
 
-**Format**: "This is a ___ disguised as a ___"
+**Format**: "This is a ___disguised as a___"
 
 **Examples (DO NOT USE, understand the pattern):**
+
 - "This is a computer vision research project disguised as a kids game"
 - "This is a behavioral training tool disguised as a learning app"
 - "This is a content play disguised as a tech platform"
@@ -176,11 +182,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 Document the actual UI/flows you encountered:
 
 **Screen 1: Landing/Home**
+
 - [ ] Visual description: [what you saw, colors, mascot]
 - [ ] Primary CTA: [what button is most prominent]
 - [ ] Entry points: [ways to start playing]
 
 **Screen 2: Onboarding/First Flow**
+
 - [ ] Steps before first game: [number and description]
 - [ ] Permission prompts: [what permissions requested, how]
 - [ ] Time-to-first-game: [your measured time]
@@ -189,17 +197,20 @@ Document the actual UI/flows you encountered:
 For each game (name them explicitly):
 
 **Game 1: [Name]**
+
 - Educational objective: [what kids learn]
 - Camera interaction: [how hand/camera is used]
 - Success feedback: [what happens when kid succeeds]
 - Difficulty curve: [too easy/too hard/just right]
 
 **Game 2: [Name]**
+
 - [same structure as Game 1]
 
 [Continue for all games]
 
 **Screen X: Progress/Dashboard**
+
 - [ ] What progress is tracked: [stars, levels, completion %]
 - [ ] How progress is displayed: [visual, text, charts]
 - [ ] Parental controls visible: [yes/no, what exists]
@@ -209,6 +220,7 @@ For each game (name them explicitly):
 **B. Core Interaction Loops**
 
 **Loop 1: [Name - e.g., "Finger Counting"]**
+
 - Trigger: [what starts the loop]
 - Action: [what kid does]
 - Feedback: [what system responds with]
@@ -216,6 +228,7 @@ For each game (name them explicitly):
 - Repeat trigger: [what prompts kid to do it again]
 
 **Loop 2: [Name]**
+
 - [same structure as Loop 1]
 
 [Document 2-3 primary loops]
@@ -262,6 +275,7 @@ Be specific. "X for Y" format.
 **Example (DO NOT USE):** "First app that teaches counting to 2-year-olds by using camera instead of abstract concepts"
 
 **Your Wedge**:
+
 - **Target user**: [specific persona - e.g., "frustrated parents of 2-4 year olds"]
 - **Core problem**: [what pain point, why current solutions fail]
 - **Wedge mechanism**: [how this app uniquely solves it]
@@ -278,16 +292,19 @@ Be specific. "X for Y" format.
 **Expansion Path (3 phases):**
 
 **Phase 1: Core Product (0-12 months)**
+
 - [ ] What gets to 10,000 MAU
 - [ ] 2-3 key features added
 - [ ] Primary acquisition channel
 
 **Phase 2: Content Expansion (12-24 months)**
+
 - [ ] What enables third-party content (curriculum creators)
 - [ ] Revenue split model (if any)
 - [ ] 10,000→100,000 MAU path
 
 **Phase 3: Full Platform (24+ months)**
+
 - [ ] What makes it a two-sided marketplace (learners + creators)
 - [ ] Network effects kick in (e.g., "content improves with more users")
 - [ ] 100,000→1,000,000 MAU path
@@ -299,6 +316,7 @@ Be specific. "X for Y" format.
 **Answer**: What unstoppable force makes this category inevitable?
 
 **Options (pick one or combine):**
+
 - [ ] Camera-first computing (AR/VR convergence)
 - [ ] Home learning shift (post-pandemic trend)
 - [ ] Screen-time wellness movement (parents want active engagement)
@@ -307,6 +325,7 @@ Be specific. "X for Y" format.
 - [ ] Other: [specify]
 
 **Your Inevitability Claim**:
+
 - **Macro trend**: [name the trend]
 - **Why it's unstoppable**: [market forces, technology convergence, behavioral shift]
 - **Why THIS company wins it**: [unique advantage in inevitable future]
@@ -316,6 +335,7 @@ Be specific. "X for Y" format.
 ### #4: Moat Analysis (Score 0-10 each, Justify)
 
 **Scoring Guide:**
+
 - 0-2: Weak/Nonexistent
 - 3-4: Moderate/Emerging
 - 5-6: Solid/Competent
@@ -329,11 +349,13 @@ Be specific. "X for Y" format.
 #### **A. Data Moat**
 
 **What data is uniquely generated?**
+
 - [ ] User interaction data: [what's collected]
 - [ ] Performance data: [what's measured]
 - [ ] Learning outcomes: [what's tracked]
 
 **Is it defensible?**
+
 - [ ] Can competitors collect same data? [yes/no, why]
 - [ ] Does data improve product over time? [how]
 - [ ] Is there a data network effect? [explain]
@@ -347,11 +369,13 @@ Be specific. "X for Y" format.
 #### **B. Model Moat (Anything hard to replicate beyond MediaPipe?)**
 
 **Beyond MediaPipe (which anyone can use):**
+
 - [ ] Custom ML models: [what's unique, if any]
 - [ ] Curriculum algorithms: [what's proprietary, if any]
 - [ ] Gesture recognition tuning: [what's specialized, if any]
 
 **Is it defensible?**
+
 - [ ] Can a team of 3 engineers replicate in 3 months? [yes/no]
 - [ ] What's the barrier? [data volume, domain expertise, proprietary IP]
 - [ ] IP protection possible? [patents, trade secrets]
@@ -365,16 +389,19 @@ Be specific. "X for Y" format.
 #### **C. Content Moat (Curriculum + Interaction Design)**
 
 **Content Assets:**
+
 - [ ] Original curriculum: [what's unique, if any]
 - [ ] Licensed content: [what's used, if any]
 - [ ] Content creation pipeline: [how new content gets made]
 
 **Design System:**
+
 - [ ] Interaction patterns: [what's unique about how kids engage]
 - [ ] Mascot/brand: [Pip character, brand identity]
 - [ ] Content format: [what's standardized, if any]
 
 **Is it defensible?**
+
 - [ ] Can competitors copy content? [yes/no, how hard]
 - [ ] Is content production scalable? [how fast can new games be built]
 - [ ] Is there a content moat (e.g., exclusive partnerships)?
@@ -388,16 +415,19 @@ Be specific. "X for Y" format.
 #### **D. Distribution Moat (Virality, School Channel, Partnerships)**
 
 **Current Distribution:**
+
 - [ ] How do users find it now? [discover what channels exist]
 - [ ] Any built-in virality? [shareable moments, parent referrals]
 - [ ] Partnership discussions? [any evidence of outreach]
 
 **Potential Moat:**
+
 - [ ] School district partnerships: [path, if any]
 - [ ] Publisher relationships: [content distribution deals]
 - [ ] App store placement: [featured, category rankings]
 
 **Is it defensible?**
+
 - [ ] Can a well-funded competitor buy the same distribution? [yes/no]
 - [ ] Are there network effects? [users bringing users]
 - [ ] Is there a channel lock-in? [exclusive partnerships]
@@ -411,16 +441,19 @@ Be specific. "X for Y" format.
 #### **E. Brand Moat (Mascot, Identity, Trust)**
 
 **Brand Assets:**
+
 - [ ] Mascot character (Pip): [describe what you see]
 - [ ] Visual identity: [colors, typography, design language]
 - [ ] Tone of voice: [how it speaks to kids/parents]
 
 **Trust Signals:**
+
 - [ ] Safety posture: [what signals trust - e.g., COPPA compliance, privacy policy]
 - [ ] Parent controls: [what's available for oversight]
 - [ ] Professional polish: [does it feel "real company" or hobby project]
 
 **Is it defensible?**
+
 - [ ] Can a competitor copy the mascot? [yes/no, legal/brand barriers]
 - [ ] Is brand emotionally resonant? [would kids/parents remember it]
 - [ ] Is there a trust premium? [would parents choose this over anonymous competitor]
@@ -434,16 +467,19 @@ Be specific. "X for Y" format.
 #### **F. Switching Costs (For Parents/Teachers/Schools)**
 
 **For Parents:**
+
 - [ ] Progress transfer: [can progress move to competitor? yes/no]
 - [ ] Habit formation: [does this become a daily ritual?]
 - [ ] Integration with routines: [does it fit into existing schedules]
 
 **For Teachers/Schools:**
+
 - [ ] Curriculum alignment: [does it fit state standards? if any school mode]
 - [ ] Classroom management: [tools for teachers, if any]
 - [ ] Data/reporting: [what's provided for tracking student progress]
 
 **Is it defensible?**
+
 - [ ] If parent switches, what do they lose? [progress, customization, investment]
 - [ ] If school switches, what do they lose? [training, data, setup]
 - [ ] How strong are switching costs? [0-10 scale overall]
@@ -463,6 +499,7 @@ Be specific. "X for Y" format.
 **For Each Risk:**
 
 **Format**:
+
 - **Risk Type**: [Privacy/Safety / Technical / GTM / Retention / Regulatory / Competition / Team / Financial]
 - **Why It's Real**: [specific evidence or market reality]
 - **What Mitigates It**: [strategy, feature, partnership, etc.]
@@ -484,6 +521,7 @@ Be specific. "X for Y" format.
 [Repeat Risk 1 format for 11 more risks]
 
 **Suggested Risk Categories to Cover:**
+
 1. Privacy/Camera Data Handling (mandatory)
 2. Child Safety / Moderation (mandatory)
 3. Regulatory / COPPA (mandatory)
@@ -511,11 +549,13 @@ Be specific. "X for Y" format.
 **Revenue Driver**: [what increases revenue? - more kids, more content, premium features]
 
 **"Must Be True" for Model 1 to Succeed**:
+
 - [ ] [Hypothesis 1]: [what must be true?]
 - [ ] [Hypothesis 2]: [what must be true?]
 - [ ] [Hypothesis 3]: [what must be true?]
 
 **What Would Break Model 1**:
+
 - [ ] [Breaker 1]: [what would kill this pricing?]
 - [ ] [Breaker 2]: [what would kill this pricing?]
 
@@ -529,11 +569,13 @@ Be specific. "X for Y" format.
 **Revenue Driver**: [what increases revenue? - more schools, more students, add-on modules]
 
 **"Must Be True" for Model 2 to Succeed**:
+
 - [ ] [Hypothesis 1]: [what must be true?]
 - [ ] [Hypothesis 2]: [what must be true?]
 - [ ] [Hypothesis 3]: [what must be true?]
 
 **What Would Break Model 2**:
+
 - [ ] [Breaker 1]: [what would kill this pricing?]
 - [ ] [Breaker 2]: [what would kill this pricing?]
 
@@ -547,11 +589,13 @@ Be specific. "X for Y" format.
 **Revenue Driver**: [what increases revenue? - conversion rate, upsell to annual plan]
 
 **"Must Be True" for Model 3 to Succeed**:
+
 - [ ] [Hypothesis 1]: [what must be true?]
 - [ ] [Hypothesis 2]: [what must be true?]
 - [ ] [Hypothesis 3]: [what must be true?]
 
 **What Would Break Model 3**:
+
 - [ ] [Breaker 1]: [what would kill this pricing?]
 - [ ] [Breaker 2]: [what would kill this pricing?]
 
@@ -562,6 +606,7 @@ Be specific. "X for Y" format.
 **A. 3 Channels That Could Work in First 6 Months**
 
 **Channel 1: [Name]**
+
 - **What it is**: [description - e.g., "parent Facebook groups for learning"]
 - **Why it works**: [why THIS channel for THIS product]
 - **Strategy**: [specific execution - e.g., "share demo video + offer free month"]
@@ -569,9 +614,11 @@ Be specific. "X for Y" format.
 - **Risk**: [what could go wrong?]
 
 **Channel 2: [Name]**
+
 - [same structure as Channel 1]
 
 **Channel 3: [Name]**
+
 - [same structure as Channel 1]
 
 ---
@@ -579,11 +626,13 @@ Be specific. "X for Y" format.
 **B. 2 Channels That Are Tempting But Likely Wasteful Early**
 
 **Wasteful Channel 1: [Name]**
+
 - **Why it's tempting**: [what makes you think it could work]
 - **Why it's wasteful**: [why this channel won't work NOW]
 - **When it might work**: [later milestone when channel becomes viable]
 
 **Wasteful Channel 2: [Name]**
+
 - [same structure as Wasteful Channel 1]
 
 ---
@@ -593,15 +642,18 @@ Be specific. "X for Y" format.
 **Answer**: What would make a kid/parent share this?
 
 **Moment 1: [Description]**
+
 - **Trigger**: [what happens in app that's share-worthy]
 - **What gets shared**: [video, screenshot, quote?]
 - **Platform**: [where would they share? Instagram, TikTok, WhatsApp?]
 - **Virality Multiplier**: [if shared, how many new users could it bring? 1x, 5x, 10x?]
 
 **Moment 2: [Description]**
+
 - [same structure as Moment 1]
 
 **Moment 3: [Description]**
+
 - [same structure as Moment 1]
 
 ---
@@ -609,12 +661,14 @@ Be specific. "X for Y" format.
 **D. Community Loops: How Parents/Teachers Contribute (Without Turning It Into Work)**
 
 **Loop 1: [Name]**
+
 - **Contribution**: [what do users contribute? content, feedback, curriculum?]
 - **Incentive**: [why would they contribute? recognition, rewards, access?]
 - **Quality Control**: [how do you prevent bad contributions?]
 - **Network Effect**: [how does contribution make product better for everyone?]
 
 **Loop 2: [Name]**
+
 - [same structure as Loop 1]
 
 ---
@@ -624,14 +678,17 @@ Be specific. "X for Y" format.
 **A. What Would Bring Kids Back Tomorrow?**
 
 **Factor 1: [Name]**
+
 - **Mechanism**: [how does it work?]
 - **Evidence you saw**: [did you observe this in the app?]
 - **Rating (0-10)**: [how strong is this retention lever?]
 
 **Factor 2: [Name]**
+
 - [same structure as Factor 1]
 
 **Factor 3: [Name]**
+
 - [same structure as Factor 1]
 
 ---
@@ -639,14 +696,17 @@ Be specific. "X for Y" format.
 **B. What Would Make Parents Schedule It Weekly?**
 
 **Factor 1: [Name]**
+
 - **Mechanism**: [how does it work?]
 - **Evidence you saw**: [did you observe this in the app?]
 - **Rating (0-10)**: [how strong is this retention lever?]
 
 **Factor 2: [Name]**
+
 - [same structure as Factor 1]
 
 **Factor 3: [Name]**
+
 - [same structure as Factor 1]
 
 ---
@@ -654,24 +714,28 @@ Be specific. "X for Y" format.
 **C. Missing Systems: Progression, Personalization, Habit Loops, Rewards (Be Specific, Not Generic)**
 
 **System 1: Progression**
+
 - **What exists now**: [what did you observe in the app?]
 - **What's missing**: [what SHOULD be there but isn't?]
 - **Why it matters**: [how does this impact retention?]
 - **Implementation complexity**: [Easy/Medium/Hard]
 
 **System 2: Personalization**
+
 - **What exists now**: [what did you observe?]
 - **What's missing**: [what SHOULD be there but isn't?]
 - **Why it matters**: [how does this impact retention?]
 - **Implementation complexity**: [Easy/Medium/Hard]
 
 **System 3: Habit Loops**
+
 - **What exists now**: [what did you observe?]
 - **What's missing**: [what SHOULD be there but isn't?]
 - **Why it matters**: [how does this impact retention?]
 - **Implementation complexity**: [Easy/Medium/Hard]
 
 **System 4: Rewards**
+
 - **What exists now**: [what did you observe?]
 - **What's missing**: [what SHOULD be there but isn't?]
 - **Why it matters**: [how does this impact retention?]
@@ -705,14 +769,17 @@ Be specific. "X for Y" format.
 **B. Likely Competitors by Category (Not a List of Names Unless Obvious)**
 
 **Category 1: [Name - e.g., "Traditional Educational Apps"]**
+
 - **Strengths**: [what incumbents do well]
 - **Weaknesses**: [where incumbents fail]
 - **Where this app wins**: [specific advantage]
 
 **Category 2: [Name - e.g., "Screen-Time Management Apps"]**
+
 - [same structure as Category 1]
 
 **Category 3: [Name - e.g., "AR/VR Learning Experiences"]**
+
 - [same structure as Category 1]
 
 ---
@@ -720,11 +787,13 @@ Be specific. "X for Y" format.
 **C. Where Incumbents Are Strong vs Where This Can Win**
 
 **Incumbent Strengths**:
+
 1. **[Strength 1]**: [description, why hard to beat]
 2. **[Strength 2]**: [description, why hard to beat]
 3. **[Strength 3]**: [description, why hard to beat]
 
 **Where This App Wins**:
+
 1. **[Win 1]**: [specific advantage incumbents can't/won't match]
 2. **[Win 2]**: [specific advantage incumbents can't/won't match]
 3. **[Win 3]**: [specific advantage incumbents can't/won't match]
@@ -734,6 +803,7 @@ Be specific. "X for Y" format.
 ### #10: "Investment Readiness" Scorecard (0-10 Each)
 
 **Scoring Guide:**
+
 - 0-2: Not Ready / Need Fundamental Pivot
 - 3-4: Early Stage / Many Gaps
 - 5-6: Seed Stage / Viable Direction
@@ -829,20 +899,25 @@ Be specific. "X for Y" format.
 **B. The Top 5 Milestones to Hit in Next 8 Weeks**
 
 **Milestone 1: [Title]**
+
 - **What**: [specific outcome]
 - **Why it matters**: [connection to investment thesis]
 - **Success metric**: [how to measure completion]
 
 **Milestone 2: [Title]**
+
 - [same structure as Milestone 1]
 
 **Milestone 3: [Title]**
+
 - [same structure as Milestone 1]
 
 **Milestone 4: [Title]**
+
 - [same structure as Milestone 1]
 
 **Milestone 5: [Title]**
+
 - [same structure as Milestone 1]
 
 ---
@@ -850,20 +925,25 @@ Be specific. "X for Y" format.
 **C. The Top 5 Metrics to Instrument Immediately**
 
 **Metric 1: [Name]**
+
 - **Why it matters**: [connection to retention/monetization]
 - **How to measure**: [technical implementation]
 - **Target**: [what's good vs bad? e.g., "Week 1 retention >40%"]
 
 **Metric 2: [Name]**
+
 - [same structure as Metric 1]
 
 **Metric 3: [Name]**
+
 - [same structure as Metric 1]
 
 **Metric 4: [Name]**
+
 - [same structure as Metric 1]
 
 **Metric 5: [Name]**
+
 - [same structure as Metric 1]
 
 ---
@@ -896,101 +976,122 @@ Be specific. "X for Y" format.
 
 #### **Market Questions (Min 5)**
 
-6. **[Question 6]**
+1. **[Question 6]**
    - **Answer that makes you lean IN**: [specific]
    - **Answer that makes you WALK AWAY**: [specific]
 
-7. **[Question 7]**
+2. **[Question 7]**
    - [same structure as Question 6]
 
-8. **[Question 8]**
+3. **[Question 8]**
    - [same structure as Question 6]
 
-9. **[Question 9]**
+4. **[Question 9]**
    - [same structure as Question 6]
 
-10. **[Question 10]**
-   - [same structure as Question 6]
+5. **[Question 10]**
+
+- [same structure as Question 6]
 
 ---
 
 #### **GTM (Go-to-Market) Questions (Min 5)**
 
-11. **[Question 11]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 11]**
 
-12. **[Question 12]**
-   - [same structure as Question 11]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-13. **[Question 13]**
-   - [same structure as Question 11]
+1. **[Question 12]**
 
-14. **[Question 14]**
-   - [same structure as Question 11]
+- [same structure as Question 11]
 
-15. **[Question 15]**
-   - [same structure as Question 11]
+1. **[Question 13]**
+
+- [same structure as Question 11]
+
+1. **[Question 14]**
+
+- [same structure as Question 11]
+
+1. **[Question 15]**
+
+- [same structure as Question 11]
 
 ---
 
 #### **Tech Questions (Min 5)**
 
-16. **[Question 16]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 16]**
 
-17. **[Question 17]**
-   - [same structure as Question 16]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-18. **[Question 18]**
-   - [same structure as Question 16]
+1. **[Question 17]**
 
-19. **[Question 19]**
-   - [same structure as Question 16]
+- [same structure as Question 16]
 
-20. **[Question 20]**
-   - [same structure as Question 16]
+1. **[Question 18]**
+
+- [same structure as Question 16]
+
+1. **[Question 19]**
+
+- [same structure as Question 16]
+
+1. **[Question 20]**
+
+- [same structure as Question 16]
 
 ---
 
 #### **Safety/Privacy Questions (Min 5)**
 
-21. **[Question 21]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 21]**
 
-22. **[Question 22]**
-   - [same structure as Question 21]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-23. **[Question 23]**
-   - [same structure as Question 21]
+1. **[Question 22]**
 
-24. **[Question 24]**
-   - [same structure as Question 21]
+- [same structure as Question 21]
 
-25. **[Question 25]**
-   - [same structure as Question 21]
+1. **[Question 23]**
+
+- [same structure as Question 21]
+
+1. **[Question 24]**
+
+- [same structure as Question 21]
+
+1. **[Question 25]**
+
+- [same structure as Question 21]
 
 ---
 
 #### **Team/Ops Questions (Optional - If You Feel Strongly About It)**
 
-26. **[Question 26]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 26]**
 
-27. **[Question 27]**
-   - [same structure as Question 26]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-28. **[Question 28]**
-   - [same structure as Question 26]
+1. **[Question 27]**
 
-29. **[Question 29]**
-   - [same structure as Question 26]
+- [same structure as Question 26]
 
-30. **[Question 30]**
-   - [same structure as Question 26]
+1. **[Question 28]**
+
+- [same structure as Question 26]
+
+1. **[Question 29]**
+
+- [same structure as Question 26]
+
+1. **[Question 30]**
+
+- [same structure as Question 26]
 
 ---
 
@@ -1025,7 +1126,7 @@ Be specific. "X for Y" format.
 
 ## Begin Now
 
-**Open http://localhost:6173 and start exploring.**
+**Open <http://localhost:6173> and start exploring.**
 
 **Timebox**: 10-minute product tour minimum (can go longer if needed)
 **Output Format**: Follow the 12 deliverable sections above strictly

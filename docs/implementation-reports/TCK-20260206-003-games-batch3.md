@@ -9,10 +9,11 @@ Status: DONE
 1. Migrated `ConnectTheDots` from a custom per-page tracking loop to `useHandTrackingRuntime`.
 2. Added reusable hit-target utility for circle-based pinch interactions.
 3. Added two new runtime-based games:
+
 - Number Tap Trail
 - Shape Sequence
-4. Added routes and game catalog entries for new games.
-5. Added tests for new shared utility and verified type-check/tests.
+1. Added routes and game catalog entries for new games.
+2. Added tests for new shared utility and verified type-check/tests.
 
 ## Shared Reuse Added
 
@@ -24,12 +25,15 @@ Status: DONE
 ### New shared interaction utility
 
 Added:
+
 - `src/frontend/src/games/hitTarget.ts`
 
 Purpose:
+
 - Locate the first circular target hit by a fingertip point + radius.
 
 Used by:
+
 - `src/frontend/src/pages/NumberTapTrail.tsx`
 - `src/frontend/src/pages/ShapeSequence.tsx`
 
@@ -55,10 +59,12 @@ Used by:
 ## Routing and Catalog
 
 Added routes:
+
 - `/games/number-tap-trail`
 - `/games/shape-sequence`
 
 Catalog entries added in games list:
+
 - `number-tap-trail`
 - `shape-sequence`
 
@@ -71,6 +77,7 @@ Command:
 `cd src/frontend && npm run type-check`
 
 Result:
+
 - Passed
 
 ### Tests
@@ -80,6 +87,7 @@ Command:
 `cd src/frontend && npm run test -- --run src/games/__tests__/hitTarget.test.ts src/games/__tests__/targetPracticeLogic.test.ts src/utils/__tests__/handTrackingFrame.test.ts`
 
 Result:
+
 - 3 files passed
 - 11 tests passed
 

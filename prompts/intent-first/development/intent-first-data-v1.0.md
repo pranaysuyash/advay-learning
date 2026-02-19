@@ -1,4 +1,5 @@
 # Intent-First Data Philosophy v1.0
+
 ## "Question Data Before Acting on It"
 
 **Core Principle:** Before making decisions based on data or implementing data changes, investigate the data quality, context, and business relevance to ensure insights are accurate, actionable, and aligned with reality.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Data Context Discovery
+
 1. **Identify data sources** (where does the data originate and how is it collected?)
 2. **Assess collection methods** (look for sampling bias, gaps, or misclassification)
 3. **Check data lineage** (understand transformations, joins, and enrichments)
@@ -17,6 +19,7 @@
 5. **Review existing schema** (what data structures already exist?)
 
 ### Phase 2: Intent Analysis
+
 - What business decision is this data meant to inform?
 - Are we looking at the right metrics for the question?
 - What assumptions are we making about completeness and accuracy?
@@ -24,6 +27,7 @@
 - **Can we use existing data structures or do we need new ones?**
 
 ### Phase 3: Data Reliability Assessment
+
 - **Completeness**: Is all expected data present?
 - **Accuracy**: Are values measured and recorded correctly?
 - **Consistency**: Do sources agree and trends align over time?
@@ -36,6 +40,7 @@
 ## Quick Filter
 
 Investigate further if any are true:
+
 - Source or collection method recently changed
 - Missing data in high-impact periods
 - Unexplained spikes/drops without known cause
@@ -63,6 +68,7 @@ Investigate further if any are true:
 ## Codebase-First Data Rule
 
 Use the **smallest set of high-quality, relevant, and recent** data to make the decision:
+
 1. **Leverage existing data** before creating new collection
 2. **Extend schemas incrementally** - add fields before replacing tables
 3. **Maintain backward compatibility** - ensure existing queries still work

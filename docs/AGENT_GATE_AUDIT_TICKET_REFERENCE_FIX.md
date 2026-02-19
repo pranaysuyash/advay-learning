@@ -60,6 +60,7 @@ BUT it doesn't explicitly say "add ticket reference to audit document header".
 ### 1. Added Ticket Reference to Audit Document
 
 **Fixed**: Added ticket ID to audit header
+
 ```markdown
 Date: 2026-01-30
 Ticket: TCK-20260130-045
@@ -76,6 +77,7 @@ Ticket: TCK-20260130-045
 **Priority**: P1  
 **Status**: OPEN  
 **Scope**:
+
 - Reduce overlays to single top bar
 - Remove technical state messages
 - Consolidate action buttons
@@ -130,14 +132,15 @@ prompts/audit/audit-ticketing-v1.0.md
    Method: [Audit method]
    ```
 
-2. **Ticket Creation**:
+1. **Ticket Creation**:
    - Create worklog ticket IMMEDIATELY with detailed scope
    - Add ticket ID to audit document header
    - Link audit findings to specific worklog ticket sections
 
-3. **Bidirectional Linking**:
+2. **Bidirectional Linking**:
    - Audit document: "See TCK-YYYYMMDD-NNN for implementation"
    - Worklog ticket: "Source: Audit file `docs/audit/[name].md`"
+
 ```
 
 ### When Processing Audit Findings
@@ -154,6 +157,7 @@ prompts/audit/audit-ticketing-v1.0.md
 ### Current Behavior
 
 The agent-gate hook enforces ticket references for audit artifacts but:
+
 - ❌ Blocks creation of new audit artifacts without ticket ID
 - ❌ Inconsistent with current practice (many audits don't have references)
 - ✅ Validates audit artifacts that DO have ticket references
@@ -161,12 +165,14 @@ The agent-gate hook enforces ticket references for audit artifacts but:
 ### Expected Behavior
 
 Audit artifacts are typically:
+
 - **Created DURING audit phase** → No ticket exists yet
 - **Linked AFTER ticketing phase** → Ticket reference added
 
 ### Problem with Current Hook
 
 The hook doesn't account for the temporal nature of audit work:
+
 - Phase 1: Create audit (no ticket yet)
 - Phase 2: Create ticket (now audit exists)
 - Phase 3: Update audit with ticket reference
@@ -190,6 +196,7 @@ The hook doesn't account for the temporal nature of audit work:
 **IMMEDIATE**: Implement Option C (Add Audit Ticketing Prompt)
 
 This provides:
+
 1. Clear workflow for audit artifact creation and ticketing
 2. Doesn't break existing workflow
 3. Can be adopted incrementally
@@ -212,6 +219,7 @@ Phase 3: Link audit to ticket (optional, for traceability)
 ### 2. Agent Gate Should Validate, Not Block
 
 The gate should:
+
 1. **Warn**: "Audit artifact lacks ticket reference - proceed anyway or create one?"
 2. **Offer options**: "Create ticket now", "Skip ticketing", "Mark as technical doc"
 3. **Non-blocking**: Only block for ACTUAL violations (secrets, destructive code, etc.)
@@ -219,6 +227,7 @@ The gate should:
 ### 3. Documentation Beats Enforcement
 
 Instead of strict gate rules, create:
+
 - Clear prompts with examples
 - Workflow documentation
 - Automated tooling support
@@ -229,11 +238,13 @@ Instead of strict gate rules, create:
 
 **Issue**: ✅ FIXED  
 **Fixes Applied**:
+
 1. Added ticket ID to audit document header: `TCK-20260130-045`
 2. Created worklog ticket for camera UX issues
 3. Created this analysis document
 
 **Next Steps**:
+
 1. Implement Option C (Create Audit Ticketing Prompt)
 2. Document the fix in AGENTS.md if needed
 3. Test agent gate with updated workflow
@@ -241,6 +252,7 @@ Instead of strict gate rules, create:
 ---
 
 **Evidence**:
+
 - **Commit**: Shows fix was applied to audit document
 - **Worklog**: Shows ticket TCK-20260130-045 was created
 - **Gate**: No more agent-gate errors after fix

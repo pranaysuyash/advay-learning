@@ -1,15 +1,11 @@
 """Games management endpoints."""
 
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.db.models.game import Game
-from app.db.models.user import User as UserModel
+from app.schemas.game import Game, GameCreate, GameList, GameUpdate
 from app.schemas.user import User, UserRole
-from app.schemas.game import Game, GameCreate, GameUpdate, GameFilter, GameList
 from app.services.game_service import GameService
 
 router = APIRouter()

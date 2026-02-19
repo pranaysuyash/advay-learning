@@ -12,6 +12,7 @@
 This document focuses on **practical, code-implementable safety measures** to protect children and comply with COPPA (USA) and DPDP Act (India). No enterprise certifications (ISO, kidSAFE, etc.) are in scope—only code standards that prevent legal issues.
 
 ### The Simple Rule
+>
 > **Collect nothing. Store nothing. Track nothing.**
 > If you don't have the data, you can't violate privacy laws.
 
@@ -32,6 +33,7 @@ This document focuses on **practical, code-implementable safety measures** to pr
 | Right to Delete | Parents can request deletion | Nothing to delete |
 
 #### COPPA Penalties
+
 - Up to **$50,000+ per violation**
 - FTC actively enforcing in 2025-2026
 - Class action lawsuit risk
@@ -49,6 +51,7 @@ This document focuses on **practical, code-implementable safety measures** to pr
 | Data Fiduciary Obligations | Heavy responsibilities if you hold data | Hold no data |
 
 #### DPDP Penalties
+
 - Up to **₹250 crore (~$30M USD)** for violations
 - Data Protection Board can investigate
 - Reputational damage in Indian market

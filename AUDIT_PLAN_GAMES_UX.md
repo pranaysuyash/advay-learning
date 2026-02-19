@@ -3,6 +3,7 @@
 ## Problem Statement
 
 Conduct a comprehensive **multi-persona audit** of:
+
 1. **Games system** - How games are presented, selected, and played across age groups
 2. **Age-group UI component selection** - How UI components are adapted for 2-3yr, 4-6yr, 7-9yr cohorts
 3. **Analytics tracking** - How gameplay events, progress, and engagement are captured and reported
@@ -63,6 +64,7 @@ Conduct a comprehensive **multi-persona audit** of:
 ## Scope & Constraints
 
 **In-Scope:**
+
 - Games system architecture and UX
 - UI component library usage across age groups
 - Analytics event tracking and storage
@@ -70,6 +72,7 @@ Conduct a comprehensive **multi-persona audit** of:
 - Safety controls per game
 
 **Out-of-Scope:**
+
 - Backend API design (separate audit)
 - Camera/hand-tracing mechanics (separate axis)
 - Full landing page redesign
@@ -87,6 +90,7 @@ Conduct a comprehensive **multi-persona audit** of:
 ## Phase 1 Discovery - Completed ✓
 
 **Games Discovered** (4 total):
+
 1. AlphabetGame (Draw Letters) - 2-8yr, Alphabets, Easy
 2. FingerNumberShow (Finger Counting) - 3-7yr, Numbers, Easy
 3. ConnectTheDots - 3-6yr, Drawing, Easy
@@ -95,16 +99,19 @@ Conduct a comprehensive **multi-persona audit** of:
 **Key Finding**: All hardcoded "Easy" difficulty - NO progression
 
 **Analytics Backend**:
+
 - Progress model exists with activity_type, content_id, score, duration_seconds, meta_data
 - Batch API with idempotency support
 - Limited granularity (no game-specific events)
 
 **UI Components**:
+
 - GameCard.tsx shows ageRange but identical difficulty colors (no visual distinction)
 - ProfileStore tracks age but doesn't use it for filtering
 - GameSetupCard generic with no age-based adaptation
 
 **Critical Gaps**:
+
 1. No difficulty progression (all "Easy")
 2. Age filtering not implemented
 3. Difficulty colors identical (no visual feedback)

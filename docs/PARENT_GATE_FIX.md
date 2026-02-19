@@ -1,5 +1,4 @@
 
-
 ---
 
 ## BUG FIX: Parent Gate Button Not Responding
@@ -9,10 +8,13 @@
 **Priority:** P0 (Critical - can't access Settings)
 
 ### Problem
+
 The Parent Gate "Hold to Unlock" button stopped responding to clicks/touches. Previously worked (user could press for 3 seconds to unlock), but now nothing happens when holding the button.
 
 ### Root Cause
+
 The ParentGate component was rendered INSIDE a `<motion.div>` with animation properties:
+
 ```tsx
 <motion.div
   initial={{ opacity: 0, y: 20 }}
@@ -25,6 +27,7 @@ The ParentGate component was rendered INSIDE a `<motion.div>` with animation pro
 ```
 
 **Why this broke it:**
+
 - Framer Motion's `motion.div` creates a new **stacking context**
 - ParentGate uses `fixed inset-0 z-50` to overlay the screen
 - But being inside the motion wrapper constrained its positioning
@@ -32,7 +35,9 @@ The ParentGate component was rendered INSIDE a `<motion.div>` with animation pro
 - Button events weren't firing correctly
 
 ### Solution
+
 Moved ParentGate OUTSIDE the motion wrapper:
+
 ```tsx
 {/* Parent Gate - Render outside motion wrapper to avoid stacking context issues */}
 {!parentGatePassed && (
@@ -54,6 +59,7 @@ Moved ParentGate OUTSIDE the motion wrapper:
 **File:** `src/frontend/src/pages/Settings.tsx`
 
 **Before:**
+
 ```tsx
 <section className='max-w-7xl mx-auto px-4 py-8'>
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -68,6 +74,7 @@ Moved ParentGate OUTSIDE the motion wrapper:
 ```
 
 **After:**
+
 ```tsx
 <section className='max-w-7xl mx-auto px-4 py-8'>
   {/* Parent Gate - Render outside motion wrapper */}

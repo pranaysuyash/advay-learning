@@ -449,16 +449,19 @@ export function GestureFeedback({
 ## 6. Testing Strategy
 
 ### 6.1 Unit Tests
+
 - Gesture detection accuracy with mock landmarks
 - Hold duration calculations
 - Cooldown behavior
 
 ### 6.2 Integration Tests
+
 - Calibration flow completion
 - Gesture-to-action mapping
 - Settings persistence
 
 ### 6.3 User Testing (Children 4-10)
+
 - Can children perform gestures?
 - Do they understand the calibration?
 - Is hold duration appropriate?

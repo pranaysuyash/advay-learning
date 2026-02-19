@@ -15,7 +15,9 @@ You are a UX analyst reviewing an application for flow issues, user journey fric
 ## Phase 1: Discovery
 
 ### 1.1 Identify User Personas
+
 List the primary user types and their goals:
+
 ```
 - Persona: [Name/Type]
   - Age range: [if relevant]
@@ -25,14 +27,18 @@ List the primary user types and their goals:
 ```
 
 ### 1.2 Map All Entry Points
+
 Find where users can start their journey:
+
 - Direct URLs
 - Navigation links
 - Deep links
 - Redirects from auth
 
 ### 1.3 Identify Core User Stories
+
 For each major feature, document:
+
 ```
 As a [persona],
 I want to [action],
@@ -47,6 +53,7 @@ Acceptance criteria:
 ## Phase 2: Flow Mapping
 
 ### 2.1 Click-Path Analysis
+
 For each core journey, count clicks/taps to completion:
 
 | Journey | Steps | Path | Friction Points |
@@ -54,13 +61,16 @@ For each core journey, count clicks/taps to completion:
 | [name]  | [N]   | Page1 → Page2 → ... | [issues] |
 
 **Red flags:**
+
 - More than 3 clicks to primary action
 - More than 5 clicks to any action
 - Redundant screens
 - Repeated information entry
 
 ### 2.2 Decision Point Audit
+
 List every place users must make a choice:
+
 ```
 - Location: [page/component]
 - Decision: [what they choose]
@@ -70,13 +80,16 @@ List every place users must make a choice:
 ```
 
 **Red flags:**
+
 - More than 4 options without defaults
 - Irreversible decisions without confirmation
 - No "recommended" option for novice users
 - Technical jargon in options
 
 ### 2.3 State Persistence Check
+
 For each user preference/setting:
+
 ```
 - Setting: [name]
 - Stored: [yes/no]
@@ -86,6 +99,7 @@ For each user preference/setting:
 ```
 
 **Red flags:**
+
 - User re-enters same info repeatedly
 - Settings reset unexpectedly
 - No "remember my choice" option
@@ -95,25 +109,32 @@ For each user preference/setting:
 ## Phase 3: Friction Analysis
 
 ### 3.1 Loading States
+
 For each async operation:
+
 - Is there a loading indicator?
 - How long before timeout/error?
 - Can user cancel?
 - Is progress shown for long operations?
 
 ### 3.2 Error States
+
 For each possible error:
+
 - Is error message user-friendly?
 - Is recovery path clear?
 - Can user retry without losing progress?
 
 ### 3.3 Empty States
+
 For each list/collection:
+
 - What shows when empty?
 - Is there a call-to-action?
 - Is it encouraging, not discouraging?
 
 ### 3.4 Interruption Recovery
+
 - What happens if user navigates away mid-flow?
 - Is progress saved?
 - Can they resume?
@@ -124,18 +145,21 @@ For each list/collection:
 ## Phase 4: Accessibility & Inclusivity
 
 ### 4.1 Input Methods
+
 - Keyboard navigation works?
 - Touch targets adequate (48px+)?
 - Mouse hover states exist?
 - Voice control compatible?
 
 ### 4.2 Cognitive Load
+
 - Instructions clear and concise?
 - Too much text on screen?
 - Visual hierarchy guides attention?
 - Can user skip tutorials?
 
 ### 4.3 Time Pressure
+
 - Are there unnecessary timers?
 - Can users pause timed activities?
 - Are time limits appropriate for audience?
@@ -145,12 +169,15 @@ For each list/collection:
 ## Phase 5: Output Format
 
 ### Summary Table
+
 | Issue | Severity | Location | Recommendation |
 |-------|----------|----------|----------------|
 | [description] | P0/P1/P2/P3 | [file/page] | [fix] |
 
 ### Flow Diagrams
+
 Use Mermaid to visualize:
+
 ```mermaid
 flowchart LR
     A[Start] --> B{Decision}
@@ -159,7 +186,9 @@ flowchart LR
 ```
 
 ### Prioritized Recommendations
+
 Group fixes by:
+
 1. **P0 - Blockers**: Users cannot complete core journey
 2. **P1 - Major friction**: Users struggle but can complete
 3. **P2 - Minor friction**: Annoyances that don't block

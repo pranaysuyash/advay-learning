@@ -7,6 +7,7 @@
 **Problem**: Dashboard "Add Child Profile" button links to `/settings`, but Settings page has no profile creation UI.
 
 **Current Flow**:
+
 1. User clicks "Add Child Profile" on Dashboard
 2. Gets redirected to Settings
 3. Settings has no profile creation form
@@ -15,6 +16,7 @@
 **Root Cause**: Missing UI for `profileStore.createProfile()`
 
 **Fix Needed**:
+
 - Add child profile creation form to Dashboard OR
 - Create separate "/profiles" page OR
 - Add modal/dialog for profile creation
@@ -30,24 +32,27 @@
 **Concept**: After user finishes drawing a stroke, automatically smooth it to create cleaner lines.
 
 **Use Cases**:
+
 - Shaky hand drawings become smoother
 - Better visual feedback for kids
 - More "professional" looking output
 
 **Implementation Options**:
 
-| Option | Approach | Pros | Cons |
-|--------|----------|------|------|
-| A | Real-time smoothing | Immediate feedback | May feel laggy |
-| B | Post-stroke smoothing | Clean result | Delayed feedback |
-| C | Simplified geometry | Very clean | Loses detail |
+| Option | Approach              | Pros               | Cons             |
+| ------ | --------------------- | ------------------ | ---------------- |
+| A      | Real-time smoothing   | Immediate feedback | May feel laggy   |
+| B      | Post-stroke smoothing | Clean result       | Delayed feedback |
+| C      | Simplified geometry   | Very clean         | Loses detail     |
 
 **Recommended**: Option B (Post-stroke smoothing)
+
 - Apply smoothing when drawing stops
 - Use Catmull-Rom spline or Bézier curve fitting
 - Reduce points while maintaining shape
 
 **Algorithm Sketch**:
+
 ```typescript
 // Simplify path using Ramer-Douglas-Peucker or curve fitting
 function smoothPath(points: Point[]): Point[] {
@@ -64,6 +69,7 @@ function smoothPath(points: Point[]): Point[] {
 See WORKLOG_TICKETS.md for TCK-20260128-009 through TCK-20260128-016.
 
 Current status:
+
 - ✅ Button Toggle (done)
 - ✅ Pinch Gesture (done)
 - 🔵 Dwell/Click (pending)
@@ -148,6 +154,7 @@ Current status:
 ### Feature 6: Parent Dashboard Improvements
 
 **Current Issues**:
+
 - No real progress data (mock data only)
 - No detailed per-letter stats
 - No time-series tracking
@@ -171,12 +178,14 @@ Current status:
 **Finding**: Several card-like UI elements used extremely low-contrast white borders (e.g., `border-white/10`) on a light background, making borders and separators barely visible, especially in large screens and low-contrast viewing conditions.
 
 **Fix implemented (Medium-scope)**:
+
 - Replace faint borders with semantic tokens: `border-border` (standard) and `border-border-strong` (focus states).
 - Add `bg-white/10` to primary card surfaces to lift cards off the background.
 - Apply `shadow-sm` to main cards and `shadow-md` to emphasized/mastered cards for subtle depth.
 - Ensure `select`/`input` controls use `border-border` and `focus:border-border-strong` for clearer affordance.
 
 **Files updated**:
+
 - `src/frontend/src/components/LetterJourney.tsx` (card borders, legend tokens)
 - `src/frontend/src/components/ui/Layout.tsx` (header separator)
 - `src/frontend/src/components/ui/Card.tsx` (card defaults)
@@ -184,6 +193,7 @@ Current status:
 - `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/games/FingerNumberShow.tsx`, `src/frontend/src/pages/Login.tsx`, `src/frontend/src/pages/Register.tsx`, `src/frontend/src/pages/Progress.tsx`, `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/pages/Game.tsx`
 
 **Evidence & Results**:
+
 - **Before screenshots**: `docs/screenshots/ui_contrast/before/{home,dashboard,game,progress,settings}.png`
 - **After screenshots**: `docs/screenshots/ui_contrast/after/{home,dashboard,game,progress,settings}.png`
 - **Unit tests**: `npx vitest --run` → **76 tests passed** (Observed)
@@ -193,12 +203,12 @@ Current status:
 
 **Next**: Add a visual regression snapshot pipeline and integrate the `StyleTest` page into QA for quick manual checks.
 
-3. **Multiple Child Management**
+1. **Multiple Child Management**
    - Better child switching
    - Individual progress for each
    - Side-by-side comparison
 
-4. **Export/Share**
+2. **Export/Share**
    - PDF progress reports
    - Share achievements
    - Print certificates
@@ -233,19 +243,23 @@ Current status:
 ## Priority Ranking
 
 ### P0 (Critical)
+
 1. Fix child profile creation flow
 
 ### P1 (High)
+
 2. Complete drawing control modes (Dwell, Two-handed, etc.)
 3. Add mode selector UI
 4. Line smoothing/anti-aliasing
 
 ### P2 (Medium)
+
 5. Visual feedback enhancements (trails, particles)
 6. Audio feedback
 7. Real progress tracking
 
 ### P3 (Low)
+
 8. Gamification (achievements, rewards)
 9. Accessibility features
 10. Advanced parent dashboard
@@ -258,4 +272,3 @@ Current status:
 2. **This week**: Complete drawing control modes + selector (P1)
 3. **Next**: Line smoothing (P1)
 4. **Later**: Visual/audio enhancements (P2)
-

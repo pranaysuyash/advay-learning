@@ -75,22 +75,28 @@ You are a documentation specialist focused on creating docs that are accurate, u
 [One sentence description]
 
 **Parameters**:
+
 - `param1` (type): [description]
 - `param2` (type, optional): [description]. Default: [value]
 
 **Returns**:
+
 - (type): [description]
 
 **Raises**:
+
 - `ErrorType`: [when this happens]
 
 **Example**:
+
 ```python
 result = function_name("value", param2=True)
 ```
 
 **Notes**:
+
 - [Important caveat or tip]
+
 ```
 
 ### How-To Guide
@@ -118,6 +124,7 @@ command to run
 ```
 
 Expected output:
+
 ```
 what you should see
 ```
@@ -140,6 +147,7 @@ what you should see
 
 - [Related guide 1]
 - [Related guide 2]
+
 ```
 
 ### Architecture/Design Doc

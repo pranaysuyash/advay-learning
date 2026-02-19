@@ -2,6 +2,7 @@
 <!-- Describe your changes in detail -->
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
@@ -12,8 +13,8 @@
 
 ## Changes Made
 <!-- List the main changes -->
-- 
-- 
+-
+-
 
 ## Testing
 <!-- Describe the tests you ran -->
@@ -25,6 +26,7 @@
 <!-- Add screenshots to help explain your changes -->
 
 ## Checklist
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review completed
 - [ ] Comments added for complex code

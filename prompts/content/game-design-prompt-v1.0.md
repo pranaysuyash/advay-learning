@@ -19,48 +19,56 @@ When requesting a new game design, provide:
 ## Core Game Patterns (Choose One or Combine)
 
 ### Pattern 1: Touch Targets
+
 **Interaction**: Touch appearing targets with fingertip/body part
 **Best for**: Recognition, speed, reaction time
 **MediaPipe**: Hand Landmarker
 **Difficulty knobs**: Target size, speed, distractors, required order
 
 ### Pattern 2: Drag & Drop (Pinch Grab)
+
 **Interaction**: Pick item with pinch, move, drop into zones
 **Best for**: Categorization, sorting, spatial reasoning
 **MediaPipe**: Hand Landmarker
 **Difficulty knobs**: Number of categories, moving targets, wrong-drop penalty
 
 ### Pattern 3: Trace Paths
+
 **Interaction**: Follow outline or maze with fingertip
 **Best for**: Pre-writing, letter formation, control
 **MediaPipe**: Hand Landmarker
 **Difficulty knobs**: Tolerance, stroke order strictness, path complexity
 
 ### Pattern 4: Hold Still
+
 **Interaction**: Keep pose/fingertip in position for N seconds
 **Best for**: Balance, control, patience
 **MediaPipe**: Hand/Pose Landmarker
 **Difficulty knobs**: Duration, movement tolerance, distractions
 
 ### Pattern 5: Match Pose/Expression
+
 **Interaction**: Mirror target pose shown on screen
 **Best for**: Body awareness, following instructions, gross motor
 **MediaPipe**: Pose/Face Landmarker
 **Difficulty knobs**: Angle tolerance, hold time, multi-step sequences
 
 ### Pattern 6: Sequence Memory
+
 **Interaction**: Do actions in order
 **Best for**: Working memory, pattern recognition
 **MediaPipe**: Hand/Pose Landmarker
 **Difficulty knobs**: Sequence length, speed, mixed modalities
 
 ### Pattern 7: Catch & Avoid
+
 **Interaction**: Catch correct items, avoid incorrect ones
 **Best for**: Reaction time, categorization under pressure
 **MediaPipe**: Hand Landmarker
 **Difficulty knobs**: Spawn rate, item speed, distractor ratio
 
 ### Pattern 8: Scavenger Hunt
+
 **Interaction**: Show real-world objects/colors to camera
 **Best for**: Real-world learning, exploration
 **MediaPipe**: Segmentation/Object Detection
@@ -133,6 +141,7 @@ For each game idea, provide:
 ## Example Request
 
 **User Input**:
+
 ```
 Domain: Math - counting and one-to-one correspondence
 Age: 3-4 years
@@ -142,6 +151,7 @@ Special: Should feel like feeding animals
 ```
 
 **Expected Output**:
+
 ```markdown
 ### Feed the Animals
 

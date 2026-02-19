@@ -137,6 +137,7 @@ npm run dev
 ## 🎯 MVP Status
 
 ✅ **MVP Complete**: Advay can:
+
 1. Open the app in browser
 2. Allow camera access
 3. Choose between Free Draw or Shape Trace
@@ -207,6 +208,6 @@ npm run dev
 4. **Engine/Games separation** (clean architecture)
 5. **IndexedDB** (not localStorage for structured data)
 
-## 🎉 Ready for Advay!
+## 🎉 Ready for Advay
 
 The app is ready to use. Run `npm run dev` and let Advay try it!

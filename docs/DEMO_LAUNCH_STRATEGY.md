@@ -85,6 +85,7 @@
 **Cost**: Free
 
 **Steps:**
+
 1. Record 60-second demo video (gameplay highlight reel)
 2. Take 5-10 screenshots of mascot + UI
 3. Write LinkedIn/X post copy (3 versions)
@@ -93,12 +94,14 @@
 6. Respond to comments within 24 hours
 
 **Pros:**
+
 - Fastest time to market (2-3 hours)
 - No infrastructure setup needed
 - Full control over presentation
 - Can edit video for best moments
 
 **Cons:**
+
 - No live demo URL (users can't try themselves)
 - Less interactive feedback
 - Requires video editing skills
@@ -115,6 +118,7 @@
 **Steps:**
 
 **Frontend (Vercel):**
+
 ```bash
 cd src/frontend
 vercel login
@@ -122,6 +126,7 @@ vercel deploy --prod
 ```
 
 **Backend (Railway):**
+
 ```bash
 cd src/backend
 railway login
@@ -130,6 +135,7 @@ railway up
 ```
 
 **Post-Deployment:**
+
 1. Update frontend API_URL to Railway backend URL
 2. Configure CORS in backend (add Vercel domain to ALLOWED_ORIGINS)
 3. Test end-to-end flow (register → play → progress)
@@ -137,12 +143,14 @@ railway up
 5. Post to LinkedIn/X with live demo link
 
 **Pros:**
+
 - Live demo URL (users can try immediately)
 - Free SSL/HTTPS included
 - Automatic deployments on git push
 - Professional presentation (not just screenshots)
 
 **Cons:**
+
 - 4-5 hours setup time
 - Requires free tier accounts (Vercel + Railway)
 - Backend limits (Railway free tier: 512MB RAM, 500hrs/month)
@@ -157,6 +165,7 @@ railway up
 **Cost**: Free (ngrok free tier)
 
 **Steps:**
+
 ```bash
 # Terminal 1: Run backend locally
 cd src/backend
@@ -175,16 +184,19 @@ ngrok http 5173
 ```
 
 **Post-Setup:**
+
 1. Share ngrok URLs in LinkedIn/X post
 2. Record demo video while ngrok is active
 3. Note: ngrok URLs expire after ~2 hours (free tier)
 
 **Pros:**
+
 - Fastest live demo setup (1 hour)
 - No account creation needed
 - Full control over environment
 
 **Cons:**
+
 - URLs are temporary (expire in ~2 hours)
 - No SSL (ngrok provides SSL but URLs are long/ugly)
 - Requires multiple terminals running
@@ -197,6 +209,7 @@ ngrok http 5173
 ## CHOSEN LAUNCH OPTION: **Option 2 - Vercel + Railway**
 
 **Rationale:**
+
 - Maximum credibility for portfolio showcase
 - Free SSL/HTTPS included
 - Users can try demo immediately (better feedback)
@@ -297,15 +310,18 @@ Early beta, feedback welcome! 👋
 ### 0:00-0:15 (Intro)
 
 **Visual:**
+
 - Show mascot Pip waving "Hi!"
 - Text overlay: "Advay Vision Learning"
 - Quick cut: Camera hand tracking visualization (hand skeleton overlay)
 
 **Audio:**
+
 - Narration: "Hi, I'm Pranay. I've been building Advay Vision Learning - AI-powered educational games for kids."
 - Background music: Upbeat, kid-friendly
 
 **Text Overlay:**
+
 - "AI-powered learning for kids 2-6"
 - "Built with MediaPipe hand tracking"
 
@@ -314,6 +330,7 @@ Early beta, feedback welcome! 👋
 ### 0:15-0:45 (Gameplay Highlight Reel)
 
 **Visual:**
+
 - **0:15-0:30**: FingerNumberShow game
   - Show kid's hand showing 5 fingers
   - Game detects: "5 fingers detected!"
@@ -329,10 +346,12 @@ Early beta, feedback welcome! 👋
   - ConnectTheDots: Hand cursor connecting dots
 
 **Audio:**
+
 - Narration: "The magic: kids don't need keyboards or mice. They just use their hands."
 - Background: Sound effects for correct answers (cheerful)
 
 **Key Moments to Highlight:**
+
 1. **0:20**: 5-finger detection (shows thumb counting works)
 2. **0:32**: Pinch gesture (shows gesture recognition)
 3. **0:42**: Hand cursor (shows camera tracking accuracy)
@@ -342,15 +361,18 @@ Early beta, feedback welcome! 👋
 ### 0:45-1:00 (Outro + Call to Action)
 
 **Visual:**
+
 - Show progress dashboard (stars, games played)
 - Text overlay: "Still in early beta"
 - Mascot Pip: "Building in public!"
 
 **Audio:**
+
 - Narration: "I'm still in early beta, building in public. Feedback welcome!"
 - Background: Fade out music
 
 **Text Overlay:**
+
 - "Demo: [Vercel URL]"
 - "Code: github.com/pranay/learning_for_kids"
 - "Feedback: @pranay" (or email)
@@ -362,18 +384,21 @@ Early beta, feedback welcome! 👋
 ### Day 0 (Launch Day)
 
 **Morning:**
+
 - [ ] Deploy frontend to Vercel (2 hours)
 - [ ] Deploy backend to Railway (2 hours)
 - [ ] Test end-to-end flow (30 minutes)
 - [ ] Record 60-second demo video (1 hour)
 
 **Afternoon:**
+
 - [ ] Post to LinkedIn (Version 2) - 1:00 PM IST
 - [ ] Post to X (Version 1) - 1:30 PM IST
 - [ ] Update GitHub README with demo link and screenshots
 - [ ] Respond to first 10 comments within 2 hours
 
 **Evening:**
+
 - [ ] Track views/engagement metrics (LinkedIn stats, X analytics)
 - [ ] Document initial reactions (positive/negative/constructive)
 
@@ -382,20 +407,24 @@ Early beta, feedback welcome! 👋
 ### Day 1-3 (Follow-Up)
 
 **Daily Checklist:**
+
 - [ ] Respond to ALL comments (morning and evening)
 - [ ] Upvote thoughtful feedback
 - [ ] Thank people for engagement
 - [ ] Post 1 follow-up on Day 2 with feedback summary
 
 **Day 1:**
+
 - [ ] Monitor for critical bugs (if users try demo)
 - [ ] Fix any obvious issues if quick
 
 **Day 2:**
+
 - [ ] Post follow-up: "First 24 hours of feedback - what I learned"
 - [ ] Highlight 3 specific pieces of feedback received
 
 **Day 3:**
+
 - [ ] Collect 3 specific pieces of feedback:
   - **Technical**: [bug report, suggestion, issue]
   - **UX**: [confusing moment, hard-to-use feature]
@@ -407,6 +436,7 @@ Early beta, feedback welcome! 👋
 ### Day 4-7 (Iterate)
 
 **Day 4-5:**
+
 - [ ] Implement 1-2 quick wins from feedback:
   - Quick Win 1: [specific fix/improvement]
   - Quick Win 2: [specific fix/improvement]
@@ -414,12 +444,14 @@ Early beta, feedback welcome! 👋
 - [ ] Deploy fixes to Vercel/Railway
 
 **Day 6:**
+
 - [ ] Post "v0.1.1 - What we learned & built" update on LinkedIn
 - [ ] Include: before/after screenshots of quick wins
 - [ ] Credit people who gave feedback (tag them if they commented)
 - [ ] Update worklog with feedback-driven improvements
 
 **Day 7:**
+
 - [ ] Reach out to 5 key people who engaged:
   - [ ] Person 1: LinkedIn connection request + DM
   - [ ] Person 2: Comment on their recent post
@@ -575,6 +607,7 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 ### Good Demo Launch Example
 
 **Post:**
+
 ```
 I'm building Advay Vision Learning - camera-based educational games for kids.
 
@@ -589,6 +622,7 @@ What do you think?
 ```
 
 **Characteristics:**
+
 - ✅ Authentic tone: "I'm building"
 - ✅ Visual proof: Demo video + screenshots
 - ✅ Transparency: "Still in early beta"
@@ -599,6 +633,7 @@ What do you think?
 ### Bad Demo Launch Example
 
 **Post:**
+
 ```
 🚀 Introducing Advay Vision Learning - The BEST kids learning app!
 
@@ -614,6 +649,7 @@ The future of education is here!
 ```
 
 **Characteristics:**
+
 - ❌ Salesy tone: "The BEST"
 - ❌ No visuals: Text-only
 - ❌ Over-promising: "10 games" (only 4 built), "Production-ready" (not true)

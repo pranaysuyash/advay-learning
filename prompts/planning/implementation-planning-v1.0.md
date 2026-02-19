@@ -2,13 +2,15 @@
 
 **Goal**: Create a detailed, verifiable implementation plan for a feature or work unit before coding begins. This bridges the gap between "ticket exists" and "code is written."
 
-**When to use**: 
+**When to use**:
+
 - Before implementing any non-trivial feature (P1 or higher)
 - When the implementation approach is unclear or has multiple options
 - When multiple files/components need coordination
 - Before requesting a code review
 
 **When NOT to use**:
+
 - For trivial one-line fixes
 - When the implementation is already clear and documented
 - For audit remediation (use `prompts/remediation/implementation-v1.6.1.md` instead)
@@ -20,6 +22,7 @@
 You are a senior engineer creating an implementation plan. Your job is to think through the approach, identify risks, and produce a plan that another engineer could execute.
 
 You are NOT:
+
 - writing production code
 - making final architecture decisions alone
 - estimating time/effort
@@ -50,12 +53,14 @@ You are NOT:
 ## REQUIRED DISCOVERY (run if possible)
 
 If Git availability is YES:
+
 ```bash
 git status --porcelain
 git diff --name-only origin/main...HEAD
 ```
 
 Always:
+
 ```bash
 # Find relevant files
 rg -n "<feature keywords>" src -S --type-add 'code:*.{ts,tsx,js,jsx,py}' -tcode
@@ -76,15 +81,18 @@ If any command fails, capture raw output and mark related claims as Unknown.
 ### A) Discovery Summary
 
 **Observed** (from commands/files):
+
 - Existing code patterns that apply
 - Similar features already implemented
 - Relevant files and their purposes
 
 **Inferred** (logical deductions):
+
 - How components likely interact
 - Potential integration points
 
 **Unknown** (cannot determine without implementation):
+
 - Technical blockers that need prototyping
 - Performance characteristics
 - Edge case behaviors
@@ -104,16 +112,19 @@ For non-trivial features, present 2-3 implementation approaches:
 ### C) Detailed Plan (Chosen Option)
 
 #### Phase 1: Foundation
+
 - Files to create/modify
 - Interfaces/types to define
 - State changes needed
 
 #### Phase 2: Core Implementation
+
 - Step-by-step implementation order
 - Key functions/components
 - Error handling strategy
 
 #### Phase 3: Integration & Polish
+
 - How it connects to existing code
 - UI/UX considerations
 - Edge cases to handle
@@ -143,6 +154,7 @@ For non-trivial features, present 2-3 implementation approaches:
 ### G) Rollback Plan
 
 If this goes wrong, how do we revert?
+
 - Files to restore
 - Database migrations to consider
 - Feature flags to disable
@@ -213,6 +225,7 @@ If this goes wrong, how do we revert?
 Stop after producing the implementation plan. Do not write production code.
 
 The plan should be detailed enough that:
+
 1. Another engineer could implement it
 2. A reviewer could validate the approach
 3. You could execute it step-by-step
@@ -233,4 +246,3 @@ After this planning prompt completes:
 ## EXAMPLE OUTPUT
 
 See `prompts/planning/example-output.md` for a complete example.
-

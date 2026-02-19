@@ -14,6 +14,7 @@
 This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision Learning platform, targeting children aged 4-10 years. The project focuses on transforming the functional but basic interface into an engaging, delightful, and accessible experience that maximizes learning outcomes and child motivation.
 
 **Current State Assessment:**
+
 - ✅ Solid foundation: mascot "Pip", animations, multi-language support
 - ⚠️ Basic visuals: minimal color, static dashboards, limited feedback
 - ⚠️ Limited engagement: no celebrations, achievements, or audio feedback
@@ -21,6 +22,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 - ⚠️ Missing polish: no themes, avatars, or progress visualization
 
 **Target State:**
+
 - Magical, engaging experience with celebrations, particles, and sounds
 - Gamified progress with levels, badges, and achievements
 - Child-safe navigation and accessibility compliance
@@ -36,6 +38,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 ## Project Scope
 
 ### In-Scope
+
 1. **P0 - Engagement & Motivation** (Weeks 1-4)
    - Achievement-triggered celebration system
    - Particle effects (confetti, sparkles, stars)
@@ -62,6 +65,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
    - Parent controls and settings
 
 ### Out-of-Scope
+
 - Backend API changes (unless required for new features)
 - Mobile app development (web-only)
 - Social features (leaderboards, challenges) - P3 future work
@@ -69,6 +73,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 - Complete redesign of existing functionality (only enhancements)
 
 ### Behavior Change Allowed
+
 - YES - Adding new features and interactions
 - UI/UX improvements expected to increase engagement
 
@@ -77,6 +82,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 ## Success Criteria
 
 ### Quantitative Metrics
+
 - **Engagement:** +25% increase in daily active users
 - **Session Duration:** Target 10-15 minutes (up from 5-10)
 - **Retention:** 7-day retention target 40%
@@ -84,11 +90,13 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 - **Accessibility:** WCAG AA compliance (all pages pass axe DevTools)
 
 ### Qualitative Metrics
+
 - Parent satisfaction: 4.5/5 stars
 - Child engagement: 4/5 stars (observation-based)
 - Net Promoter Score (NPS): +40
 
 ### Technical Metrics
+
 - Performance: No regressions in load time (<2s)
 - Bundle size: Increase <20% from current
 - Lighthouse score: >90 on all audits
@@ -99,6 +107,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 ## Architecture & Technical Approach
 
 ### Design Principles
+
 1. **Child-Centered Design:** Everything optimized for 4-10 year old developmental needs
 2. **Progressive Enhancement:** New features add to, don't replace, existing functionality
 3. **Performance First:** Animations and effects must be performant on low-end devices
@@ -106,6 +115,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 5. **Safety First:** Child-safe navigation, parental controls, COPPA compliance
 
 ### Tech Stack Additions
+
 ```json
 {
   "dependencies": {
@@ -122,6 +132,7 @@ This master plan orchestrates a comprehensive UI/UX upgrade for the Advay Vision
 ```
 
 ### Component Architecture
+
 ```
 src/frontend/src/
 ├── components/
@@ -169,6 +180,7 @@ src/frontend/src/
 ```
 
 ### State Management Strategy
+
 ```typescript
 // New Zustand store for achievements
 interface AchievementStore {
@@ -191,17 +203,20 @@ interface AchievementStore {
 ### Week 1: Celebration System Foundation
 
 **Tickets:**
+
 - TCK-20260129-100: Implement particle effects system
 - TCK-20260129-101: Create celebration component infrastructure
 - TCK-20260129-102: Add audio feedback system
 
 **Deliverables:**
+
 - Particle effects library integration
 - Celebration overlay component
 - Audio manager with sound assets
 - Unit tests for particle and audio systems
 
 **Success Criteria:**
+
 - Confetti animation triggers on button click
 - Sound effects play on button interactions
 - No console errors in particle system
@@ -210,18 +225,21 @@ interface AchievementStore {
 ### Week 2: Achievement-Triggered Celebrations
 
 **Tickets:**
+
 - TCK-20260129-103: Define achievement types and conditions
 - TCK-20260129-104: Implement achievement detection system
 - TCK-20260129-105: Connect celebrations to game achievements
 - TCK-20260129-106: Integrate mascot celebrations with achievements
 
 **Deliverables:**
+
 - Achievement data structure (achievements.ts)
 - Achievement detection logic
 - Celebration triggers for: letter-mastered, perfect-score, streak
 - Mascot video integration with achievements
 
 **Success Criteria:**
+
 - Achievements trigger automatically when conditions met
 - Mascot video plays on letter mastery
 - Confetti particles appear on perfect score
@@ -230,18 +248,21 @@ interface AchievementStore {
 ### Week 3: Gamified Progress Dashboard
 
 **Tickets:**
+
 - TCK-20260129-107: Create XP and level system
 - TCK-20260129-108: Implement badge display component
 - TCK-20260129-109: Redesign dashboard with gamified elements
 - TCK-20260129-110: Add level-up animations
 
 **Deliverables:**
+
 - Level system with XP calculations
 - Badge grid display with locked/unlocked states
 - Redesigned dashboard with levels, XP, badges
 - Level-up celebration animation
 
 **Success Criteria:**
+
 - XP bar shows progress toward next level
 - Level increases when XP threshold reached
 - Level-up animation triggers automatically
@@ -250,18 +271,21 @@ interface AchievementStore {
 ### Week 4: Progress Visualization & Navigation
 
 **Tickets:**
+
 - TCK-20260129-111: Implement enhanced progress charts
 - TCK-20260129-112: Create child-safe navigation bar
 - TCK-20260129-113: Add breadcrumb navigation
 - TCK-20260129-114: Update Game page with new progress visualization
 
 **Deliverables:**
+
 - Animated progress charts for learning history
 - Bottom navigation bar with large touch targets
 - Breadcrumb component for location awareness
 - Enhanced Game page with real-time progress
 
 **Success Criteria:**
+
 - Progress charts animate on load
 - Navigation bar works on mobile/tablet
 - Breadcrumbs show correct location
@@ -274,18 +298,21 @@ interface AchievementStore {
 ### Week 5: Animations & Micro-interactions
 
 **Tickets:**
+
 - TCK-20260129-115: Implement page transition animations
 - TCK-20260129-116: Add interactive button states
 - TCK-20260129-117: Create loading skeleton components
 - TCK-20260129-118: Optimize animation performance
 
 **Deliverables:**
+
 - Page transition component with slide/fade effects
 - Button variants with hover/click animations
 - Skeleton screens for all major pages
 - Performance optimization (GPU acceleration)
 
 **Success Criteria:**
+
 - Page transitions feel smooth (60fps)
 - Buttons have clear hover/click feedback
 - Skeleton screens show before content loads
@@ -294,18 +321,21 @@ interface AchievementStore {
 ### Week 6: Theme Customization
 
 **Tickets:**
+
 - TCK-20260129-119: Define theme structure and variants
 - TCK-20260129-120: Implement theme provider
 - TCK-20260129-121: Create theme selector UI
 - TCK-20260129-122: Add theme transitions and persistence
 
 **Deliverables:**
+
 - 4 theme variants (space, ocean, forest, sunset)
 - Theme provider with context
 - Theme selector in settings
 - Smooth theme transitions
 
 **Success Criteria:**
+
 - All 4 themes apply correctly
 - Theme selection persists across sessions
 - Theme transitions animate smoothly
@@ -314,18 +344,21 @@ interface AchievementStore {
 ### Week 7: Avatar System
 
 **Tickets:**
+
 - TCK-20260129-123: Define avatar parts structure
 - TCK-20260129-124: Create avatar creator component
 - TCK-20260129-125: Implement unlockable avatar parts
 - TCK-20260129-126: Integrate avatar with profile system
 
 **Deliverables:**
+
 - Avatar part data (hair, eyes, mouth, accessories)
 - Avatar creator UI with drag-and-drop
 - Unlock system based on achievements
 - Avatar saved to child profile
 
 **Success Criteria:**
+
 - Avatar creator renders all parts correctly
 - Unlockable parts show locked state
 - Avatar saves to profile
@@ -334,18 +367,21 @@ interface AchievementStore {
 ### Week 8: Dashboard Widgets
 
 **Tickets:**
+
 - TCK-20260129-127: Create activity feed widget
 - TCK-20260129-128: Implement weekly goal widget
 - TCK-20260129-129: Add widgets to dashboard
 - TCK-20260129-130: Widget performance optimization
 
 **Deliverables:**
+
 - Activity feed with recent achievements
 - Weekly goal progress tracker
 - Widget grid layout on dashboard
 - Lazy loading for widget data
 
 **Success Criteria:**
+
 - Activity feed shows recent events
 - Weekly goal tracks progress correctly
 - Widgets load without blocking page
@@ -358,18 +394,21 @@ interface AchievementStore {
 ### Week 9: Accessibility Compliance
 
 **Tickets:**
+
 - TCK-20260129-131: Fix all accessibility audit findings
 - TCK-20260129-132: Implement focus management system
 - TCK-20260129-133: Add ARIA labels to all interactive elements
 - TCK-20260129-134: Keyboard navigation improvements
 
 **Deliverables:**
+
 - All P1/P2 accessibility issues fixed
 - Focus trapping for modals
 - Proper ARIA labels throughout
 - Keyboard navigation works for all features
 
 **Success Criteria:**
+
 - Axe DevTools scan passes (0 critical errors)
 - VoiceOver announces all content correctly
 - Keyboard navigation is smooth
@@ -378,18 +417,21 @@ interface AchievementStore {
 ### Week 10: Screen Time Management
 
 **Tickets:**
+
 - TCK-20260129-135: Implement session timer
 - TCK-20260129-136: Create warning modal system
 - TCK-20260129-137: Add limit reached flow
 - TCK-20260129-138: Parent gate for time extension
 
 **Deliverables:**
+
 - Session timer in corner of screen
 - Warning popup 2 minutes before limit
 - End-of-session flow
 - Parent authentication for time extension
 
 **Success Criteria:**
+
 - Timer tracks session time accurately
 - Warning appears at correct time
 - Session ends when limit reached
@@ -398,18 +440,21 @@ interface AchievementStore {
 ### Week 11: COPPA Compliance
 
 **Tickets:**
+
 - TCK-20260129-139: Create privacy policy modal
 - TCK-20260129-140: Add parental consent checkboxes
 - TCK-20260129-141: Implement data export enhancement
 - TCK-20260129-142: Add data deletion flow
 
 **Deliverables:**
+
 - Privacy policy modal on first use
 - Consent checkboxes in registration
 - Enhanced data export with all fields
 - Data deletion option in settings
 
 **Success Criteria:**
+
 - Privacy policy displays on first visit
 - Consent is required for account creation
 - Export includes all user data
@@ -418,18 +463,21 @@ interface AchievementStore {
 ### Week 12: Testing & Polish
 
 **Tickets:**
+
 - TCK-20260129-143: Comprehensive E2E testing
 - TCK-20260129-144: Accessibility audit with screen readers
 - TCK-20260129-145: Performance optimization review
 - TCK-20260129-146: Documentation updates
 
 **Deliverables:**
+
 - E2E test suite covers all new features
 - Screen reader testing documentation
 - Performance optimization report
 - Updated docs (README, COMPONENTS.md)
 
 **Success Criteria:**
+
 - All E2E tests pass
 - Screen reader navigation works
 - Lighthouse score >90
@@ -474,23 +522,27 @@ interface AchievementStore {
 ### Testing Strategy
 
 **Unit Tests:**
+
 - All new components have unit tests
 - Test coverage >80% for new features
 - Mock audio and particle systems for testing
 
 **Integration Tests:**
+
 - Test achievement detection and unlocking
 - Test celebration triggers and audio playback
 - Test level progression and XP calculation
 - Test theme switching and persistence
 
 **E2E Tests:**
+
 - Full user flow: register → play game → achieve milestone → celebrate
 - Dashboard navigation and widget interactions
 - Avatar creation and saving
 - Settings configuration and persistence
 
 **Accessibility Tests:**
+
 - Axe DevTools automated scans
 - VoiceOver (macOS) manual testing
 - NVDA (Windows) manual testing
@@ -521,6 +573,7 @@ interface AchievementStore {
 ## Documentation Requirements
 
 ### Technical Documentation
+
 - **COMPONENTS.md:** Document all new components with props and usage
 - **THEMING.md:** Theme system documentation and customization guide
 - **ACHIEVEMENTS.md:** Achievement types, conditions, and unlocking
@@ -528,12 +581,14 @@ interface AchievementStore {
 - **ACCESSIBILITY.md:** A11y features and compliance status
 
 ### User Documentation
+
 - **PARENT_GUIDE.md:** Parent controls, screen time, settings
 - **CHILD_GUIDE.md:** Age-appropriate instructions with illustrations
 - **ACHIEVEMENTS.md:** Public-facing achievement guide
 - **FAQ.md:** Common questions and troubleshooting
 
 ### Developer Documentation
+
 - **CONTRIBUTING.md:** Updated with new component patterns
 - **TESTING.md:** E2E test suite documentation
 - **DEPLOYMENT.md:** Deployment checklist for new features
@@ -543,16 +598,19 @@ interface AchievementStore {
 ## Communication Plan
 
 ### Stakeholder Updates
+
 - **Weekly:** Progress summary with completed tickets
 - **Bi-weekly:** Demo of new features
 - **Monthly:** Milestone review and plan adjustments
 
 ### Parent/Child Feedback
+
 - **Week 4:** Initial P0 features (celebrations, achievements)
 - **Week 8:** Phase 1+2 features (themes, avatars)
 - **Week 12:** All features, request for feedback
 
 ### Internal Communication
+
 - **Daily:** Standup with ticket updates
 - **Weekly:** Retro to discuss blockers and improvements
 - **Milestone:** Post-mortem and lessons learned
@@ -562,24 +620,28 @@ interface AchievementStore {
 ## Success Celebration & Launch Plan
 
 ### Beta Launch (Week 12)
+
 - Deploy to staging environment
 - Invite 10-20 beta families
 - Collect feedback on all features
 - Fix critical bugs
 
 ### Soft Launch (Week 13)
+
 - Deploy to production with feature flags
 - Enable for 10% of users
 - Monitor performance and errors
 - Incremental rollout to 50%, 100%
 
 ### Full Launch (Week 14)
+
 - Feature flags removed
 - Announcement email to all users
 - Blog post and social media
 - Support documentation updated
 
 ### Post-Launch Monitoring
+
 - Daily error tracking (Sentry)
 - Weekly engagement metrics review
 - Monthly user satisfaction survey
@@ -590,12 +652,14 @@ interface AchievementStore {
 ## Resource Requirements
 
 ### Development Resources
+
 - **Senior Frontend Developer:** 80-100 hours (2-3 months part-time)
 - **UI/UX Designer:** 20-30 hours (themes, avatars, icons)
 - **QA Engineer:** 40-50 hours (testing, accessibility)
 - **Audio Designer:** 10-15 hours (sound effects, music)
 
 ### Tools & Services
+
 - **Design Tools:** Figma (themes, avatars)
 - **Audio:** Adobe Audition (sound editing)
 - **Testing:** BrowserStack (cross-browser testing)
@@ -603,6 +667,7 @@ interface AchievementStore {
 - **Error Tracking:** Sentry (error monitoring)
 
 ### Budget Estimate
+
 - Development: $8,000 - $12,000 (based on $100-150/hr)
 - Design: $2,000 - $3,000
 - Audio Assets: $500 - $1,000
@@ -616,6 +681,7 @@ interface AchievementStore {
 The UI Upgrade Project is considered complete when:
 
 ### Must-Have (P0-P2)
+
 - [x] All P0 tickets completed (celebrations, achievements, gamification)
 - [x] All P1 tickets completed (themes, avatars, animations)
 - [x] All P2 tickets completed (accessibility, safety, COPPA)
@@ -626,6 +692,7 @@ The UI Upgrade Project is considered complete when:
 - [x] Documentation complete and updated
 
 ### Nice-to-Have (P3)
+
 - [ ] Social features implemented (optional, future work)
 - [ ] Adaptive learning system (optional, future work)
 - [ ] Multi-language theme support (optional, future work)
@@ -635,21 +702,25 @@ The UI Upgrade Project is considered complete when:
 ## Related Documents
 
 ### Existing Audits
+
 - `docs/audit/ui_design_audit.md` - General UI audit findings
 - `docs/audit/child_usability_audit.md` - Child-centered recommendations
 - `docs/audit/ui__src__frontend__src__App.tsx.md` - App.tsx audit
 - `docs/audit/ui__src__frontend__src__pages__Dashboard.tsx.md` - Dashboard audit
 
 ### Existing Plans
+
 - `docs/UI_UPGRADE_PLAN.md` - Initial UI upgrade plan (this refines it)
 
 ### Project Documentation
+
 - `docs/WORKLOG_TICKETS.md` - All work tickets
 - `docs/GAME_MECHANICS.md` - Game design principles
 - `docs/LEARNING_PLAN.md` - Educational objectives
 - `AGENTS.md` - Agent coordination guidelines
 
 ### Prompts & Templates
+
 - `prompts/ui/child-centered-ux-audit-v1.0.md` - Child UX audit
 - `prompts/ui/repo-aware-ui-auditor-v1.0.md` - UI audit
 - `prompts/implementation/feature-implementation-v1.0.md` - Feature implementation
@@ -735,6 +806,7 @@ The UI Upgrade Project is considered complete when:
    - Component structures
 
 **Worklog Tickets Created:** 8
+
 - TCK-20260129-150: MediaPipe Capabilities & Features (RESEARCH)
 - TCK-20260129-200: Implement Finger Number Show (FEATURE)
 - TCK-20260129-201: Implement Connect-the-Dots (FEATURE)
@@ -747,6 +819,7 @@ The UI Upgrade Project is considered complete when:
 - TCK-20260129-209: Implement Free Paint Mode (ENHANCEMENT)
 
 **Summary:**
+
 - All MediaPipe capabilities documented with examples
 - 50+ educational features cataloged
 - Generic implementation prompts created
@@ -765,24 +838,28 @@ The UI Upgrade Project is considered complete when:
 **Extended Timeline (4+ Months):**
 
 **Month 1-2:** Core Educational Features (8 games)
+
 - Week 1-2: Finger Number Show, Connect-the-Dots
 - Week 3-4: Simon Says Body, Freeze Dance, Yoga Animals
 - Week 5-8: Reach Stars, Tap Count, Sort Buckets
 - Week 9-12: Free Paint Mode (brush system integration)
 
 **Month 3-4:** Language & Vocabulary Features
+
 - Week 1-2: Hindi Greetings (6 gestures), Point and Say
 - Week 3-4: Vocabulary Builder (20+ objects), Show and Tell
 - Week 5-8: Expression Mirror (6+ expressions), Mouth Shapes
 - Week 9-12: Head Orientation (4 directions)
 
 **Month 5-6:** Advanced Features
+
 - Week 1-2: Scavenger Hunt (real-world object detection)
 - Week 3-4: Story Quests (segmentation + tasks)
 - Week 5-8: Pattern Builder (color/shape patterns)
 - Week 9-12: Logic & Memory (gesture sequences, puzzles)
 
 **Month 7-8: Social & Creative
+
 - Week 1-2: Feelings Story (emotional awareness)
 - Week 3-4: Sticker Book & Collectibles (achievement system integration)
 - Week 5-8: Magic Background Worlds (Space, Underwater, Jungle)
@@ -792,12 +869,14 @@ The UI Upgrade Project is considered complete when:
 ## Updated Success Metrics
 
 **Engagement Targets:**
+
 - Daily Active Users: +25% (from current baseline)
 - Session Duration: 15-20 minutes (from 10-15 minutes)
 - Retention: 50% 7-day retention (from 40%)
 - Completion Rate: 80% game completion
 
 **Learning Targets:**
+
 - 10 new words/numbers per week
 - 50+ gestures mastered
 - 20+ activities completed per session
@@ -805,6 +884,7 @@ The UI Upgrade Project is considered complete when:
 - 5- patterns completed per month
 
 **Technical Targets:**
+
 - Maintain 25-30 FPS with all games active
 - Bundle size increase <15% from baseline
 - Lighthouse score >90 on all pages
@@ -842,14 +922,15 @@ The UI Upgrade Project is considered complete when:
 Implement **Finger Number Show** (TCK-20260129-200) first - it's simple, uses just Hand Landmarker (no complex ML), educational value is clear, builds on existing letter tracing foundation.
 
 **After That:**
+
 - **Connect-the-Dots** (TCK-20260129-201) - Fine motor skill development
 - **Simon Says Body** (TCK-20260129-203) - Gross motor + following instructions
 - **Freeze Dance** (TCK-20260129-204) - Rhythm + pose control
 
 **Weeks 5-8:**
+
 - **Weeks 1-2:** Complete all 8 MVP games
 - **Week 3-4:** Add 2 educational features (Hindi greetings, Vocabulary Builder)
 - **Week 5-8:** Integrate brush system (Phase 1 from UI upgrade plan) with educational extensions
 
 ---
-

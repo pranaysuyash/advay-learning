@@ -30,9 +30,11 @@ Brief one-line description of what changed and why.
 ## Behavior Changes
 
 ### Before
+
 - Description of old behavior
 
 ### After
+
 - Description of new behavior
 
 ## Test Coverage

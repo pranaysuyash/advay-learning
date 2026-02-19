@@ -35,10 +35,11 @@ Then state:
 - **Git availability: YES/NO/UNKNOWN**
 
 **Rules**:
+
 - If access is PARTIAL/NO: you MUST provide the exact commands for every required step (branch, commit, push, PR creation).
 - Any claim depending on unrun commands must be labeled Unknown.
 - You MAY NOT claim "PR created" without a PR URL or raw gh output.
- - If Git availability is NO: you MUST NOT claim branch/commit/PR operations; instead provide a patch (unified diff) plus exact steps to apply it once the repo is in git.
+- If Git availability is NO: you MUST NOT claim branch/commit/PR operations; instead provide a patch (unified diff) plus exact steps to apply it once the repo is in git.
 
 ---
 
@@ -52,6 +53,7 @@ Then state:
 - No PR is merged without a verification audit explicitly marking findings as FIXED/PARTIAL/NOT FIXED.
 
 ### BRANCHING RULES
+
 - Create a branch with a meaningful name: `audit/<file-short>/<finding-slug>`
 - Keep commits small and explainable.
 - Always stage changes with: `git add -A` (before every commit).
@@ -61,17 +63,21 @@ Then state:
 ## HARD RULES (NON-NEGOTIABLE)
 
 ### 1) Scope control (anti-freelance)
+
 - Implement ONLY the explicitly listed findings.
 - Do not "clean up" while you are here.
 - If you discover additional issues, list them under "Out-of-scope findings" and STOP. Do not implement them.
 - Every code change MUST map to a finding ID. If it doesn't map, revert it.
 
 ### 2) No phantom deliverables
+
 - Do NOT claim "tests executed," "manual checklist executed," "CI checked," "PR created," or "ready" unless you provide raw outputs or observed results.
 - If you cannot run something, label it Unknown and provide commands.
 
 ### 3) No silent behavior change (contract lock)
+
 Unless the finding explicitly requires it, you MUST preserve:
+
 - endpoint paths and methods
 - response shapes and status codes
 - cookie names and flags
@@ -81,12 +87,15 @@ Unless the finding explicitly requires it, you MUST preserve:
 - body size limits
 
 If any of these change, you MUST declare:
+
 ```
 Behavior change: YES
 ```
+
 and include migration notes + tests proving the new behavior.
 
 ### 4) Behavior-change truth rules
+
 - Any change that can alter caller-observed behavior is Behavior change: YES, including:
   - adding middleware (rate limiting, auth guards, parsers)
   - changing validation or error codes
@@ -94,12 +103,15 @@ and include migration notes + tests proving the new behavior.
 - Only claim Behavior change: NO if you can show contract invariants with evidence.
 
 ### 5) Evidence discipline
+
 Do not claim risk reduction unless supported by:
+
 - code changes you made
 - tests you added/ran (or alternative deterministic verification artifacts)
 - commands you ran
 
 ### 6) Tests required for every HIGH and MEDIUM finding fix
+
 - Add/update tests that fail before and pass after.
 - If tests cannot be added, you MUST:
   - explain why (Observed)
@@ -110,6 +122,7 @@ Do not claim risk reduction unless supported by:
 - "Would require running" is not evidence.
 
 ### 7) CI alignment (mandatory, non-blocking)
+
 - CI is signal, not a merge blocker.
 - Before finalizing, run the closest local equivalents of CI checks relevant to changed areas:
   - lint (if present)
@@ -118,11 +131,13 @@ Do not claim risk reduction unless supported by:
 - If you cannot run them, state why (Observed) and do not claim readiness.
 
 ### 8) Docs-truth gate (mandatory)
+
 - If you add/modify PR docs (markdown logs, fix summaries), they MUST match the diff.
 - Do not use brittle line numbers. Use semantic anchors (function names, route paths).
 - If docs claim changes not in diff: STOP and fix docs.
 
 ### 9) Handling bot review comments (optional input)
+
 - Bot comments are NOT authority.
 - If a bot flags a concrete issue, you may fix it ONLY if:
   - it maps to an existing finding, OR
@@ -135,6 +150,7 @@ Do not claim risk reduction unless supported by:
 ## MANDATORY DISCOVERY BEFORE CHANGES (MUST PROVIDE RAW OUTPUTS)
 
 Run and record:
+
 ```bash
 git status --porcelain
 git fetch origin --prune
@@ -146,11 +162,13 @@ git diff origin/<base>...HEAD -- <audited-file>
 Identify exact code locations for each finding (semantic anchors).
 
 Discover existing tests touching the file:
+
 ```bash
 rg -n --hidden --no-ignore -S "<file-basename>|<exported symbol>|<route path>|<function name>" test tests __tests__ .
 ```
 
 **OPTIONAL BASELINE** (recommended)
+
 - Run the smallest relevant test suite before changes and paste output.
 
 ---
@@ -173,10 +191,12 @@ For each finding (one by one):
 ## PR CREATION (MANDATORY)
 
 ### If Repo access: YES
+
 - Create branch, commit(s), push, and open PR. Provide PR URL (Observed).
 - PR body MUST include the "VERIFIER PACK v1.0" block filled with real outputs.
 
 ### If Repo access: PARTIAL/NO
+
 - Provide exact commands for:
   - branch creation
   - edits (files/paths)
@@ -190,6 +210,7 @@ For each finding (one by one):
 ## TICKET LEDGER UPDATE (IF PROVIDED)
 
 If Ticket ledger file path is provided:
+
 - Add/update exactly ONE entry for this PR: finding IDs, branch, PR link, status, and next-audit queue items.
 - Do NOT create new tracking files.
 
@@ -198,6 +219,7 @@ If Ticket ledger file path is provided:
 ## AUDIT CAPTURE DOC (IF PROVIDED)
 
 If Audit capture path is provided (example: `docs/audit/<...>.md`):
+
 - Create/update exactly that one file with:
   - audit reference (file + audit version)
   - findings list (IDs/headings)
@@ -210,6 +232,7 @@ If Audit capture path is provided (example: `docs/audit/<...>.md`):
 ## DELIVERABLES (REQUIRED OUTPUT)
 
 ### A) Change summary
+
 - Findings targeted (IDs/headings)
 - Files changed (audited file + tests only, unless justified)
 - Behavior change: YES/NO
@@ -217,16 +240,19 @@ If Audit capture path is provided (example: `docs/audit/<...>.md`):
 - Out-of-scope findings: list or "none"
 
 ### B) Evidence log (raw outputs)
+
 - Commands executed (git/rg/tests)
 - Test results (pass/fail with output excerpts)
 - Any repro/verification artifact output
 
 ### C) Risk and compatibility note
+
 - Caller-visible behavior changes (explicit, even if intended)
 - Any migration notes (if Behavior change: YES)
 - Follow-ups deferred (explicit)
 
 ### D) PR readiness checklist
+
 - Branch name matches rule
 - Commits meaningful
 - Tests added for HIGH/MEDIUM (or deterministic alternative artifact)
@@ -294,6 +320,7 @@ If no automated tests were added/changed:
 ### F) NEXT AUDIT QUEUE v1.0 (MANDATORY IF OUT-OF-SCOPE NOT EMPTY)
 
 For each queued item:
+
 - Ticket title: <short imperative>
 - Target: <file or bounded scope>
 - Why it exists (Observed/Inferred): <one paragraph>

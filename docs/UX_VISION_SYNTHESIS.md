@@ -25,7 +25,9 @@
 ## 🎯 STRONG CONSENSUS (All agents agree)
 
 ### 1. Mascot is Central to Experience
+
 Every document emphasizes a mascot character:
+
 - **My vision:** "Pip is the Interface" - everything flows through Pip
 - **UX_ENHANCEMENTS:** "Buddy is not just decoration; it is the Interface"
 - **child_usability_audit:** "Ally the Learning Owl" as guide/cheerleader
@@ -35,7 +37,9 @@ Every document emphasizes a mascot character:
 **Action:** Continue with Pip as the mascot, implement sprite sheet animations
 
 ### 2. Sound is Non-Negotiable
+
 All documents emphasize audio:
+
 - **My vision:** "Sound is 50% of the Experience"
 - **UX_ENHANCEMENTS:** "Audio: Voiceover, SFX (Pop, Sparkle, Thud)"
 - **child_usability_audit:** "Audio Feedback System" detailed with types
@@ -45,7 +49,9 @@ All documents emphasize audio:
 **Action:** P0 priority - add basic sounds
 
 ### 3. Visual Celebrations Required
+
 Universal agreement on success feedback:
+
 - **My vision:** "Confetti EVERYWHERE, Pip backflips, stars rain down"
 - **UX_ENHANCEMENTS:** "Particle/Confetti explosion on success"
 - **child_usability_audit:** "Confetti Animation, Character Reaction"
@@ -55,7 +61,9 @@ Universal agreement on success feedback:
 **Action:** P0 priority - add confetti and stars
 
 ### 4. Replace Text with Visuals
+
 Consensus that text-based feedback fails children:
+
 - **My vision:** "85% accuracy" → 3 stars
 - **UX_ENHANCEMENTS:** "Progress Bar: Not a line, but a jar filling"
 - **child_usability_audit:** "Children respond better to multimodal feedback"
@@ -65,7 +73,9 @@ Consensus that text-based feedback fails children:
 **Action:** P1 priority - replace accuracy % with star system
 
 ### 5. Age-Appropriate Defaults
+
 All documents recognize different ages need different experiences:
+
 - **My vision:** 4-6 year olds vs 7-10 year olds
 - **AGE_BANDS.md:** Detailed 3-4, 5-6, 7-8, 9+ bands
 - **LEARNING_PLAN.md:** Age-specific session lengths, hints, difficulty
@@ -75,7 +85,9 @@ All documents recognize different ages need different experiences:
 **Action:** Implement age-based defaults in settings
 
 ### 6. Failure Should Be Gentle/Funny
+
 No harsh error feedback:
+
 - **My vision:** "Failure is Funny, Not Scary" - Pip giggles at wobbly letters
 - **GAME_MECHANICS:** "Error-friendly: never punish mistakes"
 - **child_usability_audit:** "Incorrect but Close: Gentle chime + 'Almost!'"
@@ -130,12 +142,14 @@ No harsh error feedback:
 ## 🆕 UNIQUE CONTRIBUTIONS (Only in one document)
 
 ### From My Vision (UX_VISION_CLAUDE.md)
+
 - **"Pip is sleeping, then wakes up"** loading state
 - **Letter creatures join "alphabet zoo"** collectible system
 - **Specific first 30 seconds flow** (no menus, follow Pip)
 - **"What would make a 5-year-old beg to use this"** framing
 
 ### From VISION_AI_NATIVE_LEARNING.md
+
 - **Generation Alpha characteristics** (AI-native thinking)
 - **"Prompt Literacy"** as new skill to teach
 - **AI-generated activities** (not just letters)
@@ -143,11 +157,13 @@ No harsh error feedback:
 - **Parent dashboard showing conversation themes**
 
 ### From UX_ENHANCEMENTS.md
+
 - **Specific color palette** (Sky Blue, Grass Green, Sunshine Yellow)
 - **"useAudio" hook** technical approach
 - **"AdventureMap" component** implementation plan
 
 ### From GAME_MECHANICS.md
+
 - **Anti-frustration system** (detect quitting, intervene)
 - **Mode D: Two-Handed Control** interaction mode
 - **"Stroke practice" mini-game** fallback when frustrated
@@ -155,17 +171,20 @@ No harsh error feedback:
 - **Creative modes** (Free Draw, Draw From Clues, Shape Builder)
 
 ### From LEARNING_PLAN.md
+
 - **9 skill modules** (Pre-writing, Letters, Numeracy, Creative Studio, Face+Body, Thinking Games, STEM Play, Mindfulness)
 - **"Copy-from-memory"** tracing mode
 - **Confusable pairs** (b/d, p/q) handling
 
 ### From child_usability_audit.md
+
 - **Child psychology research basis** (Piaget, Self-Determination Theory)
 - **COPPA compliance considerations**
 - **44px minimum touch targets**
 - **"Ally" owl detailed design** (big eyes, glasses, feathers)
 
 ### From difficulty-progression.md
+
 - **Research on Khan Academy, Duolingo, ABCmouse** approaches
 - **Option A/B/C progression models**
 - **"Hybrid: Adaptive Unlock with Exploration"** recommendation
@@ -175,6 +194,7 @@ No harsh error feedback:
 ## ⚠️ GAPS & MISSING PIECES
 
 ### Not Addressed Anywhere
+
 1. **Onboarding tutorial** - How does child learn the interface?
 2. **Parent-child handoff** - When does parent step away?
 3. **Offline capabilities** - Works without internet?
@@ -182,6 +202,7 @@ No harsh error feedback:
 5. **Accessibility for disabilities** - Beyond standard a11y
 
 ### Addressed But Contradictory
+
 1. **Session length:**
    - AGE_BANDS: 3-15 minutes by age
    - My vision: 15 minutes ideal
@@ -197,6 +218,7 @@ No harsh error feedback:
 ## 📋 CONSOLIDATED PRIORITY LIST
 
 ### P0 - Without these, the app feels broken
+
 | Item | Effort | Impact | Source |
 |------|--------|--------|--------|
 | Add sound effects (success, tap, letter) | Low | High | All docs |
@@ -205,6 +227,7 @@ No harsh error feedback:
 | Replace "85%" with stars (1-3) | Low | High | All docs |
 
 ### P1 - Core child experience
+
 | Item | Effort | Impact | Source |
 |------|--------|--------|--------|
 | Pip sprite animations (5 states) | Medium | High | MASCOT_SPRITE |
@@ -213,6 +236,7 @@ No harsh error feedback:
 | Age-based defaults in settings | Medium | Medium | AGE_BANDS |
 
 ### P2 - Differentiation & Delight
+
 | Item | Effort | Impact | Source |
 |------|--------|--------|--------|
 | Letter creatures collection | High | High | My vision |
@@ -221,6 +245,7 @@ No harsh error feedback:
 | Adventure Map with zones | High | Medium | UX_ENHANCEMENTS |
 
 ### P3 - AI-Native Future
+
 | Item | Effort | Impact | Source |
 |------|--------|--------|--------|
 | Pip AI responses (Claude integration) | Very High | Very High | VISION_AI_NATIVE |
@@ -232,17 +257,20 @@ No harsh error feedback:
 ## 🎬 RECOMMENDED IMMEDIATE ACTIONS
 
 ### This Week (P0 Quick Wins)
+
 1. **Add 3 sounds:** success "ding", tap "pop", letter pronunciation
 2. **Add confetti:** CSS animation on trace completion
 3. **Star rating:** Replace percentage with 1-3 stars
 4. **Pip happy face:** Swap image on success
 
 ### Next 2 Weeks (P1 Core)
+
 1. **Pip sprite sheet:** Integrate existing sprites for 5 states
 2. **Letter Path mockup:** Design landscape zones
 3. **Failure delight:** Pip giggles + wobble animation
 
 ### Month 1 (P2 Differentiation)
+
 1. **Letter creatures:** Design 26 characters
 2. **Anti-frustration:** Detect and intervene
 3. **Age band settings:** Implement in UI

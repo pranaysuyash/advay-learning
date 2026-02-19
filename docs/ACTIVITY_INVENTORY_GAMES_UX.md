@@ -22,6 +22,7 @@
 ## 🎮 CORE GAMES (4 IMPLEMENTED & ACTIVE)
 
 ### 1. Draw Letters (Alphabet Tracing)
+
 - **File**: `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx`
 - **Type**: Drawing/Tracing activity
 - **Age Range**: 2-8 years
@@ -32,13 +33,14 @@
   - Letter-by-letter progression
   - Visual feedback (letter highlight, sound)
   - Completion celebration
-- **Analytics Tracked**: 
+- **Analytics Tracked**:
   - `activity_type: letter_tracing`
   - `content_id: letter (A-Z per language)`
   - `score: accuracy percentage`
   - `duration_seconds: time spent`
 
 ### 2. Finger Counting
+
 - **File**: `src/frontend/src/games/FingerNumberShow.tsx` + `finger-number-show/`
 - **Type**: Recognition/Hand gesture activity
 - **Age Range**: 3-7 years
@@ -56,6 +58,7 @@
   - `duration_seconds`
 
 ### 3. Connect the Dots
+
 - **File**: `src/frontend/src/pages/ConnectTheDots.tsx`
 - **Type**: Drawing/sequencing activity
 - **Age Range**: 3-6 years
@@ -73,6 +76,7 @@
   - `duration_seconds`
 
 ### 4. Find the Letter (Letter Hunt)
+
 - **File**: `src/frontend/src/pages/LetterHunt.tsx`
 - **Type**: Recognition/search activity
 - **Age Range**: 2-6 years
@@ -98,6 +102,7 @@
 **Architecture**: Island-based progression with unlocking mechanics
 
 ### Island 1: Alphabet Lighthouse (Starter)
+
 **Objective**: Master letter tracing and recognition
 
 | Quest ID | Quest Name | Game Type | XP Reward | Difficulty |
@@ -107,6 +112,7 @@
 | Q3 | Upside Down Fun | Rotated Letters | 50 | Medium |
 
 ### Island 2: Number Nook (Unlocks after Island 1)
+
 **Objective**: Learn finger counting and number recognition
 
 | Quest ID | Quest Name | Game Type | XP Reward | Difficulty |
@@ -115,6 +121,7 @@
 | Q5 | Finger Flash | Speed Recognition | 75 | Medium |
 
 ### Island 3: Treasure Bay (Unlocks after Island 2)
+
 **Objective**: Challenge with letter hunting
 
 | Quest ID | Quest Name | Game Type | XP Reward | Difficulty |
@@ -122,6 +129,7 @@
 | Q6 | Treasure Hunter | Letter Hunt | 100 | Medium |
 
 ### Island 4: Star Studio (Unlocks after Island 3)
+
 **Objective**: Creative drawing and constellation creation
 
 | Quest ID | Quest Name | Game Type | XP Reward | Difficulty |
@@ -157,33 +165,39 @@
 **File**: `src/frontend/src/data/alphabets.ts`
 
 ### English (EN)
+
 - **Script**: Latin
 - **Letters**: 26 (A-Z)
 - **Icon Set**: Common objects (Apple, Ball, Cat, Dog, Egg, Fish, etc.)
 - **Status**: Full support with visual icons
 
 ### Hindi (HI)
+
 - **Script**: Devanagari
 - **Structure**: Vowels (Swars: अ, आ, इ, ई, उ, ऊ, ऋ, ए, ऐ, ओ, औ) + Consonants (Vyanjans)
 - **Icon Set**: Cultural/regional icons
 - **Status**: Full support with cultural adaptation
 
 ### Kannada (KN)
+
 - **Script**: Kannada (Dravidian)
 - **Letters**: Complete Kannada alphabet
 - **Status**: Full support
 
 ### Telugu (TE)
+
 - **Script**: Telugu (Dravidian)
 - **Letters**: Complete Telugu alphabet
 - **Status**: Full support
 
 ### Tamil (TA)
+
 - **Script**: Tamil (Dravidian)
 - **Letters**: Complete Tamil alphabet
 - **Status**: Full support
 
-**Multilingual Implementation**: 
+**Multilingual Implementation**:
+
 - Language selection in profile (5-language dropdown)
 - Game content adapts to selected language
 - Learning progress tracked per language
@@ -193,12 +207,14 @@
 
 ## 🗄️ BACKEND ACTIVITY TRACKING SCHEMA
 
-**Files**: 
+**Files**:
+
 - `src/backend/app/db/models/progress.py`
 - `src/backend/app/api/v1/endpoints/progress.py`
 - `src/backend/app/schemas/progress.py`
 
 ### Progress Model
+
 ```python
 class Progress(Base):
     id: UUID (primary key)
@@ -213,6 +229,7 @@ class Progress(Base):
 ```
 
 ### Activity Types Tracked
+
 ```
 - drawing: Tracing, drawing, connecting activities
 - recognition: Letter/number recognition, identification
@@ -220,6 +237,7 @@ class Progress(Base):
 ```
 
 ### API Endpoints
+
 - `POST /progress` - Save single activity
 - `POST /progress/batch` - Batch save with deduplication (idempotency keys)
 - `GET /progress` - Retrieve all progress for profile
@@ -232,6 +250,7 @@ class Progress(Base):
 ## 🛠️ SHARED GAME INFRASTRUCTURE & COMPONENTS
 
 ### Core Game Components (Reusable)
+
 - **GameContainer.tsx** - Standardized container with minimal chrome
 - **GameLayout.tsx** - Universal layout with webcam integration (ref-forwarded)
 - **GameHeader.tsx** - Consistent header across all games (title, controls)
@@ -239,6 +258,7 @@ class Progress(Base):
 - **GameCard.tsx** - Game selection UI (title, ageRange, difficulty, category)
 
 ### Input & Gesture Recognition
+
 - **useHandTracking()** - MediaPipe HandLandmarker hook (GPU/CPU fallback)
 - **useGameLoop()** - FPS-limited game loop (default 30fps)
 - **pinchDetection.ts** - Pinch gesture detection (start/release thresholds)
@@ -247,6 +267,7 @@ class Progress(Base):
 - **landmarkUtils.ts** - Hand landmark normalization and processing
 
 ### Wellness & Monitoring
+
 - **useInactivityDetector()** - 60-second default timeout
 - **useAttentionDetection()** - Eye gaze/engagement tracking (MediaPipe Face Mesh)
 - **usePostureDetection()** - Body posture monitoring
@@ -254,6 +275,7 @@ class Progress(Base):
 - **WellnessReminder** - Break reminders at configurable intervals
 
 ### Game Data & Store
+
 - **characterStore.ts** - Mascot character state (Pip, Lumi)
 - **settingsStore.ts** - Game settings and preferences
 - **profileStore.ts** - Active child profile (age, language, progress)
@@ -264,6 +286,7 @@ class Progress(Base):
 ## 🧪 TESTING & QA ARTIFACTS
 
 ### Test Files
+
 - `src/frontend/src/pages/__tests__/Game.smoke.test.tsx` - General game smoke tests
 - `src/frontend/src/pages/__tests__/Game.pending.test.tsx` - Pending test cases
 - `src/frontend/src/games/__tests__/fingerCounting.test.ts` - Finger counting unit tests
@@ -271,6 +294,7 @@ class Progress(Base):
 - Connect the Dots visual regression tests
 
 ### Dev/Debug Features
+
 - **MediaPipeTest page** - Hand tracking visualization (dev-only)
 - **Debug console logs** - Hand landmark data, gesture state
 - **Network tab monitoring** - Analytics events, progress API calls
@@ -281,23 +305,27 @@ class Progress(Base):
 ## ⚠️ CRITICAL GAPS & OBSERVATIONS
 
 ### Games
+
 - **No difficulty progression**: All 4 games hardcoded to "Easy"
 - **No progressive content**: Games don't get harder as child improves
 - **Islands configured but hidden**: 8 quests exist in backend but not shown in UI
 - **Social activities undefined**: 6 templates exist but no gameplay implementation
 
 ### Analytics
+
 - **Limited event granularity**: Only completion tracked, not per-attempt data
 - **No gesture quality metrics**: Can't track hand steadiness, accuracy per stroke
 - **No engagement metrics**: Missing time-to-first-interaction, retry patterns
 - **No game-specific events**: All games map to generic "drawing" or "recognition"
 
 ### Multilingual
+
 - **Full support implemented**: 5 languages with cultural adaptation
 - **Learning progress isolated**: Kids can't progress across languages easily
 - **No mixed-language mode**: Can't practice letters from multiple languages in one session
 
 ### UI/Components
+
 - **No age-based adaptation**: Same UI for 2yr and 8yr old
 - **Difficulty colors identical**: Easy/Medium/Hard have same styling
 - **Profile age not used**: Age tracked but not used for content filtering
@@ -308,6 +336,7 @@ class Progress(Base):
 ## 🔄 EVIDENCE CLASSIFICATION
 
 **Observed** (Code-verified):
+
 - 4 games implemented (files found, code reviewed)
 - Backend progress model with batch API (schema verified)
 - 5-language support with icon sets (data files reviewed)
@@ -316,12 +345,14 @@ class Progress(Base):
 - Game components reusable and well-structured
 
 **Inferred** (Logical from code):
+
 - Islands not exposed in frontend (quests.ts defined but Games.tsx doesn't load them)
 - Social activities not implemented (templates exist but no gameplay code)
 - Age-based adaptation not implemented (profileStore.age exists but Games.tsx doesn't filter by it)
 - Difficulty not progressive (Games.tsx shows all as "Easy", no configuration for difficulty levels)
 
 **Unknown** (Requires testing):
+
 - How do children actually experience games across age ranges?
 - Are analytics events firing correctly during gameplay?
 - Is parent progress dashboard accurate and actionable?
@@ -333,6 +364,7 @@ class Progress(Base):
 ## 📈 NEXT STEPS
 
 This comprehensive inventory provides baseline for multi-model analysis:
+
 - **Part B**: Code Quality & Architecture Review (Claude, GPT, Gemini)
 - **Part C**: UX Pattern Analysis & Improvement Suggestions
 - **Part D**: Cross-Model Consensus & Synthesis

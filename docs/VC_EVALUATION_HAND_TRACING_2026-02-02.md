@@ -3,7 +3,7 @@
 **Evaluation Date**: February 2, 2026  
 **Evaluator Persona**: Series A VC Partner (Top-Tier Fund)  
 **Focus**: Hand Tracing as Core Differentiator  
-**Product Access**: http://localhost:6173  
+**Product Access**: <http://localhost:6173>  
 **Evaluation Scope**: Product-market fit, defensibility, investor appeal
 
 ---
@@ -854,7 +854,7 @@ Do NOT take the funding if:
 
 "Hand Tracing for Kids Learning" is the first app where kids learn letters naturally — by using their hands to trace in the air, not tapping abstract buttons. We use MediaPipe computer vision (runs on device, no cloud) to detect hand movements and give real-time feedback. It feels magical to kids, teaches faster than flashcards, and scales to any curriculum area (numbers, shapes, ASL, etc.)."
 
-### Key Strengths to Lead With:
+### Key Strengths to Lead With
 
 1. **Magical Core Interaction**: Hand as input is revolutionary; kids "get it" instantly
 2. **Technical Differentiation**: GPU-accelerated hand tracking is hard to build; we have it
@@ -862,7 +862,7 @@ Do NOT take the funding if:
 4. **Defensive Growth Path**: Content scale + school partnerships = 24-month moat build
 5. **Founding Team**: [Credibility of founder + advisors; critical to communicate]
 
-### Red Flags to Pre-Empt:
+### Red Flags to Pre-Empt
 
 1. "But Duolingo could build this in 6 months?" → Response: "Yes, but we'll have 100K users, pedagogy validation, & school partnerships by then. Speed matters more than features in EdTech."
 2. "Can kids learn from this?" → Response: "We're funding a 4-week efficacy study (pre-launch); results will prove learning outcomes vs control group."

@@ -11,6 +11,7 @@
 This prompt provides comprehensive guidance for implementing educational features that go beyond basic letter tracing. These features leverage MediaPipe capabilities to create engaging, multi-modal learning experiences for children aged 4-10 years.
 
 **Core Domains Covered:**
+
 - Language Learning (Hindi greetings, vocabulary, phonics)
 - Social-Emotional Development (expression mirroring, feelings)
 - Cognitive Skills (patterns, memory, logic, problem-solving)
@@ -18,6 +19,7 @@ This prompt provides comprehensive guidance for implementing educational feature
 - Interactive Storytelling (quests, narrative-based activities)
 
 **Technical Feasibility:**
+
 - ✅ HIGH - MediaPipe provides all needed capabilities
 - ✅ HIGH - Can integrate with existing Game.tsx
 - ✅ MEDIUM - Requires some new components (but mostly reuses existing)
@@ -44,12 +46,14 @@ This prompt provides comprehensive guidance for implementing educational feature
 ### Step 1: Read the Worklog Ticket
 
 **Action:**
+
 ```bash
 # Find your ticket (e.g., TCK-20260129-201)
 grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 ```
 
 **What to Look For:**
+
 - Scope contract (what feature to implement)
 - Acceptance Criteria (must be testable)
 - Dependencies (other features that must complete first)
@@ -68,6 +72,7 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 | **Pattern 4: Interactive Story** | Pose + Hand Landmarker | HIGH | Quest-based learning |
 
 **Select Your Pattern:**
+
 - Most educational features use Pattern 2 or 3
 - Static content (Pattern 1) is fastest to implement
 - Camera-based activities (Pattern 3) is most engaging but requires more time
@@ -77,6 +82,7 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 ### Step 3: Assess Technical Requirements
 
 **Checklist:**
+
 - [ ] Does this feature need MediaPipe? (YES = Pattern 2/3, NO = Pattern 1)
 - [ ] Does this feature need Object Detection? (YES = scavenger hunts, NO = greetings)
 - [ ] Does this feature need Face Landmarker? (YES = expressions, NO = others)
@@ -90,6 +96,7 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 **Example Success Criteria:**
 
 **For Hindi Greetings Feature:**
+
 - [x] 6 gestures defined (Ha, Ji, Namaste, etc.)
 - [x] Hand Landmarker detects gestures with >80% accuracy
 - [x] Visual feedback on correct gesture
@@ -100,6 +107,7 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 - [ ] Multilingual support (English + Hindi)
 
 **For Vocabulary Builder Feature:**
+
 - [ ] 20+ objects defined (fruits, animals, etc.)
 - [ ] Object Detector recognizes objects
 - [ ] Child draws object on canvas (or uses brush)
@@ -109,6 +117,7 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 - [ ] Shows usage examples/definitions
 
 **For Expression Mirror Feature:**
+
 - [ ] 6+ expressions defined (happy, sad, surprised, etc.)
 - [ ] Face Landmarker detects expressions
 - [ ] Blendshapes compared for matching
@@ -123,22 +132,26 @@ grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
 ### Step 1: Choose Integration Approach
 
 **Option A: Extend Game.tsx**
+
 - Add new game mode toggle to existing Game.tsx
 - Reuse camera infrastructure
 - Keep all features (letter tracing, achievements, etc.)
 
 **Option B: Separate Game Page**
+
 - Create dedicated page for feature
 - Clean separation of concerns
 - More flexible routing
 
 **Decision:**
+
 - Start with Option A (extend Game.tsx)
 - Create separate game pages only for very complex features
 
 ### Step 2: Data Structure
 
 **For Content-Based Features:**
+
 ```typescript
 // src/frontend/src/data/hindiGestures.ts
 export const hindiGestures = {
@@ -215,6 +228,7 @@ export const vocabulary = [
 ```
 
 **For Camera-Based Activities:**
+
 ```typescript
 // src/frontend/src/data/activityLibrary.ts
 export const activities = [
@@ -257,6 +271,7 @@ export const activities = [
 ### Step 3: Component Structure
 
 **Recommended Structure:**
+
 ```
 src/frontend/src/features/
 ├── hindi/
@@ -281,6 +296,7 @@ src/frontend/src/features/
 ### Pattern 1: Hindi Greetings (Gesture Recognition)
 
 **What It Does:**
+
 - Teaches Hindi greetings (Ha, Ji, Namaste, etc.)
 - Detects child's hand gestures using MediaPipe Hand Landmarker
 - Provides instant feedback (correct/incorrect)
@@ -288,6 +304,7 @@ src/frontend/src/features/
 - Celebrates correct answers
 
 **Technical Approach:**
+
 ```typescript
 // Detect gesture
 const detectHindiGesture = (landmarks: Landmark[]): Gesture => {
@@ -345,6 +362,7 @@ function renderFeedback(detectedGesture: string, confidence: number) {
 ### Pattern 2: Vocabulary Builder (Object Recognition + Drawing)
 
 **What It Does:**
+
 - Shows object on screen (apple, ball, cat, etc.)
 - Child draws or selects object using hand/brush
 - AI recognizes what was drawn
@@ -352,6 +370,7 @@ function renderFeedback(detectedGesture: string, confidence: number) {
 - Shows usage example
 
 **Technical Approach:**
+
 ```typescript
 // Simple object recognition (color-based)
 const recognizeDrawing = (canvas: HTMLCanvasElement): string | null => {
@@ -394,12 +413,14 @@ function renderVocabularyGame() {
 ### Pattern 3: Expression Mirror (Social-Emotional)
 
 **What It Does:**
+
 - Shows character face with expression (happy, sad, surprised, etc.)
 - Child copies expression with their face
 - Teaches emotional awareness (happy = good, sad = upset)
 - No emotion detection claims (just expression matching)
 
 **Technical Approach:**
+
 ```typescript
 // Match facial blendshapes
 const detectExpression = (blendshapes: Blendshapes): Expression => {
@@ -446,12 +467,14 @@ function renderCharacterWithExpression(expression: Expression) {
 ### Pattern 4: Pattern Builder (Cognitive Skills)
 
 **What It Does:**
+
 - Shows color pattern (Red, Blue, Red, Blue)
 - Child copies pattern by selecting colors in order
 - Teaches pattern recognition
 - Progressive difficulty (longer patterns, more colors)
 
 **Technical Approach:**
+
 ```typescript
 // Generate pattern
 const generatePattern = (length: number): Color[] => {
@@ -488,6 +511,7 @@ const validatePattern = (userPattern: Color[], targetPattern: Color[]): boolean 
 ### Step 1: Create Feature Directory
 
 **Action:**
+
 ```bash
 # Create feature directory
 mkdir -p src/frontend/src/features/hindi
@@ -499,6 +523,7 @@ mkdir -p src/frontend/src/features/hindi/greetings
 ### Step 2: Implement Core Components
 
 **Required Components:**
+
 - `GestureDetector.tsx` - Reusable gesture detection
 - `ObjectDetector.tsx` - Reusable object detection wrapper
 - `FeedbackDisplay.tsx` - Visual feedback (correct/incorrect)
@@ -508,6 +533,7 @@ mkdir -p src/frontend/src/features/hindi/greetings
 ### Step 3: Implement Feature Component
 
 **Example: HindiGreetings.tsx**
+
 ```typescript
 import { useState, useEffect } from 'react';
 import { useMediaPipeTaskRunner } from '../../services/mediapipeTaskRunner';
@@ -619,6 +645,7 @@ export function HindiGreetings() {
 ### Step 4: Integrate with Game.tsx
 
 **Action:**
+
 ```typescript
 // src/frontend/src/pages/Game.tsx
 import { HindiGreetings } from '../features/hindi/greetings/HindiGreetings';
@@ -653,6 +680,7 @@ export function Game() {
 ### Step 1: Unit Tests
 
 **Test File:**
+
 ```typescript
 // src/frontend/src/features/hindi/__tests__/HindiGreetings.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -691,12 +719,14 @@ describe('HindiGreetings', () => {
 ### Step 2: Manual Testing Checklist
 
 **Accessibility:**
+
 - [ ] Large touch targets (60px+) for gesture display
 - [ ] WCAG AA color contrast
 - [ ] Keyboard navigation works (Tab, Enter, Space)
 - [ ] Screen reader announces state changes
 
 **Functionality:**
+
 - [ ] Gestures detect reliably in good lighting
 - [ ] Feedback is immediate and clear
 - [ ] Sounds play correctly
@@ -704,6 +734,7 @@ describe('HindiGreetings', () => {
 - [ ] No false negatives (wrong gesture not too harsh)
 
 **Performance:**
+
 - [ ] Target 30 FPS achieved
 - ] No frame drops below 20 FPS
 - ] Confetti doesn't impact performance
@@ -716,6 +747,7 @@ describe('HindiGreetings', () => {
 ### Step 1: Update WORKLOG_TICKETS.md
 
 **Action:**
+
 ```bash
 # Update your ticket
 rg -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
@@ -726,6 +758,7 @@ echo "Marked as DONE at $(date -u +%Y-%m-%d)" >> docs/WORKLOG_TICKETS.md
 ```
 
 **What to Update:**
+
 - Status: DONE
 - Completion timestamp
 - Evidence section (screenshots, test outputs)
@@ -734,6 +767,7 @@ echo "Marked as DONE at $(date -u +%Y-%m-%d)" >> docs/WORKLOG_TICKETS.md
 ### Step 2: Create Documentation
 
 **Action:**
+
 ```bash
 # Create feature documentation
 touch docs/MEDIAPIPE_EDUCATIONAL_FEATURES.md
@@ -754,6 +788,7 @@ echo ">>" >> docs/MEDIAPIPE_EDUCATIONAL_FEATURES.md
 Before marking your worklog ticket as DONE, verify:
 
 ### Functionality
+
 - [ ] Core feature works as described
 - [ ] All gestures/tasks implemented
 - [ ] MediaPipe integration successful
@@ -762,18 +797,21 @@ Before marking your worklog ticket as DONE, verify:
 - [ ] Works on target platform (web, mobile)
 
 ### Quality
+
 - [ ] No TypeScript errors
 - [ ] No ESLint errors
 - [ ] No console errors during use
 - [ ] Performance target met (25+ FPS)
 
 ### Testing
+
 - [ ] Unit tests pass
 - [ ] Manual testing complete
 - [ ] Accessibility checklist passed
 - [ ] No critical bugs
 
 ### Documentation
+
 - [ ] WORKLOG_TICKETS.md updated
 - [ ] Feature documented in MEDIAPIPE_EDUCATIONAL_FEATURES.md
 - [ ] Implementation notes added
@@ -784,6 +822,7 @@ Before marking your worklog ticket as DONE, verify:
 ## QUICK REFERENCE
 
 **MediaPipe Tasks:**
+
 - Hand Landmarker: 21 landmarks, gestures
 - Face Landmarker: 468 landmarks, 52 blendshapes
 - Pose Landmarker: 33 landmarks, body position
@@ -791,6 +830,7 @@ Before marking your worklog ticket as DONE, verify:
 - Object Detector: Real-world objects, classification
 
 **Game Types:**
+
 - Fine Motor: Tracing, dot connection
 - Gross Motor: Simon Says, Yoga, Dance
 - Language: Greetings, Vocabulary, Phonics
@@ -798,6 +838,7 @@ Before marking your worklog ticket as DONE, verify:
 - Cognitive: Patterns, Memory, Logic
 
 **Best Practices:**
+
 - EMA smoothing (alpha 0.5-0.7)
 - Frame skipping for performance (every 2nd frame)
 - GPU delegation when available

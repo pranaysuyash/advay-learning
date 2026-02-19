@@ -10,17 +10,20 @@
 You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven learning web app for kids ages 2-6.
 
 **Product Access:**
-- URL: http://localhost:6173
+
+- URL: <http://localhost:6173>
 - **CRITICAL**: Must explore hands-on. Do NOT restart anything. Do NOT install anything. Do NOT change code.
 
 **Evaluation Constraints:**
+
 - You are evaluating both product potential AND company quality (inferred from current state)
 - This is NOT a generic VC memo. It must be grounded in what you observe.
 - Distinguish between: A) What you observed, B) What you infer (label as "Inference")
 - C) What you would need to verify in diligence (questions + metrics)
 
 **App Architecture (Actual):**
-- Frontend: React + Vite, running at http://localhost:6173
+
+- Frontend: React + Vite, running at <http://localhost:6173>
 - Routes: `/home`, `/login`, `/register`, `/dashboard`, `/game` (AlphabetGame), `/games`, `/games/finger-number-show`, `/games/connect-the-dots`, `/games/letter-hunt`, `/progress`, `/settings`
 - Games: FingerNumberShow, AlphabetGame, ConnectTheDots, LetterHunt
 - Hand Tracking: Centralized via `useHandTracking` hook (`src/frontend/src/hooks/useHandTracking.ts`)
@@ -29,6 +32,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - Backend: Python FastAPI + PostgreSQL + Alembic (`src/backend/app/`)
 
 **Code References to Look For:**
+
 - FingerNumberShow game: `src/frontend/src/games/FingerNumberShow.tsx`
   - Lines 1-12: Imports (useHandTracking, useTTS, MediaPipe tasks-vision)
   - Lines 25-47: DIFFICULTY_LEVELS array with 5 levels (min/max numbers, reward multipliers)
@@ -91,9 +95,10 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### Step 1: 10-Minute Product Tour
 
-**Open http://localhost:6173 and explore:**
+**Open <http://localhost:6173> and explore:**
 
 **Time Allocation:**
+
 - 0:00-2:00: Landing page + onboarding (first impression)
 - 2:00-4:00: Core gameplay loop (how it feels to play)
 - 4:00-6:00: Unique features enabled by camera (what makes it special)
@@ -101,6 +106,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - 8:00-10:00: Edge cases and stress-testing
 
 **What you're looking for:**
+
 - Product clarity (is value obvious?)
 - Execution quality (is it polished?)
 - Technical depth (is MediaPipe integration solid?)
@@ -124,6 +130,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
   - Evidence: Track time from camera start to first interaction
 
 **Evidence to Collect:**
+
 - Time to first hand detection
 - Visual feedback type (cursor, skeleton overlay, celebration)
 - Whether interaction feels responsive or laggy
@@ -139,11 +146,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Time-to-Trust**: How long to believe "this is safe for my kid"?
 
 **Evidence to Collect:**
+
 - Actual timestamps (page load, camera permission, first game, first win)
 - Any friction points (multiple clicks, unclear instructions)
 - Trust signals visible (privacy indicators, safety notices)
 
 **Red Flags:**
+
 - Any >3 minutes = onboarding too long
 - Any >90 seconds to first fun = engagement risk
 - No clear trust/safety indicators = parent concern risk
@@ -184,6 +193,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
    - Evidence: Can parent understand child's progress at a glance?
 
 **For each activity:**
+
 - **Educational objective**: What do kids learn?
 - **Camera interaction**: How do they engage? (FingerNumberShow uses `useHandTracking`)
 - **Completion time**: How long to finish?
@@ -227,6 +237,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
    - Evidence: Load times, memory usage
 
 **For each scenario:**
+
 - **What happens**: Does it work, degrade, or break?
 - **What error shows**: Is it kid-friendly?
 - **Recovery time**: If it breaks, how long to recover?
@@ -254,9 +265,10 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### #1: Investment Headline
 
-**Format**: "This is a ___ disguised as a ___"
+**Format**: "This is a ___disguised as a___"
 
 **Examples (DO NOT USE, understand pattern):**
+
 - "This is a computer vision research project disguised as a kids game"
 - "This is a behavioral training tool disguised as a learning app"
 - "This is a content play disguised as a tech platform"
@@ -270,17 +282,20 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **A. Product Map (Screens + Flows)**
 
 **Screen 1: Landing Page (`/home`)**
+
 - [ ] Visual description: [what you saw - colors, mascot Pip, layout]
 - [ ] Primary CTA: [what button is most prominent]
 - [ ] Entry points: [ways to start playing]
 - [ ] Load time: [how long to fully render]
 
 **Screen 2: Onboarding (`/login` → `/register`)**
+
 - [ ] Steps before first game: [number and description]
 - [ ] Permission prompts: [what permissions requested, how]
 - [ ] Time-to-first-game: [measured]
 
 **Screen 3: Dashboard (`/dashboard`)**
+
 - [ ] What progress is tracked: [stars, LetterJourney, multi-child]
 - [ ] Child profile management: [Add Child modal, profile selector]
 - [ ] Parental controls visible: [settings access, export]
@@ -289,6 +304,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Screen 4-N: Each Game**
 
 **Game 1: FingerNumberShow** (`/games/finger-number-show`)
+
 - **Code reference**: `src/frontend/src/games/FingerNumberShow.tsx`
 - [ ] Educational objective: Counting, number recognition (1-10, 11-20)
 - [ ] Camera interaction: Hand tracking via `useHandTracking` hook
@@ -299,20 +315,24 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - [ ] Load time: [measured]
 
 **Game 2: AlphabetGame** (`/game`)
+
 - **Educational objective**: Letter tracing
 - [ ] Camera interaction: Pinch gesture for drawing
 - [ ] Target selection: A-Z or custom set
 - [ ] Progress updates: LetterJourney
 
 **Game 3: ConnectTheDots**
+
 - **Educational objective**: Fine motor skills, sequencing
 - [ ] Camera interaction: Hand cursor for dot selection
 
 **Game 4: LetterHunt**
+
 - **Educational objective**: Letter recognition (find matching letter on screen)
 - [ ] Camera interaction: Pointing or hand movement
 
 **Screen N: Progress** (`/progress`)
+
 - **Code reference**: `src/frontend/src/pages/Progress.tsx`
 - [ ] Real-time sync via `progressQueue`
 - [ ] LetterJourney visualization
@@ -323,6 +343,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **B. Core Interaction Loops**
 
 **Loop 1: FingerNumbering Game**
+
 - **Trigger**: Parent starts game (from dashboard or home)
 - **Action**: Kid shows hand → MediaPipe detects number → mascot celebrates
 - **Feedback**: Stars earned (0-3 based on accuracy), streak bonus (3 in a row)
@@ -331,6 +352,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Code reference**: `src/frontend/src/games/FingerNumberShow.tsx` lines 1-100
 
 **Loop 2: Progress Tracking**
+
 - **Trigger**: Game ends or milestone reached
 - **Action**: `progressQueue` syncs to backend → `progressStore` updates
 - **Feedback**: LetterJourney updates, stars displayed in dashboard
@@ -378,6 +400,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 ---
 
 **Overall Polish Score** (0-10):
+
 - [ ] [Give score with 1-2 sentence justification]
 
 ---
@@ -401,17 +424,20 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Current State**: 4 games, progress tracking, multi-child support
 
 **Phase 1: Core Product (0-12 months)**
+
 - [ ] What: All 4 games + progress tracking + multi-child
 - [ ] Users: 100-1,000 parents
 - [ ] Revenue: $5-50K/month (B2C)
 - [ ] What enables it: Progress data collection
 
 **Phase 2: Content Expansion (12-24 months)**
+
 - [ ] What: Curriculum marketplace (teachers create lessons)
 - [ ] Revenue: Revenue share with creators (20-30%)
 - [ ] What enables it: Scalable content beyond founder builds
 
 **Phase 3: Full Platform (24+ months)**
+
 - [ ] What: Two-sided marketplace (creators + learners)
 - [ ] Network effects kick in: More content = more users = better recommendations
 - [ ] Revenue: Commission on transactions
@@ -423,6 +449,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **C. The Inevitability: What macro trend helps it win**
 
 **Options (pick one or combine):**
+
 - [ ] Camera-first computing (AR/VR convergence)
 - [ ] Home learning shift (post-pandemic trend)
 - [ ] Screen-time wellness movement (parents want active engagement)
@@ -439,11 +466,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### A. Data Moat
 
 **What data is uniquely generated?**
+
 - [ ] User interaction data: [hand gesture types, accuracy, session length]
 - [ ] Learning outcomes: [star ratings, completed games, LetterJourney progress]
 - [ ] Child profiles: [age, language preferences, per-child metrics]
 
 **Is it defensible?**
+
 - [ ] Can competitors collect same data? [Yes/No with reason]
 - [ ] Does data improve product over time? [Yes/No with explanation]
 - [ ] Is there a data network effect? [Yes/No with explanation]
@@ -457,12 +486,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### B. Model Moat
 
 **Beyond MediaPipe (which anyone can use):**
+
 - [ ] Custom ML models: [anything unique, if any]
 - [ ] Curriculum algorithms: [how difficulty adapts, star rating logic]
 - [ ] Gesture recognition tuning: [confidence thresholds in `useHandTracking` hook]
 - [ ] Thumb detection logic: [6-10 finger range - unique algorithm]
 
 **Is it defensible?**
+
 - [ ] Can a team of 3 engineers replicate in 3 months? [Yes/No]
 - [ ] What's the barrier? [IP, data volume, domain expertise]
 
@@ -475,15 +506,18 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### C. Content Moat (Curriculum + Interaction Design)
 
 **Content Assets:**
+
 - [ ] Games: 4 distinct educational games (FingerNumberShow, AlphabetGame, ConnectTheDots, LetterHunt)
 - [ ] Progress systems: Stars, LetterJourney, streaks
 - [ ] Mascot (Pip): Character with personality
 
 **Design System:**
+
 - [ ] Interaction patterns: Camera gestures (count, pinch, point)
 - [ ] Gamification: Streaks, multipliers, rewards
 
 **Is it defensible?**
+
 - [ ] Can competitors copy content? [Yes/No]
 - [ ] Is content production scalable? [Yes/No]
 - [ ] Is there a content moat (exclusive partnerships)?
@@ -497,11 +531,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### D. Distribution Moat (Virality, School Channel, Partnerships)
 
 **Current Distribution:**
+
 - [ ] Organic: Parent communities, word-of-mouth
 - [ ] Potential: School pilot programs (not currently implemented)
 - [ ] Code reference: Check if school-specific features exist
 
 **Is it defensible?**
+
 - [ ] Are there network effects? [Yes/No]
 - [ ] Are there exclusive partnerships? [Yes/No]
 - [ ] Channel lock-in? [Yes/No]
@@ -515,16 +551,19 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### E. Brand Moat (Mascot, Identity, Trust)
 
 **Brand Assets:**
+
 - [ ] Mascot: Pip character (seen in games)
 - [ ] Visual identity: Colors, typography (Nunito font)
 - [ ] Tone of voice: Kid-friendly in TTS and UI
 
 **Trust Signals:**
+
 - [ ] Privacy policy: [check if exists]
 - [ ] Parental controls: [Child profiles, settings]
 - [ ] Code reference: Check `auth.py` for security measures
 
 **Is it defensible?**
+
 - [ ] Can competitor copy mascot? [Yes/No - but would need to rebuild brand]
 - [ ] Is brand emotionally resonant? [Would kids/parents remember it?]
 
@@ -537,11 +576,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 #### F. Switching Costs (For Parents/Teachers/Schools)
 
 **For Parents:**
+
 - [ ] Progress transfer: Can progress move to competitor? [check `progressStore` + `progressApi`]
 - [ ] Habit formation: Is app part of daily routine? [check engagement metrics]
 - [ ] Customization: Stars earned, child preferences
 
 **Is it defensible?**
+
 - [ ] If parent switches, what do they lose? [All progress + stars]
 - [ ] How strong are switching costs? [Score 0-10]
 
@@ -565,6 +606,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence you'd look for**: [what data would confirm/severity]
 
 **Risk 1**: Privacy/Safety - Camera Data Handling**
+
 - **Why it's real**: Parents suspicious of camera apps for kids
 - **Severity**: HIGH
 - **Current State**: Check if camera indicator exists, check privacy policy
@@ -572,6 +614,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: Parent questions, adoption rate comparison
 
 **Risk 2**: Technical - MediaPipe Model Accuracy**
+
 - **Why it's real**: Kid rooms often have dim lighting, low light degrades
 - **Severity**: MEDIUM
 - **Current State**: Check if `useHandTracking` has confidence thresholds (lines 70-73)
@@ -579,6 +622,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: Session length in low light vs normal
 
 **Risk 3**: Technical - Browser Camera API Limitations**
+
 - **Why it's real**: Browser APIs have limitations (resolution, frame rate)
 - **Severity**: LOW (manageable)
 - **Current State**: Check `react-webcam` integration
@@ -586,6 +630,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: Cross-platform testing data
 
 **Risk 4**: Retention - Gamification Overstimulation**
+
 - **Why it's real**: Too many rewards/celebrations can devalue learning
 - **Severity**: MEDIUM
 - **Current State**: Check streak system (Line 84-100), reward multipliers (Line 63-82)
@@ -593,6 +638,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: A/B test reward frequency vs retention
 
 **Risk 5**: Competition - Camera-Based EdTech Incumbents**
+
 - **Why it's real**: Khan Academy, Duolingo Kids could add camera features
 - **Severity**: MEDIUM
 - **Current State**: No major incumbents in camera-based toddler learning
@@ -600,6 +646,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: Feature comparison tables, user interviews
 
 **Risk 6**: GTM - Organic Growth Slow**
+
 - **Why it's real**: Virality doesn't exist yet, organic growth is slow
 - **Severity**: MEDIUM
 - **Current State**: No viral loops built (no "share progress" features)
@@ -607,6 +654,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: Viral coefficient tracking, organic growth rate
 
 **Risk 7**: Team - Solo Founder Velocity Risk**
+
 - **Why it's real**: Single founder = bus factor risk, limited bandwidth
 - **Severity**: LOW (positive signal - code quality is good based on actual observation)
 - **Current State**: Code quality observed in FingerNumberShow, Progress, Dashboard files is high
@@ -614,6 +662,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence**: 2-week milestone completion capability (based on actual development speed)
 
 **Risk 8**: Financial - Burn Rate & Runway
+
 - **Why it's real**: Angel $25K-$50K = 3-6 months runway (tight)
 - **Severity**: MEDIUM
 - **Current State**: No revenue yet, pure burn
@@ -627,57 +676,68 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **A. B2C Subscription (Parents Paying)**
 
 **Packaging** (based on actual implementation):
+
 - All 4 games + progress tracking + multi-child support (up to 5 children)
 - Star ratings: 0-3 stars based on accuracy
 - LetterJourney: A-Z letter completion visualization
 - Export functionality
 
 **Price Point** (realistic):
+
 - Monthly: $5-10 (India/US price-sensitive markets)
 - Annual: $50-120 (15-20% savings over monthly)
 - Free tier: 2 games unlocked
 
 **Who Pays**:
+
 - Primary: Parents of 2-6 year olds in India/US
 - Segments: Price-sensitive ($3-5/month), Education-focused
 
 **Revenue Driver**:
+
 - More kids per family (2-5 children supported via `profileStore`)
 - Premium content packs (additional games/activities)
 - Analytics tier (future)
 
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] Parents see weekly progress value (stars, LetterJourney in dashboard)
 - [ ] 10-15 minute daily usage is achievable (kids enjoy this length)
 - [ ] Parents pay for "progress, not screen time" (guilt reduction is unique value)
 - [ ] Churn <5% monthly (subscription LTV sufficient)
 
 **What Would Break It** (2 bullets):
+
 - [ ] Day 7 retention < 40% (no habit formed)
 - [ ] Average session <5 minutes (too short = no value)
 - [ ] Competitor offers better experience for free
 
 **First Pricing Experiments to Run** (3 bullets):
+
 - [ ] Test free tier: 2 games free, 4 games locked (measure conversion)
 - [ ] Test annual discount: Show "20% off if you pay annually" (measure LTV)
 
 ---
 
 **B. B2B2C Schools (Daycares Paying)**
+
 - **Current State**: Not implemented yet
 - **Price Point**: $5/student/month or $200/classroom license
 - **Potential**: Schools, daycares in India/US
 
 **"Must Be True"** (3 bullets):
+
 - [ ] Activities align with early learning standards (shapes, colors, letters, numbers)
 - [ ] Teachers see educational value (camera = engagement tool)
 - [ ] Parents trust camera safety (privacy policy + dashboard)
 
 **What Would Break It** (2 bullets):
+
 - [ ] Schools don't see classroom value
 - [ ] Teachers resist camera-based interaction (privacy concerns)
 
 **First Partnerships to Approach** (3 bullets):
+
 - [ ] Reach out to 3-5 preschools in local area
 - [ ] Partner with early learning publishers
 
@@ -686,20 +746,24 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **C. Hybrid (Freemium + Premium Upsell)**
 
 **Packaging**:
+
 - Free: 2 games unlocked, basic progress tracking
 - Premium: All games, LetterJourney, analytics, export
 
 **Price Point**:
+
 - Free: $0
 - Premium: $7/month or $70/year
 - Annual discount: 20% off
 
 **"Must Be True"** (3 bullets):
+
 - [ ] Free tier shows value (2 games are fun)
 - [ ] Premium features are compelling (LetterJourney = strong differentiator)
 - [ ] Conversion rate > 5% after 1 month
 
 **First Upsell Experiments to Run** (3 bullets):
+
 - [ ] Test "unlock all games" CTA in free tier
 - [ ] Test "see LetterJourney progress" upsell
 
@@ -712,6 +776,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **A. 3 Channels That Could Work in First 6 Months**
 
 **Channel 1: Parent Facebook Groups (India/US)**
+
 - **What it is**: Engaged parent communities where kids are discussed
 - **Why it works**: Parents actively seeking educational apps, trust peer recommendations
 - **Strategy**: Share demo videos, ask for feedback, answer questions, build relationships
@@ -719,6 +784,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence needed**: Group activity, feedback collection
 
 **Channel 2: Educational Influencers/Bloggers**
+
 - **What it is**: Parents follow early learning experts on Instagram, YouTube, Substack
 - **Why it works**: Trust authority, educational content discovery
 - **Strategy**: Send free access to influencers, ask for reviews, feature showcase
@@ -726,6 +792,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Evidence needed**: Influencer posts, referral traffic
 
 **Channel 3: Preschool/Daycare Local Outreach**
+
 - **What it is**: Visit local early learning centers, demo to teachers/parents
 - **Why it works**: Face-to-face builds trust, immediate feedback
 - **Strategy**: Demo to 10 centers, collect 5 pilots by Month 3
@@ -737,11 +804,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **B. 2 Channels That Are Tempting But Likely Wasteful Early**
 
 **Wasteful Channel 1: App Store Ads (Apple/Google Play)**
+
 - **Why tempting**: Scale quickly, reach millions of parents
 - **Why wasteful**: CAC is high ($5-10/CAC), no organic proof of fit
 - **When it might work**: After product-market fit proven via organic channels
 
 **Wasteful Channel 2: Paid Social Media Ads**
+
 - **Why tempting**: Scale quickly, reach broad audience
 - **Why wasteful**: Early stage, CAC too high, conversion unknown
 - **When it might work**: After organic CAC proven, need scale
@@ -751,18 +820,21 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **C. Viral Hooks: What Shareable Moments Must Product Generate**
 
 **Viral Hook 1**: Share LetterJourney Achievement**
+
 - **Trigger**: Child completes all letters A-Z
 - **Visual**: A-Z journey complete, mascot celebrates
 - **Share**: "My child completed the alphabet!" with screenshot
 - **Viral Multiplier**: 3-5x shares per completed journey
 
 **Viral Hook 2**: "Beat Parent's Score" Challenge**
+
 - **Trigger**: Child earns 3-star rating
 - **Visual**: Challenge notification: "Child X got 3 stars on counting game - can you beat it?"
 - **Share**: "Challenge friend" CTA in dashboard
 - **Viral Multiplier**: 1.2x new users per challenge (social proof)
 
 **Viral Hook 3**: Share Progress Milestone**
+
 - **Trigger**: Child completes level 5 or wins streak
 - **Visual**: Milestone celebration, progress graph
 - **Share**: "My kid is progressing so fast!" with week-over-week comparison
@@ -770,12 +842,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Community Loops: How Parents/Teachers Contribute (Without Turning It Into Work)**
 
 **Loop 1**: Content Library (future)**
+
 - **Contribution**: Teachers share lesson plans, activity templates
 - **Incentive**: Recognition, profile on platform
 - **Quality Control**: Peer review, rating system
 - **Network Effect**: More content = better recommendations for all parents
 
 **Loop 2**: Local Language Support (future)**
+
 - **Contribution**: Parents translate voiceovers, add regional content
 - **Incentive**: Cultural relevance, child engagement
 - **Quality Control**: Community voting, review system
@@ -787,11 +861,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **A. What Would Bring Kids Back Tomorrow?**
 
 **Mechanism 1**: Progress Tracking (Stars + LetterJourney)**
+
 - **What it is**: Visual progress motivates continued play
 - **Evidence**: Check `progressStore` + `LetterJourney` implementation
 - **Why it works**: Parents can see growth, kids feel accomplishment
 
 **Mechanism 2**: Daily New Games**
+
 - **What it is**: Variety prevents boredom
 - **Current State**: Only 4 games - **RISK**
 - **Evidence**: All games listed in App.tsx routes
@@ -799,12 +875,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Fix needed**: "More games coming" messaging, weekly content drops (even 1 new game/week)
 
 **Mechanism 3**: Streak System**
+
 - **What it is**: Encourages multi-day engagement
 - **Evidence**: FingerNumberShow lines 84-100
 - **Why it works**: Kids want to maintain streaks for bonus multiplier
 - **Fix direction**: Ensure 3 consecutive days, reward consistency
 
 **Mechanism 4**: TTS (Text-to-Speech)**
+
 - **What it is**: Pip mascot speaks, educational narration
 - **Evidence**: Check `useTTS` hook integration
 - **Why it works**: Audio-visual learning engages multiple senses
@@ -815,12 +893,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **B. What Would Make Parents Schedule It Weekly?**
 
 **Feature 1: Real-Time Progress Dashboard**
+
 - **What it is**: Parents see child's stars, LetterJourney without waiting
 - **Evidence**: `progressStore` + `progressQueue` real-time sync
 - **Why it works**: Transparency reduces anxiety, enables scheduling
 - **Fix direction**: Optimize sync frequency, add notifications
 
 **Feature 2: Multi-Child Profiles**
+
 - **What it is**: One account for entire family
 - **Evidence**: `profileStore` implementation
 - **Why it works**: Simplifies management, increases family accounts
@@ -831,6 +911,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **C. Missing Systems: Progression, Personalization, Habit Loops, Rewards**
 
 **System 1: Progression System**
+
 - **Current State**: 3 levels in FingerNumberShow + LetterJourney
 - **What exists**: Basic leveling (1, 2, 3) + A-Z letter completion
 - **What's missing**: Adaptive difficulty, personalized learning paths
@@ -838,18 +919,21 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Fix needed**: [AI-driven difficulty adjustment, personalized curriculum]
 
 **System 2: Daily Challenge**
+
 - **Current State**: Not observed
 - **What's missing**: "Daily challenge" to keep kids returning
 - **Why it matters**: Habit formation, engagement without chore feeling
 - **Fix needed**: [Daily "Count to 20 in 2 minutes" challenge, streak bonus]
 
 **System 3: Habit Loops**
+
 - **Current State**: Progress tracking exists but no habit triggers
 - **What's missing**: "Time-based reminders" (Play at 3pm), streak protection
 - **Why it matters**: Builds daily engagement automatically
 - **Fix needed**: [Push notifications, "You haven't played today!"
 
 **System 4: Rewards Beyond Stars**
+
 - **Current State**: Star ratings (0-3 stars)
 - **What's missing**: Badges, achievements, collectibles, virtual currency
 - **Why it matters**: Motivation beyond stars, sense of accomplishment
@@ -864,6 +948,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Direct Category**: Camera-Based EdTech for Ages 2-6
 
 **Closest Analogs:**
+
 1. **Khan Academy Kids**: Touch-based, no camera interaction
 2. **Duolingo Kids**: Touch-based, no camera
 3. **ABCMouse**: Mouse-based, no camera
@@ -871,6 +956,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 5. **PBS Kids**: Touch-based, no camera
 
 **Similarities with Each**:
+
 - [ ] What's alike: [educational content, gamification]
 - [ ] What's different: [camera interaction, mascot Pip, specific games]
 
@@ -879,16 +965,19 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **B. Likely Competitors by Category (Not Names Unless Obvious)**
 
 **Category 1: Traditional Educational Apps**
+
 - **Strengths**: Established brands, massive content libraries
 - **Weaknesses**: Touch-only, no camera, passive experience
 - **Where This Wins**: Camera-based interaction is more engaging, Pip mascot is unique
 
 **Category 2: Screen-Time Management Apps**
+
 - **Strengths**: Parental control, time tracking
 - **Weaknesses**: Content-free, only controls
 - **Where This Wins**: Educational content + progress = "guilt-free" screen time
 
 **Category 3: Interactive Storybooks**
+
 - **Strengths**: Immersive, narrative-driven
 - **Weaknesses**: No progress tracking, no repeatability
 - **Where This Wins**: Progress tracking + story + educational value
@@ -898,12 +987,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **C. Where Incumbents Are Strong vs Where This Can Win**
 
 **Incumbent Strengths**:
+
 1. **Content scale**: Khan has 10,000+ lessons
 2. **Brand recognition**: Decades of trust
 3. **Distribution**: Installed in millions of schools
 4. **Funding**: Billions raised
 
 **Where This Wins**:
+
 1. **Unique category**: Camera-based toddlers underserved (no major incumbent)
 2. **Mascot differentiator**: Pip is character-driven, not generic
 3. **Technical advantage**: First mover in camera-based gesture learning
@@ -914,41 +1005,49 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 ### #10: "Investment Readiness" Scorecard (0-10 Each)
 
 **A. Product Clarity**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Actual clarity of value proposition
 
 **B. Trust/Safety Posture**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Camera transparency, parental controls, data handling
 
 **C. Retention Potential**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Progress tracking systems, habit formation mechanisms
 
 **D. Differentiation**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Camera-based interaction, mascot Pip, unique games
 
 **E. Speed of Iteration (Implied by Current Build)**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Code quality from actual files, central hand tracking
 
 **F. Go-to-Market Plausibility**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: 3 realistic channels identified, no platform constraints
 
 **G. Defensibility**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences]
 - **Evidence**: Moat analysis results
 
 **H. Overall Fundability**
+
 - **Score**: [0-10]
 - **Justification**: [2-3 sentences based on all above]
 
@@ -961,6 +1060,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **The Single Biggest Change That Increases Fundability**
 
 **Change**: [Specific, actionable, 1-2 sentences]
+
 - **Why**: [explain impact on evaluation]
 - **Implementation**: [No code changes or clear UX improvement]
 
@@ -969,27 +1069,32 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **The Top 5 Milestones to Hit in Next 8 Weeks**
 
 **Milestone 1**: [Specific - based on actual gaps observed]
+
 - **Why**: [explain]
 - **Expected Impact**: [explain]
 - **Measure**: [how to know it worked]
 
 **Milestone 2**: [Specific]
+
 - **Why**: [explain]
 - **Expected Impact**: [explain]
 - **Measure**: [how to know it worked]
 
 **Milestone 3**: [Specific]
+
 - **Why**: [explain]
 - **Challenged from**: [which evaluation finding it addresses]
 - **Expected Impact**: [explain]
 - **Measure**: [how to know it worked]
 
 **Milestone 4**: [Specific]
+
 - **Why**: [explain]
 - **Expected Impact**: [explain]
 - **Measure**: [how to know it worked]
 
 **Milestone 5**: [Specific]
+
 - **Why**: [explain]
 - **Expected Impact**: [explain]
 - **Measure**: [how to know it worked]
@@ -999,26 +1104,31 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **The Top 5 Metrics to Instrument Immediately**
 
 **Metric 1**: Time-to-First-Win**
+
 - **Why it matters**: [explain]
 - **How to measure**: [code implementation]
 - **Target**: <60 seconds
 
 **Metric 2**: Session Length**
+
 - **Why it matters**: [explain]
 - **How to measure**: [code implementation]
 - **Target**: 10-15 minutes average
 
 **Metric 3**: Day-1 and Day-7 Return Rate**
+
 - **Why it matters**: [explain]
 - **How to measure**: [code implementation]
 - **Target**: >40% Day 7 retention
 
 **Metric 4**: Activity Completion Rate**
+
 - **Why it matters**: [explain]
 - **How to measure**: [code implementation]
 - **Target**: >60% completion rate
 
 **Metric 5**: Parent Intervention Count**
+
 - **Why it matters**: [explain]
 - **How to measure**: [code implementation]
 - **Target**: <2 times/week
@@ -1053,96 +1163,113 @@ Split into Categories with Investor Decision Criteria
 
 **Market Questions (5)**
 
-6. **[Question 6]**
+1. **[Question 6]**
    - **Answer that makes you lean IN**: [specific]
    - **Answer that makes you WALK AWAY**: [specific]
 
-7. **[Question 7]**
+2. **[Question 7]**
    - **Answer that makes you lean IN**: [specific]
    - **Answer that makes you WALK AWAY**: [specific]
 
-8. **[Question 8]**
+3. **[Question 8]**
    - **Answer that makes you lean IN**: [specific]
    - **Answer that makes you WALK AWAY**: [specific]
 
-9. **[Question 9]**
+4. **[Question 9]**
    - **Answer that makes you lean IN**: [specific]
    - **Answer that makes you WALK AWAY**: [specific]
 
-10. **[Question 10]**
-   - **Answer that makes you lean IN**: [specific]
+5. **[Question 10]**
+
+- **Answer that makes you lean IN**: [specific]
 
 **GTM Questions (5)**
 
-11. **[Question 11]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 11]**
 
-12. **[Question 12]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-13. **[Question 13]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 12]**
 
-14. **[Question 14]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-15. [Question 15]**
-   - **Answer that makes you lean IN**: [specific]
+1. **[Question 13]**
+
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
+
+1. **[Question 14]**
+
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
+
+1. [Question 15]**
+
+- **Answer that makes you lean IN**: [specific]
 
 **Tech Questions (5)**
 
-16. **[Question 16]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 16]**
 
-17. **[Question 17]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-18. **[Question 18]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 17]**
 
-19. **Question 19]**
-   - **Answer that makes you lean IN**: [specific]
-   - Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-20. **[Question 20]**
-   - **Answer that makes you lean IN**: [specific]
-   - - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 18]**
+
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
+
+1. **Question 19]**
+
+- **Answer that makes you lean IN**: [specific]
+- Answer that makes you WALK AWAY**: [specific]
+
+1. **[Question 20]**
+
+- **Answer that makes you lean IN**: [specific]
+- - **Answer that makes you WALK AWAY**: [specific]
 
 **Safety/Privacy Questions (5)**
 
-21. **[Question 21]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 21]**
 
-22. **[Question 22]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-23. **[Question 23]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 22]**
 
-24. **[Question 24]**
-   - Answer that makes you lean IN**: [specific]
-   - - **Answer that makes you WALK AWAY**: [specific]
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
-25. **[Question 25]**
-   - Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 23]**
+
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
+
+1. **[Question 24]**
+
+- Answer that makes you lean IN**: [specific]
+- - **Answer that makes you WALK AWAY**: [specific]
+
+1. **[Question 25]**
+
+- Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
 **Team/Ops Questions (Optional - If You Feel Strongly About It)**
 
-26. **[Question 26]**
-   - **Answer that makes you lean IN**: [specific]
-   - **Answer that makes you WALK AWAY**: [specific]
+1. **[Question 26]**
+
+- **Answer that makes you lean IN**: [specific]
+- **Answer that makes you WALK AWAY**: [specific]
 
 ---
 
@@ -1184,9 +1311,10 @@ This is NOT a generic VC memo. It must be:
 
 ## Begin Now
 
-**Open http://localhost:6173 and start exploring.**
+**Open <http://localhost:6173> and start exploring.**
 
 **Evidence Collection Checklist:**
+
 - [ ] Screenshots of all 10 deliverable sections
 - [ ] Actual code paths referenced for every observation
 - [ ] Measured times for all timing checks

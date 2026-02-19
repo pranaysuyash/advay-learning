@@ -1,4 +1,5 @@
 # Game Improvement Master Plan
+
 ## Advay Vision Learning - Games, Lessons & Experiences
 
 **Date:** 2026-02-17  
@@ -12,6 +13,7 @@
 This document consolidates findings from critical assessments, audits, and research to create a unified improvement plan for all learning games, lessons, and experiments in the Advay Vision Learning platform.
 
 **Current State:**
+
 - 13 games implemented (10 hand-based, 3 pose-based)
 - 67+ game ideas catalogued
 - 3 CV systems working in isolation (hand, face, pose)
@@ -19,6 +21,7 @@ This document consolidates findings from critical assessments, audits, and resea
 - High latency (300-500ms) affecting magic feel
 
 **Target State:**
+
 - Combined CV experiences (hand + pose + face together)
 - Visible wellness/attention tracking
 - <200ms latency
@@ -50,6 +53,7 @@ This document consolidates findings from critical assessments, audits, and resea
 ### 1.2 Planned Games (From Catalog)
 
 **P0 (Next 2-4 weeks):**
+
 | # | Game | Type | Effort |
 |---|------|------|--------|
 | 14 | **Phonics Sounds** | Hand+Audio | 1.5 weeks |
@@ -57,6 +61,7 @@ This document consolidates findings from critical assessments, audits, and resea
 | 16 | **Shape Safari** | Hand | 1 week |
 
 **P1 (1-2 months):**
+
 | # | Game | Type | Effort |
 |---|------|------|--------|
 | 17 | **Rhyme Time** | Audio+Touch | 1 week |
@@ -75,6 +80,7 @@ This document consolidates findings from critical assessments, audits, and resea
 **Solution:** Create games that combine hand + pose + face tracking.
 
 #### Implementation: Freeze Dance + Fingers (Week 1)
+
 ```
 Game Flow:
 1. Music plays → Dance with whole body (pose tracking)
@@ -84,10 +90,12 @@ Game Flow:
 ```
 
 **Files to modify:**
+
 - `src/frontend/src/pages/FreezeDance.tsx` - Add hand tracking
 - `src/frontend/src/hooks/useCombinedTracking.ts` - NEW hook
 
 #### Implementation: Yoga Letter Tracer (Week 2)
+
 ```
 Game Flow:
 1. Show animal pose (tree pose for giraffe)
@@ -111,6 +119,7 @@ UI Element: "Focus Power" meter
 ```
 
 **Files to modify:**
+
 - `src/frontend/src/components/AttentionMeter.tsx` - NEW component
 - `src/frontend/src/hooks/useAttentionDetection.ts` - Expose score
 - `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` - Integrate
@@ -129,6 +138,7 @@ UI Element: "Focus Power" meter
 | Letter mode silent | Speak letter names | 1 day |
 
 **Finger Number Show Prompt Changes:**
+
 ```
 Before: "Can you please show me three fingers?"
 After:  "Show 3!"
@@ -185,6 +195,7 @@ UI:
 ```
 
 **Assets needed:**
+
 - Phoneme recordings (26 sounds)
 - Word example images
 - Pip teaching animations
@@ -202,6 +213,7 @@ UI:
 **Target:** 400 lines, focused
 
 **Changes:**
+
 1. Remove accuracy scoring → Binary "you did it!"
 2. Make hint letter pulse/glow
 3. Continuous sound while tracing
@@ -223,23 +235,27 @@ UI:
 ## Section 4: Implementation Roadmap
 
 ### Week 1: Combined CV Foundation
+
 - [ ] Create `useCombinedTracking` hook
 - [ ] Modify FreezeDance to add hand challenges
 - [ ] Add visible attention meter to AlphabetGame
 - [ ] Reduce hold time to 200ms
 
 ### Week 2: Audio & UX Polish
+
 - [ ] Shorten all TTS prompts
 - [ ] Add satisfying success sounds
 - [ ] Implement auto-start flow
 - [ ] Add background music system
 
 ### Week 3: New Games
+
 - [ ] Implement Phonics Sounds game
 - [ ] Implement Mirror Draw game
 - [ ] Create game variation system
 
 ### Week 4: Combined CV Advanced
+
 - [ ] Yoga Letter Tracer game
 - [ ] Full Body Simon Says
 - [ ] Attention Arena (face + hand)
@@ -292,12 +308,14 @@ type GameState =
 
 ## Section 6: Success Metrics
 
-### Stop Tracking:
+### Stop Tracking
+
 - ❌ Educational outcomes
 - ❌ Time spent learning
 - ❌ Accuracy scores
 
-### Start Tracking:
+### Start Tracking
+
 - ✅ Sessions per day
 - ✅ "One more time" clicks
 - ✅ Spontaneous joy (laughter detection)
@@ -309,17 +327,20 @@ type GameState =
 ## Section 7: Evidence Classification
 
 **Observed:**
+
 - 13 games exist (code reviewed)
 - CV systems work in isolation (code verified)
 - 450ms hold time (FingerNumberShow.tsx:449)
 - 1653 lines in AlphabetGamePage.tsx
 
 **Inferred:**
+
 - Kids want combined experiences (competitive analysis)
 - Shorter prompts = better engagement (pedagogical research)
 - Visible feedback increases retention (UX studies)
 
 **Unknown:**
+
 - Actual retention metrics (needs analytics)
 - Optimal hold time per age group (needs playtesting)
 - Which combined CV games kids prefer (needs A/B testing)
@@ -329,6 +350,7 @@ type GameState =
 ## Appendix: Quick Reference
 
 ### File Locations
+
 ```
 Games:           src/frontend/src/pages/*.tsx
 Game logic:      src/frontend/src/games/*.ts
@@ -338,6 +360,7 @@ Assets:          src/frontend/public/assets/
 ```
 
 ### Key Hooks
+
 ```
 useHandTracking        - Hand landmark detection
 usePoseTracking        - Body pose detection  
@@ -348,6 +371,7 @@ useSoundEffects        - Audio playback
 ```
 
 ### Related Documents
+
 - `GAME_IDEAS_CATALOG.md` - 67 game concepts
 - `GAMES-CRITICAL-ASSESSMENT-20260216.md` - Fun factor analysis
 - `ACTIVITY_INVENTORY_GAMES_UX.md` - Current inventory

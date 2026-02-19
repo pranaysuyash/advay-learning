@@ -143,14 +143,17 @@ Small/Medium/Large
 ## Decision Log
 
 ### 2024-01-XX: Start with English alphabet
+
 **Decision**: MVP will focus on English alphabet tracing before adding other languages.
 **Rationale**: Simpler to implement, establish patterns, then expand.
 
 ### 2024-01-XX: Local-first architecture
+
 **Decision**: All data stays local by default, optional cloud sync later.
 **Rationale**: Privacy, safety, works offline.
 
 ### 2024-01-XX: PyQt6 for UI
+
 **Decision**: Use PyQt6 for initial implementation.
 **Rationale**: Rich features, good documentation, can switch later if needed.
 
@@ -159,12 +162,15 @@ Small/Medium/Large
 Update this section as features are completed:
 
 ### Completed
+
 _None yet - project in planning phase_
 
 ### In Progress
+
 _None yet_
 
 ### Next Up
+
 1. Project setup and architecture
 2. Camera integration
 3. Hand tracking basics
@@ -172,6 +178,7 @@ _None yet_
 ## Feedback & Iteration
 
 After MVP, features will be prioritized based on:
+
 1. Advay's engagement and feedback
 2. Parent observations
 3. Learning effectiveness

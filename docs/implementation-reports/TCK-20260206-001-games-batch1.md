@@ -19,10 +19,12 @@ Batch objective was to convert hand tracking to a reusable base runtime and impl
 ### Base Tracking (shared)
 
 Added:
+
 - `src/frontend/src/hooks/useHandTrackingRuntime.ts`
 - `src/frontend/src/utils/handTrackingFrame.ts`
 
 Shared responsibilities:
+
 - Pull video frame from webcam
 - Execute `detectForVideo` through centralized loop
 - Normalize hand output to `TrackedHandFrame`
@@ -64,6 +66,7 @@ This keeps base tracking behavior consistent while allowing each game to define 
 `cd src/frontend && npm run type-check`
 
 Result:
+
 - Passed
 
 ### Command
@@ -71,6 +74,7 @@ Result:
 `cd src/frontend && npm run test -- --run src/utils/__tests__/handTrackingFrame.test.ts src/games/__tests__/musicPinchLogic.test.ts src/games/__tests__/steadyHandLogic.test.ts`
 
 Result:
+
 - 3 test files passed
 - 11 tests passed
 

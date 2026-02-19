@@ -5,6 +5,7 @@
 **Goal**: Create a reusable “Game Setup System” for camera-based games so every game has a consistent, kid-friendly, parent-friendly setup experience (mode/language/difficulty) and we avoid regressions from copy-pasted setup UI.
 
 This prompt is designed for:
+
 - repeated setup patterns across multiple games
 - child-centered UX constraints (low reading burden, big targets)
 - camera-first flows (per `docs/INPUT_METHODS_SPECIFICATION.md`)
@@ -21,6 +22,7 @@ This prompt is designed for:
 - Behavior change allowed: NO (UI structure changes only; semantics preserved)
 
 Targets:
+
 - Primary file(s):
 - Secondary file(s) (new shared components):
 - Game(s) to adopt first:
@@ -42,6 +44,7 @@ Targets:
 ## Discovery (Required Evidence)
 
 Run and paste raw outputs:
+
 ```bash
 git status --porcelain
 rg -n "Choose Game Mode|Choose Difficulty|Choose Language" src/frontend/src -S
@@ -58,6 +61,7 @@ Define these (names can vary, but keep the roles):
 4) `LanguageSelector` (thin wrapper around OptionChips)
 
 Each must define:
+
 - Props contract
 - States: loading/disabled/selected
 - A11y: labels + keyboard interaction rules
@@ -66,6 +70,7 @@ Each must define:
 ## Implementation Plan (Use `prompts/planning/implementation-planning-v1.0.md`)
 
 Create a plan with:
+
 - Step order (shared primitives first, then adopt into one game)
 - Tests to add (at least one small unit test for mapping logic; and one component test if available)
 - Manual verification checklist (kid flow; camera permission denied)
@@ -77,4 +82,3 @@ Create a plan with:
 - `npm run type-check` passes
 - Scoped eslint passes
 - No regressions in the “Input Methods” contract messaging
-

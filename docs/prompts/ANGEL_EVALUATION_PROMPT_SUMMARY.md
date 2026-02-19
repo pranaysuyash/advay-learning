@@ -87,13 +87,14 @@
    - No "come back with more features" - specific, measurable improvements
 
 10. **If I Invest: What I'd Ask For**
-   - Investment amount ($10K-$100K realistic for angel check)
-   - Use of funds (3 bullets: founder salary, marketing/growth, buffer)
-   - Success metrics I'd want (3 bullets: 1K families, 40% retention, etc.)
-   - Demo video structure (3 scenes: intro, gameplay, outro)
-   - Landing + waitlist angle (2 bullets)
-   - Simple terms I'd want (3 bullets: common stock, board seat, pro-rata)
-   - All grounded in "would a kid use this tomorrow?"
+
+- Investment amount ($10K-$100K realistic for angel check)
+- Use of funds (3 bullets: founder salary, marketing/growth, buffer)
+- Success metrics I'd want (3 bullets: 1K families, 40% retention, etc.)
+- Demo video structure (3 scenes: intro, gameplay, outro)
+- Landing + waitlist angle (2 bullets)
+- Simple terms I'd want (3 bullets: common stock, board seat, pro-rata)
+- All grounded in "would a kid use this tomorrow?"
 
 ---
 
@@ -102,6 +103,7 @@
 ### 6-Step Product Exploration (30-45 minutes total)
 
 **Step 1: First-Run Test (15 seconds)**
+
 - Timer starts when page loads
 - Do I understand what this is within 15 seconds?
 - Is value obvious?
@@ -110,12 +112,14 @@
 - Score: Yes/No
 
 **Step 2: Time to First Fun**
+
 - Play ONE game and time to first success
 - Target: <60 seconds
 - Red flag if >90 seconds
 - Check: clear objective, immediate tracking, obvious success feedback
 
 **Step 3: Reliability Test - Messy Reality**
+
 - Test 4 scenarios intentionally:
   1. Low light: does tracking degrade gracefully?
   2. Distance: too close/too far?
@@ -125,11 +129,13 @@
 - What you're looking for: robust enough for real kid behavior?
 
 **Step 4: Variety Test - Repeatable?**
+
 - Play at least 3 different games/activities
 - For each: educational objective, interaction pattern, completion time, fun factor
 - What you're looking for: enough variety for daily repetition?
 
 **Step 5: Safety Trust Test**
+
 - Check 4 things:
   1. Camera transparency (can I see what's capturing?)
   2. Safe exit (big button, obvious)
@@ -139,6 +145,7 @@
 - What you're looking for: trust, no red flags for parents
 
 **Step 6: Parent Practicality Test**
+
 - Scenario: parent has 7 minutes, kid needs to use this
 - Test: <2 minutes to start, parent understands progress without manual, daily time limits visible, pause/resume
 - What you're looking for: fits real parent's routine?
@@ -150,6 +157,7 @@
 As you explore, keep these personas in mind:
 
 **Persona 1: Toddler (2-3 years old)**
+
 - Can: Tap, wave, very basic gestures
 - Can't: Read, follow multi-step instructions, understand complex rules
 - Behavior: Chaotic tapping, short attention span (2-3 minutes max)
@@ -157,6 +165,7 @@ As you explore, keep these personas in mind:
 - Ask: "Would this work for [toddler]?"
 
 **Persona 2: Kid (5-6 years old)**
+
 - Can: Follow short instructions, understand rewards/progression
 - Can't: Read complex text, navigate nested menus
 - Behavior: Likes seeing progress, wants to "unlock" new things
@@ -164,6 +173,7 @@ As you explore, keep these personas in mind:
 - Ask: "Would this work for [kid]?"
 
 **Persona 3: Parent (Weekday Morning)**
+
 - Has: 7 minutes, coffee, low patience
 - Wants: Kid occupied so parent can work
 - Cares about: Safety, education value, screen time guilt
@@ -174,63 +184,73 @@ As you explore, keep these personas in mind:
 
 ## Key Differentiators from VC Prompt
 
-### What This Prompt Does Better (Angel vs VC):
+### What This Prompt Does Better (Angel vs VC)
 
 **1. Binary Decision Framework**
-   - VC: Grand thesis, long-term vision
-   - Angel: Invest/Pass/Maybe NOW - specific 2-4 week path to "Yes"
-   - Focus: Practical, immediate, actionable
+
+- VC: Grand thesis, long-term vision
+- Angel: Invest/Pass/Maybe NOW - specific 2-4 week path to "Yes"
+- Focus: Practical, immediate, actionable
 
 **2. "First $1" vs "Unicorn Vision"**
-   - VC: TAM, expansion, platform, inevitability
-   - Angel: Will a parent pay $5/month? Can you get 1 school?
-   - Grounded in early-stage revenue reality
+
+- VC: TAM, expansion, platform, inevitability
+- Angel: Will a parent pay $5/month? Can you get 1 school?
+- Grounded in early-stage revenue reality
 
 **3. Founder Execution Focus**
-   - VC: Team velocity, scalability, go-to-market strategy
-   - Angel: Can founder ship fast? Can they iterate? Is code quality high?
-   - Focus on: Scrappy execution, rapid feedback loop
+
+- VC: Team velocity, scalability, go-to-market strategy
+- Angel: Can founder ship fast? Can they iterate? Is code quality high?
+- Focus on: Scrappy execution, rapid feedback loop
 
 **4. Retention as THE Metric**
-   - VC: Long-term LTV, CAC, churn
-   - Angel: Will a kid use this again tomorrow? Is there a habit loop?
-   - Tie everything to "will kid repeat this tomorrow?"
+
+- VC: Long-term LTV, CAC, churn
+- Angel: Will a kid use this again tomorrow? Is there a habit loop?
+- Tie everything to "will kid repeat this tomorrow?"
 
 **5. Practical Risk Assessment**
-   - VC: Existential risks (COPPA, incumbents, market shifts)
-   - Angel: Manageable risks (camera reliability in low light, thin content, frustration)
-   - Focus on: What can we fix in 2 weeks?
+
+- VC: Existential risks (COPPA, incumbents, market shifts)
+- Angel: Manageable risks (camera reliability in low light, thin content, frustration)
+- Focus on: What can we fix in 2 weeks?
 
 **6. Simulated Personas**
-   - VC: Abstract user segments, market research
-   - Angel: Specific personas (toddler, kid, parent) - test against these
-   - Hands-on: "Would this work for [persona]?"
+
+- VC: Abstract user segments, market research
+- Angel: Specific personas (toddler, kid, parent) - test against these
+- Hands-on: "Would this work for [persona]?"
 
 **7. Specific Blocker Identification**
-   - VC: Strategic blockers (distribution, partnerships)
-   - Angel: UX blockers (took 3 minutes to understand, confusing onboarding)
-   - Top 10 blockers: where they happen, what you expected, fix direction
+
+- VC: Strategic blockers (distribution, partnerships)
+- Angel: UX blockers (took 3 minutes to understand, confusing onboarding)
+- Top 10 blockers: where they happen, what you expected, fix direction
 
 **8. 2-Week Action Plan**
-   - VC: 8-week milestones, long-term vision
-   - Angel: 10 milestones in 2 weeks, immediate actions
-   - Each milestone: what, why it matters, expected impact, how to measure
+
+- VC: 8-week milestones, long-term vision
+- Angel: 10 milestones in 2 weeks, immediate actions
+- Each milestone: what, why it matters, expected impact, how to measure
 
 **9. Early-Stage Metrics (6 max)**
-   - VC: Scale metrics (1M users, $1M MRR)
-   - Angel: Engagement metrics (time-to-first-win, session length, return rate)
-   - Definitions included: what's good vs bad
+
+- VC: Scale metrics (1M users, $1M MRR)
+- Angel: Engagement metrics (time-to-first-win, session length, return rate)
+- Definitions included: what's good vs bad
 
 **10. Demo Video Structure**
-   - VC: Brand narrative, emotional story
-   - Angel: 3 scenes (intro, gameplay, outro), simple terms
-   - Landing + waitlist angle: "Camera learning for kids under 5"
+
+- VC: Brand narrative, emotional story
+- Angel: 3 scenes (intro, gameplay, outro), simple terms
+- Landing + waitlist angle: "Camera learning for kids under 5"
 
 ---
 
 ## Quality Bar
 
-### This is NOT a Generic Angel Memo. It Must Be:
+### This is NOT a Generic Angel Memo. It Must Be
 
 1. **Specific and Actionable**
    - Every recommendation is something founder can DO
@@ -274,13 +294,15 @@ As you explore, keep these personas in mind:
 **Use Case**: Before writing angel checks or having serious angel conversations
 
 **Prerequisites:**
-- Product running at http://localhost:6173
+
+- Product running at <http://localhost:6173>
 - 30-45 minutes available for hands-on exploration
 - Willing to hear brutal feedback (this prompt is not for ego)
 
 **Execution Flow:**
+
 1. **Read prompt completely** - Understand all 10 deliverables and exploration steps
-2. **Open product** - http://localhost:6173
+2. **Open product** - <http://localhost:6173>
 3. **Follow 6-step exploration** - 30-45 minutes hands-on
 4. **Document observations** - Use 10 deliverable format strictly
 5. **Answer honestly** - Be investor-first, not founder-flattering
@@ -294,11 +316,13 @@ As you explore, keep these personas in mind:
 **The prompt produces a comprehensive angel investor memo covering:**
 
 **Decision Framework:**
+
 - One-line verdict (Invest/Pass/Maybe)
 - If No: Minimum to get to Yes in 2-4 weeks
 - If Yes: What to push founder to do immediately
 
 **Product Assessment:**
+
 - 5-minute product tour summary
 - Core "magic" identification
 - What's working (3 strengths)
@@ -306,38 +330,46 @@ As you explore, keep these personas in mind:
 - Overall polish score (0-10)
 
 **Investment Logic:**
+
 - Best use case (specific scenario, why camera matters)
 - Narrowest target user (specific persona)
 - Habit loop (trigger → action → reward → repeat)
 - Why this could win (specific advantage)
 
 **Love Blockers:**
+
 - Top 10 things preventing user love
 - For each: where, what expected vs got, why it matters, fix direction
 
 **Monetization:**
+
 - 2 realistic revenue paths (B2C subscription, school B2B2C, hybrid)
 - Primary path selection
 - For each: pricing, who pays, "must be true" hypotheses, breakers, first 3 experiments
 
 **Execution Plan:**
+
 - 10 milestones in 2 weeks
 - Each with: what, why, impact, measurement
 
 **Metrics:**
+
 - 6 early-stage metrics with definitions
 - Examples: time-to-first-win, session length, return rate, activity completion
 
 **Risks:**
+
 - Top 8 practical risks with mitigation
 - Types: privacy/safety, camera reliability, overstimulation, thin content, distribution, regulatory, competitive, team execution
 
 **If I Pass:**
+
 - Minimum to get to "Yes" (demo, retention, trust/safety)
 - 9 improvements with evidence needed
 - Timeline to re-evaluate
 
 **If I Invest:**
+
 - Investment amount ($10K-$100K)
 - Use of funds (founder salary, marketing, buffer)
 - Success metrics (3 bullets)
@@ -352,18 +384,21 @@ As you explore, keep these personas in mind:
 **Target App**: Advay Vision Learning (MediaPipe-based, camera-driven learning web app for kids 2-6)
 
 **Key Technology to Evaluate:**
+
 - MediaPipe HandLandmarker performance (does tracking feel smooth?)
 - Camera permission flow (is it clear, kid-friendly?)
 - Real-time gesture recognition (pinch, pointing, waving)
 - Progress tracking system (does it feel rewarding?)
 
 **Current Game State (What to Expect):**
+
 - Multiple games (FingerNumberShow, AlphabetGame, LetterHunt, ConnectTheDots)
 - Camera-first interaction (no mouse/touch required by default)
 - Mascot (Pip) for personality/feedback
 - Progress dashboard (stars, levels, completion)
 
 **Specific Angles to Test:**
+
 - **Toddler mode**: Can a 2-3 year-old get a win? (simple gestures, immediate feedback)
 - **Early reader mode**: Can a 4-6 year-old follow instructions and unlock things? (progression, rewards)
 - **Parent mode**: Can a busy parent understand progress and trust safety? (clear visibility, no red flags)
@@ -372,19 +407,22 @@ As you explore, keep these personas in mind:
 
 ## Execution Notes
 
-### Time to Complete Prompt:
+### Time to Complete Prompt
+
 - **Reading prompt**: 15-20 minutes
 - **Product exploration**: 30-45 minutes (hands-on)
 - **Documentation**: 60-90 minutes (10 deliverables)
 - **Total estimated**: 2-3 hours
 
-### Skill Level Required:
+### Skill Level Required
+
 - **Angel investment experience**: Understanding of pre-seed/angel rounds
 - **Product intuition**: Ability to assess UX/retention from brief use
 - **Technical literacy**: Understanding of MediaPipe, browser APIs, scalability basics
 - **Parent psychology**: What makes parents trust apps for kids
 
-### Output Quality:
+### Output Quality
+
 - **Angel-ready memo**: Can be shared with angels as-is
 - **Brutally honest**: No sugarcoating, clear risks and gaps
 - **Actionable feedback**: Specific changes to improve investability

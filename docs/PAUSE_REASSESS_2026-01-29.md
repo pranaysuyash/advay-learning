@@ -8,6 +8,7 @@
 ## Step 1 — Snapshot the Current State (Observed)
 
 ### Git Status
+
 ```
 90 files modified
 Key changes:
@@ -22,11 +23,13 @@ Key changes:
 ```
 
 ### Test Status
+
 ```
 ================== 34 passed, 1 skipped, 2 warnings ==================
 ```
 
 ### Recent Tickets Completed
+
 - SECURITY-HIGH-001 through 004 (4 P0 security tickets)
 - BACKEND-MED-001 (Rate limiting)
 - TCK-20260128-021 (Adaptive Batch Unlock)
@@ -36,6 +39,7 @@ Key changes:
 ## Step 2 — Facts vs Assumptions
 
 ### Observed Facts
+
 - ✅ 34 backend tests passing
 - ✅ 4 P0 security tickets completed (timing attack, email verification, password reset, cookies)
 - ✅ Rate limiting implemented with slowapi
@@ -47,6 +51,7 @@ Key changes:
 - ⚠️ 1 skipped test (rate limiting in production mode)
 
 ### Inferred/Unknown
+
 - ❓ Frontend not tested (no frontend test runner configured)
 - ❓ Email service not configured for production
 - ❓ Actual production deployment status unknown
@@ -58,7 +63,8 @@ Key changes:
 ## Step 3 — Consolidate Findings into Buckets
 
 ### Security/Privacy ✅ (Strong)
-- **What's Working**: 
+
+- **What's Working**:
   - Timing attack protection
   - Email verification flow
   - Password reset flow
@@ -71,6 +77,7 @@ Key changes:
 - **Next Fix**: BACKEND-MED-002 (Input Validation) - Low effort
 
 ### Backend ✅ (Good)
+
 - **What's Working**:
   - 34 tests passing
   - Clean architecture
@@ -82,6 +89,7 @@ Key changes:
 - **Next Fix**: Fix deprecation warnings - Low effort
 
 ### Frontend ⚠️ (Needs Attention)
+
 - **What's Working**:
   - Cookie-based auth implemented
   - Email verification UI
@@ -94,6 +102,7 @@ Key changes:
 - **Next Fix**: FRONTEND-MED-002 (Error Handling) - Medium effort
 
 ### Tests ✅ (Good)
+
 - **What's Working**:
   - 34 tests passing
   - Security tests comprehensive
@@ -104,6 +113,7 @@ Key changes:
 - **Next Fix**: Not urgent
 
 ### Docs/Process ✅ (Good)
+
 - **What's Working**:
   - 31 audit artifacts
   - 8 ADRs
@@ -113,6 +123,7 @@ Key changes:
 - **Next Fix**: Answer Q-002, Q-003, Q-004
 
 ### Product/UX ⚠️ (Needs Attention)
+
 - **What's Working**:
   - Adaptive batch unlock
   - Letter journey visualization
@@ -128,11 +139,13 @@ Key changes:
 **Bottleneck**: **3 Open Questions Blocking Progress**
 
 **Why it's the bottleneck**:
+
 - Q-002 (Email service) blocks production deployment
 - Q-003 (Password policy) blocks SECURITY-HIGH-005
 - Without decisions, can't complete security hardening
 
 **What it blocks**:
+
 - Production readiness
 - Remaining security tickets
 - Clear next priorities
@@ -142,17 +155,20 @@ Key changes:
 ## Step 5 — Minimal Next Plan
 
 ### Work Unit 1: Answer Open Questions (DECISION)
+
 **Scope**: Document decisions for Q-002, Q-003, Q-004  
 **In-scope**: Update clarity/questions.md with decisions  
 **Out-of-scope**: Implementation
 
 **Acceptance Criteria**:
+
 - [ ] Q-002 answered (Email service provider chosen)
 - [ ] Q-003 answered (Password policy decided)
 - [ ] Q-004 answered (Session timeout decided)
 - [ ] Decisions documented with rationale
 
 **Verification**:
+
 ```bash
 grep -A5 "Resolution:" docs/clarity/questions.md | head -20
 ```
@@ -162,11 +178,13 @@ grep -A5 "Resolution:" docs/clarity/questions.md | head -20
 ---
 
 ### Work Unit 2: Input Validation (BACKEND-MED-002)
+
 **Scope**: Add Pydantic validators for UUID, email, age, language  
 **In-scope**: Schema validation only  
 **Out-of-scope**: Business logic changes
 
 **Acceptance Criteria**:
+
 - [ ] UUID format validation for all ID parameters
 - [ ] Email format validation
 - [ ] Age range validation (0-18)
@@ -174,6 +192,7 @@ grep -A5 "Resolution:" docs/clarity/questions.md | head -20
 - [ ] Tests for validation errors
 
 **Verification**:
+
 ```bash
 cd src/backend && uv run pytest tests/ -v -k "validation"
 ```
@@ -183,16 +202,19 @@ cd src/backend && uv run pytest tests/ -v -k "validation"
 ---
 
 ### Work Unit 3: Fix Deprecation Warnings (TECH DEBT)
+
 **Scope**: Fix Pydantic and Python deprecation warnings  
 **In-scope**: Config updates  
 **Out-of-scope**: Major refactors
 
 **Acceptance Criteria**:
+
 - [ ] Pydantic class-based config migrated to ConfigDict
 - [ ] Python crypt deprecation addressed
 - [ ] Tests pass without warnings
 
 **Verification**:
+
 ```bash
 cd src/backend && uv run pytest -W error 2>&1 | grep -i "deprecation\|warning"
 ```
@@ -214,6 +236,7 @@ See appended entry in `docs/WORKLOG_TICKETS.md` below.
 **Biggest Blocker**: 3 open questions need decisions
 
 **Next 3 Work Units**:
+
 1. Answer open questions (decision-only)
 2. BACKEND-MED-002 (Input Validation)
 3. Fix deprecation warnings

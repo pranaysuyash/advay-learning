@@ -1,4 +1,5 @@
 # Intent-First Leadership v1.0
+
 ## "Lead with Clarity, Not Control"
 
 **Core Principle:** Align people around clear intent, constraints, and context so they can move fast with good judgment.
@@ -10,18 +11,21 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Define the situation and stakeholders**
 2. **Gather signals, history, and constraints**
 3. **Surface hidden incentives and risks**
 4. **Review existing team capabilities** (what's already working well?)
 
 ### Phase 2: Intent Analysis
+
 - What outcome are we truly optimizing for?
 - Which principles must not be violated?
 - What trade-offs are acceptable?
 - **What existing strengths can we build upon?**
 
 ### Phase 3: Priority Assessment
+
 - **Impact**: magnitude of upside or avoided downside
 - **Effort**: time, energy, attention, capital
 - **Risk**: reversibility, blast radius, optionality
@@ -42,6 +46,7 @@
 ## Quick Filter
 
 Skip deep work if all are true:
+
 - Low, vague, or misaligned intent
 - High effort for marginal value
 - Better alternatives exist now
@@ -54,6 +59,7 @@ Skip deep work if all are true:
 ## Codebase-First Enhancement Rule
 
 Ship the smallest action that:
+
 1. **Builds on existing strengths** - leverage what the team does well
 2. **Proves intent** - demonstrates clear direction
 3. **Creates real, observable value** - tangible outcomes

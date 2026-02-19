@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Python 3.13+ (for backend)
 - uv (Python package manager) - `pip install uv`
@@ -24,8 +24,8 @@ cd src/backend
 uv run python -m uvicorn app.main:app --reload --port 8001
 ```
 
-Backend API will be at: http://localhost:8001
-API docs at: http://localhost:8001/docs
+Backend API will be at: <http://localhost:8001>
+API docs at: <http://localhost:8001/docs>
 
 > **Note:** If port 8000 is busy, use 8001, 8002, etc. Update the frontend `.env` file to match.
 
@@ -45,7 +45,7 @@ echo "VITE_API_BASE_URL=http://localhost:8001" > .env
 npm run dev
 ```
 
-Frontend will be at: http://localhost:6173 (or check console output)
+Frontend will be at: <http://localhost:6173> (or check console output)
 
 ### 3. Download MediaPipe Model (Optional - for hand tracking)
 
@@ -128,22 +128,26 @@ src/
 ## Troubleshooting
 
 ### Backend won't start
+
 - Check Python 3.13+ is installed
 - Ensure uv is installed: `pip install uv`
 - Run `uv sync` from **project root** (not src/backend)
 - Try a different port: `--port 8001` or `--port 8002`
 
 ### Frontend won't start
+
 - Check Node.js 18+ is installed
 - Ensure port 6173 is free
 - Run `npm install` in `src/frontend`
 
 ### Camera not working
+
 - Check browser permissions
 - Ensure HTTPS or localhost (required for camera)
 - Try refreshing the page
 
 ### API connection errors
+
 - Verify backend is running (check port 8000/8001)
 - Check browser console for CORS errors
 - Update `VITE_API_BASE_URL` in frontend `.env` to match backend port

@@ -54,6 +54,7 @@ This report provides a comprehensive view of the ADVAY learning platform's educa
 | Tamil | 30 | ✅ Complete | 3 each |
 
 **Letter Data Structure:**
+
 - Character (Unicode)
 - Name (associated word)
 - Multiple icons (3 per letter for variety)
@@ -107,6 +108,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 ### 2.3 Full Game Catalog (48+ Activities)
 
 #### A) Pre-Writing & Fine Motor (6 games)
+
 - A1. Air Tracing Letters ✅ (implemented)
 - A2. Shape Tracing ❌
 - A3. Maze Finger Walk ❌
@@ -115,6 +117,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - A6. Steady Hand Lab ❌
 
 #### B) Alphabets & Phonics (5 games)
+
 - B1. Letter Hunt ❌
 - B2. Letter-Sound Sorting ❌
 - B3. Build a Word (3-letter) ❌
@@ -122,6 +125,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - B5. Sight Word Pop ❌
 
 #### C) Numbers & Math (7 games)
+
 - C1. Finger Number Show ❌
 - C2. Count & Drag ❌
 - C3. Compare Quantities ❌
@@ -131,6 +135,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - C7. Number Tracing ❌
 
 #### D) Colors, Shapes & Sorting (7 games)
+
 - D1. Sort by Color ❌
 - D2. Sort by Shape ❌
 - D3. Sort by Attribute ❌
@@ -140,6 +145,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - D7. Color Scavenger Hunt ❌
 
 #### E) Language & Multilingual (5 games)
+
 - E1. Bilingual Prompt Mode ❌
 - E2. Point and Say ❌
 - E3. Action Verbs ❌
@@ -147,6 +153,7 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - E5. Storybook Interactive ❌
 
 #### F) Gross Motor & Coordination (5 games)
+
 - F1. Simon Says (Body) ❌
 - F2. Freeze Dance ❌
 - F3. Balance Challenges ❌
@@ -154,21 +161,25 @@ From [GAME_CATALOG.md](docs/GAME_CATALOG.md) - Priority order:
 - F5. Yoga Animals ❌
 
 #### G) Social-Emotional (2 games)
+
 - G1. Expression Mirror ❌
 - G2. Feelings Story ❌
 
 #### H) Creativity & Rewards (3 games)
+
 - H1. Magic Background Worlds ❌
 - H2. Silhouette Painting ❌
 - H3. Shadow Puppets Digital ❌
 
 #### I) Logic, Memory & Problem Solving (4 games)
+
 - I1. Gesture Sequence ❌
 - I2. Pattern Builder ❌
 - I3. Memory Match ❌
 - I4. Sequencing Pictures ❌
 
 #### J) STEM & Exploration (4 games)
+
 - J1. Sorting by Properties ❌
 - J2. Space Clean-up ❌
 - J3. Underwater Bubbles ❌
@@ -342,6 +353,7 @@ The platform currently focuses on **individual letters** but lacks:
 **Gap:** No lowercase support
 
 **Recommendation:**
+
 ```typescript
 // Extend Letter interface
 interface Letter {
@@ -362,6 +374,7 @@ interface Letter {
 **Gap:** Entire number learning domain
 
 **Recommendation:**
+
 ```typescript
 export const numberAlphabet: Alphabet = {
   language: 'numbers',
@@ -382,6 +395,7 @@ export const numberAlphabet: Alphabet = {
 **Gap:** No word-level content
 
 **Recommendation:**
+
 ```typescript
 interface Word {
   word: string;           // 'CAT'
@@ -409,6 +423,7 @@ export const englishWords: Word[] = [
 **Gap:** Shape recognition/tracing
 
 **Recommendation:**
+
 ```typescript
 interface Shape {
   name: string;
@@ -434,6 +449,7 @@ export const shapes: Shape[] = [
 **Gap:** Dedicated color learning content
 
 **Recommendation:**
+
 ```typescript
 interface Color {
   name: string;
@@ -458,6 +474,7 @@ export const colors: Color[] = [
 ### 6.1 Object Recognition (Camera-Based)
 
 **Required Technology:**
+
 - MediaPipe Object Detection or TensorFlow.js
 - Pre-trained model for common objects
 - Real-time classification
@@ -468,6 +485,7 @@ export const colors: Color[] = [
 ### 6.2 Handwriting Recognition
 
 **Required Technology:**
+
 - MediaPipe Gesture Classification or custom ML model
 - Stroke sequence analysis
 - Letter/number classifier
@@ -478,6 +496,7 @@ export const colors: Color[] = [
 ### 6.3 Pose Detection (for Body Games)
 
 **Required Technology:**
+
 - MediaPipe Pose Landmarker (already mentioned)
 - 33 body keypoints
 - Pose matching algorithm
@@ -487,6 +506,7 @@ export const colors: Color[] = [
 ### 6.4 Body Segmentation (for AR Effects)
 
 **Required Technology:**
+
 - MediaPipe Image Segmenter
 - Background replacement
 - Mask overlay

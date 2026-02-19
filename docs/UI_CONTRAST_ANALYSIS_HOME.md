@@ -25,7 +25,7 @@
 
 ### 2. Text Contrast Analysis
 
-#### Home Page Text Colors:
+#### Home Page Text Colors
 
 ```tsx
 // Headline
@@ -43,11 +43,12 @@
 ```
 
 **Contrast Ratios:**
+
 - `text-white/80` on #FDF8F3 = **2.4:1** ❌ FAILS WCAG AA (needs 4.5:1)
 - `text-white/70` on #FDF8F3 = **2.1:1** ❌ FAILS WCAG AA (needs 4.5:1)
 - Gradient text (`red-400` to `red-600`) - **high visibility** due to saturation
 
-#### Other Pages Text Colors:
+#### Other Pages Text Colors
 
 ```tsx
 // Dashboard
@@ -62,6 +63,7 @@
 ```
 
 **Contrast Ratios:**
+
 - `text-text-secondary` (#4B5563) on #FDF8F3 = **7.2:1** ✅ EXCEEDS WCAG AA
 - `text-text-muted` (#6B7280) on #FDF8F3 = **4.7:1** ✅ PASSES WCAG AA
 - `text-text-primary` (#1F2937) on #FDF8F3 = **13.9:1** ✅ EXCEEDS WCAG AAA
@@ -70,12 +72,14 @@
 
 ### 3. Component Usage Patterns
 
-#### Home Page:
+#### Home Page
+
 - **Custom implementations** for cards, buttons, layouts
 - Inline styles in JSX
 - No use of unified UI components
 
-#### Other Pages (Dashboard, Settings, Progress):
+#### Other Pages (Dashboard, Settings, Progress)
+
 - **Unified component system:**
   - `Button` component with variants (primary, secondary, danger, ghost, success)
   - `Card` component with standardized styling
@@ -88,7 +92,8 @@
 
 ### 4. Card and Container Styling
 
-#### Home Feature Cards:
+#### Home Feature Cards
+
 ```tsx
 <motion.div
   className="bg-white/10 border border-border rounded-xl p-6 text-center shadow-sm"
@@ -100,11 +105,13 @@
 ```
 
 **Issues:**
+
 - `bg-white/10` = 10% white on cream (low contrast background)
 - `text-white/70` = low contrast text
 - Custom card layout vs. unified `Card` component
 
-#### Dashboard Cards:
+#### Dashboard Cards
+
 ```tsx
 <Card>
   <div className="flex items-center gap-3 mb-2">
@@ -117,6 +124,7 @@
 ```
 
 **Strengths:**
+
 - Uses `bg-bg-tertiary` (#F5F0E8) for structured backgrounds
 - `text-text-primary` for high contrast
 - Unified Card component with consistent borders (`border-border`)
@@ -126,7 +134,8 @@
 
 ### 5. Button Styling
 
-#### Home Buttons:
+#### Home Buttons
+
 ```tsx
 // Primary CTA
 <Link to="/register" className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition">
@@ -139,7 +148,8 @@
 </Link>
 ```
 
-#### Other Pages Buttons:
+#### Other Pages Buttons
+
 ```tsx
 // Using Button component
 <Button variant="primary" size="lg">Primary Action</Button>
@@ -147,6 +157,7 @@
 ```
 
 **Button Component Styles:**
+
 ```tsx
 primary: 'bg-pip-orange text-white shadow-soft hover:bg-pip-rust hover:shadow-soft-lg'
 secondary: 'bg-white text-advay-slate border border-border shadow-soft hover:bg-bg-tertiary hover:shadow-soft-lg'
@@ -156,7 +167,7 @@ secondary: 'bg-white text-advay-slate border border-border shadow-soft hover:bg-
 
 ## Summary: Why Home Has "Better" Contrast
 
-### The Paradox:
+### The Paradox
 
 Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **appears to have better visibility** because:
 
@@ -181,7 +192,8 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 
 ## Design System Gaps
 
-### Home Page Outdated Patterns:
+### Home Page Outdated Patterns
+
 | Element | Current (Home) | Should Be |
 |---------|----------------|------------|
 | Headline | Gradient text | `text-text-primary` or brand accent color |
@@ -191,7 +203,8 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 | Card background | `bg-white/10` | `bg-bg-tertiary` |
 | Buttons | Inline Link styling | `Button` component variants |
 
-### Missing from Home:
+### Missing from Home
+
 - FeatureCard component usage
 - Button component usage
 - Design token consistency
@@ -203,18 +216,22 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 ## Recommendations
 
 ### Option 1: Fix Other Pages (Recommended)
+
 **Rationale:** Home's gradient approach, while visually striking, doesn't meet accessibility standards. Better to fix root cause across all pages.
 
 **Actions:**
+
 1. Increase font sizes on other pages' headers (match Home's `text-5xl`)
 2. Reduce visual clutter (simplify card layouts)
 3. Add gradient or brand accent colors to key headings
 4. Ensure text-text-secondary is used on **adequate background colors** (not white/10)
 
 ### Option 2: Fix Home Page to Match System
+
 **Rationale:** Home should use unified components and WCAG-compliant colors.
 
 **Actions:**
+
 1. Replace gradient h1 with `text-text-primary` (13.9:1 contrast)
 2. Change `text-white/80` → `text-text-secondary` (7.2:1)
 3. Change `text-white/70` → `text-text-secondary` (7.2:1)
@@ -223,9 +240,11 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 6. Ensure all backgrounds use `bg-bg-tertiary` (not `bg-white/10`)
 
 ### Option 3: Hybrid Approach (Balance)
+
 **Rationale:** Keep visual impact of Home while meeting accessibility standards.
 
 **Actions:**
+
 1. Replace `text-white/80` with `text-text-secondary` + gradient accent
 2. Add visual hierarchy improvements to other pages
 3. Create new "Hero" component that combines best of both worlds
@@ -235,7 +254,8 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 
 ## Technical Details
 
-### CSS Variables Available:
+### CSS Variables Available
+
 ```css
 --text-primary: #1F2937;         /* 13.9:1 - AAA Enhanced */
 --text-secondary: #4B5563;       /* 7.2:1 - AAA Enhanced */
@@ -246,7 +266,8 @@ Home page uses **low contrast text** (`text-white/80`, `text-white/70`) but **ap
 --pip-orange: #C45A3D;            /* Brand primary */
 ```
 
-### WCAG 2.1 Standards:
+### WCAG 2.1 Standards
+
 - **Level AA:** 4.5:1 contrast for normal text
 - **Level AAA:** 7:1 contrast for enhanced readability
 - **Large text:** 3:1 contrast allowed for 18pt+

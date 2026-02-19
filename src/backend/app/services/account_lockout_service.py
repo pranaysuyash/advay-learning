@@ -1,14 +1,10 @@
 """Account lockout service for tracking failed login attempts and implementing account lockout."""
 
-import asyncio
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.models.user import User
 
 
 class AccountLockoutService:
@@ -34,27 +30,27 @@ class AccountLockoutService:
             True if account should be locked, False otherwise
         """
         now = time.time()
-        
+
         # Initialize attempts list if not exists
         if email not in cls._failed_attempts:
             cls._failed_attempts[email] = []
-        
+
         # Add current attempt
         cls._failed_attempts[email].append(now)
-        
+
         # Remove attempts older than the window
         cls._failed_attempts[email] = [
             attempt for attempt in cls._failed_attempts[email]
             if now - attempt <= cls.ATTEMPT_WINDOW_SECONDS
         ]
-        
+
         # Check if we've exceeded the limit
         should_lock = len(cls._failed_attempts[email]) >= cls.MAX_FAILED_ATTEMPTS
-        
+
         if should_lock:
             # Lock the account
             cls._account_lockouts[email] = datetime.now() + timedelta(minutes=cls.LOCKOUT_DURATION_MINUTES)
-            
+
         return should_lock
 
     @classmethod
@@ -73,7 +69,7 @@ class AccountLockoutService:
             else:
                 # Lockout period expired, remove from lockouts
                 del cls._account_lockouts[email]
-                
+
         return False
 
     @classmethod
@@ -93,7 +89,7 @@ class AccountLockoutService:
             else:
                 # Lockout period expired, remove from lockouts
                 del cls._account_lockouts[email]
-                
+
         return None
 
     @classmethod
@@ -105,7 +101,7 @@ class AccountLockoutService:
         """
         if email in cls._failed_attempts:
             del cls._failed_attempts[email]
-            
+
         if email in cls._account_lockouts:
             del cls._account_lockouts[email]
 
@@ -121,11 +117,11 @@ class AccountLockoutService:
             True if account was locked and unlocked, False otherwise
         """
         was_locked = email in cls._account_lockouts
-        
+
         if email in cls._account_lockouts:
             del cls._account_lockouts[email]
-            
+
         if email in cls._failed_attempts:
             del cls._failed_attempts[email]
-            
+
         return was_locked

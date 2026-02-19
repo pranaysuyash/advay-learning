@@ -1,4 +1,5 @@
 # Intent-First Communication v1.0
+
 ## "Speak for Understanding, Not Performance"
 
 **Core Principle:** Every message serves a single outcome for a specific audience at a specific moment.
@@ -10,18 +11,21 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Define the situation and stakeholders**
 2. **Gather signals, history, and constraints**
 3. **Surface hidden incentives and risks**
 4. **Review existing communication patterns** (what's already working?)
 
 ### Phase 2: Intent Analysis
+
 - What outcome are we truly optimizing for?
 - Which principles must not be violated?
 - What trade-offs are acceptable?
 - **How does this fit existing communication norms?**
 
 ### Phase 3: Priority Assessment
+
 - **Impact**: magnitude of upside or avoided downside
 - **Effort**: time, energy, attention, capital
 - **Risk**: reversibility, blast radius, optionality
@@ -43,6 +47,7 @@
 ## Quick Filter
 
 Skip deep work if all are true:
+
 - Low, vague, or misaligned intent
 - High effort for marginal value
 - Better alternatives exist now
@@ -55,6 +60,7 @@ Skip deep work if all are true:
 ## Codebase-First Enhancement Rule
 
 Communicate using:
+
 1. **Existing channels first** - leverage current communication patterns
 2. **Established terminology** - use language the team understands
 3. **Proven formats** - use structures that have worked before

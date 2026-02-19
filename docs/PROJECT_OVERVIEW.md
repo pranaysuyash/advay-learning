@@ -89,7 +89,9 @@ source .venv/bin/activate
 ## Current Status
 
 ### MVP Definition
+
 Child can:
+
 1. Open the app
 2. Use hand gestures to interact
 3. Trace English alphabet letters
@@ -97,9 +99,11 @@ Child can:
 5. See their learning progress
 
 ### In Progress
+
 - Project setup and documentation ✅
 
 ### Next Up
+
 1. Camera integration
 2. Hand tracking basics
 3. Basic UI framework
@@ -109,19 +113,23 @@ Child can:
 ## Development Guidelines
 
 ### Code Quality
+
 - Type hints required
 - Docstrings for public APIs
 - Tests for new code
 - Pre-commit hooks run automatically
 
 ### PR Guidelines
+
 - Size: < 300 LOC preferred
 - Reviews: At least 1 approval
 - Tests: Must pass
 - Docs: Update as needed
 
 ### No CI/CD
+
 We use manual quality gates:
+
 - Pre-commit hooks for style
 - Local test runs
 - PR review checklist
@@ -130,11 +138,13 @@ We use manual quality gates:
 ## Communication
 
 ### Questions?
+
 1. Check documentation in `docs/`
 2. Review existing feature specs
 3. Create issue for discussion
 
 ### Reporting Issues
+
 - Use clear, descriptive titles
 - Include steps to reproduce
 - Note environment details
@@ -143,12 +153,14 @@ We use manual quality gates:
 ## Resources
 
 ### External Documentation
+
 - [MediaPipe Hands](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker)
 - [OpenCV Python](https://docs.opencv.org/4.x/d6/d00/tutorial_py_root.html)
 - [PyQt6 Reference](https://www.riverbankcomputing.com/static/Docs/PyQt6/)
 - [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 
 ### Tools
+
 - **Package Manager**: [uv](https://github.com/astral-sh/uv)
 - **Linter**: [ruff](https://docs.astral.sh/ruff/)
 - **Formatter**: [black](https://black.readthedocs.io/)
@@ -158,12 +170,14 @@ We use manual quality gates:
 ## Success Metrics
 
 ### Technical
+
 - [ ] 30 FPS hand tracking
 - [ ] < 200MB memory usage
 - [ ] < 1 second startup time
 - [ ] 80%+ test coverage
 
 ### User Experience
+
 - [ ] Child can use independently
 - [ ] Parent can review progress
 - [ ] Works offline

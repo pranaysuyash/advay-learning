@@ -1,4 +1,5 @@
 # UI/UX Design Audit + Frontend Code Review
+
 ## Kids Camera Learning App - Advay Vision Learning
 
 **Date**: February 1, 2026  
@@ -14,6 +15,7 @@
 ## Does it feel like a kids app? **PARTIAL (7/10)**
 
 **Reasons:**
+
 1. ✅ **Strong foundation**: Mascot (Pip the Red Panda), playful color palette (cream/terracotta), large touch targets (60px minimum), and friendly typography (Nunito) create a kid-friendly aesthetic
 2. ⚠️ **Inconsistent execution**: Some pages (Home, Games) feel polished and kid-focused, while others (Login, Register, Settings) look like generic adult-focused forms with minimal kid-appropriate visual cues
 3. ⚠️ **Missing kid-centric feedback**: Limited use of sound effects, celebrations, and progressive disclosure that would make the app feel more "magical" for children
@@ -21,6 +23,7 @@
 ## Does it feel modern and polished? **YES (8/10)**
 
 **Reasons:**
+
 1. ✅ **Design system**: Well-structured Tailwind configuration with custom design tokens, proper contrast ratios (WCAG AA/AAA), and consistent spacing/scale
 2. ✅ **Animation quality**: Framer Motion used thoughtfully with spring animations, smooth transitions, and reduced motion support
 3. ✅ **Component architecture**: Reusable components (Button, Card, Icon, Toast) with proper TypeScript types, variants, and accessibility features
@@ -93,6 +96,7 @@
 ```
 
 **Navigation Pattern**: Hub-and-spoke model
+
 - **Hub**: Dashboard (central management)
 - **Spokes**: Individual games, progress, settings
 - **Entry points**: Home (public), Login/Register (auth)
@@ -122,14 +126,15 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 **Note**: Screenshots were captured via Playwright but not saved to expected directory. Tests passed successfully, confirming all pages are accessible. See test execution evidence in `/tmp/playwright-output-2.log`.
 
 **Pages Captured** (Playwright test evidence):
-- home-desktop-full, home-desktop-above-fold, home-tablet-*, home-mobile-*
-- login-desktop-full, login-tablet-*, login-mobile-*
-- register-desktop-full, register-tablet-*, register-mobile-*
-- dashboard-desktop-full, dashboard-tablet-*, dashboard-mobile-*
-- games-desktop-full, games-tablet-*, games-mobile-*
-- finger-number-show-*, connect-the-dots-*, letter-hunt-*
-- progress-desktop-full, progress-tablet-*, progress-mobile-*
-- settings-desktop-full, settings-tablet-*, settings-mobile-*
+
+- home-desktop-full, home-desktop-above-fold, home-tablet-_, home-mobile-_
+- login-desktop-full, login-tablet-_, login-mobile-_
+- register-desktop-full, register-tablet-_, register-mobile-_
+- dashboard-desktop-full, dashboard-tablet-_, dashboard-mobile-_
+- games-desktop-full, games-tablet-_, games-mobile-_
+- finger-number-show-_, connect-the-dots-_, letter-hunt-\*
+- progress-desktop-full, progress-tablet-_, progress-mobile-_
+- settings-desktop-full, settings-tablet-_, settings-mobile-_
 - home-button-0-hover, home-button-1-hover, home-button-2-hover
 - dashboard-empty, home-tutorial-overlay
 
@@ -142,6 +147,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Home (route: /)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Landing page for new users, showcase features, provide entry points (Register, Try Demo)
 - **Primary Action**: "Get Started" (Register) or "Try Demo" (Guest play)
 
@@ -185,6 +191,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **8/10**
 
 **Justification**:
+
 - ✅ Simple, clear hero message ("Learn with Your Hands")
 - ✅ Big, easy-to-tap buttons (gradient CTA)
 - ✅ Visual icons for non-readers (feature grid)
@@ -194,6 +201,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **7/10**
 
 **Justification**:
+
 - ✅ Clear explanation of features (hand tracking, multi-language)
 - ✅ Try Demo option without commitment
 - ⚠️ No explicit mention of privacy, safety, or COPPA compliance
@@ -202,6 +210,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **8/10**
 
 **Justification**:
+
 - ✅ Motion animations with Framer Motion (`initial={{ opacity: 0, y: 20 }}`)
 - ✅ Gradient buttons and text effects
 - ✅ Responsive grid layout
@@ -244,6 +253,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Login (route: /login)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Authenticate existing users to access dashboard and games
 - **Primary Action**: "Sign In" button
 
@@ -286,6 +296,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **3/10**
 
 **Justification**:
+
 - ❌ Generic form with no playful elements
 - ❌ No mascot or kid-friendly visuals
 - ⚠️ "Sign in" and "Sign up" terminology may confuse young kids (though parents use this page)
@@ -294,6 +305,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **6/10**
 
 **Justification**:
+
 - ✅ Clean, professional-looking form
 - ✅ Email verification error handling
 - ⚠️ No security indicators (lock icon, SSL badge)
@@ -302,6 +314,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Motion animations on load
 - ✅ Error states with red accent colors
 - ✅ Gradient button styling
@@ -338,6 +351,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Register (route: /register)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Create new parent account and set up child profile
 - **Primary Action**: "Create Account" button
 
@@ -379,6 +393,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **2/10**
 
 **Justification**:
+
 - ❌ Generic form with zero playful elements
 - ❌ No child profile creation in flow (separate step in Dashboard)
 - ❌ Mascot missing from entire page
@@ -386,6 +401,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **5/10**
 
 **Justification**:
+
 - ✅ Clean, professional-looking form
 - ⚠️ No privacy policy link
 - ⚠️ No explanation of how child data is handled
@@ -394,6 +410,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Consistent with Login
 - ✅ Motion animations
 - ✅ Gradient button styling
@@ -423,6 +440,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Dashboard (route: /dashboard)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Central hub for managing child profiles, viewing progress, selecting profiles for games
 - **Primary Action**: Select child profile → Navigate to games
 
@@ -466,6 +484,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **7/10**
 
 **Justification**:
+
 - ✅ Colorful profile cards with avatars
 - ✅ Star ratings and progress bars are visual and intuitive
 - ✅ "Add Child" modal is simple
@@ -474,6 +493,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **8/10**
 
 **Justification**:
+
 - ✅ Clear progress tracking shows learning outcomes
 - ✅ Profile management is intuitive
 - ✅ Export progress function (Dashboard.tsx:54)
@@ -482,6 +502,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Card-based layout with hover effects
 - ✅ Color-coded progress indicators
 - ✅ Modal animations
@@ -512,6 +533,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Games (route: /games)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Game gallery showing all available learning activities
 - **Primary Action**: Select game → Start playing
 
@@ -555,6 +577,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **8/10**
 
 **Justification**:
+
 - ✅ Colorful cards with large icons
 - ✅ Tags show age range (helpful for parents)
 - ✅ Descriptions are simple and clear
@@ -563,6 +586,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **7/10**
 
 **Justification**:
+
 - ✅ Age ranges help parents select appropriate games
 - ✅ Difficulty ratings ("Beginner to Advanced")
 - ✅ "Safe, ad-free environment" callout (Games.tsx:167-177)
@@ -571,6 +595,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **8/10**
 
 **Justification**:
+
 - ✅ Smooth card animations (staggered fade-in)
 - ✅ Hover effects on cards
 - ✅ Gradient play buttons
@@ -601,6 +626,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Alphabet Tracing Game (route: /game)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Core learning activity - trace letters using hand tracking
 - **Primary Action**: Trace letter with finger → Complete → Next letter
 
@@ -644,6 +670,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **7/10**
 
 **Justification**:
+
 - ✅ Large letter display with colorful segments
 - ✅ Real-time finger tracking is magical
 - ✅ Mascot (`Mascot` component) provides guidance
@@ -653,6 +680,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **6/10**
 
 **Justification**:
+
 - ✅ Camera permission handled gracefully
 - ✅ Clear error messages when tracking fails
 - ⚠️ No visible "Stop Camera" button during gameplay
@@ -661,6 +689,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Smooth hand tracking with MediaPipe
 - ✅ Drawing canvas with animated segments
 - ✅ Wellness timer and reminder components (AlphabetGame.tsx:26-28)
@@ -691,6 +720,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Progress (route: /progress)
 
 ### Purpose and Primary Action
+
 - **Purpose**: View detailed learning progress and analytics for selected child
 - **Primary Action**: Review progress → Identify areas for improvement
 
@@ -723,6 +753,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **4/10**
 
 **Justification**:
+
 - ⚠️ Charts and analytics are adult-focused
 - ❌ No gamification elements (badges, achievements)
 - ❌ No "You're doing great!" encouragement
@@ -731,6 +762,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Parent Trust Score: **8/10**
 
 **Justification**:
+
 - ✅ Detailed progress tracking
 - ✅ Shows learning outcomes
 - ✅ Export functionality (Dashboard.tsx:54)
@@ -738,6 +770,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Chart.js integration for visualizations
 - ✅ Responsive layout
 - ⚠️ Could use more interactive charts (tooltips, drill-down)
@@ -761,6 +794,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ## Page: Settings (route: /settings)
 
 ### Purpose and Primary Action
+
 - **Purpose**: Manage app settings, parental controls, account preferences
 - **Primary Action**: Modify setting → Save
 
@@ -793,12 +827,14 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Kid-friendliness Score: **2/10**
 
 **Justification**:
+
 - ❌ Settings page is entirely adult-focused
 - ❌ Complex parent gate may confuse kids who accidentally access it
 
 ### Parent Trust Score: **9/10**
 
 **Justification**:
+
 - ✅ Robust parent gate prevents accidental changes
 - ✅ Clear camera permission settings
 - ✅ Mute/volume controls
@@ -807,6 +843,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### Modern Polish Score: **7/10**
 
 **Justification**:
+
 - ✅ Clean, organized layout
 - ✅ Toggle switches for binary settings
 - ✅ Confirmation dialogs for destructive actions
@@ -833,34 +870,34 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 
 ### UI Foundation Components
 
-| Component | File Path | Purpose | Used In |
-|-----------|-----------|---------|---------|
-| Button | `components/ui/Button.tsx` | Primary CTA with variants (primary, secondary, danger, success, ghost), sizes, icons | Pages: Login, Register, Dashboard, Games, Settings, others |
-| Card | `components/ui/Card.tsx` | Container with sub-components (CardHeader, CardFooter) | Pages: Games, Dashboard |
-| Icon | `components/ui/Icon.tsx` | SVG icon system with size variants | Used throughout app |
-| Toast | `components/ui/Toast.tsx` | Notification system (success, error, warning, info) | Global (ToastProvider) |
-| Tooltip | `components/ui/Tooltip.tsx` | Hover tooltip for additional info | Not extensively used |
-| Layout | `components/ui/Layout.tsx` | Main app layout (header, nav, footer) | Wrapped around all routes |
-| ProtectedRoute | `components/ui/ProtectedRoute.tsx` | Auth guard for protected pages | Routes: /dashboard, /game, /games, etc. |
-| ConfirmDialog | `components/ui/ConfirmDialog.tsx` | Confirmation modal for destructive actions | Settings (progress reset) |
-| AvatarCapture | `components/ui/AvatarCapture.tsx` | Camera-based avatar capture for profiles | Profile creation |
-| Skeleton | `components/ui/Skeleton.tsx` | Loading placeholder | Not extensively used |
+| Component      | File Path                          | Purpose                                                                              | Used In                                                    |
+| -------------- | ---------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Button         | `components/ui/Button.tsx`         | Primary CTA with variants (primary, secondary, danger, success, ghost), sizes, icons | Pages: Login, Register, Dashboard, Games, Settings, others |
+| Card           | `components/ui/Card.tsx`           | Container with sub-components (CardHeader, CardFooter)                               | Pages: Games, Dashboard                                    |
+| Icon           | `components/ui/Icon.tsx`           | SVG icon system with size variants                                                   | Used throughout app                                        |
+| Toast          | `components/ui/Toast.tsx`          | Notification system (success, error, warning, info)                                  | Global (ToastProvider)                                     |
+| Tooltip        | `components/ui/Tooltip.tsx`        | Hover tooltip for additional info                                                    | Not extensively used                                       |
+| Layout         | `components/ui/Layout.tsx`         | Main app layout (header, nav, footer)                                                | Wrapped around all routes                                  |
+| ProtectedRoute | `components/ui/ProtectedRoute.tsx` | Auth guard for protected pages                                                       | Routes: /dashboard, /game, /games, etc.                    |
+| ConfirmDialog  | `components/ui/ConfirmDialog.tsx`  | Confirmation modal for destructive actions                                           | Settings (progress reset)                                  |
+| AvatarCapture  | `components/ui/AvatarCapture.tsx`  | Camera-based avatar capture for profiles                                             | Profile creation                                           |
+| Skeleton       | `components/ui/Skeleton.tsx`       | Loading placeholder                                                                  | Not extensively used                                       |
 
 ### Game-Specific Components
 
-| Component | File Path | Purpose | Used In |
-|-----------|-----------|---------|---------|
-| Mascot | `components/Mascot.tsx` | Animated Pip mascot with TTS | AlphabetGame, Dashboard, onboarding |
-| GameTutorial | `components/GameTutorial.tsx` | Tutorial overlay for games | AlphabetGame |
-| CameraPermissionTutorial | `components/CameraPermissionTutorial.tsx` | Camera onboarding tutorial | AlphabetGame |
-| WellnessTimer | `components/WellnessTimer.tsx` | Session time tracking | AlphabetGame |
-| WellnessReminder | `components/WellnessReminder.tsx` | Break reminders | AlphabetGame |
-| LetterJourney | `components/LetterJourney.tsx` | Progress visualization for letters | Dashboard |
+| Component                | File Path                                 | Purpose                            | Used In                             |
+| ------------------------ | ----------------------------------------- | ---------------------------------- | ----------------------------------- |
+| Mascot                   | `components/Mascot.tsx`                   | Animated Pip mascot with TTS       | AlphabetGame, Dashboard, onboarding |
+| GameTutorial             | `components/GameTutorial.tsx`             | Tutorial overlay for games         | AlphabetGame                        |
+| CameraPermissionTutorial | `components/CameraPermissionTutorial.tsx` | Camera onboarding tutorial         | AlphabetGame                        |
+| WellnessTimer            | `components/WellnessTimer.tsx`            | Session time tracking              | AlphabetGame                        |
+| WellnessReminder         | `components/WellnessReminder.tsx`         | Break reminders                    | AlphabetGame                        |
+| LetterJourney            | `components/LetterJourney.tsx`            | Progress visualization for letters | Dashboard                           |
 
 ### Layout Components
 
-| Component | File Path | Purpose | Used In |
-|-----------|-----------|---------|---------|
+| Component  | File Path                          | Purpose                       | Used In                              |
+| ---------- | ---------------------------------- | ----------------------------- | ------------------------------------ |
 | GameLayout | `components/layout/GameLayout.tsx` | Layout wrapper for game pages | AlphabetGame, FingerNumberShow, etc. |
 
 ## Inconsistencies and Duplication
@@ -868,6 +905,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### 1. Button Styling Duplication
 
 **Evidence**:
+
 - `components/ui/Button.tsx` has full button system with variants
 - Multiple pages define inline button styles:
   - `Home.tsx:34-44`: Inline gradient buttons
@@ -881,7 +919,8 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### 2. Color Token Inconsistency
 
 **Evidence**:
-- `tailwind.config.js` defines colors (brand-primary, brand-secondary, pip-*, etc.)
+
+- `tailwind.config.js` defines colors (brand-primary, brand-secondary, pip-\*, etc.)
 - `index.css` defines CSS custom properties (--brand-primary, --bg-primary, etc.)
 - Pages use both:
   - Tailwind classes: `bg-pip-orange`, `text-advay-slate`
@@ -894,6 +933,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### 3. Input Field Styling
 
 **Evidence**:
+
 - `Login.tsx:99`, `Login.tsx:118`: Input fields with `bg-white/10`
 - `Register.tsx:99`, `Register.tsx:118`: Same pattern
 - No dedicated `Input` component
@@ -905,6 +945,7 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### 4. Card Styling Variations
 
 **Evidence**:
+
 - `components/ui/Card.tsx` has standardized Card with CardHeader/CardFooter
 - Some pages use inline card styling:
   - `Login.tsx:56`: `bg-white/10 border border-border`
@@ -918,13 +959,16 @@ Dashboard (select profile) → Games Gallery → Select Game → Gameplay → Pr
 ### 5. Missing Components
 
 **Gap 1: No Modal System**
+
 - `ConfirmDialog` exists but no generic `Modal` component
 - Settings uses inline modal logic
 
 **Gap 2: No Tabs Component**
+
 - No reusable tabs for switching views
 
 **Gap 3: No Progress/Slider Component**
+
 - Custom progress bars implemented inline
 
 ## Proposed "Minimum Design System"
@@ -1024,11 +1068,13 @@ colors: {
 ### Recovery Paths
 
 **Camera Permission Denied**:
+
 - ✅ `AlphabetGame.tsx:119-122` tracks permission state
 - ✅ `CameraPermissionTutorial` component exists for onboarding
 - ⚠️ No clear "try again" flow after denial
 
 **Email Verification Failed**:
+
 - ✅ `Register.tsx:66-84` shows error with "Resend verification" link
 - ✅ `Login.tsx:66-84` handles unverified email login
 
@@ -1077,11 +1123,13 @@ colors: {
 ### Recovery Paths
 
 **Hand Tracking Lost**:
+
 - ✅ `useHandTracking` hook handles initialization
 - ✅ `isHandTrackingReady` state tracks status
 - ⚠️ No visible "reconnecting..." indicator
 
 **Low Confidence Tracking**:
+
 - ⚠️ No explicit guidance UI for low confidence
 - **Evidence**: `AlphabetGame.tsx:100-106` (tracking config)
 - **Severity**: Medium
@@ -1091,15 +1139,18 @@ colors: {
 ## Recovery Paths
 
 **Denied Camera Permission**:
+
 - ✅ Permission state tracked (`granted` | `denied` | `prompt`)
 - ✅ `CameraPermissionTutorial` component for onboarding
 - ⚠️ No in-game "Enable Camera" button after denial
 
 **Low Confidence Tracking**:
+
 - ⚠️ No explicit guidance or retry UI
 - **Recommendation**: Add "Move closer to camera" or "Improve lighting" tips
 
 **Camera Off During Game**:
+
 - ⚠️ No "Resume Camera" button visible
 - **Recommendation**: Add quick-access button to re-enable camera
 
@@ -1108,11 +1159,13 @@ colors: {
 ## Switching/Navigation Safety
 
 **What Works**:
+
 1. ✅ Protected routes require auth (`ProtectedRoute` component)
 2. ✅ Layout provides consistent navigation (Home | Games | Progress | Settings)
 3. ✅ Settings has parent gate for sensitive settings
 
 **What Breaks**:
+
 1. **No "Confirm Exit" on Gameplay**
    - Kids can accidentally navigate away from game
    - **Evidence**: `AlphabetGame.tsx` (no exit confirmation)
@@ -1132,29 +1185,34 @@ colors: {
 **Stack**: React 19.2 + TypeScript 5.3 + Vite 7.3 + Tailwind CSS 3.4 + Framer Motion 12.29
 
 **State Management**:
+
 - Zustand stores: `useAuthStore`, `useProfileStore`, `useProgressStore`, `useSettingsStore`
 - Local component state for UI (forms, modals, game state)
 - Evidence: `src/store/` directory
 
 **Routing**:
+
 - React Router DOM 6.28
 - Lazy-loaded pages for code splitting (`lazy()` imports)
 - Protected routes with `ProtectedRoute` component
 - Evidence: `App.tsx:8-21`
 
 **Styling**:
+
 - Tailwind CSS for utility-first styling
 - CSS custom properties in `index.css` for base styles
 - Some inline styles (need migration to components)
 - Evidence: `tailwind.config.js`, `index.css`
 
 **Component Structure**:
+
 - Presentational components in `components/ui/`
 - Feature components in `components/` (Mascot, GameTutorial, etc.)
 - Pages in `pages/` directory
 - Evidence: Directory structure
 
 **Hooks**:
+
 - Custom hooks in `hooks/` directory:
   - `useHandTracking`, `useGameLoop`
   - `usePostureDetection`, `useAttentionDetection`
@@ -1168,17 +1226,20 @@ colors: {
 ### 1. **AlphabetGame.tsx** (438 lines) - CRITICAL
 
 **Issues**:
+
 - 15+ state variables in single component
 - Complex game logic mixed with UI rendering
 - Hard to test and maintain
 - Evidence: `AlphabetGame.tsx:1-438`
 
 **Impact**:
+
 - Bugs harder to fix
 - Features harder to add
 - Performance optimization difficult
 
 **Recommendation**:
+
 - Extract `useGameLogic` hook
 - Extract `useDrawingState` hook
 - Extract `useCameraState` hook
@@ -1189,15 +1250,18 @@ colors: {
 ### 2. **Dashboard.tsx** (318 lines) - HIGH
 
 **Issues**:
+
 - Multiple concerns in one component: profile selection, add child, edit profile, progress display
 - Modal logic embedded inline
 - Evidence: `Dashboard.tsx:1-318`
 
 **Impact**:
+
 - Difficult to modify profile flow
 - Reusability limited
 
 **Recommendation**:
+
 - Extract `ChildProfileCard` component
 - Extract `AddChildModal` component
 - Extract `EditProfileModal` component
@@ -1208,6 +1272,7 @@ colors: {
 ### 3. **Button Styling Duplication** - MEDIUM
 
 **Issues**:
+
 - Inline button styles across pages
 - Not using centralized `Button` component
 - Evidence:
@@ -1216,10 +1281,12 @@ colors: {
   - `Login.tsx:125-131`
 
 **Impact**:
+
 - Maintenance burden
 - Inconsistent behavior
 
 **Recommendation**:
+
 - Migrate all buttons to use `Button` component
 - Add missing variants if needed
 
@@ -1228,6 +1295,7 @@ colors: {
 ### 4. **Card Styling Duplication** - MEDIUM
 
 **Issues**:
+
 - Inline card styles across pages
 - Not using centralized `Card` component
 - Evidence:
@@ -1236,10 +1304,12 @@ colors: {
   - `Home.tsx:70`
 
 **Impact**:
+
 - Maintenance burden
 - Inconsistent behavior
 
 **Recommendation**:
+
 - Migrate all cards to use `Card` component
 
 ---
@@ -1247,15 +1317,18 @@ colors: {
 ### 5. **Input Field Duplication** - MEDIUM
 
 **Issues**:
+
 - No centralized `Input` component
 - Duplication across Login, Register
 - Evidence: `Login.tsx:99`, `Register.tsx:99`
 
 **Impact**:
+
 - Inconsistent input behavior
 - No shared validation logic
 
 **Recommendation**:
+
 - Create `Input` component with variants
 - Migrate all inputs to use it
 
@@ -1266,15 +1339,18 @@ colors: {
 ### 1. **Two Coexisting Color Systems**
 
 **Evidence**:
+
 - `tailwind.config.js:9-69` defines Tailwind colors
 - `index.css:10-59` defines CSS custom properties
 - Pages use both systems
 
 **Issue**:
+
 - Confusion about which to use
 - No clear migration path
 
 **Recommendation**:
+
 - Standardize on Tailwind colors
 - Use CSS vars only for base styles (body, html)
 
@@ -1283,14 +1359,17 @@ colors: {
 ### 2. **Hardcoded Color Values in Components**
 
 **Evidence**:
+
 - `LetterHunt.tsx`: Inline `color` prop with hex values
 - `AlphabetGame.tsx`: Color class mapping (`LETTER_COLOR_CLASS_MAP`)
 
 **Issue**:
+
 - Difficult to update color palette
 - Inconsistent with design tokens
 
 **Recommendation**:
+
 - Use Tailwind color classes everywhere
 - Remove hex value mappings
 
@@ -1299,11 +1378,13 @@ colors: {
 ### 3. **Typography Inconsistencies**
 
 **Evidence**:
+
 - Some pages use `text-3xl`, others use `text-xl`
 - No standardized heading hierarchy
 - Evidence: Multiple pages with inconsistent heading sizes
 
 **Recommendation**:
+
 - Create typography scale with clear hierarchy
 - Use semantic heading elements (h1, h2, h3)
 
@@ -1314,10 +1395,12 @@ colors: {
 ### 1. **Low Contrast Text** - MEDIUM
 
 **Evidence**:
+
 - `Home.tsx:27-30`: `text-white/80` and `text-white/70` on light background
 - May violate WCAG AA (4.5:1)
 
 **Recommendation**:
+
 - Use darker text colors from design tokens
 - Test with contrast checker
 
@@ -1326,10 +1409,12 @@ colors: {
 ### 2. **Missing ARIA Labels on Icon Buttons** - MEDIUM
 
 **Evidence**:
+
 - Icon-only buttons without `aria-label`
 - Search code for `<UIIcon name='...' />` in button contexts
 
 **Recommendation**:
+
 - Add `aria-label` to all icon-only buttons
 - Example: `<Button aria-label="Close">...</Button>`
 
@@ -1338,10 +1423,12 @@ colors: {
 ### 3. **Keyboard Navigation Not Tested** - LOW
 
 **Evidence**:
+
 - No visible keyboard focus styles beyond `:focus-visible`
 - `index.css:181-184` has focus styles but not comprehensive
 
 **Recommendation**:
+
 - Test all interactive elements with keyboard
 - Ensure visible focus indicators
 
@@ -1350,6 +1437,7 @@ colors: {
 ### 4. **Motion Sensitivity** - GOOD
 
 **Evidence**:
+
 - `index.css:644-653` has `@media (prefers-reduced-motion)` block
 - Animations disabled for users who prefer reduced motion
 
@@ -1362,11 +1450,13 @@ colors: {
 ### 1. **Large Component Re-renders** - MEDIUM
 
 **Evidence**:
+
 - `AlphabetGame.tsx`: 438 lines, complex state
 - `Dashboard.tsx`: 318 lines, complex state
 - May cause unnecessary re-renders
 
 **Recommendation**:
+
 - Use `React.memo` where appropriate
 - Extract sub-components to isolate state changes
 - Use `useMemo` and `useCallback` for expensive computations
@@ -1376,10 +1466,12 @@ colors: {
 ### 2. **Hand Tracking Model Loading** - MEDIUM
 
 **Evidence**:
+
 - `useHandTracking` hook loads MediaPipe models
 - `isModelLoading` state but loading spinner may not be visible
 
 **Recommendation**:
+
 - Ensure loading state is clearly visible
 - Consider lazy-loading models
 
@@ -1388,10 +1480,12 @@ colors: {
 ### 3. **Unoptimized Images** - LOW
 
 **Evidence**:
+
 - `public/assets/images/` and `public/assets/icons/` contain many files
 - No visible optimization (WebP, lazy loading)
 
 **Recommendation**:
+
 - Optimize images (WebP format)
 - Implement lazy loading for images below fold
 - Use `next/image` equivalent (Vite Image component)
@@ -1401,12 +1495,14 @@ colors: {
 ### 4. **Bundle Size** - LOW
 
 **Evidence**:
+
 - `package.json` dependencies include heavy libraries:
   - `@mediapipe/tasks-vision`: AI model library
   - `@tensorflow/tfjs`: TensorFlow.js
   - `chart.js` and `react-chartjs-2`: Charting
 
 **Recommendation**:
+
 - Code-split AI libraries (load on-demand)
 - Consider lighter alternatives for charting
 
@@ -1438,31 +1534,31 @@ colors: {
 
 ## High Impact Quick Wins (1 Day)
 
-4. **[High] Add Confetti Celebration on Letter Completion**
+1. **[High] Add Confetti Celebration on Letter Completion**
    - **File**: `AlphabetGame.tsx` (completion logic)
    - **Effort**: 1 day
    - **Impact**: Increases motivation and engagement
    - **Description**: Trigger confetti + mascot celebration when letter traced correctly
 
-5. **[High] Fix Text Contrast in Hero (Home)**
+2. **[High] Fix Text Contrast in Hero (Home)**
    - **File**: `Home.tsx:27-30`
    - **Effort**: 0.5 day
    - **Impact**: WCAG compliance; better readability
    - **Description**: Replace `text-white/80` with darker text color
 
-6. **[High] Add "Forgot Password" Flow**
+3. **[High] Add "Forgot Password" Flow**
    - **File**: `Login.tsx` + create `PasswordReset.tsx`
    - **Effort**: 1 day
    - **Impact**: Prevents user lockout; reduces support burden
    - **Description**: Add password recovery flow
 
-7. **[High] Add "Quick Play" / "Continue Learning" Card in Dashboard**
+4. **[High] Add "Quick Play" / "Continue Learning" Card in Dashboard**
    - **File**: `Dashboard.tsx`
    - **Effort**: 1 day
    - **Impact**: Reduces clicks to game start; improves engagement
    - **Description**: Show last played game with "Continue" button
 
-8. **[High] Add In-Game Parent Quick Controls**
+5. **[High] Add In-Game Parent Quick Controls**
    - **File**: `AlphabetGame.tsx` (game UI)
    - **Effort**: 1 day
    - **Impact**: Parents can intervene without exiting
@@ -1472,81 +1568,81 @@ colors: {
 
 ## MVP Polish (1 Week)
 
-9. **[Medium] Refactor AlphabetGame Component**
+1. **[Medium] Refactor AlphabetGame Component**
    - **File**: `AlphabetGame.tsx`
    - **Effort**: 2-3 days
    - **Impact**: Improves maintainability; easier to add features
    - **Description**: Extract game logic hooks; break into sub-components
 
-10. **[Medium] Refactor Dashboard Component**
-    - **File**: `Dashboard.tsx`
-    - **Effort**: 1-2 days
-    - **Impact**: Improves maintainability
-    - **Description**: Extract card components; simplify state
+2. **[Medium] Refactor Dashboard Component**
+   - **File**: `Dashboard.tsx`
+   - **Effort**: 1-2 days
+   - **Impact**: Improves maintainability
+   - **Description**: Extract card components; simplify state
 
-11. **[Medium] Migrate All Buttons to Button Component**
-    - **File**: Multiple pages
-    - **Effort**: 2 days
-    - **Impact**: Consistent behavior; easier maintenance
-    - **Description**: Replace inline button styles with `Button` component
+3. **[Medium] Migrate All Buttons to Button Component**
+   - **File**: Multiple pages
+   - **Effort**: 2 days
+   - **Impact**: Consistent behavior; easier maintenance
+   - **Description**: Replace inline button styles with `Button` component
 
-12. **[Medium] Migrate All Cards to Card Component**
-    - **File**: Multiple pages
-    - **Effort**: 1 day
-    - **Impact**: Consistent behavior
-    - **Description**: Replace inline card styles with `Card` component
+4. **[Medium] Migrate All Cards to Card Component**
+   - **File**: Multiple pages
+   - **Effort**: 1 day
+   - **Impact**: Consistent behavior
+   - **Description**: Replace inline card styles with `Card` component
 
-13. **[Medium] Add Input Component**
-    - **File**: `components/ui/Input.tsx` (create new)
-    - **Effort**: 1 day
-    - **Impact**: Consistent input behavior
-    - **Description**: Create reusable Input component with variants
+5. **[Medium] Add Input Component**
+   - **File**: `components/ui/Input.tsx` (create new)
+   - **Effort**: 1 day
+   - **Impact**: Consistent input behavior
+   - **Description**: Create reusable Input component with variants
 
-14. **[Medium] Add Game Video Previews on Hover**
-    - **File**: `Games.tsx`
-    - **Effort**: 1-2 days
-    - **Impact**: Better game discovery; higher engagement
-    - **Description**: Autoplay short video preview on game card hover
+6. **[Medium] Add Game Video Previews on Hover**
+   - **File**: `Games.tsx`
+   - **Effort**: 1-2 days
+   - **Impact**: Better game discovery; higher engagement
+   - **Description**: Autoplay short video preview on game card hover
 
-15. **[Medium] Add "Next Steps" Section in Progress**
-    - **File**: `Progress.tsx`
-    - **Effort**: 1 day
-    - **Impact**: Makes progress actionable
-    - **Description**: Show recommended next games based on gaps
+7. **[Medium] Add "Next Steps" Section in Progress**
+   - **File**: `Progress.tsx`
+   - **Effort**: 1 day
+   - **Impact**: Makes progress actionable
+   - **Description**: Show recommended next games based on gaps
 
 ---
 
 ## Product-Level Design Upgrades (1 Month)
 
-16. **[Low] Add Badges/Achievements System**
-    - **File**: New `components/Badges.tsx` + store updates
-    - **Effort**: 3-5 days
-    - **Impact**: Gamification; increased engagement
-    - **Description**: Unlock badges for milestones (first letter, 10 letters, 90% accuracy)
+1. **[Low] Add Badges/Achievements System**
+   - **File**: New `components/Badges.tsx` + store updates
+   - **Effort**: 3-5 days
+   - **Impact**: Gamification; increased engagement
+   - **Description**: Unlock badges for milestones (first letter, 10 letters, 90% accuracy)
 
-17. **[Low] Add "For [Child Name]" Personalization**
-    - **File**: Multiple pages
-    - **Effort**: 2-3 days
-    - **Impact**: Personalized experience
-    - **Description**: Personalize titles based on selected profile
+2. **[Low] Add "For [Child Name]" Personalization**
+   - **File**: Multiple pages
+   - **Effort**: 2-3 days
+   - **Impact**: Personalized experience
+   - **Description**: Personalize titles based on selected profile
 
-18. **[Low] Add "Recommended for Age" Section**
-    - **File**: `Games.tsx`
-    - **Effort**: 1-2 days
-    - **Impact**: Better game discovery
-    - **Description**: Filter/reorder games based on child's age
+3. **[Low] Add "Recommended for Age" Section**
+   - **File**: `Games.tsx`
+   - **Effort**: 1-2 days
+   - **Impact**: Better game discovery
+   - **Description**: Filter/reorder games based on child's age
 
-19. **[Low] Optimize Images and Bundle Size**
-    - **File**: Build configuration
-    - **Effort**: 2-3 days
-    - **Impact**: Faster load times
-    - **Description**: Optimize images; code-split AI libraries
+4. **[Low] Optimize Images and Bundle Size**
+   - **File**: Build configuration
+   - **Effort**: 2-3 days
+   - **Impact**: Faster load times
+   - **Description**: Optimize images; code-split AI libraries
 
-20. **[Low] Extract Parent Gate to Reusable Component**
-    - **File**: `components/ui/ParentGate.tsx` (create new)
-    - **Effort**: 1 day
-    - **Impact**: Consistent behavior; easier maintenance
-    - **Description**: Extract parent gate logic from Settings
+5. **[Low] Extract Parent Gate to Reusable Component**
+   - **File**: `components/ui/ParentGate.tsx` (create new)
+   - **Effort**: 1 day
+   - **Impact**: Consistent behavior; easier maintenance
+   - **Description**: Extract parent gate logic from Settings
 
 ---
 
@@ -1620,52 +1716,52 @@ colors: {
 ## 10 Specific Changes That Most Increase "Modern Premium" Feel
 
 1. **Add Subtle Gradient Backgrounds**
-    - Replace solid backgrounds with soft gradients (cream to peach, blue to teal)
-    - File: `index.css` (update base backgrounds)
-    - Effort: 0.5 day
+   - Replace solid backgrounds with soft gradients (cream to peach, blue to teal)
+   - File: `index.css` (update base backgrounds)
+   - Effort: 0.5 day
 
 2. **Add Glassmorphism Effects**
-    - Add backdrop-blur and semi-transparent backgrounds to cards and modals
-    - Already used in some places (`backdrop-blur`)
-    - File: `Card.tsx`, `Button.tsx`, modals
-    - Effort: 1 day
+   - Add backdrop-blur and semi-transparent backgrounds to cards and modals
+   - Already used in some places (`backdrop-blur`)
+   - File: `Card.tsx`, `Button.tsx`, modals
+   - Effort: 1 day
 
 3. **Add Micro-Interactions**
-    - Add subtle hover lift, scale, and shadow transitions on all interactive elements
-    - Already has some, expand to all cards, buttons, links
-    - File: `Card.tsx`, `Button.tsx`, `Games.tsx`
-    - Effort: 1-2 days
+   - Add subtle hover lift, scale, and shadow transitions on all interactive elements
+   - Already has some, expand to all cards, buttons, links
+   - File: `Card.tsx`, `Button.tsx`, `Games.tsx`
+   - Effort: 1-2 days
 
 4. **Add Smooth Loading Skeletons**
-    - Replace empty states with animated skeleton loaders
-    - Evidence: `Skeleton.tsx` component exists
-    - File: Use in `Dashboard.tsx`, `Games.tsx`, `Progress.tsx`
-    - Effort: 1 day
+   - Replace empty states with animated skeleton loaders
+   - Evidence: `Skeleton.tsx` component exists
+   - File: Use in `Dashboard.tsx`, `Games.tsx`, `Progress.tsx`
+   - Effort: 1 day
 
 5. **Add Floating Action Button (FAB) for Quick Actions**
-    - Add floating "Quick Play" or "Mascot" button that stays visible
-    - File: `Layout.tsx` (add FAB)
-    - Effort: 1 day
+   - Add floating "Quick Play" or "Mascot" button that stays visible
+   - File: `Layout.tsx` (add FAB)
+   - Effort: 1 day
 
 6. **Add Smooth Chart Animations**
-    - Animate progress charts on load using Chart.js animations
-    - File: `Progress.tsx`, `HistoricalProgressChart.tsx`
-    - Effort: 1 day
+   - Animate progress charts on load using Chart.js animations
+   - File: `Progress.tsx`, `HistoricalProgressChart.tsx`
+   - Effort: 1 day
 
 7. **Add Ripple Effect on Buttons**
-    - Add material-design ripple effect on button press
-    - File: `Button.tsx`
-    - Effort: 1 day
+   - Add material-design ripple effect on button press
+   - File: `Button.tsx`
+   - Effort: 1 day
 
 8. **Add Parallax Scroll Effects**
-    - Add subtle parallax on hero section and game cards
-    - File: `Home.tsx`, `Games.tsx`
-    - Effort: 1-2 days
+   - Add subtle parallax on hero section and game cards
+   - File: `Home.tsx`, `Games.tsx`
+   - Effort: 1-2 days
 
 9. **Add Dark Mode Support**
-    - Implement dark mode with smooth transition
-    - File: `tailwind.config.js` (add dark mode), create theme toggle
-    - Effort: 2-3 days
+   - Implement dark mode with smooth transition
+   - File: `tailwind.config.js` (add dark mode), create theme toggle
+   - Effort: 2-3 days
 
 10. **Add Keyboard Shortcuts**
     - Add shortcuts: "M" for mute, "S" for stop camera, "H" for help
@@ -1677,36 +1773,37 @@ colors: {
 ## 5 Things to Remove/Simplify (Reduce Clutter/Confusion)
 
 1. **Remove "Try Demo" Link from Home**
-    - Confuses purpose; better to guide users to Register
-    - File: `Home.tsx:40-44`
-    - Effort: 0.5 day
+   - Confuses purpose; better to guide users to Register
+   - File: `Home.tsx:40-44`
+   - Effort: 0.5 day
 
 2. **Simplify Settings - Remove Advanced Options**
-    - Move advanced settings to separate "Advanced" section with parent gate
-    - File: `Settings.tsx`
-    - Effort: 1 day
+   - Move advanced settings to separate "Advanced" section with parent gate
+   - File: `Settings.tsx`
+   - Effort: 1 day
 
 3. **Remove "Style Test" Route**
-    - Dev-only route shouldn't be in production
-    - File: `App.tsx:79`
-    - Effort: 0.1 day
+   - Dev-only route shouldn't be in production
+   - File: `App.tsx:79`
+   - Effort: 0.1 day
 
 4. **Simplify Progress Page - Remove Complex Charts**
-    - Replace detailed charts with simple, visual progress summaries
-    - Keep detailed charts in "Advanced" section
-    - File: `Progress.tsx`
-    - Effort: 1-2 days
+   - Replace detailed charts with simple, visual progress summaries
+   - Keep detailed charts in "Advanced" section
+   - File: `Progress.tsx`
+   - Effort: 1-2 days
 
 5. **Remove Unused Exported Components**
-    - Remove unused exports from `components/ui/` (e.g., unused convenience functions)
-    - File: Multiple UI components
-    - Effort: 0.5 day
+   - Remove unused exports from `components/ui/` (e.g., unused convenience functions)
+   - File: Multiple UI components
+   - Effort: 0.5 day
 
 ---
 
 # Conclusion
 
 The Advay Vision Learning frontend has a **strong foundation** with:
+
 - ✅ Well-structured design system (Tailwind + custom tokens)
 - ✅ Reusable components (Button, Card, Icon, Toast, Mascot)
 - ✅ Accessibility considerations (focus states, reduced motion, contrast)
@@ -1714,29 +1811,34 @@ The Advay Vision Learning frontend has a **strong foundation** with:
 - ✅ Playful color palette and typography (Nunito font, terracotta/cream colors)
 
 **Key Strengths**:
+
 - Mascot (Pip) creates emotional connection
 - Hand tracking integration is magical for kids
 - Parent gate shows consideration for safety
 - Multi-language support (English, Hindi, Kannada, Telugu, Tamil)
 
 **Critical Gaps**:
+
 - ❌ Camera permission not introduced before first game (blocker)
 - ❌ Child profile not created during registration (blocker)
 - ❌ No celebration effects on game success (high impact)
 - ❌ Parent controls not accessible during gameplay (high impact)
 
 **UI Debt Hotspots**:
+
 1. `AlphabetGame.tsx` (438 lines) - needs refactoring
 2. `Dashboard.tsx` (318 lines) - needs refactoring
 3. Button/Card styling duplication - needs migration to components
 4. Two coexisting color systems - needs standardization
 
 **Overall Assessment**:
+
 - **Kid-friendliness**: 7/10 (strong foundation, missing magic)
 - **Parent trust**: 7/10 (good progress tracking, missing privacy disclosure)
 - **Modern polish**: 8/10 (design system is solid, some inconsistencies)
 
 **Recommended Next Steps**:
+
 1. Implement blockers (camera permission, child profile creation)
 2. Add quick wins (confetti, sound effects, celebration)
 3. Refactor hotspots (AlphabetGame, Dashboard)

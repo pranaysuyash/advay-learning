@@ -9,6 +9,7 @@
 ## Context
 
 During error resolution session, identified multiple categories of issues:
+
 - ESLint/TypeScript errors (resolved via code changes + config changes)
 - Missing icon assets (IconName type includes icons without SVG files)
 - LSP warnings in VS Code (button types, form labels)
@@ -21,16 +22,19 @@ During error resolution session, identified multiple categories of issues:
 ## 10 Priority Work Items
 
 ### Priority 1: Test the application
+
 **Type**: VALIDATION
 **Estimated Effort**: 30 minutes
 
 **Background**:
+
 - Fixed multiple TypeScript and ESLint errors
 - Updated lint configuration (disabled `exhaustive-deps`, `rules-of-hooks`)
 - Modified component files to resolve type errors
 - Need to verify these changes don't break existing functionality
 
 **Scope**:
+
 - In-scope:
   - Start frontend dev server (if not running)
   - Start backend dev server (if not running)
@@ -50,38 +54,46 @@ During error resolution session, identified multiple categories of issues:
   - E2E test execution (Playwright setup not verified)
 
 **Actions**:
+
 1. Check if servers are already running:
+
    ```bash
    lsof -i :6173 2>/dev/null && echo "Frontend: running" || echo "Frontend: not running"
    lsof -i :8001 2>/dev/null && echo "Backend: running" || echo "Backend: not running"
    ```
 
 2. If not running, start backend first:
+
    ```bash
    cd src/backend && source ../.venv/bin/activate && python -m uvicorn app.main:app --host 0.0.0.0 --port 8001
    ```
 
 3. Start frontend:
+
    ```bash
    cd src/frontend && npm run dev
    ```
 
 4. Run frontend tests:
+
    ```bash
    cd src/frontend && npm test
    ```
 
 5. Run backend tests (if exists):
+
    ```bash
    cd src/backend && source ../.venv/bin/activate && pytest tests/
    ```
 
 6. Build production:
+
    ```bash
    cd src/frontend && npm run build
    ```
 
 **Acceptance Criteria**:
+
 - [ ] Frontend dev server starts on port 6173
 - [ ] Backend dev server starts on port 8001
 - [ ] Both servers run simultaneously without errors
@@ -92,29 +104,35 @@ During error resolution session, identified multiple categories of issues:
 - [ ] selectedChildData fix doesn't cause crashes in Dashboard
 
 **Risks**:
+
 - **Low Risk**: Testing may reveal issues that require additional fixes
 - **Mitigation**: Have worklog tickets ready for discovered issues
 
 **Dependencies**:
+
 - Blocking: None
 - Blocked by: None
 
 ---
 
 ### Priority 2: Fix 10 button type prop warnings
+
 **Type**: REMEDIATION
 **Estimated Effort**: 15 minutes
 
 **Background**:
+
 - Disabled `react/button-type-has-static-qualifiers` in .eslintrc.cjs
 - ESLint shows 10+ warnings about missing `type` attribute on `<button>` elements
 - These warnings don't break functionality but are linter complaints
 
 **Affected Files** (from LSP diagnostics):
+
 - `src/frontend/src/pages/AlphabetGame.tsx`: 10 warnings (lines: 746, 776, 788, 883, 941, 948, 973, 979, 994, 1021, 1022)
 - Other button warnings may exist in other files
 
 **Scope**:
+
 - In-scope:
   - Review each button in AlphabetGame.tsx and add appropriate `type` attributes
   - Common button types: `button`, `submit`, `reset`
@@ -124,7 +142,9 @@ During error resolution session, identified multiple categories of issues:
   - Changing button behavior
 
 **Actions**:
+
 1. Search for all button elements in AlphabetGame.tsx:
+
    ```bash
    cd src/frontend && rg -n "<button" src/pages/AlphabetGame.tsx
    ```
@@ -147,32 +167,38 @@ During error resolution session, identified multiple categories of issues:
    - Add appropriate type (button, submit, reset, etc.)
 
 4. Re-run type-check and eslint to verify fixes:
+
    ```bash
    cd src/frontend && npm run type-check
    cd src/frontend && npx eslint . --ext ts,tsx --max-warnings 999
    ```
 
 **Acceptance Criteria**:
+
 - [ ] All 10 button warnings resolved (or explicitly left unneeded with comment)
 - [ ] TypeScript compiles without new errors from these changes
 - [ ] ESLint shows no button-type warnings for AlphabetGame.tsx
 - [ ] Buttons still function correctly (test to verify)
 
 **Risks**:
+
 - **Low Risk**: Adding `type` attributes is safe and won't break functionality
 - **Note**: Some buttons may not need a type if they're generic - document this decision
 
 **Dependencies**:
+
 - Blocking: Priority 1 (need to test after button changes)
 - Related to: Priority 3 (icon assets)
 
 ---
 
 ### Priority 3: Add missing icon SVG files
+
 **Type**: FEATURE/ASSETS
 **Estimated Effort**: 20 minutes
 
 **Background**:
+
 - Updated IconName type in `src/frontend/src/components/ui/Icon.tsx` to include:
   - `'coffee'`
   - `'drop'`
@@ -183,6 +209,7 @@ During error resolution session, identified multiple categories of issues:
 - This causes broken icon displays in production
 
 **Missing Assets**:
+
 ```
 src/frontend/public/assets/icons/ui/coffee.svg
 src/frontend/public/assets/icons/ui/drop.svg
@@ -191,6 +218,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 ```
 
 **Scope**:
+
 - In-scope:
   - Create 4 missing SVG icon files
   - Use brand-appropriate design style (simple, monochrome, kid-friendly)
@@ -202,7 +230,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - Creating icon generation tool
 
 **Actions**:
+
 1. Check existing icon design patterns:
+
    ```bash
    ls -la src/frontend/public/assets/icons/ui/*.svg | head -3
    ```
@@ -214,6 +244,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Eye: Simple eye outline (open)
 
    Example SVG structure:
+
    ```xml
    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
      <!-- path data -->
@@ -221,12 +252,14 @@ src/frontend/public/assets/icons/ui/eye.svg
    ```
 
 3. Verify icons work:
+
    ```bash
    cd src/frontend && npm run build
    # Check for icon compilation errors
    ```
 
 **Acceptance Criteria**:
+
 - [ ] All 4 SVG files created with valid XML structure
 - [ ] Icons render correctly in production build
 - [ ] Icons are consistent with existing style (simple, outline-based)
@@ -234,26 +267,31 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] IconName type correctly references all icons
 
 **Risks**:
+
 - **Low Risk**: Creating simple icons won't break anything
 - **Note**: Temporary placeholders are fine - can improve in separate design ticket
 
 **Dependencies**:
+
 - Related to: Priority 2 (button types appear in same files)
 - Related to: Priority 4 (tests need to validate assets)
 
 ---
 
 ### Priority 4: Run the test suite
+
 **Type**: VALIDATION
 **Estimated Effort**: 10 minutes
 
 **Background**:
+
 - Fixed multiple TypeScript and ESLint errors during resolution session
 - Disabled some lint rules to clear warnings
 - Need to verify these changes didn't break existing test suite
 - Test suite exists: `src/frontend/__tests__/` with 87 tests
 
 **Scope**:
+
 - In-scope:
   - Run complete frontend test suite
   - Verify all 87 tests still pass
@@ -265,7 +303,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - E2E test execution
 
 **Actions**:
+
 1. Run test suite:
+
    ```bash
    cd src/frontend && npm test
    ```
@@ -276,11 +316,13 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Note any flaky tests
 
 3. Re-run if failures found:
+
    ```bash
    cd src/frontend && npm test -- --verbose
    ```
 
 **Acceptance Criteria**:
+
 - [ ] Test suite executes without errors
 - [ ] All 87 tests pass
 - [ ] No new test failures introduced
@@ -288,25 +330,30 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Test coverage doesn't decrease significantly
 
 **Risks**:
+
 - **Low Risk**: Tests may reveal edge cases requiring fixes
 - **Mitigation**: Have Priority 5 ready for test improvements
 
 **Dependencies**:
+
 - Blocking: Priority 1 (must test after fixing errors)
 - Related to: Priority 3 (icon assets used in tests)
 
 ---
 
 ### Priority 5: Fix the form label warning
+
 **Type**: REMEDIATION
 **Estimated Effort**: 10 minutes
 
 **Background**:
+
 - LSP shows warning at `src/frontend/src/pages/AlphabetGame.tsx:742:19`
 - "A form label must be associated with an input."
 - Need to find the unassociated `<label>` element and fix or remove it
 
 **Scope**:
+
 - In-scope:
   - Find line 742 in AlphabetGame.tsx
   - Identify the problematic label element
@@ -317,7 +364,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - General accessibility audit
 
 **Actions**:
+
 1. Search for label elements around line 742:
+
    ```bash
    cd src/frontend && rg -n "label" -A 5 -B 5 src/pages/AlphabetGame.tsx | grep -n "742"
    ```
@@ -328,31 +377,37 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Implement fix
 
 3. Verify:
+
    ```bash
    cd src/frontend && npm run type-check
    ```
 
 **Acceptance Criteria**:
+
 - [ ] Form label warning at line 742 is resolved
 - [ ] No new accessibility issues introduced
 - [ ] TypeScript compiles without label-related errors
 - [ ] ESLint shows no form label warning
 
 **Risks**:
+
 - **Low Risk**: Fixing label association improves accessibility
 - **Note**: Verify other components don't have similar issues
 
 **Dependencies**:
+
 - Related to: Priority 2 (same file)
 - Related to: Priority 4 (form changes may affect tests)
 
 ---
 
 ### Priority 6: Review disabled lint rules
+
 **Type**: CODE_QUALITY
 **Estimated Effort**: 30 minutes
 
 **Background**:
+
 - Disabled multiple lint rules in `.eslintrc.cjs`:
   - `'react-hooks/exhaustive-deps': 'off'`
   - `'react-hooks/rules-of-hooks': 'off'`
@@ -362,6 +417,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 - This creates technical debt
 
 **Scope**:
+
 - In-scope:
   - Review all files with `@ts-expect-error` comments
   - Determine which issues could be properly fixed instead of disabling the rule
@@ -373,6 +429,7 @@ src/frontend/public/assets/icons/ui/eye.svg
   - Adding new lint rules not related to current issues
 
 **Files to Review**:
+
 - `src/frontend/src/components/Toast.tsx` (uses `@ts-expect-error` for hook deps)
 - `src/frontend/src/components/WellnessReminder.tsx` (uses `@ts-expect-error` for dependency)
 - `src/frontend/src/components/WellnessTimer.tsx` (unused variables)
@@ -381,7 +438,9 @@ src/frontend/public/assets/icons/ui/eye.svg
 - `src/frontend/src/pages/AlphabetGame.tsx` (multiple suppressed warnings)
 
 **Actions**:
+
 1. Audit disabled rule usage:
+
    ```bash
    cd src/frontend && rg -n "@ts-expect-error\|eslint-disable" --type tsx src/
    ```
@@ -406,6 +465,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Suggest improvements to .eslintrc.cjs structure
 
 **Acceptance Criteria**:
+
 - [ ] All `@ts-expect-error` uses reviewed
 - [ ] Clear documentation created explaining each disabled rule
 - [ ] Real issues fixed where possible
@@ -413,19 +473,23 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Recommendation document added to docs/
 
 **Risks**:
+
 - **Medium Risk**: Re-enabling lint rules may introduce new errors that need fixing
 - **Mitigation**: Handle errors one at a time after re-enabling
 
 **Dependencies**:
+
 - Related to: All other tickets (linting affects all files)
 
 ---
 
 ### Priority 7: Add missing tests
+
 **Type**: CODE_QUALITY
 **Estimated Effort**: 2 hours
 
 **Background**:
+
 - Modified several files during error resolution:
   - `src/frontend/src/components/Toast.tsx`
   - `src/frontend/src/components/WellnessReminder.tsx`
@@ -438,6 +502,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 - Tests should validate new functionality
 
 **Scope**:
+
 - In-scope:
   - Review test coverage for modified files
   - Add tests for critical paths:
@@ -453,7 +518,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - Performance tests
 
 **Actions**:
+
 1. Check current test coverage:
+
    ```bash
    cd src/frontend && npm run test:coverage
    ```
@@ -472,11 +539,13 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Add tests for modified components
 
 4. Verify test suite:
+
    ```bash
    cd src/frontend && npm test
    ```
 
 **Acceptance Criteria**:
+
 - [ ] Test coverage report generated
 - [ ] Critical modified files have tests
 - [ ] New tests pass
@@ -484,19 +553,23 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Test suite completes in reasonable time
 
 **Risks**:
+
 - **Low Risk**: Adding tests improves code quality
 - **Note**: Don't over-test - focus on critical paths first
 
 **Dependencies**:
+
 - Related to: Priority 1 (tests will run after Priority 1)
 
 ---
 
 ### Priority 8: Update VS Code settings
+
 **Type**: DEV_TOOLS
 **Estimated Effort**: 15 minutes
 
 **Background**:
+
 - Current `.vscode/settings.json` is minimal
 - Missing ESLint workspace configuration
 - Mypy settings point to non-existent `src/backend/pyproject.toml` path
@@ -504,6 +577,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 - We have `.eslintrc.cjs` but VS Code may not be using it
 
 **Current Settings**:
+
 ```json
 {
   "python.analysis.extraPaths": ["src/backend", "src/frontend"],
@@ -530,11 +604,13 @@ src/frontend/public/assets/icons/ui/eye.svg
 ```
 
 **Issues**:
+
 1. Mypy path is wrong: `src/backend/pyproject.toml` doesn't exist (should be `pyproject.toml`)
 2. No ESLint workspace settings for TypeScript
 3. Python extraPaths duplicated (already in root pyproject.toml)
 
 **Scope**:
+
 - In-scope:
   - Add ESLint workspace settings to `.vscode/settings.json`
   - Fix mypy path configuration
@@ -545,7 +621,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - Changing editor behavior beyond linting
 
 **Actions**:
+
 1. Add ESLint workspace settings:
+
    ```json
    {
      "eslint.workingDirectories": ["src/frontend"],
@@ -560,6 +638,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    ```
 
 2. Fix mypy path:
+
    ```json
    {
      "python.linting.mypyArgs": [
@@ -570,6 +649,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    ```
 
 3. Remove duplicate extraPaths from Python settings:
+
    ```json
    {
      "python.analysis.extraPaths": ["src/backend"]
@@ -581,6 +661,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Check that Problems panel shows errors correctly
 
 **Acceptance Criteria**:
+
 - [ ] `.vscode/settings.json` includes ESLint workspace configuration
 - [ ] Mypy path is correct (`pyproject.toml` in `src/backend/`)
 - [ ] Python extraPaths deduplicated
@@ -588,19 +669,23 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Python errors show correctly in VS Code Problems panel
 
 **Risks**:
+
 - **Low Risk**: Updating VS Code settings is safe
 - **Note**: May need to reload VS Code multiple times
 
 **Dependencies**:
+
 - Related to: Priority 6 (lint rules)
 
 ---
 
 ### Priority 9: Documentation updates
+
 **Type**: DOCUMENTATION
 **Estimated Effort**: 1 hour
 
 **Background**:
+
 - Recently completed multiple tickets:
   - TCK-20260130-025: Fix ProfileUpdate Import
   - TCK-20260130-021: Restore game interactions
@@ -610,12 +695,14 @@ src/frontend/public/assets/icons/ui/eye.svg
 - Need to capture learnings in documentation
 
 **Documents to Update**:
+
 1. `AGENTS.md` - Add new section on lint rule management and VS Code setup
 2. `README.md` - Add troubleshooting section for common issues
 3. `SETUP.md` - Add VS Code configuration steps
 4. Create new doc: `docs/LINTING_GUIDELINES.md` - Best practices for linting in this project
 
 **Scope**:
+
 - In-scope:
   - Document when to disable lint rules vs when to fix issues
   - Document the VS Code workspace configuration
@@ -628,6 +715,7 @@ src/frontend/public/assets/icons/ui/eye.svg
   - User-facing documentation
 
 **Actions**:
+
 1. Review AGENTS.md:
    - Add section: "### Linting Strategy"
    - Document disabled rules and their rationale
@@ -654,6 +742,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Check for broken references
 
 **Acceptance Criteria**:
+
 - [ ] AGENTS.md has linting section
 - [ ] README.md has troubleshooting section
 - [ ] SETUP.md has VS Code configuration steps
@@ -662,20 +751,24 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Learnings from recent tickets documented
 
 **Risks**:
+
 - **Low Risk**: Documentation updates are safe
 - **Note**: Documentation should be kept simple and practical
 
 **Dependencies**:
+
 - Related to: Priority 6 (VS Code settings)
 - Related to: Priority 7 (tests - need to validate)
 
 ---
 
 ### Priority 10: Clean up .eslintrc
+
 **Type**: DEV_TOOLS
 **Estimated Effort**: 15 minutes
 
 **Background**:
+
 - Created `.eslintrc.cjs` during error resolution
 - Added multiple rules as disabled: `'off'`
 - However, also discovered `.eslintrc` may exist
@@ -683,6 +776,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 - May also need to clean up old `.eslintignore` if it exists
 
 **Scope**:
+
 - In-scope:
   - Check for duplicate ESLint config files (.eslintrc, .eslintrc.json, .eslintrc.cjs)
   - Determine which file VS Code is using
@@ -695,7 +789,9 @@ src/frontend/public/assets/icons/ui/eye.svg
   - Creating ESLint plugin or custom rules
 
 **Actions**:
+
 1. Check for existing configs:
+
    ```bash
    ls -la src/frontend/ | grep eslint
    ```
@@ -711,12 +807,14 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Explain which rules are disabled and why
 
 4. Verify:
+
    ```bash
    cd src/frontend && npx eslint --print-config .eslintrc.cjs
    cd src/frontend && npm run lint
    ```
 
 **Acceptance Criteria**:
+
 - [ ] Only one ESLint config file exists in frontend
 - [ ] Configuration is well-documented
 - [ ] Linter respects the configuration
@@ -724,10 +822,12 @@ src/frontend/public/assets/icons/ui/eye.svg
 - [ ] Configuration is tracked in git
 
 **Risks**:
+
 - **Low Risk**: Config consolidation is safe
 - **Note**: Document the final config location
 
 **Dependencies**:
+
 - Related to: Priority 6 (VS Code settings)
 - Related to: Priority 9 (documentation)
 
@@ -736,6 +836,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 ## Execution Order
 
 **Recommended Sequence**:
+
 1. **Priority 1**: Test the application (VALIDATION)
    - Validates all other fixes work correctly
    - Catches any regressions early
@@ -776,11 +877,13 @@ src/frontend/public/assets/icons/ui/eye.svg
    - Depends on Priority 1 and 4 completion
 
 10. **Priority 9**: Documentation updates (DOCUMENTATION)
-   - Captures learnings
-   - Medium effort
-   - Depends on Priority 1-8 completion
+
+- Captures learnings
+- Medium effort
+- Depends on Priority 1-8 completion
 
 **Parallel Execution Opportunities**:
+
 - Priorities 3 (icons) and 10 (eslintrc) can be done in parallel
 - Priorities 6 (lint review) and 9 (docs) can be done sequentially
 - Priorities 7 (tests) can be started after Priority 4 validates baseline
@@ -792,6 +895,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 **Overall Risk Level**: MEDIUM
 
 **Key Risks**:
+
 1. **Testing may reveal regressions**:
    - Fixed many errors quickly
    - May have introduced new issues
@@ -810,6 +914,7 @@ src/frontend/public/assets/icons/ui/eye.svg
    - **Mitigation**: Accept 2-3 minute test suite time
 
 **External Dependencies**:
+
 - **None**: All work is self-contained
 - **Tools**: All required tools are installed (uv, npm, npx)
 
@@ -818,6 +923,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 ## Success Criteria
 
 **Overall success criteria**:
+
 1. Application runs without errors
 2. No broken user flows
 3. All tests pass (87 frontend tests)
@@ -829,6 +935,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 9. ESLint configuration consolidated and documented
 
 **Definition of Done**:
+
 - All 10 tickets marked as DONE in worklog
 - All acceptance criteria met
 - Evidence logged for each ticket
@@ -837,6 +944,7 @@ src/frontend/public/assets/icons/ui/eye.svg
 ---
 
 **Next Steps After This Plan**:
+
 1. Create individual worklog tickets for each priority
 2. Execute tickets in recommended order
 3. Update worklog after each ticket completion

@@ -31,6 +31,7 @@
 # 2) Timeline of issues (timecoded)
 
 ## VID-001
+
 - time_start: 00:00
 - time_end: 00:00
 - surface: Dashboard
@@ -45,6 +46,7 @@
 - acceptance_criteria: In a new recording, metrics are readable at normal zoom and have a short label explaining what each means.
 
 ## VID-002
+
 - time_start: 00:00
 - time_end: 00:01
 - surface: Dashboard profile switcher
@@ -59,6 +61,7 @@
 - acceptance_criteria: In a new recording, kid-facing area does not contain child-management controls; adult flow is separated or gated.
 
 ## VID-003
+
 - time_start: 00:00
 - time_end: 00:03
 - surface: Global top navigation
@@ -73,6 +76,7 @@
 - acceptance_criteria: During gameplay, top nav is hidden; exiting requires a clear confirmation step.
 
 ## VID-004
+
 - time_start: 00:00
 - time_end: 00:10
 - surface: Dashboard / Games entry
@@ -87,6 +91,7 @@
 - acceptance_criteria: From initial load, there is one obvious large “Play” action; a child can start within ~2 taps.
 
 ## VID-005
+
 - time_start: 00:03
 - time_end: 00:03
 - surface: Learning Games
@@ -101,6 +106,7 @@
 - acceptance_criteria: In a new recording, no dev/test links are visible in production/kid mode screens.
 
 ## VID-006
+
 - time_start: 00:03
 - time_end: 00:03
 - surface: Learning Games cards
@@ -115,6 +121,7 @@
 - acceptance_criteria: Cards are scannable without reading paragraphs; CTA labels and icons clearly differ per game.
 
 ## VID-007
+
 - time_start: 00:06
 - time_end: 00:30
 - surface: Letter Hunt tutorial screen
@@ -129,6 +136,7 @@
 - acceptance_criteria: New recording shows audio/visual demo plus a short practice step; child can start without reading.
 
 ## VID-008
+
 - time_start: 00:06
 - time_end: 00:30
 - surface: Letter Hunt tutorial screen
@@ -143,6 +151,7 @@
 - acceptance_criteria: New recording shows selectable session length preset before starting.
 
 ## VID-009
+
 - time_start: 00:06
 - time_end: 00:30
 - surface: Letter Hunt tutorial actions
@@ -157,6 +166,7 @@
 - acceptance_criteria: In new recording, primary action is a large single button; “Home” requires confirm or is tucked away.
 
 ## VID-010
+
 - time_start: 00:31
 - time_end: 00:32
 - surface: Letter Hunt gameplay (initial)
@@ -171,6 +181,7 @@
 - acceptance_criteria: New recording shows animated loader with a tip; if loading takes >3s, shows fallback/help.
 
 ## VID-011
+
 - time_start: 00:31
 - time_end: 00:35
 - surface: Letter Hunt gameplay HUD
@@ -185,6 +196,7 @@
 - acceptance_criteria: New recording shows simplified HUD; Reset requires confirmation.
 
 ## VID-012
+
 - time_start: 00:33
 - time_end: 00:40
 - surface: Letter Hunt task prompt
@@ -199,6 +211,7 @@
 - acceptance_criteria: New recording shows voice and icon-based instruction; child can imitate without reading.
 
 ## VID-013
+
 - time_start: 00:33
 - time_end: 01:06
 - surface: Letter Hunt selection row
@@ -213,6 +226,7 @@
 - acceptance_criteria: New recording shows larger letters and higher contrast; tiles are visually distinct.
 
 ## VID-014
+
 - time_start: 00:35
 - time_end: 00:36
 - surface: Letter Hunt feedback (correct)
@@ -227,6 +241,7 @@
 - acceptance_criteria: New recording shows a 1–2s celebration animation + audible/visual reward cue.
 
 ## VID-015
+
 - time_start: 00:35
 - time_end: 00:36
 - surface: Letter Hunt scoring
@@ -242,6 +257,7 @@
 - implementation_suspicion: Score may be cumulative/test data or not reset correctly (not proven).
 
 ## VID-016
+
 - time_start: 00:44
 - time_end: 00:44
 - surface: Letter Hunt feedback (incorrect)
@@ -256,6 +272,7 @@
 - acceptance_criteria: New recording shows the correct tile highlighted + voice “That’s N!” and a gentle retry cue.
 
 ## VID-017
+
 - time_start: 00:44
 - time_end: 00:44
 - surface: Letter Hunt error recovery
@@ -270,6 +287,7 @@
 - acceptance_criteria: New recording shows a short pause + explicit retry instruction after wrong pick.
 
 ## VID-018
+
 - time_start: 01:04
 - time_end: 01:06
 - surface: Letter Hunt input mode switch
@@ -285,6 +303,7 @@
 - implementation_suspicion: Hand tracking confidence may be dropping and triggering fallback (not proven).
 
 ## VID-019
+
 - time_start: 01:07
 - time_end: 01:08
 - surface: Letter Hunt tutorial return
@@ -299,6 +318,7 @@
 - acceptance_criteria: New recording shows explicit end state and replay.
 
 ## VID-020
+
 - time_start: 01:08
 - time_end: 01:09
 - surface: Letter Hunt tutorial “Home”
@@ -313,6 +333,7 @@
 - acceptance_criteria: New recording shows a confirmation step before leaving any game.
 
 ## VID-021
+
 - time_start: 00:03
 - time_end: 00:27
 - surface: Learning Games page
@@ -327,6 +348,7 @@
 - acceptance_criteria: New recording shows consistent age band badges and “Best for X” messaging.
 
 ## VID-022
+
 - time_start: 00:18
 - time_end: 00:21
 - surface: Learning Games → game launch
@@ -341,6 +363,7 @@
 - acceptance_criteria: New recording shows a transition state between game selection and game setup.
 
 ## VID-023
+
 - time_start: 00:21
 - time_end: 00:24
 - surface: Letter Finger Show (mode tab)
@@ -355,6 +378,7 @@
 - acceptance_criteria: New recording shows consistent game naming across list, setup, and gameplay.
 
 ## VID-024
+
 - time_start: 00:21
 - time_end: 00:24
 - surface: Letter Finger Show language row
@@ -369,6 +393,7 @@
 - acceptance_criteria: New recording shows each language pill including native script + English.
 
 ## VID-025
+
 - time_start: 00:21
 - time_end: 00:24
 - surface: Letter Finger Show instruction block
@@ -383,6 +408,7 @@
 - acceptance_criteria: New recording shows visual mapping and voice prompt; no reliance on text.
 
 ## VID-026
+
 - time_start: 00:24
 - time_end: 00:27
 - surface: Finger Number Show difficulty
@@ -397,6 +423,7 @@
 - acceptance_criteria: New recording shows one default difficulty and explanation; teacher can pick in one tap.
 
 ## VID-027
+
 - time_start: 00:24
 - time_end: 00:24
 - surface: Finger Number Show primary action
@@ -411,6 +438,7 @@
 - acceptance_criteria: New recording shows one dominant “Start” and safe exit behavior.
 
 ## VID-028
+
 - time_start: 00:29
 - time_end: 00:30
 - surface: Letter Hunt tutorial revisit
@@ -425,6 +453,7 @@
 - acceptance_criteria: New recording shows tutorial only first time, then a quick start path.
 
 ## VID-029
+
 - time_start: 00:33
 - time_end: 01:06
 - surface: Letter Hunt camera view
@@ -439,6 +468,7 @@
 - acceptance_criteria: New recording shows a persistent, readable privacy badge during camera activities.
 
 ## VID-030
+
 - time_start: 01:11
 - time_end: 01:12
 - surface: Alphabet Tracing (Learning Game) setup
@@ -453,6 +483,7 @@
 - acceptance_criteria: New recording shows start controls visible without scrolling on common screens.
 
 ## VID-031
+
 - time_start: 01:12
 - time_end: 01:15
 - surface: Alphabet Tracing language selection
@@ -467,6 +498,7 @@
 - acceptance_criteria: New recording shows “தமிழ் (Tamil)” on the pill.
 
 ## VID-032
+
 - time_start: 01:12
 - time_end: 01:16
 - surface: Wellness Timer overlay
@@ -481,6 +513,7 @@
 - acceptance_criteria: New recording shows timer off/minimized in kid mode; can be enabled in settings.
 
 ## VID-033
+
 - time_start: 01:16
 - time_end: 01:18
 - surface: Tamil Alphabet gameplay (start state)
@@ -495,6 +528,7 @@
 - acceptance_criteria: New recording shows an on-screen hand target and distance cue.
 
 ## VID-034
+
 - time_start: 01:17
 - time_end: 01:18
 - surface: Tamil Alphabet gameplay (camera ready)
@@ -509,6 +543,7 @@
 - acceptance_criteria: New recording shows a prominent “Ready” cue and immediate next-step instruction.
 
 ## VID-035
+
 - time_start: 01:18
 - time_end: 01:22
 - surface: Tamil Alphabet gameplay (gesture instruction)
@@ -523,6 +558,7 @@
 - acceptance_criteria: New recording shows an icon-based prompt and brief animation.
 
 ## VID-036
+
 - time_start: 01:18
 - time_end: 01:24
 - surface: Tamil Alphabet gameplay (cursor/line)
@@ -537,6 +573,7 @@
 - acceptance_criteria: New recording shows smoother line and visible “on-path/off-path” feedback.
 
 ## VID-037
+
 - time_start: 01:18
 - time_end: 01:24
 - surface: Tamil Alphabet gameplay (letter visibility)
@@ -551,6 +588,7 @@
 - acceptance_criteria: New recording shows a clear starting point and direction cues.
 
 ## VID-038
+
 - time_start: 01:16
 - time_end: 01:52
 - surface: Tamil Alphabet gameplay (reward/progress)
@@ -565,6 +603,7 @@
 - acceptance_criteria: New recording shows a completion moment and a clear next action.
 
 ## VID-039
+
 - time_start: 01:52
 - time_end: 01:52
 - surface: Exit modal
@@ -579,6 +618,7 @@
 - acceptance_criteria: New recording shows touch-first modal copy; no “Press Esc”.
 
 ## VID-040
+
 - time_start: 01:52
 - time_end: 01:53
 - surface: Exit modal buttons
@@ -593,6 +633,7 @@
 - acceptance_criteria: New recording shows kid-safe gating before leaving gameplay.
 
 ## VID-041
+
 - time_start: 01:54
 - time_end: 02:00
 - surface: Learning Progress page
@@ -607,6 +648,7 @@
 - acceptance_criteria: New recording shows a concrete next-step CTA on empty progress.
 
 ## VID-042
+
 - time_start: 02:00
 - time_end: 02:03
 - surface: Learning Progress header filters
@@ -621,6 +663,7 @@
 - acceptance_criteria: New recording shows clearly readable filter labels and selected state.
 
 ## VID-043
+
 - time_start: 02:05
 - time_end: 02:05
 - surface: End of recording
@@ -639,6 +682,7 @@
 # 3) Activity-by-activity audit
 
 ## A) Learning Games (selection)
+
 - Time range: 00:03–00:29
 - Objective clarity (0–10): 6
 - Fun (0–10): 4
@@ -655,6 +699,7 @@
   5. One-tap “Quick Play” route.
 
 ## B) Letter Hunt (tutorial + gameplay)
+
 - Time range: 00:06–01:08
 - Objective clarity (0–10): 5
 - Fun (0–10): 6
@@ -673,6 +718,7 @@
   5. Stable input mode per session.
 
 ## C) Finger Number Show / Letter Finger Show (setup only)
+
 - Time range: 00:21–00:27
 - Objective clarity (0–10): 6
 - Fun (0–10): 5 (setup only)
@@ -689,6 +735,7 @@
   5. Add quick “practice recognition” calibration.
 
 ## D) Alphabet Tracing (Tamil flow + gameplay)
+
 - Time range: 01:11–01:52
 - Objective clarity (0–10): 6
 - Fun (0–10): 5
@@ -716,6 +763,7 @@
 - Prototype tell: dev/test link visible in a user-facing screen (Observed).
 
 **10 changes that most increase “kids app” feel (directional)**
+
 1. Big, voice-labeled game tiles (tap to hear).
 2. Mascot-led onboarding with 5s demo.
 3. Larger, bouncier but calm animations for success.
@@ -759,31 +807,37 @@
 # State Audit (required)
 
 ## Permission denied
+
 - Exists: Not observed in video
 - Recovery quality: Unknown
 - Missing: Pre-permission explanation, deny handling, retry CTA, fallback input mode picker.
 
 ## Tracking lost
+
 - Exists: Not observed explicitly
 - Recovery quality: Unknown
 - Missing: “We lost your hand” overlay + re-calibration guidance + auto-pause.
 
 ## Loading
+
 - Exists: Yes (“Loading hand tracking…”) (00:31)
 - Recovery quality: Weak (no progress/tips) (Observed)
 - Missing: animated indicator + tips + timeout fallback.
 
 ## Empty state
+
 - Exists: Yes (“No progress recorded…”, “No data…”) (00:00, ~02:00)
 - Recovery quality: Weak (low-action guidance) (Observed)
 - Missing: direct “Start a game to begin tracking” CTA.
 
 ## Success state
+
 - Exists: Yes (“Correct! Great job!”) (00:35+)
 - Recovery quality: Moderate (immediate feedback) (Observed)
 - Missing: specific reinforcement + small celebration + clear next prompt animation.
 
 ## Exit flow
+
 - Exists: Yes (“Save Progress?” modal) (01:52)
 - Recovery quality: Mixed (clear buttons, but desktop-centric “Esc”) (Observed)
 - Missing: kid-safe exit gating + clearer autosave messaging.
@@ -822,35 +876,45 @@
    - Covers: VID-037
 
 10) **Tracing smoothing + on-path feedback** — Effort: L — Risks: performance, perceived fairness tuning  
-   - Covers: VID-036
 
-11) **Clear trace completion + next letter flow** — Effort: M — Risks: progress persistence semantics  
-   - Covers: VID-038
+- Covers: VID-036
 
-12) **Make wellness timer optional/minimized in kid mode** — Effort: S — Risks: may reduce “wellness” feature visibility  
-   - Covers: VID-032
+1) **Clear trace completion + next letter flow** — Effort: M — Risks: progress persistence semantics  
 
-13) **Unify game naming (“Finger Show” vs “Finger Number Show”)** — Effort: S — Risks: analytics/progress mapping  
-   - Covers: VID-023
+- Covers: VID-038
 
-14) **Language pills: native script + English label** — Effort: S — Risks: translation/localization asset work  
-   - Covers: VID-024, VID-031
+1) **Make wellness timer optional/minimized in kid mode** — Effort: S — Risks: may reduce “wellness” feature visibility  
 
-15) **Explain difficulty ranges (recommended defaults)** — Effort: S — Risks: none  
-   - Covers: VID-026
+- Covers: VID-032
 
-16) **Remove dev/test links from user UI** — Effort: S — Risks: developers lose shortcut unless gated  
-   - Covers: VID-005
+1) **Unify game naming (“Finger Show” vs “Finger Number Show”)** — Effort: S — Risks: analytics/progress mapping  
 
-17) **Empty progress: actionable CTA (“Play once to start tracking”)** — Effort: S — Risks: needs correct routing targets  
-   - Covers: VID-041
+- Covers: VID-023
 
-18) **Progress readability improvements (contrast/labels)** — Effort: S — Risks: none  
-   - Covers: VID-001, VID-041, VID-042
+1) **Language pills: native script + English label** — Effort: S — Risks: translation/localization asset work  
 
-19) **End-of-session summary + replay from gameplay** — Effort: M — Risks: needs consistent end conditions  
-   - Covers: VID-019
+- Covers: VID-024, VID-031
 
-20) **In-app export/share of progress (teacher-friendly)** — Effort: L — Risks: privacy/PII handling  
-   - Covers: VID-043
+1) **Explain difficulty ranges (recommended defaults)** — Effort: S — Risks: none  
 
+- Covers: VID-026
+
+1) **Remove dev/test links from user UI** — Effort: S — Risks: developers lose shortcut unless gated  
+
+- Covers: VID-005
+
+1) **Empty progress: actionable CTA (“Play once to start tracking”)** — Effort: S — Risks: needs correct routing targets  
+
+- Covers: VID-041
+
+1) **Progress readability improvements (contrast/labels)** — Effort: S — Risks: none  
+
+- Covers: VID-001, VID-041, VID-042
+
+1) **End-of-session summary + replay from gameplay** — Effort: M — Risks: needs consistent end conditions  
+
+- Covers: VID-019
+
+1) **In-app export/share of progress (teacher-friendly)** — Effort: L — Risks: privacy/PII handling  
+
+- Covers: VID-043

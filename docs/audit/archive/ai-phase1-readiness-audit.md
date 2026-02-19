@@ -45,6 +45,7 @@ The `alphabets.ts` file contains **5 complete alphabets**:
 **Evidence:** Lines 18-245 in `src/frontend/src/data/alphabets.ts`
 
 Each letter includes:
+
 - `char`: The letter character
 - `name`: Word example (e.g., "Apple" for A)
 - `emoji`: Visual representation
@@ -55,6 +56,7 @@ Each letter includes:
 ### 1.2 Game Implementation
 
 **AlphabetGame.tsx** (900+ lines) implements:
+
 - Hand tracking with MediaPipe
 - Letter tracing with pinch gestures
 - Accuracy calculation
@@ -62,12 +64,14 @@ Each letter includes:
 - Mascot integration (visual only)
 
 **What's Working:**
+
 - Profile-based language selection (line 80: `profile?.preferred_language`)
 - Difficulty-based letter count (easy=5, medium=10, hard=all)
 - Visual feedback (accuracy bar, streak counter)
 - Mascot state changes (idle, happy, waiting)
 
 **What's Missing:**
+
 - NO audio feedback on success/failure
 - NO letter pronunciation on display
 - NO TTS for messages like "Great job!"
@@ -75,12 +79,14 @@ Each letter includes:
 ### 1.3 Mascot Implementation
 
 **Mascot.tsx** (267 lines) implements:
+
 - Visual states: idle, happy, thinking, waiting, celebrating
 - Video celebration (webm files exist)
 - Speech bubble (TEXT only - not spoken)
 - Animation via Framer Motion
 
 **Assets Found:**
+
 - `/public/assets/images/red_panda_no_bg.png` - Static image
 - `/public/assets/videos/pip_alpha.webm` - Celebration video
 - `/public/assets/videos/pip_alpha_v2.webm` - Celebration video v2
@@ -90,6 +96,7 @@ Each letter includes:
 ### 1.4 Settings Store
 
 **settingsStore.ts** has `soundEnabled: true` as default, but:
+
 - No audio system consumes this setting
 - No sound effects are implemented
 - Setting exists but is non-functional
@@ -113,6 +120,7 @@ Each letter includes:
 | Browser compatibility | ✅ Yes | Chrome, Safari, Firefox, Edge |
 
 **Files Created:**
+
 ```
 src/frontend/src/services/ai/tts/TTSService.ts ✅
 src/frontend/src/hooks/useTTS.ts ✅
@@ -132,6 +140,7 @@ src/frontend/src/data/pipResponses.ts ✅
 | Multi-language support | ❌ No | Need Hindi/Kannada/Telugu/Tamil audio |
 
 **Audio Assets Needed (Minimum for English):**
+
 ```
 /public/audio/letters/en/a_name.mp3    # "A" (letter name)
 /public/audio/letters/en/a_sound.mp3   # "ah" (phonetic sound)
@@ -139,6 +148,7 @@ src/frontend/src/data/pipResponses.ts ✅
 ```
 
 **For All Languages:**
+
 - English: 52 files
 - Hindi: 70 files (35 letters × 2)
 - Kannada: 76 files
@@ -159,6 +169,7 @@ src/frontend/src/data/pipResponses.ts ✅
 | Mascot state sync | ✅ Yes | State changes + TTS work |
 
 **New Feedback System (AlphabetGame.tsx):**
+
 ```typescript
 // Uses pipResponses.ts templates
 getTracingResponse(accuracy)  // Random encouraging messages
@@ -180,6 +191,7 @@ getStreakMessage(streak)      // Milestone celebrations
 ### 3.1 No Audio Infrastructure
 
 **Grep Results for "audio|sound|speech|tts":**
+
 - `settingsStore.ts`: `soundEnabled: boolean` (line 8) - unused
 - `Mascot.tsx`: `muted` attribute on video (line 205)
 - No audio playback code anywhere
@@ -187,6 +199,7 @@ getStreakMessage(streak)      // Milestone celebrations
 ### 3.2 Web Speech API Compatibility
 
 Browser support for `speechSynthesis`:
+
 - Chrome: ✅ Full support
 - Safari: ✅ Full support
 - Firefox: ✅ Full support
@@ -197,6 +210,7 @@ Browser support for `speechSynthesis`:
 ### 3.3 Mascot Integration Points
 
 The Mascot component accepts `message` prop but only displays it visually:
+
 ```typescript
 // Mascot.tsx line 148-161
 {message && (
@@ -248,12 +262,14 @@ The Mascot component accepts `message` prop but only displays it visually:
 ## 5. Recommended Implementation Order
 
 ### Week 1: TTS Foundation
+
 1. **Day 1-2:** Create TTSService.ts with Web Speech API
 2. **Day 3:** Create useTTS hook
 3. **Day 4:** Integrate TTS with Mascot (speak messages)
 4. **Day 5:** Add success/failure sounds to AlphabetGame.tsx
 
 ### Week 2: Letter Audio
+
 1. **Day 1-2:** Source/record English letter audio
 2. **Day 3:** Create audio playback utility
 3. **Day 4:** Integrate letter pronunciation in AlphabetGame.tsx
@@ -386,10 +402,10 @@ The multi-language alphabets are already implemented and working - they just nee
 ## Related Tickets
 
 **TCK-20260129-100: AI Phase 1 TTS Implementation**
+
 - Status: ✅ DONE
 - Completed: 2026-01-30 00:00 UTC
 - Addresses all TTS infrastructure, response templates, and mascot integration
 - See worklog TCK-20260129-100 for full details
 
 **Note**: Letter audio files (AI-002) remain to be implemented as separate task (not in scope of Phase 1 audit completion).
-

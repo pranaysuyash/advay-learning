@@ -1,4 +1,5 @@
 # Intent-First Customer Success Philosophy v1.0
+
 ## "Solve for Outcomes, Not Just Issues"
 
 **Core Principle:** Before responding to customer requests, creating support processes, or designing success programs, investigate what customers are actually trying to achieve and ensure interventions drive meaningful outcomes for their business.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the customer situation** (support request, onboarding challenge, adoption issue, or success opportunity)
 2. **Understand customer goals** (what business outcome are they trying to achieve?)
 3. **Assess current customer journey** (where are they in their lifecycle and what are their pain points?)
@@ -17,6 +19,7 @@
 5. **Review existing processes** (what's already in place that could be improved?)
 
 ### Phase 2: Outcome Analysis
+
 - What business result is the customer ultimately trying to achieve?
 - How does this request or issue relate to their broader success with our product?
 - What would resolution look like from their perspective vs. our perspective?
@@ -24,6 +27,7 @@
 - **Can we use existing processes to solve this?**
 
 ### Phase 3: Intervention Prioritization
+
 - **Customer Impact**: How significantly does this affect their business outcomes?
 - **Relationship Impact**: Effect on customer satisfaction, retention, and expansion potential
 - **Scalability**: Can solving this help other customers with similar challenges?
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Provide minimal intervention if all true:
+
 - Issue has simple workaround that doesn't affect core workflows
 - Customer is achieving their primary business outcomes
 - Low impact on customer satisfaction or success metrics
@@ -60,6 +65,7 @@ Provide minimal intervention if all true:
 ## Codebase-First Customer Success Rule
 
 For *Critical* and *High* priority situations:
+
 1. **Use existing processes first** - leverage current support infrastructure
 2. **Enhance incrementally** - improve processes based on patterns
 3. **Document solutions** - create reusable responses for common issues

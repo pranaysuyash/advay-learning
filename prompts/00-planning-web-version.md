@@ -14,12 +14,14 @@ Building a browser-based learning app for Advay that uses the laptop camera for 
 ## Deliverables Required
 
 ### 1. PRD for MVP
+
 - Hand pointer drawing on canvas
 - One shape-trace game
 - Local progress tracking
 - Parent PIN gate
 
 ### 2. Repo Structure
+
 ```
 app/
   src/
@@ -34,29 +36,34 @@ app/
 ```
 
 ### 3. Privacy & Security Plan
+
 - Data inventory (what we store)
 - Threat model (what could go wrong)
 - Mitigations (how we prevent it)
 - Delete/export policy
 
 ### 4. Local Profiles + Parent PIN
+
 - Profile creation (name only, no PII)
 - PIN hashing (local, bcrypt or similar)
 - Gate for settings/data operations
 
 ### 5. Testing Strategy (No CI)
+
 - Unit tests: Vitest for logic
 - Integration: Mock camera frames
 - Golden video: Prerecorded test clips
 - Local verify script
 
 ### 6. Git Workflow
+
 - Branch naming: `feat/`, `fix/`, `docs/`
 - PR template with checklist
 - LOC delta check (< 500 lines)
 - Doc update requirements
 
 ### 7. ADRs
+
 - Web-first local-only
 - MediaPipe Tasks Vision
 - Local profiles with parent PIN
@@ -72,24 +79,28 @@ app/
 ## Phase Plan
 
 ### Phase 0: Skeleton (Day 1)
+
 - Repo structure
 - Vite + React + TS setup
 - MediaPipe local assets
 - Verify script
 
 ### Phase 1: Engine (Days 2-5)
+
 - Camera access
 - HandLandmarker
 - Pointer signal with smoothing
 - Canvas drawing
 
 ### Phase 2: First Game (Days 6-10)
+
 - Shape trace game
 - Scoring logic
 - Progress save
 - Simple rewards
 
 ### Phase 3: Polish (Later)
+
 - More games
 - Alphabets
 - Face tracking
@@ -98,6 +109,7 @@ app/
 ## Output Format
 
 Provide:
+
 1. Checklists (not essays)
 2. File templates (ready to copy)
 3. Code snippets (implementation-ready)

@@ -44,7 +44,7 @@
 
 ### Infrastructure
 
-4. [x] **INFRA-MED-001**: Fix Frontend Vulnerabilities ✅ DONE
+1. [x] **INFRA-MED-001**: Fix Frontend Vulnerabilities ✅ DONE
    - Updated vite to 7.3.1
    - Updated vitest to latest
    - Build successful
@@ -58,17 +58,17 @@
 
 ### Backend
 
-5. [ ] **BACKEND-MED-003**: Add Logging
+1. [ ] **BACKEND-MED-003**: Add Logging
    - Structured logging (JSON)
    - Audit trail for security operations
    - Effort: Medium
 
-6. [ ] **BACKEND-MED-004**: Error Handling
+2. [ ] **BACKEND-MED-004**: Error Handling
    - Custom exceptions
    - Better error messages
    - Effort: Medium
 
-7. [ ] **SECURITY-HIGH-006**: Refresh Token Rotation
+3. [ ] **SECURITY-HIGH-006**: Refresh Token Rotation
    - One-time use refresh tokens
    - Token family tracking
    - Effort: Medium
@@ -76,13 +76,13 @@
 
 ### Frontend
 
-8. [ ] **FRONTEND-MED-002**: Error Handling & Toast Notifications
+1. [ ] **FRONTEND-MED-002**: Error Handling & Toast Notifications
    - Toast notifications for errors
    - Better loading states
    - Effort: Medium
    - Impact: Better UX
 
-9. [ ] **UI-LOW-002**: Improve Loading States
+2. [ ] **UI-LOW-002**: Improve Loading States
    - Animated spinner instead of "Loading..."
    - Skeleton screens where appropriate
    - Effort: Low
@@ -92,10 +92,10 @@
 
 ## Later (P3 Priority)
 
-10. [ ] **UI-LOW-001**: Mobile Navigation Menu
-11. [ ] **UI-LOW-003**: Keyboard Navigation Support
-12. [ ] **INFRA-MED-002**: Backend Dependency Scanning
-13. [ ] **BACKEND-MED-005**: Configurable Completion Threshold
+1. [ ] **UI-LOW-001**: Mobile Navigation Menu
+2. [ ] **UI-LOW-003**: Keyboard Navigation Support
+3. [ ] **INFRA-MED-002**: Backend Dependency Scanning
+4. [ ] **BACKEND-MED-005**: Configurable Completion Threshold
 
 ---
 

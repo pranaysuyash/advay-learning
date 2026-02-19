@@ -14,6 +14,7 @@ You are verifying that an AI feature implementation meets all requirements for t
 ## Verification Scope
 
 ### Feature Under Verification
+
 - **Feature Name:** [Fill in]
 - **Implementation Ticket:** [Fill in]
 - **Developer:** [Fill in]
@@ -335,18 +336,21 @@ cd src/frontend && npm test
 ## Post-Verification Actions
 
 ### If PASS
+
 1. Update ticket status to "Verified"
 2. Approve PR
 3. Schedule deployment
 4. Update worklog
 
 ### If FAIL
+
 1. Document failures in ticket
 2. Request fixes from developer
 3. Schedule re-verification
 4. Do not merge until resolved
 
 ### If PARTIAL
+
 1. Document partial failures
 2. Assess risk of proceeding
 3. Create follow-up tickets for issues

@@ -3,12 +3,14 @@
 This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 
 ## Core Rules
+
 - **Evidence-first**: require Observed/Inferred/Unknown labels for non-trivial claims.
 - **Scope discipline**: one work unit per run; new findings → new ticket.
 - **Preservation-first**: refactor in place; avoid `*_v2` parallel implementations.
 - **Append-only tracking**: `docs/WORKLOG_TICKETS.md` is canonical.
 
 ## Recommended Prompt Skeleton
+
 1) Purpose
 2) Use When
 3) Non-negotiable rules
@@ -19,6 +21,7 @@ This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 8) Stop condition (hard)
 
 ## Prompting Techniques We Use (Practical)
+
 - **Gates**: “don’t code before ticket + plan”
 - **Checklists**: required commands; required artifacts; required outputs
 - **Rubrics**: PASS/FAIL criteria for completeness
@@ -26,12 +29,14 @@ This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 - **Test scenarios**: tabletop cases to validate the prompt design
 
 ## Anti-Patterns (Avoid)
+
 - “Do whatever you think is best” without scope
 - Prompts that allow silent scope creep
 - Prompts that don’t demand verification evidence
 - Copy/pasting external prompts verbatim (use patterns, not phrasing)
 
 ## Evidence Snippet Template
+
 - Every prompt-driven artifact must include an evidence snippet (e.g., in the plan, worklog, reality check) that labels the most consequential claims as **Observed**, **Inferred**, or **Unknown**.
 - Template:
 
@@ -45,6 +50,7 @@ This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 - Place this snippet near the conclusion or findings section so reviewers know what evidence supports each assertion. Refer back to this guide when authoring new prompts to keep the evidence discipline consistent.
 
 ## Related Prompts
+
 - Pre-flight: `prompts/workflow/pre-flight-check-v1.0.md`
 - Clean-room gate: `prompts/workflow/pre-merge-clean-room-check-v1.0.md`
 - Prompt QA: `prompts/workflow/prompt-quality-gate-v1.0.md`

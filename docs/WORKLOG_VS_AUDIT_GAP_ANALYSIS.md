@@ -16,6 +16,7 @@
 ## Audit Sources Analyzed
 
 ### 1. QA Worklog (Jan 29, 2026)
+
 **File**: `docs/audit/QA_WORKLOG_2026_01_29.md`  
 **Findings**: 7 critical/major issues
 
@@ -27,10 +28,12 @@
 | "Permission not requested" bug persists | MEDIUM | ❌ NOT TRACKED | **GAP** |
 
 ### 2. Audit Report v1 (Comprehensive)
+
 **File**: `docs/audit/audit_report_v1.md`  
 **Findings**: 40+ issues prioritized by severity
 
 #### High Severity Issues (8 total)
+
 | Issue | Status in Worklog | Gap |
 |--------|-------------------|------|
 | No "Back/Exit" button in Game UI | ✅ TCK-20260130-008 | None |
@@ -43,6 +46,7 @@
 | Pre-readers need voice-overs for navigation | ❌ NOT TRACKED | **GAP** |
 
 #### Must-Have Features (Missing)
+
 | Feature | Status in Worklog | Gap |
 |---------|-------------------|------|
 | Tutorial Overlay (3-step GIF showing hands up → pinch → trace) | ❌ NOT TRACKED | **GAP** |
@@ -50,6 +54,7 @@
 | Home/Exit button in Game | ✅ TCK-20260130-008 | None |
 
 #### Should-Have Features (Missing)
+
 | Feature | Status in Worklog | Gap |
 |---------|-------------------|------|
 | Level Progression (Easy → Medium → Hard) | ❌ NOT TRACKED | **GAP** |
@@ -58,6 +63,7 @@
 | Offline Indicator | ❌ NOT TRACKED | **GAP** |
 
 #### New Activity Ideas (20+ documented)
+
 | Activity | Status in Worklog | Gap |
 |---------|-------------------|------|
 | Bubble Popper | ❌ NOT TRACKED | **GAP** |
@@ -82,13 +88,16 @@
 | Memory Card Flip | ❌ NOT TRACKED | **GAP** |
 
 ### 3. Improvement Roadmap v1
+
 **File**: `docs/audit/improvement_roadmap_v1.md`  
 **Timeline**:
+
 - Phase 1 (Next 24 hours): Squashing Friction
 - Phase 2 (Next 1 week): Retention Loop
 - Phase 3 (Next 1 month): The "Product"
 
 #### Phase 1 Tasks (All addressed except permission bug)
+
 | Task | Status in Worklog | Gap |
 |-------|-------------------|------|
 | Add `HomeButton` to `Game.tsx` | ✅ TCK-20260130-008 | None |
@@ -97,6 +106,7 @@
 | Add "Pinch to Start" instruction text | ❌ NOT TRACKED | **GAP** |
 
 #### Phase 2 Tasks
+
 | Task | Status in Worklog | Gap |
 |-------|-------------------|------|
 | Implement Star Rating component | ❌ NOT TRACKED | **GAP** |
@@ -104,6 +114,7 @@
 | Add Parent Lock on Settings | ✅ TCK-20260130-009 | None |
 
 #### Phase 3 Tasks
+
 | Task | Status in Worklog | Gap |
 |-------|-------------------|------|
 | Offline PWA (cache models/assets) | ❌ NOT TRACKED | **GAP** |
@@ -113,15 +124,19 @@
 ### 4. Individual File Audits
 
 #### Home.tsx Audit
+
 **File**: `docs/audit/ui__src__frontend__src__pages__Home.tsx.md`  
 **Findings**:
+
 - Low contrast text (`text-white/80`, `text-white/70`)
 - Outdated styling vs. other pages
 - ✅ **ANALYZED** in `docs/UI_CONTRAST_ANALYSIS_HOME.md` but **NO TICKET CREATED**
 
 #### Dashboard.tsx Audit
+
 **File**: `docs/audit/ui__src__frontend__src__pages__Dashboard.tsx.md`  
 **Findings**:
+
 - Typography readability issues
 - Missing ARIA labels
 - Statistics not kid-friendly
@@ -129,22 +144,28 @@
 - ✅ **SEPARATE TICKETS CREATED** (TCK-20260131-006 through TCK-20260131-011)
 
 #### Game.tsx Audits
+
 **File**: `docs/audit/src__frontend__src__pages__Game.tsx.md`  
 **File**: `docs/audit/ui__src__frontend__src__pages__Game.tsx.md`  
 **Findings**:
+
 - Multiple UX issues documented
 - ✅ **SEPARATE TICKETS CREATED** for major features
 
 #### Settings.tsx Audit
+
 **File**: `docs/audit/ui__src__frontend__src__pages__Settings.tsx.md`  
 **Findings**:
+
 - Form accessibility issues
 - Permission warning persistence
 - ✅ **SEPARATE TICKET CREATED** (TCK-20260130-013)
 
 #### Progress.tsx Audit
+
 **File**: `docs/audit/ui__src__frontend__src__pages__Progress.tsx.md`  
 **Findings**:
+
 - Data presentation issues
 - ✅ **ANALYZED** but **NO TICKET CREATED**
 
@@ -165,6 +186,7 @@
 ### High Priority Missing Tickets
 
 **GAP 1**: Permission Warning Persistence Bug (P1)
+
 - **Issue**: "Permission not requested" warning persists even when camera is active
 - **Location**: Settings.tsx
 - **Documented in**: QA Worklog, Audit Report v1, Improvement Roadmap Phase 1
@@ -172,6 +194,7 @@
 - **Recommendation**: Create TCK-20260130-035 :: Fix Permission Warning Persistence Bug
 
 **GAP 2**: Missing "Pinch to Draw" Tutorial (P1)
+
 - **Issue**: Users don't understand how to start - no visual instruction
 - **Location**: Game.tsx
 - **Documented in**: Audit Report v1
@@ -179,6 +202,7 @@
 - **Recommendation**: Create TCK-20260130-036 :: Add Tutorial Overlay - Pinch to Start Game
 
 **GAP 3**: Onboarding Vacuum (P1)
+
 - **Issue**: Users dropped directly into Game without calibration or tutorial
 - **Location**: Game.tsx
 - **Documented in**: Audit Report v1
@@ -186,6 +210,7 @@
 - **Recommendation**: Create TCK-20260130-037 :: Add Onboarding Flow - First-Time User Tutorial
 
 **GAP 4**: Content Depth - Letters Only (P2)
+
 - **Issue**: Only alphabet learning, no numbers/shapes/logic games
 - **Impact**: Low retention for 4-6 year olds
 - **Documented in**: Audit Report v1
@@ -193,6 +218,7 @@
 - **Recommendation**: Create TCK-20260130-038 :: Add Number Learning Activities (0-9)
 
 **GAP 5**: Voice-Over for Navigation (P2)
+
 - **Issue**: Pre-readers can't read Settings/Dashboard
 - **Location**: Multiple pages
 - **Documented in**: Audit Report v1
@@ -200,6 +226,7 @@
 - **Recommendation**: Create TCK-20260130-039 :: Add Voice-Over Support for Navigation Screens
 
 **GAP 6**: Star Rating System (P2)
+
 - **Issue**: No visual reward system for accuracy
 - **Location**: Game.tsx, Progress tracking
 - **Documented in**: Audit Report v1, Improvement Roadmap Phase 2
@@ -207,6 +234,7 @@
 - **Recommendation**: Create TCK-20260130-040 :: Implement Star Rating System (1-3 Stars per Letter)
 
 **GAP 7**: Level Progression (P2)
+
 - **Issue**: No Easy → Medium → Hard progression
 - **Location**: Game.tsx, Settings.tsx
 - **Documented in**: Audit Report v1, Improvement Roadmap Phase 2
@@ -214,6 +242,7 @@
 - **Recommendation**: Create TCK-20260130-041 :: Implement Level Progression System (Easy/Medium/Hard Modes)
 
 **GAP 8**: New Games - 18 Activities Not Tracked
+
 - **Issue**: 18+ new game ideas documented but not in worklog
 - **Impact**: Long-term roadmap undefined
 - **Documented in**: Audit Report v1
@@ -225,12 +254,14 @@
 ## Ticket Coverage by Priority
 
 ### P0 (Critical) - Missing: 4
+
 - ❌ Permission Warning Persistence Bug
 - ❌ Tutorial Overlay (Pinch to Start)
 - ❌ Onboarding Vacuum
 - ❌ Home Button (Already TCK-20260130-008) ✅
 
 ### P1 (High) - Missing: 5
+
 - ❌ Content Depth (Numbers, Shapes, Logic)
 - ❌ Voice-Over for Navigation
 - ❌ Star Rating System
@@ -238,6 +269,7 @@
 - ❌ Webcam Contrast (Already TCK-20260130-011) ✅
 
 ### P2 (Medium) - Missing: 10+
+
 - ❌ 18 new game activities (Bubble Popper, Shadow Hand, etc.)
 - ❌ Offline Mode Indicator
 - ❌ Session Summary Screen
@@ -282,36 +314,36 @@ See "Critical Gaps Summary" section above for details.
 1. **Create TCK-20260130-035** :: Fix Permission Warning Persistence Bug (P0)
    - Scope: Settings.tsx camera permission state management
    - Priority: CRITICAL (user reported, documented in 3 audits)
-   
+
 2. **Create TCK-20260130-036** :: Add Tutorial Overlay - Pinch to Start (P0)
    - Scope: Game.tsx tutorial animation overlay
    - Priority: CRITICAL (onboarding vacuum)
 
 ### Short-term (Next 1 week)
 
-3. **Create TCK-20260130-037** :: Add Onboarding Flow (P1)
+1. **Create TCK-20260130-037** :: Add Onboarding Flow (P1)
    - Scope: First-time user experience flow
    - Priority: HIGH (accessibility for pre-readers)
 
-4. **Create TCK-20260130-038** :: Add Number Learning (P2)
+2. **Create TCK-20260130-038** :: Add Number Learning (P2)
    - Scope: Number tracing (0-9) like alphabet
    - Priority: HIGH (content depth)
 
-5. **Create TCK-20260130-039** :: Add Voice-Over Support (P2)
+3. **Create TCK-20260130-039** :: Add Voice-Over Support (P2)
    - Scope: Audio prompts for navigation screens
    - Priority: HIGH (accessibility for pre-readers)
 
 ### Medium-term (Next 1 month)
 
-6. **Create TCK-20260130-040** :: Implement Star Rating System (P2)
+1. **Create TCK-20260130-040** :: Implement Star Rating System (P2)
    - Scope: 1-3 stars based on accuracy percentage
    - Priority: MEDIUM (retention loop)
 
-7. **Create TCK-20260130-041** :: Implement Level Progression (P2)
+2. **Create TCK-20260130-041** :: Implement Level Progression (P2)
    - Scope: Easy (Palm) → Medium (Pinch) → Hard (Precision) modes
    - Priority: MEDIUM (retention loop)
 
-8. **Create TCK-20260130-042** :: Roadmap for New Game Activities (P3)
+3. **Create TCK-20260130-042** :: Roadmap for New Game Activities (P3)
    - Scope: Document 18+ new game ideas as individual tickets
    - Priority: LOW (long-term planning)
 
@@ -334,7 +366,7 @@ See "Critical Gaps Summary" section above for details.
 
 **Why such a large gap?**
 
-1. **Audit-to-Worklog Disconnect**: 
+1. **Audit-to-Worklog Disconnect**:
    - Audit reports are comprehensive but findings are not systematically converted to tickets
    - No process to automatically create worklog tickets from audit findings
 
@@ -355,6 +387,7 @@ See "Critical Gaps Summary" section above for details.
 **When starting work on audit findings:**
 
 1. **Before any code changes**:
+
    ```bash
    # Check if worklog ticket exists for the issue
    grep "TCK-<ticket-id>" docs/WORKLOG_TICKETS.md
@@ -370,6 +403,7 @@ See "Critical Gaps Summary" section above for details.
    - Use TCK-YYYYMMDD-NNN format with descriptive title
 
 3. **Ticket Creation Template**:
+
    ```markdown
    ### TCK-YYYYMMDD-NNN :: [Descriptive Title]
    
@@ -386,6 +420,7 @@ See "Critical Gaps Summary" section above for details.
    ```
 
 4. **Regular Audit Review**:
+
    ```bash
    # Weekly task: Review audit docs for untracked findings
    ./scripts/audit_sync.sh
@@ -405,7 +440,8 @@ See "Critical Gaps Summary" section above for details.
 **Process Gap**: No systematic workflow for converting audit findings → worklog tickets  
 **Impact**: Risk of forgetting important issues, losing context, duplicating effort  
 
-**Recommendation**: 
+**Recommendation**:
+
 1. Create the 8 recommended tickets above immediately
 2. Implement audit review workflow
 3. Update AGENTS.md with audit-to-ticket workflow requirements

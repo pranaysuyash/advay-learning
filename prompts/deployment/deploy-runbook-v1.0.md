@@ -26,18 +26,22 @@ ls -la src/frontend src/backend
 ## OUTPUT (REQUIRED)
 
 ### A) Preconditions
+
 - Required versions (node/python/etc)
 - Env vars needed (names only, no secrets)
 
 ### B) Deploy/run steps
+
 - Exact commands
 - Verification steps (health checks, key routes)
 
 ### C) Observability
+
 - What logs to check
 - What “healthy” looks like
 
 ### D) Rollback plan
+
 - Steps to revert safely
 
 ---

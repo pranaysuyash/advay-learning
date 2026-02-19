@@ -1,16 +1,20 @@
 # ADR 003: Storage Strategy
 
 ## Status
+
 Accepted (Updated 2026-01-29: Migrated from SQLite to PostgreSQL)
 
 ## Context
+
 We need to determine how to store application data including:
+
 - Learning progress
 - Game scores and achievements
 - User settings
 - Application state
 
 ## Decision
+
 We will use **PostgreSQL** as the primary database for both development and production.
 
 ### Why PostgreSQL over SQLite
@@ -24,11 +28,13 @@ We will use **PostgreSQL** as the primary database for both development and prod
 | Data integrity | Good | Better (constraints) ✅ |
 
 ### Storage Layers
+
 1. **PostgreSQL Database**: Structured data (users, progress, profiles, achievements)
 2. **File System / S3**: Assets (sounds, images, videos)
 3. **Environment Variables**: Configuration (secrets, URLs)
 
 ### Database Schema Approach
+
 - Use Alembic for migrations
 - Async SQLAlchemy for ORM
 - Migration version tracking in `alembic_version` table
@@ -48,6 +54,7 @@ We will use **PostgreSQL** as the primary database for both development and prod
 ## Consequences
 
 ### Positive
+
 - ✅ Production parity (same DB in dev and prod)
 - ✅ ACID compliance for data integrity
 - ✅ Easy to query and inspect
@@ -56,6 +63,7 @@ We will use **PostgreSQL** as the primary database for both development and prod
 - ✅ Better tooling (pgAdmin, pg_dump, etc.)
 
 ### Negative
+
 - ❌ Requires PostgreSQL installation for local dev
 - ❌ Slightly more setup than SQLite
 - ❌ Need to manage connection pooling
@@ -63,11 +71,13 @@ We will use **PostgreSQL** as the primary database for both development and prod
 ## Implementation Details
 
 ### Connection URL Format
+
 ```
 postgresql+asyncpg://user:password@host:port/database
 ```
 
 ### Development Setup
+
 ```bash
 # macOS
 brew install postgresql@14
@@ -80,6 +90,7 @@ alembic upgrade head
 ```
 
 ### Key Tables
+
 - `users` - Parent accounts with authentication
 - `profiles` - Child profiles (multiple per user)
 - `progress` - Learning progress per letter/language
@@ -87,11 +98,13 @@ alembic upgrade head
 - `audit_logs` - Security and deletion audit trail
 
 ### Backup Strategy
+
 - Production: Automated daily pg_dump backups
 - Point-in-time recovery with WAL archiving
 - Encrypted backups stored in separate region
 
 ### Connection Pooling
+
 ```python
 # Using SQLAlchemy async with pool settings
 engine = create_async_engine(
@@ -112,5 +125,6 @@ engine = create_async_engine(
 | 004 | Add achievements table | 2026-01-29 |
 
 ## Related Decisions
+
 - ADR 001: Local-First Architecture
 - ADR 002: Python Tech Stack

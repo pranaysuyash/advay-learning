@@ -14,18 +14,23 @@ You are updating an existing AI feature in the Advay Vision Learning app. This p
 ## Update Categories
 
 ### Category A: Provider/Model Update
+
 Switching providers or upgrading model versions
 
 ### Category B: Performance Optimization
+
 Improving latency, reducing costs, enhancing quality
 
 ### Category C: Safety Enhancement
+
 Improving content filtering, adding safeguards
 
 ### Category D: Bug Fix
+
 Resolving issues with existing functionality
 
 ### Category E: Feature Enhancement
+
 Adding new capabilities to existing feature
 
 ---
@@ -203,6 +208,7 @@ console.log(`AI Generation Time: ${endTime - startTime}ms`);
 ### Step 3: Optimization Strategies
 
 #### Caching
+
 ```typescript
 const responseCache = new Map<string, CachedResponse>();
 
@@ -220,6 +226,7 @@ async function generateWithCache(input: string): Promise<string> {
 ```
 
 #### Streaming
+
 ```typescript
 async function* generateStreaming(input: string): AsyncGenerator<string> {
   const stream = await aiService.generateStream(input);
@@ -230,6 +237,7 @@ async function* generateStreaming(input: string): AsyncGenerator<string> {
 ```
 
 #### Preloading
+
 ```typescript
 // Preload likely responses
 function preloadCommonResponses() {

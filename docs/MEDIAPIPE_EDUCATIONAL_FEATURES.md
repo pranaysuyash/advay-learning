@@ -12,6 +12,7 @@
 MediaPipe is Google's cross-platform real-time perception framework that provides hands-free, interactive learning experiences. This document explores how to leverage MediaPipe's full capabilities to create engaging, educational activities for children aged 4-10 years.
 
 **MediaPipe Capabilities Covered:**
+
 - ✅ Hand Landmark Detection (21 points per hand)
 - ✅ Face Landmark Detection (468 points + blendshapes)
 - ✅ Pose Detection (33 body keypoints)
@@ -21,6 +22,7 @@ MediaPipe is Google's cross-platform real-time perception framework that provide
 - ✅ Holistic Combinations (multi-modal sensing)
 
 **Educational Domains:**
+
 - Fine Motor Skills (pre-writing, tracing, control)
 - Gross Motor Skills (pose, balance, coordination)
 - Language & Vocabulary (words, phonics, bilingual)
@@ -39,6 +41,7 @@ MediaPipe is Google's cross-platform real-time perception framework that provide
 MediaPipe is a framework for building machine learning perception pipelines. It consists of:
 
 **Core Components:**
+
 1. **Input Layer:** Camera frames (video stream) or images
 2. **Preprocessing:** Frame resizing, normalization, quality checks
 3. **Inference:** ML models (neural networks)
@@ -47,6 +50,7 @@ MediaPipe is a framework for building machine learning perception pipelines. It 
 6. **Output:** Landmarks, masks, classifications, bounding boxes
 
 **Architecture Pattern:**
+
 ```
 Camera Frames → Preprocessing → Model Inference → Smoothing → Post-Processing → Output
      ↓              ↓               ↓              ↓              ↓               ↓
@@ -56,15 +60,18 @@ Camera Frames → Preprocessing → Model Inference → Smoothing → Post-Proce
 ### MediaPipe Tasks (Prebuilt Pipelines)
 
 #### 1. Hand Landmarker
+
 **Purpose:** Detect 21 hand keypoints in real-time
 
 **Output:**
+
 - 21 2D/3D landmarks per hand
 - Handedness (left/right)
 - Multiple hand detection (up to 2 hands)
 - Confidence scores (0.0 to 1.0)
 
 **Landmarks (Standard MediaPipe Hand Topology):**
+
 ```
 0: Wrist
 1: Thumb CMC (carpometacarpal joint)
@@ -90,6 +97,7 @@ Camera Frames → Preprocessing → Model Inference → Smoothing → Post-Proce
 ```
 
 **Use Cases for Education:**
+
 - Index finger tip (landmark 8) = Pen/brush cursor
 - Pinch gesture (thumb + index) = Drawing trigger
 - Finger counting = Counting games, number recognition
@@ -98,11 +106,13 @@ Camera Frames → Preprocessing → Model Inference → Smoothing → Post-Proce
 - Wrist position = Tracking, stability
 
 **Performance:**
+
 - FPS: 25-30 on modern devices
 - Latency: <100ms (inference + smoothing)
 - Supports: Web, Android, iOS
 
 **Implementation Tips:**
+
 ```typescript
 const handLandmarker = await HandLandmarker.createFromOptions(vision, {
   baseOptions: {
@@ -122,9 +132,11 @@ if (results.landmarks && results.landmarks.length > 0) {
 ```
 
 #### 2. Face Landmarker
+
 **Purpose:** Detect 468 3D face landmarks + 52 blendshapes
 
 **Output:**
+
 - 468 3D face landmarks
 - 52 facial blendshape coefficients (for expressions)
 - Face presence detection
@@ -132,11 +144,13 @@ if (results.landmarks && results.landmarks.length > 0) {
 - Face mesh (triangulated surface)
 
 **Blendshapes (Expressions):**
+
 - Neutral, Blink, LookUp, LookDown, LookLeft, LookRight
 - MouthSmile, MouthPucker, JawOpen, UpperLipUp, LowerLipDown
 - EyebrowLowerer, EyebrowRaiser, CheekPuff
 
 **Use Cases for Education:**
+
 - Expression mirroring (copy happy, sad, surprised)
 - Mouth shape teaching (phonics: "A E I O U" shapes)
 - Head orientation (up, down, left, right)
@@ -145,11 +159,13 @@ if (results.landmarks && results.landmarks.length > 0) {
 - Gaze direction (attention tracking)
 
 **Performance:**
+
 - FPS: 20-25 on modern devices (more complex than hands)
 - Latency: <150ms
 - Supports: Web, Android, iOS
 
 **Implementation Tips:**
+
 ```typescript
 const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
   baseOptions: {
@@ -170,15 +186,18 @@ if (results.faceBlendshapes) {
 ```
 
 #### 3. Pose Landmarker
+
 **Purpose:** Detect 33 body keypoints for full-body tracking
 
 **Output:**
+
 - 33 3D pose landmarks
 - Body segmentation mask
 - Presence detection
 - Confidence scores
 
 **Pose Landmarks:**
+
 ```
 Face: 0-10 (nose, eyes, ears, mouth)
 Upper Body: 11-12 (shoulders)
@@ -189,6 +208,7 @@ Feet: 23-26 (foot keypoints)
 ```
 
 **Use Cases for Education:**
+
 - Simon Says (touch head, shoulders, knees, elbows)
 - Freeze Dance (hold poses to music)
 - Yoga/Exercise (match teacher's pose)
@@ -198,11 +218,13 @@ Feet: 23-26 (foot keypoints)
 - Posture correction (gentle feedback)
 
 **Performance:**
+
 - FPS: 20-25 (full-body tracking)
 - Latency: <150ms
 - Supports: Web, Android, iOS
 
 **Implementation Tips:**
+
 ```typescript
 const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
   baseOptions: {
@@ -227,14 +249,17 @@ if (results.poseLandmarks && results.poseLandmarks.length > 0) {
 ```
 
 #### 4. Image Segmenter
+
 **Purpose:** Create pixel-level segmentation masks for objects/people
 
 **Output:**
+
 - Segmentation mask (0/1 per pixel)
 - Confidence scores per category
 - Multi-category support (person, background, etc.)
 
 **Use Cases for Education:**
+
 - Background removal (magic silhouette)
 - "Paint inside silhouette" games
 - Body segmentation (catch things on body)
@@ -242,11 +267,13 @@ if (results.poseLandmarks && results.poseLandmarks.length > 0) {
 - Content-aware effects (hair color, face filters)
 
 **Performance:**
+
 - FPS: 15-20 (per-pixel processing is expensive)
 - Latency: <200ms
 - Supports: Web, Android, iOS
 
 **Implementation Tips:**
+
 ```typescript
 const imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
   baseOptions: {
@@ -266,15 +293,18 @@ if (results.categoryMask) {
 ```
 
 #### 5. Object Detector
+
 **Purpose:** Detect objects in camera frame with bounding boxes
 
 **Output:**
+
 - Bounding boxes (x, y, width, height)
 - Class labels (object names)
 - Confidence scores (0.0 to 1.0)
 - Keypoints for objects (if supported)
 
 **Use Cases for Education:**
+
 - Scavenger hunts ("find something red")
 - Show-and-tell ("show me an apple")
 - Object categorization ("is this a fruit or vegetable?")
@@ -283,11 +313,13 @@ if (results.categoryMask) {
 - Shape identification
 
 **Performance:**
+
 - FPS: 15-20 (depends on model complexity)
 - Latency: <200ms
 - Supports: Web, Android, iOS
 
 **Implementation Tips:**
+
 ```typescript
 const objectDetector = await ObjectDetector.createFromOptions(vision, {
   baseOptions: {
@@ -312,12 +344,15 @@ if (results.detections && results.detections.length > 0) {
 ### MediaPipe Usage Patterns
 
 #### Pattern 1: IMAGE Mode (Single Frame)
+
 **Use When:**
+
 - Static image analysis
 - Photo-based activities
 - Not real-time
 
 **Implementation:**
+
 ```typescript
 const image = new Image();
 image.src = 'photo.jpg';
@@ -332,12 +367,15 @@ image.onload = async () => {
 **Cons:** No real-time tracking
 
 #### Pattern 2: VIDEO/STREAM Mode (Recommended)
+
 **Use When:**
+
 - Real-time games
 - Camera-based activities
 - Continuous tracking
 
 **Implementation:**
+
 ```typescript
 // In animation loop
 function renderLoop(timestamp: number) {
@@ -355,11 +393,14 @@ function renderLoop(timestamp: number) {
 **Cons:** Slightly more complex
 
 #### Pattern 3: IMAGE Mode with Timestamps (Hybrid)
+
 **Use When:**
+
 - Want IMAGE mode API but need temporal data
 - Debugging/visualization
 
 **Implementation:**
+
 ```typescript
 const lastTimestamp = -1;
 
@@ -377,7 +418,9 @@ function processFrame(video: HTMLVideoElement) {
 ### Smoothing and Tracking
 
 #### Why Smoothing is Critical
+
 Raw MediaPipe landmarks are noisy due to:
+
 - Camera noise
 - Model inference variance
 - Fast movements
@@ -385,6 +428,7 @@ Raw MediaPipe landmarks are noisy due to:
 - Occlusions (hand goes out of frame temporarily)
 
 **Without Smoothing:**
+
 - Jittery, unpleasant experience
 - Unreliable gesture detection
 - Fails fine motor control requirements
@@ -393,6 +437,7 @@ Raw MediaPipe landmarks are noisy due to:
 #### Smoothing Techniques
 
 1. **Exponential Moving Average (EMA) - Recommended**
+
 ```typescript
 interface SmoothedLandmark {
   x: number;
@@ -421,7 +466,8 @@ function smoothLandmarks(
 }
 ```
 
-2. **Kalman Filter (Advanced)**
+1. **Kalman Filter (Advanced)**
+
 ```typescript
 // More complex but smoother
 // Good for precise tracking but higher computational cost
@@ -435,7 +481,8 @@ function kalmanFilter(predicted: Point, measured: Point): Point {
 }
 ```
 
-3. **Median Filter (Simple, Good for Outliers)**
+1. **Median Filter (Simple, Good for Outliers)**
+
 ```typescript
 function medianFilter(landmarks: Point[]): Point[] {
   return landmarks.map((_, i) => {
@@ -451,6 +498,7 @@ function medianFilter(landmarks: Point[]): Point[] {
 #### Critical Quality Metrics
 
 1. **Detection Confidence**
+
 ```typescript
 const confidence = results.landmarks[0].visibility;
 
@@ -459,7 +507,8 @@ if (confidence < 0.5) {
 }
 ```
 
-2. **FPS Monitoring**
+1. **FPS Monitoring**
+
 ```typescript
 let frameCount = 0;
 let lastFpsUpdate = performance.now();
@@ -482,7 +531,8 @@ function measureFps() {
 }
 ```
 
-3. **Presence Detection**
+1. **Presence Detection**
+
 ```typescript
 const handPresent = results.landmarks && results.landmarks.length > 0;
 
@@ -494,6 +544,7 @@ if (!handPresent && isPlaying) {
 #### Bad Condition Handling
 
 1. **Low Light Detection**
+
 ```typescript
 const avgConfidence = results.landmarks.reduce((sum, lm) => sum + lm.visibility, 0) / 21;
 
@@ -503,7 +554,8 @@ if (avgConfidence < 0.3) {
 }
 ```
 
-2. **Face Out of Frame**
+1. **Face Out of Frame**
+
 ```typescript
 if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
   // Face lost - pause expression game
@@ -511,7 +563,8 @@ if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
 }
 ```
 
-3. **Too Close to Camera**
+1. **Too Close to Camera**
+
 ```typescript
 const faceSize = calculateBoundingBox(results.faceLandmarks).width;
 const canvasWidth = canvas.width;
@@ -522,7 +575,8 @@ if (faceSize / canvasWidth > 0.8) {
 }
 ```
 
-4. **Side Angle Issues**
+1. **Side Angle Issues**
+
 ```typescript
 const faceYaw = results.facialTransformationMatrixes[0].yaw;
 
@@ -535,6 +589,7 @@ if (Math.abs(faceYaw) > Math.PI / 4) {
 ### Performance Optimization
 
 #### Frame Skipping
+
 ```typescript
 let frameCount = 0;
 
@@ -555,6 +610,7 @@ function processVideoFrame() {
 ```
 
 #### Resolution Management
+
 ```typescript
 // Reduce resolution for better performance
 const targetWidth = 640;  // Downsample from 1080p
@@ -566,6 +622,7 @@ canvas.height = targetHeight;
 ```
 
 #### GPU Delegation
+
 ```typescript
 const task = await Task.createFromOptions(vision, {
   baseOptions: {
@@ -581,11 +638,13 @@ const task = await Task.createFromOptions(vision, {
 ### Domain 1: Fine Motor Skills (Pre-Writing & Tracing)
 
 #### Feature 1.1: Air Letter Tracing (Current)
+
 **Description:** Trace letters, numbers, shapes with index finger cursor
 
 **MediaPipe Used:** Hand Landmarker (landmark 8 = cursor)
 
 **Enhancements Possible:**
+
 - Start dot + directional arrows (guide stroke direction)
 - Ghost stroke path (show ideal path, child traces over)
 - Stroke order highlighting (which part of letter to draw next)
@@ -593,6 +652,7 @@ const task = await Task.createFromOptions(vision, {
 - Brush selection (crayon, marker, calligraphy)
 
 **Implementation Pattern:**
+
 ```typescript
 // Ghost stroke
 function drawGhostStroke(ctx: CanvasRenderingContext2D, letter: string) {
@@ -620,11 +680,13 @@ function calculateTracingAccuracy(userPath: Point[], idealPath: Point[]): number
 ```
 
 #### Feature 1.2: Connect-the-Dots
+
 **Description:** Dots appear in letter shape, child touches them in order
 
 **MediaPipe Used:** Hand Landmarker (landmark 8 = pointer)
 
 **Implementation:**
+
 ```typescript
 const dots = generateDotPattern(letter);  // Array of {x, y, order}
 
@@ -646,17 +708,20 @@ function checkDotTouch(fingerPosition: Point): boolean {
 ```
 
 **Enhancements:**
+
 - Glow effect on correct dots
 - Gentle "try again" on wrong dot
 - Progress bar showing dots completed
 - Different dot sizes (large for start, smaller for later)
 
 #### Feature 1.3: Shape Tracing
+
 **Description:** Trace basic shapes (circle, square, triangle, star)
 
 **MediaPipe Used:** Hand Landmarker
 
 **Implementation:**
+
 ```typescript
 const shapes = [
   { type: 'circle', path: generateCirclePath() },
@@ -674,17 +739,20 @@ function traceShape(shape: Shape) {
 ```
 
 **Educational Value:**
+
 - Pre-writing skills
 - Geometry recognition
 - Spatial awareness
 - Shape names learning
 
 #### Feature 1.4: Finger Control Drills
+
 **Description:** Specific finger exercises to build fine motor control
 
 **MediaPipe Used:** Hand Landmarker (individual finger tips)
 
 **Exercise Examples:**
+
 1. **Pinch Control:**
    - "Pinch thumb + index" → Hold for 2 seconds
    - "Pinch index + middle" → Hold for 2 seconds
@@ -701,6 +769,7 @@ function traceShape(shape: Shape) {
    - Builds timing and rhythm
 
 **Implementation:**
+
 ```typescript
 function detectFingerLift(landmarks: Landmark[]): number | null {
   // Check if finger tip is significantly higher than knuckle
@@ -720,11 +789,13 @@ function detectFingerLift(landmarks: Landmark[]): number | null {
 ### Domain 2: Gross Motor Skills (Pose & Balance)
 
 #### Feature 2.1: Simon Says (Body)
+
 **Description:** Follow instructions like "Touch your head", "Touch your knees"
 
 **MediaPipe Used:** Pose Landmarker (head, shoulders, elbows, knees)
 
 **Poses to Recognize:**
+
 1. "Touch your head" → Hands above shoulders
 2. "Touch your left shoulder" → Right hand touches left shoulder
 3. "Touch your right shoulder" → Left hand touches right shoulder
@@ -735,6 +806,7 @@ function detectFingerLift(landmarks: Landmark[]): number | null {
 8. "Make a T" → Arms spread, knees together
 
 **Implementation:**
+
 ```typescript
 function checkPoseInstruction(instruction: string, pose: Pose): boolean {
   switch (instruction) {
@@ -756,17 +828,20 @@ function checkPoseInstruction(instruction: string, pose: Pose): boolean {
 ```
 
 **Enhancements:**
+
 - Visual outline showing target body part
 - Gentle "try again" if pose not detected
 - Progressive difficulty (faster sequences, more poses)
 - Sound effects on successful pose matching
 
 #### Feature 2.2: Freeze Dance
+
 **Description:** Dance to music, freeze when music stops, hold pose
 
 **MediaPipe Used:** Pose Landmarker
 
 **Implementation:**
+
 ```typescript
 let isFreezing = false;
 let freezeStartTime = 0;
@@ -795,6 +870,7 @@ function freezeDanceLoop() {
 ```
 
 **Dance Patterns:**
+
 1. Clap rhythm (hand distance spikes)
 2. Jump (vertical movement)
 3. Side-to-side (horizontal movement)
@@ -802,17 +878,20 @@ function freezeDanceLoop() {
 5. Squat (vertical movement with knees bent)
 
 **Educational Value:**
+
 - Rhythm and timing
 - Coordination
 - Balance
 - Following instructions
 
 #### Feature 2.3: Yoga Animals
+
 **Description:** Mimic animal poses with body
 
 **MediaPipe Used:** Pose Landmarker
 
 **Animals:**
+
 1. **Tree Pose:** Arms up, standing tall
 2. **Warrior Pose:** One leg back, arms out
 3. **Star Pose:** Standing on one leg, arms out
@@ -820,6 +899,7 @@ function freezeDanceLoop() {
 5. **Frog Pose:** Squat position, arms on ground
 
 **Implementation:**
+
 ```typescript
 const animalPoses = {
   tree: {
@@ -849,17 +929,20 @@ function checkAnimalPose(currentPose: Pose): string | null {
 ```
 
 **Enhancements:**
+
 - Show animal illustration as target pose
 - Play animal sound when matched
 - Display fun fact about animal
 - Progressive difficulty (hold pose longer)
 
 #### Feature 2.4: Balance Challenges
+
 **Description:** Stand on one leg, hold balance
 
 **MediaPipe Used:** Pose Landmarker (hips, knees, ankles)
 
 **Implementation:**
+
 ```typescript
 function checkBalance(pose: Pose): number {
   const leftKnee = pose.leftKnee;
@@ -882,6 +965,7 @@ function checkBalance(pose: Pose): number {
 ```
 
 **Educational Value:**
+
 - Balance and coordination
 - Core strength
 - Body awareness
@@ -891,11 +975,13 @@ function checkBalance(pose: Pose): number {
 ### Domain 3: Language & Vocabulary
 
 #### Feature 3.1: Hindi NAMASTE Practice
+
 **Description:** Practice Hindi greetings with hand gestures
 
 **MediaPipe Used:** Hand Landmarker + Custom Gesture Classifier
 
 **Gestures to Teach:**
+
 1. **Ha (हा):** Fist with thumb up
 2. **Ji (जी):** Open palm with fingers spread
 3. **Namaste (नमस्ते):** Both palms together, fingers up, slight bow
@@ -904,6 +990,7 @@ function checkBalance(pose: Pose): number {
 6. **Yes (हाँ/जी):** Thumbs up gesture (universal)
 
 **Implementation:**
+
 ```typescript
 const hindiGestures = {
   ha: {
@@ -935,17 +1022,20 @@ function recognizeHindiGesture(landmarks: Landmark[]): string | null {
 ```
 
 **Educational Value:**
+
 - Cultural greetings
 - Hindi vocabulary
 - Gesture recognition
 - Multilingual learning
 
 #### Feature 3.2: Vocabulary Builder
+
 **Description:** Draw objects, AI recognizes them, teaches words
 
 **MediaPipe Used:** Object Detector + Hand Landmarker (for drawing area)
 
 **Implementation:**
+
 ```typescript
 function vocabularyGame() {
   // Show random object card
@@ -977,6 +1067,7 @@ function teachWord(object: string) {
 ```
 
 **Object Categories:**
+
 - Fruits (apple, banana, orange, grapes)
 - Animals (cat, dog, bird, fish)
 - Colors (red, blue, green, yellow)
@@ -986,11 +1077,13 @@ function teachWord(object: string) {
 - Nature (sun, tree, flower, cloud)
 
 #### Feature 3.3: Point and Say
+
 **Description:** Show object on screen, child points to it, teaches words
 
 **MediaPipe Used:** Hand Landmarker (landmark 8 = pointer)
 
 **Implementation:**
+
 ```typescript
 function pointAndSayGame() {
   const targetObjects = getRandomObjects(3);  // "apple", "ball", "cup"
@@ -1021,17 +1114,20 @@ function pointAndSayGame() {
 ```
 
 **Enhancements:**
+
 - Highlight object when pointed at
 - Visual confirmation (checkmark appears on object)
 - Audio confirmation (word pronunciation)
 - Show object in different sizes (close vs far)
 
 #### Feature 3.4: Action Verbs (Wave, Clap, Jump, Sit)
+
 **Description:** Demonstrate action verbs with gestures
 
 **MediaPipe Used:** Pose Landmarker + Motion Detection
 
 **Actions:**
+
 1. **Wave (आओ/Aam):** Hand movement side-to-side
 2. **Clap (ताली/Thaali):** Hands move together rapidly (distance spike)
 3. **Jump (छलां/Uchalna):** Vertical position change (y decreases)
@@ -1040,6 +1136,7 @@ function pointAndSayGame() {
 6. **Turn (मुड़ना/Mumkarna):** Yaw rotation (left/right turn)
 
 **Implementation:**
+
 ```typescript
 function detectAction(landmarks: Landmark[], previousLandmarks: Landmark[]): Action {
   const handVelocity = calculateHandVelocity(landmarks, previousLandmarks);
@@ -1082,6 +1179,7 @@ function detectAction(landmarks: Landmark[], previousLandmarks: Landmark[]): Act
 ```
 
 **Educational Value:**
+
 - Action vocabulary (English + Hindi + Kannada)
 - Following instructions
 - Gross motor skills
@@ -1092,11 +1190,13 @@ function detectAction(landmarks: Landmark[], previousLandmarks: Landmark[]): Act
 ### Domain 4: Math & Numeracy
 
 #### Feature 4.1: Finger Number Show
+
 **Description:** Show numbers with fingers
 
 **MediaPipe Used:** Hand Landmarker (count extended fingers)
 
 **Implementation:**
+
 ```typescript
 function countFingers(landmarks: Landmark[]): number {
   let count = 0;
@@ -1137,17 +1237,20 @@ function fingerNumberGame() {
 ```
 
 **Enhancements:**
+
 - Show number name (One, Two, Three...)
 - Pronunciation in 3 languages
 - Visual feedback (count appears on fingers)
 - Support both hands (sum fingers from both hands)
 
 #### Feature 4.2: Tap Count
+
 **Description:** Objects fall/appear, child taps each once
 
 **MediaPipe Used:** Hand Landmarker (tap detection)
 
 **Implementation:**
+
 ```typescript
 const fallenObjects: FallingObject[] = [];
 const touchedObjects: Set<string> = new Set();
@@ -1194,17 +1297,20 @@ function updateObjects() {
 ```
 
 **Educational Value:**
+
 - One-to-one correspondence
 - Counting
 - Hand-eye coordination
 - Number recognition
 
 #### Feature 4.3: Number Line Jump
+
 **Description:** Character jumps along number line when child swipes
 
 **MediaPipe Used:** Hand Landmarker (swipe detection)
 
 **Implementation:**
+
 ```typescript
 const numberLine = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 let characterPosition = 0;
@@ -1245,17 +1351,20 @@ function numberLineGame() {
 ```
 
 **Educational Value:**
+
 - Number recognition
 - Ordering (before/after)
 - Quantity comparison
 - Left/right direction
 
 #### Feature 4.4: Quick Compare
+
 **Description:** Two piles, "which has more?"
 
 **MediaPipe Used:** Hand Landmarker (tap counting)
 
 **Implementation:**
+
 ```typescript
 const leftPile = createPile(5);  // 5 apples
 const rightPile = createPile(3);  // 3 apples
@@ -1291,17 +1400,20 @@ function quickCompareGame() {
 ```
 
 **Educational Value:**
+
 - Quantity comparison (more/less)
 - Number recognition
 - Left/right discrimination
 - One-to-one correspondence
 
 #### Feature 4.5: Make Ten
+
 **Description:** Drag numbers to sum to 10
 
 **MediaPipe Used:** Hand Landmarker (drag & drop)
 
 **Implementation:**
+
 ```typescript
 const numberSlots = [
   { position: { x: -0.3, y: 0.3 }, value: null },
@@ -1339,17 +1451,20 @@ function makeTenGame() {
 ```
 
 **Educational Value:**
+
 - Number recognition
 - Addition (basic operations)
 - Number bonds (what makes 10)
 - Problem solving
 
 #### Feature 4.6: Bigger Smaller
+
 **Description:** Compare number size concepts
 
 **MediaPipe Used:** Hand Landmarker (swipe/drag)
 
 **Implementation:**
+
 ```typescript
 const targetNumber = Math.floor(Math.random() * 10) + 1;
 
@@ -1381,6 +1496,7 @@ function biggerSmallerGame() {
 ```
 
 **Educational Value:**
+
 - Number comparison (greater/less)
 - Size concepts
 - Quantitative reasoning
@@ -1391,11 +1507,13 @@ function biggerSmallerGame() {
 ### Domain 5: Colors, Shapes, Sorting, Categorization
 
 #### Feature 5.1: Sort into Buckets (Apples)
+
 **Description:** Pick apples, drop into colored buckets
 
 **MediaPipe Used:** Hand Landmarker (pinch grab & drop)
 
 **Implementation:**
+
 ```typescript
 const buckets = [
   { color: '#FF6B6B', name: 'red', count: 0 },
@@ -1436,17 +1554,20 @@ function bucketSortGame() {
 ```
 
 **Educational Value:**
+
 - Color recognition
 - Categorization
 - Sorting skills
 - Hand-eye coordination
 
 #### Feature 5.2: Paint Mixer
+
 **Description:** Collect colors by touching blobs, mix them
 
 **MediaPipe Used:** Hand Landmarker (tap detection)
 
 **Implementation:**
+
 ```typescript
 const colorBlobs = [
   { color: '#FF0000', position: { x: -0.4, y: 0.3 }, collected: 0 },
@@ -1495,23 +1616,27 @@ function mixColors(colors: Color[]): string {
 ```
 
 **Enhancements:**
+
 - Start with 2 colors, add more as child improves
 - Show "primary" and "secondary" colors
 - Teach color names
 - Show mixing animation
 
 **Educational Value:**
+
 - Color recognition
 - Color mixing (secondary colors)
 - Vocabulary (orange, purple, green)
 - Fine motor control
 
 #### Feature 5.3: Color Scavenger Hunt (Real World)
+
 **Description:** Find something red, blue, yellow in real environment
 
 **MediaPipe Used:** Object Detector (color detection) + Hand Landmarker
 
 **Implementation:**
+
 ```typescript
 function colorScavengerGame() {
   const targetColors = ['red', 'blue', 'yellow'];
@@ -1539,17 +1664,20 @@ function colorScavengerGame() {
 ```
 
 **Educational Value:**
+
 - Color vocabulary
 - Real-world connection
 - Object recognition
 - Attention to environment
 
 #### Feature 5.4: Sort by Shape
+
 **Description:** Drag shapes into shape holes
 
 **MediaPipe Used:** Hand Landmarker (drag & drop)
 
 **Implementation:**
+
 ```typescript
 const shapes = ['circle', 'square', 'triangle'];
 const shapeHoles = [
@@ -1586,17 +1714,20 @@ function shapeSortGame() {
 ```
 
 **Educational Value:**
+
 - Shape recognition
 - Categorization
 - Spatial matching
 - Fine motor skills
 
 #### Feature 5.5: Sort by Attribute
+
 **Description:** Sort objects by property (big vs small, striped vs plain)
 
 **MediaPipe Used:** Object Detector + Hand Landmarker
 
 **Implementation:**
+
 ```typescript
 const categories = {
   big: ['elephant', 'car', 'house'],
@@ -1629,17 +1760,20 @@ function attributeSortGame() {
 ```
 
 **Educational Value:**
+
 - Attribute recognition
 - Categorization
 - Vocabulary
 - Comparative reasoning
 
 #### Feature 5.6: Pattern Continuation
+
 **Description:** Continue color or shape pattern
 
 **MediaPipe Used:** Hand Landmarker (tap selection)
 
 **Implementation:**
+
 ```typescript
 const pattern = [
   { type: 'color', value: 'red', next: 'blue' },
@@ -1684,6 +1818,7 @@ function patternGame() {
 ```
 
 **Educational Value:**
+
 - Pattern recognition
 - Sequencing
 - Color recognition
@@ -1694,11 +1829,13 @@ function patternGame() {
 ### Domain 6: Logic & Memory
 
 #### Feature 6.1: Gesture Sequence
+
 **Description:** Remember and repeat gesture sequence (pinch, wave, thumbs up)
 
 **MediaPipe Used:** Hand Landmarker (custom gesture recognizer)
 
 **Implementation:**
+
 ```typescript
 const gestureLibrary = {
   pinch: { name: 'Pinch', detect: detectPinch },
@@ -1731,23 +1868,27 @@ function gestureSequenceGame() {
 ```
 
 **Enhancements:**
+
 - Show sequence as icons
 - Progressive difficulty (longer sequences)
 - Speed increase (faster sequences)
 - Visual feedback on each gesture
 
 **Educational Value:**
+
 - Memory (working memory)
 - Pattern recognition
 - Sequencing
 - Gesture vocabulary
 
 #### Feature 6.2: Pattern Builder
+
 **Description:** Copy color patterns (Red, Blue, Red, Blue)
 
 **MediaPipe Used:** Hand Landmarker (tap selection)
 
 **Implementation:**
+
 ```typescript
 const basePattern = ['red', 'blue'];
 const length = 4;  // Can increase difficulty
@@ -1780,23 +1921,27 @@ function patternBuilderGame() {
 ```
 
 **Enhancements:**
+
 - Show pattern as colored circles
 - Highlight current step
 - Progressive difficulty (longer patterns, more colors)
 - Speed increase (timer-based)
 
 **Educational Value:**
+
 - Pattern recognition
 - Short-term memory
 - Color identification
 - Sequencing
 
 #### Feature 6.3: Odd One Out
+
 **Description:** 3 objects, one differs by color or shape
 
 **MediaPipe Used:** Object Detector (classifies objects)
 
 **Implementation:**
+
 ```typescript
 function oddOneOutGame() {
   // Generate 3 objects
@@ -1844,6 +1989,7 @@ function makeOneOdd(objects: Object[]): [Object, Object[], string] {
 ```
 
 **Educational Value:**
+
 - Pattern recognition
 - Visual discrimination
 - Attention to detail
@@ -1854,11 +2000,13 @@ function makeOneOdd(objects: Object[]): [Object, Object[], string] {
 ### Domain 7: Social-Emotional
 
 #### Feature 7.1: Expression Mirror
+
 **Description:** Child mimics facial expressions shown on screen
 
 **MediaPipe Used:** Face Landmarker (blendshapes for expressions)
 
 **Expressions:**
+
 1. **Happy:** Smile mouth
 2. **Sad:** Frown mouth
 3. **Surprised:** Eyes wide, mouth open
@@ -1866,6 +2014,7 @@ function makeOneOdd(objects: Object[]): [Object, Object[], string] {
 5. **Sleepy:** Eyes half-closed, mouth relaxed
 
 **Implementation:**
+
 ```typescript
 const expressions = {
   happy: {
@@ -1917,22 +2066,26 @@ function compareBlendshapes(detected: Blendshapes, target: Blendshapes): number 
 ```
 
 **Educational Value:**
+
 - Emotional awareness
 - Expression recognition
 - Social-emotional learning
 - Self-regulation
 
 **Important Note:**
+
 - Label as "expression matching" (NOT emotion detection)
 - Use fun, encouraging language
 - Avoid claiming "AI detects emotions" (it doesn't)
 
 #### Feature 7.2: Mouth Shapes (Phonics)
+
 **Description:** Match mouth shape to letter sounds (A, E, I, O, U)
 
 **MediaPipe Used:** Face Landmarker (mouth landmarks: 13-16 for lips)
 
 **Implementation:**
+
 ```typescript
 const mouthShapes = {
   A: {
@@ -2013,6 +2166,7 @@ function extractMouthShape(faceResults: FaceResults): MouthShape {
 ```
 
 **Educational Value:**
+
 - Phonics (letter sounds)
 - Mouth shape awareness
 - Early speech skills
@@ -2020,11 +2174,13 @@ function extractMouthShape(faceResults: FaceResults): MouthShape {
 - Multilingual support (Hindi, Kannada equivalents)
 
 #### Feature 7.3: Head Orientation
+
 **Description:** Follow head movement instructions (up, down, left, right)
 
 **MediaPipe Used:** Face Landmarker (roll, pitch, yaw)
 
 **Implementation:**
+
 ```typescript
 function headOrientationGame() {
   const instructions = [
@@ -2068,6 +2224,7 @@ function extractHeadOrientation(faceResults: FaceResults): string {
 ```
 
 **Educational Value:**
+
 - Following instructions
 - Body awareness
 - Directionality (up/down/left/right)
@@ -2079,17 +2236,20 @@ function extractHeadOrientation(faceResults: FaceResults): string {
 ### Domain 8: Creative & Artistic
 
 #### Feature 8.1: Free Paint Mode
+
 **Description:** Draw freely on canvas with brush system
 
 **MediaPipe Used:** Hand Landmarker (index finger as brush cursor)
 
 **Integration with Brush System:**
+
 - Use Phase 1 brush selection (TCK-20260129-100 through TCK-20260129-103)
 - Toggle between "Letter Trace" mode and "Free Paint" mode
 - Child chooses brush, color, size
 - Free canvas drawing with no letter tracing required
 
 **Implementation:**
+
 ```typescript
 const [gameMode, setGameMode] = useState<'trace' | 'paint'>('trace');
 const [brushSettings, setBrushSettings] = useState({
@@ -2145,6 +2305,7 @@ function drawFreePaint(ctx: CanvasRenderingContext2D, brush: BrushSettings, posi
 ```
 
 **Educational Value:**
+
 - Creative expression
 - Fine motor skills
 - Art exploration
@@ -2152,11 +2313,13 @@ function drawFreePaint(ctx: CanvasRenderingContext2D, brush: BrushSettings, posi
 - Stress relief
 
 #### Feature 8.2: Magic Background Story Mode
+
 **Description:** Child becomes astronaut/underwater explorer based on segmentation
 
 **MediaPipe Used:** Image Segmenter (body segmentation) + Hand Landmarker
 
 **Implementation:**
+
 ```typescript
 const worlds = {
   space: {
@@ -2228,6 +2391,7 @@ function renderPersonMask(mask: ImageData, world: World) {
 ```
 
 **Educational Value:**
+
 - Creativity and storytelling
 - Environmental awareness
 - Role-playing
@@ -2235,11 +2399,13 @@ function renderPersonMask(mask: ImageData, world: World) {
 - Contextual learning
 
 #### Feature 8.3: Sticker Book and Collectibles
+
 **Description:** Earn stickers through achievements, collect in book
 
 **MediaPipe Used:** Hand Landmarker (for all games)
 
 **Implementation:**
+
 ```typescript
 const stickers = [
   { id: 'star', name: 'Golden Star', icon: '⭐', unlocked: false, unlockCondition: 'Complete 10 letters' },
@@ -2279,6 +2445,7 @@ function stickerBook(stickers: Sticker[]) {
 ```
 
 **Educational Value:**
+
 - Motivation and engagement
 - Achievement system integration
 - Collection mechanic
@@ -2290,11 +2457,13 @@ function stickerBook(stickers: Sticker[]) {
 ### Domain 9: Real-World Learning
 
 #### Feature 9.1: Show and Tell
+
 **Description:** Show object on screen, child points to it, teaches words
 
 **MediaPipe Used:** Hand Landmarker (landmark 8 = pointer) OR Object Detector
 
 **Implementation:**
+
 ```typescript
 function showAndTellGame() {
   const objects = [
@@ -2349,6 +2518,7 @@ function teachWord(object: Object) {
 ```
 
 **Educational Value:**
+
 - Object vocabulary
 - Word pronunciation
 - Descriptive language (soft/hard, size)
@@ -2356,11 +2526,13 @@ function teachWord(object: Object) {
 - Visual-word association
 
 #### Feature 9.2: Scavenger Hunt
+
 **Description:** Find objects in camera view based on attributes
 
 **MediaPipe Used:** Object Detector (recognizes objects) + Hand Landmarker
 
 **Implementation:**
+
 ```typescript
 function scavengerHuntGame() {
   const categories = {
@@ -2399,6 +2571,7 @@ function scavengerHuntGame() {
 ```
 
 **Educational Value:**
+
 - Object recognition
 - Categorization skills
 - Vocabulary building
@@ -2406,11 +2579,13 @@ function scavengerHuntGame() {
 - Environmental connection
 
 #### Feature 9.3: Story Quests (Segmentation + Goals)
+
 **Description:** Interactive story where child helps character by completing tasks
 
 **MediaPipe Used:** Image Segmenter (body mask for character) + Hand Landmarker (for interactions)
 
 **Story Examples:**
+
 1. **Space Clean-up:**
    - Character is astronaut
    - Trash floats around
@@ -2431,6 +2606,7 @@ function scavengerHuntGame() {
    - Story: "Collect the fruits, but watch out for the rocks!"
 
 **Implementation:**
+
 ```typescript
 function storyQuest(story: Story) {
   let currentTask = 0;
@@ -2481,6 +2657,7 @@ function completeTask(task: Task): boolean {
 ```
 
 **Educational Value:**
+
 - Storytelling comprehension
 - Following instructions
 - Spatial awareness
@@ -2901,6 +3078,7 @@ Level 10: Reasoning problem (word riddles)
 ### Weekly Learning Plan (8-Week Progressive)
 
 **Week 1-2: Fine Motor Foundations**
+
 - Day 1: Air tracing (A-E, simple)
 - Day 2: Connect dots (3 dots, simple)
 - Day 3: Tracing with start dot
@@ -2913,6 +3091,7 @@ Level 10: Reasoning problem (word riddles)
 - Day 10: Review and celebrate
 
 **Week 3-4: Letters & Sounds**
+
 - Day 11: Letter tracing (F-J)
 - Day 11: Letter hunt (find letters among distractors)
 - Day 12: Sound sorting (animals by sound)
@@ -2925,6 +3104,7 @@ Level 10: Reasoning problem (word riddles)
 - Day 19: Review and celebrate
 
 **Week 5-6: Numbers & Math**
+
 - Day 21: Finger count (0-5)
 - Day 22: Number line jump (0-5)
 - Day 23: Tap count (apples)
@@ -2937,6 +3117,7 @@ Level 10: Reasoning problem (word riddles)
 - Day 30: Review and celebrate
 
 **Week 7-8: Colors, Shapes, Logic**
+
 - Day 31: Color sort (3 buckets)
 - Day 32: Shape sort (3 holes)
 - Day 33: Pattern builder (colors)
@@ -3242,18 +3423,21 @@ class ErrorHandler {
 ### Implementation Priority
 
 **Phase 1 (Weeks 1-4): Core Games**
+
 - All 8 games above
 - Focus on robust core game patterns
 - Build reusable game components
 - Establish MediaPipe runner system
 
 **Phase 2 (Weeks 5-8): Advanced Games**
+
 - More complex games requiring custom classifiers
 - Story-based quests
 - Multi-step activities
 - Advanced AI features (if needed)
 
 **Phase 3 (Weeks 9-12): Content Packs**
+
 - Domain-specific content packs
 - Progressive curriculum
 - Leveling systems
@@ -3304,6 +3488,7 @@ class ErrorHandler {
 MediaPipe is exceptionally well-suited for educational applications targeting children aged 4-10 years. Its capabilities span:
 
 **Real-Time Perception:**
+
 - Hands (21 landmarks) - Drawing, gestures, counting
 - Face (468 landmarks) - Expressions, mouth shapes, head orientation
 - Pose (33 keypoints) - Body positions, balance, coordination
@@ -3311,6 +3496,7 @@ MediaPipe is exceptionally well-suited for educational applications targeting ch
 - Object Detection - Real-world learning, scavenger hunts
 
 **Educational Domains Covered:**
+
 - Fine Motor Skills (pre-writing, tracing, control)
 - Gross Motor Skills (pose, balance, coordination)
 - Language & Vocabulary (words, phonics, bilingual)

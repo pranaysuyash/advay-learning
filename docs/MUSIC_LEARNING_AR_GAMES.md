@@ -1,4 +1,5 @@
 # Music Learning & AR Music Games
+
 ## Comprehensive Catalog for Advay Vision Learning
 
 **Document ID:** MUSIC-AR-001  
@@ -10,6 +11,7 @@
 ## 🎵 EXECUTIVE SUMMARY
 
 Music education is a **high-value, underexplored** domain for Advay Vision Learning. Combined with AR capabilities, music games can:
+
 - Teach rhythm, pitch, and pattern recognition
 - Develop fine motor control through instrument simulation
 - Create magical "air instrument" experiences
@@ -29,6 +31,7 @@ Music education is a **high-value, underexplored** domain for Advay Vision Learn
 ## 🎼 FOUNDATIONAL MUSIC GAMES (12)
 
 ### M1. **Bubble Pop Symphony** (Ages 2-5)
+
 **Pattern:** Touch Targets + Audio
 **Concept:** Bubbles float up with musical notes. Pop them to play melodies.
 **Learning:** Cause-effect, pitch recognition, simple melodies
@@ -44,10 +47,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M2. **Sound Garden** (Ages 3-6)
+
 **Pattern:** Touch Targets
 **Concept:** Touch flowers/plants to play notes. Different plants = different instruments.
 **Learning:** Instrument sounds, melody creation, creativity
 **Features:**
+
 - Sunflower = Piano
 - Mushroom = Flute
 - Fern = Violin
@@ -58,10 +63,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M3. **Pip's Music Conductor** (Ages 4-8)
+
 **Pattern:** Hold Still + Movement
 **Concept:** Use hand as conductor's baton to control virtual orchestra
 **Learning:** Rhythm, tempo, dynamics (loud/soft), instrument families
 **Mechanics:**
+
 - Hand height = Volume (higher = louder)
 - Hand speed = Tempo (faster = quicker)
 - Circular motion = Crescendo
@@ -72,10 +79,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M4. **Pitch Match** (Ages 5-8)
+
 **Pattern:** Voice + Visual Feedback
 **Concept:** Pip plays a note, child sings it back. Visual feedback shows if pitch matches.
 **Learning:** Pitch recognition, ear training, singing
 **Visual:**
+
 - Wavy line shows target pitch
 - Child's voice creates second line
 - Match = lines overlap = points!
@@ -85,10 +94,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M5. **Rhythm Tap** (Ages 4-7) ⭐ HIGH PRIORITY
+
 **Pattern:** Sequence Memory + Timing
 **Concept:** Repeat rhythm patterns by clapping or tapping
 **Learning:** Rhythm patterns, timing, pattern memory
 **Progression:**
+
 1. Ta (quarter note)
 2. Ta-ta (eighth notes)
 3. Ta-a (half note)
@@ -100,10 +111,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M6. **Note Reading Adventure** (Ages 6-8)
+
 **Pattern:** Drag & Drop
 **Concept:** Place notes on staff to create melodies
 **Learning:** Note names, staff reading, melody composition
 **Features:**
+
 - Color-coded notes (Do=Red, Re=Orange, etc.)
 - Solfege + letter names
 - Hear melody immediately
@@ -114,10 +127,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M7. **Instrument Safari** (Ages 3-6)
+
 **Pattern:** Touch Targets + Scavenger Hunt
 **Concept:** Find instruments hidden in scenes, hear their sounds
 **Learning:** Instrument recognition, orchestra families
 **Scenes:**
+
 - Orchestra pit
 - Jungle (animal sounds as instruments)
 - Kitchen (pots = drums!)
@@ -127,10 +142,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M8. **Loud & Soft** (Ages 2-4)
+
 **Pattern:** Movement
 **Concept:** Move body to control dynamics
 **Learning:** Dynamics (piano/forte), body control
 **Mechanics:**
+
 - Big movements = Loud (forte)
 - Small movements = Soft (piano)
 - Visual: Pip grows/shrinks with volume
@@ -140,10 +157,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M9. **Fast & Slow** (Ages 2-4)
+
 **Pattern:** Movement
 **Concept:** Control music tempo through movement speed
 **Learning:** Tempo (allegro/adagio), self-regulation
 **Mechanics:**
+
 - Dance fast = Fast music
 - Move slow = Slow music
 - Freeze = Music stops
@@ -153,10 +172,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M10. **High & Low** (Ages 3-5)
+
 **Pattern:** Movement
 **Concept:** Body height = Pitch height
 **Learning:** Pitch direction, vocal range
 **Mechanics:**
+
 - Reach up high = High pitch
 - Crouch down low = Low pitch
 - Slide between = Glissando
@@ -166,10 +187,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### M11. **Echo Pip** (Ages 4-6)
+
 **Pattern:** Sequence Memory + Voice
 **Concept:** Pip sings a pattern, child echoes back
 **Learning:** Melodic patterns, memory, singing
 **Progression:**
+
 1. Single notes (Do-Do)
 2. Two notes (Do-Re)
 3. Three notes (Do-Re-Mi)
@@ -180,6 +203,7 @@ Screen: Colorful bubbles rising
 ---
 
 ### M12. **Music Memory** (Ages 5-8)
+
 **Pattern:** Sequence Memory
 **Concept:** Remember and repeat increasingly long note sequences
 **Learning:** Auditory memory, pattern recognition
@@ -192,10 +216,12 @@ Screen: Colorful bubbles rising
 ## 🎸 INSTRUMENT LEARNING GAMES (15)
 
 ### I1. **Air Guitar Hero** (Ages 5-8) ⭐ HIGH PRIORITY
+
 **Pattern:** Match Pose + Strumming
 **Concept:** Play air guitar with hand tracking
 **Learning:** Rhythm, string instrument basics, performance confidence
 **Mechanics:**
+
 - Left hand = Frets (position = note)
 - Right hand = Strumming motion
 - Visual feedback on "strings"
@@ -206,10 +232,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I2. **Virtual Piano** (Ages 4-8)
+
 **Pattern:** Touch Targets
 **Concept:** Play virtual piano with finger taps
 **Learning:** Keyboard layout, melody playing
 **Features:**
+
 - Color-coded keys (rainbow)
 - Follow-along songs (falling notes)
 - Free play mode
@@ -220,10 +248,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I3. **Drum Kit Air Play** (Ages 4-7)
+
 **Pattern:** Touch Targets + Timing
 **Concept:** Virtual drum kit played with hand movements
 **Learning:** Rhythm, beat keeping, drum kit components
 **Setup:**
+
 - Hi-hat (left side)
 - Snare (center)
 - Toms (right side)
@@ -234,10 +264,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I4. **Violin Bow Master** (Ages 6-8)
+
 **Pattern:** Trace Paths + Hold Still
 **Concept:** Simulate violin bowing with hand
 **Learning:** Bow control, steady rhythm, string technique
 **Mechanics:**
+
 - Hold "violin" position (left hand pose)
 - Right hand makes bowing motion
 - Straight bow = good tone
@@ -248,10 +280,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I5. **Flute Fingers** (Ages 6-8)
+
 **Pattern:** Match Pose
 **Concept:** Learn flute fingerings through hand poses
 **Learning:** Woodwind fingerings, breath control concept
 **Mechanics:**
+
 - Show finger placement for each note
 - Child mirrors with hand
 - "Blow" (visual only) to play note
@@ -262,10 +296,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I6. **Trumpet Valves** (Ages 6-8)
+
 **Pattern:** Match Pose
 **Concept:** Three-finger valve combinations
 **Learning:** Brass fingerings, valve combinations
 **Mechanics:**
+
 - Left hand holds trumpet (pose)
 - Right hand fingers press virtual valves
 - Learn 7 basic combinations
@@ -275,10 +311,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I7. **Tabla Touch** (Ages 5-8) 🇮🇳 CULTURAL
+
 **Pattern:** Touch Targets + Rhythm
 **Concept:** Learn basic tabla strokes
 **Learning:** Indian classical rhythm, cultural music
 **Strokes:**
+
 - Ta (right hand edge)
 - Tin (right hand center)
 - Na (left hand)
@@ -292,10 +330,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I8. **Sitar String Pluck** (Ages 6-8) 🇮🇳 CULTURAL
+
 **Pattern:** Match Pose
 **Concept:** Air sitar playing with hand gestures
 **Learning:** Indian classical music, string instruments
 **Mechanics:**
+
 - Left hand = Frets (meend slides)
 - Right hand = Plucking motion
 - Characteristic buzzing sound
@@ -305,10 +345,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I9. **Harmonica Breath** (Ages 5-7)
+
 **Pattern:** Hold Still + Breathing
 **Concept:** Hold harmonica position, breath controls notes
 **Learning:** Breath control, harmonica basics
 **Mechanics:**
+
 - Hand pose = Hold harmonica
 - Lean forward/back = Different notes
 - Visual breath meter
@@ -318,10 +360,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I10. **Xylophone Rainbow** (Ages 3-6)
+
 **Pattern:** Touch Targets
 **Concept:** Colorful xylophone bars
 **Learning:** Pitch-color association, melody
 **Features:**
+
 - Rainbow-colored bars (pitch = color)
 - Large targets for easy hitting
 - Visual note names
@@ -332,10 +376,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I11. **Hand Pan Drums** (Ages 4-7)
+
 **Pattern:** Touch Targets
 **Concept:** Virtual handpan (hang drum) with ethereal tones
 **Learning:** Scale patterns, relaxation, improvisation
 **Features:**
+
 - Circular layout
 - Pentatonic scale (always sounds good)
 - Reverb/echo effects
@@ -346,10 +392,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I12. **Beatbox Academy** (Ages 6-8)
+
 **Pattern:** Voice + Visual
 **Concept:** Learn basic beatboxing sounds
 **Learning:** Rhythm, vocal percussion, creativity
 **Sounds:**
+
 - Kick drum ("boots")
 - Hi-hat ("ts")
 - Snare ("ka")
@@ -360,10 +408,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I13. **Ukulele Strum** (Ages 5-7)
+
 **Pattern:** Match Pose
 **Concept:** Four-string strumming
 **Learning:** Chord basics, strumming patterns
 **Mechanics:**
+
 - Simple chord shapes (C, G, F, Am)
 - Strumming hand motion
 - Happy, bright tones
@@ -373,10 +423,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I14. **Synthesizer Explorer** (Ages 6-8)
+
 **Pattern:** Touch Targets + Controls
 **Concept:** Play with synthesizer parameters
 **Learning:** Sound waves, timbre, electronic music
 **Controls:**
+
 - Waveform selector (sine, square, sawtooth)
 - Filter cutoff
 - Effects (reverb, delay)
@@ -387,10 +439,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### I15. **DJ Pip Mixer** (Ages 6-8)
+
 **Pattern:** Drag & Drop + Controls
 **Concept:** Simple DJ mixing interface
 **Learning:** Beat matching, crossfading, music structure
 **Features:**
+
 - Two virtual turntables
 - Crossfader
 - Tempo adjustment
@@ -403,10 +457,12 @@ Screen: Colorful bubbles rising
 ## 🥁 RHYTHM & MOVEMENT GAMES (10)
 
 ### R1. **Clap Along** (Ages 3-6)
+
 **Pattern:** Audio Input + Visual
 **Concept:** Clap along with songs, system detects claps
 **Learning:** Beat keeping, rhythm
 **Features:**
+
 - Popular children's songs
 - Visual metronome
 - Clap detection feedback
@@ -416,10 +472,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R2. **Stomp & Clap** (Ages 4-7)
+
 **Pattern:** Pose + Audio
 **Concept:** Body percussion patterns
 **Learning:** Body percussion, coordination, rhythm
 **Actions:**
+
 - Stomp (foot detection)
 - Clap (hands together)
 - Snap (finger detection)
@@ -433,10 +491,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R3. **Dance Dance Learning** (Ages 4-8)
+
 **Pattern:** Match Pose + Sequence
 **Concept:** Dance game with educational content
 **Learning:** Movement patterns, following directions, exercise
 **Steps:**
+
 - Step left/right
 - Jump
 - Spin
@@ -448,10 +508,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R4. **Freeze Dance Deluxe** (Ages 3-6)
+
 **Pattern:** Movement + Hold Still
 **Concept:** Enhanced freeze dance with poses
 **Learning:** Self-control, listening, creativity
 **Features:**
+
 - Music plays = Dance
 - Music stops = Freeze in specific pose
 - Poses: Tree, Star, Animal shapes
@@ -462,10 +524,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R5. **Parachute Pop** (Ages 3-5)
+
 **Pattern:** Movement
 **Concept:** Virtual parachute play
 **Learning:** Cooperation (if multiplayer), up/down concepts, rhythm
 **Mechanics:**
+
 - Arms up = Parachute up
 - Arms down = Parachute down
 - Pop virtual balls up
@@ -475,10 +539,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R6. **Musical Statues Advanced** (Ages 4-7)
+
 **Pattern:** Movement + Match Pose
 **Concept:** Freeze in specific poses when music stops
 **Learning:** Body control, pose recognition, creativity
 **Poses:**
+
 - Letters (make body into A, T, X)
 - Animals (elephant, snake, bird)
 - Emotions (happy, sad, surprised)
@@ -488,10 +554,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R7. **Hokey Pokey Tracker** (Ages 3-5)
+
 **Pattern:** Match Pose + Sequence
 **Concept:** Follow along with classic song
 **Learning:** Body parts, left/right, following directions
 **Tracking:**
+
 - "Put your right hand in" - detect right hand movement
 - "Put your right hand out" - detect hand withdrawal
 - "Shake it all about" - detect shaking motion
@@ -501,10 +569,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R8. **Mirror Moves** (Ages 4-7)
+
 **Pattern:** Match Pose
 **Concept:** Copy Pip's dance moves exactly
 **Learning:** Imitation, body awareness, rhythm
 **Moves:**
+
 - Arm waves
 - Head bobs
 - Shoulder shrugs
@@ -516,10 +586,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R9. **Tempo Turtle** (Ages 3-6)
+
 **Pattern:** Movement
 **Concept:** Move at different speeds to match tempo
 **Learning:** Tempo (fast/slow), self-regulation
 **Characters:**
+
 - Turtle = Very slow
 - Elephant = Slow walk
 - Human = Medium
@@ -531,10 +603,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### R10. **Marching Band** (Ages 4-7)
+
 **Pattern:** Movement + Rhythm
 **Concept:** March in time to music
 **Learning:** Steady beat, coordination, gross motor
 **Actions:**
+
 - High knees marching
 - Arm swinging
 - Instrument miming (while marching)
@@ -546,10 +620,12 @@ Screen: Colorful bubbles rising
 ## 🥽 AR MUSIC EXPERIENCES (8)
 
 ### AR-M1. **AR Orchestra** ⭐ FLAGSHIP
+
 **Pattern:** Dual Camera + Hand Tracking
 **Concept:** Virtual orchestra appears in your room
 **Learning:** Instrument families, orchestra layout, conducting
 **Experience:**
+
 1. External camera maps room
 2. Virtual orchestra sections appear around child
 3. Walk around to visit different sections
@@ -561,10 +637,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M2. **AR Piano Keys** ⭐ HIGH PRIORITY
+
 **Pattern:** External Camera (Top-down) + Hand Tracking
 **Concept:** Virtual piano keys projected onto real table
 **Learning:** Piano playing, note locations
 **Setup:**
+
 1. Calibrate external camera to table surface
 2. Virtual piano keyboard appears on screen
 3. Child plays by tapping on real table
@@ -575,10 +653,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M3. **AR Drum Kit**
+
 **Pattern:** External Camera + Hand Tracking
 **Concept:** Virtual drums around child in real space
 **Learning:** Drum kit layout, spatial audio, rhythm
 **Experience:**
+
 - Snare drum in front
 - Hi-hat to left
 - Toms to right
@@ -590,10 +670,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M4. **AR Xylophone on Table**
+
 **Pattern:** External Camera (Top-down)
 **Concept:** Virtual xylophone on real table
 **Learning:** Pitch, melody, color-note association
 **Features:**
+
 - Mallets held in hands (tracked)
 - Strike virtual bars
 - Haptic feedback (visual only)
@@ -604,10 +686,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M5. **AR Music Notes Floating**
+
 **Pattern:** Single Camera
 **Concept:** Musical notes float in 3D space around child
 **Learning:** Note reading, pitch direction
 **Experience:**
+
 - Notes appear in air
 - Touch/catch the correct note
 - Notes arranged by pitch (high = up, low = down)
@@ -618,10 +702,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M6. **AR Music Staff**
+
 **Pattern:** External Camera (Top-down)
 **Concept:** Giant music staff on table/floor
 **Learning:** Staff notation, note placement
 **Experience:**
+
 - Walk (or place hands) on staff lines/spaces
 - Each position plays a note
 - Compose by walking patterns
@@ -632,10 +718,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M7. **AR Recording Studio**
+
 **Pattern:** Dual Camera
 **Concept:** Virtual recording booth with instruments
 **Learning:** Multi-track recording, layering, production
 **Features:**
+
 - Lay down drum track
 - Add bass line
 - Guitar overlay
@@ -647,10 +735,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### AR-M8. **AR Music Wall**
+
 **Pattern:** External Camera (Room-facing)
 **Concept:** Wall becomes interactive music interface
 **Learning:** Musical patterns, composition
 **Experience:**
+
 - Project music grid on real wall
 - Touch wall to activate sounds
 - Launchpad-style interface
@@ -663,10 +753,12 @@ Screen: Colorful bubbles rising
 ## 🎶 CULTURAL MUSIC GAMES (10)
 
 ### C1. **Indian Classical Raga Explorer** (Ages 6-8) 🇮🇳
+
 **Pattern:** Touch Targets + Audio
 **Concept:** Explore basic ragas and their moods
 **Learning:** Indian classical music, ragas, emotions
 **Ragas:**
+
 - Yaman (evening, devotional)
 - Bhairav (morning, serious)
 - Desh (rainy season, romantic)
@@ -680,10 +772,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C2. **Bollywood Dance** (Ages 5-8) 🇮🇳
+
 **Pattern:** Match Pose + Sequence
 **Concept:** Learn simple Bollywood dance steps
 **Learning:** Indian dance, rhythm, expression
 **Steps:**
+
 - Thumka (hip sway)
 - Neck movements
 - Hand gestures (mudras)
@@ -694,9 +788,11 @@ Screen: Colorful bubbles rising
 ---
 
 ### C3. **Folk Rhythms** (Ages 5-8) 🇮🇳
+
 **Pattern:** Rhythm + Cultural
 **Concept:** Learn folk rhythms from different Indian states
 **Examples:**
+
 - Garba (Gujarat) - circular clapping pattern
 - Bhangra (Punjab) - energetic dhol rhythm
 - Lavani (Maharashtra) - fast tempo
@@ -706,10 +802,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C4. **Western Classical Journey** (Ages 6-8)
+
 **Pattern:** Interactive Story
 **Concept:** Journey through classical music eras
 **Learning:** Music history, famous composers, styles
 **Eras:**
+
 - Baroque (Bach) - ornate patterns
 - Classical (Mozart) - balanced phrases
 - Romantic (Beethoven) - emotional
@@ -720,10 +818,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C5. **World Instruments** (Ages 5-8)
+
 **Pattern:** Touch Targets + Geography
 **Concept:** Explore instruments from around the world
 **Learning:** Cultural diversity, geography, instrument families
 **Countries:**
+
 - India (sitar, tabla)
 - China (erhu, pipa)
 - Africa (djembe, mbira)
@@ -735,10 +835,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C6. **Nursery Rhymes Around World** (Ages 3-6)
+
 **Pattern:** Interactive Songs
 **Concept:** Same tune, different languages
 **Learning:** Languages, cultural diversity, music
 **Examples:**
+
 - "Twinkle Twinkle" in 5 languages
 - "If You're Happy" in different cultures
 - Local Indian rhymes
@@ -748,10 +850,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C7. **Devotional Songs** (Ages 5-8) 🇮🇳
+
 **Pattern:** Follow-along
 **Concept:** Learn simple bhajans and shlokas
 **Learning:** Devotional music, Sanskrit/Hindi, culture
 **Features:**
+
 - Line-by-line learning
 - Meaning explanations
 - Gentle, calm experience
@@ -761,9 +865,11 @@ Screen: Colorful bubbles rising
 ---
 
 ### C8. **Festival Music** (Ages 4-7) 🇮🇳
+
 **Pattern:** Rhythm + Cultural
 **Concept:** Music associated with Indian festivals
 **Festivals:**
+
 - Diwali - celebratory music
 - Holi - playful, colorful songs
 - Eid - qawwali style
@@ -774,10 +880,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C9. **Call and Response** (Ages 4-7)
+
 **Pattern:** Voice + Sequence
 **Concept:** Traditional call-and-response songs
 **Learning:** Listening, singing, cultural traditions
 **Examples:**
+
 - "Who took the cookie?"
 - Indian folk call-and-response
 - African work songs
@@ -787,10 +895,12 @@ Screen: Colorful bubbles rising
 ---
 
 ### C10. **Instrument Craft** (Ages 5-8)
+
 **Pattern:** DIY + AR
 **Concept:** Make simple instruments, then play in AR
 **Learning:** STEM, creativity, music
 **Instruments to Make:**
+
 - Shaker (bottle + rice)
 - Drum (box + sticks)
 - String instrument (box + rubber bands)
@@ -847,36 +957,42 @@ import { ResonanceAudio } from 'resonance-audio';
 ## 📊 IMPLEMENTATION ROADMAP
 
 ### Phase 1: Foundation (Weeks 1-2)
+
 - [ ] Set up Web Audio API infrastructure
 - [ ] Create reusable MusicButton component
 - [ ] Implement basic pitch detection
 - [ ] Create audio sample library structure
 
 ### Phase 2: Basic Music (Weeks 3-5)
+
 - [ ] Bubble Pop Symphony
 - [ ] Sound Garden
 - [ ] Rhythm Tap
 - [ ] High & Low movement game
 
 ### Phase 3: Instruments (Weeks 6-9)
+
 - [ ] Virtual Piano
 - [ ] Drum Kit Air Play
 - [ ] Xylophone Rainbow
 - [ ] Air Guitar Hero
 
 ### Phase 4: Cultural (Weeks 10-12)
+
 - [ ] Tabla Touch
 - [ ] Bollywood Dance
 - [ ] Folk Rhythms
 - [ ] Raga Explorer
 
 ### Phase 5: AR Music (Weeks 13-16)
+
 - [ ] AR Piano Keys
 - [ ] AR Drum Kit
 - [ ] AR Orchestra
 - [ ] AR Music Wall
 
 ### Phase 6: Advanced (Weeks 17-20)
+
 - [ ] Pitch Match (singing)
 - [ ] DJ Pip Mixer
 - [ ] Recording Studio
@@ -887,16 +1003,19 @@ import { ResonanceAudio } from 'resonance-audio';
 ## 🎯 SUCCESS METRICS
 
 ### Engagement
+
 - Average session length: 8+ minutes (vs 5 min baseline)
 - Return rate for music games: 60%+
 - Songs created per child: 3+ per week
 
 ### Learning
+
 - Pitch matching accuracy improvement: 40%+
 - Rhythm keeping consistency: 50%+
 - Instrument recognition: 80%+ after 4 weeks
 
 ### Satisfaction
+
 - Music games rated "fun": 90%+
 - Parent satisfaction with music content: 85%+
 - Cultural music appreciation: Self-reported increase

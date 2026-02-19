@@ -31,6 +31,7 @@ Act as my technical tutor and thinking partner.
 ### 4) Provide 2-3 Alternative Perspectives
 
 Choose from:
+
 - **Analogy or mental model** - relate to something familiar
 - **Geometric/visual interpretation** - if applicable
 - **Implementation/engineering view** - how you'd use it in code or systems

@@ -9,13 +9,15 @@
 ### Code Additions Made
 
 1. **Parent Gate State Variables** (added at line 19-21):
+
 ```typescript
 const [parentGatePassed, setParentGatePassed] = useState(false);
 const [holdingGate, setHoldingGate] = useState(false);
 const [holdDuration, setHoldDuration] = useState(0);
 ```
 
-2. **Parent Gate Hold Logic** (added at line 23-51):
+1. **Parent Gate Hold Logic** (added at line 23-51):
+
 ```typescript
 useEffect(() => {
   let interval: number | undefined;
@@ -56,7 +58,8 @@ useEffect(() => {
 }, []);
 ```
 
-3. **Parent Gate Overlay in JSX** (added at line 115):
+1. **Parent Gate Overlay in JSX** (added at line 115):
+
 ```jsx
 {!parentGatePassed && (
   <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
@@ -86,7 +89,8 @@ useEffect(() => {
 )}
 ```
 
-4. **Settings Content Wrapper** (added at line 151):
+1. **Settings Content Wrapper** (added at line 151):
+
 ```jsx
 {parentGatePassed && (
   <h1 className='text-3xl font-bold mb-8'>Settings</h1>
@@ -103,6 +107,7 @@ useEffect(() => {
 **TypeScript JSX Parse Error:**
 
 The file has a JSX structure mismatch causing TypeScript errors:
+
 ```
 ERROR [149:16] expected `)` but instead found `className`
 ERROR [115:7] Expected corresponding JSX closing tag for 'motion.div'.
@@ -113,6 +118,7 @@ ERROR [490:5] expected `)` but instead found `<`
 
 **Root Cause:**
 The conditional rendering is creating unclosed JSX elements. The pattern:
+
 ```jsx
 {!parentGatePassed && <overlay>}
 {parentGatePassed && <settings>}
@@ -121,6 +127,7 @@ The conditional rendering is creating unclosed JSX elements. The pattern:
 This doesn't properly close the parent motion.div container.
 
 **What's Happening:**
+
 - Parent gate overlay opens correctly
 - But Settings content doesn't render because of structure
 - LSP cannot parse the JSX correctly
@@ -133,7 +140,9 @@ This doesn't properly close the parent motion.div container.
 ## What Needs Fixing
 
 ### Option 1: Wrap Entire Content (Recommended)
+
 Create a parent wrapper div that contains both conditions:
+
 ```jsx
 <motion.div>
   {!parentGatePassed && <overlay>}
@@ -142,6 +151,7 @@ Create a parent wrapper div that contains both conditions:
 ```
 
 ### Option 2: Fix Existing Structure
+
 Reorganize the JSX to ensure proper nesting and closing of all divs.
 
 ---
@@ -149,7 +159,9 @@ Reorganize the JSX to ensure proper nesting and closing of all divs.
 ## For Next Agent: Step-by-Step Fix
 
 ### Step 1: Understand Current Structure
+
 Read lines 113-120 and 485-492 to see the return statement area:
+
 ```bash
 sed -n '113,120p' src/frontend/src/pages/Settings.tsx
 sed -n '485,492p' src/frontend/src/pages/Settings.tsx
@@ -158,6 +170,7 @@ sed -n '485,492p' src/frontend/src/pages/Settings.tsx
 ### Step 2: Fix JSX Structure
 
 **Approach A: Simple wrapper** (easier, less risk)
+
 1. Find line 115: `return (<div className='max-w-7xl mx-auto px-4 py-8'>`
 2. Find line 77: `<motion.div ... >`
 3. Find line 490: `</motion.div>`
@@ -182,6 +195,7 @@ return (
 ```
 
 **Approach B: Proper nesting** (cleaner, but more careful)
+
 1. Ensure parent gate div closes properly: `</div>`
 2. Ensure Settings content opens properly: `<div>`
 3. Ensure motion.div closes at end: `</motion.div>`
@@ -189,6 +203,7 @@ return (
 ### Step 3: Verify Tags Match
 
 Count opening and closing div tags:
+
 ```bash
 # Opening divs
 grep -c "<div" src/frontend/src/pages/Settings.tsx
@@ -219,6 +234,7 @@ npm run type-check
 ### Step 6: Update Worklog
 
 Edit `docs/WORKLOG_TICKETS.md`:
+
 ```markdown
 ### TCK-20260130-009 :: Implement Parent Gate for Settings (P0)
 
@@ -261,12 +277,14 @@ From TCK-20260130-009:
 ## Notes
 
 **What Works:**
+
 - Parent gate state logic is correct
 - Hold duration tracking works
 - Parent gate overlay UI is styled correctly
 - Mouse and touch events handled
 
 **What's Broken:**
+
 - JSX structure doesn't parse
 - Missing 3 closing `</div>` tags
 - motion.div not closing properly

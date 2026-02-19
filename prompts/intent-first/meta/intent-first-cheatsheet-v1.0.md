@@ -1,6 +1,7 @@
 # Intent-First Cheatsheet v1.0
 
 ## Universal Intent Test
+>
 > "What is the real intent behind this, and will our approach create genuine value?"
 
 ---
@@ -8,18 +9,21 @@
 ## The 3-Phase Framework (All Philosophies)
 
 ### Phase 1: Context Discovery
+
 1. Define situation and stakeholders
 2. Gather signals, history, constraints
 3. Surface hidden incentives and risks
 4. **Review existing code/assets/processes**
 
 ### Phase 2: Intent Analysis
+
 - What outcome are we truly optimizing for?
 - Which principles must not be violated?
 - What trade-offs are acceptable?
 - **What existing foundation can we build upon?**
 
 ### Phase 3: Priority Assessment
+
 - Impact: magnitude of upside/downside
 - Effort: time, energy, attention, capital
 - Risk: reversibility, blast radius, optionality
@@ -30,6 +34,7 @@
 ## Quick Filter (All Philosophies)
 
 Skip deep analysis if all true:
+
 - Low, vague, or misaligned intent
 - High effort for marginal value
 - Better alternatives exist now
@@ -42,6 +47,7 @@ Skip deep analysis if all true:
 ## Codebase-First Rule (All Philosophies)
 
 Ship the smallest action that:
+
 1. **Builds on existing foundation**
 2. Proves intent and creates observable value
 3. Can be instrumented for feedback
@@ -52,6 +58,7 @@ Ship the smallest action that:
 ## One-Page Cheatsheets by Philosophy
 
 ### Development
+
 - **Intent test:** What problem and for whom? What's already there?
 - **Quick filter:** low intent + high effort + weak foundation → log debt
 - **Codebase-first:** enhance existing, preserve patterns, add don't destroy
@@ -59,6 +66,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-development-v1.0.md`
 
 ### Testing
+
 - **Intent test:** What user journey breaks if this fails?
 - **Quick filter:** low impact + well-covered + high effort → log debt
 - **Codebase-first:** test existing behavior before new, preserve coverage
@@ -66,6 +74,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-testing-v1.0.md`
 
 ### UX Design
+
 - **Intent test:** What user problem? Can we use existing components?
 - **Quick filter:** cosmetic only + low traffic + high effort → log debt
 - **Codebase-first:** use existing patterns, extend don't replace
@@ -73,6 +82,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-ux-design-v1.0.md`
 
 ### Code Review
+
 - **Intent test:** What problem? Does it fit existing patterns?
 - **Quick filter:** low risk + standard patterns → skim only
 - **Codebase-first:** consistency, correctness, security, maintainability
@@ -80,6 +90,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-code-review-v1.0.md`
 
 ### Deployment
+
 - **Intent test:** Worst case? Can we roll back? Is foundation stable?
 - **Quick filter:** no monitoring + untested rollback + unstable → delay
 - **Codebase-first:** preserve existing functionality, deploy incrementally
@@ -87,6 +98,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-deployment-v1.0.md`
 
 ### Data
+
 - **Intent test:** What decision? Can we use existing data structures?
 - **Quick filter:** low quality + any decision → don't use
 - **Codebase-first:** leverage existing data, extend schemas incrementally
@@ -94,6 +106,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-data-v1.0.md`
 
 ### Security
+
 - **Intent test:** What attack vector? How do existing controls help?
 - **Quick filter:** low threat + adequate controls → document risk
 - **Codebase-first:** layer on existing controls, enhance incrementally
@@ -101,6 +114,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-security-v1.0.md`
 
 ### Performance
+
 - **Intent test:** What do users actually feel? Profile existing code first
 - **Quick filter:** few users + meets requirements + high effort → log debt
 - **Codebase-first:** profile before optimizing, optimize existing before rewrite
@@ -108,6 +122,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-performance-v1.0.md`
 
 ### Documentation
+
 - **Intent test:** Who needs this? Does it match current code?
 - **Quick filter:** self-explanatory + small audience + misaligned → log debt
 - **Codebase-first:** document existing code first, keep in sync
@@ -115,6 +130,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-documentation-v1.0.md`
 
 ### Product
+
 - **Intent test:** What user problem? Can we enhance existing features?
 - **Quick filter:** few users + adequate workarounds + misaligned → log debt
 - **Codebase-first:** enhance before building new, extend working patterns
@@ -122,6 +138,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-product-v1.0.md`
 
 ### Content
+
 - **Intent test:** What reader problem? Can we update existing content?
 - **Quick filter:** small audience + existing coverage adequate → log debt
 - **Codebase-first:** update before creating new, build on what works
@@ -129,6 +146,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-content-v1.0.md`
 
 ### Customer Success
+
 - **Intent test:** What customer outcome? Can existing processes handle this?
 - **Quick filter:** simple workaround + achieving goals → minimal intervention
 - **Codebase-first:** use existing processes, enhance incrementally
@@ -136,6 +154,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-customer-success-v1.0.md`
 
 ### Sales
+
 - **Intent test:** What problem and why now? Do they fit our process?
 - **Quick filter:** unclear problem + poor fit + weak urgency → minimal investment
 - **Codebase-first:** follow existing process, use existing materials
@@ -143,6 +162,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-sales-v1.0.md`
 
 ### Operations
+
 - **Intent test:** What business outcome? Can we improve existing processes?
 - **Quick filter:** adequate current + low frequency + high effort → log debt
 - **Codebase-first:** improve before automating, enhance incrementally
@@ -150,6 +170,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-operations-v1.0.md`
 
 ### Leadership
+
 - **Intent test:** What outcome? What existing capabilities can we leverage?
 - **Quick filter:** low intent + high effort + strong team fit → log debt
 - **Codebase-first:** build on team strengths, enhance working processes
@@ -157,6 +178,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-leadership-v1.0.md`
 
 ### Communication
+
 - **Intent test:** What outcome? What channels already exist?
 - **Quick filter:** low intent + high effort + adequate channels → log debt
 - **Codebase-first:** use existing channels, established terminology
@@ -164,6 +186,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-communication-v1.0.md`
 
 ### Decision-Making
+
 - **Intent test:** Reversible? What precedents exist?
 - **Quick filter:** low intent + precedent exists → use precedent
 - **Codebase-first:** check precedents, use existing frameworks
@@ -171,6 +194,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-decision-making-v1.0.md`
 
 ### Creativity
+
 - **Intent test:** What emotion? What existing assets can we use?
 - **Quick filter:** low intent + existing assets usable → log debt
 - **Codebase-first:** use existing brand elements, proven patterns
@@ -178,6 +202,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-creativity-v1.0.md`
 
 ### Learning
+
 - **Intent test:** What outcome? What existing knowledge to build on?
 - **Quick filter:** low intent + sufficient existing → log debt
 - **Codebase-first:** build on existing knowledge, project-based practice
@@ -185,6 +210,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-learning-v1.0.md`
 
 ### Wellbeing
+
 - **Intent test:** What energy outcome? What existing habits to anchor?
 - **Quick filter:** low intent + adequate habits → log debt
 - **Codebase-first:** anchor to existing habits, minimum viable changes
@@ -192,6 +218,7 @@ Ship the smallest action that:
 - **Standard prompt:** see `intent-first-wellbeing-v1.0.md`
 
 ### Relationships
+
 - **Intent test:** What trust outcome? What existing foundation?
 - **Quick filter:** low intent + strong foundation → log debt
 - **Codebase-first:** maintain existing, repair when needed
@@ -203,6 +230,7 @@ Ship the smallest action that:
 ## Quick Reference: Intent Debt Log
 
 When skipping deep work, log:
+
 ```
 - Date: [when noted]
 - Intent: [what was considered]

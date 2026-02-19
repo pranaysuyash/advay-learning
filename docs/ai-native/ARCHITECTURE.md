@@ -119,6 +119,7 @@ This document defines the technical architecture for transforming the Advay Visi
 ### 2.1 LLM Service (Text Generation)
 
 #### Purpose
+
 Generate Pip's responses, stories, activity descriptions, and personalized feedback.
 
 #### Provider Options
@@ -131,6 +132,7 @@ Generate Pip's responses, stories, activity descriptions, and personalized feedb
 | **Ollama (Phi-3)** | Local | 50-200ms | Free | Moderate | Yes |
 
 #### Recommended Strategy
+
 ```
 Primary: Ollama (Llama 3.2 3B) - Fast local responses
 Fallback: Claude API - Complex generation (stories, activities)
@@ -138,6 +140,7 @@ Cache: Redis/LocalStorage - Repeated responses
 ```
 
 #### Interface Definition
+
 ```typescript
 interface LLMService {
   // Quick responses (Pip reactions)
@@ -164,6 +167,7 @@ interface PipContext {
 ```
 
 #### System Prompt Template
+
 ```
 You are Pip, a friendly red panda learning companion for a {age}-year-old child named {name}.
 
@@ -192,6 +196,7 @@ Respond as Pip would. Keep it under 20 words.
 ### 2.2 TTS Service (Text-to-Speech)
 
 #### Purpose
+
 Give Pip a voice. All text responses should be speakable.
 
 #### Provider Options
@@ -205,6 +210,7 @@ Give Pip a voice. All text responses should be speakable.
 | **Coqui TTS** | Local | 50-150ms | Good | High | Free |
 
 #### Recommended Strategy
+
 ```
 Primary: Web Speech API - Immediate feedback (letters, simple words)
 Enhanced: Piper TTS (local) - Pip's voice for longer responses
@@ -212,6 +218,7 @@ Premium: ElevenLabs - Story narration (optional, parent-enabled)
 ```
 
 #### Interface Definition
+
 ```typescript
 interface TTSService {
   // Speak text immediately
@@ -236,6 +243,7 @@ interface TTSOptions {
 ```
 
 #### Voice Personas
+
 ```typescript
 const VOICE_PERSONAS = {
   pip: {
@@ -262,6 +270,7 @@ const VOICE_PERSONAS = {
 ### 2.3 STT Service (Speech-to-Text)
 
 #### Purpose
+
 Allow children to talk to Pip. Voice input is more natural for young children than typing.
 
 #### Provider Options
@@ -274,6 +283,7 @@ Allow children to talk to Pip. Voice input is more natural for young children th
 | **Vosk** | Local | Real-time | Good | Fair | Free |
 
 #### Recommended Strategy
+
 ```
 Primary: Web Speech API - Real-time, works on most browsers
 Enhanced: Whisper.cpp (local) - Better accuracy for child voices
@@ -281,6 +291,7 @@ Fallback: Whisper API - When local fails
 ```
 
 #### Interface Definition
+
 ```typescript
 interface STTService {
   // Start listening
@@ -305,6 +316,7 @@ interface STTOptions {
 ```
 
 #### Child Voice Considerations
+
 ```typescript
 const CHILD_VOICE_CONFIG = {
   // Children speak differently - adjust processing
@@ -318,6 +330,7 @@ const CHILD_VOICE_CONFIG = {
 ### 2.4 Vision Service (Camera/Scene Understanding)
 
 #### Purpose
+
 Understand what the child shows to the camera and enable AR-style interactions.
 
 #### Provider Options
@@ -330,6 +343,7 @@ Understand what the child shows to the camera and enable AR-style interactions.
 | **GPT-4 Vision** | Cloud | Scene understanding | 1-3s | $$$ |
 
 #### Recommended Strategy
+
 ```
 Primary: MediaPipe - Hand tracking (already implemented)
 Enhanced: TensorFlow.js - Object detection for "show and tell"
@@ -339,6 +353,7 @@ IMPORTANT: Never store camera frames. Process and discard.
 ```
 
 #### Interface Definition
+
 ```typescript
 interface VisionService {
   // Hand tracking (existing)
@@ -362,6 +377,7 @@ interface DetectedObject {
 ```
 
 #### Privacy Safeguards
+
 ```typescript
 const VISION_PRIVACY = {
   // NEVER store frames
@@ -500,6 +516,7 @@ Child traces letter "D" successfully
 ## 4. Implementation Phases
 
 ### Phase 1: Foundation (Weeks 1-2)
+
 **Goal:** Basic AI infrastructure with local-first approach
 
 | Component | Task | Priority |
@@ -511,6 +528,7 @@ Child traces letter "D" successfully
 | Architecture | Provider abstraction layer | P1 |
 
 ### Phase 2: Voice Input (Weeks 3-4)
+
 **Goal:** Children can talk to Pip
 
 | Component | Task | Priority |
@@ -522,6 +540,7 @@ Child traces letter "D" successfully
 | Safety | Input content filtering | P0 |
 
 ### Phase 3: Smart Responses (Weeks 5-6)
+
 **Goal:** Pip responds contextually
 
 | Component | Task | Priority |
@@ -533,6 +552,7 @@ Child traces letter "D" successfully
 | Cache | Response caching layer | P1 |
 
 ### Phase 4: Vision Features (Weeks 7-8)
+
 **Goal:** Camera-based interactions
 
 | Component | Task | Priority |
@@ -654,16 +674,19 @@ const CHILD_ERROR_MESSAGES = {
 ## 8. Security Considerations
 
 ### 8.1 API Key Protection
+
 - Never expose API keys in frontend code
 - Use backend proxy for all cloud API calls
 - Rotate keys regularly
 
 ### 8.2 Input Sanitization
+
 - Sanitize all text before sending to LLM
 - Filter inappropriate words before processing
 - Validate audio input length
 
 ### 8.3 Output Filtering
+
 - All LLM responses pass through content filter
 - Block responses mentioning violence, adult content, etc.
 - Fallback to safe templates if filter fails
@@ -673,6 +696,7 @@ const CHILD_ERROR_MESSAGES = {
 ## 9. Monitoring & Observability
 
 ### 9.1 Metrics to Track
+
 - Response latency (p50, p95, p99)
 - Provider fallback rate
 - Content filter trigger rate
@@ -680,6 +704,7 @@ const CHILD_ERROR_MESSAGES = {
 - Parent feature toggle patterns
 
 ### 9.2 Logging (Privacy-Preserving)
+
 ```typescript
 // DO log
 logger.info('ai_response_generated', {

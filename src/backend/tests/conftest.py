@@ -3,6 +3,7 @@ import os
 from typing import AsyncGenerator, Generator
 
 import pytest
+from sqlalchemy.pool import NullPool
 
 # Load test environment before any app imports
 from dotenv import load_dotenv
@@ -20,11 +21,14 @@ from app.core.config import settings
 from app.db import session as db_session_module
 from app.db.base_class import Base
 
-# Create test engine (uses PostgreSQL test database from .env.test)
-test_engine = create_async_engine(settings.DATABASE_URL, echo=False)
-test_async_session = async_sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
+# Create test engine with NullPool - no connection reuse between tests
+# This ensures each test gets fresh connections, avoiding event loop conflicts
+test_engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=False,
+    poolclass=NullPool,
 )
+test_async_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 # Monkey-patch the session module
 db_session_module.engine = test_engine
@@ -38,7 +42,8 @@ from app.main import app
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
@@ -60,14 +65,13 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     async with test_async_session() as session:
         yield session
         await session.rollback()
+        await session.close()
 
 
 @pytest.fixture(scope="function")
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as test_client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         yield test_client
 
 

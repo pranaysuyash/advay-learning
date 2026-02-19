@@ -28,11 +28,13 @@ Analysis of camera-based games reveals significant code duplication and inconsis
 #### 1. HandLandmarker Initialization (Duplicated 4+ times)
 
 **Pattern found in:**
+
 - `AlphabetGame.tsx` - lines 91-147
 - `FingerNumberShow.tsx` - lines 323-351
 - `LetterHunt.tsx` - lines 52-79
 
 **Inconsistencies:**
+
 ```typescript
 // AlphabetGame - tries GPU then CPU fallback
 const delegatesToTry = preferredDelegate === 'GPU' ? ['GPU', 'CPU'] : ['CPU', 'GPU'];
@@ -47,6 +49,7 @@ delegate: 'GPU'
 #### 2. Pinch Detection (Duplicated 3+ times)
 
 **Threshold inconsistencies:**
+
 | Game | Start Threshold | Release Threshold | Hysteresis |
 |------|-----------------|-------------------|------------|
 | AlphabetGame | 0.08 | Same (0.08) | ❌ No |
@@ -56,6 +59,7 @@ delegate: 'GPU'
 #### 3. Frame Loop Boilerplate (Duplicated 4+ times)
 
 Every game repeats:
+
 ```typescript
 const loop = () => {
   if (!canvas || !video || !ctx) { rafIdRef.current = requestAnimationFrame(loop); return; }
@@ -105,6 +109,7 @@ Some games check `video.currentTime !== lastVideoTimeRef.current`, others don't.
 ### Issue 4: No Shared Drawing Utilities
 
 Each game that draws implements its own:
+
 - Point smoothing
 - Line rendering
 - Glow effects
@@ -137,6 +142,7 @@ interface UseHandTrackingReturn {
 ```
 
 **Benefits:**
+
 - Single source of truth for initialization
 - Automatic GPU→CPU fallback
 - Consistent confidence thresholds
@@ -321,6 +327,7 @@ src/frontend/src/
 ## Conclusion
 
 Centralizing hand tracking mechanics will:
+
 - Reduce code duplication by ~60%
 - Ensure consistent UX across games
 - Make improvements propagate automatically

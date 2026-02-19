@@ -25,6 +25,7 @@ This is designed for a MediaPipe-based kids learning web app (camera + low-laten
 5) **Prefer repo truth over speculation**. If unknown: state what you checked and what would confirm it.
 
 Evidence labels (required for non-trivial claims):
+
 - **Observed** (directly verified)
 - **Inferred** (logical implication)
 - **Unknown** (cannot determine)
@@ -66,11 +67,13 @@ Suggested one-line request format:
 ## Step 2: Define “The Standard” for This App
 
 Choose a standard that fits:
+
 - Kids app constraints (fun, clarity, forgiving UX)
 - Camera/MediaPipe constraints (latency, jitter, permission flows)
 - The existing code structure (do not recommend an alien architecture)
 
 Output a crisp **Standard Spec**:
+
 - Principles (5–10)
 - Allowed patterns (with short examples)
 - Disallowed patterns (with short examples)
@@ -82,11 +85,13 @@ Output a crisp **Standard Spec**:
 ## Step 3: Coverage Audit Across the Whole App
 
 Enumerate the app surface (pages, key components, workflows). For each item, mark:
+
 - Compliant
 - Partially compliant
 - Non-compliant
 
 For non-compliant items:
+
 - Explain what violates the standard
 - Explain user impact (kid, parent, teacher)
 - Point to exact evidence (path + short excerpt; screenshot if applicable)
@@ -94,6 +99,7 @@ For non-compliant items:
 ## Step 4: Visual Confirmation (Only When Axis Touches UI)
 
 If the axis is UI/UX/design/workflows/accessibility:
+
 - Use Playwright (preferred) or equivalent to capture evidence:
   - Screenshots at desktop/tablet/mobile breakpoints
   - Key states: permission prompt, camera off, tracking lost, error, empty, loading, success
@@ -109,11 +115,13 @@ If the axis is UI/UX/design/workflows/accessibility:
 ## Step 6: Migration Plan and Enforcement
 
 Migration plan (stepwise):
+
 - Day 0–1 (quick wins)
 - Week 1 (core refactor)
 - Week 2+ (hardening)
 
 Enforcement mechanisms (axis-specific examples):
+
 - lint rules
 - unit tests for error boundaries
 - visual regression snapshots
@@ -126,36 +134,44 @@ Propose a PR “Definition of Done” checklist for PRs touching this axis.
 ## Required Output Format (Strict)
 
 # 1) Scope and axis
+
 - Axis:
 - In-scope:
 - Out-of-scope:
 
 # 2) Executive verdict
+
 - Current consistency score (0–10) for this axis
 - Biggest 3 risks to product quality (for this axis only)
 - Biggest 3 opportunities (for this axis only)
 
 # 3) Evidence map
+
 - Docs consulted (paths)
 - Code areas reviewed (paths)
 - Key searches performed (queries)
 - Optional: pages/routes list if relevant
 
 # 4) Standard Spec (the app-wide rulebook for this axis)
+
 - Principles
 - Allowed patterns (with short examples)
 - Disallowed patterns (with short examples)
 - Required states/behaviors (if applicable)
 
 # 5) Compliance matrix
+
 For each page/component/workflow:
+
 - Item:
 - Status: Compliant / Partial / Non-compliant
 - Evidence:
 - Notes:
 
 # 6) Top issues (ranked)
+
 For each:
+
 - Severity: Blocker / High / Medium / Low
 - Where:
 - Evidence:
@@ -163,16 +179,19 @@ For each:
 - Fix direction:
 
 # 7) Migration plan
+
 - Day 0–1 (quick wins)
 - Week 1 (core refactor)
 - Week 2+ (hardening)
 
 # 8) Enforcement plan
+
 - Automated checks
 - PR checklist
 - Ongoing audit cadence
 
 # 9) Appendix
+
 - Screenshot Index (if any)
 - Short code excerpts (only the minimum needed)
 - Open questions (only those that block certainty)
@@ -180,25 +199,30 @@ For each:
 ## Axis-Specific Guidance (Pick Only What Matches the Axis)
 
 If Axis = **Component architecture and reuse**:
+
 - Identify component boundaries, prop API consistency, duplication hotspots, “one-off” variants.
 - Output: a component inventory + recommended canonical components + anti-pattern list.
 
 If Axis = **Error handling and error UX**:
+
 - Identify all error sources (API, camera, permissions, model init, unsupported browser).
 - Audit: how errors are surfaced, whether recoverable, and whether kids can proceed.
 - Output: a single error taxonomy + UI patterns for errors + where current code diverges.
 
 If Axis = **UI design system consistency**:
+
 - Audit tokens, typography scale, spacing, radii, shadows, color usage, motion.
 - Output: a minimal token set + component style rules + page-by-page violations.
 
 If Axis = **Workflows and routing coherence**:
+
 - Map workflows end-to-end and look for dead ends, confusing nav, broken back behavior.
 - Output: workflow diagrams in text + recommended route structure + guardrails.
 
 ## Quality Gate (PASS/FAIL)
 
 PASS only if all are true:
+
 - You audited exactly **one axis** (explicitly stated in Scope).
 - Every non-trivial claim is labeled Observed/Inferred/Unknown and has evidence.
 - The “Standard Spec” is app-contextual (kids + camera constraints) and not alien to the repo.
@@ -207,6 +231,7 @@ PASS only if all are true:
 - You listed enforcement mechanisms appropriate to the axis.
 
 FAIL if any are true:
+
 - Multiple axes are mixed.
 - Output format deviates from the strict required sections.
 - Claims are generic without repo evidence.

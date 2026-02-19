@@ -1,4 +1,5 @@
 # Brand Voice & Mascot Guide
+
 ## Advay Vision Learning - Complete Character & Communication Specification
 
 **Version:** 1.0
@@ -42,6 +43,7 @@
 ### 1.2 Why a Red Panda?
 
 **Strategic Reasoning:**
+
 1. **Unique** - Not overused like pandas, cats, or dogs in kids' apps
 2. **Indian Connection** - Native to Himalayan region (culturally relevant)
 3. **Cute Factor** - Naturally adorable, round faces, expressive
@@ -161,6 +163,7 @@ Pip exists to make every child feel:
 ### 4.3 Pip's Vocabulary by Context
 
 #### Greetings
+
 ```
 First Launch: "Hi there! I'm Pip! Want to go on an adventure?"
 Returning: "You're back! I missed you!"
@@ -168,6 +171,7 @@ Daily: "Good morning! Ready to play?"
 ```
 
 #### Encouragement
+
 ```
 Success (High): "WOW! Amazing!" / "You did it! Super!"
 Success (Medium): "Great job!" / "Nice work!"
@@ -176,6 +180,7 @@ Struggle: "It's okay, this one's tricky!"
 ```
 
 #### Celebration
+
 ```
 Small Win: "Yay!" (with bounce)
 Medium Win: "Fantastic work!"
@@ -227,6 +232,7 @@ Big Win: "INCREDIBLE! You're a champion!"
 ### 5.3 Expression Intensity Scale
 
 Each expression can have 3 intensity levels:
+
 - **Low (Subtle):** Micro-expressions, continuous feedback, 10-20% movement
 - **Medium (Standard):** Clear, readable, most interactions, 50% movement
 - **High (Exaggerated):** Big, theatrical, major moments, 100% movement
@@ -260,6 +266,7 @@ Pip's animations should feel:
 ### 6.3 Idle Animations
 
 **Always Running (Subtle):**
+
 1. **Breathing** - Slight scale 1.0 → 1.02 → 1.0 (3s loop)
 2. **Blinking** - Random blink every 3-5 seconds (150ms)
 3. **Ear Twitch** - Occasional ear movement (every 8-12s)
@@ -294,6 +301,7 @@ Pip's animations should feel:
 ### 7.2 Sound Effect Categories
 
 #### UI Sounds
+
 | Sound | Description | Duration |
 |-------|-------------|----------|
 | Button tap | Soft pop | 100ms |
@@ -302,6 +310,7 @@ Pip's animations should feel:
 | Error/Invalid | Soft boop | 150ms |
 
 #### Pip Sounds
+
 | Sound | When Used | Duration |
 |-------|-----------|----------|
 | Pip hello | Greeting | 500ms |
@@ -312,6 +321,7 @@ Pip's animations should feel:
 | Pip encourage | Support | 800ms |
 
 #### Celebration Sounds
+
 | Sound | When Used | Duration |
 |-------|-----------|----------|
 | Stars appear | Star reward | 400ms |
@@ -357,6 +367,7 @@ Pip's animations should feel:
 ### 8.2 Context-Aware Responses
 
 **During Learning:**
+
 - Child doing well: Pip cheers from corner
 - Child struggling: Pip moves closer, offers help
 - Child inactive: Pip gently prompts
@@ -365,6 +376,7 @@ Pip's animations should feel:
 ### 8.3 Help System Integration
 
 **Progressive Help:**
+
 1. First struggle: Encouraging message
 2. Second struggle: Offer hint ("Want a clue?")
 3. Third struggle: Show demonstration
@@ -447,6 +459,7 @@ Pip's animations should feel:
 ### 12.1 Current Implementation Status
 
 From `Mascot.tsx`:
+
 ```typescript
 // Currently implemented states:
 state?: 'idle' | 'happy' | 'thinking' | 'waiting' | 'celebrating';
@@ -495,6 +508,7 @@ type Expression =
 ### 12.4 Asset Checklist
 
 **Required for MVP:**
+
 - [ ] Pip static expressions (8 minimum) at 3 sizes
 - [ ] Pip idle animation (breathing loop)
 - [ ] Pip celebration animation
@@ -503,6 +517,7 @@ type Expression =
 - [ ] Celebration sounds (5 minimum)
 
 **Required for Full Experience:**
+
 - [ ] All 16 expressions
 - [ ] Full animation set
 - [ ] Zone ambient sounds
@@ -515,6 +530,7 @@ type Expression =
 ## Quick Reference Card
 
 ### Pip Do's
+
 - Be warm and encouraging
 - Use simple words
 - Celebrate all attempts
@@ -523,6 +539,7 @@ type Expression =
 - Offer help proactively
 
 ### Pip Don'ts
+
 - Say "wrong" or "failed"
 - Rush the child
 - Use complex vocabulary

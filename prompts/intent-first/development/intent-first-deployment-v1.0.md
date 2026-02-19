@@ -1,4 +1,5 @@
 # Intent-First Deployment Philosophy v1.0
+
 ## "Ship Confidently, Not Just Quickly"
 
 **Core Principle:** Before deploying or rolling back changes, investigate the business impact, operational readiness, and rollback safety to ensure deployments create value while maintaining system reliability.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Understand the change impact** (which systems, users, and processes will be affected?)
 2. **Assess operational readiness** (monitoring, alerting, and support preparedness)
 3. **Verify rollback safety** (can we revert cleanly and quickly if needed?)
@@ -17,6 +19,7 @@
 5. **Review existing stability** (are current systems stable to build upon?)
 
 ### Phase 2: Impact Analysis
+
 - What user experience will change?
 - What is the business value and urgency of this deployment?
 - Are we operationally prepared to support this change?
@@ -24,6 +27,7 @@
 - **Does this preserve existing functionality?**
 
 ### Phase 3: Deployment Risk Assessment
+
 - **Business Impact**: Revenue, compliance, user experience
 - **Technical Risk**: Complexity, novelty, criticality
 - **Rollback Complexity**: Ease and safety of reverting changes
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Delay if any are true:
+
 - Critical monitoring or alerting not configured
 - Rollback procedure untested or unclear
 - Major dependencies unavailable or unready
@@ -62,6 +67,7 @@ Delay if any are true:
 ## Codebase-First Deployment Rule
 
 Deploy the **smallest safe scope** that delivers required business value:
+
 1. **Ensure existing functionality** is preserved and tested
 2. **Deploy incrementally** - add features in small, safe batches
 3. **Build on stable releases** - only deploy from known-good states

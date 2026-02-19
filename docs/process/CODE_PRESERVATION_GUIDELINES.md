@@ -17,6 +17,7 @@ This guideline establishes a **preservation-first, implementation-preferred** ap
 ## The Problem with "Cleanup"
 
 Traditional cleanup approaches often:
+
 - Delete code that was intended for a feature
 - Lose institutional knowledge embedded in existing code
 - Miss opportunities to complete partially-implemented features
@@ -152,6 +153,7 @@ Rationale:
 If decision is ACTIVATE or COMPLETE:
 
 1. **Create/Update Ticket**
+
    ```markdown
    ### TCK-20260201-XXX :: Complete Parent Dashboard Integration
    
@@ -188,12 +190,14 @@ If decision is ACTIVATE or COMPLETE:
 ### Step 5: If Deletion is Truly Required
 
 Only delete if:
+
 - Code is confirmed superseded by better implementation
 - Code is broken and fixing is more expensive than rewriting
 - Code has no clear purpose even after investigation
 - User explicitly approves deletion
 
 **Deletion Process:**
+
 1. Move to `archive/<date>/` first
 2. Document why in worklog
 3. Get explicit approval
@@ -208,11 +212,13 @@ Only delete if:
 **Scenario:** `VoiceCommand` hook exists but never used.
 
 **Investigation:**
+
 - Git: Created for "voice-enabled games" feature
 - Worklog: TCK-20260110-035, deprioritized due to "accuracy concerns"
 - State: Complete, tested, just not wired to games
 
 **Decision:** ACTIVATE
+
 - Accuracy concerns can be addressed with confidence thresholds
 - Feature differentiates app in market
 - Integration effort: 1 day per game
@@ -226,11 +232,13 @@ Only delete if:
 **Scenario:** `OfflineMode` service has cache logic but no sync.
 
 **Investigation:**
+
 - Git: Created for "offline learning" feature
 - State: Caching works, conflict resolution missing
 - Blocked on: "Sync strategy decision" (now decided)
 
 **Decision:** COMPLETE
+
 - Core logic is solid
 - Sync strategy now documented
 - Value: High for Indian market (connectivity issues)
@@ -244,12 +252,14 @@ Only delete if:
 **Scenario:** `GestureRecognition` module with complex ML code, no imports.
 
 **Investigation:**
+
 - Git: Created by former team member
 - No worklog references
 - Code: Complex, no comments, uses deprecated API
 - Tests: Fail
 
 **Decision:** ARCHIVE
+
 - Can't determine original intent
 - Uses deprecated APIs (would need rewrite)
 - No clear product value
@@ -263,10 +273,12 @@ Only delete if:
 **Scenario:** Two date formatting utilities: `formatDate()` and `formatLocalizedDate()`
 
 **Investigation:**
+
 - `formatDate()`: Used in 12 places, simple formatting
 - `formatLocalizedDate()`: Used in 3 places, supports i18n
 
 **Decision:** MERGE
+
 - Keep `formatLocalizedDate()` (superset of functionality)
 - Migrate `formatDate()` calls to use it
 - Delete `formatDate()` after migration
@@ -315,7 +327,7 @@ This guideline **extends** the existing "Preservation First" principle in AGENTS
 
 ## Quick Reference Card
 
-### When You Find Unused Code:
+### When You Find Unused Code
 
 ```
 1. INVESTIGATE (15-30 min)

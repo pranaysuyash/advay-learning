@@ -1,4 +1,5 @@
 # Intent-First Product Philosophy v1.0
+
 ## "Validate Need Before Building Features"
 
 **Core Principle:** Before building, modifying, or removing product features, investigate the actual user problem, validate the solution approach, and ensure the effort creates measurable value for users and business.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the opportunity** (user request, data insight, competitive gap, or strategic initiative)
 2. **Understand the user problem** (who has this problem, when, and how severely?)
 3. **Research existing solutions** (how do users currently solve this, and what are the limitations?)
@@ -17,6 +19,7 @@
 5. **Review existing features** (what's already built that could be enhanced?)
 
 ### Phase 2: Problem Validation
+
 - What specific job are users trying to get done?
 - How painful is the current solution or lack thereof?
 - What would success look like for users and business?
@@ -24,6 +27,7 @@
 - **Can we enhance existing features instead of building new ones?**
 
 ### Phase 3: Solution Prioritization
+
 - **User Impact**: How many users are affected and how significantly?
 - **Business Impact**: Effect on acquisition, retention, revenue, or strategic goals
 - **Solution Confidence**: How confident are we this approach will work?
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip feature development if all true:
+
 - Very few users experience this problem
 - Existing workarounds are adequate
 - High development effort for unclear user value
@@ -61,6 +66,7 @@ Skip feature development if all true:
 ## Codebase-First Product Rule
 
 For *Critical* and *High* priority features:
+
 1. **Enhance before building new** - improve existing features where possible
 2. **Extend working patterns** - build upon features users already adopt
 3. **Leverage existing foundation** - use what's already built and working

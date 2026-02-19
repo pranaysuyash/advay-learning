@@ -8,7 +8,8 @@
 ## Completed Audit Items (from ui_ux_comprehensive_audit_2026-02-01.md)
 
 ### ✅ P0 Blockers - DONE
-1. **Forgot Password Flow** 
+
+1. **Forgot Password Flow**
    - Backend: `/auth/forgot-password` and `/auth/reset-password` already existed
    - Frontend: ForgotPassword.tsx and ResetPassword.tsx updated to use authApi
    - Styling: Updated to match app's dark theme
@@ -19,22 +20,23 @@
    - Caps lock warning implemented
 
 ### ✅ P1 Items - DONE
+
 3. **Flag Emoji → SVGs**
    - Created `src/frontend/src/data/languages.ts` with centralized language data
    - Created SVG flag icons: `/assets/icons/ui/flag-en.svg`, `flag-in.svg`
    - Updated: Games.tsx, AddChildModal.tsx, EditProfileModal.tsx, FingerNumberShow.tsx
 
-4. **Icon Consolidation**
+2. **Icon Consolidation**
    - Confirmed two icon systems serve different purposes (Icon.tsx for assets, UIIcon for named UI icons)
    - No duplicate to remove
 
 ### 🎯 Remaining Items
 
-5. **Empty States (P1)**
+1. **Empty States (P1)**
    - Dashboard empty state still basic
    - Needs illustrations + mascot guidance
 
-6. **Audio Feedback (P2)**
+2. **Audio Feedback (P2)**
    - TTS exists, celebration sounds missing
    - Need to add sound effects for success/celebration
 
@@ -42,7 +44,8 @@
 
 ## Demo Readiness Summary
 
-### ✅ COMPLETED:
+### ✅ COMPLETED
+
 1. Camera Permission UX - CameraRecoveryModal created
 2. Visual Success Celebration - Confetti + StoryModal on completion
 3. Modal Component - 3 modals now exist (CameraRecovery, ExitConfirmation, StoryModal)
@@ -51,11 +54,11 @@
 6. Forgot Password Flow - Backend + frontend
 7. Flag Emojis → SVG icons
 
-### 🎯 NEXT PRIORITY:
+### 🎯 NEXT PRIORITY
+
 1. Empty States - Add illustrations to Dashboard
 2. Audio Feedback - Celebration sounds
 3. Continue auditing remaining files
-
 
 ---
 
@@ -64,6 +67,7 @@
 **Date:** 2026-02-01 | **Ticket:** TCK-20260201-001
 
 ### Executive Summary
+
 - **Kid-Feel Score:** 7/10 (strong mascot, but inconsistent across pages)
 - **Modern Polish:** 8/10 (good design system, Framer Motion)
 - **Top Risks:** Camera permission first-run flow, parental controls visibility
@@ -88,6 +92,7 @@
 | **Low** | Extract Parent Gate to Reusable Component | OPEN | Still in Settings.tsx |
 
 ### 10 Changes to Increase "Kid App" Feel (from audit)
+
 1. Add Mascot on Every Page - PARTIAL (in game, not all pages)
 2. Add Sound Effects - OPEN (TTS exists, sounds missing)
 3. Add Celebration Effects - ✅ DONE (confetti + StoryModal)
@@ -100,4 +105,3 @@
 10. Add Playful Error Messages - OPEN (generic errors still)
 
 ### Status: ✅ AUDITED
-

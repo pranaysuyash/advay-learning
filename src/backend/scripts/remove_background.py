@@ -6,12 +6,12 @@ from PIL import Image
 def remove_white_background(input_path, output_path):
     print(f"Processing {input_path}...")
     try:
-        img = Image.open(input_path)
+        img: Image.Image = Image.open(input_path)
         img = img.convert("RGBA")
         datas = img.getdata()
 
-        new_data = []
-        for item in datas:
+        new_data: list[tuple[int, int, int, int]] = []
+        for item in datas:  # type: ignore[attr-defined]
             # Check if pixel is white (with some tolerance)
             if item[0] > 240 and item[1] > 240 and item[2] > 240:
                 new_data.append((255, 255, 255, 0))
@@ -27,7 +27,7 @@ def remove_white_background(input_path, output_path):
 
 if __name__ == "__main__":
     import sys
-    
+
     # Check for CLI args
     if len(sys.argv) > 2:
         input_p = sys.argv[1]

@@ -1,15 +1,19 @@
 # ADR 004: Tech Stack Comparison - Web vs Desktop
 
 ## Status
+
 Proposed - Pending Decision
 
 ## Context
+
 We have two viable architectural approaches for Advay's learning app:
 
 ### Option A: Web-First (Browser-based)
+
 **Stack**: Vite + React + TypeScript + MediaPipe (Web/WASM)
 
 ### Option C: Python Desktop
+
 **Stack**: Python + PyQt6 + OpenCV + MediaPipe (Python)
 
 ## Comparison
@@ -29,12 +33,14 @@ We have two viable architectural approaches for Advay's learning app:
 ## Decision Factors
 
 ### Why Web (Option A) Might Be Better
+
 1. **Easier for non-technical parent** - No Python environment to maintain
 2. **Faster UI development** - React ecosystem is rich
 3. **Easier distribution** - Just open a browser
 4. **Better long-term maintenance** - Web tech is universal
 
 ### Why Python Desktop (Option C) Might Be Better
+
 1. **Better CV control** - Full OpenCV + MediaPipe Python API
 2. **Familiar stack** - If team knows Python well
 3. **No browser permission issues** - Direct camera access
@@ -53,6 +59,7 @@ We have two viable architectural approaches for Advay's learning app:
 ## Hybrid Approach
 
 Keep Python for **offline tooling only**:
+
 - Content generation (alphabet templates, datasets)
 - Evaluation and testing
 - Model training (if needed later)
@@ -60,6 +67,7 @@ Keep Python for **offline tooling only**:
 ## Implementation Path
 
 ### Phase 0: Foundation (Web)
+
 ```
 app/
   src/
@@ -70,12 +78,14 @@ app/
 ```
 
 ### Phase 1: Engine (Web)
+
 - Camera access via `getUserMedia`
 - MediaPipe HandLandmarker
 - Pointer signal with smoothing
 - Canvas drawing
 
 ### Phase 2: Content (Web + Python Tools)
+
 - Shape tracing game
 - Python tools for generating content
 
@@ -90,5 +100,6 @@ app/
 **Pending your input** - Both options are viable. Web is better for maintenance and distribution, Python is better for CV control and if you're more comfortable with it.
 
 ## Related Decisions
+
 - ADR 001: Local-First Architecture (applies to both)
 - ADR 002: Python Tech Stack (would be superseded if choosing Web)

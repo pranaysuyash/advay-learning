@@ -1,4 +1,5 @@
 # Narrative Design Research: "Pip's Learning Adventure"
+
 ## Story-Based Progression for Advay Vision Learning
 
 **Date:** 2026-02-01  
@@ -12,25 +13,26 @@
 
 ### Research Foundation
 
-| Study | Finding |
-|-------|---------|
-| Bruner (1986) | Children learn through narrative; stories provide context and meaning |
-| Common Sense Media (2019) | Apps with narratives have 3x higher engagement than drill apps |
-| Hirsh-Pasek et al. (2015) | Educational apps should be "minds-on" not just "fingers-on" |
+| Study                     | Finding                                                               |
+| ------------------------- | --------------------------------------------------------------------- |
+| Bruner (1986)             | Children learn through narrative; stories provide context and meaning |
+| Common Sense Media (2019) | Apps with narratives have 3x higher engagement than drill apps        |
+| Hirsh-Pasek et al. (2015) | Educational apps should be "minds-on" not just "fingers-on"           |
 
 ### Key Insight
+
 > "Learning wrapped in story feels like play. Play wrapped in learning feels like work."
 > — Dr. Kathy Hirsh-Pasek, Temple University
 
 ### What Kids Apps Get Right
 
-| App | Narrative Device | Why It Works |
-|-----|------------------|--------------|
-| **Duolingo Kids** | Unlock new characters | Social connection |
-| **Khan Academy Kids** | Story time unlocks | Reward anticipation |
-| **ABCmouse** | Adventure path | Clear progression |
-| **Homer** | Personalized stories | Identity |
-| **Endless Alphabet** | Monster reveals | Surprise |
+| App                   | Narrative Device      | Why It Works        |
+| --------------------- | --------------------- | ------------------- |
+| **Duolingo Kids**     | Unlock new characters | Social connection   |
+| **Khan Academy Kids** | Story time unlocks    | Reward anticipation |
+| **ABCmouse**          | Adventure path        | Clear progression   |
+| **Homer**             | Personalized stories  | Identity            |
+| **Endless Alphabet**  | Monster reveals       | Surprise            |
 
 ---
 
@@ -38,13 +40,13 @@
 
 ### What Advay Already Has
 
-| Asset | Location | Current Use |
-|-------|----------|-------------|
-| Pip (mascot) | `Mascot.tsx` | Feedback only |
-| Map | `Map.tsx` | Decorative |
-| Story Modal | `StoryModal.tsx` | Unused |
-| Story Store | `storyStore.ts` | Partially implemented |
-| Islands | In storyStore | Data only |
+| Asset        | Location         | Current Use           |
+| ------------ | ---------------- | --------------------- |
+| Pip (mascot) | `Mascot.tsx`     | Feedback only         |
+| Map          | `Map.tsx`        | Decorative            |
+| Story Modal  | `StoryModal.tsx` | Unused                |
+| Story Store  | `storyStore.ts`  | Partially implemented |
+| Islands      | In storyStore    | Data only             |
 
 ### What's Missing
 
@@ -65,6 +67,7 @@
 
 > **Journey:**
 > Each skill area is an island:
+>
 > - 🏝️ **Literacy Lagoon** - Alphabet Tracing
 > - 🔢 **Number Cove** - Finger Number Show
 > - 🔗 **Connection Beach** - Connect the Dots
@@ -75,21 +78,23 @@
 
 ### Story Beats (Milestones)
 
-| Trigger | Story Beat | Pip Dialogue | Visual |
-|---------|------------|--------------|--------|
-| First login | Welcome | "Hi! I'm Pip! Will you help me find the lost letters?" | Pip waves |
-| First letter | Discovery | "You found the letter A! It's beautiful!" | Sparkle effect |
-| 5 letters | Progress | "The forest is growing! I can see flowers!" | Map updates |
-| 13 letters (halfway) | Midpoint | "We're halfway there! You're amazing!" | New island area unlocks |
-| 26 letters | Completion | "You did it! You're the Guardian of Literacy Lagoon!" | Crown + celebration |
-| All games complete | Ultimate | "Knowledge Island is restored! Thank you, hero!" | Full map revealed |
+| Trigger              | Story Beat | Pip Dialogue                                           | Visual                  |
+| -------------------- | ---------- | ------------------------------------------------------ | ----------------------- |
+| First login          | Welcome    | "Hi! I'm Pip! Will you help me find the lost letters?" | Pip waves               |
+| First letter         | Discovery  | "You found the letter A! It's beautiful!"              | Sparkle effect          |
+| 5 letters            | Progress   | "The forest is growing! I can see flowers!"            | Map updates             |
+| 13 letters (halfway) | Midpoint   | "We're halfway there! You're amazing!"                 | New island area unlocks |
+| 26 letters           | Completion | "You did it! You're the Guardian of Literacy Lagoon!"  | Crown + celebration     |
+| All games complete   | Ultimate   | "Knowledge Island is restored! Thank you, hero!"       | Full map revealed       |
 
 ---
 
 ## 4. Character Development: Pip
 
 ### Current Pip States
+
 From `Mascot.tsx`:
+
 - `idle` - Blinking, slight movement
 - `talking` - Speaking animation
 - `celebrating` - Arms up
@@ -98,20 +103,21 @@ From `Mascot.tsx`:
 
 ### Proposed Pip States (for Story)
 
-| State | Use Case | Animation |
-|-------|----------|-----------|
-| `welcoming` | First-time user | Wave + sparkle eyes |
-| `encouraging` | User stuck | Cheerleading motion |
-| `storytelling` | Story beats | Zoom to face + speech bubble |
-| `adventuring` | Map navigation | Flying/moving pose |
-| `sleeping` | Idle too long | Gentle snore |
-| `guardian` | Achievement unlock | Crown appears |
+| State          | Use Case           | Animation                    |
+| -------------- | ------------------ | ---------------------------- |
+| `welcoming`    | First-time user    | Wave + sparkle eyes          |
+| `encouraging`  | User stuck         | Cheerleading motion          |
+| `storytelling` | Story beats        | Zoom to face + speech bubble |
+| `adventuring`  | Map navigation     | Flying/moving pose           |
+| `sleeping`     | Idle too long      | Gentle snore                 |
+| `guardian`     | Achievement unlock | Crown appears                |
 
 ### Pip's Voice (TTS or Recorded)
 
 **Personality:** Warm, enthusiastic, patient, silly sometimes
 
 **Sample Lines:**
+
 - Welcome: "Hellooo! I've been waiting for you!"
 - Encouragement: "Almost got it! Try once more!"
 - Success: "WOOHOO! You're a superstar!"
@@ -126,35 +132,36 @@ From `Mascot.tsx`:
 
 ```
                     ⛅ Sky
-                    
+
     🏔️ Mystery Peak         🌋 Challenge Volcano
     (Locked - Future)        (Locked - Future)
-    
+
 🏝️ Literacy      🏠 Knowledge    🔢 Number
    Lagoon           Island          Cove
                    (Home)
-                   
+
     🔗 Connection              🔍 Discovery
        Beach                      Bay
-       
+
                     🌊 Ocean
 ```
 
 ### Island Unlock Logic
 
-| Island | Unlock Requirement |
-|--------|-------------------|
-| Knowledge Island (Home) | Always unlocked |
-| Literacy Lagoon | Trace 1 letter |
-| Number Cove | Show 1 number |
-| Connection Beach | Connect 1 dot sequence |
-| Discovery Bay | Hunt 1 letter |
-| Mystery Peak | Complete all basic islands |
-| Challenge Volcano | Reach Advanced difficulty |
+| Island                  | Unlock Requirement         |
+| ----------------------- | -------------------------- |
+| Knowledge Island (Home) | Always unlocked            |
+| Literacy Lagoon         | Trace 1 letter             |
+| Number Cove             | Show 1 number              |
+| Connection Beach        | Connect 1 dot sequence     |
+| Discovery Bay           | Hunt 1 letter              |
+| Mystery Peak            | Complete all basic islands |
+| Challenge Volcano       | Reach Advanced difficulty  |
 
 ### Visual Progression
 
 As child completes tasks:
+
 1. **Grayed islands** → **Colorful islands**
 2. **Bare trees** → **Growing forest** (per letter)
 3. **Empty paths** → **Lit pathways**
@@ -165,35 +172,38 @@ As child completes tasks:
 ## 6. Implementation Roadmap
 
 ### Phase 1: Foundation (1 Week)
+
 **Goal:** Make existing assets interactive
 
-| Task | Effort | Dependencies |
-|------|--------|--------------|
-| Update Map.tsx with click handlers | 4h | None |
-| Connect storyStore to progressStore | 2h | None |
-| Add Pip storytelling state | 4h | None |
-| Create first 5 story beat dialogues | 2h | None |
-| Trigger story modal on milestones | 4h | Above |
+| Task                                | Effort | Dependencies |
+| ----------------------------------- | ------ | ------------ |
+| Update Map.tsx with click handlers  | 4h     | None         |
+| Connect storyStore to progressStore | 2h     | None         |
+| Add Pip storytelling state          | 4h     | None         |
+| Create first 5 story beat dialogues | 2h     | None         |
+| Trigger story modal on milestones   | 4h     | Above        |
 
 ### Phase 2: Visual Journey (1 Week)
+
 **Goal:** Show progression visually
 
-| Task | Effort | Dependencies |
-|------|--------|--------------|
-| Design island illustrations | 8h | Can outsource |
-| Implement island unlock animations | 4h | Phase 1 |
-| Add forest growth visualization | 4h | Phase 1 |
-| Create achievement badge system | 4h | Phase 1 |
+| Task                               | Effort | Dependencies  |
+| ---------------------------------- | ------ | ------------- |
+| Design island illustrations        | 8h     | Can outsource |
+| Implement island unlock animations | 4h     | Phase 1       |
+| Add forest growth visualization    | 4h     | Phase 1       |
+| Create achievement badge system    | 4h     | Phase 1       |
 
 ### Phase 3: Audio & Polish (1 Week)
+
 **Goal:** Full narrative experience
 
-| Task | Effort | Dependencies |
-|------|--------|--------------|
-| Record/generate Pip voice lines | 8h | Script done |
-| Implement audio playback with Settings | 4h | Phase 1 |
-| Add ambient island sounds | 4h | Audio system |
-| Final story beat polish | 4h | All above |
+| Task                                   | Effort | Dependencies |
+| -------------------------------------- | ------ | ------------ |
+| Record/generate Pip voice lines        | 8h     | Script done  |
+| Implement audio playback with Settings | 4h     | Phase 1      |
+| Add ambient island sounds              | 4h     | Audio system |
+| Final story beat polish                | 4h     | All above    |
 
 ---
 
@@ -278,14 +288,14 @@ PIP: "Our magic is back! Thank you, hero!"
 
 ### Required Assets
 
-| Asset | Type | Quantity | Notes |
-|-------|------|----------|-------|
-| Island illustrations | PNG/SVG | 6 | Locked + Unlocked states |
-| Forest growth stages | SVG | 5 | Progressive vegetation |
-| Achievement badges | PNG | 10 | Various milestones |
-| Pip voice lines | MP3/WAV | ~20 | Or TTS |
-| Ambient sounds | MP3 | 4 | One per island |
-| Celebration music | MP3 | 1 | Victory theme |
+| Asset                | Type    | Quantity | Notes                    |
+| -------------------- | ------- | -------- | ------------------------ |
+| Island illustrations | PNG/SVG | 6        | Locked + Unlocked states |
+| Forest growth stages | SVG     | 5        | Progressive vegetation   |
+| Achievement badges   | PNG     | 10       | Various milestones       |
+| Pip voice lines      | MP3/WAV | ~20      | Or TTS                   |
+| Ambient sounds       | MP3     | 4        | One per island           |
+| Celebration music    | MP3     | 1        | Victory theme            |
 
 ---
 
@@ -293,12 +303,12 @@ PIP: "Our magic is back! Thank you, hero!"
 
 ### Metrics to Track
 
-| Metric | Current | Target | Why |
-|--------|---------|--------|-----|
-| Session length | Unknown | +20% | Story hooks keep kids playing |
-| Letter completion rate | Unknown | +30% | Narrative reward motivates |
-| Return rate (next day) | Unknown | +40% | Kids want to see what's next |
-| Full alphabet completion | Unknown | 2x | Clear goal motivates |
+| Metric                   | Current | Target | Why                           |
+| ------------------------ | ------- | ------ | ----------------------------- |
+| Session length           | Unknown | +20%   | Story hooks keep kids playing |
+| Letter completion rate   | Unknown | +30%   | Narrative reward motivates    |
+| Return rate (next day)   | Unknown | +40%   | Kids want to see what's next  |
+| Full alphabet completion | Unknown | 2x     | Clear goal motivates          |
 
 ### Qualitative Signals
 
@@ -311,13 +321,13 @@ PIP: "Our magic is back! Thank you, hero!"
 
 ## 9. Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Story feels too long | Kids skip | Make all story optional/skippable |
-| Voice acting is expensive | Budget | Use high-quality TTS first |
-| Story delays game start | Frustration | Story plays AFTER first success |
-| Not culturally universal | Excludes users | Keep story simple, no locale-specific references |
-| Motion/audio overload | Sensory issues | Respect prefers-reduced-motion and mute |
+| Risk                      | Impact         | Mitigation                                       |
+| ------------------------- | -------------- | ------------------------------------------------ |
+| Story feels too long      | Kids skip      | Make all story optional/skippable                |
+| Voice acting is expensive | Budget         | Use high-quality TTS first                       |
+| Story delays game start   | Frustration    | Story plays AFTER first success                  |
+| Not culturally universal  | Excludes users | Keep story simple, no locale-specific references |
+| Motion/audio overload     | Sensory issues | Respect prefers-reduced-motion and mute          |
 
 ---
 
@@ -326,6 +336,7 @@ PIP: "Our magic is back! Thank you, hero!"
 ### Story Season 2
 
 After all current games complete:
+
 - **New Islands** unlock with new games
 - **Pip's Friends** - Other animal characters for each skill area
 - **Multiplayer** - Visit friend's islands
@@ -333,34 +344,39 @@ After all current games complete:
 
 ### Character Expansion
 
-| Character | Island | Personality |
-|-----------|--------|-------------|
-| Pip | All | Enthusiastic guide |
-| Numa | Number Cove | Clever dolphin |
-| Dottie | Connection Beach | Artistic crab |
-| Scout | Discovery Bay | Curious fox |
+| Character | Island           | Personality        |
+| --------- | ---------------- | ------------------ |
+| Pip       | All              | Enthusiastic guide |
+| Numa      | Number Cove      | Clever dolphin     |
+| Dottie    | Connection Beach | Artistic crab      |
+| Scout     | Discovery Bay    | Curious fox        |
 
 ---
 
 ## Appendix: Competitive Narrative Analysis
 
 ### Duolingo Kids
+
 - **Narrative:** Characters are friends to visit
 - **Progression:** Unlock new friends
 - **Weakness:** Shallow story
 
 ### Khan Academy Kids
+
 - **Narrative:** Library of content unlocks
 - **Progression:** Complete "books"
 - **Strength:** Strong reward loop
 
 ### Homer
+
 - **Narrative:** Personalized stories with child as protagonist
 - **Progression:** Story chapters unlock
 - **Strength:** Identity integration
 
 ### Advay Opportunity
+
 **Differentiate with:**
+
 - Real-time hand tracking makes interaction unique
 - Island metaphor is visual and tangible
 - Multi-language support allows global story

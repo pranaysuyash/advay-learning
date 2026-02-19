@@ -39,6 +39,7 @@
 | 1.7 | TCK-20260128-002 | HARD | Align docs/scripts to actual repo layout | Low | None |
 
 ### Phase 1 Exit Criteria
+
 - [ ] All P0 tickets closed
 - [ ] Security audit passes
 - [ ] Database schema consistent
@@ -69,6 +70,7 @@
 | 2.10 | TCK-20260130-011 | REM | Webcam Overlay Contrast/Visibility | Low | None |
 
 ### Phase 2 Exit Criteria
+
 - [ ] FingerNumberShow works with all 5 languages
 - [ ] Game counting logic fixed (thumb=5)
 - [ ] Camera layout optimized
@@ -96,6 +98,7 @@
 | 3.7 | TCK-20260129-212 | FEAT | Hindi Special Characters Support | Medium | None |
 
 ### Phase 3 Exit Criteria
+
 - [ ] Language selection works in all games
 - [ ] Number Tracing game playable
 - [ ] Connect-the-Dots game playable
@@ -119,6 +122,7 @@
 ### What Gets Fixed
 
 **Before** (Current):
+
 ```
 Dashboard shows:
 ├── Letters Learned: 12/26
@@ -128,6 +132,7 @@ Dashboard shows:
 ```
 
 **After** (With Analytics):
+
 ```
 Dashboard shows:
 ├── 📊 Overall Skills
@@ -149,16 +154,19 @@ Dashboard shows:
 ### Technical Approach
 
 **Database Changes**:
+
 - Add `game_type` to progress table
 - New `game_sessions` table for per-session metrics
 - New `skill_metrics` table for aggregated weekly scores
 
 **Game Instrumentation**:
+
 - FingerNumberShow: Track numbers shown, finger counts, accuracy
 - ConnectTheDots: Track completion time, path accuracy
 - LetterHunt: Track letters found, time to find
 
 **Dashboard Redesign**:
+
 - Replace letter-only stats with 4 skill categories
 - Add game activity breakdown
 - Add skill development trend charts
@@ -218,6 +226,7 @@ Dashboard shows:
 | 4.15 | TCK-20260129-123 | FEAT | Weekly Goal Widget | Medium | 4.13 |
 
 ### Phase 4 Exit Criteria
+
 - [ ] Achievement system live
 - [ ] XP/Level system working
 - [ ] Celebrations on all milestones
@@ -262,6 +271,7 @@ Dashboard shows:
 | 5.13 | TCK-20260129-071 | AUDIT | Audit Current Game Implementation vs Learning Plan | Medium | All games |
 
 ### Phase 5 Exit Criteria
+
 - [ ] All UI polished, no "AI giveaway" elements
 - [ ] React 19 upgrade complete
 - [ ] Performance targets met
@@ -357,16 +367,19 @@ Dashboard shows:
 ## Weekly Sprint Cadence
 
 ### Sprint Planning (Monday)
+
 - Review completed tickets
 - Assign next week's work
 - Update critical path
 
 ### Daily Standup
+
 - Blockers identification
 - Progress on critical path
 - Scope adjustment if needed
 
 ### Sprint Review (Friday)
+
 - Demo completed features
 - Update compliance metrics
 - Plan next sprint

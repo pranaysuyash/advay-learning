@@ -1,4 +1,5 @@
 # Intent-First Creativity v1.0
+
 ## "Create for Meaning, Not Noise"
 
 **Core Principle:** Anchor creative work to a target emotion, message, or experience, then iterate with constraints.
@@ -10,18 +11,21 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Define the situation and stakeholders**
 2. **Gather signals, history, and constraints**
 3. **Surface hidden incentives and risks**
 4. **Review existing creative assets** (what's already been created?)
 
 ### Phase 2: Intent Analysis
+
 - What outcome are we truly optimizing for?
 - Which principles must not be violated?
 - What trade-offs are acceptable?
 - **What existing creative assets can we build upon?**
 
 ### Phase 3: Priority Assessment
+
 - **Impact**: magnitude of upside or avoided downside
 - **Effort**: time, energy, attention, capital
 - **Risk**: reversibility, blast radius, optionality
@@ -43,6 +47,7 @@
 ## Quick Filter
 
 Skip deep work if all are true:
+
 - Low, vague, or misaligned intent
 - High effort for marginal value
 - Better alternatives exist now
@@ -55,6 +60,7 @@ Skip deep work if all are true:
 ## Codebase-First Creative Rule
 
 Create using:
+
 1. **Existing brand elements** - leverage current visual language
 2. **Proven patterns** - use what's resonated before
 3. **Modular assets** - build reusable creative components

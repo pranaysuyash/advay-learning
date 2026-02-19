@@ -18,6 +18,7 @@ Together, you protect the Realm of Learning from the **Forgetfulness Fog**—a m
 Every action in the app isn't just "using a feature"—it's **protecting knowledge** from being forgotten. The child isn't learning—they're **rescuing, restoring, and guarding** wisdom.
 
 **Core Metaphor:**
+
 - Knowledge = Magical artifacts
 - Learning = Restoration rituals
 - Progress = Power growing
@@ -30,6 +31,7 @@ Every action in the app isn't just "using a feature"—it's **protecting knowled
 ### 1. The Guardian Identity System
 
 **User Onboarding Becomes "The Choosing":**
+
 ```
 Current: "Create Account"
 Story: "The ancient scrolls have foretold your arrival, young Guardian. 
@@ -41,6 +43,7 @@ Story: "Seal your identity with the Guardian's Mark (email) and
 ```
 
 **Profile Creation = "Forming Your Guardian Avatar":**
+
 ```
 Current: "Add Child Profile"
 Story: "Every Guardian needs an Apprentice to train. Who will you 
@@ -54,6 +57,7 @@ Story: "Which ancient tongue shall you speak? The Realm understands
 ### 2. The Companion Bond (Pip Relationship)
 
 **Pip Isn't Just a Mascot—Pip Is:**
+
 - Your **Scout** (finds lost knowledge)
 - Your **Mentor** (guides rituals)
 - Your **Friend** (shares the burden)
@@ -61,6 +65,7 @@ Story: "Which ancient tongue shall you speak? The Realm understands
 - Your **Student** (learns from you too!)
 
 **Pip's Role by Context:**
+
 | Feature | Pip's Role | Narrative Angle |
 |---------|-----------|-----------------|
 | Login | Gatekeeper | "The realm recognizes your mark, Guardian. Welcome back!" |
@@ -74,18 +79,21 @@ Story: "Which ancient tongue shall you speak? The Realm understands
 ## Feature-by-Feature Narrative Transformation
 
 ### 1. LOGIN / AUTHENTICATION 🏰
+
 **Story Arc: "The Guardian's Return"**
 
 **Current:** Login page with email/password
 **Story:** "The Gates of Knowledge"
 
 **Visual Design:**
+
 - Background: Ancient stone gates with glowing runes
 - Fields: Etched into stone tablets
 - Button: "Speak the Words and Enter"
 - Mascot: Pip stands guard at the gate with a lantern
 
 **Copy Transformation:**
+
 ```
 Current: "Welcome Back"
 Story: "The Gates Recognize You"
@@ -107,6 +115,7 @@ Story: "New to the Realm?" → "Become a Guardian"
 ```
 
 **Error State:**
+
 ```
 Current: "Invalid email or password"
 Story: "The gates do not recognize these marks. Try again, Guardian. 
@@ -118,6 +127,7 @@ Pip: "Don't worry! Even legendary Guardians forget sometimes.
 ```
 
 **Success Animation:**
+
 - Gates slowly open with grinding stone sound
 - Light pours through
 - Pip jumps excitedly
@@ -126,6 +136,7 @@ Pip: "Don't worry! Even legendary Guardians forget sometimes.
 ---
 
 ### 2. REGISTRATION / ONBOARDING 🌟
+
 **Story Arc: "The Becoming"**
 
 **Current:** Form to create account
@@ -134,6 +145,7 @@ Pip: "Don't worry! Even legendary Guardians forget sometimes.
 **3-Step Narrative:**
 
 **Step 1: The Summoning**
+
 ```
 Scene: Mystical forest, swirling mists
 Pip: "The ancient scrolls spoke of your arrival... 
@@ -146,6 +158,7 @@ Pip: "Excellent! The Realm needs you.
 ```
 
 **Step 2: Forging Your Identity**
+
 ```
 Current: Enter email, create password
 Story: "Inscribe Your Guardian's Mark"
@@ -159,6 +172,7 @@ Fields presented as "Runes to Carve"
 ```
 
 **Step 3: Choosing Your First Apprentice**
+
 ```
 Current: Add child profile
 Story: "Select Your First Companion"
@@ -174,6 +188,7 @@ Pip: "[Name]... a strong name. Together, you will do great things!"
 ```
 
 **Completion:**
+
 - Guardian badge appears (animated)
 - "You are now [Name], Guardian of Knowledge!"
 - "Your quest begins..."
@@ -182,18 +197,21 @@ Pip: "[Name]... a strong name. Together, you will do great things!"
 ---
 
 ### 3. DASHBOARD 🏰
+
 **Story Arc: "The Guardian's Sanctum"**
 
 **Current:** Parent dashboard with stats and child profiles
 **Story:** "Your Stronghold"
 
 **Visual Metaphor:**
+
 - Dashboard = Your castle's war room
 - Stats = Scouting reports
 - Children = Your apprentices in training
 - Progress maps = Territory you've protected
 
 **Header Area:**
+
 ```
 Current: "Dashboard"
 Story: "The Guardian's Sanctum"
@@ -203,6 +221,7 @@ Subtitle: "Welcome back, Guardian [Parent Name].
 ```
 
 **Stats Bar Transformation:**
+
 ```
 Current: "Literacy | 45% | ↑ 12%"
 Story: "Territory Protected | 45% | ↑ The Fog retreats!"
@@ -215,6 +234,7 @@ Story: "Time in Realm | 3.5 hours | Dedication befits a Guardian!"
 ```
 
 **Child Profiles = "Your Apprentices":**
+
 ```
 Current: Child card with name, age, progress
 Story: Apprentice scroll with:
@@ -228,6 +248,7 @@ Progress Bar: "Knowledge Restored"
 ```
 
 **Empty State (No Children):**
+
 ```
 Current: "No children added yet"
 Story: "Your Sanctum Awaits Apprentices"
@@ -242,6 +263,7 @@ Button: "Recruit Apprentice"
 ```
 
 **Letter Journey Visualization:**
+
 ```
 Current: "Letter Journey - Letters Learned"
 Story: "The Great Restoration - Artifacts Recovered"
@@ -257,6 +279,7 @@ Uncompleted letters are gray/misty
 ```
 
 **Add Child Modal:**
+
 ```
 Current: "Add Child Profile"
 Story: "Recruit New Apprentice"
@@ -272,6 +295,7 @@ Button: "Welcome Them to the Sanctum"
 ```
 
 **Language Selector:**
+
 ```
 Current: Dropdown with flags
 Story: "Choose the Ancient Tongue"
@@ -292,12 +316,14 @@ Pip: "The Guardians of old spoke many tongues.
 ---
 
 ### 4. GAMES / ACTIVITIES SELECTION 🗺️
+
 **Story Arc: "The Quest Board"**
 
 **Current:** Cards showing available games
 **Story:** "Missions from the Realm"
 
 **Header:**
+
 ```
 Current: "Games"
 Story: "The Quest Board"
@@ -309,6 +335,7 @@ Subtitle: "Choose your mission, Guardian.
 **Game Cards as "Mission Scrolls":**
 
 **Card 1: The Alphabet Tracing**
+
 ```
 Current: "Alphabet Tracing - Trace letters with your hand"
 Story: "🌲 The Lost Letters of the Whispering Woods"
@@ -327,6 +354,7 @@ Pip: "I can hear the letters calling for help from the woods!"
 ```
 
 **Card 2: Finger Counting**
+
 ```
 Current: "Finger Number Show - Count with your fingers"
 Story: "🏔️ The Number Stones of Counting Mountain"
@@ -345,6 +373,7 @@ Pip: "It's cold up there, but the stones must be recovered!"
 ```
 
 **Card 3: Connect the Dots**
+
 ```
 Current: "Connect the Dots - Complete the shapes"
 Story: "🌊 The Shapes of the Mystic Lake"
@@ -363,6 +392,7 @@ Pip: "The lake whispers that it misses its shapes..."
 ```
 
 **Card 4: Letter Hunt**
+
 ```
 Current: "Letter Hunt - Find hidden letters"
 Story: "🔍 The Hidden Glyphs of the Word Caves"
@@ -381,6 +411,7 @@ Pip: "I smell old parchment... the caves hold many secrets!"
 ```
 
 **Locked Games (Coming Soon):**
+
 ```
 Current: "Coming Soon"
 Story: "🔒 Quests Beyond the Horizon"
@@ -394,6 +425,7 @@ Teaser: "I hear tales of the Color Kingdom and the Music Marshes..."
 ```
 
 **Selection Animation:**
+
 - Card glows when selected
 - Pip runs ahead: "To adventure!"
 - Transition: Portal/swirl effect to game
@@ -401,12 +433,14 @@ Teaser: "I hear tales of the Color Kingdom and the Music Marshes..."
 ---
 
 ### 5. ALPHABET TRACING GAME 🌲
+
 **Story Arc: "The Whispering Woods Rescue"**
 
 **Current:** Hand tracking letter tracing
 **Story:** Chapter 1: Lost Letters
 
 **Opening Scene:**
+
 ```
 [Animation: Forest with mist]
 
@@ -430,6 +464,7 @@ Pip: "Quick, Guardian! Trace the shape of A with your magic
 **During Gameplay - Contextual Story:**
 
 **Tracing Well:**
+
 ```
 At 25%: Pip: "The vines are weakening! Keep going!"
 At 50%: Pip: "Halfway! I can see A struggling to break free!"
@@ -438,6 +473,7 @@ At 100%: [Vines snap, letter A glows]
 ```
 
 **Tracing Struggles:**
+
 ```
 After 3 attempts:
 Pip: "These vines are strong... But I have an idea!
@@ -453,6 +489,7 @@ Pip: "This letter is being extra stubborn.
 ```
 
 **Success Celebration:**
+
 ```
 [Vines shatter, Letter A floats free]
 [Golden light emanates]
@@ -472,6 +509,7 @@ Victory Stats:
 ```
 
 **Post-Success Options:**
+
 ```
 Current: "Next Letter" or "Back to Dashboard"
 Story: 
@@ -484,6 +522,7 @@ Pip: "B is trapped nearby! Should we rescue them too?
 ```
 
 **Batch Completion (5 Letters):**
+
 ```
 After 5 letters in one session:
 [Special animation]
@@ -497,6 +536,7 @@ Pip (excited): "Five letters in one journey!
 ```
 
 **Camera Denied Narrative:**
+
 ```
 Current: "Camera not available - Mouse/Touch Mode Active"
 Story: "The Fog Blocks Your Sight Magic"
@@ -518,9 +558,11 @@ Pip: "Your finger is now your magic wand!
 ---
 
 ### 6. FINGER NUMBER GAME 🏔️
+
 **Story Arc: "The Counting Mountain Expedition"**
 
 **Story Setup:**
+
 ```
 Scene: Snowy mountain peaks
 
@@ -538,6 +580,7 @@ Pip: "To melt the ice, you must show the correct count with your fingers!
 **Gameplay Narrative:**
 
 **Correct Count:**
+
 ```
 [Child shows 3 fingers]
 
@@ -552,6 +595,7 @@ Pip: "The stone is restored! Counting Mountain grows safer!"
 ```
 
 **Wrong Count:**
+
 ```
 [Child shows 2 fingers instead of 3]
 
@@ -565,6 +609,7 @@ Pip: "One... two... [wait]... three!
 ```
 
 **Progression Story:**
+
 ```
 After unlocking 3 numbers:
 Pip: "Look! The path up the mountain is clearing! 
@@ -582,9 +627,11 @@ Pip: "You did it! All the Number Stones are free!
 ---
 
 ### 7. CONNECT THE DOTS GAME 🌊
+
 **Story Arc: "The Mystic Lake Constellations"**
 
 **Story Setup:**
+
 ```
 Scene: Serene lake at night, stars reflecting
 
@@ -600,30 +647,35 @@ Pip: "Connect the star-points in the right order to restore
 **Shape Transformations:**
 
 **Circle:**
+
 ```
 Before: Dots scattered
 After connection: "The Moon Shield! Ancient protection against the Fog!"
 ```
 
 **Square:**
+
 ```
 Before: Dots scattered  
 After: "The Foundation Stone! Stability for the Realm!"
 ```
 
 **Triangle:**
+
 ```
 Before: Dots scattered
 After: "The Mountain Peak! Reaching for knowledge!"
 ```
 
 **Heart:**
+
 ```
 Before: Dots scattered
 After: "The Heart of Courage! Every Guardian needs one!"
 ```
 
 **Completion Narrative:**
+
 ```
 After restoring a shape:
 [Shape glows, ripples across lake]
@@ -638,9 +690,11 @@ Pip: "The Lake recognizes you! It's showing its gratitude!"
 ---
 
 ### 8. LETTER HUNT GAME 🔍
+
 **Story Arc: "The Word Caves Archaeological Dig"**
 
 **Story Setup:**
+
 ```
 Scene: Cave entrance, torch-lit
 
@@ -659,6 +713,7 @@ Pip: "The Fog has camouflaged letters among these ancient writings.
 **Gameplay:**
 
 **Finding the Letter:**
+
 ```
 Scene: "THE TREE IS TALL"
 
@@ -677,6 +732,7 @@ Pip: "The last one! In 'TALL'!
 ```
 
 **Completion:**
+
 ```
 [All Ts glow golden]
 
@@ -691,12 +747,14 @@ Pip: "All the hidden Ts found!
 ---
 
 ### 9. PROGRESS PAGE 📜
+
 **Story Arc: "The Chronicle of Legends"**
 
 **Current:** Stats and charts
 **Story:** "Your Legendary Deeds"
 
 **Header:**
+
 ```
 Current: "Progress"
 Story: "The Chronicle of Legends"
@@ -705,6 +763,7 @@ Subtitle: "Your deeds shall be remembered for generations, Guardian [Name]."
 ```
 
 **Stats Transformation:**
+
 ```
 Current: "Letters Learned: 15/26"
 Story: "Artifacts Restored: 15 of 26 Sacred Letters"
@@ -720,6 +779,7 @@ Story: "Consecutive Days Guarding: 7 - The Fog cannot defeat your consistency!"
 ```
 
 **Progress Visualization:**
+
 ```
 Instead of: Progress bars
 Show: Territory map being reclaimed from Fog
@@ -733,6 +793,7 @@ Each letter = A restored village/library/sanctuary
 ```
 
 **Achievements = "Guardian Honors":**
+
 ```
 Current: "Achievement Unlocked"
 Story: "Honor Bestowed Upon You"
@@ -747,6 +808,7 @@ Badges:
 ```
 
 **Time Breakdown:**
+
 ```
 Current: "Time by Activity - 2hrs tracing, 1hr counting..."
 Story: "Where You Defended the Realm"
@@ -761,6 +823,7 @@ Visual: Map with different territories highlighted
 ```
 
 **Export Data:**
+
 ```
 Current: "Export Progress Data"
 Story: "Create Your Chronicle Scroll"
@@ -775,12 +838,14 @@ Button: "Forge Chronicle Scroll (PDF)"
 ---
 
 ### 10. SETTINGS PAGE ⚙️
+
 **Story Arc: "The Guardian's Toolkit"**
 
 **Current:** App settings
 **Story:** "The Artificer's Workshop"
 
 **Header:**
+
 ```
 Current: "Settings"
 Story: "Your Guardian Toolkit"
@@ -792,6 +857,7 @@ Subtitle: "Every Guardian maintains their equipment.
 **Setting Categories as "Tools":**
 
 **Parental Controls = "Master Guardian Locks":**
+
 ```
 Current: "Parent Gate - Hold for 3 seconds"
 Story: "Master Guardian Seal"
@@ -806,6 +872,7 @@ Success: "The seal recognizes you, Master Guardian."
 ```
 
 **Sound Settings = "Audio Crystals":**
+
 ```
 Current: "Sound Volume"
 Story: "Adjust the Audio Crystals"
@@ -821,6 +888,7 @@ Slider: "Crystal Resonance Level"
 ```
 
 **Language = "Translation Runes":**
+
 ```
 Current: "Language"
 Story: "Ancient Translation Runes"
@@ -832,6 +900,7 @@ Story: "Ancient Translation Runes"
 ```
 
 **Accessibility = "Accessibility Enhancements":**
+
 ```
 Current: "Accessibility Options"
 Story: "Adaptive Magic"
@@ -846,6 +915,7 @@ Story: "Adaptive Magic"
 ```
 
 **Reset Progress = "The Memory Cleansing Ritual":**
+
 ```
 Current: "Reset All Progress"
 Story: "The Ritual of New Beginning"
@@ -866,12 +936,14 @@ Button: "Begin Ritual of New Beginning"
 ---
 
 ### 11. WELLNESS FEATURES 🧘
+
 **Story Arc: "Guardian's Self-Care"**
 
 **Current:** Break reminders, posture alerts
 **Story:** "Even Guardians Must Rest"
 
 **Break Reminder (20 minutes):**
+
 ```
 Current: "You've been playing for 20 minutes. Take a break?"
 Story: "Your Magic Reserves Are Depleting"
@@ -892,6 +964,7 @@ Button: "Rest Now (Pause)" | "Continue Training (5 more min)"
 ```
 
 **Posture Reminder:**
+
 ```
 Current: "Check your posture!"
 Story: "The Guardian's Stance"
@@ -907,6 +980,7 @@ Pip: "Guardian! Your stance!
 ```
 
 **Hydration Reminder:**
+
 ```
 Current: "Remember to drink water"
 Story: "The Waters of Vitality"
@@ -920,6 +994,7 @@ Pip: "Guardian! When did you last drink from the Waters of Vitality?
 ```
 
 **Eye Strain Reminder:**
+
 ```
 Current: "Rest your eyes"
 Story: "The 20-20-20 Vision Ritual"
@@ -939,6 +1014,7 @@ Pip: "Spell casting strains the eyes...
 ---
 
 ### 12. ONBOARDING / TUTORIAL 📖
+
 **Story Arc: "The Guardian's First Quest"**
 
 **Current:** Tutorial screens explaining features
@@ -947,6 +1023,7 @@ Pip: "Spell casting strains the eyes...
 **Tutorial Becomes "Training Scenarios":**
 
 **Step 1: Meeting Pip**
+
 ```
 Scene: Forest clearing
 
@@ -960,6 +1037,7 @@ Pip: "Greetings, new Guardian! I am Pip,
 ```
 
 **Step 2: Hand Tracking Tutorial**
+
 ```
 Current: "Show your hand to the camera"
 Story: "Channeling Your Sight Magic"
@@ -975,6 +1053,7 @@ Pip: "First, let's awaken your Sight Magic!
 ```
 
 **Step 3: Pinch Tutorial**
+
 ```
 Current: "Pinch your fingers to draw"
 Story: "The Precision Grip"
@@ -989,6 +1068,7 @@ Pip: "Guardians use a special grip for delicate magic...
 ```
 
 **Step 4: First Letter Rescue**
+
 ```
 Current: "Trace the letter A"
 Story: "Your First Mission"
@@ -1005,6 +1085,7 @@ Pip: "Your training is complete!
 ```
 
 **Tutorial Completion:**
+
 ```
 Current: "Tutorial Complete!"
 Story: "Guardian, You Are Ready"
@@ -1027,12 +1108,14 @@ Pip: "You did it! Your first rescue!
 ### The Forgetfulness Fog (Antagonist)
 
 **The Fog is:**
+
 - The reason knowledge needs "saving"
 - What makes letters "lost"
 - Why we need to act quickly
 - A visible threat (visual: mist, gray colors)
 
 **Fog Appearances:**
+
 - When child struggles: "The Fog is thick here..."
 - When child succeeds: "The Fog retreats!"
 - Loading screens: "Pushing back the Fog..."
@@ -1044,12 +1127,14 @@ As child learns more, the Fog visibly retreats from the world map.
 ### The Great Book (Central Artifact)
 
 **The Book is:**
+
 - Repository of all rescued knowledge
 - Progress tracker
 - Source of power
 - Visual centerpiece
 
 **Book States:**
+
 - Empty: Sad Pip, fluttering blank pages
 - Filling: Pages turning, letters glowing
 - Complete: Golden light, humming with power
@@ -1061,6 +1146,7 @@ As child learns more, the Fog visibly retreats from the world map.
 **Show:** Living map of the Realm
 
 **Map Features:**
+
 - Different territories (woods, mountain, lake, caves)
 - Fog coverage (gray = unvisited/unlearned)
 - Guardian's location (where you are)
@@ -1068,6 +1154,7 @@ As child learns more, the Fog visibly retreats from the world map.
 - Mission markers (what's available)
 
 **Map Navigation:**
+
 ```
 "Where shall we adventure today, Guardian?"
 [Child taps territory]
@@ -1096,6 +1183,7 @@ Level 26+: Legendary Guardian
 ```
 
 **Level Up Celebrations:**
+
 ```
 [Power surge animation]
 
@@ -1115,6 +1203,7 @@ Pip: "Your Guardian Power grows!
 **Story:** Honors bestowed by the Realm
 
 **Badge Ceremony:**
+
 ```
 [Formal animation, trumpets]
 
@@ -1141,12 +1230,14 @@ Pip: "Your Guardian Power grows!
 **Story:** "Field Reports for the Council of Elders"
 
 **Email Subject:**
+
 ```
 Current: "Weekly Progress Report"
 Story: "Guardian [Child Name]'s Weekly Field Report"
 ```
 
 **Email Content:**
+
 ```
 "Greetings, Elder [Parent Name],
 
@@ -1179,6 +1270,7 @@ The Realm needs more Guardians like [Child Name]!
 **Visual:** Observatory with crystal ball showing child's progress
 
 **Pip's Report:**
+
 ```
 Pip (to parent): "Elder [Parent Name], 
  your apprentice grows in power!
@@ -1205,17 +1297,20 @@ Pip (to parent): "Elder [Parent Name],
 **Story:** "Your Daily Vigil Begins"
 
 **Day 1:**
+
 ```
 Pip: "You return! The Realm is safer with you here, Guardian!"
 ```
 
 **Day 7:**
+
 ```
 Pip: "Seven days you've guarded us! 
       The Forgetfulness Fog trembles at your consistency!"
 ```
 
 **Day 30:**
+
 ```
 [Special animation]
 
@@ -1288,7 +1383,7 @@ const copy = {
 
 ## Summary: The Complete Story Universe
 
-### Every Feature Becomes:
+### Every Feature Becomes
 
 1. **Purposeful** - "We're rescuing letters, not just learning them"
 2. **Emotional** - "Pip needs me! The Realm depends on me!"
@@ -1296,7 +1391,7 @@ const copy = {
 4. **Connected** - "All these activities save the same world"
 5. **Memorable** - "Remember when we freed Letter A from the vines?"
 
-### The Transformation:
+### The Transformation
 
 | Aspect | Before | After |
 |--------|--------|-------|
@@ -1308,9 +1403,10 @@ const copy = {
 | **Success** | Good job! | You saved another piece of knowledge! |
 | **Purpose** | Learning ABCs | Protecting wisdom from oblivion |
 
-### The Result:
+### The Result
 
 An app where:
+
 - **Login** = Returning to your duty
 - **Learning** = Going on adventures  
 - **Practicing** = Training your magic

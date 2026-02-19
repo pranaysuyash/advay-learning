@@ -12,6 +12,7 @@
 Research into feasibility of adding brush selection, painting tools, and enhanced drawing experience to the current finger-tracking Game.tsx. Findings confirm this is **technically feasible and highly recommended** for improving child engagement and creativity.
 
 **Key Findings:**
+
 - ✅ MediaPipe + brush tools is technically feasible (existing implementations exist)
 - ✅ Brush selection is expected feature in kids drawing apps
 - ✅ Canvas API supports advanced brush effects out of the box
@@ -27,6 +28,7 @@ Research into feasibility of adding brush selection, painting tools, and enhance
 ## Current Implementation Analysis
 
 ### Game.tsx Overview
+
 **File:** `src/frontend/src/pages/Game.tsx`
 **Lines:** 798
 **Framework:** React with TypeScript
@@ -35,12 +37,14 @@ Research into feasibility of adding brush selection, painting tools, and enhance
 ### Current Drawing System
 
 **Technology Stack:**
+
 - MediaPipe HandLandmarker for hand tracking
 - HTML5 Canvas API for drawing
 - React state management (useState, useRef, useCallback)
 - Framer Motion for animations
 
 **Current Features:**
+
 1. **Finger Tracking:** Uses MediaPipe HandLandmarker with GPU delegate
 2. **Cursor Tracking:** Index finger tip (landmark 8) follows hand
 3. **Drawing Trigger:** Pinch gesture (thumb + index finger) to draw
@@ -51,6 +55,7 @@ Research into feasibility of adding brush selection, painting tools, and enhance
 8. **Cursor Visual:** Glowing circle that changes color when pinching
 
 **Drawing Algorithm:**
+
 ```typescript
 // Current drawing logic (simplified)
 if (isPinching) {
@@ -75,6 +80,7 @@ segments.forEach((segment) => {
 ```
 
 **Key Observations:**
+
 - **No Brush Selection:** Only one drawing style (simple line, width 12, color fixed)
 - **No Painting Tools:** No eraser, fill bucket, or other tools
 - **Limited Creative Expression:** Children can only trace letters, not create freely
@@ -89,13 +95,16 @@ segments.forEach((segment) => {
 ### Educational Drawing Apps with Brush Selection
 
 #### 1. Kids Canvas (Google Play)
+
 **Features:**
+
 - 20+ vibrant colors
 - Variety of brush options
 - Intuitive design for kids
 - Free with no ads
 
 **Brush Types:** (Observed from app description)
+
 - Basic round brushes
 - Calligraphy brushes
 - Texture brushes (simulating real media)
@@ -103,7 +112,9 @@ segments.forEach((segment) => {
 - Special effect brushes (glow, rainbow)
 
 #### 2. Kids Paint Joy (iOS)
+
 **Features:**
+
 - 13 brushes with unique styles
 - Doodle on canvas or photo
 - Intuitive brush picker
@@ -112,6 +123,7 @@ segments.forEach((segment) => {
 - Gallery saves
 
 **Brush Features:**
+
 - Size adjustment (3-5 sizes per brush)
 - Opacity control
 - Pressure sensitivity simulation
@@ -119,13 +131,16 @@ segments.forEach((segment) => {
 - Unlockable premium brushes
 
 #### 3. Drawing Pad (iOS - ~$13)
+
 **Features:**
+
 - Most advanced iPad drawing app
 - Multiple mediums (digital paints, pens, pencils)
 - Layer support (pro feature)
 - Advanced brush engine
 
 **Brush Capabilities:**
+
 - 100+ brushes across categories
 - Custom brush creation
 - Brush size and opacity
@@ -133,7 +148,9 @@ segments.forEach((segment) => {
 - Blending modes
 
 #### 4. Kids Finger Painting (Various)
+
 **Features:**
+
 - Finger-only painting (no brushes)
 - Free and offline
 - 20+ colors
@@ -146,21 +163,25 @@ segments.forEach((segment) => {
 ### Research: MediaPipe + Brush Tool Implementations
 
 #### 1. Gesture Painting with OpenCV and MediaPipe (GitHub)
+
 **Description:** GitHub project combining MediaPipe hand tracking with painting tools.
 
 **Features:**
+
 - Hand gesture detection (MediaPipe)
 - Canvas painting
 - Color and brush selection
 - Tool switching via gestures
 
 **Technical Approach:**
+
 - Uses MediaPipe HandLandmarker
 - OpenCV for image processing
 - Canvas API for drawing
 - Gesture recognition for tool switching (e.g., pinch for pen, wave for eraser)
 
 **Code Pattern (Observed from description):**
+
 ```python
 # Pseudocode pattern from research
 hand_landmarks = mediapipe_handlandmarker.detect(frame)
@@ -173,15 +194,18 @@ elif current_tool == "eraser":
 ```
 
 #### 2. Real-Time Hand Tracking for Virtual Painter (LinkedIn Article)
+
 **Description:** Uses MediaPipe hand tracking to enable drawing without physical tools.
 
 **Features:**
+
 - Real-time hand tracking
 - Canvas overlay for drawing effect
 - MediaPipe integration with live feed
 - Multiple drawing styles
 
 **Technical Approach:**
+
 - MediaPipe HandLandmarker with GPU delegate
 - Real-time canvas drawing
 - Performance optimization (30fps)
@@ -190,14 +214,17 @@ elif current_tool == "eraser":
 **Key Insight:** Demonstrates MediaPipe + canvas drawing is viable for real-time applications.
 
 #### 3. HAND TRACKING CANVAS (IRJETS Research)
+
 **Description:** Tool selection using custom hand gestures.
 
 **Features:**
+
 - Switch between pen, eraser, and other tools
 - Canvas reset via gesture
 - Gesture-based control system
 
 **Technical Approach:**
+
 - Custom gesture recognition using MediaPipe landmarks
 - State machine for tool modes
 - Canvas manipulation based on selected tool
@@ -205,15 +232,18 @@ elif current_tool == "eraser":
 **Key Insight:** Shows gesture-based tool switching is technically feasible and intuitive.
 
 #### 4. Air Canvas: Hand Tracking Using OpenCV and MediaPipe (Research Paper)
+
 **Description:** Research paper on AR canvas drawing with hand tracking.
 
 **Features:**
+
 - Hand tracking and gesture recognition
 - Canvas manipulation in AR space
 - Multiple tools and effects
 - Real-time performance
 
 **Technical Approach:**
+
 - MediaPipe for hand detection
 - OpenCV for image processing
 - WebGL/Three.js for AR rendering
@@ -239,7 +269,9 @@ elif current_tool == "eraser":
 ### Brush Stroke Implementation Options
 
 #### 1. Simple Line Drawing (Current Implementation)
+
 **Code Pattern:**
+
 ```typescript
 ctx.beginPath();
 ctx.strokeStyle = color;
@@ -253,7 +285,9 @@ ctx.stroke();
 **Cons:** Limited visual appeal, no texture
 
 #### 2. Brush Stroke with Texture (Image Pattern)
+
 **Code Pattern:**
+
 ```typescript
 const brushPattern = new Image();
 brushPattern.src = '/assets/brush-textures/soft-brush.png';
@@ -270,7 +304,9 @@ ctx.restore();
 **Cons:** Performance impact, requires assets
 
 #### 3. Smooth Bezier Curves (Catmull-Rom Spline)
+
 **Code Pattern:**
+
 ```typescript
 function drawSmoothLine(ctx: CanvasRenderingContext2D, points: Point[]) {
   if (points.length < 3) return;
@@ -294,7 +330,9 @@ function drawSmoothLine(ctx: CanvasRenderingContext2D, points: Point[]) {
 **Cons:** More complex, computational overhead
 
 #### 4. Multi-Line Brush (Calligraphy Effect)
+
 **Code Pattern:**
+
 ```typescript
 function drawCalligraphyBrush(ctx: CanvasRenderingContext2D, point: Point, velocity: number) {
   const angle = calculateAngle(point, previousPoint);
@@ -316,7 +354,9 @@ function drawCalligraphyBrush(ctx: CanvasRenderingContext2D, point: Point, veloc
 **Cons:** Performance impact, complexity
 
 #### 5. Pressure-Sensitive Brush (Simulated)
+
 **Code Pattern:**
+
 ```typescript
 function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
   // Slower movement = more pressure = thicker line
@@ -334,7 +374,9 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Canvas Performance Optimization
 
 **Techniques for Multiple Drawing Features:**
+
 1. **Offscreen Canvas for Pattern Caching:**
+
    ```typescript
    const patternCanvas = document.createElement('canvas');
    const patternCtx = patternCanvas.getContext('2d');
@@ -345,6 +387,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
    ```
 
 2. **RequestAnimationFrame Throttling:**
+
    ```typescript
    let frameCount = 0;
    function renderLoop() {
@@ -357,6 +400,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
    ```
 
 3. **Batch Rendering:**
+
    ```typescript
    // Group similar draws together
    ctx.save();
@@ -371,6 +415,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
    ```
 
 4. **Canvas Clipping for Selection:**
+
    ```typescript
    // Only redraw affected region when tool changes
    ctx.save();
@@ -388,7 +433,9 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Brush Selection UI Patterns
 
 #### Pattern 1: Bottom Toolbar (Most Common)
+
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────┐
 │ 🖌   🖌   🖌   [✏️] │
@@ -401,7 +448,9 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 **Cons:** Reduces canvas area on mobile
 
 #### Pattern 2: Floating Palette
+
 **Layout:**
+
 ```
      [🎨 Color Picker]
          ↓
@@ -416,7 +465,9 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 **Cons:** Can be dismissed accidentally
 
 #### Pattern 3: Sidebar Panel
+
 **Layout:**
+
 ```
 ┌──────┬──────────────────────────┐
 │ Tools│                     │
@@ -435,6 +486,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Color Picker Patterns for Kids
 
 #### Pattern 1: Preset Palette (Recommended)
+
 ```
 ┌─────────────────────────────────────────┐
 │ 🔴  🟠  🟡  🟢  🔵  🟣  🟤  ⚪ │
@@ -446,6 +498,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 **Cons:** Limited color variety
 
 #### Pattern 2: Color Wheel with Large Handle
+
 ```
         ◀──
       🎨
@@ -457,6 +510,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 **Cons:** Complex UI, may overwhelm young children
 
 #### Pattern 3: Swatch Grid (Best Balance)
+
 ```
 ┌──────┬──────┬──────┐
 │ 🔴🟠│ 🟡🟢│ 🔵🟣│ ⚪⚫│ ⬜⬛│
@@ -470,6 +524,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Tool Selection Patterns
 
 #### Pattern 1: Large Icon Buttons (Best for Kids)
+
 ```
 ┌───────────┬───────────┬───────────┐
 │    🖌     │     🧹      │     🪣     │
@@ -482,6 +537,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 **Cons:** Takes significant UI space
 
 #### Pattern 2: Compact Icon Buttons with Labels
+
 ```
 ┌─────┬─────┬─────┬─────┐
 │ 🖌  │ 🧹  │ 🪣  │  ✏️ │
@@ -496,18 +552,21 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Accessibility Considerations
 
 #### Keyboard Navigation
+
 - Tab order: Brushes → Tools → Colors → Actions
 - Keyboard shortcuts: B (Brush), E (Eraser), C (Color), Z (Undo)
 - Focus indicators: Clear outline on selected tool
 - ARIA labels: `aria-label="Round Brush, 20px size"`
 
 #### Screen Reader Support
+
 - Tool state announced: "Round brush selected, 20 pixels"
 - Color announced: "Red color selected"
 - Drawing feedback: "Drawing started", "Drawing stopped"
 - Tool changes: "Switched to eraser"
 
 #### Reduced Motion Support
+
 - Respect `prefers-reduced-motion` system preference
 - Disable brush animations when reduced motion is on
 - Keep static brush preview
@@ -520,6 +579,7 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
 ### Recommended Features (Prioritized by Impact)
 
 #### P0 - Core Brush Selection (Immediate Impact)
+
 1. **Basic Brush Palette** (Week 1-2)
    - 6 brush types: Round, Marker, Calligraphy, Crayon, Watercolor, Chalk
    - Each brush has visual preview
@@ -546,25 +606,26 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
    - Keyboard shortcuts: Ctrl+Z (Undo), Ctrl+Y (Redo)
 
 #### P1 - Enhanced Brush Effects (Week 3-4)
+
 5. **Color Palette** (Week 3)
    - 12 preset colors (3 warm, 3 cool, 3 pastel, 3 neon)
    - Color swatch grid layout
    - Clear visual selection
    - Current color highlighted
 
-6. **Brush Opacity Control** (Week 3-4)
+2. **Brush Opacity Control** (Week 3-4)
    - Slider: 20% to 100% opacity
    - Default: 100% (fully opaque)
    - Visual opacity indicator
    - Affects drawing strokes
 
-7. **Calligraphy Brush Effect** (Week 4)
+3. **Calligraphy Brush Effect** (Week 4)
    - Multi-line stroke effect
    - Responds to drawing velocity
    - Creates artistic, expressive lines
    - Can be toggled on/off
 
-8. **Pressure-Sensitive Drawing** (Week 4-5)
+4. **Pressure-Sensitive Drawing** (Week 4-5)
    - Use existing velocity tracking
    - Slower movement = thicker lines
    - Faster movement = thinner lines
@@ -572,32 +633,37 @@ function simulatePressure(ctx: CanvasRenderingContext2D, velocity: number) {
    - Can be disabled for simplicity
 
 #### P2 - Advanced Tools (Week 5-8)
+
 9. **Fill Bucket Tool** (Week 5-6)
    - Flood fill algorithm (stack-based or scanline)
    - Confined to letter outline
    - Animation when filling
    - Color picker for custom colors
 
-10. **Shape Stamps** (Week 6-7)
-   - Heart, star, flower shapes
-   - Click to stamp on canvas
-   - Adjustable size and rotation
-   - Fun for decoration
+2. **Shape Stamps** (Week 6-7)
 
-11. **Custom Brush Creation** (Week 7-8)
-   - Adjust brush parameters (roundness, size, texture)
-   - Create and save custom brush
-   - Unlockable feature (earn 10 letters to create custom brush)
+- Heart, star, flower shapes
+- Click to stamp on canvas
+- Adjustable size and rotation
+- Fun for decoration
+
+1. **Custom Brush Creation** (Week 7-8)
+
+- Adjust brush parameters (roundness, size, texture)
+- Create and save custom brush
+- Unlockable feature (earn 10 letters to create custom brush)
 
 ### Mode Selection: Finger vs Brush
 
 #### Recommendation: Co-Existence Mode (NOT Exclusive)
+
 - Children can use BOTH finger tracking AND brush tools
 - Brush selection doesn't replace finger mode, it enhances it
 - Mode switch: Toggle between "Finger Mode" and "Tool Mode"
 - Tool Mode: Use finger to select tools, then tap to paint
 
 #### Alternative: Exclusive Modes (Simpler for MVP)
+
 - **Finger Mode:** Current Game.tsx (tracing letters)
 - **Free Paint Mode:** New mode with full brush tools
 - **Mode Switch:** Button in main menu
@@ -685,6 +751,7 @@ src/frontend/src/hooks/
 ### Integration with Existing Game.tsx
 
 **Minimal Changes Required:**
+
 1. Add tool selector to Game UI
 2. Wrap canvas drawing in brush-aware logic
 3. Update drawing algorithm to use selected brush settings
@@ -692,6 +759,7 @@ src/frontend/src/hooks/
 5. Add undo/redo to existing point array
 
 **No Breaking Changes:**
+
 - Existing finger tracking continues to work
 - Letter tracing game flow unchanged
 - Can be rolled out incrementally
@@ -744,6 +812,7 @@ src/frontend/src/hooks/
 ```
 
 **Color Organization:**
+
 - Row 1: Warm colors (red, orange, yellow)
 - Row 2: Cool colors (green, blue, purple)
 - Row 3: Pastel colors (pink, cyan, lime)
@@ -805,6 +874,7 @@ src/frontend/src/hooks/
 **Optimization Strategies:**
 
 1. **Pre-render Brush Patterns**
+
    ```typescript
    const brushPatterns: Record<BrushType, CanvasPattern> = {};
    
@@ -822,6 +892,7 @@ src/frontend/src/hooks/
    ```
 
 2. **Debounce Undo/Redo**
+
    ```typescript
    const undoDebounceRef = useRef<NodeJS.Timeout | null>(null);
    
@@ -838,6 +909,7 @@ src/frontend/src/hooks/
    ```
 
 3. **Limit Drawing History**
+
    ```typescript
    const MAX_HISTORY = 10;
    
@@ -876,6 +948,7 @@ src/frontend/src/hooks/
 **Target Age:** 4-10 years
 
 **4-6 Years (Toddlers/Young Kids):**
+
 - **Recommended:** Simple brush selection (3-5 options)
 - **Recommended:** Large touch targets (60x60px minimum)
 - **Recommended:** Bright, saturated colors (no pastels)
@@ -884,6 +957,7 @@ src/frontend/src/hooks/
 - **Avoid:** Advanced brush effects (calligraphy, pressure)
 
 **7-10 Years (Older Kids):**
+
 - **Recommended:** Full brush palette (6-10 options)
 - **Recommended:** Sliders for size and opacity
 - **Recommended:** Color palette (12+ colors)
@@ -893,6 +967,7 @@ src/frontend/src/hooks/
 ### Progressive Disclosure
 
 **Unlockable Features:**
+
 - Start with: 3 basic brushes (round, marker, crayon)
 - Unlock after: Complete 5 letters → 1 new brush (watercolor)
 - Unlock after: 10 letters → Fill bucket tool
@@ -900,12 +975,14 @@ src/frontend/src/hooks/
 - Unlock after: Achievements → Premium brush set
 
 **Progressive UI:**
+
 ```
 Round    Marker   Crayon   [🔒]   [🔒]
   ✅        ✅        🔒       🔒       🔒
 ```
 
 **Visual Feedback:**
+
 - Locked items: Grayed out, lock icon
 - Unlocked items: Full color, available to select
 - Unlock celebration: Confetti + mascot message
@@ -913,6 +990,7 @@ Round    Marker   Crayon   [🔒]   [🔒]
 ### Learning Integration
 
 **Brush Activities for Educational Value:**
+
 1. **Letter Outlining:** Use brush to outline letters before filling
 2. **Color by Number:** Choose correct color for numbers (e.g., 5 = blue)
 3. **Shape Tracing:** Use different brushes for different shapes
@@ -956,7 +1034,9 @@ Round    Marker   Crayon   [🔒]   [🔒]
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1-2)
+
 **Week 1:**
+
 - [ ] Implement basic brush palette (3 brushes: round, marker, crayon)
 - [ ] Add brush size slider (3 presets: small, medium, large)
 - [ ] Add brush selector UI to Game page
@@ -964,6 +1044,7 @@ Round    Marker   Crayon   [🔒]   [🔒]
 - [ ] Test with MediaPipe finger tracking
 
 **Week 2:**
+
 - [ ] Add eraser tool
 - [ ] Implement undo/redo (max 10 steps)
 - [ ] Add tool selector UI
@@ -971,7 +1052,9 @@ Round    Marker   Crayon   [🔒]   [🔒]
 - [ ] Performance optimization
 
 ### Phase 2: Enhancement (Week 3-4)
+
 **Week 3:**
+
 - [ ] Expand brush palette (6-8 brushes)
 - [ ] Add color palette (8-12 colors)
 - [ ] Implement brush preview
@@ -979,6 +1062,7 @@ Round    Marker   Crayon   [🔒]   [🔒]
 - [ ] Mobile testing and optimization
 
 **Week 4:**
+
 - [ ] Add brush opacity control
 - [ ] Implement calligraphy brush effect
 - [ ] Add pressure-sensitive drawing
@@ -986,6 +1070,7 @@ Round    Marker   Crayon   [🔒]   [🔒]
 - [ ] Add fill bucket tool (if performance allows)
 
 ### Phase 3: Advanced Features (Week 5-6)
+
 - [ ] Custom brush creator
 - [ ] Shape stamps
 - [ ] Advanced brush effects (texture, glow)
@@ -997,18 +1082,21 @@ Round    Marker   Crayon   [🔒]   [🔒]
 ## Success Metrics
 
 ### Engagement Metrics (Target)
+
 - **Daily Active Users (DAU):** +15% increase
 - **Session Duration:** Increase from 10-15 min to 15-20 min
 - **Feature Usage:** 80% of users try brush tools within 1 week
 - **Retention:** 7-day retention improve from 40% to 50%
 
 ### Technical Metrics (Target)
+
 - **Canvas Performance:** Maintain 30fps with basic brushes
 - **Bundle Size:** Increase <10% (optimized rendering)
 - **Lighthouse Score:** Maintain >90 (no regressions)
 - **MediaPipe FPS:** No regressions (maintain 25-30fps)
 
 ### User Satisfaction (Target)
+
 - **Parent Feedback:** 4.0/5 stars for creative features
 - **Child Engagement:** 4.0/5 stars for brush tools
 - **Net Promoter Score (NPS):** +30 (more creative tools)
@@ -1018,38 +1106,41 @@ Round    Marker   Crayon   [🔒]   [🔒]
 ## Related Resources
 
 ### Research References
+
 1. **"Gesture Painting with OpenCV and MediaPipe"** - GitHub
-   - https://github.com/jatinkushwaha14/GesturePainting_OpenCV
-   
+   - <https://github.com/jatinkushwaha14/GesturePainting_OpenCV>
+
 2. **"Real-Time Hand Tracking for Virtual Painter | Nazrul Ansari"** - LinkedIn Article
    - MediaPipe integration with live canvas
-   
+
 3. **"HAND TRACKING CANVAS"** - IRJMETS Research
    - Tool switching with custom gestures
-   
+
 4. **"Air Canvas: Hand Tracking Using OpenCV and MediaPipe"** - SSRN Research
    - AR canvas drawing technical paper
 
 ### Implementation References
+
 1. **Canvas Drawing Tutorial (Epic Brush Stroke Drawing)** - YouTube
-   - https://www.youtube.com/watch?v=1lUKqISgRH0
-   
+   - <https://www.youtube.com/watch?v=1lUKqISgRH0>
+
 2. **"How to get a smooth, continuous brush stroke (Canvas)?"** - Stack Overflow
    - Advanced brush stroke algorithms
-   
+
 3. **"The Graphics Canvas element"** - MDN Web Docs
    - Canvas API best practices
 
 ### App References (for UI patterns)
+
 1. **Kids Canvas** - Google Play
    - Color palette, brush options, kids-friendly UI
-   
+
 2. **Kids Paint Joy** - iOS App Store
    - 13 brushes, brush picker, intuitive design
-   
+
 3. **Drawing Pad** - iOS ($13)
    - Advanced brush engine, multiple tools
-   
+
 4. **Kids Finger Painting** - Various
    - Finger-only mode (no brushes), confirms brush selection is optional
 

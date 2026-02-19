@@ -30,7 +30,9 @@ Automated checks:
 - **Command**: `...`
 - **Output**:
   ```
+
   ...
+
   ```
 - Result: PASS/FAIL/UNKNOWN
 

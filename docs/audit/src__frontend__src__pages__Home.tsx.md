@@ -46,7 +46,7 @@ P1 (Medium priority):
 - Add a short trust strip near the demo CTA: "Try the demo — no camera or sign-up required".
 - Add aria-hidden to decorative mascot and ensure CTAs have text labels at all breakpoints.
 
-## Acceptance criteria (for P0):
+## Acceptance criteria (for P0)
 
 - Onboarding does not flash before hydration completes (testable by simulating immediate rehydration and verifying no flash).
 - "Try Demo" CTA is visible and launches an in-page demo without request for camera or auth; landing demo completes and shows first-screen content.

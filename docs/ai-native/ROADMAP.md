@@ -21,6 +21,7 @@ This roadmap describes a local-first, safety-first rollout of AI-native features
 - AI-003: Pip Quick Responses (template-based; no LLM required)
 
 Acceptance signals:
+
 - Child can complete a session without reading text prompts.
 - Audio interactions feel immediate (<200ms perceived latency for most actions).
 
@@ -30,6 +31,7 @@ Acceptance signals:
 - AI-005: Simple conversations (strictly bounded, kid-safe responses)
 
 Acceptance signals:
+
 - No unsafe content observed in internal testing under adversarial prompts.
 - Clear “listening” indicator and easy stop control.
 
@@ -40,6 +42,7 @@ Acceptance signals:
 - AI-010: Adaptive Learning Path (local progress signals only)
 
 Acceptance signals:
+
 - Personalization improves engagement without collecting sensitive data.
 
 ### Phase 4 (Weeks 9–12): “Show & Tell”
@@ -48,6 +51,6 @@ Acceptance signals:
 - AI-009: AR Face Overlays
 
 Acceptance signals:
+
 - Clear camera-on indicator and explicit permission UX.
 - No media storage; processing is ephemeral.
-

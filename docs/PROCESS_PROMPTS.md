@@ -3,6 +3,7 @@
 Purpose: provide a living reference of the canonical prompts, personas/axes, and required outputs so every agent can quickly understand which combiners are allowed and how they should be documented.
 
 ## How to use
+
 - Always cite the prompt file name, persona(s), and audit axis you used (per `AGENTS.md`). Link back to this registry when you chain multiple prompts so downstream agents can trace the reasoning path.
 - When a new prompt or persona is introduced, add it to this registry before wide use.
 - Use the “Evidence discipline” column as a reminder to label Observed/Inferred/Unknown in downstream deliverables.
@@ -22,5 +23,6 @@ Purpose: provide a living reference of the canonical prompts, personas/axes, and
 | `prompts/planning/implementation-planning-v1.0.md` | Implementation planner / Execution axis | Create implementation plan after plan approval, mapping tasks to prompts/workflow. | Implementation plan with scope, acceptance criteria, dependencies. | Use when moving from planning to coding. |
 
 ## Weekly cadence reminder
+
 - Run `./scripts/audit_review.sh` at least once per week (per AGENTS instructions) and capture the output (command, results, blocked findings) in the evidence log or worklog entry.
 - If the script surfaces new findings, create TCK tickets before starting implementation and reference the prompt/persona table entry created for this run.

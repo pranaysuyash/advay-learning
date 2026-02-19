@@ -19,7 +19,8 @@
 
 **File**: `src/frontend/src/components/ui/ConfirmDialog.tsx`  
 **Lines**: 78-165  
-**Current State**: 
+**Current State**:
+
 - Backdrop click works (line 24: `onClick={onCancel}`)
 - No ESC key handler for closing dialog
 - No focus trapping within dialog
@@ -27,6 +28,7 @@
 **Issue**: Users expect to press ESC to close dialogs but this doesn't work
 
 **Recommendation**:
+
 ```typescript
 // Add ESC key support
 useEffect(() => {
@@ -65,7 +67,8 @@ useEffect(() => {
 **Lines**: 23-75  
 **Issue**: No way to cancel parent gate if clicked by mistake
 
-**Fix Applied**: 
+**Fix Applied**:
+
 - Added "← Go Back" button to cancel and navigate back
 - Added ESC key support to cancel
 - Added text "or press ESC to cancel"
@@ -83,6 +86,7 @@ useEffect(() => {
 **Issue**: When a modal opens, users can't tab through elements or focus on buttons by default
 
 **Recommendation**:
+
 ```typescript
 import { useEffect, useRef } from 'react';
 
@@ -127,7 +131,8 @@ useEffect(() => {
 **Files**: `src/frontend/src/pages/Settings.tsx` (multiple locations)  
 **Lines**: 476-510 (Unlock All), 499-507 (Reset Letter Progress), 538-545 (Reset All Settings)
 
-**Current State**: 
+**Current State**:
+
 - All destructive actions have confirmation dialogs ✅
 - No undo/redo mechanism
 - Users can't revert accidental destructive actions
@@ -135,6 +140,7 @@ useEffect(() => {
 **Issue**: Even with confirmation, accidental destructive actions are permanent
 
 **Recommendation**:
+
 ```typescript
 // Add toast notification after successful action
 toast.showToast('Action completed successfully. Undo? (Tap to revert)', 'info');
@@ -172,7 +178,8 @@ const undoManager = {
 ### 6. Missing Loading States
 
 **Files**: Multiple pages (Dashboard, Settings, Game)  
-**Current State**: 
+**Current State**:
+
 - Some actions don't show loading state during async operations
 - Buttons can be clicked multiple times during loading
 - No visual feedback during network requests
@@ -180,6 +187,7 @@ const undoManager = {
 **Issue**: Users don't know if action is in progress
 
 **Examples Found**:
+
 ```typescript
 // Settings.tsx - Unlock All Letters (line 476)
 const confirmed = await confirm({...});  // No loading indicator
@@ -191,6 +199,7 @@ if (confirmed) {
 ```
 
 **Recommendation**:
+
 ```typescript
 const [isUnlocking, setIsUnlocking] = useState(false);
 
@@ -225,7 +234,8 @@ const handleUnlockAll = async () => {
 ### 7. No Success Feedback After Major Actions
 
 **Files**: `src/frontend/src/pages/Settings.tsx`, `src/frontend/src/pages/Dashboard.tsx`  
-**Current State**: 
+**Current State**:
+
 - Toast notifications for some actions ✅
 - No persistent confirmation that action succeeded
 - Users might be unsure if action completed
@@ -233,6 +243,7 @@ const handleUnlockAll = async () => {
 **Issue**: Unclear if major actions (profile updates, settings changes) were applied successfully
 
 **Recommendation**:
+
 ```typescript
 // After successful action, show persistent feedback
 // 1. Toast notification (already exists)
@@ -264,6 +275,7 @@ toast.showToast('Settings updated successfully!', 'success');
 **Issue**: Kids don't know what to do when stuck or if there's a problem
 
 **Recommendation**:
+
 ```typescript
 // Add help button in game UI
 <button
@@ -294,6 +306,7 @@ toast.showToast('Settings updated successfully!', 'success');
 **Issue**: Users don't know which fields are required until they try to submit
 
 **Recommendation**:
+
 ```typescript
 // Add required field indicators
 <div className="space-y-4">
@@ -337,6 +350,7 @@ toast.showToast('Settings updated successfully!', 'success');
 **Issue**: Keyboard-only users can't navigate efficiently
 
 **Recommendation**:
+
 ```typescript
 // Add keyboard shortcuts in Game
 useEffect(() => {
@@ -402,15 +416,15 @@ useEffect(() => {
 
 ### Short-term (Next 1 week)
 
-4. **Create TCK-20260130-041** :: Add Focus Trapping to Modals (P2)
-5. **Create TCK-20260130-042** :: Add Undo Manager for Destructive Actions (P2)
-6. **Create TCK-20260130-043** :: Add Help/Hints to Game (P2)
-7. **Create TCK-20260130-044** :: Add Success Feedback for Major Actions (P2)
+1. **Create TCK-20260130-041** :: Add Focus Trapping to Modals (P2)
+2. **Create TCK-20260130-042** :: Add Undo Manager for Destructive Actions (P2)
+3. **Create TCK-20260130-043** :: Add Help/Hints to Game (P2)
+4. **Create TCK-20260130-044** :: Add Success Feedback for Major Actions (P2)
 
 ### Medium-term (Next 1 month)
 
-8. **Create TCK-20260130-045** :: Add Keyboard Navigation Support (P2)
-9. **Create TCK-20260130-046** :: Comprehensive Keyboard Shortcuts Documentation (P2)
+1. **Create TCK-20260130-045** :: Add Keyboard Navigation Support (P2)
+2. **Create TCK-20260130-046** :: Comprehensive Keyboard Shortcuts Documentation (P2)
 
 ---
 
@@ -452,11 +466,13 @@ For each UX fix, verify:
 ## References
 
 **Similar Issues Already Ticketed:**
+
 - TCK-20260130-008: Add Home/Exit button to Game ✅
 - TCK-20260130-009: Implement Parent Gate for Settings ✅
 - TCK-20260130-011: Fix Webcam Overlay Contrast ✅
 
 **New Issues Identified:**
+
 - 10 additional UX blunders not previously tracked
 
 ---

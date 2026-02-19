@@ -56,32 +56,36 @@
 ## Related Tickets
 
 **TCK-20260130-014: Medium-scope UI Contrast Sweep**
+
 - Status: OPEN
 - Created: 2026-01-30 00:00 UTC
 - Addresses all contrast and separation findings from this audit
 - See worklog TCK-20260130-014 for full details
 
 **TCK-20260131-002: Fix Accessibility & Form Issues**
+
 - Status: OPEN
 - Created: 2026-01-31 00:00 UTC
 - Addresses accessibility (WCAG AA, keyboard nav, form attributes)
 - See docs/tickets/TCK-20260131-002.md for full details
 
 **TCK-20260130-008: Add Home/Exit Button to Game Screen**
+
 - Status: OPEN
 - Created: 2026-01-30 00:00 UTC
 - Addresses Issue #1 from audit_report_v1.md
 - See worklog for full details
 
 **TCK-20260130-009: Implement Parent Gate for Settings**
+
 - Status: OPEN
 - Created: 2026-01-30 00:00 UTC
 - Addresses Issue #3 from audit_report_v1.md
 - See worklog for full details
 
 **TCK-20260130-010: Add Tutorial Overlay for First-Time Users**
+
 - Status: OPEN
 - Created: 2026-01-30 00:00 UTC
 - Addresses Issue #2 from audit_report_v1.md
 - See worklog for full details
-

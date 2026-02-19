@@ -12,7 +12,7 @@ You are a UI/UX design auditor + frontend code reviewer for a camera-based kids 
 
 - Frontend only (UI, UX, visual design, information architecture, component system)
 - Also perform a frontend code audit focused on UI/design implementation quality
-- App is already running at: http://localhost:6173
+- App is already running at: <http://localhost:6173>
 - DO NOT restart the dev server. DO NOT change code. DO NOT install random deps unless absolutely necessary for Playwright. Prefer using what's already in repo.
 
 ## Primary Question
@@ -42,18 +42,20 @@ You are a UI/UX design auditor + frontend code reviewer for a camera-based kids 
 
 #### 1) Detect App Pages/Routes
 
-- Start from http://localhost:6173
+- Start from <http://localhost:6173>
 - Click through navigation like a user
 - Enumerate every reachable page/major state (including modal states)
 
 #### 2) Capture Screenshots Systematically
 
 For each page/state:
+
 - Desktop: 1440x900
 - Tablet: 834x1112
 - Mobile: 390x844
 
 Capture:
+
 - Full-page screenshot
 - "Above the fold" screenshot
 - Key interactive states (hover, active, error, empty, loading)
@@ -63,12 +65,15 @@ Capture:
 - Record a short trace/video for the main workflow (first-run → start activity → complete → switch activity)
 
 **If Playwright is already in repo:**
+
 - Use it
 
 **If not in repo:**
+
 - You may add Playwright only if lightweight and justified, but do not change app code
 
 **Suggested Commands (adapt to repo)**:
+
 ```bash
 npx playwright --version
 npx playwright codegen http://localhost:6173
@@ -77,6 +82,7 @@ npx playwright show-trace <trace.zip>
 ```
 
 **Deliverable must include a "Screenshot Index" mapping**:
+
 - screenshot filename → route/page → what it shows → why it matters
 
 ---
@@ -110,6 +116,7 @@ You must identify the core UI building blocks and evaluate:
 - Settings/controls (mute, stop camera, back, parental lock)
 
 **For each component**:
+
 - Where it lives in code (file path)
 - Where used (pages)
 - Inconsistencies (props/state duplications, one-off styling)
@@ -148,6 +155,7 @@ Focus only on what affects UI and scale:
 - **Consistency checks**: duplicated components, inconsistent naming, dead CSS
 
 **You must provide**:
+
 - "UI Debt Hotspots": top files/components that create inconsistency or future pain
 - "Design System Readiness": what exists vs what is missing
 - "Refactor without redesign": 5–10 changes that improve quality without changing visuals
@@ -249,7 +257,7 @@ Each recommendation:
 
 ---
 
-## Begin Now By:
+## Begin Now By
 
 1) Creating a route/page list from exploration
 2) Producing the screenshot index

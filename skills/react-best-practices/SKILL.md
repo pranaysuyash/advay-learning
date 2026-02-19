@@ -20,4 +20,3 @@ Use the repo prompt as the single source of truth:
 - Label claims as **Observed / Inferred / Unknown**
 - Provide verification commands + raw outputs
 - Keep scope to one hardening slice per change-set
-

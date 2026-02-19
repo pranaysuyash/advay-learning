@@ -17,13 +17,17 @@ Use this template when creating new feature specifications in `docs/features/spe
 ## 1. Overview
 
 ### 1.1 Description
+
 Brief description of what this feature does.
 
 ### 1.2 Problem Statement
+
 What problem does this solve? Why is it needed?
 
 ### 1.3 Success Criteria
+
 How do we know this feature is successful?
+
 - [ ] Measurable outcome 1
 - [ ] Measurable outcome 2
 
@@ -32,15 +36,18 @@ How do we know this feature is successful?
 ## 2. User Stories
 
 ### Story 1: [Title]
+
 **As a** [user type]
 **I want** [goal]
 **So that** [benefit]
 
 **Acceptance Criteria:**
+
 - Given [context], when [action], then [result]
 - Given [context], when [action], then [result]
 
 ### Story 2: [Title]
+
 ...
 
 ---

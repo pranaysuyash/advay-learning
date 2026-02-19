@@ -90,20 +90,24 @@ Reusable pure-function modules extracted from game pages:
 | **Re-export** | `src/frontend/src/pages/AlphabetGame.tsx` |
 
 **Learning Objectives:**
+
 - Letter recognition and formation
 - Fine motor control through tracing
 - Multi-language alphabet exposure
 
 **Input Method:**
+
 - ✋ Hand tracking — finger tracing on canvas
 - 🖱️ Mouse fallback
 
 **Game Mechanics:**
+
 - Draw letters by tracing paths with index finger
 - Multi-language support: English, Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Telugu (తెలుగు), Tamil (தமிழ்)
 - Visual guides show stroke order and direction
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - Canvas-based drawing system
 
@@ -123,15 +127,18 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/games/FingerNumberShow.tsx` |
 
 **Learning Objectives:**
+
 - Number recognition (0–20)
 - One-to-one correspondence
 - Fine motor control (extending specific fingers)
 
 **Input Method:**
+
 - ✋ Hand tracking — hold up fingers to show a number
 - Uses `countExtendedFingersFromLandmarks` from `fingerCounting.ts`
 
 **Game Mechanics:**
+
 - **Level 1:** Numbers 0–2 (single hand, simple)
 - **Level 2:** Numbers 0–5 (single hand, full range)
 - **Level 3:** Numbers 0–10 (single hand, extended)
@@ -140,6 +147,7 @@ Reusable pure-function modules extracted from game pages:
 - Visual feedback confirms correct count
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `fingerCounting.ts` → `countExtendedFingersFromLandmarks`
 - Sub-components: `FingerNumberShowHud.tsx`, `FingerNumberShowMenu.tsx`
@@ -160,21 +168,25 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/ConnectTheDots.tsx` |
 
 **Learning Objectives:**
+
 - Number sequence recognition
 - Fine motor control and hand-eye coordination
 - Shape recognition (completed patterns)
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch gesture to connect
 - 🖱️ Mouse click fallback
 
 **Game Mechanics:**
+
 - Connect numbered dots in ascending order (1, 2, 3…)
 - 5 levels per difficulty setting
 - 60-second timer per level
 - 3 difficulty modes affect dot count and spacing
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - Canvas-based dot/line rendering
 
@@ -194,15 +206,18 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/LetterHunt.tsx` |
 
 **Learning Objectives:**
+
 - Letter recognition across multiple scripts
 - Visual scanning and discrimination
 - Quick decision-making
 
 **Input Method:**
+
 - ✋ Hand tracking — cursor control + pinch to select
 - 🖱️ Mouse fallback
 
 **Game Mechanics:**
+
 - Find the target letter from 5 options displayed on screen
 - 30 seconds per round
 - 10 rounds per level, 3 levels total
@@ -210,6 +225,7 @@ Reusable pure-function modules extracted from game pages:
 - Score based on speed and accuracy
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `getAlphabet` (multilingual letter sets)
 
@@ -229,20 +245,24 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/MusicPinchBeat.tsx` |
 
 **Learning Objectives:**
+
 - Rhythm and timing
 - Indian musical notes (Sa, Re, Ga)
 - Hand-eye coordination
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch gesture on the correct lane
 
 **Game Mechanics:**
+
 - 3 lanes corresponding to musical notes: Sa, Re, Ga
 - Notes scroll toward the player; pinch on the glowing lane to hit
 - Streak-based scoring — celebration every 5 consecutive hits
 - Uses `musicPinchLogic.ts` for lane detection and note selection
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `musicPinchLogic.ts` → `getLaneFromNormalizedX`, `pickNextLane`
 - `useSoundEffects`
@@ -264,14 +284,17 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/SteadyHandLab.tsx` |
 
 **Learning Objectives:**
+
 - Hand steadiness and fine motor control
 - Focus and concentration
 - Spatial awareness
 
 **Input Method:**
+
 - ✋ Hand tracking — hold fingertip inside target ring
 
 **Game Mechanics:**
+
 - A target ring appears on screen; hold index fingertip inside it
 - Progress bar fills linearly while inside the ring
 - Progress decays when fingertip leaves the ring
@@ -279,6 +302,7 @@ Reusable pure-function modules extracted from game pages:
 - Uses `steadyHandLogic.ts` for progress/decay math
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `steadyHandLogic.ts` → `updateHoldProgress`, `pickTargetPoint`
 - `CelebrationOverlay`
@@ -299,14 +323,17 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/ShapePop.tsx` |
 
 **Learning Objectives:**
+
 - Shape recognition (circle, triangle, square, diamond, star)
 - Hand-eye coordination
 - Reaction speed
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch inside shapes to pop them
 
 **Game Mechanics:**
+
 - Shapes appear on screen: ◯ △ □ ◇ ☆
 - Pinch inside a shape to pop it and earn points
 - 60-second timed game
@@ -314,6 +341,7 @@ Reusable pure-function modules extracted from game pages:
 - Uses `targetPracticeLogic.ts` for hit detection and placement
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `targetPracticeLogic.ts` → `isPointInCircle`, `pickSpacedPoints`
 - `CelebrationOverlay`
@@ -334,14 +362,17 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/ColorMatchGarden.tsx` |
 
 **Learning Objectives:**
+
 - Color recognition and naming
 - Visual discrimination
 - Following instructions
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch the matching flower
 
 **Game Mechanics:**
+
 - 3 flowers displayed, each a different color
 - App asks "Find the [color] flower!" — pinch the correct one
 - 6 colors: Red, Blue, Green, Yellow, Pink, Purple
@@ -350,6 +381,7 @@ Reusable pure-function modules extracted from game pages:
 - Uses `targetPracticeLogic.ts` for hit detection
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `targetPracticeLogic.ts`
 - `useSoundEffects`
@@ -371,14 +403,17 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/NumberTapTrail.tsx` |
 
 **Learning Objectives:**
+
 - Number sequence and ordering
 - Counting skills
 - Visual scanning
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch numbers in order
 
 **Game Mechanics:**
+
 - Numbers scattered on screen; pinch them in ascending order (1, 2, 3…)
 - 6 levels with increasing difficulty
 - 90-second timer
@@ -386,6 +421,7 @@ Reusable pure-function modules extracted from game pages:
 - Uses `hitTarget.ts` for hit detection and `targetPracticeLogic.ts` for placement
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `hitTarget.ts` → `findHitTarget`
 - `targetPracticeLogic.ts` → `pickSpacedPoints`
@@ -407,14 +443,17 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/ShapeSequence.tsx` |
 
 **Learning Objectives:**
+
 - Visual memory and recall
 - Shape recognition
 - Sequential ordering
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch shapes in remembered order
 
 **Game Mechanics:**
+
 - A sequence of shapes is shown briefly (◯ □ △ ◇ ☆ ✦)
 - Player must pinch shapes in the exact order shown
 - 6 levels — sequence length increases per level
@@ -423,6 +462,7 @@ Reusable pure-function modules extracted from game pages:
 - Uses `hitTarget.ts` for selection detection
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - `hitTarget.ts` → `findHitTarget`
 - `CelebrationOverlay`
@@ -443,15 +483,18 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/YogaAnimals.tsx` |
 
 **Learning Objectives:**
+
 - Body awareness and coordination
 - Animal recognition
 - Balance and flexibility
 - Following visual instructions
 
 **Input Method:**
+
 - 🧍 Full-body pose tracking via MediaPipe `PoseLandmarker`
 
 **Game Mechanics:**
+
 - 6 animal poses: Lion 🦁, Cat 🐱, Tree 🌳, Dog 🐕, Frog 🐸, Bird 🐦
 - Child copies the shown animal pose using their full body
 - 70% match threshold to pass
@@ -459,6 +502,7 @@ Reusable pure-function modules extracted from game pages:
 - Visual overlay shows expected pose vs. current body position
 
 **Key Dependencies:**
+
 - MediaPipe `PoseLandmarker` (not `HandLandmarker`)
 - Custom pose matching algorithms
 - `CelebrationOverlay`
@@ -479,17 +523,20 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/FreezeDance.tsx` |
 
 **Learning Objectives:**
+
 - Impulse control (freeze on command)
 - Rhythm and movement
 - Listening skills
 - Hand coordination (finger challenges)
 
 **Input Method:**
+
 - 🧍 Pose tracking for body movement detection
 - ✋ Hand tracking for finger challenges (after round 3)
 - 🔊 Text-to-Speech (TTS) for instructions
 
 **Game Mechanics:**
+
 - 3 phases per round:
   1. **Dancing** — music plays, child dances freely
   2. **Freezing** — music stops, child must freeze (movement detected = penalty)
@@ -498,6 +545,7 @@ Reusable pure-function modules extracted from game pages:
 - TTS announces phase transitions
 
 **Key Dependencies:**
+
 - MediaPipe `PoseLandmarker` + `HandLandmarker`
 - `fingerCounting.ts` (for finger challenges)
 - Web Speech API (TTS)
@@ -519,15 +567,18 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/SimonSays.tsx` |
 
 **Learning Objectives:**
+
 - Body part identification
 - Following instructions
 - Impulse control ("Simon Says" vs. no prefix)
 - Gross motor coordination
 
 **Input Method:**
+
 - 🧍 Pose tracking via MediaPipe `PoseLandmarker`
 
 **Game Mechanics:**
+
 - Actions: Touch Head, Wave, Arms Up, Hands On Hips, T-Rex Arms, Touch Shoulders
 - App announces an action; child performs it with their body
 - 100 points per correctly detected pose
@@ -535,6 +586,7 @@ Reusable pure-function modules extracted from game pages:
 - Pose detection via landmark position analysis
 
 **Key Dependencies:**
+
 - MediaPipe `PoseLandmarker`
 - Custom pose detection for each action
 - `CelebrationOverlay`
@@ -555,15 +607,18 @@ Reusable pure-function modules extracted from game pages:
 | **Source** | `src/frontend/src/pages/VirtualChemistryLab.tsx` |
 
 **Learning Objectives:**
+
 - Basic chemistry concepts (reactions, mixing)
 - Cause and effect
 - Scientific exploration and experimentation
 - Discovery-based learning
 
 **Input Method:**
+
 - ✋ Hand tracking — pinch gesture for pouring
 
 **Game Mechanics:**
+
 - Available chemicals: Water, Vinegar, Baking Soda, Color Dyes, Oil, Soap
 - 5 discoverable reactions
 - Pinch gesture simulates pouring one chemical into another
@@ -571,6 +626,7 @@ Reusable pure-function modules extracted from game pages:
 - Open-ended exploration — no timer, no score
 
 **Key Dependencies:**
+
 - `useHandTracking`, `useHandTrackingRuntime`
 - Custom reaction logic
 - Discovery Book UI

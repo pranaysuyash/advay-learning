@@ -12,6 +12,7 @@
 This research covers practical deployment strategies for Advay Vision Learning across Google Play, Apple App Store, and direct PWA distribution. Focus is on **code-level compliance** with kids category requirements rather than enterprise certifications.
 
 ### Key Decisions
+
 | Aspect | Recommendation | Rationale |
 |--------|---------------|-----------|
 | Primary Platform | Google Play (TWA) | 96%+ Android in India, TWA allows PWA distribution |
@@ -28,6 +29,7 @@ This research covers practical deployment strategies for Advay Vision Learning a
 The **Designed for Families** program is **mandatory** for apps targeting children under 13.
 
 #### Eligibility Requirements
+
 ```
 ✅ App must be family-friendly
 ✅ COPPA/applicable child privacy law compliance
@@ -38,6 +40,7 @@ The **Designed for Families** program is **mandatory** for apps targeting childr
 ```
 
 #### For Advay Vision Learning
+
 | Requirement | Our Approach | Status |
 |-------------|--------------|--------|
 | Family-friendly | Educational games, no violence | ✅ Ready |
@@ -49,6 +52,7 @@ The **Designed for Families** program is **mandatory** for apps targeting childr
 ### 1.2 Teacher Approved Program (Optional)
 
 Google's **Teacher Approved** badge is optional but valuable for visibility:
+
 - Apps reviewed by teachers and child development specialists
 - Higher visibility in family-focused searches
 - Credibility with parents
@@ -77,6 +81,7 @@ npx @nickytonline/pwa-to-play-store
 ```
 
 #### TWA Benefits
+
 | Benefit | Details |
 |---------|---------|
 | PWA in Play Store | Users find app in familiar store |
@@ -85,6 +90,7 @@ npx @nickytonline/pwa-to-play-store
 | Same Codebase | No separate Android codebase |
 
 #### TWA Requirements
+
 ```javascript
 // Required in manifest.json
 {
@@ -116,6 +122,7 @@ npx @nickytonline/pwa-to-play-store
 Apple's Kids Category has **non-negotiable** requirements:
 
 #### Hard Requirements
+
 ```
 ❌ NO third-party analytics (including Firebase Analytics)
 ❌ NO third-party advertising
@@ -126,6 +133,7 @@ Apple's Kids Category has **non-negotiable** requirements:
 ```
 
 #### Code Implications for iOS Build
+
 ```typescript
 // Conditional feature loading
 const isAppleKidsCategory = process.env.APPLE_KIDS_BUILD === 'true';
@@ -148,6 +156,7 @@ const openExternalLink = (url: string) => {
 ### 2.2 New Age Ratings (Effective Jan 31, 2026)
 
 Apple introduces new age rating categories:
+
 - **4+**: Current kids category
 - **13+**: New teenage category
 - **16+**: New mature teens
@@ -401,12 +410,14 @@ const PRICING = {
 ## 8. References & Resources
 
 ### Official Documentation
+
 - [Google Play Families Policy](https://support.google.com/googleplay/android-developer/answer/9893335)
 - [Apple Kids Category Guidelines](https://developer.apple.com/app-store/kids-apps/)
 - [PWA Criteria](https://web.dev/install-criteria/)
 - [Bubblewrap TWA](https://github.com/aspect/aspect)
 
 ### Tools
+
 - [PWA Builder](https://www.pwabuilder.com/) - Generate TWA from PWA
 - [Maskable.app](https://maskable.app/) - Icon generator
 - [Play Console](https://play.google.com/console)

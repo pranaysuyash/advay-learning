@@ -242,15 +242,19 @@ Execution log:
 - [2026-01-30 12:36 UTC] Implemented two-hand diagnostics + more permissive detection | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  13 passed (13)
           Tests  82 passed (82)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 2.16s
     ```
+
   - **Interpretation**: Observed — changes compile and tests pass; UI now exposes hands + per-hand breakdown to confirm two-hand summing at runtime.
 
 ### TCK-20260130-027 :: LetterHunt camera-first mechanic (pinch to select)
@@ -296,15 +300,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  84 passed (84)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 2.62s
   ```
+
 - **Interpretation**: Observed — LetterHunt uses camera-first pinch selection, helper is unit-tested, and build/tests succeed.
 
 ### TCK-20260130-028 :: FingerNumberShow prompt UX + TTS + stop “auto-changing” for 0
@@ -353,15 +361,19 @@ Status updates:
 - [2026-01-30 12:51 UTC] **DONE** — Prompt overlay enlarged; `0` now “make a fist” (hand required); TTS prompt added + replay button | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  14 passed (14)
           Tests  84 passed (84)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 4.46s
     ```
+
   - **Interpretation**: Observed — changes compile and tests pass; prompt UX + 0 gating + TTS replay are implemented.
 
 ### TCK-20260130-029 :: Mascot TTS reliability (debounce + tap-to-speak)
@@ -396,15 +408,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  84 passed (84)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.43s
   ```
+
 - **Interpretation**: Observed — changes compile and tests pass; Mascot speech is now debounced and can be triggered via click.
 
 ### TCK-20260130-030 :: FingerNumberShow reach 10 (thumb + rotated fingers + two-hand sum)
@@ -442,15 +458,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  85 passed (85)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.45s
   ```
+
 - **Interpretation**: Observed — updated counting logic + tests pass; game can now reach 10 when both hands are detected.
 
 ### TCK-20260130-031 :: FingerNumberShow prompt for kids + streak gating
@@ -488,15 +508,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  85 passed (85)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.44s
   ```
+
 - **Interpretation**: Observed — prompt is now big + timed; streak scoring is gated and tests/build succeed.
 
 ### TCK-20260130-025 :: Brand Guidelines Analysis & Competitive Research
@@ -603,6 +627,7 @@ Execution log:
 - [2026-01-30 12:12 UTC] Confirmed current implementation ignores thumb | Evidence:
   - **Command**: `rg -n "fingerPairs" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     150:    const fingerPairs = [
     151:      { tip: 8, pip: 6 },
@@ -611,6 +636,7 @@ Execution log:
     154:      { tip: 20, pip: 18 },
     155:    ];
     ```
+
   - **Interpretation**: Observed — thumb landmarks (2/3/4) are not considered, so max per hand is 4.
 
 Next actions:
@@ -624,15 +650,19 @@ Status updates:
 - [2026-01-30 12:22 UTC] **DONE** — Thumb counting implemented + regression tests added; frontend test/build verified | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  13 passed (13)
           Tests  82 passed (82)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 3.16s
     ```
+
   - **Interpretation**: Observed — unit tests pass (including `fingerCounting.test.ts`), and production build succeeds.
 
 ### TCK-20260130-023 :: Restore game interactions (AlphabetGame tracking + ConnectTheDots clicks)
@@ -684,34 +714,42 @@ Execution log:
 - [2026-01-30 11:59 UTC] ConnectTheDots responsive hit-testing fix present | Evidence:
   - **Command**: `rg -n "scaleX = canvasRef\\.current\\.width / rect\\.width" src/frontend/src/pages/ConnectTheDots.tsx`
   - **Output**:
+
     ```
     203:                    const scaleX = canvasRef.current.width / rect.width;
     ```
+
   - **Interpretation**: Observed — click coordinates are now scaled into canvas space.
 - [2026-01-30 11:59 UTC] AlphabetGame tracking loop present | Evidence:
   - **Command**: `rg -n "FilesetResolver|HandLandmarker|detectForVideo|pinchDistance|onPointerDown" src/frontend/src/pages/AlphabetGame.tsx`
   - **Output**:
+
     ```
     6:import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
     ... detectForVideo ...
     ... pinchDistance ...
     ... onPointerDown ...
     ```
+
   - **Interpretation**: Observed — AlphabetGame now includes a MediaPipe loop and pointer drawing handlers.
 - [2026-01-30 11:59 UTC] Verified frontend tests | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest suite passes after interaction fixes.
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 2.37s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Risks/notes:
@@ -762,9 +800,11 @@ Execution log:
 - [2026-01-30 11:51 UTC] Confirmed current bug condition | Evidence:
   - **Command**: `rg -n "totalFingers === targetNumber\\s*&&\\s*targetNumber > 0" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     177:    if (totalFingers === targetNumber && targetNumber > 0 && !showCelebration) {
     ```
+
   - **Interpretation**: Observed — success is currently blocked for target `0` by `targetNumber > 0`.
 
 Next actions:
@@ -777,27 +817,33 @@ Execution log:
 - [2026-01-30 11:53 UTC] Implemented zero-success gating on “hands seen recently” | Evidence:
   - **Command**: `rg -n "lastHandsSeenAtRef|canSucceedOnZero|handsSeenRecently|isDetectedMatch" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     ... lastHandsSeenAtRef ...
     ... handsSeenRecently ...
     ... canSucceedOnZero ...
     ... isDetectedMatch ...
     ```
+
   - **Interpretation**: Observed — target `0` success now requires a recently-detected hand (prevents auto-success on “no hands”).
 - [2026-01-30 11:53 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:53 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.93s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -856,10 +902,12 @@ Execution log:
 - [2026-01-30 11:55 UTC] Confirmed current target selection uses `Math.random()` per pick | Evidence:
   - **Command**: `rg -n "Math\\.random\\(\\) \\* range" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     83:      const newTarget = Math.floor(Math.random() * range) + minNumber;
     195:        const newTarget = Math.floor(Math.random() * range) + minNumber;
     ```
+
   - **Interpretation**: Observed — small ranges can look non-random due to frequent repeats.
 
 Next actions:
@@ -872,27 +920,33 @@ Execution log:
 - [2026-01-30 11:59 UTC] Implemented shuffled target bag + no immediate repeats | Evidence:
   - **Command**: `rg -n "targetBagRef|refillTargetBag|shuffleInPlace|setNextTarget" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     ... targetBagRef ...
     ... refillTargetBag ...
     ... shuffleInPlace ...
     ... setNextTarget ...
     ```
+
   - **Interpretation**: Observed — target selection now uses a per-level shuffled bag instead of per-pick `Math.random()`.
 - [2026-01-30 11:59 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.89s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -951,11 +1005,13 @@ Execution log:
 - [2026-01-30 11:46 UTC] Scoped file + current UI confirmed | Evidence:
   - **Command**: `rg -n "Target Number Display|Current Count Display|bg-gradient-to-br from-purple" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     261:        {/* Target Number Display */}
     270:            className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-8 mb-6 text-center"
     284:        {/* Current Count Display */}
     ```
+
   - **Interpretation**: Observed — playing UI currently renders large target/detected sections above the camera.
 
 Next actions:
@@ -969,27 +1025,33 @@ Execution log:
 - [2026-01-30 11:49 UTC] Implemented camera-first playing UI | Evidence:
   - **Command**: `rg -n "Target Number Display|Current Count Display|Detected:|Show <span" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     0 matches for Target Number Display
     0 matches for Current Count Display
     ... Detected: ...
     ... Show <span ...
     ```
+
   - **Interpretation**: Observed — above-camera target/detected panels removed; target+detected now rendered as in-camera overlays.
 - [2026-01-30 11:49 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:49 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.93s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -1049,18 +1111,22 @@ Execution log:
 - [2026-01-30 11:25 UTC] Initial discovery | Evidence:
   - **Command**: `git status --porcelain && git rev-parse --short HEAD`
   - **Output**:
+
     ```
      M src/frontend/src/pages/AlphabetGame.tsx
      M src/frontend/src/pages/Dashboard.tsx
     fab14b1
     ```
+
   - **Interpretation**: Observed — local workspace has uncommitted UI edits on the two target screens at commit `fab14b1`.
 - [2026-01-30 11:25 UTC] Brand guideline reference | Evidence:
   - **Command**: `ls -la docs/BRAND_KIT.md`
   - **Output**:
+
     ```
     -rw-r--r--@ 1 pranay  staff  6998 Jan 30 10:48 docs/BRAND_KIT.md
     ```
+
   - **Interpretation**: Observed — `docs/BRAND_KIT.md` exists and is treated as the palette/typography source for this ticket.
 
 Next actions:
@@ -1079,31 +1145,39 @@ Execution log:
 - [2026-01-30 11:30 UTC] Frontend tests blocked by low disk space | Evidence:
   - **Command**: `df -h /`
   - **Output**:
+
     ```
     /dev/disk3s1s1   926Gi    17Gi   216Mi    99%  /
     ```
+
   - **Interpretation**: Observed — test runner failed to write temp files due to low available disk.
 - [2026-01-30 11:32 UTC] Freed temp space to unblock tests | Evidence:
   - **Command**: `rm -rf .mypy_cache .pytest_cache && rm -rf /var/folders/*/*/T/* 2>/dev/null || true && df -h /`
   - **Output**:
+
     ```
     /dev/disk3s1s1   926Gi    17Gi   1.1Gi    94%  /
     ```
+
   - **Interpretation**: Observed — disk space recovered and tests could proceed.
 - [2026-01-30 11:44 UTC] Verified frontend tests and production build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest suite passes after UI refresh.
 - [2026-01-30 11:44 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.86s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -1165,6 +1239,7 @@ Execution log:
 - [2026-01-30 16:35 UTC] Verified server startup | Evidence:
   - **Command**: `cd src/backend && source .venv/bin/activate && timeout 10s uvicorn app.main:app --host 0.0.0.0 --port 8001`
   - **Output**:
+
     ```
     INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
     INFO:     Started reloader process [45933] using WatchFiles
@@ -1172,6 +1247,7 @@ Execution log:
     INFO:     Waiting for application startup.
     INFO:     Application startup complete.
     ```
+
   - **Interpretation**: Observed — Server starts successfully without NameError
 
 Status updates:
@@ -1533,6 +1609,7 @@ Evidence:
   - Generates formatted report
 
 - **Command Output:**
+
   ```
   Total combinations tested: 34
   ❌ Failing (< 3:1):        22 (64.7%)
@@ -3578,7 +3655,7 @@ UNIT TESTS:
    - Test calculateAccuracy with < 10 points (returns 0)
    - Test coverage calculation (points within letter area)
    - Test density calculation (points per area)
-   - Test combined score formula (coverage _ 0.6 + density _ 0.4)
+   - Test combined score formula (coverage _0.6 + density_ 0.4)
 
 6. Game Flow Tests:
    - Test game start (isPlaying = true, reset state)
@@ -3949,7 +4026,7 @@ Execution log:
 - 2026-01-29 09:06 UTC: **Observed** calculateAccuracy() function in Game.tsx (lines 128-156)
 - 2026-01-29 09:06 UTC: **Observed** Coverage calculation (points within letter area)
 - 2026-01-29 09:06 UTC: **Observed** Density calculation (points per area)
-- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage _ 0.6 + density _ 0.4
+- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage _0.6 + density_ 0.4
 - 2026-01-29 09:07 UTC: **Observed** saveProgress() function in Game.tsx (lines 160-190)
 - 2026-01-29 09:07 UTC: **Observed** progressApi.saveProgress() call with score, streak, duration
 - 2026-01-29 09:07 UTC: **Observed** Backend POST / endpoint in progress.py
@@ -3972,7 +4049,7 @@ Evidence:
   - Lines 128-156: calculateAccuracy() function ✅
   - Coverage calculation: Points within letter radius ✅
   - Density calculation: points per area (min(points.length / 100, 1)) ✅
-  - Combined score: Math.round((coverage _ 0.6 + density _ 0.4) \* 100) ✅
+  - Combined score: Math.round((coverage _0.6 + density_ 0.4) \* 100) ✅
   - Lines 160-190: saveProgress() function ✅
   - API call: progressApi.saveProgress(profileId, {...}) ✅
   - Meta data includes: language, difficulty, streak, points_earned ✅
@@ -4795,7 +4872,7 @@ _None currently_
 
 ## How to Use This Worklog
 
-### For Any Agent Starting Work:
+### For Any Agent Starting Work
 
 1. **Check this file first** - See what's DONE, IN_PROGRESS, or OPEN
 2. **Pick from OPEN queue** - Choose highest priority item
@@ -4804,7 +4881,7 @@ _None currently_
 5. **Log evidence** - Record commands, files changed, outputs
 6. **Mark DONE when complete** - Move to Done section
 
-### Status Definitions:
+### Status Definitions
 
 - **OPEN** 🔵 - Ready to start, not assigned
 - **IN_PROGRESS** 🟡 - Currently being worked on
@@ -4812,7 +4889,7 @@ _None currently_
 - **BLOCKED** 🔴 - Cannot proceed, needs external help
 - **DROPPED** ⚪ - Decided not to do
 
-### Ticket Template:
+### Ticket Template
 
 ```markdown
 <!-- TEMPLATE: Copy this section to create a new ticket, then replace placeholders -->
@@ -5073,6 +5150,7 @@ Execution log:
 - [2026-01-28 14:18 IST] Verified new prompt files exist | Evidence:
   - **Command**: `find prompts/support prompts/stakeholder prompts/deployment -type f | sort`
   - **Output**:
+
     ```
     prompts/deployment/deploy-runbook-v1.0.md
     prompts/deployment/incident-response-v1.0.md
@@ -5080,6 +5158,7 @@ Execution log:
     prompts/support/feedback-intake-v1.0.md
     prompts/support/issue-triage-v1.0.md
     ```
+
   - **Interpretation**: Observed — support/deploy/stakeholder prompts exist at expected paths.
 - [2026-01-28 14:18 IST] Verified index entries exist | Evidence:
   - **Command**: `rg -n "Support / Feedback|Deployment / Incident Response|Stakeholder Comms|QA findings|Backlog grooming" prompts/README.md`
@@ -5223,10 +5302,12 @@ Execution log:
 - [2026-01-28 14:03 IST] Added architecture + content role prompts | Evidence:
   - **Command**: `find prompts/architecture prompts/content -type f | sort`
   - **Output**:
+
     ```
     prompts/architecture/adr-draft-v1.0.md
     prompts/content/learning-module-spec-v1.0.md
     ```
+
   - **Interpretation**: Observed — architecture ADR drafting and curriculum/content module spec prompts now exist and are indexed in `prompts/README.md`.
 
 ---
@@ -5462,6 +5543,7 @@ Status Updates:
 PM System Utility Score: **10/10** ✅
 
 **Why 10/10:**
+
 | Criterion | Before | After |
 |-----------|--------|-------|
 | Single source of truth | ✅ | ✅ |
@@ -5611,6 +5693,7 @@ Execution Log:
 - [2026-01-28 14:54 IST] Verified TypeScript and lint pass
 
 Languages Now Supported:
+
 | Language | Letters | Examples |
 |----------|---------|----------|
 | English | 26 | A for Apple 🍎 |
@@ -5683,6 +5766,7 @@ Execution Log:
   - Needs profile ID for full integration
 
 Scoring System:
+
 | Accuracy | Points | Rating |
 |----------|--------|--------|
 | 90-100% | 20 | ⭐⭐⭐ Excellent |
@@ -5762,6 +5846,7 @@ uv run pytest tests/ -v
 ```
 
 Test Coverage:
+
 | File | Tests | Coverage |
 |------|-------|----------|
 | test_auth.py | 6 | Register, Login, Auth checks |
@@ -5885,6 +5970,7 @@ Execution Log:
 - [2026-01-28 15:28 IST] Verified TypeScript and lint pass
 
 Dashboard Features:
+
 | Feature | Description |
 |---------|-------------|
 | Child Selector | Switch between multiple children |
@@ -5916,14 +6002,14 @@ Fix CORS error for frontend port 6173 and create proper setup verification promp
 
 Root Cause:
 
-- Backend ALLOWED_ORIGINS didn't include http://localhost:6173
+- Backend ALLOWED_ORIGINS didn't include <http://localhost:6173>
 - Frontend .env wasn't created with correct API URL
 - No verification prompt existed for port/CORS setup
 
 Fix Applied:
 
-- [x] Updated src/backend/.env ALLOWED_ORIGINS to include http://localhost:6173
-- [x] Created src/frontend/.env with VITE_API_BASE_URL=http://localhost:8001
+- [x] Updated src/backend/.env ALLOWED_ORIGINS to include <http://localhost:6173>
+- [x] Created src/frontend/.env with VITE_API_BASE_URL=<http://localhost:8001>
 - [x] Created prompts/workflow/project-setup-verification-v1.0.md
 
 Evidence:
@@ -17697,7 +17783,7 @@ Project previously used SQLite for development and PostgreSQL for production. Th
    - `docs/architecture/decisions/003-storage-strategy.md` - Complete rewrite for PostgreSQL
 
 6. **Created test user in PostgreSQL**
-   - User: pranay.suyash@gmail.com
+   - User: <pranay.suyash@gmail.com>
    - Email verified: true
 
 ### Files Modified
@@ -18539,6 +18625,7 @@ Inputs:
 **Finding**: Replace simple finger cursor with themed virtual brushes.
 
 **Brush Ideas Documented**:
+
 | Brush | Effect | Use Case |
 |-------|--------|----------|
 | Magic Wand | Sparkle trail, star particles | Letter tracing, spell casting |
@@ -18594,6 +18681,7 @@ interface Brush {
 - Fade + shrink over time for natural disappearance
 
 **Success Feedback Tiers**:
+
 | Score | Effect | Duration |
 |-------|--------|----------|
 | 70-79 | Small sparkle burst | 1 sec |
@@ -18617,6 +18705,7 @@ interface Brush {
 - Educational: Music, pitch recognition
 
 **Gesture Detection Possibilities**:
+
 | Gesture | Use Case |
 |---------|----------|
 | Clap | Confirm selection, celebrate |
@@ -18642,6 +18731,7 @@ interface Brush {
 ### 5. Multi-Hand Games
 
 **Two-Hand Coordination Games**:
+
 | Game | Left Hand | Right Hand |
 |------|-----------|------------|
 | Orchestra | Volume control | Instrument selection |
@@ -18669,6 +18759,7 @@ interface Brush {
 ### 7. Power-Ups & Gamification
 
 **Temporary Ability Ideas**:
+
 | Power-Up | Effect | Duration |
 |----------|--------|----------|
 | Mega Brush | 3x brush size | 10 sec |
@@ -18844,6 +18935,7 @@ Execution log:
   - **Output**: 798 lines (Observed)
   - **Command**: `rg -n "MediaPipe|hand.*track|canvas|drawing" src/frontend/src/pages/Game.tsx -S --type-add 'code:*.{ts,tsx,js,jsx}' | head -30`
   - **Output**:
+
     ```
     src/frontend/src/pages/Game.tsx:5:import { HandLandmarker } from '@mediapipe/tasks-vision';
     src/frontend/src/pages/Game.tsx:22:const [isPinching, setIsPinching] = useState(false);
@@ -18852,6 +18944,7 @@ Execution log:
     src/frontend/src/pages/Game.tsx:414:// IMPORTANT: MediaPipe x coordinates are normalized [0,1]
     src/frontend/src/pages/Game.tsx:798: (Observed) Total file lines
     ```
+
   - **Interpretation**: Current implementation uses MediaPipe hand tracking with pinch gesture to draw. Uses index finger tip (landmark 8) as cursor, pinch gesture (thumb+index) to draw on canvas. No brush selection or painting tools currently exist.
 
 - [2026-01-29 23:05 UTC] Researched similar apps with brush selection | Evidence:
@@ -19989,6 +20082,7 @@ Files Modified:
 - src/frontend/src/data/alphabets.ts
 
 Changes Made:
+
 | Letter | Word | Old Emoji | New Emoji | Reason |
 |--------|------|-----------|-----------|--------|
 | अ | अनार (Anaar) | 🍎 | 🍈 | Pomegranate, not apple |
@@ -20056,6 +20150,7 @@ Research Questions:
 Key Findings:
 
 **Cultural Gestures (India)**:
+
 | Gesture | MediaPipe Feature | Game Application |
 |---------|-------------------|------------------|
 | Namaste (🙏) | Hand Landmarker - palms together | "Namaste Detective" game |
@@ -20064,6 +20159,7 @@ Key Findings:
 | Indian finger counting | Hand Landmarker - finger positions | Counting differences |
 
 **Universal Gestures**:
+
 | Gesture | Detection Method | Use Case |
 |---------|------------------|----------|
 | Thumbs up/down | Thumb extended, fingers curled | Voting, approval |

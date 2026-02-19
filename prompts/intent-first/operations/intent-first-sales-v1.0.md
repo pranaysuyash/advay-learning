@@ -1,4 +1,5 @@
 # Intent-First Sales Philosophy v1.0
+
 ## "Qualify for Fit, Not Just Revenue"
 
 **Core Principle:** Before pursuing leads, designing sales processes, or making pricing decisions, investigate whether prospects can actually achieve meaningful success with your product and if the partnership would be mutually beneficial long-term.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the sales opportunity** (inbound lead, outbound prospect, expansion opportunity, or competitive displacement)
 2. **Understand prospect situation** (business context, current solutions, and decision-making process)
 3. **Assess mutual fit potential** (can our product solve their problem? Can they be successful with us?)
@@ -17,6 +19,7 @@
 5. **Review existing pipeline** (what stage are they in, what's already been done?)
 
 ### Phase 2: Fit Analysis
+
 - What specific business problem are they trying to solve and why now?
 - Do they have the resources, commitment, and capability to be successful with our solution?
 - Is there a clear path to measurable value that justifies our pricing?
@@ -24,6 +27,7 @@
 - **Can existing sales processes address their needs?**
 
 ### Phase 3: Opportunity Prioritization
+
 - **Success Probability**: Likelihood prospect can achieve meaningful outcomes with our product
 - **Revenue Quality**: Deal size, terms, and long-term expansion potential
 - **Strategic Value**: Market significance, reference potential, and competitive positioning
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Minimize sales investment if all true:
+
 - Unclear business problem or weak urgency to solve it
 - Limited budget or decision-making authority
 - Poor fit between their needs and our product capabilities
@@ -60,6 +65,7 @@ Minimize sales investment if all true:
 ## Codebase-First Sales Rule
 
 For *Critical* and *High* priority opportunities:
+
 1. **Follow existing sales process** - use proven pipeline stages
 2. **Leverage existing materials** - use current decks, demos, and case studies
 3. **Build on successful patterns** - apply what's worked for similar customers

@@ -72,16 +72,19 @@ Based on comprehensive analysis of the codebase and existing UX documentation, t
 ### Character Integration Strategy
 
 #### PIP (Main Guide)
+
 - **Role:** Core hand tracking, main navigation, primary feedback
 - **Location:** Always present in camera view
 - **Features:** Hand tracking, gesture recognition, star ratings, TTS feedback
 
 #### Lumi (Companion Character)
+
 - **Role:** Joins for special lessons, multiplayer, story progression
 - **Location:** Appears in story modal, adventure map, celebration scenes
 - **Features:** Additional guidance, emotional support, character interactions
 
-#### When Lumi Appears:
+#### When Lumi Appears
+
 - Multiplayer games (sharing, turn-taking)
 - Special lessons (social skills, collaboration)
 - Story progression (cutscenes, celebrations)
@@ -108,6 +111,7 @@ Replace dark theme with playful, child-friendly colors:
 ```
 
 **Files to modify:**
+
 - `src/frontend/src/index.css` - New background, color variables
 - `src/frontend/tailwind.config.js` - Extend theme with new colors
 
@@ -121,6 +125,7 @@ Replace dark theme with playful, child-friendly colors:
 | Button text | Nunito | 1.25rem |
 
 **Files to modify:**
+
 - `src/frontend/index.html` - Add Google Fonts
 - `src/frontend/src/index.css` - Font family definitions
 
@@ -175,6 +180,7 @@ NEW (Adventure Path with PIP & Lumi):
 #### Component Changes
 
 **New: `AdventureMap.tsx`**
+
 - SVG path winding through screen with PIP and Lumi positions
 - Letter nodes positioned along path
 - PIP character positioned at current letter (camera view)
@@ -183,6 +189,7 @@ NEW (Adventure Path with PIP & Lumi):
 - Creature icons for mastered letters
 
 **Modified: `LetterJourney.tsx`**
+
 - Replace grid with AdventureMap
 - Keep batch unlock logic
 - Add zone theme switching
@@ -210,6 +217,7 @@ NEW (Adventure Path with PIP & Lumi):
 #### Technical Implementation
 
 **New: `useAudio.ts` hook**
+
 ```typescript
 interface UseAudioReturn {
   play: (soundName: string, character?: 'pip' | 'lumi') => void;
@@ -220,6 +228,7 @@ interface UseAudioReturn {
 ```
 
 **Features:**
+
 - Preload critical sounds for both PIP and Lumi
 - Character-specific audio cues
 - Cross-character harmony for celebrations
@@ -236,6 +245,7 @@ Replace text feedback with multi-sensory celebrations.
 #### Success Celebration (Accuracy ≥ 70%)
 
 **Visual:**
+
 1. Confetti explosion (canvas or CSS particles)
 2. Stars appear (1-3 based on score)
 3. Pip backflip animation
@@ -243,11 +253,13 @@ Replace text feedback with multi-sensory celebrations.
 5. Screen flash (subtle color pulse)
 
 **Audio:**
+
 1. Success sound (ding-ding!)
 2. Letter pronunciation
 3. Pip giggle (P1)
 
 **Timing:**
+
 ```
 T+0ms:   Check completed
 T+100ms: Confetti starts, screen flash
@@ -260,17 +272,20 @@ T+2000ms: Auto-advance to next letter
 #### "Try Again" Feedback (Accuracy < 70%)
 
 **Visual:**
+
 1. Letter wobbles (ticklish animation)
 2. PIP tilts head (thinking pose)
 3. LUMI offers encouragement
 4. Encouraging gesture from both characters
 
 **Audio:**
+
 1. Gentle sound (not harsh buzzer)
 2. PIP encouragement voice ("Try again!")
 3. LUMI supportive voice ("You've got this!")
 
 **New Components:**
+
 - `Celebration.tsx` - Confetti and particles
 - `StarRating.tsx` - 1-3 star display
 - `FeedbackOverlay.tsx` - Combined visual feedback
@@ -281,6 +296,7 @@ T+2000ms: Auto-advance to next letter
 ### Phase 5: Game Screen Redesign (Week 3) 🎮
 
 #### Current Layout Issues
+
 - Too much text instruction
 - Small controls
 - Percentage display
@@ -329,6 +345,7 @@ T+2000ms: Auto-advance to next letter
 7. **Minimal text** - Voice + visuals over text
 
 **Files to modify:**
+
 - `Game.tsx` - Complete layout redesign
 - `AdventureMap.tsx` - PIP and LUMI positioning
 
@@ -360,6 +377,7 @@ Home  Play  Stars  Me
 - "See your stars!" → Bounce toward Stars
 
 **Files to modify:**
+
 - `Layout.tsx` - Icon-based nav with PIP & LUMI
 - `Mascot.tsx` - Guide animations for both characters
 
@@ -416,6 +434,7 @@ Step 6: Guided Trace
 ```
 
 **New Component:**
+
 - `Onboarding.tsx` - Step-based tutorial with PIP & LUMI
 
 ---
@@ -459,6 +478,7 @@ Each letter becomes a collectible creature friend:
 ```
 
 **New Components:**
+
 - `LetterCreature.tsx` - Individual creature card
 - `Collection.tsx` - Grid view of all creatures
 - `CreatureDetail.tsx` - Individual creature view
@@ -468,6 +488,7 @@ Each letter becomes a collectible creature friend:
 ## 📊 Implementation Priority Matrix
 
 ### P0 - Critical (Week 1)
+
 | Item | Effort | Impact | Files |
 |------|--------|--------|-------|
 | New color palette | 2h | HIGH | `index.css`, `tailwind.config.js` |
@@ -477,6 +498,7 @@ Each letter becomes a collectible creature friend:
 | PIP & LUMI character integration | 4h | HIGH | `Mascot.tsx`, new components |
 
 ### P1 - Core Experience (Weeks 2-3)
+
 | Item | Effort | Impact | Files |
 |------|--------|--------|-------|
 | Adventure Map | 8h | HIGH | `LetterJourney.tsx` |
@@ -487,6 +509,7 @@ Each letter becomes a collectible creature friend:
 | LUMI companion integration | 6h | HIGH | New components |
 
 ### P2 - Differentiation (Weeks 4-5)
+
 | Item | Effort | Impact | Files |
 |------|--------|--------|-------|
 | Letter creatures | 12h | HIGH | New components |
@@ -495,6 +518,7 @@ Each letter becomes a collectible creature friend:
 | PIP & LUMI story progression | 8h | HIGH | Story system |
 
 ### P3 - Polish (Week 6+)
+
 | Item | Effort | Impact |
 |------|--------|--------|
 | Anti-frustration detection | 8h | MEDIUM |
@@ -507,6 +531,7 @@ Each letter becomes a collectible creature friend:
 ## 🎨 Asset Requirements
 
 ### Audio Assets
+
 | Asset | Format | Count | Source |
 |-------|--------|-------|--------|
 | Success sounds | MP3 | 3 | Generate/buy |
@@ -515,6 +540,7 @@ Each letter becomes a collectible creature friend:
 | Pip sounds | MP3 | 5 | Record/buy |
 
 ### Visual Assets
+
 | Asset | Format | Count | Source |
 |-------|--------|-------|--------|
 | Letter creatures | SVG/PNG | 26 | Illustrator/CSS |
@@ -527,18 +553,21 @@ Each letter becomes a collectible creature friend:
 ## ✅ Success Metrics
 
 ### Child Engagement
+
 - [ ] Child asks to play again unprompted
 - [ ] Child talks about Pip outside the app
 - [ ] Child shows collection to others
 - [ ] Session length increases by 50%+
 
 ### Usability
+
 - [ ] Child can start game without reading
 - [ ] Child understands feedback without text
 - [ ] No confusion about next action
 - [ ] Completion rate > 80%
 
 ### Technical
+
 - [ ] No performance degradation (60fps)
 - [ ] Audio plays within 100ms
 - [ ] First paint < 1s

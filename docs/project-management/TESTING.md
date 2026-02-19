@@ -118,6 +118,7 @@ class TestCameraTrackingIntegration:
 #### Manual Test Checklist
 
 **Camera & Tracking:**
+
 - [ ] Camera initializes correctly
 - [ ] Hand detected in various lighting
 - [ ] Tracking works at different distances
@@ -125,12 +126,14 @@ class TestCameraTrackingIntegration:
 - [ ] Face tracking works with/without glasses
 
 **UI/UX:**
+
 - [ ] All buttons respond to gestures
 - [ ] Visual feedback is clear
 - [ ] Sounds play correctly
 - [ ] No UI freezing during processing
 
 **Learning Modules:**
+
 - [ ] Progress saves correctly
 - [ ] Progress loads correctly
 - [ ] Rewards display properly
@@ -174,6 +177,7 @@ def mock_hand_landmarks():
 ### Test Assets
 
 Store in `tests/assets/`:
+
 - Sample images (small, compressed)
 - Mock data files (JSON)
 - Test databases (SQLite)
@@ -188,6 +192,7 @@ Before running tests, ensure the test database exists and migrations are applied
 ```
 
 This script:
+
 - Checks if PostgreSQL is running
 - Creates `advay_learning_test` database if it doesn't exist
 - Runs alembic migrations on the test database
@@ -258,6 +263,7 @@ repos:
 ### Good Tests
 
 ✅ **Do:**
+
 - Test one thing per test
 - Use descriptive test names
 - Arrange-Act-Assert structure
@@ -267,6 +273,7 @@ repos:
 - Use mocking for external dependencies
 
 ❌ **Don't:**
+
 - Test implementation details
 - Have conditional logic in tests
 - Depend on test execution order

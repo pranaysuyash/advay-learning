@@ -11,10 +11,12 @@
 You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven learning web app for kids ages 2-6.
 
 **Product Access:**
-- URL: http://localhost:6173
+
+- URL: <http://localhost:6173>
 - **CRITICAL**: Must explore hands-on. Do NOT restart anything. Do NOT install anything. Do NOT change code.
 
 **Evaluation Constraints:**
+
 - You are evaluating practical viability: Can this work? Will users love it? Can founder execute?
 - This is NOT a grand narrative. Be specific, grounded in what you actually observe.
 - You are supportive but NOT soft: You will say NO if it's not there.
@@ -59,13 +61,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### Step 1: First-Run Test
 
-**Open http://localhost:6173 and time:**
+**Open <http://localhost:6173> and time:**
 
 - **15-second timer starts when page loads**
 - **What you get**: Do you understand what this is within 15 seconds?
 - **Score**: Yes/No
 
 **What you're looking for:**
+
 - Is value obvious immediately? (e.g., "camera learning for kids" vs unclear)
 - Is there a clear call-to-action? (Start Game button?)
 - Does mascot (Pip) give immediate personality?
@@ -83,6 +86,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Target**: <60 seconds
 
 **What you're looking for:**
+
 - Does kid get a win quickly or is there friction?
 - Is first objective clear or confusing?
 - Does tracking work immediately or is there setup time?
@@ -102,11 +106,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 4. **Background Clutter**: Add random items behind you → does tracking get confused?
 
 **For each:**
+
 - **What happens**: Does it work, degrade, or break?
 - **What error shows**: Is it kid-friendly or technical jargon?
 - **Recovery time**: If it breaks, how long to get back to playing?
 
 **What you're looking for:**
+
 - Is tracking robust enough for real kid behavior?
 - Are there clear error states parents understand?
 - Can it handle edge cases without crashing?
@@ -118,12 +124,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Play at least 3 different games/activities briefly:**
 
 **For each:**
+
 - **Educational objective**: What do kids learn?
 - **Interaction pattern**: How do they engage?
 - **Completion time**: How long to finish?
 - **Fun factor**: Would kids want to play this again tomorrow?
 
 **What you're looking for:**
+
 - Is there enough variety for daily repetition?
 - Do games feel different or is it same interaction with new skin?
 - Is progression obvious (e.g., "unlock letter B after completing A")?
@@ -142,11 +150,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 4. **Parental Visibility**: Can parent see what kid did? (progress, activity)
 
 **For each:**
+
 - **What you see**: Describe what you observe
 - **Kid-friendly?**: Yes/No with reason
 - **Parent-friendly?**: Yes/No with reason
 
 **What you're looking for:**
+
 - Would I trust this with MY kid's camera?
 - Are there red flags that would make parents uninstall?
 - Is safety/privacy handled in a way that builds trust?
@@ -158,12 +168,14 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Scenario**: Parent has 7 minutes before work, kid needs to use this.
 
 **Test:**
+
 - Can parent get kid started in <2 minutes?
 - Can parent understand progress WITHOUT reading a manual?
 - Is there a way to set daily time limits (if you care)?
 - Is there a "pause/resume" mechanism if kid gets called away?
 
 **What you're looking for:**
+
 - Does this fit a real parent's routine?
 - Is there parental guilt if kid spends 2 hours? (controls visible?)
 - Is setup/onboarding simple enough for busy parents?
@@ -175,18 +187,21 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 As you explore, keep these personas in mind:
 
 **Persona 1: Toddler (2-3 years old)**
+
 - **Can**: Tap, wave, very basic gestures
 - **Can't**: Read, follow multi-step instructions, understand complex rules
 - **Behavior**: Chaotic tapping, short attention span (2-3 minutes max)
 - **Success metric**: Gets a win without crying
 
 **Persona 2: Kid (5-6 years old)**
+
 - **Can**: Follow short instructions, understand rewards/progression
 - **Can't**: Read complex text, navigate nested menus
 - **Behavior**: Likes seeing progress, wants to "unlock" new things
 - **Success metric**: Completes objective, wants to play again
 
 **Persona 3: Parent (Weekday Morning)**
+
 - **Has**: 7 minutes, coffee, low patience
 - **Wants**: Kid occupied so parent can work
 - **Cares about**: Safety, education value, screen time guilt
@@ -203,6 +218,7 @@ As you explore, keep these personas in mind:
 **Format**: "Invest / Pass / Maybe"
 
 **Options:**
+
 - **Invest**: I'd write a $10K-$100K check TODAY based on what I saw
 - **Pass**: Not ready for angel money yet. Come back after [specific milestones]
 - **Maybe**: Promising but need to see [specific evidence] before deciding
@@ -216,23 +232,28 @@ As you explore, keep these personas in mind:
 **Format**: Bullet points, no fluff, what you actually observed
 
 **Product Concept** (1-2 bullets):
+
 - [ ] [What it is, in simple terms]
 - [ ] [Who it's for, in simple terms]
 
 **Core "Magic"** (1 bullet):
+
 - [ ] [The ONE thing that makes this special - be specific]
 
 **What's Working** (3 bullets max):
+
 - [ ] [Specific strength you observed - e.g., "Hand tracking is surprisingly smooth"]
 - [ ] [Specific strength - e.g., "Kids get immediate feedback"]
 - [ ] [Specific strength - e.g., "Progress is visually clear"]
 
 **What's Broken or Confusing** (3 bullets max):
+
 - [ ] [Specific failure - e.g., "Took 3 minutes to understand what to do"]
 - [ ] [Specific failure - e.g., "Camera permission flow was unclear"]
 - [ ] [Specific failure - e.g., "No clear way to stop/play again"]
 
 **Overall Polish Score** (0-10):
+
 - [ ] [Your score, 1-2 sentences justification]
 
 ---
@@ -242,17 +263,21 @@ As you explore, keep these personas in mind:
 **Format**: Specific use case, specific user, why camera matters
 
 **Best Use Case** (1-2 bullets):
+
 - [ ] [Specific scenario - e.g., "2-year-old wants to count but can't touch numbers on screen"]
 - [ ] [Why this matters - e.g., "Camera turns abstract counting into physical fun"]
 
 **Narrowest Target User** (1 bullet):
+
 - [ ] [Specific persona - e.g., "Parents of 3-4 year olds who want  minimize screen time guilt"]
 
 **The Habit Loop** (1 paragraph):
+
 - [ ] [Describe: trigger → action → reward → repeat - be specific]
 - [ ] [Example: "Kid finishes counting game → mascot celebrates → kid wants to play again tomorrow"]
 
 **Why This Could Win** (1-2 sentences):
+
 - [ ] [What advantage this has - be specific, no buzzwords]
 
 ---
@@ -262,36 +287,46 @@ As you explore, keep these personas in mind:
 **Format**: For each block - where it happens, what you expected vs what you got, fix direction (no code)
 
 **Block 1**: [Name]
+
 - **Where it happens**: [specific screen/flow]
 - **What I expected**: [what I thought would happen]
 - **What I got**: [what actually happened - be honest]
 - **Fix direction**: [what would unblock this - no code changes, UX improvement]
 
 **Block 2**: [Name]
+
 - [same structure]
 
 **Block 3**: [Name]
+
 - [same structure]
 
 **Block 4**: [Name]
+
 - [same structure]
 
 **Block 5**: [Name]
+
 - [same structure]
 
 **Block 6**: [Name]
+
 - [same structure]
 
 **Block 7**: [Name]
+
 - [same structure]
 
 **Block 8**: [Name]
+
 - [same structure]
 
 **Block 9**: [Name]
+
 - [same structure]
 
 **Block 10**: [Name]
+
 - [same structure]
 
 ---
@@ -307,6 +342,7 @@ As you explore, keep these personas in mind:
 **Who Pays**: [Specific parent segment - e.g., "Parents of 3-6 year olds in India/US"]
 **Revenue Driver**: [What increases revenue - e.g., "More kids, premium content"]
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] [Hypothesis 1: what must be true?]
 - [ ] [Hypothesis 2: what must be true?]
 - [ ] [Hypothesis 3: what must be true?]
@@ -327,6 +363,7 @@ As you explore, keep these personas in mind:
 **Who Pays**: [Specific school segment - e.g., "US/India preschools, daycares"]
 **Revenue Driver**: [What increases revenue - e.g., "More classrooms, premium features"]
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] [Hypothesis 1: what must be true?]
 - [ ] [Hypothesis 2: what must be true?]
 - [ ] [Hypothesis 3: what must be true?]
@@ -347,6 +384,7 @@ As you explore, keep these personas in mind:
 **Who Converts**: [Specific segment - e.g., "Parents who try free, want more"]
 **Revenue Driver**: [What increases revenue - e.g., "Conversion to paid, annual plans"]
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] [Hypothesis 1: what must be true?]
 - [ ] [Hypothesis 2: what must be true?]
 - [ ] [Hypothesis 3: what must be true?]
@@ -367,6 +405,7 @@ As you explore, keep these personas in mind:
 **Format**: 10 milestones max, each with expected user impact
 
 **Milestone 1**: [Title - e.g., "Fix Top 3 Love-Blocking Issues"]
+
 - **What**: [specific action]
 - **Why**: [why this matters for user love]
 - **Expected impact**: [how it improves experience]
@@ -374,30 +413,39 @@ As you explore, keep these personas in mind:
 - **Timeline**: [when to complete - e.g., "Day 3"]
 
 **Milestone 2**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 3**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 4**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 5**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 6**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 7**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 8**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 9**: [Title]
+
 - [same structure as Milestone 1]
 
 **Milestone 10**: [Title]
+
 - [same structure as Milestone 1]
 
 **Total Timeline**: [2 weeks exactly - what must be done to get to "Yes" or "Pass"]
@@ -409,24 +457,30 @@ As you explore, keep these personas in mind:
 **Format**: 6 metrics max, definition + what's "good" vs "bad"
 
 **Metric 1**: [Name - e.g., "Time-to-First-Win"]
+
 - **Definition**: [how to measure - e.g., "Time from landing to first success celebration"]
 - **Good**: [target range - e.g., "<60 seconds"]
 - **Bad**: [red flag - e.g., ">90 seconds means kids won't engage"]
 - **Why it matters**: [connection to retention/love]
 
 **Metric 2**: [Name]
+
 - [same structure as Metric 1]
 
 **Metric 3**: [Name]
+
 - [same structure as Metric 1]
 
 **Metric 4**: [Name]
+
 - [same structure as Metric 1]
 
 **Metric 5**: [Name]
+
 - [same structure as Metric 1]
 
 **Metric 6**: [Name]
+
 - [same structure as Metric 1]
 
 ---
@@ -436,30 +490,38 @@ As you explore, keep these personas in mind:
 **Format**: Top 8, realistic assessment, mitigation expected
 
 **Risk 1**: [Name - e.g., "Camera Reliability in Low Light"]
+
 - **Type**: [Privacy/Safety / Technical / GTM / Retention / Regulatory / Competition / Team]
 - **Why it's real**: [specific concern based on what you saw]
 - **Mitigation I'd expect**: [practical fix - no "raise $1M"]
 - **Evidence to monitor**: [what data would confirm/severity]
 
 **Risk 2**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 3**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 4**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 5**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 6**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 7**: [Name]
+
 - [same structure as Risk 1]
 
 **Risk 8**: [Name]
+
 - [same structure as Risk 1]
 
 ---
@@ -469,19 +531,23 @@ As you explore, keep these personas in mind:
 **Format**: Minimum to get to "Yes" in 2-4 weeks
 
 **Minimum Demo Improvement 1**: [Title]
+
 - **What**: [specific UX improvement]
 - **Why**: [how this proves founder can iterate]
 - **Evidence needed**: [how to confirm it worked]
 
 **Minimum Demo Improvement 2**: [Title]
+
 - [same structure as Improvement 1]
 
 **Minimum Retention Signal 1**: [Title]
+
 - **What**: [specific feature/mechanic]
 - **Why**: [how this proves kids will return]
 - **Evidence needed**: [how to confirm it worked]
 
 **Minimum Trust/Safety Signal 1**: [Title]
+
 - **What**: [specific privacy/safety feature]
 - **Why**: [how this builds parent trust]
 - **Evidence needed**: [how to confirm it worked]
@@ -497,25 +563,30 @@ As you explore, keep these personas in mind:
 **Investment Amount**: [Suggest realistic angel check size - e.g., "$50K for 4 months runway"]
 
 **Use of Funds** (3 bullets):
+
 - [ ] [What money goes to - e.g., "$30K founder salary"]
 - [ ] [What money goes to - e.g., "$15K marketing/growth"]
 - [ ] [What money goes to - e.g., "$5K buffer"]
 
 **Success Metrics I'd Want** (3 bullets):
+
 - [ ] [Metric 1 - e.g., "1,000 families using it weekly"]
 - [ ] [Metric 2 - e.g., "Week 1 retention >40%"]
 - [ ] [Metric 3 - e.g., "$10K MRR or 10 school partnerships"]
 
 **Demo Video Structure** (3 bullets):
+
 - [ ] [Scene 1 - e.g., "15-second intro: 'This is what it is'"]
 - [ ] [Scene 2 - e.g., "30-second gameplay: show it working"]
 - [ ] [Scene 3 - e.g., "15-second outro: 'Here's where this goes'"]
 
 **Landing + Waitlist Angle** (2 bullets):
+
 - [ ] [Landing focus - e.g., "Camera learning for kids under 5"]
 - [ ] [Waitlist hook - e.g., "First 1,000 parents get free month"]
 
 **Simple Terms I'd Want** (3 bullets):
+
 - [ ] [Term 1 - e.g., "Common stock with 1x liquidation pref"]
 - [ ] [Term 2 - e.g., "Board seat for investor"]
 - [ ] [Term 3 - e.g., "Pro-rata rights on next round"]
@@ -560,7 +631,7 @@ As you explore, keep these personas in mind:
 
 ## Begin Now
 
-**Open http://localhost:6173 and start exploring.**
+**Open <http://localhost:6173> and start exploring.**
 
 **Timebox**: 30-45 minutes (6 exploration steps)
 **Output Format**: Follow 10 deliverable sections strictly
@@ -575,18 +646,21 @@ As you explore, keep these personas in mind:
 **Target App**: Advay Vision Learning (MediaPipe-based, camera-driven learning web app for kids 2-6)
 
 **Key Technology to Evaluate:**
+
 - MediaPipe HandLandmarker performance (does tracking feel smooth?)
 - Camera permission flow (is it clear, kid-friendly?)
 - Real-time gesture recognition (pinch, pointing, wave)
 - Progress tracking system (does it feel rewarding?)
 
 **Current Game State (What to expect):**
+
 - Multiple games (FingerNumberShow, AlphabetGame, LetterHunt, ConnectTheDots, etc.)
 - Camera-first interaction (no mouse/touch required by default)
 - Mascot (Pip) for personality/feedback
 - Progress dashboard (stars, levels, completion)
 
 **Specific Angles to Test:**
+
 - **Toddler mode**: Can a 2-year-old get a win? (simple gestures, immediate feedback)
 - **Early reader mode**: Can a 4-6 year old follow instructions and unlock things?
 - **Parent mode**: Can a busy parent understand progress and trust safety?

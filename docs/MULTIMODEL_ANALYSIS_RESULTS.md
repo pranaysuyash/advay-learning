@@ -38,18 +38,21 @@ The app has a **fragmented, post-hoc architecture** where core systems (games, q
 ### Top 3 Findings (High Confidence)
 
 #### 1. Hardcoded Game Array is a Scalability Cliff
+
 - **Current**: 4 games in static array with inline metadata
 - **Problem**: Adding game #5 requires code change, test, deploy
 - **Impact**: Can't support dynamic game libraries, A/B testing, or personalized game recommendations
 - **Evidence**: `availableGames: Game[]` with manual entries; no backend fetch
 
 #### 2. Difficulty Progression is Not Architected
+
 - All 4 games hardcoded to "Easy"; no mechanism to surface Medium/Hard
 - Profile has age but doesn't use it to filter difficulty
 - Suggests: Difficulty is designed into game data but not into game selection logic
 - **Risk**: As app scales, will end up with per-game difficulty logic scattered across 4+ components
 
 #### 3. Quest System is Architecturally Complete but Organizationally Lost
+
 - 8 quest chains + 4 learning islands fully configured in backend
 - Games.tsx doesn't reference quest system at all
 - Suggests: Quest feature was built separately; no integration plan exists
@@ -58,6 +61,7 @@ The app has a **fragmented, post-hoc architecture** where core systems (games, q
 ### Top 3 Improvement Suggestions (Ordered by Impact)
 
 #### 1. Adopt Backend-Driven Game Configuration (P0)
+
 - **Move**: Game metadata from `availableGames: Game[]` → REST API `/api/games`
 - **Enables**: Dynamic game library, per-profile game recommendations, A/B testing, easy game additions
 - **Architecture**: `useGames(profileAge?: number)` → filters backend games by age + profile
@@ -65,6 +69,7 @@ The app has a **fragmented, post-hoc architecture** where core systems (games, q
 - **Impact**: Transforms from "4 hardcoded games" to "unlimited games via config"
 
 #### 2. Define Difficulty Progression as a First-Class System (P0)
+
 - **Create**: `DifficultyProgression` interface: `{ gameId, targetAge, sequence: [Easy → Medium → Hard] }`
 - **Backend stores**: Per-profile progress: `{ profileId, gameId, unlockedDifficulty: "Medium" }`
 - **Frontend**: Game card shows locked difficulty levels + unlock criteria
@@ -72,6 +77,7 @@ The app has a **fragmented, post-hoc architecture** where core systems (games, q
 - **Impact**: Enables progression-based engagement; prevents boredom; justifies keeping "Easy" label
 
 #### 3. Expose Quest System as Primary Navigation (P1)
+
 - **Replace**: Flat "4 games" → hierarchical "4 islands" with embedded games
 - **Simplify**: Quests use game IDs; just wire backend quest chains → UI quest map
 - **Benefit**: Provides narrative structure; reduces "what do I do next?" friction; aligns with 4-8yr old cognitive needs
@@ -94,7 +100,7 @@ The app has a **fragmented, post-hoc architecture** where core systems (games, q
 
 ### Summary
 
-The codebase shows **good separation of concerns** (games, analytics, profiles) but suffers from **under-abstraction in two areas**: 
+The codebase shows **good separation of concerns** (games, analytics, profiles) but suffers from **under-abstraction in two areas**:
 
 1. Game implementation duplication likely exists across 4 games with no shared patterns or utils
 2. Analytics schema is too permissive (untyped JSON + generic activity types) and won't scale to capture gesture-level performance needed for a hand-tracking app
@@ -104,6 +110,7 @@ The code is functional but will accumulate technical debt as more games/events a
 ### Top 3 Findings (High Confidence)
 
 #### 1. Analytics Schema is Too Generic for Hand-Tracking Specificity
+
 - **Current**: `meta_data: dict` (untyped JSON) + `activity_type: str` (string, not enum)
 - **Problem**: Can't enforce gesture metrics (hand position, stroke smoothness, palm stability) or distinguish game-specific events
 - **Evidence**: No gesture quality metrics defined; meta_data has no schema validation
@@ -111,6 +118,7 @@ The code is functional but will accumulate technical debt as more games/events a
 - **Missed insight**: Hand-tracking app needs **stroke-level events** (finger position, velocity), not just completion
 
 #### 2. Game Implementation Likely Has Copy-Paste Duplication
+
 - 4 games exist: Alphabet Tracing, Finger Counting, Connect Dots, Letter Hunt
 - Identical game interface suggests similar lifecycle: camera → hand tracking → gesture recognition → score
 - No mention of shared game base class, composition pattern, or game engine
@@ -118,6 +126,7 @@ The code is functional but will accumulate technical debt as more games/events a
 - **Code smell**: Each game likely has its own `handleGestureEvent()`, `calculateScore()`, `trackAttempt()` separately
 
 #### 3. Activity Type Should Be Enum, Not String
+
 - **Current**: `activity_type: "drawing" | "recognition" | "game"` (inferred as string)
 - **Problem**: No type safety; typos create analytics holes; can't enumerate valid types
 - **Impact**: When querying "all drawing activities", might miss games that used variant spelling
@@ -126,6 +135,7 @@ The code is functional but will accumulate technical debt as more games/events a
 ### Top 3 Improvement Suggestions (Ordered by Impact)
 
 #### 1. Replace `meta_data: dict` with Typed Event Schema (P0)
+
 ```python
 @dataclass
 class GestureEvent:
@@ -135,6 +145,7 @@ class GestureEvent:
     attempt_num: int
     duration_ms: int
 ```
+
 - **Backend validation**: Enforces schema before storage
 - **Frontend sends**: Structured events, not arbitrary JSON
 - **Benefit**: Analytics become queryable; can measure gesture quality improvements over time
@@ -142,6 +153,7 @@ class GestureEvent:
 - **Impact**: Unblocks gesture-specific analytics
 
 #### 2. Extract Game Base Class / Composition Pattern (P1)
+
 - **Identify**: Common game lifecycle: `GameEngine` → handles camera, gesture recognition, scoring
 - **Pattern**: Each specific game (Alphabet, Finger Counting, etc.) inherits or composes `GameEngine`
 - **Shared utils**: `handleHandDetection()`, `scoreGesture()`, `trackAttempt()`
@@ -150,6 +162,7 @@ class GestureEvent:
 - **Impact**: Reduces codebase by ~30% for gesture-heavy logic; improves consistency
 
 #### 3. Add Per-Attempt Granularity to Progress Tracking (P1)
+
 ```python
 class Progress:
     attempt_number: int
@@ -158,6 +171,7 @@ class Progress:
     gesture_events: List[GestureEvent]
     score: int
 ```
+
 - **Benefit**: Track "did kids retry after failure?", "how long before giving up?", "improvement trend"
 - **Timeline**: 2 days (schema update + batch insert)
 - **Impact**: Enables engagement metrics (retry patterns); informs difficulty unlocking logic
@@ -186,6 +200,7 @@ The app has a **foundational UX problem**: all difficulty colors are identical, 
 ### Top 3 Findings (High Confidence)
 
 #### 1. Identical Difficulty Colors Violate Basic UX Principles for Children
+
 - **Current**: Easy/Medium/Hard all use `bg-bg-tertiary`, `text-text-secondary`, `border-border`
 - **Problem**: No visual distinction → kids think there's only 1 difficulty level
 - **Impact**: Can't communicate "you've unlocked Medium!" because "unlocked" looks identical to "locked"
@@ -194,6 +209,7 @@ The app has a **foundational UX problem**: all difficulty colors are identical, 
 - **Severity**: This is a BUG; color palette is clearly unintentional
 
 #### 2. Age Range as String "2-8 years" is Too Abstract for Behavioral Content Selection
+
 - **Current**: ageRange: string like "2-8 years" stored but never parsed/used
 - **Problem**: Profile has `age?: number` but games don't filter by numeric age
 - **Cognitive gap**: A 2yr old has 6-year developmental gap from 8yr old (huge); "2-8" is meaningless
@@ -202,6 +218,7 @@ The app has a **foundational UX problem**: all difficulty colors are identical, 
 - **Risk**: Kids play mis-matched difficulty → frustration → churn
 
 #### 3. Hidden Quest System = Abandoned Engagement Hook
+
 - **Status**: 8 quest chains + 4 learning islands fully configured but invisible in UI
 - **Problem**: Kids don't know progression exists; no narrative motivation
 - **Example lost**: Instead of "Complete 3 quests to unlock Island 2!", kids see 4 unrelated games
@@ -280,30 +297,35 @@ Replace identical color trio with distinct difficulty tokens:
 ### CONSENSUS: What All 3 Models Agree On
 
 #### 1. Hardcoded Game Array Must Be Replaced with Backend-Driven Configuration
+
 - **Claude**: Scalability cliff; can't add games without code deploys
 - **GPT**: Code duplication across 4 games; no pattern library
 - **Gemini**: Can't personalize difficulty/content per profile without backend flexibility
 - **Joint verdict**: Move games to REST API `/api/games` with profile-aware filtering (P0)
 
 #### 2. Difficulty Levels Are Non-Functional (All "Easy")
+
 - **Claude**: No progression mechanism architected
 - **GPT**: Difficulty stored but not used in game selection logic
 - **Gemini**: Identical colors → kids can't see difficulty distinction
 - **Joint verdict**: Implement visual difficulty signals + unlock mechanics (P0)
 
 #### 3. Hidden Quest System is Expensive Waste; Must Expose It
+
 - **Claude**: Fully architected but not integrated; should be primary navigation
 - **GPT**: Dead code from architectural mismatch
 - **Gemini**: Major engagement hook for 5-9yr olds; kids crave narrative structure
 - **Joint verdict**: Wire backend quests → UI within 1 sprint (P0)
 
 #### 4. Analytics Schema Too Generic; Needs Game-Specific + Gesture-Level Granularity
+
 - **Claude**: `meta_data: dict` blocks future personalization
 - **GPT**: Untyped JSON + string activity types create maintenance debt
 - **Gemini**: Can't measure what makes kids engaged (retry patterns, session flow)
 - **Joint verdict**: Replace with typed `GestureEvent` schema + per-attempt tracking (P1)
 
 #### 5. Profile Age Field is Designed but Not Used in Logic
+
 - **Claude**: Age should gate difficulty + quest exposure
 - **GPT**: Age should filter activities in query
 - **Gemini**: Age should determine UI simplicity + narrative complexity
@@ -362,18 +384,18 @@ Replace identical color trio with distinct difficulty tokens:
 
 ### PHASE 2: ENGAGEMENT LOOP (Weeks 2-3)
 
-5. **Item #4 (Gemini, 3-4d)**: Expose quest system. Uses backend from Item #1.
-6. **Item #8 (Claude, 2d)**: Difficulty unlock mechanics. Design unlock rules; backend + UI.
+1. **Item #4 (Gemini, 3-4d)**: Expose quest system. Uses backend from Item #1.
+2. **Item #8 (Claude, 2d)**: Difficulty unlock mechanics. Design unlock rules; backend + UI.
 
 ### PHASE 3: DATA INFRASTRUCTURE (Weeks 3-4, parallelize 5+6+7)
 
-7. **Item #5 (GPT, 3d)**: Typed `GestureEvent` schema.
-8. **Item #6 (GPT, 2d)**: Per-attempt progress tracking.
-9. **Item #7 (GPT, 2-3d)**: Extract game base class.
+1. **Item #5 (GPT, 3d)**: Typed `GestureEvent` schema.
+2. **Item #6 (GPT, 2d)**: Per-attempt progress tracking.
+3. **Item #7 (GPT, 2-3d)**: Extract game base class.
 
 ### PHASE 4: AGE-SEGMENTATION (Weeks 4-5)
 
-10. **Item #9 (Gemini, 3d)**: Age-aware quest variants.
+1. **Item #9 (Gemini, 3d)**: Age-aware quest variants.
 
 ---
 

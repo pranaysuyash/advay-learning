@@ -9,6 +9,7 @@
 ## 📋 Executive Summary
 
 **User Requests Analysis:**
+
 1. ✅ Clean old/duplicate files (Game.tsx vs AlphabetGame.tsx + Games.tsx)
 2. ✅ Profile data storage in PostgreSQL (not just localStorage)
 3. ✅ Standard profile picture size (low resolution, small storage)
@@ -39,6 +40,7 @@
 \`\`\`
 
 **Profile Storage Assessment:**
+
 - ❌ Photos not in backend database
 - ❌ Avatar URLs not in backend
 - ❌ No image upload/download flow
@@ -55,6 +57,7 @@
 **File:** \`src/frontend/src/components/ui/Layout.tsx\`
 
 **Current Issues:**
+
 - No user info display (name/email/avatar)
 - No logout/sign-out button
 - No active navigation state indicator
@@ -165,6 +168,7 @@ const { profiles, fetchProfiles } = useProfileStore();
 **File:** \`src/frontend/src/pages/Dashboard.tsx\`
 
 **Current State:**
+
 - Has auth check
 - Has child selector
 - ❌ No welcome message ("Welcome back, [Child Name]!")
@@ -190,6 +194,7 @@ const { user } = useAuthStore();
 **File:** \`src/frontend/src/store/authStore.ts\`
 
 **Current State:**
+
 - User interface has: \`id, email, role, is_active, email_verified\`
 - ❌ No \`avatar_url\` field
 - ❌ No \`profile_photo\` field
@@ -254,10 +259,10 @@ export function AvatarCapture({
 
   const handleStartCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user', width: 640, height: 480 } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: 640, height: 480 }
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObjectURL = stream;
       }
@@ -269,7 +274,7 @@ export function AvatarCapture({
 
   const handleCapture = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
-    
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -303,7 +308,7 @@ export function AvatarCapture({
 
   const handleSavePhoto = useCallback(async () => {
     if (!capturedPhoto) return;
-    
+
     setIsCapturing(true);
     
     try {
@@ -417,6 +422,7 @@ export function AvatarCapture({
 \`\`\`
 
 **Design Decisions:**
+
 - Resolution: 640x480 (good balance of quality vs storage)
 - Compression: 0.85 JPEG quality (small file size)
 - Countdown: 3 seconds before capture (prevents motion blur)
@@ -463,7 +469,7 @@ async def upload_profile_photo(
     try:
         # Verify ownership
         profile = db.query(Profile).filter(Profile.id == profile_id).first()
-        
+
         if not profile or profile.user_id != current_user.id:
             raise HTTPException(
                 status_code=403,
@@ -510,7 +516,7 @@ async def download_profile_photo(
 ):
     """Get a child's profile photo URL."""
     profile = db.query(Profile).filter(Profile.id == profile_id).first()
-    
+
     if not profile or profile.user_id != current_user.id:
         raise HTTPException(
                 status_code=403,
@@ -535,7 +541,7 @@ export const profileApi = {
     const formData = new FormData();
     formData.append('profile_id', profileId);
     formData.append('photo', file);
-    
+
     const response = await apiClient.post<{ avatar_url: string }>(
       \`/api/v1/users/me/profiles/\${profileId}/photo\`,
       formData
@@ -611,7 +617,7 @@ export function AvatarEffects({
           <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
         </div>
       )}
-      
+
       {/* Effect controls - only visible when editing */}
       {avatarUrl && (
         <div className="effect-selector mb-4">
@@ -707,16 +713,16 @@ export function AvatarEffects({
 
 **Implementation:**
 \`\`\`css
-/* Avatar Effects Styles */
+/*Avatar Effects Styles*/
 
-/* Pixelated / Retro Effect */
+/*Pixelated / Retro Effect*/
 .avatar-pixelated {
   image-rendering: pixelated;
   image-smoothing: quality-low;
   filter: contrast(1.2) saturate(1.2);
 }
 
-/* Animal Frame */
+/*Animal Frame*/
 .avatar-animal {
   border: 4px dashed var(--pip-orange);
   border-radius: 50%;
@@ -726,7 +732,7 @@ export function AvatarEffects({
 
 .avatar-animal::before,
 .avatar-animal::after {
-  /* Animal ears/decorations can go here */
+  /*Animal ears/decorations can go here*/
   content: '';
   position: absolute;
   width: 20px;
@@ -734,27 +740,27 @@ export function AvatarEffects({
   top: -10px;
 }
 
-/* Cartoon Style */
+/*Cartoon Style*/
 .avatar-cartoon {
   filter: saturate(1.5) brightness(1.1) contrast(1.1);
 }
 
-/* Glow Effect */
+/*Glow Effect*/
 .avatar-glow {
   filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
 }
 
-/* Rainbow Border Animation */
+/*Rainbow Border Animation*/
 .avatar-rainbow {
   animation: rainbow-border 3s linear infinite;
   border: 3px solid transparent;
   border-image: linear-gradient(
     to right,
-    #ff0000 0%, 
-    #ff7f00 20%, 
-    #ff00ff 40%, 
-    #0000ff 60%, 
-    #4b0082 80%, 
+    #ff0000 0%,
+    #ff7f00 20%,
+    #ff00ff 40%,
+    #0000ff 60%,
+    #4b0082 80%,
     #8b00ff 100%
   );
 }
@@ -763,17 +769,17 @@ export function AvatarEffects({
   to {
     border-image: linear-gradient(
       to right,
-      #ff0000 0%, 
-      #ff7f00 20%, 
-      #ff00ff 40%, 
-      #0000ff 60%, 
-      #4b0082 80%, 
+      #ff0000 0%,
+      #ff7f00 20%,
+      #ff00ff 40%,
+      #0000ff 60%,
+      #4b0082 80%,
       #8b00ff 100%
     );
   }
 }
 
-/* Sparkle Animation */
+/*Sparkle Animation*/
 .avatar-sparkle {
   position: relative;
 }
@@ -796,7 +802,7 @@ export function AvatarEffects({
   }
 }
 
-/* Container for avatar display */
+/*Container for avatar display*/
 .avatar-display-container {
   position: relative;
   width: 100%;
@@ -879,7 +885,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       // ... existing settings ...
-      
+
       // NEW: Parental controls
       maxEffectsEnabled: true,
       defaultEffect: 'normal',
@@ -945,7 +951,7 @@ export function ParentalPinDialog({
             onClick={(e) => e.stopPropagation()}
           >
             <UIIcon name="lock" size={48} className="text-pip-orange mb-6" />
-            
+
             <h2 className="text-2xl font-bold mb-2 text-text-primary">
               Parental PIN Required
             </h2>
@@ -1049,6 +1055,7 @@ const getAvailableEffects = (age: number) => {
 **Purpose:** Parent-controlled setup wizard for first-time configuration
 
 **Features:**
+
 1. Parent PIN creation
 2. Default child profile setup
 3. Camera permissions
@@ -1076,6 +1083,7 @@ const getAvailableEffects = (age: number) => {
 ### Storage Strategy
 
 **Profile Photos:**
+
 - ✅ PostgreSQL database (persistent, scalable)
 - Resolution: 640x480
 - Compression: 0.85 JPEG (balance quality vs size)
@@ -1085,6 +1093,7 @@ const getAvailableEffects = (age: number) => {
 ### Avatar Effects Strategy
 
 **Performance:**
+
 - ✅ CSS-only effects (no Canvas processing)
 - Instant application (no delay)
 - Low memory usage
@@ -1093,11 +1102,13 @@ const getAvailableEffects = (age: number) => {
 ### Security & Privacy
 
 **Profile Photos:**
+
 - ✅ Backend validation (ownership check, size limits)
 - ✅ Access control (parent PIN required)
 - ⚠️ Need S3 integration for storage (planned feature)
 
 **Parental Controls:**
+
 - ✅ PIN-based restrictions
 - ✅ Age-based effect filtering
 - ✅ Settings protection (require PIN to change)
@@ -1110,6 +1121,7 @@ const getAvailableEffects = (age: number) => {
 ### Unit Tests
 
 Each phase should have tests:
+
 - Avatar photo capture component
 - Avatar effects application
 - Parental PIN validation
@@ -1160,6 +1172,7 @@ interface PhotoResponse {
 ### Avatar Effects Configuration
 
 **Effect Types:**
+
 - \`normal\`: No effects applied
 - \`pixelated\`: 8-bit retro effect (image-rendering: pixelated, image-smoothing: quality-low)
 - \`animal\`: Dashed border frame (custom CSS frame)
@@ -1169,11 +1182,13 @@ interface PhotoResponse {
 - \`sparkle\`: Floating sparkle particles (CSS animation)
 
 **Age Restrictions:**
+
 - Age 0-4: Only \`normal\` effect available
 - Age 5-7: Normal + pixelated + animal frames
 - Age 8+: All effects available
 
 **Default by Age:**
+
 - Age 0-4: \`normal\`
 - Age 5-7: \`normal\`
 - Age 8+: \`normal\`
@@ -1185,34 +1200,42 @@ interface PhotoResponse {
 ### Storage Backend
 
 **Q1:** Should profile photos use S3 object storage or local filesystem?
+
 - **Option A:** S3 (scalable, CDN caching, good for production)
 - **Option B:** Local storage (faster for dev, no infrastructure needed)
 - **Recommendation:** Start with local filesystem, plan S3 migration
 
 **Q2:** Should photos be stored at full resolution or compressed?
+
 - **Recommendation:** Upload at 640x480, compress to 0.85 JPEG quality (good balance)
 
 **Q3:** What should be the photo size limit per child?
+
 - **Recommendation:** 2MB per photo (reasonable storage limit)
 
 ### Avatar Effects
 
 **Q1:** Should there be preset themed frames (animals, sports, holidays)?
+
 - **Recommendation:** Start with 5 animal frames (lion, cat, dog, bear, rabbit, duck), expand later
 
 **Q2:** Should sparkle effect intensity be configurable?
+
 - **Recommendation:** Add sparkle density slider (8-16 particles)
 
 ### Parental Controls
 
 **Q1:** What should be the default PIN?
+
 - **Recommendation:** Generate random 4-digit PIN during profile creation, allow parents to change in settings
 
 **Q2:** Should PIN entry be on a timer (to prevent shoulder surfing)?
+
 - **Recommendation:** No - just require 4 digits before enabling verify button
 
 **Q3:** What other parental controls are needed?
-- **Recommendation:** 
+
+- **Recommendation:**
   - Daily time limit (already exists, enforce in game)
   - Game time tracking per child
   - Activity reports (what games played, time spent)
@@ -1245,6 +1268,7 @@ interface PhotoResponse {
 ## 📋 Success Criteria
 
 ### Phase 1: Authentication & Profile UX
+
 - [ ] Layout shows user info (name/email/avatar) when logged in
 - [ ] Layout shows logout/sign-out button when authenticated
 - [ ] Layout highlights active page in navigation
@@ -1259,6 +1283,7 @@ interface PhotoResponse {
 - [ ] Tests verify photo upload flow
 
 ### Phase 2: Profile Data Storage
+
 - [ ] Database migration created and run successfully
 - [ ] Profile schema includes avatar_url, profile_photo, photo_updated_at
 - [ ] API endpoints tested with Postman/frontend
@@ -1269,6 +1294,7 @@ interface PhotoResponse {
 - [ ] Photo deletion removes from storage and clears database
 
 ### Phase 3: Avatar Effects
+
 - [ ] AvatarEffects component created with all 6 effect types
 - [ ] CSS styles implemented for all effects (pixelated, animal, cartoon, glow, rainbow, sparkle)
 - [ ] Effects are applied correctly to avatar display
@@ -1279,6 +1305,7 @@ interface PhotoResponse {
 - [ ] Tests verify effect rendering across browsers
 
 ### Phase 4: Parental Controls
+
 - [ ] Parental control settings added to settings store
 - [ ] maxEffectsEnabled, defaultEffect fields added
 - [ ] requirePinForChanges, requirePinForGame fields added
@@ -1292,6 +1319,7 @@ interface PhotoResponse {
 - [ ] Tests verify parental control flow
 
 ### Phase 5: Setup & Configuration
+
 - [ ] AppSetup component created (PIN setup, default profile, permissions)
 - [ ] First-time setup wizard implemented
 - [ ] Camera permission helper shows clear instructions
@@ -1301,6 +1329,7 @@ interface PhotoResponse {
 - [ ] Tests verify setup flow end-to-end
 
 ### Phase 6: Clean-up & Optimization
+
 - [ ] Game.tsx confirmed removed or archived (no references)
 - [ ] All unused imports removed
 - [ ] Large files optimized (if any >100k lines)
@@ -1309,6 +1338,7 @@ interface PhotoResponse {
 - [ ] Lighthouse score measured (target 90+ performance)
 
 ### Cross-Phase Quality Gates
+
 - [ ] Authentication flow tested with multiple users
 - [ ] Profile photo upload tested with multiple file types
 - [ ] Avatar effects tested across age groups
@@ -1326,6 +1356,7 @@ interface PhotoResponse {
 ### Why This Approach?
 
 **CSS-First for Avatar Effects:**
+
 - ✅ **Performance:** No image processing required, instant application
 - ✅ **Simplicity:** Pure CSS, no complex JavaScript state management
 - ✅ **Maintainability:** Easy to add new effects, modify colors
@@ -1333,12 +1364,14 @@ interface PhotoResponse {
 - ✅ **Cost:** No backend processing overhead
 
 **PostgreSQL for Profile Storage:**
+
 - ✅ **Reliability:** Persistent, transactional storage
 - ✅ **Scalability:** Easy to add indexes, migrations
 - ✅ **Backup:** Can dump/restore full database
 - ✅ **Queries:** Complex joins (profile + progress + children) efficient
 
 **Backend Photo Storage:**
+
 - ⚠️ **Initial:** Local filesystem (faster for MVP)
 - 🎯 **Future:** S3 object storage (CDN, better performance)
 
@@ -1391,20 +1424,24 @@ interface PhotoResponse {
 ## 📋 Next Steps (After Approval)
 
 **IMMEDIATE (Day 1-2):**
+
 1. Review and approve this comprehensive plan
 2. Create worklog tickets for each phase (6 tickets total)
 3. Start Phase 1 (Authentication UX)
 
 **SHORT-TERM (Week 1):**
+
 1. Complete Phase 2 (Profile Photo Storage)
 2. Complete Phase 3 (Avatar Effects)
 
 **MEDIUM-TERM (Week 2-3):**
+
 1. Complete Phase 4 (Parental Controls)
 2. Complete Phase 5 (Setup & Configuration)
 3. Complete Phase 6 (Clean-up & Optimization)
 
 **LONG-TERM (Month 1):**
+
 1. S3 migration for photo storage
 2. Advanced avatar effects (video filters, face frames)
 3. Activity-level parental controls
@@ -1435,6 +1472,7 @@ This plan addresses ALL user requests:
 ## 📋 Files Reference
 
 ### New Files to Create
+
 1. \`src/frontend/src/components/ui/Layout.tsx\` - UPDATE
 2. \`src/frontend/src/components/ui/AvatarCapture.tsx\` - NEW
 3. \`src/frontend/src/components/ui/AvatarEffects.tsx\` - NEW
@@ -1446,6 +1484,7 @@ This plan addresses ALL user requests:
 9. \`src/frontend/src/index.css\` - UPDATE
 
 ### Backend Files to Create/Update
+
 1. \`src/backend/alembic/versions/005_add_profile_photos.sql\` - NEW
 2. \`src/backend/app/api/v1/endpoints/profiles.py\` - UPDATE
 3. \`src/backend/app/schemas/profile.py\` - UPDATE

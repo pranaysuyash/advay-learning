@@ -59,6 +59,7 @@ ls -la
 ```
 
 **Output**: Brief topology summary
+
 - Entrypoints (server, CLI, app)
 - Key directories and their purpose
 - Build/deploy scripts
@@ -71,6 +72,7 @@ ls -la
 **Goal**: Find what already exists before creating anything new
 
 **Search locations**:
+
 ```bash
 # Prompts and personas
 find . -type d \( -name "prompts" -o -name "personas" -o -name "guidelines" \) 2>/dev/null
@@ -138,6 +140,7 @@ Use this heuristic to determine what SHOULD exist:
 **Goal**: Extract testable claims from documentation
 
 **Read**:
+
 - README.md
 - docs/*.md (architecture, specs, API docs)
 - CHANGELOG.md
@@ -155,6 +158,7 @@ Use this heuristic to determine what SHOULD exist:
 ```
 
 **Claim extraction rules**:
+
 - Make claims atomic and testable
 - Include feature claims, architecture claims, API claims
 - Include "how to" claims (setup, deployment, usage)
@@ -331,6 +335,7 @@ For each item in "Missing Conventions List":
 ```
 
 **Backlog rules**:
+
 - Every task follows repo conventions (or proposes them)
 - Every task has acceptance criteria
 - P0 = blocking readiness or high risk

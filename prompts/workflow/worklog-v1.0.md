@@ -16,6 +16,7 @@
 ## WHEN TO CREATE A NEW TICKET
 
 Create a new ticket when:
+
 - starting a new audit/remediation/hardening effort
 - starting a new feature slice
 - starting a new QA/security/release effort

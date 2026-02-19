@@ -11,14 +11,17 @@
 ## 1. Overview
 
 ### 1.1 Description
+
 A number tracing game where children trace numbers 0-9 using hand tracking (same mechanics as letter tracing). This extends the existing tracing game to teach numeracy skills.
 
 ### 1.2 Problem Statement
+
 - Currently only have letter tracing (A-Z)
 - No numeracy/number recognition games
 - Children need to learn numbers 0-9 before advancing to math
 
 ### 1.3 Success Criteria
+
 - [ ] Children can trace numbers 0-9
 - [ ] Accuracy scoring works same as letter tracing
 - [ ] Progress is saved to backend
@@ -29,21 +32,25 @@ A number tracing game where children trace numbers 0-9 using hand tracking (same
 ## 2. User Stories
 
 ### Story 1: Child Tracing Numbers
+
 **As a** child (age 4-6)
 **I want** to trace numbers with my finger
 **So that** I can learn to write numbers
 
 **Acceptance Criteria:**
+
 - Given I'm on the game page, when I select "Numbers" mode, then I see numbers 0-9
 - Given a number is displayed, when I trace it correctly, I get points
 - Given I complete a number, when my accuracy is >70%, I advance to next number
 
 ### Story 2: Parent Viewing Progress
+
 **As a** parent
 **I want** to see my child's number tracing progress
 **So that** I know they're learning numeracy
 
 **Acceptance Criteria:**
+
 - Given I'm on the dashboard, when I view progress, I see numbers learned
 - Given my child traces numbers, when I check stats, I see accuracy over time
 
@@ -104,6 +111,7 @@ activity_type: 'number_tracing'
 ### 4.3 API/Interface
 
 No new backend APIs needed. Uses existing:
+
 - `POST /progress/` with `activity_type: 'number_tracing'`
 
 ### 4.4 Dependencies
@@ -127,6 +135,7 @@ Dashboard → Select Profile → Game Page → Choose "Numbers" Mode → Trace 0
 ### 5.2 Screen Details
 
 **Number Tracing Mode**
+
 - Same layout as letter tracing
 - Number displayed large center
 - Dots representing number value (e.g., 3 = ● ● ●)

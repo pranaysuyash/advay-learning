@@ -1,4 +1,5 @@
 # Intent-First Development Philosophy v1.0
+
 ## "Investigate Intent Before Acting"
 
 **Core Principle:** Before removing, suppressing, or "fixing" any code, feature, or element — investigate the original intent and determine if completing/enhancing it would create more value than removing it.
@@ -10,12 +11,14 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the element** (code, feature, UI element, database structure, etc.)
 2. **Search for references** across codebase, documentation, user stories, designs
 3. **Check related systems** (UI, backend, DB, third-party integrations)
 4. **Review history** (Git commits, PRs, issue discussions, meeting notes)
 
 ### Phase 2: Intent Analysis
+
 - What user problem was this meant to solve?
 - What workflow was this part of?
 - Are there similar completed features showing the pattern?
@@ -23,6 +26,7 @@
 - **What's already working that we can build upon?**
 
 ### Phase 3: Impact Assessment
+
 - **User Value**: High/Medium/Low impact on user experience
 - **Business Value**: Revenue, retention, or operational impact
 - **Technical Effort**: Hours/days/weeks to complete properly
@@ -34,6 +38,7 @@
 ## Quick Filter
 
 Skip deep analysis if all true:
+
 - No user-facing connection
 - No business value identified
 - High technical effort required
@@ -61,6 +66,7 @@ Skip deep analysis if all true:
 ## Codebase-First Enhancement Rule
 
 For *Critical* and *High* priority items:
+
 1. **Start with what's there** - understand existing implementation fully
 2. **Build incrementally** - enhance rather than replace where possible
 3. **Preserve working patterns** - follow established codebase conventions

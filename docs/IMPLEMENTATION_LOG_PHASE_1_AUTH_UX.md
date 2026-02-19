@@ -11,6 +11,7 @@
 ### 1. Updated Layout.tsx
 
 Added user info display when authenticated:
+
 ```tsx
 // User info section in header
 {isAuthenticated && user && (
@@ -42,6 +43,7 @@ Added user info display when authenticated:
 ```
 
 Added logout/sign-out button when authenticated:
+
 ```tsx
 {/* Sign Out Button */}
 <button
@@ -55,6 +57,7 @@ Added logout/sign-out button when authenticated:
 ```
 
 Added active navigation state indicators:
+
 ```tsx
 {/* Navigation links with active state */}
 <Link 
@@ -107,6 +110,7 @@ Added active navigation state indicators:
 ### 2. Updated AuthStore to support avatar fields
 
 Added to User interface:
+
 ```typescript
 interface User {
   id: string;
@@ -120,6 +124,7 @@ interface User {
 ```
 
 Updated AuthState interface:
+
 ```typescript
 interface AuthState {
   user: User | null;
@@ -130,6 +135,7 @@ interface AuthState {
 ```
 
 **Note**: avatar_url and profile_photo added to interfaces but not populated in this phase (will be implemented in Phase 2)
+
 ```
 
 ---
@@ -152,6 +158,7 @@ cd src/frontend && npm run build
 
 **Layout.tsx**: User info displays, logout button works, navigation highlights active page
 **AuthStore**: Avatar fields available, auth state functions work
+
 ```
 
 ---

@@ -33,6 +33,6 @@ This repo uses **two layers** of tracking:
 ## When GitHub Is Not Available
 
 If the workspace is not a git checkout or GH auth is not configured:
+
 - Work normally using the worklog only.
 - Set `Issue: Unknown` and record why under Evidence (Observed/Unknown).
-

@@ -34,6 +34,7 @@ Repeat as a loop: **TEACH → CHECK → FIX → RETEST**
 ### D) Alternative Perspectives (2-4)
 
 Include at least two of:
+
 - Analogy/mental model
 - Geometric/visual view
 - Implementation/engineering view

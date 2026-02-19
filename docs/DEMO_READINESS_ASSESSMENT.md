@@ -337,7 +337,7 @@
 
 **Go with Option C today + Option A this week:**
 
-### Today (2 hours):
+### Today (2 hours)
 
 1. Record demo video showing:
    - ConnectTheDots with pinch gesture (just implemented!)
@@ -351,7 +351,7 @@
 3. Include architecture diagram from docs
 4. Link to GitHub (if public) or tech stack description
 
-### This Week (Option A - 8 hours):
+### This Week (Option A - 8 hours)
 
 - Fix TypeScript errors
 - Polish camera permission flow

@@ -14,6 +14,7 @@
 ## Scope Contract
 
 **In-scope:**
+
 - First-run experience analysis (Home page)
 - Navigation & information architecture assessment
 - Activity quality across game flows
@@ -24,12 +25,14 @@
 - Concrete actionable recommendations
 
 **Out-of-scope:**
+
 - Game-specific audits (AlphabetGame, FingerNumberShow, etc.)
 - Backend functionality
 - MediaPipe performance analysis
 - Implementation of fixes (report-only)
 
 **Targets:**
+
 - **Repo:** learning_for_kids
 - **File(s):**
   - `src/frontend/src/pages/Home.tsx`
@@ -49,6 +52,7 @@
 **Age Band:** 4-6 years
 **Reading Level:** Early reader (learning to recognize letters/numbers)
 **Cognitive Abilities:**
+
 - Limited attention span (5-10 minutes per activity)
 - Developing fine motor skills (precise gestures challenging)
 - Learning letter/number recognition (not reading fluently)
@@ -64,6 +68,7 @@
 ### A) First-Run Experience
 
 #### KUX-QA-001 — Home page lacks clear value proposition for first-time users (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Home.tsx` (line 35: `<span>Advay</span> <span className='text-pip-orange'>.`) Shows app name "Advay" but doesn't explain what it is for kids. No tagline or value proposition visible.
@@ -74,6 +79,7 @@
 - **Risk:** LOW (small copy change)
 
 #### KUX-QA-002 — "Skip to content" link is unusual for kids (LOW)
+
 - **Severity:** LOW
 - **Confidence:** High
 - **Evidence:** **Observed** - `Layout.tsx` line 23: `<a href='#main-content' className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-primary focus:px-4 focus:py-3 focus:rounded-xl focus:shadow-soft focus:border focus:border-border' >Skip to content</a>` This is for accessibility (screen readers) but positioned with absolute positioning, creates navigation confusion.
@@ -89,6 +95,7 @@
 ### B) Navigation & Information Architecture
 
 #### KUX-QA-003 — Demo mode exit confusingly goes to Home (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Home.tsx` line 14: `exitDemo()` function sets `demoMode(false)` and `window.location.href = '/'` (navigates to home). `Layout.tsx` lines 29-42: demo mode banner shows "Exit Demo Mode" button.
@@ -99,6 +106,7 @@
 - **Risk:** MED (if navigation logic isn't right)
 
 #### KUX-QA-004 — Navigation is clear and recoverable (GOOD)
+
 - **Severity:** LOW (positive finding)
 - **Confidence:** High
 - **Evidence:** **Observed** - `Layout.tsx` lines 54-87: Navigation includes Home, Games, Progress, Settings in header and footer (lines 79-87). "Home", "Games", "Progress", "Settings" links in nav bar. Footer has "Privacy Policy" link.
@@ -112,6 +120,7 @@
 ### C) Activity Quality
 
 #### KUX-QA-005 — No onboarding/tutorial for games (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` lines 30-75: Game definitions include `description` (e.g., "Trace letters with your finger to learn alphabets. Features celebration animations and phonics sounds!") but no onboarding. Lines 76-85: Show all 4 game cards in grid. No tutorial or "try this first" guidance.
@@ -127,6 +136,7 @@
 ### D) UX for Kids
 
 #### KUX-QA-006 — Game cards use staggered animation (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` line 74: `<GameCard key={game.id} {...game} animationDelay={index * 0.1} />`. Cards appear one after another with 0.1s delay.
@@ -137,6 +147,7 @@
 - **Risk:** LOW (small timing adjustment)
 
 #### KUX-QA-007 — "Play in [Language]" button text may be confusing (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` line 78: Shows `Play in ${getLanguageLabel(currentProfile.preferred_language)}` (e.g., "Play in English", "Play in Hindi").
@@ -147,6 +158,7 @@
 - **Risk:** LOW (text change only)
 
 #### KUX-QA-008 — Age ranges in game data not visible to child/parent (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` lines 38-74: Game definitions include `ageRange` (e.g., '4-7 years', '3-8 years') but not displayed in UI. Age info only in data store, not surfaced to child or parent selecting.
@@ -161,6 +173,7 @@
 ### E) UX for Parents
 
 #### KUX-QA-009 — No "What did my kid learn today?" summary visible (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - Checked `Dashboard.tsx` and `Layout.tsx` - No progress summary or "Today's learning" section visible in Layout navigation. Checked App.tsx routes - no `/today-summary` route.
@@ -175,6 +188,7 @@
 ### F) Accessibility & Inclusivity
 
 #### KUX-QA-010 — Demo mode banner has low contrast (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Layout.tsx` lines 29-42: Demo mode banner uses `bg-pip-orange text-white py-2 px-4`. `bg-pip-orange` is dark. If checked against WCAG AA for dark backgrounds (4.5:1 contrast ratio), this fails minimum (requires 7:1). Low vision users will struggle.
@@ -189,6 +203,7 @@
 ### G) Visual Design & Polish
 
 #### KUX-QA-011 — App name "Advay" could be more kid-friendly (LOW)
+
 - **Severity:** LOW
 - **Confidence:** High
 - **Evidence:** **Observed** - App name appears as "Advay" (likely child's name or creator name). For kids 4-6 years old, "Advay Vision Learning" is formal but less engaging.
@@ -205,12 +220,14 @@
 **Total Findings:** 11 (2 HIGH, 6 MED, 3 LOW, 1 positive)
 
 **Critical Issues (HIGH):**
+
 - KUX-QA-003: Demo mode exit confusingly navigates to Home
 - KUX-QA-005: No onboarding/tutorial for games
 - KUX-QA-009: No "Today's Summary" visible for parents
 - KUX-QA-010: Demo mode banner has low contrast (accessibility issue)
 
 **Medium Priority (MED):**
+
 - KUX-QA-001: Home page lacks clear value proposition
 - KUX-QA-002: "Skip to content" link is unusual
 - KUX-QA-006: Game cards use staggered animation
@@ -218,23 +235,27 @@
 - KUX-QA-008: Age ranges not visible
 
 **Low Priority (LOW):**
+
 - KUX-QA-004: Navigation is clear and recoverable (positive)
 - KUX-QA-011: App name could be more kid-friendly
 
 **Overall Assessment:**
 The app provides solid navigation and core functionality but lacks:
+
 - First-run/onboarding guidance for games
 - Visual feedback for parents (no "Today's Summary")
 - Accessibility compliance issues (contrast in demo banner)
 - Game selection could be overwhelming without age-appropriate visual cues
 
 **Strengths:**
+
 - Clear navigation structure
 - Good separation of authenticated vs public pages
 - Demo mode with exit flow
 - Age ranges defined (just not visible)
 
 **Key Gaps:**
+
 - No onboarding for new users on Games page
 - Missing parent-facing "Today's Summary"
 - Accessibility issue in demo banner
@@ -275,17 +296,20 @@ The app provides solid navigation and core functionality but lacks:
 ## Evidence Sources
 
 **Files Analyzed:**
+
 - `src/frontend/src/pages/Home.tsx` - Demo mode, landing content
 - `src/frontend/src/components/ui/Layout.tsx` - Navigation structure, demo banner
 - `src/frontend/src/pages/Games.tsx` - Game selection flow (referenced only)
 - `src/frontend/src/App.tsx` - Routes (referenced only)
 
 **Commands Run:**
+
 - `curl -s http://localhost:6173` - Check if frontend running
 - `rg -l "first.*run|onboarding|tutorial|demo.*mode|camera.*permission" /Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/Home.tsx` - Search for onboarding
 - `rg -n "exit|logout|settings|navigate|back.*button" /Users/pranay/Projects/learning_for_kids/src/frontend/src/components/ui/Layout.tsx` - Search for navigation buttons
 
 **Command Outputs:**
+
 - Home.tsx: Lines 13-81 (demo mode with exit function)
 - Layout.tsx: Lines 1-100 (full navigation structure including demo banner)
 - Games.tsx: Lines 30-75 (game definitions and cards with staggered animation)

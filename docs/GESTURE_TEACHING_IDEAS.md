@@ -11,6 +11,7 @@
 **What to Teach**: The traditional Indian greeting with folded hands
 
 **Game: "Namaste Detective"**
+
 - **Pattern**: Match Pose
 - **How it works**:
   1. System shows animation of hands coming together at chest level
@@ -19,11 +20,13 @@
   4. Success triggers: "Namaste! 🙏 Well done!"
   
 **Learning Extensions**:
+
 - Teach when to use namaste (elders, teachers, guests)
 - Explain meaning: "The divine in me bows to the divine in you"
 - Pair with "Namaste" audio in Hindi
 
 **Detection Logic**:
+
 ```typescript
 const detectNamaste = (landmarks) => {
   // Both hands visible
@@ -41,6 +44,7 @@ const detectNamaste = (landmarks) => {
 **What to Teach**: The Indian side-to-side head wobble that means "yes/I understand"
 
 **Game: "Head Wobble Challenge"**
+
 - **Pattern**: Hold Still + Movement Detection
 - **How it works**:
   1. System demonstrates the gentle side-to-side wobble
@@ -49,6 +53,7 @@ const detectNamaste = (landmarks) => {
   4. Success when smooth side-to-side motion detected
 
 **Teach Differences**:
+
 | Gesture | Meaning | Movement |
 |---------|---------|----------|
 | Side wobble | Yes / I understand | Gentle side-to-side |
@@ -56,6 +61,7 @@ const detectNamaste = (landmarks) => {
 | Side shake | No | Horizontal shake |
 
 **Cultural Context**:
+
 - When to use each gesture
 - Regional variations (North vs South India)
 - Tone and context matters
@@ -67,6 +73,7 @@ const detectNamaste = (landmarks) => {
 **What to Teach**: Elders giving blessings with hand on head
 
 **Game: "Give a Blessing"**
+
 - **Pattern**: Drag & Drop + Hold Still
 - **How it works**:
   1. Virtual "younger" character appears
@@ -83,11 +90,13 @@ const detectNamaste = (landmarks) => {
 ### 1. Thumbs Up / Thumbs Down
 
 **Game: "Gesture Voting"**
+
 - System asks: "Do you like apples?"
 - Child shows thumbs up (yes) or thumbs down (no)
 - MediaPipe detects thumb position relative to fingers
 
 **Teaching Points**:
+
 - When to use (approval/disapproval)
 - Cultural differences (thumbs up is positive in most cultures)
 - Paired with verbal response
@@ -97,11 +106,13 @@ const detectNamaste = (landmarks) => {
 ### 2. Wave Hello / Goodbye
 
 **Game: "Wave to Pip"**
+
 - Pip appears and waves
 - Child waves back
 - Hand tracking detects waving motion (repeated side-to-side)
 
 **Extensions**:
+
 - Different wave styles (royal wave, excited wave, shy wave)
 - When to wave (greeting, leaving, getting attention)
 
@@ -110,6 +121,7 @@ const detectNamaste = (landmarks) => {
 ### 3. OK Sign 👌
 
 **Game: "Make an OK"**
+
 - Form circle with thumb and index finger
 - Other fingers extended
 - Use to confirm answers: "Is this correct? Show me OK!"
@@ -119,12 +131,14 @@ const detectNamaste = (landmarks) => {
 ### 4. Pointing
 
 **Game: "Point to the Answer"**
+
 - System asks: "Where is the red balloon?"
 - Child points with index finger
 - Hand Landmarker tracks index fingertip
 - Selection confirmed with tap gesture
 
 **Teach**:
+
 - Pointing etiquette (don't point at people)
 - Using open hand vs finger in different cultures
 
@@ -133,6 +147,7 @@ const detectNamaste = (landmarks) => {
 ### 5. Stop / Wait ✋
 
 **Game: "Traffic Controller"**
+
 - Cars approaching in game
 - Child shows open palm = Stop
 - Child waves hand = Go
@@ -145,6 +160,7 @@ const detectNamaste = (landmarks) => {
 ### 6. Clapping 👏
 
 **Game: "Clap for Success"**
+
 - Detect hands coming together quickly
 - Use for celebrations in games
 - Rhythm clapping games (copy the pattern)
@@ -156,17 +172,20 @@ const detectNamaste = (landmarks) => {
 ### 1. Counting on Fingers (Indian Style)
 
 **Teaching**: Indian finger counting differs from Western:
+
 - Start with closed fist
 - Thumb = 1
 - Thumb + index = 2
 - And so on...
 
 **Game: "Show Me Five"**
+
 - System asks for number in Hindi
 - Child shows correct finger count Indian style
 - MediaPipe counts extended fingers
 
 **Compare**:
+
 | Count | Indian Style | Western Style |
 |-------|--------------|---------------|
 | 1 | Thumb | Index |
@@ -179,11 +198,13 @@ const detectNamaste = (landmarks) => {
 **Introduction to hand gestures from Indian classical dance**
 
 **Game: "Mudra Memory"**
+
 - Show simple mudra (e.g., Pataka - open palm)
 - Child copies the hand shape
 - Score based on accuracy
 
 **Simple Mudras to Teach**:
+
 | Mudra | Hand Shape | Meaning |
 |-------|------------|---------|
 | Pataka | Open palm | Blessing, forest |
@@ -200,12 +221,14 @@ const detectNamaste = (landmarks) => {
 ### 1. Emotion Mirror
 
 **Game: "Copy the Face"**
+
 - System shows emoji face (happy, sad, surprised, angry)
 - Child makes the expression
 - Face Landmarker detects expression match
 - Fun, not judgmental scoring
 
 **Teach**:
+
 - Reading emotions in others
 - Expressing feelings appropriately
 - Cultural expressions (smiling in photos vs natural)
@@ -215,6 +238,7 @@ const detectNamaste = (landmarks) => {
 ### 2. Simon Says (Enhanced)
 
 **Game: "Pip Says"**
+
 - "Pip says touch your head"
 - "Pip says do namaste"
 - "Pip says thumbs up"
@@ -227,6 +251,7 @@ const detectNamaste = (landmarks) => {
 ### 1. Indian Sign Language (ISL) Alphabet
 
 **Game: "Sign the Letter"**
+
 - Show letter on screen
 - Child makes ISL sign for that letter
 - Hand tracking validates shape
@@ -238,6 +263,7 @@ const detectNamaste = (landmarks) => {
 ### 2. Basic ISL Words
 
 **Game: "Sign Language Hero"**
+
 - Common words: Thank you, Please, Sorry, Water, Food
 - Child learns 5-10 essential signs
 - Great for inclusivity education
@@ -249,6 +275,7 @@ const detectNamaste = (landmarks) => {
 ### 1. Gesture Around the World
 
 **Game: "Global Gestures"**
+
 | Country | Gesture | Meaning |
 |---------|---------|---------|
 | India | Namaste | Hello/Respect |
@@ -259,6 +286,7 @@ const detectNamaste = (landmarks) => {
 | Hawaii | Shaka 🤙 | Hang loose/Thanks |
 
 **How it works**:
+
 - Learn gesture from different culture
 - Practice with MediaPipe detection
 - Learn when/where it's used
@@ -268,6 +296,7 @@ const detectNamaste = (landmarks) => {
 ### 2. Gestures That Differ
 
 **Teach Awareness**:
+
 | Gesture | USA Meaning | Other Meanings |
 |---------|-------------|----------------|
 | Thumbs up | Good! | Offensive in some Middle East countries |
@@ -281,31 +310,39 @@ const detectNamaste = (landmarks) => {
 ## 🎮 Game Implementation Ideas
 
 ### Game 1: "Gesture Explorer"
+
 **Type**: Adventure game
 **Mechanic**: Use gestures to interact with characters
+
 - Namaste to elders
 - Wave to friends  
 - Thumbs up for approval
 - Point to select items
 
 ### Game 2: "Cultural Quest India"
+
 **Type**: Story-based learning
 **Mechanic**: Travel through Indian scenes, learn appropriate gestures
+
 - Village: Namaste to villagers
 - City: Traffic gestures
 - Temple: Blessing gesture
 - Home: Respect gestures
 
 ### Game 3: "Gesture Detective"
+
 **Type**: Mystery game
 **Mechanic**: Decode messages using gestures
+
 - Clue shows gesture image
 - Child performs gesture
 - Unlocks next clue
 
 ### Game 4: "Mirror Me"
+
 **Type**: Rhythm game
 **Mechanic**: Copy gesture sequences
+
 - System shows: Wave → Namaste → Thumbs up
 - Child repeats in order
 - Speed increases with success
@@ -362,18 +399,21 @@ const isThumbsUp = (hand) => {
 ## 📝 Curriculum Integration
 
 ### Preschool (3-5 years)
+
 - Wave hello/goodbye
 - Thumbs up/down
 - Clapping
 - Basic namaste (simplified)
 
 ### Early Elementary (5-7 years)
+
 - Full namaste with meaning
 - Head wobble vs nod
 - Pointing etiquette
 - Basic emotions
 
 ### Elementary (7-9 years)
+
 - Mudras introduction
 - Cultural context discussions
 - Finger counting differences
@@ -384,16 +424,19 @@ const isThumbsUp = (hand) => {
 ## 🎨 UI/UX Considerations
 
 ### Feedback Design
+
 - **Positive**: Gentle chime + "Namaste! Well done!"
 - **Guidance**: "Bring your hands together at your chest"
 - **Cultural**: Show context ("Use this to greet elders")
 
 ### Visual Aids
+
 - Ghost/outline of target gesture
 - Video demonstration option
 - Cultural context photos
 
 ### Accessibility
+
 - Alternative input methods
 - Extended time for complex gestures
 - Clear distinction between similar gestures

@@ -17,12 +17,14 @@
 ## REQUIRED DISCOVERY
 
 If Git availability is YES:
+
 ```bash
 git diff --name-only <base>..<head>
 git diff <base>..<head> --stat
 ```
 
 Always:
+
 ```bash
 rg -n "<affected route/symbol>" -S src || true
 ```

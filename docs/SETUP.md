@@ -71,6 +71,7 @@ Example `.vscode/settings.json`:
 **Evidence**: TCK-20260131-008 (Priority 8) - Updated VS Code settings for proper ESLint workspace configuration and mypy path resolution.
 
 **Related Tickets**:
+
 - TCK-20260131-008: Update VS Code settings
 - TCK-20260131-006: Review disabled lint rules (documents ESLint configuration decisions)
 
@@ -142,6 +143,7 @@ Before running backend tests, set up the test database:
 ```
 
 This script:
+
 - Checks if PostgreSQL is running
 - Creates `advay_learning_test` database if it doesn't exist
 - Runs alembic migrations on the test database
@@ -150,9 +152,9 @@ This script:
 
 ## Verify Installation
 
-- Backend: http://localhost:8001/health
-- API Docs: http://localhost:8001/docs
-- Frontend: http://localhost:5173
+- Backend: <http://localhost:8001/health>
+- API Docs: <http://localhost:8001/docs>
+- Frontend: <http://localhost:5173>
 
 ## Running Tests
 

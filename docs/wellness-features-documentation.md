@@ -1,27 +1,32 @@
 # Wellness Features Documentation
 
 ## Overview
+
 This document describes the wellness features implemented in the Advay Learning App to promote healthy gaming habits for children.
 
 ## Features Implemented
 
 ### 1. Active Time Tracking
+
 - Monitors continuous playtime
 - Tracks minutes since game started
 - Provides data for wellness reminders
 
 ### 2. Inactivity Detection
+
 - Detects when child is not interacting with the game
 - Uses event listeners for mouse, keyboard, touch, and scroll events
 - Resets timer when activity is detected
 
 ### 3. Wellness Timer Component
+
 - Visual display of active and inactive time
 - Configurable thresholds for reminders
 - Option to hide/show the timer
 - Floating reminder indicator when hidden
 
 ### 4. Wellness Reminder System
+
 - Contextual reminders based on time thresholds:
   - Break reminder after 15 minutes of continuous play
   - Water/hydration reminder after 20 minutes
@@ -31,6 +36,7 @@ This document describes the wellness features implemented in the Advay Learning 
 - Postpone and dismiss options
 
 ### 5. Eye Tracking (Advanced)
+
 - Uses MediaPipe Face Landmarker for blink detection
 - Calculates Eye Aspect Ratio (EAR) to detect blinks
 - Provides blink count and timing data
@@ -41,12 +47,14 @@ This document describes the wellness features implemented in the Advay Learning 
 ### Components
 
 #### WellnessTimer.tsx
+
 - Displays active time and inactive time
 - Configurable thresholds for reminders
 - Toggle visibility option
 - Uses React state and effects for time tracking
 
 #### WellnessReminder.tsx
+
 - Modal component for wellness notifications
 - Contextual messages based on detected needs
 - Different types: break, water, stretch, inactive
@@ -55,12 +63,14 @@ This document describes the wellness features implemented in the Advay Learning 
 #### Hooks
 
 ##### useInactivityDetector.ts
+
 - Tracks user activity via event listeners
 - Configurable timeout threshold
 - Returns active status and time remaining
 - Automatically resets on user interaction
 
 ##### useEyeTracking.ts
+
 - Integrates with MediaPipe for face detection
 - Calculates eye aspect ratios for blink detection
 - Returns blink count and eye state
@@ -69,6 +79,7 @@ This document describes the wellness features implemented in the Advay Learning 
 ### Integration Points
 
 #### AlphabetGame.tsx
+
 - Added wellness state variables
 - Integrated WellnessTimer component
 - Integrated WellnessReminder component
@@ -78,24 +89,28 @@ This document describes the wellness features implemented in the Advay Learning 
 ## Configuration Options
 
 ### WellnessTimer Props
+
 - `onBreakReminder`: Callback when break threshold reached
 - `activeThreshold`: Minutes before break reminder (default: 15)
 - `inactiveThreshold`: Seconds before inactivity reminder (default: 60)
 - `onInactiveDetected`: Callback when inactivity detected
 
 ### WellnessReminder Props
+
 - `activeTime`: Current active time in minutes
 - `inactiveTime`: Current inactive time in seconds
 - `onDismiss`: Callback when reminder dismissed
 - `onPostpone`: Callback when reminder postponed
 
 ### useInactivityDetector Options
+
 - `timeoutMs`: Milliseconds before inactivity detected (default: 60000)
 - `onInactivityDetected`: Callback when inactivity detected
 
 ## Usage Examples
 
 ### Basic Integration
+
 ```tsx
 import WellnessTimer from '../components/WellnessTimer';
 import WellnessReminder from '../components/WellnessReminder';
@@ -130,12 +145,14 @@ return (
 ## Best Practices
 
 ### For Developers
+
 - Always check if game is active before triggering wellness features
 - Use appropriate thresholds based on age group
 - Provide clear, kid-friendly messaging
 - Test on various devices and browsers
 
 ### For Parents/Educators
+
 - Customize thresholds based on child's attention span
 - Monitor wellness feature effectiveness
 - Adjust settings based on child's response
@@ -144,6 +161,7 @@ return (
 ## Future Enhancements
 
 ### Planned Features
+
 - More sophisticated eye tracking for attention detection
 - Personalized wellness schedules
 - Parent dashboard for wellness data
@@ -151,6 +169,7 @@ return (
 - Adaptive reminder timing based on child behavior
 
 ### Potential Improvements
+
 - Audio reminders for younger children
 - Gamified wellness activities
 - Social wellness challenges
@@ -176,18 +195,21 @@ return (
 ## Testing Guidelines
 
 ### Unit Tests
+
 - Time tracking accuracy
 - Inactivity detection reliability
 - Reminder triggering conditions
 - State management correctness
 
 ### Integration Tests
+
 - Component rendering in game context
 - Event listener attachment/removal
 - Data flow between components
 - Lifecycle management during game start/stop
 
 ### User Acceptance Tests
+
 - Child-friendly interface validation
 - Appropriate timing of reminders
 - Non-disruptive experience

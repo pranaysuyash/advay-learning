@@ -2,6 +2,7 @@
 
 **Date:** 2026-01-29
 **Audited files:**
+
 - `src/backend/app/core/security.py`
 - `src/backend/app/api/v1/endpoints/auth.py`
 **Base commit SHA:** 1519b8156acf474e27afab3c8c549bdc241dca3b
@@ -43,6 +44,7 @@ Commands executed (high-signal):
 ## 3) What this system actually does (Observed)
 
 The authentication system provides:
+
 - Password hashing/verification using bcrypt
 - JWT token creation for access and refresh tokens using HS256
 - User registration, login, logout, and token refresh endpoints
@@ -55,12 +57,14 @@ The authentication system provides:
 ## 4) Key components (Observed)
 
 ### Security Module (`src/backend/app/core/security.py`)
+
 - `verify_password()`: Verifies password against bcrypt hash
 - `get_password_hash()`: Creates bcrypt hash with 72-byte truncation
 - `create_access_token()`: Creates JWT access token (15-min expiry)
 - `create_refresh_token()`: Creates JWT refresh token (7-day expiry)
 
 ### Auth Endpoints (`src/backend/app/api/v1/endpoints/auth.py`)
+
 - `register()`: User registration with duplicate email check
 - `login()`: Authentication with JWT token creation and cookie setting
 - `logout()`: Clears authentication cookies
@@ -78,11 +82,13 @@ The authentication system provides:
 ### 5a) Outbound dependencies (Observed)
 
 **Security Module:**
+
 - `bcrypt` (load-bearing): Password hashing and verification
 - `jose.jwt` (load-bearing): JWT encoding/decoding
 - `settings.SECRET_KEY`, `ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_EXPIRE_DAYS` (load-bearing)
 
 **Auth Endpoints:**
+
 - `UserService` (load-bearing): User CRUD and authentication operations
 - `app.core.security.create_access_token`, `create_refresh_token` (load-bearing)
 - `app.core.rate_limit.limiter` (load-bearing): Rate limiting
@@ -377,18 +383,18 @@ The authentication system provides:
 
 ### MEDIUM PRIORITY (Implement Soon)
 
-3. **Comprehensive Refresh Tests** (M3)
+1. **Comprehensive Refresh Tests** (M3)
    - Add tests for all refresh scenarios
    - Test token expiration handling
    - Test invalid token rejection
 
 ### LOW PRIORITY (Implement When Convenient)
 
-4. **Request Schema for Refresh** (L1)
+1. **Request Schema for Refresh** (L1)
    - Add Pydantic model for refresh request
    - Improve API documentation
 
-5. **Status Code Consistency** (L2)
+2. **Status Code Consistency** (L2)
    - Change register to return 201
    - Update tests accordingly
 
@@ -397,23 +403,27 @@ The authentication system provides:
 ## 20) Implementation roadmap
 
 ### Phase 1: Token Revocation (1-2 days)
+
 - Add `jti` to token creation functions
 - Create revocation database table
 - Implement revocation checks
 - Add comprehensive tests
 
 ### Phase 2: Refresh Rotation (1-2 days)
+
 - Add refresh token tracking
 - Implement rotation logic
 - Add invalidation on refresh
 - Add comprehensive tests
 
 ### Phase 3: Test Coverage (1 day)
+
 - Add missing refresh endpoint tests
 - Add token revocation tests
 - Add refresh rotation tests
 
 ### Phase 4: API Improvements (0.5 day)
+
 - Add request schema for refresh
 - Fix status code inconsistency
 - Update documentation
@@ -452,4 +462,3 @@ _End of audit._
 This audit ticket (TCK-20260129-080) is currently **OPEN** and contains many findings that need implementation.
 
 See the full audit document above for detailed findings and recommended actions.
-

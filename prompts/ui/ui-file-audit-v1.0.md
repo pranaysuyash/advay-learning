@@ -11,6 +11,7 @@ If something depends on other code not provided, label it Unknown.
 
 **EVIDENCE DISCIPLINE (NON-NEGOTIABLE)**
 Every non-trivial claim MUST be labeled as exactly one:
+
 - Observed: directly verifiable from this file alone
 - Inferred: logically implied but not provable from this file
 - Unknown: cannot be determined from this file
@@ -23,36 +24,43 @@ Then provide a short human explanation.
 **WHAT TO AUDIT (check all that apply)**
 
 1) States and transitions
+
 - Loading, empty, error, partial
 - Disabled conditions, optimistic updates, retries
 - Race conditions (stale closures, outdated requests)
 
-2) Accessibility
+1) Accessibility
+
 - Keyboard reachability (tab order, focus traps)
 - Focus styles and focus management on dialog/open/close
 - Semantic elements vs div soup
 - Labels for inputs, ARIA only when needed
 
-3) Responsiveness and layout safety
+1) Responsiveness and layout safety
+
 - Overflow, truncation, wrapping, long strings
 - Container queries/breakpoints assumptions
 - Touch target sizes for mobile
 
-4) Visual hierarchy and interaction clarity (from code-level clues)
+1) Visual hierarchy and interaction clarity (from code-level clues)
+
 - Primary action placement and disabled logic
 - Confusing dual CTAs, ambiguous labels
 
-5) Performance footguns
+1) Performance footguns
+
 - Unbounded renders, expensive computations in render
 - Missing memoization when warranted
 - Large lists without virtualization
 
-6) Consistency and maintainability
+1) Consistency and maintainability
+
 - Duplicated patterns, missing shared components
 - Styling drift, hard-coded spacing/colors vs tokens
 - Error handling patterns inconsistent with project norms (if provided)
 
 **JSON SCHEMA**
+
 ```json
 {
   "meta": {
@@ -101,5 +109,6 @@ Then provide a short human explanation.
 ```
 
 **FINAL OUTPUT FORMAT**
+
 - First line: UI_FILE_AUDIT_RESULT={...valid json...}
 - Then: concise summary of the top issues and the safest fix path

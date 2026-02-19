@@ -20,12 +20,14 @@
 ## Brand Architecture (Dual System)
 
 ### Advay — The Platform
+
 - **Represents**: Technology, Education, Trust
 - **Audience**: Parents, Investors, Schools
 - **Tone**: Smart, Advanced, Caring
 - **Color**: Advay Slate `#2D3748`
 
 ### Pip — The Companion  
+
 - **Represents**: Fun, Friendship, Engagement
 - **Audience**: Kids ages 3-8
 - **Tone**: Playful, Encouraging, Concrete
@@ -116,6 +118,7 @@ font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
 ## Logo System
 
 ### Primary Logo
+
 **Advay wordmark** with optional Pip icon
 
 ```
@@ -270,18 +273,21 @@ box-shadow: 0 8px 0 #E5B86E;
 ### For Children (Pip's Voice)
 
 **DO:**
+
 - Short, concrete instructions: "Show me your hand"
 - Action-first: "Wave like me!"
 - Concrete praise: "You traced the A!"
 - One instruction at a time
 
 **DON'T:**
+
 - Baby talk
 - Long sentences
 - Generic praise ("Amazing!")
 - Too many exclamation points
 
 **Example:**
+
 - Good: "Draw a circle. Great! Now try the letter B."
 - Bad: "Let's have so much fun learning together!!!"
 

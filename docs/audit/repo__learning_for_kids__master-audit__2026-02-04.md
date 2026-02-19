@@ -11,6 +11,7 @@
 ## Evidence Discipline
 
 This report separates:
+
 - **Observed**: Verified from repository files and command outputs.
 - **Inferred**: Logical interpretation based on observed evidence.
 - **Unknown**: Cannot be determined without running services, inspecting secrets, or real device testing.
@@ -59,6 +60,7 @@ Where this report references external best practices and standards, links are pr
   - Exclude: generated build output and vendored dependencies.
 
 **Skipped/Excluded areas (Observed)**:
+
 - `src/frontend/node_modules/`, `src/frontend/dist/`, caches (`.ruff_cache`, `.pytest_cache`, etc.).
 
 ## B) Product Behavior Reconstruction
@@ -163,6 +165,7 @@ A React + FastAPI learning app aimed at kids 2–8 with camera-driven interactio
 ## 3) Audit Findings
 
 Format per finding:
+
 - **ID**: category-number
 - **Severity**: Blocker/High/Med/Low
 - **Confidence**: High/Med/Low
@@ -339,16 +342,15 @@ Format per finding:
 
 ### Standards and best-practice references
 
-- JWT (RFC 7519): https://www.rfc-editor.org/rfc/rfc7519
-- HTTP cookies (RFC 6265): https://www.rfc-editor.org/rfc/rfc6265
-- MDN SameSite cookies: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#samesite_attribute
-- OWASP ASVS (Application Security Verification Standard): https://owasp.org/www-project-application-security-verification-standard/
-- FTC COPPA Rule (children’s privacy in the US): https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa
-- MDN getUserMedia: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-- W3C Permissions Policy: https://www.w3.org/TR/permissions-policy-1/
+- JWT (RFC 7519): <https://www.rfc-editor.org/rfc/rfc7519>
+- HTTP cookies (RFC 6265): <https://www.rfc-editor.org/rfc/rfc6265>
+- MDN SameSite cookies: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#samesite_attribute>
+- OWASP ASVS (Application Security Verification Standard): <https://owasp.org/www-project-application-security-verification-standard/>
+- FTC COPPA Rule (children’s privacy in the US): <https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa>
+- MDN getUserMedia: <https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia>
+- W3C Permissions Policy: <https://www.w3.org/TR/permissions-policy-1/>
 
 ### Notes on how research influences recommendations (Inferred)
 
 - Cookie/session guidance and OWASP verification practices inform the auth + contract-freeze + rate limiting roadmap.
 - COPPA/children’s privacy guidance informs the urgency of reconciling privacy posture docs with the actual deployment model.
-

@@ -5,6 +5,7 @@
 Conduct persona-based playtest audit of 4 games with 8 personas to verify multi-model code review findings and identify UX issues across age groups.
 
 **Focus Areas** (from multi-model analysis):
+
 1. Difficulty colors - Are they visually distinct? Can users tell difficulty levels apart?
 2. Age-based component adaptation - Do buttons, text size, instructions change per age group?
 3. Analytics capture - Are gameplay events fired? Are they logged?
@@ -16,10 +17,12 @@ Conduct persona-based playtest audit of 4 games with 8 personas to verify multi-
 ## Test Setup
 
 ### Server Status ✅
-- **Frontend**: Running on http://localhost:6173
-- **Backend**: Running on http://localhost:8001
+
+- **Frontend**: Running on <http://localhost:6173>
+- **Backend**: Running on <http://localhost:8001>
 
 ### Profile Setup
+
 Before starting playtests, verify test profiles exist or create them:
 
 ```bash
@@ -43,7 +46,9 @@ Before starting playtests, verify test profiles exist or create them:
 ```
 
 ### Browser Console Setup
+
 Open DevTools (F12 or Cmd+Opt+J) and monitor:
+
 - Console logs (errors, warnings, analytics events)
 - Network tab (API calls, event tracking)
 - Application tab (localStorage, sessionStorage)
@@ -55,6 +60,7 @@ Open DevTools (F12 or Cmd+Opt+J) and monitor:
 ### Test 1: AlphabetGame (Draw Letters) - Asha Persona (2-3yr)
 
 **Expected Behaviors** (from multi-model analysis):
+
 - Toddler will tap/swipe randomly
 - Can't follow written instructions
 - Needs immediate visual feedback
@@ -63,7 +69,7 @@ Open DevTools (F12 or Cmd+Opt+J) and monitor:
 **Test Steps**:
 
 1. **Launch game**:
-   - Open http://localhost:6173
+   - Open <http://localhost:6173>
    - Select "Asha" profile
    - Tap "Games"
    - Tap "Draw Letters" or "AlphabetGame"
@@ -97,6 +103,7 @@ Open DevTools (F12 or Cmd+Opt+J) and monitor:
 ### Test 2: AlphabetGame (Draw Letters) - Dev Persona (4-6yr)
 
 **Expected Behaviors**:
+
 - Can follow simple instructions
 - Wants to know if they won or lost
 - Tries multiple times on failure
@@ -135,6 +142,7 @@ Open DevTools (F12 or Cmd+Opt+J) and monitor:
 ### Test 3: AlphabetGame (Draw Letters) - Maya Persona (7-9yr)
 
 **Expected Behaviors**:
+
 - Reads and follows complex instructions
 - Wants to optimize performance
 - Asks about harder levels
@@ -221,8 +229,8 @@ Open DevTools (F12 or Cmd+Opt+J) and monitor:
    - [ ] Check profile or settings for quest unlock status
 
 3. **Try Direct URL** (if quests hidden in UI):
-   - [ ] Try http://localhost:6173/quests
-   - [ ] Try http://localhost:6173/islands
+   - [ ] Try <http://localhost:6173/quests>
+   - [ ] Try <http://localhost:6173/islands>
    - [ ] Does it load? Redirect? Show 404?
 
 4. **Check Console**:
@@ -305,7 +313,9 @@ For each test, document:
 
 **Console Log**:
 ```
+
 [Paste relevant console events, analytics payloads, network calls]
+
 ```
 
 **Findings**:

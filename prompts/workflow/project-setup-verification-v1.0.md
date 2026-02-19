@@ -7,6 +7,7 @@ Use this prompt when setting up the project for the first time or when ports/con
 Before running the app, verify:
 
 ### 1. Port Availability
+
 ```bash
 # Check if ports are free
 lsof -i :8000  # or 8001, 8002, etc.
@@ -14,15 +15,18 @@ lsof -i :5173  # or 6173, etc.
 ```
 
 ### 2. Backend Configuration
+
 File: `src/backend/.env`
 
 Required fields:
+
 - `SECRET_KEY` - Any string for dev
 - `DATABASE_URL` - SQLite path or PostgreSQL URL
 - `ALLOWED_ORIGINS` - MUST include frontend URL
 
 **CRITICAL: CORS Configuration**
 The `ALLOWED_ORIGINS` must include the exact frontend URL including port:
+
 ```
 # If frontend runs on localhost:6173
 ALLOWED_ORIGINS=["http://localhost:6173"]
@@ -35,6 +39,7 @@ ALLOWED_ORIGINS=["http://localhost:6173","http://localhost:5173"]
 ```
 
 ### 3. Frontend Configuration
+
 File: `src/frontend/.env` (create if doesn't exist)
 
 ```bash
@@ -57,22 +62,29 @@ grep -E "800[0-9]|5173|6173" docs/QUICKSTART.md
 ## Common Issues & Fixes
 
 ### CORS Error
+
 ```
 Access to XMLHttpRequest blocked by CORS policy
 ```
+
 **Fix:** Add frontend URL to `src/backend/.env` ALLOWED_ORIGINS
 
 ### Port Already in Use
+
 ```
 Error: Address already in use
 ```
+
 **Fix:** Change port in both backend command AND frontend .env
 
 ### Connection Refused
+
 ```
 net::ERR_CONNECTION_REFUSED
 ```
-**Fix:** 
+
+**Fix:**
+
 1. Check backend is running
 2. Verify ports match between frontend .env and backend
 3. Check firewall settings
@@ -84,11 +96,13 @@ net::ERR_CONNECTION_REFUSED
    - Frontend: 5173, 6173, etc.
 
 2. **Configure backend** (`src/backend/.env`)
+
    ```
    ALLOWED_ORIGINS=["http://localhost:FRONTEND_PORT"]
    ```
 
 3. **Configure frontend** (`src/frontend/.env`)
+
    ```
    VITE_API_BASE_URL=http://localhost:BACKEND_PORT
    ```
@@ -98,15 +112,20 @@ net::ERR_CONNECTION_REFUSED
    - Update all port references
 
 5. **Verify before starting**
+
    ```bash
    # Check backend config
+
 grep ALLOWED_ORIGINS src/backend/.env
-   
-   # Check frontend config
+
+# Check frontend config
+
 cat src/frontend/.env
-   
-   # Check docs
+
+# Check docs
+
 grep -E "(800[0-9]|5173|6173)" docs/QUICKSTART.md | head -5
+
    ```
 
 ## Evidence to Record

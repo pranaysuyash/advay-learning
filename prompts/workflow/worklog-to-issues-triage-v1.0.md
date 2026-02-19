@@ -3,6 +3,7 @@
 **Purpose**: Convert a batch of OPEN/P0–P1 worklog tickets into GitHub Issues with consistent labels, and append Issue links back into the worklog.
 
 **Use When**:
+
 - The worklog is becoming hard to scan
 - You want team visibility without changing the canonical worklog process
 
@@ -27,11 +28,13 @@
 ## Step 1 — Collect Candidate Tickets
 
 From `docs/WORKLOG_TICKETS.md`, list tickets matching the filter:
+
 - Ticket ID, title
 - Type, priority, status
 - One-line summary
 
 Evidence:
+
 ```bash
 rg -n "### TCK-" docs/WORKLOG_TICKETS.md
 ```
@@ -41,11 +44,12 @@ rg -n "### TCK-" docs/WORKLOG_TICKETS.md
 ## Step 2 — For Each Ticket (Up to Max)
 
 1) Check if an Issue already exists:
+
 ```bash
 gh issue list --search "<ticket-id>" --state all
 ```
-2) If none exists, create one using `prompts/workflow/issue-sync-v1.0.md`.
-3) Append `Issue: #...` to the ticket with evidence.
+1) If none exists, create one using `prompts/workflow/issue-sync-v1.0.md`.
+2) Append `Issue: #...` to the ticket with evidence.
 
 ---
 

@@ -16,6 +16,7 @@ This document captures the linting practices and decisions made in the Advay Vis
 Never silence lint errors without understanding their root cause and documenting the decision.
 
 **Before Disabling a Rule:**
+
 1. **Understand the error**: Why is the linter flagging this?
 2. **Assess impact**: Is this a real issue or a false positive?
 3. **Consider alternatives**: Can we fix the underlying issue instead?
@@ -30,26 +31,32 @@ Never silence lint errors without understanding their root cause and documenting
 
 Use `@ts-expect-error` sparingly and only when appropriate.
 
-### When NOT to use:
+### When NOT to use
+
 - **False positives**: Variables with underscore prefix (`_variableName`) that are intentionally unused
+
   ```typescript
   // This is a placeholder variable for future use
   const _unusedPlaceholder = someValue;
   ```
+
   - **Rationale**: The underscore prefix signals "intentionally unused" to other developers
 
-### When to use:
+### When to use
+
 - **Genuinely unused variables**: If a variable is truly unused and has no underscore prefix, fix it or remove it
 - **Stale suppressions**: Remove old `@ts-expect-error` comments after fixing the underlying issue
 
-### Examples from Codebase:
+### Examples from Codebase
 
 **Appropriate Use** (intentionally unused):
+
 ```typescript
 // FingerNumberShow.tsx:152
 // @ts-expect-error - showCelebration is used by code below (removed for lint)
 const [showCelebration, setShowCelebration] = useState(false);
 ```
+
 - **Why**: Variable removed during refactoring but state management still needs the setter
 
 ---
@@ -59,13 +66,14 @@ const [showCelebration, setShowCelebration] = useState(false);
 ### Rules to Consider Before Disabling
 
 **Common Rules Often Disabled:**
+
 - `react-hooks/exhaustive-deps` - Hook dependency checking
 - `react-hooks/rules-of-hooks` - Hooks placement rules
 - `react/button-type-has-static-qualifiers` - Button type attributes
 - `@typescript-eslint/no-explicit-any` - Any type usage
 - `react-refresh/only-export-components` - Component export patterns
 
-### Decision Matrix:
+### Decision Matrix
 
 | Rule | Severity | When to Disable | When to Keep | Example |
 |-------|----------|-------------------|----------|---------|
@@ -95,7 +103,7 @@ const [showCelebration, setShowCelebration] = useState(false);
 
 ## 5. Disabled Lint Rules in This Project
 
-### Current Configuration (`.eslintrc.cjs`):
+### Current Configuration (`.eslintrc.cjs`)
 
 ```javascript
 module.exports = {
@@ -122,7 +130,7 @@ module.exports = {
 }
 ```
 
-### Rules Currently Disabled:
+### Rules Currently Disabled
 
 1. **`react-hooks/exhaustive-deps`**: 'off'
    - **Rationale**: Legacy code with complex hook dependencies not worth refactoring
@@ -144,12 +152,14 @@ module.exports = {
    - **Impact**: Medium - type safety degraded
    - **Recommendation**: Gradually introduce proper types, starting with new features
 
-### Historical Suppressions:
+### Historical Suppressions
 
 **From TCK-20260130-032** (Fix ProfileUpdate Import):
+
 - ✅ Fixed actual issue instead of disabling rules
 
 **From TCK-20260131-002** (Fix 10 button warnings):
+
 - ✅ Added `type` attributes to buttons for accessibility
 - ✅ Fixed form label association with `htmlFor`
 - ✅ TypeScript compiles with 0 errors
@@ -158,7 +168,7 @@ module.exports = {
 
 ## 6. When to Disable Rules
 
-### Decision Workflow:
+### Decision Workflow
 
 1. **Can we fix it without disabling?**
    - Yes → Fix it
@@ -178,7 +188,7 @@ module.exports = {
 
 ## 7. Re-enabling Rules
 
-### Process for Re-enabling:
+### Process for Re-enabling
 
 1. **Identify rules to re-enable**
    - Review each disabled rule
@@ -200,7 +210,7 @@ module.exports = {
 
 ## 8. VS Code Configuration
 
-### Settings for Linting (`.vscode/settings.json`):
+### Settings for Linting (`.vscode/settings.json`)
 
 ```json
 {
@@ -248,6 +258,7 @@ module.exports = {
 **Purpose**: ESLint workspace settings ensure VS Code uses the project's ESLint configuration instead of default settings.
 
 **Updates** (TCK-20260131-008 - Priority 8, 2026-01-31):
+
 - ✅ Fixed mypyArgs path from `"src/backend/pyproject.toml"` to `"pyproject.toml"` (corrects relative path)
 - ✅ Added ESLint workspace configuration: `eslint.workingDirectories`, `eslint.validate`, `eslint.options`
 - ✅ Configured rule warning levels: `react-hooks/exhaustive-deps` and `react-hooks/rules-of-hooks` set to `"warn"`
@@ -264,6 +275,7 @@ npm run audit:ui-design
 ```
 
 This command checks for:
+
 - inline hex colors in remediated UI files
 - low-contrast Home hero patterns from prior audit findings
 - canonical `Button` usage on Home
@@ -295,14 +307,14 @@ Reference: `docs/process/UI_DESIGN_SYSTEM_ENFORCEMENT.md`
 
 ## 10. Continuous Improvement
 
-### Goals:
+### Goals
 
 1. **Reduce disabled lint rules**: Gradually re-enable rules as code is refactored
 2. **Improve type safety**: Replace `any` types with proper TypeScript types
 3. **Fix accessibility**: Ensure all interactive elements have proper semantic markup
 4. **Better documentation**: Keep this guide updated with current practices
 
-### Metrics to Track:
+### Metrics to Track
 
 - **Number of disabled rules**: Currently 4 rules disabled
 - **Number of TypeScript errors**: Target: 0
@@ -315,8 +327,8 @@ Reference: `docs/process/UI_DESIGN_SYSTEM_ENFORCEMENT.md`
 
 - **Worklog Tickets**: See `docs/WORKLOG_TICKETS.md` for all linting-related work
 - **Project Documentation**: See `docs/SETUP.md` for environment setup
-- **React Documentation**: https://react.dev for hooks and component patterns
-- **ESLint Documentation**: https://eslint.org/docs/latest/rules/
+- **React Documentation**: <https://react.dev> for hooks and component patterns
+- **ESLint Documentation**: <https://eslint.org/docs/latest/rules/>
 
 ---
 

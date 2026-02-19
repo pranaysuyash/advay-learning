@@ -3,7 +3,6 @@
 import pytest
 from httpx import AsyncClient
 
-from app.main import app
 from app.db.models.user import User as UserModel
 from app.schemas.user import UserRole
 
@@ -134,6 +133,7 @@ async def test_delete_game_admin(client: AsyncClient, admin_token: str, db_sessi
 async def create_test_user(db_session, role: UserRole = UserRole.ADMIN) -> UserModel:
     """Helper to create admin user for tests."""
     from uuid import uuid4
+
     from app.core.security import get_password_hash
 
     user = UserModel(
@@ -171,7 +171,6 @@ async def login_user(client: AsyncClient, user: UserModel) -> str:
                 ip_address=None,
                 user_agent=None,
             )
-            from app.services.user_service import UserService
 
             user.email_verified = True
             session.add(user)

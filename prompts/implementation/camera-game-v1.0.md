@@ -11,6 +11,7 @@
 This prompt provides step-by-step guidance for implementing camera-based educational games that use MediaPipe (hands, face, pose, segmentation, object detection). All games should follow the architecture and best practices documented in `docs/MEDIAPIPE_EDUCATIONAL_FEATURES.md`.
 
 **Applicability:**
+
 - Single-player games (Simon Says, Freeze Dance, Yoga Animals, Reach Stars, Tap Count, Sort Buckets, etc.)
 - Multi-camera support (up to 2 hands)
 - Real-time perception (25-30 FPS target)
@@ -37,12 +38,14 @@ This prompt provides step-by-step guidance for implementing camera-based educati
 ### Step 1: Read the Worklog Ticket
 
 **Action:**
+
 ```bash
 # Find your ticket (e.g., TCK-20260129-200)
 grep -A 5 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
 ```
 
 **What to Look For:**
+
 - Scope contract (what to build, what to avoid)
 - Acceptance Criteria (must be testable)
 - Dependencies (other tickets that must complete first)
@@ -51,6 +54,7 @@ grep -A 5 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
 ### Step 2: Analyze Current Architecture
 
 **Action:**
+
 ```bash
 # Check existing MediaPipe integration
 rg -n "HandLandmarker|FaceLandmarker|PoseLandmarker" src/frontend/src --type-add 'ts,tsx'
@@ -63,6 +67,7 @@ ls -la src/frontend/src/components/game/ || echo "No game components"
 ```
 
 **What to Look For:**
+
 - Current MediaPipe setup (which tasks are already running)
 - Existing game architecture (how games are structured)
 - Reusable components that can be adapted
@@ -87,6 +92,7 @@ Review your worklog ticket and identify game type:
 | Real-World | Object Detector | Medium | Scavenger Hunt |
 
 **Select Your Implementation Path:**
+
 - Single MediaPipe Task: Hand, Face, Pose, or Object Detector
 - Core Interaction Primitives: Use existing or create new
 - Reusable Components: Build once, use multiple times
@@ -98,6 +104,7 @@ Review your worklog ticket and identify game type:
 ### Step 1: Camera Manager (Required for All Games)
 
 **What It Does:**
+
 - Manages camera permissions
 - Starts/stops camera stream
 - Provides video element to games
@@ -105,6 +112,7 @@ Review your worklog ticket and identify game type:
 - Provides camera quality signals
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/services/cameraManager.ts
 export class CameraManager {
@@ -176,6 +184,7 @@ export class CameraManager {
 ```
 
 **Evidence Requirements:**
+
 - [ ] CameraManager.ts created
 - [ ] Camera starts successfully
 - [ ] Camera stops cleanly
@@ -186,6 +195,7 @@ export class CameraManager {
 ### Step 2: MediaPipe Task Runner (Required for All Games)
 
 **What It Does:**
+
 - Wraps MediaPipe task initialization
 - Provides frame detection loop
 - Implements smoothing (EMA)
@@ -193,6 +203,7 @@ export class CameraManager {
 - Provides quality signals
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/services/mediapipeTaskRunner.ts
 interface TaskRunnerConfig {
@@ -307,6 +318,7 @@ export class MediaPipeTaskRunner {
 ```
 
 **Evidence Requirements:**
+
 - [ ] MediaPipeTaskRunner created
 - [ ] Supports Hand, Face, Pose tasks
 - [ ] EMA smoothing implemented
@@ -321,6 +333,7 @@ export class MediaPipeTaskRunner {
 ### Step 1: Base Game Component
 
 **What It Does:**
+
 - Common game infrastructure (camera loop, state machine, scoring)
 - Reusable across all game types
 - Handles lifecycle (start, pause, end, cleanup)
@@ -328,6 +341,7 @@ export class MediaPipeTaskRunner {
 - Supports undo/redo (where applicable)
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/components/game/BaseGame.tsx
 export interface BaseGameState {
@@ -440,6 +454,7 @@ export function BaseGame(props: BaseGameProps) {
 ### Step 2: Game Canvas Component
 
 **What It Does:**
+
 - Manages canvas rendering
 - Handles high-DPI displays
 - Provides drawing primitives
@@ -447,6 +462,7 @@ export function BaseGame(props: BaseGameProps) {
 - Supports multiple layers (game, UI overlay)
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/components/game/GameCanvas.tsx
 export interface GameCanvasProps {
@@ -534,6 +550,7 @@ export function GameCanvas(props: GameCanvasProps) {
 ### Step 1: Create Game Component Structure
 
 **Action:**
+
 ```bash
 # Create game directory
 mkdir -p src/frontend/src/games
@@ -543,6 +560,7 @@ touch src/frontend/src/games/YOUR_GAME_NAME.tsx
 ```
 
 **Template:**
+
 ```typescript
 // src/frontend/src/games/YOUR_GAME_NAME.tsx
 import { useState, useEffect, useCallback } from 'react';
@@ -658,6 +676,7 @@ export function YOUR_GAME_NAME() {
 Implement the `processGameResults` function with your game-specific logic.
 
 **For Hand-Based Games (Fine Motor, Gross Motor):**
+
 ```typescript
 const processGameResults = (results: HandResult) => {
   if (!results.landmarks || results.landmarks.length === 0) {
@@ -684,6 +703,7 @@ const processGameResults = (results: HandResult) => {
 ```
 
 **For Face-Based Games (Social-Emotional):**
+
 ```typescript
 const processGameResults = (results: FaceResult) => {
   if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
@@ -704,6 +724,7 @@ const processGameResults = (results: FaceResult) => {
 ```
 
 **For Object Detection Games (Language, Math, Real-World):**
+
 ```typescript
 const processGameResults = (results: DetectionResult) => {
   if (!results.detections || results.detections.length === 0) {
@@ -726,6 +747,7 @@ const processGameResults = (results: DetectionResult) => {
 Add child-friendly UI elements to your game component.
 
 **Best Practices:**
+
 - Large touch targets (minimum 60px for 4-6 year olds)
 - Clear, simple icons (emoji or SVG)
 - Bright, contrasting colors
@@ -734,6 +756,7 @@ Add child-friendly UI elements to your game component.
 - Celebrations for success (confetti, mascot)
 
 **Implementation:**
+
 ```typescript
 <motion.div
   initial={{ opacity: 0, scale: 0.8 }}
@@ -767,12 +790,14 @@ Add child-friendly UI elements to your game component.
 Integrate audio feedback using `useCelebrations` or `audioManager`.
 
 **Best Practices:**
+
 - Gentle, encouraging sounds (not harsh or negative)
 - Short, non-repetitive loops
 - Volume control (parent setting)
 - Easy to implement without audio files (use Web Audio API)
 
 **Implementation:**
+
 ```typescript
 import { playSound } from '../utils/audioManager';
 
@@ -798,6 +823,7 @@ const handleAction = (action: string) => {
 Add route for your game and integrate with App.tsx.
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/App.tsx
 // Add route for your game
@@ -810,6 +836,7 @@ Add route for your game and integrate with App.tsx.
 Export your game component and add to navigation.
 
 **Implementation:**
+
 ```typescript
 // src/frontend/src/games/YOUR_GAME_NAME.tsx
 export function YOUR_GAME_NAME();
@@ -826,6 +853,7 @@ export { YOUR_GAME_NAME } from './YOUR_GAME_NAME';
 ### Step 1: Unit Tests
 
 **Action:**
+
 ```bash
 # Create test file
 touch src/frontend/src/games/__tests__/YOUR_GAME_NAME.test.tsx
@@ -835,6 +863,7 @@ npm test -- YOUR_GAME_NAME.test.tsx
 ```
 
 **What to Test:**
+
 - Game logic (state changes, scoring)
 - MediaPipe integration (if applicable)
 - Canvas rendering
@@ -842,6 +871,7 @@ npm test -- YOUR_GAME_NAME.test.tsx
 - Error handling
 
 **Test Template:**
+
 ```typescript
 // src/frontend/src/games/__tests__/YOUR_GAME_NAME.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -869,6 +899,7 @@ describe('YOUR_GAME_NAME', () => {
 Test your game manually before committing.
 
 **Test Checklist:**
+
 - [ ] Camera starts successfully
 - [ ] MediaPipe initializes without errors
 - [ ] Game loop runs at 25+ FPS
@@ -887,6 +918,7 @@ Test your game manually before committing.
 Monitor FPS and optimize if needed.
 
 **Performance Checklist:**
+
 - [ ] Target FPS achieved (25-30 FPS)
 - [ ] No frame drops below 20 FPS
 - [ ] Canvas rendering is smooth (no jank)
@@ -899,6 +931,7 @@ Monitor FPS and optimize if needed.
 Test with screen reader and keyboard.
 
 **Accessibility Checklist:**
+
 - [ ] All interactive elements have ARIA labels
 - [ ] Keyboard navigation works (Tab, Enter, Space, Escape)
 - ] Focus indicators are visible
@@ -914,6 +947,7 @@ Test with screen reader and keyboard.
 ### Step 1: Update WORKLOG_TICKETS.md
 
 **Action:**
+
 ```bash
 # Update your worklog ticket
 # Find your ticket (e.g., TCK-20260129-200)
@@ -925,12 +959,14 @@ rg -A 20 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
 ```
 
 **What to Update:**
+
 - Status: DONE (mark as completed)
 - Completion timestamp
 - Evidence of implementation (screenshots, test results)
 - Next actions (if applicable)
 
 **Evidence Template:**
+
 ```markdown
 ### Evidence of Completion
 
@@ -950,6 +986,7 @@ rg -A 20 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
 ### Step 2: Update Component Documentation
 
 **Action:**
+
 ```bash
 # Update component documentation
 touch src/frontend/src/components/game/README.md
@@ -965,6 +1002,7 @@ echo "- YOUR_GAME_NAME: Game description" >> src/frontend/src/components/game/RE
 ### Hand-Based Games (Fine Motor, Gross Motor)
 
 **Pattern 1: Finger Position Detection**
+
 ```typescript
 // Get finger position
 const fingerPosition = taskRunner.getFingerPosition(0);  // Index finger
@@ -980,6 +1018,7 @@ const isPointingAt = (position: Point, target: { x, y }, threshold: number = 0.0
 ```
 
 **Pattern 2: Pinch Detection**
+
 ```typescript
 // Detect pinch gesture
 const detectPinch = (results: HandResult) => {
@@ -999,6 +1038,7 @@ const detectPinch = (results: HandResult) => {
 ```
 
 **Pattern 3: Hand Raise Detection**
+
 ```typescript
 // Detect if hand is raised
 const isHandRaised = (wrist: Point, shoulder: Point) => {
@@ -1008,6 +1048,7 @@ const isHandRaised = (wrist: Point, shoulder: Point) => {
 ```
 
 **Pattern 4: Both Hands Support**
+
 ```typescript
 // Support both hands
 const getLeftHandPosition = () => taskRunner.getFingerPosition(0);
@@ -1022,6 +1063,7 @@ const isBothHandsRaised = (leftWrist, rightWrist) => {
 ### Face-Based Games (Social-Emotional)
 
 **Pattern 1: Expression Matching**
+
 ```typescript
 // Match expression by comparing blendshapes
 const matchExpression = (detected: Blendshapes, target: FaceBlendshapes): number => {
@@ -1044,6 +1086,7 @@ const matchExpression = (detected: Blendshapes, target: FaceBlendshapes): number
 ```
 
 **Pattern 2: Head Orientation Detection**
+
 ```typescript
 // Detect head turn (left/right)
 const detectHeadOrientation = (results: FaceResult): 'left' | 'center' | 'right' => {
@@ -1058,6 +1101,7 @@ const detectHeadOrientation = (results: FaceResult): 'left' | 'center' | 'right'
 ### Pose-Based Games (Gross Motor)
 
 **Pattern 1: Body Part Position Comparison**
+
 ```typescript
 // Check if body part is above/below/in zone
 const isPartAbove = (part: Point, reference: Point): boolean => {
@@ -1071,6 +1115,7 @@ const isPartInZone = (part: Point, zone: { minX, maxX, minY, maxY }): boolean =>
 ```
 
 **Pattern 2: Pose Matching**
+
 ```typescript
 // Match target pose
 const matchPose = (detected: PoseLandmarks, target: TargetPose): number => {
@@ -1089,6 +1134,7 @@ const matchPose = (detected: PoseLandmarks, target: TargetPose): number => {
 ### Object Detection Games
 
 **Pattern 1: Object Presence Check**
+
 ```typescript
 // Check if object is detected with confidence
 const isObjectDetected = (results: DetectionResult): boolean => {
@@ -1102,6 +1148,7 @@ const isObjectDetected = (results: DetectionResult): boolean => {
 ```
 
 **Pattern 2: Object Classification**
+
 ```typescript
 // Classify detected object
 const classifyObject = (detection: DetectionResult): string => {
@@ -1121,6 +1168,7 @@ const classifyObject = (detection: DetectionResult): string => {
 ### Child Safety Guidelines
 
 **Age-Appropriate Content:**
+
 - No scary or violent content
 - No flashing lights or sudden loud noises
 - Positive, encouraging feedback
@@ -1130,6 +1178,7 @@ const classifyObject = (detection: DetectionResult): string => {
 - No time pressure (no timers or countdowns unless parent-enabled)
 
 **Privacy Guidelines:**
+
 - Process video frames locally (no cloud uploads by default)
 - No personal data collection without parent consent
 - No facial recognition for identity (expressions only)
@@ -1140,6 +1189,7 @@ const classifyObject = (detection: DetectionResult): string => {
 ### Parental Controls
 
 **Settings to Implement:**
+
 ```typescript
 // Parent dashboard controls
 interface ParentSettings {
@@ -1195,6 +1245,7 @@ const useSessionTimer = (maxDuration: number = 30) => {
 Before marking your worklog ticket as DONE, verify:
 
 ### Code Quality
+
 - [ ] TypeScript compilation passes
 - [ ] No ESLint errors
 - [ ] No unused variables
@@ -1202,6 +1253,7 @@ Before marking your worklog ticket as DONE, verify:
 - [ ] Components are reusable
 
 ### Functionality
+
 - [ ] Game starts correctly
 - [ ] Game loop runs smoothly
 - [ ] MediaPipe integration works
@@ -1211,12 +1263,14 @@ Before marking your worklog ticket as DONE, verify:
 - [ ] Error handling is graceful
 
 ### Performance
+
 - [ ] Target FPS achieved (25-30)
 - [ ] No performance regressions
 - [ ] Memory usage is reasonable
 - [ ] Works on mobile/tablet/desktop
 
 ### Accessibility
+
 - [ ] ARIA labels present
 - [ ] Keyboard navigation works
 - [ ] Colors are WCAG AA compliant
@@ -1224,12 +1278,14 @@ Before marking your worklog ticket as DONE, verify:
 - [ ] Screen reader support
 
 ### Testing
+
 - [ ] Unit tests pass
 - [ ] Manual testing complete
 - [ ] Edge cases handled
 - [ ] No critical bugs
 
 ### Documentation
+
 - [ ] WORKLOG_TICKETS.md updated (marked DONE)
 - [ ] Code comments added where needed
 - [ ] Evidence section completed
@@ -1240,6 +1296,7 @@ Before marking your worklog ticket as DONE, verify:
 ## QUICK REFERENCE
 
 **MediaPipe Tasks:**
+
 - Hand Landmarker: 21 landmarks, detect gestures, counting
 - Face Landmarker: 468 landmarks, 52 blendshapes, expressions
 - Pose Landmarker: 33 landmarks, body position, balance
@@ -1247,6 +1304,7 @@ Before marking your worklog ticket as DONE, verify:
 - Object Detector: Real-world objects, classification
 
 **Common Primitives:**
+
 - `getFingerPosition(handIndex)`: Get index finger tip coordinates
 - `detectPinch(results)`: Check if thumb+index pinching
 - `isPointingAt(position, target, threshold)`: Check proximity
@@ -1254,6 +1312,7 @@ Before marking your worklog ticket as DONE, verify:
 - `matchPose(detected, target)`: Compare body landmarks
 
 **Best Practices:**
+
 - Use EMA smoothing (alpha 0.5-0.7)
 - Skip frames for performance (every 2nd frame)
 - Monitor FPS continuously

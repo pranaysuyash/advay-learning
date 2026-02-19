@@ -19,7 +19,7 @@ if TESTING:
 else:
     DEFAULT_LIMITS = ["100/minute"]  # Default: 100 requests per minute per IP
 
-limiter = Limiter(key_func=get_remote_address, default_limits=DEFAULT_LIMITS)  # type: ignore
+limiter = Limiter(key_func=get_remote_address, default_limits=DEFAULT_LIMITS)
 
 
 def get_rate_limit_exceeded_handler() -> Any:

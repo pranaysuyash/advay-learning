@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-01  
 **Auditor:** AI Design Auditor  
-**App URL:** http://localhost:6173  
+**App URL:** <http://localhost:6173>  
 **Screenshots Captured:** 57 across desktop (1440x900), tablet (834x1112), mobile (390x844)
 **Ticket:** TCK-20260201-001
 
@@ -11,39 +11,47 @@
 ## 1) Executive Verdict
 
 ### Does it feel like a kids app?
+
 **PARTIAL** - 6/10
 
 **Reasons:**
+
 1. **Mascot presence** (Pip the Red Panda) adds charm and kid-appeal with speech bubbles, animations, and celebration video effects - this is a strength
 2. **Color palette** is warm and inviting (cream backgrounds, terracotta/orange accents) but lacks the playful vibrancy typical of top kids apps
 3. **Language support** (English, Hindi, Kannada, Telugu, Tamil) is excellent for diverse learners but UI doesn't fully leverage cultural visual elements
 
 **Missing kid-app elements:**
+
 - No playful background patterns or textures
 - Limited use of rounded, organic shapes (relies heavily on rectangles)
 - Sound feedback integration present but visual celebration effects minimal
 - No character-driven navigation or storytelling framework
 
 ### Does it feel modern and polished?
+
 **YES** - 7/10
 
 **Reasons:**
+
 1. **Clean, minimalist aesthetic** with consistent spacing and typography creates a professional, uncluttered feel
 2. **Framer Motion animations** provide smooth transitions and micro-interactions (page loads, card hovers, button presses)
 3. **Glassmorphism effects** (backdrop blur, translucent backgrounds) add contemporary visual depth
 4. **Responsive design** works well across all viewport sizes with appropriate touch targets
 
 **Polish gaps:**
+
 - Dark navy background on landing page feels more corporate than playful
 - Form inputs lack visual flair (standard browser styling in some places)
 - Loading states are basic (simple spinner) without branded elements
 - Error states use generic red backgrounds without kid-friendly messaging
 
 ### Biggest UX Risk to Adoption
+
 1. **Camera permission friction** - The app requires camera access for core functionality but the permission request flow lacks child-friendly explanation and fallback mouse/touch mode isn't prominently advertised upfront
 2. **First-run complexity** - Dashboard presents multiple child profiles, language selection, and game options simultaneously without clear guidance on "where to start"
 
 ### Biggest Visual/Design Opportunity
+
 1. **Typography system** - Currently relies heavily on Nunito font family (good for kids) but lacks playful display typefaces for headers and could benefit from more expressive letterforms in the tracing game itself
 2. **Empty states** - "No children added" and "No progress" states are functional but miss opportunities for delight and encouragement
 
@@ -53,22 +61,23 @@
 
 ### Pages/Routes Discovered
 
-| Route | Page Name | Access | Key Purpose |
-|-------|-----------|--------|-------------|
-| `/` | Home | Public | Landing, onboarding, hero showcase |
-| `/login` | Login | Public | Authentication with error handling |
-| `/register` | Register | Public | Account creation with validation |
-| `/dashboard` | Dashboard | Protected | Child profile management, progress overview |
-| `/games` | Games | Protected | Game selection and discovery |
-| `/game` | Alphabet Game | Protected | Main tracing activity with camera |
-| `/games/finger-number-show` | Finger Numbers | Protected | Hand counting game |
-| `/games/connect-the-dots` | Connect Dots | Protected | Fine motor skill game |
-| `/games/letter-hunt` | Letter Hunt | Protected | Letter recognition game |
-| `/progress` | Progress | Protected | Detailed progress analytics |
-| `/settings` | Settings | Protected | App preferences and controls |
-| `/style-test` | Style Test | Public | Component documentation |
+| Route                       | Page Name      | Access    | Key Purpose                                 |
+| --------------------------- | -------------- | --------- | ------------------------------------------- |
+| `/`                         | Home           | Public    | Landing, onboarding, hero showcase          |
+| `/login`                    | Login          | Public    | Authentication with error handling          |
+| `/register`                 | Register       | Public    | Account creation with validation            |
+| `/dashboard`                | Dashboard      | Protected | Child profile management, progress overview |
+| `/games`                    | Games          | Protected | Game selection and discovery                |
+| `/game`                     | Alphabet Game  | Protected | Main tracing activity with camera           |
+| `/games/finger-number-show` | Finger Numbers | Protected | Hand counting game                          |
+| `/games/connect-the-dots`   | Connect Dots   | Protected | Fine motor skill game                       |
+| `/games/letter-hunt`        | Letter Hunt    | Protected | Letter recognition game                     |
+| `/progress`                 | Progress       | Protected | Detailed progress analytics                 |
+| `/settings`                 | Settings       | Protected | App preferences and controls                |
+| `/style-test`               | Style Test     | Public    | Component documentation                     |
 
 ### Primary Navigation Model
+
 - **Global nav bar** (persistent header): Home → Games → Progress → Settings
 - **Contextual navigation**: Dashboard has child selector, Games has language selector
 - **In-game navigation**: Home button, drawing controls, progress indicators
@@ -109,30 +118,30 @@ Return to Dashboard/Games (parent/child choice)
 
 ### Public Pages (No Auth Required)
 
-| Filename | Route | Viewport | Type | What to Look At | Severity Notes |
-|----------|-------|----------|------|-----------------|----------------|
-| desktop_home_full.png | / | 1440x900 | Full | Landing hero, mascot, CTA buttons | Baseline design |
-| desktop_home_viewport.png | / | 1440x900 | Viewport | Above-fold first impression | Critical for conversion |
-| mobile_home_full.png | / | 390x844 | Full | Responsive stacking, touch targets | Mobile UX critical |
-| desktop_login_full.png | /login | 1440x900 | Full | Form layout, error states | Trust signal area |
-| desktop_login_error.png | /login | 1440x900 | Error | Error message styling | UX recovery test |
-| mobile_login_error.png | /login | 390x844 | Error | Mobile error display | Accessibility |
-| desktop_register_full.png | /register | 1440x900 | Full | Registration flow | Onboarding gate |
-| desktop_style-test_full.png | /style-test | 1440x900 | Full | Design system components | System audit ref |
+| Filename                    | Route       | Viewport | Type     | What to Look At                    | Severity Notes          |
+| --------------------------- | ----------- | -------- | -------- | ---------------------------------- | ----------------------- |
+| desktop_home_full.png       | /           | 1440x900 | Full     | Landing hero, mascot, CTA buttons  | Baseline design         |
+| desktop_home_viewport.png   | /           | 1440x900 | Viewport | Above-fold first impression        | Critical for conversion |
+| mobile_home_full.png        | /           | 390x844  | Full     | Responsive stacking, touch targets | Mobile UX critical      |
+| desktop_login_full.png      | /login      | 1440x900 | Full     | Form layout, error states          | Trust signal area       |
+| desktop_login_error.png     | /login      | 1440x900 | Error    | Error message styling              | UX recovery test        |
+| mobile_login_error.png      | /login      | 390x844  | Error    | Mobile error display               | Accessibility           |
+| desktop_register_full.png   | /register   | 1440x900 | Full     | Registration flow                  | Onboarding gate         |
+| desktop_style-test_full.png | /style-test | 1440x900 | Full     | Design system components           | System audit ref        |
 
 ### Protected Pages (Require Auth)
 
-| Filename | Route | Viewport | Type | Description | Status |
-|----------|-------|----------|------|-------------|--------|
-| desktop_dashboard_full.png | /dashboard | 1440x900 | Full | Child profiles, progress stats | Captured |
-| tablet_dashboard_full.png | /dashboard | 834x1112 | Full | Dashboard tablet layout | Captured |
-| mobile_dashboard_full.png | /dashboard | 390x844 | Full | Dashboard mobile view | Captured |
-| desktop_games_full.png | /games | 1440x900 | Full | Game selection cards | Captured |
-| tablet_games_full.png | /games | 834x1112 | Full | Games tablet grid | Captured |
-| desktop_alphabet-game_full.png | /game | 1440x900 | Full | Main game interface | Captured |
-| mobile_alphabet-game_full.png | /game | 390x844 | Full | Game mobile adaptation | Captured |
-| desktop_settings_full.png | /settings | 1440x900 | Full | Settings page layout | Captured |
-| desktop_progress_full.png | /progress | 1440x900 | Full | Progress charts | Captured |
+| Filename                       | Route      | Viewport | Type | Description                    | Status   |
+| ------------------------------ | ---------- | -------- | ---- | ------------------------------ | -------- |
+| desktop_dashboard_full.png     | /dashboard | 1440x900 | Full | Child profiles, progress stats | Captured |
+| tablet_dashboard_full.png      | /dashboard | 834x1112 | Full | Dashboard tablet layout        | Captured |
+| mobile_dashboard_full.png      | /dashboard | 390x844  | Full | Dashboard mobile view          | Captured |
+| desktop_games_full.png         | /games     | 1440x900 | Full | Game selection cards           | Captured |
+| tablet_games_full.png          | /games     | 834x1112 | Full | Games tablet grid              | Captured |
+| desktop_alphabet-game_full.png | /game      | 1440x900 | Full | Main game interface            | Captured |
+| mobile_alphabet-game_full.png  | /game      | 390x844  | Full | Game mobile adaptation         | Captured |
+| desktop_settings_full.png      | /settings  | 1440x900 | Full | Settings page layout           | Captured |
+| desktop_progress_full.png      | /progress  | 1440x900 | Full | Progress charts                | Captured |
 
 **Total Screenshots:** 57 across 12 routes, 3 viewports, multiple states
 
@@ -146,6 +155,7 @@ Return to Dashboard/Games (parent/child choice)
 Landing page designed to communicate app value proposition and drive user to either register (primary) or try demo (secondary).
 
 **What Works:**
+
 - Mascot presence (Pip) creates immediate emotional connection
 - Clear value proposition: "Learn with Your Hands" + AI-powered educational platform
 - Two clear CTAs with visual hierarchy (Get Started vs Try Demo)
@@ -153,51 +163,52 @@ Landing page designed to communicate app value proposition and drive user to eit
 - Motion: Framer Motion fade-in animation on load
 
 **What Breaks:**
+
 - Dark navy background (#1F2937) feels corporate, not playful
 - Feature icons reference SVG paths that may not exist ("/assets/images/feature-hand-tracking.svg")
 - "Try Demo" bypasses auth but game still requires login (potential UX confusion)
 - No social proof or trust indicators (reviews, user count, awards)
 
 **Kid-Friendliness Score:** 6/10  
-*Justification:* Mascot helps, but overall aesthetic is too minimalist for young children. Needs more color, animation, and playful elements.
+_Justification:_ Mascot helps, but overall aesthetic is too minimalist for young children. Needs more color, animation, and playful elements.
 
 **Parent Trust Score:** 7/10  
-*Justification:* Clean, professional design signals quality. Multi-language support visible. Missing: security badges, privacy policy links, COPPA compliance indicators.
+_Justification:_ Clean, professional design signals quality. Multi-language support visible. Missing: security badges, privacy policy links, COPPA compliance indicators.
 
 **Modern Polish Score:** 8/10  
-*Justification:* Excellent use of animations, glassmorphism, spacing. Typography hierarchy clear. Color transitions smooth.
+_Justification:_ Excellent use of animations, glassmorphism, spacing. Typography hierarchy clear. Color transitions smooth.
 
 **Recommendations (Prioritized):**
 
 1. **Add playful background elements**
-   - *What:* Subtle animated shapes, confetti particles, or soft color blobs in background
-   - *Why:* Creates kid-friendly atmosphere without cluttering interface
-   - *Evidence:* Current dark background feels sterile (screenshot: desktop_home_full.png)
-   - *Validation:* A/B test engagement time with/without background animation
+   - _What:_ Subtle animated shapes, confetti particles, or soft color blobs in background
+   - _Why:_ Creates kid-friendly atmosphere without cluttering interface
+   - _Evidence:_ Current dark background feels sterile (screenshot: desktop_home_full.png)
+   - _Validation:_ A/B test engagement time with/without background animation
 
 2. **Implement "Try Demo" fully**
-   - *What:* Either remove the button or create a true guest/demo mode that doesn't require auth
-   - *Why:* Current flow creates frustration - user clicks "Try Demo" but game redirects to login
-   - *Evidence:* Code review shows /game route has ProtectedRoute wrapper
-   - *Validation:* User flow test - can user reach gameplay without account?
+   - _What:_ Either remove the button or create a true guest/demo mode that doesn't require auth
+   - _Why:_ Current flow creates frustration - user clicks "Try Demo" but game redirects to login
+   - _Evidence:_ Code review shows /game route has ProtectedRoute wrapper
+   - _Validation:_ User flow test - can user reach gameplay without account?
 
 3. **Add trust indicators**
-   - *What:* COPPA compliant badge, "No ads" promise, "Data privacy" icon
-   - *Why:* Parents need reassurance before creating accounts for children
-   - *Evidence:* Landing page lacks any trust signals (desktop_home_full.png)
-   - *Validation:* Parent survey on what information they need before signing up
+   - _What:_ COPPA compliant badge, "No ads" promise, "Data privacy" icon
+   - _Why:_ Parents need reassurance before creating accounts for children
+   - _Evidence:_ Landing page lacks any trust signals (desktop_home_full.png)
+   - _Validation:_ Parent survey on what information they need before signing up
 
 4. **Improve feature icons**
-   - *What:* Ensure all feature icons exist, add animations to icons
-   - *Why:* Visual storytelling helps children understand value proposition
-   - *Evidence:* Icon paths in Home.tsx reference /assets/images/ that may be missing
-   - *Validation:* Check all icon paths resolve correctly
+   - _What:_ Ensure all feature icons exist, add animations to icons
+   - _Why:_ Visual storytelling helps children understand value proposition
+   - _Evidence:_ Icon paths in Home.tsx reference /assets/images/ that may be missing
+   - _Validation:_ Check all icon paths resolve correctly
 
 5. **Add video/demo preview**
-   - *What:* 15-second looping video showing hand tracking in action
-   - *Why:* Show, don't tell - parents and kids need to see the magic
-   - *Evidence:* No video content on landing page
-   - *Validation:* Heatmap analysis of where users look on landing page
+   - _What:_ 15-second looping video showing hand tracking in action
+   - _Why:_ Show, don't tell - parents and kids need to see the magic
+   - _Evidence:_ No video content on landing page
+   - _Validation:_ Heatmap analysis of where users look on landing page
 
 ---
 
@@ -207,6 +218,7 @@ Landing page designed to communicate app value proposition and drive user to eit
 Authentication gate with email/password, error handling, and resend verification flow.
 
 **What Works:**
+
 - Clean card-based layout with clear visual hierarchy
 - Error messages prominently displayed with red background
 - Resend verification flow for unverified emails (good UX recovery)
@@ -214,40 +226,41 @@ Authentication gate with email/password, error handling, and resend verification
 - Link to register for new users
 
 **What Breaks:**
+
 - No "Forgot Password" link (major UX gap)
 - No "Show Password" toggle (accessibility issue)
-- Placeholder text "you@example.com" is generic and cold
+- Placeholder text "<you@example.com>" is generic and cold
 - Form uses `text-white/80` on light background - contrast could be better
 - Error state uses red background but text could be more kid-friendly ("Oops!" vs error codes)
 
 **Kid-Friendliness Score:** 3/10  
-*Justification:* Login page is adult-oriented by necessity, but could include mascot, friendlier language, or color to ease anxiety.
+_Justification:_ Login page is adult-oriented by necessity, but could include mascot, friendlier language, or color to ease anxiety.
 
 **Parent Trust Score:** 6/10  
-*Justification:* Functional and clear, but lacks password recovery and visibility toggle that parents expect in modern apps.
+_Justification:_ Functional and clear, but lacks password recovery and visibility toggle that parents expect in modern apps.
 
 **Modern Polish Score:** 7/10  
-*Justification:* Clean design, good spacing, subtle card shadow. Form validation feedback is immediate.
+_Justification:_ Clean design, good spacing, subtle card shadow. Form validation feedback is immediate.
 
 **Recommendations:**
 
 1. **Add "Forgot Password" link**
-   - *What:* Link below password field
-   - *Why:* Standard expected functionality, critical for account recovery
-   - *Evidence:* Login.tsx lines 131-139 have "Sign up" link but no password recovery
-   - *Validation:* Test password recovery flow end-to-end
+   - _What:_ Link below password field
+   - _Why:_ Standard expected functionality, critical for account recovery
+   - _Evidence:_ Login.tsx lines 131-139 have "Sign up" link but no password recovery
+   - _Validation:_ Test password recovery flow end-to-end
 
 2. **Add "Show Password" toggle**
-   - *What:* Eye icon button inside password input
-   - *Why:* Helps users verify input, especially on mobile keyboards
-   - *Evidence:* Standard accessibility practice missing
-   - *Validation:* WCAG 2.1 compliance check
+   - _What:_ Eye icon button inside password input
+   - _Why:_ Helps users verify input, especially on mobile keyboards
+   - _Evidence:_ Standard accessibility practice missing
+   - _Validation:_ WCAG 2.1 compliance check
 
 3. **Kid-friendly error messages**
-   - *What:* Replace technical error messages with friendly ones ("Oops! That doesn't look right. Try again!")
-   - *Why:* Children may be using this with parents; scary error messages create anxiety
-   - *Evidence:* Login.tsx line 67 shows generic error display
-   - *Validation:* Review all error messages in auth flow
+   - _What:_ Replace technical error messages with friendly ones ("Oops! That doesn't look right. Try again!")
+   - _Why:_ Children may be using this with parents; scary error messages create anxiety
+   - _Evidence:_ Login.tsx line 67 shows generic error display
+   - _Validation:_ Review all error messages in auth flow
 
 ---
 
@@ -257,6 +270,7 @@ Authentication gate with email/password, error handling, and resend verification
 Parent hub for managing child profiles, viewing progress, and launching games.
 
 **What Works:**
+
 - Clean stats bar showing Literacy, Accuracy, Time metrics
 - Child selector with edit capability
 - "Add Child" flow with modal
@@ -265,6 +279,7 @@ Parent hub for managing child profiles, viewing progress, and launching games.
 - Export progress data functionality
 
 **What Breaks:**
+
 - Empty state (no children) is text-heavy and lacks visual encouragement
 - Stats bar uses progress bars that are very small (16px wide)
 - Edit profile button is tiny (14px icon) - hard to tap on mobile
@@ -272,33 +287,33 @@ Parent hub for managing child profiles, viewing progress, and launching games.
 - Learning Tips section is static text - not personalized
 
 **Kid-Friendliness Score:** 4/10  
-*Justification:* This is primarily a parent page, but could still use mascot guidance and friendlier visuals.
+_Justification:_ This is primarily a parent page, but could still use mascot guidance and friendlier visuals.
 
 **Parent Trust Score:** 8/10  
-*Justification:* Comprehensive progress tracking, export functionality, multiple language support. Clear value for parents.
+_Justification:_ Comprehensive progress tracking, export functionality, multiple language support. Clear value for parents.
 
 **Modern Polish Score:** 7/10  
-*Justification:* Good use of cards, shadows, spacing. Stats visualization could be more sophisticated (charts instead of progress bars).
+_Justification:_ Good use of cards, shadows, spacing. Stats visualization could be more sophisticated (charts instead of progress bars).
 
 **Recommendations:**
 
 1. **Redesign empty state**
-   - *What:* Large illustration of mascot + "Let's add your first learner!" + prominent CTA
-   - *Why:* Current empty state is functional but not delightful
-   - *Evidence:* Dashboard.tsx lines 435-458 show plain empty state
-   - *Validation:* Measure time-to-first-child-profile completion
+   - _What:_ Large illustration of mascot + "Let's add your first learner!" + prominent CTA
+   - _Why:_ Current empty state is functional but not delightful
+   - _Evidence:_ Dashboard.tsx lines 435-458 show plain empty state
+   - _Validation:_ Measure time-to-first-child-profile completion
 
 2. **Improve stats visualization**
-   - *What:* Replace tiny progress bars with larger visual indicators or mini-charts
-   - *Why:* Parents want to quickly grasp progress at a glance
-   - *Evidence:* Lines 409-431 show compact stats bar
-   - *Validation:* Parent feedback on progress clarity
+   - _What:_ Replace tiny progress bars with larger visual indicators or mini-charts
+   - _Why:_ Parents want to quickly grasp progress at a glance
+   - _Evidence:_ Lines 409-431 show compact stats bar
+   - _Validation:_ Parent feedback on progress clarity
 
 3. **Fix flag emoji rendering**
-   - *What:* Use SVG flags instead of emoji, or remove flags entirely
-   - *Why:* Flag emojis render as country codes on some platforms (Windows, older Android)
-   - *Evidence:* Lines 711-715 use emoji flags
-   - *Validation:* Test language selector on Windows, iOS, Android
+   - _What:_ Use SVG flags instead of emoji, or remove flags entirely
+   - _Why:_ Flag emojis render as country codes on some platforms (Windows, older Android)
+   - _Evidence:_ Lines 711-715 use emoji flags
+   - _Validation:_ Test language selector on Windows, iOS, Android
 
 ---
 
@@ -308,6 +323,7 @@ Parent hub for managing child profiles, viewing progress, and launching games.
 Game discovery and selection hub showing available activities.
 
 **What Works:**
+
 - Card-based layout with clear game thumbnails (icons)
 - Each card shows: title, description, age range, category, difficulty
 - Staggered animation on card entrance (Framer Motion delay)
@@ -315,33 +331,34 @@ Game discovery and selection hub showing available activities.
 - Language indicator on alphabet tracing game
 
 **What Breaks:**
+
 - Game cards use same icon ("target") for ConnectTheDots and LetterHunt - confusing
 - "Coming Soon" button style inconsistent (disabled but not visually distinct enough)
 - No preview/demo mode for games (have to fully enter to see what it's like)
 - Missing visual differentiation between literacy, numeracy, and motor skill games
 
 **Kid-Friendliness Score:** 7/10  
-*Justification:* Cards are visually appealing, icons are large, clear categorization helps selection.
+_Justification:_ Cards are visually appealing, icons are large, clear categorization helps selection.
 
 **Parent Trust Score:** 7/10  
-*Justification:* Age ranges and difficulty levels help parents choose appropriate content.
+_Justification:_ Age ranges and difficulty levels help parents choose appropriate content.
 
 **Modern Polish Score:** 8/10  
-*Justification:* Smooth animations, consistent card design, good use of color coding (category badges).
+_Justification:_ Smooth animations, consistent card design, good use of color coding (category badges).
 
 **Recommendations:**
 
 1. **Unique icons for each game**
-   - *What:* ConnectTheDots should use "pencil" or "path" icon, LetterHunt should use "search" icon
-   - *Why:* Currently both use "target" - confusing differentiation
-   - *Evidence:* Games.tsx lines 48, 58 both use icon: 'target'
-   - *Validation:* User testing - can children distinguish games by icon alone?
+   - _What:_ ConnectTheDots should use "pencil" or "path" icon, LetterHunt should use "search" icon
+   - _Why:_ Currently both use "target" - confusing differentiation
+   - _Evidence:_ Games.tsx lines 48, 58 both use icon: 'target'
+   - _Validation:_ User testing - can children distinguish games by icon alone?
 
 2. **Add game preview modal**
-   - *What:* Click card to see screenshot/animation of gameplay before committing
-   - *Why:* Reduces anxiety about entering new activity, helps kids decide
-   - *Evidence:* No preview mechanism exists
-   - *Validation:* Measure bounce rate from game selection
+   - _What:_ Click card to see screenshot/animation of gameplay before committing
+   - _Why:_ Reduces anxiety about entering new activity, helps kids decide
+   - _Evidence:_ No preview mechanism exists
+   - _Validation:_ Measure bounce rate from game selection
 
 ---
 
@@ -351,6 +368,7 @@ Game discovery and selection hub showing available activities.
 Core learning activity: hand tracking-based alphabet tracing.
 
 **What Works:**
+
 - Large letter display with icon and pronunciation
 - Camera feed with canvas overlay for drawing
 - Two-stage prompt system (big center → side pill after 1.8s)
@@ -361,6 +379,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 - Language selector (5 languages supported)
 
 **What Breaks:**
+
 - Camera permission denial shows warning but UI still suggests hand tracking works
 - Game controls (Home, Draw/Stop, Clear) are small and clustered top-right
 - Letter display when playing overlays camera feed in absolute positioning (can obscure view)
@@ -368,39 +387,39 @@ Core learning activity: hand tracking-based alphabet tracing.
 - Success/fail feedback is text-only (no visual celebration animation)
 
 **Kid-Friendliness Score:** 8/10  
-*Justification:* Large letter display, intuitive hand tracking, mascot presence, clear instructions. Core loop is well-designed for children.
+_Justification:_ Large letter display, intuitive hand tracking, mascot presence, clear instructions. Core loop is well-designed for children.
 
 **Parent Trust Score:** 7/10  
-*Justification:* Wellness features show care for child wellbeing. Progress tracking is robust. Camera privacy needs clearer communication.
+_Justification:_ Wellness features show care for child wellbeing. Progress tracking is robust. Camera privacy needs clearer communication.
 
 **Modern Polish Score:** 7/10  
-*Justification:* Good canvas integration, smooth hand tracking. UI controls need refinement. Missing audio-visual feedback richness.
+_Justification:_ Good canvas integration, smooth hand tracking. UI controls need refinement. Missing audio-visual feedback richness.
 
 **Recommendations:**
 
 1. **Improve control button sizing**
-   - *What:* Make game control buttons larger (minimum 60px touch target) and spread them out
-   - *Why:* Current buttons are 32-40px - too small for children's motor control
-   - *Evidence:* Lines 976-1023 show compact button cluster
-   - *Validation:* Touch target analysis on mobile devices
+   - _What:_ Make game control buttons larger (minimum 60px touch target) and spread them out
+   - _Why:_ Current buttons are 32-40px - too small for children's motor control
+   - _Evidence:_ Lines 976-1023 show compact button cluster
+   - _Validation:_ Touch target analysis on mobile devices
 
 2. **Add visual success celebration**
-   - *What:* Confetti, mascot celebration animation, star burst when tracing completed successfully
-   - *Why:* Positive reinforcement is critical for children's motivation
-   - *Evidence:* Current feedback is text-only: "Great job! 🎉"
-   - *Validation:* Measure engagement and repeat play rates
+   - _What:_ Confetti, mascot celebration animation, star burst when tracing completed successfully
+   - _Why:_ Positive reinforcement is critical for children's motivation
+   - _Evidence:_ Current feedback is text-only: "Great job! 🎉"
+   - _Validation:_ Measure engagement and repeat play rates
 
 3. **Audio feedback integration**
-   - *What:* Letter name pronunciation at start, encouragement sounds during tracing, success chime
-   - *Why:* Multi-sensory learning is more effective for children
-   - *Evidence:* TTS exists (useTTS hook) but not integrated with game loop
-   - *Validation:* A/B test learning retention with/without audio
+   - _What:_ Letter name pronunciation at start, encouragement sounds during tracing, success chime
+   - _Why:_ Multi-sensory learning is more effective for children
+   - _Evidence:_ TTS exists (useTTS hook) but not integrated with game loop
+   - _Validation:_ A/B test learning retention with/without audio
 
 4. **Clarify camera fallback**
-   - *What:* When camera denied, change instruction text from "Pinch to draw" to "Touch to draw"
-   - *Why:* Current UI is misleading when in mouse/touch mode
-   - *Evidence:* Lines 911-916 show static instruction text
-   - *Validation:* Observation testing with camera-denied users
+   - _What:_ When camera denied, change instruction text from "Pinch to draw" to "Touch to draw"
+   - _Why:_ Current UI is misleading when in mouse/touch mode
+   - _Evidence:_ Lines 911-916 show static instruction text
+   - _Validation:_ Observation testing with camera-denied users
 
 ---
 
@@ -409,6 +428,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 ### Component Inventory (Grouped)
 
 **UI Primitives (src/components/ui/):**
+
 - Button (with variants: primary, secondary, danger, success, ghost)
 - Card (with hover, padding variants, sub-components: Header, Footer, StatCard, FeatureCard)
 - Icon (UIIcon with name-based system, size support)
@@ -420,6 +440,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 - Tooltip (not actively used in reviewed pages)
 
 **Domain Components (src/components/):**
+
 - Mascot (Pip with states: idle, happy, thinking, waiting, celebrating + TTS)
 - Icon (image-based icon with fallback)
 - GameTutorial (onboarding overlay)
@@ -438,43 +459,44 @@ Core learning activity: hand tracking-based alphabet tracing.
    - `components/ui/Icon.tsx` exports UIIcon (name-based)
    - `components/Icon.tsx` exports Icon (image src-based)
    - Both used interchangeably creating confusion
-   - *Evidence:* Dashboard uses both UIIcon and Icon
-   - *Recommendation:* Consolidate to single Icon component with both capabilities
+   - _Evidence:_ Dashboard uses both UIIcon and Icon
+   - _Recommendation:_ Consolidate to single Icon component with both capabilities
 
 2. **Button Implementation Divergence**
    - `components/ui/Button.tsx` has proper design system implementation (variants, sizes, motion)
    - Pages use inline Tailwind buttons with `bg-gradient-to-r from-red-500` directly
-   - *Evidence:* Login.tsx line 127 uses inline styles instead of Button component
-   - *Recommendation:* Audit all pages, replace inline buttons with Button component
+   - _Evidence:_ Login.tsx line 127 uses inline styles instead of Button component
+   - _Recommendation:_ Audit all pages, replace inline buttons with Button component
 
 3. **Form Input Inconsistency**
    - No centralized Input component
    - Each form implements inputs differently (Login vs Register vs Dashboard modals)
-   - *Evidence:* Login uses `focus:border-border-strong`, Register uses same but different spacing
-   - *Recommendation:* Create Input, Label, FormField components
+   - _Evidence:_ Login uses `focus:border-border-strong`, Register uses same but different spacing
+   - _Recommendation:_ Create Input, Label, FormField components
 
 4. **Modal Implementation Duplication**
    - Add Child modal, Edit Profile modal both implement their own modal shells
    - No reusable Modal component
-   - *Evidence:* Dashboard.tsx implements 2 different modals with similar backdrop/positioning
-   - *Recommendation:* Create Modal component with variants
+   - _Evidence:_ Dashboard.tsx implements 2 different modals with similar backdrop/positioning
+   - _Recommendation:_ Create Modal component with variants
 
 **Medium Issues:**
 
-5. **Color Token Usage**
+1. **Color Token Usage**
    - CSS variables defined in index.css but Tailwind arbitrary values used everywhere
    - Example: `bg-red-500/20` instead of using semantic token
-   - *Evidence:* Games.tsx uses `bg-red-500/20`, `text-red-400` directly
-   - *Recommendation:* Map all colors to semantic tokens
+   - _Evidence:_ Games.tsx uses `bg-red-500/20`, `text-red-400` directly
+   - _Recommendation:_ Map all colors to semantic tokens
 
-6. **Animation Timing Inconsistency**
+2. **Animation Timing Inconsistency**
    - Some components use 0.2s transitions, others 0.3s, framer-motion uses spring physics
-   - *Evidence:* Button uses duration-200, cards use spring transitions
-   - *Recommendation:* Define timing tokens (fast: 150ms, normal: 200ms, slow: 300ms)
+   - _Evidence:_ Button uses duration-200, cards use spring transitions
+   - _Recommendation:_ Define timing tokens (fast: 150ms, normal: 200ms, slow: 300ms)
 
 ### Missing Components/Tokens
 
 **Components Needed:**
+
 1. Input/TextField with label, error state, helper text
 2. Select/Dropdown (custom styled, not native)
 3. Modal/Dialog (reusable shell)
@@ -487,6 +509,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 10. VideoPlayer (for tutorials)
 
 **Design Tokens Missing:**
+
 1. Animation timing scale (ease-in, ease-out, spring configs)
 2. Z-index scale (modal, toast, tooltip layers)
 3. Shadow scale (currently only shadow-soft, shadow-soft-lg)
@@ -496,6 +519,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 ### Proposed "Minimum Design System"
 
 **Tokens (CSS Variables):**
+
 ```css
 :root {
   /* Animation */
@@ -503,14 +527,14 @@ Core learning activity: hand tracking-based alphabet tracing.
   --duration-normal: 200ms;
   --duration-slow: 300ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  
+
   /* Elevation */
   --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-modal: 300;
   --z-toast: 400;
-  
+
   /* Shadows extended */
   --shadow-md: 0 4px 6px -1px rgba(61, 64, 91, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(61, 64, 91, 0.15);
@@ -518,6 +542,7 @@ Core learning activity: hand tracking-based alphabet tracing.
 ```
 
 **Component Library Structure:**
+
 ```
 components/
 ├── ui/                    # Primitive components
@@ -551,19 +576,21 @@ components/
 ### First Run Workflow
 
 **Happy Path:**
+
 1. Landing page → Clicks "Get Started" → Register → Email verification → Login → Onboarding modal → Dashboard
 2. Time: ~3-5 minutes
 
 **Failure States:**
 
-| State | Trigger | Current UX | Severity | Recommendation |
-|-------|---------|------------|----------|----------------|
-| Email verification timeout | User doesn't verify email within window | Error message only | High | Add "Resend" functionality with countdown timer |
-| Registration validation fail | Password < 8 chars, mismatched | Inline error shown | Medium | Add password strength indicator |
-| Onboarding skip | User clicks skip | Sets flag, skips forever | Low | Offer to replay tutorial later |
-| Network error during register | API unavailable | Generic error | High | Show friendly offline message |
+| State                         | Trigger                                 | Current UX               | Severity | Recommendation                                  |
+| ----------------------------- | --------------------------------------- | ------------------------ | -------- | ----------------------------------------------- |
+| Email verification timeout    | User doesn't verify email within window | Error message only       | High     | Add "Resend" functionality with countdown timer |
+| Registration validation fail  | Password < 8 chars, mismatched          | Inline error shown       | Medium   | Add password strength indicator                 |
+| Onboarding skip               | User clicks skip                        | Sets flag, skips forever | Low      | Offer to replay tutorial later                  |
+| Network error during register | API unavailable                         | Generic error            | High     | Show friendly offline message                   |
 
 **Observed Issues:**
+
 - Email verification required before first use (good for security, friction for UX)
 - No guest/demo mode to try before registering
 - Onboarding is modal-based but could be more interactive
@@ -571,20 +598,22 @@ components/
 ### Activity Loop (Alphabet Game)
 
 **Happy Path:**
+
 1. Start screen → Camera permission → Hand tracking ready → Letter prompt → Pinch to trace → Check progress → Feedback → Next letter
 2. Average time per letter: 1-2 minutes
 
 **Failure States:**
 
-| State | Trigger | Current UX | Severity | Recommendation |
-|-------|---------|------------|----------|----------------|
-| Camera denied | User blocks permission | Shows warning, allows mouse mode | Medium | Better fallback messaging |
-| Hand tracking fails | Poor lighting, no hands | Feedback: "Loading hand tracking..." | High | Visual guide for hand positioning |
-| Low accuracy | Poor tracing | "Good start — try to trace the full shape!" | Low | Show visual guide of correct path |
-| Inactivity | No input for 60s | Wellness reminder triggers | Low | Good - but add auto-pause |
-| Batch completion | After 5 letters | Auto-syncs progress | Low | Show celebration animation |
+| State               | Trigger                 | Current UX                                  | Severity | Recommendation                    |
+| ------------------- | ----------------------- | ------------------------------------------- | -------- | --------------------------------- |
+| Camera denied       | User blocks permission  | Shows warning, allows mouse mode            | Medium   | Better fallback messaging         |
+| Hand tracking fails | Poor lighting, no hands | Feedback: "Loading hand tracking..."        | High     | Visual guide for hand positioning |
+| Low accuracy        | Poor tracing            | "Good start — try to trace the full shape!" | Low      | Show visual guide of correct path |
+| Inactivity          | No input for 60s        | Wellness reminder triggers                  | Low      | Good - but add auto-pause         |
+| Batch completion    | After 5 letters         | Auto-syncs progress                         | Low      | Show celebration animation        |
 
 **Observed Issues:**
+
 - Two-stage prompt (center → side) may confuse some children
 - No clear "lesson complete" state at end of alphabet
 - Progress check is manual button press (not automatic)
@@ -592,16 +621,19 @@ components/
 ### Recovery Paths
 
 **Camera Permission Recovery:**
+
 - Current: Shows amber warning banner with mouse fallback
 - Gap: No guidance on how to enable camera later
 - Fix: Add "How to enable camera" expandable section
 
 **Low Confidence Tracking:**
+
 - Current: Generic "Loading hand tracking..." message
 - Gap: No troubleshooting guidance
 - Fix: Show hand positioning guide illustration
 
 **Error Recovery:**
+
 - Current: Error messages appear in red banner
 - Gap: No retry mechanisms or alternative paths
 - Fix: Add "Try Again" buttons, offer alternative activities
@@ -609,17 +641,20 @@ components/
 ### Switching/Navigation Safety
 
 **Current Implementation:**
+
 - Home button always visible during gameplay (top-right)
 - Stop button ends session gracefully
 - Progress auto-saves
 - Language can be switched mid-session
 
 **Issues:**
+
 - Home button small and in corner (hard for kids to reach)
 - No confirmation dialog when leaving mid-trace (data loss risk)
 - Switching activities loses current letter progress
 
 **Recommendations:**
+
 1. Move Home button to bottom-left (easier reach)
 2. Add "Are you sure?" dialog when leaving with unsaved progress
 3. Auto-save letter progress when switching (even if not "mastered")
@@ -631,6 +666,7 @@ components/
 ### Architecture Summary
 
 **Technology Stack:**
+
 - React 19.2.4 with TypeScript
 - Tailwind CSS 3.4.1 for styling
 - Framer Motion for animations
@@ -641,6 +677,7 @@ components/
 - Playwright for E2E testing
 
 **Strengths:**
+
 1. Modern React patterns (hooks, functional components)
 2. Good TypeScript coverage
 3. Component lazy loading with Suspense
@@ -650,6 +687,7 @@ components/
 7. Test coverage exists (unit + E2E)
 
 **Weaknesses:**
+
 1. No strict component architecture (presentational vs container)
 2. Mix of CSS-in-JS (Tailwind) and CSS variables (inconsistent)
 3. Heavy page components (Dashboard.tsx is 817 lines)
@@ -659,8 +697,9 @@ components/
 ### UI Debt Hotspots
 
 **File: `src/pages/Dashboard.tsx`**
+
 - **Lines:** 817
-- **Issues:** 
+- **Issues:**
   - Contains 2 modal implementations inline
   - Stats calculation logic mixed with presentation
   - Form state management duplicated
@@ -668,6 +707,7 @@ components/
 - **Refactor:** Split into: DashboardLayout, ChildSelector, AddChildModal, EditProfileModal, StatsBar, ProgressSection
 
 **File: `src/pages/AlphabetGame.tsx`**
+
 - **Lines:** 1140
 - **Issues:**
   - Game logic, hand tracking, canvas drawing, UI all in one file
@@ -677,6 +717,7 @@ components/
 - **Refactor:** Split into: GameEngine (logic), DrawingCanvas (canvas), HandTrackingOverlay, GameControls, WellnessManager
 
 **File: `src/components/ui/Layout.tsx`**
+
 - **Lines:** 72
 - **Issues:**
   - Navigation links hardcoded
@@ -686,10 +727,11 @@ components/
 - **Refactor:** Add mobile menu, active route highlighting, configurable nav items
 
 **File: `src/index.css`**
+
 - **Lines:** 653
 - **Issues:**
   - Mix of utility classes and component classes
-  - Letter color classes generated (letter-color-*) but brittle
+  - Letter color classes generated (letter-color-\*) but brittle
   - Hardcoded values scattered
 - **Risk:** Style inconsistencies, maintainability
 - **Refactor:** Organize into: base, tokens, components, utilities sections
@@ -697,21 +739,23 @@ components/
 ### Styling/Token Issues
 
 **Hardcoded Colors (Non-Exhaustive):**
+
 ```
 src/pages/Games.tsx:
   - bg-red-500/20, text-red-400 (should use semantic tokens)
   - bg-blue-500/20, text-blue-300 (inconsistent with brand palette)
-  
+
 src/pages/Login.tsx:
   - bg-red-500/20, border-red-500/30 (error states)
   - from-red-500 to-red-600 (gradients)
-  
+
 src/pages/Dashboard.tsx:
   - text-slate-500, text-slate-600 (not in design system)
   - bg-pip-orange (inconsistent naming)
 ```
 
 **Recommendations:**
+
 1. Audit all color usage, map to semantic tokens
 2. Replace arbitrary Tailwind values with design tokens
 3. Create color usage guide (when to use each token)
@@ -743,17 +787,17 @@ src/pages/Dashboard.tsx:
 
 **Medium Priority:**
 
-5. **Alt Text Issues** (Dashboard.tsx lines 368, 390)
+1. **Alt Text Issues** (Dashboard.tsx lines 368, 390)
    - Empty alt attributes on some images
    - Decorative images need empty alt, informative need description
    - Fix: Audit all img tags
 
-6. **Button Types** (Multiple files)
+2. **Button Types** (Multiple files)
    - Several buttons missing explicit `type="button"`
    - Can cause unexpected form submissions
    - Fix: Add explicit types to all buttons
 
-7. **Reduced Motion** (index.css lines 44-52)
+3. **Reduced Motion** (index.css lines 44-52)
    - Has `@media (prefers-reduced-motion: reduce)` support
    - But Framer Motion animations may not respect this
    - Fix: Add useReducedMotion hook integration
@@ -784,6 +828,7 @@ src/pages/Dashboard.tsx:
    - Fix: Implement route-based code splitting
 
 **Recommendations:**
+
 1. Add React DevTools Profiler analysis
 2. Implement virtualization for long lists
 3. Lazy load MediaPipe only when needed
@@ -812,69 +857,69 @@ src/pages/Dashboard.tsx:
 
 ### High Impact Quick Wins (1 Day)
 
-4. **Add Visual Success Celebration** (AlphabetGame.tsx)
+1. **Add Visual Success Celebration** (AlphabetGame.tsx)
    - Impact: Increases child engagement
    - Effort: Low (use existing Framer Motion)
    - Priority: P1
 
-5. **Fix Flag Emoji Rendering** (Dashboard.tsx)
+2. **Fix Flag Emoji Rendering** (Dashboard.tsx)
    - Impact: Professional polish on all platforms
    - Effort: Low (replace with SVGs)
    - Priority: P1
 
-6. **Improve Empty States** (Dashboard.tsx)
+3. **Improve Empty States** (Dashboard.tsx)
    - Impact: Better first-time user experience
    - Effort: Low (add illustrations)
    - Priority: P1
 
-7. **Consolidate Icon System** (Global)
+4. **Consolidate Icon System** (Global)
    - Impact: Code maintainability
    - Effort: Medium
    - Priority: P1
 
 ### MVP Polish (1 Week)
 
-8. **Create Modal Component** (Global)
+1. **Create Modal Component** (Global)
    - Impact: Consistent UX, accessibility
    - Effort: Medium
    - Priority: P2
 
-9. **Refactor Dashboard.tsx** (Split components)
+2. **Refactor Dashboard.tsx** (Split components)
    - Impact: Maintainability, testability
    - Effort: High
    - Priority: P2
 
-10. **Add Audio Feedback** (AlphabetGame.tsx)
-    - Impact: Multi-sensory learning
-    - Effort: Medium (use existing TTS)
-    - Priority: P2
+3. **Add Audio Feedback** (AlphabetGame.tsx)
+   - Impact: Multi-sensory learning
+   - Effort: Medium (use existing TTS)
+   - Priority: P2
 
-11. **Implement Loading States** (Global)
-    - Impact: Perceived performance
-    - Effort: Low-Medium
-    - Priority: P2
+4. **Implement Loading States** (Global)
+   - Impact: Perceived performance
+   - Effort: Low-Medium
+   - Priority: P2
 
 ### Product-Level Design Upgrades (1 Month)
 
-12. **Add Game Preview Modal** (Games.tsx)
-    - Impact: Better game discovery
-    - Effort: Medium
-    - Priority: P3
+1. **Add Game Preview Modal** (Games.tsx)
+   - Impact: Better game discovery
+   - Effort: Medium
+   - Priority: P3
 
-13. **Create Animation System** (Global)
-    - Impact: Delight, brand personality
-    - Effort: High
-    - Priority: P3
+2. **Create Animation System** (Global)
+   - Impact: Delight, brand personality
+   - Effort: High
+   - Priority: P3
 
-14. **Implement Advanced Progress Analytics** (Progress.tsx)
-    - Impact: Parent value proposition
-    - Effort: High (needs data viz library)
-    - Priority: P3
+3. **Implement Advanced Progress Analytics** (Progress.tsx)
+   - Impact: Parent value proposition
+   - Effort: High (needs data viz library)
+   - Priority: P3
 
-15. **Add Character-Driven Navigation** (Global)
-    - Impact: Kid engagement, app personality
-    - Effort: High
-    - Priority: P3
+4. **Add Character-Driven Navigation** (Global)
+   - Impact: Kid engagement, app personality
+   - Effort: High
+   - Priority: P3
 
 ---
 
@@ -1004,7 +1049,7 @@ src/pages/Dashboard.tsx:
 
 5. **Remove Unused Style Classes**
    - index.css has many unused utility classes
-   - Audit and remove (letter-color-*, etc.)
+   - Audit and remove (letter-color-\*, etc.)
 
 ---
 
@@ -1012,13 +1057,10 @@ src/pages/Dashboard.tsx:
 
 - **Blocker:** Prevents use or causes rage-quit
   - Examples: Can't login, game crashes, can't exit
-  
 - **High:** Major confusion, trust loss, frequent frustration
   - Examples: No password reset, unclear error messages, inaccessible on mobile
-  
 - **Medium:** Noticeable polish gap, inconsistent behavior
   - Examples: Flag emojis render wrong, inconsistent button sizes
-  
 - **Low:** Cosmetic, nice-to-have
   - Examples: Animation timing inconsistencies, unused CSS classes
 
@@ -1029,6 +1071,7 @@ src/pages/Dashboard.tsx:
 The Advay Vision Learning app demonstrates a solid technical foundation with modern React patterns, good TypeScript coverage, and thoughtful features like multi-language support and wellness monitoring. The UI is clean, professional, and generally usable.
 
 **Key Strengths:**
+
 - Mascot character (Pip) adds personality and engagement
 - Multi-language support is comprehensive
 - Hand tracking integration is smooth
@@ -1036,6 +1079,7 @@ The Advay Vision Learning app demonstrates a solid technical foundation with mod
 - Responsive design works across devices
 
 **Critical Gaps:**
+
 1. Missing "kid app" visual language (too corporate/minimalist)
 2. Lack of audio-visual feedback and celebration
 3. Component system needs consolidation
@@ -1043,6 +1087,7 @@ The Advay Vision Learning app demonstrates a solid technical foundation with mod
 5. Form and input components need standardization
 
 **Immediate Next Steps:**
+
 1. Implement password reset flow
 2. Add visual celebration effects to game
 3. Consolidate icon and button components

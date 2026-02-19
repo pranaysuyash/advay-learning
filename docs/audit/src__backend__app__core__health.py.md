@@ -39,6 +39,7 @@ Commands executed (high-signal):
 ## 3) What this file actually does (Observed)
 
 Provides health check utilities for monitoring application dependencies:
+
 - `check_database()`: Tests database connectivity with lightweight query
 - `get_health_status()`: Aggregates component health statuses
 - Used by `/health` endpoint in main.py for monitoring
@@ -48,10 +49,12 @@ Provides health check utilities for monitoring application dependencies:
 ## 4) Key components (Observed)
 
 ### Functions
+
 - `check_database(db: AsyncSession)`: Executes `SELECT 1` query, returns status dict
 - `get_health_status(db: AsyncSession)`: Aggregates component statuses, returns overall status
 
 ### Data Structures
+
 - Status dict: `{"status": "healthy"|"unhealthy", "error": str}`
 - Health status dict: `{"status": str, "components": {component: status}}`
 
@@ -60,11 +63,13 @@ Provides health check utilities for monitoring application dependencies:
 ## 5) Dependencies and contracts
 
 ### 5a) Outbound dependencies (Observed)
+
 - `sqlalchemy.text` (load-bearing): SQL query construction
 - `sqlalchemy.ext.asyncio.AsyncSession` (load-bearing): Database connectivity
 - `Exception` handling: Generic exception catching
 
 ### 5b) Inbound dependencies (Observed)
+
 - `src/backend/app/main.py`: Uses `get_health_status()` in `/health` endpoint
 - `src/backend/tests/test_health.py`: Tests health functionality
 - Monitoring systems: Depend on `/health` endpoint availability
@@ -74,11 +79,13 @@ Provides health check utilities for monitoring application dependencies:
 ## 6) Capability surface
 
 ### 6a) Direct capabilities (Observed)
+
 - Database connectivity testing
 - Health status aggregation
 - Error reporting for failed checks
 
 ### 6b) Implied capabilities (Inferred)
+
 - Application monitoring foundation
 - Dependency health tracking
 - Incident detection and reporting
@@ -147,16 +154,19 @@ Provides health check utilities for monitoring application dependencies:
 ## 10) Inter-file impact analysis
 
 ### 10.1 Inbound impact
+
 - `/health` endpoint depends on status structure and error format
 - Monitoring systems expect specific response format
 - Tests validate specific status codes and response structure
 
 ### 10.2 Outbound impact
+
 - Database changes could affect health check reliability
 - Exception handling changes could affect error reporting
 - Performance issues in dependencies affect health status
 
 ### 10.3 Change impact per finding
+
 - **M1 (Dependency Monitoring)**: Adding new checks requires endpoint updates
 - **M2 (Performance Metrics)**: Adding metrics changes response structure
 - **M3 (Caching)**: Adding cache requires cache dependency management
@@ -174,6 +184,7 @@ Provides health check utilities for monitoring application dependencies:
 ## 12) Patch plan (actionable, scoped)
 
 ### For M1 (MEDIUM) - Comprehensive Dependency Monitoring
+
 - **Where**: `src/backend/app/core/health.py` + new health check modules
 - **What**: Add modular health check system for Redis, external APIs, etc.
 - **Why**: Detect failures in all critical dependencies
@@ -181,6 +192,7 @@ Provides health check utilities for monitoring application dependencies:
 - **Test**: Add tests for new dependency checks
 
 ### For M2 (MEDIUM) - Performance Metrics Collection
+
 - **Where**: `src/backend/app/core/health.py`
 - **What**: Add timing metrics and performance data collection
 - **Why**: Detect performance degradation early
@@ -188,6 +200,7 @@ Provides health check utilities for monitoring application dependencies:
 - **Test**: Validate metrics accuracy
 
 ### For M3 (MEDIUM) - Health Check Caching
+
 - **Where**: `src/backend/app/core/health.py`
 - **What**: Implement short-term caching with cache invalidation
 - **Why**: Reduce database load from frequent health checks
@@ -199,11 +212,13 @@ Provides health check utilities for monitoring application dependencies:
 ## 13) Verification and test coverage
 
 ### Existing tests (Observed)
+
 - `test_health_ok()`: Tests successful health check (200 response)
 - `test_health_db_down()`: Tests database failure (503 response)
 - Good coverage of core functionality
 
 ### Missing tests (Observed)
+
 - No tests for additional dependency checks
 - No performance metric validation
 - No cache behavior tests
@@ -222,11 +237,13 @@ Provides health check utilities for monitoring application dependencies:
 ## 15) Regression analysis
 
 ### File History
+
 - **Initial commit**: Basic health check implementation
 - **Current state**: No changes since initial implementation
 - **Status**: Stable, no regressions detected
 
 ### Health Check Evolution
+
 - **Added**: Database connectivity testing
 - **Missing**: Comprehensive monitoring, performance metrics
 - **Stable**: No breaking changes or issues introduced
@@ -238,6 +255,7 @@ Provides health check utilities for monitoring application dependencies:
 ### Current Production Readiness: ⚠️ PARTIAL
 
 **Strengths:**
+
 - ✅ Database connectivity monitoring works
 - ✅ Proper error handling and reporting
 - ✅ Appropriate HTTP status codes (200/503)
@@ -245,6 +263,7 @@ Provides health check utilities for monitoring application dependencies:
 - ✅ Async database operations
 
 **Weaknesses:**
+
 - ❌ Limited to database monitoring only
 - ❌ No performance metrics or trends
 - ❌ No caching for frequent checks
@@ -258,16 +277,19 @@ Provides health check utilities for monitoring application dependencies:
 ### Compliance with Monitoring Standards
 
 **✅ Implemented:**
+
 - Database connectivity testing
 - Health status aggregation
 - Proper HTTP status codes
 - Error detail reporting
 
 **⚠️ Partial:**
+
 - Dependency monitoring (database only)
 - Error handling (basic implementation)
 
 **❌ Missing:**
+
 - Comprehensive dependency checks
 - Performance metrics collection
 - Health check caching
@@ -281,12 +303,14 @@ Provides health check utilities for monitoring application dependencies:
 ## 18) Performance assessment
 
 ### Current Performance Characteristics
+
 - **Database Query**: Lightweight `SELECT 1` (fast)
 - **Response Time**: < 10ms typical
 - **Resource Usage**: Low (single query)
 - **Scalability**: Good (simple operation)
 
 ### Potential Bottlenecks
+
 - **Database Load**: Frequent checks without caching
 - **Error Handling**: Exception processing overhead
 - **Response Size**: Could grow with more components
@@ -296,37 +320,44 @@ Provides health check utilities for monitoring application dependencies:
 ## 19) Recommendations and prioritization
 
 ### HIGH PRIORITY (Critical for Production)
+
 1. **Add Health Check Caching** (M3) - Reduce database load
 2. **Add Timeout Handling** (L2) - Prevent slow check issues
 
 ### MEDIUM PRIORITY (Important Improvements)
+
 3. **Add Comprehensive Monitoring** (M1) - Monitor all dependencies
-4. **Add Performance Metrics** (M2) - Track response times
+2. **Add Performance Metrics** (M2) - Track response times
 
 ### LOW PRIORITY (Nice-to-have)
+
 5. **Add Error Sanitization** (L1) - Production error handling
-6. **Add Historical Tracking** - Trend analysis
+2. **Add Historical Tracking** - Trend analysis
 
 ---
 
 ## 20) Implementation roadmap
 
 ### Phase 1: Critical Fixes (1-2 days)
+
 - Add caching with 5-10 second TTL
 - Add per-component timeouts (2-5 seconds)
 - Add cache invalidation on dependency changes
 
 ### Phase 2: Monitoring Enhancement (2-3 days)
+
 - Add Redis health check
 - Add external API health checks
 - Add modular health check system
 
 ### Phase 3: Performance Tracking (1-2 days)
+
 - Add response time metrics
 - Add query performance tracking
 - Add metric collection endpoints
 
 ### Phase 4: Advanced Features (1 day)
+
 - Add error sanitization
 - Add historical tracking
 - Add alert thresholds
@@ -337,12 +368,14 @@ Provides health check utilities for monitoring application dependencies:
 
 The health check system provides basic database monitoring but lacks comprehensive dependency tracking and performance optimization. The core functionality is solid and well-tested, but several improvements would enhance production readiness:
 
-### Critical Improvements Needed:
+### Critical Improvements Needed
+
 1. **Health Check Caching** - Essential for high-traffic scenarios
 2. **Timeout Handling** - Prevent cascading failures
 3. **Comprehensive Monitoring** - Detect all dependency failures
 
 ### Current Status: PARTIALLY PRODUCTION-READY
+
 - ✅ Core functionality works
 - ✅ Proper error handling
 - ✅ Good test coverage

@@ -25,10 +25,12 @@
 ## CHECKS (run what applies; mark the rest Unknown)
 
 ### 1) Services start clean
+
 - backend start command + first 20 log lines (no secrets)
 - frontend start command + first 20 log lines
 
 If Git availability is YES (optional):
+
 ```bash
 git status --porcelain
 git rev-parse --abbrev-ref HEAD
@@ -36,21 +38,25 @@ git rev-parse HEAD
 ```
 
 ### 2) Health checks
+
 ```bash
 curl -s -i "<BACKEND_URL>/health"
 curl -s -i "<BACKEND_URL>/"
 ```
 
 ### 3) Basic navigation smoke
+
 - Open `/`, `/login`, `/register`, `/dashboard`, `/game`, `/settings`
 - Note any blank screens, console errors (Observed)
 
 ### 4) Camera permission smoke (if camera is used by current build)
+
 - First run: request appears
 - Deny: app remains usable (fallback)
 - Allow: camera indicator shows, stop works
 
 ### 5) Data safety smoke (if storage/export/delete exist in build)
+
 - Export works (file created / JSON shown)
 - Delete works (data cleared)
 

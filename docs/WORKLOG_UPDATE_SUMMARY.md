@@ -27,32 +27,32 @@ Reviewed codebase for untracked work and created/updated worklog tickets for all
 
 ### New Remediation Tickets (OPEN)
 
-3. **TCK-20260130-008: Add Home/Exit Button to Game Screen (P0)** 🔵
+1. **TCK-20260130-008: Add Home/Exit Button to Game Screen (P0)** 🔵
    - Critical user safety issue - users get trapped in game
    - File: src/frontend/src/pages/Game.tsx
    - Must be large, accessible, visible at all times
 
-4. **TCK-20260130-009: Implement Parent Gate for Settings (P0)** 🔵
+2. **TCK-20260130-009: Implement Parent Gate for Settings (P0)** 🔵
    - Critical child safety issue - children can disable camera
    - File: src/frontend/src/pages/Settings.tsx
    - Simple verification (3-second hold recommended)
 
-5. **TCK-20260130-010: Add Tutorial Overlay for First-Time Users (P0)** 🔵
+3. **TCK-20260130-010: Add Tutorial Overlay for First-Time Users (P0)** 🔵
    - Critical onboarding gap - 2-year-olds cannot intuit pinch gesture
    - New component: src/frontend/src/components/GameTutorial.tsx
    - 3 steps: Hands up → Pinch → Trace
 
-6. **TCK-20260130-011: Fix Webcam Overlay Contrast/Visibility (P0)** 🔵
+4. **TCK-20260130-011: Fix Webcam Overlay Contrast/Visibility (P0)** 🔵
    - Critical classroom usability issue
    - File: src/frontend/src/pages/Game.tsx
    - Add 30% dimming filter + High Contrast toggle
 
-7. **TCK-20260130-012: Add Camera Active Indicator (P1)** 🔵
+5. **TCK-20260130-012: Add Camera Active Indicator (P1)** 🔵
    - High priority - parents need to verify camera status
    - File: src/frontend/src/pages/Game.tsx
    - Recording light or status badge
 
-8. **TCK-20260130-013: Fix Permission Warning Persistence Bug (P1)** 🔵
+6. **TCK-20260130-013: Fix Permission Warning Persistence Bug (P1)** 🔵
    - High priority bug - false warnings confusing users
    - File: src/frontend/src/pages/Game.tsx
    - Show warning only when permission actually denied
@@ -72,15 +72,18 @@ Reviewed codebase for untracked work and created/updated worklog tickets for all
 Previously untracked files now documented:
 
 **QA Audit Artifacts:**
+
 - docs/audit/QA_WORKLOG_2026_01_29.md
 - docs/audit/audit_report_v1.md
 - docs/audit/ux_feedback_v1.md
 - docs/audit/improvement_roadmap_v1.md
 
 **Feature Implementation:**
+
 - src/frontend/src/data/iconMap.ts
 
 **Already Tracked (confirmed in existing tickets):**
+
 - docs/BRAND_KIT.md (TCK-20260130-005)
 - docs/BRAND_ARCHITECTURE_COMPLETE.md (TCK-20260130-004)
 - docs/BRAND_NAMING_EXPLORATION.md (TCK-20260130-003)

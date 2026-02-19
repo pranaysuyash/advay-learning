@@ -57,6 +57,7 @@ Assets Specification:
 | Celebrations | Lottie/CSS | Variable | Confetti, sparkles, success effects |
 
 Generation Method:
+
 - Tool: OpenAI Image API (gpt-image-1.5)
 - CLI: scripts/image_gen.py
 - Requires: OPENAI_API_KEY environment variable
@@ -122,6 +123,7 @@ Scope contract:
   - Accessibility audit (separate ticket)
 
 Personas Used:
+
 1. **Ananya** (Age 5, Bangalore) - Kindergartener, English + Kannada learner
 2. **Priya** (Age 32, Parent) - Working mother, tech-savvy, privacy-conscious
 3. **Arjun** (Age 7, Rural Karnataka) - First-gen English learner, limited connectivity
@@ -139,12 +141,14 @@ Key Findings:
 | Cultural context missing | P2 | Arjun | All pages |
 
 Scores:
+
 - Overall: 6.5/10
 - Ananya (Age 5): 6/10
 - Priya (Parent): 7/10
 - Arjun (Regional): 6/10
 
 Recommendations Created:
+
 - P0: 3 critical fixes
 - P1: 3 high-value improvements
 - P2: 3 nice-to-have enhancements
@@ -245,6 +249,7 @@ Acceptance Criteria:
 - [ ] Instructions match actual interaction mode (pinch vs touch)
 
 Blockers:
+
 - None
 
 Execution log:
@@ -288,6 +293,7 @@ Scope contract:
   - New illustrations for trust bar
 
 Trust Messages:
+
 ```
 "✓ No ads  ✓ No data collection  ✓ Made for ages 2-8  ✓ Parent controlled"
 ```
@@ -308,6 +314,7 @@ Acceptance Criteria:
 - [ ] Age range visible (3-8 years)
 
 Blockers:
+
 - None
 
 Execution log:
@@ -334,29 +341,34 @@ Description:
 Fixed the confusing two-stage letter prompt in Alphabet Game that was causing children (Ananya persona) to get confused. The letter was moving from center to side after 1.8 seconds, making children think the game changed.
 
 Root Cause:
+
 - Original implementation had `promptStage` state ('center' | 'side')
 - After 1.8 seconds, letter moved from big center display to small side pill
 - Children thought the letter disappeared or game changed
 
 Solution:
+
 - Removed two-stage timing logic entirely
 - Created single consistent prompt in top-left corner
 - Shows letter (big), name, and icon together from the start
 - No animations or transitions that could confuse
 
 Changes Made:
+
 - Removed: `promptStage` state, `promptTimeoutRef`, setTimeout logic
 - Added: `showLetterPrompt` boolean state
 - New UI: Consistent top-left card with letter + name + icon
 - File: src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
 
 Before:
+
 ```
 [Big center letter] --1.8s--> [Small side pill]
    "A"                      "Trace A (apple)"
 ```
 
 After:
+
 ```
 [Consistent top-left card]
 ┌─────────────────┐
@@ -368,6 +380,7 @@ After:
 ```
 
 Acceptance Criteria:
+
 - [x] Letter prompt stays in one consistent position
 - [x] No timing-based stage switching
 - [x] Shows letter, name, and icon together
@@ -375,12 +388,14 @@ Acceptance Criteria:
 - [x] Mascot guidance remains clear
 
 Execution log:
+
 - [2026-02-04 19:20 IST] Issue identified | Evidence: Ananya persona confused by moving letter
 - [2026-02-04 19:22 IST] Removed two-stage state | Evidence: Deleted promptStage, promptTimeoutRef
 - [2026-02-04 19:25 IST] Implemented consistent prompt | Evidence: New single-position UI in top-left
 - [2026-02-04 19:27 IST] Cleaned up remaining references | Evidence: All setPromptStage calls removed
 
 Status updates:
+
 - [2026-02-04 19:20 IST] **IN_PROGRESS** — Fixing two-stage prompt
 - [2026-02-04 19:27 IST] **DONE** — Single consistent prompt implemented
 
@@ -398,24 +413,28 @@ Description:
 Comprehensive visual audit using Playwright to capture screenshots with real user credentials, analyzed through three persona lenses (Ananya Age 5, Priya Parent, Arjun Regional).
 
 Methodology:
+
 - Captured 24 screenshots (8 pages × 3 viewports)
-- Used credentials: pranay.suyash@gmail.com
+- Used credentials: <pranay.suyash@gmail.com>
 - Desktop (1440x900), Tablet (834x1112), Mobile (390x844)
 - Analyzed with persona-specific prompts
 - Cross-referenced visual consistency
 
 Tools Used:
+
 - Playwright (chromium browser automation)
 - Node.js script for screenshot capture
 - Visual analysis against persona guidelines
 
 Key Findings:
+
 - Overall Visual Score: 7.2/10
 - Ananya (Child): 6.5/10 - Onboarding too dark, needs game previews
 - Priya (Parent): 7.5/10 - Professional, minor trust indicator gaps
 - Arjun (Regional): 7/10 - Language barrier on landing, good visuals
 
 Critical Issues Found:
+
 1. Onboarding modal dark background (scary for children)
 2. Game cards lack visual thumbnails
 3. Dashboard information density too high
@@ -423,6 +442,7 @@ Critical Issues Found:
 5. Syntax error in AlphabetGamePage.tsx discovered
 
 Screenshots Captured:
+
 - Home (with onboarding modal)
 - Login
 - Register
@@ -432,11 +452,13 @@ Screenshots Captured:
 - Settings
 
 Output:
+
 - Full report: docs/MULTI_PERSONA_VISUAL_AUDIT_REPORT_2026-02-05.md
 - Screenshots: audit-screenshots/visual-audit-2026-02-05/
 - Manifest: manifest.json with all capture metadata
 
 Acceptance Criteria:
+
 - [x] 24 screenshots captured across 3 viewports
 - [x] All 8 key pages documented
 - [x] 3 persona analyses completed
@@ -446,6 +468,7 @@ Acceptance Criteria:
 - [x] Syntax error discovered and fixed
 
 Execution log:
+
 - [2026-02-05 11:00 IST] Started audit | Evidence: Planning SRR Loop execution
 - [2026-02-05 11:05 IST] Servers verified | Backend healthy, frontend started
 - [2026-02-05 11:08 IST] Screenshots captured | 24 total, all viewports
@@ -456,6 +479,7 @@ Execution log:
 - [2026-02-05 11:30 IST] Report complete | Multi-faceted analysis done
 
 Status updates:
+
 - [2026-02-05 11:00 IST] **IN_PROGRESS** — Capturing screenshots
 - [2026-02-05 11:30 IST] **DONE** — Audit complete with recommendations
 
@@ -523,6 +547,7 @@ Inputs:
 Evidence gathered:
 
 **Observed**: Games system structure and configuration
+
 - Command: `find src/frontend/src -type d | grep -E "game|component"` + manual file inspection
 - **Finding**: 4 games currently implemented:
   1. `AlphabetGame` (Draw Letters) - ageRange: "2-8 years", category: Alphabets, difficulty: Easy
@@ -534,6 +559,7 @@ Evidence gathered:
 - Game cards display ageRange as string; no dynamic filtering by child age
 
 **Observed**: Progress/Analytics tracking infrastructure
+
 - Backend model: `src/backend/app/db/models/progress.py`
   - Tracks: `activity_type` (drawing, recognition, game), `content_id`, `score`, `duration_seconds`, `meta_data`, `idempotency_key`
   - Records: completion timestamp, profile_id, batch/dedupe support
@@ -546,6 +572,7 @@ Evidence gathered:
 - No game-specific event tracking observed in backend (only activity_type + content_id)
 
 **Observed**: UI component patterns for games
+
 - `GameCard.tsx` - Shows: title, description, ageRange (string), category, difficulty, optional stars/playCount/progress
   - Category colors map: Alphabets, Numeracy, Fine Motor (Tailwind classes)
   - Difficulty colors map: Easy, Medium, Hard (all use same Tailwind classes - no visual distinction)
@@ -556,12 +583,14 @@ Evidence gathered:
 - `ProfileStore.ts` - Tracks `age?: number` per profile but no age-based component rendering logic visible
 
 **Inferred**: Age-group UI component adaptation gaps
+
 - Profile store tracks age but games.tsx doesn't use it to filter/customize game difficulty
 - Games hardcode ageRange strings; no dynamic difficulty gating or age-appropriate content selection
 - No persona-specific button sizes, text complexity, or visual hierarchy changes observed in source
 - Difficulty color mappings are identical for Easy/Medium/Hard - no visual distinction in UI
 
-**Unknown**: 
+**Unknown**:
+
 - How are games actually presenting UI to different age groups during gameplay? (Need playtest evidence)
 - Is analytics data being actively captured during gameplay or only on completion?
 - How parents/teachers view progress analytics? (Completeness + accuracy of parent dashboard)
@@ -682,7 +711,7 @@ Inputs:
 
 - Prompt used: MediaPipe Vision Audit (Phase 6 — M1)
 - Source artifacts: `docs/MEDIAPIPE_VISION_AUDIT_2026-02-14.md`
-- Reference: Géry Casiez et al., "1€ Filter", CHI 2012, https://gery.casiez.net/1euro/
+- Reference: Géry Casiez et al., "1€ Filter", CHI 2012, <https://gery.casiez.net/1euro/>
 
 Plan:
 
@@ -1120,5 +1149,100 @@ Prompt & persona usage table:
 |-------------|----------------|------------|----------------------|
 | docs/COMPREHENSIVE_INNOVATIVE_GAMES_CATALOG.md | Innovation architect | Game design | Science learning through play |
 | docs/research/RESEARCH-016-AR-CAPABILITIES.md | Technical researcher | Feasibility | Hand tracking for interaction |
+
+---
+
+---
+
+### TCK-20260217-007 :: Fun First Games Catalog + Air Canvas Studio
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 13:45 IST
+Status: **DONE**
+Completed: 2026-02-17 13:45 IST
+Priority: P0
+
+Description:
+Create a "Fun First" games catalog focused on pure entertainment rather than educational outcomes. Implement Air Canvas Studio as the first fun-focused game where kids can draw in 3D space with their hands.
+
+Scope contract:
+
+- In-scope:
+  - Create FUN_FIRST_GAMES_CATALOG.md with 25+ game ideas
+  - Categories: Air Drawing, Music, Sports, Experiment Toys, Roleplay, Party Games
+  - Implement AirCanvas.tsx game page
+  - 8 different brush types with unique visual effects
+  - Color picker with 14 colors
+  - Hand tracking drawing mechanics
+  - Screenshot and download functionality
+  - Particle system for visual effects
+  
+- Out-of-scope:
+  - Educational content or learning objectives
+  - Curriculum alignment
+  - Progress tracking (just fun!)
+  - Other games from catalog (future work)
+  
+- Behavior change allowed: N/A (new games)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/FUN_FIRST_GAMES_CATALOG.md (new)
+  - src/frontend/src/pages/AirCanvas.tsx (new)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Fun First catalog has 25+ game concepts across 7 categories
+- [x] Air Canvas Studio implements 8 brush types
+- [x] Hand tracking drawing (open hand = draw, closed hand = pause)
+- [x] Visual particle effects for each brush
+- [x] Screenshot and download functionality
+- [x] Responsive UI with brush/color selection
+- [x] TypeScript type-check passes
+- [x] Tests pass
+
+Evidence Links:
+
+- Source: docs/FUN_FIRST_GAMES_CATALOG.md
+- Implementation: src/frontend/src/pages/AirCanvas.tsx
+
+Execution log:
+
+- [2026-02-17 13:30 IST] Created FUN_FIRST_GAMES_CATALOG.md with 25+ pure entertainment games
+  - Air Drawing: Canvas, Kaleidoscope, 3D Sculpture, Painting
+  - Music: Air Guitar, Drums, Conductor, Beatbox
+  - Sports: Archery, Bowling, Fruit Ninja, Tennis, Ball Toss
+  - Experiment Toys: Particles, Bubbles, Lava Lamp, Inkblots
+  - Roleplay: Superpowers, Magic Wand, Puppets
+  - Party: Simon Says, Pong, Freeze Dance Battle
+  - AI-Powered: Doodle to Image, Story from Movement
+- [2026-02-17 13:45 IST] Implemented AirCanvas.tsx
+  - 8 brushes: Sparkle, Neon, Rainbow, Fire, Smoke, Glitter, Laser, Bubble
+  - 14 colors + random color picker
+  - Hand tracking: open hand to draw, closed hand to pause
+  - Brush size control (0.5x - 3x)
+  - Particle system with physics
+  - Screenshot modal with download
+  - UI toggle to hide/show controls
+- [2026-02-17 13:45 IST] Verification | Evidence:
+  - TypeScript: `npm run type-check` passes
+  - Tests: 376 passed (1 pre-existing Playwright config failure)
+  - Commit: aaab1f6
+
+Status updates:
+
+- [2026-02-17 13:30 IST] **OPEN** — Ticket created
+- [2026-02-17 13:45 IST] **DONE** — Fun First catalog and Air Canvas implemented
+
+Prompt & persona usage table:
+
+| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
+|-------------|----------------|------------|----------------------|
+| FUN_FIRST_GAMES_CATALOG.md | Play designer | Entertainment | Pure fun, no pedagogy |
+| AirCanvas.tsx | Creative developer | Implementation | Hand tracking art tool |
 
 ---

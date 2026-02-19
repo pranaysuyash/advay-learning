@@ -1,4 +1,5 @@
 # Research Roadmap
+
 ## Advay Vision Learning - Comprehensive Research Planning
 
 **Version:** 1.0
@@ -83,14 +84,17 @@ Goals:
 ## 3. Planned Research Areas
 
 ### 3.1 RESEARCH-001: Technical Implementation Patterns
+
 **Priority:** P0 - Critical
 **Category:** Technical
 **Estimated Effort:** 2-3 days
 
 #### Objective
+
 Validate that proposed features are technically feasible with current stack and identify optimization patterns.
 
 #### Research Questions
+
 1. What is MediaPipe's actual performance on low-end Android devices?
 2. How do we handle camera access failures gracefully?
 3. What's the optimal frame rate for gesture detection vs. battery life?
@@ -100,6 +104,7 @@ Validate that proposed features are technically feasible with current stack and 
 7. What are the memory limits we need to respect?
 
 #### Deliverables
+
 - [ ] Device compatibility matrix (minimum specs)
 - [ ] Performance benchmarks document
 - [ ] Offline architecture pattern
@@ -107,6 +112,7 @@ Validate that proposed features are technically feasible with current stack and 
 - [ ] Bundle size optimization strategies
 
 #### Sources to Research
+
 - MediaPipe documentation and GitHub issues
 - React Native vs. PWA performance comparisons
 - Similar apps' technical implementations
@@ -116,14 +122,17 @@ Validate that proposed features are technically feasible with current stack and 
 ---
 
 ### 3.2 RESEARCH-002: Monetization & Business Model
+
 **Priority:** P0 - Critical
 **Category:** Business
 **Estimated Effort:** 2-3 days
 
 #### Objective
+
 Define a sustainable, ethical business model appropriate for Indian market and kids' apps.
 
 #### Research Questions
+
 1. What do Indian parents actually pay for kids' educational apps?
 2. What's the average LTV (lifetime value) for kids' apps in India?
 3. How do successful freemium kids' apps structure their offerings?
@@ -133,6 +142,7 @@ Define a sustainable, ethical business model appropriate for Indian market and k
 7. What partnership models exist (B2B to schools, NGOs)?
 
 #### Deliverables
+
 - [ ] Pricing strategy document
 - [ ] Freemium feature split recommendation
 - [ ] Payment integration requirements
@@ -140,6 +150,7 @@ Define a sustainable, ethical business model appropriate for Indian market and k
 - [ ] Financial projections (basic)
 
 #### Sources to Research
+
 - Indian EdTech market reports (RedSeer, Inc42)
 - Competitor pricing (actual Indian pricing)
 - App store revenue data
@@ -149,14 +160,17 @@ Define a sustainable, ethical business model appropriate for Indian market and k
 ---
 
 ### 3.3 RESEARCH-003: Curriculum & Learning Outcomes
+
 **Priority:** P1 - High
 **Category:** Product
 **Estimated Effort:** 2 days
 
 #### Objective
+
 Align app content with recognized educational frameworks and define measurable learning outcomes.
 
 #### Research Questions
+
 1. What are NCERT/CBSE learning outcomes for ages 3-10?
 2. How do we measure "learning" vs. "playing"?
 3. What's the optimal session length by age?
@@ -166,6 +180,7 @@ Align app content with recognized educational frameworks and define measurable l
 7. What certifications/endorsements matter to Indian parents?
 
 #### Deliverables
+
 - [ ] Curriculum alignment matrix (games → learning outcomes)
 - [ ] Assessment methodology document
 - [ ] Progress reporting design
@@ -173,6 +188,7 @@ Align app content with recognized educational frameworks and define measurable l
 - [ ] Credential/endorsement strategy
 
 #### Sources to Research
+
 - NCERT curriculum documents
 - Early childhood development research
 - Educational assessment frameworks
@@ -182,14 +198,17 @@ Align app content with recognized educational frameworks and define measurable l
 ---
 
 ### 3.4 RESEARCH-004: Accessibility Standards
+
 **Priority:** P1 - High
 **Category:** Product
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Ensure app is usable by children with various abilities and meets accessibility standards.
 
 #### Research Questions
+
 1. What WCAG guidelines apply specifically to kids' apps?
 2. How do we accommodate motor impairments with gesture controls?
 3. What visual accessibility requirements exist (color blindness, low vision)?
@@ -199,6 +218,7 @@ Ensure app is usable by children with various abilities and meets accessibility 
 7. What are legal requirements for accessibility in India?
 
 #### Deliverables
+
 - [ ] Accessibility requirements document
 - [ ] Alternative interaction patterns for each game type
 - [ ] Color palette accessibility verification
@@ -206,6 +226,7 @@ Ensure app is usable by children with various abilities and meets accessibility 
 - [ ] Motor accommodation patterns
 
 #### Sources to Research
+
 - WCAG 2.1 guidelines (focus on kids' app interpretations)
 - Disability statistics in India
 - Accessible EdTech examples
@@ -215,14 +236,17 @@ Ensure app is usable by children with various abilities and meets accessibility 
 ---
 
 ### 3.5 RESEARCH-005: Sound & Music Production
+
 **Priority:** P2 - Medium
 **Category:** Product
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Define audio asset requirements and production/licensing approach.
 
 #### Research Questions
+
 1. What are the full audio asset requirements (list all sounds needed)?
 2. Should we use TTS, voice actors, or hybrid for Pip's voice?
 3. What music licensing options exist (royalty-free, commissioned, AI-generated)?
@@ -232,6 +256,7 @@ Define audio asset requirements and production/licensing approach.
 7. What's the budget range for professional audio production?
 
 #### Deliverables
+
 - [ ] Complete audio asset inventory
 - [ ] Voice production recommendation (TTS vs. actor)
 - [ ] Music licensing strategy
@@ -239,6 +264,7 @@ Define audio asset requirements and production/licensing approach.
 - [ ] Production budget estimate
 
 #### Sources to Research
+
 - Voice actor marketplaces (Fiverr, Voices.com)
 - Royalty-free music libraries
 - TTS quality comparisons
@@ -248,14 +274,17 @@ Define audio asset requirements and production/licensing approach.
 ---
 
 ### 3.6 RESEARCH-006: Legal & Compliance
+
 **Priority:** P1 - High
 **Category:** Legal
 **Estimated Effort:** 2 days
 
 #### Objective
+
 Understand all legal requirements for a kids' app operating in India and potentially globally.
 
 #### Research Questions
+
 1. What does India's DPDP Act require for children's data?
 2. How does COPPA (US) apply if we expand globally?
 3. What are Google Play and Apple App Store policies for kids' apps?
@@ -265,6 +294,7 @@ Understand all legal requirements for a kids' app operating in India and potenti
 7. Do we need any specific certifications (kidSAFE, etc.)?
 
 #### Deliverables
+
 - [ ] Legal requirements checklist (India-focused)
 - [ ] Privacy policy template for kids' apps
 - [ ] Parental consent flow design
@@ -272,6 +302,7 @@ Understand all legal requirements for a kids' app operating in India and potenti
 - [ ] App store compliance checklist
 
 #### Sources to Research
+
 - India DPDP Act text and guidelines
 - COPPA regulations and FTC guidance
 - App store developer policies
@@ -282,14 +313,17 @@ Understand all legal requirements for a kids' app operating in India and potenti
 ---
 
 ### 3.7 RESEARCH-007: Parent Experience & Dashboard
+
 **Priority:** P2 - Medium
 **Category:** Product
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Design a parent experience that builds trust, provides value, and drives engagement.
 
 #### Research Questions
+
 1. What information do parents actually want to see?
 2. How detailed should progress reports be?
 3. What parental controls are expected/required?
@@ -299,6 +333,7 @@ Design a parent experience that builds trust, provides value, and drives engagem
 7. What drives parents to recommend apps to other parents?
 
 #### Deliverables
+
 - [ ] Parent dashboard requirements document
 - [ ] Progress report design specifications
 - [ ] Parental controls feature list
@@ -306,6 +341,7 @@ Design a parent experience that builds trust, provides value, and drives engagem
 - [ ] Parent onboarding flow
 
 #### Sources to Research
+
 - Competitor parent dashboard analysis
 - Parent UX research studies
 - EdTech parent satisfaction surveys
@@ -315,14 +351,17 @@ Design a parent experience that builds trust, provides value, and drives engagem
 ---
 
 ### 3.8 RESEARCH-008: Growth & Marketing Strategy
+
 **Priority:** P3 - Low (Post-MVP)
 **Category:** Growth
 **Estimated Effort:** 2 days
 
 #### Objective
+
 Develop a go-to-market strategy for the Indian market.
 
 #### Research Questions
+
 1. What are the most effective channels for reaching Indian parents?
 2. How do successful kids' apps acquire users in India?
 3. What role do schools/educators play in app adoption?
@@ -332,6 +371,7 @@ Develop a go-to-market strategy for the Indian market.
 7. What's the CAC (customer acquisition cost) benchmark?
 
 #### Deliverables
+
 - [ ] Go-to-market strategy document
 - [ ] Channel prioritization
 - [ ] Influencer partnership plan
@@ -339,6 +379,7 @@ Develop a go-to-market strategy for the Indian market.
 - [ ] Referral program design
 
 #### Sources to Research
+
 - Indian parent online behavior data
 - EdTech marketing case studies
 - Influencer marketing platforms
@@ -348,14 +389,17 @@ Develop a go-to-market strategy for the Indian market.
 ---
 
 ### 3.9 RESEARCH-009: Localization & Cultural Adaptation
+
 **Priority:** P2 - Medium
 **Category:** Product
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Ensure content is culturally appropriate and locally relevant across Indian languages/regions.
 
 #### Research Questions
+
 1. What cultural references resonate in different Indian regions?
 2. How do we handle festival variations across religions/regions?
 3. What food/animal examples are appropriate universally?
@@ -365,6 +409,7 @@ Ensure content is culturally appropriate and locally relevant across Indian lang
 7. What regional content variations are needed?
 
 #### Deliverables
+
 - [ ] Cultural sensitivity guidelines
 - [ ] Regional content variation matrix
 - [ ] Localization workflow document
@@ -372,6 +417,7 @@ Ensure content is culturally appropriate and locally relevant across Indian lang
 - [ ] Festival/celebration calendar
 
 #### Sources to Research
+
 - Regional cultural research
 - Localization best practices
 - Translation service comparisons
@@ -381,14 +427,17 @@ Ensure content is culturally appropriate and locally relevant across Indian lang
 ---
 
 ### 3.10 RESEARCH-010: Analytics & Data Strategy
+
 **Priority:** P2 - Medium
 **Category:** Technical
 **Estimated Effort:** 1 day
 
 #### Objective
+
 Define what data to collect, how to analyze it, and how to use insights while respecting privacy.
 
 #### Research Questions
+
 1. What metrics matter most for a kids' learning app?
 2. How do we measure learning outcomes vs. engagement?
 3. What analytics tools are COPPA/DPDP compliant?
@@ -398,6 +447,7 @@ Define what data to collect, how to analyze it, and how to use insights while re
 7. What data should we explicitly NOT collect?
 
 #### Deliverables
+
 - [ ] Metrics definition document
 - [ ] Analytics tool recommendation
 - [ ] Data collection policy
@@ -405,6 +455,7 @@ Define what data to collect, how to analyze it, and how to use insights while re
 - [ ] A/B testing guidelines
 
 #### Sources to Research
+
 - Privacy-first analytics tools
 - EdTech metrics benchmarks
 - Kids' app analytics case studies
@@ -414,14 +465,17 @@ Define what data to collect, how to analyze it, and how to use insights while re
 ---
 
 ### 3.11 RESEARCH-011: Deployment & Distribution Strategy
+
 **Priority:** P1 - High
 **Category:** Technical
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Define how the app will be built, distributed, and updated across platforms.
 
 #### Research Questions
+
 1. PWA vs. React Native vs. Native app - which is best for camera-heavy apps?
 2. What are the Play Store/App Store requirements for kids' apps?
 3. How do we handle app updates without disrupting learning progress?
@@ -431,6 +485,7 @@ Define how the app will be built, distributed, and updated across platforms.
 7. How do we handle device fragmentation in Android?
 
 #### Deliverables
+
 - [ ] Platform decision document (PWA vs Native)
 - [ ] App store submission checklist
 - [ ] Update strategy document
@@ -438,6 +493,7 @@ Define how the app will be built, distributed, and updated across platforms.
 - [ ] Device testing matrix
 
 #### Sources to Research
+
 - Play Store Kids category requirements
 - Apple App Store Kids category guidelines
 - PWA camera/ML performance benchmarks
@@ -447,14 +503,17 @@ Define how the app will be built, distributed, and updated across platforms.
 ---
 
 ### 3.12 RESEARCH-012: Safety & Content Moderation
+
 **Priority:** P1 - High
 **Category:** Product
 **Estimated Effort:** 1 day
 
 #### Objective
+
 Ensure the app is safe for children and has appropriate safeguards.
 
 #### Research Questions
+
 1. What content moderation is needed for user-generated content (if any)?
 2. How do we prevent inappropriate use of the camera?
 3. What safeguards exist for chat/social features (if planned)?
@@ -464,6 +523,7 @@ Ensure the app is safe for children and has appropriate safeguards.
 7. What parental controls are expected/required?
 
 #### Deliverables
+
 - [ ] Safety features checklist
 - [ ] Screen time/addiction prevention design
 - [ ] Parental control requirements
@@ -471,6 +531,7 @@ Ensure the app is safe for children and has appropriate safeguards.
 - [ ] Content guidelines document
 
 #### Sources to Research
+
 - Kids' app safety best practices
 - Screen time research for children
 - Parental control implementations
@@ -480,14 +541,17 @@ Ensure the app is safe for children and has appropriate safeguards.
 ---
 
 ### 3.13 RESEARCH-013: Offline Experience Design
+
 **Priority:** P1 - High
 **Category:** Technical
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Define how the app works when there's no or poor internet connectivity.
 
 #### Research Questions
+
 1. What features work offline vs. require connectivity?
 2. How do we sync progress when connection is restored?
 3. What content needs to be pre-downloaded?
@@ -497,6 +561,7 @@ Define how the app works when there's no or poor internet connectivity.
 7. How do we communicate connectivity status to children?
 
 #### Deliverables
+
 - [ ] Offline feature matrix
 - [ ] Sync architecture document
 - [ ] Storage requirements analysis
@@ -504,6 +569,7 @@ Define how the app works when there's no or poor internet connectivity.
 - [ ] Conflict resolution strategy
 
 #### Sources to Research
+
 - Offline-first architecture patterns
 - Service Worker capabilities
 - IndexedDB/local storage limits
@@ -513,14 +579,17 @@ Define how the app works when there's no or poor internet connectivity.
 ---
 
 ### 3.14 RESEARCH-014: Gamification & Motivation Psychology
+
 **Priority:** P2 - Medium
 **Category:** Product
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Design ethical, effective motivation systems that drive learning without creating addiction.
 
 #### Research Questions
+
 1. What reward systems work for ages 3-10 without creating dependence?
 2. How do we balance intrinsic vs. extrinsic motivation?
 3. What's the right frequency/magnitude of rewards?
@@ -530,6 +599,7 @@ Design ethical, effective motivation systems that drive learning without creatin
 7. What does "ethical gamification" mean for kids?
 
 #### Deliverables
+
 - [ ] Reward system design principles
 - [ ] Streak/consistency mechanic recommendation
 - [ ] Collectibles system design
@@ -537,6 +607,7 @@ Design ethical, effective motivation systems that drive learning without creatin
 - [ ] Motivation research summary
 
 #### Sources to Research
+
 - Child psychology research on rewards
 - Gamification ethics literature
 - Competitor gamification analysis
@@ -546,14 +617,17 @@ Design ethical, effective motivation systems that drive learning without creatin
 ---
 
 ### 3.15 RESEARCH-015: Teacher & School Integration
+
 **Priority:** P3 - Low (Post-MVP)
 **Category:** Business
 **Estimated Effort:** 1-2 days
 
 #### Objective
+
 Explore B2B opportunities with schools, teachers, and educational institutions.
 
 #### Research Questions
+
 1. What do teachers need from educational apps?
 2. How do schools procure and deploy apps?
 3. What classroom features are needed (multi-student, teacher dashboard)?
@@ -563,6 +637,7 @@ Explore B2B opportunities with schools, teachers, and educational institutions.
 7. What content alignment with curriculum is needed?
 
 #### Deliverables
+
 - [ ] Teacher requirements document
 - [ ] School sales process analysis
 - [ ] Classroom feature requirements
@@ -570,6 +645,7 @@ Explore B2B opportunities with schools, teachers, and educational institutions.
 - [ ] Partnership opportunity list
 
 #### Sources to Research
+
 - EdTech school sales research
 - Teacher adoption case studies
 - Indian school technology adoption
@@ -579,14 +655,17 @@ Explore B2B opportunities with schools, teachers, and educational institutions.
 ---
 
 ### 3.16 RESEARCH-016: AR (Augmented Reality) Capabilities
+
 **Priority:** P1 - High
 **Category:** Technical/Product
 **Estimated Effort:** 2-3 days
 
 #### Objective
+
 Explore AR capabilities given our camera-based architecture, including dual camera setups and new AR learning experiences.
 
 #### Research Questions
+
 1. What WebAR technologies work best with our React + MediaPipe stack?
 2. Can we support dual cameras (laptop front + external) for AR?
 3. What new games become possible with AR?
@@ -597,6 +676,7 @@ Explore AR capabilities given our camera-based architecture, including dual came
 8. What are the privacy implications of external/environment cameras?
 
 #### Deliverables
+
 - [ ] WebAR technology comparison and recommendation
 - [ ] Dual camera technical feasibility report
 - [ ] AR game concept document (new games + enhancements)
@@ -607,6 +687,7 @@ Explore AR capabilities given our camera-based architecture, including dual came
 - [ ] Implementation roadmap for AR features
 
 #### Key Findings (Preliminary)
+
 - **Dual camera is feasible** in modern browsers via `enumerateDevices()` + `getUserMedia()`
 - **Recommended approach**: MediaPipe + Canvas overlay (works everywhere) + WebXR progressive enhancement
 - **New games enabled**: AR tracing on paper, virtual manipulatives, room scavenger hunts, AR science lab
@@ -614,6 +695,7 @@ Explore AR capabilities given our camera-based architecture, including dual came
 - **Performance**: Dual camera = 2x processing, requires optimization (frame skipping, resolution scaling)
 
 #### Sources to Research
+
 - WebXR Device API documentation
 - MediaPipe segmentation models
 - Existing AR learning apps (Osmo, Kaju, Wonderscope)
@@ -784,18 +866,23 @@ RESEARCH-006 (Legal) ──────┬──► RESEARCH-010 (Analytics)
 ### 6.2 Parallel Tracks
 
 **Track A: Technical Foundation**
+
 - RESEARCH-001 → RESEARCH-004, RESEARCH-011, RESEARCH-013
 
 **Track B: Business Model**
+
 - RESEARCH-002 → RESEARCH-006 → RESEARCH-008, RESEARCH-015
 
 **Track C: Product & Content**
+
 - RESEARCH-003 → RESEARCH-007, RESEARCH-009, RESEARCH-014
 
 **Track D: Compliance & Safety**
+
 - RESEARCH-006 → RESEARCH-010, RESEARCH-012
 
 **Track E: Infrastructure**
+
 - RESEARCH-005 (can run in parallel with others)
 
 ### 6.3 Critical Path
@@ -849,18 +936,21 @@ Total: ~8-10 days before implementation decisions
 ## Appendix A: Research Resources
 
 ### Websites & Databases
-- MediaPipe documentation: https://developers.google.com/mediapipe
-- NCERT curriculum: https://ncert.nic.in
+
+- MediaPipe documentation: <https://developers.google.com/mediapipe>
+- NCERT curriculum: <https://ncert.nic.in>
 - Indian EdTech reports: Inc42, RedSeer, Tracxn
 - Privacy regulations: MeitY (India), FTC (US)
 
 ### Tools for Research
+
 - Competitive analysis: SimilarWeb, App Annie
 - Survey tools: Google Forms, Typeform
 - Technical testing: Lighthouse, WebPageTest
 - Analytics: Mixpanel, Amplitude
 
 ### People to Consult
+
 - Early childhood educators
 - Parents of target age children
 - Legal/compliance experts

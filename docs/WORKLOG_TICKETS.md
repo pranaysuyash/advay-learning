@@ -63,7 +63,7 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - docs/GAMES.md (new)
-  - src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx (new)
+  - src/frontend/src/pages/**tests**/GamePages.smoke.test.tsx (new)
 - Branch/PR: main
 
 Acceptance Criteria:
@@ -135,6 +135,7 @@ Execution log:
 - [2026-02-04 11:09 IST] Discovery | Evidence:
   - **Command**: `git status --porcelain`
   - **Output**:
+
     ```
      M docs/SETUP.md
     MM docs/WORKLOG_TICKETS.md
@@ -144,41 +145,50 @@ Execution log:
     A  scripts/test-db-bootstrap.sh
      M src/frontend/src/pages/Dashboard.tsx
     ```
+
   - **Interpretation**: Observed — Existing worktree changes present; preserve unrelated changes and scope edits to UI files listed above + this ticket entry.
 - [2026-02-04 11:09 IST] Discovery | Evidence:
   - **Command**: `rg -n "Wellness Timer|Stretch Alert" -S src/frontend/src | head -n 50`
   - **Output**:
+
     ```
     src/frontend/src/components/WellnessTimer.tsx:93:            <h3 className="font-bold text-white text-sm">Wellness Timer</h3>
     src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx:1512:      {/* Wellness Timer */}
     ```
+
   - **Interpretation**: Observed — Wellness Timer and alert UI are part of the AlphabetGamePage screen and can impact perceived UI quality.
 - [2026-02-04 11:21 IST] Implemented UI polish changes | Evidence:
   - **Command**: `git diff --stat -- src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx src/frontend/src/components/WellnessTimer.tsx src/frontend/src/components/WellnessReminder.tsx`
   - **Output**:
+
     ```
      src/frontend/src/components/WellnessReminder.tsx   |  14 +-
      src/frontend/src/components/WellnessTimer.tsx      |  31 +-
      .../src/pages/alphabet-game/AlphabetGamePage.tsx   | 363 +++++++++++----------
      3 files changed, 213 insertions(+), 195 deletions(-)
     ```
+
   - **Interpretation**: Observed — UI-only changes applied to the scoped files.
 - [2026-02-04 11:21 IST] Verification | Evidence:
   - **Command**: `cd src/frontend && npm run type-check`
   - **Output**:
+
     ```
     > advay-vision-frontend@0.1.0 type-check
     > tsc --noEmit
     ```
+
   - **Interpretation**: Observed — TypeScript typecheck passes.
 - [2026-02-04 11:21 IST] Verification | Evidence:
   - **Command**: `cd src/frontend && npm test --silent -- --run --no-color`
   - **Output**:
+
     ```
      RUN  v4.0.18 /Users/pranay/Projects/learning_for_kids/src/frontend
      Test Files  36 passed (36)
           Tests  338 passed (338)
     ```
+
   - **Interpretation**: Observed — Vitest passes (some console warnings from existing tests remain).
 
 Status updates:
@@ -252,9 +262,11 @@ Execution log:
 - [2026-02-04 11:24 IST] Discovery | Evidence:
   - **Command**: `lsof -i :6173 | head || true`
   - **Output**:
+
     ```
     node      49638 pranay   16u  IPv4 0x56abb7cb83bdd36e      0t0  TCP localhost:6173 (LISTEN)
     ```
+
   - **Interpretation**: Observed — Frontend dev server is running; visual audits via Playwright are possible.
 - [2026-02-04 11:25 IST] Evidence capture | Evidence:
   - **Command**: `cd src/frontend && npx playwright install chromium`
@@ -263,16 +275,20 @@ Execution log:
 - [2026-02-04 11:25 IST] Evidence capture | Evidence:
   - **Command**: `cd src/frontend && node --input-type=module - <<'NODE' ... NODE`
   - **Output**:
+
     ```
     Saved screenshots to /Users/pranay/Projects/learning_for_kids/audit-screenshots/2026-02-04-ui-audit
     ```
+
   - **Interpretation**: Observed — Fresh screenshots captured for `/game` and `/games` at desktop/tablet/mobile.
 - [2026-02-04 11:37 IST] Audit artifact updated | Evidence:
   - **Command**: `rg -n "2026-02-04 Addendum" docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md`
   - **Output**:
+
     ```
     209:# 2026-02-04 Addendum — Persona-Driven UI/UX Audit (Pre-game + Overlays)
     ```
+
   - **Interpretation**: Observed — Persona-driven addendum appended to the existing AlphabetGamePage audit artifact.
 
 Status updates:
@@ -345,16 +361,20 @@ Execution log:
 - [2026-02-04 11:32 IST] Evidence capture | Evidence:
   - **Command**: `cd src/frontend && node --input-type=module - <<'NODE' ... NODE`
   - **Output**:
+
     ```
     Saved screenshots to /Users/pranay/Projects/learning_for_kids/audit-screenshots/2026-02-04-ui-audit
     ```
+
   - **Interpretation**: Observed — Fresh screenshots captured for `/login` on desktop and mobile.
 - [2026-02-04 11:37 IST] Audit artifact updated | Evidence:
   - **Command**: `rg -n "2026-02-04 Addendum" docs/audit/ui__src__frontend__src__pages__Login.tsx.md`
   - **Output**:
+
     ```
     159:# 2026-02-04 Addendum — Persona-Driven UI/UX Audit (Parent Funnel + Mobile Layout)
     ```
+
   - **Interpretation**: Observed — Persona-driven addendum appended to the existing Login audit artifact with screenshot index + recommendations.
 
 Status updates:
@@ -1476,15 +1496,19 @@ Execution log:
 - [2026-01-30 12:36 UTC] Implemented two-hand diagnostics + more permissive detection | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  13 passed (13)
           Tests  82 passed (82)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 2.16s
     ```
+
   - **Interpretation**: Observed — changes compile and tests pass; UI now exposes hands + per-hand breakdown to confirm two-hand summing at runtime.
 
 ### TCK-20260130-027 :: LetterHunt camera-first mechanic (pinch to select)
@@ -1530,15 +1554,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  84 passed (84)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 2.62s
   ```
+
 - **Interpretation**: Observed — LetterHunt uses camera-first pinch selection, helper is unit-tested, and build/tests succeed.
 
 ### TCK-20260130-028 :: FingerNumberShow prompt UX + TTS + stop “auto-changing” for 0
@@ -1590,15 +1618,19 @@ Status updates:
 - [2026-01-30 12:51 UTC] **DONE** — Prompt overlay enlarged; `0` now “make a fist” (hand required); TTS prompt added + replay button | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  14 passed (14)
           Tests  84 passed (84)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 4.46s
     ```
+
   - **Interpretation**: Observed — changes compile and tests pass; prompt UX + 0 gating + TTS replay are implemented.
 
 ### TCK-20260130-029 :: Mascot TTS reliability (debounce + tap-to-speak)
@@ -1633,15 +1665,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  84 passed (84)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.43s
   ```
+
 - **Interpretation**: Observed — changes compile and tests pass; Mascot speech is now debounced and can be triggered via click.
 
 ### TCK-20260130-030 :: FingerNumberShow reach 10 (thumb + rotated fingers + two-hand sum)
@@ -1679,15 +1715,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  85 passed (85)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.45s
   ```
+
 - **Interpretation**: Observed — updated counting logic + tests pass; game can now reach 10 when both hands are detected.
 
 ### TCK-20260130-031 :: FingerNumberShow prompt for kids + streak gating
@@ -1725,15 +1765,19 @@ Evidence:
 
 - **Command**: `cd src/frontend && npm test`
 - **Output**:
+
   ```
    Test Files  14 passed (14)
         Tests  85 passed (85)
   ```
+
 - **Command**: `cd src/frontend && npm run build`
 - **Output**:
+
   ```
   ✓ built in 1.44s
   ```
+
 - **Interpretation**: Observed — prompt is now big + timed; streak scoring is gated and tests/build succeed.
 
 ### TCK-20260130-025 :: Brand Guidelines Analysis & Competitive Research
@@ -1849,6 +1893,7 @@ Execution log:
 - [2026-01-30 12:12 UTC] Confirmed current implementation ignores thumb | Evidence:
   - **Command**: `rg -n "fingerPairs" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     150:    const fingerPairs = [
     151:      { tip: 8, pip: 6 },
@@ -1857,6 +1902,7 @@ Execution log:
     154:      { tip: 20, pip: 18 },
     155:    ];
     ```
+
   - **Interpretation**: Observed — thumb landmarks (2/3/4) are not considered, so max per hand is 4.
 
 Next actions:
@@ -1872,15 +1918,19 @@ Status updates:
 - [2026-01-30 12:22 UTC] **DONE** — Thumb counting implemented + regression tests added; frontend test/build verified | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
      Test Files  13 passed (13)
           Tests  82 passed (82)
     ```
+
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 3.16s
     ```
+
   - **Interpretation**: Observed — unit tests pass (including `fingerCounting.test.ts`), and production build succeeds.
 
 ### TCK-20260130-023 :: Restore game interactions (AlphabetGame tracking + ConnectTheDots clicks)
@@ -1935,34 +1985,42 @@ Execution log:
 - [2026-01-30 11:59 UTC] ConnectTheDots responsive hit-testing fix present | Evidence:
   - **Command**: `rg -n "scaleX = canvasRef\\.current\\.width / rect\\.width" src/frontend/src/pages/ConnectTheDots.tsx`
   - **Output**:
+
     ```
     203:                    const scaleX = canvasRef.current.width / rect.width;
     ```
+
   - **Interpretation**: Observed — click coordinates are now scaled into canvas space.
 - [2026-01-30 11:59 UTC] AlphabetGame tracking loop present | Evidence:
   - **Command**: `rg -n "FilesetResolver|HandLandmarker|detectForVideo|pinchDistance|onPointerDown" src/frontend/src/pages/AlphabetGame.tsx`
   - **Output**:
+
     ```
     6:import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
     ... detectForVideo ...
     ... pinchDistance ...
     ... onPointerDown ...
     ```
+
   - **Interpretation**: Observed — AlphabetGame now includes a MediaPipe loop and pointer drawing handlers.
 - [2026-01-30 11:59 UTC] Verified frontend tests | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest suite passes after interaction fixes.
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 2.37s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Risks/notes:
@@ -2017,9 +2075,11 @@ Execution log:
 - [2026-01-30 11:51 UTC] Confirmed current bug condition | Evidence:
   - **Command**: `rg -n "totalFingers === targetNumber\\s*&&\\s*targetNumber > 0" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     177:    if (totalFingers === targetNumber && targetNumber > 0 && !showCelebration) {
     ```
+
   - **Interpretation**: Observed — success is currently blocked for target `0` by `targetNumber > 0`.
 
 Next actions:
@@ -2035,27 +2095,33 @@ Execution log:
 - [2026-01-30 11:53 UTC] Implemented zero-success gating on “hands seen recently” | Evidence:
   - **Command**: `rg -n "lastHandsSeenAtRef|canSucceedOnZero|handsSeenRecently|isDetectedMatch" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     ... lastHandsSeenAtRef ...
     ... handsSeenRecently ...
     ... canSucceedOnZero ...
     ... isDetectedMatch ...
     ```
+
   - **Interpretation**: Observed — target `0` success now requires a recently-detected hand (prevents auto-success on “no hands”).
 - [2026-01-30 11:53 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:53 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.93s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -2120,10 +2186,12 @@ Execution log:
 - [2026-01-30 11:55 UTC] Confirmed current target selection uses `Math.random()` per pick | Evidence:
   - **Command**: `rg -n "Math\\.random\\(\\) \\* range" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     83:      const newTarget = Math.floor(Math.random() * range) + minNumber;
     195:        const newTarget = Math.floor(Math.random() * range) + minNumber;
     ```
+
   - **Interpretation**: Observed — small ranges can look non-random due to frequent repeats.
 
 Next actions:
@@ -2139,27 +2207,33 @@ Execution log:
 - [2026-01-30 11:59 UTC] Implemented shuffled target bag + no immediate repeats | Evidence:
   - **Command**: `rg -n "targetBagRef|refillTargetBag|shuffleInPlace|setNextTarget" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     ... targetBagRef ...
     ... refillTargetBag ...
     ... shuffleInPlace ...
     ... setNextTarget ...
     ```
+
   - **Interpretation**: Observed — target selection now uses a per-level shuffled bag instead of per-pick `Math.random()`.
 - [2026-01-30 11:59 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.89s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -2224,11 +2298,13 @@ Execution log:
 - [2026-01-30 11:46 UTC] Scoped file + current UI confirmed | Evidence:
   - **Command**: `rg -n "Target Number Display|Current Count Display|bg-gradient-to-br from-purple" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     261:        {/* Target Number Display */}
     270:            className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-8 mb-6 text-center"
     284:        {/* Current Count Display */}
     ```
+
   - **Interpretation**: Observed — playing UI currently renders large target/detected sections above the camera.
 
 Next actions:
@@ -2245,27 +2321,33 @@ Execution log:
 - [2026-01-30 11:49 UTC] Implemented camera-first playing UI | Evidence:
   - **Command**: `rg -n "Target Number Display|Current Count Display|Detected:|Show <span" src/frontend/src/games/FingerNumberShow.tsx`
   - **Output**:
+
     ```
     0 matches for Target Number Display
     0 matches for Current Count Display
     ... Detected: ...
     ... Show <span ...
     ```
+
   - **Interpretation**: Observed — above-camera target/detected panels removed; target+detected now rendered as in-camera overlays.
 - [2026-01-30 11:49 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest passes.
 - [2026-01-30 11:49 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.93s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -2331,18 +2413,22 @@ Execution log:
 - [2026-01-30 11:25 UTC] Initial discovery | Evidence:
   - **Command**: `git status --porcelain && git rev-parse --short HEAD`
   - **Output**:
+
     ```
      M src/frontend/src/pages/AlphabetGame.tsx
      M src/frontend/src/pages/Dashboard.tsx
     fab14b1
     ```
+
   - **Interpretation**: Observed — local workspace has uncommitted UI edits on the two target screens at commit `fab14b1`.
 - [2026-01-30 11:25 UTC] Brand guideline reference | Evidence:
   - **Command**: `ls -la docs/BRAND_KIT.md`
   - **Output**:
+
     ```
     -rw-r--r--@ 1 pranay  staff  6998 Jan 30 10:48 docs/BRAND_KIT.md
     ```
+
   - **Interpretation**: Observed — `docs/BRAND_KIT.md` exists and is treated as the palette/typography source for this ticket.
 
 Next actions:
@@ -2364,31 +2450,39 @@ Execution log:
 - [2026-01-30 11:30 UTC] Frontend tests blocked by low disk space | Evidence:
   - **Command**: `df -h /`
   - **Output**:
+
     ```
     /dev/disk3s1s1   926Gi    17Gi   216Mi    99%  /
     ```
+
   - **Interpretation**: Observed — test runner failed to write temp files due to low available disk.
 - [2026-01-30 11:32 UTC] Freed temp space to unblock tests | Evidence:
   - **Command**: `rm -rf .mypy_cache .pytest_cache && rm -rf /var/folders/*/*/T/* 2>/dev/null || true && df -h /`
   - **Output**:
+
     ```
     /dev/disk3s1s1   926Gi    17Gi   1.1Gi    94%  /
     ```
+
   - **Interpretation**: Observed — disk space recovered and tests could proceed.
 - [2026-01-30 11:44 UTC] Verified frontend tests and production build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
+
     ```
     Test Files  12 passed (12)
     Tests       80 passed (80)
     ```
+
   - **Interpretation**: Observed — vitest suite passes after UI refresh.
 - [2026-01-30 11:44 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
+
     ```
     ✓ built in 1.86s
     ```
+
   - **Interpretation**: Observed — `tsc && vite build` succeeds.
 
 Acceptance Criteria:
@@ -2455,6 +2549,7 @@ Execution log:
 - [2026-01-30 16:35 UTC] Verified server startup | Evidence:
   - **Command**: `cd src/backend && source .venv/bin/activate && timeout 10s uvicorn app.main:app --host 0.0.0.0 --port 8001`
   - **Output**:
+
     ```
     INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
     INFO:     Started reloader process [45933] using WatchFiles
@@ -2462,6 +2557,7 @@ Execution log:
     INFO:     Waiting for application startup.
     INFO:     Application startup complete.
     ```
+
   - **Interpretation**: Observed — Server starts successfully without NameError
 
 Status updates:
@@ -2844,6 +2940,7 @@ Evidence:
   - Generates formatted report
 
 - **Command Output:**
+
   ```
   Total combinations tested: 34
   ❌ Failing (< 3:1):        22 (64.7%)
@@ -4970,7 +5067,7 @@ UNIT TESTS:
    - Test calculateAccuracy with < 10 points (returns 0)
    - Test coverage calculation (points within letter area)
    - Test density calculation (points per area)
-   - Test combined score formula (coverage _ 0.6 + density _ 0.4)
+   - Test combined score formula (coverage _0.6 + density_ 0.4)
 
 6. Game Flow Tests:
    - Test game start (isPlaying = true, reset state)
@@ -5349,7 +5446,7 @@ Execution log:
 - 2026-01-29 09:06 UTC: **Observed** calculateAccuracy() function in Game.tsx (lines 128-156)
 - 2026-01-29 09:06 UTC: **Observed** Coverage calculation (points within letter area)
 - 2026-01-29 09:06 UTC: **Observed** Density calculation (points per area)
-- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage _ 0.6 + density _ 0.4
+- 2026-01-29 09:06 UTC: **Observed** Combined score algorithm: coverage _0.6 + density_ 0.4
 - 2026-01-29 09:07 UTC: **Observed** saveProgress() function in Game.tsx (lines 160-190)
 - 2026-01-29 09:07 UTC: **Observed** progressApi.saveProgress() call with score, streak, duration
 - 2026-01-29 09:07 UTC: **Observed** Backend POST / endpoint in progress.py
@@ -5374,7 +5471,7 @@ Evidence:
   - Lines 128-156: calculateAccuracy() function ✅
   - Coverage calculation: Points within letter radius ✅
   - Density calculation: points per area (min(points.length / 100, 1)) ✅
-  - Combined score: Math.round((coverage _ 0.6 + density _ 0.4) \* 100) ✅
+  - Combined score: Math.round((coverage _0.6 + density_ 0.4) \* 100) ✅
   - Lines 160-190: saveProgress() function ✅
   - API call: progressApi.saveProgress(profileId, {...}) ✅
   - Meta data includes: language, difficulty, streak, points_earned ✅
@@ -6234,7 +6331,7 @@ _None currently_
 
 ## How to Use This Worklog
 
-### For Any Agent Starting Work:
+### For Any Agent Starting Work
 
 1. **Check this file first** - See what's DONE, IN_PROGRESS, or OPEN
 2. **Pick from OPEN queue** - Choose highest priority item
@@ -6243,7 +6340,7 @@ _None currently_
 5. **Log evidence** - Record commands, files changed, outputs
 6. **Mark DONE when complete** - Move to Done section
 
-### Status Definitions:
+### Status Definitions
 
 - **OPEN** 🔵 - Ready to start, not assigned
 - **IN_PROGRESS** 🟡 - Currently being worked on
@@ -6251,7 +6348,7 @@ _None currently_
 - **BLOCKED** 🔴 - Cannot proceed, needs external help
 - **DROPPED** ⚪ - Decided not to do
 
-### Ticket Template:
+### Ticket Template
 
 ```markdown
 <!-- TEMPLATE: Copy this section to create a new ticket, then replace placeholders -->
@@ -6528,6 +6625,7 @@ Execution log:
 - [2026-01-28 14:18 IST] Verified new prompt files exist | Evidence:
   - **Command**: `find prompts/support prompts/stakeholder prompts/deployment -type f | sort`
   - **Output**:
+
     ```
     prompts/deployment/deploy-runbook-v1.0.md
     prompts/deployment/incident-response-v1.0.md
@@ -6535,6 +6633,7 @@ Execution log:
     prompts/support/feedback-intake-v1.0.md
     prompts/support/issue-triage-v1.0.md
     ```
+
   - **Interpretation**: Observed — support/deploy/stakeholder prompts exist at expected paths.
 - [2026-01-28 14:18 IST] Verified index entries exist | Evidence:
   - **Command**: `rg -n "Support / Feedback|Deployment / Incident Response|Stakeholder Comms|QA findings|Backlog grooming" prompts/README.md`
@@ -6693,10 +6792,12 @@ Execution log:
 - [2026-01-28 14:03 IST] Added architecture + content role prompts | Evidence:
   - **Command**: `find prompts/architecture prompts/content -type f | sort`
   - **Output**:
+
     ```
     prompts/architecture/adr-draft-v1.0.md
     prompts/content/learning-module-spec-v1.0.md
     ```
+
   - **Interpretation**: Observed — architecture ADR drafting and curriculum/content module spec prompts now exist and are indexed in `prompts/README.md`.
 
 ---
@@ -6937,6 +7038,7 @@ Status Updates:
 PM System Utility Score: **10/10** ✅
 
 **Why 10/10:**
+
 | Criterion | Before | After |
 |-----------|--------|-------|
 | Single source of truth | ✅ | ✅ |
@@ -7086,6 +7188,7 @@ Execution Log:
 - [2026-01-28 14:54 IST] Verified TypeScript and lint pass
 
 Languages Now Supported:
+
 | Language | Letters | Examples |
 |----------|---------|----------|
 | English | 26 | A for Apple 🍎 |
@@ -7158,6 +7261,7 @@ Execution Log:
   - Needs profile ID for full integration
 
 Scoring System:
+
 | Accuracy | Points | Rating |
 |----------|--------|--------|
 | 90-100% | 20 | ⭐⭐⭐ Excellent |
@@ -7237,6 +7341,7 @@ uv run pytest tests/ -v
 ```
 
 Test Coverage:
+
 | File | Tests | Coverage |
 |------|-------|----------|
 | test_auth.py | 6 | Register, Login, Auth checks |
@@ -7360,6 +7465,7 @@ Execution Log:
 - [2026-01-28 15:28 IST] Verified TypeScript and lint pass
 
 Dashboard Features:
+
 | Feature | Description |
 |---------|-------------|
 | Child Selector | Switch between multiple children |
@@ -7391,14 +7497,14 @@ Fix CORS error for frontend port 6173 and create proper setup verification promp
 
 Root Cause:
 
-- Backend ALLOWED_ORIGINS didn't include http://localhost:6173
+- Backend ALLOWED_ORIGINS didn't include <http://localhost:6173>
 - Frontend .env wasn't created with correct API URL
 - No verification prompt existed for port/CORS setup
 
 Fix Applied:
 
-- [x] Updated src/backend/.env ALLOWED_ORIGINS to include http://localhost:6173
-- [x] Created src/frontend/.env with VITE_API_BASE_URL=http://localhost:8001
+- [x] Updated src/backend/.env ALLOWED_ORIGINS to include <http://localhost:6173>
+- [x] Created src/frontend/.env with VITE_API_BASE_URL=<http://localhost:8001>
 - [x] Created prompts/workflow/project-setup-verification-v1.0.md
 
 Evidence:
@@ -19530,7 +19636,7 @@ Project previously used SQLite for development and PostgreSQL for production. Th
    - `docs/architecture/decisions/003-storage-strategy.md` - Complete rewrite for PostgreSQL
 
 6. **Created test user in PostgreSQL**
-   - User: pranay.suyash@gmail.com
+   - User: <pranay.suyash@gmail.com>
    - Email verified: true
 
 ### Files Modified
@@ -20394,6 +20500,7 @@ Inputs:
 **Finding**: Replace simple finger cursor with themed virtual brushes.
 
 **Brush Ideas Documented**:
+
 | Brush | Effect | Use Case |
 |-------|--------|----------|
 | Magic Wand | Sparkle trail, star particles | Letter tracing, spell casting |
@@ -20449,6 +20556,7 @@ interface Brush {
 - Fade + shrink over time for natural disappearance
 
 **Success Feedback Tiers**:
+
 | Score | Effect | Duration |
 |-------|--------|----------|
 | 70-79 | Small sparkle burst | 1 sec |
@@ -20472,6 +20580,7 @@ interface Brush {
 - Educational: Music, pitch recognition
 
 **Gesture Detection Possibilities**:
+
 | Gesture | Use Case |
 |---------|----------|
 | Clap | Confirm selection, celebrate |
@@ -20497,6 +20606,7 @@ interface Brush {
 ### 5. Multi-Hand Games
 
 **Two-Hand Coordination Games**:
+
 | Game | Left Hand | Right Hand |
 |------|-----------|------------|
 | Orchestra | Volume control | Instrument selection |
@@ -20524,6 +20634,7 @@ interface Brush {
 ### 7. Power-Ups & Gamification
 
 **Temporary Ability Ideas**:
+
 | Power-Up | Effect | Duration |
 |----------|--------|----------|
 | Mega Brush | 3x brush size | 10 sec |
@@ -20707,6 +20818,7 @@ Execution log:
   - **Output**: 798 lines (Observed)
   - **Command**: `rg -n "MediaPipe|hand.*track|canvas|drawing" src/frontend/src/pages/Game.tsx -S --type-add 'code:*.{ts,tsx,js,jsx}' | head -30`
   - **Output**:
+
     ```
     src/frontend/src/pages/Game.tsx:5:import { HandLandmarker } from '@mediapipe/tasks-vision';
     src/frontend/src/pages/Game.tsx:22:const [isPinching, setIsPinching] = useState(false);
@@ -20715,6 +20827,7 @@ Execution log:
     src/frontend/src/pages/Game.tsx:414:// IMPORTANT: MediaPipe x coordinates are normalized [0,1]
     src/frontend/src/pages/Game.tsx:798: (Observed) Total file lines
     ```
+
   - **Interpretation**: Current implementation uses MediaPipe hand tracking with pinch gesture to draw. Uses index finger tip (landmark 8) as cursor, pinch gesture (thumb+index) to draw on canvas. No brush selection or painting tools currently exist.
 
 - [2026-01-29 23:05 UTC] Researched similar apps with brush selection | Evidence:
@@ -21894,6 +22007,7 @@ Files Modified:
 - src/frontend/src/data/alphabets.ts
 
 Changes Made:
+
 | Letter | Word | Old Emoji | New Emoji | Reason |
 |--------|------|-----------|-----------|--------|
 | अ | अनार (Anaar) | 🍎 | 🍈 | Pomegranate, not apple |
@@ -21961,6 +22075,7 @@ Research Questions:
 Key Findings:
 
 **Cultural Gestures (India)**:
+
 | Gesture | MediaPipe Feature | Game Application |
 |---------|-------------------|------------------|
 | Namaste (🙏) | Hand Landmarker - palms together | "Namaste Detective" game |
@@ -21969,6 +22084,7 @@ Key Findings:
 | Indian finger counting | Hand Landmarker - finger positions | Counting differences |
 
 **Universal Gestures**:
+
 | Gesture | Detection Method | Use Case |
 |---------|------------------|----------|
 | Thumbs up/down | Thumb extended, fingers curled | Voting, approval |
@@ -34760,6 +34876,7 @@ Games can use in 3 ways:
    ```
 
 3. Manual component:
+
    ```tsx
    <CameraPermissionPrompt
      onPermissionGranted={startGame}
@@ -35097,6 +35214,7 @@ Evidence:
    - Full accessibility (semantic HTML, labels)
 
 3. **Example Usage**:
+
    ```tsx
    <ErrorDisplay
      errorCode='NotAllowedError'
@@ -37035,8 +37153,8 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                     | Persona / lens           | Audit axis                                                      | Evidence link / notes                                     |
+| ----------------------------------------------- | ------------------------ | --------------------------------------------------------------- | --------------------------------------------------------- |
 | `prompts/audit/single-axis-app-auditor-v1.0.md` | Accessibility specialist | Accessibility (keyboard, focus, contrast, reduced motion, ARIA) | Kids learning app (4-6 years) requiring accessible design |
 
 Next actions:
@@ -37063,8 +37181,8 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                     | Persona / lens           | Audit axis                                                      | Evidence link / notes                                     |
+| ----------------------------------------------- | ------------------------ | --------------------------------------------------------------- | --------------------------------------------------------- |
 | `prompts/audit/single-axis-app-auditor-v1.0.md` | Accessibility specialist | Accessibility (keyboard, focus, contrast, reduced motion, ARIA) | Kids learning app (4-6 years) requiring accessible design |
 
 Next actions:
@@ -37131,10 +37249,12 @@ Execution log:
 - [2025-02-05] Discovery | Evidence:
   - **Command**: `rg -n "role.*parent|parent.*admin" src/backend/app/`
   - **Output**:
+
     ```
     src/backend/app/db/models/user.py:28:    role: Mapped[str] = mapped_column(String, default="parent")  # parent, admin
     src/backend/app/schemas/user.py:69:    role: str = "parent"
     ```
+
   - **Interpretation**: Observed — Backend has role fields as plain strings without enum type safety
 
 - [2025-02-05] Discovery | Evidence:
@@ -37142,7 +37262,7 @@ Execution log:
   - **Output**: No admin role management endpoints found
   - **Interpretation**: Observed — No admin endpoints exist for managing user roles
 
- - [2025-02-05] **OPEN** — Ticket created for implementing user role enum and admin role management
+- [2025-02-05] **OPEN** — Ticket created for implementing user role enum and admin role management
 
 - [2025-02-05 12:30 UTC] Implementation: Added UserRole enum to schemas | Evidence:
   - **Command**: `python -c "from app.schemas.user import UserRole; print('UserRole enum created successfully'); print('PARENT:', UserRole.PARENT.value); print('ADMIN:', UserRole.ADMIN.value)"`
@@ -37184,8 +37304,8 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                    | Persona / lens   | Audit axis                        | Evidence link / notes                      |
+| ---------------------------------------------- | ---------------- | --------------------------------- | ------------------------------------------ |
 | `prompts/remediation/implementation-v1.6.1.md` | Backend engineer | Type safety + admin functionality | Implementation of enum and admin endpoints |
 
 Next actions:
@@ -37263,9 +37383,9 @@ Status updates:
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| N/A | UI/UX Designer + Accessibility Specialist | Concept design | Vision: Magic gesture-based playground; Recommendation: Hybrid approach for safety |
+| Prompt file | Persona / lens                            | Audit axis     | Evidence link / notes                                                              |
+| ----------- | ----------------------------------------- | -------------- | ---------------------------------------------------------------------------------- |
+| N/A         | UI/UX Designer + Accessibility Specialist | Concept design | Vision: Magic gesture-based playground; Recommendation: Hybrid approach for safety |
 
 Next actions:
 
@@ -37280,6 +37400,7 @@ Risks/notes:
 ---
 
 ### TCK-20260206-001 :: Batch 1 Games Implementation + Shared Hand-Tracking Runtime
+
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-06 17:32 UTC
@@ -37290,6 +37411,7 @@ Description:
 Implement a first game batch that uses a shared MediaPipe hand-tracking runtime (base tracking + per-game customization), add new camera games from documented ideas, and validate with tests and docs.
 
 Scope contract:
+
 - In-scope:
   - Add a shared hand-tracking frame runtime hook for game-level customization
   - Refactor at least one existing game to use the shared runtime
@@ -37304,21 +37426,23 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
-  - src/frontend/src/hooks/*
-  - src/frontend/src/pages/*
-  - src/frontend/src/games/*
-  - src/frontend/src/utils/*
+  - src/frontend/src/hooks/\*
+  - src/frontend/src/pages/\*
+  - src/frontend/src/games/\*
+  - src/frontend/src/utils/\*
   - src/frontend/src/App.tsx
   - src/frontend/src/pages/Games.tsx
-  - docs/*
+  - docs/\*
 - Branch/PR: main
 - Range: 893fa98d063cc4f3834e1b623ea624819a9d2a31..WORKTREE
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
+
 - [x] Shared base hand-tracking runtime exists and exposes normalized per-frame data + pinch transitions for game callbacks
 - [x] At least one existing game uses the shared runtime
 - [x] At least two batch games are implemented and playable via routes
@@ -37327,9 +37451,11 @@ Acceptance Criteria:
 - [x] Documentation updated for batch scope, architecture usage, and verification
 
 Execution log:
+
 - [2026-02-06 17:32 UTC] Discovery: checked repo and workflow prerequisites | Evidence:
   - **Command**: `git status --porcelain=v1 -uall`
   - **Output**:
+
     ```
     M docs/ARCHITECTURE.md
     M docs/WORKLOG_ADDENDUM_v2.md
@@ -37347,21 +37473,25 @@ Execution log:
     ?? docs/architecture/HAND_TRACKING_ARCHITECTURE.md
     ... (additional untracked prompt/docs/backend files)
     ```
+
   - **Interpretation**: Observed — Worktree contains substantial pre-existing parallel changes; preservation discipline required.
 
 - [2026-02-06 17:32 UTC] Discovery: checked required prompt map and architecture/game docs | Evidence:
   - **Command**: `sed -n '1,220p' prompts/README.md && sed -n '1,260p' docs/GAME_CATALOG.md && sed -n '1,260p' docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md`
   - **Output**:
+
     ```
     prompts/README.md includes feature implementation and hardening prompts.
     docs/GAME_CATALOG.md lists interaction primitives + games including music and steady-hand ideas.
     docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md lists implemented games and new game ideas.
     ```
+
   - **Interpretation**: Observed — Documented game inventory is sufficient to pick a scoped batch.
 
 - [2026-02-06 17:32 UTC] Discovery: environment checks | Evidence:
   - **Command**: `git config core.hooksPath && python --version && uv --version && node --version && ls -la .venv >/dev/null 2>&1 && echo 'venv exists' || echo 'venv missing' && lsof -i :6173 >/dev/null 2>&1 && echo 'frontend server running on 6173' || echo 'frontend server not running' && lsof -i :8001 >/dev/null 2>&1 && echo 'backend server running on 8001' || echo 'backend server not running'`
   - **Output**:
+
     ```
     .githooks
     Python 3.11.12
@@ -37371,11 +37501,13 @@ Execution log:
     frontend server running on 6173
     backend server running on 8001
     ```
+
   - **Interpretation**: Observed — Hooks path is configured; local servers are active; Python version differs from AGENTS target (3.13+), risk noted.
 
 - [2026-02-06 17:38 UTC] Implementation: shared runtime + game batch integration complete | Evidence:
   - **Command**: `rg -n "music-pinch-beat|steady-hand-lab|useHandTrackingRuntime|buildTrackedHandFrame" src/frontend/src`
   - **Output**:
+
     ```
     src/frontend/src/hooks/useHandTrackingRuntime.ts:51:export function useHandTrackingRuntime(
     src/frontend/src/utils/handTrackingFrame.ts:66:export function buildTrackedHandFrame(
@@ -37387,20 +37519,24 @@ Execution log:
     src/frontend/src/pages/Games.tsx:72:      id: 'music-pinch-beat',
     src/frontend/src/pages/Games.tsx:83:      id: 'steady-hand-lab',
     ```
+
   - **Interpretation**: Observed — Shared runtime is implemented, existing game migration is done, and two new games are routed/cataloged.
 
 - [2026-02-06 17:39 UTC] Verification: frontend type-check passed | Evidence:
   - **Command**: `cd src/frontend && npm run type-check`
   - **Output**:
+
     ```
     > advay-vision-frontend@0.1.0 type-check
     > tsc --noEmit
     ```
+
   - **Interpretation**: Observed — TypeScript compilation succeeds for the frontend with new runtime and game additions.
 
 - [2026-02-06 17:40 UTC] Verification: targeted tests passed | Evidence:
   - **Command**: `cd src/frontend && npm run test -- --run src/utils/__tests__/handTrackingFrame.test.ts src/games/__tests__/musicPinchLogic.test.ts src/games/__tests__/steadyHandLogic.test.ts`
   - **Output**:
+
     ```
     ✓ src/games/__tests__/musicPinchLogic.test.ts (4 tests)
     ✓ src/games/__tests__/steadyHandLogic.test.ts (4 tests)
@@ -37409,33 +37545,39 @@ Execution log:
     Test Files 3 passed (3)
     Tests 11 passed (11)
     ```
+
   - **Interpretation**: Observed — New runtime/data-path logic tests pass.
 
 - [2026-02-06 17:40 UTC] Documentation: batch report added | Evidence:
   - **Command**: `ls docs/implementation-reports/TCK-20260206-001-games-batch1.md`
   - **Output**:
+
     ```
     docs/implementation-reports/TCK-20260206-001-games-batch1.md
     ```
+
   - **Interpretation**: Observed — Batch planning/implementation/testing documentation exists in repo.
 
 Status updates:
+
 - [2026-02-06 17:32 UTC] **IN_PROGRESS** — Scope locked; implementation starting
 - [2026-02-06 17:40 UTC] **DONE** — Shared runtime delivered, three-game batch completed, tests and docs updated
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                             | Persona / lens      | Audit axis                                 | Evidence link / notes                                           |
+| ------------------------------------------------------- | ------------------- | ------------------------------------------ | --------------------------------------------------------------- |
 | `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Shared runtime + game slice implementation | Used to define one bounded implementation batch with tests/docs |
-| `prompts/workflow/worklog-v1.0.md` | Workflow tracking | Ticket discipline + evidence logging | Used for append-only ticket creation and evidence format |
+| `prompts/workflow/worklog-v1.0.md`                      | Workflow tracking   | Ticket discipline + evidence logging       | Used for append-only ticket creation and evidence format        |
 
 Next actions:
+
 1. Migrate `AlphabetGamePage.tsx` to `useHandTrackingRuntime` for full runtime parity across all active hand games.
 2. Add a calibration/settings layer (pinch thresholds, smoothing) as shared runtime options.
 3. Add integration tests around route-level game mount/start flows for new games.
 
 Risks/notes:
+
 - Pre-existing uncommitted changes must be preserved; avoid touching unrelated modified files where possible.
 - Python version mismatch (3.11 vs expected 3.13+) is out-of-scope for this frontend batch.
 
@@ -37480,7 +37622,7 @@ Targets:
   - src/backend/app/services/game_service.py
   - src/backend/app/api/v1/api.py
   - src/backend/app/data/games_data.py
-  - src/backend/app/schemas/__init__.py
+  - src/backend/app/schemas/**init**.py
   - src/backend/alembic/versions/005_add_games_table.py
   - src/backend/app/api/v1/endpoints/users.py (role update endpoint only)
 - Branch/PR: main
@@ -37549,8 +37691,8 @@ Execution log:
   - **Interpretation**: Observed — Games endpoints registered at /games prefix
 
 - [2025-02-05 15:00 UTC] Implementation: Updated schema registry | Evidence:
-  - **File**: src/backend/app/schemas/__init__.py
-  - **Change**: Added game schemas to __all__ export list
+  - **File**: src/backend/app/schemas/**init**.py
+  - **Change**: Added game schemas to **all** export list
   - **Interpretation**: Observed — Game schemas now exported for import
 
 - [2025-02-05 15:05 UTC] Implementation: Updated user role endpoint | Evidence:
@@ -37588,15 +37730,14 @@ Status updates:
 - [2025-02-05 15:10 UTC] **IN_PROGRESS** — Day 1 implementation complete, proceeding to Day 2 (tests + frontend integration)
 - [2025-02-05 16:00 UTC] **IN_PROGRESS** — Day 2: Database migration + seeding, then frontend integration
 
-
 Status updates:
 
 - [2025-02-05 15:00 UTC] **IN_PROGRESS** — Day 1 implementation complete, proceeding to Day 2 (tests + frontend integration)
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
+| Prompt file                                   | Persona / lens   | Audit axis      | Evidence link / notes                                  |
+| --------------------------------------------- | ---------------- | --------------- | ------------------------------------------------------ |
 | `docs/IMPLEMENTATION_GAMES_MANAGEMENT_API.md` | Backend engineer | API development | Implementing Games Management API following 3-day plan |
 
 Next actions:
@@ -37617,6 +37758,7 @@ Risks/notes:
 ---
 
 ### TCK-20260206-002 :: Games Batch 2 - Additional Runtime-Based Games + Migration
+
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-06 17:49 UTC
@@ -37627,6 +37769,7 @@ Description:
 Continue adding camera games while enforcing shared MediaPipe componentization. Deliver new games based on shared runtime abstractions and migrate another existing game to the same runtime path.
 
 Scope contract:
+
 - In-scope:
   - Extract additional shared gameplay utilities reusable across multiple games
   - Migrate `LetterHunt` tracking loop to `useHandTrackingRuntime`
@@ -37641,22 +37784,24 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
-  - src/frontend/src/hooks/*
-  - src/frontend/src/pages/*
-  - src/frontend/src/games/*
-  - src/frontend/src/utils/*
+  - src/frontend/src/hooks/\*
+  - src/frontend/src/pages/\*
+  - src/frontend/src/games/\*
+  - src/frontend/src/utils/\*
   - src/frontend/src/App.tsx
   - src/frontend/src/pages/Games.tsx
-  - docs/implementation-reports/*
+  - docs/implementation-reports/\*
   - docs/WORKLOG_TICKETS.md
 - Branch/PR: main
 - Range: 65a7d9d74c99266bfecaa5c14f462e9deca9063e..WORKTREE
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
+
 - [x] `LetterHunt` uses `useHandTrackingRuntime` (no direct per-frame `detectForVideo` loop)
 - [x] At least two additional runtime-based games are implemented and routed
 - [x] New games consume shared logic utilities (not copy-pasted math/target logic)
@@ -37664,18 +37809,22 @@ Acceptance Criteria:
 - [x] Batch documentation and worklog evidence are updated
 
 Execution log:
+
 - [2026-02-06 17:49 UTC] Discovery: baseline branch/head and ticket uniqueness checked | Evidence:
   - **Command**: `git rev-parse --abbrev-ref HEAD && git rev-parse HEAD && rg -n "^### TCK-20260206-002" docs/WORKLOG_TICKETS.md || true`
   - **Output**:
+
     ```
     main
     65a7d9d74c99266bfecaa5c14f462e9deca9063e
     ```
+
   - **Interpretation**: Observed — Working on main with unique new ticket ID.
 
 - [2026-02-06 17:49 UTC] Discovery: parallel worktree state preserved | Evidence:
   - **Command**: `git status --porcelain=v1 -uall | sed -n '1,120p'`
   - **Output**:
+
     ```
     M docs/ARCHITECTURE.md
     M docs/WORKLOG_ADDENDUM_v2.md
@@ -37693,11 +37842,13 @@ Execution log:
     ?? docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md
     ...
     ```
+
   - **Interpretation**: Observed — Existing cross-agent changes are present and preserved.
 
 - [2026-02-06 17:53 UTC] Implementation: migration + new games + routes completed | Evidence:
   - **Command**: `rg -n "useHandTrackingRuntime\\(|shape-pop|color-match-garden|targetPracticeLogic" src/frontend/src/App.tsx src/frontend/src/pages/Games.tsx src/frontend/src/pages/LetterHunt.tsx src/frontend/src/pages/ShapePop.tsx src/frontend/src/pages/ColorMatchGarden.tsx src/frontend/src/games/targetPracticeLogic.ts`
   - **Output**:
+
     ```
     src/frontend/src/pages/Games.tsx:94:      id: 'shape-pop',
     src/frontend/src/pages/Games.tsx:105:      id: 'color-match-garden',
@@ -37709,20 +37860,24 @@ Execution log:
     src/frontend/src/pages/ShapePop.tsx:18:} from '../games/targetPracticeLogic';
     src/frontend/src/pages/ColorMatchGarden.tsx:18:} from '../games/targetPracticeLogic';
     ```
+
   - **Interpretation**: Observed — Existing game migrated, two new runtime-based games implemented/routed, shared target utility reused.
 
 - [2026-02-06 17:53 UTC] Verification: frontend type-check passed | Evidence:
   - **Command**: `cd src/frontend && npm run type-check`
   - **Output**:
+
     ```
     > advay-vision-frontend@0.1.0 type-check
     > tsc --noEmit
     ```
+
   - **Interpretation**: Observed — TypeScript compile passed after batch 2 changes.
 
 - [2026-02-06 17:53 UTC] Verification: targeted tests passed | Evidence:
   - **Command**: `cd src/frontend && npm run test -- --run src/utils/__tests__/handTrackingFrame.test.ts src/games/__tests__/musicPinchLogic.test.ts src/games/__tests__/steadyHandLogic.test.ts src/games/__tests__/targetPracticeLogic.test.ts`
   - **Output**:
+
     ```
     ✓ src/games/__tests__/musicPinchLogic.test.ts (4 tests)
     ✓ src/games/__tests__/steadyHandLogic.test.ts (4 tests)
@@ -37732,36 +37887,43 @@ Execution log:
     Test Files 4 passed (4)
     Tests 16 passed (16)
     ```
+
   - **Interpretation**: Observed — Shared logic/runtime tests pass.
 
 - [2026-02-06 17:53 UTC] Documentation: batch 2 implementation report added | Evidence:
   - **Command**: `ls docs/implementation-reports/TCK-20260206-002-games-batch2.md`
   - **Output**:
+
     ```
     docs/implementation-reports/TCK-20260206-002-games-batch2.md
     ```
+
   - **Interpretation**: Observed — Batch 2 implementation artifact exists.
 
 Status updates:
+
 - [2026-02-06 17:49 UTC] **IN_PROGRESS** — Batch 2 scope opened
 - [2026-02-06 17:53 UTC] **DONE** — LetterHunt runtime migration + 2 new games + tests/docs complete
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Runtime reuse + new game slices | Scoped implementation with tests and docs |
-| `prompts/workflow/worklog-v1.0.md` | Workflow tracking | Evidence and ticket discipline | Append-only ticket updates with command outputs |
+| Prompt file                                             | Persona / lens      | Audit axis                      | Evidence link / notes                           |
+| ------------------------------------------------------- | ------------------- | ------------------------------- | ----------------------------------------------- |
+| `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Runtime reuse + new game slices | Scoped implementation with tests and docs       |
+| `prompts/workflow/worklog-v1.0.md`                      | Workflow tracking   | Evidence and ticket discipline  | Append-only ticket updates with command outputs |
 
 Next actions:
+
 1. Migrate `ConnectTheDots` to `useHandTrackingRuntime` to reduce remaining per-game loop duplication.
 2. Add shared spawn/difficulty presets to drive standardized progression across runtime-based games.
 3. Add Playwright flow checks for newly added routes and basic game start interactions.
 
 Risks/notes:
+
 - Preserve all pre-existing worktree changes and include comprehensive staging when committing.
 
 ### TCK-20260206-003 :: Games Batch 3 - ConnectTheDots Runtime Migration + 2 New Games
+
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-06 18:22 UTC
@@ -37772,6 +37934,7 @@ Description:
 Continue game expansion with shared runtime/component reuse. Migrate `ConnectTheDots` to shared hand-tracking runtime and add two more runtime-based games with additional shared interaction extraction.
 
 Scope contract:
+
 - In-scope:
   - Migrate `ConnectTheDots` frame loop from custom RAF/detect pipeline to `useHandTrackingRuntime`
   - Extract reusable target-hit interaction utility
@@ -37786,21 +37949,23 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/ConnectTheDots.tsx
-  - src/frontend/src/pages/*
-  - src/frontend/src/games/*
+  - src/frontend/src/pages/\*
+  - src/frontend/src/games/\*
   - src/frontend/src/App.tsx
   - src/frontend/src/pages/Games.tsx
-  - docs/implementation-reports/*
+  - docs/implementation-reports/\*
   - docs/WORKLOG_TICKETS.md
 - Branch/PR: main
 - Range: 65a7d9d74c99266bfecaa5c14f462e9deca9063e..WORKTREE
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
+
 - [x] `ConnectTheDots` uses `useHandTrackingRuntime` (no custom detect loop)
 - [x] Two additional runtime-based games are implemented and routed
 - [x] New shared interaction utility is extracted and used by multiple games
@@ -37808,18 +37973,22 @@ Acceptance Criteria:
 - [x] Batch 3 docs/worklog evidence complete
 
 Execution log:
+
 - [2026-02-06 18:22 UTC] Discovery: batch 3 started with file baseline | Evidence:
   - **Command**: `date -u '+%Y-%m-%d %H:%M UTC' && rg -n "^### TCK-20260206-003" docs/WORKLOG_TICKETS.md || true && sed -n '1,420p' src/frontend/src/pages/ConnectTheDots.tsx`
   - **Output**:
+
     ```
     2026-02-06 18:22 UTC
     [ConnectTheDots currently contains custom RAF loop + direct detectForVideo path]
     ```
+
   - **Interpretation**: Observed — Target migration file still uses non-shared per-game tracking loop.
 
 - [2026-02-06 18:24 UTC] Implementation: ConnectTheDots migrated + two new games routed/cataloged | Evidence:
   - **Command**: `rg -n "useHandTrackingRuntime\\(|detectForVideo|requestAnimationFrame\\(|shape-pop|color-match-garden|number-tap-trail|shape-sequence|findHitTarget\\(|pickSpacedPoints\\(" src/frontend/src/pages/ConnectTheDots.tsx src/frontend/src/pages/ShapePop.tsx src/frontend/src/pages/ColorMatchGarden.tsx src/frontend/src/pages/NumberTapTrail.tsx src/frontend/src/pages/ShapeSequence.tsx src/frontend/src/games/hitTarget.ts src/frontend/src/App.tsx src/frontend/src/pages/Games.tsx`
   - **Output**:
+
     ```
     src/frontend/src/pages/ConnectTheDots.tsx:200:  useHandTrackingRuntime({
     src/frontend/src/pages/NumberTapTrail.tsx:42:  const points = pickSpacedPoints(count, 0.2, 0.14, random01);
@@ -37833,20 +38002,24 @@ Execution log:
     src/frontend/src/pages/Games.tsx:116:      id: 'number-tap-trail',
     src/frontend/src/pages/Games.tsx:127:      id: 'shape-sequence',
     ```
+
   - **Interpretation**: Observed — Migration and batch-3 game additions are wired and using shared runtime/shared target logic.
 
 - [2026-02-06 18:25 UTC] Verification: frontend type-check passed | Evidence:
   - **Command**: `cd src/frontend && npm run type-check`
   - **Output**:
+
     ```
     > advay-vision-frontend@0.1.0 type-check
     > tsc --noEmit
     ```
+
   - **Interpretation**: Observed — Frontend TypeScript compile succeeded after batch-3 changes.
 
 - [2026-02-06 18:26 UTC] Verification: targeted shared-logic tests passed | Evidence:
   - **Command**: `cd src/frontend && npm run test -- --run src/games/__tests__/hitTarget.test.ts src/games/__tests__/targetPracticeLogic.test.ts src/utils/__tests__/handTrackingFrame.test.ts`
   - **Output**:
+
     ```
     ✓ src/games/__tests__/targetPracticeLogic.test.ts (5 tests)
     ✓ src/games/__tests__/hitTarget.test.ts (3 tests)
@@ -37855,33 +38028,39 @@ Execution log:
     Test Files 3 passed (3)
     Tests 11 passed (11)
     ```
+
   - **Interpretation**: Observed — Shared interaction/runtime tests pass.
 
 - [2026-02-06 18:26 UTC] Documentation: batch-3 report added | Evidence:
   - **Command**: `ls docs/implementation-reports/TCK-20260206-003-games-batch3.md`
   - **Output**:
+
     ```
     docs/implementation-reports/TCK-20260206-003-games-batch3.md
     ```
+
   - **Interpretation**: Observed — Batch-3 implementation artifact exists.
 
 Status updates:
+
 - [2026-02-06 18:22 UTC] **IN_PROGRESS** — Batch 3 scope opened
 - [2026-02-06 18:26 UTC] **DONE** — ConnectTheDots runtime migration + 2 new games + shared utility + tests/docs complete
 
 Prompt & persona usage table:
 
-| Prompt file | Persona / lens | Audit axis | Evidence link / notes |
-| --- | --- | --- | --- |
-| `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Runtime reuse + new game slices | Scoped implementation with tests/docs |
-| `prompts/workflow/worklog-v1.0.md` | Workflow tracking | Evidence and ticket discipline | Append-only ticket updates with command outputs |
+| Prompt file                                             | Persona / lens      | Audit axis                      | Evidence link / notes                           |
+| ------------------------------------------------------- | ------------------- | ------------------------------- | ----------------------------------------------- |
+| `prompts/implementation/feature-implementation-v1.0.md` | Feature implementer | Runtime reuse + new game slices | Scoped implementation with tests/docs           |
+| `prompts/workflow/worklog-v1.0.md`                      | Workflow tracking   | Evidence and ticket discipline  | Append-only ticket updates with command outputs |
 
 Next actions:
+
 1. Migrate `AlphabetGamePage.tsx` drawing/pinch loop to `useHandTrackingRuntime` for final parity in hand-driven games.
 2. Add a shared difficulty/pacing config module and apply it across all runtime-based games.
 3. Add route-level Playwright smoke checks for newly added games.
 
 Risks/notes:
+
 - Preserve all existing parallel modifications and avoid reverting unrecognized changes.
 
 ---
@@ -37921,12 +38100,14 @@ Execution log:
 
 - [2026-02-16 09:30 IST] Ticket created based on external feedback review | Evidence: Feedback identified Node 24 as non-existent
 - [2026-02-16 09:35 IST] Fixed package.json | Evidence:
+
   ```
   $ grep '"node"' src/frontend/package.json
   "node": ">=18.0.0"
   ```
 
 Status updates:
+
 - [2026-02-16 09:30 IST] **IN_PROGRESS** — Starting fix
 - [2026-02-16 09:35 IST] **DONE** — Version corrected from >=24.0.0 to >=18.0.0
 
@@ -37941,13 +38122,13 @@ Status: **DONE**
 Priority: P0
 
 Description:
-Remove MyPy exclusion for src/backend/.* which is excluding entire backend from type checking.
+Remove MyPy exclusion for src/backend/.\* which is excluding entire backend from type checking.
 
 Scope contract:
 
 - In-scope:
   - Remove `exclude = ["src/backend/.*"]` from pyproject.toml [tool.mypy]
-  - Remove `ignore_errors = true` override for src.backend.app.*
+  - Remove `ignore_errors = true` override for src.backend.app.\*
   - Fix any immediate type errors that surface
 - Out-of-scope:
   - Major refactoring
@@ -37970,6 +38151,7 @@ Execution log:
 
 - [2026-02-16 09:31 IST] Ticket created | Evidence: pyproject.toml line 149 excludes backend
 - [2026-02-16 09:40 IST] Fixed pyproject.toml | Evidence:
+
   ```
   $ grep -c "exclude = \" myproject.toml
   0 (removed backend exclusion)
@@ -37978,6 +38160,7 @@ Execution log:
   ```
 
 Status updates:
+
 - [2026-02-16 09:31 IST] **OPEN** — Awaiting implementation
 - [2026-02-16 09:40 IST] **DONE** — Removed backend exclusion and ignore_errors override
 
@@ -38022,6 +38205,7 @@ Execution log:
 
 - [2026-02-16 09:32 IST] Ticket created | Evidence: src/main.py lines 16-32 are placeholder prints
 - [2026-02-16 09:38 IST] Implemented new main.py with uvicorn launcher | Evidence:
+
   ```python
   def main() -> int:
       """Main application entry point."""
@@ -38029,7 +38213,9 @@ Execution log:
       # ... health checks ...
       uvicorn.run(app="app.main:app", host=args.host, port=args.port, reload=is_development)
   ```
+
 - [2026-02-16 09:45 IST] Tested with --check flag | Evidence:
+
   ```
   $ python src/main.py --check
   ✅ Configuration loaded (environment: development)
@@ -38039,6 +38225,7 @@ Execution log:
   ```
 
 Status updates:
+
 - [2026-02-16 09:32 IST] **OPEN** — Awaiting implementation
 - [2026-02-16 09:38 IST] **IN_PROGRESS** — Writing launcher
 - [2026-02-16 09:45 IST] **DONE** — Full launcher implemented with health checks
@@ -38084,9 +38271,11 @@ Execution log:
 - [2026-02-16 09:33 IST] Ticket created | Evidence: ls -la shows empty directories (64 bytes each)
 
 Status updates:
+
 - [2026-02-16 09:33 IST] **OPEN** — Awaiting decision on approach
 
 Next actions:
+
 1. Decide: populate empty dirs with migrated code OR update docs to match reality
 2. Preference: Update docs to match src/backend/ and src/frontend/ structure (lower risk)
 

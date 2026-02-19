@@ -21,6 +21,7 @@ This document defines 4 interaction pattern families for evolving from a static 
 ## Pattern 1: Grab & Catch Pattern
 
 ### 🎯 Design Philosophy
+
 **Tactile, Satisfying, Physical-Feeling**
 
 The Grab & Catch pattern mimics real-world object manipulation. Games are like floating soap bubbles or balloons that respond to the child's hand approaching, create anticipation through visual feedback, and provide satisfying "physics" when grabbed and thrown.
@@ -97,16 +98,19 @@ The Grab & Catch pattern mimics real-world object manipulation. Games are like f
 ### Learning Opportunity
 
 **Motor Skill Development:**
+
 - **Reach & Approach:** Develops hand-eye coordination, spatial awareness
 - **Grab Gesture:** Practices grasp/release, fine motor control
 - **Throw Motion:** Full arm coordination, understanding of force/trajectory
 
 **Cognitive Learning:**
+
 - **Cause & Effect:** "When I grab, things respond"
 - **Object Permanence:** Games "exist" even when floating away
 - **Spatial Reasoning:** Estimating distances, predicting where bubbles will float
 
 **Gamification Hook:**
+
 - Track "best catches" (fastest grab time)
 - Earn "Bubble Master" badges
 - Bubble color changes with mastery level
@@ -207,6 +211,7 @@ class BubbleRenderer {
 | **Throw too weak** | Release velocity < threshold | Bubble snaps back to hand | "Give it a bigger throw!" |
 
 **Graceful Degradation:**
+
 - After 3 failed gesture attempts → Show button overlay
 - After 5 failed → Suggest mouse mode with "That's okay! Let's use the mouse instead"
 - Settings toggle: "Always show buttons" for accessibility
@@ -251,6 +256,7 @@ class BubbleRenderer {
 6. **Age Auto-Detection:** System-guessed difficulty vs explicit age setting — Which produces better engagement?
 
 **Metrics to Track:**
+
 - Time to first successful grab
 - Grab success rate per session
 - Return gesture usage (vs back button)
@@ -262,6 +268,7 @@ class BubbleRenderer {
 ## Pattern 2: Wave & Flow Pattern
 
 ### 🎯 Design Philosophy
+
 **Magical, Fluid, Wind-Like**
 
 The Wave & Flow pattern turns the child's hand into a source of invisible wind. Games float like leaves in a stream, responding to gentle pushes and pulls. Specific wave directions unlock specific game categories, teaching spatial relationships and creating a sense of magical control over the environment.
@@ -342,16 +349,19 @@ The Wave & Flow pattern turns the child's hand into a source of invisible wind. 
 ### Learning Opportunity
 
 **Directional Concepts:**
+
 - **Left/Right/Up/Down:** Explicit spatial vocabulary
 - **Cardinal Directions:** Can extend to N/S/E/W for older kids
 - **Categorization:** Games grouped by type, teaches classification
 
 **Scientific Concepts:**
+
 - **Cause & Effect:** Wave → Wind → Movement
 - **Force & Motion:** Bigger wave = more force = faster movement
 - **Fluid Dynamics (simplified):** Things float, drift, have weight differences
 
 **Memory & Pattern Recognition:**
+
 - **Wave Combos (older kids):** Up + Left = Advanced Math, etc.
 - **Sequential Patterns:** Three up-waves in a row = secret bonus game
 
@@ -505,6 +515,7 @@ function revealCategory(direction: WaveDirection, games: FloatingGame[]) {
 ## Pattern 3: Dancing & Rhythmic Pattern
 
 ### 🎯 Design Philosophy
+
 **Music-Based, Engaging, Full-Body Joy**
 
 The Dancing & Rhythmic pattern uses continuous background music as the heartbeat of the interface. Games respond to the child's movement in rhythm with the music—bouncing, swaying, and glowing in time. Matching gestures to the beat reveals and launches games, making the selection process itself a joyful activity.
@@ -585,16 +596,19 @@ The Dancing & Rhythmic pattern uses continuous background music as the heartbeat
 ### Learning Opportunity
 
 **Musical Development:**
+
 - **Beat Awareness:** Fundamental rhythm recognition
 - **Tempo Adaptation:** Music speeds up/slows down with mastery
 - **Pattern Recognition:** Repeated rhythmic patterns in game reveal
 
 **Physical Development:**
+
 - **Gross Motor:** Dancing, jumping, spinning
 - **Coordination:** Matching movement to audio
 - **Body Awareness:** Understanding how movement creates effects
 
 **Cognitive Benefits:**
+
 - **Timing & Sequencing:** Actions have optimal moments
 - **Prediction:** Anticipating beats, planning movements
 - **Cause & Effect:** "My dance creates magic"
@@ -764,6 +778,7 @@ class BeatVisualizer {
 ## Pattern 4: Portal & Journey Pattern
 
 ### 🎯 Design Philosophy
+
 **Narrative, Quest-Like, Adventure**
 
 The Portal & Journey pattern transforms game selection into an adventure. Each game is a portal floating in a mystical space—stepping through reveals a new world. The pattern emphasizes narrative framing, creates anticipation through previews, and makes returning feel like completing a chapter rather than quitting.
@@ -846,16 +861,19 @@ The Portal & Journey pattern transforms game selection into an adventure. Each g
 ### Learning Opportunity
 
 **Narrative Skills:**
+
 - **Story Structure:** Entry, journey, return = beginning, middle, end
 - **World-Building:** Each game is a "world" with its own rules
 - **Continuity:** Progress persists, stories continue across sessions
 
 **Spatial Concepts:**
+
 - **Through & Back:** Understanding of traversal
 - **Here & There:** Concrete vs abstract locations
 - **Depth:** 2D representation of 3D space (portal = doorway)
 
 **Executive Function:**
+
 - **Planning:** Previews help choose intentionally
 - **Decision-Making:** Pick which world to explore
 - **Completion:** Satisfying return, sense of accomplishment
@@ -1017,6 +1035,7 @@ class PortalGestureDetector {
 | **8-9 yr** | 12+ portals | Complex entry rituals | Quick peek, discovery | Quest chains, obstacles |
 
 **Multi-Step Journeys (7-9yr):**
+
 - Portal leads to hub → choose sub-portal
 - Must solve mini-puzzle to unlock certain portals
 - Progress unlocks new portal realms
@@ -1075,6 +1094,7 @@ class PortalGestureDetector {
 | **Jump** | - | - | Reveal category | - |
 
 **Conflict Resolution:**
+
 - **Wave gesture** is used in 3 patterns with different meanings → Use context: which pattern is active?
 - **Recommend:** Allow users to choose 1-2 patterns, don't mix all 4 simultaneously
 
@@ -1085,6 +1105,7 @@ class PortalGestureDetector {
 **MVP: Grab & Catch Pattern (Primary) + Wave Navigation (Secondary)**
 
 **Rationale:**
+
 1. **Grab & Catch** is most intuitive—maps to real-world object manipulation
 2. **Wave Navigation** adds depth without conflicting gestures
 3. Both work with 2D rendering (no WebGL requirement)
@@ -1092,6 +1113,7 @@ class PortalGestureDetector {
 5. Works across all age groups with simple adaptations
 
 **MVP Feature Set:**
+
 - 8-12 floating game bubbles
 - Hand tracking with open palm / closed fist
 - Bubble physics (bounce, float, gravity)
@@ -1101,6 +1123,7 @@ class PortalGestureDetector {
 - Fallback buttons visible after 3 failed gestures
 
 **Implementation Timeline:**
+
 - Week 1: Bubble physics + basic rendering
 - Week 2: Hand tracking integration + grab detection
 - Week 3: Wave detection + navigation
@@ -1138,17 +1161,20 @@ Level 4 (Premium/Advanced): Portal & Journey (narrative mode)
 ### Success Metrics (Unified)
 
 **Engagement:**
+
 - Time to first game launch (target: <30 seconds)
 - Games explored before selection (target: 2-3)
 - Session duration with gesture vs without
 - Return rate within 24 hours
 
 **Gesture Adoption:**
+
 - Gesture success rate (target: >80% after calibration)
 - Fallback button usage rate (target: <20%)
 - Gesture vocabulary mastery (track new gestures learned)
 
 **Joy Metrics:**
+
 - Smile detection rate during interaction
 - Voluntary return gesture usage (vs. back button)
 - Parent feedback sentiment

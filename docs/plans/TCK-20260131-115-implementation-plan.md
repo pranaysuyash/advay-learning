@@ -3,6 +3,7 @@
 Goal: Turn the Top-10 launch levers into a sequenced, verifiable execution plan (small PRs; no scope creep).
 
 Related research:
+
 - `docs/research/RESEARCH-015-LAUNCH-HITLIST.md`
 - `docs/BRAND_KIT.md`
 - `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`
@@ -14,14 +15,17 @@ Related research:
 ## Discovery Summary
 
 **Observed**:
+
 - Repo already contains brand tokens + usage guidance in `docs/BRAND_KIT.md`.
 - Camera UX problems (overlay overload, technical leakage) are documented in `docs/audit/ui__camera_game_screen_ux_audit_2026-01-30.md`.
 - A progress ingestion surface exists (see ticket `TCK-20260131-105`).
 
 **Inferred**:
+
 - The fastest path to “feels premium + works” is: (1) camera-first layouts + prompts, (2) brand token enforcement, (3) tracking correctness, (4) visible progress.
 
 **Unknown**:
+
 - Exact root causes for all “tracking not working” reports without reproductions and logs per device/browser.
 
 ## Options Considered
@@ -37,10 +41,12 @@ Related research:
 ## Execution Plan (Chosen Option)
 
 ### Phase 0: Hygiene + Freeze Rules (1 PR)
+
 1. Add a worklog “Errata / collisions” note to stop further ticket-ID drift (append-only).
 2. Define “no deletion” policy for artifacts in tickets (move to `docs/audit/archive/` only when needed; keep pointers).
 
 ### Phase 1: Look Premium (2–3 PRs)
+
 1. **Brand token enforcement**
    - Replace gradient-heavy primary surfaces with brand palette + subtle elevation (no persistent animations).
    - Targets: game shells + entry pages (`Home`, `Games`, auth).
@@ -48,6 +54,7 @@ Related research:
    - Standardize the “two-stage goal prompt” pattern + TTS replay affordance across camera games.
 
 ### Phase 2: Feel Reliable (2–4 PRs)
+
 1. **Tracking QA harness**
    - Add a dev-only diagnostics overlay and a repeatable QA checklist (docs + optional debug UI).
 2. **Connect-the-Dots camera-first repair**
@@ -56,6 +63,7 @@ Related research:
    - Validate 0/5/10 and 2-hand sum, add tests where feasible.
 
 ### Phase 3: Be Trustworthy + Sticky (2–3 PRs)
+
 1. **Analytics/progress MVP**
    - Implement `TCK-20260131-105` slices; surface simple parent progress.
 2. **Rewards pacing**
@@ -97,4 +105,3 @@ Related research:
 
 - Revert per-PR; keep UI changes behind minimal CSS token layer where possible.
 - For tracking experiments, gate behind a dev flag / setting.
-

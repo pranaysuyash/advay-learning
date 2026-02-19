@@ -13,12 +13,14 @@
 **Decision:** There is no "main game" or "primary game" in the Advay Vision Learning platform.
 
 **Rationale:**
+
 - Children have diverse learning styles and interests
 - Different games target different skills (motor, cognitive, recognition)
 - No single activity should dominate the experience
 - Prevents over-investment in one feature at expense of others
 
 **Implementation:**
+
 ```typescript
 // All games are peers in the games array
 const availableGames: Game[] = [
@@ -42,6 +44,7 @@ const availableGames: Game[] = [
 ```
 
 **What This Means:**
+
 - ✅ No game gets preferential UI treatment
 - ✅ All games use shared infrastructure (camera, hand tracking, progress)
 - ✅ Dashboard shows all games equally
@@ -49,6 +52,7 @@ const availableGames: Game[] = [
 - ✅ Marketing describes "a library of games" not "a game with extras"
 
 **What This Prevents:**
+
 - ❌ "Alphabet Game" being treated as the product
 - ❌ Other games feeling like "side features"
 - ❌ Technical debt from game-specific hacks
@@ -63,6 +67,7 @@ const availableGames: Game[] = [
 **Decision:** All games share centralized infrastructure components rather than implementing their own.
 
 **Rationale:**
+
 - Consistent user experience across games
 - Reduced code duplication
 - Easier maintenance and updates
@@ -79,6 +84,7 @@ const availableGames: Game[] = [
 **Current State:** Each game implements hand tracking independently (being unified)
 
 **Responsibilities:**
+
 - Initialize MediaPipe Hands
 - Process video stream
 - Normalize landmark data
@@ -87,6 +93,7 @@ const availableGames: Game[] = [
 - Provide fallback states
 
 **Interface:**
+
 ```typescript
 interface HandTrackingService {
   // Initialization
@@ -108,6 +115,7 @@ interface HandTrackingService {
 ```
 
 **Games Consume, Don't Implement:**
+
 ```typescript
 // CORRECT: Game uses centralized service
 function AlphabetGame() {
@@ -125,6 +133,7 @@ function AlphabetGame() {
 ```
 
 **Migration Status:**
+
 - See ticket `TCK-20260203-050` - Adopt centralized `getHandLandmarkLists()` utility
 - Games being updated: LetterHunt, ConnectTheDots, AlphabetGamePage, MediaPipeTest
 
@@ -136,12 +145,14 @@ function AlphabetGame() {
 **Current State:** Partially centralized, needs hardening
 
 **Responsibilities:**
+
 - Track session progress
 - Sync with backend API
 - Cache for offline usage
 - Aggregate stats for Dashboard
 
 **Interface:**
+
 ```typescript
 interface ProgressService {
   // Session
@@ -158,6 +169,7 @@ interface ProgressService {
 ```
 
 **Open Issues:**
+
 - See ticket `TCK-20260203-049` - Progress not updating immediately after game
 
 ---
@@ -168,6 +180,7 @@ interface ProgressService {
 **Current State:** Each game handles camera independently
 
 **Responsibilities:**
+
 - Single camera permission request
 - Shared video stream
 - Permission state management
@@ -181,6 +194,7 @@ interface ProgressService {
 **Current State:** Centralized but needs polish
 
 **Responsibilities:**
+
 - Camera permission flow
 - Hand tracking tutorial
 - Touch/mouse fallback explanation
@@ -194,6 +208,7 @@ interface ProgressService {
 **Current State:** Games implement their own layout
 
 **Responsibilities:**
+
 - Consistent game layout
 - Header with back button
 - Pip (mascot) integration
@@ -205,9 +220,10 @@ interface ProgressService {
 
 ## Game Development Guidelines
 
-### When Adding a New Game:
+### When Adding a New Game
 
 1. **Use Centralized Services**
+
    ```typescript
    import { useHandTracking } from '../hooks/useHandTracking';
    import { useProgress } from '../hooks/useProgress';
@@ -215,6 +231,7 @@ interface ProgressService {
    ```
 
 2. **Implement Game Interface**
+
    ```typescript
    interface Game {
      id: string;
@@ -243,12 +260,14 @@ interface ProgressService {
 ## Architecture Decision Records
 
 ### ADR-001: No Main Game
+
 - **Date:** 2026-02-05
 - **Decision:** All games are equal peers, no hierarchy
 - **Context:** Product owner clarified vision is "library of games" not "one game"
 - **Consequences:** Equal UI treatment, shared infrastructure, distributed investment
 
 ### ADR-002: Centralized Hand Tracking
+
 - **Date:** 2026-02-05
 - **Decision:** Single hand tracking service used by all games
 - **Context:** Multiple implementations causing inconsistency and bugs

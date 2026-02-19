@@ -3,6 +3,7 @@
 **Purpose**: Decide if a PR is ready to merge based on scope alignment, diff quality, verification, and cleanliness. Designed to reduce “big diff, unclear value” merges.
 
 **Use When**:
+
 - Reviewing a PR before merge
 - You want a consistent pass/fail gate for changes
 - There are big diffs or refactors involved
@@ -21,6 +22,7 @@
 ## Step 1 — Identify Scope + Expected Outcomes
 
 Collect:
+
 - Ticket ID(s)
 - Acceptance criteria
 - “Behavior change allowed” value
@@ -32,12 +34,14 @@ If missing, BLOCK and request ticket update.
 ## Step 2 — Diff Health Checks (Observed)
 
 If git is available:
+
 ```bash
 git diff --stat <base>..<head>
 git diff <base>..<head>
 ```
 
 Key questions:
+
 - Are changes concentrated in the intended files?
 - Is there any unrelated churn (formatting, renames, dependency bumps)?
 - Is there duplicated “new version” code instead of refactoring?
@@ -47,10 +51,12 @@ Key questions:
 ## Step 3 — Deviation Heuristic (LOC + Concentration)
 
 Compute:
+
 - Total changed LOC (additions + deletions)
 - Top 3 files by change size
 
 Guidance:
+
 - If one file has huge delta (>200–300 LOC), require a refactor rationale and added tests.
 - If the diff spans many unrelated areas, BLOCK and request split.
 
@@ -59,6 +65,7 @@ Guidance:
 ## Step 4 — Verification Gate
 
 Must include at least one of (depending on area):
+
 - Backend: `cd src/backend && uv run pytest`
 - Frontend: `npm -C src/frontend run type-check`
 - Lint where configured
@@ -70,6 +77,7 @@ If verification not run, status is REQUEST CHANGES unless explicitly impossible 
 ## Step 5 — PR Cleanliness Gate
 
 Confirm:
+
 - No stray artifacts (logs, caches, db files) are committed
 - Docs updated if behavior/config changed
 - Worklog updated with evidence + final status

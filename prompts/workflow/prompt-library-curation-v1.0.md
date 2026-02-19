@@ -3,6 +3,7 @@
 **Purpose**: Upgrade/add prompts to this repo using external prompt libraries as inspiration, while avoiding verbatim copying and enforcing this repo’s workflow (evidence-first, scope discipline, append-only worklog).
 
 **Use When**:
+
 - You want to create a new prompt file in `prompts/`
 - You found a good prompt online and want an equivalent “repo-native” version
 - You want to refactor an existing prompt to be clearer/more reliable
@@ -23,11 +24,13 @@
 ## Step 1 — Select Target + Work Type
 
 Choose one:
+
 - New prompt (add file)
 - Prompt refactor (update one file)
 - Prompt index only (update `prompts/README.md`)
 
 Write a scope contract:
+
 - In-scope:
 - Out-of-scope:
 - Behavior change allowed: N/A (prompts/docs only)
@@ -37,6 +40,7 @@ Write a scope contract:
 ## Step 2 — Extract Patterns (Not Words)
 
 From the external source(s), extract only *patterns* such as:
+
 - “Role / Goal / Inputs / Constraints / Output format”
 - “Gating checklist before execution”
 - “Rubric-based self-check”
@@ -44,6 +48,7 @@ From the external source(s), extract only *patterns* such as:
 - “Test-case driven verification”
 
 Do NOT copy:
+
 - long phrasing
 - full templates
 - unique examples that look like the source
@@ -53,11 +58,13 @@ Do NOT copy:
 ## Step 3 — Draft the Repo-Native Prompt
 
 Prompts should be:
+
 - Clear about when to use it
 - Deterministic about required outputs
 - Explicit about stop conditions
 
 Recommended structure:
+
 1) Purpose
 2) Use When
 3) Non-negotiable rules
@@ -71,6 +78,7 @@ Recommended structure:
 ## Step 4 — Add a Quality Gate Section
 
 Every new/updated prompt should include:
+
 - A small rubric: “PASS if …”
 - A minimal “evidence block” requirement (commands + outputs)
 - A “don’t do” list (e.g., no scope creep, no parallel versions, no stray files)
@@ -89,6 +97,7 @@ If you don’t want a rubric per prompt, ensure the prompt references:
    - evidence (file list + links)
 
 Evidence commands (examples):
+
 ```bash
 ls -la prompts/<category>/<file>.md
 rg -n "<file>.md" prompts/README.md

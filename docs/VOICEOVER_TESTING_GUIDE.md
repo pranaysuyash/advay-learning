@@ -38,21 +38,21 @@
 
 **Goal**: Verify all main page regions are discoverable
 
-### Steps:
+### Steps
 
 1. Navigate to Home page
 2. Press `VO + U` to open Web Rotor
 3. Press Left/Right arrow to select "Landmarks" category
 4. Press Up/Down arrow to navigate landmarks
 
-### Expected Results:
+### Expected Results
 
 - ✅ **Header** landmark (top navigation)
 - ✅ **Navigation** landmark (menu)
 - ✅ **Main** landmark (primary content)
 - ✅ **Footer** landmark (bottom info)
 
-### Record Results:
+### Record Results
 
 ```
 [ ] Header found
@@ -67,14 +67,14 @@
 
 **Goal**: Verify no heading levels skipped (H1→H2→H3, not H1→H3)
 
-### Steps (repeat for each page):
+### Steps (repeat for each page)
 
 1. Navigate to page: Home, Dashboard, Settings, AlphabetGame
 2. Press `VO + U` → Select "Headings"
 3. Navigate through headings with Up/Down arrows
 4. Note the heading levels (H1, H2, H3, etc.)
 
-### Expected Results:
+### Expected Results
 
 **Home Page**:
 
@@ -97,7 +97,7 @@
 - ✅ H1: Game title
 - ✅ H2: Instructions or sections
 
-### Record Results:
+### Record Results
 
 ```
 Home: [ ] No skipped levels
@@ -112,18 +112,18 @@ AlphabetGame: [ ] No skipped levels
 
 **Goal**: Verify sections and articles are navigable
 
-### Steps:
+### Steps
 
 1. Navigate to Home page
 2. Press `VO + Cmd + J` to jump to next section
 3. VoiceOver should announce "Section: [name]"
 
-### Expected Results:
+### Expected Results
 
 - ✅ Home: Multiple article sections for game categories
 - ✅ Dashboard: Sections for activities, progress, achievements
 
-### Record Results:
+### Record Results
 
 ```
 Home sections: [ ] Navigable with VO + Cmd + J
@@ -136,14 +136,14 @@ Dashboard sections: [ ] Navigable with VO + Cmd + J
 
 **Goal**: Verify form fields have labels and logical Tab order
 
-### Steps:
+### Steps
 
 1. Navigate to Settings page
 2. Press `VO + U` → Select "Form Controls"
 3. Navigate through form controls
 4. For each control, verify VoiceOver announces the label
 
-### Expected Results:
+### Expected Results
 
 - ✅ Username field: Announces "Username, edit text"
 - ✅ Email field: Announces "Email, edit text"
@@ -151,13 +151,13 @@ Dashboard sections: [ ] Navigable with VO + Cmd + J
 - ✅ Difficulty dropdown: Announces "Difficulty Level, pop-up button"
 - ✅ Sound toggle: Announces "Sound Effects, checkbox" or similar
 
-### Tab Order Test:
+### Tab Order Test
 
 1. Click in first field
 2. Press Tab repeatedly
 3. Verify logical order (top to bottom, left to right)
 
-### Record Results:
+### Record Results
 
 ```
 Form labels: [ ] All present and announced
@@ -171,20 +171,20 @@ Required fields: [ ] Marked appropriately
 
 **Goal**: Verify score/progress values announced to screen reader
 
-### Steps:
+### Steps
 
 1. Navigate to AlphabetGame
 2. Start the game
 3. Use VoiceOver cursor (VO + arrows) to navigate to score display
 4. VoiceOver should announce the current score value
 
-### Expected Results:
+### Expected Results
 
 - ✅ Score uses `<output>` element
 - ✅ VoiceOver announces: "Score: [value]" or similar
 - ✅ Updates are announced when score changes (if live region)
 
-### Record Results:
+### Record Results
 
 ```
 Score output: [ ] Announced correctly
@@ -197,19 +197,19 @@ Updates: [ ] Dynamic changes announced (if applicable)
 
 **Goal**: Verify progress bars announce value and max
 
-### Steps:
+### Steps
 
 1. Navigate to Dashboard
 2. Use VoiceOver to navigate to progress bars
 3. VoiceOver should announce: "Progress, [value] of [max]"
 
-### Expected Results:
+### Expected Results
 
 - ✅ Progress uses `<progress>` element
 - ✅ VoiceOver announces current value and maximum
 - ✅ Percentage or fraction is clear
 
-### Record Results:
+### Record Results
 
 ```
 Progress bars: [ ] Value and max announced
@@ -222,21 +222,21 @@ Context: [ ] Clear what progress represents
 
 **Goal**: Verify dialogs trap focus and close with ESC
 
-### Steps:
+### Steps
 
 1. Trigger a modal/dialog (e.g., Settings confirmation, delete action)
 2. Press Tab - focus should stay within dialog
 3. Press ESC - dialog should close
 4. Verify focus returns to triggering element
 
-### Expected Results:
+### Expected Results
 
 - ✅ Focus trapped within dialog
 - ✅ ESC closes dialog
 - ✅ Focus returns to trigger element
 - ✅ Dialog announced with proper role
 
-### Record Results:
+### Record Results
 
 ```
 Focus trap: [ ] Works correctly
@@ -251,7 +251,7 @@ Role announcement: [ ] Dialog role announced
 
 **Goal**: Verify all interactive elements reachable via keyboard
 
-### Steps:
+### Steps
 
 1. Navigate entire app using only keyboard:
    - Tab: Next interactive element
@@ -260,14 +260,14 @@ Role announcement: [ ] Dialog role announced
    - Arrow keys: Navigate menus/dropdowns
 2. Verify no "keyboard traps" (can't escape an element)
 
-### Expected Results:
+### Expected Results
 
 - ✅ All buttons/links reachable with Tab
 - ✅ No keyboard traps
 - ✅ Visual focus indicator visible
 - ✅ Skip to content link (optional but recommended)
 
-### Record Results:
+### Record Results
 
 ```
 All interactive elements: [ ] Reachable

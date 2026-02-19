@@ -21,6 +21,7 @@ This audit analyzes all text color combinations used in the Advay Vision Learnin
 ## Methodology
 
 ### Contrast Ratio Formula (WCAG 2.1)
+
 ```
 (L1 + 0.05) / (L2 + 0.05)
 
@@ -31,6 +32,7 @@ Where:
 ```
 
 ### WCAG Compliance Levels
+
 | Level | Ratio | Usage |
 |-------|-------|-------|
 | **AAA Enhanced** | ≥ 7:1 | Best practice for all text |
@@ -39,7 +41,9 @@ Where:
 | **FAIL** | < 3:1 | Non-compliant |
 
 ### Colors Audited
+
 All colors from:
+
 - `src/frontend/src/index.css` (CSS variables)
 - `src/frontend/tailwind.config.js` (Tailwind config)
 - Hardcoded colors found in component files
@@ -96,6 +100,7 @@ These combinations FAIL WCAG standards and require remediation:
 **Impact:** Primary brand colors fail contrast requirements. White text on brand buttons is not accessible.
 
 **Recommended Fix:**
+
 ```css
 /* Option A: Darken brand colors */
 --brand-primary: #C45A3D;  /* Darker coral: 4.6:1 ratio */
@@ -122,6 +127,7 @@ These combinations FAIL WCAG standards and require remediation:
 **Impact:** All semantic colors fail on light backgrounds. Error/success states may be unreadable.
 
 **Recommended Fix:**
+
 ```css
 /* Use darker semantic colors for text */
 --error-text: #B54A32;      /* 4.6:1 on cream */
@@ -145,6 +151,7 @@ These combinations FAIL WCAG standards and require remediation:
 **Impact:** Muted text fails contrast. May affect users with low vision.
 
 **Recommended Fix:**
+
 ```css
 /* Darken muted text */
 --text-muted: #6B7280;  /* 4.7:1 on cream, was #9CA3AF */
@@ -166,6 +173,7 @@ These combinations FAIL WCAG standards and require remediation:
 **Impact:** Hardcoded Tailwind colors throughout components fail contrast.
 
 **Locations Found:**
+
 - `src/frontend/src/pages/Progress.tsx:132` - yellow-300 text
 - `src/frontend/src/pages/Progress.tsx:189` - red-400 text
 - `src/frontend/src/pages/Progress.tsx:247` - green-400 icon
@@ -180,6 +188,7 @@ These combinations FAIL WCAG standards and require remediation:
 ## Component-Level Findings
 
 ### Progress.tsx
+
 ```tsx
 // Line 132 - FAILING (1.82:1)
 <div className='... text-yellow-300 ...'>
@@ -195,6 +204,7 @@ These combinations FAIL WCAG standards and require remediation:
 ```
 
 ### FingerNumberShow.tsx
+
 ```tsx
 // Line 297 - FAILING (1.65:1)
 className="... text-green-400 ..."
@@ -204,6 +214,7 @@ className="bg-green-500/20 ... text-green-400"
 ```
 
 ### GameTutorial.tsx
+
 ```tsx
 // Line 54 - FAILING (2.66:1)
 <h2 className="... text-orange-500">
@@ -232,21 +243,21 @@ className="... text-orange-400 ..."
 
 ### Short Term (Next Sprint)
 
-4. **Audit All Hardcoded Colors**
+1. **Audit All Hardcoded Colors**
    - Replace Tailwind colors with semantic variables
    - Create mapping: `green-400` → `--success-text`
 
-5. **Add Contrast Testing to CI**
+2. **Add Contrast Testing to CI**
    - Install axe-core or similar
    - Fail builds on contrast violations
 
 ### Long Term (Month 1-2)
 
-6. **Design System Updates**
+1. **Design System Updates**
    - Create semantic color tokens for all text
    - Document contrast requirements for designers
 
-7. **User Testing**
+2. **User Testing**
    - Test with users who have low vision
    - Verify readability on different devices
 
@@ -285,20 +296,24 @@ className="... text-orange-400 ..."
 ## Evidence
 
 ### Calculation Output
+
 Generated via `tools/contrast_calculator.py` using WCAG 2.1 relative luminance formula.
 
 **Command:**
+
 ```bash
 python3 tools/contrast_calculator.py
 ```
 
 **Raw Results:**
+
 - 34 color combinations tested
 - 22 failing (64.7%)
 - 3 AA Large only (8.8%)
 - 9 passing (26.5%)
 
 ### WCAG Reference
+
 - [WCAG 2.1 Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
 - [Relative Luminance Definition](https://www.w3.org/TR/WCAG21/#dfn-relative-luminance)
 

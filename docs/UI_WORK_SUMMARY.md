@@ -36,6 +36,7 @@ Three major UI/UX improvements were completed in rapid succession:
 | `loading-pip.svg` | Animated spinner | Loading states |
 
 ### Components Updated
+
 - `Home.tsx` - Feature cards now use illustrations instead of emojis
 - `Dashboard.tsx` - Empty state uses Pip illustration
 - `Progress.tsx` - Empty state uses chart illustration
@@ -71,6 +72,7 @@ Three major UI/UX improvements were completed in rapid succession:
 | Trophy | `trophy.svg` | 🏆 | Rewards |
 
 ### Components Updated
+
 - `Dashboard.tsx` - Stats icons, export button
 - `Game.tsx` - Home button, trace indicator, controls
 - `Settings.tsx` - Camera status, unlock, export
@@ -80,7 +82,9 @@ Three major UI/UX improvements were completed in rapid succession:
 - `FingerNumberShow.tsx` - Feedback check
 
 ### New Component
+
 - `UIIcon.tsx` - Type-safe icon component
+
   ```tsx
   <UIIcon name="flame" size={24} className="text-orange-400" />
   ```
@@ -94,6 +98,7 @@ Three major UI/UX improvements were completed in rapid succession:
 ### Components Created (6 components)
 
 #### 1. Toast Notification System (`Toast.tsx`)
+
 - Replaces native `alert()` calls
 - 4 types: success, error, warning, info
 - Auto-dismiss with progress bar
@@ -101,12 +106,14 @@ Three major UI/UX improvements were completed in rapid succession:
 - Smooth animations
 
 **Usage:**
+
 ```tsx
 const { showToast } = useToast();
 showToast('Progress saved!', 'success');
 ```
 
 #### 2. Confirm Dialog (`ConfirmDialog.tsx`)
+
 - Replaces native `confirm()` calls
 - Async/await API (no callback hell)
 - 3 severity types: info, warning, danger
@@ -114,6 +121,7 @@ showToast('Progress saved!', 'success');
 - Keyboard accessible
 
 **Usage:**
+
 ```tsx
 const { confirm } = useConfirm();
 const result = await confirm({
@@ -124,6 +132,7 @@ const result = await confirm({
 ```
 
 #### 3. Button Component (`Button.tsx`)
+
 - 5 variants: primary, secondary, danger, success, ghost
 - 3 sizes: sm, md, lg
 - Loading state support
@@ -131,6 +140,7 @@ const result = await confirm({
 - Full TypeScript types
 
 **Usage:**
+
 ```tsx
 <Button variant="primary" size="lg" iconLeft="check">
   Save Progress
@@ -141,12 +151,14 @@ const result = await confirm({
 ```
 
 #### 4. Card Component (`Card.tsx`)
+
 - Base card with hover effects
 - Sub-components: CardHeader, CardFooter
 - Pre-built: StatCard, FeatureCard
 - Consistent shadows and borders
 
 **Usage:**
+
 ```tsx
 <Card hover>
   <CardHeader title="Statistics" />
@@ -156,12 +168,14 @@ const result = await confirm({
 ```
 
 #### 5. Tooltip Component (`Tooltip.tsx`)
+
 - 4 positions: top, bottom, left, right
 - Hover and focus trigger
 - Configurable delay
 - Accessible (ARIA attributes)
 
 **Usage:**
+
 ```tsx
 <Tooltip content="Click to save" position="top">
   <button>Save</button>
@@ -169,12 +183,14 @@ const result = await confirm({
 ```
 
 #### 6. Skeleton Loading (`Skeleton.tsx`)
+
 - 4 layouts: Card, Stat, Avatar, Text
 - Shimmer animation
 - Reduces layout shift
 - Better UX than spinners
 
 **Usage:**
+
 ```tsx
 <SkeletonCard />
 <SkeletonStat />
@@ -185,6 +201,7 @@ const result = await confirm({
 ### Integration
 
 **App.tsx** - Wrapped with providers:
+
 ```tsx
 <ToastProvider>
   <ConfirmProvider>
@@ -194,6 +211,7 @@ const result = await confirm({
 ```
 
 **Pages Updated:**
+
 - `Settings.tsx` - Fully migrated (Button, ConfirmDialog)
 - `Dashboard.tsx` - Partial (Card for stats)
 
@@ -202,6 +220,7 @@ const result = await confirm({
 ## Files Changed Summary
 
 ### New Files (30+)
+
 ```
 src/frontend/public/assets/images/
 ├── hero-learning.svg
@@ -231,6 +250,7 @@ src/frontend/src/components/ui/
 ```
 
 ### Modified Files
+
 ```
 src/frontend/src/App.tsx - Added providers
 src/frontend/src/pages/Dashboard.tsx - Cards + icons
@@ -259,6 +279,7 @@ src/frontend/src/games/FingerNumberShow.tsx - Icon
 ## Before/After Comparison
 
 ### Before
+
 - ❌ Mixed emojis (system-dependent rendering)
 - ❌ Native `alert()` / `confirm()` dialogs
 - ❌ Inline-styled buttons (inconsistent)
@@ -266,6 +287,7 @@ src/frontend/src/games/FingerNumberShow.tsx - Icon
 - ❌ Basic empty states
 
 ### After
+
 - ✅ Consistent SVG icons (brand-controlled)
 - ✅ Beautiful toast notifications
 - ✅ Styled confirm dialogs

@@ -1,4 +1,5 @@
 # Intent-First Documentation Philosophy v1.0
+
 ## "Document What Developers Actually Need"
 
 **Core Principle:** Before writing, updating, or removing documentation, investigate what knowledge gaps exist, what decisions need context, and what information developers actually need to be effective.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the knowledge gap** (what information is missing or unclear?)
 2. **Understand the audience** (who needs this information and what's their context?)
 3. **Research existing documentation** (what already exists and why isn't it working?)
@@ -17,6 +19,7 @@
 5. **Review existing code** (what's implemented that needs documenting?)
 
 ### Phase 2: Intent Analysis
+
 - What specific problem will this documentation solve?
 - What decisions or actions will this information enable?
 - Who will read this and what do they need to accomplish?
@@ -24,6 +27,7 @@
 - **How does this relate to existing documentation?**
 
 ### Phase 3: Documentation Value Assessment
+
 - **Knowledge Impact**: How critical is this information for success?
 - **Audience Size**: How many people need this information?
 - **Update Frequency**: How often will this need maintenance?
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip detailed documentation if all true:
+
 - Information is self-explanatory from code or UI
 - Very few people need this specific information
 - Information changes frequently and is hard to keep current
@@ -60,6 +65,7 @@ Skip detailed documentation if all true:
 ## Codebase-First Documentation Rule
 
 For *Critical* and *High* priority items:
+
 1. **Document existing code** before new features
 2. **Keep docs in sync** - update when code changes
 3. **Reference actual code** - link to files, functions, lines

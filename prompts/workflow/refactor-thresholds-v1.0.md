@@ -3,6 +3,7 @@
 **Purpose**: Decide when a file should be refactored, and define a safe refactor plan with objective thresholds (LOC, complexity, churn), without scope creep.
 
 **Use When**:
+
 - A file keeps accumulating changes and becomes hard to maintain
 - A PR touches a file heavily and the diff is getting unreadable
 - You want a policy like “after X LOC or Y complexity, refactor”
@@ -21,6 +22,7 @@
 ## Step 1 — Gather Metrics (Observed)
 
 If possible run:
+
 ```bash
 # LOC
 wc -l <file>
@@ -30,6 +32,7 @@ rg -n "<key symbols>" <file>
 ```
 
 If git is available:
+
 ```bash
 git log --oneline -- <file> | head -n 20
 git blame -n <file> | head -n 40
@@ -42,6 +45,7 @@ Record outputs in the worklog as Observed evidence.
 ## Step 2 — Threshold Heuristics (Choose What Applies)
 
 Use these as **guidelines**, not absolute rules:
+
 - **LOC trigger**: > 300–500 LOC for a single component/service file → consider splitting.
 - **Churn trigger**: touched in > 5 commits in the last week (or repeatedly) → consider refactor for stability.
 - **Complexity trigger**: deeply nested conditionals, duplicated logic, unclear responsibilities → refactor.

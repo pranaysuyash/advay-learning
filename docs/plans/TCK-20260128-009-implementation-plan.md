@@ -13,22 +13,27 @@
 ### Observed
 
 **File: `src/frontend/src/pages/Game.tsx`**
+
 - Line 25: `const [isPlaying, setIsPlaying] = useState(false);` - Game has play/pause state
 - Line 30: `const drawnPointsRef = useRef<Point[]>([]);` - Drawing points stored in ref
 - Line 135-245: `detectAndDraw` function handles the drawing loop
 - Line 236-238: Points added to drawing when hand detected:
+
   ```typescript
   // Add point to drawing (store the DISPLAY coordinates)
   setDrawnPoints(prev => [...prev, { x: displayX, y: displayY }]);
   ```
+
 - Line 414+: Game UI with start/stop controls
 
 **Current behavior**:
+
 - Drawing starts immediately when `isPlaying` is true and hand is detected
 - No separate "drawing mode" vs "cursor only" state
 - `isPlaying` controls both camera and drawing together
 
 **File: `src/frontend/src/store/settingsStore.ts`** (expected pattern)
+
 - Settings store uses Zustand with persistence
 - Drawing mode setting would follow same pattern as `showHints`, `language`, etc.
 
@@ -54,6 +59,7 @@
 | C | Always draw when hand detected, add "pause drawing" button | Simpler implementation | Opposite of requested UX | HIGH |
 
 **Recommendation**: Option A
+
 - Cleanest separation of concerns
 - Allows cursor to be visible without drawing
 - Matches the acceptance criteria
@@ -74,16 +80,16 @@
 
 ### Phase 2: Core Implementation (UI)
 
-3. **Add Drawing Toggle Button**
+1. **Add Drawing Toggle Button**
    - Location: Top-right corner of game area (next to Clear/Stop)
    - States:
      - `!isDrawing`: "✏️ Start Drawing" (green/primary)
      - `isDrawing`: "✋ Stop Drawing" (red/warning)
    - Click handler: `() => setIsDrawing(!isDrawing)`
 
-4. **Visual Feedback**
+2. **Visual Feedback**
    - When `isDrawing` is true:
-     - Button shows "Stop Drawing" 
+     - Button shows "Stop Drawing"
      - Optional: Small indicator near cursor ("Recording" dot)
    - When `isDrawing` is false:
      - Button shows "Start Drawing"
@@ -91,13 +97,13 @@
 
 ### Phase 3: Integration & State Reset
 
-5. **Reset `isDrawing` on game state changes**
+1. **Reset `isDrawing` on game state changes**
    - `startGame()`: Set `isDrawing = false` (user must explicitly start)
    - `stopGame()`: Set `isDrawing = false`
    - `nextLetter()`: Keep `isDrawing` as-is (continue drawing next letter)
    - `clearDrawing()`: Keep `isDrawing` as-is (clear but keep drawing)
 
-6. **Help Text Update**
+2. **Help Text Update**
    - Update instruction text to mention the button
    - "Click 'Start Drawing' to begin tracing"
 
@@ -106,10 +112,12 @@
 ## Testing Strategy
 
 ### Unit Tests (if test file exists)
+
 - Test state transitions: `isDrawing` toggles correctly
 - Test that points only added when `isDrawing` is true
 
 ### Manual Verification
+
 1. Start game → "Start Drawing" button visible
 2. Move hand → cursor visible, no drawing
 3. Click "Start Drawing" → button changes to "Stop Drawing"
@@ -120,6 +128,7 @@
 8. Click "Next Letter" → new letter, mode stays as-is
 
 ### Edge Cases
+
 - Rapid toggle (spam click) - should handle gracefully
 - Start drawing with no hand visible - should work when hand appears
 - Stop mid-stroke - stroke ends cleanly
@@ -154,6 +163,7 @@
 If this implementation causes issues:
 
 1. **Revert to single commit** (if committed):
+
    ```bash
    git revert <commit-hash>
    ```
@@ -179,11 +189,13 @@ If this implementation causes issues:
 ### Key Code Changes
 
 **State addition (around line 25):**
+
 ```typescript
 const [isDrawing, setIsDrawing] = useState(false);
 ```
 
 **Drawing condition (around line 236):**
+
 ```typescript
 // Only add points when in drawing mode
 if (isDrawing) {
@@ -192,6 +204,7 @@ if (isDrawing) {
 ```
 
 **Button JSX (around line 452, with Clear/Stop buttons):**
+
 ```typescript
 <button
   onClick={() => setIsDrawing(!isDrawing)}
@@ -206,6 +219,7 @@ if (isDrawing) {
 ```
 
 **State reset in startGame (around line 264):**
+
 ```typescript
 const startGame = () => {
   setIsPlaying(true);
@@ -224,4 +238,3 @@ const startGame = () => {
 1. Execute this plan using `prompts/implementation/feature-implementation-v1.0.md`
 2. Verify with `prompts/review/completeness-check-v1.0.md`
 3. Update WORKLOG_TICKETS.md with completion evidence
-

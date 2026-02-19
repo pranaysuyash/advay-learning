@@ -10,6 +10,7 @@
 ## 🔴 Current State: Severely Limited
 
 ### What's Being Tracked (Letters Only)
+
 ```
 Dashboard Currently Shows:
 ├── Letters Learned: 12/26
@@ -21,6 +22,7 @@ Dashboard Currently Shows:
 ```
 
 ### Games That Exist But Aren't Tracked
+
 | Game | Tracked? | Data Available? |
 |------|----------|-----------------|
 | Alphabet Tracing | ✅ Yes | Letters, accuracy, time |
@@ -33,6 +35,7 @@ Dashboard Currently Shows:
 ## 🤔 The Real Question: What SHOULD We Track?
 
 ### Category 1: Learning Progress (Universal)
+
 ```typescript
 interface LearningMetrics {
   // SKILLS (not just letters)
@@ -55,6 +58,7 @@ interface LearningMetrics {
 ```
 
 ### Category 2: Engagement (Behavioral)
+
 ```typescript
 interface EngagementMetrics {
   // SESSION LEVEL
@@ -83,6 +87,7 @@ interface EngagementMetrics {
 ```
 
 ### Category 3: Skill Development (Longitudinal)
+
 ```typescript
 interface SkillDevelopment {
   // IMPROVEMENT OVER TIME
@@ -108,6 +113,7 @@ interface SkillDevelopment {
 ### Category 4: Game-Specific Metrics
 
 #### Alphabet Tracing
+
 ```typescript
 interface AlphabetTracingMetrics {
   lettersMastered: string[];        // accuracy > 90%
@@ -131,6 +137,7 @@ interface AlphabetTracingMetrics {
 ```
 
 #### FingerNumberShow
+
 ```typescript
 interface FingerNumberShowMetrics {
   // NUMBER UNDERSTANDING
@@ -157,6 +164,7 @@ interface FingerNumberShowMetrics {
 ```
 
 #### ConnectTheDots
+
 ```typescript
 interface ConnectTheDotsMetrics {
   puzzlesCompleted: number;
@@ -176,6 +184,7 @@ interface ConnectTheDotsMetrics {
 ```
 
 #### LetterHunt
+
 ```typescript
 interface LetterHuntMetrics {
   lettersFound: number;
@@ -196,6 +205,7 @@ interface LetterHuntMetrics {
 ## 📊 Unified Dashboard Design
 
 ### Header: Overall Progress
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  📊 Overall Progress                         [Export] [⚙️]  │
@@ -208,6 +218,7 @@ interface LetterHuntMetrics {
 ```
 
 ### Game Breakdown
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  🎮 Game Activity                                          │
@@ -221,6 +232,7 @@ interface LetterHuntMetrics {
 ```
 
 ### Skill Development
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  📈 Skill Development (Last 30 Days)                       │
@@ -238,23 +250,27 @@ interface LetterHuntMetrics {
 ## 🔧 Implementation Plan
 
 ### Phase 1: Data Model Extension (Week 1)
+
 - [ ] Extend `progress` table to include game_type
 - [ ] Create game-specific metrics tables
 - [ ] Migration for existing letter-only data
 
 ### Phase 2: Game Instrumentation (Week 2-3)
+
 - [ ] AlphabetGame: Already tracked ✓
 - [ ] FingerNumberShow: Add tracking hooks
 - [ ] ConnectTheDots: Add tracking hooks
 - [ ] LetterHunt: Add tracking hooks
 
 ### Phase 3: Dashboard Redesign (Week 4)
+
 - [ ] Create unified "Overall Progress" view
 - [ ] Add game activity breakdown
 - [ ] Add skill development charts
 - [ ] Remove letter-only focus
 
 ### Phase 4: Parent Insights (Week 5)
+
 - [ ] Weekly summary emails
 - [ ] Skill milestone notifications
 - [ ] Game recommendations based on progress
@@ -263,18 +279,21 @@ interface LetterHuntMetrics {
 
 ## ❓ Questions to Answer
 
-### For Parents:
+### For Parents
+
 1. "Is my child improving?" → Skill development over time
 2. "What are they good at?" → Highest accuracy games
 3. "What needs practice?" → Lowest accuracy areas
 4. "How much are they using it?" → Session frequency & duration
 
-### For Product:
+### For Product
+
 1. "Which games are most popular?" → Game play distribution
 2. "Where do kids get stuck?" → Drop-off points, retry counts
 3. "Is the AI working?" → Hand tracking accuracy improvements
 
-### For Learning Science:
+### For Learning Science
+
 1. "What's the optimal session length?" → Correlation: time vs retention
 2. "Which order of activities works best?" → Sequence analysis
 3. "When do kids lose interest?" → Attention span by age

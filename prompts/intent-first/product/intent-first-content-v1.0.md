@@ -1,4 +1,5 @@
 # Intent-First Content Philosophy v1.0
+
 ## "Write for the Reader, Not the Algorithm"
 
 **Core Principle:** Before creating, updating, or removing content (copy, messaging, SEO content), investigate what the audience actually needs, how they search and consume information, and what actions you want them to take.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the content need** (new feature launch, SEO gap, user confusion, or conversion issue)
 2. **Understand the audience** (who are they, what do they know, what do they need?)
 3. **Research search and consumption patterns** (how do people find and engage with this type of content?)
@@ -17,6 +19,7 @@
 5. **Review existing content** (what's already written that could be updated?)
 
 ### Phase 2: Intent Analysis
+
 - What specific problem is the audience trying to solve?
 - What action do we want them to take after reading this?
 - How does this content fit into their journey or decision process?
@@ -24,6 +27,7 @@
 - **Can we update existing content instead of creating new?**
 
 ### Phase 3: Content Value Assessment
+
 - **Audience Impact**: How many people need this information and how urgently?
 - **Business Impact**: Effect on awareness, conversion, retention, or support efficiency
 - **Content Effort**: Time to research, write, design, and maintain
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip detailed content creation if all true:
+
 - Very small audience with minimal business impact
 - Existing content already serves this need well
 - High effort required for minimal incremental value
@@ -61,6 +66,7 @@ Skip detailed content creation if all true:
 ## Codebase-First Content Rule
 
 For *Critical* and *High* priority content:
+
 1. **Update before creating new** - enhance existing content where possible
 2. **Build on what works** - extend messaging that's performing well
 3. **Repurpose successful content** - adapt high-performing content for new uses

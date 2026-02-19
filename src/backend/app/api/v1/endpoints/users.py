@@ -10,7 +10,7 @@ from app.core.security import verify_password
 from app.core.validation import ValidationError, validate_uuid
 from app.db.models.user import User as UserModel
 from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
-from app.schemas.user import User, UserUpdate, UserRoleUpdate
+from app.schemas.user import User, UserRole, UserRoleUpdate, UserUpdate
 from app.schemas.verification import DeleteAccountRequest, DeleteProfileRequest
 from app.services.audit_service import AuditService
 from app.services.profile_service import ProfileService
@@ -130,7 +130,7 @@ async def get_my_profiles(
     current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ) -> List[Profile]:
     """Get current user's profiles (children)."""
-    profiles = await ProfileService.get_by_parent(db, current_user.id)
+    profiles: List[Profile] = await ProfileService.get_by_parent(db, current_user.id)
     return profiles
 
 

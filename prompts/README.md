@@ -106,6 +106,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 - ADR draft: `prompts/architecture/adr-draft-v1.0.md`
 
 **Architecture Documentation (in `docs/architecture/`):**
+
 - **Game Architecture Principles**: `docs/architecture/GAME_ARCHITECTURE_PRINCIPLES.md`
   - No "main game" philosophy (all games are equal peers)
   - Shared infrastructure principles (centralized hand tracking, progress, camera)
@@ -128,11 +129,13 @@ This folder contains the reusable prompts that govern how agents work on this re
 **Core Principle:** "Investigate intent before acting" - adapted from MVP mindset to **Codebase-First** mindset (enhance existing code before starting fresh).
 
 **Quick Start:**
+
 - **Overview**: `prompts/intent-first/meta/intent-first-handbook-overview-v1.0.md`
 - **Cheatsheet**: `prompts/intent-first/meta/intent-first-cheatsheet-v1.0.md`
 - **Implementation Guide**: `prompts/intent-first/meta/intent-first-implementation-guide-v1.0.md`
 
 **Development & Technical:**
+
 - Development: `prompts/intent-first/development/intent-first-development-v1.0.md`
 - Testing: `prompts/intent-first/development/intent-first-testing-v1.0.md`
 - UX Design: `prompts/intent-first/development/intent-first-ux-design-v1.0.md`
@@ -144,15 +147,18 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Documentation: `prompts/intent-first/development/intent-first-documentation-v1.0.md`
 
 **Product & Strategy:**
+
 - Product: `prompts/intent-first/product/intent-first-product-v1.0.md`
 - Content: `prompts/intent-first/product/intent-first-content-v1.0.md`
 
 **Operations:**
+
 - Customer Success: `prompts/intent-first/operations/intent-first-customer-success-v1.0.md`
 - Sales: `prompts/intent-first/operations/intent-first-sales-v1.0.md`
 - Operations: `prompts/intent-first/operations/intent-first-operations-v1.0.md`
 
 **Leadership & Personal:**
+
 - Leadership: `prompts/intent-first/leadership/intent-first-leadership-v1.0.md`
 - Communication: `prompts/intent-first/leadership/intent-first-communication-v1.0.md`
 - Decision-Making: `prompts/intent-first/leadership/intent-first-decision-making-v1.0.md`

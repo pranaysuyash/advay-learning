@@ -1,4 +1,5 @@
 # Advay Vision Learning 🎨👋
+
 **Active Discovery Vision AI for Youth**
 
 AI-powered interactive learning platform for young children (2-8 years) using computer vision for hand tracking, drawing, and language recognition.
@@ -15,6 +16,7 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.13+
 - Node.js 18+
 - PostgreSQL 14+
@@ -51,9 +53,10 @@ npm run dev
 ```
 
 Access:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8001
-- API Docs: http://localhost:8001/docs
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:8001>
+- API Docs: <http://localhost:8001/docs>
 
 ## 🏗️ Tech Stack
 
@@ -80,6 +83,7 @@ Access:
 
 **Problem**: TypeScript errors not showing in VS Code "Problems" panel
 **Solution**: Update `.vscode/settings.json` with ESLint workspace configuration
+
 ```json
 {
   "eslint.workingDirectories": ["src/frontend"],
@@ -92,6 +96,7 @@ Access:
   }
 }
 ```
+
 **Evidence**: TCK-20260131-008 (Priority 8) updated settings and both frontend and backend linters working correctly.
 
 ### Common Development Issues

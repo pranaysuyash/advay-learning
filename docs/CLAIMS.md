@@ -3,6 +3,7 @@
 Purpose: prevent cross-agent contradictions by requiring every non-trivial claim to be recorded with evidence.
 
 Rules:
+
 - Append-only (never rewrite prior entries).
 - Every claim must be labeled exactly one of: `Observed`, `Inferred`, `Unknown`.
 - Claims that affect audits/reviews must be referenced in the relevant `docs/audit/*.md` artifact.
@@ -46,6 +47,7 @@ Evidence:
 **File**: src/frontend/src/games/FingerNumberShow.tsx (lines 102-130)
 
 **Code snippet**:
+
 ```typescript
 // Thumb:
 // Improved detection for kids' hands - uses multiple heuristics for reliability.
@@ -82,6 +84,7 @@ if (thumbTip && thumbIp && thumbMcp) {
 Interpretation: The new algorithm uses three independent heuristics and requires only 2 of 3 to pass, making it more forgiving for children's hand positions compared to the previous strict 2-condition requirement.
 
 Refs:
+
 - Ticket: TCK-20260130-015
 
 ---
@@ -99,17 +102,21 @@ Evidence:
 **File**: src/frontend/src/games/FingerNumberShow.tsx
 
 **Changes**:
+
 1. MediaPipe config (line 326):
+
 ```typescript
 numHands: 4,  // was 2
 ```
 
-2. New difficulty level (line 56):
+1. New difficulty level (line 56):
+
 ```typescript
 { name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
 ```
 
-3. Extended number names (lines 39-59):
+1. Extended number names (lines 39-59):
+
 ```typescript
 const NUMBER_NAMES = [
   'Zero', 'One', 'Two', ..., 'Ten',
@@ -121,6 +128,7 @@ const NUMBER_NAMES = [
 Interpretation: The game now detects up to 4 hands simultaneously and supports counting up to 20 fingers in the new "Duo Mode" difficulty level.
 
 Refs:
+
 - Ticket: TCK-20260130-015
 
 ---
@@ -138,7 +146,9 @@ Evidence:
 **File**: src/frontend/src/games/FingerNumberShow.tsx
 
 **Key additions**:
+
 1. Language configuration (lines 137-143):
+
 ```typescript
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -149,7 +159,8 @@ const LANGUAGES = [
 ] as const;
 ```
 
-2. Game mode state (lines 146-149):
+1. Game mode state (lines 146-149):
+
 ```typescript
 type GameMode = 'numbers' | 'letters';
 const [gameMode, setGameMode] = useState<GameMode>('numbers');
@@ -157,11 +168,12 @@ const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 const [targetLetter, setTargetLetter] = useState<Letter | null>(null);
 ```
 
-3. Letter matching logic - uses getLetterNumberValue() to map A=1, B=2, etc.
+1. Letter matching logic - uses getLetterNumberValue() to map A=1, B=2, etc.
 
 Interpretation: Users can now switch between Numbers mode and Letters mode, with Letters mode supporting all 5 languages using the existing alphabet data from alphabets.ts.
 
 Refs:
+
 - Ticket: TCK-20260130-015
 
 ---
@@ -192,6 +204,7 @@ const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
 ```
 
 **Also updated**:
+
 - `stable.target === currentTargetNumber` comparison
 - `stableMatchRef.current = { startAt: nowMs, target: currentTargetNumber, count: totalFingers }` assignment
 
@@ -200,6 +213,7 @@ const eligibleMatch = totalFingers === currentTargetNumber && canSucceedOnZero;
 Interpretation: The success detection now correctly compares finger count against the letter value in letter mode (A=1, B=2, etc.) instead of the reset targetNumber (0).
 
 Refs:
+
 - Ticket: TCK-20260130-015
 
 ---
@@ -215,6 +229,7 @@ Evidence type: Observed
 Evidence:
 
 **Problem**: `currentCount` was in the useCallback dependency array, but `setCurrentCount()` was called inside the callback, creating an infinite loop:
+
 1. setCurrentCount() updates state
 2. State update triggers callback recreation
 3. useEffect runs and calls detectAndDraw again
@@ -239,6 +254,7 @@ Evidence:
 Interpretation: The infinite loop was causing the debug logs to flood the console and likely preventing proper success detection from working correctly.
 
 Refs:
+
 - Ticket: TCK-20260130-015
 
 ---
@@ -254,18 +270,21 @@ Evidence type: Observed
 Evidence:
 
 **Problem**: Vite/React Fast Refresh showed warning:
+
 ```
 Could not Fast Refresh ("countExtendedFingersFromLandmarks" export is incompatible)
 ```
 
 This happened because exporting non-component functions from a React component file breaks Fast Refresh.
 
-**Fix**: 
+**Fix**:
+
 1. Moved `countExtendedFingersFromLandmarks` to new file `src/games/fingerCounting.ts`
 2. Updated `FingerNumberShow.tsx` to import from the new file
 3. Updated test file `fingerCounting.test.ts` to import from new location
 
 **Files changed**:
+
 - Created: `src/frontend/src/games/fingerCounting.ts`
 - Modified: `src/frontend/src/games/FingerNumberShow.tsx`
 - Modified: `src/frontend/src/games/__tests__/fingerCounting.test.ts`
@@ -273,4 +292,5 @@ This happened because exporting non-component functions from a React component f
 **Result**: HMR warning eliminated, all 155 tests pass
 
 Refs:
+
 - Ticket: TCK-20260130-015

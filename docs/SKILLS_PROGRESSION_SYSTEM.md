@@ -1,4 +1,5 @@
 # Skills Progression System Design
+
 ## Unified Skill Tracking, Leveling & Parent Reports
 
 **Created:** 2026-02-01  
@@ -10,6 +11,7 @@
 ## Executive Summary
 
 ### Current State
+
 | What We Track | What We Don't Track |
 |---------------|---------------------|
 | ✅ Letter progress per language | ❌ Cross-game skills |
@@ -18,6 +20,7 @@
 | ✅ Time played | ❌ Parent weekly reports |
 
 ### Proposed State
+
 - **5 Skill Categories** with level progression
 - **XP-based advancement** tied to activities
 - **Parent Dashboard** with insights
@@ -159,6 +162,7 @@ interface SkillState {
 ## Parent Dashboard Design
 
 ### Overview Tab
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  👦 Advay's Learning Progress          Week of Feb 1-7    │
@@ -187,6 +191,7 @@ interface SkillState {
 ```
 
 ### Activity Tab
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  📊 Activity Breakdown                                     │
@@ -213,6 +218,7 @@ interface SkillState {
 ```
 
 ### Insights Tab
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  💡 Learning Insights for Advay                            │
@@ -293,12 +299,14 @@ Pip & the Advay Vision Team
 ## Implementation Roadmap
 
 ### Phase 1: Skill Store (Week 1)
+
 - [ ] Create `skillStore.ts` with schema above
 - [ ] Integrate with existing `progressStore.ts`
 - [ ] XP calculation hooks
 - [ ] Level-up detection and celebration
 
 ### Phase 2: Activity Logging (Week 1-2)
+
 - [ ] Instrument Alphabet Tracing
 - [ ] Instrument Finger Number Show
 - [ ] Instrument Connect the Dots
@@ -306,12 +314,14 @@ Pip & the Advay Vision Team
 - [ ] Persist to localStorage + API queue
 
 ### Phase 3: Parent Dashboard (Week 2-3)
+
 - [ ] Skills overview component
 - [ ] Activity breakdown chart
 - [ ] Insights generator
 - [ ] Export to PDF feature
 
 ### Phase 4: Email Reports (Week 4)
+
 - [ ] Email template design
 - [ ] Backend: Weekly report generation
 - [ ] Parent email preferences
@@ -347,18 +357,21 @@ Frontend (localStorage)  →  Queue (Service Worker)  →  Backend (PostgreSQL)
 ## Privacy Considerations
 
 ### What's Stored
+
 - ✅ Skill XP and levels
 - ✅ Activity counts and timestamps
 - ✅ Accuracy percentages
 - ✅ Session durations
 
 ### What's NOT Stored
+
 - ❌ Video/camera feeds
 - ❌ Audio recordings
 - ❌ Exact finger positions
 - ❌ Biometric data
 
 ### Data Retention
+
 - Activity logs: 1 year
 - Skill progress: Indefinite (tied to account)
 - Email reports: Last 12 weeks
@@ -379,18 +392,23 @@ Frontend (localStorage)  →  Queue (Service Worker)  →  Backend (PostgreSQL)
 ## FAQ
 
 ### Q: How does XP differ from "mastery"?
+
 **A:** Mastery is binary (letter mastered or not). XP is cumulative, rewarding practice even without perfection. A child can earn XP even if they don't master a letter.
 
 ### Q: Can skills regress?
+
 **A:** No. XP never decreases. If a child struggles, they earn less XP but never lose XP. This maintains positive motivation.
 
 ### Q: How are level thresholds determined?
+
 **A:** Based on estimated 15-minute daily sessions:
+
 - Level 2: ~1 week of play
 - Level 5: ~1 month
 - Level 10: ~3-4 months
 
 ### Q: What happens at max level (10)?
+
 **A:** Child becomes a "Guardian" of that skill. Future games may offer Level 11-20 or "Prestige" system.
 
 ---

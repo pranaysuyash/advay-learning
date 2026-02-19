@@ -3,6 +3,7 @@
 **Purpose**: Help an agent do a quick, ethical market scan to inform “what next” decisions. Outputs a validation plan, findings summary, and actionable product implications.
 
 **Use When**:
+
 - You want market input without turning the agent into a full-time analyst
 - You need pricing/positioning/feature expectations from comparable apps
 
@@ -29,6 +30,7 @@
 ## Step 1 — Define Research Questions (5–8)
 
 Examples:
+
 - What are the standard core loops?
 - What do parents value most (privacy, progress, content breadth)?
 - Common pricing models?
@@ -40,11 +42,13 @@ Examples:
 ## Step 2 — Competitor/Alternative Set (8–15)
 
 Create a list of:
+
 - Direct competitors (same category)
 - Adjacent alternatives (drawing apps, puzzle apps)
 - “Offline” alternatives (worksheets, physical toys)
 
 If web browsing is allowed, capture for each:
+
 - Name + platform
 - Core loop
 - Pricing model
@@ -56,6 +60,7 @@ If web browsing is allowed, capture for each:
 ## Step 3 — Pattern Extraction (No Copying)
 
 Extract patterns into bullets:
+
 - 5 “table stakes” features
 - 5 “delighters”
 - 5 “trust builders” (privacy, parent control)
@@ -66,6 +71,7 @@ Extract patterns into bullets:
 ## Step 4 — Implications for Our Roadmap
 
 Produce:
+
 - 3–5 implications (what we should do)
 - 3–5 non-goals (what we should avoid)
 - 2–3 experiments to validate quickly (A/B optional; can be manual)
@@ -84,4 +90,3 @@ Produce:
 ## Stop Condition
 
 Stop after delivering implications and a ticket proposal; do not implement features.
-

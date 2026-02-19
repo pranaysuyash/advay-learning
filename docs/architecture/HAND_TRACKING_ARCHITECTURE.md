@@ -10,12 +10,14 @@
 
 **Current State (Problem):**
 Each game implements hand tracking independently:
+
 - `LetterHunt.tsx` - inline `results?.landmarks?.[0]` pattern
 - `ConnectTheDots.tsx` - inline normalization
 - `AlphabetGamePage.tsx` - direct MediaPipe access
 - `MediaPipeTest.tsx` - test-specific implementation
 
 **Issues:**
+
 1. Inconsistent hand data handling
 2. Duplicate code across games
 3. Different coordinate systems
@@ -31,6 +33,7 @@ Each game implements hand tracking independently:
 **Central Utility:** `src/frontend/src/utils/landmarkUtils.ts`
 
 **Function:**
+
 ```typescript
 export function getHandLandmarkLists(results: HandLandmarkerResult): {
   landmarks: NormalizedLandmark[][];
@@ -42,6 +45,7 @@ export function getHandLandmarkLists(results: HandLandmarkerResult): {
 ```
 
 **Benefits:**
+
 - ✅ Single source of truth for hand data normalization
 - ✅ Handles API version drift automatically
 - ✅ Consistent coordinate system across games
@@ -57,6 +61,7 @@ export function getHandLandmarkLists(results: HandLandmarkerResult): {
 **Scope:** Update all game files to use centralized utility
 
 **Files to Update:**
+
 1. `LetterHunt.tsx`
 2. `ConnectTheDots.tsx`
 3. `AlphabetGamePage.tsx`
@@ -118,6 +123,7 @@ export function useHandTracking(options?: UseHandTrackingOptions): UseHandTracki
 ```
 
 **Usage in Games:**
+
 ```typescript
 function LetterHunt() {
   const { hand, isTracking, error } = useHandTracking({
@@ -137,6 +143,7 @@ function LetterHunt() {
 ```
 
 **Benefits:**
+
 - Games don't touch MediaPipe directly
 - Declarative API (react to events)
 - Automatic lifecycle management
@@ -213,12 +220,14 @@ Games receive coordinates normalized to screen:
 ```
 
 **Conversion to pixels:**
+
 ```typescript
 const pixelX = hand.landmarks.indexTip.x * canvas.width;
 const pixelY = hand.landmarks.indexTip.y * canvas.height;
 ```
 
 **Mirroring:**
+
 - Camera feed is mirrored for natural feel
 - Hand coordinates are adjusted accordingly
 - Games receive "corrected" coordinates
@@ -249,6 +258,7 @@ interface GestureDetection {
 ```
 
 **Games subscribe to gestures, not raw data:**
+
 ```typescript
 const { gesture } = useHandTracking({
   onGesture: (g) => {
@@ -280,6 +290,7 @@ interface HandTrackingFallback {
 ```
 
 **Automatic Fallback:**
+
 1. Try camera
 2. If denied/fails → switch to touch/mouse
 3. Game receives same `HandData` interface
@@ -298,6 +309,7 @@ interface HandTrackingFallback {
 5. **Pause on Hide:** Stop tracking when tab hidden
 
 **Target Performance:**
+
 - < 5ms processing time per frame
 - < 10% CPU usage on mid-range devices
 - Smooth 30fps even on tablets
@@ -318,6 +330,7 @@ type HandTrackingError =
 ```
 
 **Recovery Strategies:**
+
 - `PERMISSION_DENIED` → Show touch fallback option
 - `CAMERA_NOT_FOUND` → Auto-switch to touch mode
 - `TRACKING_LOST` → Retry for 3s, then pause game

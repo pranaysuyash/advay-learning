@@ -15,13 +15,13 @@ Steps:
 . .venv/bin/activate
 ```
 
-2. Install backend dev deps (if not installed):
+1. Install backend dev deps (if not installed):
 
 ```bash
 uv pip install -e '.[dev]'
 ```
 
-3. Ensure frontend deps installed and Playwright browsers present:
+1. Ensure frontend deps installed and Playwright browsers present:
 
 ```bash
 cd src/frontend
@@ -29,7 +29,7 @@ npm ci
 npx playwright install --with-deps
 ```
 
-4. Run the e2e script (it will start backend & frontend if necessary, wait for health, run tests, then teardown):
+1. Run the e2e script (it will start backend & frontend if necessary, wait for health, run tests, then teardown):
 
 ```bash
 # The script will detect running services and skip starting them if present

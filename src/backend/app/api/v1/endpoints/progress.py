@@ -46,7 +46,7 @@ async def get_progress(
         )
 
     progress = await ProgressService.get_by_profile(db, profile_id)
-    return progress
+    return progress  # type: ignore[no-any-return]
 
 
 @router.post("/", response_model=Progress)
@@ -125,9 +125,7 @@ async def save_progress_batch(
         try:
             # Try to create; ProgressService.create will raise DuplicateProgressError if duplicate
             progress = await ProgressService.create(db, profile_id, it)
-            results.append(
-                {"idempotency_key": key, "status": "ok", "server_id": str(progress.id)}
-            )
+            results.append({"idempotency_key": key, "status": "ok", "server_id": str(progress.id)})
         except Exception as e:
             # Handle duplicate specifically
             if isinstance(e, DuplicateProgressError):
@@ -142,9 +140,7 @@ async def save_progress_batch(
                 )
             else:
                 # Other errors reported as error for that item
-                results.append(
-                    {"idempotency_key": key, "status": "error", "error": str(e)}
-                )
+                results.append({"idempotency_key": key, "status": "error", "error": str(e)})
 
     return {"results": results}
 

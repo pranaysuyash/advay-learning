@@ -184,6 +184,30 @@ export function Games() {
       difficulty: 'Easy',
       isNew: true,
     },
+    {
+      id: 'word-builder',
+      title: 'Word Builder',
+      description:
+        'Pinch letters in order to spell fun words! 📝✨',
+      path: '/games/word-builder',
+      icon: 'letters',
+      ageRange: '3-7 years',
+      category: 'Literacy',
+      difficulty: 'Easy',
+      isNew: true,
+    },
+    {
+      id: 'emoji-match',
+      title: 'Emoji Match',
+      description:
+        'Match emotions to the right emoji face! 😊😢😠',
+      path: '/games/emoji-match',
+      icon: 'heart',
+      ageRange: '3-7 years',
+      category: 'Emotions',
+      difficulty: 'Easy',
+      isNew: true,
+    },
   ];
 
   const getLanguageLabel = (code: string) => {

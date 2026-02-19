@@ -1,4 +1,5 @@
 # Game Ideas - Full Catalog
+
 ## 60+ Learning Activities for Advay Vision Learning
 
 **Created:** 2026-02-01  
@@ -8,6 +9,7 @@
 ---
 
 ## 🎯 Priority Legend
+
 - **P0**: Next Sprint (2-4 weeks)
 - **P1**: Near-Term (1-2 months)  
 - **P2**: Future (3-6 months)
@@ -20,6 +22,7 @@
 ### PHONICS GAMES (New!)
 
 #### 9. Phonics Sounds (Pip Spells It!) - P0 ⭐
+
 **Age:** 3-6 | **Effort:** 1.5 weeks
 
 **Concept:** Pip makes a letter SOUND, child traces the letter.
@@ -41,18 +44,21 @@
 ```
 
 **Mechanics:**
+
 - Pip plays letter SOUND (not name)
 - Ghost letter appears faintly
 - Child traces the letter
 - On complete: "Buh is for Ball! 🏐"
 
 **Progression:**
+
 1. Easy sounds (A, B, C, D, M, S)
 2. Medium sounds (E, F, G, H, L, N)
 3. Similar sounds (B/D, P/T)
 4. Vowel variations (long/short)
 
 **Assets Needed:**
+
 - [ ] Phoneme audio recordings (26+ sounds)
 - [ ] Word examples with images
 - [ ] Pip "teaching" animations
@@ -60,6 +66,7 @@
 ---
 
 #### 10. Phonics Tracing (Sound It Out!) - P1
+
 **Age:** 4-6 | **Effort:** 1.5 weeks
 
 **Concept:** Kid traces, Pip sounds it out IN REAL-TIME.
@@ -73,6 +80,7 @@ AS child traces T:
 ```
 
 **Sound Types:**
+
 | Type | Letters | Behavior |
 |------|---------|----------|
 | Continuous | S, F, M, N, R, L, Z | Sound while tracing |
@@ -82,6 +90,7 @@ AS child traces T:
 ---
 
 #### 11. Rhyme Time - P1
+
 **Age:** 4-6 | **Effort:** 1 week
 
 **Concept:** Match rhyming words.
@@ -93,6 +102,7 @@ Which rhymes with CAT? 🐱
 ```
 
 **Rhyme Families:**
+
 - -at: cat, bat, hat, mat, rat, sat
 - -an: can, fan, man, pan, van, ran
 - -ig: big, dig, fig, pig, wig
@@ -102,6 +112,7 @@ Which rhymes with CAT? 🐱
 ---
 
 #### 12. Beginning Sounds - P2
+
 **Age:** 3-5 | **Effort:** 1 week
 
 "What sound does BALL start with?"
@@ -111,6 +122,7 @@ Which rhymes with CAT? 🐱
 ---
 
 #### 13. Ending Sounds - P3
+
 **Age:** 4-6 | **Effort:** 1 week
 
 "What sound does CAT end with?"
@@ -120,6 +132,7 @@ Which rhymes with CAT? 🐱
 ---
 
 #### 14. Blend Builder - P2
+
 **Age:** 5-7 | **Effort:** 2 weeks
 
 Pip: "Kuh... Ah... Tuh..."
@@ -130,6 +143,7 @@ Progression: 3 sounds → 4 sounds → consonant blends
 ---
 
 #### 15. Syllable Clap - P2
+
 **Age:** 4-6 | **Effort:** 1 week
 
 🍌 BANANA - How many claps?
@@ -139,15 +153,18 @@ Or clap for camera to count!
 ---
 
 #### 16. Vowel Valley - P3
+
 **Age:** 5-7 | **Effort:** 2 weeks
 
 Learn short vs long vowels:
+
 - Short A: cat, hat, map
 - Long A: cake, make, game
 
 ---
 
 #### 17. Sight Word Flash - P2
+
 **Age:** 5-7 | **Effort:** 1 week
 
 Quick flash of high-frequency words.
@@ -262,6 +279,7 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 ## GAME VARIATION IDEAS
 
 ### Alphabet Tracing Extensions
+
 - **Speed Mode**: Trace as fast as possible
 - **Reverse Trace**: Start at end of stroke
 - **Multi-Letter**: Trace 3 letters in a row
@@ -269,12 +287,14 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 - **Capital vs Lowercase**: Matching game
 
 ### Finger Number Show Extensions
+
 - **Two Hands**: Show 6-10 with both hands
 - **Skip Counting**: Show 2, 4, 6, 8
 - **Quick Flash**: Show before timer ends
 - **Subtraction Mode**: Start at 10, show what's left
 
 ### Game Modifiers (Apply to Any Game)
+
 | Modifier | Effect |
 |----------|--------|
 | **Timer Mode** | Complete before timer |
@@ -288,6 +308,7 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 ## MULTI-LANGUAGE CONSIDERATIONS
 
 ### Games That Need Language Version
+
 | Game | Per-Language Work |
 |------|-------------------|
 | Alphabet Tracing | New letter sets |
@@ -297,6 +318,7 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 | Sight Words | Language-specific lists |
 
 ### Games That Are Language-Neutral
+
 | Game | Why |
 |------|-----|
 | Mirror Draw | Visual only |
@@ -310,6 +332,7 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 ## SEASONAL/THEMED CONTENT
 
 ### Holiday Themes
+
 | Season | Theme Ideas |
 |--------|-------------|
 | Diwali | Diya tracing, rangoli colors |
@@ -319,6 +342,7 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 | Summer | Beach scenes, ice cream |
 
 ### Weekly Themes
+
 - Animals Week
 - Space Week  
 - Ocean Week

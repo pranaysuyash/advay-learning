@@ -3,7 +3,7 @@
 **Date:** 2026-02-04  
 **Auditor:** Kimi Code CLI  
 **API:** Advay Vision Learning API v0.1.0  
-**Base URL:** http://localhost:8001
+**Base URL:** <http://localhost:8001>
 
 ---
 
@@ -24,13 +24,16 @@
 ## Bug Fixes Applied During Audit
 
 ### Fix 1: Datetime Timezone Bug (Critical)
+
 **Issue:** Registration, email verification, and password reset endpoints returned 500 errors due to timezone-aware datetime being stored in `TIMESTAMP WITHOUT TIME ZONE` columns.
 
 **Files Modified:**
+
 - `app/core/email.py` - `get_verification_expiry()` now returns naive datetime
 - `app/services/user_service.py` - Comparison datetimes now use naive format
 
 **Changes:**
+
 ```python
 # Before (caused 500 error)
 return datetime.now(timezone.utc) + timedelta(hours=24)
@@ -44,6 +47,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ## 1. Public Endpoints
 
 ### GET /
+
 **Status:** ✅ PASS
 
 | Check | Result |
@@ -53,6 +57,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | Status code | 200 |
 
 **Response:**
+
 ```json
 {
   "message": "Advay Vision Learning API",
@@ -64,6 +69,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### GET /health
+
 **Status:** ✅ PASS
 
 | Check | Result |
@@ -73,6 +79,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | Status code | 200 |
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -93,6 +100,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### GET /docs (Swagger UI)
+
 **Status:** ✅ PASS
 
 - Interactive API documentation available
@@ -102,6 +110,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### GET /redoc (ReDoc)
+
 **Status:** ✅ PASS
 
 - Alternative documentation interface available
@@ -112,9 +121,11 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ## 2. Authentication Endpoints
 
 ### POST /api/v1/auth/register
+
 **Status:** ✅ PASS (After Fix)
 
 **Test Results:**
+
 | Test Case | Expected | Actual | Status |
 |-----------|----------|--------|--------|
 | Valid registration | 200 + message | 200 + message | ✅ |
@@ -123,11 +134,13 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | Weak password | 422 Validation Error | 422 | ✅ |
 
 **Response (Success):**
+
 ```json
 {"message": "If an account is eligible, a verification email has been sent."}
 ```
 
 **Response (Validation Error):**
+
 ```json
 {
   "detail": [
@@ -143,9 +156,11 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/login
+
 **Status:** ✅ PASS
 
 **Test Results:**
+
 | Test Case | Expected | Actual | Status |
 |-----------|----------|--------|--------|
 | Invalid credentials | 401 | 401 | ✅ |
@@ -153,6 +168,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | Account lockout | After 5 attempts | After 4 attempts | ✅ |
 
 **Response (Invalid):**
+
 ```json
 {"detail": "Incorrect email or password"}
 ```
@@ -160,6 +176,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/logout
+
 **Status:** ✅ PASS
 
 - ✅ Clears authentication cookies
@@ -167,6 +184,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 - ✅ Revokes refresh token
 
 **Response:**
+
 ```json
 {"message": "Logout successful"}
 ```
@@ -174,6 +192,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/refresh
+
 **Status:** ✅ PASS
 
 - ✅ Requires refresh token cookie
@@ -181,6 +200,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 - ✅ Implements token rotation
 
 **Response (No Token):**
+
 ```json
 {"detail": "No refresh token provided"}
 ```
@@ -188,14 +208,17 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/verify-email
+
 **Status:** ✅ PASS (After Fix)
 
 **Test Results:**
+
 | Test Case | Expected | Actual | Status |
 |-----------|----------|--------|--------|
 | Invalid token | 400 Bad Request | 400 | ✅ |
 
 **Response:**
+
 ```json
 {"detail": "Invalid or expired verification token"}
 ```
@@ -203,12 +226,14 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/forgot-password
+
 **Status:** ✅ PASS
 
 - ✅ Returns generic message (prevents user enumeration)
 - ✅ Rate limited
 
 **Response:**
+
 ```json
 {"message": "If an account exists, a password reset email has been sent."}
 ```
@@ -216,14 +241,17 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/reset-password
+
 **Status:** ✅ PASS (After Fix)
 
 **Test Results:**
+
 | Test Case | Expected | Actual | Status |
 |-----------|----------|--------|--------|
 | Invalid token | 400 Bad Request | 400 | ✅ |
 
 **Response:**
+
 ```json
 {"detail": "Invalid or expired reset token"}
 ```
@@ -231,12 +259,14 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### POST /api/v1/auth/resend-verification
+
 **Status:** ✅ PASS
 
 - ✅ Returns generic message
 - ✅ Works for non-existent emails
 
 **Response:**
+
 ```json
 {"message": "If an account exists, a verification email has been sent."}
 ```
@@ -244,12 +274,14 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ---
 
 ### GET /api/v1/auth/me
+
 **Status:** ✅ PASS
 
 - ✅ Returns 401 when not authenticated
 - ✅ Returns user data from valid token
 
 **Response (No Auth):**
+
 ```json
 {"detail": "Not authenticated"}
 ```
@@ -259,6 +291,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ## 3. User Management Endpoints
 
 ### All User Endpoints (No Auth Tests)
+
 **Status:** ✅ PASS
 
 | Endpoint | Expected | Actual | Status |
@@ -272,6 +305,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | PATCH /api/v1/users/me/profiles/{id} | 401 | 401 | ✅ |
 
 **Response:**
+
 ```json
 {"detail": "Could not validate credentials"}
 ```
@@ -281,6 +315,7 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 ## 4. Progress Endpoints
 
 ### All Progress Endpoints (No Auth Tests)
+
 **Status:** ✅ PASS
 
 | Endpoint | Expected | Actual | Status |
@@ -304,10 +339,11 @@ return datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 | GET /api/v1/users/me/profiles/{id}/photo | 401/200 | 404 | ⚠️ |
 | DELETE /api/v1/users/me/profiles/{id}/photo | 401/200 | 404 | ⚠️ |
 
-**Root Cause:** 
+**Root Cause:**
 The file `app/api/v1/endpoints/profile_photos.py` exists but is not included in `app/api/v1/api.py`.
 
 **Fix:**
+
 ```python
 # app/api/v1/api.py
 from app.api.v1.endpoints import auth, profile_photos, progress, users
@@ -328,6 +364,7 @@ api_router.include_router(profile_photos.router, tags=["profile-photos"])
 | XSS | `<script>alert(1)</script>` | Blocked (422) | ✅ |
 
 **Details:**
+
 - SQL Injection: Returns 401 with generic error message
 - NoSQL Injection: Pydantic validates email type, rejects object
 - XSS: Email validation rejects script tags in email address
@@ -355,6 +392,7 @@ api_router.include_router(profile_photos.router, tags=["profile-photos"])
 | /auth/login | 5 rapid requests | 429 after 4 attempts | ✅ |
 
 **Test Results:**
+
 ```
 Attempt 1: 401
 Attempt 2: 401

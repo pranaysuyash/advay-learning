@@ -17,11 +17,13 @@ Based on comprehensive research into child psychology, accessibility standards, 
 ### 1.1 Key Findings from Academic Sources
 
 **Cool Colors (Recommended for Learning):**
+
 - **Blue**: Calms the mind, reduces anxiety, lowers heart rate and respiration
 - **Green**: Creates balance, enhances concentration, associated with nature and harmony
 - **Soft Purple/Lavender**: Promotes relaxation, good for sleep and calm focus
 
 **Warm Colors (Use Sparingly):**
+
 - **Red**: Increases energy and excitement BUT can cause overstimulation, aggression, and inability to focus
 - **Orange**: Encourages confidence and social interaction BUT too much is overwhelming
 - **Yellow**: Cheerful and motivating BUT bright yellow in large doses creates agitation
@@ -45,6 +47,7 @@ Based on research, here is a calm, accessible palette:
 | Warning | Soft Amber | `#F2CC8F` | Gentle warnings |
 
 **Why This Palette:**
+
 - All colors are muted/desaturated (not bright/neon)
 - High contrast for accessibility (WCAG AA compliant)
 - Cool tones dominate (calming for learning)
@@ -57,11 +60,13 @@ Based on research, here is a calm, accessible palette:
 ### 2.1 Contrast Requirements
 
 **Standard WCAG AA (Minimum):**
+
 - Normal text: 4.5:1 contrast ratio
 - Large text: 3:1 contrast ratio
 - Icons/UI components: 3:1 contrast ratio
 
 **For Children (Recommended Higher Standards):**
+
 - Normal text: **7:1** (enhanced for developing eyes)
 - Interactive elements: **4.5:1** minimum
 - Never rely on color alone—use icons + text
@@ -69,12 +74,14 @@ Based on research, here is a calm, accessible palette:
 ### 2.2 Typography Guidelines
 
 **Font Selection:**
+
 - Use simple, highly legible sans-serif fonts
 - Avoid decorative/script fonts entirely
 - Recommended: **Nunito**, **Open Sans**, **Roboto**
 - Font size: Minimum 16px, preferably 18-20px for toddlers
 
 **Line Height & Spacing:**
+
 - Line height: 1.5 minimum
 - Letter spacing: Slightly increased (+0.5px)
 - Paragraph width: Max 60 characters
@@ -82,12 +89,14 @@ Based on research, here is a calm, accessible palette:
 ### 2.3 Motion and Animation
 
 **Critical Warnings:**
+
 - Never use flashing/strobing (can trigger seizures)
 - Respect `prefers-reduced-motion` setting
 - Keep animations subtle and purposeful
 - Avoid parallax or motion that could cause dizziness
 
 **Safe Animation Guidelines:**
+
 - Duration: 200-300ms for micro-interactions
 - Easing: Simple ease-in-out
 - Purpose: Only for feedback (button press), not decoration
@@ -99,6 +108,7 @@ Based on research, here is a calm, accessible palette:
 ### 3.1 Khan Academy Kids
 
 **Design Strengths:**
+
 - Calm, pastel color palette
 - Generous whitespace
 - Simple, clear navigation
@@ -110,6 +120,7 @@ Based on research, here is a calm, accessible palette:
 ### 3.2 Duolingo ABC
 
 **Design Strengths:**
+
 - Large touch targets (minimum 44x44px)
 - Clear visual hierarchy
 - Immediate, gentle feedback
@@ -121,6 +132,7 @@ Based on research, here is a calm, accessible palette:
 ### 3.3 PBS Kids
 
 **Design Strengths:**
+
 - Tested extensively with children
 - High contrast for readability
 - Predictable navigation
@@ -132,6 +144,7 @@ Based on research, here is a calm, accessible palette:
 ### 3.4 Toca Boca Apps
 
 **Design Strengths:**
+
 - Whimsical but not overwhelming
 - Open-ended play
 - No failure states (can't do it "wrong")
@@ -147,6 +160,7 @@ Based on research, here is a calm, accessible palette:
 ### 4.1 Cognitive Abilities
 
 **2-3 Year Olds:**
+
 - Limited reading ability (pre-literate)
 - Short attention span (3-5 minutes)
 - Need immediate feedback
@@ -154,6 +168,7 @@ Based on research, here is a calm, accessible palette:
 - Learn through repetition and exploration
 
 **Design Implications:**
+
 - Use icons, not text labels
 - Keep sessions short
 - Immediate visual/audio feedback
@@ -162,12 +177,14 @@ Based on research, here is a calm, accessible palette:
 ### 4.2 Motor Skills
 
 **Touch Targets:**
+
 - Minimum: **48x48px** (Apple HIG)
 - Recommended: **60x60px** for toddlers
 - Spacing: Minimum 8px between targets
 - Avoid precise gestures (pinch, multi-finger)
 
 **Interaction Patterns:**
+
 - Single tap is best
 - Drag only for drawing (natural motion)
 - Avoid double-tap, long-press for primary actions
@@ -175,12 +192,14 @@ Based on research, here is a calm, accessible palette:
 ### 4.3 Visual Development
 
 **What Toddlers See:**
+
 - Developing depth perception
 - Sensitive to bright lights/colors
 - Prefer simple, uncluttered layouts
 - Attracted to faces and movement (but not too much)
 
 **Design Implications:**
+
 - Avoid bright white backgrounds (use cream/off-white)
 - Reduce visual clutter
 - Use faces/sparingly and purposefully
@@ -193,23 +212,27 @@ Based on research, here is a calm, accessible palette:
 ### 5.1 The "CALM" Framework
 
 **C - Clear**
+
 - One primary action per screen
 - Obvious what to do next
 - No hidden gestures or complex navigation
 
 **A - Accessible**
+
 - High contrast (7:1 for text)
 - Large touch targets (60x60px)
 - Works with screen readers
 - Respects reduced motion preferences
 
 **L - Limited**
+
 - Minimal visual elements
 - No decorative animations
 - Focus on core task
 - Generous whitespace
 
 **M - Motivating**
+
 - Gentle, positive feedback
 - No failure states
 - Celebrate effort, not just success
@@ -233,21 +256,25 @@ Based on research, here is a calm, accessible palette:
 ### 6.1 Color Application
 
 **Background:** Soft cream `#FDF8F3`
+
 - Warm but not bright
 - Easy on young eyes
 - Professional yet friendly
 
 **Primary Action:** Soft coral `#E07A5F`
+
 - Warm enough to invite interaction
 - Not aggressive like bright red
 - Good contrast on cream background
 
 **Success Feedback:** Sage green `#81B29A`
+
 - Associated with growth/nature
 - Calming positive reinforcement
 - Avoid bright "traffic light" green
 
 **Text:** Charcoal `#3D405B`
+
 - Not pure black (harsh)
 - Warm undertone (friendly)
 - Excellent contrast on cream
@@ -255,18 +282,21 @@ Based on research, here is a calm, accessible palette:
 ### 6.2 Layout Principles
 
 **Home Screen:**
+
 - Single primary action: "Start Learning"
 - Mascot visible but not animated
 - No scrolling required
 - Clear, simple icons
 
 **Game Screen:**
+
 - Letter takes center stage (60% of screen)
 - Camera view prominent
 - Minimal UI overlay
 - One clear call-to-action
 
 **Navigation:**
+
 - Bottom tab bar (thumb-reachable)
 - 3-4 items maximum
 - Icon + label (for parents)
@@ -277,30 +307,35 @@ Based on research, here is a calm, accessible palette:
 **Font:** Nunito (rounded, friendly, highly legible)
 
 **Sizes:**
+
 - Letter display: 120px (huge, clear)
 - Headings: 32px
 - Body: 20px (larger than standard)
 - Labels: 16px minimum
 
 **Weights:**
+
 - Use Regular (400) and Bold (700) only
 - Avoid Light weights (hard to read)
 
 ### 6.4 Feedback Design
 
 **Success (3 stars):**
+
 - Gentle "ding" sound (not loud)
 - Star appears with subtle animation
 - Mascot smiles (static, not animated)
 - No confetti or overwhelming celebration
 
 **Try Again (1-2 stars):**
+
 - Encouraging message: "Good try!"
 - Mascot offers hint
 - No negative sounds or colors
 - Immediate opportunity to retry
 
 **Progress:**
+
 - Simple star count (not percentages)
 - Visual progress bar (gentle color)
 - No complex statistics
@@ -312,12 +347,14 @@ Based on research, here is a calm, accessible palette:
 ### 7.1 With Your Son (2yr 9mo)
 
 **Session Structure:**
+
 - 5-10 minutes maximum
 - One feature at a time
 - Observe without guiding
 - Note: What does he tap first? Where does he get stuck?
 
 **Questions to Answer:**
+
 - Can he start the game without help?
 - Does he understand what to trace?
 - Is he drawn to any colors/elements?
@@ -327,16 +364,19 @@ Based on research, here is a calm, accessible palette:
 ### 7.2 Accessibility Testing
 
 **Contrast Check:**
+
 - Use WebAIM Contrast Checker
 - Verify all text meets 7:1 ratio
 - Check interactive elements meet 4.5:1
 
 **Motion Testing:**
+
 - Enable "Reduce Motion" on device
 - Verify app remains usable
 - No essential info lost
 
 **Screen Reader Testing:**
+
 - Test with VoiceOver (iOS) or TalkBack (Android)
 - Ensure all interactive elements labeled
 - Verify logical navigation order
@@ -346,18 +386,21 @@ Based on research, here is a calm, accessible palette:
 ## 8. Implementation Priority (Revised)
 
 ### Phase 1: Foundation (Week 1)
+
 1. Implement calm color palette
 2. Set up proper typography
 3. Ensure WCAG AA+ contrast
 4. Test with your son
 
 ### Phase 2: Core Experience (Week 2)
+
 1. Simplified game screen layout
 2. Star rating (not percentages)
 3. Gentle sound feedback
 4. Large touch targets
 
 ### Phase 3: Polish (Week 3)
+
 1. Mascot integration (subtle)
 2. Progress visualization
 3. Parent dashboard (if needed)

@@ -14,6 +14,7 @@ You are conducting focused research on a specific AI technology, provider, or ap
 ## Research Setup
 
 ### Research Topic
+
 - **Topic:** [Fill in specific topic]
 - **Research Goal:** [What decision will this inform?]
 - **Time Budget:** [How long to spend]
@@ -25,15 +26,19 @@ You are conducting focused research on a specific AI technology, provider, or ap
 ## Research Categories
 
 ### Category A: Provider Research
+
 Evaluating an AI service provider (Claude, OpenAI, ElevenLabs, etc.)
 
 ### Category B: Technology Research
+
 Understanding a technology approach (local LLMs, TTS engines, etc.)
 
 ### Category C: Implementation Research
+
 How to implement a specific capability
 
 ### Category D: Safety/Compliance Research
+
 Understanding requirements and best practices
 
 ---
@@ -125,6 +130,7 @@ Understanding requirements and best practices
 ```typescript
 // Example API call
 ```
+
 ```
 
 ### Safety & Compliance
@@ -297,10 +303,13 @@ Understanding requirements and best practices
 ```
 
 ### What We Can Learn
+
 [Key takeaways]
 
 ### What We'd Change
+
 [Adaptations for our use case]
+
 ```
 
 ### Architecture Options
@@ -462,25 +471,29 @@ Understanding requirements and best practices
 ## Research Sources
 
 ### AI/ML Documentation
-- Anthropic Docs: https://docs.anthropic.com
-- OpenAI Docs: https://platform.openai.com/docs
-- Hugging Face: https://huggingface.co/docs
-- TensorFlow.js: https://www.tensorflow.org/js
-- MediaPipe: https://developers.google.com/mediapipe
+
+- Anthropic Docs: <https://docs.anthropic.com>
+- OpenAI Docs: <https://platform.openai.com/docs>
+- Hugging Face: <https://huggingface.co/docs>
+- TensorFlow.js: <https://www.tensorflow.org/js>
+- MediaPipe: <https://developers.google.com/mediapipe>
 
 ### Educational Technology
-- EdTech Evidence: https://www.edtechevidence.org
-- What Works Clearinghouse: https://ies.ed.gov/ncee/wwc/
-- Common Sense Media: https://www.commonsensemedia.org
+
+- EdTech Evidence: <https://www.edtechevidence.org>
+- What Works Clearinghouse: <https://ies.ed.gov/ncee/wwc/>
+- Common Sense Media: <https://www.commonsensemedia.org>
 
 ### Child Safety
-- COPPA: https://www.ftc.gov/business-guidance/privacy-security/childrens-privacy
-- kidSAFE: https://www.kidsafeseal.com
-- PRIVO: https://www.privo.com
+
+- COPPA: <https://www.ftc.gov/business-guidance/privacy-security/childrens-privacy>
+- kidSAFE: <https://www.kidsafeseal.com>
+- PRIVO: <https://www.privo.com>
 
 ### Technical Benchmarks
-- Papers With Code: https://paperswithcode.com
-- Hugging Face Leaderboards: https://huggingface.co/spaces
+
+- Papers With Code: <https://paperswithcode.com>
+- Hugging Face Leaderboards: <https://huggingface.co/spaces>
 - AI Benchmarks: Various model-specific resources
 
 ---

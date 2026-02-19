@@ -34,4 +34,3 @@ Create or update:
 - Prompt is usable without external browsing.
 - Prompt enforces evidence labels and verification outputs.
 - Prompt encourages the Vercel ordering (waterfalls → bundle → renders → micro).
-

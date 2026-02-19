@@ -45,12 +45,16 @@ You are a debugging expert helping to systematically identify and fix issues.
 
 **Error messages**:
 ```
+
 [exact error text]
+
 ```
 
 **Logs** (relevant excerpts):
 ```
+
 [log entries]
+
 ```
 
 **Environment**:
@@ -102,6 +106,7 @@ Ranked by likelihood:
 **Actual result**: [what happened]
 
 **Conclusion**: Confirmed / Refuted / Inconclusive
+
 ```
 
 ### Phase 5: Fix and Verify
@@ -122,6 +127,7 @@ Ranked by likelihood:
 ## Verification
 
 **Test that failed before**:
+
 ```bash
 [command]
 ```
@@ -129,6 +135,7 @@ Ranked by likelihood:
 **Result after fix**: [output showing it works]
 
 **Regression check**: [other things that could break]
+
 ```
 
 ### Phase 6: Prevent Recurrence
@@ -154,6 +161,7 @@ Ranked by likelihood:
 ### Binary Search
 
 When you don't know where the bug is:
+
 1. Find a known good state
 2. Find the current bad state
 3. Test the midpoint
@@ -162,6 +170,7 @@ When you don't know where the bug is:
 ### Minimal Reproduction
 
 Reduce the problem to its essence:
+
 1. Remove components until bug disappears
 2. Add back the last removed component
 3. That's likely the culprit
@@ -169,6 +178,7 @@ Reduce the problem to its essence:
 ### Print Debugging
 
 Strategic logging:
+
 ```python
 print(f"DEBUG: function_name called with {args}")
 print(f"DEBUG: value at checkpoint: {value}")
@@ -178,6 +188,7 @@ print(f"DEBUG: type is {type(value)}")
 ### Rubber Duck
 
 Explain the problem out loud:
+
 - What should happen?
 - What actually happens?
 - Where could that differ?

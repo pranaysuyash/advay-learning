@@ -1,7 +1,8 @@
 # Code Samples for Multi-Model Architecture Review
 
 ## Context
-Kids learning app (2-9yr). 4 games with hand tracking. All "Easy" difficulty. 
+
+Kids learning app (2-9yr). 4 games with hand tracking. All "Easy" difficulty.
 No age-based UI adaptation. Backend has quest system (hidden) + limited analytics.
 
 ---
@@ -53,6 +54,7 @@ export function Games() {
 ```
 
 **Questions for Review**:
+
 1. How should game configuration be refactored for scalability?
 2. Should difficulty be enum-based with progression levels?
 3. Should ageRange be parsed and used for filtering?
@@ -84,6 +86,7 @@ class Progress(Base):
 ```
 
 **Observations**:
+
 - Limited granularity (only completion tracked, not per-attempt)
 - meta_data JSON but no schema defined for structured events
 - No game-specific event types (all maps to generic "drawing" or "recognition")
@@ -91,6 +94,7 @@ class Progress(Base):
 - No engagement metrics (time-to-first-action, retry patterns)
 
 **Questions for Review**:
+
 1. Is meta_data appropriate for extensibility or should events be typed?
 2. What per-attempt metrics should be captured for learning analysis?
 3. How should gesture quality (hand steadiness, accuracy) be tracked?
@@ -118,11 +122,13 @@ const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; border: stri
 ```
 
 **Problems**:
+
 - Easy/Medium/Hard have IDENTICAL colors (no visual hierarchy)
 - No visual feedback for progression or difficulty
 - Children can't distinguish difficulty levels
 
 **Questions for Review**:
+
 1. How should color progression be implemented for children 2-9yr?
 2. Should difficulty colors use different saturation, brightness, or hue?
 3. Should icons/symbols supplement color-only difficulty indication?
@@ -150,6 +156,7 @@ interface ProfileState {
 **Observation**: Age is tracked in profile but **NOT USED in Games.tsx for filtering or adaptation**.
 
 **Questions for Review**:
+
 1. How should age-based filtering be architected?
 2. Should recommended games be filtered by currentProfile.age?
 3. Should UI components adapt based on age?
@@ -174,6 +181,7 @@ interface ProfileState {
 ```
 
 **Questions for Review**:
+
 1. Should quests be exposed as the primary progression system?
 2. How should island unlocking mechanics work?
 3. Should Games page show individual games or quest-based structure?
@@ -183,21 +191,27 @@ interface ProfileState {
 ## Review Tasks for Models
 
 ### For Claude (Architecture & Design)
+
 Focus on:
+
 - Scalability of hardcoded game config
 - Age-based adaptation architecture
 - Quest system integration
 - Backend-driven vs frontend-driven progression
 
 ### For GPT (Code Quality & Patterns)
+
 Focus on:
+
 - Component duplication patterns
 - Analytics schema extensibility
 - Refactoring opportunities
 - Code organization best practices
 
 ### For Gemini (UX & Engagement)
+
 Focus on:
+
 - Difficulty communication effectiveness
 - Engagement loop tightness
 - Age-appropriate design patterns

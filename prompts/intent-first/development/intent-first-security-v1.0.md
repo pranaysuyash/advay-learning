@@ -1,4 +1,5 @@
 # Intent-First Security Philosophy v1.0
+
 ## "Secure by Understanding, Not by Blocking"
 
 **Core Principle:** Before implementing, modifying, or removing security controls, investigate the actual attack vectors, business risk, and user impact to ensure security measures provide genuine protection while enabling legitimate use.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the security need** (threat, vulnerability, compliance requirement, or incident response)
 2. **Understand the attack surface** (what assets, data, or processes need protection?)
 3. **Assess current controls** (what security measures already exist and their effectiveness)
@@ -17,6 +19,7 @@
 5. **Review existing security architecture** (what protections are already in place?)
 
 ### Phase 2: Threat Analysis
+
 - What specific threats or attack vectors are we protecting against?
 - What's the likelihood and potential impact of these threats?
 - Who are the threat actors and what are their capabilities?
@@ -24,6 +27,7 @@
 - **How does this integrate with existing security measures?**
 
 ### Phase 3: Security Impact Assessment
+
 - **Threat Severity**: Likelihood and impact of the threat being mitigated
 - **Business Risk**: Financial, regulatory, or reputational impact if exploited
 - **User Impact**: Effect on legitimate user workflows and experience
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip complex security implementation if all true:
+
 - Very low threat probability with minimal potential impact
 - Existing controls already provide adequate protection
 - High user friction for minimal security benefit
@@ -60,6 +65,7 @@ Skip complex security implementation if all true:
 ## Codebase-First Security Rule
 
 For *Critical* and *High* priority items:
+
 1. **Layer on existing controls** - defense in depth
 2. **Enhance incrementally** - improve current protections before adding new ones
 3. **Maintain user experience** - security shouldn't block legitimate use

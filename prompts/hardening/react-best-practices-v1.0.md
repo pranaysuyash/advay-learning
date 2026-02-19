@@ -109,4 +109,3 @@ If you cannot measure/prove improvement:
 - Mark the claim **Unknown**
 - Still ship a correctness-preserving refactor with tests
 - List what measurement is needed (exact commands/tools) to upgrade to **Observed**
-

@@ -14,15 +14,19 @@ You are exploring possibilities for new AI-native features in the Advay Vision L
 ## Exploration Framework
 
 ### Phase 1: Technology Survey
+
 Understand what AI capabilities are available and mature.
 
 ### Phase 2: User Need Mapping
+
 Map AI capabilities to child/parent needs.
 
 ### Phase 3: Feasibility Assessment
+
 Evaluate technical, safety, and resource requirements.
 
 ### Phase 4: Prioritization
+
 Rank features by impact and effort.
 
 ---
@@ -126,6 +130,7 @@ Explore what modern LLMs can do for children's education:
 ### 3.1 Quick-Win Features (Low effort, high impact)
 
 #### Feature: Pip Voice Responses
+
 **Description:** Pip speaks all feedback using TTS
 **AI Used:** Web Speech API / Piper TTS
 **Effort:** Low (1-2 days)
@@ -133,6 +138,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Safe (pre-generated or templated)
 
 #### Feature: Letter Pronunciation
+
 **Description:** Say each letter sound when tracing
 **AI Used:** TTS with phonics library
 **Effort:** Low (1 day)
@@ -140,6 +146,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Safe (curated audio)
 
 #### Feature: Simple Q&A
+
 **Description:** Answer basic "why" questions
 **AI Used:** Local LLM with strict prompts
 **Effort:** Medium (1 week)
@@ -149,6 +156,7 @@ Explore what modern LLMs can do for children's education:
 ### 3.2 Medium-Effort Features
 
 #### Feature: Story Generator
+
 **Description:** Create personalized short stories
 **AI Used:** Claude API with child context
 **Effort:** Medium (2 weeks)
@@ -156,6 +164,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Moderate (output filtering needed)
 
 #### Feature: Show and Tell
+
 **Description:** Child shows object, Pip identifies and teaches
 **AI Used:** TensorFlow.js object detection + LLM
 **Effort:** Medium (2 weeks)
@@ -163,6 +172,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Moderate (camera privacy considerations)
 
 #### Feature: Voice Commands
+
 **Description:** Child can speak to navigate and control
 **AI Used:** Web Speech API + intent classification
 **Effort:** Medium (2 weeks)
@@ -172,6 +182,7 @@ Explore what modern LLMs can do for children's education:
 ### 3.3 High-Effort Features
 
 #### Feature: Adaptive Learning Path
+
 **Description:** AI determines optimal next activity
 **AI Used:** LLM reasoning + progress analysis
 **Effort:** High (1 month)
@@ -179,6 +190,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Safe (no content generation)
 
 #### Feature: Creative Studio AI
+
 **Description:** AI collaborates on drawings and stories
 **AI Used:** LLM + (optional) image generation
 **Effort:** High (1-2 months)
@@ -186,6 +198,7 @@ Explore what modern LLMs can do for children's education:
 **Safety:** Complex (needs careful design)
 
 #### Feature: Real-Time Conversation
+
 **Description:** Natural voice chat with Pip
 **AI Used:** Real-time voice API (OpenAI, etc.)
 **Effort:** Very High (2-3 months)
@@ -257,18 +270,21 @@ For each feature under consideration, complete this assessment:
 Use these questions to guide deeper exploration:
 
 ### Technology Questions
+
 1. What's the current state of child voice recognition accuracy?
 2. Can local LLMs run fast enough on typical family devices?
 3. What are the best practices for AI content filtering for children?
 4. How do other educational apps handle AI safety?
 
 ### User Questions
+
 1. What do children actually ask AI assistants?
 2. How do parents feel about AI talking to their children?
 3. What activities keep children engaged longest?
 4. What frustrates children when using voice interfaces?
 
 ### Business Questions
+
 1. What AI features would parents pay premium for?
 2. What's the competitive landscape for AI kids apps?
 3. What are the regulatory considerations (COPPA, GDPR)?

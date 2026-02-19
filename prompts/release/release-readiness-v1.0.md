@@ -21,6 +21,7 @@ sed -n '1,120p' CHANGELOG.md
 ```
 
 If Git availability is YES (optional but recommended):
+
 ```bash
 git status --porcelain
 git rev-parse --abbrev-ref HEAD
@@ -28,6 +29,7 @@ git rev-parse HEAD
 ```
 
 Run the project’s verification commands if they exist and are applicable; otherwise list Unknown:
+
 - frontend: `npm run lint`, `npm run type-check`, `npm run test`
 - backend: `pytest`
 
@@ -36,6 +38,7 @@ Run the project’s verification commands if they exist and are applicable; othe
 ## OUTPUT (REQUIRED)
 
 ### A) Release checklist (PASS/FAIL/UNKNOWN)
+
 - Build/boot (frontend + backend)
 - Tests
 - Security/privacy review
@@ -43,9 +46,11 @@ Run the project’s verification commands if they exist and are applicable; othe
 - Data export/delete verified (if applicable)
 
 ### B) Evidence log
+
 - Commands + raw outputs (or Unknown)
 
 ### C) Go/No-Go decision
+
 - GO / NO-GO / GO WITH RISKS
 - Risks and rollback notes
 

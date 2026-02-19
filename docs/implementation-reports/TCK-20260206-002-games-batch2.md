@@ -8,11 +8,12 @@ Status: DONE
 
 1. Migrated an existing game (`LetterHunt`) to shared runtime.
 2. Added two new runtime-based camera games:
+
 - Shape Pop
 - Color Match Garden
-3. Added shared target-practice utility logic for reuse.
-4. Wired routes and game catalog entries.
-5. Added tests and verified type-check.
+1. Added shared target-practice utility logic for reuse.
+2. Wired routes and game catalog entries.
+3. Added tests and verified type-check.
 
 ## Shared Reuse Added
 
@@ -25,15 +26,18 @@ Status: DONE
 ### Utility reuse
 
 Added shared utility module:
+
 - `src/frontend/src/games/targetPracticeLogic.ts`
 
 Functions reused by multiple games:
+
 - `pickRandomPoint`
 - `pickSpacedPoints`
 - `isPointInCircle`
 - `distanceBetweenPoints`
 
 Consumers:
+
 - `src/frontend/src/pages/ShapePop.tsx`
 - `src/frontend/src/pages/ColorMatchGarden.tsx`
 
@@ -54,10 +58,12 @@ Consumers:
 ## Routing and Catalog
 
 Added routes:
+
 - `/games/shape-pop`
 - `/games/color-match-garden`
 
 Catalog additions in games list with metadata:
+
 - `shape-pop`
 - `color-match-garden`
 
@@ -70,6 +76,7 @@ Command:
 `cd src/frontend && npm run type-check`
 
 Result:
+
 - Passed
 
 ### Tests
@@ -79,6 +86,7 @@ Command:
 `cd src/frontend && npm run test -- --run src/utils/__tests__/handTrackingFrame.test.ts src/games/__tests__/musicPinchLogic.test.ts src/games/__tests__/steadyHandLogic.test.ts src/games/__tests__/targetPracticeLogic.test.ts`
 
 Result:
+
 - 4 files passed
 - 16 tests passed
 

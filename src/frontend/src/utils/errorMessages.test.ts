@@ -119,7 +119,7 @@ describe('errorMessages', () => {
 
     it('includes emoji prefix', () => {
       const formatted = formatErrorMessage('NotFoundError');
-      expect(formatted).toMatch(/^[🔍]/);
+      expect(formatted).toMatch(/^[🔍]/u);
     });
 
     it('separates parts with newlines for readability', () => {

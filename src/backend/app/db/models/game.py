@@ -1,16 +1,16 @@
 """Game model for game/activity management."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base_class import Base
 
 if TYPE_CHECKING:
-    from app.db.models.user import User
+    pass
 
 
 class Game(Base):

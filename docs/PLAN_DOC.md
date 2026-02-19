@@ -127,7 +127,7 @@ Deliver a hydration-guarded, camera-optional demo experience that reduces first-
 - Acceptance: <5% drop-off at permission prompt
 - Effort: M (4-6 hours)
 
-5. **TCK-20260202-042** - Create guided demo onboarding flow
+1. **TCK-20260202-042** - Create guided demo onboarding flow
    - Context: Users unclear on demo limitations and features
    - Scope: Step-by-step introduction, feature preview, clear CTAs
    - Acceptance: 70%+ users complete onboarding
@@ -144,7 +144,7 @@ Deliver a hydration-guarded, camera-optional demo experience that reduces first-
 - Acceptance: Accessible on iPhone SE (375px width)
 - Effort: M (4-6 hours)
 
-7. **TCK-20260202-044** - Implement error-first design patterns
+1. **TCK-20260202-044** - Implement error-first design patterns
    - Context: Technical errors shown to users
    - Scope: Human-centered error messages, clear recovery actions
    - Acceptance: No technical jargon in user-facing errors
@@ -161,7 +161,7 @@ Deliver a hydration-guarded, camera-optional demo experience that reduces first-
 - Acceptance: Consistent experience across all targets
 - Effort: M (4-6 hours)
 
-9. **TCK-20260202-046** - Accessibility compliance verification
+1. **TCK-20260202-046** - Accessibility compliance verification
    - Context: Screen reader and keyboard navigation untested
    - Scope: WCAG AA compliance, screen reader testing
    - Acceptance: Passes accessibility audit

@@ -1,4 +1,5 @@
 # Intent-First Performance Philosophy v1.0
+
 ## "Optimize What Users Actually Feel"
 
 **Core Principle:** Before implementing performance optimizations, investigate real user impact and business metrics to ensure efforts improve actual user experience rather than synthetic benchmarks.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify performance concerns** (user complaints, monitoring alerts, or proactive optimization)
 2. **Measure current user experience** (real user metrics, not just synthetic tests)
 3. **Understand usage patterns** (when, where, and how users experience slowness)
@@ -17,6 +19,7 @@
 5. **Profile existing code** (where are the actual bottlenecks?)
 
 ### Phase 2: Impact Analysis
+
 - What specific user actions or workflows are affected?
 - How does current performance impact business metrics?
 - Where do users actually experience slowness in their journey?
@@ -24,6 +27,7 @@
 - **What's causing the bottleneck in existing code?**
 
 ### Phase 3: Performance Priority Assessment
+
 - **User Impact**: How many users experience the performance issue
 - **Business Impact**: Effect on conversion, retention, or revenue
 - **Optimization Effort**: Complexity and time required for improvement
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Skip complex optimization if all true:
+
 - Performance issue affects very few users
 - Current performance meets business requirements
 - High optimization effort for minimal user-perceivable improvement
@@ -60,6 +65,7 @@ Skip complex optimization if all true:
 ## Codebase-First Performance Rule
 
 For *Critical* and *High* priority items:
+
 1. **Profile before optimizing** - identify real bottlenecks in existing code
 2. **Optimize existing code first** - improve current implementation before rewriting
 3. **Target slowest experiences** - focus on the 20% of users with worst performance

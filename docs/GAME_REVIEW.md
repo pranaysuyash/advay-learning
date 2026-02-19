@@ -20,6 +20,7 @@
 ## 1. Alphabet Tracing (AlphabetGamePage.tsx)
 
 ### ✅ What's Good
+
 - Comprehensive hand tracking with fallback to mouse/touch
 - Wellness timers (break, hydration, stretch reminders)
 - Posture and attention detection
@@ -58,6 +59,7 @@
 ## 2. Finger Number Show (FingerNumberShow.tsx)
 
 ### ✅ What's Good
+
 - Dual mode: Numbers AND Letters
 - Multi-language letter support
 - Multiple difficulty levels (0-2, 0-5, 0-10, Duo Mode 0-20)
@@ -103,6 +105,7 @@
 ## 3. Connect The Dots (ConnectTheDots.tsx)
 
 ### ✅ What's Good
+
 - Pinch detection for dot connection
 - Mouse/touch fallback (click on dots)
 - Timer per level
@@ -153,6 +156,7 @@
 ## 4. Letter Hunt (LetterHunt.tsx)
 
 ### ✅ What's Good
+
 - Clean pinch-to-select mechanic
 - Mouse/touch fallback
 - Multi-language support
@@ -200,6 +204,7 @@
 ## 5. Games Hub (Games.tsx)
 
 ### ✅ What's Good
+
 - Clean card-based layout
 - Profile-aware (shows current player)
 - Profile picker modal
@@ -277,18 +282,21 @@ New Game:
 ## Cross-Cutting Improvements
 
 ### Accessibility
+
 - [ ] Add keyboard navigation to all games
 - [ ] Add screen reader announcements for game state changes
 - [ ] Add high-contrast mode toggle (exists in AlphabetGame)
 - [ ] Ensure all interactive elements have 56px min touch targets
 
 ### Consistency
+
 - [ ] All games should have WellnessTimer
 - [ ] All games should persist progress
 - [ ] All games should have tutorial/onboarding
 - [ ] Standardize camera permission handling
 
 ### Analytics (for future)
+
 - [ ] Track time spent per game
 - [ ] Track common failure points
 - [ ] A/B test difficulty settings
@@ -298,20 +306,23 @@ New Game:
 ## Priority Implementation Order
 
 ### P0 - Critical UX
+
 1. Add tutorials to Finger Number Show, Connect The Dots, Letter Hunt
 2. Fix Connect The Dots to actually reveal pictures
 3. Add progress persistence to all games
 
 ### P1 - Polish
+
 4. Add WellnessTimer to all games
-5. Add TTS/audio to Letter Hunt
-6. Add streak visualization to Finger Number Show
-7. Add visual similar letter challenges to Letter Hunt
+2. Add TTS/audio to Letter Hunt
+3. Add streak visualization to Finger Number Show
+4. Add visual similar letter challenges to Letter Hunt
 
 ### P2 - Nice to Have
+
 8. Adaptive difficulty in Alphabet Tracing
-9. Relaxed mode (no timer) in Connect The Dots
-10. Game preview screenshots in Games Hub
+2. Relaxed mode (no timer) in Connect The Dots
+3. Game preview screenshots in Games Hub
 
 ---
 

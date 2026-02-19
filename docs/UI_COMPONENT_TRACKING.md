@@ -35,11 +35,13 @@
 **Enhanced:** 2026-01-29 (contrast & borders)  
 **Approved By:** User  
 **Files Modified:**
+
 - `src/frontend/src/index.css` - Complete color system with CSS variables
 - `src/frontend/tailwind.config.js` - Tailwind color configuration
 - `src/frontend/index.html` - Nunito font loading
 
 **What's Included:**
+
 - 15 CSS custom properties for consistent theming
 - **Enhanced text contrast**: #1F2937 (darker) for primary text
 - **Sharper borders**: 2px solid #D1D5DB, strong variant #9CA3AF
@@ -51,6 +53,7 @@
 - Tailwind integration with all custom colors
 
 **Contrast Improvements:**
+
 - Text Primary: #1F2937 (was #3D405B) - 15.8:1 ratio on cream background
 - Text Secondary: #4B5563 (was #6B7280) - 7.8:1 ratio
 - Body font-weight: 600 (was 400) - bolder, clearer
@@ -62,6 +65,7 @@
 **File:** `src/frontend/src/index.css`
 
 **CSS Variables:**
+
 ```css
 :root {
   /* Background Colors */
@@ -130,10 +134,12 @@
 ### Planned Implementation
 
 **Font Family:** Nunito (Google Fonts)
+
 - Rounded, friendly, highly legible
 - Designed for UI and readability
 
 **Scale:**
+
 | Level | Size | Usage |
 |-------|------|-------|
 | Display | 96px | Letter display in game |
@@ -151,6 +157,7 @@
 ## Implementation Notes
 
 ### Process
+
 1. Propose component with full specifications
 2. User reviews and approves/modifies
 3. Upon approval, implement component
@@ -158,6 +165,7 @@
 5. Move to next component
 
 ### Constraints
+
 - One component at a time
 - No rushing
 - Research-backed decisions only
@@ -165,7 +173,9 @@
 - Test with real child (2yr 9mo)
 
 ### Rollback Plan
+
 If any component doesn't work:
+
 - Revert to previous state
 - Revisit research
 - Propose alternative

@@ -12,6 +12,7 @@
 This research covers practical marketing strategies for an indie-developed children's educational app in India. Focus is on **low-cost, high-impact channels** suitable for a solo developer or small team.
 
 ### Key Takeaways
+
 | Strategy | Investment | Expected Impact | Timeline |
 |----------|------------|-----------------|----------|
 | Content Marketing | Low (time) | High long-term | 3-6 months |
@@ -29,6 +30,7 @@ This research covers practical marketing strategies for an indie-developed child
 Create content that parents are searching for:
 
 #### Educational Content (SEO-focused)
+
 ```markdown
 ## High-Value Article Topics
 
@@ -95,6 +97,7 @@ Ongoing:
 ### 2.1 The 2025-2026 Reality
 
 Product Hunt algorithm changed significantly:
+
 - Only **10% of launches get featured** (down from ~30%)
 - First **2-4 hours** are critical for momentum
 - **Community engagement** before launch matters
@@ -193,6 +196,7 @@ Midnight     - Day 1 complete
 ### 3.2 Content Ideas by Platform
 
 #### Instagram Reels (30-60 seconds)
+
 ```
 1. "Watch my 4-year-old trace letters with his finger in the air! ✏️"
 2. "This is what active screen time looks like 📱➡️🏃"
@@ -202,6 +206,7 @@ Midnight     - Day 1 complete
 ```
 
 #### YouTube Videos
+
 ```
 1. "How to Use Advay Vision Learning - Full Tutorial" (5 min)
 2. "Why Camera-Based Learning Works for Kids" (8 min)
@@ -211,6 +216,7 @@ Midnight     - Day 1 complete
 ```
 
 #### WhatsApp Strategy
+
 ```
 - Join parent groups (school groups, neighborhood groups)
 - Share genuinely helpful parenting tips (not just app promo)

@@ -11,12 +11,15 @@
 ## 1. Overview
 
 ### 1.1 Description
+
 Implement basic hand detection and tracking using MediaPipe to enable hand-based interaction with the learning app.
 
 ### 1.2 Problem Statement
+
 The app needs to detect and track hands through the camera to enable gesture-based interaction for drawing and learning activities.
 
 ### 1.3 Success Criteria
+
 - [ ] Hand is detected in real-time (30 FPS target)
 - [ ] Hand landmarks are extracted and accessible
 - [ ] Multiple hands can be tracked (at least 2)
@@ -28,20 +31,24 @@ The app needs to detect and track hands through the camera to enable gesture-bas
 ## 2. User Stories
 
 ### Story 1: Basic Hand Detection
+
 **As a** child using the app  
 **I want** the app to see my hand  
 **So that** I can interact with activities using hand gestures
 
 **Acceptance Criteria:**
+
 - Given the camera is active, when I show my hand, then the app detects it
 - Given hand is detected, when I move my hand, then the tracking follows smoothly
 
 ### Story 2: Multiple Hand Support
+
 **As a** child playing a game  
 **I want** to use both hands  
 **So that** I can do more complex interactions
 
 **Acceptance Criteria:**
+
 - Given both hands are visible, when the app processes the frame, then both hands are tracked
 - Given one hand is tracked, when I show the second hand, then it is also detected
 
@@ -185,6 +192,7 @@ class HandDetector:
 ### 5.2 Debug Mode
 
 Optional overlay showing:
+
 - Landmark points (colored dots)
 - Landmark connections (skeleton)
 - Confidence score
@@ -250,8 +258,8 @@ Optional overlay showing:
 
 ## 9. Notes & References
 
-- MediaPipe Hands documentation: https://developers.google.com/mediapipe/solutions/vision/hand_landmarker
-- 21 landmark model: https://developers.google.com/mediapipe/solutions/vision/hand_landmarker#models
+- MediaPipe Hands documentation: <https://developers.google.com/mediapipe/solutions/vision/hand_landmarker>
+- 21 landmark model: <https://developers.google.com/mediapipe/solutions/vision/hand_landmarker#models>
 
 ---
 

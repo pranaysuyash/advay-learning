@@ -12,6 +12,7 @@
 This document provides comprehensive research on computer vision technologies and their educational applications for children, going beyond the existing documentation in the project. It covers MediaPipe capabilities, ONNX model possibilities, creative game ideas, AR/Mixed Reality features, accessibility considerations, and social/multiplayer implementations.
 
 **Key Technologies Covered:**
+
 - MediaPipe (Hand, Pose, Face, Object Detection, Segmentation)
 - ONNX Runtime (Object Detection, Classification, OCR)
 - TensorFlow.js / COCO-SSD
@@ -38,6 +39,7 @@ This document provides comprehensive research on computer vision technologies an
 | **Conducting Orchestra** | Track hand movement tempo, control music | Music appreciation, rhythm | MEDIUM |
 
 **Technical Details:**
+
 ```typescript
 // Advanced finger tracking for piano keys
 const fingerTips = [4, 8, 12, 16, 20]; // Thumb, Index, Middle, Ring, Pinky tips
@@ -82,6 +84,7 @@ function detectPianoKeys(landmarks: NormalizedLandmark[]) {
 | **Obstacle Course** | Virtual obstacles to duck/jump | Full body spatial awareness | 5-10 |
 
 **Implementation Example - Jumping Jacks Counter:**
+
 ```typescript
 interface PoseState {
   armsUp: boolean;
@@ -110,6 +113,7 @@ function detectJumpingJack(landmarks: NormalizedLandmark[]): PoseState {
 ```
 
 **Research References:**
+
 - [BlazePose Research](https://research.google/blog/on-device-real-time-body-pose-tracking-with-mediapipe-blazepose/)
 - [Yoga Pose Classification](https://link.springer.com/article/10.1007/s12652-022-03910-0)
 - [ML Kit Pose Detection](https://developers.google.com/ml-kit/vision/pose-detection/classifying-poses)
@@ -131,6 +135,7 @@ function detectJumpingJack(landmarks: NormalizedLandmark[]): PoseState {
 | **Mirror Game** | Expression matching | Imitation, learning | No storage |
 
 **Attention Tracking Implementation:**
+
 ```typescript
 interface AttentionMetrics {
   lookingAtScreen: boolean;
@@ -160,6 +165,7 @@ function assessAttention(blendshapes: FaceBlendshape[]): AttentionMetrics {
 ```
 
 **Research References:**
+
 - [Face Landmarker Guide](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
 - [Facial Emotion Recognition with MediaPipe](https://github.com/REWTAO/Facial-emotion-recognition-using-mediapipe)
 - [Student Attention Monitoring](https://www.mdpi.com/2504-2289/7/1/48)
@@ -187,17 +193,21 @@ function assessAttention(blendshapes: FaceBlendshape[]): AttentionMetrics {
 The MediaPipe/TensorFlow.js object detector trained on COCO dataset can detect 80 object classes. Here are educationally relevant ones:
 
 **Animals (Great for Learning):**
+
 - bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe
 
 **Everyday Objects:**
+
 - bottle, cup, fork, knife, spoon, bowl
 - chair, couch, bed, dining table
 - book, clock, scissors, toothbrush
 
 **Vehicles & Transportation:**
+
 - bicycle, car, motorcycle, airplane, bus, train, truck, boat
 
 **Food Items:**
+
 - banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake
 
 **Educational Game Ideas:**
@@ -213,6 +223,7 @@ The MediaPipe/TensorFlow.js object detector trained on COCO dataset can detect 8
 | **Size Comparison** | Compare detected objects | Multiple objects | Math concepts |
 
 **Implementation:**
+
 ```typescript
 const objectDetector = await ObjectDetector.createFromOptions(vision, {
   baseOptions: {
@@ -234,6 +245,7 @@ function checkScavengerItem(target: string, detections: Detection[]): boolean {
 ```
 
 **Research References:**
+
 - [MediaPipe Object Detector Guide](https://ai.google.dev/edge/mediapipe/solutions/vision/object_detector)
 - [Real-Time 3D Object Detection on Mobile](https://research.google/blog/real-time-3d-object-detection-on-mobile-devices-with-mediapipe/)
 
@@ -254,6 +266,7 @@ function checkScavengerItem(target: string, detections: Detection[]): boolean {
 | **Green Screen Studio** | Background removal | Create videos with backgrounds | MEDIUM |
 
 **Multi-Class Segmentation Categories:**
+
 ```typescript
 // MediaPipe Selfie Segmentation output categories
 const SEGMENTATION_CATEGORIES = {
@@ -267,6 +280,7 @@ const SEGMENTATION_CATEGORIES = {
 ```
 
 **Research References:**
+
 - [MediaPipe Image Segmentation Guide](https://developers.google.com/mediapipe/solutions/vision/image_segmenter)
 - [Selfie Segmentation](https://chuoling.github.io/mediapipe/solutions/selfie_segmentation.html)
 
@@ -321,6 +335,7 @@ const SEGMENTATION_CATEGORIES = {
 | **Spelling Checker** | OCR + Dictionary | Check written words | 85%+ |
 
 **Implementation Approach:**
+
 ```typescript
 // Using Tesseract.js for web-based OCR
 import Tesseract from 'tesseract.js';
@@ -339,6 +354,7 @@ async function recognizeHandwriting(imageData: ImageData): Promise<string> {
 ```
 
 **Research References:**
+
 - [Basic Handwriting Instructor for Kids Using OCR](https://ieeexplore.ieee.org/document/5508516/)
 - [Children's Handwriting OCR Challenge](https://dabordel.medium.com/if-i-cant-read-children-s-handwriting-how-can-an-ocr-3f5edcdcfd7b)
 
@@ -378,11 +394,13 @@ async function recognizeHandwriting(imageData: ImageData): Promise<string> {
 | **Communication Bridge** | Real-time sign-to-text | Deaf/hearing siblings |
 
 **Existing Apps to Reference:**
+
 - **PopSign** - Educational game teaching 500+ ASL signs
 - **Signs by NVIDIA** - AI-powered sign language coaching
 - **Fingerspelling.xyz** - ASL alphabet learning
 
 **Research References:**
+
 - [PopSign App](https://www.popsign.org/)
 - [NVIDIA Signs Platform](https://blogs.nvidia.com/blog/ai-sign-language/)
 - [Computer Vision for Sign Language](https://blog.roboflow.com/computer-vision-american-sign-language/)
@@ -413,6 +431,7 @@ async function recognizeHandwriting(imageData: ImageData): Promise<string> {
 | **Pet Reacts to Emotions** | Face Blendshapes | Smile = pet happy, frown = pet concerned |
 
 **Research References:**
+
 - [Peridot by Niantic](https://nianticlabs.com/news/peridot-generative-ai)
 - [Physical Presence Pet CMU Project](https://www.cmu.edu/news/stories/archives/2025/july/etcs-physical-presence-pet-redefines-vr-companionship)
 - [Interactive AR Pet Tutorial](https://www.auki.com/posemesh/learn/lesson/lesson/interactive-ar-pet)
@@ -430,6 +449,7 @@ async function recognizeHandwriting(imageData: ImageData): Promise<string> {
 | **Multiple Characters** | Two-hand tracking | Control two puppets at once |
 
 **Research References:**
+
 - [Hand Gesture-Based Interactive Puppetry System](https://link.springer.com/article/10.1007/s00371-016-1272-6)
 - [HaSPeR Hand Shadow Puppet Dataset](https://arxiv.org/html/2408.10360v1)
 
@@ -469,6 +489,7 @@ async function recognizeHandwriting(imageData: ImageData): Promise<string> {
 ### 4.1 Attention Tracking
 
 **Implementation Architecture:**
+
 ```
 Face Landmarker → Gaze Direction → Engagement Score
         ↓                ↓               ↓
@@ -478,6 +499,7 @@ Face Landmarker → Gaze Direction → Engagement Score
 ```
 
 **Metrics to Track:**
+
 | Metric | Detection Method | Threshold | Action |
 |--------|------------------|-----------|--------|
 | **Looking Away** | Gaze direction | >30% time off-screen | Pip: "Are you still there?" |
@@ -486,12 +508,14 @@ Face Landmarker → Gaze Direction → Engagement Score
 | **Engagement** | Composite score | <50% | Change activity type |
 
 **Research References:**
+
 - [Facial Fatigue Detection App](https://www.researchgate.net/publication/390799355)
 - [Student Attention Monitoring XGBoost](https://www.sciencedirect.com/science/article/pii/S2666920X2300070X)
 
 ### 4.2 Engagement Detection
 
 **Behavioral Signals:**
+
 - **Positive:** Smiling, leaning forward, active participation
 - **Negative:** Looking away, yawning, slouching, fidgeting
 - **Neutral:** Normal posture, following content
@@ -499,6 +523,7 @@ Face Landmarker → Gaze Direction → Engagement Score
 ### 4.3 Fatigue Detection
 
 **Visual Indicators:**
+
 | Indicator | Detection | Response |
 |-----------|-----------|----------|
 | Frequent blinking | Eye blendshapes | Pip: "Your eyes look tired!" |
@@ -509,6 +534,7 @@ Face Landmarker → Gaze Direction → Engagement Score
 ### 4.4 Posture Monitoring
 
 **Sitting Posture Detection:**
+
 ```typescript
 interface PostureAssessment {
   headForward: boolean;   // Head too far forward
@@ -541,6 +567,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ```
 
 **Research References:**
+
 - [Sitting Posture Recognition with Cameras](https://dl.acm.org/doi/10.1145/3663976.3664014)
 - [Posture Monitoring for Children](https://journals.sagepub.com/doi/abs/10.3233/WOR-213634)
 - [Children Posture ML Applications](https://www.mdpi.com/2306-5354/12/12/1311)
@@ -548,6 +575,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 4.5 Multi-Child Detection (Siblings)
 
 **Multiplayer Same-Screen Features:**
+
 | Feature | Implementation | Use Case |
 |---------|---------------|----------|
 | **Two-Player Detection** | Multi-person pose | Sibling games |
@@ -560,6 +588,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 4.6 Real-World Homework Help
 
 **Point & Solve Features:**
+
 | Subject | Detection | AI Response |
 |---------|-----------|-------------|
 | **Math Problems** | OCR + Math parsing | Step-by-step solution |
@@ -571,6 +600,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 4.7 3D Object Understanding
 
 **Objectron Features (3D Bounding Boxes):**
+
 - Detect object orientation (which way is "up")
 - Estimate real-world object size
 - Track object rotation during manipulation
@@ -591,6 +621,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 | **Anatomy Model** | AR body overlay | Learning body parts |
 
 **AR Apps Reference:**
+
 - [McGraw Hill AR](https://www.mheducation.com/prek-12/program/microsites/mcgraw-hill-ar.html)
 - [Leo AR Education](https://www.educationalappstore.com/app-lists/best-augmented-reality-apps)
 
@@ -616,6 +647,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 5.4 Interactive Storybooks
 
 **AR Book Features:**
+
 - Point camera at book page
 - Characters come alive and move
 - Touch character to trigger actions
@@ -635,6 +667,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 5.6 Time Travel (Historical Overlays)
 
 **Historical Learning AR:**
+
 - See room as it looked 100 years ago
 - Meet historical figures (AR characters)
 - Explore ancient buildings
@@ -656,6 +689,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 6.1 Sign Language Recognition/Teaching
 
 **Comprehensive ASL/ISL Support:**
+
 | Feature | Technology | Benefit |
 |---------|-----------|---------|
 | **Letter Recognition** | Hand landmark classifier | Learn alphabet |
@@ -665,6 +699,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 | **Sign-to-Text** | Continuous recognition | Communication bridge |
 
 **Research References:**
+
 - [PopSign Educational Game](https://www.popsign.org/)
 - [Signs by NVIDIA](https://www.deptagency.com/case/ai-powered-sign-language-education-that-changes-lives/)
 - [AI Technologies for Sign Language](https://pmc.ncbi.nlm.nih.gov/articles/PMC8434597/)
@@ -672,6 +707,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 6.2 Lip Reading Assistance
 
 **For Hearing-Impaired Children:**
+
 | Feature | Technology |
 |---------|-----------|
 | **Speech-to-Text Overlay** | Face detection + LipNet |
@@ -683,6 +719,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 6.3 Motor Skill Adaptation
 
 **Adaptive Interfaces:**
+
 | Adaptation | Detection | Adjustment |
 |------------|-----------|------------|
 | **Larger Touch Targets** | Tremor detection | Increase UI element size |
@@ -705,6 +742,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 6.5 Autism Spectrum Support
 
 **Emotion Recognition Training:**
+
 | Feature | Technology | Therapeutic Use |
 |---------|-----------|-----------------|
 | **Emotion Mirror** | Face blendshapes | Practice expressions |
@@ -713,6 +751,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 | **Sensory Adjustment** | Preference detection | Customize stimulation |
 
 **Research References:**
+
 - [Emotion Recognition Technologies for ASD](https://link.springer.com/article/10.1007/s10209-021-00818-y)
 - [ALTRIRAS Game for Autism](https://onlinelibrary.wiley.com/doi/10.1155/2019/4384896)
 - [Mobile Apps for ASD Emotion Recognition](https://www.frontiersin.org/journals/child-and-adolescent-psychiatry/articles/10.3389/frcha.2023.1118665/full)
@@ -742,6 +781,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 7.3 Turn-Based with Siblings
 
 **Fair Turn Management:**
+
 - Face recognition for player identification
 - Automatic turn switching
 - Score tracking per player
@@ -759,6 +799,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 7.5 Remote Play with Grandparents
 
 **Video Call Integration:**
+
 | Feature | Technology |
 |---------|-----------|
 | **Shared Drawing Canvas** | WebRTC + Canvas sync |
@@ -767,6 +808,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 | **Show & Tell** | Object detection sharing |
 
 **Apps Reference:**
+
 - [Together Video App](https://www.togethervideoapp.com/)
 - [Caribu Reading App](https://parents-together.org/9-great-apps-and-games-for-playing-with-grandparents-from-far-away/)
 - [Kinoo Family Activities](https://parents-together.org/9-great-apps-and-games-for-playing-with-grandparents-from-far-away/)
@@ -778,6 +820,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 8.1 Skill Progression Tracking
 
 **Tracked Metrics:**
+
 | Skill Category | Metrics | Visualization |
 |----------------|---------|---------------|
 | **Fine Motor** | Tracing accuracy, smoothness | Line graph over time |
@@ -789,6 +832,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 8.2 Learning Style Detection
 
 **Adaptive Content Based on:**
+
 | Learning Style | Detected By | Content Adaptation |
 |----------------|-------------|-------------------|
 | **Visual** | Prefers image-heavy content | More illustrations |
@@ -799,6 +843,7 @@ function assessPosture(poseLandmarks: NormalizedLandmark[]): PostureAssessment {
 ### 8.3 Difficulty Auto-Adjustment
 
 **Dynamic Difficulty Algorithm:**
+
 ```typescript
 interface DifficultyState {
   currentLevel: number;
@@ -826,6 +871,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 8.4 Report Generation for Parents
 
 **Weekly Report Contents:**
+
 | Section | Data Points |
 |---------|-------------|
 | **Time Summary** | Total time, sessions, average session |
@@ -838,6 +884,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 8.5 School Curriculum Alignment
 
 **Standards Mapping:**
+
 | Grade Level | Skills Covered | Standards Alignment |
 |-------------|----------------|---------------------|
 | Pre-K (3-4) | Letter recognition, counting 1-10 | Common Core ELA RF.K.1 |
@@ -906,18 +953,21 @@ function adjustDifficulty(state: DifficultyState): number {
 ## Part 11: Implementation Roadmap
 
 ### Phase 1: Foundation Enhancement (Current - Month 2)
+
 - [x] Hand tracking letter tracing
 - [ ] Pose-based body games (Simon Says, Freeze Dance)
 - [ ] Face expression mirror game
 - [ ] Basic attention tracking
 
 ### Phase 2: Expanded CV Features (Months 3-4)
+
 - [ ] Object detection scavenger hunt
 - [ ] Yoga for kids with pose matching
 - [ ] Sign language alphabet recognition
 - [ ] Background segmentation effects
 
 ### Phase 3: Advanced Features (Months 5-6)
+
 - [ ] Full body dance games
 - [ ] Emotion recognition quiz
 - [ ] Multi-child detection
@@ -925,12 +975,14 @@ function adjustDifficulty(state: DifficultyState): number {
 - [ ] OCR homework helper
 
 ### Phase 4: AR/Social Features (Months 7-9)
+
 - [ ] AR character companions
 - [ ] Virtual museum/zoo experiences
 - [ ] Remote play with grandparents
 - [ ] Parent-child collaborative activities
 
 ### Phase 5: Full Platform (Months 10-12)
+
 - [ ] Complete accessibility suite
 - [ ] School curriculum alignment
 - [ ] Advanced analytics dashboard
@@ -967,6 +1019,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ## Appendix C: Research Sources
 
 ### MediaPipe Documentation
+
 - [MediaPipe Solutions Guide](https://ai.google.dev/edge/mediapipe/solutions/guide)
 - [Hand Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
 - [Pose Landmarker](https://github.com/google-ai-edge/mediapipe/blob/master/docs/solutions/pose.md)
@@ -975,6 +1028,7 @@ function adjustDifficulty(state: DifficultyState): number {
 - [Image Segmenter](https://developers.google.com/mediapipe/solutions/vision/image_segmenter)
 
 ### Academic Research
+
 - [Yoga Pose Classification with CNN](https://link.springer.com/article/10.1007/s12652-022-03910-0)
 - [Hand Gesture Puppetry for Children](https://link.springer.com/article/10.1007/s00371-016-1272-6)
 - [Emotion Recognition for Autism](https://link.springer.com/article/10.1007/s10209-021-00818-y)
@@ -982,6 +1036,7 @@ function adjustDifficulty(state: DifficultyState): number {
 - [AI Technologies for Sign Language](https://pmc.ncbi.nlm.nih.gov/articles/PMC8434597/)
 
 ### Industry Applications
+
 - [Peridot AR Pet Game](https://nianticlabs.com/news/peridot-generative-ai)
 - [PopSign ASL Learning](https://www.popsign.org/)
 - [NVIDIA Signs Platform](https://blogs.nvidia.com/blog/ai-sign-language/)
@@ -996,6 +1051,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 12.1 Hand Tracking Games (50 Ideas)
 
 #### Fine Motor Skills
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 1 | **Air Tracing Letters** | Trace letters in the air | 3-6 | Easy |
@@ -1010,6 +1066,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 10 | **Calligraphy Practice** | Write with calligraphy effects | 6-10 | Hard |
 
 #### Gesture-Based Games
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 11 | **Rock Paper Scissors** | Play against AI opponent | 4-10 | Easy |
@@ -1024,6 +1081,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 20 | **Finger Math** | Show answer with fingers | 4-8 | Medium |
 
 #### Music & Rhythm (Hand)
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 21 | **Air Piano** | Play virtual piano keys | 4-10 | Medium |
@@ -1038,6 +1096,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 30 | **DJ Scratch** | Virtual turntable scratching | 6-10 | Hard |
 
 #### Creative & Storytelling (Hand)
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 31 | **Shadow Puppets** | Make animal shadows | 4-10 | Medium |
@@ -1052,6 +1111,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 40 | **Firefly Jar** | Catch fireflies in jar | 3-7 | Medium |
 
 #### Sign Language & Communication
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 41 | **ASL Alphabet** | Learn A-Z in sign language | 5-10 | Medium |
@@ -1070,6 +1130,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 12.2 Pose/Body Tracking Games (40 Ideas)
 
 #### Movement & Exercise
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 51 | **Jumping Jacks Counter** | Count jumping jacks automatically | 4-10 | Easy |
@@ -1084,6 +1145,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 60 | **Cool Down Yoga** | Gentle end-of-session poses | 4-10 | Easy |
 
 #### Dance & Rhythm (Body)
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 61 | **Dance Mirror** | Copy dance moves shown | 4-10 | Medium |
@@ -1098,6 +1160,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 70 | **Music Video Star** | Record dancing with effects | 6-10 | Medium |
 
 #### Yoga & Mindfulness
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 71 | **Downward Dog** | Hold pose with feedback | 4-10 | Easy |
@@ -1112,6 +1175,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 80 | **Body Scan Relax** | Progressive relaxation | 5-10 | Easy |
 
 #### Simon Says & Following Instructions
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 81 | **Simon Says Body** | Touch head, shoulders, etc. | 3-7 | Easy |
@@ -1130,6 +1194,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 12.3 Face Detection Games (30 Ideas)
 
 #### Expression Games
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 91 | **Emotion Mirror** | Copy shown emotions | 3-8 | Easy |
@@ -1144,6 +1209,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 100 | **Emotion Vocabulary** | Learn emotion words | 3-8 | Easy |
 
 #### AR Face Effects
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 101 | **Animal Face Filters** | Become cat, dog, tiger | 3-10 | Easy |
@@ -1158,6 +1224,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 110 | **Space Helmet** | Astronaut face effect | 3-10 | Easy |
 
 #### Attention & Engagement
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 111 | **Eye Contact Trainer** | Practice looking at camera | 4-10 | Easy |
@@ -1176,6 +1243,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 12.4 Object Detection Games (25 Ideas)
 
 #### Scavenger Hunts
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 121 | **Find Something Red** | Color-based scavenger hunt | 3-7 | Easy |
@@ -1190,6 +1258,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 130 | **Nature Collection** | Show leaves, flowers | 3-10 | Easy |
 
 #### Learning with Objects
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 131 | **What's This?** | Object identification | 3-6 | Easy |
@@ -1204,6 +1273,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 140 | **Object Story** | Show object, AI tells story | 3-8 | Easy |
 
 #### Flash Card Enhancement
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 141 | **Physical Flashcard Scan** | Scan real flashcards | 3-10 | Easy |
@@ -1217,6 +1287,7 @@ function adjustDifficulty(state: DifficultyState): number {
 ### 12.5 Segmentation & AR Games (20 Ideas)
 
 #### Background & Effects
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 146 | **Space Background** | Float in space | 3-10 | Easy |
@@ -1231,6 +1302,7 @@ function adjustDifficulty(state: DifficultyState): number {
 | 155 | **Invisible Cloak** | Harry Potter effect | 3-10 | Easy |
 
 #### Body Art & Costume
+
 | # | Game Name | Description | Age | Difficulty |
 |---|-----------|-------------|-----|------------|
 | 156 | **Silhouette Painter** | Paint on body outline | 3-10 | Easy |
@@ -1442,6 +1514,7 @@ function trackAttention(blendshapes: Blendshape[]): AttentionState {
 ### 15.2 Custom Models for Education
 
 **Worth Training:**
+
 1. **Letter Grade Classifier** - Grade handwritten letters A-F
 2. **Number Grade Classifier** - Grade handwritten 0-9
 3. **Pose Correctness** - Is yoga pose correct?

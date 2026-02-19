@@ -16,6 +16,7 @@ feature/alphabet-module
 ```
 
 **Branch Types:**
+
 - `main`: Production-ready code
 - `develop`: Integration branch for features
 - `feature/*`: New features or enhancements
@@ -49,6 +50,7 @@ git push -u origin feature/descriptive-name
 Format: `<type>(<scope>): <description>`
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -58,6 +60,7 @@ Format: `<type>(<scope>): <description>`
 - `chore`: Maintenance tasks
 
 **Scopes (examples):**
+
 - `hand_tracking`
 - `face_tracking`
 - `ui`
@@ -68,6 +71,7 @@ Format: `<type>(<scope>): <description>`
 - `docs`
 
 **Examples:**
+
 ```
 feat(hand_tracking): implement pinch-to-draw gesture
 fix(ui): resolve canvas flickering issue
@@ -121,6 +125,7 @@ To ensure quality reviews:
 | New Dependencies | > 3 | > 5 |
 
 **If your PR exceeds limits:**
+
 1. Split into smaller, logical PRs
 2. Document the dependency between PRs
 3. Get explicit approval for large changes
@@ -148,6 +153,7 @@ git diff --stat develop...HEAD
 ```
 
 **Guidelines:**
+
 - Prefer small, focused PRs
 - Large refactors should be discussed in issue first
 - Document architectural decisions for significant changes
@@ -155,6 +161,7 @@ git diff --stat develop...HEAD
 #### Quality Gates (Manual)
 
 Before merging to `develop`:
+
 - [ ] All tests pass
 - [ ] Type checking passes (`mypy src/`)
 - [ ] Linting passes (`ruff check src/`)
@@ -163,6 +170,7 @@ Before merging to `develop`:
 - [ ] Review approval received
 
 Before merging to `main`:
+
 - [ ] All develop quality gates
 - [ ] Integration tests pass
 - [ ] Manual smoke test completed
@@ -312,6 +320,7 @@ class TestHandDetector:
 ### Reporting Bugs
 
 Include:
+
 1. Steps to reproduce
 2. Expected behavior
 3. Actual behavior

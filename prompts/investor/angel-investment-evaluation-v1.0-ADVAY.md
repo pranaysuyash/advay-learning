@@ -11,17 +11,20 @@
 You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven learning web app for kids ages 2-6.
 
 **Product Access:**
-- URL: http://localhost:6173
+
+- URL: <http://localhost:6173>
 - **CRITICAL**: Must explore hands-on. Do NOT restart anything. Do NOT install anything. Do NOT change code.
 
 **Evaluation Constraints:**
+
 - You are evaluating practical viability: Can this work? Will users love it? Can founder execute?
 - This is NOT a grand narrative. Be specific, grounded in what you actually observe.
 - You are supportive but NOT soft: You will say NO if it's not there.
 - Keep jargon minimal: Explain clearly, no buzzwords.
 
 **App Architecture (Actual):**
-- Frontend: React + Vite, running at http://localhost:6173
+
+- Frontend: React + Vite, running at <http://localhost:6173>
 - Routes: `/home`, `/login`, `/register`, `/dashboard`, `/game` (AlphabetGame), `/games` (index), `/games/finger-number-show`, `/games/connect-the-dots`, `/games/letter-hunt`, `/progress`, `/settings`
 - Games: FingerNumberShow, AlphabetGame, ConnectTheDots, LetterHunt
 - Hand Tracking: Centralized via `useHandTracking` hook (`src/frontend/src/hooks/useHandTracking.ts`)
@@ -29,6 +32,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - Multi-child: `profileStore` (`src/frontend/src/store/useProfileStore.ts`)
 
 **Code References to Look For:**
+
 - FingerNumberShow game: `src/frontend/src/games/FingerNumberShow.tsx`
   - Lines 25-47: Difficulty levels (Level 1-3, Duo Mode)
   - Lines 63-82: Reward multipliers (1.2x, 1.0x, 0.6x)
@@ -81,19 +85,21 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 
 ### Step 1: First-Run Test
 
-**Open http://localhost:6173 and time:**
+**Open <http://localhost:6173> and time:**
 
 - **15-second timer starts when page loads**
 - **What you get**: Do you understand what this is within 15 seconds?
 - **Score**: Yes/No
 
 **What you're looking for:**
+
 - Is value obvious immediately? (e.g., "camera learning for kids" vs unclear)
 - Is there a clear call-to-action? (Start Game button?)
 - Does mascot (Pip) give immediate personality?
 - Is there ANY friction before first fun moment?
 
 **Evidence to Collect:**
+
 - Page title from `<title>` tag
 - Hero section text (h1, h2 on home page)
 - Any visible CTA buttons on home page
@@ -104,17 +110,20 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 ### Step 2: Time to First Fun
 
 **Play FingerNumberShow:**
+
 - Navigate to `http://localhost:6173/games/finger-number-show`
 - Timer starts when you click "Start Game" or when camera permission is granted
 - **Target**: <60 seconds
 
 **What you're looking for:**
+
 - Does kid get a win quickly or is there friction?
 - Is first objective clear or confusing?
 - Does tracking work immediately or is there setup time?
 - Is success feedback obvious (celebration, sound, visual)?
 
 **Evidence to Collect:**
+
 - Time from page load to first game start
 - Time to camera permission granted
 - Time to first number detected (counting game shows progress)
@@ -149,11 +158,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
    - Look for: Tracking confusion with other objects in frame
 
 **For each scenario:**
+
 - **What happens**: Does it work, degrade, or break?
 - **What error shows**: Is it kid-friendly or technical jargon?
 - **Recovery time**: If it breaks, how long to get back to playing?
 
 **What you're looking for:**
+
 - Is tracking robust enough for real kid behavior?
 - Are there clear error states parents understand?
 - Can it handle edge cases without crashing?
@@ -165,6 +176,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Play at least 3 different games briefly:**
 
 **Games to test:**
+
 1. **FingerNumberShow** (`/games/finger-number-show`)
    - Educational objective: Counting, number recognition
    - Interaction: Camera-based hand counting (useHandTracking hook)
@@ -185,6 +197,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
    - Interaction: Camera pointing or hand movement
 
 **For each game:**
+
 - **Educational objective**: What do kids learn?
 - **Camera interaction**: How do they engage? (FingerNumberShow uses `useHandTracking` hook)
 - **Completion time**: How long to finish?
@@ -192,6 +205,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - **Difficulty curve**: Too easy/too hard/just right?
 
 **Evidence to Collect:**
+
 - Route taken (from browser URL)
 - Time to complete one round
 - Progress earned (stars, levels, scores)
@@ -199,6 +213,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 - Any "Try again" or "Replay" buttons
 
 **What you're looking for:**
+
 - Is there enough variety for daily repetition?
 - Do games feel different or is it same interaction with new skin?
 - Is progression obvious (e.g., "Unlock letter B after completing A")?
@@ -233,11 +248,13 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
      - Export button
 
 **What you're looking for:**
+
 - Would I trust this with MY kid's camera?
 - Are there red flags that would make parents uninstall?
 - Is safety/privacy handled in a way that builds trust?
 
 **Evidence to Collect:**
+
 - Dashboard accessibility
 - Progress visibility (LetterJourney, stars)
 - Any external links in dashboard
@@ -250,19 +267,22 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 **Scenario**: Parent has 7 minutes before work, kid needs to use this.
 
 **Test:**
+
 - Can parent get kid started in <2 minutes?
-   - Navigate from home → dashboard → select child → start game
+  - Navigate from home → dashboard → select child → start game
 - Check: Number of steps required
 - Check: Can parent understand progress WITHOUT reading a manual?
 - Check: Is there a way to set daily time limits (if you care)?
 - Check: Is there a "pause/resume" mechanism if kid gets called away?
 
 **What you're looking for:**
+
 - Does this fit a real parent's routine?
 - Is there parental guilt if kid spends 2 hours? (controls visible?)
 - Is setup/onboarding simple enough for busy parents?
 
 **Evidence to Collect:**
+
 - Time from home to gameplay start
 - Number of clicks/keystrokes to start game
 - Whether dashboard is intuitive
@@ -276,6 +296,7 @@ You are evaluating **Advay Vision Learning** - a MediaPipe-based, camera-driven 
 As you explore, keep these personas in mind:
 
 **Persona 1: Toddler (2-3 years old)**
+
 - **Can**: Tap, wave, very basic gestures
 - **Can't**: Read, follow multi-step instructions, understand complex rules
 - **Behavior**: Chaotic tapping, short attention span (2-3 minutes max)
@@ -283,6 +304,7 @@ As you explore, keep these personas in mind:
 - **Ask**: "Would this work for [toddler]?" when testing
 
 **Persona 2: Kid (5-6 years old)**
+
 - **Can**: Follow short instructions, understand rewards/progression
 - **Can't**: Read complex text, navigate nested menus
 - **Behavior**: Likes seeing progress, wants to "unlock" new things
@@ -290,6 +312,7 @@ As you explore, keep these personas in mind:
 - **Ask**: "Would this work for [kid]?" when testing
 
 **Persona 3: Parent (Weekday Morning)**
+
 - **Has**: 7 minutes, coffee, low patience
 - **Wants**: Kid occupied so parent can work
 - **Cares about**: Safety, education value, screen time guilt
@@ -305,6 +328,7 @@ As you explore, keep these personas in mind:
 **Format**: "Invest / Pass / Maybe"
 
 **Options:**
+
 - **Invest**: I'd write a $10K-$100K check TODAY based on what I saw
 - **Pass**: Not ready for angel money yet. Come back after [specific milestones]
 - **Maybe**: Promising but need to see [specific evidence] before deciding
@@ -318,26 +342,31 @@ As you explore, keep these personas in mind:
 **Format**: Bullet points, no fluff, what you actually observed
 
 **Product Concept** (1-2 bullets):
+
 - [ ] Camera-based educational platform for kids 2-6 using hand gestures
 - [ ] Multi-language support (English, Hindi, Kannada, Telugu, Tamil)
 - [ ] Progress tracking with stars, LetterJourney, multi-child profiles
 
 **Core "Magic"** (1 bullet):
+
 - [ ] Real-time hand tracking via `useHandTracking` hook allows counting with actual fingers
 - [ ] Natural gesture-based learning (count numbers, trace letters, connect dots) without touch
 
 **What's Working** (3 bullets max):
+
 - [ ] Hand tracking is smooth and responsive (based on `useHandTracking` integration)
 - [ ] Progress tracking is comprehensive (stars, LetterJourney, real-time sync)
 - [ ] Multi-child support via `profileStore` allows family accounts
 - [ ] Difficulty progression system (3 levels + Duo Mode) in FingerNumberShow
 
 **What's Broken or Confusing** (3 bullets max):
+
 - [ ] [Document what you found]
 - [ ] [Document what you found]
 - [ ] [Document what you found]
 
 **Overall Polish Score** (0-10):
+
 - [ ] [Give score with 1-2 sentence justification based on actual UX]
 
 ---
@@ -345,21 +374,25 @@ As you explore, keep these personas in mind:
 ### #3: Why It Might Work (The Wedge)
 
 **Best Use Case** (1-2 bullets):
+
 - [ ] **Narrow target**: Parents of 2-4 year olds who want to minimize screen time guilt
 - [ ] **Problem solved**: Traditional apps require touch/keyboard - this uses natural hand gestures
 - [ ] **Why camera matters**: 2-year-old can count with real fingers, not abstract screen tapping
 
 **Narrowest Target User** (1 bullet):
+
 - [ ] **Primary**: Parents in India/US who value early education
 - [ ] **Secondary**: Kids 2-6 who learn through play
 
 **The Habit Loop** (1 paragraph):
+
 - [ ] **Trigger**: Parent initiates game (from dashboard or home)
 - [ ] **Action**: Kid plays game → earns stars/progress (visible in dashboard via LetterJourney)
 - [ ] **Reward**: Mascot celebration + star rating
 - [ ] **Return**: Parent sees progress → feels good about screen time → repeats next day
 
 **Why This Could Win** (1-2 sentences):
+
 - [ ] Camera-based category is underserved (no one has cracked gesture-based learning for toddlers)
 - [ ] Progress tracking + multi-child = strong retention foundation (based on actual `progressStore` implementation)
 
@@ -368,6 +401,7 @@ As you explore, keep these personas in mind:
 ### #4: What Blocks Love (Top 10)
 
 **Block 1**: [Name]
+
 - **Where it happens**: [specific screen/flow]
 - **What I expected**: [what you thought would happen]
 - **What I got**: [what actually happened - be honest]
@@ -377,6 +411,7 @@ As you explore, keep these personas in mind:
 [Repeat for Blocks 2-10]
 
 **Common Blocks to Check For:**
+
 - Unclear onboarding (no tutorial?)
 - Confusing game selection (too many options?)
 - Slow game loading (lazy load delay?)
@@ -400,17 +435,20 @@ As you explore, keep these personas in mind:
 **Path A: Consumer B2C Subscription (Parents Paying)**
 
 **Packaging** (based on actual `progressStore` + `profileStore` implementation):
+
 - All 4 games (FingerNumberShow, AlphabetGame, ConnectTheDots, LetterHunt)
 - Progress tracking (stars, LetterJourney, activity logs)
 - Multi-child profiles (up to 5 children per account)
 - Unlimited play time
 
 **Price Point** (realistic for angel stage):
+
 - Monthly: $5/month (India/US price-sensitive markets)
 - Annual: $40/year (33% savings over monthly)
 - What free: 2 games unlocked (e.g., FingerNumberShow + AlphabetGame)
 
 **Who Pays**:
+
 - **Primary**: Parents of 2-6 year olds in India/US
 - **Segments**:
   - Price-sensitive: $3-5/month
@@ -418,21 +456,25 @@ As you explore, keep these personas in mind:
   - Working parents: Will pay for "no guilt" screen time
 
 **Revenue Driver**:
+
 - More kids per family (2-5 children supported)
 - Premium content packs (additional games/activities)
 - Analytics/insights tier (future)
 
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] Parents see weekly progress value (stars, LetterJourney visible in dashboard)
 - [ ] 10-15 minute daily usage is achievable (kids enjoy this length)
 - [ ] Parents pay for "progress, not screen time" (guilt reduction is unique value)
 
 **What Would Break It** (2 bullets):
+
 - [ ] Kids don't repeat daily (Day 7 retention < 40%)
 - [ ] Parents don't perceive value (can't easily find progress in dashboard)
 - [ ] Competitor offers better camera-based experience for free
 
 **First Pricing Experiments to Run** (3 bullets):
+
 - [ ] Test free tier: 2 games free, 4 games locked (measure conversion to paid)
 - [ ] Test annual discount: Show "20% off if you pay annually" (measure LTV)
 - [ ] Test sibling discount: "50% off for 2nd+ child" (measure household revenue)
@@ -442,36 +484,43 @@ As you explore, keep these personas in mind:
 **Path B: School Pilot / B2B2C (Daycares Paying for Families)**
 
 **Packaging**:
+
 - Curriculum-aligned activities per classroom
 - Parent app (dashboard, progress export)
 - Teacher dashboard (future, not currently implemented)
 
 **Price Point**:
+
 - $5/student/month or $200/classroom license
 - Target: Preschools, daycares in India/US
 
 **Who Pays**:
+
 - School directors, daycare owners
 - Segments:
   - Education-focused: "learning through play" curriculum
   - Quality-conscious: Trust camera-based interaction is safe
 
 **Revenue Driver**:
+
 - More classrooms (B2B2C)
 - Premium teacher tools (analytics, lesson plans)
 - Parent app adoption (upsell families to classroom license)
 
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] Activities align with early learning standards (shapes, colors, letters, numbers)
 - [ ] Teachers see educational value (camera = engagement tool)
 - [ ] Parents trust camera safety (privacy policy + dashboard visibility)
 
 **What Would Break It** (2 bullets):
+
 - [ ] Schools don't see classroom value (curriculum feels unstructured)
 - [ ] Parents resist camera-based interaction (privacy concerns)
 - [ ] No clear path from trial → adoption (how to purchase?)
 
 **First Partnerships to Approach** (3 bullets):
+
 - [ ] Reach out to 3-5 preschools in local area (offer free pilot)
 - [ ] Partner with early learning publishers (content supply)
 - [ ] Join EdTech communities (parent Facebook groups, teacher forums)
@@ -481,31 +530,37 @@ As you explore, keep these personas in mind:
 **Path C: Hybrid (Freemium + Premium Upsell)**
 
 **Packaging**:
+
 - Free: 2 games unlocked, basic progress tracking
 - Premium: All games, LetterJourney, analytics, export
 
 **Price Point**:
+
 - Free: $0
 - Premium: $7/month or $70/year
 - Annual discount: 20% off
 
 **Who Converts**:
+
 - Parents who use free tier and want:
   - All games unlocked
   - Progress insights (LetterJourney)
   - Export for school readiness
 
 **"Must Be True" for This to Work** (3 bullets):
+
 - [ ] Free tier shows value (2 games are fun, kids want more)
 - [ ] Premium features are compelling (LetterJourney = strong differentiator)
 - [ ] Conversion rate > 5% after 1 month of use
 
 **What Would Break It** (2 bullets):
+
 - [ ] Free tier feels complete (2 games enough for months)
 - [ ] Premium doesn't add enough value (LetterJourney not worth paying)
 - [ ] Competitor offers more for free
 
 **First Upsell Experiments to Run** (3 bullets):
+
 - [ ] Test "unlock all games" CTA in free tier (measure click-through)
 - [ ] Test "see LetterJourney progress" upsell (measure upgrade interest)
 - [ ] Test pricing page design (measure conversion from free → premium)
@@ -517,60 +572,70 @@ As you explore, keep these personas in mind:
 ### #6: 2-Week Plan I'd Demand as an Angel
 
 **Milestone 1**: Fix Top 3 Love Blockers (Day 1-3)
+
 - **What**: [specific action based on Step 4 findings]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves experience]
 - **Measure**: [how to know it worked]
 
 **Milestone 2**: Add Progress During Gameplay (Day 4-7)
+
 - **What**: [specific fix from Step 2 parent practicality test]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 3**: Add "Play Again" Buttons (Day 8-11)
+
 - **What**: [specific fix from Step 4 findings]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 4**: Optimize Game Load Performance (Day 12-14)
+
 - **What**: [specific fix based on FingerNumberShow lazy load observation]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 5**: Add Clear Onboarding Tutorial (Day 15-18)
+
 - **What**: [specific fix - overlay explaining "Count with your fingers"]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 6**: Run Pricing Experiments (Day 19-23)
+
 - **What**: [specific experiment from Step 5]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 7**: Camera Transparency Fixes (Day 24-27)
+
 - **What**: [specific fix - add camera indicator, "No recording" badge]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 8**: Anti-Shake Algorithm Improvement (Day 28-33)
+
 - **What**: [specific fix based on Step 3 reliability test findings]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 9**: Add "More Games Coming" Messaging (Day 34-38)
+
 - **What**: [specific fix - add banner, road map in settings]
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
 - **Measure**: [how to know it worked]
 
 **Milestone 10**: Final Re-Evaluation (Day 41)
+
 - **What**: Re-test all 6 sections with fixes
 - **Why it matters**: [explain]
 - **Expected impact**: [how it improves]
@@ -583,6 +648,7 @@ As you explore, keep these personas in mind:
 ### #7: Metrics I Care About (Early Stage, Minimal)
 
 **Metric 1**: Time-to-First-Win
+
 - **Definition**: Time from landing to first "success" celebration
 - **Good**: <60 seconds
 - **Bad**: >90 seconds (kids won't engage)
@@ -590,6 +656,7 @@ As you explore, keep these personas in mind:
 - **How to measure** (code): Add timestamp when "Start Game" clicked, track time to first star earned
 
 **Metric 2**: Session Length
+
 - **Definition**: Time from game start to exit (or 3 min idle)
 - **Good**: 10-15 minutes (kid wants to play this long)
 - **Bad**: <5 minutes (too short = no value) or >30 minutes (screen time guilt)
@@ -597,6 +664,7 @@ As you explore, keep these personas in mind:
 - **How to measure** (code): Track game start/end timestamps in `progressStore`
 
 **Metric 3**: Day-1 and Day-7 Return Rate
+
 - **Definition**: % of kids who play on Day 2 and Day 8
 - **Good**: >40% (habit formed, product is sticky)
 - **Bad**: <20% (no stickiness, churn risk)
@@ -604,6 +672,7 @@ As you explore, keep these personas in mind:
 - **How to measure** (code): Track daily active users in `progressStore`, calculate D1/D7 return rate
 
 **Metric 4**: Activity Completion Rate
+
 - **Definition**: % of started activities/games completed per session
 - **Good**: >60% (kid feels progress, not frustration)
 - **Bad**: <30% (too hard, abandonment)
@@ -611,6 +680,7 @@ As you explore, keep these personas in mind:
 - **How to measure** (code): Track completed vs started activities in `progressStore`
 
 **Metric 5**: Parent Intervention Count
+
 - **Definition**: # times parent helps kid per week (through dashboard interactions)
 - **Good**: <2 times/week (kid is autonomous, product is usable)
 - **Bad**: >5 times/week (frustrating, product doesn't work)
@@ -618,6 +688,7 @@ As you explore, keep these personas in mind:
 - **How to measure** (code): Count dashboard visits, profile switches, progress exports
 
 **Metric 6**: Tracking Failure Rate
+
 - **Definition**: % of sessions with hand tracking failures (no hand detected, false positives)
 - **Good**: <5% (reliable enough for kids)
 - **Bad**: >15% (unreliable, frustrating)
@@ -629,6 +700,7 @@ As you explore, keep these personas in mind:
 ### #8: Risks (Practical, Not Paranoia)
 
 **Risk 1**: Privacy Trust - Camera Data Handling
+
 - **Type**: Privacy/Safety
 - **Why it's real**: Parents are rightfully suspicious of camera apps for kids
 - **Current State**: Check if camera indicator exists, check if "No recording" badge is present
@@ -637,6 +709,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: Parent questions about privacy decrease by 50%, adoption rate with vs without indicator
 
 **Risk 2**: Camera Reliability - Low Light Conditions
+
 - **Type**: Technical
 - **Why it's real**: Kid rooms often have dim lighting, MediaPipe degrades
 - **Current State**: Test if low light causes errors, unclear messaging
@@ -645,6 +718,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: Session length in low light vs normal, user complaints about reliability
 
 **Risk 3**: Overstimulation/Frustration - Jittery Motion
+
 - **Type**: Retention
 - **Why it's real**: Jittery motion causes false positives, kids get frustrated and quit
 - **Current State**: Check if anti-shake exists, test quick motion behavior
@@ -653,6 +727,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: Session completion rate with jittery vs normal motion, "too hard" feedback
 
 **Risk 4**: Thin Content - Only 4 Games Today
+
 - **Type**: Market
 - **Why it's real**: Kids may finish all games in 1 week, no reason to return
 - **Current State**: Verify only 4 games exist in routes
@@ -661,6 +736,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: Day 7 retention rate drop after Week 1 vs Week 2-3
 
 **Risk 5**: Distribution - No Virality Built In
+
 - **Type**: GTM
 - **Why it's real**: Organic growth is slow without viral loops
 - **Current State**: Check if "Share progress" or "Beat parent's score" features exist
@@ -669,6 +745,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: Viral coefficient (shares per user), organic growth rate (pre vs post-viral features)
 
 **Risk 6**: Team Velocity - App is Polished (GOOD)
+
 - **Type**: Team
 - **Why it's real**: Need to show 2-week execution capability
 - **Current State**: Verify code quality in FingerNumberShow, Progress, Dashboard files
@@ -677,6 +754,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: 2-week milestone completion rate, bug fix turnaround time
 
 **Risk 7**: Market Traction - None (RISK)
+
 - **Type**: Market
 - **Why it's real**: Angels ask "how many users?" No proof = no check
 - **Current State**: 0 public users, only local development
@@ -685,6 +763,7 @@ As you explore, keep these personas in mind:
 - **Evidence to monitor**: User count, waitlist signups, demo metrics (views, engagement)
 
 **Risk 8**: Parent Complexity - Dashboard is Feature-Rich (Manageable)
+
 - **Type**: Product
 - **Why it's real**: Non-technical parents may find dashboard overwhelming
 - **Current State**: Test if parent can find child progress quickly without reading manual
@@ -697,21 +776,25 @@ As you explore, keep these personas in mind:
 ### #9: If I Pass: What Changes My Mind
 
 **Minimum Demo Improvement 1**: Add Clear Onboarding
+
 - **What**: First-run tutorial overlay explaining "Count with your fingers"
 - **Why**: Kids should know what to do within 15 seconds, not clicking randomly
 - **Evidence needed**: Time-to-first-win drops from ~90s to <60s
 
 **Minimum Demo Improvement 2**: Make Games Section Prominent
+
 - **What**: "Play Now" CTA on home page with game previews
 - **Why**: Clear path to value, game discovery increases starts by 50%
 - **Evidence needed**: Games section CTR increases by 50%
 
 **Minimum Retention Signal 1**: Progress During Gameplay
+
 - **What**: Show current score/stars in sidebar while playing FingerNumberShow
 - **Why**: Parents see progress in real-time, no "what did they do?" anxiety
 - **Evidence needed**: Dashboard visits during gameplay hours increase
 
 **Timeline to Re-Evaluate**: **February 28th - Come back for another look**
+
 - **Why**: 2 weeks to fix top blockers and collect initial data
 
 ---
@@ -721,27 +804,32 @@ As you explore, keep these personas in mind:
 **Investment Amount**: $25,000 - $50,000 (angel check size)
 
 **Use of Funds (3 bullets)**:
+
 - $15,000: Founder salary (3 months @ $5K/month)
 - $5,000: Customer acquisition (LinkedIn/X demo + parent Facebook groups + educational communities)
 - $5,000: First 3 pricing experiments (test free tiers, measure conversion to paid)
 - $5,000: Buffer (top 3 love blocker fixes, technical improvements, contingency)
 
 **Success Metrics I'd Want** (3 bullets):
+
 - 1,000 families using it weekly by Month 3
 - 40% Day 7 retention by Month 3 (habit formed)
 - Average session length >10 minutes
 - At least 2 pricing experiments completed
 
 **Demo Video Structure (3 scenes)**:
+
 - **Scene 1 (0:00-0:15)**: "Hi, I'm Pranay. This is Advay Vision Learning." (show mascot Pip)
 - **Scene 2 (0:15-0:45)**: "Watch kids learn with their hands." (FingerNumberShow gameplay montage showing hand tracking)
 - **Scene 3 (0:45-1:00)**: "Parents see real progress." (Dashboard showing stars, LetterJourney)
 
 **Landing + Waitlist Angle (2 bullets)**:
+
 - "Camera learning for kids ages 2-6 - No keyboard, no mouse, just natural interaction" (primary category)
 - "First 1,000 parents get free month - Join waitlist: [URL] - Limited offer for early adopters"
 
 **Simple Terms I'd Want** (3 bullets):
+
 - Common stock with 1x liquidation preference (angels get this often)
 - Board seat if >$25K check
 - Pro-rata rights on next round (10% discount to angels)
@@ -790,9 +878,10 @@ As you explore, keep these personas in mind:
 
 ## Begin Now
 
-**Open http://localhost:6173 and start exploring.**
+**Open <http://localhost:6173> and start exploring.**
 
 **Evaluation Flow:**
+
 1. Load home page (check first-impression)
 2. Navigate to `/dashboard` (check parent practicality)
 3. Play FingerNumberShow at `/games/finger-number-show` (test gameplay)
@@ -801,6 +890,7 @@ As you explore, keep these personas in mind:
 6. Document all observations with actual file paths
 
 **Evidence Collection Checklist:**
+
 - [ ] Screenshots of all 6 sections with filenames
 - [ ] Actual code paths for key observations
 - [ ] Measured times for all timing checks

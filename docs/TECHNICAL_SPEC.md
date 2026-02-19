@@ -3,10 +3,13 @@
 ## 1. Architecture Overview
 
 ### Current Architecture
+
 The Advay Learning App is a React-based educational application that uses MediaPipe for hand tracking and real-time interaction. The application follows a component-based architecture with centralized state management.
 
 ### Enhanced Architecture
+
 The enhanced architecture will maintain the current structure while adding:
+
 - Adaptive learning engine
 - Advanced wellness monitoring
 - Collaborative features
@@ -16,6 +19,7 @@ The enhanced architecture will maintain the current structure while adding:
 ## 2. Adaptive Learning Engine
 
 ### 2.1 Knowledge Tracing Implementation
+
 ```
 AdaptiveEngine
 ├── ProficiencyEstimator
@@ -30,12 +34,14 @@ AdaptiveEngine
 ```
 
 ### 2.2 Technical Implementation
+
 - **Algorithm**: Simple BKT model with performance-based difficulty adjustment
 - **Data Storage**: Local storage with periodic sync to backend
 - **Performance**: Browser-based computation using TensorFlow.js
 - **Privacy**: All personalization data stored locally
 
 ### 2.3 API Specifications
+
 ```typescript
 interface ProficiencyModel {
   letterId: string;
@@ -63,6 +69,7 @@ interface AdaptiveEngine {
 ## 3. Wellness Features
 
 ### 3.1 Posture Detection System
+
 ```
 PostureMonitor
 ├── PoseEstimator (MediaPipe)
@@ -76,12 +83,14 @@ PostureMonitor
 ```
 
 ### 3.2 Technical Implementation
+
 - **Library**: MediaPipe Pose for real-time pose estimation
 - **Processing**: Client-side only to preserve privacy
 - **Performance**: Optimized for mobile devices with fallbacks
 - **Accuracy**: Tolerance for children's different proportions
 
 ### 3.3 API Specifications
+
 ```typescript
 interface PostureData {
   shoulderAlignment: number; // 0-1 score
@@ -104,6 +113,7 @@ interface PostureMonitor {
 ```
 
 ### 3.4 Attention Detection
+
 ```
 AttentionDetector
 ├── EyeTracker (MediaPipe Face Mesh)
@@ -118,6 +128,7 @@ AttentionDetector
 ## 4. Collaborative Features
 
 ### 4.1 Multiplayer Architecture
+
 ```
 CollaborationManager
 ├── SessionManager
@@ -132,12 +143,14 @@ CollaborationManager
 ```
 
 ### 4.2 Technical Implementation
+
 - **Real-time Communication**: WebSocket connections for live collaboration
 - **State Management**: CRDTs for conflict-free state synchronization
 - **Privacy**: End-to-end encryption for all communications
 - **Performance**: Optimized for low-bandwidth connections
 
 ### 4.3 API Specifications
+
 ```typescript
 interface CollaborationSession {
   sessionId: string;
@@ -172,6 +185,7 @@ interface CollaborationManager {
 ## 5. Content Expansion
 
 ### 5.1 Multi-Language Support Architecture
+
 ```
 LanguageManager
 ├── LocaleLoader
@@ -186,12 +200,14 @@ LanguageManager
 ```
 
 ### 5.2 Technical Implementation
+
 - **Internationalization**: React-i18next for translation management
 - **Dynamic Loading**: Code splitting for locale-specific content
 - **Audio**: Web Audio API for pronunciation guides
 - **Cultural Adaptation**: Region-specific imagery and examples
 
 ### 5.3 API Specifications
+
 ```typescript
 interface LocaleData {
   languageCode: string;
@@ -228,6 +244,7 @@ interface LanguageManager {
 ## 6. Offline Functionality
 
 ### 6.1 Architecture
+
 ```
 OfflineManager
 ├── CacheManager
@@ -242,12 +259,14 @@ OfflineManager
 ```
 
 ### 6.2 Technical Implementation
+
 - **Storage**: IndexedDB for structured data, Cache API for assets
 - **Sync**: Background sync API with conflict resolution
 - **Performance**: Optimized for low-storage devices
 - **Privacy**: All data encrypted locally
 
 ### 6.3 API Specifications
+
 ```typescript
 interface SyncOperation {
   id: string;
@@ -271,6 +290,7 @@ interface OfflineManager {
 ## 7. Analytics and Monitoring
 
 ### 7.1 Architecture
+
 ```
 AnalyticsEngine
 ├── EventTracker
@@ -285,12 +305,14 @@ AnalyticsEngine
 ```
 
 ### 7.2 Technical Implementation
+
 - **Tracking**: Privacy-compliant event tracking
 - **Performance**: Core Web Vitals and custom metrics
 - **Analysis**: Client-side pattern recognition
 - **Reporting**: Aggregated insights without personal data
 
 ### 7.3 API Specifications
+
 ```typescript
 interface LearningEvent {
   type: 'attempt' | 'success' | 'failure' | 'session_start' | 'session_end';
@@ -328,6 +350,7 @@ interface AnalyticsEngine {
 ## 8. Accessibility Features
 
 ### 8.1 Architecture
+
 ```
 AccessibilityManager
 ├── AriaHandler
@@ -342,12 +365,14 @@ AccessibilityManager
 ```
 
 ### 8.2 Technical Implementation
+
 - **Compliance**: WCAG 2.1 AA standards
 - **Navigation**: Full keyboard and screen reader support
 - **Adaptation**: Dynamic UI adjustments based on preferences
 - **Performance**: Minimal impact on core functionality
 
 ### 8.3 API Specifications
+
 ```typescript
 interface AccessibilityPreferences {
   highContrast: boolean;
@@ -368,6 +393,7 @@ interface AccessibilityManager {
 ## 9. Gamification System
 
 ### 9.1 Architecture
+
 ```
 GamificationEngine
 ├── AchievementManager
@@ -382,12 +408,14 @@ GamificationEngine
 ```
 
 ### 9.2 Technical Implementation
+
 - **Achievements**: Criteria-based achievement system
 - **Rewards**: Virtual items and customization options
 - **Progression**: Level and streak tracking
 - **Motivation**: Positive reinforcement mechanisms
 
 ### 9.3 API Specifications
+
 ```typescript
 interface Achievement {
   id: string;
@@ -423,12 +451,14 @@ interface GamificationEngine {
 ## 10. Security and Privacy
 
 ### 10.1 Data Handling
+
 - All personalization data stored locally
 - No biometric data transmitted to servers
 - End-to-end encryption for collaborative features
 - COPPA and GDPR compliance
 
 ### 10.2 Implementation
+
 - Client-side processing for sensitive data
 - Secure WebSocket connections
 - Encrypted local storage
@@ -437,12 +467,14 @@ interface GamificationEngine {
 ## 11. Performance Requirements
 
 ### 11.1 Performance Targets
+
 - Maintain current Lighthouse scores or improve
 - 60fps during gameplay
 - Sub-3-second load times
 - Responsive UI during all operations
 
 ### 11.2 Optimization Strategies
+
 - Code splitting and lazy loading
 - Component memoization
 - Efficient rendering patterns

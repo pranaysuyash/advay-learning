@@ -41,6 +41,7 @@ Each philosophy follows the same 3-phase investigation framework:
 ## Philosophy Library
 
 ### Development & Technical
+
 - **Development** (`intent-first-development-v1.0.md`) - "Investigate Intent Before Acting"
 - **Testing** (`intent-first-testing-v1.0.md`) - "Test What Matters Most First"
 - **UX Design** (`intent-first-ux-design-v1.0.md`) - "Design for the Experience, Not the Pixels"
@@ -52,15 +53,18 @@ Each philosophy follows the same 3-phase investigation framework:
 - **Documentation** (`intent-first-documentation-v1.0.md`) - "Document What Developers Actually Need"
 
 ### Product & Strategy
+
 - **Product** (`intent-first-product-v1.0.md`) - "Validate Need Before Building Features"
 - **Content** (`intent-first-content-v1.0.md`) - "Write for the Reader, Not the Algorithm"
 
 ### Operations
+
 - **Customer Success** (`intent-first-customer-success-v1.0.md`) - "Solve for Outcomes, Not Just Issues"
 - **Sales** (`intent-first-sales-v1.0.md`) - "Qualify for Fit, Not Just Revenue"
 - **Operations** (`intent-first-operations-v1.0.md`) - "Automate What Scales, Not What's Easy"
 
 ### Leadership & Personal
+
 - **Leadership** (`intent-first-leadership-v1.0.md`) - "Lead with Clarity, Not Control"
 - **Communication** (`intent-first-communication-v1.0.md`) - "Speak for Understanding, Not Performance"
 - **Decision-Making** (`intent-first-decision-making-v1.0.md`) - "Decide for Impact, Not Just Speed"
@@ -74,16 +78,19 @@ Each philosophy follows the same 3-phase investigation framework:
 ## How to Use This Handbook
 
 ### Individual Contributors
+
 - Use the AI prompts for immediate decision support
 - Apply the investigation framework to your daily work
 - Reference relevant philosophy for your area
 
 ### Team Leads
+
 - Implement the checklists and review processes
 - Share the philosophy with your team
 - Use for architecture and prioritization decisions
 
 ### Organizations
+
 - Adopt the team integration frameworks
 - Track success metrics
 - Continuously improve based on learnings
@@ -93,6 +100,7 @@ Each philosophy follows the same 3-phase investigation framework:
 ## Quick Reference
 
 ### The Intent Stack
+
 - **Personal:** values, energy, constraints
 - **Team:** shared goals, interfaces, commitments
 - **Product:** user value, metrics, roadmap
@@ -100,16 +108,19 @@ Each philosophy follows the same 3-phase investigation framework:
 - **Ecosystem:** partners, regulation, community
 
 ### Intent Check-in Rituals
+
 - **Daily (7 min):** top 1–3 outcomes, one hard thing, one easy win
 - **Weekly (30 min):** review metrics, intent debt, next bets
 - **Monthly (60 min):** themes, opportunities, stop‑doing list
 - **Quarterly (90 min):** narrative update, re-align stack
 
 ### Intent-to-Action Loop
+
 Capture → Analyze → Act → Measure → Reflect → Adjust  
 Make loops small, frequent, and visible.
 
 ### Chaining Intents (example)
+
 Data → Product → Sales → CS → Product.  
 Make the handoff artifact a one‑page "Intent Brief" with problem, constraints, metrics, owners.
 
@@ -128,6 +139,7 @@ Unlike the original "MVP mindset," this adapted version emphasizes working with 
 | Validate hypotheses | Build on proven foundation |
 
 ### When to Apply Codebase-First
+
 - Existing code is stable and functional
 - Current features have user adoption
 - Team understands existing patterns
@@ -135,6 +147,7 @@ Unlike the original "MVP mindset," this adapted version emphasizes working with 
 - Risk of breaking changes is high
 
 ### When to Consider Replacement
+
 - Existing code is fundamentally broken
 - Technical debt is unmanageable
 - Architecture doesn't support requirements

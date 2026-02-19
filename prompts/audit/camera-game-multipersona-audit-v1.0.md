@@ -46,4 +46,3 @@ rg -n "requestAnimationFrame\\(|setInterval\\(|setTimeout\\(" <target-file>
   - Findings table with priorities (P0–P3)
   - Concrete patch plan (but do not implement in audit)
   - Evidence appendix with command outputs
-

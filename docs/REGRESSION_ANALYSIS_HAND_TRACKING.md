@@ -1,12 +1,14 @@
 # Hand Tracking Regression Analysis
 
 ## Summary
+
 **Regression ID:** REG-20260201-001  
 **Date Discovered:** 2026-02-01  
 **Severity:** Medium (UI feedback incorrect, core functionality works)  
 **Status:** FIXED
 
 ## What Regressed
+
 The mascot's feedback message always displayed "Camera tracking unavailable" even when the hand tracking model loaded successfully.
 
 ## Root Cause Analysis
@@ -22,6 +24,7 @@ The mascot's feedback message always displayed "Camera tracking unavailable" eve
 ### Code Comparison
 
 **✅ Working Pattern (before refactor - `5742d1c`):**
+
 ```tsx
 // Local variable - synchronous, no stale state issue
 let loadedDelegate: 'GPU' | 'CPU' | null = null;
@@ -44,6 +47,7 @@ if (loadedDelegate) {
 ```
 
 **❌ Broken Pattern (after refactor - `a8575e7`):**
+
 ```tsx
 // React state - asynchronous, prone to stale state
 if (!isHandTrackingReady) {
@@ -68,6 +72,7 @@ if (isHandTrackingReady) {
 ## Fixes Applied
 
 ### 1. Fixed Stale State in `AlphabetGame.tsx`
+
 ```tsx
 // Don't check state synchronously - use useEffect to monitor it
 if (!isHandTrackingReady) {
@@ -87,6 +92,7 @@ useEffect(() => {
 ```
 
 ### 2. Fixed React Strict Mode in `useHandTracking.ts`
+
 ```tsx
 useEffect(() => {
   isMountedRef.current = true;  // Reset on remount
@@ -98,38 +104,48 @@ useEffect(() => {
 ```
 
 ### 3. Fixed Posture Model Path
+
 Changed from non-existent `pose_landmarker_heavy.task` to valid `pose_landmarker_lite.task`.
 
 ## Prevention Recommendations
 
 ### 1. Add Integration Test for Hand Tracking Feedback
+
 Create a test that verifies the feedback message changes to "Camera ready!" after model initialization.
 
 ### 2. Refactoring Checklist
+
 When refactoring async initialization patterns:
+
 - [ ] Check if original code used local variables for synchronous flow
 - [ ] If converting to React state, add `useEffect` monitors for state changes
 - [ ] Test in React Strict Mode (dev mode) for double-mount issues
 - [ ] Verify cleanup/reinit cycle works correctly
 
 ### 3. Pre-Commit Hook
+
 Add a pre-commit check that runs the Alphabet Game E2E test:
+
 ```bash
 npm run test:e2e -- --grep "hand tracking feedback"
 ```
 
 ### 4. Documentation Standards
+
 When implementing centralized hooks, document:
+
 - The async nature of state updates
 - Required `useEffect` patterns for consumers
 - React Strict Mode considerations
 
 ## Files Modified in Fix
+
 - `src/frontend/src/pages/AlphabetGame.tsx` - Stale state fix + useEffect monitor
 - `src/frontend/src/hooks/useHandTracking.ts` - React Strict Mode fix
 - `src/frontend/src/hooks/usePostureDetection.ts` - Model path fix
 
 ## Verification
+
 - ✅ Build succeeds
 - ✅ Browser test confirms "Loading hand tracking..." → "Camera ready!" transition works
 - ✅ Console log `[AlphabetGame] Hand tracking became ready during gameplay` appears

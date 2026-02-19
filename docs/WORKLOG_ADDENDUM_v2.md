@@ -272,6 +272,7 @@ Failing:
 
 - Command: `git status --porcelain`
 - Output:
+
   ```
   M  src/frontend/e2e/AlphabetGame.e2e.test.ts  (13 tests, 6 failures fixed)
   ?? docs/ANGEL_EVALUATION_HAND_TRACING_2026-02-02.md  (~10,000 words)
@@ -1142,7 +1143,7 @@ Deploy application to production and announce to users. Current state: Not deplo
   - Deploy backend to production server (use scripts/deploy.sh)
   - Deploy frontend to production server (build + configure nginx)
   - Run database migrations (or verify already run)
-  - Verify health endpoint is healthy (curl https://api.advay.com/health)
+  - Verify health endpoint is healthy (curl <https://api.advay.com/health>)
   - Run smoke tests (critical user flows):
     - Register new user
     - Login
@@ -1220,7 +1221,7 @@ Deploy application to production and announce to users. Current state: Not deplo
 
 ## Deployment Readiness Summary
 
-### ✅ Already DONE (from worklog or codebase):
+### ✅ Already DONE (from worklog or codebase)
 
 1. **Environment & Secrets Configuration** ✅ (TCK-20260129-201)
    - config.py has SECRET_KEY validation (min 32 chars, rejects weak defaults)
@@ -1237,35 +1238,35 @@ Deploy application to production and announce to users. Current state: Not deplo
    - /health endpoint registered in main.py
    - Returns 503 if unhealthy, 200 if healthy
 
-### 🔵 OPEN (tickets created in ADDENDUM_v2):
+### 🔵 OPEN (tickets created in ADDENDUM_v2)
 
-4. **Dependency Management - uv-native deployment** ✅ (TCK-20260131-001) - DONE ✅
+1. **Dependency Management - uv-native deployment** ✅ (TCK-20260131-001) - DONE ✅
    - Decision: No requirements.txt needed, use uv.lock for reproducible builds
    - Verified uv.lock exists (32KB)
    - Updated TCK-20260131-002 to use uv workflow
    - Completed: 2026-01-31 23:30 UTC
 
-5. **Build & Deploy Scripts** 🔵 (TCK-20260131-002)
+2. **Build & Deploy Scripts** 🔵 (TCK-20260131-002)
    - No deploy.sh, build.sh exists
    - Need to create production deployment scripts using `uv sync`
    - Estimated: 4 hours
 
-6. **Deployment Documentation** 🔵 (TCK-20260131-003)
+3. **Deployment Documentation** 🔵 (TCK-20260131-003)
    - No DEPLOYMENT.md, ENVIRONMENT.md, TROUBLESHOOTING.md exists
    - Only plan (DEPLOYMENT_ROADMAP_v1.md) exists
    - Estimated: 4 hours
 
-7. **Operations Runbook** 🔵 (TCK-20260131-004)
+4. **Operations Runbook** 🔵 (TCK-20260131-004)
    - No RUNBOOK.md exists
    - Need to document start/stop, backups, logs, incident response
    - Estimated: 3 hours
 
-8. **Pre-Launch Verification** 🔵 (TCK-20260131-005)
+5. **Pre-Launch Verification** 🔵 (TCK-20260131-005)
    - Checklist defined but not executed
    - Need to run comprehensive verification
    - Estimated: 4 hours
 
-9. **Production Launch** 🔵 (TCK-20260131-006)
+6. **Production Launch** 🔵 (TCK-20260131-006)
    - Not deployed yet
    - Dependent on all above tickets
    - Estimated: 2 hours
@@ -1274,7 +1275,7 @@ Deploy application to production and announce to users. Current state: Not deplo
 
 (Saved 2 hours by using uv-native deployment instead of requirements.txt)
 
-### Next Immediate Actions:
+### Next Immediate Actions
 
 1. **Create build/deploy scripts** (TCK-20260131-002) - 4 hours
 2. **Write deployment documentation** (TCK-20260131-003) - 4 hours
@@ -1312,20 +1313,20 @@ Project uses `uv` as package manager (not pip), so requirements.txt is not neede
 
 ## Additional Updates for uv-native deployment (2026-01-31)
 
-### TCK-20260131-002 Update:
+### TCK-20260131-002 Update
 
 - Execution log updated to reference uv workflow
 - Use `uv sync` or `uv pip install -e .` in deploy.sh
 
-### TCK-20260131-004 Update:
+### TCK-20260131-004 Update
 
 - Security Updates section updated to use `uv sync --upgrade` instead of `pip install -r requirements.txt --upgrade`
 
-### TCK-20260131-006 Update:
+### TCK-20260131-006 Update
 
 - Prerequisites updated: TCK-20260131-001 is DONE (uv-native deployment documented)
 
-### Summary of Changes:
+### Summary of Changes
 
 1. **TCK-20260131-001**: DONE ✅ - Documented uv-native deployment, no requirements.txt needed
 2. **Total work reduced**: From 19 hours to 17 hours (saved 2 hours)
@@ -1333,7 +1334,7 @@ Project uses `uv` as package manager (not pip), so requirements.txt is not neede
 4. **SETUP.md**: Already documents uv workflow (no changes needed)
 5. **Reproducible builds**: Leverage existing uv.lock (already exists, 32KB)
 
-### Next steps:
+### Next steps
 
 1. Implement TCK-20260131-002 (Build & Deploy Scripts) - 4 hours
 2. Implement TCK-20260131-003 (Deployment Documentation) - 4 hours
@@ -1400,24 +1401,32 @@ Execution log:
 - [2026-01-31 23:30 UTC] Repo status + HEAD recorded | Evidence:
   - **Command**: `git status --porcelain`
   - **Output**:
+
     ```
      M src/frontend/src/pages/AlphabetGame.tsx
     ?? prompts/release/demo-launch-strategy-v1.0.md
     ```
+
   - **Interpretation**: Observed — One modified file and one untracked prompt file.
+
 - [2026-01-31 23:30 UTC] Branch recorded | Evidence:
   - **Command**: `git rev-parse --abbrev-ref HEAD`
   - **Output**:
+
     ```
     main
     ```
+
   - **Interpretation**: Observed — Work is on main.
+
 - [2026-01-31 23:30 UTC] HEAD recorded | Evidence:
   - **Command**: `git rev-parse HEAD`
   - **Output**:
+
     ```
     b7c71b2ee02a3ef8cc6e9e322e193ce6a6901842
     ```
+
   - **Interpretation**: Observed — Current head commit recorded.
 
 Status updates:
@@ -1576,11 +1585,11 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 
 ## Documentation Summary
 
-### Prompt Created:
+### Prompt Created
 
 - `prompts/release/demo-launch-strategy-v1.0.md` - Solo founder persona for demo launch
 
-### Documents Created:
+### Documents Created
 
 1. **DEMO_LAUNCH_STRATEGY.md** - Full launch strategy document (100+ pages):
    - Demo readiness assessment (4/4 core working ✅)
@@ -1592,11 +1601,11 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 
 2. **WORKLOG_ADDENDUM_v2.md** - Updated with TCK-20260131-007
 
-### Prompts Index Updated:
+### Prompts Index Updated
 
 - `prompts/README.md` - Added demo launch strategy prompt reference
 
-### Execution Flow:
+### Execution Flow
 
 1. User asked: "do you think the game is demo ready?"
 2. Created prompt: `prompts/release/demo-launch-strategy-v1.0.md` (solo founder persona)
@@ -1604,7 +1613,7 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 4. Updated worklog with TCK-20260131-007
 5. Updated `prompts/README.md` with new prompt reference
 
-### Key Decisions:
+### Key Decisions
 
 - **DEMO READY**: ✅ (4/4 core functionality working)
 - **PRODUCTION READY**: ❌ (0/5 infrastructure missing)
@@ -1613,7 +1622,7 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 - **TIMELINE**: 4-5 hours to launch
 - **METRICS**: LinkedIn 500+ views, X 1000+ views, GitHub 5+ stars
 
-### Next Steps (for TCK-20260131-007):
+### Next Steps (for TCK-20260131-007)
 
 1. Deploy frontend to Vercel (2 hours)
 2. Deploy backend to Railway (2 hours)
@@ -1946,20 +1955,20 @@ Created comprehensive angel investor evaluation prompt for MediaPipe-based, came
 
 ## Documentation Summary
 
-### Prompt Files Created:
+### Prompt Files Created
 
 1. `prompts/investor/angel-investment-evaluation-v1.0.md` (1000+ lines)
 2. `docs/prompts/ANGEL_EVALUATION_PROMPT_SUMMARY.md` (400+ lines)
 
-### Files Modified:
+### Files Modified
 
 1. `prompts/README.md` - Added angel investor prompt reference
 
-### Worklog Updates:
+### Worklog Updates
 
 1. `docs/WORKLOG_ADDENDUM_v2.md` - Added TCK-20260131-009 (DONE)
 
-### Prompt Comparison:
+### Prompt Comparison
 
 | Aspect     | VC Prompt                       | Angel Prompt                          |
 | ---------- | ------------------------------- | ------------------------------------- |
@@ -1973,7 +1982,7 @@ Created comprehensive angel investor evaluation prompt for MediaPipe-based, came
 | Risks      | Existential (COPPA, incumbents) | Practical (reliability, thin content) |
 | Pages      | ~60                             | ~10 (one-line deliverables)           |
 
-### Usage:
+### Usage
 
 **When to Use Angel Prompt:**
 
@@ -2015,12 +2024,12 @@ Status: **DONE**
 Priority: P0
 
 **Description:**
-Executed angel investor evaluation prompt against running Advay Vision Learning app at http://localhost:6173. Prompt: prompts/investor/angel-investment-evaluation-v1.0.md. Focus: Practical viability, real user love, believable path to first revenue.
+Executed angel investor evaluation prompt against running Advay Vision Learning app at <http://localhost:6173>. Prompt: prompts/investor/angel-investment-evaluation-v1.0.md. Focus: Practical viability, real user love, believable path to first revenue.
 
 **Scope Contract:**
 
 - In-scope:
-  - Hands-on product exploration at http://localhost:6173
+  - Hands-on product exploration at <http://localhost:6173>
   - 10-minute product tour (first-impression, onboarding, core gameplay, progress systems)
   - Core magic identification (camera-specific advantages)
   - Love blocker identification (top 10 with fix directions)
@@ -2073,7 +2082,7 @@ Executed angel investor evaluation prompt against running Advay Vision Learning 
 **Execution Log:**
 
 - [2026-01-31 00:10 UTC] Started angel investor evaluation | Evidence: prompts/investor/angel-investment-evaluation-v1.0.md
-- [2026-01-31 00:10 UTC] Verified app running | Evidence: http://localhost:6173 accessible, returns HTML
+- [2026-01-31 00:10 UTC] Verified app running | Evidence: <http://localhost:6173> accessible, returns HTML
 - [2026-01-31 00:05 UTC] Explored app architecture | Evidence: Read App.tsx, identified 4 games, lazy-loaded pages
 - [2026-01-31 00:10 UTC] Analyzed FingerNumberShow | Evidence: Hand tracking via useHandTracking hook, 3 difficulty levels, reward multipliers, streak system
 - [2026-01-31 00:15 UTC] Analyzed progress tracking | Evidence: Progress.tsx + Dashboard.tsx, progressStore + progressApi, star ratings, LetterJourney, multiple children
@@ -2088,7 +2097,7 @@ Executed angel investor evaluation prompt against running Advay Vision Learning 
 
 **Evidence:**
 
-- App is running at http://localhost:6173 ✅
+- App is running at <http://localhost:6173> ✅
 - App architecture: React Router + lazy pages, 4 games, central hand tracking ✅
 - FingerNumberShow analysis: Camera-based interaction, 3 levels, reward system ✅
 - Progress tracking: Real-time sync, star ratings, multi-child support ✅
@@ -2272,7 +2281,7 @@ Executed angel investor evaluation prompt against running Advay Vision Learning 
 
 **Evidence Documentation:**
 
-All findings based on hands-on exploration of running app at http://localhost:6173
+All findings based on hands-on exploration of running app at <http://localhost:6173>
 Code reviews: FingerNumberShow.tsx, Progress.tsx, Dashboard.tsx, App.tsx
 Store analysis: progressStore, profileStore, settingsStore
 Retention systems: progressQueue, progressApi, LetterJourney, star ratings
@@ -2418,7 +2427,7 @@ Created app-specific versions of both VC and Angel investor evaluation prompts, 
 **Next Actions** (Priority: MEDIUM - for investor readiness):
 
 1. **Execute Hands-On Evaluation** (When ready):
-   - Use Playwright to actually explore http://localhost:6173 hands-on
+   - Use Playwright to actually explore <http://localhost:6173> hands-on
    - Collect actual screenshots and timing data
    - Complete full evaluation using app-specific prompts
    - Document findings in worklog
@@ -2585,7 +2594,7 @@ Comprehensive UI/UX audit of the entire Advay Vision Learning frontend, capturin
   - Evidence: Created `ui-audit-screenshots.cjs` and `auth-screenshots.cjs`
   - 27 public page screenshots captured successfully
 - 2026-02-01 10:15 IST | Authenticated screenshot capture
-  - Evidence: Login with test credentials (pranay.suyash@gmail.com)
+  - Evidence: Login with test credentials (<pranay.suyash@gmail.com>)
   - 30 protected page screenshots captured successfully
   - Total: 57 screenshots across 3 viewports
 
@@ -7906,13 +7915,14 @@ Increased all touch targets to meet 44px WCAG minimum, 52-60px for kid-friendly:
 - ✅ Took 30 minutes (quick win!)
 
 **Before/After:**
-| Element | Before | After | Improvement |
-|---------|--------|-------|-------------|
-| Button (md) | 44px | **52px** | +18% |
-| Button (lg) | 48px | **60px** | +25% |
-| Game controls | ~36px | **56px** | +55% |
-| Dashboard edit | 14px | **36px** | +157% 🚀 |
-| Add Child | ~28px | **44px** | +57% |
+
+| Element        | Before | After    | Improvement |
+| -------------- | ------ | -------- | ----------- |
+| Button (md)    | 44px   | **52px** | +18%        |
+| Button (lg)    | 48px   | **60px** | +25%        |
+| Game controls  | ~36px  | **56px** | +55%        |
+| Dashboard edit | 14px   | **36px** | +157% 🚀    |
+| Add Child      | ~28px  | **44px** | +57%        |
 
 **Testing Needed:**
 
@@ -8145,7 +8155,7 @@ Complete password reset flow with email tokens, secure validation, and user-frie
 
 1. User clicks "Forgot password?" on login
 2. Enters email on /forgot-password page
-3. Receives email with reset link (http://localhost:5173/reset-password?token=xyz)
+3. Receives email with reset link (<http://localhost:5173/reset-password?token=xyz>)
 4. Clicks link, enters new password on /reset-password
 5. Password updated, redirected to login
 6. Can now login with new password
@@ -8222,7 +8232,7 @@ Begin refactoring Dashboard.tsx (855 lines) into smaller, focused components wit
 
 Extracted 3 simple presentational components with exact copy-paste JSX:
 
-### Components Created:
+### Components Created
 
 1. **EmptyState.tsx** (`src/frontend/src/components/dashboard/EmptyState.tsx`)
    - Displays when no children added yet
@@ -8245,7 +8255,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 4. **index.ts Barrel Export** (`src/frontend/src/components/dashboard/index.ts`)
    - Clean import: `import { EmptyState, TipsSection, StatsBar } from '../components/dashboard'`
 
-### Changes to Dashboard.tsx:
+### Changes to Dashboard.tsx
 
 **Before:**
 
@@ -8261,7 +8271,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 - TipsSection: `<TipsSection />` (1 line)
 - **Total: 3 lines, 62 lines moved to dedicated components**
 
-### Verification of Zero Regression:
+### Verification of Zero Regression
 
 ✅ **Same JSX structure** - Exact copy-paste, no changes to classes or layout  
 ✅ **Same props passing** - All data flows identically  
@@ -8270,7 +8280,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 ✅ **Same imports** - UIIcon, motion, etc. all present  
 ✅ **Same accessibility** - aria-labels, roles maintained
 
-### Impact:
+### Impact
 
 - **Dashboard.tsx reduced:** 855 → ~790 lines (-65 lines, -7.6%)
 - **Maintainability improved:** Presentational logic separated
@@ -8278,7 +8288,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 - **Testability improved:** Can test components in isolation
 - **ZERO functional changes:** All behavior identical
 
-### Next Phases (Future Work):
+### Next Phases (Future Work)
 
 **Phase 2: Modal Extractions**
 
@@ -8296,7 +8306,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 - DashboardHeader (simple wrapper)
 - Extract shared types to `types/dashboard.ts`
 
-### Testing Required:
+### Testing Required
 
 - [ ] Verify Dashboard loads correctly
 - [ ] Verify EmptyState displays when no children
@@ -8306,7 +8316,7 @@ Extracted 3 simple presentational components with exact copy-paste JSX:
 - [ ] Check TypeScript compilation
 - [ ] Check no console errors
 
-### Files Modified:
+### Files Modified
 
 - ✅ Created: `src/frontend/src/components/dashboard/EmptyState.tsx`
 - ✅ Created: `src/frontend/src/components/dashboard/TipsSection.tsx`
@@ -8334,7 +8344,7 @@ Continue refactoring Dashboard.tsx by extracting complex modal components with f
 
 Extracted 2 complex modal components with form state and validation:
 
-### Components Created:
+### Components Created
 
 1. **AddChildModal.tsx** (`src/frontend/src/components/dashboard/AddChildModal.tsx`)
    - Form for creating new child profile
@@ -8355,7 +8365,7 @@ Extracted 2 complex modal components with form state and validation:
 3. **Updated barrel export** (`src/frontend/src/components/dashboard/index.ts`)
    - Added exports for both modal components
 
-### Changes to Dashboard.tsx:
+### Changes to Dashboard.tsx
 
 **Add Child Modal - Before:**  
 86 lines of inline JSX with form inputs, validation, buttons
@@ -8399,7 +8409,7 @@ Extracted 2 complex modal components with form state and validation:
 />
 ```
 
-### Phase 1 + Phase 2 Combined Results:
+### Phase 1 + Phase 2 Combined Results
 
 **Dashboard.tsx line count:**
 
@@ -8417,7 +8427,7 @@ Extracted 2 complex modal components with form state and validation:
 4. AddChildModal (Phase 2)
 5. EditProfileModal (Phase 2)
 
-### Verification of Zero Regression:
+### Verification of Zero Regression
 
 ✅ **Same form fields** - Name, age, language inputs identical  
 ✅ **Same validation** - Required name field, trim checks preserved  
@@ -8428,7 +8438,7 @@ Extracted 2 complex modal components with form state and validation:
 ✅ **Same error handling** - Form validation and disabled states preserved  
 ✅ **Type safety maintained** - TypeScript interfaces for all props
 
-### Impact:
+### Impact
 
 - **Maintainability:** Each modal is now testable in isolation
 - **Reusability:** Modals can be used elsewhere if needed
@@ -8436,7 +8446,7 @@ Extracted 2 complex modal components with form state and validation:
 - **Developer experience:** Easier to find and modify modal code
 - **ZERO functional changes:** All behavior identical to before
 
-### Code Quality Improvements:
+### Code Quality Improvements
 
 **Before (in Dashboard.tsx):**
 
@@ -8450,7 +8460,7 @@ Extracted 2 complex modal components with form state and validation:
 - Modals in separate files with clear responsibilities
 - Each component < 100 lines and focused
 
-### Testing Required:
+### Testing Required
 
 - [ ] Add Child modal opens and closes correctly
 - [ ] Can create new child profile
@@ -8461,7 +8471,7 @@ Extracted 2 complex modal components with form state and validation:
 - [ ] Loading states display correctly
 - [ ] No console errors
 
-### Files Created/Modified:
+### Files Created/Modified
 
 **Created:**
 
@@ -8708,34 +8718,34 @@ Also changed toggle button:
 
 ## Files Modified
 
-### Critical Fixes:
+### Critical Fixes
 
 1. ✅ `src/frontend/src/pages/ConnectTheDots.tsx` (line 54)
 2. ✅ `src/frontend/src/pages/Games.tsx` (profile picker modal)
 3. ✅ `src/frontend/src/components/WellnessTimer.tsx` (colors)
 
-### Refactoring:
+### Refactoring
 
-4. ✅ `src/frontend/src/pages/Dashboard.tsx` (component integration)
-5. ✅ `src/frontend/src/components/dashboard/EmptyState.tsx` (new)
-6. ✅ `src/frontend/src/components/dashboard/TipsSection.tsx` (new)
-7. ✅ `src/frontend/src/components/dashboard/StatsBar.tsx` (new)
-8. ✅ `src/frontend/src/components/dashboard/AddChildModal.tsx` (new)
-9. ✅ `src/frontend/src/components/dashboard/EditProfileModal.tsx` (new)
-10. ✅ `src/frontend/src/components/dashboard/index.ts` (exports)
+1. ✅ `src/frontend/src/pages/Dashboard.tsx` (component integration)
+2. ✅ `src/frontend/src/components/dashboard/EmptyState.tsx` (new)
+3. ✅ `src/frontend/src/components/dashboard/TipsSection.tsx` (new)
+4. ✅ `src/frontend/src/components/dashboard/StatsBar.tsx` (new)
+5. ✅ `src/frontend/src/components/dashboard/AddChildModal.tsx` (new)
+6. ✅ `src/frontend/src/components/dashboard/EditProfileModal.tsx` (new)
+7. ✅ `src/frontend/src/components/dashboard/index.ts` (exports)
 
 ---
 
 ## Testing Required
 
-### For Connect The Dots:
+### For Connect The Dots
 
 - [ ] Hand tracking starts automatically
 - [ ] Camera view visible
 - [ ] Hand cursor appears
 - [ ] Can connect dots with pinch
 
-### For Game Navigation:
+### For Game Navigation
 
 - [ ] Click "Play" with no profile → shows picker modal
 - [ ] Can select existing profile
@@ -8743,13 +8753,13 @@ Also changed toggle button:
 - [ ] Game starts after selection
 - [ ] Cancel button works
 
-### For Wellness Timer:
+### For Wellness Timer
 
 - [ ] Shows orange/amber gradient (not purple)
 - [ ] Toggle button matches theme
 - [ ] All timer functions work
 
-### For Dashboard Refactor:
+### For Dashboard Refactor
 
 - [ ] EmptyState shows when no children
 - [ ] StatsBar displays correctly
@@ -9219,7 +9229,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 
 ### Before vs After
 
-#### Before (Inconsistent):
+#### Before (Inconsistent)
 
 - ❌ Different header heights across games
 - ❌ Buttons ranging from 32px to 48px
@@ -9227,7 +9237,7 @@ Successfully standardized the UI/UX across all games to provide a consistent, ki
 - ❌ Wasted space with multiple headers/footers
 - ❌ Controls in different positions
 
-#### After (Standardized):
+#### After (Standardized)
 
 - ✅ All games: 56px header
 - ✅ All buttons: 56px minimum

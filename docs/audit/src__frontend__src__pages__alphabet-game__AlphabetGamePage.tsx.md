@@ -41,12 +41,12 @@
 
 ### MEDIUM SEVERITY ISSUES
 
-5. **State Management Complexity** (P2)
+1. **State Management Complexity** (P2)
    - **Evidence**: 30+ useState and useRef declarations scattered throughout
    - **Impact**: Difficult to track state relationships and dependencies
    - **Recommendation**: Consider state management library or reducer pattern
 
-6. **Dependency Management** (P2)
+2. **Dependency Management** (P2)
    - **Evidence**: Massive useEffect dependencies array with complex interdependencies
    - **Impact**: Potential for infinite loops or missed updates
    - **Recommendation**: Break into smaller, focused effects
@@ -67,12 +67,12 @@
 
 ### MEDIUM SEVERITY ISSUES
 
-3. **Feedback Delay** (P1)
+1. **Feedback Delay** (P1)
    - **Evidence**: Some actions don't provide immediate feedback
    - **Impact**: Children may not understand if their actions were registered
    - **Recommendation**: Add immediate visual/audio feedback
 
-4. **Complex Instructions** (P1)
+2. **Complex Instructions** (P1)
    - **Evidence**: Some text is too complex for young children
    - **Impact**: Reduced comprehension and engagement
    - **Recommendation**: Use simpler language and more visual cues
@@ -93,12 +93,12 @@
 
 ### MEDIUM SEVERITY ISSUES
 
-3. **Calibration Issues** (P1)
+1. **Calibration Issues** (P1)
    - **Evidence**: No clear calibration process for hand tracking
    - **Impact**: Inaccurate tracking from start
    - **Recommendation**: Add simple calibration step
 
-4. **Lighting Sensitivity** (P1)
+2. **Lighting Sensitivity** (P1)
    - **Evidence**: Hand tracking may fail in poor lighting
    - **Impact**: Inconsistent experience
    - **Recommendation**: Add lighting guidance
@@ -119,12 +119,12 @@
 
 ### MEDIUM SEVERITY ISSUES
 
-3. **Color Usage** (P1)
+1. **Color Usage** (P1)
    - **Evidence**: Inconsistent color scheme application
    - **Impact**: Reduced visual coherence
    - **Recommendation**: Establish consistent color system
 
-4. **Animation Performance** (P1)
+2. **Animation Performance** (P1)
    - **Evidence**: Multiple animations may cause jank on lower-end devices
    - **Impact**: Poor performance perception
    - **Recommendation**: Optimize animations for performance
@@ -145,12 +145,12 @@
 
 ### MEDIUM SEVERITY ISSUES
 
-3. **Code Duplication** (P1)
+1. **Code Duplication** (P1)
    - **Evidence**: Similar logic repeated in multiple places
    - **Impact**: Maintenance burden, potential inconsistencies
    - **Recommendation**: Extract reusable functions/components
 
-4. **Magic Numbers** (P1)
+2. **Magic Numbers** (P1)
    - **Evidence**: Hardcoded values throughout the code
    - **Impact**: Difficult to adjust parameters
    - **Recommendation**: Extract to named constants
@@ -166,18 +166,21 @@
 ## G) Recommendations for Refactoring
 
 ### Phase 1: Critical (P0)
+
 - Extract core game logic into separate hooks
 - Create dedicated components for hand tracking
 - Implement proper error boundaries
 - Add security validations for localStorage
 
 ### Phase 2: High (P1)
+
 - Split UI into smaller, focused components
 - Improve accessibility features
 - Optimize performance-critical sections
 - Add proper error logging
 
 ### Phase 3: Medium (P2)
+
 - Implement responsive design improvements
 - Add comprehensive unit tests
 - Refine UX based on child feedback
@@ -210,6 +213,7 @@
 
 **Ticket:** TCK-20260204-008  
 **Prompts used:**
+
 - `prompts/ui/child-centered-ux-audit-v1.0.md`
 - `prompts/ui/ui-ux-design-audit-v1.0.0.md`
 - `prompts/ui/mediapipe-kids-app-ux-qa-audit-pack-v1.0.md`

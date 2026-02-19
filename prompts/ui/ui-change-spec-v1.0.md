@@ -14,6 +14,7 @@ UI_CHANGE_SPEC_RESULT={...json...}
 Then provide a short human explanation.
 
 **SPEC MUST INCLUDE**
+
 - User goal and non-goals
 - Entry points and exit points
 - States: loading, empty, error, success, disabled
@@ -24,6 +25,7 @@ Then provide a short human explanation.
 - "Smallest viable version" and "Nice-to-have version"
 
 **JSON SCHEMA**
+
 ```json
 {
   "meta": {"version":"1.0","change_title":"string"},
@@ -48,5 +50,6 @@ Then provide a short human explanation.
 ```
 
 **FINAL OUTPUT FORMAT**
+
 - First line: UI_CHANGE_SPEC_RESULT={...valid json...}
 - Then: concise explanation of MVP vs nice-to-have

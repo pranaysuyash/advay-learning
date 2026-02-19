@@ -1,4 +1,5 @@
 # RESEARCH-001: Technical Implementation Patterns
+
 ## Advay Vision Learning - Technical Feasibility & Architecture Research
 
 **Priority:** P0 - Critical
@@ -30,12 +31,14 @@ This research validates the technical feasibility of building a camera-based lea
 **Finding:** MediaPipe is optimized for mobile and can achieve real-time performance, but frame rates vary significantly by device class.
 
 **Evidence:**
+
 - MediaPipe uses GPU inference via TFLite on most modern phones ([Google Research Blog](https://research.google/blog/on-device-real-time-hand-tracking-with-mediapipe/))
 - OpenGL ES 3.1+ required for ML inference calculators ([MediaPipe GPU Docs](https://mediapipe.readthedocs.io/en/latest/framework_concepts/gpu.html))
 - Some users report ~10 FPS on lower-end devices ([GitHub Issue #3564](https://github.com/google/mediapipe/issues/3564))
 - Qualcomm provides optimized MediaPipe models for their chipsets ([Qualcomm AI Hub](https://aihub.qualcomm.com/models/mediapipe_hand))
 
 **Performance Tiers:**
+
 | Device Class | RAM | Expected FPS | Usability |
 |--------------|-----|--------------|-----------|
 | Low-end | <4GB | 10-15 FPS | Marginal - may feel laggy |
@@ -63,6 +66,7 @@ This research validates the technical feasibility of building a camera-based lea
 | Too far/close | Landmark size analysis | Visual distance indicator |
 
 **Implementation Pattern:**
+
 ```typescript
 interface CameraState {
   status: 'initializing' | 'active' | 'error' | 'recovery';
@@ -84,11 +88,13 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 **Finding:** 15-20 FPS is the optimal balance for kids' apps; higher provides diminishing returns.
 
 **Evidence:**
+
 - MediaPipe hand tracking designed for real-time at 30 FPS but works at lower rates ([MediaPipe Paper](https://arxiv.org/abs/2006.10214))
 - Key optimization: Palm detector runs infrequently, saving computation ([Google Research](https://research.google/blog/on-device-real-time-hand-tracking-with-mediapipe/))
 - Kids' gestures are typically slower than adult gestures, allowing lower frame rates
 
 **Recommendations:**
+
 | Use Case | Target FPS | Battery Mode |
 |----------|------------|--------------|
 | Touch targets (simple) | 15 FPS | Battery saver |
@@ -96,6 +102,7 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 | Fast-paced games | 25-30 FPS | Performance |
 
 **Battery Optimization Strategies:**
+
 1. **Frame skipping:** Process every 2nd frame in idle states
 2. **Detection throttling:** Only run palm detector when needed
 3. **ROI processing:** Focus on hand region after initial detection
@@ -110,11 +117,13 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 **Finding:** Three-layer storage architecture with background sync is the recommended pattern.
 
 **Evidence:**
+
 - Offline-first PWA patterns well-established ([LogRocket Guide](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/))
 - Service worker caching achieves 95% faster repeat loads ([MagicBell](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies))
 - Background Sync API enables automatic sync with 99.9% reliability ([Medium Article](https://oluwadaprof.medium.com/building-an-offline-first-pwa-notes-app-with-next-js-indexeddb-and-supabase-f861aa3a06f9))
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                         User Input                          │
@@ -144,12 +153,14 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 ```
 
 **What Works Offline:**
+
 - All downloaded activities
 - Progress tracking
 - Achievements/badges
 - Settings and preferences
 
 **What Requires Online:**
+
 - Initial content download
 - Account sync
 - Leaderboards (if any)
@@ -164,6 +175,7 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 **Finding:** MediaPipe Web bundles are ~10-15MB; native can be optimized to ~5-8MB.
 
 **Size Breakdown:**
+
 | Component | Size (Web) | Size (Native) |
 |-----------|-----------|---------------|
 | Hand Landmarker model | ~5MB | ~3-4MB |
@@ -172,12 +184,14 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 | Runtime/libraries | ~2MB | ~1MB |
 
 **Optimization Strategies:**
+
 1. **Lazy loading:** Load models only when activity requires them
 2. **Model quantization:** Use int8 models for smaller size
 3. **Selective bundling:** Only include hand tracking for MVP
 4. **CDN hosting:** Load models from CDN on first use (cache after)
 
 **Indian Market Consideration:**
+
 - Entry-level phones often have 32-64GB storage ([IMARC Report](https://www.imarcgroup.com/india-smartphone-market))
 - App should target < 50MB initial install
 - Additional content downloaded progressively
@@ -191,12 +205,14 @@ Camera → MediaPipe → Fallback Activities → Offline Mode
 **Finding:** Lock orientation during camera activities; support portrait-only for simplicity.
 
 **Recommendations:**
+
 1. **Portrait-only lock** during camera activities (prevents camera feed flip issues)
 2. **Orientation change listener** to pause activity if detected
 3. **Responsive layouts** that work in portrait across device sizes
 4. **Safe area handling** for notches and rounded corners
 
 **Implementation:**
+
 ```typescript
 // React Native approach
 useEffect(() => {
@@ -226,12 +242,14 @@ useEffect(() => {
 **Finding:** Target < 150MB RAM usage; implement memory pressure monitoring.
 
 **Memory Considerations:**
+
 - Low-end devices (2-4GB): Browser/app may have 150-300MB limit
 - MediaPipe hand tracking: ~50-100MB depending on implementation
 - Camera feed buffer: ~20-50MB
 - App UI/state: ~30-50MB
 
 **Memory Management Strategies:**
+
 ```typescript
 // Monitor memory pressure
 if ('memory' in navigator) {
@@ -273,6 +291,7 @@ function cleanupActivity() {
 | Hardware APIs | Limited | Full | RN |
 
 **Sources:**
+
 - [PWA vs Native 2026 Comparison](https://progressier.com/pwa-vs-native-app-comparison-table)
 - [TopFlightApps Analysis](https://topflightapps.com/ideas/native-vs-progressive-web-app/)
 - [PWA vs React Native](https://flatirons.com/blog/pwa-vs-react-native/)
@@ -307,6 +326,7 @@ function cleanupActivity() {
 Based on market research ([IMARC](https://www.imarcgroup.com/india-smartphone-market), [Statista](https://www.statista.com/statistics/269487/top-5-india-smartphone-vendors/)):
 
 **Tier 1: Primary Support (70% market)**
+
 - RAM: 4GB-8GB
 - SoC: MediaTek Dimensity 6000+, Snapdragon 600+
 - Android: 11+
@@ -314,6 +334,7 @@ Based on market research ([IMARC](https://www.imarcgroup.com/india-smartphone-ma
 - Examples: Redmi Note series, Realme number series, Samsung Galaxy A series
 
 **Tier 2: Basic Support (20% market)**
+
 - RAM: 3-4GB
 - SoC: MediaTek Helio, Snapdragon 400 series
 - Android: 10+
@@ -321,6 +342,7 @@ Based on market research ([IMARC](https://www.imarcgroup.com/india-smartphone-ma
 - Examples: Entry-level devices from Xiaomi, Vivo, Oppo
 
 **Tier 3: Limited Support (10% market)**
+
 - RAM: <3GB
 - Older SoCs
 - Android: 9+
@@ -461,18 +483,21 @@ const loadActivity = async (activityId) => {
 ## Action Items
 
 ### Immediate (Before Implementation)
+
 - [ ] Set up device testing lab (3-5 representative devices)
 - [ ] Create MediaPipe performance benchmark script
 - [ ] Define fallback activity requirements
 - [ ] Document camera permission UX flow
 
 ### During Development
+
 - [ ] Implement memory pressure monitoring
 - [ ] Build offline sync queue
 - [ ] Create device capability detection
 - [ ] Set up performance monitoring (FPS, memory, battery)
 
 ### Pre-Launch
+
 - [ ] Complete device compatibility matrix with real benchmarks
 - [ ] Stress test offline sync with conflict scenarios
 - [ ] Battery consumption testing (1-hour session)
@@ -483,6 +508,7 @@ const loadActivity = async (activityId) => {
 ## Sources
 
 ### MediaPipe & Performance
+
 - [MediaPipe Documentation](https://developers.google.com/mediapipe)
 - [MediaPipe Hands Paper](https://arxiv.org/abs/2006.10214)
 - [Google Research Blog](https://research.google/blog/on-device-real-time-hand-tracking-with-mediapipe/)
@@ -490,17 +516,20 @@ const loadActivity = async (activityId) => {
 - [ONNX vs MediaPipe 2025](https://medium.com/@sharmapraveen91/onnx-runtime-mobile-vs-mediapipe-your-2025-guide-to-building-ai-powered-mobile-apps-7c49a222b879)
 
 ### Platform Comparison
+
 - [PWA vs Native 2026](https://progressier.com/pwa-vs-native-app-comparison-table)
 - [TopFlightApps Analysis](https://topflightapps.com/ideas/native-vs-progressive-web-app/)
 - [PWA vs React Native](https://flatirons.com/blog/pwa-vs-react-native/)
 - [React Native vs Flutter vs PWA 2026](https://medium.com/@orami98/react-native-vs-flutter-vs-progressive-web-apps-the-2026-mobile-development-showdown-303ef6c131bc)
 
 ### Offline Architecture
+
 - [Offline-First Frontend 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
 - [Offline-First PWA Patterns](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies)
 - [IndexedDB + Supabase Example](https://oluwadaprof.medium.com/building-an-offline-first-pwa-notes-app-with-next-js-indexeddb-and-supabase-f861aa3a06f9)
 
 ### India Market
+
 - [India Smartphone Market 2025-2033](https://www.imarcgroup.com/india-smartphone-market)
 - [India Smartphone Q3 2025](https://my.idc.com/getdoc.jsp?containerId=prAP53921425)
 - [Smartphone Vendors India 2025](https://www.statista.com/statistics/269487/top-5-india-smartphone-vendors/)

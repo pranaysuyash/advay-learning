@@ -15,15 +15,19 @@ This document establishes safety and privacy guidelines for all AI features in t
 ## 1. Core Principles
 
 ### 1.1 Child Safety First
+
 Every design decision must prioritize child safety over functionality, engagement, or business metrics.
 
 ### 1.2 Privacy by Design
+
 Data minimization is not optional. If data isn't absolutely necessary, don't collect it.
 
 ### 1.3 Transparency
+
 Parents must understand what AI is doing. Children should know Pip is an AI friend.
 
 ### 1.4 Fail Safe
+
 When in doubt, restrict. When safety systems fail, default to safe behavior.
 
 ---

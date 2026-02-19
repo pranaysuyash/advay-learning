@@ -160,6 +160,7 @@ This audit follows the UI file audit prompt v1.0, focusing on correctness, acces
 
 **Ticket:** TCK-20260204-009  
 **Prompts used:**
+
 - `prompts/ui/child-centered-ux-audit-v1.0.md`
 - `prompts/ui/ui-ux-design-audit-v1.0.0.md`
 - `prompts/ui/ui-file-audit-v1.0.md`

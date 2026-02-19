@@ -1,14 +1,17 @@
 # External Feedback Verification & Integration Prompt v1.0
 
 ## Purpose
+
 Provide a disciplined, evidence-first workflow for triaging every piece of external feedback so it can influence the codebase only after it is verified, scoped, and logged.
 
 ## Use When
+
 - You receive external feedback (user, teammate, reviewer, customer, or automated guardrail) that might drive code, UX, or process changes.
 - The feedback is not yet tied to a tracked ticket or audit finding.
 - You are acting as the “Working Agent” for the repo and must evaluate whether to accept, defer, or reject the suggestion.
 
 ## Non-negotiable Rules
+
 - **External feedback is a hypothesis**; test it with repo artifacts, running sessions, or audit frameworks before accepting.
 - **Do NOT implement changes in this run.** The goal is verification, not execution.
 - Do not restart services unless explicitly asked.
@@ -16,17 +19,20 @@ Provide a disciplined, evidence-first workflow for triaging every piece of exter
 - If you can’t verify something because of missing access, document the blocker and request the minimum evidence (screenshots, routes, credentials, etc.) without repeating already-supplied info.
 
 ## Inputs
+
 - Verbatim external feedback text.
 - Context: environment (local/staging/prod), page/route, device details (if provided).
 - Desired outcome (accept/ignore, backlog, rebuttal, etc.).
 - Project audit frameworks (Single-Axis Auditor, UI Audit, etc.) referenced by the repo.
 
 ## Preconditions
+
 - Repository is open.
 - Any relevant services (frontend/backend) that were already running remain active; do not restart them.
 - You know the current audit frameworks (e.g., Single-Axis Audits) and where to look for them.
 
 ## Steps
+
 1. **Step 0 – Normalize the feedback**
    - Restate the text in three buckets: Claims (with testable statements), Recommendations, and Implied Goals.
    - Convert each Claim into a statement that can be verified/falsified.
@@ -51,7 +57,9 @@ Provide a disciplined, evidence-first workflow for triaging every piece of exter
    - If the feedback touches a pattern (component, error handling, design tokens), document the canonical standard, pages that comply, divergences, migration plan, and guardrails (lint rules, PR checklist, visual snapshots).
 
 ## Output Format
+
 Produce the report exactly in the required section order with headings and bullets:
+
 ```
 # 1) External feedback summary
 - Source:
@@ -61,8 +69,10 @@ Produce the report exactly in the required section order with headings and bulle
 - Implied goal:
 ...
 ```
+
 Follow the remaining sections (audit framework, verification plan, evidence log, findings matrix, decision, backlog-ready specs, consistency enforcement, what would change your mind) per the instructions.
 
 ## Stop Condition
+
 - Enough evidence collected to classify each claim and produce backlog entries or rebuttals.
 - No code changes have been made; you can now hand off the verified feedback for implementation.

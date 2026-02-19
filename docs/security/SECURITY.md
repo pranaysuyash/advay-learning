@@ -49,6 +49,7 @@ Landmarks Used for Interaction
 ```
 
 **Key Points:**
+
 - Camera frames are processed in real-time
 - No frames are stored to disk
 - No frames are transmitted over network
@@ -127,6 +128,7 @@ app.add_middleware(
 ### Security Considerations
 
 ⚠️ **WARNING**: The current configuration allows:
+
 - All HTTP methods (`["*"]`)
 - All headers (`["*"]`)
 - Credentials (cookies, auth headers)
@@ -136,6 +138,7 @@ app.add_middleware(
 ### Recommended Configurations
 
 **Development (Safe)**:
+
 ```python
 ALLOWED_ORIGINS=["http://localhost:5173", "http://localhost:3000"]
 allow_credentials=True
@@ -144,6 +147,7 @@ allow_headers=["Authorization", "Content-Type"]
 ```
 
 **Production (Safe)**:
+
 ```python
 ALLOWED_ORIGINS=["https://yourdomain.com"]  # Explicit domains only
 allow_credentials=True
@@ -153,6 +157,7 @@ allow_origin_regex=None  # Don't use regex in production
 ```
 
 **Unsafe (DO NOT USE)**:
+
 ```python
 ALLOWED_ORIGINS=["*"]  # Wildcard with credentials = DANGEROUS
 allow_credentials=True
@@ -161,6 +166,7 @@ allow_credentials=True
 ### Runtime Safety Check
 
 The application logs a warning on startup if potentially dangerous CORS config is detected:
+
 ```python
 if "*" in settings.ALLOWED_ORIGINS and allow_credentials:
     logger.warning("CORS: Wildcard origin with credentials is insecure!")
@@ -191,6 +197,7 @@ Application works completely offline by default.
 ### Optional Online Features
 
 If online features are added (e.g., pronunciation audio):
+
 - HTTPS only
 - No tracking cookies
 - Minimal data transmission
@@ -219,6 +226,7 @@ If online features are added (e.g., pronunciation audio):
 ### Parent Dashboard
 
 Accessible via Parent Mode:
+
 - View all stored data
 - Export data (JSON, CSV)
 - Delete all data
@@ -228,6 +236,7 @@ Accessible via Parent Mode:
 ### Privacy Audit Log
 
 Records:
+
 - When camera was accessed
 - Data export events
 - Settings changes
@@ -246,6 +255,7 @@ Records:
 ### Data Breach Response
 
 Since data is local-only, breaches would require device compromise:
+
 1. Guide parent through data audit
 2. Provide data export/deletion tools
 3. Update security recommendations

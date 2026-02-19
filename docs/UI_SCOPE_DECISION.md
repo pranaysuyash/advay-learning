@@ -5,20 +5,24 @@
 **Owner:** AI Assistant
 
 ## Choice
+
 **Selected scope:** Medium (Recommended)
 
 Actions included:
+
 - Apply stronger borders (`border-border`) and `shadow-sm` to key cards and containers.
 - Add subtle card background `bg-white/10` where appropriate to increase surface contrast.
 - Ensure `select` and `input` elements use `border-border` and `focus:border-border-strong` for clearer affordance.
 - Run tests and dev build, collect before/after screenshots, and document changes.
 
 ## Rationale
+
 - Provides immediate, measurable accessibility gains with low risk to layout or behavior.
 - Balances effort vs. value: quick to implement, easy to roll back if needed, and covers the most visible regressions.
 - Prepares the codebase for a future Aggressive theme token update by aligning components to token usage.
 
 ## Implementation Plan
+
 1. Capture "before" screenshots across main pages: Home, Dashboard, Game, Progress, Settings.
 2. Apply class updates across `Settings`, `Dashboard`, `Game`, `Progress`, `LetterJourney` (verify), and common layout components.
 3. Run unit tests and `vite build` to validate no regressions.

@@ -24,6 +24,7 @@
 **Approach**: Adaptive progression with manual override
 
 **How it works**:
+
 - Kids follow a "Learning Path" that cycles through topics
 - Activities progress based on child performance
 - Progress quickly if topic mastered
@@ -33,11 +34,13 @@
 - Parents can manually adjust learning level if needed
 
 **Progress Indicators**:
+
 - Green checkmark: Mastered
 - Yellow checkmark: In progress
 - Red checkmark: Developing
 
 **Parent Control**:
+
 - Can manually adjust learning level
 - Can view detailed progress
 - Can see which activities completed
@@ -51,12 +54,14 @@
 **Approach**: Grade-level based with manual adjustment
 
 **How it works**:
+
 - Separate Learning Paths for Reading and Math
 - Grade level settings (can be different for each subject)
 - Changing grade level resets the Learning Path
 - Activities must be completed in sequence
 
 **Parent Control**:
+
 - Can change grade levels at any time
 - Different levels for different subjects
 - Warning: Changing resets progress on that path
@@ -70,6 +75,7 @@
 **Approach**: Unlock levels by completing previous ones
 
 **How it works**:
+
 - Lessons organized in a tree/branch structure
 - Must complete Lesson 1 to unlock Lesson 2
 - Hearts system (lose hearts for mistakes)
@@ -85,6 +91,7 @@
 **Approach**: Personalized learning paths with progress tracking
 
 **How it works**:
+
 - Research-backed curriculum
 - Aligns with Common Core standards
 - Progress tracking and reporting for parents
@@ -100,6 +107,7 @@
 **Approach**: Open exploration, no forced sequence
 
 **How it works**:
+
 - All letters available from start
 - Kids choose which letter to learn
 - Interactive word puzzles
@@ -145,6 +153,7 @@
 Based on Khan Academy Kids model:
 
 **How it works**:
+
 1. Start with 5 letters (Easy)
 2. After completing all 5 with 70%+ accuracy, unlock 5 more (now 10 total)
 3. After completing 10 with 70%+ accuracy, unlock all letters
@@ -152,12 +161,14 @@ Based on Khan Academy Kids model:
 5. Visual progress indicator shows "X of Y letters mastered"
 
 **Pros**:
+
 - Kid-friendly (automatic progression)
 - Parent has control if needed
 - Clear sense of achievement
 - Adapts to child's pace
 
 **Cons**:
+
 - More complex to implement
 - Need to track per-letter mastery
 
@@ -166,17 +177,20 @@ Based on Khan Academy Kids model:
 Based on Duolingo model:
 
 **How it works**:
+
 1. Start with only Letter A
 2. Master A (trace 3 times with good accuracy) → unlock B
 3. Continue unlocking letters sequentially
 4. Visual "letter path" showing progress
 
 **Pros**:
+
 - Very clear progression
 - Sense of achievement with each unlock
 - Simple to understand
 
 **Cons**:
+
 - May feel slow/restrictive
 - Less freedom to explore
 
@@ -185,17 +199,20 @@ Based on Duolingo model:
 Hybrid approach:
 
 **How it works**:
+
 1. All letters always visible
 2. "Easy Mode" = trace freely, no scoring
 3. "Challenge Mode" = must achieve accuracy to "collect" letter
 4. Collect all letters to earn reward
 
 **Pros**:
+
 - Freedom to explore
 - Gamification through collecting
 - No frustration from locked content
 
 **Cons**:
+
 - Less structured progression
 - May overwhelm some kids
 
@@ -212,12 +229,14 @@ Hybrid approach:
 5. **Parent Override**: Settings to manually unlock all letters
 
 **Visual Design**:
+
 - Map/path showing letter journey
 - Locked letters grayed out with "?"
 - Unlocked letters colorful and clickable
 - Progress bar: "Mastered 7 of 26 letters"
 
 **Gamification**:
+
 - Badge for unlocking each batch
 - Special reward for completing all 26
 - Streak bonus for consecutive days
@@ -234,4 +253,3 @@ Hybrid approach:
 ---
 
 **Next Step**: Present findings to stakeholders for decision on Q-001
-

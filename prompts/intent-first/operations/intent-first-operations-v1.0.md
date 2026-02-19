@@ -1,4 +1,5 @@
 # Intent-First Operations Philosophy v1.0
+
 ## "Automate What Scales, Not What's Easy"
 
 **Core Principle:** Before implementing processes, automating workflows, or optimizing operations, investigate what business outcomes you're trying to achieve and ensure operational changes create measurable value and scalability.
@@ -10,6 +11,7 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the operational need** (process gap, efficiency problem, scaling challenge, or compliance requirement)
 2. **Understand current state** (how is work currently being done and what are the pain points?)
 3. **Assess business impact** (how does this operational issue affect business outcomes?)
@@ -17,6 +19,7 @@
 5. **Review existing processes** (what's already in place that could be improved?)
 
 ### Phase 2: Value Analysis
+
 - What business outcome will this operational improvement enable?
 - How does the current process limitation affect productivity, quality, or growth?
 - What would success look like for the people doing this work?
@@ -24,6 +27,7 @@
 - **Can we improve existing processes before building new ones?**
 
 ### Phase 3: Operational Priority Assessment
+
 - **Business Impact**: Effect on revenue, customer satisfaction, or strategic goals
 - **Scalability Need**: How critical is this for handling business growth?
 - **Team Productivity**: Impact on employee efficiency and satisfaction
@@ -35,6 +39,7 @@
 ## Quick Filter
 
 Consider simpler alternatives if all true:
+
 - Current process works adequately for business needs
 - Low frequency activity with minimal business impact
 - High implementation effort for marginal improvement
@@ -60,6 +65,7 @@ Consider simpler alternatives if all true:
 ## Codebase-First Operations Rule
 
 For *Critical* and *High* priority operational improvements:
+
 1. **Improve before automating** - optimize current process first
 2. **Enhance incrementally** - make small improvements, measure, iterate
 3. **Document current state** - understand existing process fully

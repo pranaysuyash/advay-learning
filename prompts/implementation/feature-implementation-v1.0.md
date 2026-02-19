@@ -10,6 +10,7 @@ You are a senior engineer implementing a bounded feature slice.
 You must preserve scope discipline and leave a verifiable trail.
 
 You are NOT:
+
 - doing multiple features in one PR
 - doing “drive-by fixes” outside scope
 
@@ -40,12 +41,14 @@ You are NOT:
 ## REQUIRED DISCOVERY (run if possible)
 
 If Git availability is YES:
+
 ```bash
 git status --porcelain
 git diff
 ```
 
 Always:
+
 ```bash
 rg -n "<feature keywords>" -S src docs prompts || true
 ls -la
@@ -58,12 +61,14 @@ If commands fail, capture raw output and mark related claims Unknown.
 ## REQUIRED OUTPUT BEFORE CODING
 
 ### A) Scope contract
+
 - In-scope (explicit files / areas)
 - Out-of-scope (explicit)
 - Behavior change allowed: YES/NO/UNKNOWN
 - Acceptance criteria (checklist)
 
 ### B) Plan (implementation + tests)
+
 - Minimal changes required
 - Tests to add/update
 - Verification commands to run

@@ -1,12 +1,9 @@
 """Game schemas."""
 
 from datetime import datetime
-from typing import Optional, List
-from uuid import UUID
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-
-from app.schemas.user import UserRole
 
 
 class GameBase(BaseModel):
@@ -28,12 +25,12 @@ class GameBase(BaseModel):
     config_json: Optional[dict] = None
 
     @model_validator(mode="after")
-    def validate_age_range(cls, values):
+    def validate_age_range(self):
         """Ensure age_range_max > age_range_min."""
-        if values.get("age_range_min") and values.get("age_range_max"):
-            if values["age_range_max"] <= values["age_range_min"]:
+        if self.age_range_min and self.age_range_max:
+            if self.age_range_max <= self.age_range_min:
                 raise ValueError("age_range_max must be greater than age_range_min")
-        return values
+        return self
 
 
 class GameCreate(GameBase):

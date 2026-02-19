@@ -10,6 +10,7 @@
 ## Overview
 
 Games are currently hardcoded in the frontend (`availableGames` array in `Games.tsx`). This blocks:
+
 - Adding new games without code deployment
 - Configuring game settings (age range, difficulty, duration)
 - A/B testing game variations
@@ -696,6 +697,7 @@ def downgrade() -> None:
 **File**: `src/frontend/src/pages/Games.tsx`
 
 **Changes**:
+
 1. Remove hardcoded `availableGames` array
 2. Add `useState` for games data
 3. Add `useEffect` to fetch games from API on mount
@@ -848,6 +850,7 @@ async def test_get_game_by_slug(async_client: AsyncClient):
 ## Implementation Order
 
 ### Day 1 (4-6 hours)
+
 1. Create Game model (`app/db/models/game.py`)
 2. Create Game schemas (`app/schemas/game.py`)
 3. Create migration (`alembic/versions/005_add_games_table.py`)
@@ -856,17 +859,19 @@ async def test_get_game_by_slug(async_client: AsyncClient):
 6. Create seed script to load initial games
 
 ### Day 2 (4-6 hours)
+
 7. Create Game service (`app/services/game_service.py`)
-8. Create Games API endpoints (`app/api/v1/endpoints/games.py`)
-9. Register router in `app/api/v1/api.py`
-10. Write backend tests (`tests/test_games.py`)
-11. Run backend tests
+2. Create Games API endpoints (`app/api/v1/endpoints/games.py`)
+3. Register router in `app/api/v1/api.py`
+4. Write backend tests (`tests/test_games.py`)
+5. Run backend tests
 
 ### Day 3 (2-3 hours)
+
 12. Create frontend game API service
-13. Update Games.tsx to use API
-14. Update GameCard to handle loading/error states
-15. End-to-end test: Load Games page, verify games display
+2. Update Games.tsx to use API
+3. Update GameCard to handle loading/error states
+4. End-to-end test: Load Games page, verify games display
 
 ---
 
@@ -891,11 +896,13 @@ async def test_get_game_by_slug(async_client: AsyncClient):
 ## Risks & Considerations
 
 ### Critical
+
 - **Slug uniqueness**: Must ensure game slugs are unique to avoid routing conflicts
 - **Admin access**: Only superusers AND admins should manage games (double protection)
 - **Progress metrics**: Need to decide when/how to calculate `avg_score`, `completion_rate`, `total_plays`
 
 ### Considerations for Later
+
 - **Game activities/levels**: May need Activity model for structured content
 - **Game categories**: Consider adding subcategories for better filtering
 - **A/B testing**: Add `variant_id` to Game model for testing variations

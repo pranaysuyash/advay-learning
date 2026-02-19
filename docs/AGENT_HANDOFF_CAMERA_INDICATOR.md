@@ -78,6 +78,7 @@ Add the indicator in the game controls overlay area (around line 950 in Game.tsx
 ### 3. Testing Requirements
 
 After implementation, test:
+
 1. Start game → Camera Active indicator appears
 2. Stop game → Camera Active indicator disappears
 3. Toggle high contrast → Indicator should still work

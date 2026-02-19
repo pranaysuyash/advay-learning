@@ -13,6 +13,7 @@
 ### Observed
 
 **File: `src/frontend/src/pages/Game.tsx`**
+
 - MediaPipe hand landmarks: 21 points per hand (0-20)
 - Landmark 4: Thumb tip
 - Landmark 8: Index finger tip
@@ -20,6 +21,7 @@
 - Button toggle currently controls `isDrawing` state
 
 **Current drawing control flow:**
+
 1. User clicks "Start Drawing" button → `setIsDrawing(true)`
 2. Hand detection adds points when `isDrawing` is true
 3. User clicks "Stop Drawing" button → `setIsDrawing(false)`
@@ -48,6 +50,7 @@
 | C | Mode selector (Pinch vs Button) | User choice | More UI complexity | MED |
 
 **Recommendation**: Option B for now (both active), then Option C when mode selector is built
+
 - Button always works as fallback
 - Pinch detected continuously when hand visible
 - No mode switch needed yet
@@ -70,18 +73,18 @@
 
 ### Phase 2: Visual Feedback
 
-3. **Cursor visual feedback**
+1. **Cursor visual feedback**
    - When pinching: larger cursor, brighter glow
    - Color change: normal → bright yellow/white when pinching
    - Visual indicator near cursor (optional)
 
-4. **Button state feedback**
+2. **Button state feedback**
    - Button shows "Pinching..." or icon when pinch active
    - Helps user understand the connection
 
 ### Phase 3: Settings Integration (for later)
 
-5. **Add to settings store** (when mode selector built)
+1. **Add to settings store** (when mode selector built)
    - `drawingControlMode: 'button' | 'pinch' | 'both'`
    - Default: 'both'
 
@@ -90,6 +93,7 @@
 ## Testing Strategy
 
 ### Manual Verification
+
 1. Show hand → cursor visible
 2. Move thumb and index apart → not pinching
 3. Bring thumb and index together → pinch detected, drawing starts
@@ -98,6 +102,7 @@
 6. Both can work together
 
 ### Edge Cases
+
 - Hand partially visible (only one finger) → no pinch
 - Quick pinch/release → should toggle quickly
 - Hold pinch long time → continuous drawing
@@ -168,4 +173,3 @@ const cursorColor = isPinching ? '#ffff00' : currentLetter.color;
 2. Add visual feedback
 3. Test with browser
 4. Update WORKLOG_TICKETS.md
-

@@ -267,14 +267,14 @@ Notes: All commands were executed in the `src/frontend` git workspace where `src
 
 Multiple findings from this audit have been addressed by existing tickets:
 
-| Finding | Ticket ID | Status |
-|---------|------------|--------|
-| F-Game-01: MediaPipe CDN failure | Need new ticket | OPEN |
-| F-Game-02: Camera permission denial | Need new ticket | OPEN |
-| F-Game-03: No explicit disposal | Need new ticket | OPEN |
-| F-Game-04: Missing tests | Covered by TCK-20260129-050 | IN_PROGRESS |
-| F-Game-05: GPU fallback | Need new ticket | OPEN |
-| F-Game-06: Debug logging | Part of general cleanup | N/A |
+| Finding                             | Ticket ID                   | Status      |
+| ----------------------------------- | --------------------------- | ----------- |
+| F-Game-01: MediaPipe CDN failure    | Need new ticket             | OPEN        |
+| F-Game-02: Camera permission denial | Need new ticket             | OPEN        |
+| F-Game-03: No explicit disposal     | Need new ticket             | OPEN        |
+| F-Game-04: Missing tests            | Covered by TCK-20260129-050 | IN_PROGRESS |
+| F-Game-05: GPU fallback             | Need new ticket             | OPEN        |
+| F-Game-06: Debug logging            | Part of general cleanup     | N/A         |
 
 **Note**: This ticket is for TCK-20260129-050 which implements comprehensive testing.
 
@@ -301,7 +301,12 @@ Git availability: YES
   - Evidence: `Game.tsx` uses `useProfileStore` (e.g., `useProfileStore.getState().fetchProfiles()` and `const { profiles } = useProfileStore();`) but **does not import it** at the top of the file (Observed snippet):
 
   ```tsx
-  import { useSettingsStore, useAuthStore, useProgressStore, BATCH_SIZE, } from '../store';
+  import {
+    useSettingsStore,
+    useAuthStore,
+    useProgressStore,
+    BATCH_SIZE,
+  } from '../store';
   // ... later in file:
   useProfileStore.getState().fetchProfiles();
   const { profiles } = useProfileStore();
@@ -317,4 +322,3 @@ Git availability: YES
 **Prepared by:** GitHub Copilot
 
 ---
-

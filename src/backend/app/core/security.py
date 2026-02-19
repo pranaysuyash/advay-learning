@@ -14,7 +14,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     # Encode passwords to bytes for bcrypt
     plain_bytes = plain_password.encode("utf-8")
     hash_bytes = hashed_password.encode("utf-8")
-    return bcrypt.checkpw(plain_bytes, hash_bytes)
+    return bcrypt.checkpw(plain_bytes, hash_bytes)  # type: ignore
 
 
 def get_password_hash(password: str) -> str:
@@ -23,7 +23,7 @@ def get_password_hash(password: str) -> str:
     password_bytes = password[:72].encode("utf-8")
     # Use bcrypt directly to avoid passlib's crypt deprecation warning
     salt = bcrypt.gensalt(rounds=12)
-    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")
+    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")  # type: ignore
 
 
 def create_access_token(

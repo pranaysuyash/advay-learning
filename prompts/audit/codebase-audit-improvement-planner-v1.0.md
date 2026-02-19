@@ -32,6 +32,7 @@ You MUST document every persona you used and why it is relevant.
 6. **Product/UX** - onboarding, clarity, polish expectations
 
 **Additional lenses** (add 1-4 depending on repo nature):
+
 - Data/ML (model management, data pipelines, experiment tracking)
 - Mobile (platform-specific issues)
 - Accessibility (a11y compliance)
@@ -153,6 +154,7 @@ For each of the 10:
 ### E) Quick Wins vs Strategic Bets
 
 Split the 10 into:
+
 - **Quick Wins** (ship in days): [list]
 - **Strategic Bets** (weeks): [list]
 

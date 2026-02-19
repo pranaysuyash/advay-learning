@@ -1,5 +1,4 @@
 
-
 ---
 
 ## BUG FIX: Progress Page Stuck on Loading
@@ -9,12 +8,15 @@
 **Priority:** P0 (Critical - users can't view progress)
 
 ### Problem
+
 The Progress page was stuck showing the loading animation indefinitely when:
+
 1. No child profiles existed
 2. No profile was selected
 3. The API call couldn't be made
 
 ### Root Cause
+
 In `src/frontend/src/pages/Progress.tsx`:
 
 ```typescript
@@ -30,6 +32,7 @@ useEffect(() => {
 ```
 
 When `selectedProfileId` was empty:
+
 1. Loading started as `true` (initial state)
 2. useEffect returned early without fetching
 3. Loading never got set to `false`
@@ -38,6 +41,7 @@ When `selectedProfileId` was empty:
 ### Solution
 
 **Fix 1: Handle empty profile ID**
+
 ```typescript
 useEffect(() => {
   if (!selectedProfileId) {
@@ -52,6 +56,7 @@ useEffect(() => {
 Added two helpful empty states:
 
 1. **No Profiles Exist:**
+
    ```
    👨‍👩‍👧‍👦
    No Profiles Yet
@@ -60,6 +65,7 @@ Added two helpful empty states:
    ```
 
 2. **Profiles Exist But None Selected:**
+
    ```
    👆
    Select a Profile
@@ -87,11 +93,13 @@ Added two helpful empty states:
 ### Impact
 
 **Before:**
+
 - ❌ Infinite loading animation
 - ❌ Users confused why progress won't load
 - ❌ No indication of what to do
 
 **After:**
+
 - ✅ Clear messaging when no profiles
 - ✅ Helpful CTA to add profile
 - ✅ No infinite loading

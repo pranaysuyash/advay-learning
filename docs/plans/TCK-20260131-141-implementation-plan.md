@@ -10,9 +10,10 @@
 
 ## Discovery Summary
 
-### Observed (from code analysis):
+### Observed (from code analysis)
 
 **File: `src/frontend/src/pages/AlphabetGame.tsx`**
+
 - Contains hand tracking loop at lines 413-553
 - Has `smoothPoints()` function with 3-point moving average
 - Uses hysteresis: start 0.05, release 0.07
@@ -20,18 +21,21 @@
 - Full canvas redraw each frame with glow effect
 
 **File: `src/frontend/src/pages/LetterHunt.tsx`**
+
 - Has its own hand initialization (lines 52-79)
 - Pinch detection without hysteresis (line 275: `pinchDistance < 0.05`)
 - No frame skipping
 - GPU only, no CPU fallback
 
 **File: `src/frontend/src/games/FingerNumberShow.tsx`**
+
 - Has hand initialization (lines 323-351)
 - Has frame skipping (lines 392-396: `frameSkipRef.current % 2`)
 - Lower confidence thresholds (0.3)
 - Duplicate `countExtendedFingersFromLandmarks()` function
 
 **Command Output:**
+
 ```bash
 $ rg -l "HandLandmarker" src/frontend/src
 src/frontend/src/pages/AlphabetGame.tsx
@@ -39,14 +43,14 @@ src/frontend/src/pages/LetterHunt.tsx
 src/frontend/src/games/FingerNumberShow.tsx
 ```
 
-### Inferred:
+### Inferred
 
 - Each game implements hand tracking independently
 - No shared utilities exist for hand tracking
 - Refactoring one game won't affect others without shared hooks
 - AlphabetGame has the most mature implementation
 
-### Unknown:
+### Unknown
 
 - Performance impact of centralization (needs testing)
 - Browser compatibility of shared hooks
@@ -71,11 +75,13 @@ src/frontend/src/games/FingerNumberShow.tsx
 ### Phase 1: Core Hooks (TCK-20260131-142)
 
 **Files to create:**
+
 1. `src/frontend/src/hooks/useHandTracking.ts`
 2. `src/frontend/src/hooks/useGameLoop.ts`
 3. `src/frontend/src/types/tracking.ts`
 
 **useHandTracking hook:**
+
 ```typescript
 interface UseHandTrackingOptions {
   numHands?: number;
@@ -96,12 +102,14 @@ interface UseHandTrackingReturn {
 ```
 
 **Key features:**
+
 - Automatic GPU→CPU fallback
 - Consistent default confidence (0.3)
 - Error handling with user-friendly messages
 - Cleanup on unmount
 
 **useGameLoop hook:**
+
 ```typescript
 interface UseGameLoopOptions {
   onFrame: (deltaTime: number, fps: number) => void;
@@ -111,6 +119,7 @@ interface UseGameLoopOptions {
 ```
 
 **Key features:**
+
 - RAF management
 - FPS limiting
 - Delta time calculation
@@ -121,6 +130,7 @@ interface UseGameLoopOptions {
 **File to create:** `src/frontend/src/utils/drawing.ts`
 
 **Functions:**
+
 ```typescript
 // Smooth points using moving average
 export function smoothPoints(
@@ -181,6 +191,7 @@ export function createDefaultPinchState(): PinchState;
 ```
 
 **Hysteresis logic:**
+
 - Start pinch: distance < 0.05
 - Release pinch: distance > 0.07
 - Transition events: 'start', 'continue', 'release', 'none'
@@ -196,6 +207,7 @@ export function createDefaultPinchState(): PinchState;
 5. Keep existing UI and game logic
 
 **Migration steps:**
+
 1. Import new hooks/utilities
 2. Replace initialization
 3. Replace detection loop
@@ -205,11 +217,13 @@ export function createDefaultPinchState(): PinchState;
 ### Phase 5: Other Games Refactor (TCK-20260131-146)
 
 **LetterHunt changes:**
+
 - Use useHandTracking hook
 - Use detectPinch utility
 - Add useGameLoop
 
 **FingerNumberShow changes:**
+
 - Use useHandTracking hook
 - Use useGameLoop
 - Keep custom finger counting (game-specific)
@@ -218,30 +232,33 @@ export function createDefaultPinchState(): PinchState;
 
 ## Testing Strategy
 
-### Unit Tests:
+### Unit Tests
 
 **drawing.test.ts:**
+
 - smoothPoints with various inputs
 - buildSegments with break points
 - drawSegments with empty segments
 
 **pinchDetection.test.ts:**
+
 - Hysteresis behavior
 - Transition detection
 - Edge cases (null landmarks)
 
 **useHandTracking.test.ts:**
+
 - Hook renders without error
 - Initialize function exists
 - Cleanup on unmount
 
-### Integration Tests:
+### Integration Tests
 
 - AlphabetGame works with new hooks
 - LetterHunt works with new hooks
 - FingerNumberShow works with new hooks
 
-### Manual Verification:
+### Manual Verification
 
 1. Start each game
 2. Verify hand tracking initializes
@@ -285,6 +302,7 @@ export function createDefaultPinchState(): PinchState;
 If critical issues are found:
 
 1. Restore original game files from git:
+
    ```bash
    git checkout HEAD -- src/frontend/src/pages/AlphabetGame.tsx
    git checkout HEAD -- src/frontend/src/pages/LetterHunt.tsx
@@ -292,6 +310,7 @@ If critical issues are found:
    ```
 
 2. Remove new files:
+
    ```bash
    git rm src/frontend/src/hooks/useHandTracking.ts
    git rm src/frontend/src/hooks/useGameLoop.ts
@@ -306,7 +325,8 @@ If critical issues are found:
 
 ## Files to Create/Modify
 
-### New Files (5):
+### New Files (5)
+
 ```
 src/frontend/src/
 ├── hooks/
@@ -327,7 +347,8 @@ src/frontend/src/
     └── tracking.ts
 ```
 
-### Modified Files (3):
+### Modified Files (3)
+
 ```
 src/frontend/src/
 ├── pages/
@@ -342,6 +363,7 @@ src/frontend/src/
 ## Dependencies
 
 No new external dependencies required. All utilities use:
+
 - React built-in hooks
 - MediaPipe tasks-vision (already installed)
 - Canvas API (browser native)

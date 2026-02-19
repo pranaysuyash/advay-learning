@@ -1,4 +1,5 @@
 Ticket ID: TCK-20260130-001
+
 # Camera Game Screen UX - Deep Code & Research Analysis
 
 Date: 2026-01-30  
@@ -13,6 +14,7 @@ Method: Line-by-line code analysis + educational UX research application
 ### AlphabetGame.tsx (1049 lines)
 
 **Overlay count during active play** (Lines 800-1000):
+
 ```tsx
 Top-left cluster (5 badges):
 - "Trace: A" (target letter)
@@ -36,12 +38,14 @@ Below camera: "Check My Tracing" + "Skip to Next"
 **Total: 12+ UI elements competing for attention**
 
 **Technical messaging leak** (Line 107, 130):
+
 ```tsx
 setFeedback(`Hand tracking active (${loadedDelegate} mode)`);
 // Shows "GPU mode" or "CPU mode" to kids
 ```
 
 **Positive feedback pattern** (Lines 145-155):
+
 ```tsx
 if (nextAccuracy >= 70) {
   setFeedback('Great job! 🎉');
@@ -51,9 +55,11 @@ if (nextAccuracy >= 70) {
   setStreak(0);
 }
 ```
+
 ✅ Always encouraging, never punishing
 
 **Motion effects**:
+
 - Line 955: `animate-pulse` on camera status badge (persistent)
 - Line 960: Pulsing red dot (persistent)
 - Line 980: `hover:scale-105` on multiple buttons
@@ -64,6 +70,7 @@ if (nextAccuracy >= 70) {
 ### FingerNumberShow.tsx (620 lines)
 
 **Two-stage prompt pattern** (Lines 200-210, 570-610):
+
 ```tsx
 // Stage 1: Center (1.8s)
 <div className="text-7xl font-black">{targetNumber}</div>
@@ -76,6 +83,7 @@ promptTimeoutRef.current = setTimeout(() =>
 **Strong pattern**: Initial attention → compact persistence
 
 **Top-left cluster during 'side' stage** (Lines 600-620):
+
 ```tsx
 - "Show 5 (Five)" (target)
 - "Detected: 5 (3 + 2)" (count breakdown)
@@ -84,9 +92,11 @@ promptTimeoutRef.current = setTimeout(() =>
 - "Level 2" (difficulty)
 - "🔥 5 streak!" (conditional)
 ```
+
 **Still 6 badges** - contradicts two-stage minimalism goal
 
 **Instant gratification pattern** (Lines 350-370):
+
 ```tsx
 // 450ms stable hold → immediate celebration
 if (nowMs - (stable.startAt ?? nowMs) >= 450) {
@@ -94,6 +104,7 @@ if (nowMs - (stable.startAt ?? nowMs) >= 450) {
   setScore(prev => prev + points);
 }
 ```
+
 ✅ Immediate reward on success
 
 ---
@@ -101,6 +112,7 @@ if (nowMs - (stable.startAt ?? nowMs) >= 450) {
 ### LetterHunt.tsx (570 lines)
 
 **Feedback pattern** (Lines 150-160):
+
 ```tsx
 // Correct answer
 setFeedback({ message: 'Correct! Great job!', type: 'success' });
@@ -111,9 +123,11 @@ setFeedback({
   type: 'error' 
 });
 ```
+
 ⚠️ Uses 'error' type for wrong answers (research says positive-only)
 
 **Timer urgency** (Lines 120-140):
+
 - 30s countdown per round
 - Immediate vs delayed gratification mix
 
@@ -122,9 +136,11 @@ setFeedback({
 ## Educational UX Research Application
 
 ### 1. Immediate vs Delayed Gratification
+
 **Source**: App Developer Magazine - "Brain has two reward systems"
 
 **Current implementation**:
+
 - ✅ FingerNumberShow: 450ms hold → instant celebration (immediate)
 - ✅ AlphabetGame: Instant "Great job!" on accuracy check (immediate)
 - ⚠️ Streak tracking mixes both without clear separation
@@ -134,9 +150,11 @@ setFeedback({
 ---
 
 ### 2. Positive Feedback Only
+
 **Source**: UX Collective - "For young children feedback should always be positive"
 
 **Current implementation**:
+
 - ✅ AlphabetGame: "Good start — try to trace the full shape!" (encouraging)
 - ✅ FingerNumberShow: No negative feedback found
 - ⚠️ LetterHunt: `type: 'error'` for wrong answers
@@ -146,15 +164,18 @@ setFeedback({
 ---
 
 ### 3. Avoid Flashy Distractions
+
 **Source**: Smart Tales - "Avoid flashy distractions or instant gratification"
 
 **Current violations**:
+
 - ⚠️ Persistent `animate-pulse` on camera status (AlphabetGame L955)
 - ⚠️ Persistent `animate-pulse` on streak badge (FingerNumberShow L620)
 - ⚠️ Multiple `hover:scale-105` transforms on buttons
 - ⚠️ Pulsing red dot on camera status (AlphabetGame L960)
 
 **Controlled celebrations** (✅):
+
 - 1.8s timeout on celebrations
 - Burst-style, not continuous
 
@@ -163,9 +184,11 @@ setFeedback({
 ---
 
 ### 4. Virtual Helper Pattern
+
 **Source**: Eleken - "Virtual helper/character makes UX smoother"
 
 **Current implementation**:
+
 - ✅ Mascot component with dynamic states (happy/waiting/idle)
 - ✅ Contextual messages based on game state
 - ⚠️ Positioned bottom-left over camera (reduces hero area by 15-20%)
@@ -175,6 +198,7 @@ setFeedback({
 ---
 
 ### 5. Design Patterns for Learning Games
+
 **Source**: ResearchGate - "Match game patterns with learning functions"
 
 **Pattern analysis**:
@@ -192,11 +216,13 @@ setFeedback({
 ## Priority Issues (Code-backed)
 
 ### HIGH: Overlay proliferation
+
 **Evidence**: AlphabetGame Lines 800-1000 show 12 UI elements during play  
 **Research violation**: "Minimal cognitive load for learning efficiency"  
 **Impact**: Camera is 40-50% obscured, not hero  
 
 **Fix**:
+
 ```tsx
 // Current: 12 elements
 // Target: 3 elements
@@ -215,10 +241,12 @@ Move to overflow/pause:
 ---
 
 ### HIGH: Technical leakage
+
 **Evidence**: Lines 107, 130 show GPU/CPU delegate info to kids  
 **Research violation**: Not age-appropriate or learning-relevant  
 
 **Fix**:
+
 ```tsx
 // Remove completely:
 ❌ `Hand tracking active (${loadedDelegate} mode)`
@@ -232,10 +260,12 @@ Move to overflow/pause:
 ---
 
 ### MEDIUM: Motion overload
+
 **Evidence**: 4+ persistent `animate-pulse` effects found  
 **Research violation**: "Avoid flashy distractions"  
 
 **Fix**:
+
 ```tsx
 // Remove persistent animations:
 ❌ animate-pulse on camera badge
@@ -251,10 +281,12 @@ Move to overflow/pause:
 ---
 
 ### MEDIUM: Positive feedback inconsistency
+
 **Evidence**: LetterHunt Line 155 uses `type: 'error'`  
 **Research**: "Feedback should always be positive"  
 
 **Fix**:
+
 ```tsx
 // Change from:
 ❌ type: 'error'
@@ -272,6 +304,7 @@ Move to overflow/pause:
 ## Recommendations (Actionable)
 
 ### Phase 1: Simplify overlays (HIGH)
+
 ```tsx
 // AlphabetGame overlay reduction
 TOP BAR (single, compact):
@@ -298,6 +331,7 @@ PAUSE SCREEN:
 ```
 
 ### Phase 2: Remove technical noise (HIGH)
+
 ```tsx
 // Delete all technical status
 ❌ GPU/CPU delegate info
@@ -311,6 +345,7 @@ PAUSE SCREEN:
 ```
 
 ### Phase 3: Adopt two-stage prompts (MEDIUM)
+
 ```tsx
 // FingerNumberShow pattern → All games
 
@@ -329,6 +364,7 @@ STAGE 2 (compact badge, persistent):
 ```
 
 ### Phase 4: Reduce motion (MEDIUM)
+
 ```tsx
 // Remove persistent animations
 BADGES: No animate-pulse
@@ -349,6 +385,7 @@ PRIMARY CTA: Subtle hover effects
 ```
 
 ### Phase 5: Optimize mascot (LOW)
+
 ```tsx
 // Option A: Collapsible
 <Mascot 
@@ -368,21 +405,25 @@ PRIMARY CTA: Subtle hover effects
 ## Verification Criteria
 
 **Camera Hero Test**:
+
 - [ ] Camera feed occupies ≥70% of vertical space during active play
 - [ ] Max 3 UI elements visible (top bar + camera + bottom action)
 - [ ] No overlays on camera except 2-stage prompt (center 1.8s → side badge)
 
 **Technical Cleanliness Test**:
+
 - [ ] No GPU/CPU/delegate info shown
 - [ ] No persistent "Camera Active" badges
 - [ ] Camera operates transparently (no status except on fail)
 
 **Educational UX Test**:
+
 - [ ] All feedback is positive/encouraging (no 'error' types)
 - [ ] No persistent pulsing animations (only burst celebrations)
 - [ ] Immediate success feedback (≤500ms from action)
 
 **Code Quality Test**:
+
 - [ ] Overlay count in markup ≤3 during `isPlaying={true}`
 - [ ] `animate-pulse` removed from persistent badges
 - [ ] Two-stage prompt pattern implemented (center → side)

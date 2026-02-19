@@ -1,4 +1,5 @@
 # Complete Body Interaction Vision
+
 ## "Your Whole Body is the Controller"
 
 **Document ID:** CBI-VISION-001  
@@ -27,6 +28,7 @@
 ## 👋 1. HAND-BASED INTERACTIONS
 
 ### 1.1 Fine Motor Skills
+
 **Precision, dexterity, coordination**
 
 | Activity | Hand Input | Learning Target |
@@ -43,6 +45,7 @@
 | **Knot Tying** | Loop and pull gestures | Survival skills, patterns |
 
 ### 1.2 Hand Gestures & Signs
+
 **Symbolic communication, expression**
 
 | Activity | Gesture | Learning Target |
@@ -59,6 +62,7 @@
 | **Stop Hand** | Palm out | Safety, boundaries, self-control |
 
 ### 1.3 Hand-Eye Coordination
+
 **Tracking, timing, accuracy**
 
 | Activity | Interaction | Learning Target |
@@ -79,6 +83,7 @@
 ## 😊 2. FACE-BASED INTERACTIONS
 
 ### 2.1 Facial Expressions
+
 **Emotions, communication, empathy**
 
 | Activity | Face Input | Learning Target |
@@ -95,6 +100,7 @@
 | **Lip Sync** | Mouth shapes | Phonetics, pronunciation |
 
 ### 2.2 Head & Gaze
+
 **Attention, direction, focus**
 
 | Activity | Head Input | Learning Target |
@@ -111,6 +117,7 @@
 | **Bow Greeting** | Head bow | Cultural respect, manners |
 
 ### 2.3 Mouth & Speech
+
 **Oral motor, pronunciation, singing**
 
 | Activity | Mouth Input | Learning Target |
@@ -131,6 +138,7 @@
 ## 🧍 3. POSTURE & POSITION
 
 ### 3.1 Static Postures
+
 **Alignment, balance, form**
 
 | Activity | Posture Input | Learning Target |
@@ -147,6 +155,7 @@
 | **Sitting Still** | Quiet posture | Self-regulation, focus |
 
 ### 3.2 Posture Changes
+
 **Transitions, movement quality**
 
 | Activity | Movement Input | Learning Target |
@@ -167,6 +176,7 @@
 ## 🏃 4. FULL BODY MOVEMENT
 
 ### 4.1 Locomotion
+
 **Traveling, moving through space**
 
 | Activity | Movement Input | Learning Target |
@@ -183,6 +193,7 @@
 | **Side Shuffle** | Lateral movement | Agility, sports skills |
 
 ### 4.2 Gross Motor Actions
+
 **Big movements, whole body**
 
 | Activity | Action Input | Learning Target |
@@ -199,6 +210,7 @@
 | **Crawl** | Ground movement | Development, coordination |
 
 ### 4.3 Dance & Expression
+
 **Artistic movement, rhythm**
 
 | Activity | Dance Input | Learning Target |
@@ -215,6 +227,7 @@
 | **Fast & Furious** | Quick movements | Energy, release, cardio |
 
 ### 4.4 Sports Skills
+
 **Athletic movements, coordination**
 
 | Activity | Sport Input | Learning Target |
@@ -235,6 +248,7 @@
 ## 🎵 5. VOICE & AUDIO
 
 ### 5.1 Speech & Language
+
 **Communication, pronunciation**
 
 | Activity | Voice Input | Learning Target |
@@ -251,6 +265,7 @@
 | **Call & Response** | Echo patterns | Listening, memory |
 
 ### 5.2 Singing & Music
+
 **Pitch, rhythm, melody**
 
 | Activity | Singing Input | Learning Target |
@@ -267,6 +282,7 @@
 | **Choir Parts** | Soprano/alto/tenor | Teamwork, music reading |
 
 ### 5.3 Sound Making
+
 **Non-vocal audio**
 
 | Activity | Sound Input | Learning Target |
@@ -287,6 +303,7 @@
 ## 🔄 6. MULTI-MODAL COMBINATIONS
 
 ### 6.1 Hand + Face
+
 **Coordinated expression**
 
 | Activity | Inputs | Learning Target |
@@ -303,6 +320,7 @@
 | **Blow Kiss** | Hand to lips + Pucker | Affection, social |
 
 ### 6.2 Hand + Body
+
 **Full coordination**
 
 | Activity | Inputs | Learning Target |
@@ -319,6 +337,7 @@
 | **Wheelbarrow** | Hands + Feet walking | Strength, cooperation |
 
 ### 6.3 Body + Voice
+
 **Physical expression with sound**
 
 | Activity | Inputs | Learning Target |
@@ -335,6 +354,7 @@
 | **Musical Statues** | Pose + Silence | Control, balance |
 
 ### 6.4 Complete Integration
+
 **All modalities together**
 
 | Activity | All Inputs | Learning Target |
@@ -357,6 +377,7 @@
 ### By Age Group
 
 **Ages 2-4: Foundation**
+
 - Hand: Pointing, basic gestures
 - Face: Simple expressions, looking
 - Posture: Standing, sitting
@@ -364,6 +385,7 @@
 - Voice: Singing, simple words
 
 **Ages 5-7: Development**
+
 - Hand: Writing, drawing, signs
 - Face: Complex expressions, reading
 - Posture: Yoga poses, alignment
@@ -371,6 +393,7 @@
 - Voice: Clear speech, singing
 
 **Ages 8-10: Mastery**
+
 - Hand: Fine control, instruments
 - Face: Subtle expressions, acting
 - Posture: Complex poses, form
@@ -397,22 +420,25 @@
 ## 🎯 IMPLEMENTATION PRIORITIES
 
 ### Phase 1: Core Modalities (Weeks 1-4)
+
 1. Hand tracking (exists) - Refine
 2. Basic face detection - Expressions
 3. Simple pose detection - Standing/sitting
 4. Voice input - Basic commands
 
 ### Phase 2: Integration (Weeks 5-8)
+
 5. Hand + Face combinations
-6. Posture analysis for yoga
-7. Full body dance tracking
-8. Voice pitch detection
+2. Posture analysis for yoga
+3. Full body dance tracking
+4. Voice pitch detection
 
 ### Phase 3: Advanced (Weeks 9-12)
+
 9. Multi-modal fusion
-10. Complex sequences
-11. Performance capture
-12. Real-time feedback
+2. Complex sequences
+3. Performance capture
+4. Real-time feedback
 
 ---
 

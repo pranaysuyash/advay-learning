@@ -109,10 +109,10 @@ User Action → Frontend Event → API Request → Database → Parent Dashboard
 - Camera: Explicit permission
 - Storage: Encrypted at rest
 
-
 ## Related Architecture Documents
 
 ### Core Architecture
+
 - [Game Architecture Principles](architecture/GAME_ARCHITECTURE_PRINCIPLES.md) - **KEY READ**
   - No "main game" philosophy (all games are equal peers)
   - Shared infrastructure principles
@@ -136,6 +136,7 @@ User Action → Frontend Event → API Request → Database → Parent Dashboard
   - Accessibility considerations
 
 ### Vision & Strategy
+
 - [Complete Body Interaction Vision](../COMPLETE_BODY_INTERACTION_VISION.md) - Future vision
 - [UI/UX Reality Check](../UI_UX_REALITY_CHECK.md) - Current gaps assessment
 - [Spatial Gesture UI Concept](../ui/CONCEPT_spatial_gesture_ui.md) - Future UI concept

@@ -9,6 +9,7 @@
 ### File: `src/frontend/src/pages/Settings.tsx`
 
 **Existing State Variables:**
+
 ```typescript
 const [cameraPermission, setCameraPermission] = useState<
   'granted' | 'denied' | 'prompt'
@@ -18,11 +19,13 @@ const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
 ```
 
 **Existing Functions:**
+
 - `checkCameraPermission()` - Checks camera permissions on mount
 - `handleCameraToggle()` - Toggles camera enable/disable
 - `handleReset()` - Resets all settings
 
 **Existing Stores:**
+
 - `useSettingsStore()` - Settings state management
 - `useProgressStore()` - Progress tracking (unlockAllBatches, resetProgress, getUnlockedBatches, getMasteredLettersCount)
 
@@ -30,14 +33,16 @@ const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
 
 ## What Needs to Be Added (Parent Gate)
 
-### Required State Variables:
+### Required State Variables
+
 ```typescript
 const [parentGatePassed, setParentGatePassed] = useState(false);
 const [holdingGate, setHoldingGate] = useState(false);
 const [holdDuration, setHoldDuration] = useState(0);
 ```
 
-### Required Functions:
+### Required Functions
+
 ```typescript
 // Handle parent gate hold duration (3 seconds)
 useEffect(() => {
@@ -126,6 +131,7 @@ This overlay should wrap around ALL Settings content when gate not passed. It sh
 All existing Settings content should be wrapped by the parent gate conditional. NO other changes needed to existing Settings content.
 
 **Important:** Do NOT wrap Settings content in JSX fragment `<>...</>`. The conditional should be:
+
 - Gate overlay: `{!parentGatePassed && <overlay>}`
 - Settings content: `{parentGatePassed && <existing-settings>}`
 
@@ -135,9 +141,10 @@ This creates two separate render branches that don't nest.
 
 ## Integration Points
 
-### Where to Add Code:
+### Where to Add Code
 
 1. **After line 18** (after `showUnlockConfirm` state):
+
    ```typescript
    const [parentGatePassed, setParentGatePassed] = useState(false);
    const [holdingGate, setHoldingGate] = useState(false);
@@ -145,6 +152,7 @@ This creates two separate render branches that don't nest.
    ```
 
 2. **After line 42** (after `handleReset` function):
+
    ```typescript
    const handleGateStart = () => {
      setHoldingGate(true);
@@ -193,7 +201,7 @@ This creates two separate render branches that don't nest.
 
 ## Implementation Steps
 
-### For Next Agent:
+### For Next Agent
 
 1. ✅ **Read clean Settings.tsx** (done - file is reverted)
 2. ⬜ **Add parent gate state variables** (after line 18)
@@ -224,11 +232,13 @@ This creates two separate render branches that don't nest.
 ## Notes for Next Agent
 
 **Don't make the same mistake I made:**
+
 - Do NOT wrap the entire Settings content in a conditional that creates nested JSX
 - Use two separate conditionals: `{!parentGatePassed && <overlay>}` AND `{parentGatePassed && <settings>}`
 - This creates two independent render branches that TypeScript can parse correctly
 
 **Acceptance Criteria Checklist:**
+
 - [ ] Parent gate overlay implemented
 - [ ] 3-second hold logic works
 - [ ] Visual feedback (progress indicator)

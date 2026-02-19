@@ -1,11 +1,13 @@
 # Next Focus Strategy Prompt v1.0 (Market + Audience + Repo Reality)
 
 **Purpose**: Recommend what to work on next using a blend of:
+
 - product thinking (audience, personas, value prop, SWOT)
 - market awareness (alternatives, differentiation, risks)
 - repo reality (current capabilities, constraints, technical debt)
 
 **Use When**:
+
 - Founder asks “what next?”
 - Roadmap feels unclear or overly code-driven
 - You need to pick 1–3 high-leverage bets for the next sprint
@@ -34,11 +36,13 @@
 ## Step 1 — Baseline “Repo Reality” (Observed)
 
 If you can run commands, capture:
+
 - what features exist (pages/modules)
 - what’s broken (failing tests, flaky tracking)
 - biggest tech debt items blocking iteration
 
 Required evidence block (if possible):
+
 ```bash
 ls -la docs
 rg -n "TODO|FIXME|HACK" -S src docs prompts || true
@@ -49,6 +53,7 @@ rg -n "TODO|FIXME|HACK" -S src docs prompts || true
 ## Step 2 — Audience & Personas (2–3)
 
 Create 2–3 personas, each with:
+
 - Who: (child/parent)
 - Context: (home learning, school supplement, special needs, multilingual)
 - Jobs-to-be-done: (what success looks like)
@@ -60,6 +65,7 @@ Create 2–3 personas, each with:
 ## Step 3 — SWOT (Product-Level)
 
 Create a simple SWOT table for *this product* (not the repo).
+
 - Strengths: e.g., local-first privacy, camera play, multilingual
 - Weaknesses: e.g., reliability, content breadth, setup friction
 - Opportunities: e.g., parent dashboards, differentiated creative play
@@ -72,12 +78,15 @@ If you lack evidence for any item, label it `Inferred` or `Unknown`.
 ## Step 4 — Market Alternatives (Lightweight)
 
 Without heavy research, list 5–10 “alternatives” categories:
+
 - school apps, handwriting apps, puzzle apps, creative drawing apps, etc.
 
 Then define **positioning**:
+
 - “For <persona>, who <need>, our product is a <category> that <unique benefit>.”
 
 If web research is allowed, propose a 30-minute validation plan:
+
 - keywords to search
 - what to extract (pricing, core loops, differentiation)
 
@@ -86,6 +95,7 @@ If web research is allowed, propose a 30-minute validation plan:
 ## Step 5 — Candidate Bets (Generate 6–10)
 
 Brainstorm 6–10 possible next focus areas across:
+
 - Reliability (tracking stability, tests green)
 - Core learning loop improvements (scoring, adaptive difficulty)
 - Content expansion (numbers, puzzles, creative)
@@ -93,6 +103,7 @@ Brainstorm 6–10 possible next focus areas across:
 - UX improvements (onboarding, calibration)
 
 For each bet, score:
+
 - Impact (1–5)
 - Effort (1–5)
 - Risk (1–5)
@@ -104,6 +115,7 @@ For each bet, score:
 ## Step 6 — Choose 1–3 Next Bets + Define Success
 
 Pick the top 1–3 bets and define:
+
 - Success metric (observable)
 - User-facing outcome
 - Minimum viable scope (1 sprint)
@@ -114,6 +126,7 @@ Pick the top 1–3 bets and define:
 ## Step 7 — Convert into Work Tickets (Repo-Native)
 
 Create:
+
 - 1 “epic” ticket (optional)
 - 2–5 implementation tickets with:
   - explicit file targets (if known)

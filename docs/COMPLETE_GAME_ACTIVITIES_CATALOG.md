@@ -1,4 +1,5 @@
 # Complete Games & Activities Catalog
+
 ## Synthesis + New Creative Ideas
 
 **Last Updated:** 2026-02-05
@@ -20,6 +21,7 @@
 ## ✅ CURRENTLY IMPLEMENTED (4 Games)
 
 ### Live Games
+
 1. **Alphabet Tracing** - Multi-language letter tracing with hand tracking
 2. **Finger Number Show** - Finger counting 0-20 with dual letter mode
 3. **Connect the Dots** - Number/letter sequence to reveal images
@@ -30,6 +32,7 @@
 ## 📚 DOCUMENTED GAMES (60+ from existing docs)
 
 ### Literacy Games (20)
+
 - Alphabet Tracing ✅, Letter Hunt ✅, Connect Dots ✅
 - Phonics Sounds, Phonics Tracing, Rhyme Time
 - Beginning/Ending Sounds, Blend Builder, Syllable Clap
@@ -37,6 +40,7 @@
 - Story Builder, Reading Along, Letter Sound Match
 
 ### Numeracy Games (13)
+
 - Finger Number Show ✅
 - Number Tracing, Math Monsters, Color by Number
 - Counting Objects, More or Less, Number Sequence
@@ -44,24 +48,29 @@
 - Shape Counting, Time Telling, Pattern Continue
 
 ### Motor Skills (9)
+
 - Mirror Draw, Shape Safari, Connect Dots ✅
 - Maze Runner, Path Following, Cutting Practice
 - Pinch Practice, Circle Drawing, Sticker Placement
 
 ### Logic/Cognitive (8)
+
 - Story Sequence, Memory Match, Odd One Out
 - Size Sorting, Same & Different, Puzzle Builder
 - Shadow Match, Pattern Complete
 
 ### Creative (6)
+
 - Free Draw, Color Mixing, Dress Up Pip
 - Scene Builder, Music Maker, Rhythm Tap
 
 ### Knowledge (6)
+
 - Animal Sounds, Body Parts, Emotion Cards
 - Nature Explorer, Weather Watch, Colors of Life
 
 ### Audio/Voice (5)
+
 - Voice Stories, Sing Along, Sound Effects
 - Echo Game, Animal Teacher
 
@@ -70,11 +79,14 @@
 ## 🎮 NEW CREATIVE GAME IDEAS (40+)
 
 ### A. PHYSICAL MOVEMENT GAMES (8)
+
 Using full body/pose detection
 
 #### A1. **Yoga Animals** (Ages 3-6)
+
 **Pattern:** Match Pose
 **How:** Copy animal yoga poses shown by Pip
+
 - "Be a fierce lion!" 🦁 (Lion pose)
 - "Stretch like a cat!" 🐱 (Cat-cow)
 - "Stand tall like a tree!" 🌳 (Tree pose)
@@ -83,8 +95,10 @@ Using full body/pose detection
 **Effort:** 2 weeks
 
 #### A2. **Simon Says with Pip** (Ages 3-7)
+
 **Pattern:** Sequence Memory + Match Pose
-**How:** 
+**How:**
+
 - Pip demonstrates 2-3 actions (touch head, wave, clap)
 - Child repeats the sequence
 - Gets progressively harder
@@ -93,8 +107,10 @@ Using full body/pose detection
 **Effort:** 1.5 weeks
 
 #### A3. **Freeze Dance** (Ages 2-6)
+
 **Pattern:** Hold Still
 **How:**
+
 - Music plays, child dances freely
 - Music stops, child must FREEZE in place
 - Pip detects movement - if still = points!
@@ -103,8 +119,10 @@ Using full body/pose detection
 **Effort:** 1 week
 
 #### A4. **Shadow Puppets** (Ages 4-7)
+
 **Pattern:** Match Pose
 **How:**
+
 - Make hand shadow animals on screen
 - Match the target shadow shape
 - "Make a butterfly!" "Make a dog!"
@@ -113,8 +131,10 @@ Using full body/pose detection
 **Effort:** 2 weeks
 
 #### A5. **Balloon Pop Fitness** (Ages 3-6)
+
 **Pattern:** Touch Targets + Movement
 **How:**
+
 - Virtual balloons float up screen
 - Child jumps/reaches to "pop" them
 - Different colors = different actions
@@ -126,8 +146,10 @@ Using full body/pose detection
 **Effort:** 2 weeks
 
 #### A6. **Follow the Leader** (Ages 3-6)
+
 **Pattern:** Match Pose
 **How:**
+
 - Pip leads movement patterns
 - Child mirrors exactly
 - Walk like a penguin, hop like a frog, tiptoe
@@ -136,8 +158,10 @@ Using full body/pose detection
 **Effort:** 1.5 weeks
 
 #### A7. **Musical Statues** (Ages 4-7)
+
 **Pattern:** Hold Still + Creativity
 **How:**
+
 - Dance when music plays
 - Freeze in a specific pose when it stops
 - Hold for 5 seconds
@@ -147,8 +171,10 @@ Using full body/pose detection
 **Effort:** 1.5 weeks
 
 #### A8. **Obstacle Course** (Ages 4-7)
+
 **Pattern:** Sequence Memory + Movement
 **How:**
+
 - Virtual obstacle course appears
 - Duck under the bar, jump over the log, sidestep the rocks
 - Complete in correct order
@@ -159,11 +185,14 @@ Using full body/pose detection
 ---
 
 ### B. COLLABORATIVE GAMES (6)
+
 For siblings, friends, or parent-child
 
 #### B1. **Co-Draw** (Ages 4-8)
+
 **Pattern:** Drag & Drop + Trace Paths
 **How:**
+
 - Two players (two hands or two kids)
 - Complete a drawing together
 - One draws left side, other draws right
@@ -173,8 +202,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### B2. **Hand Puppet Theater** (Ages 3-7)
+
 **Pattern:** Drag & Drop + Voice
 **How:**
+
 - Virtual puppet stage with characters
 - Use hands as puppets (finger = head, thumb = arms)
 - Move puppets to tell stories
@@ -184,8 +215,10 @@ For siblings, friends, or parent-child
 **Effort:** 3 weeks
 
 #### B3. **Team Tracing** (Ages 5-8)
+
 **Pattern:** Trace Paths
 **How:**
+
 - Complex letter/shape requires 2+ hands
 - "Use both hands to trace this big letter!"
 - Parent can help child complete
@@ -194,8 +227,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### B4. **Pass the Parcel** (Ages 3-6)
+
 **Pattern:** Sequence Memory
 **How:**
+
 - Virtual parcel moves around circle
 - When music stops, player "opens" layer
 - Layer reveals: puzzle piece, letter to trace, number to show
@@ -204,8 +239,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### B5. **Cooperative Cleanup** (Ages 3-5)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Messy room scene with toys scattered
 - Two players work together to sort items into bins
 - One picks, one guides where to put
@@ -214,8 +251,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### B6. **Mirror Me** (Ages 4-7)
+
 **Pattern:** Match Pose
 **How:**
+
 - Parent/child face each other (or siblings)
 - One leads movements, other mirrors
 - System detects synchronization
@@ -228,8 +267,10 @@ For siblings, friends, or parent-child
 ### C. SEASONAL/THEMATIC GAMES (10)
 
 #### C1. **Festival of Lights (Diwali)** 🪔 (Ages 3-7)
+
 **Pattern:** Trace Paths + Hold Still
 **How:**
+
 - Trace diya (oil lamp) shapes
 - "Light" virtual diyas by holding finger steady
 - Create rangoli patterns by connecting dots
@@ -239,8 +280,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### C2. **Holi Color Splash** 🎨 (Ages 3-6)
+
 **Pattern:** Touch Targets
 **How:**
+
 - White canvas with outlines
 - Touch different areas to "splash" color
 - Mix colors by overlapping splashes
@@ -250,8 +293,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### C3. **Pongal Harvest** 🌾 (Ages 4-7)
+
 **Pattern:** Sequence Memory
 **How:**
+
 - Traditional Pongal pot boiling simulation
 - Add ingredients in correct order
 - Stir with hand movements
@@ -261,8 +306,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### C4. **Christmas Tree Decorator** 🎄 (Ages 3-6)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Drag ornaments to decorate tree
 - Hang at different heights
 - Light up tree when complete
@@ -272,8 +319,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### C5. **Rainy Day Puddle Jump** ☔ (Ages 3-5)
+
 **Pattern:** Touch Targets
 **How:**
+
 - Virtual puddles appear on screen
 - Jump on them (motion detection)
 - Splash effects when "hit"
@@ -283,8 +332,10 @@ For siblings, friends, or parent-child
 **Effort:** 1 week
 
 #### C6. **Space Explorer** 🚀 (Ages 4-8)
+
 **Pattern:** Trace Paths + Touch Targets
 **How:**
+
 - Trace rocket path to planets
 - "Collect" stars by touching them
 - Learn planet names
@@ -294,8 +345,10 @@ For siblings, friends, or parent-child
 **Effort:** 3 weeks
 
 #### C7. **Underwater Adventure** 🐠 (Ages 3-6)
+
 **Pattern:** Touch Targets + Drag & Drop
 **How:**
+
 - Swim through ocean (trace path)
 - Touch sea creatures to learn names
 - Help fish find their school (color matching)
@@ -305,8 +358,10 @@ For siblings, friends, or parent-child
 **Effort:** 3 weeks
 
 #### C8. **Jungle Safari** 🦁 (Ages 3-6)
+
 **Pattern:** Scavenger Hunt + Touch Targets
 **How:**
+
 - Find hidden animals in jungle scene
 - Make animal sounds or gestures to "call" them
 - Learn animal facts from Pip
@@ -316,8 +371,10 @@ For siblings, friends, or parent-child
 **Effort:** 3 weeks
 
 #### C9. **Dinosaur Dig** 🦕 (Ages 4-7)
+
 **Pattern:** Trace Paths + Touch Targets
 **How:**
+
 - Brush away dirt (swipe gestures) to reveal fossils
 - Assemble dinosaur skeleton by dragging bones
 - Learn dinosaur names and sounds
@@ -326,8 +383,10 @@ For siblings, friends, or parent-child
 **Effort:** 2.5 weeks
 
 #### C10. **Farm Friends** 🚜 (Ages 2-5)
+
 **Pattern:** Touch Targets + Drag & Drop
 **How:**
+
 - Feed animals by dragging correct food
 - Trace paths to help animals find home
 - Learn animal sounds
@@ -341,8 +400,10 @@ For siblings, friends, or parent-child
 ### D. MULTISENSORY GAMES (8)
 
 #### D1. **Texture Explorer** (Ages 3-5)
+
 **Pattern:** Touch Targets
 **How:**
+
 - Show objects with different textures
 - Child touches/gestures to "feel" them
 - Audio feedback describes texture
@@ -352,8 +413,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### D2. **Sound Garden** (Ages 2-6)
+
 **Pattern:** Touch Targets
 **How:**
+
 - Touch flowers, they play musical notes
 - Create simple melodies
 - Different plants = different instruments
@@ -362,9 +425,11 @@ For siblings, friends, or parent-child
 **Tech:** Web Audio API + Hand tracking
 **Effort:** 2 weeks
 
-#### D3. **Smell Detective** (Ages 4-6) 
+#### D3. **Smell Detective** (Ages 4-6)
+
 **Pattern:** Scavenger Hunt
 **How:**
+
 - "Find something that smells sweet/sour" in room
 - Use camera to scan objects
 - (Simulated) - points for finding right categories
@@ -374,8 +439,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### D4. **Temperature Sort** (Ages 3-5)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Sort items by temperature: hot ☀️, warm 🌤️, cold ❄️
 - Sun, ice cream, soup, snowman, etc.
 - Drag to correct zones
@@ -384,8 +451,10 @@ For siblings, friends, or parent-child
 **Effort:** 1 week
 
 #### D5. **Taste Match** (Ages 4-6)
+
 **Pattern:** Touch Targets
 **How:**
+
 - Show food items
 - "Find something sweet/salty/sour"
 - Match taste category
@@ -395,8 +464,10 @@ For siblings, friends, or parent-child
 **Effort:** 1 week
 
 #### D6. **Music Conductor** (Ages 4-8)
+
 **Pattern:** Hold Still + Movement
 **How:**
+
 - Use hand as conductor's baton
 - Speed up/slow down music by moving hand
 - Volume control by hand height
@@ -406,8 +477,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### D7. **Light Painter** (Ages 4-7)
+
 **Pattern:** Trace Paths
 **How:**
+
 - Dark screen, fingertip leaves light trail
 - Draw glowing pictures in "dark"
 - Long exposure effect
@@ -417,8 +490,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### D8. **Bubble Pop Symphony** (Ages 2-5)
+
 **Pattern:** Touch Targets
 **How:**
+
 - Bubbles float up with different notes
 - Pop bubbles to play melody
 - Color-coded notes
@@ -432,8 +507,10 @@ For siblings, friends, or parent-child
 ### E. EVERYDAY LIFE SKILLS (8)
 
 #### E1. **Dress for Weather** 👕 (Ages 3-5)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Show weather outside (rainy, sunny, snowy)
 - Drag appropriate clothes to Pip
 - Raincoat + boots for rain, sunglasses for sun
@@ -442,8 +519,10 @@ For siblings, friends, or parent-child
 **Effort:** 1 week
 
 #### E2. **Brush Teeth with Pip** 🪥 (Ages 2-4)
+
 **Pattern:** Match Pose
 **How:**
+
 - Pip demonstrates brushing motion
 - Child mimics with hand (holding virtual toothbrush)
 - 2-minute timer with song
@@ -453,8 +532,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### E3. **Pack the Lunchbox** 🍱 (Ages 3-5)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Sort healthy vs treat foods
 - Pack balanced lunchbox
 - "One fruit, one vegetable, one protein"
@@ -464,8 +545,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### E4. **Tidy Up Time** 🧹 (Ages 3-5)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Messy room scene
 - Drag items to correct places
 - Toys in toybox, books on shelf, clothes in hamper
@@ -475,8 +558,10 @@ For siblings, friends, or parent-child
 **Effort:** 1 week
 
 #### E5. **Wash Hands Dance** 🧼 (Ages 2-4)
+
 **Pattern:** Match Pose
 **How:**
+
 - 20-second handwashing song
 - Pip demonstrates proper technique
 - Child follows along
@@ -486,8 +571,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### E6. **Set the Table** 🍽️ (Ages 4-6)
+
 **Pattern:** Drag & Drop
 **How:**
+
 - Place plate, cup, fork, spoon, napkin correctly
 - Learn left/right placement
 - Count settings for number of people
@@ -497,8 +584,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### E7. **Plant a Garden** 🌱 (Ages 4-7)
+
 **Pattern:** Sequence Memory + Drag & Drop
 **How:**
+
 - Dig hole, plant seed, water, watch grow
 - Daily check-ins (progress over days)
 - Learn plant parts and needs
@@ -508,8 +597,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### E8. **Cooking with Pip** 👨‍🍳 (Ages 4-7)
+
 **Pattern:** Sequence Memory + Drag & Drop
 **How:**
+
 - Simple recipes: sandwich, fruit salad
 - Add ingredients in correct order
 - Mix with hand gestures
@@ -525,8 +616,10 @@ For siblings, friends, or parent-child
 ### Indian Cultural Games
 
 #### G1. **Mudra Master** 🙏 (Ages 5-8)
+
 **Pattern:** Match Pose
 **How:**
+
 - Learn traditional Indian dance mudras (hand gestures)
 - Pataka, Tripataka, Ardhapataka
 - Each mudra has meaning and story
@@ -536,8 +629,10 @@ For siblings, friends, or parent-child
 **Effort:** 3 weeks
 
 #### G2. **Rangoli Designer** 🌸 (Ages 4-8)
+
 **Pattern:** Trace Paths + Symmetry
 **How:**
+
 - Traditional floor art patterns
 - Trace intricate designs with finger
 - Dot grid system (connect the dots advanced)
@@ -547,8 +642,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### G3. **Garba Steps** 💃 (Ages 5-8)
+
 **Pattern:** Match Pose + Sequence
 **How:**
+
 - Learn basic Garba dance steps
 - Follow Pip's movements
 - Hand clapping patterns
@@ -558,8 +655,10 @@ For siblings, friends, or parent-child
 **Effort:** 2.5 weeks
 
 #### G4. **Story of Ganesha** 🐘 (Ages 4-7)
+
 **Pattern:** Interactive Story
 **How:**
+
 - Interactive story with gestures
 - Make elephant trunk with arm
 - Help Ganesha solve puzzles
@@ -571,8 +670,10 @@ For siblings, friends, or parent-child
 ### Universal Gesture Games
 
 #### G5. **Sign Language Basics** 🤟 (Ages 5-8)
+
 **Pattern:** Match Pose
 **How:**
+
 - Learn basic ISL (Indian Sign Language) signs
 - Alphabet, numbers, common words
 - "Hello," "Thank you," "Please"
@@ -582,8 +683,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### G6. **Emotion Charades** 😊 (Ages 4-7)
+
 **Pattern:** Match Pose
 **How:**
+
 - Act out emotions with face/body
 - System detects facial expression
 - "Show me HAPPY!" "Show me SURPRISED!"
@@ -593,8 +696,10 @@ For siblings, friends, or parent-child
 **Effort:** 2 weeks
 
 #### G7. **Traffic Police** 🚦 (Ages 3-6)
+
 **Pattern:** Match Pose
 **How:**
+
 - Be a traffic police officer
 - Stop = Open palm up
 - Go = Point forward
@@ -605,8 +710,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### G8. **Magic Wand** 🪄 (Ages 3-6)
+
 **Pattern:** Sequence Memory
 **How:**
+
 - Learn "magic spells" (specific gestures)
 - Circle + tap = make object appear
 - Swish + flick = change color
@@ -616,8 +723,10 @@ For siblings, friends, or parent-child
 **Effort:** 1.5 weeks
 
 #### G9. **Puppet Control** 🎭 (Ages 4-7)
+
 **Pattern:** Match Pose
 **How:**
+
 - Control virtual marionette puppet
 - Each finger controls different string
 - Make puppet walk, dance, wave
@@ -627,8 +736,10 @@ For siblings, friends, or parent-child
 **Effort:** 2.5 weeks
 
 #### G10. **Air Band** 🎸 (Ages 4-8)
+
 **Pattern:** Match Pose
 **How:**
+
 - Play air guitar, drums, piano
 - Different hand positions = different instruments
 - Follow rhythm patterns
@@ -641,15 +752,19 @@ For siblings, friends, or parent-child
 
 ## 👥 NEW SOCIAL ACTIVITIES (8)
 
-### S1. **Compliment Circle** 
+### S1. **Compliment Circle**
+
 **Type:** Kindness | **Players:** 2+ | **Duration:** 5 min
+
 - Players take turns giving compliments
 - Pip teaches what makes a good compliment
 - "I like how you..." "You're good at..."
 **Skills:** Kindness, observation, positivity
 
 ### S2. **Helping Hands**
+
 **Type:** Cooperation | **Players:** 2 | **Duration:** 8 min
+
 - One player has the "problem" (can't reach something)
 - Other player helps
 - Switch roles
@@ -657,14 +772,18 @@ For siblings, friends, or parent-child
 **Skills:** Empathy, cooperation, gratitude
 
 ### S3. **Feelings Check**
+
 **Type:** Emotional | **Players:** 1+ | **Duration:** 3 min
+
 - Point to how you're feeling today
 - Happy 😊, Sad 😢, Angry 😠, Excited 🎉, Tired 😴
 - Pip validates: "It's okay to feel sad"
 **Skills:** Emotional awareness, vocabulary
 
 ### S4. **Apology Practice**
+
 **Type:** Conflict Resolution | **Players:** 2 | **Duration:** 5 min
+
 - Role play scenarios where someone gets hurt
 - Practice saying "I'm sorry"
 - Practice accepting apology
@@ -672,28 +791,36 @@ For siblings, friends, or parent-child
 **Skills:** Responsibility, forgiveness, empathy
 
 ### S5. **Sharing Snacks**
+
 **Type:** Sharing | **Players:** 2+ | **Duration:** 5 min
+
 - Divide virtual snacks equally
 - One person distributes, others choose
 - "Would you like some?" "Thank you!"
 **Skills:** Fairness, generosity, manners
 
 ### S6. **Taking Turns Builder**
+
 **Type:** Patience | **Players:** 2+ | **Duration:** 6 min
+
 - Build a block tower together
 - Strict turn-taking
 - Celebrate when it falls!
 **Skills:** Patience, turn-taking, resilience
 
 ### S7. **Empathy Detective**
+
 **Type:** Understanding | **Players:** 1+ | **Duration:** 5 min
+
 - Watch Pip scenarios
 - "How do you think Pip feels?"
 - "Why does Pip feel that way?"
 **Skills:** Perspective-taking, empathy
 
 ### S8. **Friendship Bracelet**
+
 **Type:** Bonding | **Players:** 2 | **Duration:** 8 min
+
 - Take turns adding beads to virtual bracelet
 - Choose colors that remind you of friend
 - Exchange bracelets
@@ -725,6 +852,7 @@ For siblings, friends, or parent-child
 ## 🎯 IMPLEMENTATION PRIORITY (NEW Games)
 
 ### Quick Wins (1-2 weeks each)
+
 1. **Yoga Animals** - Uses existing pose detection
 2. **Freeze Dance** - Simple motion detection
 3. **Dress for Weather** - Drag & drop pattern
@@ -732,24 +860,27 @@ For siblings, friends, or parent-child
 5. **Simon Says** - Basic pose matching
 
 ### Medium Effort (2-3 weeks each)
+
 6. **Festival Games** (Diwali/Holi) - Cultural + Canvas
-7. **Shadow Puppets** - Hand shape analysis
-8. **Balloon Pop Fitness** - Motion + targets
-9. **Light Painter** - Canvas effects
-10. **Sign Language Basics** - Hand shapes
+2. **Shadow Puppets** - Hand shape analysis
+3. **Balloon Pop Fitness** - Motion + targets
+4. **Light Painter** - Canvas effects
+5. **Sign Language Basics** - Hand shapes
 
 ### Larger Projects (3-4 weeks each)
+
 11. **Space/Underwater Adventure** - Rich environments
-12. **Hand Puppet Theater** - Multi-hand tracking
-13. **Mudra Master** - Complex hand recognition
-14. **Obstacle Course** - Advanced pose detection
-15. **Co-Draw** - Multiplayer synchronization
+2. **Hand Puppet Theater** - Multi-hand tracking
+3. **Mudra Master** - Complex hand recognition
+4. **Obstacle Course** - Advanced pose detection
+5. **Co-Draw** - Multiplayer synchronization
 
 ---
 
 ## 🔧 TECHNOLOGY REQUIREMENTS
 
 ### Already Available (from current games)
+
 - ✅ MediaPipe Hand Landmarker (21 keypoints)
 - ✅ MediaPipe Pose Landmarker (33 keypoints)
 - ✅ Canvas API for drawing
@@ -758,6 +889,7 @@ For siblings, friends, or parent-child
 - ✅ React + TypeScript
 
 ### New Tech Needed
+
 - 🔲 MediaPipe Face Landmarker (for emotion games)
 - 🔲 Object Detection (for scavenger hunts)
 - 🔲 Multi-hand tracking optimization
@@ -782,6 +914,7 @@ For siblings, friends, or parent-child
 ## 💡 CONCLUSION
 
 With **185+ total activities** (existing + new), Advay Vision Learning can provide:
+
 - **2+ years of daily content** (if child plays 2-3 activities/day)
 - **Full curriculum coverage** for ages 2-8
 - **Cultural relevance** for Indian families

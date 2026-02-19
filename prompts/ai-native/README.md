@@ -81,6 +81,7 @@ This directory contains workflow prompts for developing, testing, and maintainin
 ## Common Scenarios
 
 ### "We want to add a new AI feature"
+
 ```
 1. ai-feature-explore-v1.0.md  (brainstorm possibilities)
 2. ai-feature-research-v1.0.md (evaluate options)
@@ -89,6 +90,7 @@ This directory contains workflow prompts for developing, testing, and maintainin
 ```
 
 ### "We want to switch LLM providers"
+
 ```
 1. ai-feature-research-v1.0.md (compare providers)
 2. ai-feature-update-v1.0.md   (migrate)
@@ -96,6 +98,7 @@ This directory contains workflow prompts for developing, testing, and maintainin
 ```
 
 ### "Something is broken in production"
+
 ```
 1. ai-feature-check-v1.0.md    (diagnose)
 2. ai-feature-update-v1.0.md   (fix)
@@ -103,6 +106,7 @@ This directory contains workflow prompts for developing, testing, and maintainin
 ```
 
 ### "We need to improve performance"
+
 ```
 1. ai-feature-check-v1.0.md    (measure baseline)
 2. ai-feature-research-v1.0.md (research options)
@@ -117,6 +121,7 @@ This directory contains workflow prompts for developing, testing, and maintainin
 ### Updating Prompts
 
 When updating a prompt:
+
 1. Increment version number (e.g., v1.0 → v1.1)
 2. Add changelog entry
 3. Update README if scope changes
@@ -125,6 +130,7 @@ When updating a prompt:
 ### Creating New Prompts
 
 New prompts should include:
+
 - Version number and date
 - Clear purpose statement
 - When to use / When not to use

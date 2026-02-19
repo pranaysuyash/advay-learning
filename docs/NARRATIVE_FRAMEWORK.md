@@ -11,6 +11,7 @@ Transform the app from a collection of educational games into a cohesive narrati
 ### Setting Concept
 
 A vibrant, whimsical world where:
+
 - **Letters live as friendly characters** (A is an Antelope, B is a Butterfly)
 - **Every location has a purpose** (Jungle for tracing, Beach for counting, Mountain for challenges)
 - **Discovery is constant** — new areas unlock as children progress
@@ -49,6 +50,7 @@ A vibrant, whimsical world where:
 ### Pip's Voice Lines (TTS Integration)
 
 **Positive Reinforcement:**
+
 - "You did it! High five! ✋"
 - "Woohoo! You're getting so good!"
 - "Amazing! Even better than last time!"
@@ -56,6 +58,7 @@ A vibrant, whimsical world where:
 - "You're a letter superstar! ⭐"
 
 **Encouragement (When Struggling):**
+
 - "That's okay! Let's try again together."
 - "Hmm, that was close! Try tracing a little slower."
 - "You're doing great! Keep going!"
@@ -63,11 +66,13 @@ A vibrant, whimsical world where:
 - "Mistakes help us learn. Let's try once more!"
 
 **Milestone Celebrations:**
+
 - "You learned your first letter! This is so exciting!"
 - "10 letters! You're becoming a letter master!"
 - "All 26 letters! You did it! Let's celebrate! 🎉"
 
 **Goodbyes:**
+
 - "Great playing today! See you next time!"
 - "Time to go? That's okay! I'll be here when you come back!"
 - "Sleep tight! Dream of letters! 🌙"
@@ -82,12 +87,14 @@ A vibrant, whimsical world where:
 > "Oh no! The Letter Friends are lost in the mist! They need you to trace their shapes to help them find their way home. Each letter you trace frees them from the mist!"
 
 **Mechanic as Story:**
+
 - Drawing isn't "tracing" — it's "rescuing"
 - Each letter is a character with a name and personality
 - "A says 'Ahhh' and wants to be your friend!"
 - When rescued, the letter joins a parade
 
 **Visual Progression:**
+
 1. Letter appears dim (lost in mist)
 2. Child traces (beams of light appear)
 3. Letter becomes bright (rescued)
@@ -100,12 +107,14 @@ A vibrant, whimsical world where:
 > "The animal friends want to know how many treats they have. Hold up your fingers to show them! They'll count along with you!"
 
 **Mechanic as Story:**
+
 - Numbers aren't abstract — they're quantities of treats
 - 1 cookie for the bunny 🐰
 - 2 bones for the puppy 🐶
 - 3 berries for the bird 🐦
 
 **Visual Progression:**
+
 - Animals appear with empty bowls
 - "How many treats does Bunny want?"
 - Child shows number with fingers
@@ -118,12 +127,14 @@ A vibrant, whimsical world where:
 > "The night sky is full of secret pictures! Connect the stars to reveal what shapes are hiding in the clouds. I wonder what you'll discover..."
 
 **Mechanic as Story:**
+
 - Not "dots" — they're stars
 - Not "connecting" — it's "drawing constellations"
 - Each completed picture reveals a constellation
 - Collections: Animals, Letters, Numbers, Shapes
 
 **Visual Progression:**
+
 - Night sky with numbered stars
 - As dots connect, lines glow
 - Final reveal: Constellation animation
@@ -135,11 +146,13 @@ A vibrant, whimsical world where:
 > "The Letter Friends are playing hide and seek! They're hiding among the leaves, flowers, and clouds. Can you find [Letter A]?"
 
 **Mechanic as Story:**
+
 - Not "find the letter" — it's "find your friend"
 - Environment is alive (leaves move, flowers wave)
 - When found: Letter friend waves and says hello
 
 **Visual Progression:**
+
 - Busy scene (garden, forest, sky)
 - Letter peeks out from hiding
 - Child taps letter
@@ -155,6 +168,7 @@ A vibrant, whimsical world where:
 The Progress page isn't analytics — it's a storybook of adventures. Each page shows:
 
 **"Your Journey" Pages:**
+
 - **Cover:** Child's name, profile picture, "Adventurer since [date]"
 - **"Places You've Been"** — Map showing unlocked locations
 - **"Friends You've Met"** — Collection of Letter Friends rescued
@@ -162,6 +176,7 @@ The Progress page isn't analytics — it's a storybook of adventures. Each page 
 - **"Treasures Found"** — Achievement medals
 
 **Visual Style:**
+
 - Hand-drawn map aesthetic
 - Sticker collection UI
 - Passport stamp style
@@ -184,11 +199,13 @@ The Progress page isn't analytics — it's a storybook of adventures. Each page 
 ### Instead of "Wrong": "Pip Helps You Try Again"
 
 **Narrative Voice:**
+
 - "Oops! That letter is a bit shy. Try again!"
 - "The letter is hiding from the mist. Trace more carefully!"
 - "Hmm, almost! The letter needs a bit more help."
 
 **Visual Treatment:**
+
 - No red X's
 - No error states
 - Soft, encouraging colors (yellow/orange, not red)
@@ -224,6 +241,7 @@ The Progress page isn't analytics — it's a storybook of adventures. Each page 
 | Profile | Adventurer Profile | 👤 |
 
 **Parent Control as Story:**
+
 - "Camera" → "Pip's Eyes" (turn on/off)
 - "Mute" → "Quiet Mode" (shhh, Pip whispers)
 - "Time Limit" → "Adventure Hours"
@@ -382,6 +400,7 @@ The Progress page isn't analytics — it's a storybook of adventures. Each page 
 ## 14. References
 
 **Inspiration:**
+
 - **Toca Boca**: Open-ended play, no rules
 - **Peppa Pig**: Familiar characters, repetition as comfort
 - **Sesame Street**: Learning through characters
@@ -395,9 +414,9 @@ The Progress page isn't analytics — it's a storybook of adventures. Each page 
 This narrative framework transforms the app from:
 
 > **"Educational software with games"**
-> 
+>
 > to
-> 
+>
 > **"A world where children explore, discover, and grow with Pip"**
 
 Every interaction becomes part of a story. Every milestone is a celebration. Every difficulty is an opportunity for encouragement. The child isn't learning — they're adventuring.

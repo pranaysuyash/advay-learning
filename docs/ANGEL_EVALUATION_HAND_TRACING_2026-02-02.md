@@ -3,7 +3,7 @@
 **Evaluation Date**: February 2, 2026  
 **Evaluator Persona**: Small Angel Investor (Practical, Scrappy, Founder-Friendly)  
 **Investment Stage**: Pre-Seed / Angel ($10K-$100K checks)  
-**Product Access**: http://localhost:6173  
+**Product Access**: <http://localhost:6173>  
 **Evaluation Focus**: Hand tracing as core user love driver
 
 ---

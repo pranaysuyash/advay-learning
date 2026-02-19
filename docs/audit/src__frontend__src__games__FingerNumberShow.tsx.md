@@ -111,6 +111,7 @@
 **Command**: `git status --porcelain=v1 | head -n 80`
 
 **Output**:
+
 ```
 M docs/WORKLOG_ADDENDUM_v2.md
 M docs/WORKLOG_TICKETS.md
@@ -126,6 +127,7 @@ M src/frontend/src/games/FingerNumberShow.tsx
 **Command**: `wc -l src/frontend/src/games/FingerNumberShow.tsx`
 
 **Output**:
+
 ```
 692 src/frontend/src/games/FingerNumberShow.tsx
 ```
@@ -135,6 +137,7 @@ M src/frontend/src/games/FingerNumberShow.tsx
 **Command**: `rg -n "useHandTracking\\(|useGameLoop\\(" src/frontend/src/games/FingerNumberShow.tsx`
 
 **Output**:
+
 ```
 84:  } = useHandTracking({
 349:  useGameLoop({
@@ -145,6 +148,7 @@ M src/frontend/src/games/FingerNumberShow.tsx
 **Command**: `rg -n "requestAnimationFrame\\(|setInterval\\(|setTimeout\\(" src/frontend/src/games/FingerNumberShow.tsx`
 
 **Output**:
+
 ```
 212:        promptTimeoutRef.current = setTimeout(
 258:        promptTimeoutRef.current = setTimeout(
@@ -157,6 +161,7 @@ M src/frontend/src/games/FingerNumberShow.tsx
 **Command**: `cd src/frontend && npm run type-check`
 
 **Output**:
+
 ```
 > advay-vision-frontend@0.1.0 type-check
 > tsc --noEmit
@@ -167,9 +172,9 @@ M src/frontend/src/games/FingerNumberShow.tsx
 **Command**: `cd src/frontend && npx vitest run src/games/finger-number-show/handTrackingConfig.test.ts`
 
 **Output**:
+
 ```
 ✓ src/games/finger-number-show/handTrackingConfig.test.ts (2 tests)
 ```
 
 **Interpretation**: Observed — adaptive max-hands mapping is unit-tested.
-

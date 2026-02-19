@@ -1,5 +1,4 @@
 
-
 ---
 
 ## FIX: Parent Gate Animation Not Showing
@@ -9,18 +8,22 @@
 **Problem:** Button works but no visual feedback (no % counter, no color change)
 
 ### Root Cause
+
 The `animateProgress` function had a **closure issue** - it was using a stale `holding` state value from the closure, causing the animation loop to stop after the first frame.
 
 ### Solution
+
 1. Moved `holdingRef` declaration before the animation function
 2. Set `holdingRef.current = true` immediately when starting to hold
 3. Changed the animation check from `if (holding)` to `if (holdingRef.current)` to always get fresh value
 4. Explicitly started the animation loop with `requestAnimationFrame`
 
 ### Changes Made
+
 **File:** `src/frontend/src/components/ui/ParentGate.tsx`
 
 **Key Fixes:**
+
 ```typescript
 // Before: holding state was stale in closure
 const animateProgress = () => {
@@ -52,6 +55,7 @@ const startHolding = useCallback(() => {
 ```
 
 ### Expected Behavior Now
+
 1. Press button → Shows "Hold... 0%" immediately
 2. While holding → Progress increases: 5%, 15%, 30%, 60%, etc.
 3. Button turns orange while holding

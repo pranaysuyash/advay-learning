@@ -19,12 +19,14 @@
 ## Part 1: ADVAY (The Platform)
 
 ### Name Details
+
 - **Name:** ADVAY
 - **Pronunciation:** /ˈʌdveɪ/ (UHD-vay)
 - **Origin:** Founder's son's name
 - **Sanskrit:** अद्वय meaning "Unique/Without a second"
 
 ### Acronym (LOCKED)
+
 ```
 A - Active
 D - Discovery
@@ -36,13 +38,16 @@ Y - Youth
 **Full:** Active Discovery Vision AI for Youth
 
 ### Role
+
 The product/platform brand representing:
+
 - Technology and innovation
 - Educational quality
 - Trust and credibility
 - Serious brand moments
 
 ### Where ADVAY Appears
+
 - Homepage header
 - Pricing pages
 - Privacy policy and legal
@@ -52,6 +57,7 @@ The product/platform brand representing:
 - Parent-focused content
 
 ### Tone
+
 Smart, Advanced, Caring, Trustworthy
 
 ---
@@ -59,12 +65,14 @@ Smart, Advanced, Caring, Trustworthy
 ## Part 2: Pip (The Companion)
 
 ### Name Details
+
 - **Name:** Pip
 - **Full Name:** Pip the Red Panda
 - **Asset:** red_panda_no_bg_cropped_tight.png
 - **Internal System:** PipEngine or PipTutor (adaptive layer)
 
 ### Acronym
+
 ```
 P - Playful
 I - Interactive
@@ -74,13 +82,16 @@ P - Partner
 **Full:** Pip, the Playful Interactive Partner
 
 ### Role
+
 The mascot and UX companion representing:
+
 - Fun and engagement
 - Child guidance and encouragement
 - Emotional connection
 - Movement demonstration
 
 ### Where Pip Appears
+
 - Child onboarding ("Hi, I'm Pip!")
 - Game feedback moments
 - Gesture demonstrations ("Move like me!")
@@ -90,24 +101,29 @@ The mascot and UX companion representing:
 - Safety/parent gates ("Ask a parent")
 
 ### Where Pip Does NOT Appear
+
 - Serious parent pages (pricing, privacy, data policy)
 - Dense dashboards (keep calm and readable)
 - School/enterprise pitch decks
 
 ### Tone Guidelines
+
 **DO:**
+
 - Short, concrete, action-first
 - One instruction at a time
 - Reward effort, not intelligence
 - Concrete praise over generic
 
 **DON'T:**
+
 - Baby talk
 - Long sentences
 - Generic praise ("Amazing!")
 - Too many exclamation points
 
 **Examples:**
+
 - Good: "Show me your hand." "You traced the A!"
 - Bad: "Let's have so much fun!" "You're so smart!!!"
 
@@ -116,12 +132,15 @@ The mascot and UX companion representing:
 ## Part 3: The Complete Story
 
 ### Long Form
+
 Advay is named after my son Advay, which means "unique" in Sanskrit - because every child learns differently. Advay stands for Active Discovery Vision AI for Youth, combining movement-based learning with smart technology. And every adventurer needs a companion: that's Pip, your Playful Interactive Partner, who guides, encourages, and celebrates every discovery along the way.
 
 ### Short Form
+
 Advay: Active Discovery Vision AI for Youth. Guided by Pip, your child's learning buddy.
 
 ### One Line
+
 Advay combines Active Discovery Vision AI for Youth with Pip, the Playful Interactive Partner.
 
 ---
@@ -129,6 +148,7 @@ Advay combines Active Discovery Vision AI for Youth with Pip, the Playful Intera
 ## Part 4: Visual System
 
 ### Color Palette
+
 | Color | Hex | Use | Source |
 |-------|-----|-----|--------|
 | Pip Orange | #E85D04 | Primary, CTAs, Pip | Red panda fur |
@@ -139,11 +159,13 @@ Advay combines Active Discovery Vision AI for Youth with Pip, the Playful Intera
 ### Logo Lockups
 
 **Primary:**
+
 ```
 [Pip icon] ADVAY
 ```
 
 **Full:**
+
 ```
 [Pip icon]
 ADVAY
@@ -159,6 +181,7 @@ Guided by Pip, your Playful Interactive Partner
 ## Part 5: Asset Requirements
 
 ### Pip Poses (10 Core)
+
 1. Idle - default waiting
 2. Wave - greeting/goodbye
 3. Point Left - navigation
@@ -171,9 +194,11 @@ Guided by Pip, your Playful Interactive Partner
 10. Stop - parent gate
 
 ### Pip Emotes (12 UI)
+
 Star, Heart, Confetti, Question, Exclamation, Timer, Camera, Hand, Microphone, Book, Trophy, Lock
 
 ### Pip Stickers (6 Labels)
+
 - Parent Only
 - Camera On
 - Good Lighting
@@ -182,6 +207,7 @@ Star, Heart, Confetti, Question, Exclamation, Timer, Camera, Hand, Microphone, B
 - Level Up
 
 ### Style Rules
+
 - 3 expressions max: neutral, happy, thinking
 - Consistent outline weight
 - Same eye style throughout
@@ -192,17 +218,21 @@ Star, Heart, Confetti, Question, Exclamation, Timer, Camera, Hand, Microphone, B
 ## Part 6: Messaging by Context
 
 ### Homepage Hero
+
 Meet ADVAY
 Active Discovery Vision AI for Youth
 Your child learns through movement. Pip makes it fun.
 
 ### For Parents
+
 ADVAY uses computer vision to turn screen time into active time. With Pip, the Playful Interactive Partner, your child stays engaged while building motor skills and knowledge.
 
 ### For Kids (In-App)
+
 Hi friend! I'm Pip! Let's go on an Active Discovery adventure together. Can you wave like me?
 
 ### Pitch Deck Close
+
 ADVAY is Active Discovery Vision AI for Youth - the tech serious enough for investors. Pip is the Playful Interactive Partner that makes kids actually want to use it.
 
 ---
@@ -218,6 +248,7 @@ ADVAY is Active Discovery Vision AI for Youth - the tech serious enough for inve
 | Internal code | PascalCase | "PipEngine", "PipTutor" |
 
 Never use:
+
 - "PIP" in headings
 - "pip" lowercase as brand
 - "Advay" with different spelling
@@ -227,18 +258,22 @@ Never use:
 ## Part 8: Digital Strategy
 
 ### Domains
+
 - Primary: advay.app or advaylearning.com
 - Redirect: meetpip.com to mascot page
 
 ### Social
+
 - @advaylearning (main)
 - @meetpip (fun content)
 
 ### Email
-- hello@advay.app (support)
-- pip@advay.app (newsletters)
+
+- <hello@advay.app> (support)
+- <pip@advay.app> (newsletters)
 
 ### App Store
+
 - Name: "Advay: Learn with Pip"
 - Subtitle: "Active Discovery Vision AI for Youth"
 

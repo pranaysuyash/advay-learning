@@ -3,11 +3,13 @@
 ## What "No Video Storage" Actually Means
 
 ### The app DOES use camera ✅
+
 - Real-time hand tracking works perfectly
 - All gesture recognition features work
 - Profile pictures stored (with pixelation/effects as planned)
 
 ### The app DOESN'T store raw video ✅
+
 - Video frames are processed in real-time
 - Only hand landmark data saved (x,y coordinates of fingers)
 - Video stream is discarded immediately after analysis
@@ -31,6 +33,7 @@
 ## Analogy
 
 Think of it like wearing glasses:
+
 - Your glasses (camera) let you see and process what's in front of you (gestures)
 - Your brain (hand tracking algorithm) understands what you're seeing (finger positions)
 - But your glasses don't record or store what you looked at
@@ -56,6 +59,7 @@ external servers."
 ## COPPA Compliance
 
 ✅ **COPPA-Safe** because:
+
 1. **No video recording** = no biometric data collection
 2. **Hand landmarks only** = mathematical coordinates, not identifying
 3. **Profile pictures pixelated/effected** = not identifying biometric data

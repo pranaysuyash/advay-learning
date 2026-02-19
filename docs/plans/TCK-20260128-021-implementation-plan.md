@@ -14,6 +14,7 @@
 Implement adaptive difficulty progression where kids unlock letters in batches of 5 based on mastery, with parent override capability.
 
 **Batch Structure**:
+
 - Batch 1: Letters 1-5 (A-E for English)
 - Batch 2: Letters 6-10 (F-J for English)
 - Batch 3: Letters 11-15 (K-O for English)
@@ -35,6 +36,7 @@ Implement adaptive difficulty progression where kids unlock letters in batches o
    - Methods: `markLetterMastered()`, `isBatchUnlocked()`, `getUnlockedLetters()`
 
 2. **Letter Mastery Schema**:
+
    ```typescript
    interface LetterProgress {
      letter: string;
@@ -46,6 +48,7 @@ Implement adaptive difficulty progression where kids unlock letters in batches o
    ```
 
 3. **Batch Tracking**:
+
    ```typescript
    interface BatchProgress {
      batchIndex: number;
@@ -106,12 +109,14 @@ Implement adaptive difficulty progression where kids unlock letters in batches o
 
 ## Files to Modify/Create
 
-### New Files:
+### New Files
+
 1. `src/frontend/src/store/progressStore.ts` - Progress tracking
 2. `src/frontend/src/components/LetterJourney.tsx` - Visual journey map
 3. `src/frontend/src/components/BatchUnlockModal.tsx` - Unlock celebration
 
-### Modified Files:
+### Modified Files
+
 1. `src/frontend/src/pages/Game.tsx` - Mastery tracking, unlock checks
 2. `src/frontend/src/pages/Dashboard.tsx` - Add Journey button
 3. `src/frontend/src/pages/Settings.tsx` - Parent override controls
@@ -180,4 +185,3 @@ Implement adaptive difficulty progression where kids unlock letters in batches o
 3. Create LetterJourney component
 4. Update Settings with parent override
 5. Test and verify
-

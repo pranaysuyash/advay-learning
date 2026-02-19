@@ -51,6 +51,7 @@ Complete visual asset reference for the Advay learning platform.
 **Total: 110+ SVG icons**
 
 ### Icon Naming Convention
+
 - Lowercase with hyphens: `apple.svg`, `ice-cream.svg`, `fountain-pen.svg`
 - Default fallback: `default.svg`
 
@@ -65,6 +66,7 @@ Complete visual asset reference for the Advay learning platform.
 | Tamil | 13+ | pancake, tortoise, needle, umbrella... |
 
 ### Icon Style
+
 - Simple, flat design
 - Single color fill
 - Kid-friendly silhouettes
@@ -112,6 +114,7 @@ Complete visual asset reference for the Advay learning platform.
 ## Usage Guidelines
 
 ### SVG Icons (Alphabet)
+
 ```tsx
 // Basic usage
 <img src="/assets/icons/apple.svg" alt="Apple" width="32" height="32" />
@@ -124,6 +127,7 @@ Complete visual asset reference for the Advay learning platform.
 ```
 
 ### UI Icons
+
 ```tsx
 // Using UIIcon component
 import { UIIcon } from '../components/ui/Icon';
@@ -142,6 +146,7 @@ import { UIIcon } from '../components/ui/Icon';
 ```
 
 ### Feature Illustrations
+
 ```tsx
 // In feature cards
 <div className="w-20 h-20 mx-auto mb-4">
@@ -154,6 +159,7 @@ import { UIIcon } from '../components/ui/Icon';
 ```
 
 ### Loading Animation
+
 ```tsx
 // Loading spinner with Pip
 <div className="w-16 h-16">
@@ -168,6 +174,7 @@ import { UIIcon } from '../components/ui/Icon';
 ## Asset Checklist
 
 ### Critical (Required for launch)
+
 - [x] Logo system (full, mark, avatar)
 - [x] Alphabet icons (100+)
 - [x] UI icons (19)
@@ -179,6 +186,7 @@ import { UIIcon } from '../components/ui/Icon';
 - [x] Onboarding illustrations
 
 ### Nice to have (Post-launch)
+
 - [ ] Animated mascot reactions
 - [ ] Additional empty states
 - [ ] Seasonal variations

@@ -88,17 +88,20 @@
 ## Open Questions (Need Decisions)
 
 ### Q-002: Email Service Provider for Production
+
 - **Status**: OPEN
 - **Options**: SendGrid, AWS SES, Mailgun, SMTP
 - **Impact**: Required for email verification and password reset in production
 
 ### Q-003: Password Policy Strictness
+
 - **Status**: OPEN
 - **Current**: 8 characters minimum
 - **Options**: Current, NIST guidelines, Strict (complexity requirements)
 - **Impact**: Parent account security vs UX
 
 ### Q-004: Session Timeout Duration
+
 - **Status**: OPEN
 - **Current**: 15 min access, 7 days refresh
 - **Options**: Short (security), Medium (current), Long (convenience), Adaptive
@@ -180,25 +183,33 @@
 ## Next Steps Options
 
 ### Option A: Continue Security Hardening (Recommended)
+
 Focus on remaining P1 security tickets:
+
 1. BACKEND-MED-002 (Input Validation) - Quick win
 2. SECURITY-HIGH-005 (Password Strength) - Quick win
 3. BACKEND-MED-006 (Parent Verification) - Important for child safety
 
 ### Option B: Frontend Polish
+
 Improve user experience:
+
 1. FRONTEND-MED-002 (Error Handling) - Better UX
 2. UI-LOW-002 (Loading States) - Better UX
 3. UI-LOW-001 (Mobile Navigation) - Accessibility
 
 ### Option C: Infrastructure
+
 Set up production readiness:
+
 1. INFRA-MED-001 (Fix Vulnerabilities)
 2. INFRA-MED-002 (Dependency Scanning)
 3. Q-002 decision (Email Service)
 
 ### Option D: Feature Development
+
 Add new capabilities:
+
 1. Achievement system
 2. Data export functionality
 3. Parent dashboard analytics
@@ -208,11 +219,13 @@ Add new capabilities:
 ## Files Changed (Last Session)
 
 ### New Files
+
 - `src/backend/app/core/email.py`
 - `src/backend/app/core/rate_limit.py`
 - `src/backend/tests/test_security.py`
 
 ### Modified Files (Key)
+
 - `src/backend/app/api/v1/endpoints/auth.py` - Major refactor for cookies
 - `src/backend/app/services/user_service.py` - Timing attack fix, verification
 - `src/backend/app/db/models/user.py` - New fields for verification/reset

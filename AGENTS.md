@@ -85,6 +85,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 **Principle:** Don't just delete unused code. Understand why it exists, see if it can make the app better, and implement functionality rather than delete.
 
 **Guidelines:**
+
 - Never discard contributor code unless clearly inferior
 - Keep meaningful comments/tests/docs unless incorrect
 - Prefer merging both sides when resolving conflicts
@@ -93,9 +94,10 @@ This document governs how AI agents (including myself and others) work on the Ad
 - **See**: `docs/process/CODE_PRESERVATION_GUIDELINES.md` for detailed workflow
 
 **No deletions without explicit approval**:
-  - Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
-  - If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
-  - **Exception**: Deletion is acceptable after completing the investigation workflow in CODE_PRESERVATION_GUIDELINES.md and documenting why deletion was chosen over implementation.
+
+- Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
+- If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
+- **Exception**: Deletion is acceptable after completing the investigation workflow in CODE_PRESERVATION_GUIDELINES.md and documenting why deletion was chosen over implementation.
 
 ### 5. Staging Is Always Comprehensive
 
@@ -432,6 +434,7 @@ cd src/frontend && npm install
    Avoids terminal input entirely.
 
 3. **Configure git editor**:
+
    ```bash
    git config core.editor "nano"  # or vim, emacs, etc.
    git commit  # Will open editor, no terminal paste issues

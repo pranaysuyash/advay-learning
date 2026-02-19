@@ -48,4 +48,3 @@ Also include:
 
 - A "tone guide" paragraph (2-4 sentences) for this app
 - A short list of banned words/phrases (e.g., "invalid", "error", "failed") with suggested replacements
-

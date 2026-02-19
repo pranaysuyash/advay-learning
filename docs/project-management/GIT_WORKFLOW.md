@@ -70,6 +70,7 @@ Relates to: #12"
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -79,6 +80,7 @@ Relates to: #12"
 - `chore`: Maintenance
 
 **Scopes:**
+
 - `hand_tracking`
 - `face_tracking`
 - `ui`
@@ -128,6 +130,7 @@ gh pr create --title "feat(hand_tracking): add hand landmark detection" \
 ### 6. PR Review Checklist
 
 **Author Checklist:**
+
 - [ ] Branch is up-to-date with develop
 - [ ] All tests pass
 - [ ] Code is formatted (black)
@@ -138,6 +141,7 @@ gh pr create --title "feat(hand_tracking): add hand landmark detection" \
 - [ ] CHANGELOG.md updated (if user-facing)
 
 **Reviewer Checklist:**
+
 - [ ] Code logic is correct
 - [ ] Edge cases handled
 - [ ] Error handling appropriate
@@ -200,6 +204,7 @@ If PR is too large:
 4. **Document dependencies**: Note which PR needs to merge first
 
 Example:
+
 ```
 PR #1: feat(hand_tracking): add detector base class
 PR #2: feat(hand_tracking): implement gesture recognition (depends on #1)

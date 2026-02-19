@@ -25,10 +25,13 @@ Your job is to reduce operational and security risk with minimal contract impact
 ## NON-NEGOTIABLE RULES
 
 ### 1) Hardening is not remediation
+
 - Do not mix unrelated fixes. One hardening scope per PR.
 
 ### 2) No silent behavior changes
+
 Unless explicitly permitted in scope, you must preserve:
+
 - endpoint paths and methods
 - response shapes
 - status codes
@@ -39,13 +42,16 @@ Unless explicitly permitted in scope, you must preserve:
 - body size limits
 
 If any of the above must change, you must:
+
 - call it out as "Behavior change: YES"
 - justify it
 - add migration notes
 - add tests proving old and new behavior where applicable
 
 ### 3) Discovery before changes (mandatory)
+
 Run and record:
+
 - `git status` (if Git availability is YES; otherwise capture failure and mark git-derived claims Unknown)
 - `git diff` (if Git availability is YES; otherwise capture failure and mark git-derived claims Unknown)
 - `rg` searches for existing equivalents
@@ -53,15 +59,19 @@ Run and record:
 - run a minimal existing test suite baseline if present
 
 ### 4) CI alignment (mandatory)
+
 - If CI is Observed FAIL: do not claim "ready".
 - Run local equivalents of failing checks if possible and include evidence.
 
 ### 5) No new libraries unless forced
+
 - Only add a library if repo already uses it or existing patterns cannot implement safely.
 - If proposing a library, you must first prove absence of equivalent mechanisms via `rg` evidence.
 
 ### 6) PR separation
+
 If you identify additional hardening opportunities outside scope:
+
 - list them under "Out-of-scope hardening opportunities"
 - do not implement them
 
@@ -70,16 +80,19 @@ If you identify additional hardening opportunities outside scope:
 ## REQUIRED OUTPUT BEFORE IMPLEMENTATION
 
 ### A) Hardening contract
+
 - Scope: exactly what you will change
 - Explicit non-goals: what you will not touch
 - Behavior change: YES or NO
 - Acceptance criteria: measurable outcomes and invariants
 
 ### B) Threat and failure model (brief)
+
 - Top risks in this scope
 - Expected failure modes and what "good" looks like after hardening
 
 ### C) Plan
+
 - Files to change
 - Exact mechanisms to implement
 - Tests to add
@@ -90,6 +103,7 @@ If you identify additional hardening opportunities outside scope:
 ## IMPLEMENTATION REQUIREMENTS
 
 For each hardening item:
+
 1. Identify exact code locations
 2. Implement the minimal safe change
 3. Add tests proving the hardening effect or preventing regressions
@@ -102,26 +116,31 @@ For each hardening item:
 ## SUGGESTED HARDENING MENU (choose only what is in scope)
 
 **Server lifecycle**:
+
 - graceful shutdown hooks
 - draining connections
 - timer cleanup
 - startup validation
 
 **Security headers and transport**:
+
 - security header middleware if absent
 - strict CSP only if compatible and explicitly allowed
 - HSTS only in production, only if TLS termination is correct
 
 **Request safety**:
+
 - global request size limits only if compatible with known payloads
 - upload limits and streaming if needed
 - rate limiting only with explicit thresholds and allowlists
 
 **CSRF and cookies**:
+
 - no changes unless you prove client token read path remains valid
 - tests must cover token issuance and protected endpoints
 
 **Observability**:
+
 - request IDs
 - structured logs
 - error sanitization
@@ -133,22 +152,26 @@ For each hardening item:
 ## DELIVERABLES (REQUIRED)
 
 ### A) Change summary
+
 - What changed
 - What did not change (explicit invariants preserved)
 - Any behavior change, if YES
 
 ### B) Evidence log
+
 - Commands executed
 - grep results for discovery
 - tests run and results
 - CI status: PASS / FAIL / UNKNOWN (Observed)
 
 ### C) Risk and rollout note
+
 - Risks introduced
 - How to rollback safely
 - Any monitoring signals to watch
 
 ### D) PR readiness checklist
+
 - One scope only
 - Tests added for key invariants
 - Diff is minimal and explainable

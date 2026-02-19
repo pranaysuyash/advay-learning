@@ -10,12 +10,14 @@
 ## 1. Executive Summary
 
 ### Current State
+
 - **Total Assets:** 161 files (images, icons, videos)
 - **Icon Library:** 112 SVG icons for alphabet games (multi-language support)
 - **Mascot:** Pip the Red Panda (images + animated videos)
 - **Brand Assets:** Logo, color palette, basic identity
 
 ### Critical Gaps Identified
+
 | Category | Status | Priority |
 |----------|--------|----------|
 | Marketing/landing visuals | ⚠️ Missing | P0 |
@@ -26,6 +28,7 @@
 | Cultural illustrations (India-focused) | ❌ Missing | P1 |
 
 ### TG (Target Audience) Alignment Score
+
 - **Child Appeal:** 6/10 (needs more playfulness)
 - **Parent Trust:** 7/10 (needs safety/compliance indicators)
 - **Cultural Relevance:** 5/10 (needs more Indian context)
@@ -35,13 +38,16 @@
 ## 2. Persona Analysis
 
 ### Primary Persona: Ananya (Age 5, Bangalore)
+
 **Background:**
+
 - Kindergartener learning English and Kannada
 - Uses parent's tablet for 30-60 min daily
 - Loves colorful characters and animations
 - Gets frustrated with complex navigation
 
 **Visual Needs:**
+
 - Large, friendly buttons with clear icons
 - Celebratory animations for achievements
 - Mascot (Pip) guidance throughout
@@ -49,36 +55,44 @@
 - Bright but not overwhelming colors
 
 **Pain Points:**
+
 - Dark backgrounds feel "scary"
 - Confused when icons don't match content
 - Wants immediate visual feedback
 
 ### Secondary Persona: Priya (Parent, Age 32)
+
 **Background:**
+
 - Working mother, tech-savvy
 - Concerned about screen time and privacy
 - Wants educational value proven
 - Appreciates multi-language support
 
 **Visual Needs:**
+
 - Trust badges (COPPA, privacy)
 - Clean, professional design
 - Progress visualization
 - Clear safety indicators
 
 **Pain Points:**
+
 - No visible privacy assurances
 - Unclear data usage indicators
 - Needs reassurance about camera usage
 
 ### Tertiary Persona: Arjun (Age 7, Rural Karnataka)
+
 **Background:**
+
 - First-generation English learner
 - Limited internet connectivity
 - Uses basic Android phone
 - Kannada primary language
 
 **Visual Needs:**
+
 - Culturally familiar imagery
 - Works on low-resolution screens
 - Minimal bandwidth usage
@@ -91,6 +105,7 @@
 ### 3.1 Existing Assets ✅
 
 #### Brand Assets (`assets/brand/`)
+
 | File | Status | Usage |
 |------|--------|-------|
 | logo-mark.svg | ✅ | App icon, favicon |
@@ -99,6 +114,7 @@
 | pip-avatar.svg | ✅ | Mascot avatar |
 
 #### Mascot Assets (`public/assets/images/`)
+
 | File | Status | Usage |
 |------|--------|-------|
 | red_panda_no_bg.png | ✅ | Main mascot image |
@@ -106,6 +122,7 @@
 | pip_alpha_v2.webm | ✅ | Animated mascot video |
 
 #### Feature Icons (`public/assets/images/`)
+
 | File | Status | Usage |
 |------|--------|-------|
 | feature-hand-tracking.svg | ✅ | Landing page |
@@ -114,11 +131,13 @@
 | hero-learning.svg | ✅ | Landing hero |
 
 #### Game Icons (`public/assets/icons/` - 112 icons)
+
 - English alphabet: apple, ball, cat, dog, elephant... zebra
 - Hindi/Kannada/Telugu/Tamil specific icons
 - Status: ✅ Comprehensive coverage
 
 #### UI Icons
+
 - Empty states: empty-no-children.svg, empty-no-progress.svg
 - Loading: loading-pip.svg
 - Achievements: badge-star.svg, streak-flame.svg
@@ -162,6 +181,7 @@
 ### 4.1 Image Requirements
 
 #### Hero Illustration (Home Page)
+
 ```
 Use case: photorealistic-natural + illustration-story
 Asset type: landing page hero
@@ -178,6 +198,7 @@ Avoid: Stereotypical imagery, cluttered backgrounds, dark colors
 ```
 
 #### Trust Badges (Set of 4)
+
 ```
 Use case: logo-brand
 Asset type: trust indicators
@@ -192,6 +213,7 @@ Color: Terracotta/orange primary
 ```
 
 #### Game Thumbnails (5 games)
+
 ```
 Use case: ui-mockup
 Size: 400x300px, 2x for retina
@@ -205,6 +227,7 @@ Style: Colorful, playful, clear game representation
 ```
 
 #### Achievement Badges (12 tiers)
+
 ```
 Use case: logo-brand
 Style: Circular badges with metallic finishes
@@ -220,6 +243,7 @@ Each: 128x128px PNG with transparency
 ### 4.2 Icon Requirements
 
 #### UI Icons (Missing)
+
 | Icon | Usage | Priority |
 |------|-------|----------|
 | Camera enable guide | Camera recovery | P0 |
@@ -232,6 +256,7 @@ Each: 128x128px PNG with transparency
 ### 4.3 Animation Requirements
 
 #### Celebration Effects
+
 ```
 Use case: stylized-concept
 Trigger: Correct answer, level complete, streak achieved
@@ -252,37 +277,46 @@ Duration: 1-2 seconds
 ## 5. Persona-Based Testing Criteria
 
 ### Test with Ananya (Age 5)
+
 **Visual Comprehension Test:**
+
 - [ ] Can she identify the game from thumbnail alone?
 - [ ] Does she understand what to do from illustrations?
 - [ ] Are buttons visually distinct and appealing?
 - [ ] Does she recognize achievement badges as rewards?
 
 **Emotional Response Test:**
+
 - [ ] Does mascot Pip make her smile?
 - [ ] Is celebration satisfying enough to repeat?
 - [ ] Are error messages friendly (not scary)?
 - [ ] Does she feel proud showing badges to parent?
 
 ### Test with Priya (Parent)
+
 **Trust Indicators Test:**
+
 - [ ] Are trust badges visible on first scroll?
 - [ ] Does COPPA badge reassure about data safety?
 - [ ] Are camera permissions clearly explained visually?
 - [ ] Does progress visualization feel credible?
 
 **Professional Assessment:**
+
 - [ ] Is design polished enough to pay for?
 - [ ] Do illustrations feel high-quality?
 - [ ] Is visual hierarchy clear for navigation?
 
 ### Test with Arjun (Rural/Regional)
+
 **Cultural Relevance Test:**
+
 - [ ] Do illustrations include familiar contexts?
 - [ ] Are regional language icons accurate?
 - [ ] Does imagery feel inclusive of rural settings?
 
 **Technical Accessibility:**
+
 - [ ] Do images load on slow connections?
 - [ ] Are icons clear at low resolution?
 - [ ] Is contrast sufficient for older devices?
@@ -292,18 +326,21 @@ Duration: 1-2 seconds
 ## 6. Implementation Roadmap
 
 ### Phase 1: Critical (Week 1-2)
+
 1. Generate hero illustration for landing page
 2. Create trust badge set (4 icons)
 3. Design camera permission illustration
 4. Create error state illustrations (3x)
 
 ### Phase 2: High Value (Week 3-4)
+
 1. Generate game thumbnails (5 images)
 2. Design achievement badge set (12 badges)
 3. Create game background illustrations (5 scenes)
 4. Design celebration animations
 
 ### Phase 3: Polish (Week 5-6)
+
 1. Cultural scene illustrations
 2. Parent guide visuals
 3. Additional mascot expressions
@@ -328,6 +365,7 @@ Before any asset goes live:
 ## 8. Budget Estimate
 
 ### Generation Approach
+
 Using AI image generation (gpt-image-1.5):
 
 | Asset Type | Count | Est. Cost |

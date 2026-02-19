@@ -10,13 +10,15 @@
 ## Test 1: AlphabetGame (Draw Letters) - Asha Persona (2-3yr)
 
 **Setup**:
+
 - Profile: Asha (Age: 2)
 - Test Time: 2026-02-05 14:35 IST
-- Server Status: Frontend ✅ (http://localhost:6173) / Backend ✅ (http://localhost:8001)
+- Server Status: Frontend ✅ (<http://localhost:6173>) / Backend ✅ (<http://localhost:8001>)
 - App: Advay Vision Learning (hand-tracking games for children)
 
 **Navigation**:
-1. Open http://localhost:6173
+
+1. Open <http://localhost:6173>
 2. Create/select profile "Asha" (age: 2, language: English)
 3. Go to Games page
 4. Select "Draw Letters" game
@@ -24,6 +26,7 @@
 **Pre-Test Observations**:
 
 From Games.tsx (line 30-71), all 4 games are hardcoded with:
+
 - `difficulty: "Easy"` (line 39, 49, 59, 69) - **No difficulty variation**
 - Hardcoded age ranges (2-8yr, 3-7yr, 3-6yr, 2-6yr)
 - Profile age field exists but not used for filtering/adaptation
@@ -124,6 +127,7 @@ Finding 1 (P0 Consensus): All games hardcoded difficulty "Easy"
 ## Test 2: AlphabetGame (Draw Letters) - Dev Persona (4-6yr)
 
 **Setup**:
+
 - Profile: Dev (Age: 5)
 - Test Time: 2026-02-05 14:45 IST
 - Previous Test: Asha (2-3yr) just completed
@@ -189,12 +193,14 @@ ACTUAL DIFFERENCES (to be tested):
 ## Test 3: AlphabetGame (Draw Letters) - Maya Persona (7-9yr)
 
 **Setup**:
+
 - Profile: Maya (Age: 8)
 - Test Time: 2026-02-05 14:55 IST
 
 **Challenge Focus**:
 
 Maya (7-9yr) expects:
+
 - Multiple difficulty options (Easy → Medium → Hard)
 - Achievement system (badges, unlocks, leaderboard)
 - Challenge progression (faster times, accuracy goals)
@@ -202,14 +208,17 @@ Maya (7-9yr) expects:
 **Expected Findings** (from multi-model):
 
 P0: All games hardcoded "Easy" — Maya can't access Medium/Hard
+
 - Will she ask "Where are harder levels?"
 - Will she get bored or unmotivated?
 
 P0: Age-based content gating not working
+
 - No special content unlocked for age 8
 - Same game experience as Asha (2yr) — inappropriate
 
 P1: No achievement/progression system visible
+
 - No badges, unlocks, mastery levels
 - Just drawing letters with no goal beyond "draw"
 
@@ -249,6 +258,7 @@ localStorage.getItem('achievements')   // Any badges or mastery data?
 **Purpose**: Verify gesture recognition + analytics across age groups
 
 **Setup**:
+
 - Game: Finger Counting (hand gesture recognition)
 - Personas: Asha (2yr), Dev (5yr), Maya (8yr)
 - Focus: Camera access, hand detection, gesture analytics
@@ -256,6 +266,7 @@ localStorage.getItem('achievements')   // Any badges or mastery data?
 **Pre-Test Code Review**:
 
 From backend analysis (quests.ts + progress.py):
+
 - Hand/gesture data should be captured in analytics
 - Progress model has `meta_data: dict` (untyped JSON)
 - **P1 Finding**: No gesture quality metrics (hand steadiness, confidence score)
@@ -368,6 +379,7 @@ Expected result: **P1 Finding Verified** — Analytics missing gesture quality m
 **Background**:
 
 From Phase 2A Audit: **8 Hidden Quest Chains**
+
 - Alphabet Lighthouse (letters learning path)
 - Number Nook (numbers learning path)
 - Treasure Bay (adventure quests)
@@ -387,9 +399,9 @@ From Phase 2A Audit: **8 Hidden Quest Chains**
    - [ ] Navigation has "Learning Islands"?
 
 3. **Try Direct URLs**:
-   - [ ] http://localhost:6173/quests (404 or loads?)
-   - [ ] http://localhost:6173/islands (404 or loads?)
-   - [ ] http://localhost:6173/quest-chains (404 or loads?)
+   - [ ] <http://localhost:6173/quests> (404 or loads?)
+   - [ ] <http://localhost:6173/islands> (404 or loads?)
+   - [ ] <http://localhost:6173/quest-chains> (404 or loads?)
 
 4. **Check Source Code**:
    - [ ] Is quest data fetched in Home.tsx?
@@ -432,6 +444,7 @@ From Phase 2A Audit: **8 Hidden Quest Chains**
 **Purpose**: Verify parent view shows gameplay analytics (P1 Finding: Generic Schema)
 
 **Setup**:
+
 - Profile: Arun (Age 35, Role: Parent)
 - Linked children: Asha (2), Dev (5), Maya (8)
 - Time: 2026-02-05 15:15 IST
@@ -439,6 +452,7 @@ From Phase 2A Audit: **8 Hidden Quest Chains**
 **Pre-Test Analytics Check**:
 
 From Phase 2A Audit:
+
 - Progress model (progress.py): `meta_data: dict` (untyped JSON)
 - No structured gesture quality fields
 - No per-attempt tracking (only aggregate)
@@ -509,6 +523,7 @@ OBSERVED:
 ## Summary
 
 **Tests Completed**:
+
 - [ ] Test 1: AlphabetGame - Asha (2-3yr)
 - [ ] Test 2: AlphabetGame - Dev (4-6yr)
 - [ ] Test 3: AlphabetGame - Maya (7-9yr)
@@ -517,12 +532,14 @@ OBSERVED:
 - [ ] Test 6: Parent analytics dashboard
 
 **P0 Findings Verified So Far**:
+
 - ✅ Difficulty hardcoded "Easy" (code review confirmed)
 - ✅ Difficulty colors identical (visual inspection confirmed)
 - ⏳ Age-based adaptation not visible (pending screenshot comparison)
 - ⏳ Quest system hidden (pending navigation check)
 
 **P1 Findings Verified So Far**:
+
 - ⏳ Analytics schema generic (pending payload inspection)
 
 **Next Phase**: Synthesis of playtest evidence + multi-model findings → create audit artifact

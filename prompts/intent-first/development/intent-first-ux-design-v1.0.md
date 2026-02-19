@@ -1,4 +1,5 @@
 # Intent-First UX Design Philosophy v1.0
+
 ## "Design for the Experience, Not the Pixels"
 
 **Core Principle:** Before creating, modifying, or removing any design element, investigate the user's actual needs, workflows, and pain points to ensure every design change has measurable user and business impact.
@@ -10,12 +11,14 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the design challenge** (new feature, usability issue, or aesthetic update)
 2. **Research existing user behavior** (analytics, heatmaps, support tickets, user interviews)
 3. **Map current user journeys** (compare actual usage patterns with intended flows)
 4. **Analyze design system context** (check consistency with existing patterns, components, and accessibility standards)
 
 ### Phase 2: User Intent Analysis
+
 - What task is the user trying to accomplish?
 - What's their mental model and expectations?
 - Where do users currently struggle or drop off?
@@ -23,6 +26,7 @@
 - Does this affect a core or secondary workflow?
 
 ### Phase 3: Design Impact Assessment
+
 - **User Impact**: Improvement in task success, speed, or error rate
 - **Business Impact**: Effect on conversion, retention, satisfaction, or compliance
 - **Design Effort**: Time to design, validate, and document
@@ -34,6 +38,7 @@
 ## Quick Filter
 
 Skip detailed design work if all true:
+
 - Purely cosmetic with no measurable usability improvement
 - Very low-traffic area with minimal impact
 - High implementation complexity for minimal gain
@@ -59,6 +64,7 @@ Skip detailed design work if all true:
 ## Codebase-First Design Rule
 
 For *Critical* and *High* priority items:
+
 1. **Use existing components** first - leverage current design system
 2. **Extend, don't replace** - enhance existing patterns before creating new ones
 3. **Maintain consistency** - ensure new elements fit established visual language
@@ -66,6 +72,7 @@ For *Critical* and *High* priority items:
 5. **Test with users** - validate changes against real user behavior
 
 **When introducing new patterns:**
+
 - Must solve a problem existing patterns cannot
 - Should be reusable across multiple features
 - Needs documentation and design rationale

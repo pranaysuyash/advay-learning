@@ -27,7 +27,7 @@
    - Language selector for English, Hindi, Kannada, Telugu, Tamil
    - Letter matching: A=1, B=2, C=3, etc.
 
-2. **Thumb Detection Fix** ✅ 
+2. **Thumb Detection Fix** ✅
    - Fixed issue where full hand counted only 4 fingers
    - New 3-heuristic algorithm with majority voting (2/3)
    - More forgiving for children's hand positions
@@ -70,23 +70,28 @@ The Finger Number Show game has **6 critical UX issues** ranging from visibility
 **Severity:** CRITICAL  
 
 ### Current State
+
 - Game only supports numbers 0-10
 - No language selection UI
 - No alphabet tracing capability
 - Hardcoded English number names only
 
 ### Expected Behavior (per design)
+
 Users should be able to:
+
 - Select language: English, Hindi, Kannada, Telugu, Tamil
 - Trace alphabet letters (like in Game/AlphabetGame)
 - See native script and transliteration
 
 ### User Impact
+
 - **High** - Users cannot practice non-English alphabets
 - Children learning native languages cannot use this game mode
 - Inconsistent with AlphabetGame.tsx which supports 5 languages
 
 ### Evidence
+
 ```tsx
 // Line 27-39: Only English number names
 const NUMBER_NAMES = [
@@ -98,9 +103,11 @@ const NUMBER_NAMES = [
 ```
 
 ### Recommendation
+
 **Priority: P1**
 
 Add language selection similar to AlphabetGame.tsx:
+
 ```tsx
 // Add language selector UI
 const LANGUAGES = [
@@ -122,21 +129,25 @@ const LANGUAGES = [
 **Severity:** CRITICAL  
 
 ### Current State
+
 - Numbers display appears ABOVE camera feed
 - Camera takes up only middle section
 - Layout: Header → Difficulty → Feedback → Numbers → Camera → Instructions
 - Target number shown in center overlay initially, then moves to top-left
 
 ### User Report
+>
 > "Camera and canvas area positioned BELOW number displays. User suggests camera should take up CENTER screen."
 
 ### Problems
+
 1. **Visual hierarchy is backwards** - Numbers (the prompt) dominate, camera (the input) is secondary
 2. **Screen space wasted** - Camera should be the focal point
 3. **Child confusion** - Children look at numbers, not camera when making gestures
 4. **Not optimized for small screens** - Vertical stacking wastes space
 
 ### Evidence
+
 ```tsx
 // Lines 476-509: Current layout order
 <div className="relative">
@@ -157,9 +168,11 @@ const LANGUAGES = [
 ```
 
 ### Recommendation
+
 **Priority: P1**
 
 **Option A: Full-screen camera with overlay (Recommended)**
+
 ```tsx
 // Camera should fill more vertical space
 <div className="relative h-[70vh] min-h-[500px]">
@@ -172,6 +185,7 @@ const LANGUAGES = [
 ```
 
 **Option B: Split-screen layout**
+
 ```tsx
 <div className="flex flex-col lg:flex-row gap-4">
   <div className="lg:w-2/3">{/* Camera */}</div>
@@ -188,6 +202,7 @@ const LANGUAGES = [
 **Severity:** HIGH  
 
 ### Current State
+
 ```tsx
 <button
   type="button"
@@ -199,9 +214,11 @@ const LANGUAGES = [
 ```
 
 ### User Report
+>
 > "User had to use console to highlight and click button. Button exists but may be hidden or obscured. No visual affordance that it's interactive."
 
 ### Analysis
+
 - Button styling looks correct in code
 - Possible issues:
   1. **Z-index layering** - Camera preview or overlays may obscure button
@@ -210,21 +227,25 @@ const LANGUAGES = [
   4. **Loading state** - Button appears/disappears based on `isModelLoading`
 
 ### Recommendation
+
 **Priority: P2**
 
 1. **Ensure z-index is correct:**
+
 ```tsx
 <button
   className="relative z-10 ..." // Ensure button is above overlays
 >
 ```
 
-2. **Increase touch target:**
+1. **Increase touch target:**
+
 ```tsx
 <button className="px-8 py-4 min-h-[56px] ...">
 ```
 
-3. **Add more prominent visual cues:**
+1. **Add more prominent visual cues:**
+
 ```tsx
 <button className="... ring-2 ring-white/30 ring-offset-2 ring-offset-transparent">
   <span className="flex items-center gap-2">
@@ -234,7 +255,8 @@ const LANGUAGES = [
 </button>
 ```
 
-4. **Add loading skeleton:**
+1. **Add loading skeleton:**
+
 ```tsx
 {isModelLoading ? (
   <div className="px-8 py-4 bg-gray-200 animate-pulse rounded-lg">
@@ -254,21 +276,25 @@ const LANGUAGES = [
 **Severity:** HIGH  
 
 ### Current State
+
 - Success requires holding number for 450ms (`stableMatchRef`)
 - When matched, shows "Great! {NUMBER}! +{points} points" for 1.8 seconds
 - Then auto-advances to next target
 - Current count shown in top-left overlay
 
 ### User Report
+>
 > "You're showing [number] appears when number matched. User correctly boxed number green but game didn't proceed. No indication of waiting state or expected next action. Confusing - is it waiting for timer? expecting more input?"
 
 ### Problems
+
 1. **No "holding" indicator** - User doesn't know they need to HOLD the pose
 2. **Green border feedback missing** - User expected visual confirmation
 3. **Timeout not visible** - No progress indicator for the 450ms hold
 4. **Auto-advance surprise** - Next number appears without clear transition
 
 ### Evidence
+
 ```tsx
 // Line 356: 450ms hold requirement
 } else if (!successLockRef.current && nowMs - (stable.startAt ?? nowMs) >= 450) {
@@ -282,9 +308,11 @@ setTimeout(() => {
 ```
 
 ### Recommendation
+
 **Priority: P2**
 
 1. **Add hold progress indicator:**
+
 ```tsx
 // When match detected but not yet held long enough
 {isDetectedMatch && !successLockRef.current && (
@@ -302,7 +330,8 @@ setTimeout(() => {
 )}
 ```
 
-2. **Add clear visual states:**
+1. **Add clear visual states:**
+
 ```tsx
 // Detected match indicator
 <div className={`
@@ -316,7 +345,8 @@ setTimeout(() => {
 </div>
 ```
 
-3. **Add "Next" button instead of auto-advance:**
+1. **Add "Next" button instead of auto-advance:**
+
 ```tsx
 // After success, show next button
 {successLockRef.current && (
@@ -338,6 +368,7 @@ setTimeout(() => {
 **Severity:** MEDIUM  
 
 ### Current State
+
 - Target number shown in two places:
   1. **Center overlay** (briefly, during `promptStage === 'center'`)
   2. **Top-left badge** (after 1.8s, `promptStage === 'side'`)
@@ -345,18 +376,22 @@ setTimeout(() => {
 - Instructions at bottom of screen
 
 ### User Report
+>
 > "Questions should be on same side or on right? No clear pattern in current code. Should questions be grouped with target/current count? Or separate screen?"
 
 ### Problems
+
 1. **Dual locations for same info** - Target appears center then top-left
 2. **Unclear visual grouping** - Target, detected, and instructions are scattered
 3. **Animation may be missed** - Center prompt only shows for 1.8s
 4. **No persistent target display** - After center stage, target is small
 
 ### Recommendation
+
 **Priority: P3**
 
 **Unified target display:**
+
 ```tsx
 // Persistent target card (always visible)
 <div className="absolute top-4 left-4 bg-white rounded-2xl p-4 shadow-lg">
@@ -394,6 +429,7 @@ setTimeout(() => {
    - No focus indicators
 
 2. **Missing ARIA labels**
+
    ```tsx
    // Line 509-514: Webcam has no aria-label
    <Webcam
@@ -414,6 +450,7 @@ setTimeout(() => {
    - No text/sound alternative for colorblind users
 
 ### Recommendation
+
 **Priority: P3**
 
 ```tsx
@@ -450,6 +487,7 @@ useEffect(() => {
 
 **Location:** Line 586-588  
 **Issue:** Uses `🔥` emoji instead of UIIcon component
+
 ```tsx
 <div className="...">
   🔥 {streak} streak!  // Should use <UIIcon name="flame" />
@@ -460,6 +498,7 @@ useEffect(() => {
 
 **Location:** Lines 191-194, 482-483  
 **Issue:** English-only strings, not internationalized
+
 ```tsx
 setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 // Not translatable
@@ -498,6 +537,7 @@ setFeedback(`Great! ${NUMBER_NAMES[totalFingers]}! +${points} points`);
 ---
 
 **Next Actions:**
+
 1. Create remediation tickets for P1 items
 2. Schedule design review for layout changes
 3. Plan accessibility audit with assistive technology users

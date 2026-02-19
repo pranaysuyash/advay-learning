@@ -1,4 +1,5 @@
 # Intent-First Testing Philosophy v1.0
+
 ## "Test What Matters Most First"
 
 **Core Principle:** Before writing, modifying, or removing tests, investigate which user flows, integrations, and failure points are most critical to business success and user experience, then design tests accordingly.
@@ -10,18 +11,21 @@
 ## Universal Investigation Framework
 
 ### Phase 1: Context Discovery
+
 1. **Identify the testing need** (new feature, bug fix, refactoring, legacy cleanup, or migration)
 2. **Map user journeys** (critical paths users take through the system)
 3. **Analyze failure impact** (what breaks and who is affected when this component fails?)
 4. **Review existing coverage** (what's already tested, what gaps exist, and what's redundant?)
 
 ### Phase 2: Value Analysis
+
 - What user problem does this code solve?
 - What's the business impact if this fails in production?
 - How often is this code path executed?
 - What's the cost of failure vs cost of comprehensive testing?
 
 ### Phase 3: Test Prioritization
+
 - **Business Impact**: User trust, revenue, compliance
 - **Failure Probability**: Historical stability, change frequency
 - **Test Effort**: Time to write, maintain, and run
@@ -32,6 +36,7 @@
 ## Quick Filter
 
 Skip detailed test planning if all true:
+
 - Low user/business impact if it fails
 - Simple, stable code with low change frequency
 - Already well-covered by higher-level tests
@@ -56,6 +61,7 @@ Skip detailed test planning if all true:
 ## Codebase-First Testing Rule
 
 For *Critical* and *High* priority items, always cover:
+
 1. **Existing behavior preservation** - tests that ensure current functionality stays intact
 2. **Happy path success** - core user journey works
 3. **One high-impact failure mode** - what happens when it breaks
@@ -64,6 +70,7 @@ For *Critical* and *High* priority items, always cover:
 Leave exhaustive permutations for later unless risk justifies it.
 
 **When enhancing existing code:**
+
 - Write tests for new behavior
 - Ensure existing tests still pass
 - Add regression tests for bugs found

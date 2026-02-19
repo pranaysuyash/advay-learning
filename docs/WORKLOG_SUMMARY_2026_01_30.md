@@ -11,6 +11,7 @@ Updated and corrected multiple worklog tickets, clarified misunderstandings abou
 ### ✅ P0 Remediation from External QA Audit (TCK-20260130-006)
 
 All findings from QA audit now documented:
+
 - docs/audit/QA_WORKLOG_2026_01_29.md
 - docs/audit/audit_report_v1.md
 - docs/audit/ux_feedback_v1.md
@@ -126,7 +127,7 @@ All findings from QA audit now documented:
 
 ## Next Steps for Implementation
 
-### Priority Order:
+### Priority Order
 
 1. **FIX Game.tsx JSX Errors** (BLOCKER)
    - Tutorial overlay (TCK-20260130-010) can't work with current JSX structure

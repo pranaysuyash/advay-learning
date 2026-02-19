@@ -40,18 +40,21 @@ This research document explores Augmented Reality (AR) capabilities for Advay Vi
 ### 1.2 Recommended Approach for Our Stack
 
 **Primary: MediaPipe + Canvas Overlay**
+
 - Use existing MediaPipe hand/face tracking
 - Overlay graphics on `<canvas>` over video feed
 - Pros: No new dependencies, works with current architecture
 - Cons: Not "true" world-space AR
 
 **Secondary: WebXR (Progressive Enhancement)**
+
 - Add WebXR for supported devices
 - Fallback to canvas overlay for unsupported devices
 - Pros: True AR on supported devices
 - Cons: Limited device support
 
 **Exploratory: MediaPipe Segmentation**
+
 - Background removal/replacement
 - "Green screen" learning environments
 - Pros: High engagement potential
@@ -105,6 +108,7 @@ const externalStream = await navigator.mediaDevices.getUserMedia({
 ### 2.2 Use Cases for Dual Camera
 
 #### Use Case A: Hand-on-Desk Learning
+
 ```
 External Camera (Top-down)          Front Camera (User-facing)
          ↓                                   ↓
@@ -116,12 +120,14 @@ External Camera (Top-down)          Front Camera (User-facing)
 ```
 
 **Games Enabled:**
+
 - **AR Tracing**: Project tracing lines onto real paper
 - **Finger Paint AR**: Digital paint on real canvas
 - **3D Manipulatives**: Virtual blocks on real table
 - **Hand-over-Hand**: Guide child hand placement on real objects
 
 #### Use Case B: Environmental AR
+
 ```
 External Camera (Room-facing)       Front Camera (User-facing)
          ↓                                   ↓
@@ -133,6 +139,7 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ```
 
 **Games Enabled:**
+
 - **Letter Scavenger Hunt**: Find virtual letters hidden in real room
 - **Counting Real Objects**: AR counter for physical items
 - **Virtual Pet**: AR mascot walking around real room
@@ -150,6 +157,7 @@ External Camera (Room-facing)       Front Camera (User-facing)
 | Stand + Phone Holder | $15-30 | Depends on phone | Flexible positioning |
 
 **Recommended Setup for AR Learning:**
+
 1. **Budget**: Phone on gooseneck stand ($20) + DroidCam app
 2. **Standard**: Logitech C920 on monitor mount ($70)
 3. **Premium**: IPEVO document camera ($100) for top-down
@@ -161,6 +169,7 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ### 3.1 New AR-First Games
 
 #### AR-001: AR Letter Tracing on Paper
+
 **Concept**: Child traces on real paper with AR guide overlay
 **Tech**: External camera (top-down) + hand tracking
 **Learning**: Pre-writing, letter formation
@@ -179,6 +188,7 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ```
 
 **Implementation:**
+
 - Calibrate camera to paper corners (4-point calibration)
 - Overlay letter guide on video feed
 - Track finger position relative to paper
@@ -187,12 +197,14 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-002: Virtual Counting Bears
+
 **Concept**: Virtual manipulatives on real table
 **Tech**: External camera + hand tracking + pinch detection
 **Learning**: Counting, addition, subtraction
 **Engagement**: ⭐⭐⭐⭐⭐
 
 **Mechanics:**
+
 - Virtual blocks/bears appear on real table
 - Child pinches to pick up, moves hand, releases to drop
 - Physics simulation for realistic dropping
@@ -201,13 +213,15 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-003: Scavenger Hunt AR
+
 **Concept**: Find virtual objects hidden in real room
 **Tech**: External camera (room-facing) OR single camera with rotation
 **Learning**: Vocabulary, observation, spatial awareness
 **Engagement**: ⭐⭐⭐⭐⭐
 
 **Gameplay:**
-1. "Find the red ball!" 
+
+1. "Find the red ball!"
 2. Virtual red ball appears somewhere in room view
 3. Child physically moves to find it in camera view
 4. Tap/hover to collect
@@ -216,12 +230,14 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-004: AR Science Lab
+
 **Concept**: Virtual experiments overlaid on real space
 **Tech**: External camera + segmentation (optional)
 **Learning**: Science concepts, experimentation
 **Engagement**: ⭐⭐⭐⭐⭐
 
 **Experiments:**
+
 - **Volcano**: Virtual eruption on real play-doh mountain
 - **Plant Growth**: Time-lapse AR plant on real pot
 - **Solar System**: Planets orbiting in real room
@@ -230,12 +246,14 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-005: Finger Paint Studio
+
 **Concept**: Digital painting on real canvas/paper
 **Tech**: External camera (top-down) + hand tracking
 **Learning**: Creativity, colors, fine motor
 **Engagement**: ⭐⭐⭐⭐⭐
 
 **Features:**
+
 - Choose color via voice or UI
 - "Paint" with finger in air over real canvas
 - AR shows paint stroke on screen
@@ -244,12 +262,14 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-006: AR Puppet Theater
+
 **Concept**: Virtual puppets controlled by child's hands
 **Tech**: Front camera + hand tracking
 **Learning**: Storytelling, creativity, emotional expression
 **Engagement**: ⭐⭐⭐⭐⭐
 
 **Mechanics:**
+
 - Finger becomes puppet (virtual character on finger)
 - Two-hand puppets for older kids
 - Record AR performance
@@ -258,12 +278,14 @@ External Camera (Room-facing)       Front Camera (User-facing)
 ---
 
 #### AR-007: Magic Mirror Learning
+
 **Concept**: Face filters with educational twist
 **Tech**: Front camera + face mesh
 **Learning**: Self-awareness, emotions, parts of face
 **Engagement**: ⭐⭐⭐⭐
 
 **Examples:**
+
 - "Show me a happy face" - adds happy accessories when smiling detected
 - Animal face filters that teach animal facts
 - "Where is your nose?" - highlights nose on face mesh
@@ -450,11 +472,13 @@ export const ARCanvas: React.FC<ARCanvasProps> = ({
 ### 5.3 Recommendations
 
 **For MVP AR Features:**
+
 - Target: Laptop/desktop users with optional external camera
 - Fallback: Single-camera AR (works for everyone)
 - Advanced: Dual-camera for premium experience
 
 **Progressive Enhancement:**
+
 ```
 Level 1: Single camera + canvas overlay (universal)
 Level 2: Single camera + segmentation (high-end devices)
@@ -480,6 +504,7 @@ Level 4: WebXR true AR (supported devices only)
 ### 6.2 Optimization Strategies
 
 **For Dual Camera:**
+
 1. **Frame skipping**: Run external camera at 15 FPS, front at 30 FPS
 2. **Region of interest**: Only process relevant parts of external camera
 3. **Resolution scaling**: External camera at 480p, front at 720p
@@ -487,6 +512,7 @@ Level 4: WebXR true AR (supported devices only)
 5. **Web Workers**: Run tracking in separate threads
 
 **For AR Rendering:**
+
 1. **Object pooling**: Reuse AR objects instead of creating/destroying
 2. **LOD (Level of Detail)**: Simpler models when moving
 3. **Occlusion culling**: Don't render objects behind real-world obstacles
@@ -499,11 +525,13 @@ Level 4: WebXR true AR (supported devices only)
 ### 7.1 Camera Privacy
 
 **Concerns with External Camera:**
+
 - External camera may capture more of room/environment
 - Risk of capturing other family members
 - Potential for recording without child's knowledge
 
 **Mitigations:**
+
 1. **Visual indicator**: LED on external camera (hardware-level)
 2. **On-screen indicator**: Always show when external camera active
 3. **Physical cover**: Include camera cover in recommended setup
@@ -513,11 +541,13 @@ Level 4: WebXR true AR (supported devices only)
 ### 7.2 COPPA Compliance
 
 **AR-Specific Considerations:**
+
 - Background/environment may contain PII (photos, documents)
 - Segmentation could theoretically identify objects
 - Dual camera sees more than just child
 
 **Compliance Measures:**
+
 1. **No recording**: AR is real-time only, no storage
 2. **No transmission**: All processing local
 3. **Parental consent**: Explicit opt-in for external camera
@@ -528,24 +558,28 @@ Level 4: WebXR true AR (supported devices only)
 ## 8. Implementation Roadmap
 
 ### Phase 1: AR Foundation (Week 1-2)
+
 - [ ] Create `useMultiCamera` hook
 - [ ] Build `ARCanvas` component
 - [ ] Implement camera calibration system
 - [ ] Create AR game template
 
 ### Phase 2: Single-Camera AR Games (Week 3-4)
+
 - [ ] AR Letter Tracing (front camera, air-tracing)
 - [ ] AR Puppet Theater
 - [ ] Magic Mirror Learning
 - [ ] Scavenger Hunt AR (single camera rotation)
 
 ### Phase 3: Dual-Camera AR Games (Week 5-6)
+
 - [ ] AR Tracing on Paper (external camera)
 - [ ] Virtual Counting Bears
 - [ ] Finger Paint Studio
 - [ ] AR Science Lab
 
 ### Phase 4: Advanced AR (Week 7-8)
+
 - [ ] WebXR integration (progressive enhancement)
 - [ ] MediaPipe Segmentation experiments
 - [ ] 3D object interaction
@@ -567,6 +601,7 @@ Level 4: WebXR true AR (supported devices only)
 | **Kids AR** | Mobile | Marker-based | General | Markerless, hand interaction |
 
 **Our Unique Position:**
+
 - Only web-based dual-camera AR learning platform
 - No app download required (browser-based)
 - Hand tracking + AR (others use markers or touch)
@@ -579,6 +614,7 @@ Level 4: WebXR true AR (supported devices only)
 ### 10.1 Engagement Metrics
 
 **Expected Improvements with AR:**
+
 - **Session Duration**: +40% (AR games more immersive)
 - **Return Rate**: +35% (novelty + engagement)
 - **Completion Rate**: +25% (AR provides clearer guidance)
@@ -587,6 +623,7 @@ Level 4: WebXR true AR (supported devices only)
 ### 10.2 Marketing Differentiation
 
 **Messaging:**
+
 - "The only learning app that uses your child's hands in 3D space"
 - "Turn any table into a smart learning surface"
 - "Virtual teachers that appear in your living room"
@@ -595,6 +632,7 @@ Level 4: WebXR true AR (supported devices only)
 ### 10.3 Monetization
 
 **AR-Specific Revenue Opportunities:**
+
 1. **Premium AR Games**: Advanced AR features in premium tier
 2. **AR Content Packs**: Themed AR experiences (Space, Ocean, Jungle)
 3. **Hardware Bundles**: Partner with webcam manufacturers
@@ -618,18 +656,21 @@ Level 4: WebXR true AR (supported devices only)
 ## 12. Recommendations
 
 ### Immediate Actions (This Week)
+
 1. **Build AR prototype**: Simple AR letter tracing on paper
 2. **Test dual camera**: Validate technical feasibility
 3. **User research**: Survey parents about external camera willingness
 4. **Performance test**: Measure impact on target devices
 
 ### Short-term (Next Month)
+
 1. Implement single-camera AR games (lower barrier)
 2. Create AR game template for rapid development
 3. Build calibration system
 4. Develop parent onboarding for AR features
 
 ### Long-term (Next Quarter)
+
 1. Full dual-camera AR suite
 2. WebXR integration for supported devices
 3. AR content marketplace
@@ -652,18 +693,21 @@ Level 4: WebXR true AR (supported devices only)
 ### B. WebXR Support Details
 
 **Supported Devices (as of 2026):**
+
 - Android phones with ARCore
 - iOS devices with ARKit (via Safari)
 - Meta Quest Browser
 - Magic Leap
 
 **Not Supported:**
+
 - Desktop browsers (no world tracking)
 - Most tablets (except iPad Pro)
 
 ### C. External Camera Calibration
 
 **4-Point Calibration Process:**
+
 1. Show calibration pattern (A4 paper with markers)
 2. Child helps place markers at corners
 3. System calculates homography matrix
@@ -671,6 +715,7 @@ Level 4: WebXR true AR (supported devices only)
 5. Validate with test object placement
 
 **Auto-Calibration (Experimental):**
+
 - Detect paper edges automatically
 - Use hand size as scale reference
 - Validate with repeated measurements

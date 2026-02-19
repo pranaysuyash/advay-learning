@@ -11,6 +11,7 @@
 ## Executive Summary
 
 ### Current State
+
 - **Tracked Games**: 1 of 4 (Alphabet Tracing only)
 - **Missing Games**: FingerNumberShow, ConnectTheDots, LetterHunt
 - **Missing Insights**: App usage patterns, engagement, session behavior, skill development trends
@@ -18,7 +19,9 @@
 - **Privacy Status**: No COPPA/GDPR compliance documentation
 
 ### Problem
+
 Dashboard calculates progress locally from `letterProgress` store but lacks:
+
 - Game-level engagement metrics (which games kids prefer)
 - Skill category metrics (literacy, numeracy, motor skills)
 - Session/app-level usage (frequency, duration, time of day)
@@ -27,7 +30,9 @@ Dashboard calculates progress locally from `letterProgress` store but lacks:
 - Parent insights for informed guidance
 
 ### Opportunity
+
 Unified analytics architecture that:
+
 1. Tracks all 4 games with game-specific metrics
 2. Aggregates into skill categories (literacy, numeracy, motor, engagement)
 3. Powers parent insights (recommendations, milestones, trends)
@@ -43,13 +48,15 @@ Unified analytics architecture that:
 **Observed**: Code inspection reveals:
 
 **progressStore.ts** (Lines 41-100):
+
 - Zustand store tracking per-letter progress
 - `letterProgress[language]`: Array of LetterProgress objects
 - Fields: letter, attempts, bestAccuracy, mastered, lastAttemptDate
 - `batchProgress[language]`: Batch unlock state
 - `earnedBadges`: Badge collection
 
-**Dashboard.tsx** (Lines 223-250): 
+**Dashboard.tsx** (Lines 223-250):
+
 ```
 // TODO: Replace with unified tracking from ANALYTICS_TRACKING_AUDIT.md
 // Currently only tracking Alphabet Tracing - need to add:
@@ -59,6 +66,7 @@ Unified analytics architecture that:
 ```
 
 **progress.py schemas** (Lines 1-40):
+
 ```python
 class ProgressCreate(BaseModel):
   activity_type: str        # Generic - only 'alphabet' used
@@ -70,16 +78,19 @@ class ProgressCreate(BaseModel):
 ```
 
 **progress.py endpoints** (Lines 1-150):
+
 - `POST /batch` endpoint ready for multi-game batching
 - Idempotency support prevents double-counting
 - Backend ready but frontend not using it
 
 **Inferred**:
+
 - Backend supports multi-game tracking via `activity_type` field (flexible schema)
 - Batch endpoint can handle multiple games in one request (good for offline support)
 - Deduplication via `idempotency_key` prevents double-counting
 
 **Unknown**:
+
 - Whether FingerNumberShow saves any progress to backend
 - Whether ConnectTheDots/LetterHunt have tracking code
 - Current data retention policy (how long data stored)
@@ -92,6 +103,7 @@ class ProgressCreate(BaseModel):
 ### FingerNumberShow (Numeracy + Motor Skills)
 
 **What Should Be Tracked**:
+
 ```typescript
 interface FingerNumberShowMetrics {
   numbersShown: number[];              // 0-10 range
@@ -116,6 +128,7 @@ interface FingerNumberShowMetrics {
 ### ConnectTheDots (Motor Skills + Sequencing)
 
 **What Should Be Tracked**:
+
 ```typescript
 interface ConnectTheDotsMetrics {
   puzzlesCompleted: number;
@@ -137,6 +150,7 @@ interface ConnectTheDotsMetrics {
 ### LetterHunt (Literacy + Attention)
 
 **What Should Be Tracked**:
+
 ```typescript
 interface LetterHuntMetrics {
   lettersFound: number;
@@ -159,12 +173,14 @@ interface LetterHuntMetrics {
 ### Principle 1: Separate Learning from Engagement
 
 **Learning Analytics** (measure skill progress):
+
 - Accuracy metrics (correctness of response)
 - Skill mastery (% of letters/numbers mastered)
 - Improvement rate (trend over time)
 - Longitudinal data (A→B improved by X%)
 
 **Engagement Analytics** (measure app usage):
+
 - Session frequency (how often used)
 - Session duration (how long per session)
 - Game preferences (which games played)
@@ -173,6 +189,7 @@ interface LetterHuntMetrics {
 ### Principle 2: Skill Categories > Game Categories
 
 **Skill-Based Grouping** (what parents care about):
+
 ```
 Literacy (Letters + Letter Hunt):
 - Letters Learned: 12/26
@@ -193,12 +210,14 @@ Motor Skills (All games):
 ### Principle 3: Metrics Must Be Actionable
 
 **Good Metrics** (inform decisions):
+
 - ✅ Completion rate (% of attempts leading to mastery)
 - ✅ Difficulty ceiling (highest letter/number mastered)
 - ✅ Retry count (when kids give up vs persist)
 - ✅ Session quality (% of sessions with practice)
 
 **Bad Metrics** (vanity):
+
 - ❌ Total screen time (not connected to learning)
 - ❌ Badge count (arbitrary, doesn't measure skill)
 - ❌ Game play counts (which game popular doesn't explain why)
@@ -225,6 +244,7 @@ Motor Skills (All games):
 ### What "Position Only" Means
 
 **The app DOES use camera** ✅
+
 - Real-time hand tracking works perfectly
 - All gesture recognition features work
 - Profile pictures stored (with pixelation/effects as planned)
@@ -232,6 +252,7 @@ Motor Skills (All games):
 - **Game event data** all tracked and stored
 
 **The app DOESN'T store raw video** ✅
+
 - Video frames processed in real-time
 - Only positional/processed data saved:
   - Hand x,y coordinates (hand position)
@@ -268,7 +289,9 @@ saved as video and never sent to external servers."
 ```
 
 ### COPPA Compliance
+
 ✅ **COPPA-Safe** because:
+
 1. No video recording = no biometric data collection
 2. Position data only = mathematical coordinates, not identifying
 3. Profile pictures pixelated/effected = not identifying
@@ -354,6 +377,7 @@ saved as video and never sent to external servers."
 ### Event Schema Design
 
 **Core Event Format**:
+
 ```json
 {
   "idempotency_key": "alphabet-A-2026-01-31T10:45:23Z-attempt5",
@@ -375,6 +399,7 @@ saved as video and never sent to external servers."
 **Per-Game Meta Data**:
 
 **Alphabet Tracing**:
+
 ```json
 {
   "meta_data": {
@@ -388,6 +413,7 @@ saved as video and never sent to external servers."
 ```
 
 **FingerNumberShow**:
+
 ```json
 {
   "meta_data": {
@@ -402,6 +428,7 @@ saved as video and never sent to external servers."
 ```
 
 **ConnectTheDots**:
+
 ```json
 {
   "meta_data": {
@@ -415,6 +442,7 @@ saved as video and never sent to external servers."
 ```
 
 **LetterHunt**:
+
 ```json
 {
   "meta_data": {
@@ -432,30 +460,36 @@ saved as video and never sent to external servers."
 ## Part 7: Implementation Roadmap (6 Phases)
 
 ### Phase 0: Data Model Extension (Week 1)
+
 - Verify `activity_type` enum values match game names
 - Add DB indexes for performance
 - Write migration script
 
 ### Phase 1: Instrument FingerNumberShow (Week 2)
+
 - Add `useProgressStore` to component
 - Save metrics on game end
 - Format: `activity_type: "finger_numbers"`, all metadata
 
 ### Phase 2: Instrument ConnectTheDots (Week 2)
+
 - Track puzzle completion, path accuracy, sequence
 - Motor skill metrics
 
 ### Phase 3: Instrument LetterHunt (Week 2)
+
 - Track letter recognition, time to find, false clicks
 - Distraction resistance metric
 
 ### Phase 4: Dashboard Redesign (Week 3)
+
 - Skill categories (literacy, numeracy, motor, engagement)
 - Game breakdown section
 - 30-day trend graphs
 - Recommendations engine
 
 ### Phase 5: Privacy Controls (Week 4)
+
 - Privacy policy with analytics explanation
 - Parental consent on signup
 - Data export (CSV)
@@ -463,6 +497,7 @@ saved as video and never sent to external servers."
 - Hand/head tracking opt-out toggle
 
 ### Phase 6: Offline Support (Week 5)
+
 - Queue events to IndexedDB when offline
 - Batch and send when online
 - Deduplication by idempotency_key
@@ -475,17 +510,20 @@ saved as video and never sent to external servers."
 ### P0: Critical (Week 1-2)
 
 **1. Instrument FingerNumberShow** (Highest Impact)
+
 - Missing ~30% of learning metrics
 - Game already works, just needs tracking hooks
 - Effort: ~2 hours
 - Impact: Enables numeracy insights
 
 **2. Extend Dashboard to 4 Games**
+
 - Currently hides 75% of gameplay
 - Effort: ~4 hours
 - Impact: Parents see full picture
 
 **3. Add Privacy Controls**
+
 - COPPA compliance requirement
 - Effort: ~3 hours
 - Impact: Legal protection
@@ -493,16 +531,19 @@ saved as video and never sent to external servers."
 ### P1: Important (Week 3-4)
 
 **4. Implement Skill Categories**
+
 - Replace game-centric with skill-centric view
 - Effort: ~6 hours
 - Impact: Better parent decisions
 
 **5. Add Trend Analysis**
+
 - Show improvement over 30 days
 - Effort: ~4 hours
 - Impact: Motivation/engagement
 
 **6. Implement Recommendations Engine**
+
 - Suggest practice areas
 - Effort: ~5 hours
 - Impact: Parent engagement
@@ -510,11 +551,13 @@ saved as video and never sent to external servers."
 ### P2: Nice-to-Have (Month 2)
 
 **7. Offline Support**
+
 - Queue events locally
 - Effort: ~6 hours
 - Impact: Offline playability
 
 **8. Analytics Dashboard (Internal)**
+
 - Product metrics (DAU, retention, etc.)
 - Effort: ~8 hours
 - Impact: Data-driven decisions
@@ -540,12 +583,14 @@ saved as video and never sent to external servers."
 ```
 
 ### Data Retention
+
 - Raw events: 90 days (sufficient for learning analytics)
 - Aggregated metrics: 12 months (yearly trends)
 - Badges/achievements: Keep indefinitely (child's record)
 - Profile pictures: Keep while account active, delete on account closure
 
 ### Parent Controls (Required)
+
 ```
 Settings > Privacy:
 ├─ View my child's data: [Button] Opens download
@@ -559,6 +604,7 @@ Settings > Privacy:
 ## Part 10: Success Criteria
 
 **You're done when**:
+
 1. ✅ Can answer: "What should we track and why?" with 15+ specific metrics + rationale
 2. ✅ Can answer: "How do we stay COPPA/GDPR compliant?" with specific requirements
 3. ✅ Can answer: "What architecture supports privacy-first analytics?" with diagram + schema
@@ -570,17 +616,20 @@ Settings > Privacy:
 ## Appendix: Research Sources
 
 ### Game Analytics & Learning Science
+
 1. **Sesame Workshop Research**: Learning analytics in game-based learning
 2. **Game Learning Analytics**: Framework for GLA in higher education (Reardon, Kumar, Revelle 2022)
 3. **Learning Analytics for GBL**: Monitoring, assessment, adaptation in game-based learning
 
 ### Educational App Patterns
+
 1. **Seesaw**: Portfolio-based progress tracking for K-5
 2. **Canvas**: Enterprise LMS with analytics
 3. **Google Classroom**: Free progress tracking with parent insights
 4. **Codeyoung**: App balance, goal-setting, digital wellbeing patterns
 
 ### Privacy & Compliance
+
 1. **COPPA Compliance Checklist** (Countly): Parental consent, data security, deletion
 2. **COPPA 101** (Adjust): Parental rights, COPPA requirements
 3. **GDPR Article 8**: Children's consent, data deletion rights
@@ -588,6 +637,7 @@ Settings > Privacy:
 5. **iubenda**: App privacy requirements for kids
 
 ### Technical Architecture
+
 1. **TimescaleDB**: PostgreSQL extension for time-series analytics (5-35x faster)
 2. **Game Analytics Databases**: Recommendations (InfluxDB, TimescaleDB for events)
 3. **Analytics Schema Patterns**: Stack Overflow patterns for event tables
@@ -597,21 +647,27 @@ Settings > Privacy:
 ## Next Steps for Implementation Team
 
 **Week 1**:
+
 - Extend data model, add DB indexes, COPPA compliance setup
 
 **Week 2**:
+
 - Instrument FingerNumberShow, ConnectTheDots, LetterHunt
 
 **Week 3**:
+
 - Redesign dashboard with skill categories
 
 **Week 4**:
+
 - Add privacy controls, parent data export
 
 **Week 5**:
+
 - Implement offline batching support
 
 **Month 2**:
+
 - Trend analysis, recommendations, analytics dashboard
 
 ---
@@ -619,4 +675,3 @@ Settings > Privacy:
 **Document Status**: Ready for implementation  
 **Evidence Quality**: All claims backed by code inspection, research sources, or technical specifications  
 **Accessibility**: This document is the authoritative reference for all analytics research and recommendations
-

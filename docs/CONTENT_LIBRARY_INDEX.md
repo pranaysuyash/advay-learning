@@ -52,6 +52,7 @@
 ## ✨ Enhancement Quick Reference
 
 ### Virtual Brushes
+
 | Brush | Effect | Best For |
 |-------|--------|----------|
 | Magic Wand | Sparkle trail | Letter tracing |
@@ -60,6 +61,7 @@
 | Spray Can | Particle scatter | Art activities |
 
 ### Particle Effects
+
 | Effect | Trigger | Mood |
 |--------|---------|------|
 | Sparkle Trail | Drawing | Magic |
@@ -68,6 +70,7 @@
 | Bubbles | Movement | Playful |
 
 ### Gesture Interactions
+
 | Gesture | Action | Game Use |
 |---------|--------|----------|
 | Clap | Confirm/Celebrate | Trigger success |
@@ -97,24 +100,28 @@
 ## 🎨 Enhancement Implementation Priority
 
 ### Phase 1: Quick Wins (1-2 weeks)
+
 - ✨ Sparkle trail effect → **TCK-20260129-402**
 - 🎨 3-5 basic brushes → **TCK-20260129-403**
 - 🎉 Confetti burst on success → **TCK-20260129-404**
 - 🎈 Simple particles → **TCK-20260129-405**
 
 ### Phase 2: Enhanced (2-4 weeks)
+
 - 🖐️ Virtual hand overlay
 - 🌈 Rainbow trails
 - 🎵 Audio-reactive elements
 - 🏆 Combo system
 
 ### Phase 3: Advanced (1-2 months)
+
 - 🎮 3D object manipulation
 - 🎭 Multi-hand games → **TCK-20260129-406**
 - 🌟 Complex particles
 - 🎪 Transformation animations
 
 ### Implementation Tickets
+
 | Ticket | Feature | Priority |
 |--------|---------|----------|
 | TCK-20260129-402 | Sparkle Trail Effect | P1 |
@@ -141,16 +148,20 @@
 ## 🛠️ Implementation Resources
 
 ### Prompts
+
 - `prompts/content/game-design-prompt-v1.0.md` - Generate new game ideas
 
 ### Specifications
+
 - `docs/features/specs/001-hand-tracking-basics.md`
 - `docs/features/specs/002-number-tracing-game.md`
 
 ### Enhancement Guides
+
 - `docs/GAME_ENHANCEMENTS_IDEAS.md` - 50+ visual/interaction ideas
 
 ### Technical Architecture
+
 - MediaPipe Tasks (Hands, Pose, Face, Segmentation)
 - React frontend + FastAPI backend
 - Local processing (no cloud for gameplay)

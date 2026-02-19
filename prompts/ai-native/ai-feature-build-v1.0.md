@@ -14,6 +14,7 @@ You are implementing a new AI feature for the Advay Vision Learning app. This pr
 ## Pre-Implementation Checklist
 
 Before starting, verify:
+
 - [ ] Feature is documented in `docs/ai-native/FEATURE_SPECS.md`
 - [ ] Architecture alignment checked against `docs/ai-native/ARCHITECTURE.md`
 - [ ] Safety requirements reviewed in `docs/ai-native/SAFETY_GUIDELINES.md`
@@ -23,15 +24,19 @@ Before starting, verify:
 ## Feature Categories
 
 ### Category A: LLM Integration
+
 Examples: Pip responses, story generation, activity creation
 
 ### Category B: Voice Features
+
 Examples: TTS for Pip, STT for child input, voice commands
 
 ### Category C: Vision Features
+
 Examples: Object detection, AR overlays, show-and-tell
 
 ### Category D: Hybrid Features
+
 Examples: Voice + LLM conversation, Camera + LLM description
 
 ---
@@ -348,24 +353,28 @@ if (!parentControls.cameraEnabled) {
 Before marking feature complete:
 
 ### Code Quality
+
 - [ ] TypeScript strict mode passes
 - [ ] ESLint passes
 - [ ] Tests written and passing
 - [ ] Error handling complete
 
 ### Architecture
+
 - [ ] Follows provider abstraction pattern
 - [ ] Fallback implemented
 - [ ] Privacy requirements met
 - [ ] Performance budget met
 
 ### Safety
+
 - [ ] Input filtering implemented
 - [ ] Output filtering implemented
 - [ ] Age-appropriate content verified
 - [ ] Parent controls integrated
 
 ### Documentation
+
 - [ ] Feature spec updated
 - [ ] README updated (if applicable)
 - [ ] Worklog ticket updated
@@ -376,6 +385,7 @@ Before marking feature complete:
 ## Common Patterns
 
 ### Provider Factory Pattern
+
 ```typescript
 export function createLLMService(options?: LLMOptions): LLMService {
   if (options?.provider === 'cloud') {
@@ -386,6 +396,7 @@ export function createLLMService(options?: LLMOptions): LLMService {
 ```
 
 ### Graceful Degradation Pattern
+
 ```typescript
 async function withFallback<T>(
   primary: () => Promise<T>,
@@ -402,6 +413,7 @@ async function withFallback<T>(
 ```
 
 ### Child-Friendly Error Pattern
+
 ```typescript
 const CHILD_ERRORS = {
   default: "Oops! Let's try again!",

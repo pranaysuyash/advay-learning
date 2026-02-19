@@ -17,7 +17,7 @@
 
 **Prompt Sections (12 Deliverables)**:
 
-1. **Investment Headline** - "This is a ___ disguised as a ___"
+1. **Investment Headline** - "This is a ___disguised as a___"
 2. **What I Saw (FACTS ONLY)**
    - Product map (screens + flows)
    - Core interaction loops
@@ -87,9 +87,10 @@
 
 ### 10-Minute Product Tour
 
-**Open http://localhost:6173 and explore:**
+**Open <http://localhost:6173> and explore:**
 
 **Time Allocation:**
+
 - 0:00-2:00: Landing page + onboarding
 - 2:00-4:00: Core gameplay loop
 - 4:00-6:00: Unique camera features
@@ -99,12 +100,14 @@
 ### Step 2: Identify "Core Magic"
 
 **Answer:**
+
 - What does camera enable that touch/scroll apps CANNOT? (3-5 advantages)
 - What's the ONE interaction pattern that feels magical?
 
 ### Step 3: Test Onboarding
 
 **Time These:**
+
 - Time-to-First-Fun (landing → "aha!" moment)
 - Time-to-First-Learning (first educational objective)
 - Time-to-Trust (believe it's safe for kids)
@@ -117,6 +120,7 @@
 **If fewer**: Explore all repeatedly
 
 **For each:**
+
 - Educational objective
 - Camera enhancement
 - Repeatable engagement loop
@@ -138,7 +142,7 @@
 
 ## VC Mindset - What This Prompt Cares About
 
-### Primary Investment Pillars:
+### Primary Investment Pillars
 
 1. **Market Size & Urgency**
    - Billion-dollar category or niche toy?
@@ -179,7 +183,7 @@
 
 ## Quality Bar
 
-### This is NOT a generic VC memo. It must be:
+### This is NOT a generic VC memo. It must be
 
 1. **Grounded in actual product exploration**
    - Every claim must reference something observed
@@ -209,12 +213,14 @@
 
 ## What Gets Evaluated
 
-### Product Readiness:
+### Product Readiness
+
 - Does this feel investable as product direction?
 - Would you put your firm's brand on this in 6 months?
 - MVP vs what's actually built?
 
-### Moat Strength (Total Score: 0-60 / 60):
+### Moat Strength (Total Score: 0-60 / 60)
+
 - Data moat: 0-10
 - Model moat: 0-10
 - Content moat: 0-10
@@ -222,7 +228,8 @@
 - Brand moat: 0-10
 - Switching costs: 0-10
 
-### Investment Readiness (Total Score: 0-80 / 80):
+### Investment Readiness (Total Score: 0-80 / 80)
+
 - Product clarity: 0-10
 - Trust/safety: 0-10
 - Retention: 0-10
@@ -232,18 +239,21 @@
 - Defensibility: 0-10
 - Overall fundability: 0-10
 
-### Business Model Hypotheses:
+### Business Model Hypotheses
+
 - Model 1: B2C subscription (parents paying)
 - Model 2: B2B2C (schools paying for families)
 - Model 3: Hybrid (freemium + premium upsell)
 
-### Growth Strategy:
+### Growth Strategy
+
 - 3 viable channels for first 6 months
 - 2 wasteful channels to avoid
 - Viral hooks (shareable moments)
 - Community loops (user contributions)
 
-### Diligence Questions (30 min 25):
+### Diligence Questions (30 min 25)
+
 - Product: 5 questions
 - Market: 5 questions
 - GTM: 5 questions
@@ -255,42 +265,47 @@
 
 ## Files Modified/Created
 
-### Created:
+### Created
+
 1. `prompts/investor/vc-investment-evaluation-v1.0.md` (new, ~800 lines)
 
-### Modified:
+### Modified
+
 1. `prompts/README.md` - Added investor prompt reference under "Release / Ops" section
 
 ---
 
 ## Usage Instructions
 
-### When to Use This Prompt:
+### When to Use This Prompt
 
 **Use Case**: Before raising Series A or B funding, when:
+
 - You have working product (MVP or better)
 - You want to assess investment readiness
 - You need to identify gaps before talking to investors
 - You want to practice investor questions with brutal honesty
 
 **Prerequisites:**
-- Product running at http://localhost:6173
+
+- Product running at <http://localhost:6173>
 - 10+ minutes available for hands-on exploration
 - Willing to hear brutal feedback (this prompt is not for ego)
 
-### How to Use:
+### How to Use
 
 1. **Read prompt completely** - Understand all 12 deliverables
-2. **Open product** - http://localhost:6173
+2. **Open product** - <http://localhost:6173>
 3. **Follow exploration steps** - 10-minute tour, edge cases, onboarding
 4. **Document observations** - Use the 12 deliverable format strictly
 5. **Answer honestly** - Don't fluff, be investor-first
 6. **Review deliverables** - Ensure all 12 sections are complete
 7. **Iterate based on feedback** - If investors give feedback, update your answers
 
-### Output Artifact:
+### Output Artifact
 
 The prompt produces a **comprehensive investment memo** covering:
+
 - Product assessment (what works, what doesn't)
 - Investment thesis (why this could be big)
 - Risk analysis (top 12 risks with mitigation)
@@ -307,7 +322,7 @@ The prompt produces a **comprehensive investment memo** covering:
 
 ## Key Differentiators from Generic VC Memos
 
-### What This Prompt Does Better:
+### What This Prompt Does Better
 
 1. **Product-specific**: Tailored to MediaPipe-based, camera-driven learning apps
 2. **Hands-on requirement**: Must actually USE the product, not just read about it
@@ -320,7 +335,7 @@ The prompt produces a **comprehensive investment memo** covering:
 9. **Diligence questions**: For each, specifies what makes you lean IN vs WALK AWAY
 10. **Milestone/metric focus**: 5 milestones for 8 weeks + 5 metrics to instrument NOW
 
-### What This Prompt Does NOT Do:
+### What This Prompt Does NOT Do
 
 - Generic "tell me about your company" questions
 - Vague "what's your TAM?" without context
@@ -332,18 +347,21 @@ The prompt produces a **comprehensive investment memo** covering:
 
 ## Execution Notes
 
-### Time to Complete Prompt:
+### Time to Complete Prompt
+
 - **Reading prompt**: 15-20 minutes
 - **Product exploration**: 10-15 minutes (hands-on)
 - **Documentation**: 60-90 minutes (12 deliverables)
 - **Total estimated**: 1.5-2.5 hours
 
-### Skill Level Required:
+### Skill Level Required
+
 - **VC experience**: Understanding of term sheets, unit economics, go-to-market
 - **Product intuition**: Ability to assess UX, engagement, retention from brief use
 - **Technical literacy**: Understanding of MediaPipe, browser APIs, scalability
 
-### Output Quality:
+### Output Quality
+
 - **Investor-ready memo**: Can be shared with partners as-is
 - **Brutally honest**: No sugarcoating, clear risks and gaps
 - **Actionable feedback**: Specific changes to improve fundability

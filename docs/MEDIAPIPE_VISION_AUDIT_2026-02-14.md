@@ -106,6 +106,7 @@ Camera (react-webcam / getUserMedia)
 | Eye tracking hook | `src/frontend/src/hooks/useEyeTracking.ts` | Blink detection via Eye Aspect Ratio (EAR). Threshold 0.25. 200ms debounce. | `Observed`: Lines 59–114 (init), 117–228 (processVideoFrame). |
 
 **Issues** (all `Observed`):
+
 1. **No GPU→CPU fallback** — hardcoded `delegate: 'GPU'` (line 71). Will fail on older devices.
 2. **Uncapped FPS** — uses raw `requestAnimationFrame` loop (line 228) with no throttle. Will consume excessive CPU.
 3. **Redundant null check** — `faceLandmarkerRef.current` checked twice (lines 118, 121).
@@ -121,6 +122,7 @@ Camera (react-webcam / getUserMedia)
 | Posture detection hook | `src/frontend/src/hooks/usePostureDetection.ts` | Shoulder alignment + spine curvature scoring. Throttled to 10fps. | `Observed`: Lines 35–78 (init), 81–121 (processFrame). |
 
 **Issues** (all `Observed`):
+
 1. **No GPU→CPU fallback** — hardcoded `delegate: 'GPU'` (line 46). Will fail silently on older devices.
 2. **Stale closure in cleanup** — `poseLandmarker` referenced in `useEffect` cleanup (line 71) but not in dependency array (line 78). Will fail to close if landmarker changes.
 3. **`startMonitoring` race condition** — checks `isMonitoring` (line 127) before the state update from `setIsMonitoring(true)` (line 126) has flushed. First call never starts rAF.
@@ -157,6 +159,7 @@ All three pipelines load models from Google CDN:
 ### Game State Machine (Current vs Needed)
 
 **Current** (all camera games):
+
 ```
 [Menu] → [Playing] → [Menu]
               ↕
@@ -164,6 +167,7 @@ All three pipelines load models from Google CDN:
 ```
 
 **Needed**:
+
 ```
 [Menu] → [Calibrating] → [Playing] → [Menu]
                               ↕
@@ -455,6 +459,7 @@ For each PR, perform these tests with a real child (or simulate child behavior):
 All files involved in MediaPipe vision tracking:
 
 ### Hooks
+
 | File | Purpose | Pipeline |
 |---|---|---|
 | `src/frontend/src/hooks/useHandTracking.ts` | Hand landmarker init + fallback | Hand |
@@ -464,6 +469,7 @@ All files involved in MediaPipe vision tracking:
 | `src/frontend/src/hooks/usePostureDetection.ts` | Pose landmarker + posture scoring | Pose |
 
 ### Utilities
+
 | File | Purpose | Pipeline |
 |---|---|---|
 | `src/frontend/src/utils/handTrackingFrame.ts` | Frame builder (TrackedHandFrame) | Hand |
@@ -473,11 +479,13 @@ All files involved in MediaPipe vision tracking:
 | `src/frontend/src/games/fingerCounting.ts` | Multi-heuristic finger counter | Hand |
 
 ### Types
+
 | File | Purpose |
 |---|---|
 | `src/frontend/src/types/tracking.ts` | Point, Landmark, PinchState, PinchResult, PinchOptions, UseHandTrackingOptions, UseGameLoopOptions, TrackedHandFrame types |
 
 ### Components (Camera UX)
+
 | File | Purpose |
 |---|---|
 | `src/frontend/src/components/CameraPermissionPrompt.tsx` | Permission request UI |
@@ -487,6 +495,7 @@ All files involved in MediaPipe vision tracking:
 | `src/frontend/src/components/GameControls.tsx` | Standardized game controls |
 
 ### Games (Camera-based)
+
 | File | Pipeline Used |
 |---|---|
 | `src/frontend/src/games/FingerNumberShow.tsx` | Hand (counting) |
@@ -495,6 +504,7 @@ All files involved in MediaPipe vision tracking:
 | `src/frontend/src/pages/MediaPipeTest.tsx` | Hand + Face + Pose (dev only) |
 
 ### Settings
+
 | File | Relevant Flags |
 |---|---|
 | `src/frontend/src/store/settingsStore.ts` | `cameraEnabled`, `handTrackingDelegate`, `showHints` |

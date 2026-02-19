@@ -14,6 +14,7 @@
 ## Scope Contract
 
 **In-scope:**
+
 - Audit axis E: Accessibility (keyboard, focus, contrast, reduced motion, ARIA)
 - Target surface: frontend (pages: Dashboard, Games, Home; components: ParentGate, Icon, ProtectedRoute, ConfirmDialog, Card)
 - Evidence-first audit: every non-trivial claim backed by file path + code excerpt, command output
@@ -23,6 +24,7 @@
 - No code changes (report-only)
 
 **Out-of-scope:**
+
 - Backend accessibility (API endpoints, database)
 - Individual game component audits (AlphabetGame, ConnectTheDots, LetterHunt)
 - Individual hook audits
@@ -61,6 +63,7 @@
 **Reading Level:** Early reader (learning to recognize letters/numbers)
 
 **Cognitive Abilities:**
+
 - Limited attention span (5-10 minutes per activity)
 - Developing fine motor skills (precise gestures challenging)
 - Visual learning stronger than text comprehension
@@ -77,49 +80,62 @@
 ### Docs Consulted
 
 **File:** `docs/architecture/TECH_STACK.md`
+
 - **Content:** Tech stack overview
 - **Observed:** Lists React, Framer Motion, no explicit accessibility standards defined
 - **Observation:** No WCAG compliance goals, no keyboard navigation patterns documented
 
 **File:** `docs/PROJECT_PLAN.md`
+
 - **Content:** Project planning and milestones
 - **Observed:** No accessibility-specific goals identified
 
 ### Code Evidence
 
 **File:** `src/frontend/src/App.tsx` (4106 bytes, 14 lines)
+
 - **Observed:** Lines 14, 16, 48: Lazy loading with React.lazy()
 - **Excerpt:**
+
   ```tsx
   const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
   const Games = lazy(() => import('./pages/games').then(module => ({ default: module.Games })));
   ```
+
 - **Impact:** Good - proper code splitting, improves initial load time
 
 **File:** `src/frontend/src/pages/Dashboard.tsx` (32045 bytes)
+
 - **Observed:** Lines 407, 480, 716, 770: ARIA labels present
 - **Excerpt:**
+
   ```tsx
   aria-label={exporting ? 'Export in progress' : 'Export progress data'}
   <UIIcon name='play' size={24} aria-label='Play game' />
   <UIIcon name='search' size={16} aria-label='Browse all games' />
   <UIIcon name='hand' size={24} aria-label='Play games with hand tracking' />
   ```
+
 - **Impact:** **GOOD** - Proper ARIA labels on interactive elements, icons have semantic names
 
 **File:** `src/frontend/src/pages/Games.tsx` (13882 bytes)
+
 - **Observed:** Lines 2, 25, 114, 120, etc.: useReducedMotion hook used correctly
 - **Excerpt:**
+
   ```tsx
   import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
   
   const reducedMotion = useReducedMotion();
   ```
+
 - **Impact:** **GOOD** - Reduced motion support implemented, respects system preferences
 
 **File:** `src/frontend/src/components/ui/ParentGate.tsx` (187 lines)
+
 - **Observed:** Lines 35, 36, 136: Proper aria-label on hold button, animation, state management
 - **Excerpt:**
+
   ```tsx
   <button
     type='button'
@@ -145,11 +161,14 @@
         : 'Hold to Unlock'}
   </button>
   ```
+
 - **Impact:** **GOOD** - Excellent accessibility with proper ARIA labels, animations for progress, keyboard event handlers, disabled state management
 
 **File:** `src/frontend/src/components/ui/Icon.tsx` (128 lines)
+
 - **Observed:** Lines 88-99: Proper ARIA with img and fallback UI
 - **Excerpt:**
+
   ```tsx
   <AssetIcon
     src={src}
@@ -171,27 +190,33 @@
     />
   );
   ```
+
 - **Impact:** **GOOD** - Icon component handles both SVG (AssetIcon) with ARIA and img with fallback, has error state with visual indicator
 
 ### Command Outputs
 
 **Command:** `grep -n "aria-label|role|tabindex" src/frontend/src/pages/Games.tsx | head -20`
+
 - **Output:** No matches (Games.tsx line 182 has `reducedMotion` usage but no explicit ARIA labels found
 - **Observation:** Games page relies on reducedMotion animations for accessibility (good)
 
 **Command:** `grep -n "aria-label|role|tabindex" src/frontend/src/components/ui/ParentGate.tsx | head -15`
+
 - **Output:** Lines 35, 136: aria-label on button (excellent)
 - **Observation:** ParentGate has proper accessibility
 
 **Command:** `grep -n "onKeyDown|KeyDown|tabindex" src/frontend/src/pages/Dashboard.tsx src/frontend/src/pages/Games.tsx`
+
 - **Output:** No matches
 - **Observation:** No explicit keyboard navigation patterns found in main pages
 
 **Command:** `grep -n "focus-visible|autoFocus" src/frontend/src/pages/Dashboard.tsx src/frontend/src/pages/Games.tsx`
+
 - **Output:** No matches
 - **Observation:** No focus management patterns found
 
 **Command:** `grep -n "bg-.*white|text-white.*bg-|contrast" src/frontend/src/pages src/frontend/src/components`
+
 - **Output:** No matches
 - **Observation:** No explicit color contrast checks or tokens (colors defined in Tailwind config)
 
@@ -240,7 +265,7 @@
    - All interactive elements must have `aria-label` or `aria-labelledby`
    - Semantic HTML elements (nav, main, section, article)
    - Icons must have descriptive alt text
-   - Dynamic content updates: `aria-live="polite" or `aria-atomic="true"`
+   - Dynamic content updates: `aria-live="polite" or`aria-atomic="true"`
 
 4. **Screen Reader Support**
    - All icons have meaningful labels (not decorative)
@@ -294,6 +319,7 @@
 ### Enumerated App Surface
 
 **Analyzed in detail:**
+
 - `src/frontend/src/App.tsx` - Routing, lazy loading ✅
 - `src/frontend/src/pages/Dashboard.tsx` - Main dashboard, ARIA labels ✅
 - `src/frontend/src/pages/Games.tsx` - Game selection, reducedMotion ✅
@@ -321,37 +347,43 @@
 ### Principles (5-10)
 
 **1. Keyboard Navigation (CRITICAL for motor skill variance)**
-   - Tab/Shift+Tab navigation through all interactive elements
-   - Enter/Space to activate buttons and forms
-   - Escape to close modals and dialogs
-   - Arrow keys for directional navigation
-   - No focus traps (always escapable)
+
+- Tab/Shift+Tab navigation through all interactive elements
+- Enter/Space to activate buttons and forms
+- Escape to close modals and dialogs
+- Arrow keys for directional navigation
+- No focus traps (always escapable)
 
 **2. Focus Management (CRITICAL for screen readers)**
-   - Visible focus indicator for keyboard users
-   - Logical tab order matches visual layout
-   - `focus-visible` class for currently focused element
-   - `autoFocus` on dialogs and forms (ParentGate does this well)
+
+- Visible focus indicator for keyboard users
+- Logical tab order matches visual layout
+- `focus-visible` class for currently focused element
+- `autoFocus` on dialogs and forms (ParentGate does this well)
 
 **3. ARIA Labels (CRITICAL for screen readers)**
-   - All interactive elements: `aria-label` (ParentGate line 36: excellent)
-   - Icons: alt text or aria-label (Icon.tsx lines 88-99: excellent dual-mode)
-   - Semantic HTML: nav, main, section, article
+
+- All interactive elements: `aria-label` (ParentGate line 36: excellent)
+- Icons: alt text or aria-label (Icon.tsx lines 88-99: excellent dual-mode)
+- Semantic HTML: nav, main, section, article
 
 **4. Reduced Motion (CRITICAL for vestibular/motor disorders)**
-   - Respect system preference with useReducedMotion()
-   - Disable animations when reducedMotion is true
-   - Maintain meaning without motion
+
+- Respect system preference with useReducedMotion()
+- Disable animations when reducedMotion is true
+- Maintain meaning without motion
 
 **5. Screen Reader Support (CRITICAL for visual impairments)**
-   - Error states announced (Icon.tsx line 90: ✦ visual indicator)
-   - Progress announcements (ParentGate: progress shown, good)
-   - Descriptive labels on all icons and buttons
+
+- Error states announced (Icon.tsx line 90: ✦ visual indicator)
+- Progress announcements (ParentGate: progress shown, good)
+- Descriptive labels on all icons and buttons
 
 **6. Color Contrast (CRITICAL for low vision)**
-   - WCAG AA compliance (4.5:1 contrast ratio)
-   - Text on white backgrounds (Dashboard.tsx: used)
-   - Focus indicators on all backgrounds
+
+- WCAG AA compliance (4.5:1 contrast ratio)
+- Text on white backgrounds (Dashboard.tsx: used)
+- Focus indicators on all backgrounds
 
 ### Allowed Patterns
 
@@ -379,6 +411,7 @@
 ### Blocker Issues (Must Fix)
 
 **None identified.** Current accessibility implementation is solid with:
+
 - useReducedMotion() implemented in Games.tsx
 - Proper ARIA labels in ParentGate and Icon components
 - Excellent parent gate with progress animation and keyboard support
@@ -387,6 +420,7 @@
 ### High Priority Issues
 
 **ACC-001: No Explicit Keyboard Navigation in Main Pages (HIGH)**
+
 - **Severity:** High
 - **Confidence:** High
 - **Evidence:** **Observed** - `grep -n "onKeyDown|KeyDown|tabIndex|tabindex" src/frontend/src/pages/Dashboard.tsx src/frontend/src/pages/Games.tsx` returned no matches
@@ -399,6 +433,7 @@
 - **Risk:** MED (requires careful testing with keyboard users, but significantly improves accessibility)
 
 **ACC-002: Games Page Missing ARIA Labels on Interactive Elements (HIGH)**
+
 - **Severity:** High
 - **Confidence:** High
 - **Evidence:** **Observed** - `grep -n "aria-label" src/frontend/src/pages/Games.tsx` returned no matches
@@ -411,6 +446,7 @@
 - **Risk:** LOW (simple fix, no behavior change)
 
 **ACC-003: Dashboard Missing Focus Management and Focus Indicators (MED)**
+
 - **Severity:** Medium
 - **Confidence:** Medium
 - **Evidence:** **Observed** - `grep -n "focus-visible|autoFocus" src/frontend/src/pages/Dashboard.tsx` returned no matches
@@ -425,6 +461,7 @@
 ### Medium Priority Issues
 
 **ACC-004: No Explicit Color Contrast Verification (MED)**
+
 - **Severity:** Medium
 - **Confidence:** Medium
 - **Evidence:** **Observed** - `grep -n "bg-.*white|text-white.*bg-|contrast" src/frontend/src` returned no matches
@@ -437,6 +474,7 @@
 - **Risk:** LOW (testing infrastructure, no code changes)
 
 **ACC-005: No Error Boundaries Around Store-Consuming Components (MED)**
+
 - **Severity:** Medium
 - **Confidence:** Medium
 - **Evidence:** **Observed** - No error boundaries found in main pages or components
@@ -451,6 +489,7 @@
 ### Low Priority Issues
 
 **ACC-006: No Loading States Documented for Async Operations (LOW)**
+
 - **Severity:** Low
 - **Confidence:** Medium
 - **Evidence:** **Observed** - No skeleton loaders or loading placeholders found in documentation
@@ -469,12 +508,14 @@
 ### Day 0-1 (Quick Wins)
 
 **1. Add ARIA Labels to Games Page (ACC-002)**
+
 - **Action:** Add aria-label to all GameCard components in Games.tsx
 - **Expected Impact:** Screen reader users can navigate and understand game selection
 - **Effort:** S (1-2 hours - add ARIA labels)
 - **Risk:** LOW (simple fix, no behavior change)
 
 **2. Document Loading States (ACC-006)**
+
 - **Action:** Document loading state requirements, add skeleton/loader components
 - **Expected Impact:** Better UX for kids during async operations, professional feel
 - **Effort:** L (2-4 hours - document and implement loaders)
@@ -483,24 +524,28 @@
 ### Week 1 (Core Refactor)
 
 **3. Implement Keyboard Navigation (ACC-001)**
+
 - **Action:** Add Tab/Shift+Tab navigation through Dashboard and Games pages
 - **Expected Impact:** Enables keyboard-only users (motor impairments, ADHD) to use app
 - **Effort:** L (4-8 hours - keyboard navigation)
 - **Risk:** MED (requires testing with keyboard users)
 
 **4. Add Focus Management (ACC-003)**
+
 - **Action:** Add focus management with visible indicators to Dashboard
 - **Expected Impact:** Keyboard users can navigate efficiently
 - **Effort:** M (2-4 hours - focus management)
 - **Risk:** MED (requires testing with keyboard users)
 
 **5. Add Error Boundaries to Main Pages (ACC-005)**
+
 - **Action:** Add React ErrorBoundaries to Dashboard, Games, Home
 - **Expected Impact:** Prevent app crashes on state failures, provide graceful error recovery
 - **Effort:** M (4-6 hours - add ErrorBoundaries, error UI, fallbacks)
 - **Risk:** MED (significant UX improvement)
 
 **6. Set Up Automated Color Contrast Verification (ACC-004)**
+
 - **Action:** Add axe-core to build pipeline for automated color contrast checks
 - **Expected Impact:** Prevents low contrast issues, ensures WCAG AA compliance
 - **Effort:** M (4-8 hours - CI setup)
@@ -509,12 +554,14 @@
 ### Week 2+ (Hardening)
 
 **7. Expand Error Boundary Coverage (ACC-005 Follow-up)**
+
 - **Action:** Expand ErrorBoundary coverage to all pages and components
 - **Expected Impact:** Comprehensive error handling across app
 - **Effort:** L (8-12 hours - add ErrorBoundaries to remaining pages)
 - **Risk:** LOW (improves app stability)
 
 **8. Add Full WCAG Compliance Verification (ACC-004 Follow-up)**
+
 - **Action:** Run full WCAG 2.1 AA audit with automated tools on all pages
 - **Expected Impact:** Complete accessibility compliance, prevents regressions
 - **Effort:** L (12-16 hours - full audit setup and fixes)
@@ -527,6 +574,7 @@
 ### Automated Checks
 
 **1. Lint Rules**
+
 - **Tool:** ESLint with JSX-a11y plugin or custom rules
 - **Required Rules:**
   - `jsx-a11y/anchor-has-content` (ensure all anchors have content)
@@ -540,6 +588,7 @@
 - **Risk:** LOW (configuration only)
 
 **2. Accessibility Testing**
+
 - **Tool:** axe-core or @axe-core/react
 - **Required Rules:**
   - All pages must pass WCAG AA automated checks
@@ -551,6 +600,7 @@
 - **Risk:** MED (blocks builds on failures)
 
 **3. ERIA Label Enforcement**
+
 - **Tool:** Custom ESLint rule
 - **Required Rules:**
   - All buttons must have aria-label or aria-labelledby
@@ -568,6 +618,7 @@
 ### Chosen Approach: **Progressive Accessibility Enhancement**
 
 **Trade-offs:**
+
 - Current implementation has solid foundations (reduced motion, ParentGate accessibility, Icon component)
 - Keyboard navigation missing (ACC-001) - critical for many users
 - Games page missing ARIA labels (ACC-002) - high impact for screen readers
@@ -577,11 +628,13 @@
 - Implementing full WCAG compliance would be significant work (Week 2+), not sustainable
 
 **Why Not Other Approaches:**
+
 - **Full WCAG 2.1 AA audit immediately**: Would block development for weeks, unknown actual violations
 - **Rewrite entire app**: Would lose good patterns, break existing code
 - **Leave as-is**: Not option - ACC-001 is critical for excluding users with disabilities
 
 **Recommendation:**
+
 1. Implement quick wins (Day 0-1): ARIA labels on Games page, document loading states
 2. If ACC-001 (keyboard navigation) becomes blocker, proceed to Week 1 implementation
 3. Continue monitoring for ACC-002 (ARIA labels) and ACC-004 (color contrast)
@@ -594,9 +647,11 @@
 ### File Paths + Short Code Excerpts
 
 **Evidence 1: Games Page Missing ARIA Labels**
+
 - **File:** `src/frontend/src/pages/Games.tsx`
 - **Lines:** 30-75, 76-85
 - **Excerpt:**
+
   ```tsx
   <GameCard
     key={game.id}
@@ -606,13 +661,16 @@
     reducedMotion={!!reducedMotion}
   />
   ```
+
 - **Observation:** No aria-label on GameCard, but has reducedMotion support (good)
 - **Evidence Type:** Observed
 
 **Evidence 2: ParentGate Excellent Accessibility**
+
 - **File:** `src/frontend/src/components/ui/ParentGate.tsx`
 - **Lines:** 35, 136
 - **Excerpt:**
+
   ```tsx
   <button
     type='button'
@@ -631,13 +689,16 @@
         : 'Hold to Unlock'}
   </button>
   ```
+
 - **Observation:** Excellent accessibility with aria-label, keyboard handlers, progress animation
 - **Evidence Type:** Observed
 
 **Evidence 3: Icon Component Good Accessibility**
+
 - **File:** `src/frontend/src/components/ui/Icon.tsx`
 - **Lines:** 88-99
 - **Excerpt:**
+
   ```tsx
   <AssetIcon
     src={src}
@@ -654,12 +715,14 @@
     ✦
   </span>
   ```
+
 - **Observation:** Handles both SVG and img with fallback, error state with ✦ indicator
 - **Evidence Type:** Observed
 
 ### File Sizes
 
 **Command:** `wc -c src/frontend/src/App.tsx src/frontend/src/pages/Dashboard.tsx src/frontend/src/pages/Games.tsx src/frontend/src/components/ui/ParentGate.tsx src/frontend/src/components/ui/Icon.tsx`
+
 - **Observed:** Total: ~49KB analyzed
 - **Impact:** Reasonable for audit coverage
 
@@ -675,6 +738,7 @@
 The frontend demonstrates solid accessibility patterns in several areas (reduced motion, ParentGate excellence, Icon component ARIA, lazy loading). However, there are critical gaps:
 
 **Strengths:**
+
 - Reduced motion implemented correctly in Games.tsx (respects system preference)
 - ParentGate component is accessibility gold standard (aria-label, keyboard handlers, progress animation)
 - Icon component handles both SVG and img with fallback, has error state with visual indicator
@@ -682,6 +746,7 @@ The frontend demonstrates solid accessibility patterns in several areas (reduced
 - Lazy loading pattern in App.tsx (good code splitting)
 
 **Biggest Risks (for Accessibility Only):**
+
 - ACC-001 (HIGH): No explicit keyboard navigation - excludes users with motor impairments
 - ACC-002 (HIGH): Games page missing ARIA labels - screen readers can't navigate
 - ACC-005 (MED): No Error Boundaries around state-consuming components - app crash risk
@@ -691,6 +756,7 @@ The frontend demonstrates solid accessibility patterns in several areas (reduced
 Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading states. If ACC-001 (keyboard navigation) or ACC-005 (error boundaries) become blockers, proceed to Week 1 implementations.
 
 **Next Priority:**
+
 1. Add ARIA labels to Games page (ACC-002)
 2. Document loading states (ACC-006)
 3. Implement keyboard navigation (ACC-001) - if needed
@@ -702,6 +768,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
 ### Short Code Excerpts (Only Minimum Needed)
 
 **Excerpt 1: Games Page Missing ARIA Labels**
+
 ```tsx
 <GameCard
   key={game.id}
@@ -711,9 +778,11 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
   reducedMotion={!!reducedMotion}
 />
 ```
+
 **Purpose:** Evidence for ACC-002 (HIGH)
 
 **Excerpt 2: ParentGate Excellent Accessibility**
+
 ```tsx
 <button
   type='button'
@@ -728,6 +797,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
         : 'Hold to Unlock'}
 </button>
 ```
+
 **Purpose:** Evidence for ParentGate accessibility pattern (compliant)
 
 ---
@@ -737,6 +807,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
 **PASS** ✅
 
 **Pass Conditions:**
+
 - [x] You audited exactly **one axis** (Accessibility) explicitly stated in Scope
 - [x] Every non-trivial claim is labeled Observed/Inferred/Unknown and has evidence
 - [x] Compliance matrix covers target surface (pages + key components)
@@ -750,6 +821,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
 - [ ] Screenshot index (N/A - code-analysis focus)
 
 **Fail Conditions:**
+
 - [ ] Multiple axes mixed - **N/A** (single axis audit)
 - [ ] Claims are generic without repo evidence - **N/A** (all claims file-backed)
 - [ ] Output format deviates significantly - **N/A** (all required sections present)
@@ -788,6 +860,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
 ### Short Code Excerpts (Only Minimum Needed)
 
 **Excerpt 1: Games Page Missing ARIA Labels**
+
 ```tsx
 <GameCard
   key={game.id}
@@ -797,9 +870,11 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
   reducedMotion={!!reducedMotion}
 />
 ```
+
 **Purpose:** Evidence for ACC-002 (HIGH severity)
 
 **Excerpt 2: ParentGate Excellent Accessibility**
+
 ```tsx
 <button
   type='button'
@@ -813,6 +888,7 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
         : 'Hold to Unlock'}
 </button>
 ```
+
 **Purpose:** Evidence for compliant accessibility pattern
 
 ---
@@ -820,18 +896,21 @@ Implement quick wins (Day 0-1): Add ARIA labels to Games page, document loading 
 ## Open Questions
 
 **1. Keyboard Navigation Priority**
+
 - **Question:** Is ACC-001 (no keyboard navigation) a blocker for actual users with motor impairments?
 - **Relevance:** Without data on user needs, can't assess priority accurately
 - **Evidence:** No user research, no accessibility data available
 - **Action:** If implementing keyboard nav, get user input on motor skill needs vs keyboard preference
 
 **2. Color Contrast Baseline**
+
 - **Question:** What is the current color contrast ratio for main pages?
 - **Relevance:** Without automated tools, can't verify if WCAG AA is met
 - **Evidence:** No axe-core or contrast checks in code
 - **Action:** Run axe-core on Dashboard and Games to establish baseline before implementing fixes
 
 **3. Focus Management Implementation**
+
 - **Question:** Should focus management be per-page or global?
 - **Relevance:** Affects implementation complexity and testing strategy
 - **Evidence:** No existing focus management patterns found

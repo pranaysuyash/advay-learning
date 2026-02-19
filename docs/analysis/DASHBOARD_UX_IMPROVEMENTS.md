@@ -8,6 +8,7 @@
 ## 🔍 Current Issues Identified
 
 ### 1. **Scattered Actions** ❌
+
 ```
 Current layout:
 [Export Button]                    (top-right, isolated)
@@ -24,18 +25,21 @@ Current layout:
 **Problem:** Actions are scattered across the page. Export is isolated, Quick Actions are buried in a card.
 
 ### 2. **Wasted Space** ❌
+
 - Stats cards: Large padding, excessive whitespace
 - Progress bars in stat cards: Take full width for simple data
 - Two-column layout creates misalignment
 - Multi-Language card has redundant info
 
 ### 3. **Visual Hierarchy Issues** ❌
+
 - "Explore All Games" has red gradient (highest attention) but is secondary
 - "Letter Journey" (main feature) is at bottom
 - Export button prominent but rarely used
 - Settings shown in dashboard AND in sidebar
 
 ### 4. **Duplicate/Redundant Info** ❌
+
 - Preferred Language shown in:
   - Child selector context
   - Progress card badge
@@ -46,32 +50,41 @@ Current layout:
 
 ## ✅ Proposed Improvements
 
-### 1. **Consolidated Action Bar** 
+### 1. **Consolidated Action Bar**
+
 Move all actions to a single location:
+
 ```
 [Child Selector]              [Export] [Settings] [Add Child]
 ```
 
 ### 2. **Compact Stats Row**
+
 Replace 4 large cards with horizontal stats strip:
+
 ```
 Letters: 12/26 ████████░░  Accuracy: ⭐⭐⭐  Time: 45min  Streak: 🔥 5 days
 ```
 
 ### 3. **Prominent Letter Journey**
+
 Move Letter Journey to TOP (it's the main learning path):
+
 ```
 [Letter Journey - Full Width]
 [Learning Progress - Compact List]
 ```
 
 ### 4. **Simplified Quick Actions**
+
 Remove redundant buttons, keep only contextually relevant actions:
+
 - Remove "Manage Settings" (already in sidebar)
 - Remove "Weekly Report" (not implemented)
 - Keep "Explore Games" but style appropriately
 
 ### 5. **Remove Redundant Info**
+
 - Remove settings summary (duplicates Settings page)
 - Simplify Multi-Language to a single row per language
 
@@ -135,6 +148,7 @@ Remove redundant buttons, keep only contextually relevant actions:
 ## 🚀 Priority Order
 
 **Phase 1 (Quick wins):**
+
 1. Move Letter Journey to top
 2. Consolidate header actions
 3. Remove redundant buttons

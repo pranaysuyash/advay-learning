@@ -110,6 +110,16 @@ const VirtualChemistryLab = lazy(() =>
     default: module.VirtualChemistryLab,
   })),
 );
+const WordBuilder = lazy(() =>
+  import('./pages/WordBuilder').then((module) => ({
+    default: module.WordBuilder,
+  })),
+);
+const EmojiMatch = lazy(() =>
+  import('./pages/EmojiMatch').then((module) => ({
+    default: module.EmojiMatch,
+  })),
+);
 const MediaPipeTest = lazy(() =>
   import('./pages/MediaPipeTest').then((module) => ({
     default: module.MediaPipeTest,
@@ -278,6 +288,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <VirtualChemistryLab />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/word-builder'
+              element={
+                <ProtectedRoute>
+                  <WordBuilder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/emoji-match'
+              element={
+                <ProtectedRoute>
+                  <EmojiMatch />
                 </ProtectedRoute>
               }
             />

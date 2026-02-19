@@ -5,6 +5,7 @@
 You need to decide between:
 
 ### Option A: Web-First (Browser) ⭐ Recommended
+
 ```
 Frontend: Vite + React + TypeScript
 Vision: MediaPipe @mediapipe/tasks-vision (WebAssembly)
@@ -13,6 +14,7 @@ Build: Local-only, no server needed
 ```
 
 **Pros:**
+
 - Easiest for you to maintain (no Python environment)
 - Advay just opens a browser
 - Rich UI ecosystem
@@ -20,11 +22,13 @@ Build: Local-only, no server needed
 - Easier to share with others
 
 **Cons:**
+
 - Browser camera permissions can be tricky
 - Need to learn TypeScript/React if unfamiliar
 - Slightly less CV control than Python
 
 ### Option C: Python Desktop (Not Chosen)
+
 ```
 Language: Python 3.13+
 UI: PyQt6
@@ -34,12 +38,14 @@ Build: PyInstaller executable
 ```
 
 **Pros:**
+
 - Full control over CV pipeline
 - Direct camera access (no browser permissions)
 - Easier to add custom ML models later
 - Python is familiar
 
 **Cons:**
+
 - Harder to distribute (Python environment)
 - UI development slower
 - Harder for non-technical parent to maintain
@@ -56,6 +62,7 @@ Build: PyInstaller executable
 ## If You Choose Web
 
 I've prepared the web structure in `app/` directory with:
+
 - Engine module for camera + tracking
 - Games module for activities
 - Storage module for IndexedDB
@@ -64,6 +71,7 @@ I've prepared the web structure in `app/` directory with:
 ## If You Choose Python
 
 The existing Python structure in `src/` is ready with:
+
 - Hand tracking module
 - Face tracking module
 - PyQt6 UI scaffold
@@ -80,7 +88,7 @@ The existing Python structure in `src/` is ready with:
 
 ## Questions to Help Decide
 
-1. **Are you comfortable with TypeScript/React?** 
+1. **Are you comfortable with TypeScript/React?**
    - If yes → Web is great
    - If no → Python might be faster for you
 

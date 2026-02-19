@@ -15,6 +15,7 @@
 ## Resolved Questions
 
 ### Q-001: Difficulty Progression System for Kids
+
 **Status**: RESOLVED ✅  
 **Created**: 2026-01-28  
 **Resolved**: 2026-01-28  
@@ -24,11 +25,13 @@
 How should the difficulty progression work for kids learning letters?
 
 Current behavior:
+
 - Easy: 5 letters (A-E)
 - Medium: 10 letters (A-J)  
 - Hard: All letters (A-Z)
 
 User feedback indicates kids should:
+
 1. Start with Easy (5 letters)
 2. Automatically advance to Medium after mastering Easy
 3. Eventually unlock Hard with all letters
@@ -37,6 +40,7 @@ User feedback indicates kids should:
 The game currently requires manual difficulty selection in Settings. Kids (or parents) must manually change from Easy → Medium → Hard. There's no automatic progression based on performance.
 
 **Key Considerations**:
+
 - What defines "mastering" a difficulty level?
   - Accuracy threshold (e.g., 80%+ on all letters)?
   - Number of successful tracings?
@@ -66,6 +70,7 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 | Endless Alphabet | Open exploration | None |
 
 **Key Insights**:
+
 1. **Adaptive progression** (Khan Academy style) is most common for young kids
 2. **Parent override** is important - parents want control
 3. **Visual progress indicators** (checkmarks, paths) help kids understand
@@ -84,6 +89,7 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 6. Badges for completing each batch
 
 **Why this approach**:
+
 - Kid-friendly: Automatic, sense of achievement
 - Parent-friendly: Control when needed
 - Flexible: Adapts to child's pace
@@ -91,17 +97,20 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 - Proven: Similar to Khan Academy Kids (highly rated)
 
 **Implementation Complexity**: Medium
+
 - Need to track per-letter mastery
 - Need unlock state persistence
 - Need visual "journey" UI
 
 **Resolution**:
+
 - **Status**: RESOLVED ✅
 - **Decision**: Implement "Adaptive Batch Unlock with Parent Override"
 - **Implementation**: TCK-20260128-021 (COMPLETE)
 - **Rationale**: Kid-friendly automatic progression with parent control
 
 **Implementation Details**:
+
 - Letters unlock in batches of 5
 - Unlock when 3/5 letters mastered at 70%+
 - Visual Letter Journey shows progress
@@ -109,12 +118,11 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 - Gamification with badges and celebrations
 
 **Related**:
+
 - WORKLOG_TICKETS.md - TCK-20260128-021
 - UX_IMPROVEMENTS.md - Gamification ideas
 - docs/clarity/research/2026-01-28-difficulty-progression.md - Full research
 - docs/plans/TCK-20260128-021-implementation-plan.md - Implementation plan
-
-
 
 ---
 
@@ -128,12 +136,12 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 
 ---
 
-
 ---
 
 ## NEW QUESTIONS FROM SECURITY IMPLEMENTATION (2026-01-29)
 
 ### Q-002: Email Service Provider for Production
+
 **Status**: OPEN 🔵  
 **Created**: 2026-01-29  
 **Tags**: #email #production #infrastructure #security
@@ -142,6 +150,7 @@ See full research: `docs/clarity/research/2026-01-28-difficulty-progression.md`
 What email service should we use for production email delivery (verification, password reset)?
 
 **Current State**:
+
 - Currently using console logging for emails (development only)
 - Need real email delivery for production
 
@@ -155,6 +164,7 @@ What email service should we use for production email delivery (verification, pa
 | SMTP (self-hosted) | Free | Full control | Deliverability issues, maintenance |
 
 **Decision Needed**:
+
 1. Which service for production?
 2. How to handle API keys/secrets?
 3. Email template design/branding?
@@ -165,6 +175,7 @@ What email service should we use for production email delivery (verification, pa
 ---
 
 ### Q-003: Password Policy Strictness
+
 **Status**: ✅ DECIDED & IMPLEMENTED  
 **Created**: 2026-01-29  
 **Updated**: 2026-01-29  
@@ -177,6 +188,7 @@ How strict should our password requirements be for a kids' learning app?
 **Moderate Policy** - 8+ characters, requiring at least one uppercase letter, one lowercase letter, and one digit.
 
 **Rationale**:
+
 - This is a PARENT account (not kid account) - parents need reasonable security
 - Parents may reuse passwords from other sites - complexity helps protect against breaches
 - Balance: Not too strict (causes frustration) but not too loose (security risk)
@@ -184,6 +196,7 @@ How strict should our password requirements be for a kids' learning app?
 - No special characters required (reduces friction for parents)
 
 **Implementation**:
+
 - ✅ Backend validation in `UserCreate` schema (`src/backend/app/schemas/user.py`)
 - ✅ Error messages guide users to fix weak passwords
 - ✅ All tests updated with strong passwords
@@ -194,6 +207,7 @@ How strict should our password requirements be for a kids' learning app?
 ---
 
 ### Q-004: Session Timeout Duration
+
 **Status**: OPEN 🔵  
 **Created**: 2026-01-29  
 **Tags**: #security #sessions #ux
@@ -202,11 +216,13 @@ How strict should our password requirements be for a kids' learning app?
 What should our session timeout be for parent accounts?
 
 **Current Settings**:
+
 - Access token: 15 minutes
 - Refresh token: 7 days
 - No idle timeout detection
 
 **Considerations**:
+
 - Parents may step away from computer
 - Kids might use parent's device
 - Banking apps: 5-15 minutes
@@ -214,12 +230,14 @@ What should our session timeout be for parent accounts?
 - This is NOT financial data, but IS child data
 
 **Options**:
+
 1. **Short** (15 min access, 1 day refresh) - More secure, more login friction
 2. **Medium** (15 min access, 7 day refresh) - Current, balanced
 3. **Long** (1 hour access, 30 day refresh) - Less friction, less secure
 4. **Adaptive** (shorter on shared devices, longer on trusted) - Complex
 
 **Decision Needed**:
+
 - Keep current or change?
 - Add idle detection (auto-logout after inactivity)?
 - "Remember this device" option?
@@ -227,4 +245,3 @@ What should our session timeout be for parent accounts?
 **Related**: SECURITY-HIGH-004
 
 ---
-

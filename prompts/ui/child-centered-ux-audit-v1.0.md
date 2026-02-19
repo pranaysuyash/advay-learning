@@ -115,4 +115,3 @@ List 5-10 ideas with:
 
 - One suggested "MVP fun" PR scope (<= 2 files)
 - One suggested "bigger exploration" epic scope
-

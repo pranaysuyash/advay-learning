@@ -124,12 +124,14 @@ Before requesting review:
 ### Merge Strategy
 
 **For feature branches:**
+
 ```bash
 git checkout develop
 git merge --no-ff feature/branch-name
 ```
 
 **For hotfixes:**
+
 ```bash
 git checkout main
 git merge --no-ff hotfix/branch-name
@@ -192,7 +194,8 @@ Any other context or notes for reviewers
 
 ### Issue: Too Many Files Changed
 
-**Solution**: 
+**Solution**:
+
 - Split into multiple PRs
 - Extract refactoring into separate PR
 - Use stacked PRs for dependent changes
@@ -200,6 +203,7 @@ Any other context or notes for reviewers
 ### Issue: Mix of Concerns
 
 **Solution**:
+
 - Separate feature work from refactoring
 - Separate bug fixes from features
 - One logical change per PR
@@ -207,6 +211,7 @@ Any other context or notes for reviewers
 ### Issue: Missing Tests
 
 **Solution**:
+
 - Add unit tests for new functions
 - Add integration tests for new flows
 - Update existing tests for changed behavior
@@ -214,6 +219,7 @@ Any other context or notes for reviewers
 ### Issue: Unclear Description
 
 **Solution**:
+
 - Explain the problem being solved
 - Describe the approach taken
 - List specific changes made

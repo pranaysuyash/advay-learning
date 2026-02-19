@@ -18,18 +18,21 @@
 ## Scope Contract
 
 **In-scope:**
+
 - One target UI surface: Dashboard + Games page flow
 - Usability and learning experience issues for children (age 4-6 years, early reader)
 - Concrete recommendations that can be implemented in this repo
 - Routes/flows: Home → Dashboard → Games → Game selection
 
 **Out-of-scope:**
+
 - Framework migrations
 - Major design overhauls
 - Backend changes
 - Individual game page audits (AlphabetGame, FingerNumberShow, etc.)
 
 **Targets:**
+
 - **Repo:** learning_for_kids
 - **File(s):**
   - `src/frontend/src/pages/Dashboard.tsx` (831 lines)
@@ -47,6 +50,7 @@
 **Age Band:** 4-6 years
 **Reading Level:** Early reader
 **Cognitive Abilities:**
+
 - Limited attention span (5-10 minutes max per activity)
 - Developing fine motor skills (precise gestures challenging)
 - Learning letter/number recognition (not reading fluently)
@@ -62,6 +66,7 @@
 ### A) Cognitive Load & Clarity
 
 #### KUX-001 — Dashboard has too many sections at once (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 59-830 contain: StatsBar, Quick Play Card, Progress Chart (Learning Progress + Multi-Language Progress), Adventure Map + XP, Badges Summary, Quick Actions, Play Games Button, Letter Journey, Tips Section - **12 distinct content areas**
@@ -72,6 +77,7 @@
 - **Risk:** MED (child confusion if reorganization isn't intuitive)
 
 #### KUX-002 — Progress uses complex metrics without kid-friendly framing (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 309-334 show progress bars with "Average Accuracy" as percentage, "Time Played" in hours/minutes, star ratings based on 90%/70%/40% thresholds. Line 309: `value: "Letters"` but display shows "X of Y letters" which is abstract.
@@ -82,6 +88,7 @@
 - **Risk:** MED (if new framing isn't clear)
 
 #### KUX-003 — Games page offers 4 choices simultaneously without guidance (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` lines 30-75 define `availableGames` array with 4 games: Alphabet Tracing, Finger Number Show, Connect The Dots, Letter Hunt. Lines 69-85 show all 4 game cards in a grid with `animationDelay={index * 0.1}` staggered entry.
@@ -96,6 +103,7 @@
 ### B) Motivation & Feedback Loops
 
 #### KUX-004 — Progress shows mastery status that may feel punitive (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 547-606: Letters with 0% best accuracy show "Not started" in gray/circle icon with no outline. Lines 575-595: Progress bar uses `getAccuracyProgressClass()` with colors: success (70%+), warning (40-70%), error (<40%). Line 597: Empty state shows "No progress recorded in other languages yet."
@@ -106,6 +114,7 @@
 - **Risk:** MED (if encouragement isn't age-appropriate)
 
 #### KUX-005 — XP and badges shown but celebration is modal-only (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 86-106: `questSummary` shows total XP, completed quests, unlocked islands. Lines 729-751: Display shows "⭐ {totalXp} XP" and badges summary. Line 816: `StoryModal` is only shown when `showStoryModal=true` (line 95 triggers on quest completion).
@@ -120,6 +129,7 @@
 ### C) Exploration Safety ("safe to poke")
 
 #### KUX-006 — Edit Profile modal accessible without parent confirmation (HIGH)
+
 - **Severity:** HIGH
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 76-84 and 87-110: `EditProfileModal` (child component) has `onSubmit` handler that directly calls `updateProfile()` without parent gate. Lines 438-457: Edit button is accessible to any user, visible on each child profile card (line 439: `<button onClick={() => handleOpenEditModal(child)}>`).
@@ -130,6 +140,7 @@
 - **Risk:** LOW (security improvement, child won't lose access)
 
 #### KUX-007 — Navigation always has "Back" available (GOOD)
+
 - **Severity:** LOW (positive finding)
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 400-412: Dashboard header shows "Dashboard" title. Games.tsx line 53: `navigate('/games')` returns to game selection. Dashboard has no "Home" button but "Play Games" at bottom (line 758) and "All Games" (line 720) navigate to `/games`.
@@ -141,6 +152,7 @@
 ### D) Accessibility & Motor Skills
 
 #### KUX-008 — Child selector buttons may be too small on tablets (MED)
+
 - **Severity:** MED
 - **Confidence:** Med
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 419-438: Child selector button has `className='flex items-center gap-2 px-3 py-1.5 rounded-lg'` with `text-lg`. No explicit min-height specification. Lines 435-436: Edit button has `min-h-[36px] min-w-[36px]` but main child button doesn't.
@@ -151,6 +163,7 @@
 - **Risk:** LOW (small sizing adjustment)
 
 #### KUX-009 — Games page uses age ranges but no visual distinction (LOW)
+
 - **Severity:** LOW
 - **Confidence:** High
 - **Evidence:** **Observed** - `Games.tsx` lines 38-74: Game definitions include `ageRange` (e.g., '3-8 years', '4-7 years') but these aren't displayed in `GameCard` or visible in UI. Age info exists in data but not surfaced to child/parent.
@@ -165,6 +178,7 @@
 ### E) Learning Flow & Scaffolding
 
 #### KUX-010 — "Continue Learning" button always links to Alphabet Tracing (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 488-509: Quick Play Card has `to='/games/alphabet-tracing'`. Lines 310-318: Selected child logic defaults to `children[0]` if no `selectedChild`. No logic that suggests "next game" based on progress or child's last played game.
@@ -175,6 +189,7 @@
 - **Risk:** MED (if recommendation logic doesn't match child's preference)
 
 #### KUX-011 — Adventure Map exists but "Play Now" flow skips map engagement (MED)
+
 - **Severity:** MED
 - **Confidence:** High
 - **Evidence:** **Observed** - `Dashboard.tsx` lines 672-728: Adventure Map section includes `<AdventureMap />` component. Lines 709-727: Quick Actions include "Start Alphabet Quest" button that directly links to `/games/alphabet-tracing?quest=quest-a-to-z`. This bypasses the map entirely - child doesn't see or interact with map to unlock islands, just clicks button to play.
@@ -210,20 +225,20 @@
 
 ### Bigger Exploration (M - MED RISK)
 
-4. **Add "Explore Mode" for safe game discovery** (M / MED)
+1. **Add "Explore Mode" for safe game discovery** (M / MED)
    - Random game selection from filtered options: "Try something new! 🎲"
    - Removes pressure of choosing "right" game
    - 3 random suggestions based on child's age and progress
    - **Dependency:** Random selection logic
 
-5. **Add mini-games in dashboard (M / MED)
+2. **Add mini-games in dashboard (M / MED)
    - Quick 30-second activities to reinforce learning without full game commitment
    - "Quick Trace" (one letter from alphabet)
    - "Number Flash" (show number 1-10, child shows with fingers)
    - Earn small XP, encourage exploration
    - **Dependency:** New component development
 
-6. **Add "Daily Quest" to encourage variety** (M / MED)
+3. **Add "Daily Quest" to encourage variety** (M / MED)
    - Daily challenge that rotates game types
    - "Today's Quest: Play Finger Number Show for 5 minutes!"
    - Completes unlocks small reward (sticker, badge)
@@ -231,14 +246,14 @@
 
 ### Deep Exploration (L - HIGH RISK)
 
-7. **Add interactive mascot companion in dashboard** (L / HIGH)
+1. **Add interactive mascot companion in dashboard** (L / HIGH)
    - Mascot follows child's cursor and reacts to interactions
    - Mascot offers hints: "Need help? Try [Game Name]!"
    - Mascot can be petted/tapped for fun micro-interactions
    - Builds emotional connection, keeps child engaged
    - **Dependency:** Significant mascot system overhaul
 
-8. **Add AR-style "scan for secrets" feature** (L / HIGH)
+2. **Add AR-style "scan for secrets" feature** (L / HIGH)
    - Dashboard shows hidden letters that child can "scan" with camera to reveal
    - Uses existing MediaPipe, new playful application
    - "Find the hidden letter!" moment creates delight
@@ -251,11 +266,13 @@
 ### Suggested "MVP Fun" PR Scope (≤2 files)
 
 **Implement Ideas #1-3:**
+
 - Add playful mascot greeting on first dashboard visit
 - Add hover/click sound effects to game cards
 - Add mascot reactions to progress display
 
 **Files:**
+
 - `src/frontend/src/pages/Dashboard.tsx` (enhance with greeting + mascot reactions)
 - `src/frontend/src/components/GameCard.tsx` (add sound interactions)
 
@@ -268,11 +285,13 @@
 ### One Suggested "Bigger Exploration" Epic Scope
 
 **Implement Ideas #4-6:**
+
 - Explore Mode: Random game selection
 - Mini-games in dashboard
 - Daily Quest system for variety
 
 **Files:**
+
 - `src/frontend/src/pages/Dashboard.tsx` (mini-games, daily quest widget)
 - `src/frontend/src/components/ExploreMode.tsx` (new)
 - `src/frontend/src/components/DailyQuest.tsx` (new)
@@ -287,11 +306,13 @@
 ## Summary
 
 **Critical Issues (HIGH):**
+
 - KUX-001: Dashboard cognitive overload (12 content areas)
 - KUX-002: Progress metrics not kid-friendly (percentages, abstract labels)
 - KUX-006: Edit Profile accessible to child (no parent gate)
 
 **Medium Issues (MED):**
+
 - KUX-003: Games page offers 4 choices without guidance
 - KUX-004: Progress mastery status may feel punitive ("Not started", error colors)
 - KUX-005: XP/badges celebration is modal-only (delayed feedback)
@@ -300,6 +321,7 @@
 - KUX-011: Adventure Map skipped in quest flow
 
 **Positive Findings:**
+
 - KUX-007: Navigation always has "Back" available (good exploration safety)
 
 **Overall Assessment:**

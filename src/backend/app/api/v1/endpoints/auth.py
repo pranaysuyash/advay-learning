@@ -1,4 +1,5 @@
 """Authentication endpoints."""
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -24,9 +25,7 @@ COOKIE_SECURE = settings.APP_ENV == "production"  # Secure in production
 COOKIE_SAMESITE = "lax"  # CSRF protection
 ACCESS_TOKEN_COOKIE = "access_token"
 REFRESH_TOKEN_COOKIE = "refresh_token"
-REGISTRATION_SUCCESS_MESSAGE = (
-    "If an account is eligible, a verification email has been sent."
-)
+REGISTRATION_SUCCESS_MESSAGE = "If an account is eligible, a verification email has been sent."
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
@@ -170,9 +169,7 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(
-    request: Request, response: Response, db: AsyncSession = Depends(get_db)
-) -> dict:
+async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)) -> dict:
     """Logout and clear authentication cookies, revoke refresh token."""
     # Get refresh token from cookie to revoke it
     refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
@@ -217,26 +214,20 @@ async def resend_verification(email: str, db: AsyncSession = Depends(get_db)) ->
     await db.commit()
 
     # Send verification email
-    await EmailService.send_verification_email(
-        user.email, user.email_verification_token
-    )
+    await EmailService.send_verification_email(user.email, user.email_verification_token)
 
     return {"message": "If an account exists, a verification email has been sent."}
 
 
 @router.post("/forgot-password")
 @limiter.limit(RateLimits.AUTH_MEDIUM)
-async def forgot_password(
-    request: Request, email: str, db: AsyncSession = Depends(get_db)
-) -> dict:
+async def forgot_password(request: Request, email: str, db: AsyncSession = Depends(get_db)) -> dict:
     """Request password reset email."""
     user = await UserService.get_by_email(db, email)
 
     if not user:
         # Return success even if user not found (prevents user enumeration)
-        return {
-            "message": "If an account exists, a password reset email has been sent."
-        }
+        return {"message": "If an account exists, a password reset email has been sent."}
 
     # Generate password reset token
     token = await UserService.create_password_reset_token(db, user)
@@ -272,9 +263,7 @@ async def reset_password(
     # Reset password
     await UserService.reset_password(db, user, new_password)
 
-    return {
-        "message": "Password reset successfully. You can now log in with your new password."
-    }
+    return {"message": "Password reset successfully. You can now log in with your new password."}
 
 
 @router.post("/refresh")
@@ -293,7 +282,7 @@ async def refresh_token(
 
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id: str = payload.get("sub")
+        user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -340,9 +329,7 @@ async def refresh_token(
 
 
 @router.get("/me", response_model=User)
-async def get_current_user_info(
-    request: Request, db: AsyncSession = Depends(get_db)
-) -> User:
+async def get_current_user_info(request: Request, db: AsyncSession = Depends(get_db)) -> User:
     """Get current user info from access token cookie."""
     # Get access token from cookie
     access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
@@ -354,7 +341,7 @@ async def get_current_user_info(
 
     try:
         payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id: str = payload.get("sub")
+        user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

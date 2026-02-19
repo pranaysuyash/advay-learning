@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, profile_photos, progress, users, games
+from app.api.v1.endpoints import auth, games, profile_photos, progress, users
 
 api_router = APIRouter()
 

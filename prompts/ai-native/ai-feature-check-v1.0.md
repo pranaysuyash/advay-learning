@@ -14,6 +14,7 @@ You are checking the health and functionality of AI-native features in the Advay
 ## Pre-Check Requirements
 
 Before running this check, ensure:
+
 - [ ] Backend is running (`cd src/backend && uv run uvicorn app.main:app`)
 - [ ] Frontend is running (`cd src/frontend && npm run dev`)
 - [ ] Ollama is running (if using local LLM): `ollama serve`
@@ -38,6 +39,7 @@ curl http://localhost:11434/api/generate -d '{
 **Expected:** Response within 2 seconds, child-appropriate language
 
 **Verify:**
+
 - [ ] Ollama responds with model list
 - [ ] Generation completes without error
 - [ ] Response is age-appropriate
@@ -56,6 +58,7 @@ speechSynthesis.speak(utterance);
 **Expected:** Audio plays with warm, friendly tone
 
 **Verify:**
+
 - [ ] Speech synthesis available (`speechSynthesis` exists)
 - [ ] Voices available (`speechSynthesis.getVoices().length > 0`)
 - [ ] Audio plays without errors
@@ -75,6 +78,7 @@ recognition.start();
 **Expected:** Transcription appears in console
 
 **Verify:**
+
 - [ ] Speech recognition available
 - [ ] Microphone permission granted
 - [ ] Transcription is reasonably accurate
@@ -91,6 +95,7 @@ recognition.start();
 **Expected:** Hand landmarks detected, cursor moves
 
 **Verify:**
+
 - [ ] Camera permission granted
 - [ ] Hand detection works
 - [ ] Latency < 100ms
@@ -109,6 +114,7 @@ recognition.start();
 **Expected:** App continues working with degraded features
 
 **Verify:**
+
 - [ ] No crash when Ollama unavailable
 - [ ] Fallback message displayed or template used
 - [ ] User experience remains functional
@@ -126,6 +132,7 @@ recognition.start();
 7. Observe feedback (Pip reaction + voice)
 
 **Verify:**
+
 - [ ] Voice input recognized
 - [ ] Pip responds contextually
 - [ ] TTS plays response
@@ -162,6 +169,7 @@ recognition.start();
 ## Troubleshooting
 
 ### LLM Not Responding
+
 ```bash
 # Check Ollama status
 systemctl status ollama  # Linux
@@ -175,16 +183,19 @@ ollama pull llama3.2:3b
 ```
 
 ### TTS Not Working
+
 - Check browser compatibility (Chrome, Edge recommended)
 - Verify audio output device
 - Check for browser permissions
 
 ### STT Not Working
+
 - Grant microphone permission
 - Check browser compatibility
 - Try HTTPS (required for some browsers)
 
 ### Vision Not Working
+
 - Grant camera permission
 - Check MediaPipe loaded correctly
 - Verify WebGL support

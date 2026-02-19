@@ -30,12 +30,14 @@
 **User Story:** As a child, I want to hear Pip talk so that I don't need to read and Pip feels alive.
 
 **Technical Spec:**
+
 - Primary: Web Speech API
 - Enhanced: Piper TTS (local)
 - Voice: Rate 1.1, Pitch 1.2 (warm, friendly)
 - Latency: <200ms
 
 **Interface:**
+
 ```typescript
 interface TTSService {
   speak(text: string, voice?: 'pip' | 'letter'): Promise<void>;
@@ -53,11 +55,13 @@ interface TTSService {
 **User Story:** As a child, I want to hear letter sounds so I learn phonics while tracing.
 
 **Technical Spec:**
+
 - Pre-recorded audio (high quality)
 - Format: MP3/WebM, <50KB per letter
 - Includes: letter name, letter sound, example word
 
 **Audio Structure:**
+
 ```typescript
 const LETTER_AUDIO = {
   A: { name: 'ay', sound: 'ah', word: 'apple' },
@@ -73,6 +77,7 @@ const LETTER_AUDIO = {
 **User Story:** As a child, I want Pip to react to what I do so learning feels like playing with a friend.
 
 **Response Triggers:**
+
 - TRACE_PERFECT (90%+): "Amazing! You're a superstar!"
 - TRACE_GOOD (70-89%): "Great job! Keep going!"
 - TRACE_TRY_AGAIN (<70%): "Almost! Let's try again!"
@@ -80,6 +85,7 @@ const LETTER_AUDIO = {
 - LETTER_MASTERED: "Wow! You learned [Letter]!"
 
 **Technical Spec:**
+
 - Template-based responses (no LLM needed)
 - 5+ variations per trigger (avoid repetition)
 - TTS integration for all responses
@@ -93,12 +99,14 @@ const LETTER_AUDIO = {
 **User Story:** As a child, I want to talk to Pip instead of tapping.
 
 **Technical Spec:**
+
 - Primary: Web Speech API
 - Push-to-talk activation
 - Max listen: 10 seconds
 - Confidence threshold: 0.6 (lower for children)
 
 **Interface:**
+
 ```typescript
 interface STTService {
   startListening(): void;
@@ -108,6 +116,7 @@ interface STTService {
 ```
 
 **UI Elements:**
+
 - Large microphone button
 - Pulsing animation when listening
 - Clear audio feedback
@@ -119,12 +128,14 @@ interface STTService {
 **User Story:** As a child, I want to ask Pip questions and get answers.
 
 **Technical Spec:**
+
 - Primary: Ollama (Llama 3.2 3B) - local
 - Fallback: Claude API
 - Max response: 50 words
 - Latency target: <2 seconds
 
 **System Prompt:**
+
 ```
 You are Pip, a friendly red panda learning companion for children ages 4-10.
 
@@ -139,6 +150,7 @@ Child: {name}, Age: {age}
 ```
 
 **Safety:**
+
 - Input filtering (profanity, injection attempts)
 - Output filtering (age-appropriate check)
 - Topic redirection for unsafe queries
@@ -152,12 +164,14 @@ Child: {name}, Age: {age}
 **User Story:** As a child, I want Pip to tell me stories with my name in them.
 
 **Technical Spec:**
+
 - Provider: Claude API (quality needed)
 - Length: 3-5 sentences (~100 words)
 - Generation time: <5 seconds
 - Themes: Animals, Space, Ocean, Forest
 
 **Story Template:**
+
 ```typescript
 interface StoryRequest {
   childName: string;
@@ -178,11 +192,13 @@ interface StoryRequest {
 **User Story:** As a child, I want Pip to suggest fun activities so I never get bored.
 
 **Activity Types:**
+
 - Letter Trace, Letter Find, Letter Match
 - Word Build, Story Listen
 - Creative Draw, Game Play
 
 **Selection Logic:**
+
 1. Prioritize struggling letters
 2. Mix in mastered letters (confidence)
 3. Vary activity types
@@ -196,6 +212,7 @@ interface StoryRequest {
 **User Story:** As a parent, I want the app to adjust to my child's pace.
 
 **Mastery Levels:**
+
 | Level | Criteria | Guidance |
 |-------|----------|----------|
 | New | Never tried | Maximum hints |
@@ -204,6 +221,7 @@ interface StoryRequest {
 | Mastered | 85%+ (3 sessions) | Review queue |
 
 **Spaced Repetition:**
+
 - Review intervals: 1 day, 3 days, 7 days, 14 days
 - Reset on poor performance
 - Parent dashboard shows progress
@@ -217,12 +235,14 @@ interface StoryRequest {
 **User Story:** As a child, I want to show Pip my toys and learn about them.
 
 **Technical Spec:**
+
 - Engine: TensorFlow.js + COCO-SSD
 - Processing: 100% local
 - Detection: <500ms
 - NEVER store camera frames
 
 **Object Mappings:**
+
 ```typescript
 // Child shows a dog toy
 // Pip: "A doggy! I love dogs! D is for Dog. Woof woof!"
@@ -236,12 +256,14 @@ interface StoryRequest {
 **User Story:** As a child, I want to put silly hats on my face for fun.
 
 **Technical Spec:**
+
 - Engine: MediaPipe Face Mesh
 - Processing: 100% local
 - Frame rate: 30fps target
 - NEVER store face data
 
 **Overlay Types:**
+
 - Letter hats (unlock by mastering)
 - Achievement crowns
 - Silly glasses

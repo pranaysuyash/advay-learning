@@ -206,15 +206,15 @@ test('demo onboarding flow completes successfully', async ({ page }) => {
 
 ### Week 2: Experience Enhancement
 
-4. **TCK-20260202-041** - Camera permissions (improves conversion)
-5. **TCK-20260202-042** - Onboarding flow (guides users)
-6. **TCK-20260202-043** - Mobile optimization (accessibility)
+1. **TCK-20260202-041** - Camera permissions (improves conversion)
+2. **TCK-20260202-042** - Onboarding flow (guides users)
+3. **TCK-20260202-043** - Mobile optimization (accessibility)
 
 ### Week 3: Polish & Validation
 
-7. **TCK-20260202-044** - Error handling (user experience)
-8. **TCK-20260202-045** - Cross-device testing (quality assurance)
-9. **TCK-20260202-046** - Accessibility verification (compliance)
+1. **TCK-20260202-044** - Error handling (user experience)
+2. **TCK-20260202-045** - Cross-device testing (quality assurance)
+3. **TCK-20260202-046** - Accessibility verification (compliance)
 
 ## Risk Mitigation Strategies
 

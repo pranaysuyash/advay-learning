@@ -65,4 +65,3 @@ This is optimized for:
   - `PT-002` ...
 - Verification plan:
   - Before/after quick task completion rate (manual)
-

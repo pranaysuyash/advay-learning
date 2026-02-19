@@ -1,10 +1,13 @@
 # ADR 0001: Web-First Local-Only Runtime
 
 ## Status
+
 **ACCEPTED** - Locked Decision
 
 ## Context
+
 Building a production-quality learning app for Advay that will also serve as a portfolio piece. Need to optimize for:
+
 - Production launch readiness
 - Portfolio demonstration
 - Long-term maintainability
@@ -15,12 +18,14 @@ Building a production-quality learning app for Advay that will also serve as a p
 **Web-first local-only architecture.**
 
 ### Runtime
+
 - **Engine**: TypeScript in browser
 - **Vision**: MediaPipe Tasks Vision (@mediapipe/tasks-vision)
 - **UI**: React + Vite
 - **Storage**: IndexedDB
 
 ### Python Role
+
 - **ONLY in `tools/`** for offline content generation
 - **NEVER in live app path**
 - Content generation, evaluation, dataset preparation
@@ -40,6 +45,7 @@ Building a production-quality learning app for Advay that will also serve as a p
 Two hard rules from day one:
 
 ### 1. No External CDNs
+
 ```
 app/public/
   models/
@@ -49,6 +55,7 @@ app/public/
 ```
 
 ### 2. Local Verify Gate
+
 ```bash
 # scripts/verify.sh
 npm run lint
@@ -61,6 +68,7 @@ python3 scripts/check_loc_delta.py          # PR size guard
 ## Consequences
 
 ### Positive
+
 - ✅ Instant distribution (no install)
 - ✅ Optimized real-time pipeline
 - ✅ Simpler privacy model
@@ -68,6 +76,7 @@ python3 scripts/check_loc_delta.py          # PR size guard
 - ✅ Better portfolio presentation
 
 ### Negative
+
 - ❌ Browser camera permission UX
 - ❌ Limited to MediaPipe's web capabilities
 - ❌ No custom heavy ML models (not MVP-critical)
@@ -92,8 +101,10 @@ tools/             # Python offline tooling
 ```
 
 ## Related
+
 - ADR 0002: MediaPipe Tasks Vision
 - ADR 0003: Local Profiles + Parent PIN
 
 ## Locked
+
 This decision is locked. Do not revisit without strong evidence.

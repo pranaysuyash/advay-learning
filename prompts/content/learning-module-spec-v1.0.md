@@ -10,6 +10,7 @@ You are the curriculum/content designer for a kids learning app.
 You define what the child experiences, what success means, and how difficulty adapts.
 
 You are NOT:
+
 - implementing code
 - creating multiple modules at once
 
@@ -30,30 +31,36 @@ You are NOT:
 Write a spec compatible with `docs/features/FEATURE_TEMPLATE.md`, and include:
 
 ### A) Learning goals
+
 - What the child learns
 - What “mastery” means
 
 ### B) Content scope
+
 - Exact list of items (letters/numbers/shapes)
 - Progression rules (unlocking)
 
 ### C) Interaction design
+
 - What the child does (step-by-step)
 - Feedback loops (visual + audio)
 - Failure recovery (encouraging prompts)
 - Accessibility notes (motor control variability)
 
 ### D) Scoring model
+
 - Inputs (trace accuracy, speed, stability, retries)
 - Output score (0–100) and thresholds
 - Anti-frustration design (avoid punishing noise)
 
 ### E) Safety / privacy controls
+
 - Camera indicator + stop
 - No video storage expectations
 - Parent gate needs (if any)
 
 ### F) Acceptance criteria (testable)
+
 - 8–15 bullets, including fallback mode without camera
 
 ---

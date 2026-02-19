@@ -16,12 +16,14 @@ During the implementation of GPU → CPU delegate fallback for hand tracking (TC
 ## What is MPS?
 
 **Metal Performance Shaders (MPS)** is Apple's GPU-accelerated framework for machine learning computations on macOS and iOS. It provides optimized kernels for:
+
 - Neural network operations
 - Image processing
 - Linear algebra
 - Computer vision tasks
 
 **Key Benefits:**
+
 - Native Apple Silicon optimization (M1/M2/M3)
 - Lower power consumption than CPU
 - Better performance than generic GPU compute
@@ -40,6 +42,7 @@ During the implementation of GPU → CPU delegate fallback for hand tracking (TC
 | Device Support | Cross-platform | Automatic fallback |
 
 **Why WebGL, not MPS:**
+
 - MediaPipe JS uses **WebGL** for GPU acceleration
 - WebGL is a cross-platform web standard
 - On Apple Silicon Macs: WebGL → Metal (automatic translation by browser)
@@ -73,6 +76,7 @@ pyobjc-framework-metalperformanceshaders
 ### 2. No PyTorch/TensorFlow in Dependencies
 
 **Current backend dependencies:**
+
 ```toml
 numpy>=1.26.0
 opencv-python>=4.8.0
@@ -94,6 +98,7 @@ User Camera → Browser (MediaPipe JS) → WebGL GPU → Canvas Overlay
 ```
 
 Server-side ML would require:
+
 - Video upload to server (privacy concern)
 - Server-side MediaPipe with GPU support
 - Significant latency increase
@@ -119,6 +124,7 @@ Server-side ML would require:
    - No code changes needed for different platforms
 
 2. **GPU/CPU Delegate Fallback** (implemented in TCK-20260130-016)
+
    ```typescript
    // Tries GPU first, falls back to CPU
    const delegatesToTry = ['GPU', 'CPU'];
@@ -128,7 +134,7 @@ Server-side ML would require:
 
 ## When Would MPS Be Useful?
 
-### Future Scenarios Where MPS Could Help:
+### Future Scenarios Where MPS Could Help
 
 1. **Server-Side Video Processing**
    - If we move hand tracking to backend
@@ -144,7 +150,7 @@ Server-side ML would require:
    - If building a native macOS app (not web-based)
    - Direct Metal control without browser abstraction
 
-### Implementation Pattern (if needed later):
+### Implementation Pattern (if needed later)
 
 ```python
 import torch
@@ -167,6 +173,7 @@ model = MyNeuralNetwork().to(device)
 **MPS is not required for the current Advay architecture.**
 
 The web-based approach using MediaPipe JS + WebGL provides:
+
 - ✅ Cross-platform GPU acceleration (including Apple Silicon via WebGL→Metal)
 - ✅ Better privacy (processing on-device)
 - ✅ Lower latency (no server round-trip)
