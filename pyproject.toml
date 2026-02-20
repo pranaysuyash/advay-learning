@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "Private"}
 authors = [
-    {name = "Advay's Learning Team"}
+    {name = "Advay's Learning Team", email = "pranay.suyash@gmail.com"}
 ]
 keywords = ["education", "computer-vision", "kids", "learning", "ai"]
 
@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     # Core
     "numpy>=1.26.0",
-    "Pillow>=10.0.0",
+    "Pillow>=12.1.1",
     
     # Computer Vision
     "opencv-python>=4.8.0",
@@ -57,8 +57,21 @@ dev = [
     "mypy>=1.5.0",
     "pre-commit>=3.4.0",
     
-    # Security
+    # Security & Audit
     "pip-audit>=2.6.0",
+    "bandit>=1.7.0",
+    "safety>=3.0.0",
+    
+    # Code Complexity Analysis
+    "lizard>=1.17.0",
+    "radon>=6.0.0",
+    "xenon>=0.9.0",
+    
+    # Dead Code Detection
+    "vulture>=2.0.0",
+    
+    # Package Quality
+    "pyroma>=4.0.0",
     
     # Documentation
     "pdoc>=14.0.0",

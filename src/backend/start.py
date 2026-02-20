@@ -8,6 +8,7 @@ Usage:
     python start.py                    # Start with auto-reload in dev mode
     python start.py --production       # Start without reload in production mode
     python start.py --port 8002        # Start on custom port
+    python start.py --workers 4        # Start with 4 workers in production
 """
 
 import argparse
@@ -27,7 +28,7 @@ def main():
     parser.add_argument(
         "--production",
         action="store_true",
-        help="Run in production mode (no auto-reload)",
+        help="Run in production mode (no auto-reload, multiple workers)",
     )
     parser.add_argument(
         "--port",
@@ -40,17 +41,32 @@ def main():
         default="0.0.0.0",
         help="Host to bind to (default: 0.0.0.0)",
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: 1 dev, 4 production)",
+    )
     args = parser.parse_args()
 
     # Import after path setup
     from app.core.config import settings
 
-    # Determine reload mode
+    # Determine reload mode and workers
     reload_mode = not args.production and settings.DEBUG
+
+    # Set workers based on mode
+    if args.workers:
+        workers = args.workers
+    elif args.production:
+        workers = 4  # Default production workers
+    else:
+        workers = 1  # Dev mode
 
     print("🚀 Starting backend server...")
     print(f"   Host: {args.host}")
     print(f"   Port: {args.port}")
+    print(f"   Workers: {workers}")
     print(f"   Reload: {reload_mode}")
     print(f"   Python: {sys.version}")
     print()
@@ -64,7 +80,7 @@ def main():
         host=args.host,
         port=args.port,
         reload=reload_mode,
-        workers=1,
+        workers=workers,
         log_level="info",
     )
 

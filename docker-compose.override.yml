@@ -1,0 +1,28 @@
+# Docker Compose Override for Local Development
+# This file is automatically loaded by docker-compose
+# Use: docker-compose up
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/advay_learning
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./src/backend:/app
+      - ./src/backend/storage:/app/storage
+    command: python start.py
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"

@@ -76,24 +76,30 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-async def test_user(client: AsyncClient) -> dict:
-    """Create a test user and return credentials."""
+async def test_user(db_session: AsyncSession) -> dict:
+    """Create a test user directly in the database."""
+    from app.core.security import get_password_hash
+    from app.services.user_service import UserService
+
     user_data = {"email": "test@example.com", "password": "TestPassword123"}
 
-    # Register user
-    response = await client.post("/api/v1/auth/register", json=user_data)
-    if response.status_code == 200:
-        # Get verification token from response and verify email
-        # For tests, we need to manually verify since we can't access the token
-        # We'll use the resend endpoint to get a new token
-        from app.db.session import async_session
-        from app.services.user_service import UserService
+    # Check if user already exists
+    existing = await UserService.get_by_email(db_session, user_data["email"])
+    if existing:
+        return user_data
 
-        async with async_session() as session:
-            user = await UserService.get_by_email(session, user_data["email"])
-            if user and not user.email_verified:
-                # Manually verify for testing
-                await UserService.verify_email(session, user)
+    # Create user directly in database
+    from app.db.models.user import User
+
+    user = User(
+        email=user_data["email"],
+        hashed_password=get_password_hash(user_data["password"]),
+        is_active=True,
+        email_verified=True,  # Pre-verified for testing
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
 
     return user_data
 
@@ -105,6 +111,9 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
         "/api/v1/auth/login",
         data={"username": test_user["email"], "password": test_user["password"]},
     )
+    # Debug: print response if it fails
+    if response.status_code != 200:
+        print(f"Login failed: {response.status_code} - {response.text}")
     assert response.status_code == 200
 
     # Extract token from cookies
@@ -115,6 +124,41 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
         # This shouldn't happen with cookie-based auth, but for backward compatibility
         access_token = response.json().get("access_token")
 
+    return access_token
+
+
+@pytest.fixture
+async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
+    """Create an admin user and return authentication token."""
+    from app.core.security import get_password_hash
+    from app.db.models.user import User
+    from uuid import uuid4
+    
+    # Create admin user directly in database
+    user = User(
+        id=str(uuid4()),
+        email="admin@test.com",
+        hashed_password=get_password_hash("Admin123!"),
+        is_active=True,
+        is_superuser=True,
+        email_verified=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    
+    # Login to get token
+    response = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@test.com", "password": "Admin123!"},
+    )
+    assert response.status_code == 200
+    
+    cookies = response.cookies
+    access_token = cookies.get("access_token")
+    if not access_token:
+        access_token = response.json().get("access_token")
+    
     return access_token
 
 

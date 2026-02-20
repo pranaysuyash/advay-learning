@@ -76,6 +76,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Environment template files (never commit these)
+.env.*
+!.env.example
+
 # Database
 *.db
 *.sqlite

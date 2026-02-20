@@ -10,7 +10,7 @@ from app.schemas.user import UserRole
 @pytest.mark.asyncio
 async def test_list_games_unauthenticated(client: AsyncClient):
     """Test that unauthenticated users can list published games."""
-    response = await client.get("/api/v1/games")
+    response = await client.get("/api/v1/games/", follow_redirects=True)
     assert response.status_code == 200
     data = response.json()
     assert "games" in data
@@ -20,7 +20,7 @@ async def test_list_games_unauthenticated(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_list_games_with_filters(client: AsyncClient):
     """Test filtering games by category."""
-    response = await client.get("/api/v1/games?category=Alphabets")
+    response = await client.get("/api/v1/games/?category=Alphabets", follow_redirects=True)
     assert response.status_code == 200
     data = response.json()
     assert "games" in data
@@ -30,7 +30,7 @@ async def test_list_games_with_filters(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_list_games_pagination(client: AsyncClient):
     """Test pagination."""
-    response = await client.get("/api/v1/games?page=1&page_size=10")
+    response = await client.get("/api/v1/games/?page=1&page_size=10", follow_redirects=True)
     assert response.status_code == 200
     data = response.json()
     assert data["page"] == 1
@@ -40,7 +40,7 @@ async def test_list_games_pagination(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_game_by_slug(client: AsyncClient):
     """Test getting game details by slug."""
-    response = await client.get("/api/v1/games/alphabet-tracing")
+    response = await client.get("/api/v1/games/alphabet-tracing", follow_redirects=True)
     assert response.status_code == 200
     data = response.json()
     assert data["slug"] == "alphabet-tracing"
