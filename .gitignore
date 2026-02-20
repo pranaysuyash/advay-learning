@@ -114,6 +114,20 @@ test-results/
 screenshots/
 videos/
 
+evaluations/
+docs/ux_audit/
+docs/audit/
+screenshot-tests.js
+src/frontend/capture-screenshots.cjs
+src/frontend/e2e/games_visual_audit.spec.ts
+src/frontend/e2e/visual_game_audit.spec.ts
+src/frontend/screenshot-tests.js
+src/frontend/src/hooks/__tests__/eyeTrackingLogic.test.ts
+src/frontend/src/hooks/__tests__/postureDetectionLogic.test.ts
+src/frontend/test-games-visual.cjs
+src/frontend/test-games.cjs
+src/frontend/visual-test.cjs
+
 # Generated screenshots and test artifacts
 audit-screenshots/
 docs/audit/screenshots/
