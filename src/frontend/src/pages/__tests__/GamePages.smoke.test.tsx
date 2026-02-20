@@ -57,6 +57,8 @@ import { YogaAnimals } from '../YogaAnimals';
 import { FreezeDance } from '../FreezeDance';
 import { SimonSays } from '../SimonSays';
 import { FingerNumberShow } from '../../games/FingerNumberShow';
+import { WordBuilder } from '../WordBuilder';
+import { EmojiMatch } from '../EmojiMatch';
 
 function renderInRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -150,6 +152,20 @@ describe('Game pages smoke tests', () => {
     it('renders without throwing and shows key UI', () => {
       expect(() => renderInRouter(<FingerNumberShow />)).not.toThrow();
       expect(screen.getByText('Finger Number Show')).toBeTruthy();
+    });
+  });
+
+  describe('WordBuilder', () => {
+    it('renders without throwing and shows start button', () => {
+      expect(() => renderInRouter(<WordBuilder />)).not.toThrow();
+      expect(screen.getByText('Start Word Builder')).toBeTruthy();
+    });
+  });
+
+  describe('EmojiMatch', () => {
+    it('renders without throwing and shows start button', () => {
+      expect(() => renderInRouter(<EmojiMatch />)).not.toThrow();
+      expect(screen.getByText('Start Emoji Match')).toBeTruthy();
     });
   });
 });

@@ -1,0 +1,81 @@
+{
+  "video_metadata": {
+    "fps": 59.07,
+    "ms_per_frame": 16.93,
+    "resolution": "2798x1986",
+    "frames_analyzed": 40
+  },
+  "tracking_performance": {
+    "avg_hand_pointer_distance": 2016.73,
+    "max_hand_pointer_distance": 2786.76,
+    "std_hand_pointer_distance": 176.66,
+    "lag_events": 40,
+    "lag_percentage": 100.0
+  },
+  "movement_analysis": {
+    "avg_pointer_movement": 21.29,
+    "significant_movements": 1
+  },
+  "worst_tracking_events": [
+    {
+      "timestamp": 0.0,
+      "distance_pixels": 2786.76,
+      "pointer_pos": [
+        2624,
+        51
+      ],
+      "hand_pos": [
+        2,
+        995
+      ]
+    },
+    {
+      "timestamp": 0.085,
+      "distance_pixels": 2786.76,
+      "pointer_pos": [
+        2624,
+        51
+      ],
+      "hand_pos": [
+        2,
+        995
+      ]
+    },
+    {
+      "timestamp": 2.539,
+      "distance_pixels": 1976.57,
+      "pointer_pos": [
+        1894,
+        423
+      ],
+      "hand_pos": [
+        2,
+        995
+      ]
+    },
+    {
+      "timestamp": 0.169,
+      "distance_pixels": 1976.29,
+      "pointer_pos": [
+        1894,
+        423
+      ],
+      "hand_pos": [
+        2,
+        994
+      ]
+    },
+    {
+      "timestamp": 0.254,
+      "distance_pixels": 1976.29,
+      "pointer_pos": [
+        1894,
+        423
+      ],
+      "hand_pos": [
+        2,
+        994
+      ]
+    }
+  ]
+}

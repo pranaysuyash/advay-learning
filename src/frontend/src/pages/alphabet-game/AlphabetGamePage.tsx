@@ -444,20 +444,28 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     isLoading: isProfilesLoading,
     fetchProfiles,
   } = useProfileStore();
-  const resolvedProfileId = profileId ?? currentProfile?.id;
+
+  // Auto-select first available profile if none provided
+  const resolvedProfileId = profileId ?? currentProfile?.id ?? profiles[0]?.id;
   const profile = resolvedProfileId
     ? profiles.find((p: Profile) => p.id === resolvedProfileId)
     : undefined;
-  // Profile available for future use (e.g., displaying child's name)
-  void profile;
 
-  // If the route didn't provide a profileId, fetch profiles so we can fall back to currentProfile.
+  // Force fetch profiles if none available
   useEffect(() => {
-    if (resolvedProfileId) return;
-    if (profiles.length > 0) return;
-    if (isProfilesLoading) return;
-    fetchProfiles();
-  }, [fetchProfiles, isProfilesLoading, profiles.length, resolvedProfileId]);
+    if (profiles.length === 0 && !isProfilesLoading) {
+      fetchProfiles();
+    }
+  }, [fetchProfiles, isProfilesLoading, profiles.length]);
+
+  // Give it a moment then try to resolve again
+  const [resolved, setResolved] = useState(false);
+  useEffect(() => {
+    if (!resolved && !resolvedProfileId && profiles.length > 0) {
+      // Re-resolve after profiles load
+      setResolved(true);
+    }
+  }, [resolved, resolvedProfileId, profiles.length]);
 
   // Game language is determined by profile's preferred_language
   // This ensures consistency across the app
@@ -1021,8 +1029,78 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     [],
   );
 
-  // If no profile is available yet, show a loading state (prevents redirect loops during initial fetch).
+  // If no profile is available yet, show a loading state with option to continue as guest
   if (!resolvedProfileId) {
+    // Allow continuing without profile after a brief loading period
+    if (isProfilesLoading) {
+      return (
+        <section className='min-h-[60vh] flex items-center justify-center'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4' />
+            <p className='text-text-secondary'>
+              Loading your child&apos;s profile...
+            </p>
+          </div>
+        </section>
+      );
+    }
+    
+    // No profiles available - offer to create one or continue as guest
+    if (profiles.length === 0) {
+      return (
+        <section className='min-h-[60vh] flex items-center justify-center px-4'>
+          <div className='text-center max-w-md'>
+            <div className='text-6xl mb-4'>🎮</div>
+            <h2 className='text-2xl font-bold mb-2'>Ready to Learn!</h2>
+            <p className='text-text-secondary mb-6'>
+              Create a profile to save your progress, or start playing right away!
+            </p>
+            <div className='space-y-3'>
+              <button
+                type='button'
+                onClick={async () => {
+                  // Create a default profile and continue
+                  await useProfileStore.getState().createProfile({
+                    name: 'Learner',
+                    age: 5,
+                    preferred_language: 'en',
+                  });
+                }}
+                className='w-full px-5 py-3 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-xl font-bold shadow-soft hover:scale-105 transition-transform'
+              >
+                Create Profile & Play
+              </button>
+              <button
+                type='button'
+                onClick={() => {
+                  // Set a guest profile ID to bypass the check
+                  useProfileStore.setState({
+                    currentProfile: {
+                      id: 'guest',
+                      name: 'Guest',
+                      preferred_language: 'en',
+                      created_at: new Date().toISOString(),
+                    },
+                  });
+                }}
+                className='w-full px-5 py-3 bg-white border border-border rounded-xl font-bold text-advay-slate shadow-soft hover:bg-bg-tertiary transition'
+              >
+                Play as Guest
+              </button>
+              <button
+                type='button'
+                onClick={() => navigate('/dashboard')}
+                className='w-full px-5 py-3 text-text-secondary hover:text-text-primary transition'
+              >
+                ← Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    
+    // Profiles exist but none selected - show brief loading
     return (
       <section className='min-h-[60vh] flex items-center justify-center'>
         <div className='text-center'>
@@ -1030,15 +1108,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           <p className='text-text-secondary'>
             Loading your child&apos;s profile...
           </p>
-          {!isProfilesLoading && profiles.length === 0 && (
-            <button
-              type='button'
-              onClick={() => navigate('/dashboard')}
-              className='mt-4 px-5 py-3 bg-white border border-border rounded-xl font-bold text-advay-slate shadow-soft hover:bg-bg-tertiary transition'
-            >
-              Go to Dashboard
-            </button>
-          )}
         </div>
       </section>
     );

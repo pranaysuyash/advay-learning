@@ -66,6 +66,7 @@ export const Dashboard = memo(function DashboardComponent() {
     updateProfile,
     setCurrentProfile,
   } = useProfileStore();
+  const { isGuest } = useAuthStore();
   const toast = useToast();
   const { setDemoMode, demoMode } = useSettingsStore();
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
@@ -146,8 +147,10 @@ export const Dashboard = memo(function DashboardComponent() {
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
+    // Skip API calls for guest users - they don't have backend auth
+    if (isGuest) return;
     fetchProfiles();
-  }, [fetchProfiles]);
+  }, [fetchProfiles, isGuest]);
 
   const handleCreateProfile = async () => {
     if (!newChildName.trim()) return;

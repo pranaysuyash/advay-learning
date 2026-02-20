@@ -21,8 +21,29 @@ import {
 import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
-const HIT_RADIUS = 0.1;
+/**
+ * Kid-friendly haptic feedback utility
+ * Uses longer, softer vibrations appropriate for children
+ */
+function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
+
+  // Kid-friendly patterns: longer, softer vibrations
+  const patterns = {
+    success: [50, 30, 50], // Gentle double tap
+    error: [100, 50, 100], // Softer error buzz
+    celebration: [100, 50, 100, 50, 200], // Joyful burst
+  };
+
+  navigator.vibrate(patterns[type]);
+}
+
+const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 3;
+
+// Touch-friendly sizing constants for kids
+const CURSOR_SIZE = 64; // Increased from 40 (10 * 4) for easier visibility
+const TARGET_SIZE = 120; // Increased from 80 for kids' fingers
 
 function random01(): number {
   try {
@@ -74,11 +95,21 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
-  useEffect(() => { targetsRef.current = targets; }, [targets]);
-  useEffect(() => { stepIndexRef.current = stepIndex; }, [stepIndex]);
-  useEffect(() => { wordRef.current = word; }, [word]);
-  useEffect(() => { levelRef.current = level; }, [level]);
-  useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
+  useEffect(() => {
+    targetsRef.current = targets;
+  }, [targets]);
+  useEffect(() => {
+    stepIndexRef.current = stepIndex;
+  }, [stepIndex]);
+  useEffect(() => {
+    wordRef.current = word;
+  }, [word]);
+  useEffect(() => {
+    levelRef.current = level;
+  }, [level]);
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   useEffect(() => {
     if (isPlaying && !isHandTrackingReady && !isModelLoading) {
@@ -124,6 +155,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     setShowCelebration(true);
     setScore((prev) => prev + 30 + timeLeftRef.current);
 
+    // Slower pacing for kids - 3 seconds instead of 1.8s
     levelTimeoutRef.current = setTimeout(() => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
@@ -133,7 +165,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         setLevel((prev) => prev + 1);
       }
       levelTimeoutRef.current = null;
-    }, 1800);
+    }, 3000);
   }, [playCelebration]);
 
   const handleFrame = useCallback(
@@ -166,6 +198,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
       if (hit.letter === expectedLetter) {
         void playPop();
+        triggerHaptic('success');
         setCompletedLetters((prev) => [...prev, hit.letter]);
         setScore((prev) => prev + 15);
 
@@ -174,6 +207,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
         if (nextStep >= currentWord.length) {
           setFeedback(`${currentWord} complete!`);
+          triggerHaptic('celebration');
           completeWord();
         } else {
           setFeedback(`Great! Next: "${currentWord[nextStep]}"`);
@@ -181,6 +215,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       } else {
         setFeedback(`That's "${hit.letter}". Find "${expectedLetter}".`);
         void playError();
+        triggerHaptic('error');
       }
     },
     [completeWord, cursor, playError, playPop],
@@ -190,7 +225,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     isRunning: isPlaying && !gameCompleted && isHandTrackingReady,
     handLandmarker: landmarker,
     webcamRef,
-    targetFps: 24,
+    targetFps: 30, // Increased from 24 for smoother hand tracking (less lag)
     onFrame: handleFrame,
     onNoVideoFrame: () => {
       if (cursor !== null) setCursor(null);
@@ -254,7 +289,12 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const expectedLetter = word[stepIndex];
 
   return (
-    <GameContainer title='Word Builder' score={score} level={level} onHome={goHome}>
+    <GameContainer
+      title='Word Builder'
+      score={score}
+      level={level}
+      onHome={goHome}
+    >
       <div className='absolute inset-0 bg-black'>
         <Webcam
           ref={webcamRef}
@@ -280,7 +320,13 @@ export const WordBuilder = memo(function WordBuilderComponent() {
               {word.split('').map((letter, i) => (
                 <span
                   key={i}
-                  className={i < stepIndex ? 'text-emerald-300' : i === stepIndex ? 'text-amber-300 underline' : 'text-white/40'}
+                  className={
+                    i < stepIndex
+                      ? 'text-emerald-300'
+                      : i === stepIndex
+                        ? 'text-amber-300 underline'
+                        : 'text-white/40'
+                  }
                 >
                   {i < stepIndex ? letter : '_'}
                 </span>
@@ -290,17 +336,23 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         )}
 
         {targets.map((target) => {
-          const isExpected = target.letter === expectedLetter && target.isCorrect;
+          const isExpected =
+            target.letter === expectedLetter && target.isCorrect;
           const isCompleted = target.isCorrect && target.orderIndex < stepIndex;
           return (
             <div
               key={target.id}
-              className='absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
-              style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
+              className='absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+              style={{
+                left: `${target.position.x * 100}%`,
+                top: `${target.position.y * 100}%`,
+                width: `${TARGET_SIZE}px`,
+                height: `${TARGET_SIZE}px`,
+              }}
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-full border-4 flex items-center justify-center font-black text-2xl ${
+                className={`absolute inset-0 rounded-full border-4 flex items-center justify-center font-black text-3xl ${
                   isCompleted
                     ? 'border-emerald-300/40 bg-emerald-300/20 text-emerald-200/40'
                     : isExpected
@@ -316,8 +368,13 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
         {cursor && (
           <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
+            className='absolute rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
+            style={{
+              left: `${cursor.x * 100}%`,
+              top: `${cursor.y * 100}%`,
+              width: `${CURSOR_SIZE}px`,
+              height: `${CURSOR_SIZE}px`,
+            }}
             aria-hidden='true'
           />
         )}
@@ -336,7 +393,9 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
         {gameCompleted && (
           <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3'>
-            <h2 className='text-3xl font-black text-emerald-300'>Word Master!</h2>
+            <h2 className='text-3xl font-black text-emerald-300'>
+              Word Master!
+            </h2>
             <p className='text-white/90'>Final Score: {score}</p>
           </div>
         )}

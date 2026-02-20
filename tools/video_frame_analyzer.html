@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Analyzer - UX/QA Tool</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: system-ui;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #999;
+            margin-bottom: 20px;
+        }
+        .file-upload {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        .file-upload label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0066cc;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .file-upload label:hover {
+            background: #0052a3;
+        }
+        #fileName {
+            margin-top: 10px;
+            color: #4fc3f7;
+        }
+        video {
+            width: 100%;
+            max-width: 1200px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #333;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 1200px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .info {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .info-item {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        .info-item value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+        input[type="range"] {
+            flex: 1;
+            min-width: 200px;
+        }
+        .playback-speed {
+            display: flex;
+            gap: 5px;
+        }
+        .notes {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .notes textarea {
+            width: 100%;
+            min-height: 150px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        .timestamp-btn {
+            background: #28a745;
+            margin-top: 10px;
+        }
+        .timestamp-btn:hover {
+            background: #218838;
+        }
+        .download-btn {
+            background: #dc3545;
+        }
+        .download-btn:hover {
+            background: #c82333;
+        }
+        .shortcuts {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 1200px;
+            font-size: 13px;
+        }
+        .shortcuts h3 {
+            margin-top: 0;
+        }
+        .shortcuts kbd {
+            background: #444;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        #frameCanvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Video Frame Analyzer</h1>
+        <p class="subtitle">Frame-by-frame video analysis tool for UX/QA testing</p>
+        
+        <div class="file-upload">
+            <input type="file" id="fileInput" accept="video/*">
+            <label for="fileInput">📁 Choose Video File</label>
+            <div id="fileName"></div>
+        </div>
+
+        <video id="videoPlayer" controls style="display: none;">
+            Your browser does not support the video tag.
+        </video>
+
+        <div class="controls" id="controls" style="display: none;">
+            <button onclick="frameBack()">◀ Frame (-1)</button>
+            <button onclick="slowBack()">⏪ -1s</button>
+            <button onclick="playPause()">⏯ Play/Pause</button>
+            <button onclick="slowForward()">⏩ +1s</button>
+            <button onclick="frameForward()">Frame (+1) ▶</button>
+            <input type="range" id="timeline" min="0" max="100" value="0" step="0.1">
+            <div class="playback-speed">
+                <button onclick="setSpeed(0.25)">0.25x</button>
+                <button onclick="setSpeed(0.5)">0.5x</button>
+                <button onclick="setSpeed(1)">1x</button>
+                <button onclick="setSpeed(2)">2x</button>
+            </div>
+        </div>
+
+        <div class="info" id="info" style="display: none;">
+            <h3>Video Metrics</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Current Time</label>
+                    <value id="currentTime">0.00s</value>
+                </div>
+                <div class="info-item">
+                    <label>Current Frame</label>
+                    <value id="currentFrame">0</value>
+                </div>
+                <div class="info-item">
+                    <label>Duration</label>
+                    <value id="duration">0.00s</value>
+                </div>
+                <div class="info-item">
+                    <label>Frame Rate</label>
+                    <value id="fps">-- fps</value>
+                </div>
+                <div class="info-item">
+                    <label>Resolution</label>
+                    <value id="resolution">--×--</value>
+                </div>
+                <div class="info-item">
+                    <label>Playback Speed</label>
+                    <value id="playbackSpeed">1.0x</value>
+                </div>
+                <div class="info-item">
+                    <label>Frame Time</label>
+                    <value id="frameTime">-- ms</value>
+                </div>
+                <div class="info-item">
+                    <label>Total Frames</label>
+                    <value id="totalFrames">--</value>
+                </div>
+            </div>
+        </div>
+
+        <div class="notes" id="notes" style="display: none;">
+            <h3>Analysis Notes</h3>
+            <textarea id="notesArea" placeholder="Add timestamped observations here...&#x0a;&#x0a;Use 'Add Timestamp' button to insert current time.&#x0a;&#x0a;Example format:&#x0a;[0:05.234] Issue observed: Lag detected when hand moves&#x0a;[0:12.567] Target size: Too small for toddler interaction"></textarea>
+            <button class="timestamp-btn" onclick="addTimestamp()">⏱ Add Timestamp</button>
+            <button class="download-btn" onclick="downloadNotes()">💾 Download Notes</button>
+        </div>
+
+        <div class="shortcuts">
+            <h3>⌨️ Keyboard Shortcuts</h3>
+            <p><kbd>Space</kbd> Play/Pause</p>
+            <p><kbd>←</kbd> Previous frame | <kbd>Shift + ←</kbd> -1 second</p>
+            <p><kbd>→</kbd> Next frame | <kbd>Shift + →</kbd> +1 second</p>
+            <p><kbd>,</kbd> Previous frame (alternative)</p>
+            <p><kbd>.</kbd> Next frame (alternative)</p>
+        </div>
+
+        <canvas id="frameCanvas"></canvas>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const timeline = document.getElementById('timeline');
+        const fileInput = document.getElementById('fileInput');
+        const notesArea = document.getElementById('notesArea');
+        let FPS = 30; // Default, will be updated
+        let FRAME_TIME = 1000 / FPS;
+
+        // File upload handler
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+                document.getElementById('fileName').textContent = `📹 ${file.name}`;
+                document.getElementById('videoPlayer').style.display = 'block';
+                document.getElementById('controls').style.display = 'flex';
+                document.getElementById('info').style.display = 'block';
+                document.getElementById('notes').style.display = 'block';
+            }
+        });
+
+        // Update display
+        function updateInfo() {
+            const currentFrame = Math.floor(video.currentTime * FPS);
+            const totalFrames = Math.floor(video.duration * FPS);
+            
+            document.getElementById('currentTime').textContent = video.currentTime.toFixed(3) + 's';
+            document.getElementById('currentFrame').textContent = currentFrame;
+            document.getElementById('duration').textContent = video.duration.toFixed(2) + 's';
+            document.getElementById('playbackSpeed').textContent = video.playbackRate.toFixed(2) + 'x';
+            document.getElementById('totalFrames').textContent = totalFrames;
+            document.getElementById('frameTime').textContent = FRAME_TIME.toFixed(2) + ' ms';
+            
+            // Update timeline
+            if (!timeline.matches(':active')) {
+                timeline.value = (video.currentTime / video.duration) * 100;
+            }
+        }
+
+        // Detect actual frame rate from video
+        video.addEventListener('loadedmetadata', function() {
+            // Try to detect FPS (most common rates)
+            const commonFPS = [24, 25, 30, 50, 60, 120];
+            // Default to 30 if we can't detect
+            FPS = 30;
+            
+            // Update based on duration and estimated frames
+            // This is approximate - exact FPS detection requires codec info
+            document.getElementById('fps').textContent = FPS + ' fps (estimated)';
+            FRAME_TIME = 1000 / FPS;
+            
+            // Try to get actual resolution
+            const canvas = document.getElementById('frameCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            document.getElementById('resolution').textContent = 
+                video.videoWidth + '×' + video.videoHeight;
+            
+            updateInfo();
+        });
+
+        // Timeline scrubbing
+        timeline.addEventListener('input', function() {
+            const time = (this.value / 100) * video.duration;
+            video.currentTime = time;
+        });
+
+        // Frame navigation
+        function frameForward() {
+            video.currentTime += (1 / FPS);
+            video.pause();
+        }
+
+        function frameBack() {
+            video.currentTime -= (1 / FPS);
+            video.pause();
+        }
+
+        function slowForward() {
+            video.currentTime += 1;
+        }
+
+        function slowBack() {
+            video.currentTime -= 1;
+        }
+
+        function playPause() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        function setSpeed(speed) {
+            video.playbackRate = speed;
+            updateInfo();
+        }
+
+        // Timestamp insertion
+        function addTimestamp() {
+            const timestamp = formatTimestamp(video.currentTime);
+            const currentText = notesArea.value;
+            const newText = currentText + (currentText ? '\n' : '') + `[${timestamp}] `;
+            notesArea.value = newText;
+            notesArea.focus();
+            // Move cursor to end
+            notesArea.setSelectionRange(newText.length, newText.length);
+        }
+
+        function formatTimestamp(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = (seconds % 60).toFixed(3);
+            return `${mins}:${secs.padStart(6, '0')}`;
+        }
+
+        // Download notes
+        function downloadNotes() {
+            const text = notesArea.value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            a.download = `video-analysis-${timestamp}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if typing in textarea
+            if (e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    playPause();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        slowBack();
+                    } else {
+                        frameBack();
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        slowForward();
+                    } else {
+                        frameForward();
+                    }
+                    break;
+                case ',':
+                    e.preventDefault();
+                    frameBack();
+                    break;
+                case '.':
+                    e.preventDefault();
+                    frameForward();
+                    break;
+            }
+        });
+
+        // Update on video events
+        video.addEventListener('timeupdate', updateInfo);
+        video.addEventListener('loadedmetadata', updateInfo);
+        
+        // Auto-save notes to localStorage
+        notesArea.addEventListener('input', function() {
+            localStorage.setItem('videoAnalysisNotes', notesArea.value);
+        });
+
+        // Restore notes from localStorage on load
+        window.addEventListener('load', function() {
+            const savedNotes = localStorage.getItem('videoAnalysisNotes');
+            if (savedNotes) {
+                notesArea.value = savedNotes;
+            }
+        });
+    </script>
+</body>
+</html>

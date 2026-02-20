@@ -7,16 +7,22 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, isGuest, checkAuth } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Skip auth check for guest sessions - they don't have backend cookies
+    if (isGuest) {
+      setIsChecking(false);
+      return;
+    }
+    
     // Check authentication status on mount
     // This validates the cookie with the backend
     checkAuth().finally(() => {
       setIsChecking(false);
     });
-  }, [checkAuth]);
+  }, [checkAuth, isGuest]);
 
   // Show loading while checking auth
   if (isLoading || isChecking) {

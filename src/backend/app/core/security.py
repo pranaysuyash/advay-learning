@@ -14,7 +14,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     # Encode passwords to bytes for bcrypt
     plain_bytes = plain_password.encode("utf-8")
     hash_bytes = hashed_password.encode("utf-8")
-    return bcrypt.checkpw(plain_bytes, hash_bytes)  # type: ignore
+    return bcrypt.checkpw(plain_bytes, hash_bytes)
 
 
 def get_password_hash(password: str) -> str:
@@ -23,12 +23,10 @@ def get_password_hash(password: str) -> str:
     password_bytes = password[:72].encode("utf-8")
     # Use bcrypt directly to avoid passlib's crypt deprecation warning
     salt = bcrypt.gensalt(rounds=12)
-    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")  # type: ignore
+    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")
 
 
-def create_access_token(
-    data: dict[str, Any], expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token."""
     to_encode = data.copy()
     if expires_delta:
@@ -44,8 +42,6 @@ def create_access_token(
 def create_refresh_token(data: dict[str, Any]) -> str:
     """Create a JWT refresh token."""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(
-        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-    )
+    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire})
     return str(jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256"))

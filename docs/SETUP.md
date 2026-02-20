@@ -185,6 +185,17 @@ npm run audit:ui-design
 - Prettier
 - Tailwind CSS IntelliSense
 
+## Development Tools
+
+The `tools/` directory contains reusable utilities for development and QA:
+
+- **Video Frame Analyzer** (`tools/video_frame_analyzer.html`) - Frame-by-frame video analysis for UX/QA testing
+- **Contrast Calculator** (`tools/contrast_calculator.py`) - WCAG contrast ratio validation
+
+See [tools/README.md](../tools/README.md) for full documentation and usage examples.
+
+**When to add tools**: If you create a helpful utility (analyzer, converter, validator, test harness), save it to `tools/` with documentation instead of creating one-off scripts.
+
 ---
 
 **Next**: See [AGENTS.md](../AGENTS.md) for development workflow.

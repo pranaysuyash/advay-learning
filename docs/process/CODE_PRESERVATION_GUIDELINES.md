@@ -1,7 +1,7 @@
 # Code Preservation & Reactivation Guidelines
 
-**Version**: 1.0  
-**Last Updated**: 2026-02-01  
+**Version**: 1.1  
+**Last Updated**: 2026-02-20  
 **Applies To**: All AI agents working on code cleanup, refactoring, or issue remediation
 
 ---
@@ -75,6 +75,28 @@ IMPLEMENTATION (Preferred)              DELETION (Last Resort)
 ```
 
 **Default position: Move left on the spectrum.**
+
+### 4. Reusable Helper Artifact Preservation
+
+When the "unused code" is a helper artifact (for example: video analyzers, QA scripts, converters, debug harnesses), treat it as a reusable asset:
+
+1. **Never leave reusable helpers in `/tmp`**
+   - `/tmp` is scratch space, not project memory.
+   - If a helper proved useful once, migrate it into the repo.
+
+2. **Promote helper artifacts into `tools/`**
+   - Place the file in `<project>/tools/`.
+   - Rename to a descriptive, stable name.
+   - Ensure it can run independently.
+
+3. **Document and maintain**
+   - Add/update `tools/README.md` with purpose, usage, and examples.
+   - If the helper supports audits or QA workflows, reference it in related docs/tickets.
+   - Keep improving existing helpers instead of replacing them with new temp copies.
+
+4. **Cross-project mindset**
+   - Build helpers so other projects can reuse them with minimal edits.
+   - Prefer portable formats (HTML/JS or Python CLI) for maximum reuse.
 
 ---
 
@@ -371,6 +393,7 @@ Track these to validate the approach:
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 1.1 | 2026-02-20 | Added reusable helper artifact preservation policy (`/tmp` -> `tools/` + maintainability) | AI Assistant |
 | 1.0 | 2026-02-01 | Initial document | AI Assistant |
 
 ---

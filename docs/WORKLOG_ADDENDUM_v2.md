@@ -10803,3 +10803,101 @@ Status updates:
 ---
 
 EOF
+
+## TCK-20260220-001 :: Emoji Match Game - Video UX Audit
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-20 10:40 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Comprehensive video UX audit of Emoji Match game based on screen recording analysis. Identified critical pacing issues, hand-tracking problems, and child-friendliness concerns.
+
+Scope contract:
+
+- In-scope:
+  - Frame-by-frame video analysis of gameplay recording
+  - Document UX issues (timer, hand tracking, visual feedback)
+  - Create actionable recommendations by priority
+  - Save video compression helper tool for future audits
+  - Create audit artifact with detailed findings
+- Out-of-scope:
+  - Code changes or fixes
+  - Implementation of recommendations
+  - Changes to game logic
+- Behavior change allowed: NO (audit only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - docs/audit/game__emoji_match__video_ux_audit_2026-02-20.md (created)
+  - tools/video_compress.py (created)
+  - tools/README.md (updated)
+- Video source: ~/Desktop/emoji_match.mov
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Video analyzed frame-by-frame for UX issues
+- [x] Critical issues identified and documented (2 found)
+- [x] Medium issues documented (5 found)
+- [x] Minor issues documented (2 found)
+- [x] Video compression tool saved to tools/
+- [x] Tools README updated with new tool documentation
+- [x] Audit artifact created in docs/audit/
+
+Inputs:
+
+- Prompt used: User instruction for video UX analysis
+- Source artifacts:
+  - Desktop/emoji_match.mov (original 697MB recording)
+  - Desktop/emoji_match_compressed.mp4 (4MB compressed for analysis)
+- Analysis approach: Child-friendliness, hand-tracking latency, timer/pacing issues
+
+Execution log:
+
+- 2026-02-20 10:36 IST | Compressed video from 697MB to 4MB using ffmpeg
+- 2026-02-20 10:40 IST | Completed frame-by-frame video analysis
+- 2026-02-20 10:42 IST | Identified 4 critical, 5 medium, 2 minor issues
+- 2026-02-20 10:50 IST | User feedback: Added level progression bug and start button interaction issues (now 4 critical issues)
+- 2026-02-20 10:44 IST | Created video_compress.py tool in tools/
+- 2026-02-20 10:45 IST | Updated tools/README.md with new tool docs
+- 2026-02-20 10:46 IST | Created audit document: game__emoji_match__video_ux_audit_2026-02-20.md
+
+Status updates:
+
+- 2026-02-20 10:46 IST **DONE** — Video audit complete, all artifacts created
+
+Key Findings Summary:
+
+**Critical Issues:**
+1. **Level progression bug** - Level 1 celebrated twice, Level 3 shown multiple times (state management issue)
+2. **Start button not pinchable** - Breaks hand-tracking paradigm, should be big pushable button
+3. Timer too fast (20s for 10 rounds = 2s per emoji) - causes child frustration
+4. "R1/10" notation unclear - children don't understand progress
+
+**Top Medium Issues:**
+3. Hand tracking lag and small detection radius
+4. Tiny hand tracking indicators (cyan circles) hard to see
+5. Cluttered background (ceiling fan, furniture) distracts from game
+
+Next Actions:
+
+1. **URGENT**: Debug level progression state management bug (Level 1 repeating)
+2. Design big pushable start button (150-200px, 3D depth, whole-hand activation)
+3. Create implementation tickets for timer increase and progress indicator fix
+4. Coordinate with hand-tracking team on detection radius improvements
+5. Consider background blur/overlay for camera-based games
+
+Risks/notes:
+
+- Video analysis identified issues that code review alone might miss (timing, visual feedback, real-world interaction)
+- Hand tracking issues may be systemic across all camera-based games
+- Child psychology factor: Time pressure reduces learning effectiveness for ages 4-8
+
+---
+
+EOF

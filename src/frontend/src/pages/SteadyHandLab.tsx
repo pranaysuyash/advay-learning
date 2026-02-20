@@ -16,7 +16,27 @@ import { pickTargetPoint, updateHoldProgress } from '../games/steadyHandLogic';
 import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
-const TARGET_RADIUS = 0.12;
+const TARGET_RADIUS = 0.18; // Increased from 0.12 for kids' easier targeting
+
+// Touch-friendly sizing constants for kids
+const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
+const TARGET_SIZE = 160; // Increased for kids' fingers
+
+/**
+ * Kid-friendly haptic feedback utility
+ * Uses longer, softer vibrations appropriate for children
+ */
+function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
+
+  const patterns = {
+    success: [50, 30, 50], // Gentle double tap
+    error: [100, 50, 100], // Softer error buzz
+    celebration: [100, 50, 100, 50, 200], // Joyful burst
+  };
+
+  navigator.vibrate(patterns[type]);
+}
 
 function random01(): number {
   try {
@@ -38,7 +58,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const [target, setTarget] = useState<Point>(pickTargetPoint(0.4, 0.4, 0.22));
   const [cursor, setCursor] = useState<Point | null>(null);
   const [holdProgress, setHoldProgress] = useState(0);
-  const [feedback, setFeedback] = useState('Hold your fingertip inside the target ring.');
+  const [feedback, setFeedback] = useState(
+    'Hold your fingertip inside the target ring.',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
 
   const holdProgressRef = useRef(holdProgress);
@@ -57,7 +79,8 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     enableFallback: true,
   });
 
-  const { playSuccess, playError, playCelebration, playStart } = useSoundEffects();
+  const { playSuccess, playError, playCelebration, playStart } =
+    useSoundEffects();
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;
@@ -120,22 +143,37 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         setHoldProgress(0);
         setFeedback('Excellent control! New target unlocked.');
         void playSuccess();
+        triggerHaptic('success');
 
         if ((round + 1) % 5 === 0) {
           setShowCelebration(true);
+          triggerHaptic('celebration');
           void playCelebration();
-          setTimeout(() => setShowCelebration(false), 1800);
+          setTimeout(() => setShowCelebration(false), 3000); // Slower for kids
         }
 
         pickNextTarget();
-      } else if (!isInside && currentProgress > 0.05 && nextProgress < currentProgress) {
+      } else if (
+        !isInside &&
+        currentProgress > 0.05 &&
+        nextProgress < currentProgress
+      ) {
         setFeedback('Almost there. Move back into the ring and hold steady.');
         if (currentProgress > 0.6 && nextProgress < 0.35) {
           void playError();
+          triggerHaptic('error');
         }
       }
     },
-    [cursor, pickNextTarget, playCelebration, playError, playSuccess, round, target],
+    [
+      cursor,
+      pickNextTarget,
+      playCelebration,
+      playError,
+      playSuccess,
+      round,
+      target,
+    ],
   );
 
   useHandTrackingRuntime({
@@ -198,7 +236,12 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const ringScale = 1 + holdProgress * 0.15;
 
   return (
-    <GameContainer title='Steady Hand Lab' score={score} level={round} onHome={goHome}>
+    <GameContainer
+      title='Steady Hand Lab'
+      score={score}
+      level={round}
+      onHome={goHome}
+    >
       <div className='absolute inset-0 bg-black'>
         <Webcam
           ref={webcamRef}
@@ -215,16 +258,21 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         </div>
 
         <div
-          className='absolute w-36 h-36 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+          className='absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none'
           style={{
             left: `${target.x * 100}%`,
             top: `${target.y * 100}%`,
+            width: `${TARGET_SIZE}px`,
+            height: `${TARGET_SIZE}px`,
           }}
           aria-hidden='true'
         >
           <div
             className='absolute inset-0 rounded-full border-4 border-emerald-300/90 shadow-[0_0_30px_rgba(52,211,153,0.5)]'
-            style={{ transform: `scale(${ringScale})`, transition: 'transform 100ms linear' }}
+            style={{
+              transform: `scale(${ringScale})`,
+              transition: 'transform 100ms linear',
+            }}
           />
           <div className='absolute inset-3 rounded-full border-2 border-emerald-200/50' />
           <div className='absolute inset-x-5 bottom-3 h-2 rounded-full bg-white/20 overflow-hidden'>
@@ -237,8 +285,13 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
 
         {cursor && (
           <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
+            className='absolute rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
+            style={{
+              left: `${cursor.x * 100}%`,
+              top: `${cursor.y * 100}%`,
+              width: `${CURSOR_SIZE}px`,
+              height: `${CURSOR_SIZE}px`,
+            }}
             aria-hidden='true'
           />
         )}

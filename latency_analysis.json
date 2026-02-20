@@ -1,0 +1,115 @@
+{
+  "summary": {
+    "total_frames": 13,
+    "aligned_frames": 5,
+    "misaligned_frames": 8,
+    "correlation_percent": 38
+  },
+  "frames": [
+    {
+      "frame": 1,
+      "time_seconds": 2,
+      "hand_position": "center, middle height (over the green-circled emoji)",
+      "cursor_position": "center, middle height (over the green-circled emoji)",
+      "same_region": true,
+      "distance": "CLOSE"
+    },
+    {
+      "frame": 5,
+      "time_seconds": 10,
+      "hand_position": "right side, upper area",
+      "cursor_position": "center, middle height",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 10,
+      "time_seconds": 20,
+      "hand_position": "right side, middle height",
+      "cursor_position": "right side, middle height",
+      "same_region": true,
+      "distance": "CLOSE"
+    },
+    {
+      "frame": 15,
+      "time_seconds": 30,
+      "hand_position": "center, middle height",
+      "cursor_position": "right side, middle height",
+      "same_region": true,
+      "distance": "CLOSE"
+    },
+    {
+      "frame": 20,
+      "time_seconds": 40,
+      "hand_position": "right side, middle height",
+      "cursor_position": "center, upper area",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 25,
+      "time_seconds": 50,
+      "hand_position": "center, upper area",
+      "cursor_position": "center, middle area",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 30,
+      "time_seconds": 60,
+      "hand_position": "right side, middle height",
+      "cursor_position": "center, middle height",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 35,
+      "time_seconds": 70,
+      "hand_position": "center, middle height",
+      "cursor_position": "center, middle height",
+      "same_region": true,
+      "distance": "CLOSE"
+    },
+    {
+      "frame": 40,
+      "time_seconds": 80,
+      "hand_position": "right side, lower area",
+      "cursor_position": "center, middle height",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 45,
+      "time_seconds": 90,
+      "hand_position": "Lower center area (near the fox icon)",
+      "cursor_position": "Upper right area (near the \"Level 3 complete!\" text)",
+      "same_region": false,
+      "distance": "FAR"
+    },
+    {
+      "frame": 50,
+      "time_seconds": 100,
+      "hand_position": "center, upper area",
+      "cursor_position": "right side, middle height",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 55,
+      "time_seconds": 110,
+      "hand_position": "right side, lower area",
+      "cursor_position": "center, middle height",
+      "same_region": false,
+      "distance": "MEDIUM"
+    },
+    {
+      "frame": 60,
+      "time_seconds": 120,
+      "hand_position": "center, middle height (over the child's face/upper body area)",
+      "cursor_position": "center, middle height (near the \"Emotion Expert!\" text)",
+      "same_region": true,
+      "distance": "CLOSE"
+    }
+  ],
+  "note": "Hand tracking uses white mouse cursor as indicator. Alignment means cursor is in same screen region as hand. Misalignment may indicate tracking lag, loss of tracking, or hand movement between frames."
+}

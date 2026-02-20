@@ -46,7 +46,7 @@ async def get_progress(
         )
 
     progress = await ProgressService.get_by_profile(db, profile_id)
-    return progress  # type: ignore[no-any-return]
+    return progress  # type: ignore[return-value]
 
 
 @router.post("/", response_model=Progress)
@@ -81,7 +81,7 @@ async def save_progress(
         )
 
     progress = await ProgressService.create(db, profile_id, progress_in)
-    return progress
+    return progress  # type: ignore[return-value]
 
 
 @router.post("/batch")
@@ -99,14 +99,14 @@ async def save_progress_batch(
 
     # Basic validation
     try:
-        validate_uuid(profile_id, "profile_id")
+        validate_uuid(profile_id, "profile_id")  # type: ignore[arg-type]
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         )
 
-    profile = await ProfileService.get_by_id(db, profile_id)
+    profile = await ProfileService.get_by_id(db, profile_id)  # type: ignore[arg-type]
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -124,7 +124,7 @@ async def save_progress_batch(
         key = it.get("idempotency_key")
         try:
             # Try to create; ProgressService.create will raise DuplicateProgressError if duplicate
-            progress = await ProgressService.create(db, profile_id, it)
+            progress = await ProgressService.create(db, profile_id, it)  # type: ignore[arg-type]
             results.append({"idempotency_key": key, "status": "ok", "server_id": str(progress.id)})
         except Exception as e:
             # Handle duplicate specifically

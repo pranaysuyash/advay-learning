@@ -361,4 +361,4 @@ async def get_current_user_info(request: Request, db: AsyncSession = Depends(get
             detail="User not found",
         )
 
-    return user
+    return user  # type: ignore[return-value]

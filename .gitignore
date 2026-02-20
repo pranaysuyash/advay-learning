@@ -59,7 +59,6 @@ src/frontend/.vite/
 src/frontend/.turbo/
 src/frontend/.parcel-cache/
 *.local
-.eslintrc.cjs
 
 # Node & package managers (global)
 node_modules/
@@ -109,47 +108,40 @@ storage/drawings/*
 secrets/
 
 # Playwright artifacts (global)
-playwright-report/
-test-results/
-screenshots/
-videos/
+/playwright-report/
+/test-results/
+/screenshots/
+/videos/
 
-evaluations/
-docs/ux_audit/
-docs/audit/
-screenshot-tests.js
-src/frontend/capture-screenshots.cjs
-src/frontend/e2e/games_visual_audit.spec.ts
-src/frontend/e2e/visual_game_audit.spec.ts
-src/frontend/screenshot-tests.js
-src/frontend/src/hooks/__tests__/eyeTrackingLogic.test.ts
-src/frontend/src/hooks/__tests__/postureDetectionLogic.test.ts
-src/frontend/test-games-visual.cjs
-src/frontend/test-games.cjs
-src/frontend/visual-test.cjs
+# Keep docs and tools in git; ignore only generated visual artifacts.
+evaluations/**/frames/
+evaluations/**/clips/
+evaluations/**/*_frames/
+evaluations/**/*_screenshots/
+evaluations/**/raw_captures/
 
-# Generated screenshots and test artifacts
-audit-screenshots/
+# Generated screenshot/video artifacts
 docs/audit/screenshots/
-
-evaluations/emoji_match_frames/
-docs/Visual_Test_Screenshot_Summary.md
-
-# Development and analysis tools
-analyze-games.cjs
-analyze-site.cjs
-capture-auth-games.cjs
-capture-games.cjs
-capture-screenshots.cjs
-debug-alphabet.cjs
-debug_alphabet_tracing.spec.ts
-debug_guest.spec.ts
-deep_debug_alphabet.spec.ts
+docs/screenshots/
+src/frontend/screenshots/
+docs/ux_audit/**/keyframe_*.jpg
+docs/ux_audit/**/keyframe_*.jpeg
+docs/ux_audit/**/keyframe_*.png
+docs/ux_audit/**/keyframe_*_small.jpg
+audit-screenshots/
+src/frontend/docs/screenshots/
+src/frontend/docs/audit/screenshots/
+tools/**/frames/*
+tools/**/*_frames/*
+tools/**/screenshots/
+tools/*.mov
+tools/*.mp4
+tools/*.webm
+!tools/**/frames/README.md
+!tools/**/*_frames/README.md
 
 # Temporary analysis files
-emoji_match_analysis_report.md
-ematomatch_allonline.md
-scripts/backup-db.sh
+# (Intentionally left empty: keep markdown notes/reports commit-able)
 
 # CI/CD artifacts
 coverage.xml

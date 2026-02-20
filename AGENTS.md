@@ -52,8 +52,8 @@ python3 /Users/pranay/Projects/workspace_memory/scripts/install_git_precommit_ag
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.4  
-**Last Updated**: 2026-02-01  
+**Version**: 1.5  
+**Last Updated**: 2026-02-20  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -119,6 +119,46 @@ This document governs how AI agents (including myself and others) work on the Ad
 - If you see changes you do not recognize, PRESERVE them
 - Only modify/delete files you are explicitly tasked to work on
 - When in doubt, ask the user before removing anything
+
+### 7. Create Reusable Tools, Not One-Off Scripts
+
+**Principle:** When you create helpful code (analyzers, converters, validators, test harnesses), save it as a documented, reusable tool for future use—by any project.
+
+**Guidelines:**
+
+- **Save to `tools/` directory**: Store standalone helper utilities in the project's `tools/` folder
+- **Make it standalone**: Tools should work independently with minimal dependencies
+- **Document in `tools/README.md`**: Add purpose, use cases, how-to-use, and examples
+- **Migrate from temp paths immediately**: If a helper was created in `/tmp`, move it into `tools/` before completing the task
+- **Use descriptive names**: `video_frame_analyzer.html` not `temp_analyzer.html` or `tool1.py`
+- **Prefer portable formats**: HTML/JS for UI tools (works offline), Python for CLI tools
+- **Think cross-project**: Design tools that could be useful in other codebases
+- **Examples**: Video analyzers, contrast calculators, screenshot differs, log parsers, test harnesses
+
+**Why this matters:**
+
+- Prevents re-creating the same utility multiple times
+- Builds a library of battle-tested helpers
+- Makes tools discoverable for other agents and projects
+- Enables reuse across different codebases
+
+**Bad practice:**
+```bash
+# Creating one-off scripts in /tmp or random locations
+cat > /tmp/quick_check.py << 'EOF'
+# ... helpful analysis code ...
+EOF
+python /tmp/quick_check.py  # Lost after reboot
+```
+
+**Good practice:**
+```bash
+# Save as a documented tool
+cat > tools/video_frame_analyzer.html << 'EOF'
+<!-- Reusable frame-by-frame video analyzer -->
+EOF
+echo "Added to tools/README.md with usage examples"
+```
 
 ---
 
@@ -696,7 +736,8 @@ Pass if:
 7. **Never** claim "ready" without evidence
 8. **Never** expand scope without explicit approval
 9. **Never** run ad-hoc “process” work without curating it into repo prompts/docs (if it will be reused)
-10. **Never** delete other agents’ work/artifacts (docs, audits, tickets, assets) unless the user explicitly asks or explicitly approves it in the active ticket (recorded with evidence).
+10. **Never** delete other agents' work/artifacts (docs, audits, tickets, assets) unless the user explicitly asks or explicitly approves it in the active ticket (recorded with evidence)
+11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
 
 ---
 
@@ -735,6 +776,13 @@ prompts/
 - `docs/SECURITY.md` - Security guidelines
 - `docs/SETUP.md` - Environment setup
 - `docs/PROCESS_PROMPTS.md` - Prompt/persona registry + review cadence reminders
+
+### Tools Directory
+
+- `tools/` - Reusable development & QA utilities
+- `tools/README.md` - Tool catalog with use cases and examples
+- `tools/video_frame_analyzer.html` - Frame-by-frame video analysis for UX audits
+- `tools/contrast_calculator.py` - WCAG contrast ratio calculator
 
 ---
 
@@ -828,6 +876,8 @@ Risks/notes:
 
 | Version | Date       | Changes                                                                                                            |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1.6     | 2026-02-20 | Strengthened reusable-tool policy: mandatory `/tmp` migration to `tools/` and long-term maintenance requirement  |
+| 1.5     | 2026-02-20 | Added Core Principle #7: Create Reusable Tools; documented `tools/` directory; added prohibition #11              |
 | 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes |
 | 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001                 |
 | 1.0     | 2024-01-28 | Initial version                                                                                                    |

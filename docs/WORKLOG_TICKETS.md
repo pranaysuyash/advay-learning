@@ -48,6 +48,49 @@ Explored all 14 games in the Advay Vision Learning platform, created comprehensi
 
 Scope contract:
 
+### TCK-20260220-002 :: Emoji Match Game UI/UX Analysis
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-20 14:30 IST
+Status: **OPEN**
+Priority: P1
+
+Description:
+Comprehensive UI/UX analysis of Emoji Match game for toddler usability. Analyzed 634 video frames to identify critical usability issues affecting 2-4 year old users.
+
+Scope contract:
+- In-scope: Video frame analysis (1-50 frames), UI/UX issues identification, toddler usability assessment
+- Out-of-scope: Code implementation fixes, user testing execution
+- Behavior change allowed: NO (analysis only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): emoji_match_analysis_report.md, evaluations/emoji_match_frames/ (634 frames)
+- Branch/PR: main
+- Range: HEAD
+
+Inputs:
+- Prompt used: Emoji Match UI/UX Analysis
+- Source artifacts: emoji_match_analysis_report.md
+
+Plan:
+- Complete analysis report with evidence-based findings
+- Identify high/medium/low severity issues
+- Provide actionable recommendations
+- Document success metrics for remediation
+
+Execution log:
+- 2026-02-20 14:30 IST - **OPEN** — Ticket created, analysis completed
+
+Status updates:
+
+Next actions:
+1. Create extended frame analysis (51-200 frames) for comprehensive coverage
+2. Document user testing methodology for toddler validation
+3. Measure actual performance metrics (input lag, frame rates)
+4. Conduct accessibility audit for WCAG compliance
+
 - In-scope:
   - Explore and catalog all games (code review, architecture, input methods, mechanics)
   - Create `docs/GAMES.md` — comprehensive game catalog with summary table, architecture overview, and detailed entries for all 14 games
@@ -38324,3 +38367,127 @@ Next actions:
 
 1. Commit the staged deletion (done programmatically after this entry).
 2. If history purge is desired, create TCK-20260217-002 to plan and execute a rewrite (force-push required).
+
+---
+
+### TCK-20260220-001 :: Enforce Reusable Helper Preservation Across Project + Projects Root
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-20 10:55 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Strengthen project policy to preserve reusable helper tools (no `/tmp` throwaways)
+  - Update project preservation docs and tools documentation
+  - Update `/Users/pranay/Projects` root memory/alignment guides with reusable-helper workflow
+- Out-of-scope:
+  - Refactoring helper tool implementations
+  - Creating new cross-repo package infrastructure
+- Behavior change allowed: YES (process/documentation behavior)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `AGENTS.md`
+  - `docs/process/CODE_PRESERVATION_GUIDELINES.md`
+  - `tools/README.md`
+  - `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md`
+  - `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_END_USER_GUIDE.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: `prompts/workflow/worklog-v1.0.md` (template discipline) + `AGENTS.md` policy constraints
+- Source artifacts:
+  - `/tmp/emoji_analysis/video_analyzer.html`
+  - `tools/video_frame_analyzer.html`
+
+Acceptance Criteria:
+
+- [x] Project AGENTS policy explicitly requires `/tmp` helper migration into `tools/`
+- [x] Preservation guideline includes reusable helper artifact policy
+- [x] Tools catalog documents no-throwaway rule
+- [x] Projects-root memory docs include cross-project reusable helper workflow
+
+Execution log:
+
+- [2026-02-20 10:47 IST] Verified helper analyzer exists in repo and is documented | Evidence:
+  - **Command**: `ls -la tools && rg -n "video_frame_analyzer|tools/README" tools`
+  - **Interpretation**: `Observed` - `tools/video_frame_analyzer.html` and tool docs are present.
+- [2026-02-20 10:53 IST] Updated project-level policies and preservation docs | Evidence:
+  - **Command**: `git diff -- AGENTS.md docs/process/CODE_PRESERVATION_GUIDELINES.md tools/README.md`
+  - **Interpretation**: `Observed` - Added explicit `/tmp`->`tools/` migration + maintenance requirements.
+- [2026-02-20 10:54 IST] Updated Projects-root alignment/memory guides | Evidence:
+  - **Command**: `git diff -- /Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md /Users/pranay/Projects/PROJECTS_AGENT_MEMORY_END_USER_GUIDE.md`
+  - **Interpretation**: `Observed` - Added reusable helper preservation workflow for cross-project discoverability.
+
+Status updates:
+
+- [2026-02-20 10:55 IST] **DONE** — Guidelines updated at project and Projects-root levels to preserve/maintain reusable helper tools.
+
+Next actions:
+
+1. Run `/Users/pranay/Projects/projects-memory index` so updated guidance is searchable across projects.
+2. Reuse `tools/video_frame_analyzer.html` as the canonical frame-analysis helper in future audits.
+
+---
+
+### TCK-20260220-002 :: Gitignore + Tracked Artifact Hygiene (Screenshots/Visual Outputs)
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-20 11:12 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope:
+  - Verify docs are not broadly ignored
+  - Ensure screenshot/visual-output artifact folders are ignored
+  - Ensure no ignored artifacts remain tracked in index
+  - Verify local-ahead commits do not include screenshot/media artifacts
+- Out-of-scope:
+  - Rewriting already-shared remote history
+  - Removing intentional product assets under `src/frontend/public/assets/videos/`
+- Behavior change allowed: YES (repo hygiene)
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `.gitignore`
+  - `docs/WORKLOG_TICKETS.md`
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] `.gitignore` ignores screenshot artifact folders (`docs/screenshots`, `src/frontend/screenshots`)
+- [x] Docs markdown remains committable (not globally ignored)
+- [x] `git ls-files -ci --exclude-standard` returns no tracked ignored files
+- [x] Ahead commits checked for screenshot/media additions
+
+Execution log:
+
+- [2026-02-20 11:05 IST] Checked local-ahead commit contents | Evidence:
+  - **Command**: `git log --oneline origin/main..HEAD` and per-commit file list
+  - **Interpretation**: `Observed` - Ahead commits (6) modify only `.gitignore`.
+- [2026-02-20 11:08 IST] Updated ignore coverage for screenshot artifacts | Evidence:
+  - **Command**: `git diff -- .gitignore`
+  - **Interpretation**: `Observed` - Added `docs/screenshots/`, `src/frontend/screenshots/`, and `docs/ux_audit/**/keyframe_*` image patterns.
+- [2026-02-20 11:09 IST] Validated ignore + tracked state | Evidence:
+  - **Command**: `git check-ignore -v ...` and `git ls-files -ci --exclude-standard`
+  - **Output**: `NO_TRACKED_IGNORED_FILES`
+  - **Interpretation**: `Observed` - Ignored artifact paths are excluded and no ignored files remain tracked.
+- [2026-02-20 11:10 IST] Validated staged/unstaged media paths | Evidence:
+  - **Command**: `git diff --cached --name-status | rg '(\\.(png|jpg|jpeg|webm|mp4|mov)$|screenshots/)'`
+  - **Interpretation**: `Observed` - only staged screenshot entries are deletions from `src/frontend/docs/screenshots/...`.
+
+Status updates:
+
+- [2026-02-20 11:12 IST] **DONE** — `.gitignore` and local index state validated for screenshot artifact hygiene while preserving docs commitability.

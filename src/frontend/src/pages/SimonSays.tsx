@@ -93,7 +93,7 @@ export function SimonSays() {
         setIsLoading(false);
       } catch (err) {
         console.error('Failed to initialize pose landmarker:', err);
-        setError('Failed to load pose detection. Please refresh the page.');
+        setError('Could not load pose detection. This might be a network issue. Try refreshing or check your internet connection.');
         setIsLoading(false);
       }
     }

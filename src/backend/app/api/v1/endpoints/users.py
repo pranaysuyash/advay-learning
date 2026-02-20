@@ -22,7 +22,7 @@ router = APIRouter()
 @router.get("/me", response_model=User)
 async def get_me(current_user: User = Depends(get_current_user)) -> User:
     """Get current user info."""
-    return current_user
+    return current_user  # type: ignore[return-value]
 
 
 @router.get("/{user_id}", response_model=User)
@@ -42,7 +42,7 @@ async def get_user(
         )
 
     # Only allow users to view themselves or superusers to view anyone
-    if current_user.id != user_id and not current_user.is_superuser:
+    if current_user.id != user_id and not getattr(current_user, "is_superuser", False):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
@@ -54,7 +54,7 @@ async def get_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    return user
+    return user  # type: ignore[return-value]
 
 
 @router.put("/me", response_model=User)
@@ -64,8 +64,8 @@ async def update_me(
     db: AsyncSession = Depends(get_db),
 ) -> User:
     """Update current user."""
-    user = await UserService.update(db, current_user, user_in)
-    return user
+    user = await UserService.update(db, current_user, user_in)  # type: ignore[arg-type]
+    return user  # type: ignore[return-value]
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
@@ -127,11 +127,12 @@ async def delete_my_account(
 # Profile endpoints (nested under users)
 @router.get("/me/profiles", response_model=List[Profile])
 async def get_my_profiles(
-    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> List[Profile]:
     """Get current user's profiles (children)."""
-    profiles: List[Profile] = await ProfileService.get_by_parent(db, current_user.id)
-    return profiles
+    profiles = await ProfileService.get_by_parent(db, current_user.id)
+    return profiles  # type: ignore[return-value]
 
 
 @router.post("/me/profiles", response_model=Profile)
@@ -142,7 +143,7 @@ async def create_profile(
 ) -> Profile:
     """Create a new profile (child) for current user."""
     profile = await ProfileService.create(db, current_user.id, profile_in)
-    return profile
+    return profile  # type: ignore[return-value]
 
 
 @router.get("/me/profiles/{profile_id}", response_model=Profile)
@@ -176,7 +177,7 @@ async def get_profile(
             detail="Not enough permissions",
         )
 
-    return profile
+    return profile  # type: ignore[return-value]
 
 
 @router.patch("/me/profiles/{profile_id}", response_model=Profile)
@@ -230,7 +231,7 @@ async def update_profile(
         user_agent=None,
     )
 
-    return updated
+    return updated  # type: ignore[return-value]
 
 
 @router.delete("/me/profiles/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -363,4 +364,4 @@ async def update_user_role(
         user_agent=None,
     )
 
-    return target_user
+    return target_user  # type: ignore[return-value]

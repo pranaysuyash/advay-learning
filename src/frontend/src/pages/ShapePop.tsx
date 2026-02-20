@@ -12,15 +12,32 @@ import {
   type HandTrackingRuntimeMeta,
 } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
-import {
-  isPointInCircle,
-  pickRandomPoint,
-} from '../games/targetPracticeLogic';
+import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const SHAPES = ['◯', '△', '□', '◇', '☆'] as const;
-const POP_RADIUS = 0.11;
+const POP_RADIUS = 0.16; // Increased from 0.11 for kids' easier targeting
+
+// Touch-friendly sizing constants for kids
+const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
+const TARGET_SIZE = 144; // Increased from 144 (w-36 = 9rem = 144px) for kids' fingers
+
+/**
+ * Kid-friendly haptic feedback utility
+ * Uses longer, softer vibrations appropriate for children
+ */
+function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
+
+  const patterns = {
+    success: [50, 30, 50], // Gentle double tap
+    error: [100, 50, 100], // Softer error buzz
+    celebration: [100, 50, 100, 50, 200], // Joyful burst
+  };
+
+  navigator.vibrate(patterns[type]);
+}
 
 function random01(): number {
   try {
@@ -44,7 +61,9 @@ export const ShapePop = memo(function ShapePopComponent() {
   );
   const [targetShape, setTargetShape] = useState<(typeof SHAPES)[number]>('◯');
   const [cursor, setCursor] = useState<Point | null>(null);
-  const [feedback, setFeedback] = useState('Pinch when your finger is inside the shape ring.');
+  const [feedback, setFeedback] = useState(
+    'Pinch when your finger is inside the shape ring.',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
 
   const scoreRef = useRef(score);
@@ -116,17 +135,20 @@ export const ShapePop = memo(function ShapePopComponent() {
         setScore(nextScore);
         setFeedback('Pop! Great hit.');
         void playPop();
+        triggerHaptic('success');
 
         if (nextScore > 0 && nextScore % 120 === 0) {
           setShowCelebration(true);
+          triggerHaptic('celebration');
           void playCelebration();
-          setTimeout(() => setShowCelebration(false), 1800);
+          setTimeout(() => setShowCelebration(false), 3000); // Slower pacing for kids
         }
 
         spawnTarget();
       } else {
         setFeedback('Close! Move into the ring, then pinch.');
         void playError();
+        triggerHaptic('error');
       }
     },
     [cursor, playCelebration, playError, playPop, spawnTarget, targetCenter],
@@ -213,8 +235,13 @@ export const ShapePop = memo(function ShapePopComponent() {
         </div>
 
         <div
-          className='absolute w-36 h-36 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
-          style={{ left: `${targetCenter.x * 100}%`, top: `${targetCenter.y * 100}%` }}
+          className='absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+          style={{
+            left: `${targetCenter.x * 100}%`,
+            top: `${targetCenter.y * 100}%`,
+            width: `${TARGET_SIZE}px`,
+            height: `${TARGET_SIZE}px`,
+          }}
           aria-hidden='true'
         >
           <div className='absolute inset-0 rounded-full border-4 border-fuchsia-300/90 shadow-[0_0_30px_rgba(217,70,239,0.55)]' />
@@ -225,8 +252,13 @@ export const ShapePop = memo(function ShapePopComponent() {
 
         {cursor && (
           <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
+            className='absolute rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
+            style={{
+              left: `${cursor.x * 100}%`,
+              top: `${cursor.y * 100}%`,
+              width: `${CURSOR_SIZE}px`,
+              height: `${CURSOR_SIZE}px`,
+            }}
             aria-hidden='true'
           />
         )}

@@ -3,12 +3,12 @@ import os
 from typing import AsyncGenerator, Generator
 
 import pytest
-from sqlalchemy.pool import NullPool
 
 # Load test environment before any app imports
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env.test"))
 
@@ -130,10 +130,11 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
 @pytest.fixture
 async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     """Create an admin user and return authentication token."""
+    from uuid import uuid4
+
     from app.core.security import get_password_hash
     from app.db.models.user import User
-    from uuid import uuid4
-    
+
     # Create admin user directly in database
     user = User(
         id=str(uuid4()),
@@ -146,19 +147,19 @@ async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     # Login to get token
     response = await client.post(
         "/api/v1/auth/login",
         data={"username": "admin@test.com", "password": "Admin123!"},
     )
     assert response.status_code == 200
-    
+
     cookies = response.cookies
     access_token = cookies.get("access_token")
     if not access_token:
         access_token = response.json().get("access_token")
-    
+
     return access_token
 
 

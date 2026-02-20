@@ -72,7 +72,7 @@ class CacheService:
 cache_service = CacheService()
 
 
-def cache_key(prefix: str, *args, **kwargs) -> str:
+def cache_key(prefix: str, *args: object, **kwargs: object) -> str:
     """Generate cache key from prefix and arguments."""
     parts = [prefix]
     parts.extend(str(arg) for arg in args)

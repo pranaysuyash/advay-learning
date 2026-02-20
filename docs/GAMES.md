@@ -1,6 +1,6 @@
 # Advay Vision Learning — Games Catalog
 
-> **14 interactive learning games** for children ages 3–8, powered by MediaPipe hand/pose tracking, React + TypeScript + Vite.
+> **16 interactive learning games** for children ages 3–8, powered by MediaPipe hand/pose tracking, React + TypeScript + Vite.
 
 ---
 
@@ -21,7 +21,9 @@
 | 11 | [Yoga Animals](#11-yoga-animals) | `/games/yoga-animals` | Movement | Pose tracking | 6 animals | — | ✅ Complete |
 | 12 | [Freeze Dance](#12-freeze-dance) | `/games/freeze-dance` | Movement | Pose + Hand tracking | 3 phases | — | ✅ Complete |
 | 13 | [Simon Says](#13-simon-says) | `/games/simon-says` | Movement | Pose tracking | — | — | ✅ Complete |
-| 14 | [Virtual Chemistry Lab](#14-virtual-chemistry-lab) | *(not routed)* | Science | Hand tracking (pinch) | 5 reactions | — | ⚠️ Not routed |
+| 14 | [Virtual Chemistry Lab](#14-virtual-chemistry-lab) | `/games/chemistry-lab` | Science | Hand tracking (pinch) | 5 reactions | — | ✅ Complete |
+| 15 | [Word Builder](#15-word-builder) | `/games/word-builder` | Literacy / Phonics | Hand tracking (pinch) | 3 levels | 90s | ✅ Complete |
+| 16 | [Emoji Emotion Match](#16-emoji-emotion-match) | `/games/emoji-match` | Social-Emotional | Hand tracking (pinch) | 3 levels | 20s/round | ✅ Complete |
 
 ---
 
@@ -56,7 +58,9 @@ Reusable pure-function modules extracted from game pages:
 | `musicPinchLogic` | `src/frontend/src/games/musicPinchLogic.ts` | `getLaneFromNormalizedX`, `pickNextLane` | Music Pinch Beat |
 | `steadyHandLogic` | `src/frontend/src/games/steadyHandLogic.ts` | `updateHoldProgress` (linear progress + decay), `pickTargetPoint` | Steady Hand Lab |
 | `targetPracticeLogic` | `src/frontend/src/games/targetPracticeLogic.ts` | `isPointInCircle`, `pickRandomPoint`, `pickSpacedPoints` (collision-aware) | Shape Pop, Color Match Garden, Number Tap Trail |
-| `hitTarget` | `src/frontend/src/games/hitTarget.ts` | `findHitTarget` — generic circular hit detection | Number Tap Trail, Shape Sequence |
+| `hitTarget` | `src/frontend/src/games/hitTarget.ts` | `findHitTarget` — generic circular hit detection | Number Tap Trail, Shape Sequence, Word Builder |
+| `wordBuilderLogic` | `src/frontend/src/games/wordBuilderLogic.ts` | `pickWordForLevel`, `createLetterTargets`, `WORD_LISTS` | Word Builder |
+| `emojiMatchLogic` | `src/frontend/src/games/emojiMatchLogic.ts` | `buildRound`, `EMOTIONS` | Emoji Emotion Match |
 
 ### Test Coverage
 
@@ -67,6 +71,8 @@ Reusable pure-function modules extracted from game pages:
 | `src/frontend/src/games/__tests__/steadyHandLogic.test.ts` | Hold progress/decay |
 | `src/frontend/src/games/__tests__/targetPracticeLogic.test.ts` | Hit detection, point placement |
 | `src/frontend/src/games/__tests__/hitTarget.test.ts` | Generic hit target detection |
+| `src/frontend/src/games/__tests__/wordBuilderLogic.test.ts` | Word selection and letter target generation |
+| `src/frontend/src/games/__tests__/emojiMatchLogic.test.ts` | Emotion round building logic |
 | `src/frontend/src/pages/__tests__/ConnectTheDots.test.tsx` | Connect The Dots page |
 | `src/frontend/src/pages/__tests__/Game.smoke.test.tsx` | General game smoke tests |
 | `src/frontend/src/pages/__tests__/Game.pending.test.tsx` | Pending test cases |
@@ -599,11 +605,11 @@ Reusable pure-function modules extracted from game pages:
 
 | | |
 |---|---|
-| **Route** | *(Not routed — no entry in `App.tsx`)* |
+| **Route** | `/games/chemistry-lab` |
 | **Age Range** | 5–8 |
 | **Category** | Science / Exploration |
 | **Difficulty** | Open-ended |
-| **Status** | ⚠️ Not routed (component exists) |
+| **Status** | ✅ Complete (routed) |
 | **Source** | `src/frontend/src/pages/VirtualChemistryLab.tsx` |
 
 **Learning Objectives:**
@@ -633,7 +639,95 @@ Reusable pure-function modules extracted from game pages:
 
 **Test Coverage:** No dedicated tests
 
-**Note:** This game exists as a complete component but is not yet wired into the router in `App.tsx`. To enable it, add a route entry like the other games.
+---
+
+### 15. Word Builder
+
+| | |
+|---|---|
+| **Route** | `/games/word-builder` |
+| **Age Range** | 3–7 |
+| **Category** | Literacy / Phonics |
+| **Difficulty** | 3 levels |
+| **Status** | ✅ Complete (routed) |
+| **Source** | `src/frontend/src/pages/WordBuilder.tsx` |
+
+**Learning Objectives:**
+
+- Letter recognition and identification
+- Word spelling and phonics
+- Sequential ordering of letters
+- Vocabulary building (3–5 letter words)
+
+**Input Method:**
+
+- ✋ Hand tracking — pinch letters in correct order
+
+**Game Mechanics:**
+
+- A target word is displayed (e.g., "CAT"); child pinches letters in order: C → A → T
+- 3 levels with progressive word difficulty:
+  - Level 1: 3-letter words (CAT, DOG, SUN, etc.)
+  - Level 2: 4-letter words (FISH, BIRD, STAR, etc.)
+  - Level 3: 5-letter words (APPLE, HOUSE, TIGER, etc.)
+- Distractor letters added to increase challenge
+- 90-second timer
+- 15 points per correct letter + time bonus on word completion
+- Visual progress bar showing spelled letters
+- Uses `hitTarget.ts` for hit detection and `wordBuilderLogic.ts` for word selection and letter placement
+
+**Key Dependencies:**
+
+- `useHandTracking`, `useHandTrackingRuntime`
+- `wordBuilderLogic.ts` → `pickWordForLevel`, `createLetterTargets`
+- `hitTarget.ts` → `findHitTarget`
+- `CelebrationOverlay`
+
+**Test Coverage:** `wordBuilderLogic.test.ts`, `hitTarget.test.ts`
+
+---
+
+### 16. Emoji Emotion Match
+
+| | |
+|---|---|
+| **Route** | `/games/emoji-match` |
+| **Age Range** | 3–7 |
+| **Category** | Social-Emotional Learning |
+| **Difficulty** | 3 levels |
+| **Status** | ✅ Complete (routed) |
+| **Source** | `src/frontend/src/pages/EmojiMatch.tsx` |
+
+**Learning Objectives:**
+
+- Emotion recognition and naming
+- Social-emotional vocabulary building
+- Visual discrimination between facial expressions
+- Empathy development
+
+**Input Method:**
+
+- ✋ Hand tracking — pinch the correct emoji face
+
+**Game Mechanics:**
+
+- 4 emoji faces displayed on screen (😊 😢 😠 😲 😨 🤪 😴 🥰)
+- App prompts an emotion name (e.g., "Find: Happy"); child pinches the matching emoji
+- 10 rounds per session
+- 20 seconds per round (timer resets each round)
+- Streak scoring: 10 + min(15, streak × 3) per correct answer
+- Celebration every 5 correct streaks
+- 8 emotions: Happy, Sad, Angry, Surprised, Scared, Silly, Sleepy, Love
+- Uses `emojiMatchLogic.ts` for round generation and `isPointInCircle` for hit detection
+
+**Key Dependencies:**
+
+- `useHandTracking`, `useHandTrackingRuntime`
+- `emojiMatchLogic.ts` → `buildRound`, `EMOTIONS`
+- `targetPracticeLogic.ts` → `isPointInCircle`
+- `CelebrationOverlay`
+
+**Test Coverage:** `emojiMatchLogic.test.ts`
 
 ---
 
@@ -641,7 +735,7 @@ Reusable pure-function modules extracted from game pages:
 
 | Category | Games |
 |----------|-------|
-| **Literacy** | Alphabet Tracing, Letter Hunt |
+| **Literacy** | Alphabet Tracing, Letter Hunt, Word Builder |
 | **Numeracy** | Finger Number Show, Connect The Dots, Number Tap Trail |
 | **Shapes** | Shape Pop, Shape Sequence |
 | **Colors** | Color Match Garden |
@@ -649,6 +743,7 @@ Reusable pure-function modules extracted from game pages:
 | **Memory** | Shape Sequence |
 | **Rhythm / Music** | Music Pinch Beat |
 | **Movement / Body** | Yoga Animals, Freeze Dance, Simon Says |
+| **Social-Emotional** | Emoji Emotion Match |
 | **Science** | Virtual Chemistry Lab |
 
 ## Input Method Summary
@@ -663,4 +758,4 @@ Reusable pure-function modules extracted from game pages:
 
 ---
 
-*Last updated: 2026-02-18*
+*Last updated: 2026-02-20*
