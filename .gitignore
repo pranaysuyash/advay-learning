@@ -133,6 +133,7 @@ audit-screenshots/
 docs/audit/screenshots/
 
 evaluations/emoji_match_frames/
+docs/Visual_Test_Screenshot_Summary.md
 
 # Development and analysis tools
 analyze-games.cjs
