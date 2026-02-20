@@ -134,6 +134,37 @@ docs/audit/screenshots/
 
 evaluations/emoji_match_frames/
 
+# Development and analysis tools
+analyze-games.cjs
+analyze-site.cjs
+capture-auth-games.cjs
+capture-games.cjs
+capture-screenshots.cjs
+debug-alphabet.cjs
+debug_alphabet_tracing.spec.ts
+debug_guest.spec.ts
+deep_debug_alphabet.spec.ts
+
+# Documentation reports
+docs/ALPHABET_TRACING_INVESTIGATION.md
+docs/DEPLOYMENT_AND_GTM.md
+docs/GAMES_VISUAL_AUDIT_REPORT.md
+docs/GAME_VISUAL_TESTING_REPORT.md
+docs/MONITORING.md
+docs/VISUAL_TESTING_REPORT.md
+docs/Visual_Test_Report_2026-02-19.md
+docs/Visual_Test_Report_2026-02-20.md
+docs/Visual_Test_Screenshot_Summary.md
+docs/plans/NEXT_3_GAMES_PLAN.md
+
+# Temporary analysis files
+emoji_match_analysis_report.md
+ematomatch_allonline.md
+scripts/backup-db.sh
+
+# Tools directory
+tools/
+
 # CI/CD artifacts
 coverage.xml
 junit.xml
