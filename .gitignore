@@ -151,9 +151,6 @@ emoji_match_analysis_report.md
 ematomatch_allonline.md
 scripts/backup-db.sh
 
-# Tools directory
-tools/
-
 # CI/CD artifacts
 coverage.xml
 junit.xml
