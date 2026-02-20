@@ -118,6 +118,8 @@ videos/
 audit-screenshots/
 docs/audit/screenshots/
 
+evaluations/emoji_match_frames/
+
 # CI/CD artifacts
 coverage.xml
 junit.xml
