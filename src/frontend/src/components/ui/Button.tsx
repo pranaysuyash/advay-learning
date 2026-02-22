@@ -1,5 +1,4 @@
 import { ReactNode, ButtonHTMLAttributes, forwardRef } from 'react';
-import { motion } from 'framer-motion';
 import { UIIcon, IconName } from './Icon';
 import { Link, type LinkProps } from 'react-router-dom';
 
@@ -28,25 +27,25 @@ function getButtonClassName({
   className?: string;
 }) {
   const baseStyles =
-    'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-black rounded-2xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border-4 active:translate-y-[6px] active:shadow-none';
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      'bg-pip-orange text-white shadow-soft hover:bg-pip-rust hover:shadow-soft-lg active:bg-pip-rust focus:ring-pip-orange',
+      'bg-[#E85D04] text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-[#ff6c14]',
     secondary:
-      'bg-white text-advay-slate border border-border shadow-soft hover:bg-bg-tertiary hover:shadow-soft-lg active:bg-bg-tertiary focus:ring-vision-blue',
+      'bg-white text-slate-800 border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-slate-50',
     danger:
-      'bg-error text-white shadow-soft hover:bg-red-700 hover:shadow-soft-lg active:bg-red-700 focus:ring-red-500',
+      'bg-red-500 text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-red-600',
     success:
-      'bg-success text-white shadow-soft hover:bg-success-hover hover:shadow-soft-lg active:bg-success-hover focus:ring-success',
+      'bg-green-500 text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-green-600',
     ghost:
-      'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-tertiary focus:ring-vision-blue',
+      'bg-transparent text-slate-600 border-transparent active:translate-y-0 active:shadow-none hover:bg-slate-100 hover:text-slate-900',
   };
 
   const sizes: Record<ButtonSize, string> = {
-    sm: 'px-4 py-3 text-sm gap-1.5 min-h-[44px]', // WCAG: 44x44px minimum touch target (adult)
-    md: 'px-5 py-4 text-sm gap-2 min-h-[52px]', // Larger for kids (52px)
-    lg: 'px-6 py-4 text-base gap-2 min-h-[60px]', // Kid-friendly large (60px)
+    sm: 'px-4 py-3 text-sm gap-2',
+    md: 'px-6 py-4 text-lg gap-2',
+    lg: 'px-8 py-5 text-xl gap-3',
   };
 
   return `
@@ -75,74 +74,59 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const iconSizes = {
-      sm: 16,
-      md: 18,
-      lg: 20,
+      sm: 18,
+      md: 22,
+      lg: 26,
     };
 
-    // Exclude any remaining custom props from DOM
+    // Exclude custom props that shouldn't hit DOM
     const domProps = Object.fromEntries(
       Object.entries(props).filter(([key]) => !key.startsWith('full'))
     );
 
     return (
-      <motion.button
+      <button
         ref={ref}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
         className={getButtonClassName({ variant, size, fullWidth, className })}
         disabled={disabled || isLoading}
         {...domProps}
       >
         {isLoading ? (
           <>
-            <UIIcon
-              name='hourglass'
-              size={iconSizes[size]}
-              className='animate-pulse'
-            />
-            {children}
+            <span className="opacity-0">{children}</span>
           </>
         ) : (
           <>
-            {icon && iconPosition === 'left' && (
-              <UIIcon name={icon} size={iconSizes[size]} />
-            )}
+            {icon && iconPosition === 'left' && <UIIcon name={icon} size={iconSizes[size]} />}
             {children}
-            {icon && iconPosition === 'right' && (
-              <UIIcon name={icon} size={iconSizes[size]} />
-            )}
+            {icon && iconPosition === 'right' && <UIIcon name={icon} size={iconSizes[size]} />}
           </>
         )}
-      </motion.button>
+      </button>
     );
   },
 );
 
 Button.displayName = 'Button';
 
-// Convenience exports for common button patterns
+// Convenience exports
 export function PrimaryButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button variant='primary' {...props} />;
 }
-
 export function SecondaryButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button variant='secondary' {...props} />;
 }
-
 export function DangerButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button variant='danger' {...props} />;
 }
-
 export function SuccessButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button variant='success' {...props} />;
 }
-
 export function GhostButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button variant='ghost' {...props} />;
 }
 
-export interface ButtonLinkProps
-  extends Omit<LinkProps, 'className' | 'to'> {
+export interface ButtonLinkProps extends Omit<LinkProps, 'className' | 'to'> {
   to: LinkProps['to'];
   variant?: ButtonProps['variant'];
   size?: ButtonProps['size'];
@@ -165,9 +149,9 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   const iconSizes = {
-    sm: 16,
-    md: 18,
-    lg: 20,
+    sm: 18,
+    md: 22,
+    lg: 26,
   };
 
   return (
@@ -176,13 +160,9 @@ export function ButtonLink({
       className={getButtonClassName({ variant, size, fullWidth, className })}
       {...props}
     >
-      {icon && iconPosition === 'left' && (
-        <UIIcon name={icon} size={iconSizes[size]} />
-      )}
+      {icon && iconPosition === 'left' && <UIIcon name={icon} size={iconSizes[size]} />}
       {children}
-      {icon && iconPosition === 'right' && (
-        <UIIcon name={icon} size={iconSizes[size]} />
-      )}
+      {icon && iconPosition === 'right' && <UIIcon name={icon} size={iconSizes[size]} />}
     </Link>
   );
 }

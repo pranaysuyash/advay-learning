@@ -57,8 +57,8 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
     ) => {
         const containerBase =
             variant === 'hero'
-                ? 'relative bg-black overflow-hidden w-full h-full'
-                : 'relative bg-black rounded-2xl overflow-hidden aspect-video shadow-soft-lg border border-border';
+                ? 'relative bg-[#FFF8F0] overflow-hidden w-full h-full'
+                : 'relative bg-[#FFF8F0] rounded-[2.5rem] overflow-hidden aspect-video shadow-sm border-4 border-slate-100';
         const canvasBase =
             variant === 'hero'
                 ? 'absolute inset-0 w-full h-full touch-none cursor-crosshair z-30'
@@ -91,17 +91,17 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
                     }}
                 />
 
-                {/* Spotlight Vignette - Darkens edges, keeps center bright */}
+                {/* Spotlight Vignette - Brightens edges, keeps center focused */}
                 <div
                     className="absolute inset-0 pointer-events-none z-20"
                     style={{
                         background:
-                            'radial-gradient(circle at center, transparent 25%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.75) 100%)',
+                            'radial-gradient(circle at center, transparent 25%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0.8) 100%)',
                     }}
                 />
 
                 {/* Gradient Scrim at bottom for text readability */}
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/70 to-transparent pointer-events-none z-20" />
+                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/80 to-transparent pointer-events-none z-20" />
 
                 {/* Canvas Layer - For drawing (above vignette for visibility) */}
                 <canvas

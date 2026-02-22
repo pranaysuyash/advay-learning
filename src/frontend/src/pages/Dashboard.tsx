@@ -1,383 +1,128 @@
-import { useEffect, useState, useMemo, memo } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+
+import { useNavigate, Link } from 'react-router-dom';
 import {
   useAuthStore,
   useProfileStore,
-  useSettingsStore,
   useProgressStore,
-  type Profile,
+  useSettingsStore,
 } from '../store';
-import { getAlphabet } from '../data/alphabets';
-import { LetterJourney } from '../components/LetterJourney';
-import { UIIcon } from '../components/ui';
+import { Mascot } from '../components/Mascot';
+import { UIIcon } from '../components/ui/Icon';
+import { GameCard } from '../components/GameCard';
+import { DemoInterface } from '../components/demo/DemoInterface';
+import { hasBasicCameraSupport } from '../utils/featureDetection';
 import { useToast } from '../components/ui/useToast';
 import { AdventureMap } from '../components/Map';
-import { StoryModal } from '../components/StoryModal';
-import { useStoryStore } from '../store/storyStore';
-import { QUESTS, getQuestsByIsland, isIslandUnlocked } from '../data/quests';
-import {
-  EmptyState,
-  TipsSection,
-  StatsBar,
-  AddChildModal,
-  EditProfileModal,
-} from '../components/dashboard';
-import { DemoInterface } from '../components/demo/DemoInterface';
-import { CollapsibleSection } from '../components/ui/CollapsibleSection';
-import { hasBasicCameraSupport } from '../utils/featureDetection';
+import type { IconName } from '../components/ui/Icon';
 
-interface LanguageProgress {
-  language: string;
-  lettersLearned: number;
-  totalLetters: number;
-  averageAccuracy: number;
-  totalTime: number;
-}
+// Minimal recommended games for the dashboard
+const RECOMMENDED_GAMES = [
+  {
+    id: 'alphabet-tracing',
+    title: 'Draw Letters',
+    description: 'Draw letters with your finger and see them come alive! 🎉',
+    path: '/games/alphabet-tracing',
+    icon: 'letters' as IconName,
+    ageRange: '2-8 years',
+    category: 'Alphabets',
+    difficulty: 'Easy',
+  },
+  {
+    id: 'finger-number-show',
+    title: 'Finger Counting',
+    description: 'Show numbers with your fingers and Pip will count them! 🔢',
+    path: '/games/finger-number-show',
+    icon: 'hand' as IconName,
+    ageRange: '3-7 years',
+    category: 'Numbers',
+    difficulty: 'Easy',
+  },
+  {
+    id: 'music-pinch-beat',
+    title: 'Music Pinch Beat',
+    description: 'Pinch on glowing lanes to play rhythm beats! 🎵',
+    path: '/games/music-pinch-beat',
+    icon: 'sparkles' as IconName,
+    ageRange: '3-7 years',
+    category: 'Music',
+    difficulty: 'Easy',
+    isNew: true,
+  },
+  {
+    id: 'connect-the-dots',
+    title: 'Connect Dots',
+    description: 'Connect the dots to make fun pictures! 🎨',
+    path: '/games/connect-the-dots',
+    icon: 'target' as IconName,
+    ageRange: '3-6 years',
+    category: 'Drawing',
+    difficulty: 'Easy',
+  }
+];
 
-interface ChildProfile {
-  id: string;
-  name: string;
-  age: number;
-  preferredLanguage: string;
-  progress: {
-    lettersLearned: number;
-    totalLetters: number;
-    averageAccuracy: number;
-    totalTime: number;
-  };
-  languageProgress: LanguageProgress[];
-}
+export function Dashboard() {
+  const navigate = useNavigate();
+  const { isGuest, guestSession } = useAuthStore();
+  const { profiles, currentProfile, setCurrentProfile, fetchProfiles } = useProfileStore();
+  const { letterProgress } = useProgressStore();
+  const { demoMode, setDemoMode } = useSettingsStore();
+  const { showToast } = useToast();
 
-interface LanguageProgress {
-  language: string;
-  lettersLearned: number;
-  totalLetters: number;
-  averageAccuracy: number;
-  totalTime: number;
-}
-
-export const Dashboard = memo(function DashboardComponent() {
-  useAuthStore();
-  const {
-    profiles,
-    fetchProfiles,
-    createProfile,
-    updateProfile,
-    setCurrentProfile,
-  } = useProfileStore();
-  const { isGuest } = useAuthStore();
-  const toast = useToast();
-  const { setDemoMode, demoMode } = useSettingsStore();
-  const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
-  // Add Child Modal state
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newChildName, setNewChildName] = useState('');
-  const [newChildAge, setNewChildAge] = useState(5);
-  const [newChildLanguage, setNewChildLanguage] = useState('en');
-
-  // Edit Profile Modal state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editLanguage, setEditLanguage] = useState('en');
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  // Story/Map prototype state
-  const {
-    startQuest,
-    completeQuest,
-    totalXp,
-    badges,
-    completedQuests,
-    unlockedIslands,
-  } = useStoryStore();
-  const [showStoryModal, setShowStoryModal] = useState(false);
-  const navigate = useNavigate();
-
-  const questSummary = useMemo(() => {
-    const completedIds = new Set(completedQuests.map((q) => q.questId));
-    const totalQuests = QUESTS.length;
-    const completedCount = completedIds.size;
-    const unlockedCount = unlockedIslands.length;
-    const currentIslandId =
-      unlockedIslands[unlockedIslands.length - 1] ?? 'alphabet-lighthouse';
-    const currentIslandQuests = getQuestsByIsland(currentIslandId);
-    const nextUnlockableIslandId = [
-      'number-nook',
-      'treasure-bay',
-      'star-studio',
-    ].find(
-      (id) =>
-        isIslandUnlocked(id, unlockedIslands) && !unlockedIslands.includes(id),
-    );
-    return {
-      completedCount,
-      totalQuests,
-      unlockedCount,
-      currentIslandQuestCount: currentIslandQuests.length,
-      nextUnlockableIslandId,
-    };
-  }, [completedQuests, unlockedIslands]);
-
-  // Helper function to get star rating from percentage
-  const getStarRating = (
-    accuracy: number,
-  ): { stars: number; emoji: string } => {
-    if (accuracy >= 90) return { stars: 3, emoji: '⭐⭐⭐' };
-    if (accuracy >= 70) return { stars: 2, emoji: '⭐⭐' };
-    if (accuracy >= 40) return { stars: 1, emoji: '⭐' };
-    return { stars: 0, emoji: '☆' };
-  };
-
-  const getAccuracyProgressClass = (accuracy: number): string => {
-    if (accuracy >= 70) return 'progress-accent-success';
-    if (accuracy >= 40) return 'progress-accent-warning';
-    return 'progress-accent-error';
-  };
-
-  // Helper function to format time kid-friendly
-  const formatTimeKidFriendly = (minutes: number): string => {
-    if (minutes < 60) return `${Math.floor(minutes)} minutes`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
-    return `about ${Math.floor(minutes / 60)} hours`;
-  };
-  const [isCreating, setIsCreating] = useState(false);
-
   useEffect(() => {
-    // Skip API calls for guest users - they don't have backend auth
-    if (isGuest) return;
-    fetchProfiles();
+    if (!isGuest) {
+      fetchProfiles();
+    }
   }, [fetchProfiles, isGuest]);
 
-  const handleCreateProfile = async () => {
-    if (!newChildName.trim()) return;
-
-    setIsCreating(true);
-    try {
-      await createProfile({
-        name: newChildName.trim(),
-        age: newChildAge,
-        preferred_language: newChildLanguage,
-      });
-      // Reset form and close modal
-      setNewChildName('');
-      setNewChildAge(5);
-      setNewChildLanguage('en');
-      setShowAddModal(false);
-      // Refresh profiles
-      await fetchProfiles();
-    } catch (error) {
-      console.error('Failed to create profile:', error);
-    } finally {
-      setIsCreating(false);
+  // Handle guest data vs real profile data
+  const defaultProfile = useMemo(() => {
+    if (isGuest && guestSession) {
+      return {
+        id: guestSession.childProfile.id,
+        name: guestSession.childProfile.name,
+        age: guestSession.childProfile.age,
+        preferred_language: guestSession.childProfile.preferredLanguage,
+        created_at: new Date(guestSession.createdAt).toISOString(),
+      };
     }
-  };
+    return currentProfile || profiles[0];
+  }, [isGuest, guestSession, currentProfile, profiles]);
 
-  // Handle opening the edit modal
-  // const handleOpenEditModal = (child: ChildProfile) => {
-  //   // Find the actual Profile from profiles array
-  //   const profile = profiles.find((p) => p.id === child.id);
-  //   if (!profile) return;
-  //   setEditingProfile(profile);
-  //   setEditName(profile.name);
-  //   setEditLanguage(profile.preferred_language || 'en');
-  //   setShowEditModal(true);
-  // };
-
-  // Handle updating profile
-  const handleUpdateProfile = async () => {
-    if (!editingProfile || !editName.trim()) return;
-
-    setIsUpdating(true);
-    try {
-      await updateProfile(editingProfile.id, {
-        name: editName.trim(),
-        preferred_language: editLanguage,
-      });
-      toast.showToast(`Updated ${editName}'s profile!`, 'success');
-      setShowEditModal(false);
-      setEditingProfile(null);
-      setEditName('');
-      setEditLanguage('en');
-      // Refresh profiles to ensure consistency
-      await fetchProfiles();
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      toast.showToast('Failed to update profile. Please try again.', 'error');
-    } finally {
-      setIsUpdating(false);
+  // Set initial profile
+  useEffect(() => {
+    if (defaultProfile && !currentProfile && !isGuest) {
+      setCurrentProfile(defaultProfile);
     }
-  };
+  }, [defaultProfile, currentProfile, setCurrentProfile, isGuest]);
 
-  // Get real progress data
-  const { letterProgress, getMasteredLettersCount } = useProgressStore();
+  // Calculate total XP/Stars
+  const totalStars = useMemo(() => {
+    if (isGuest && guestSession) {
+      return guestSession.progress.lettersLearned * 10;
+    }
 
-  // Transform profiles to include REAL progress data
-  const children: ChildProfile[] = profiles.map((profile) => {
-    // Map 2-letter codes to full names for alphabet lookup
-    const langCode = profile.preferred_language || 'en';
-    const lang =
-      langCode === 'hi'
-        ? 'hindi'
-        : langCode === 'kn'
-          ? 'kannada'
-          : langCode === 'te'
-            ? 'telugu'
-            : langCode === 'ta'
-              ? 'tamil'
-              : 'english';
-    const alphabet = getAlphabet(langCode);
-    const langProgress = letterProgress[lang] || [];
+    let baseStars = profiles ? profiles.length * 50 : 0;
 
-    // Calculate real stats for the primary language
-    const masteredCount = getMasteredLettersCount(lang);
-    const totalLetters = alphabet.letters.length;
+    if (letterProgress) {
+      baseStars += Object.values(letterProgress).reduce((acc, itemArr) =>
+        acc + itemArr.reduce((sum, item) => sum + (item.bestAccuracy > 0 ? 10 : 0), 0)
+        , 0);
+    }
 
-    // Calculate average accuracy from attempts
-    const attemptsWithAccuracy = langProgress.filter((p) => p.attempts > 0);
-    const averageAccuracy =
-      attemptsWithAccuracy.length > 0
-        ? Math.round(
-            attemptsWithAccuracy.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-              attemptsWithAccuracy.length,
-          )
-        : 0;
-
-    // Estimate time spent (5 minutes per attempt as rough estimate)
-    const totalAttempts = langProgress.reduce((sum, p) => sum + p.attempts, 0);
-    const estimatedTimeMinutes = totalAttempts * 2; // ~2 minutes per tracing session
-
-    // Calculate progress for all languages
-    const allLanguages = ['english', 'hindi', 'kannada', 'telugu', 'tamil'];
-    const languageProgress: LanguageProgress[] = allLanguages
-      .map((language) => {
-        const langAlphabet = getAlphabet(language);
-        const langProg = letterProgress[language] || [];
-
-        const mastered = getMasteredLettersCount(language);
-        const total = langAlphabet.letters.length;
-
-        const attempts = langProg.filter((p) => p.attempts > 0);
-        const avgAcc =
-          attempts.length > 0
-            ? Math.round(
-                attempts.reduce((sum, p) => sum + p.bestAccuracy, 0) /
-                  attempts.length,
-              )
-            : 0;
-
-        const totalTime = langProg.reduce((sum, p) => sum + p.attempts, 0) * 2;
-
-        return {
-          language,
-          lettersLearned: mastered,
-          totalLetters: total,
-          averageAccuracy: avgAcc,
-          totalTime,
-        };
-      })
-      .filter((lp) => lp.lettersLearned > 0); // Only show languages with progress
-
-    return {
-      id: profile.id,
-      name: profile.name,
-      age: profile.age || 5,
-      preferredLanguage: lang,
-      progress: {
-        lettersLearned: masteredCount,
-        totalLetters: totalLetters,
-        averageAccuracy: averageAccuracy,
-        totalTime: estimatedTimeMinutes,
-      },
-      languageProgress,
-    };
-  });
-
-  const selectedChildData =
-    children.find((c) => c.id === selectedChild) || children[0];
-
-  // TODO: Replace with unified tracking from ANALYTICS_TRACKING_AUDIT.md
-  // Currently only tracking Alphabet Tracing - need to add:
-  // - FingerNumberShow metrics
-  // - ConnectTheDots metrics
-  // - LetterHunt metrics
-  // - Overall literacy/numeracy/motor scores
-  const stats = useMemo(
-    () =>
-      selectedChildData
-        ? [
-            {
-              label: 'Letters', // Kid-friendly: "Letters" instead of "Literacy"
-              // Child-centered: Show encouraging message for zero-state instead of "0 of 26"
-              value:
-                selectedChildData.progress.lettersLearned === 0
-                  ? 'Ready to start! 🎉'
-                  : `${selectedChildData.progress.lettersLearned} of ${selectedChildData.progress.totalLetters} learned`,
-              iconName: 'letters' as const,
-              percent:
-                (selectedChildData.progress.lettersLearned /
-                  selectedChildData.progress.totalLetters) *
-                100,
-            },
-            {
-              label: 'Stars Earned',
-              // Child-centered: Show encouraging message for new users
-              value:
-                selectedChildData.progress.lettersLearned === 0
-                  ? 'Ready to earn! ⭐'
-                  : getStarRating(selectedChildData.progress.averageAccuracy)
-                      .emoji,
-              iconName: 'target' as const,
-              percent: selectedChildData.progress.averageAccuracy,
-            },
-            {
-              label: 'Time Played',
-              // Child-centered: Positive framing for zero-state
-              value:
-                selectedChildData.progress.totalTime === 0
-                  ? "Let's begin! 🚀"
-                  : selectedChildData.progress.totalTime < 60
-                    ? `${Math.floor(selectedChildData.progress.totalTime)} minutes of fun!`
-                    : `${Math.floor(selectedChildData.progress.totalTime / 60)} hours of fun!`,
-              iconName: 'timer' as const,
-              percent: Math.min(
-                (selectedChildData.progress.totalTime / 300) * 100,
-                100,
-              ),
-            },
-            // TODO: Add when FingerNumberShow tracking is implemented:
-            // {
-            //   label: 'Numeracy',
-            //   value: `${numbersMastered}/${totalNumbers}`,
-            //   iconName: 'hand' as const,
-            //   percent: (numbersMastered / totalNumbers) * 100,
-            // },
-          ]
-        : [],
-    [children, selectedChild, getStarRating, formatTimeKidFriendly],
-  );
+    return baseStars;
+  }, [letterProgress, isGuest, guestSession, profiles]);
 
   const handleExport = async () => {
     setExporting(true);
-
-    // Prepare export data
     const exportData = {
       exportDate: new Date().toISOString(),
-      children: children.map((child) => ({
-        name: child.name,
-        age: child.age,
-        language: child.preferredLanguage,
-        progress: child.progress,
-      })),
+      profiles: profiles,
+      progress: letterProgress,
     };
-
-    // Create and download file
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
-    });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -386,459 +131,127 @@ export const Dashboard = memo(function DashboardComponent() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
     setExporting(false);
   };
 
   return (
-    <section className='max-w-7xl mx-auto px-4 py-8'>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {/* Demo Interface - Show when in demo mode without camera support */}
-        {demoMode && !hasBasicCameraSupport() && (
-          <DemoInterface
-            onComplete={() => {
-              toast.showToast(
-                'Demo completed! Ready to try with camera?',
-                'success',
-              );
-            }}
-            onExit={() => {
-              setDemoMode(false);
-              navigate('/');
-            }}
-          />
-        )}
+    <div className='min-h-screen bg-[#FFF8F0] font-nunito pb-24'>
+      {/* Demo Interface */}
+      {demoMode && !hasBasicCameraSupport() && (
+        <DemoInterface
+          onComplete={() => showToast('Demo completed! Ready to try with camera?', 'success')}
+          onExit={() => { setDemoMode(false); navigate('/'); }}
+        />
+      )}
 
-        {/* Header - Clean, single title */}
-        <header className='mb-6 flex justify-between items-center'>
-          <h1 className='text-4xl font-bold'>Dashboard</h1>
-          <button
-            onClick={handleExport}
-            disabled={exporting || children.length === 0}
-            className='p-2 text-slate-500 hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition disabled:opacity-30'
-            title='Export progress data'
-            aria-label={
-              exporting ? 'Export in progress' : 'Export progress data'
-            }
-          >
-            {exporting ? (
-              <UIIcon name='hourglass' size={20} aria-hidden='true' />
-            ) : (
-              <UIIcon name='download' size={20} aria-hidden='true' />
-            )}
-          </button>
-        </header>
-
-        {/* Child Selector - Clean, minimal */}
-        {children.length > 0 && (
-          <div className='mb-4 flex items-center gap-2 flex-wrap'>
-            {children.map((child) => (
-              <div key={child.id} className='flex items-center'>
-                <button
-                  onClick={() => {
-                    const profile = profiles.find((p) => p.id === child.id);
-                    if (profile) {
-                      setCurrentProfile(profile);
-                    }
-                    setSelectedChild(child.id);
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition text-base ${
-                    selectedChildData?.id === child.id
-                      ? 'bg-pip-orange text-white shadow-soft'
-                      : 'bg-white border border-border hover:bg-bg-tertiary text-text-primary'
-                  }`}
-                >
-                  <span className='font-medium text-lg'>{child.name}</span>
-                  <span className='opacity-70 text-sm'>({child.age})</span>
-                </button>
-              </div>
-            ))}
-            <button
-              type='button'
-              onClick={() => setShowAddModal(true)}
-              className='flex items-center gap-2 px-4 py-2.5 text-lg text-slate-500 hover:text-pip-orange hover:bg-bg-tertiary rounded-lg transition border border-dashed border-transparent hover:border-pip-orange/30 min-h-[44px]'
-              title='Add child'
-            >
-              <svg
-                className='w-5 h-5'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M12 4v16m8-8H4'
-                />
-              </svg>
-              Add Child
-            </button>
+      {/* HEADER AREA */}
+      <header className='px-6 py-6 lg:px-12 lg:py-8 flex justify-between items-start z-10 relative'>
+        <div className='flex items-center gap-4'>
+          <Mascot state='happy' responsiveSize='sm' hideOnMobile={false} className="hidden sm:block" />
+          <div>
+            <h1 className='text-3xl sm:text-4xl font-extrabold text-[#1E293B]'>
+              Welcome back, {defaultProfile?.name || 'Explorer'}! <span className="text-yellow-400">🌟</span>
+            </h1>
+            <p className='text-lg font-medium text-slate-500 mt-1'>
+              What magical adventure should we go on today?
+            </p>
           </div>
-        )}
-
-        {/* PRIMARY SECTION 1: Quick Play Card - Continue Learning */}
-        {selectedChildData && (
-          <div className='mb-4 p-4 bg-gradient-to-r from-pip-orange/20 to-pip-rust/10 border border-pip-orange/30 rounded-xl'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-3'>
-                <div className='w-12 h-12 bg-gradient-to-br from-pip-orange to-pip-rust rounded-xl flex items-center justify-center'>
-                  <UIIcon
-                    name='play'
-                    size={24}
-                    className='text-white'
-                    aria-label='Play game'
-                  />
-                </div>
-                <div>
-                  <h3 className='font-bold text-white text-lg'>
-                    Continue Learning 🎯
-                  </h3>
-                  <p className='text-base text-white/70'>
-                    Pick up where you left off!
-                  </p>
-                </div>
-              </div>
-              <Link
-                to='/games/alphabet-tracing'
-                className='px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-base hover:scale-105 transition-transform'
-              >
-                Play Now →
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* PRIMARY SECTION 2: Quick Stats (compact) */}
-        <div className='mb-4 bg-white border border-border rounded-xl p-4 shadow-soft'>
-          <div className='flex items-center justify-between mb-3'>
-            <h3 className='text-lg font-semibold text-text-primary'>
-              Your Progress 📊
-            </h3>
-          </div>
-          <StatsBar stats={stats} />
         </div>
 
-        {/* Empty State */}
-        {children.length === 0 && (
-          <EmptyState onAddChild={() => setShowAddModal(true)} />
-        )}
-
-        {/* PRIMARY SECTION 3: Adventure Map with Badges - Always Visible */}
-        {selectedChildData && (
-          <div className='mb-6 bg-gradient-to-br from-sky-500/10 to-cyan-500/10 border border-sky-500/20 rounded-xl p-6 shadow-soft'>
-            <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl font-semibold flex items-center gap-2'>
-                <span>🗺️</span>
-                Adventure Map
-              </h2>
-              <div className='flex items-center gap-2 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full'>
-                <span className='text-amber-400'>⭐</span>
-                <span className='text-amber-400 font-bold text-base'>
-                  {totalXp} XP
-                </span>
-              </div>
-            </div>
-
-            <AdventureMap />
-
-            <div className='mt-4 flex flex-wrap items-center gap-2 text-sm text-white/70'>
-              <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                Quests: {questSummary.completedCount}/{questSummary.totalQuests}
-              </span>
-              <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                Islands: {questSummary.unlockedCount}
-              </span>
-              <span className='px-2 py-1 bg-white/10 border border-border rounded-full'>
-                Current island quests: {questSummary.currentIslandQuestCount}
-              </span>
-              {questSummary.nextUnlockableIslandId && (
-                <span className='px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300'>
-                  Next island available: {questSummary.nextUnlockableIslandId}
-                </span>
-              )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className='mt-4 flex gap-2'>
-              <button
-                type='button'
-                onClick={() => {
-                  startQuest('quest-a-to-z');
-                  navigate('/games/alphabet-tracing?quest=quest-a-to-z');
-                }}
-                className='flex-1 px-3 py-2 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-lg font-semibold text-base hover:scale-[1.02] transition-transform'
-              >
-                Start Alphabet Quest
-              </button>
-              <Link
-                to='/games'
-                className='flex-1 px-3 py-2 bg-white/10 border border-border rounded-lg font-semibold text-white text-base hover:bg-white/20 transition text-center flex items-center justify-center gap-2'
-              >
-                <UIIcon name='search' size={16} aria-label='Browse all games' />
-                All Games
-              </Link>
-            </div>
-
-            {/* Badges Summary */}
-            {badges.length > 0 && (
-              <div className='mt-4 p-3 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl'>
-                <p className='text-sm text-amber-400 font-semibold mb-2'>
-                  🏆 Badges Earned
-                </p>
-                <div className='flex flex-wrap gap-1'>
-                  {badges.slice(0, 6).map((badge) => (
-                    <span
-                      key={badge}
-                      className='px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-sm text-amber-300'
-                    >
-                      {badge.replace('badge:', '')}
-                    </span>
-                  ))}
-                  {badges.length > 6 && (
-                    <span className='px-2 py-1 text-sm text-amber-400/70'>
-                      +{badges.length - 6} more
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
+        <div className='flex items-center gap-4'>
+          {/* STAR CURRENCY */}
+          <div className='bg-white border-2 border-yellow-200 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm font-bold text-yellow-600 cursor-pointer hover:bg-yellow-50 transition-colors'>
+            <span className='text-2xl'>⭐</span>
+            <span className='text-xl'>{totalStars.toLocaleString()}</span>
           </div>
-        )}
 
-        {/* COLLAPSIBLE: Explore More 🌟 - Advanced sections */}
-        <CollapsibleSection
-          title='Explore More 🌟'
-          icon='🔍'
-          defaultOpen={false}
-        >
-          {selectedChildData && (
-            <section className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-              {/* Learning Progress - Detailed */}
-              <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
-                <div className='flex justify-between items-center mb-4'>
-                  <h2 className='text-2xl font-semibold'>
-                    Letters Progress 📝
-                  </h2>
-                  <div className='text-base px-3 py-1 bg-bg-tertiary text-slate-600 border border-border rounded-full'>
-                    {selectedChildData.preferredLanguage}
-                  </div>
-                </div>
-                <div className='space-y-4'>
-                  {(() => {
-                    const lang = selectedChildData.preferredLanguage;
-                    const langProgress = letterProgress[lang] || [];
-                    const alphabet = getAlphabet(lang);
+          {/* ACTION BUTTONS (Hidden on small mobile, moved to nav or menu) */}
+          <div className='hidden md:flex gap-2'>
+            <button
+              onClick={handleExport}
+              disabled={exporting || profiles.length === 0}
+              className='w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 rounded-full text-slate-500 hover:text-[#3B82F6] hover:border-[#3B82F6] transition shadow-sm disabled:opacity-50'
+              title='Export progress data'
+            >
+              <UIIcon name={'download' as any} size={24} />
+            </button>
+            <Link
+              to='/settings'
+              className='w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 rounded-full text-slate-500 hover:text-[#3B82F6] hover:border-[#3B82F6] transition shadow-sm'
+              title='Settings'
+            >
+              <UIIcon name={'settings' as any} size={24} />
+            </Link>
+          </div>
+        </div>
+      </header>
 
-                    return alphabet.letters.slice(0, 5).map((letter) => {
-                      const letterProg = langProgress.find(
-                        (p) => p.letter === letter.char,
-                      );
-                      const learned = letterProg?.mastered || false;
-                      const accuracy = letterProg?.bestAccuracy || 0;
+      {/* MULTI-PROFILE SELECTOR (Subtle pill style if multiple) */}
+      {!isGuest && profiles.length > 1 && (
+        <div className='px-6 lg:px-12 mb-8'>
+          <div className='inline-flex items-center gap-2 bg-white p-1 rounded-full border-2 border-slate-100 shadow-sm'>
+            {profiles.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setCurrentProfile(p)}
+                className={`px-4 py-1.5 rounded-full text-sm font-bold transition ${p.id === currentProfile?.id ? 'bg-[#3B82F6] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-                      return (
-                        <div
-                          key={letter.char}
-                          className='flex items-center gap-4'
-                        >
-                          <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${
-                              learned
-                                ? 'bg-green-500/20 text-green-400'
-                                : 'bg-bg-tertiary text-slate-500 border border-border'
-                            }`}
-                          >
-                            {letter.char}
-                          </div>
-                          <div className='flex-1'>
-                            <div className='flex justify-between mb-1'>
-                              <span className='text-base flex items-center gap-2'>
-                                <UIIcon
-                                  src={letter.icon}
-                                  alt={letter.name}
-                                  size={20}
-                                  className='opacity-80'
-                                  fallback={letter.emoji || '✨'}
-                                />
-                                {letter.name}
-                              </span>
-                              <span className='text-base text-slate-600'>
-                                {learned ? (
-                                  <>
-                                    <UIIcon
-                                      name='check'
-                                      size={14}
-                                      className='inline mr-1 text-green-400'
-                                    />
-                                    ⭐ Super Star!
-                                  </>
-                                ) : accuracy > 0 ? (
-                                  <>
-                                    <UIIcon
-                                      name='circle'
-                                      size={14}
-                                      className='inline mr-1 text-slate-500'
-                                    />
-                                    {Math.round(accuracy)}% best
-                                  </>
-                                ) : (
-                                  <>
-                                    <UIIcon
-                                      name='circle'
-                                      size={14}
-                                      className='inline mr-1 text-slate-500'
-                                    />
-                                    Not started
-                                  </>
-                                )}
-                              </span>
-                            </div>
-                            <progress
-                              value={accuracy}
-                              max={100}
-                              className={`w-full h-2 rounded-full ${getAccuracyProgressClass(accuracy)}`}
-                            />
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </article>
+      {/* CORE ACTION AREA: GAME GRID */}
+      <main className='px-6 lg:px-12 space-y-12 max-w-[1600px] mx-auto'>
 
-              {/* Multi-Language Progress */}
-              <article className='bg-white border border-border rounded-xl p-6 shadow-soft'>
-                <h2 className='text-2xl font-semibold mb-4'>
-                  Other Languages 🌍
-                </h2>
-                {selectedChildData.languageProgress.length > 0 ? (
-                  <div className='space-y-3'>
-                    {selectedChildData.languageProgress.map((langProg) => {
-                      const percent =
-                        langProg.totalLetters > 0
-                          ? Math.round(
-                              (langProg.lettersLearned /
-                                langProg.totalLetters) *
-                                100,
-                            )
-                          : 0;
+        <section>
+          <div className='flex justify-between items-end mb-6'>
+            <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
+              <span className="text-[#E85D04]">Featured Games</span> 🎮
+            </h2>
+            <Link to="/games" className='text-lg font-bold text-[#3B82F6] hover:underline'>
+              See All →
+            </Link>
+          </div>
 
-                      return (
-                        <div
-                          key={langProg.language}
-                          className='border border-border rounded-lg p-3'
-                        >
-                          <div className='flex justify-between items-center mb-2'>
-                            <span className='font-medium capitalize text-lg'>
-                              {langProg.language}
-                            </span>
-                            <span className='text-base text-slate-600'>
-                              {langProg.lettersLearned}/{langProg.totalLetters}{' '}
-                              letters
-                            </span>
-                          </div>
-                          <div className='flex justify-between text-base mb-1'>
-                            <span>Stars:</span>
-                            <span>
-                              {getStarRating(langProg.averageAccuracy).emoji}
-                            </span>
-                          </div>
-                          <div className='flex justify-between text-base'>
-                            <span>Time Played:</span>
-                            <span>
-                              {langProg.totalTime < 60
-                                ? `${Math.floor(langProg.totalTime)} minutes`
-                                : `${Math.floor(langProg.totalTime / 60)}h ${langProg.totalTime % 60}m`}
-                            </span>
-                          </div>
-                          <progress
-                            value={percent}
-                            max={100}
-                            className='w-full h-2 rounded-full progress-accent-orange mt-2'
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className='text-center py-6 text-slate-600'>
-                    <p className='text-lg'>
-                      Start learning in more languages! 🌍
-                    </p>
-                    <p className='text-base mt-2'>
-                      Try switching languages to start learning! 🎓
-                    </p>
-                  </div>
-                )}
-              </article>
-            </section>
-          )}
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+            {RECOMMENDED_GAMES.map((game, idx) => (
+              <GameCard
+                key={game.id}
+                {...game}
+                animationDelay={idx * 0.1}
+                isNew={game.isNew}
+                buttonText="Play Now!"
+                onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
+                reducedMotion={false}
+              />
+            ))}
+          </div>
+        </section>
 
-          {/* Letter Journey */}
-          {selectedChildData && (
-            <section className='mb-6'>
-              <div className='flex items-center justify-between mb-2'>
-                <h2 className='text-xl font-semibold'>Letter Journey ✨</h2>
-                <span className='text-sm text-slate-500 capitalize'>
-                  {selectedChildData.preferredLanguage}
-                </span>
-              </div>
-              <LetterJourney language={selectedChildData.preferredLanguage} />
-            </section>
-          )}
+        {/* SECONDARY AREA: ADVENTURE MAP (Keep logic, style to match V1) */}
+        <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>
+          <div className='absolute -right-10 -bottom-10 opacity-10 pointer-events-none'>
+            <Mascot state='idle' responsiveSize='lg' />
+          </div>
 
-          {/* Tips Section */}
-          <TipsSection />
-        </CollapsibleSection>
+          <div className='flex items-center justify-between mb-8 relative z-10'>
+            <div>
+              <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
+                Your Learning Map 🗺️
+              </h2>
+              <p className='text-slate-500 font-medium'>Explore islands and complete quests!</p>
+            </div>
+          </div>
 
-        {/* Add Child Modal */}
-        <AddChildModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          childName={newChildName}
-          onChildNameChange={setNewChildName}
-          childAge={newChildAge}
-          onChildAgeChange={setNewChildAge}
-          childLanguage={newChildLanguage}
-          onChildLanguageChange={setNewChildLanguage}
-          onSubmit={handleCreateProfile}
-          isSubmitting={isCreating}
-        />
+          <div className='relative z-10'>
+            <AdventureMap />
+          </div>
+        </section>
 
-        {/* Edit Profile Modal */}
-        <EditProfileModal
-          isOpen={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingProfile(null);
-          }}
-          profile={editingProfile}
-          editName={editName}
-          onEditNameChange={setEditName}
-          editLanguage={editLanguage}
-          onEditLanguageChange={setEditLanguage}
-          onSubmit={handleUpdateProfile}
-          isSubmitting={isUpdating}
-        />
-
-        {/* Story Modal */}
-        {showStoryModal && (
-          <StoryModal
-            open={true}
-            onClose={() => {
-              completeQuest('demo-quest');
-              setShowStoryModal(false);
-              toast.showToast('Quest completed! Badge earned 🎉', 'success');
-            }}
-            title='Quest Complete'
-            badge='Explorer Badge'
-          />
-        )}
-      </motion.div>
-    </section>
+      </main>
+    </div>
   );
-});
+}

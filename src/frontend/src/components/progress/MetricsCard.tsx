@@ -24,38 +24,48 @@ export function MetricCard({
     switch (color) {
       case 'blue':
         return {
-          bg: 'bg-blue-500/25',
-          border: 'border-blue-500/40',
-          text: 'text-blue-400',
-          icon: 'text-blue-400',
+          bg: 'bg-blue-50',
+          border: 'border-[#3B82F6]',
+          iconBg: 'bg-[#3B82F6]',
+          iconColor: 'text-white',
+          text: 'text-[#3B82F6]',
+          bar: 'bg-[#3B82F6]',
         };
       case 'green':
         return {
-          bg: 'bg-green-500/25',
-          border: 'border-green-500/40',
-          text: 'text-green-400',
-          icon: 'text-green-400',
+          bg: 'bg-green-50',
+          border: 'border-[#10B981]',
+          iconBg: 'bg-[#10B981]',
+          iconColor: 'text-white',
+          text: 'text-[#10B981]',
+          bar: 'bg-[#10B981]',
         };
       case 'purple':
         return {
-          bg: 'bg-purple-500/25',
-          border: 'border-purple-500/40',
-          text: 'text-purple-400',
-          icon: 'text-purple-400',
+          bg: 'bg-purple-50',
+          border: 'border-[#8B5CF6]',
+          iconBg: 'bg-[#8B5CF6]',
+          iconColor: 'text-white',
+          text: 'text-[#8B5CF6]',
+          bar: 'bg-[#8B5CF6]',
         };
       case 'orange':
         return {
-          bg: 'bg-orange-500/25',
-          border: 'border-orange-500/40',
-          text: 'text-orange-400',
-          icon: 'text-orange-400',
+          bg: 'bg-orange-50',
+          border: 'border-[#E85D04]',
+          iconBg: 'bg-[#E85D04]',
+          iconColor: 'text-white',
+          text: 'text-[#E85D04]',
+          bar: 'bg-[#E85D04]',
         };
       default:
         return {
-          bg: 'bg-white/15',
-          border: 'border-border',
-          text: 'text-white',
-          icon: 'text-white',
+          bg: 'bg-slate-50',
+          border: 'border-slate-300',
+          iconBg: 'bg-slate-300',
+          iconColor: 'text-slate-700',
+          text: 'text-slate-700',
+          bar: 'bg-slate-400',
         };
     }
   };
@@ -67,42 +77,36 @@ export function MetricCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`p-6 rounded-xl border ${colors.bg} ${colors.border} backdrop-blur-sm`}
+      className={`p-6 rounded-[2rem] border-4 ${colors.border} ${colors.bg} shadow-sm relative overflow-hidden`}
     >
-      <div className='flex items-center gap-3 mb-4'>
-        <div className={`p-2 rounded-lg ${colors.bg} ${colors.border}`}>
-          <UIIcon name={icon as any} size={24} className={colors.icon} />
+      <div className={`absolute -right-4 -top-4 w-24 h-24 ${colors.iconBg}/10 rounded-full blur-2xl`}></div>
+
+      <div className='flex items-center gap-4 mb-6 relative z-10'>
+        <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center ${colors.iconBg} shadow-sm border-2 border-white`}>
+          <UIIcon name={icon as any} size={28} className={colors.iconColor} />
         </div>
         <div>
-          <h3 className='font-semibold text-white'>{title}</h3>
-          <p className={`text-sm capitalize ${colors.text}`}>{level}</p>
+          <h3 className='text-2xl font-black text-slate-800 tracking-tight'>{title}</h3>
+          <p className={`font-bold uppercase tracking-wider text-sm ${colors.text}`}>{level}</p>
         </div>
       </div>
 
-      <div className='mb-3'>
-        <div className='flex justify-between items-center mb-2'>
-          <span className='text-sm text-white/80'>Score</span>
-          <span className='font-bold text-white'>{score}/100</span>
+      <div className='mb-4 relative z-10'>
+        <div className='flex justify-between items-end mb-2'>
+          <span className='font-bold text-slate-500 uppercase tracking-wider text-sm'>Score</span>
+          <span className={`font-black text-xl ${colors.text}`}>{score}<span className="text-slate-400 text-sm">/100</span></span>
         </div>
-        <div className='w-full bg-white/30 rounded-full h-2'>
+        <div className='w-full bg-white border-2 border-slate-200 rounded-full h-4 overflow-hidden'>
           <motion.div
-            className={`h-2 rounded-full ${
-              color === 'blue'
-                ? 'bg-blue-500'
-                : color === 'green'
-                  ? 'bg-green-500'
-                  : color === 'purple'
-                    ? 'bg-purple-500'
-                    : 'bg-orange-500'
-            }`}
+            className={`h-full ${colors.bar} rounded-full border-r-2 border-white/50`}
             initial={{ width: 0 }}
             animate={{ width: `${score}%` }}
-            transition={{ delay: delay + 0.2, duration: 1 }}
+            transition={{ delay: delay + 0.2, duration: 1, type: 'spring' }}
           />
         </div>
       </div>
 
-      <p className='text-sm text-white/80'>{description}</p>
+      <p className='text-base font-semibold text-slate-600 relative z-10'>{description}</p>
     </motion.div>
   );
 }

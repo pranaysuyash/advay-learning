@@ -160,7 +160,7 @@ For each hardening item:
 ### B) Evidence log
 
 - Commands executed
-- grep results for discovery
+- rg results for discovery
 - tests run and results
 - CI status: PASS / FAIL / UNKNOWN (Observed)
 

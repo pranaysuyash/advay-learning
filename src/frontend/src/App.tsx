@@ -3,6 +3,8 @@ import { Layout } from './components/ui/Layout';
 import { ProtectedRoute } from './components/ui/ProtectedRoute';
 import { ToastProvider } from './components/ui/Toast';
 import { ConfirmProvider } from './components/ui/ConfirmDialog';
+import { ItemDropToast } from './components/inventory/ItemDropToast';
+import { BackpackButton } from './components/inventory/BackpackButton';
 import { Suspense, lazy } from 'react';
 
 // Lazy load pages for code splitting
@@ -123,6 +125,51 @@ const EmojiMatch = lazy(() =>
 const MediaPipeTest = lazy(() =>
   import('./pages/MediaPipeTest').then((module) => ({
     default: module.MediaPipeTest,
+  })),
+);
+const AirCanvas = lazy(() =>
+  import('./pages/AirCanvas').then((module) => ({
+    default: module.AirCanvas,
+  })),
+);
+const MirrorDraw = lazy(() =>
+  import('./pages/MirrorDraw').then((module) => ({
+    default: module.MirrorDraw,
+  })),
+);
+const PhonicsSounds = lazy(() =>
+  import('./pages/PhonicsSounds').then((module) => ({
+    default: module.PhonicsSounds,
+  })),
+);
+const BubblePopSymphony = lazy(() =>
+  import('./pages/BubblePopSymphony').then((module) => ({
+    default: module.default,
+  })),
+);
+const DressForWeather = lazy(() =>
+  import('./pages/DressForWeather').then((module) => ({
+    default: module.default,
+  })),
+);
+const StorySequence = lazy(() =>
+  import('./pages/StorySequence').then((module) => ({
+    default: module.default,
+  })),
+);
+const ShapeSafari = lazy(() =>
+  import('./pages/ShapeSafari').then((module) => ({
+    default: module.default,
+  })),
+);
+const InventoryPage = lazy(() =>
+  import('./pages/Inventory').then((module) => ({
+    default: module.Inventory,
+  })),
+);
+const DiscoveryLab = lazy(() =>
+  import('./pages/DiscoveryLab').then((module) => ({
+    default: module.DiscoveryLab,
   })),
 );
 
@@ -308,6 +355,62 @@ function App() {
               }
             />
             <Route
+              path='/games/air-canvas'
+              element={
+                <ProtectedRoute>
+                  <AirCanvas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/mirror-draw'
+              element={
+                <ProtectedRoute>
+                  <MirrorDraw />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/phonics-sounds'
+              element={
+                <ProtectedRoute>
+                  <PhonicsSounds />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/bubble-pop-symphony'
+              element={
+                <ProtectedRoute>
+                  <BubblePopSymphony />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/dress-for-weather'
+              element={
+                <ProtectedRoute>
+                  <DressForWeather />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/story-sequence'
+              element={
+                <ProtectedRoute>
+                  <StorySequence />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/shape-safari'
+              element={
+                <ProtectedRoute>
+                  <ShapeSafari />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path='/progress'
               element={
                 <ProtectedRoute>
@@ -343,7 +446,29 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+              path='/inventory'
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <InventoryPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/discovery-lab'
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <DiscoveryLab />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
+          <BackpackButton />
+          <ItemDropToast />
         </Suspense>
       </ConfirmProvider>
     </ToastProvider>

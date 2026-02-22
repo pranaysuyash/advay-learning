@@ -4,6 +4,13 @@ import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHandTracking } from '../hooks/useHandTracking';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import {
+  assetLoader,
+  PAINT_ASSETS,
+  SOUND_ASSETS,
+  WEATHER_BACKGROUNDS,
+} from '../utils/assets';
+import { mapNormalizedPointToCover } from '../utils/coordinateTransform';
 
 interface Brush {
   id: string;
@@ -57,6 +64,8 @@ export function AirCanvas() {
   const [snapshot, setSnapshot] = useState<string | null>(null);
   const colorIndexRef = useRef(0);
   const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const backgroundImageRef = useRef<HTMLImageElement | null>(null);
 
   const { playPop, playSuccess } = useSoundEffects();
 
@@ -72,6 +81,33 @@ export function AirCanvas() {
     delegate: 'GPU',
     enableFallback: true,
   });
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function preloadAssets() {
+      try {
+        await assetLoader.loadImages([
+          ...PAINT_ASSETS,
+          WEATHER_BACKGROUNDS.sunny,
+        ]);
+        await assetLoader.loadSounds(Object.values(SOUND_ASSETS));
+
+        if (!mounted) return;
+        backgroundImageRef.current = assetLoader.getImage(
+          WEATHER_BACKGROUNDS.sunny.id,
+        );
+      } catch (error) {
+        console.error('Failed to preload Air Canvas assets', error);
+      }
+    }
+
+    void preloadAssets();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Generate rainbow color
   const getRainbowColor = useCallback(() => {
@@ -110,26 +146,33 @@ export function AirCanvas() {
 
     const video = webcamRef.current.video;
     if (!video || video.readyState !== 4) {
-      requestAnimationFrame(detectHand);
+      animationFrameRef.current = requestAnimationFrame(detectHand);
       return;
     }
 
     const results = handLandmarker.detectForVideo(video, performance.now());
     const canvas = canvasRef.current;
     if (!canvas) {
-      requestAnimationFrame(detectHand);
+      animationFrameRef.current = requestAnimationFrame(detectHand);
       return;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      requestAnimationFrame(detectHand);
+      animationFrameRef.current = requestAnimationFrame(detectHand);
       return;
     }
 
     // Clear and redraw
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillStyle = 'rgba(10, 16, 28, 0.08)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const backgroundImage = backgroundImageRef.current;
+    if (backgroundImage?.src) {
+      ctx.globalAlpha = 0.08;
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
 
     if (results.landmarks && results.landmarks.length > 0) {
       const landmarks = results.landmarks[0];
@@ -145,9 +188,19 @@ export function AirCanvas() {
       const handOpen = avgTipY < wrist.y - 0.1;
       setIsHandOpen(handOpen);
 
-      // Draw position (mirrored)
-      const x = (1 - indexFinger.x) * canvas.width;
-      const y = indexFinger.y * canvas.height;
+      // Draw position using robust cover-mapping transformation
+      const mappedPoint = mapNormalizedPointToCover(
+        { x: indexFinger.x, y: indexFinger.y },
+        {
+          width: video.videoWidth || 640,
+          height: video.videoHeight || 480,
+        },
+        { width: canvas.width, height: canvas.height },
+        { mirrored: true, clamp: true },
+      );
+
+      const x = mappedPoint.x * canvas.width;
+      const y = mappedPoint.y * canvas.height;
 
       // Calculate velocity for particle spread
       let velocityX = 0;
@@ -238,13 +291,23 @@ export function AirCanvas() {
       return updated;
     });
 
-    requestAnimationFrame(detectHand);
+    animationFrameRef.current = requestAnimationFrame(detectHand);
   }, [handLandmarker, selectedBrush, selectedColor, brushSize, addParticles, getRainbowColor]);
 
   useEffect(() => {
     if (isHandReady) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       detectHand();
     }
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
   }, [isHandReady, detectHand]);
 
   // Clear canvas
@@ -258,6 +321,7 @@ export function AirCanvas() {
       }
     }
     setParticles([]);
+    lastPositionRef.current = null;
     void playPop();
   };
 
@@ -285,43 +349,52 @@ export function AirCanvas() {
   // Random color
   const randomColor = () => {
     setSelectedColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
+    assetLoader.playSound('pop', 0.2);
     void playPop();
   };
 
   // Cycle brush size
   const cycleBrushSize = () => {
     setBrushSize((prev) => (prev >= 3 ? 0.5 : prev + 0.5));
+    assetLoader.playSound('pop', 0.18);
     void playPop();
   };
 
   if (isHandLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="text-6xl mb-4">✨</div>
-          <h2 className="text-2xl font-bold text-white">Loading Air Canvas...</h2>
-          <p className="text-gray-400">Preparing magic brushes...</p>
+      <div className="min-h-[100dvh] bg-[#FFF8F0] flex flex-col items-center justify-center p-4">
+        <motion.div
+          className="text-center bg-white border-4 border-slate-100 rounded-[2.5rem] p-12 shadow-sm max-w-md w-full"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-4 border-blue-100 drop-shadow-sm">✨</div>
+          <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4">Loading Air Canvas...</h2>
+          <div className="w-16 h-16 border-8 border-slate-100 border-t-[#3B82F6] rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-xl font-bold text-slate-500">Preparing magic brushes...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#FFF8F0] relative overflow-hidden font-sans">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent">
+      <header className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
         <button
           onClick={() => navigate('/games')}
-          className="px-4 py-2 bg-white/20 backdrop-blur rounded-full font-bold text-white hover:bg-white/30 transition"
+          className="pointer-events-auto px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-200/50 rounded-[1.5rem] font-bold text-slate-700 shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
         >
-          ← Back
+          <span className="text-xl">←</span> Back
         </button>
-        <h1 className="text-2xl font-bold text-white">Air Canvas ✨</h1>
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-3 rounded-[2rem]">
+          <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas ✨</h1>
+        </div>
         <button
           onClick={() => setShowUI(!showUI)}
-          className="px-4 py-2 bg-white/20 backdrop-blur rounded-full font-bold text-white hover:bg-white/30 transition"
+          className="pointer-events-auto px-6 py-3 bg-[#F59E0B] hover:bg-amber-500 border-4 border-amber-300 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95 text-lg"
         >
-          {showUI ? '👁️' : '🎨'}
+          {showUI ? 'Hide Tools 👁️' : 'Show Tools 🎨'}
         </button>
       </header>
 
@@ -345,80 +418,85 @@ export function AirCanvas() {
       <AnimatePresence>
         {showUI && (
           <motion.div
-            className="absolute bottom-4 left-4 right-4 z-20"
-            initial={{ y: 100, opacity: 0 }}
+            className="absolute bottom-6 left-6 right-6 z-20 pointer-events-auto max-w-4xl mx-auto"
+            initial={{ y: 150, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
+            exit={{ y: 150, opacity: 0 }}
+            transition={{ type: 'spring', bounce: 0.3 }}
           >
             {/* Brushes */}
-            <div className="bg-black/60 backdrop-blur-xl rounded-2xl p-4 mb-2">
-              <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 mb-3 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {BRUSHES.map((brush) => (
                   <button
                     key={brush.id}
                     onClick={() => {
                       setSelectedBrush(brush);
+                      assetLoader.playSound('pop', 0.28);
                       void playPop();
                     }}
-                    className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold transition-all ${
-                      selectedBrush.id === brush.id
-                        ? 'bg-white text-black scale-110'
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
+                    className={`flex-shrink-0 px-6 py-3 rounded-[1.5rem] font-bold transition-all border-4 flex items-center gap-2 ${selectedBrush.id === brush.id
+                      ? 'bg-[#E85D04] border-[#D00000] text-white shadow-sm -translate-y-1'
+                      : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200'
+                      }`}
                   >
-                    <span className="mr-1">{brush.icon}</span>
-                    <span className="text-sm">{brush.name}</span>
+                    <span className="text-2xl">{brush.icon}</span>
+                    <span className="text-sm tracking-wide uppercase">{brush.name}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Colors */}
-            <div className="bg-black/60 backdrop-blur-xl rounded-2xl p-4 mb-2">
-              <div className="flex gap-2 flex-wrap justify-center">
-                {COLORS.map((color) => (
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Colors */}
+              <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 flex-1 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
+                <div className="flex gap-2 flex-wrap justify-center items-center h-full">
+                  {COLORS.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedColor(color);
+                        assetLoader.playSound('pop', 0.2);
+                        void playPop();
+                      }}
+                      title={`Select color ${color}`}
+                      aria-label={`Select color ${color}`}
+                      className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-4 transition-transform ${selectedColor === color ? 'border-slate-800 scale-110 shadow-md' : 'border-white/50 shadow-sm hover:scale-105'
+                        }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
                   <button
-                    key={color}
-                    onClick={() => {
-                      setSelectedColor(color);
-                      void playPop();
-                    }}
-                    className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                      selectedColor === color ? 'border-white scale-125' : 'border-transparent'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
+                    onClick={randomColor}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform flex items-center justify-center text-xl"
+                    title="Random Color"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 flex gap-3 justify-center shadow-[0_8px_0_0_rgba(241,245,249,1)]">
                 <button
-                  onClick={randomColor}
-                  className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-2 border-white/50"
-                  title="Random Color"
+                  onClick={cycleBrushSize}
+                  className="px-6 py-3 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-400 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95"
                 >
-                  🎲
+                  Size: {brushSize}x
+                </button>
+                <button
+                  onClick={clearCanvas}
+                  className="px-6 py-3 bg-red-100 hover:bg-red-200 border-4 border-red-200 rounded-[1.5rem] font-black text-red-600 shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                >
+                  <span>🗑️</span> Clear
+                </button>
+                <button
+                  onClick={takeSnapshot}
+                  className="px-6 py-3 bg-[#10B981] hover:bg-emerald-500 border-4 border-emerald-400 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                >
+                  <span>📸</span> Snap
                 </button>
               </div>
-            </div>
-
-            {/* Controls */}
-            <div className="bg-black/60 backdrop-blur-xl rounded-2xl p-4 flex gap-2 justify-center">
-              <button
-                onClick={cycleBrushSize}
-                className="px-4 py-2 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition"
-              >
-                Size: {brushSize}x
-              </button>
-              <button
-                onClick={clearCanvas}
-                className="px-4 py-2 bg-red-500/50 text-white rounded-xl font-bold hover:bg-red-500/70 transition"
-              >
-                🗑️ Clear
-              </button>
-              <button
-                onClick={takeSnapshot}
-                className="px-4 py-2 bg-blue-500/50 text-white rounded-xl font-bold hover:bg-blue-500/70 transition"
-              >
-                📸 Snap
-              </button>
             </div>
           </motion.div>
         )}
@@ -428,28 +506,36 @@ export function AirCanvas() {
       <AnimatePresence>
         {!isHandOpen && (
           <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 text-center">
-              <div className="text-6xl mb-4">🖐️</div>
-              <h2 className="text-2xl font-bold text-white mb-2">Open Your Hand to Draw!</h2>
-              <p className="text-gray-300">Close fingers to pause</p>
+            <div className="bg-white/95 backdrop-blur-md border-4 border-amber-200 rounded-[2.5rem] p-10 text-center shadow-lg">
+              <div className="text-[6rem] mb-4 drop-shadow-md">🖐️</div>
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Open Hand to Draw!</h2>
+              <div className="inline-block bg-slate-100 rounded-full px-6 py-2 mt-2">
+                <p className="text-lg font-bold text-slate-500">Close fingers to pause</p>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Status */}
-      <div className="absolute top-20 left-4 z-10">
-        <div className="bg-black/50 backdrop-blur rounded-full px-4 py-2 text-white text-sm">
-          {isHandReady ? '✋ Hand Ready' : '⏳ Loading...'}
-          {' | '}
-          {isHandOpen ? '🎨 Drawing' : '✋ Paused'}
-          {' | '}
-          ✨ {particleCount} particles
+      <div className="absolute top-24 left-6 z-10 pointer-events-none">
+        <div className="bg-black/40 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 flex gap-4 items-center shadow-sm">
+          <span className="text-white font-bold tracking-wide">
+            {isHandReady ? '🟢 Hand Ready' : '⏳ Loading...'}
+          </span>
+          <div className="w-px h-4 bg-white/30" />
+          <span className="text-white font-bold tracking-wide">
+            {isHandOpen ? '🎨 Drawing' : '✋ Paused'}
+          </span>
+          <div className="w-px h-4 bg-white/30" />
+          <span className="text-white/80 text-sm font-medium">
+            ✨ {particleCount}
+          </span>
         </div>
       </div>
 
@@ -457,28 +543,33 @@ export function AirCanvas() {
       <AnimatePresence>
         {snapshot && (
           <motion.div
-            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="bg-white rounded-3xl p-6 max-w-2xl w-full">
-              <h2 className="text-2xl font-bold mb-4 text-center">🎨 Your Masterpiece!</h2>
-              <img
-                src={snapshot}
-                alt="Your drawing"
-                className="w-full rounded-xl mb-4 bg-black"
-              />
-              <div className="flex gap-4">
+            <div className="bg-white border-4 border-slate-100 rounded-[3rem] p-10 max-w-2xl w-full shadow-2xl">
+              <div className="text-center mb-6">
+                <span className="text-[4rem] inline-block mb-2">🎨</span>
+                <h2 className="text-4xl font-black text-slate-800 tracking-tight">Your Masterpiece!</h2>
+              </div>
+              <div className="border-4 border-slate-200 rounded-[2rem] overflow-hidden mb-8 shadow-inner">
+                <img
+                  src={snapshot}
+                  alt="Your drawing"
+                  className="w-full bg-slate-100"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={downloadSnapshot}
-                  className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition"
+                  className="flex-1 py-4 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-400 rounded-[1.5rem] font-black text-white text-xl shadow-[0_6px_0_0_rgba(59,130,246,0.6)] hover:shadow-none hover:translate-y-[6px] transition-all flex items-center justify-center gap-2"
                 >
-                  💾 Download
+                  <span>💾</span> Download
                 </button>
                 <button
                   onClick={() => setSnapshot(null)}
-                  className="flex-1 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition"
+                  className="flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-200 rounded-[1.5rem] font-black text-slate-600 text-xl shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                 >
                   Keep Drawing
                 </button>

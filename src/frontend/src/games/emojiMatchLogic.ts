@@ -29,7 +29,7 @@ export function buildRound(
 ): { targets: EmotionTarget[]; correctId: number } {
   const shuffled = [...EMOTIONS].sort(() => random() - 0.5);
   const picked = shuffled.slice(0, optionCount);
-  const points = pickSpacedPoints(optionCount, 0.22, 0.16, random);
+  const points = pickSpacedPoints(optionCount, 0.26, 0.18, random);
 
   const targets: EmotionTarget[] = picked.map((emotion, index) => ({
     ...emotion,

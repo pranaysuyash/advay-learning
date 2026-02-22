@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSettingsStore } from '../../store';
 import { Button } from './Button';
 
@@ -9,6 +9,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const { demoMode, setDemoMode } = useSettingsStore();
+  const location = useLocation();
 
   const exitDemo = () => {
     setDemoMode(false);
@@ -16,24 +17,33 @@ export function Layout({ children }: LayoutProps) {
     window.location.href = '/';
   };
 
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Games', path: '/games' },
+    { name: 'Progress', path: '/progress' },
+    { name: 'Settings', path: '/settings' },
+  ];
+
   return (
-    <div className='min-h-screen flex flex-col bg-bg-primary text-text-primary'>
+    <div className='min-h-screen flex flex-col bg-[#FFF8F0] font-nunito selection:bg-[#3B82F6]/30'>
       <a
         href='#main-content'
-        className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-text-primary focus:px-4 focus:py-3 focus:rounded-xl focus:shadow-soft focus:border focus:border-border'
+        className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-slate-800 focus:px-6 focus:py-4 focus:rounded-2xl focus:shadow-2xl focus:border-4 focus:border-[#3B82F6] focus:font-bold focus:outline-none'
       >
         Skip to content
       </a>
 
       {/* Demo Mode Banner */}
       {demoMode && (
-        <div className='bg-pip-orange text-white py-2 px-4 flex justify-between items-center text-sm font-medium'>
-          <span>🎮 Demo Mode - Try the full experience with camera access</span>
+        <div className='bg-[#E85D04] text-white py-3 px-6 flex justify-between items-center text-sm sm:text-base font-bold tracking-wide relative z-50 shadow-sm'>
+          <span className="flex items-center gap-2">
+            <span className="text-xl">🎮</span> Demo Mode - Try the full experience with camera access
+          </span>
           <Button
             size='sm'
             variant='secondary'
             onClick={exitDemo}
-            className='bg-white/20 hover:bg-white/30 text-white border-white/30'
+            className='border-2'
             aria-label='Exit demo mode'
           >
             Exit Demo
@@ -41,67 +51,57 @@ export function Layout({ children }: LayoutProps) {
         </div>
       )}
 
-      <header className='bg-white/70 backdrop-blur border-b border-border'>
-        <div className='max-w-7xl mx-auto px-4 py-4 flex justify-between items-center'>
+      <header className='bg-white/90 backdrop-blur-md border-b-4 border-slate-200 sticky top-0 z-40 shadow-sm'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center'>
           <Link
             to='/'
-            className='text-2xl font-extrabold tracking-tight text-advay-slate'
+            className='text-3xl font-black tracking-tight text-slate-800 group hover:scale-105 transition-transform'
+            aria-label="Advay Home"
           >
-            <span className='text-advay-slate'>Advay</span>
-            <span className='text-pip-orange'>.</span>
+            Advay<span className='text-[#E85D04]'>.</span>
           </Link>
-          <nav className='flex gap-6' aria-label='Main navigation'>
-            <ul className='flex gap-6 list-none p-0 m-0'>
-              <li>
-                <Link
-                  to='/'
-                  className='text-text-secondary hover:text-text-primary transition'
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to='/games'
-                  className='text-text-secondary hover:text-text-primary transition'
-                >
-                  Games
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to='/progress'
-                  className='text-text-secondary hover:text-text-primary transition'
-                >
-                  Progress
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to='/settings'
-                  className='text-text-secondary hover:text-text-primary transition'
-                >
-                  Settings
-                </Link>
-              </li>
+
+          <nav className='hidden md:block' aria-label='Main navigation'>
+            <ul className='flex gap-8 list-none p-0 m-0'>
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path ||
+                  (link.path !== '/' && location.pathname.startsWith(link.path));
+
+                return (
+                  <li key={link.path}>
+                    <Link
+                      to={link.path}
+                      className={`text-sm font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${isActive
+                        ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
+                        : 'text-slate-500 hover:text-[#3B82F6] hover:bg-slate-50'
+                        }`}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </div>
       </header>
 
-      <main id='main-content' tabIndex={-1} className='flex-1'>
+      <main id='main-content' tabIndex={-1} className='flex-1 flex flex-col focus:outline-none relative z-10'>
         {children}
       </main>
 
-      <footer className='bg-white/70 backdrop-blur border-t border-border py-4'>
-        <div className='max-w-7xl mx-auto px-4 text-center text-text-secondary text-sm'>
-          <div className='flex items-center justify-center gap-4'>
-            <Link to='/privacy' className='hover:text-text-primary transition'>
-              Privacy Policy
+      <footer className='bg-slate-800 border-t-4 border-slate-900 overflow-hidden relative'>
+        <div className='absolute inset-0 bg-[url("/assets/images/noise.png")] opacity-10 pointer-events-none mix-blend-overlay'></div>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10 text-center'>
+          <div className='flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-slate-400'>
+            <p>© {new Date().getFullYear()} Advay Learning</p>
+            <span className='text-slate-600 hidden sm:inline'>•</span>
+            <Link to='/privacy' className='hover:text-white transition-colors focus:outline-none focus:text-white'>
+              Privacy Promise
             </Link>
-            <span className='text-border'>•</span>
-            <Link to='/terms' className='hover:text-text-primary transition'>
-              Terms of Service
+            <span className='text-slate-600 hidden sm:inline'>•</span>
+            <Link to='/terms' className='hover:text-white transition-colors focus:outline-none focus:text-white'>
+              Terms of Play
             </Link>
           </div>
         </div>

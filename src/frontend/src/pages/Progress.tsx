@@ -30,11 +30,9 @@ export function Progress() {
     'all',
   );
 
-  // Use the new progress metrics hook
   const { metrics, scorecard, honestStats, plantGrowth } =
     useProgressMetrics(progress);
 
-  // Fetch profiles on mount
   useEffect(() => {
     fetchProfiles();
   }, [fetchProfiles]);
@@ -47,14 +45,12 @@ export function Progress() {
     return unsubscribe;
   }, [selectedProfileId]);
 
-  // Set default profile on mount
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfileId) {
       setSelectedProfileId(profiles[0].id);
     }
   }, [profiles, selectedProfileId]);
 
-  // Fetch progress when profile changes
   useEffect(() => {
     if (!selectedProfileId) {
       setLoading(false);
@@ -83,33 +79,34 @@ export function Progress() {
   }, [selectedProfileId]);
 
   return (
-    <div className='max-w-7xl mx-auto px-4 py-8'>
+    <div className='max-w-7xl mx-auto px-4 py-8 lg:py-12 bg-[#FFF8F0] min-h-screen'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className='flex justify-between items-center mb-8'>
+        <div className='flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12'>
           <div>
-            <h1 className='text-3xl font-bold'>Learning Progress</h1>
-            <p className='text-white/60 mt-1'>
-              Track growth and celebrate achievements
+            <h1 className='text-4xl sm:text-5xl font-black text-slate-800 tracking-tight'>
+              Learning <span className="text-[#10B981]">Progress</span>
+            </h1>
+            <p className='text-xl text-slate-500 font-bold mt-3'>
+              Track growth and celebrate achievements.
             </p>
           </div>
 
-          <div className='flex items-center gap-4'>
+          <div className='flex flex-wrap items-center gap-4 bg-white p-3 rounded-[1.5rem] border-4 border-slate-100 shadow-sm'>
             {/* Period Selector */}
-            <div className='flex bg-white/10 border border-border rounded-lg p-1'>
+            <div className='flex bg-slate-50 border-2 border-slate-200 rounded-xl p-1'>
               {(['week', 'month', 'all'] as const).map((period) => (
                 <button
                   key={period}
                   type='button'
                   onClick={() => setReportPeriod(period)}
-                  className={`px-3 py-1 rounded-md text-sm capitalize ${
-                    reportPeriod === period
-                      ? 'bg-pip-orange text-white'
-                      : 'text-white/80 hover:text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors ${reportPeriod === period
+                      ? 'bg-[#E85D04] text-white shadow-sm'
+                      : 'text-slate-500 hover:bg-slate-200'
+                    }`}
                 >
                   {period}
                 </button>
@@ -118,8 +115,8 @@ export function Progress() {
 
             {/* Pending indicator */}
             {pendingCount > 0 && (
-              <div className='inline-flex items-center gap-2 bg-warning/20 border border-warning/30 text-warning px-3 py-1 rounded-full text-sm font-semibold'>
-                <UIIcon name='warning' size={14} />
+              <div className='inline-flex items-center gap-2 bg-yellow-100 border-2 border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl text-sm font-bold'>
+                <UIIcon name='warning' size={16} />
                 Pending ({pendingCount})
               </div>
             )}
@@ -134,7 +131,7 @@ export function Progress() {
                   setSyncing(false);
                 }
               }}
-              className='px-3 py-2 bg-white/10 border border-border rounded-lg text-white text-sm'
+              className='px-4 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 rounded-xl text-slate-600 font-bold text-sm tracking-wider uppercase transition-colors'
               disabled={syncing}
             >
               {syncing ? 'Syncing...' : 'Sync now'}
@@ -142,60 +139,60 @@ export function Progress() {
 
             {/* Profile Selector */}
             {profiles.length > 0 && (
-              <select
-                value={selectedProfileId}
-                onChange={(e) => setSelectedProfileId(e.target.value)}
-                aria-label='Select child profile'
-                title='Select child profile'
-                className='px-4 py-2 bg-white/10 border border-border rounded-lg text-white shadow-sm'
-              >
-                {profiles.map((profile) => (
-                  <option
-                    key={profile.id}
-                    value={profile.id}
-                    className='bg-gray-800'
-                  >
-                    {profile.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedProfileId}
+                  onChange={(e) => setSelectedProfileId(e.target.value)}
+                  aria-label='Select child profile'
+                  title='Select child profile'
+                  className='appearance-none px-6 py-2 pr-10 bg-white border-2 border-slate-200 rounded-xl text-slate-800 font-bold shadow-sm focus:outline-none focus:border-[#3B82F6]'
+                >
+                  {profiles.map((profile) => (
+                    <option
+                      key={profile.id}
+                      value={profile.id}
+                    >
+                      {profile.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
         {/* Loading Profiles */}
         {isLoadingProfiles && (
-          <div className='text-center py-12'>
-            <div className='w-16 h-16 mx-auto mb-4'>
-              <img
-                src='/assets/images/loading-pip.svg'
-                alt='Loading'
-                className='w-full h-full object-contain'
-              />
+          <div className='text-center py-20 bg-white border-4 border-slate-100 rounded-[2.5rem] shadow-sm'>
+            <div className='w-20 h-20 mx-auto mb-6 bg-slate-50 rounded-full flex items-center justify-center border-4 border-slate-100'>
+              <UIIcon name={'loader' as any} size={40} className='text-slate-400 animate-spin' />
             </div>
-            <p className='text-white/60'>Loading profiles...</p>
+            <p className='text-slate-500 font-bold text-xl'>Loading profiles...</p>
           </div>
         )}
 
         {/* Empty State - No Profiles */}
         {!isLoadingProfiles && !loading && profiles.length === 0 && (
-          <div className='text-center py-16'>
-            <div className='w-24 h-24 mx-auto mb-6 bg-white/10 rounded-full flex items-center justify-center'>
-              <UIIcon name='star' size={48} className='text-white/60' />
+          <div className='text-center py-20 bg-white border-4 border-slate-100 rounded-[2.5rem] shadow-sm'>
+            <div className='w-24 h-24 mx-auto mb-6 bg-[#E85D04]/10 rounded-full flex items-center justify-center border-4 border-[#E85D04]/20'>
+              <UIIcon name='star' size={48} className='text-[#E85D04]' />
             </div>
-            <h3 className='text-xl font-semibold text-white mb-2'>
+            <h3 className='text-3xl font-black text-slate-800 mb-4'>
               No Profiles Yet
             </h3>
-            <p className='text-white/60 mb-6 max-w-md mx-auto'>
+            <p className='text-slate-500 font-bold mb-8 max-w-lg mx-auto text-lg'>
               Add a child profile to start tracking their learning progress and
               see their achievements here.
             </p>
             <button
               onClick={() => navigate('/dashboard')}
-              className='px-6 py-3 bg-pip-orange text-white rounded-xl font-semibold hover:bg-pip-rust transition'
+              className='px-8 py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-2xl font-black text-xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all'
               type='button'
             >
-              Go to Dashboard to Add Profile
+              Go to Dashboard
             </button>
           </div>
         )}
@@ -205,14 +202,14 @@ export function Progress() {
           !loading &&
           profiles.length > 0 &&
           !selectedProfileId && (
-            <div className='text-center py-16'>
-              <div className='w-24 h-24 mx-auto mb-6 bg-white/10 rounded-full flex items-center justify-center'>
-                <UIIcon name='heart' size={48} className='text-white/60' />
+            <div className='text-center py-20 bg-white border-4 border-slate-100 rounded-[2.5rem] shadow-sm'>
+              <div className='w-24 h-24 mx-auto mb-6 bg-[#3B82F6]/10 rounded-full flex items-center justify-center border-4 border-[#3B82F6]/20'>
+                <UIIcon name='heart' size={48} className='text-[#3B82F6]' />
               </div>
-              <h3 className='text-xl font-semibold text-white mb-2'>
+              <h3 className='text-3xl font-black text-slate-800 mb-4'>
                 Select a Profile
               </h3>
-              <p className='text-white/60 max-w-md mx-auto'>
+              <p className='text-slate-500 font-bold max-w-lg mx-auto text-lg'>
                 Choose a child profile from the dropdown above to view their
                 learning progress.
               </p>
@@ -220,52 +217,60 @@ export function Progress() {
           )}
 
         {loading && (
-          <div className='text-center py-12'>
-            <div className='w-16 h-16 mx-auto mb-4'>
-              <img
-                src='/assets/images/loading-pip.svg'
-                alt='Loading'
-                className='w-full h-full object-contain'
-              />
+          <div className='text-center py-20 bg-white border-4 border-slate-100 rounded-[2.5rem] shadow-sm'>
+            <div className='w-20 h-20 mx-auto mb-6 bg-slate-50 rounded-full flex items-center justify-center border-4 border-slate-100'>
+              <UIIcon name={'loader' as any} size={40} className='text-slate-400 animate-spin' />
             </div>
-            <p className='text-white/60'>Loading progress...</p>
+            <p className='text-slate-500 font-bold text-xl'>Loading progress...</p>
           </div>
         )}
 
         {error && (
-          <div className='bg-red-500/20 border border-red-500/30 rounded-xl p-6 mb-8'>
-            <p className='text-text-error'>{error}</p>
+          <div className='bg-red-50 border-4 border-red-200 rounded-[2rem] p-8 mb-8 shadow-sm flex items-center gap-4'>
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+              <UIIcon name={'warning' as any} size={24} className="text-red-500" />
+            </div>
+            <p className='text-red-700 font-bold text-lg'>{error}</p>
           </div>
         )}
 
         {!loading && !error && stats && (
           <>
             {/* Plant Visualization Section */}
-            <div className='bg-white/10 border border-border rounded-xl p-8 mb-8'>
-              <div className='text-center mb-6'>
-                <h2 className='text-2xl font-bold text-white mb-2'>
+            <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 mb-12 shadow-sm relative overflow-hidden'>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/5 rounded-bl-full -z-10"></div>
+
+              <div className='text-center mb-10'>
+                <h2 className='text-4xl font-black text-slate-800 mb-2'>
                   Your Learning Garden
                 </h2>
-                <p className='text-white/60'>
+                <p className='text-xl text-slate-500 font-bold'>
                   Watch your knowledge grow with every practice session
                 </p>
               </div>
 
-              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
                 <div className='flex justify-center'>
-                  <PlantVisualization
-                    progressPercentage={plantGrowth.progress}
-                    growthStage={plantGrowth.stage}
-                    className='w-64 h-64'
-                  />
+                  <div className="w-72 h-72 bg-gradient-to-b from-blue-50 to-white rounded-full border-4 border-slate-100 flex items-center justify-center shadow-sm relative pt-12">
+                    <PlantVisualization
+                      progressPercentage={plantGrowth.progress}
+                      growthStage={plantGrowth.stage as any}
+                      className='w-48 h-48'
+                    />
+                  </div>
                 </div>
 
-                <div className='space-y-4'>
-                  <div className='bg-white/5 border border-border rounded-lg p-4'>
-                    <h3 className='font-semibold text-white mb-2'>
-                      Growth Stage: {plantGrowth.stage}
-                    </h3>
-                    <p className='text-sm text-white/80 mb-3'>
+                <div className='space-y-6'>
+                  <div className='bg-slate-50 border-4 border-slate-100 rounded-[2rem] p-8 shadow-sm'>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-[#10B981] rounded-xl flex items-center justify-center text-white border-2 border-[#000]">
+                        <UIIcon name={'star' as any} size={20} />
+                      </div>
+                      <h3 className='text-2xl font-black text-slate-800 uppercase tracking-tight'>
+                        Stage: <span className="text-[#10B981]">{plantGrowth.stage}</span>
+                      </h3>
+                    </div>
+                    <p className='text-lg font-semibold text-slate-600 mb-6 leading-relaxed'>
                       {plantGrowth.stage === 'seed' &&
                         'Your learning journey has just begun! Every practice helps the seed sprout.'}
                       {plantGrowth.stage === 'sprout' &&
@@ -277,25 +282,36 @@ export function Progress() {
                       {plantGrowth.stage === 'blooming' &&
                         'Amazing! Your plant is in full bloom, showcasing your learning achievements.'}
                     </p>
-                    <p className='text-sm text-pip-orange font-medium'>
-                      Next: {plantGrowth.nextMilestone}
-                    </p>
+                    <div className='bg-white border-2 border-slate-200 rounded-xl p-4 flex justify-between items-center'>
+                      <span className="font-bold text-slate-500 uppercase tracking-widest text-sm">Next Goal</span>
+                      <span className='text-lg text-[#E85D04] font-black'>
+                        {plantGrowth.nextMilestone}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className='text-center'>
-                    <div className='text-3xl font-bold text-white mb-1'>
-                      {scorecard.overallScore}/100
+                  <div className='text-center bg-white border-4 border-slate-100 rounded-[2rem] p-6 shadow-sm flex items-center justify-between'>
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-[#3B82F6]/10 rounded-2xl flex items-center justify-center">
+                        <span className="text-3xl">🏆</span>
+                      </div>
+                      <div className='text-left'>
+                        <div className='text-slate-500 font-bold uppercase tracking-wider text-sm'>Overall Score</div>
+                        <div className='text-slate-800 font-black text-2xl'>Learning Average</div>
+                      </div>
                     </div>
-                    <div className='text-white/60'>Overall Learning Score</div>
+                    <div className='text-5xl font-black text-[#3B82F6]'>
+                      {scorecard.overallScore}<span className="text-2xl text-slate-400">/100</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Unified Metrics Section */}
-            <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-white mb-6'>
-                Learning Dimensions
+            <div className='mb-12'>
+              <h2 className='text-3xl font-black text-slate-800 mb-8 flex items-center gap-3'>
+                <span className="text-4xl text-[#10B981]">📊</span> Learning Dimensions
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
                 <MetricCard
@@ -338,18 +354,20 @@ export function Progress() {
             </div>
 
             {/* Insights & Recommendations */}
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12'>
               {/* Insights */}
-              <div className='bg-white/10 border border-border rounded-xl p-6'>
-                <h3 className='text-xl font-semibold text-white mb-4 flex items-center gap-2'>
-                  <UIIcon
-                    name='sparkles'
-                    size={20}
-                    className='text-yellow-400'
-                  />
+              <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 shadow-sm'>
+                <h3 className='text-2xl font-black text-slate-800 mb-6 flex items-center gap-3'>
+                  <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <UIIcon
+                      name='sparkles'
+                      size={20}
+                      className='text-yellow-600'
+                    />
+                  </div>
                   Insights
                 </h3>
-                <div className='space-y-3'>
+                <div className='space-y-4'>
                   {scorecard.insights.map((insight: string, i: number) => (
                     <RecommendationCard
                       key={i}
@@ -364,12 +382,14 @@ export function Progress() {
               </div>
 
               {/* Recommendations */}
-              <div className='bg-white/10 border border-border rounded-xl p-6'>
-                <h3 className='text-xl font-semibold text-white mb-4 flex items-center gap-2'>
-                  <UIIcon name='target' size={20} className='text-green-400' />
+              <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 shadow-sm'>
+                <h3 className='text-2xl font-black text-slate-800 mb-6 flex items-center gap-3'>
+                  <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                    <UIIcon name='target' size={20} className='text-green-600' />
+                  </div>
                   Recommendations
                 </h3>
-                <div className='space-y-3'>
+                <div className='space-y-4'>
                   {scorecard.recommendations.map((rec: string, i: number) => (
                     <RecommendationCard
                       key={i}
@@ -384,103 +404,74 @@ export function Progress() {
               </div>
             </div>
 
-            {/* Strengths & Areas for Improvement */}
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
-              {/* Strengths */}
-              <div className='bg-white/10 border border-border rounded-xl p-6'>
-                <h3 className='text-xl font-semibold text-white mb-4 flex items-center gap-2'>
-                  <UIIcon name='star' size={20} className='text-yellow-400' />
-                  Strengths
-                </h3>
-                <div className='space-y-3'>
-                  {scorecard.strengths.map((strength: string, i: number) => (
-                    <RecommendationCard
-                      key={i}
-                      type='strength'
-                      title='Great at'
-                      description={strength}
-                      icon='star'
-                      delay={i * 0.1}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Areas for Improvement */}
-              <div className='bg-white/10 border border-border rounded-xl p-6'>
-                <h3 className='text-xl font-semibold text-white mb-4 flex items-center gap-2'>
-                  <UIIcon name='flame' size={20} className='text-orange-400' />
-                  Growth Opportunities
-                </h3>
-                <div className='space-y-3'>
-                  {scorecard.areasForImprovement.map(
-                    (area: string, i: number) => (
-                      <RecommendationCard
-                        key={i}
-                        type='improvement'
-                        title='Focus Area'
-                        description={area}
-                        icon='arrow-up'
-                        delay={i * 0.1}
-                      />
-                    ),
-                  )}
-                </div>
-              </div>
-            </div>
-
             {/* Honest Progress Stats */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
-              <div className='bg-white/10 border border-border rounded-xl p-6 text-center'>
-                <div className='text-3xl font-bold text-white mb-1'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-12'>
+              <div className='bg-white border-4 border-slate-100 rounded-[2rem] p-8 text-center flex flex-col items-center shadow-sm relative overflow-hidden group hover:border-[#F59E0B] transition-colors'>
+                <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#F59E0B]/10 rounded-full blur-xl group-hover:bg-[#F59E0B]/20 transition-colors'></div>
+                <div className='w-16 h-16 bg-[#F59E0B]/10 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition-transform'>🔤</div>
+                <div className='text-5xl font-black text-slate-800 mb-2'>
                   {honestStats.uniqueLettersPracticed}
                 </div>
-                <div className='text-white/60 text-sm'>
+                <div className='text-slate-500 font-bold uppercase tracking-wider text-sm'>
                   Unique Letters Practiced
                 </div>
               </div>
-              <div className='bg-white/10 border border-border rounded-xl p-6 text-center'>
-                <div className='text-3xl font-bold text-white mb-1'>
+              <div className='bg-white border-4 border-slate-100 rounded-[2rem] p-8 text-center flex flex-col items-center shadow-sm relative overflow-hidden group hover:border-[#10B981] transition-colors'>
+                <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#10B981]/10 rounded-full blur-xl group-hover:bg-[#10B981]/20 transition-colors'></div>
+                <div className='w-16 h-16 bg-[#10B981]/10 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition-transform'>🎯</div>
+                <div className='text-5xl font-black text-slate-800 mb-2'>
                   {honestStats.avgTracingAccuracy}%
                 </div>
-                <div className='text-white/60 text-sm'>
-                  Average Tracing Accuracy
+                <div className='text-slate-500 font-bold uppercase tracking-wider text-sm'>
+                  Average Accuracy
                 </div>
               </div>
-              <div className='bg-white/10 border border-border rounded-xl p-6 text-center'>
-                <div className='text-3xl font-bold text-white mb-1'>
+              <div className='bg-white border-4 border-slate-100 rounded-[2rem] p-8 text-center flex flex-col items-center shadow-sm relative overflow-hidden group hover:border-[#3B82F6] transition-colors'>
+                <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#3B82F6]/10 rounded-full blur-xl group-hover:bg-[#3B82F6]/20 transition-colors'></div>
+                <div className='w-16 h-16 bg-[#3B82F6]/10 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition-transform'>🚀</div>
+                <div className='text-5xl font-black text-slate-800 mb-2'>
                   {honestStats.totalActivities}
                 </div>
-                <div className='text-white/60 text-sm'>Total Activities</div>
+                <div className='text-slate-500 font-bold uppercase tracking-wider text-sm'>Total Activities</div>
               </div>
             </div>
 
-            {/* Recent Activity (Properly sorted by date) */}
-            <div className='bg-white/10 border border-border rounded-xl p-6'>
-              <h2 className='text-xl font-semibold mb-4'>Recent Activity</h2>
+            {/* Recent Activity */}
+            <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 lg:p-12 shadow-sm'>
+              <h2 className='text-3xl font-black text-slate-800 mb-8 flex items-center gap-3'>
+                <span className="text-4xl">⏱️</span> Recent Activity
+              </h2>
               {honestStats.recentActivity.length === 0 ? (
-                <p className='text-white/60 text-center py-8'>
-                  No activity yet. Start learning to see your progress here!
-                </p>
+                <div className='text-center py-12 bg-slate-50 rounded-[2rem] border-4 border-dashed border-slate-200'>
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-slate-100 shadow-sm text-2xl">🔍</div>
+                  <p className='text-slate-500 font-bold text-lg'>
+                    No activity yet. Start learning to see your progress here!
+                  </p>
+                </div>
               ) : (
-                <div className='space-y-4'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   {honestStats.recentActivity.map((activity, i) => (
                     <motion.div
                       key={`${activity.timestamp}-${i}`}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.05 }}
-                      className='flex justify-between items-center py-3 border-b border-border last:border-0'
+                      className='flex justify-between items-center p-5 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] hover:border-[#3B82F6]/30 transition-colors group'
                     >
-                      <div>
-                        <div className='font-medium text-white'>
-                          {activity.action}
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                          {activity.action.includes('Traced') ? '✏️' : '🎮'}
                         </div>
-                        <div className='text-sm text-white/60'>
-                          {activity.time}
+                        <div>
+                          <div className='font-black text-slate-800 text-lg group-hover:text-[#3B82F6] transition-colors'>
+                            {activity.action}
+                          </div>
+                          <div className='text-sm font-bold text-slate-500 uppercase tracking-widest mt-1'>
+                            {activity.time}
+                          </div>
                         </div>
                       </div>
-                      <div className='text-text-success font-semibold'>
+                      <div className='bg-[#10B981]/10 text-[#10B981] font-black px-4 py-2 rounded-xl border-2 border-[#10B981]/20'>
                         {activity.score}
                       </div>
                     </motion.div>

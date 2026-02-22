@@ -223,17 +223,17 @@ jobs:
 
 ### Pricing Strategy
 
-| Tier | Price | Features |
-|------|-------|----------|
-| **Free** | ₹0 | 3 games (Alphabet Tracing, Finger Number Show, Connect the Dots), 15 min/day, 1 child profile |
-| **Premium** | ₹199/mo or ₹1,499/yr (37% savings) | All 16 games, unlimited play time, 3 child profiles, progress tracking & reports |
-| **Family** | ₹299/mo or ₹2,499/yr (30% savings) | All Premium features + 5 child profiles, teacher/parent dashboard, offline mode, priority support |
+| Tier | India Pricing (INR) | Global Pricing (USD) | Features |
+|------|-------|------|----------|
+| **Trial** | ₹0 | $0 | 7-day full access to all games and features (Requires card/UPI upfront) |
+| **Premium** | ₹299/mo or ₹2,499/yr | $4.99/mo or $39.99/yr | All 16 games, unlimited play time, 3 child profiles, progress tracking & reports |
+| **Family** | ₹399/mo or ₹3,499/yr | $7.99/mo or $59.99/yr | All Premium features + 5 child profiles, teacher/parent dashboard, offline mode, priority support |
 
 **Pricing Rationale:**
-- Free tier provides enough value to demonstrate the camera interaction (primary differentiator)
-- ₹199/mo is affordable for target segment (< cost of one tutoring session)
-- Annual plans incentivize retention with significant savings
-- Family plan targets households with multiple children or small preschools
+- No permanent free tier ensures we acquire high-intent, quality users and covers base AI/infrastructure costs from Day 1. The 7-day trial provides enough time to showcase the "wow" factor of the camera.
+- Indian pricing is set to be highly competitive against local tutoring (a fraction of Cuemath/BYJU's).
+- Global pricing targets the standard $5/mo EdTech subscription sweet spot (comparable to ABCmouse or Kiddopia).
+- Annual plans incentivize retention with significant savings.
 
 ### Distribution Channels
 
@@ -382,11 +382,13 @@ jobs:
 
 ### Revenue vs. Cost (Break-Even Analysis)
 
-| Users | Free | Paid (8% conv.) | Monthly Revenue (₹199/mo) | Monthly Cost | Net |
-|-------|------|-----------------|--------------------------|-------------|-----|
-| 100 | 92 | 8 | ₹1,592 (~$19) | ~$1 | +$18 |
-| 1,000 | 920 | 80 | ₹15,920 (~$190) | ~$70 | +$120 |
-| 10,000 | 9,200 | 800 | ₹1,59,200 (~$1,900) | ~$250 | +$1,650 |
+*(Assuming a 70/30 split between Indian and Global users, blended ARPU of ~$3.00/mo, and conservative 5% Trial-to-Paid conversion)*
+
+| Trial Signups | Paid Users (5% conv.) | Est. Blended Monthly Revenue | Est. Monthly Infra Cost | Net |
+|-------|-----------------|--------------------------|-------------|-----|
+| 1,000 | 50 | ~$150 | ~$50 | +$100 |
+| 10,000 | 500 | ~$1,500 | ~$150 | +$1,350 |
+| 100,000 | 5,000 | ~$15,000 | ~$750 | +$14,250 |
 
 ---
 

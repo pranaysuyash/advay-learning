@@ -276,44 +276,43 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
 
   return (
     <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome}>
-      <div className='absolute inset-0 bg-black'>
+      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
           mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-45'
+          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-black/65' />
+        <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-200/40 pointer-events-none' />
 
-        <div className='absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-black/55 text-white text-sm text-center max-w-[90%]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[300px]'>
           {feedback}
         </div>
 
-        <div className='absolute top-16 right-4 px-4 py-2 rounded-xl bg-black/55 text-white text-sm'>
-          Time: <span className='font-bold text-amber-300'>{timeLeft}s</span>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
+          Time: <span className='font-black text-amber-500 text-2xl ml-2'>{timeLeft}s</span>
         </div>
 
         {expectedTarget && (
-          <div className='absolute top-16 left-4 px-4 py-2 rounded-xl bg-black/55 text-white text-sm border border-white/20'>
-            Next: <span className='font-bold text-emerald-300'>{expectedTarget.value}</span>
+          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg flex items-center gap-3'>
+            Next: <span className='flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-[#10B981] font-black'>{expectedTarget.value}</span>
           </div>
         )}
 
         {targets.map((target) => (
           <div
             key={target.id}
-            className='absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+            className='absolute w-[5.5rem] h-[5.5rem] -translate-x-1/2 -translate-y-1/2 pointer-events-none'
             style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
             aria-hidden='true'
           >
             <div
-              className={`absolute inset-0 rounded-full border-4 flex items-center justify-center font-black text-xl ${
-                target.cleared
-                  ? 'border-emerald-300 bg-emerald-300/40 text-emerald-100'
-                  : 'border-sky-300 bg-sky-300/30 text-white'
-              }`}
+              className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-3xl shadow-sm transition-all duration-300 ${target.cleared
+                  ? 'border-emerald-200 bg-emerald-100 text-emerald-500 scale-110'
+                  : 'border-[#3B82F6] bg-white text-[#3B82F6] hover:scale-105'
+                }`}
             >
               {target.value}
             </div>
@@ -322,18 +321,18 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
 
         {cursor && (
           <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
+            className='absolute w-12 h-12 rounded-full border-4 border-[#F59E0B] bg-amber-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(245,158,11,0.5)] pointer-events-none z-20'
             style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
             aria-hidden='true'
           />
         )}
 
         {!isPlaying && !gameCompleted && (
-          <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center'>
+          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <button
               type='button'
               onClick={startGame}
-              className='px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-2xl text-lg'
+              className='px-16 py-6 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-[2rem] shadow-sm text-3xl transition-transform hover:scale-105 active:scale-95'
             >
               Start Number Trail
             </button>
@@ -341,9 +340,15 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         )}
 
         {gameCompleted && (
-          <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3'>
-            <h2 className='text-3xl font-black text-emerald-300'>Trail Complete!</h2>
-            <p className='text-white/90'>Final Score: {score}</p>
+          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-6'>
+            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-sm'>
+              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🌟</div>
+              <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>Trail Complete!</h2>
+              <p className='text-xl font-bold text-slate-500 mb-6'>Amazing job finding them all!</p>
+              <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+                Final Score: {score}
+              </div>
+            </div>
           </div>
         )}
 

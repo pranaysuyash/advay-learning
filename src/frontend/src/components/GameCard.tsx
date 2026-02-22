@@ -5,65 +5,53 @@ import { Card } from './ui/Card';
 import { Button, ButtonLink } from './ui/Button';
 
 interface GameCardProps {
-    /** Unique game identifier */
     id: string;
-    /** Game title */
     title: string;
-    /** Short description */
     description: string;
-    /** Navigation path */
     path: string;
-    /** Icon name from UIIcon */
     icon: IconName;
-    /** Target age range */
     ageRange: string;
-    /** Game category */
     category: string;
-    /** Difficulty description */
     difficulty: string;
-    /** Optional preview image path */
     previewImage?: string;
-    /** Whether game is coming soon */
     comingSoon?: boolean;
-    /** Is this a new game? Shows badge */
     isNew?: boolean;
-    /** Stars earned (0-3) */
     starsEarned?: number;
-    /** Total plays count */
     playCount?: number;
-    /** Progress percentage (0-100) */
     progress?: number;
-    /** Animation delay for stagger effect */
     animationDelay?: number;
-    /** Callback when play is clicked */
     onPlay?: () => void;
-    /** Custom button text */
     buttonText?: string;
-    /** Reduced motion preference from caller */
     reducedMotion?: boolean;
 }
 
-// Category color mappings
+// Category color mappings - Bright, fun V1 colors
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-    'Alphabets': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'Numeracy': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'Fine Motor': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'default': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
+    'Alphabets': { bg: 'bg-[#3B82F6]/10', text: 'text-[#3B82F6]', border: 'border-[#3B82F6]/20' },
+    'Numeracy': { bg: 'bg-[#10B981]/10', text: 'text-[#10B981]', border: 'border-[#10B981]/20' },
+    'Drawing': { bg: 'bg-[#8B5CF6]/10', text: 'text-[#8B5CF6]', border: 'border-[#8B5CF6]/20' },
+    'Music': { bg: 'bg-[#EC4899]/10', text: 'text-[#EC4899]', border: 'border-[#EC4899]/20' },
+    'Motor Skills': { bg: 'bg-[#F59E0B]/10', text: 'text-[#F59E0B]', border: 'border-[#F59E0B]/20' },
+    'Shapes': { bg: 'bg-[#06B6D4]/10', text: 'text-[#06B6D4]', border: 'border-[#06B6D4]/20' },
+    'Colors': { bg: 'bg-[#EF4444]/10', text: 'text-[#EF4444]', border: 'border-[#EF4444]/20' },
+    'Memory': { bg: 'bg-[#6366F1]/10', text: 'text-[#6366F1]', border: 'border-[#6366F1]/20' },
+    'Movement': { bg: 'bg-[#14B8A6]/10', text: 'text-[#14B8A6]', border: 'border-[#14B8A6]/20' },
+    'Science': { bg: 'bg-[#8B5CF6]/10', text: 'text-[#8B5CF6]', border: 'border-[#8B5CF6]/20' },
+    'Literacy': { bg: 'bg-[#3B82F6]/10', text: 'text-[#3B82F6]', border: 'border-[#3B82F6]/20' },
+    'Emotions': { bg: 'bg-[#F43F5E]/10', text: 'text-[#F43F5E]', border: 'border-[#F43F5E]/20' },
+    'Creativity': { bg: 'bg-[#E85D04]/10', text: 'text-[#E85D04]', border: 'border-[#E85D04]/20' },
+    'default': { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
 };
 
 // Difficulty color mappings
 const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-    'Easy': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'Medium': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'Hard': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
-    'default': { bg: 'bg-bg-tertiary', text: 'text-text-secondary', border: 'border-border' },
+    'Easy': { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' },
+    'Medium': { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
+    'Hard': { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' },
+    'default': { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
 };
 
-/**
- * Beautiful game card component for the games list
- */
 export const GameCard = memo(function GameCard({
-    // id, // Not currently used but kept in props for identification
     title,
     description,
     path,
@@ -84,137 +72,135 @@ export const GameCard = memo(function GameCard({
 }: GameCardProps) {
     const categoryColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.default;
 
-    // Determine difficulty color based on first word
     const diffLevel = difficulty.split(' ')[0];
     const diffColor = DIFFICULTY_COLORS[diffLevel] || DIFFICULTY_COLORS.default;
 
     const CardContent = (
         <Card
             hover={!comingSoon && !reducedMotion}
-            className="relative h-full overflow-hidden group"
+            className={`relative h-full overflow-hidden group flex flex-col ${comingSoon ? 'opacity-60 grayscale cursor-not-allowed' : ''}`}
             padding="none"
         >
-            <motion.article
+            <motion.div
                 initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay, duration: 0.3 }}
-                className={`h-full ${comingSoon ? 'opacity-60 grayscale' : ''}`}
+                className="h-full flex flex-col"
             >
-            {/* Preview Image or Icon Header */}
-            <div className="relative h-32 bg-bg-tertiary overflow-hidden border-b border-border">
-                {previewImage ? (
-                    <img
-                        src={previewImage}
-                        alt={title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="p-4 bg-white rounded-2xl shadow-soft border border-border">
-                            <UIIcon name={icon} size={48} className="text-pip-orange" />
+                {/* Preview Image or Icon Header */}
+                <div className="relative h-40 bg-slate-50 overflow-hidden border-b-4 border-slate-100 shrink-0">
+                    {previewImage ? (
+                        <img
+                            src={previewImage}
+                            alt={title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                            <div className="w-20 h-20 bg-white rounded-[1.5rem] shadow-sm flex items-center justify-center border-4 border-slate-100 group-hover:border-[#E85D04] transition-colors group-hover:scale-110 duration-300">
+                                <UIIcon name={icon} size={40} className="text-[#E85D04]" />
+                            </div>
                         </div>
+                    )}
+
+                    {/* NEW badge */}
+                    {isNew && (
+                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-[#E85D04] text-white text-xs font-black rounded-full shadow-sm tracking-widest uppercase border-2 border-white">
+                            NEW
+                        </div>
+                    )}
+
+                    {/* COMING SOON badge */}
+                    {comingSoon && (
+                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-white text-slate-700 text-xs font-black rounded-full shadow-sm tracking-widest uppercase border-2 border-slate-200">
+                            SOON
+                        </div>
+                    )}
+
+                    {/* Stars display */}
+                    {starsEarned > 0 && (
+                        <div className="absolute top-4 right-4 flex gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm border-2 border-yellow-100">
+                            {[1, 2, 3].map((star) => (
+                                <span
+                                    key={star}
+                                    className={`text-xl -mt-1 drop-shadow-sm ${star <= starsEarned ? 'text-yellow-400' : 'text-slate-200'}`}
+                                >
+                                    ★
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Category badge */}
+                    <div className="absolute bottom-4 left-4">
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 ${categoryColor.bg} ${categoryColor.text} ${categoryColor.border} backdrop-blur-sm bg-white/90`}>
+                            {category}
+                        </span>
                     </div>
-                )}
-
-                {/* NEW badge */}
-                {isNew && (
-                    <div className="absolute top-3 left-3 px-2 py-1 bg-success text-white text-xs font-bold rounded-full shadow-soft">
-                        NEW
-                    </div>
-                )}
-
-                {/* COMING SOON badge */}
-                {comingSoon && (
-                    <div className="absolute top-3 left-3 px-2 py-1 bg-text-muted text-white text-xs font-bold rounded-full shadow-soft">
-                        COMING SOON
-                    </div>
-                )}
-
-                {/* Stars display */}
-                {starsEarned > 0 && (
-                    <div className="absolute top-3 right-3 flex gap-0.5">
-                        {[1, 2, 3].map((star) => (
-                            <span
-                                key={star}
-                                className={`text-lg ${star <= starsEarned ? 'text-warning' : 'text-border'}`}
-                            >
-                                ★
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Category badge on image */}
-                <div className="absolute bottom-3 left-3">
-                    <span className={`text-xs px-2 py-1 rounded-full border ${categoryColor.bg} ${categoryColor.text} ${categoryColor.border}`}>
-                        {category}
-                    </span>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-                {/* Title */}
-                <h3 className="text-xl font-bold mb-2 text-text-primary group-hover:text-pip-orange transition-colors">
-                    {title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                    {description}
-                </p>
-
-                {/* Tags row */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs px-2 py-1 bg-bg-tertiary text-text-secondary rounded-full border border-border">
-                        {ageRange}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded-full border ${diffColor.bg} ${diffColor.text} ${diffColor.border}`}>
-                        {difficulty}
-                    </span>
                 </div>
 
-                {/* Progress bar (if progress provided) */}
-                {progress !== undefined && (
-                    <div className="mb-4">
-                        <div className="flex justify-between text-xs text-text-secondary mb-1">
-                            <span>Progress</span>
-                            <span>{progress}%</span>
-                        </div>
-                        <div className="h-2 bg-bg-tertiary rounded-full overflow-hidden border border-border">
-                            <motion.div
-                                initial={reducedMotion ? false : { width: 0 }}
-                                animate={{ width: `${progress}%` }}
-                                transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay + 0.3, duration: 0.5 }}
-                                className="h-full bg-pip-orange rounded-full"
-                            />
-                        </div>
-                    </div>
-                )}
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-2xl font-black mb-2 text-slate-800 group-hover:text-[#3B82F6] transition-colors leading-tight tracking-tight">
+                        {title}
+                    </h3>
 
-                {/* Play count */}
-                {playCount !== undefined && playCount > 0 && (
-                    <div className="text-xs text-text-secondary mb-3">
-                        Played {playCount} time{playCount !== 1 ? 's' : ''}
-                    </div>
-                )}
+                    <p className="text-slate-600 font-semibold text-sm mb-5 line-clamp-2 leading-relaxed flex-1">
+                        {description}
+                    </p>
 
-                {/* Action button */}
-                {comingSoon ? (
-                    <Button fullWidth variant="ghost" disabled>
-                        Coming Soon
-                    </Button>
-                ) : onPlay ? (
-                    <Button fullWidth size="md" icon="sparkles" onClick={onPlay}>
-                        {buttonText}
-                    </Button>
-                ) : (
-                    <ButtonLink fullWidth size="md" icon="sparkles" to={path}>
-                        {buttonText}
-                    </ButtonLink>
-                )}
-            </div>
-            </motion.article>
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        <span className="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded-lg border-2 border-slate-200">
+                            {ageRange}
+                        </span>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-lg border-2 ${diffColor.bg} ${diffColor.text} ${diffColor.border}`}>
+                            {difficulty}
+                        </span>
+                    </div>
+
+                    {/* Progress bar (if progress provided) */}
+                    {progress !== undefined && (
+                        <div className="mb-5">
+                            <div className="flex justify-between text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                                <span>Progress</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200">
+                                <motion.div
+                                    initial={reducedMotion ? false : { width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay + 0.3, duration: 0.5 }}
+                                    className="h-full bg-green-500 rounded-full"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Play count */}
+                    {playCount !== undefined && playCount > 0 && (
+                        <div className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">
+                            Played {playCount} time{playCount !== 1 ? 's' : ''}
+                        </div>
+                    )}
+
+                    {/* Action button */}
+                    <div className="mt-auto">
+                        {comingSoon ? (
+                            <Button fullWidth variant="ghost" disabled>
+                                Coming Soon
+                            </Button>
+                        ) : onPlay ? (
+                            <Button fullWidth onClick={onPlay}>
+                                {buttonText}
+                            </Button>
+                        ) : (
+                            <ButtonLink fullWidth to={path}>
+                                {buttonText}
+                            </ButtonLink>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
         </Card>
     );
 

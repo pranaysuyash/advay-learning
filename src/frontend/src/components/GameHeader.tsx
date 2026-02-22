@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UIIcon } from './ui/Icon';
+import { Button } from './ui/Button';
 
 interface GameHeaderProps {
     /** Game title displayed in header */
@@ -70,66 +71,64 @@ export const GameHeader = memo(function GameHeader({
         <motion.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pointer-events-none"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8 pointer-events-none"
         >
             {/* Left side - Title and back button */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 bg-white/80 p-3 pr-6 rounded-[2rem] border-4 border-white shadow-sm backdrop-blur-md">
                 {showBackButton && (
                     <button
                         onClick={handleBack}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-border transition pointer-events-auto"
+                        className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-[1.25rem] border-2 border-slate-200 transition-colors focus:outline-none focus:border-[#3B82F6] pointer-events-auto shadow-sm"
                         aria-label="Go back"
                     >
-                        <UIIcon name="back" size={20} />
+                        <UIIcon name="back" size={24} />
                     </button>
                 )}
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{title}</h1>
                     {subtitle && (
-                        <p className="text-white/60 text-sm sm:text-base">{subtitle}</p>
+                        <p className="text-slate-500 font-bold text-sm sm:text-base mt-0.5">{subtitle}</p>
                     )}
                 </div>
             </div>
 
             {/* Right side - Stats and actions */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                {/* Score display */}
-                {score !== undefined && (
-                    <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-4 py-2 rounded-xl border border-yellow-500/30">
-                        <UIIcon name="star" size={18} className="text-yellow-400" />
-                        <output className="font-bold text-lg">{score}</output>
-                    </div>
-                )}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pointer-events-auto">
 
                 {/* Level display */}
                 {level !== undefined && (
-                    <div className="flex items-center gap-2 bg-blue-500/20 px-3 py-2 rounded-xl border border-blue-500/30">
-                        <span className="text-sm text-blue-300">Level</span>
-                        <span className="font-bold text-blue-400">{level}</span>
+                    <div className="flex items-center gap-2 bg-[#3B82F6] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                        <span className="text-sm font-bold text-blue-100 uppercase tracking-widest">Level</span>
+                        <span className="font-black text-white text-lg sm:text-xl">{level}</span>
+                    </div>
+                )}
+
+                {/* Score display */}
+                {score !== undefined && (
+                    <div className="flex items-center gap-2 bg-[#E85D04] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                        <UIIcon name="star" size={20} className="text-yellow-300" />
+                        <output className="font-black text-white text-lg sm:text-xl">{score}</output>
                     </div>
                 )}
 
                 {/* Streak display */}
                 {streak !== undefined && streak > 0 && (
-                    <div className="flex items-center gap-1 bg-orange-500/20 px-3 py-2 rounded-xl border border-orange-500/30">
-                        <span className="text-orange-400">🔥</span>
-                        <span className="font-bold text-orange-400">{streak}</span>
+                    <div className="flex items-center gap-2 bg-[#F59E0B] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                        <span className="text-yellow-100 text-lg">🔥</span>
+                        <span className="font-black text-white text-lg sm:text-xl">{streak}</span>
                     </div>
                 )}
 
                 {/* Timer display */}
                 {timeLeft !== undefined && (
-                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${timeLeft <= 10
-                        ? 'bg-red-500/20 border-red-500/30 animate-pulse'
+                    <div className={`flex items-center gap-2 px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000] ${timeLeft <= 10
+                        ? 'bg-red-500 animate-pulse'
                         : timeLeft <= 30
-                            ? 'bg-yellow-500/20 border-yellow-500/30'
-                            : 'bg-green-500/20 border-green-500/30'
+                            ? 'bg-[#F59E0B]'
+                            : 'bg-[#10B981]'
                         }`}>
-                        <UIIcon name="timer" size={16} className={
-                            timeLeft <= 10 ? 'text-red-400' : timeLeft <= 30 ? 'text-yellow-400' : 'text-green-400'
-                        } />
-                        <span className={`font-bold tabular-nums ${timeLeft <= 10 ? 'text-red-400' : timeLeft <= 30 ? 'text-yellow-400' : 'text-green-400'
-                            }`}>
+                        <UIIcon name="timer" size={20} className="text-white" />
+                        <span className="font-black tabular-nums text-white text-lg sm:text-xl">
                             {timeLeft}s
                         </span>
                     </div>
@@ -139,33 +138,32 @@ export const GameHeader = memo(function GameHeader({
                 {infoItems.map((item, index) => (
                     <div
                         key={index}
-                        className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl border border-border"
+                        className="flex items-center gap-2 bg-white px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-slate-200 shadow-sm"
                     >
-                        <span className="text-sm text-white/60">{item.label}</span>
-                        <span className="font-bold">{item.value}</span>
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
+                        <span className="font-black text-slate-800 text-lg">{item.value}</span>
                     </div>
                 ))}
 
                 {/* Action buttons */}
                 {secondaryAction && (
-                    <button
+                    <Button
                         onClick={secondaryAction.onClick}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl border border-border transition flex items-center gap-2 font-medium pointer-events-auto"
+                        variant="secondary"
+                        icon={secondaryAction.icon as any}
                     >
-                        {secondaryAction.icon && <UIIcon name={secondaryAction.icon as any} size={16} />}
                         {secondaryAction.label}
-                    </button>
+                    </Button>
                 )}
 
                 {primaryAction && (
-                    <button
+                    <Button
                         onClick={primaryAction.onClick}
                         disabled={primaryAction.disabled}
-                        className="px-4 py-2 bg-gradient-to-r from-pip-orange to-pip-rust hover:shadow-lg hover:shadow-pip-orange/30 rounded-xl transition flex items-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                        icon={primaryAction.icon as any}
                     >
-                        {primaryAction.icon && <UIIcon name={primaryAction.icon as any} size={16} />}
                         {primaryAction.label}
-                    </button>
+                    </Button>
                 )}
             </div>
         </motion.header>

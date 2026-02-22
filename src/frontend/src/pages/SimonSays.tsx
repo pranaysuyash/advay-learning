@@ -142,32 +142,32 @@ export function SimonSays() {
         case 'head':
           matchScore =
             (leftWrist.y < 0.3 && Math.abs(leftWrist.x - nose.x) < 0.2) ||
-            (rightWrist.y < 0.3 && Math.abs(rightWrist.x - nose.x) < 0.2)
+              (rightWrist.y < 0.3 && Math.abs(rightWrist.x - nose.x) < 0.2)
               ? 100
               : 0;
           break;
         case 'armsUp':
           matchScore =
             leftWrist.y < leftShoulder.y - 0.1 &&
-            rightWrist.y < rightShoulder.y - 0.1
+              rightWrist.y < rightShoulder.y - 0.1
               ? 100
               : 0;
           break;
         case 'handsOnHips':
           matchScore =
             leftWrist.y > 0.4 &&
-            leftWrist.y < 0.6 &&
-            rightWrist.y > 0.4 &&
-            rightWrist.y < 0.6
+              leftWrist.y < 0.6 &&
+              rightWrist.y > 0.4 &&
+              rightWrist.y < 0.6
               ? 100
               : 0;
           break;
         case 'shoulders':
           matchScore =
             Math.abs(leftWrist.x - leftShoulder.x) < 0.15 &&
-            Math.abs(leftWrist.y - leftShoulder.y) < 0.15 &&
-            Math.abs(rightWrist.x - rightShoulder.x) < 0.15 &&
-            Math.abs(rightWrist.y - rightShoulder.y) < 0.15
+              Math.abs(leftWrist.y - leftShoulder.y) < 0.15 &&
+              Math.abs(rightWrist.x - rightShoulder.x) < 0.15 &&
+              Math.abs(rightWrist.y - rightShoulder.y) < 0.15
               ? 100
               : 0;
           break;
@@ -228,17 +228,19 @@ export function SimonSays() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center'>
+      <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <motion.div
-          className='text-center'
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-12 text-center max-w-md w-full shadow-sm'
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
         >
-          <div className='text-6xl mb-4'>🧠</div>
-          <h2 className='text-2xl font-bold text-orange-700 mb-2'>
-            Loading Simon Says...
+          <div className='text-6xl mb-6 flex justify-center'>
+            <div className='w-24 h-24 border-4 border-[#3B82F6] border-t-transparent rounded-full animate-spin' />
+          </div>
+          <h2 className='text-2xl font-black text-slate-800 tracking-tight mb-2'>
+            Loading Simon Says
           </h2>
-          <p className='text-orange-500'>Get ready to move!</p>
+          <p className='text-slate-500 font-bold'>Warming up the camera...</p>
         </motion.div>
       </div>
     );
@@ -246,14 +248,14 @@ export function SimonSays() {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center'>
-        <div className='text-center p-8'>
-          <div className='text-6xl mb-4'>😢</div>
-          <h2 className='text-2xl font-bold text-red-700 mb-2'>Oops!</h2>
-          <p className='text-red-500 mb-4'>{error}</p>
+      <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
+        <div className='bg-red-50 rounded-[2.5rem] border-4 border-red-100 p-12 text-center max-w-md w-full shadow-sm'>
+          <div className='text-6xl mb-6'>😢</div>
+          <h2 className='text-2xl font-black text-red-600 tracking-tight mb-4'>Oops!</h2>
+          <p className='text-red-500 font-bold mb-8'>{error}</p>
           <button
             onClick={() => navigate('/games')}
-            className='px-6 py-3 bg-purple-500 text-white rounded-full font-bold'
+            className='px-8 py-4 bg-red-100 hover:bg-red-200 text-red-600 rounded-full font-black transition-colors'
           >
             Back to Games
           </button>
@@ -263,159 +265,183 @@ export function SimonSays() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-orange-100 to-yellow-100 p-4'>
-      <header className='flex justify-between items-center mb-4'>
+    <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 flex flex-col font-sans'>
+      {/* Header */}
+      <header className='flex justify-between items-center mb-6 max-w-5xl mx-auto w-full relative z-20'>
         <button
-          onClick={() => navigate('/games')}
-          className='px-4 py-2 bg-white/80 backdrop-blur rounded-full font-bold text-orange-700'
+          onClick={() => navigate('/dashboard')}
+          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-bold text-slate-500 transition-colors shadow-sm'
         >
-          ← Back
+          <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M10 19l-7-7m0 0l7-7m-7 7h18' /></svg>
+          <span className='hidden sm:inline'>Back</span>
         </button>
-        <h1 className='text-2xl font-bold text-orange-800'>Simon Says</h1>
-        <div className='px-4 py-2 bg-yellow-400 rounded-full font-bold text-orange-800'>
-          ⭐ {score}
+
+        <h1 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight absolute left-1/2 -translate-x-1/2'>
+          Simon Says
+        </h1>
+
+        <div className='bg-amber-50 border-4 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-sm flex items-center gap-2'>
+          ⭐ <span>{score}</span>
         </div>
       </header>
 
-      <div className='max-w-4xl mx-auto'>
+      <div className='max-w-5xl mx-auto w-full flex-1 flex flex-col'>
         {!isPlaying ? (
           <motion.div
-            className='bg-white rounded-3xl p-8 shadow-lg'
+            className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 md:p-16 shadow-sm flex-1 flex flex-col items-center justify-center text-center'
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className='text-center mb-8'>
-              <div className='text-8xl mb-4'>🧠👆</div>
-              <h2 className='text-3xl font-bold text-orange-800 mb-2'>
-                Simon Says!
-              </h2>
-              <p className='text-orange-600 text-lg'>
-                Do what Simon says with your body!
-              </p>
-            </div>
-            <div className='bg-orange-50 rounded-2xl p-6 mb-8'>
-              <h3 className='font-bold text-orange-800 mb-4'>How to Play:</h3>
-              <ul className='space-y-2 text-orange-700'>
-                <li>1. Stand in front of your camera</li>
-                <li>2. Listen to Simon's command</li>
-                <li>3. Do the action with your body!</li>
-                <li>4. Hold the pose to earn points</li>
+            <div className='text-[8rem] mb-8 drop-shadow-sm hover:scale-110 transition-transform'>🧠</div>
+            <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
+              Simon Says!
+            </h2>
+            <p className='text-slate-500 text-xl md:text-2xl font-bold mb-12 max-w-lg'>
+              Follow the instructions—but only if Simon says so!
+            </p>
+
+            <div className='bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
+              <h3 className='font-black text-slate-700 text-2xl mb-6'>How to Play:</h3>
+              <ul className='space-y-4 text-slate-600 font-bold text-lg'>
+                <li className='flex items-center gap-3'><span className='text-3xl'>📸</span> Stand directly in front of your camera</li>
+                <li className='flex items-center gap-3'><span className='text-3xl'>👂</span> Listen carefully to what Simon says</li>
+                <li className='flex items-center gap-3'><span className='text-3xl'>🏃</span> Do the action with your whole body!</li>
+                <li className='flex items-center gap-3'><span className='text-3xl'>⏸️</span> Hold the pose steady to complete it</li>
               </ul>
             </div>
+
             <button
               onClick={startGame}
-              className='w-full py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white text-xl font-bold rounded-2xl'
+              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-sm transition-all hover:scale-105 active:scale-95'
             >
-              Start Game! 🎮
+              Start Playing! 🎮
             </button>
           </motion.div>
         ) : (
-          <div className='space-y-4'>
+          <div className='flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 min-h-0'>
+            {/* Left Column: Instructions */}
             <motion.div
-              className='bg-white rounded-3xl p-6 shadow-lg'
+              className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 shadow-sm flex flex-col justify-center flex-1 lg:max-w-md'
               key={currentActionIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
             >
-              <div className='text-center'>
-                <div className='text-5xl mb-4'>{currentAction.emoji}</div>
-                <h3 className='text-2xl font-bold text-orange-800 mb-2'>
+              <div className='text-center mb-10'>
+                <div className='inline-block bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-sm'>
+                  {currentAction.emoji}
+                </div>
+                <h3 className='text-4xl font-black text-slate-800 tracking-tight mb-4'>
                   {currentAction.name}
                 </h3>
-                <p className='text-orange-600 mb-2'>
+                <p className='text-xl font-bold text-slate-500 mb-4'>
                   {currentAction.instruction}
                 </p>
-                <p className='text-gray-500'>Round {round}</p>
-              </div>
-              <div className='mt-4'>
-                <div className='flex justify-between text-sm mb-1'>
-                  <span>Match</span>
-                  <span>{Math.round(matchProgress)}%</span>
-                </div>
-                <div className='h-4 bg-gray-100 rounded-full'>
-                  <motion.div
-                    className='h-full bg-orange-400'
-                    animate={{ width: `${matchProgress}%` }}
-                  />
+                <div className='inline-block bg-slate-100 text-slate-600 font-bold px-4 py-2 rounded-full text-sm uppercase tracking-wider'>
+                  Round {round}
                 </div>
               </div>
-              <div className='mt-4'>
-                <div className='flex justify-between text-sm mb-1'>
-                  <span>Hold!</span>
-                  <span>
-                    {Math.round((holdTimeRef.current / HOLD_DURATION) * 100)}%
-                  </span>
+
+              {/* Progress Bars */}
+              <div className='space-y-6 mt-auto'>
+                <div>
+                  <div className='flex justify-between font-bold text-slate-500 mb-2 uppercase tracking-wide text-sm'>
+                    <span>Pose Accuracy</span>
+                    <span className={matchProgress > 70 ? 'text-[#10B981]' : ''}>{Math.round(matchProgress)}%</span>
+                  </div>
+                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200/50 p-1'>
+                    <motion.div
+                      className={`h-full rounded-full ${matchProgress > 70 ? 'bg-[#10B981]' : 'bg-[#3B82F6]'}`}
+                      animate={{ width: `${matchProgress}%` }}
+                      transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                    />
+                  </div>
                 </div>
-                <div className='h-2 bg-green-100 rounded-full'>
-                  <motion.div
-                    className='h-full bg-green-500'
-                    animate={{
-                      width: `${(holdTimeRef.current / HOLD_DURATION) * 100}%`,
-                    }}
-                  />
+
+                <div>
+                  <div className='flex justify-between font-bold text-slate-500 mb-2 uppercase tracking-wide text-sm'>
+                    <span>Hold Steady!</span>
+                    <span className={(holdTimeRef.current / HOLD_DURATION) >= 1 ? 'text-amber-500' : ''}>
+                      {Math.round((holdTimeRef.current / HOLD_DURATION) * 100)}%
+                    </span>
+                  </div>
+                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200/50 p-1'>
+                    <motion.div
+                      className='h-full bg-[#F59E0B] rounded-full'
+                      animate={{
+                        width: `${(holdTimeRef.current / HOLD_DURATION) * 100}%`,
+                      }}
+                      transition={{ type: 'tween', duration: 0.1 }}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
 
-            <div className='relative rounded-3xl overflow-hidden shadow-lg bg-black'>
-              <Webcam
-                ref={webcamRef}
-                onLoadedData={handleVideoLoad}
-                className='w-full h-64 object-cover'
-                mirrored
-              />
-              <canvas
-                ref={canvasRef}
-                className='absolute top-0 left-0 w-full h-64'
-                width={640}
-                height={360}
-              />
-              <div className='absolute top-4 left-4 px-3 py-1 bg-black/50 rounded-full'>
-                <span className='text-white text-sm'>
-                  {cameraReady ? '📹 Ready' : '⏳ Loading...'}
-                </span>
+            {/* Right Column: Camera & Controls */}
+            <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
+              <div className='relative rounded-[2.5rem] overflow-hidden border-4 border-slate-100 shadow-sm bg-slate-100 flex-1 min-h-[400px]'>
+                <Webcam
+                  ref={webcamRef}
+                  onLoadedData={handleVideoLoad}
+                  className='absolute inset-0 w-full h-full object-cover'
+                  mirrored
+                />
+                <canvas
+                  ref={canvasRef}
+                  className='absolute inset-0 w-full h-full'
+                  width={640}
+                  height={360}
+                />
+                <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
+                  <span className='text-white font-bold text-sm tracking-wide'>
+                    {cameraReady ? '✅ Camera Active' : '⌛ Warming up...'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className='flex gap-4'>
-              <button
-                onClick={stopGame}
-                className='flex-1 py-3 bg-white rounded-xl font-bold text-orange-700'
-              >
-                Stop
-              </button>
-              <button
-                onClick={() => {
-                  setCurrentActionIndex((i) => (i + 1) % BODY_ACTIONS.length);
-                  holdTimeRef.current = 0;
-                }}
-                className='flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold'
-              >
-                Skip ⏭
-              </button>
+              <div className='flex gap-4'>
+                <button
+                  onClick={stopGame}
+                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-black text-slate-500 shadow-sm transition-all hover:scale-[1.02] active:scale-95 text-lg'
+                >
+                  Stop Playing
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentActionIndex((i) => (i + 1) % BODY_ACTIONS.length);
+                    holdTimeRef.current = 0;
+                  }}
+                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-4 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-[1.02] active:scale-95 text-lg'
+                >
+                  Skip Pose ⏭
+                </button>
+              </div>
             </div>
           </div>
         )}
 
+        {/* Celebration Overlay */}
         <AnimatePresence>
           {showCelebration && (
             <motion.div
-              className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'
+              className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className='bg-white rounded-3xl p-8 text-center'
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
+                className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-lg'
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 20, opacity: 0 }}
               >
-                <div className='text-8xl mb-4'>🎉</div>
-                <h2 className='text-3xl font-bold text-orange-800 mb-2'>
-                  Great Job!
+                <div className='text-[6rem] mb-6 drop-shadow-sm'>🎉</div>
+                <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-4'>
+                  Great Pose!
                 </h2>
-                <p className='text-orange-600'>+100 ⭐</p>
+                <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+                  +100 Points
+                </div>
               </motion.div>
             </motion.div>
           )}

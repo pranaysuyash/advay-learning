@@ -4,3 +4,5 @@ export { useProgressStore, BATCH_SIZE, MASTERY_THRESHOLD, UNLOCK_THRESHOLD } fro
 export { useProfileStore } from './profileStore';
 export type { Profile } from './profileStore';
 export { useSettingsStore } from './settingsStore';
+export { useInventoryStore } from './inventoryStore';
+export type { OwnedItem, ItemDrop, CraftResult } from './inventoryStore';

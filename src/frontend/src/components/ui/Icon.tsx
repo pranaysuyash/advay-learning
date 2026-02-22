@@ -1,5 +1,13 @@
-import { useState } from 'react';
+import React from 'react';
 import { Icon as AssetIcon } from '../Icon';
+import {
+  Type, Target, Timer, Flame, Hand, Pencil, Home, Check, Lock, Unlock,
+  AlertTriangle, Download, Hourglass, Circle, Sparkles, Heart, Star,
+  Camera, Trophy, Coffee, Droplets, User, Eye, EyeOff, ArrowLeft, X,
+  Play, Search, RotateCcw, MousePointer2, ChevronDown, Volume2, VolumeX,
+  Shield, Video, ArrowRight, Mail, AlertCircle, CheckCircle, Loader2,
+  Settings, HelpCircle, UserRound
+} from 'lucide-react';
 
 export type IconName =
   | 'letters'
@@ -37,10 +45,15 @@ export type IconName =
   | 'volume-off'
   | 'shield'
   | 'video'
-  | 'arrow-right';
+  | 'arrow-right'
+  | 'mail'
+  | 'alert-circle'
+  | 'check-circle'
+  | 'loader'
+  | 'settings';
 
 type UIIconNamedProps = {
-  name: IconName;
+  name: IconName | string; // loosen to string due to 'as any' coercions
   size?: number;
   className?: string;
   color?: string;
@@ -56,43 +69,48 @@ type UIIconSrcProps = {
 
 type UIIconProps = UIIconNamedProps | UIIconSrcProps;
 
-const iconPaths: Record<IconName, string> = {
-  letters: '/assets/icons/ui/letters.svg',
-  target: '/assets/icons/ui/target.svg',
-  timer: '/assets/icons/ui/timer.svg',
-  flame: '/assets/icons/ui/flame.svg',
-  hand: '/assets/icons/ui/hand.svg',
-  pencil: '/assets/icons/ui/pencil.svg',
-  home: '/assets/icons/ui/home.svg',
-  check: '/assets/icons/ui/check.svg',
-  lock: '/assets/icons/ui/lock.svg',
-  unlock: '/assets/icons/ui/unlock.svg',
-  warning: '/assets/icons/ui/warning.svg',
-  download: '/assets/icons/ui/download.svg',
-  hourglass: '/assets/icons/ui/hourglass.svg',
-  circle: '/assets/icons/ui/circle.svg',
-  sparkles: '/assets/icons/ui/sparkles.svg',
-  heart: '/assets/icons/ui/heart.svg',
-  star: '/assets/icons/ui/star.svg',
-  camera: '/assets/icons/ui/camera.svg',
-  trophy: '/assets/icons/ui/trophy.svg',
-  coffee: '/assets/icons/ui/coffee.svg',
-  drop: '/assets/icons/ui/drop.svg',
-  body: '/assets/icons/ui/body.svg',
-  eye: '/assets/icons/ui/eye.svg',
-  'eye-off': '/assets/icons/ui/eye-off.svg',
-  back: '/assets/icons/ui/back.svg',
-  x: '/assets/icons/ui/x.svg',
-  play: '/assets/icons/ui/play.svg',
-  search: '/assets/icons/ui/search.svg',
-  'rotate-ccw': '/assets/icons/ui/rotate-ccw.svg',
-  'mouse-pointer': '/assets/icons/ui/mouse-pointer.svg',
-  'chevron-down': '/assets/icons/ui/chevron-down.svg',
-  'volume': '/assets/icons/ui/volume.svg',
-  'volume-off': '/assets/icons/ui/volume-off.svg',
-  'shield': '/assets/icons/ui/shield.svg',
-  'video': '/assets/icons/ui/video.svg',
-  'arrow-right': '/assets/icons/ui/arrow-right.svg',
+const LucideMap: Record<string, React.ElementType> = {
+  letters: Type,
+  target: Target,
+  timer: Timer,
+  flame: Flame,
+  hand: Hand,
+  pencil: Pencil,
+  home: Home,
+  check: Check,
+  lock: Lock,
+  unlock: Unlock,
+  warning: AlertTriangle,
+  download: Download,
+  hourglass: Hourglass,
+  circle: Circle,
+  sparkles: Sparkles,
+  heart: Heart,
+  star: Star,
+  camera: Camera,
+  trophy: Trophy,
+  coffee: Coffee,
+  drop: Droplets,
+  body: UserRound,
+  eye: Eye,
+  'eye-off': EyeOff,
+  back: ArrowLeft,
+  x: X,
+  play: Play,
+  search: Search,
+  'rotate-ccw': RotateCcw,
+  'mouse-pointer': MousePointer2,
+  'chevron-down': ChevronDown,
+  volume: Volume2,
+  'volume-off': VolumeX,
+  shield: Shield,
+  video: Video,
+  'arrow-right': ArrowRight,
+  mail: Mail,
+  'alert-circle': AlertCircle,
+  'check-circle': CheckCircle,
+  loader: Loader2,
+  settings: Settings,
 };
 
 export function UIIcon(props: UIIconProps) {
@@ -110,28 +128,14 @@ export function UIIcon(props: UIIconProps) {
   }
 
   const { name, size = 24, className = '', color = 'currentColor' } = props;
-  const [hasError, setHasError] = useState(false);
 
-  if (hasError) {
-    return (
-      <span
-        className={`inline-flex items-center justify-center ${className}`}
-        style={{ width: size, height: size, fontSize: size * 0.7 }}
-      >
-        ✦
-      </span>
-    );
-  }
+  const IconComponent = LucideMap[name as string] || HelpCircle;
 
   return (
-    <img
-      src={iconPaths[name]}
-      alt={name}
-      width={size}
-      height={size}
+    <IconComponent
+      size={size}
       className={`inline-block ${className}`}
-      style={{ color }}
-      onError={() => setHasError(true)}
+      color={color !== 'currentColor' ? color : undefined}
     />
   );
 }

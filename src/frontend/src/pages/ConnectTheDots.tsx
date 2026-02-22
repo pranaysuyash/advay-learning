@@ -16,6 +16,11 @@ import {
 } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import {
+  assetLoader,
+  SOUND_ASSETS,
+  WEATHER_BACKGROUNDS,
+} from '../utils/assets';
 
 interface Dot {
   id: number;
@@ -26,13 +31,13 @@ interface Dot {
 }
 
 const GAME_COLORS = {
-  path: 'var(--text-error)',
-  dotConnected: 'var(--success)',
-  dotPending: 'var(--text-error)',
-  dotStroke: 'var(--text-inverse)',
-  dotLabel: 'var(--text-inverse)',
-  cursorIdle: 'var(--brand-secondary)',
-  cursorPinch: 'var(--warning)',
+  path: '#CBD5E1', // slate-300
+  dotConnected: '#10B981', // emerald-500
+  dotPending: '#3B82F6', // blue-500
+  dotStroke: '#000000',
+  dotLabel: '#FFFFFF',
+  cursorIdle: '#F59E0B', // amber-500 
+  cursorPinch: '#E85D04', // pip-orange
 } as const;
 
 export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
@@ -153,6 +158,31 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
         }
         permissionHandlerRef.current = null;
         permissionStatusRef.current = null;
+      }
+    };
+  }, []);
+
+  // Asset preloading for premium polish
+  useEffect(() => {
+    const preloadAssets = async () => {
+      try {
+        await Promise.all([
+          assetLoader.loadImages(Object.values(WEATHER_BACKGROUNDS)),
+          assetLoader.loadSounds(Object.values(SOUND_ASSETS)),
+        ]);
+      } catch (error) {
+        console.error('Asset preload failed (non-blocking):', error);
+      }
+    };
+
+    void preloadAssets();
+  }, []);
+
+  // Cleanup level timeout on unmount (lifecycle hardening)
+  useEffect(() => {
+    return () => {
+      if (levelTimeoutRef.current) {
+        clearTimeout(levelTimeoutRef.current);
       }
     };
   }, []);
@@ -415,6 +445,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   };
 
   const goToHome = () => {
+    assetLoader.playSound('pop', 0.3); // Audio feedback on navigation
     navigate('/dashboard');
   };
 
@@ -483,37 +514,44 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           level={level}
           onHome={goToHome}
         >
-          <div className='relative w-full h-full'>
+          <div
+            className='relative w-full h-full bg-white/50'
+            role='main'
+            aria-label='Connect the Dots drawing game with numbered dots'
+          >
+            {/* Background layer for visual variety */}
+            <div
+              className='absolute inset-0 bg-cover bg-center opacity-10'
+              style={{
+                backgroundImage: `url(${WEATHER_BACKGROUNDS.windy.url})`,
+              }}
+              aria-hidden='true'
+            />
+
             {/* Timer Display - Top Center */}
             <div className='absolute top-4 left-1/2 -translate-x-1/2 z-40'>
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border backdrop-blur-sm ${
-                  timeLeft <= 10
-                    ? 'bg-red-500/20 border-red-500/30 animate-pulse'
+                className={`flex items-center gap-2 px-4 py-2 rounded-[1.25rem] border-4 shadow-sm backdrop-blur-md ${timeLeft <= 10
+                    ? 'bg-red-500 border-[#000000] text-white animate-pulse'
                     : timeLeft <= 30
-                      ? 'bg-yellow-500/20 border-yellow-500/30'
-                      : 'bg-green-500/20 border-green-500/30'
-                }`}
+                      ? 'bg-[#F59E0B] border-[#000000] text-white'
+                      : 'bg-white border-slate-200 text-slate-700'
+                  }`}
               >
                 <UIIcon
                   name='timer'
                   size={18}
                   className={
-                    timeLeft <= 10
-                      ? 'text-red-400'
-                      : timeLeft <= 30
-                        ? 'text-yellow-400'
-                        : 'text-green-400'
+                    timeLeft <= 30
+                      ? 'text-white'
+                      : 'text-slate-400'
                   }
                 />
                 <span
-                  className={`font-bold tabular-nums ${
-                    timeLeft <= 10
-                      ? 'text-red-400'
-                      : timeLeft <= 30
-                        ? 'text-yellow-400'
-                        : 'text-green-400'
-                  }`}
+                  className={`font-black tabular-nums text-lg ${timeLeft <= 30
+                      ? 'text-white'
+                      : 'text-slate-700'
+                    }`}
                 >
                   {timeLeft}s
                 </span>
@@ -522,9 +560,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
             {/* Next Dot Indicator */}
             <div className='absolute top-4 left-4 z-40'>
-              <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-xl border border-white/30 text-white shadow-soft'>
-                <span className='text-sm text-white/70'>Next Dot</span>
-                <span className='ml-2 font-bold text-lg'>
+              <div className='bg-white px-5 py-3 rounded-[1.25rem] border-4 border-slate-200 text-slate-800 shadow-sm'>
+                <span className='text-sm font-bold uppercase tracking-widest text-slate-500'>Next Dot</span>
+                <span className='ml-3 font-black text-xl text-[#3B82F6]'>
                   #{currentDotIndex + 1}
                 </span>
               </div>
@@ -683,28 +721,29 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
         </GameContainer>
       ) : (
         /* Menu / Completion Screen */
-        <section className='max-w-7xl mx-auto px-4 py-8'>
+        <section className='max-w-5xl mx-auto px-4 py-12'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             {/* Header */}
-            <header className='flex justify-between items-center mb-6'>
+            <header className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6'>
               <div>
-                <h1 className='text-3xl font-bold'>Connect The Dots</h1>
-                <p className='text-white/60'>
+                <h1 className='text-4xl font-black text-slate-800 mb-2 tracking-tight'>Connect The Dots</h1>
+                <p className='text-slate-500 font-bold text-lg'>
                   Connect the numbered dots in sequence to reveal the picture!
                 </p>
               </div>
 
-              <div className='text-right'>
-                <output className='block text-2xl font-bold'>
+              <div className='text-left sm:text-right bg-white p-4 rounded-2xl border-4 border-slate-100 shadow-sm'>
+                <output className='block text-3xl font-black text-[#10B981] mb-1'>
                   Score: {score}
                 </output>
                 {gameStarted && (
-                  <div className='flex items-center gap-4 text-sm text-white/60'>
-                    <span>Level: {level}</span>
-                    <span>Time: {timeLeft}s</span>
+                  <div className='flex items-center gap-4 text-sm font-bold text-slate-400 uppercase tracking-widest'>
+                    <span>Level {level}</span>
+                    <span>•</span>
+                    <span>Time {timeLeft}s</span>
                   </div>
                 )}
               </div>
@@ -713,15 +752,17 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             {showPermissionWarning && (
               <div
                 role='alert'
-                className='mb-4 flex items-start gap-3 bg-white/10 border border-border rounded-xl p-4 shadow-soft'
+                className='mb-8 flex items-start gap-4 bg-red-50 border-4 border-red-100 rounded-[2rem] p-6 shadow-sm'
               >
-                <UIIcon
-                  name='warning'
-                  size={20}
-                  className='text-text-warning mt-0.5'
-                />
-                <div className='text-sm text-white/80'>
-                  <p className='font-semibold text-white'>
+                <div className="bg-white p-2 rounded-full shadow-sm">
+                  <UIIcon
+                    name='warning'
+                    size={24}
+                    className='text-red-500'
+                  />
+                </div>
+                <div className='text-sm text-red-700 font-medium pt-1'>
+                  <p className='font-black text-lg mb-1'>
                     Camera permission denied
                   </p>
                   <p>
@@ -733,30 +774,26 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             )}
 
             {/* Game Area */}
-            <div className='bg-white/10 border border-border rounded-xl p-6 mb-6 shadow-sm'>
+            <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 mb-8 shadow-sm'>
               {!gameStarted ? (
-                <div className='flex flex-col items-center justify-center py-12'>
-                  <div className='w-24 h-24 mx-auto mb-6'>
-                    <img
-                      src='/assets/images/connect-the-dots.svg'
-                      alt='Connect the Dots'
-                      className='w-full h-full object-contain'
-                    />
+                <div className='flex flex-col items-center justify-center py-8'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 rounded-full flex items-center justify-center border-4 border-blue-100'>
+                    <div className="text-6xl">🔢</div>
                   </div>
 
-                  <h2 className='text-2xl font-semibold mb-4'>
+                  <h2 className='text-4xl font-black text-slate-800 mb-4'>
                     Connect the Dots Challenge
                   </h2>
-                  <p className='text-white/70 mb-6 max-w-md text-center'>
+                  <p className='text-slate-500 font-bold mb-10 max-w-lg text-center text-lg leading-relaxed'>
                     Connect the numbered dots in sequence to reveal the hidden
                     picture. Complete levels as fast as you can to earn more
                     points!
                   </p>
 
-                  <div className='mb-6 w-full max-w-md'>
+                  <div className='mb-10 w-full max-w-md bg-slate-50 p-6 rounded-[2rem] border-2 border-slate-100'>
                     <OptionChips
                       label='Difficulty'
-                      theme='dark'
+                      theme='light'
                       options={(['easy', 'medium', 'hard'] as const).map(
                         (diff) => ({
                           id: diff,
@@ -778,20 +815,16 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
               ) : (
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-12'>
-                  <div className='w-24 h-24 mx-auto mb-6'>
-                    <img
-                      src='/assets/images/trophy.svg'
-                      alt='Trophy'
-                      className='w-full h-full object-contain'
-                    />
+                  <div className='w-32 h-32 mx-auto mb-8 text-7xl'>
+                    🏆
                   </div>
 
-                  <h2 className='text-3xl font-bold text-green-400 mb-2'>
+                  <h2 className='text-4xl font-black text-[#10B981] mb-2'>
                     Congratulations!
                   </h2>
-                  <p className='text-xl mb-6'>You completed all levels!</p>
-                  <div className='text-2xl font-bold mb-8'>
-                    Final Score: {score}
+                  <p className='text-xl text-slate-500 font-bold mb-8'>You completed all levels!</p>
+                  <div className='text-3xl font-black text-slate-800 mb-10 border-4 border-slate-100 bg-slate-50 px-8 py-4 rounded-3xl'>
+                    Final Score: <span className="text-[#3B82F6]">{score}</span>
                   </div>
 
                   {/* Standardized Completion Controls */}
@@ -804,11 +837,11 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             </div>
 
             {/* Game Instructions */}
-            <div className='bg-blue-500/10 border border-blue-500/20 rounded-xl p-6'>
-              <h2 className='text-lg font-semibold mb-3 text-blue-400'>
+            <div className='bg-[#3B82F6]/5 border-4 border-[#3B82F6]/10 rounded-[2rem] p-8'>
+              <h2 className='text-2xl font-black mb-4 text-[#3B82F6]'>
                 How to Play
               </h2>
-              <ul className='space-y-2 text-white/70 text-sm'>
+              <ul className='space-y-3 text-slate-600 font-bold text-lg'>
                 <li>
                   • Connect the numbered dots in ascending order (1, 2, 3...)
                 </li>
@@ -820,8 +853,8 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 </li>
                 <li>• Finish all 5 levels to win the game!</li>
                 {cameraPermission === 'granted' && (
-                  <li>
-                    • <strong className='text-green-400'>Hand Tracking:</strong>{' '}
+                  <li className="pt-2">
+                    <strong className='text-[#E85D04]'>Hand Tracking:</strong>{' '}
                     Toggle &quot;Hand Mode&quot; to use gestures. Point with
                     your index finger and pinch to connect dots!
                   </li>

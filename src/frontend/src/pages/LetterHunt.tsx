@@ -48,35 +48,9 @@ const LETTER_COLOR_CLASS_MAP: Record<string, string> = {
   '#ffffff': 'letter-color-ffffff',
 };
 
-const LETTER_BORDER_CLASS_MAP: Record<string, string> = {
-  '#ef4444': 'letter-border-ef4444',
-  '#dc2626': 'letter-border-dc2626',
-  '#3b82f6': 'letter-border-3b82f6',
-  '#f59e0b': 'letter-border-f59e0b',
-  '#10b981': 'letter-border-10b981',
-  '#8b5cf6': 'letter-border-8b5cf6',
-  '#06b6d4': 'letter-border-06b6d4',
-  '#84cc16': 'letter-border-84cc16',
-  '#f97316': 'letter-border-f97316',
-  '#ec4899': 'letter-border-ec4899',
-  '#eab308': 'letter-border-eab308',
-  '#6366f1': 'letter-border-6366f1',
-  '#64748b': 'letter-border-64748b',
-  '#a16207': 'letter-border-a16207',
-  '#a855f7': 'letter-border-a855f7',
-  '#16a34a': 'letter-border-16a34a',
-  '#1f2937': 'letter-border-1f2937',
-  '#fff': 'letter-border-ffffff',
-  '#ffffff': 'letter-border-ffffff',
-};
-
 const getLetterColorClass = (color?: string) =>
   (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
   'text-pip-orange';
-
-const getLetterBorderClass = (color?: string) =>
-  (color ? LETTER_BORDER_CLASS_MAP[color.toLowerCase()] : undefined) ??
-  'border-white/15';
 
 export const LetterHunt = memo(function LetterHuntComponent() {
   const navigate = useNavigate();
@@ -424,48 +398,50 @@ export const LetterHunt = memo(function LetterHuntComponent() {
           level={level}
           onHome={goToHome}
         >
-          <div className='relative w-full h-full bg-black'>
+          <div className='relative w-full h-full bg-[#FFF8F0]'>
             {/* Camera Area */}
             <figure
               ref={cameraAreaRef}
-              className='relative w-full h-full overflow-hidden m-0'
+              className='relative w-full h-full overflow-hidden m-0 border-4 border-slate-100 rounded-[2.5rem]'
             >
               <Webcam
                 ref={webcamRef}
                 audio={false}
                 mirrored
-                className='h-full w-full object-cover'
+                className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
                 videoConstraints={{ facingMode: 'user' }}
               />
 
+              <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+
               {/* Top HUD */}
-              <div className='absolute inset-x-0 top-0 p-4 flex items-start justify-between pointer-events-none'>
-                <div className='bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/30 text-white'>
-                  <div className='text-xs opacity-80'>Find this letter</div>
-                  <div className='flex items-baseline gap-2'>
+              <div className='absolute inset-x-0 top-0 p-6 flex flex-wrap gap-4 items-start justify-between pointer-events-none z-10'>
+                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-4 border-slate-200 shadow-sm'>
+                  <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-1'>Find this letter</div>
+                  <div className='flex items-baseline gap-3'>
                     <div
-                      className={`text-4xl font-extrabold leading-none ${targetLetterColorClass}`}
+                      className={`text-5xl font-black tracking-tight ${targetLetterColorClass}`}
                     >
                       {targetLetter}
                     </div>
-                    <div className='text-sm opacity-90'>
+                    <div className='text-lg font-bold text-slate-600'>
                       {targetLetterMeta?.name}
                     </div>
                   </div>
                 </div>
 
-                <div className='bg-black/50 backdrop-blur px-3 py-2 rounded-xl border border-white/20 text-white text-right'>
-                  <div className='text-sm font-bold'>Score: {score}</div>
-                  <div className='text-xs opacity-80'>
-                    Level {level} · Round {round}/{totalRounds} · {timeLeft}s
+                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-4 border-slate-200 shadow-sm text-right'>
+                  <div className='text-xl font-bold text-slate-500 mb-1'>Score: <span className='text-[#10B981] font-black'>{score}</span></div>
+                  <div className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
+                    Level {level} · Round {round}/{totalRounds} · <span className='text-[#F59E0B]'>{timeLeft}s</span>
                   </div>
                 </div>
               </div>
 
               {/* Tracking status */}
               {!isHandTrackingReady && (
-                <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                  <div className='bg-black/60 backdrop-blur px-4 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold'>
+                <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'>
+                  <div className='bg-white/95 backdrop-blur-sm px-8 py-4 rounded-full border-4 border-slate-200 text-slate-700 shadow-sm font-bold text-lg'>
                     {isModelLoading
                       ? 'Loading hand tracking…'
                       : 'Hand tracking unavailable'}
@@ -483,20 +459,17 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               )}
 
               {/* Options overlay */}
-              <div className='absolute inset-x-0 bottom-0 p-4'>
-                <div className='bg-black/45 backdrop-blur rounded-2xl border border-white/15 p-3'>
-                  <div className='text-xs text-white/80 mb-2 flex items-center justify-between'>
+              <div className='absolute inset-x-0 bottom-0 p-6 z-10'>
+                <div className='bg-white/90 backdrop-blur-md rounded-[2rem] border-4 border-slate-100 p-6 shadow-sm'>
+                  <div className='text-sm font-bold text-slate-400 mb-4 flex items-center justify-between uppercase tracking-wider'>
                     <span>Point with your index finger · Pinch to select</span>
-                    <span className='opacity-80'>
+                    <span className='text-amber-500'>
                       {useMouseFallback ? 'Mouse fallback ON' : ''}
                     </span>
                   </div>
                   <div className='flex gap-2 justify-between'>
                     {options.map((option, idx) => {
                       const optionColorClass = getLetterColorClass(
-                        option.color,
-                      );
-                      const optionBorderClass = getLetterBorderClass(
                         option.color,
                       );
 
@@ -512,18 +485,17 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                               ? () => handleSelectOption(option)
                               : undefined
                           }
-                          className={`flex-1 min-w-0 rounded-xl px-2 py-3 border text-center transition min-h-[56px] ${
-                            hoveredOptionIndex === idx
-                              ? 'border-white/80 bg-white/15 ring-2 ring-pip-orange/70'
-                              : `${optionBorderClass} bg-white/10 hover:bg-white/15`
-                          }`}
+                          className={`flex-1 min-w-0 rounded-[1.5rem] px-4 py-6 border-4 text-center transition-all min-h-[56px] ${hoveredOptionIndex === idx
+                            ? `border-[#10B981] bg-emerald-50 scale-105 shadow-sm`
+                            : `border-slate-100 bg-white hover:bg-slate-50 hover:scale-105 shadow-sm`
+                            }`}
                         >
                           <div
-                            className={`text-3xl font-extrabold leading-none ${optionColorClass}`}
+                            className={`text-[3rem] tracking-tight font-black leading-none mb-2 ${optionColorClass}`}
                           >
                             {option.char}
                           </div>
-                          <div className='text-[11px] text-white/80 truncate'>
+                          <div className='text-sm font-bold text-slate-500 truncate'>
                             {option.name}
                           </div>
                         </button>
@@ -538,11 +510,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl p-4 text-center font-semibold pointer-events-none z-40 ${
-                    feedback.type === 'success'
-                      ? 'bg-success/90 border border-success text-white'
-                      : 'bg-error/90 border border-error text-white'
-                  }`}
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-8 py-4 text-center font-bold text-xl pointer-events-none z-40 border-4 shadow-sm ${feedback.type === 'success'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
                 >
                   {feedback.message}
                 </motion.div>
@@ -571,26 +542,27 @@ export const LetterHunt = memo(function LetterHuntComponent() {
         </GameContainer>
       ) : (
         /* Menu / Completion Screen */
-        <section className='max-w-7xl mx-auto px-4 py-8'>
+        <section className='max-w-4xl mx-auto px-4 py-8 h-full flex flex-col'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className='flex-1 flex flex-col'
           >
             {/* Header */}
-            <header className='flex justify-between items-center mb-6'>
+            <header className='flex justify-between items-center mb-10'>
               <div>
-                <h1 className='text-3xl font-bold'>Letter Hunt</h1>
-                <p className='text-white/60'>
+                <h1 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight'>Letter Hunt</h1>
+                <p className='text-slate-500 font-bold text-lg mt-2'>
                   Find the target letter among the options!
                 </p>
               </div>
 
-              <div className='text-right'>
-                <output className='block text-2xl font-bold'>
+              <div className='text-right bg-white border-4 border-amber-100 rounded-[2rem] px-8 py-4 shadow-sm'>
+                <output className='block text-3xl font-black text-amber-500'>
                   Score: {score}
                 </output>
                 {gameStarted && (
-                  <div className='flex items-center gap-4 text-sm text-white/60'>
+                  <div className='flex items-center gap-4 text-sm font-bold text-slate-400 mt-2 uppercase tracking-wide'>
                     <span>Level: {level}</span>
                     <span>
                       Round: {round}/{totalRounds}
@@ -602,21 +574,26 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             </header>
 
             {/* Game Area */}
-            <div className='bg-white border border-border rounded-xl p-6 mb-6 shadow-soft'>
+            <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 mb-8 shadow-sm flex-1 flex flex-col justify-center'>
               {!gameStarted ? (
-                <div className='flex flex-col items-center justify-center py-12'>
-                  <div className='w-24 h-24 mx-auto mb-6'>
+                <div className='flex flex-col items-center justify-center py-6'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 border-4 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-sm hover:scale-110 transition-transform'>
                     <img
                       src='/assets/images/letter-hunt.svg'
                       alt='Letter Hunt'
                       className='w-full h-full object-contain'
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.innerText = '🔎';
+                        e.currentTarget.parentElement!.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-4 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-sm hover:scale-110 transition-transform';
+                      }}
                     />
                   </div>
 
-                  <h2 className='text-2xl font-semibold mb-4'>
+                  <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-4'>
                     Letter Hunt Challenge
                   </h2>
-                  <p className='text-text-secondary mb-6 max-w-md text-center'>
+                  <p className='text-slate-500 font-bold text-lg mb-10 max-w-lg text-center leading-relaxed'>
                     Use your camera to control a cursor with your index finger,
                     then pinch (thumb + index) to select the matching letter.
                     Complete all rounds to advance to the next level.
@@ -630,20 +607,16 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 </div>
               ) : (
                 /* Game Completed Screen */
-                <div className='flex flex-col items-center justify-center py-12'>
-                  <div className='w-24 h-24 mx-auto mb-6'>
-                    <img
-                      src='/assets/images/trophy.svg'
-                      alt='Trophy'
-                      className='w-full h-full object-contain'
-                    />
+                <div className='flex flex-col items-center justify-center py-8'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-4 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-sm hover:scale-110 transition-transform'>
+                    🏆
                   </div>
 
-                  <h2 className='text-3xl font-bold text-green-400 mb-2'>
+                  <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-3'>
                     Congratulations!
                   </h2>
-                  <p className='text-xl mb-6'>You completed all levels!</p>
-                  <div className='text-2xl font-bold mb-8'>
+                  <p className='text-xl font-bold text-slate-500 mb-8'>You completed all levels!</p>
+                  <div className='text-3xl font-black text-amber-500 mb-10 bg-amber-50 px-8 py-4 rounded-full border-4 border-amber-100'>
                     Final Score: {score}
                   </div>
 
@@ -657,20 +630,16 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             </div>
 
             {/* Game Instructions */}
-            <div className='bg-white border border-border rounded-xl p-6 shadow-soft'>
-              <h2 className='text-lg font-semibold mb-3 text-advay-slate'>
+            <div className='bg-slate-50 border-4 border-slate-100 rounded-[2rem] p-8 shadow-sm'>
+              <h2 className='text-xl font-black text-slate-700 tracking-tight mb-4'>
                 How to Play
               </h2>
-              <ul className='space-y-2 text-text-secondary text-sm'>
-                <li>• A target letter appears on the camera screen</li>
-                <li>• Move your index finger to control the cursor</li>
-                <li>
-                  • Pinch (thumb + index) while hovering a tile to select it
-                </li>
-                <li>
-                  • You have 30 seconds per round — faster answers score more
-                </li>
-                <li>• Complete all 10 rounds to advance to the next level</li>
+              <ul className='space-y-3 text-slate-600 font-bold'>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> A target letter appears on the camera screen</li>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Move your index finger to control the cursor</li>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Pinch (thumb + index) while hovering a tile to select it</li>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> You have 30 seconds per round — faster answers score more</li>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Complete all 10 rounds to advance to the next level</li>
               </ul>
             </div>
           </motion.div>

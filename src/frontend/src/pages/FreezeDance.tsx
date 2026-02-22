@@ -25,7 +25,7 @@ export function FreezeDance() {
   const [gamePhase, setGamePhase] = useState<'dancing' | 'freezing' | 'fingerChallenge'>('dancing');
   const [round, setRound] = useState(1);
   const [stabilityScore, setStabilityScore] = useState(0);
-  
+
   // Combined CV: Hand tracking state
   const [targetFingers, setTargetFingers] = useState(0);
   const [detectedFingers, setDetectedFingers] = useState(0);
@@ -35,7 +35,7 @@ export function FreezeDance() {
   const lastPoseRef = useRef<any>(null);
   const stabilityRef = useRef(0);
   const handCanvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   // Hand tracking hook
   const {
     landmarker: handLandmarker,
@@ -49,7 +49,7 @@ export function FreezeDance() {
     delegate: 'GPU',
     enableFallback: true,
   });
-  
+
   const { playSuccess, playCelebration } = useSoundEffects();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -198,7 +198,7 @@ export function FreezeDance() {
 
       const freezeTimer = setTimeout(() => {
         const roundScore = Math.round(stabilityRef.current);
-        
+
         // If stability is good (>60%), add finger challenge
         if (roundScore > 60 && round > 2) {
           // FINGER CHALLENGE phase - combined CV!
@@ -207,17 +207,17 @@ export function FreezeDance() {
           setDetectedFingers(0);
           setGamePhase('fingerChallenge');
           setShowHandOverlay(true);
-          
+
           if (ttsEnabled) {
             const targetText = target === 0 ? 'fist' : `${target} finger${target !== 1 ? 's' : ''}`;
             void speak(`Freeze! Show ${targetText}!`);
           }
-          
+
           const fingerTimer = setTimeout(() => {
             setShowHandOverlay(false);
             completeRound(roundScore, fingerChallengeComplete);
           }, fingerChallengeDuration);
-          
+
           return () => clearTimeout(fingerTimer);
         } else {
           // No finger challenge yet - just complete the round
@@ -230,10 +230,10 @@ export function FreezeDance() {
 
     return () => clearTimeout(danceTimer);
   }, [isPlaying, round, ttsEnabled, speak, fingerChallengeComplete]);
-  
+
   const completeRound = (roundScore: number, success: boolean) => {
     setIsFrozen(false);
-    
+
     if (success) {
       setScore((s) => s + roundScore);
       if (roundScore > 50) {
@@ -242,7 +242,7 @@ export function FreezeDance() {
         setTimeout(() => setShowCelebration(false), 1500);
       }
     }
-    
+
     setRound((r) => r + 1);
   };
 
@@ -251,7 +251,7 @@ export function FreezeDance() {
       detectPose();
     }
   }, [isPlaying, cameraReady, detectPose]);
-  
+
   // Hand detection during finger challenge
   const detectHands = useCallback(() => {
     if (
@@ -282,7 +282,7 @@ export function FreezeDance() {
         landmarks.map((l: { x: number; y: number; z?: number }) => ({ x: l.x, y: l.y, z: l.z }))
       );
       setDetectedFingers(fingerCount);
-      
+
       // Check if challenge is complete
       if (fingerCount === targetFingers && !fingerChallengeComplete) {
         setFingerChallengeComplete(true);
@@ -366,59 +366,60 @@ export function FreezeDance() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-4'>
-      <header className='flex justify-between items-center mb-4'>
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8 font-sans'>
+      <header className='flex justify-between items-center mb-8 max-w-5xl mx-auto'>
         <button
           onClick={() => navigate('/games')}
-          className='px-4 py-2 bg-white/80 backdrop-blur rounded-full font-bold text-blue-700 hover:bg-white transition'
+          className='px-6 py-3 bg-white border-4 border-slate-100 rounded-full font-black text-slate-500 hover:scale-105 hover:text-slate-800 transition-all shadow-sm'
         >
           ← Back
         </button>
-        <h1 className='text-2xl font-bold text-blue-800'>Freeze Dance</h1>
-        <div className='px-4 py-2 bg-yellow-400 rounded-full font-bold text-blue-800'>
-          ⭐ {score}
+        <h1 className='text-3xl font-black text-slate-800 tracking-tight'>Freeze Dance</h1>
+        <div className='px-6 py-3 bg-white border-4 border-amber-100 rounded-full shadow-sm'>
+          <span className='font-bold text-amber-500 tracking-wide'>SCORE: </span>
+          <span className='font-black text-amber-500 text-xl'>{score}</span>
         </div>
       </header>
 
       <div className='max-w-4xl mx-auto'>
         {!isPlaying ? (
           <motion.div
-            className='bg-white rounded-3xl p-8 shadow-lg'
+            className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 shadow-sm'
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className='text-center mb-8'>
-              <div className='text-8xl mb-4'>💃🕺</div>
-              <h2 className='text-3xl font-bold text-blue-800 mb-2'>
+            <div className='text-center mb-10'>
+              <div className='text-[5rem] mb-6 drop-shadow-sm hover:scale-110 transition-transform'>💃🕺</div>
+              <h2 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-4'>
                 Freeze Dance!
               </h2>
-              <p className='text-blue-600 text-lg'>
-                Dance when the music plays, FREEZE when it stops!
+              <p className='text-slate-500 font-bold text-xl'>
+                Dance when the music plays, <span className='text-blue-500 font-black'>FREEZE</span> when it stops!
               </p>
             </div>
 
-            <div className='bg-blue-50 rounded-2xl p-6 mb-8'>
-              <h3 className='font-bold text-blue-800 mb-4'>How to Play:</h3>
-              <ul className='space-y-2 text-blue-700'>
-                <li className='flex items-start gap-2'>
-                  <span className='text-blue-500'>1.</span>
-                  Stand in front of your camera
+            <div className='bg-slate-50 border-4 border-slate-100 rounded-[2rem] p-8 mb-10'>
+              <h3 className='font-black text-slate-700 text-xl mb-6 tracking-tight'>How to Play:</h3>
+              <ul className='space-y-4 text-slate-600 font-medium text-lg'>
+                <li className='flex items-center gap-4'>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>1</span>
+                  <span>Stand in front of your camera</span>
                 </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-blue-500'>2.</span>
-                  Dance and move when you see "DANCE!" 💃
+                <li className='flex items-center gap-4'>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>2</span>
+                  <span>Dance and move when you see "DANCE!" 💃</span>
                 </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-blue-500'>3.</span>
-                  FREEZE when you see "FREEZE!" ❄️
+                <li className='flex items-center gap-4'>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>3</span>
+                  <span>FREEZE when you see "FREEZE!" ❄️</span>
                 </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-blue-500'>4.</span>
-                  Hold still to earn points!
+                <li className='flex items-center gap-4'>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>4</span>
+                  <span>Hold still to earn points!</span>
                 </li>
-                <li className='flex items-start gap-2 bg-purple-100 rounded-lg p-2 -mx-2'>
-                  <span className='text-purple-500'>🌟</span>
-                  <span className='font-semibold text-purple-700'>
+                <li className='flex items-center gap-4 bg-purple-50 border-2 border-purple-100 rounded-2xl p-4 mt-6'>
+                  <span className='text-purple-500 text-2xl drop-shadow-sm'>🌟</span>
+                  <span className='font-bold text-purple-700'>
                     BONUS: After round 3, show the correct number of fingers while frozen!
                   </span>
                 </li>
@@ -427,61 +428,60 @@ export function FreezeDance() {
 
             <button
               onClick={startGame}
-              className='w-full py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xl font-bold rounded-2xl hover:from-blue-600 hover:to-purple-600 transition transform hover:scale-105'
+              className='w-full py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-sm transition-all hover:scale-[1.02] active:scale-95'
             >
               Start Dancing! 🎵
             </button>
           </motion.div>
         ) : (
-          <div className='space-y-4'>
+          <div className='space-y-6'>
             <motion.div
-              className='bg-white rounded-3xl p-6 shadow-lg'
+              className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden'
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
             >
               <div className='text-center'>
-                <div className='text-5xl mb-4'>
+                <div className='text-[5rem] mb-4 drop-shadow-sm'>
                   {gamePhase === 'dancing' ? '💃' : gamePhase === 'freezing' ? '❄️' : '✋'}
                 </div>
                 <h3
-                  className={`text-3xl font-bold mb-2 ${
-                    gamePhase === 'dancing' ? 'text-blue-600' : 
-                    gamePhase === 'freezing' ? 'text-red-500' : 'text-purple-600'
-                  }`}
+                  className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing' ? 'text-[#3B82F6]' :
+                      gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
+                    }`}
                 >
-                  {gamePhase === 'dancing' ? 'DANCE!' : 
-                   gamePhase === 'freezing' ? 'FREEZE!' : `SHOW ${targetFingers}!`}
+                  {gamePhase === 'dancing' ? 'DANCE!' :
+                    gamePhase === 'freezing' ? 'FREEZE!' : `SHOW ${targetFingers}!`}
                 </h3>
-                <p className='text-gray-600'>Round {round}</p>
+                <p className='text-slate-400 font-bold uppercase tracking-widest'>Round {round}</p>
               </div>
 
               {gamePhase === 'freezing' && (
-                <div className='mt-6'>
-                  <div className='flex justify-between text-sm text-gray-600 mb-1'>
-                    <span>Hold still!</span>
-                    <span>{Math.round(stabilityScore)}%</span>
+                <div className='mt-8 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-6'>
+                  <div className='flex justify-between font-bold text-slate-600 mb-3'>
+                    <span className='uppercase tracking-wide'>Hold still!</span>
+                    <span className='text-slate-800'>{Math.round(stabilityScore)}%</span>
                   </div>
-                  <div className='h-4 bg-gray-100 rounded-full overflow-hidden'>
+                  <div className='h-6 bg-slate-200 rounded-full overflow-hidden shadow-inner'>
                     <motion.div
-                      className='h-full bg-gradient-to-r from-green-400 to-red-400'
+                      className='h-full bg-gradient-to-r from-[#10B981] to-[#EF4444]'
                       initial={{ width: 0 }}
                       animate={{ width: `${stabilityScore}%` }}
                     />
                   </div>
                 </div>
               )}
-              
+
               {gamePhase === 'fingerChallenge' && (
-                <div className='mt-6 space-y-4'>
-                  <div className='flex justify-between text-sm text-gray-600 mb-1'>
-                    <span>Your fingers:</span>
-                    <span className={`font-bold ${detectedFingers === targetFingers ? 'text-green-500' : 'text-orange-500'}`}>
+                <div className='mt-8 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-6 space-y-5'>
+                  <div className='flex justify-between font-bold text-slate-600 mb-2'>
+                    <span className='uppercase tracking-wide'>Your fingers:</span>
+                    <span className={`text-xl ${detectedFingers === targetFingers ? 'text-[#10B981]' : 'text-[#F59E0B]'}`}>
                       {detectedFingers} / {targetFingers}
                     </span>
                   </div>
-                  <div className='h-4 bg-gray-100 rounded-full overflow-hidden'>
+                  <div className='h-6 bg-slate-200 rounded-full overflow-hidden shadow-inner'>
                     <motion.div
-                      className={`h-full ${detectedFingers === targetFingers ? 'bg-green-400' : 'bg-orange-400'}`}
+                      className={`h-full ${detectedFingers === targetFingers ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`}
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%` }}
                     />
@@ -490,7 +490,7 @@ export function FreezeDance() {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className='text-center text-green-500 font-bold'
+                      className='text-center text-[#10B981] font-black text-xl tracking-wide'
                     >
                       ✓ Perfect! Hold it!
                     </motion.div>
@@ -499,53 +499,52 @@ export function FreezeDance() {
               )}
             </motion.div>
 
-            <div className='relative rounded-3xl overflow-hidden shadow-lg bg-black'>
+            <div className='relative rounded-[2.5rem] overflow-hidden bg-slate-100 border-4 border-slate-200 shadow-sm'>
               <Webcam
                 ref={webcamRef}
                 onLoadedData={handleVideoLoad}
-                className='w-full h-64 object-cover'
+                className='w-full h-[400px] object-cover'
                 mirrored
               />
               <canvas
                 ref={canvasRef}
-                className='absolute top-0 left-0 w-full h-64 pointer-events-none'
+                className='absolute top-0 left-0 w-full h-[400px] pointer-events-none'
                 width={640}
                 height={360}
               />
               {/* Hand tracking overlay for finger challenge */}
               <canvas
                 ref={handCanvasRef}
-                className={`absolute top-0 left-0 w-full h-64 pointer-events-none transition-opacity duration-300 ${showHandOverlay ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute top-0 left-0 w-full h-[400px] pointer-events-none transition-opacity duration-300 ${showHandOverlay ? 'opacity-100' : 'opacity-0'}`}
                 width={640}
                 height={360}
               />
 
-              <div className='absolute top-4 left-4 px-3 py-1 bg-black/50 backdrop-blur rounded-full'>
-                <span className='text-white text-sm'>
+              <div className='absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-slate-200 shadow-sm'>
+                <span className='text-slate-600 font-bold whitespace-nowrap'>
                   {cameraReady ? '📹 Camera Ready' : '⏳ Loading...'}
                   {isHandReady && ' ✋'}
                 </span>
               </div>
 
-              <div className='absolute top-4 right-4 px-3 py-1 bg-black/50 backdrop-blur rounded-full'>
+              <div className='absolute top-6 right-6 px-5 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-slate-200 shadow-sm'>
                 <span
-                  className={`text-sm font-bold ${
-                    gamePhase === 'dancing' ? 'text-green-400' : 
-                    gamePhase === 'freezing' ? 'text-red-400' : 'text-purple-400'
-                  }`}
+                  className={`font-black tracking-wide ${gamePhase === 'dancing' ? 'text-[#10B981]' :
+                      gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
+                    }`}
                 >
-                  {gamePhase === 'dancing' ? '💃 DANCE' : 
-                   gamePhase === 'freezing' ? '❄️ FROZEN' : '✋ FINGERS'}
+                  {gamePhase === 'dancing' ? '💃 DANCE' :
+                    gamePhase === 'freezing' ? '❄️ FROZEN' : '✋ FINGERS'}
                 </span>
               </div>
             </div>
 
-            <div className='flex gap-4'>
+            <div className='flex justify-center pt-2'>
               <button
                 onClick={stopGame}
-                className='flex-1 py-3 bg-white rounded-xl font-bold text-blue-700 hover:bg-blue-50 transition'
+                className='px-12 py-4 bg-white border-4 border-slate-200 rounded-[1.5rem] font-bold text-slate-500 hover:text-slate-800 hover:scale-105 transition-all shadow-sm'
               >
-                Stop Game
+                End Game
               </button>
             </div>
           </div>
@@ -554,24 +553,24 @@ export function FreezeDance() {
         <AnimatePresence>
           {showCelebration && (
             <motion.div
-              className='fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center z-50'
+              className='fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className='bg-white rounded-3xl p-8 text-center shadow-2xl'
+                className='bg-white rounded-[3rem] p-12 text-center shadow-sm border-4 border-slate-100 max-w-md w-[90%]'
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
               >
-                <div className='text-8xl mb-4'>🎉</div>
-                <h2 className='text-3xl font-bold text-blue-800 mb-2'>
+                <div className='text-[6rem] mb-6 drop-shadow-sm hover:scale-110 transition-transform'>🎉</div>
+                <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>
                   {fingerChallengeComplete ? 'Perfect Freeze + Fingers!' : 'Amazing Freeze!'}
                 </h2>
-                <p className='text-blue-600 text-lg mb-4'>
-                  {fingerChallengeComplete 
-                    ? 'You froze AND showed the right fingers! 🌟' 
+                <p className='text-slate-500 font-bold text-xl'>
+                  {fingerChallengeComplete
+                    ? 'You froze AND showed the right fingers! 🌟'
                     : 'Perfect stillness!'}
                 </p>
               </motion.div>

@@ -289,29 +289,29 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
   return (
     <GameContainer title='Shape Sequence' score={score} level={level} onHome={goHome}>
-      <div className='absolute inset-0 bg-black'>
+      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
           mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-45'
+          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-black/65' />
+        <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 pointer-events-none' />
 
-        <div className='absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-black/55 text-white text-sm text-center max-w-[90%]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
-        <div className='absolute top-16 right-4 px-4 py-2 rounded-xl bg-black/55 text-white text-sm'>
-          Time: <span className='font-bold text-amber-300'>{timeLeft}s</span>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
+          Time: <span className={`font-black text-2xl ml-2 ${timeLeft <= 5 ? 'text-[#EF4444]' : 'text-amber-500'}`}>{timeLeft}s</span>
         </div>
 
-        <div className='absolute top-16 left-4 px-4 py-2 rounded-xl bg-black/55 text-white text-sm border border-white/20'>
-          Sequence:{' '}
-          <span className='font-bold text-fuchsia-300 tracking-wide'>
-            {sequenceShapes.join('  ')}
+        <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg flex items-center gap-3'>
+          Sequence:
+          <span className='font-black text-2xl tracking-widest text-[#D946EF] drop-shadow-sm ml-2'>
+            {sequenceShapes.join(' ')}
           </span>
         </div>
 
@@ -320,16 +320,15 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
           return (
             <div
               key={target.id}
-              className='absolute w-24 h-24 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+              className={`absolute w-[7rem] h-[7rem] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300 ${isExpected ? 'scale-110' : 'hover:scale-105'}`}
               style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-full border-4 flex items-center justify-center font-black text-4xl ${
-                  isExpected
-                    ? 'border-fuchsia-300 bg-fuchsia-300/35 text-fuchsia-100'
-                    : 'border-slate-200 bg-slate-200/25 text-white'
-                }`}
+                className={`absolute inset-0 rounded-[2rem] border-[6px] shadow-sm flex items-center justify-center font-black text-5xl transition-colors ${isExpected
+                    ? 'border-[#D946EF] bg-fuchsia-50 text-[#D946EF]'
+                    : 'border-[#3B82F6] bg-white text-[#3B82F6]'
+                  }`}
               >
                 {target.shape}
               </div>
@@ -339,28 +338,41 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
         {cursor && (
           <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
+            className='absolute w-12 h-12 rounded-full border-4 border-[#F59E0B] bg-amber-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(245,158,11,0.5)] pointer-events-none z-20'
             style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
             aria-hidden='true'
           />
         )}
 
         {!isPlaying && !gameCompleted && (
-          <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center'>
-            <button
-              type='button'
-              onClick={startGame}
-              className='px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-2xl text-lg'
-            >
-              Start Shape Sequence
-            </button>
+          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
+              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🔢</div>
+              <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Shape Sequence</h2>
+              <p className='text-slate-500 font-bold text-xl mb-10'>
+                Pinch the shapes in the shown order.
+              </p>
+              <button
+                type='button'
+                onClick={startGame}
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+              >
+                Start Shape Sequence
+              </button>
+            </div>
           </div>
         )}
 
         {gameCompleted && (
-          <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3'>
-            <h2 className='text-3xl font-black text-fuchsia-300'>Sequence Master!</h2>
-            <p className='text-white/90'>Final Score: {score}</p>
+          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-sm'>
+              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🏆</div>
+              <h2 className='text-4xl font-black text-[#D946EF] tracking-tight mb-2'>Sequence Master!</h2>
+              <p className='text-xl font-bold text-slate-500 mb-8'>Incredible job memorizing the order!</p>
+              <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+                Final Score: {score}
+              </div>
+            </div>
           </div>
         )}
 

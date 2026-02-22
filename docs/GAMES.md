@@ -1,6 +1,6 @@
 # Advay Vision Learning — Games Catalog
 
-> **16 interactive learning games** for children ages 3–8, powered by MediaPipe hand/pose tracking, React + TypeScript + Vite.
+> **19 interactive learning games** for children ages 3–8, powered by MediaPipe hand/pose tracking, React + TypeScript + Vite.
 
 ---
 
@@ -24,6 +24,9 @@
 | 14 | [Virtual Chemistry Lab](#14-virtual-chemistry-lab) | `/games/chemistry-lab` | Science | Hand tracking (pinch) | 5 reactions | — | ✅ Complete |
 | 15 | [Word Builder](#15-word-builder) | `/games/word-builder` | Literacy / Phonics | Hand tracking (pinch) | 3 levels | 90s | ✅ Complete |
 | 16 | [Emoji Emotion Match](#16-emoji-emotion-match) | `/games/emoji-match` | Social-Emotional | Hand tracking (pinch) | 3 levels | 20s/round | ✅ Complete |
+| 17 | [Air Canvas](#17-air-canvas) | `/games/air-canvas` | Creativity | Hand tracking | — | — | ✅ Complete |
+| 18 | [Mirror Draw](#18-mirror-draw) | `/games/mirror-draw` | Creativity + Motor | Hand tracking (pinch) | 4 levels | — | ✅ Complete |
+| 19 | [Phonics Sounds](#19-phonics-sounds) | `/games/phonics-sounds` | Literacy / Phonics | Hand tracking (pinch) | 3 levels | 15-20s/round | ✅ Complete |
 
 ---
 
@@ -61,6 +64,9 @@ Reusable pure-function modules extracted from game pages:
 | `hitTarget` | `src/frontend/src/games/hitTarget.ts` | `findHitTarget` — generic circular hit detection | Number Tap Trail, Shape Sequence, Word Builder |
 | `wordBuilderLogic` | `src/frontend/src/games/wordBuilderLogic.ts` | `pickWordForLevel`, `createLetterTargets`, `WORD_LISTS` | Word Builder |
 | `emojiMatchLogic` | `src/frontend/src/games/emojiMatchLogic.ts` | `buildRound`, `EMOTIONS` | Emoji Emotion Match |
+| `airCanvasLogic` | `src/frontend/src/games/airCanvasLogic.ts` | `createStroke`, `addPointToStroke`, `detectShake`, `getBrushConfig`, `nextColor`, `nextBrush`, `getRainbowHue` | Air Canvas |
+| `mirrorDrawLogic` | `src/frontend/src/games/mirrorDrawLogic.ts` | `calculateMatchScore`, `mirrorPoint`, `samplePoints`, `getStars`, `TEMPLATES`, `LEVELS` | Mirror Draw |
+| `phonicsSoundsLogic` | `src/frontend/src/games/phonicsSoundsLogic.ts` | `buildPhonicsRound`, `getPhonemesForLevel`, `PHONEMES`, `LEVELS` | Phonics Sounds |
 
 ### Test Coverage
 
@@ -73,6 +79,9 @@ Reusable pure-function modules extracted from game pages:
 | `src/frontend/src/games/__tests__/hitTarget.test.ts` | Generic hit target detection |
 | `src/frontend/src/games/__tests__/wordBuilderLogic.test.ts` | Word selection and letter target generation |
 | `src/frontend/src/games/__tests__/emojiMatchLogic.test.ts` | Emotion round building logic |
+| `src/frontend/src/games/__tests__/airCanvasLogic.test.ts` | Stroke management, brush configs, shake detection |
+| `src/frontend/src/games/__tests__/mirrorDrawLogic.test.ts` | Templates, path matching, scoring, symmetry |
+| `src/frontend/src/games/__tests__/phonicsSoundsLogic.test.ts` | Phoneme data, round building, positioning |
 | `src/frontend/src/pages/__tests__/ConnectTheDots.test.tsx` | Connect The Dots page |
 | `src/frontend/src/pages/__tests__/Game.smoke.test.tsx` | General game smoke tests |
 | `src/frontend/src/pages/__tests__/Game.pending.test.tsx` | Pending test cases |
@@ -745,6 +754,7 @@ Reusable pure-function modules extracted from game pages:
 | **Movement / Body** | Yoga Animals, Freeze Dance, Simon Says |
 | **Social-Emotional** | Emoji Emotion Match |
 | **Science** | Virtual Chemistry Lab |
+| **Creativity** | Air Canvas, Mirror Draw |
 
 ## Input Method Summary
 
@@ -758,4 +768,4 @@ Reusable pure-function modules extracted from game pages:
 
 ---
 
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-22*

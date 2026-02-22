@@ -132,7 +132,7 @@ export function VirtualChemistryLab() {
     if (beakerContents.length < 2) return;
 
     const chemicalIds = beakerContents.map((c) => c.chemicalId);
-    
+
     for (const reaction of REACTIONS) {
       if (
         chemicalIds.includes(reaction.input1) &&
@@ -145,7 +145,7 @@ export function VirtualChemistryLab() {
           setShowReactionEffect(true);
           setScore((s) => s + 50);
           void playSuccess();
-          
+
           if (ttsEnabled) {
             void speak(`${reaction.name}! ${reaction.description}`);
           }
@@ -289,7 +289,7 @@ export function VirtualChemistryLab() {
 
       beakerContents.forEach((content) => {
         const height = (content.amount / 100) * totalHeight;
-        
+
         ctx.fillStyle = content.color;
         ctx.fillRect(
           beakerX - beakerWidth / 2 + 4,
@@ -353,90 +353,99 @@ export function VirtualChemistryLab() {
 
   if (isHandLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-        <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="text-6xl mb-4">🧪</div>
-          <h2 className="text-2xl font-bold text-purple-700">Loading Chemistry Lab...</h2>
-          <p className="text-purple-500">Getting safety goggles ready!</p>
+      <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
+        <motion.div
+          className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-12 text-center max-w-md w-full shadow-sm'
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className='text-6xl mb-6'>🧪</div>
+          <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-2'>
+            Loading Chemistry Lab
+          </h2>
+          <p className='text-slate-500 font-bold'>Getting safety goggles ready...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 p-4">
+    <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 font-sans'>
       {/* Header */}
-      <header className="flex justify-between items-center mb-4">
+      <header className='flex justify-between items-center mb-6 max-w-7xl mx-auto'>
         <button
-          onClick={() => navigate('/games')}
-          className="px-4 py-2 bg-white/80 backdrop-blur rounded-full font-bold text-purple-700 hover:bg-white transition"
+          onClick={() => navigate('/dashboard')}
+          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-bold text-slate-500 transition-colors shadow-sm'
         >
-          ← Back
+          <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M10 19l-7-7m0 0l7-7m-7 7h18' /></svg>
+          <span className='hidden sm:inline'>Back</span>
         </button>
-        <h1 className="text-2xl font-bold text-purple-800">Virtual Chemistry Lab 🧪</h1>
-        <div className="px-4 py-2 bg-yellow-400 rounded-full font-bold text-purple-800">
+        <h1 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight text-center flex-1'>
+          Virtual Chemistry Lab
+        </h1>
+        <div className='bg-amber-50 border-4 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-sm flex items-center gap-2'>
           ⭐ {score}
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className='max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Chemical Shelf */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-purple-800 mb-4">Chemical Shelf</h2>
-            <p className="text-sm text-gray-600 mb-4">
+        <div className='lg:col-span-1 space-y-6'>
+          <div className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-6 shadow-sm'>
+            <h2 className='text-2xl font-black text-slate-800 tracking-tight mb-2'>Chemical Shelf</h2>
+            <p className='text-slate-500 font-bold mb-6'>
               Select a chemical, then pinch your fingers over the beaker to pour!
             </p>
-            
-            <div className="grid grid-cols-2 gap-3">
+
+            <div className='grid grid-cols-2 gap-3'>
               {CHEMICALS.map((chemical) => (
                 <motion.button
                   key={chemical.id}
                   onClick={() => setSelectedChemical(chemical)}
-                  className={`p-3 rounded-xl border-2 transition-all ${
-                    selectedChemical?.id === chemical.id
-                      ? 'border-purple-500 bg-purple-100'
-                      : 'border-gray-200 hover:border-purple-300'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className={`p-4 rounded-[1.5rem] border-4 transition-all text-left ${selectedChemical?.id === chemical.id
+                    ? 'border-[#3B82F6] bg-blue-50'
+                    : 'border-slate-100 hover:border-slate-300 bg-white'
+                    }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <div
-                    className="w-8 h-8 rounded-full mx-auto mb-2"
+                    className='w-12 h-12 rounded-full mb-3 shadow-inner'
                     style={{ backgroundColor: chemical.color }}
                   />
-                  <div className="text-xs font-bold text-gray-800">{chemical.symbol}</div>
-                  <div className="text-xs text-gray-600">{chemical.name}</div>
+                  <div className='text-sm font-black text-slate-700 tracking-wide'>{chemical.symbol}</div>
+                  <div className='text-xs font-bold text-slate-500 truncate'>{chemical.name}</div>
                 </motion.button>
               ))}
             </div>
           </div>
 
           {/* Discovery Book */}
-          <div className="bg-white rounded-3xl p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-purple-800 mb-4">
-              Discovery Book 📖
-            </h2>
-            <div className="text-sm text-gray-600 mb-2">
-              {discoveredReactions.size} / {REACTIONS.length} reactions discovered
+          <div className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-6 shadow-sm'>
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-2xl font-black text-slate-800 tracking-tight'>
+                Discovery Book 📖
+              </h2>
+              <span className='bg-[#10B981]/10 text-[#10B981] px-3 py-1 rounded-full text-sm font-black'>
+                {discoveredReactions.size}/{REACTIONS.length}
+              </span>
             </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className='space-y-3 max-h-64 overflow-y-auto pr-2'>
               {REACTIONS.map((reaction) => {
                 const isDiscovered = discoveredReactions.has(reaction.id);
                 return (
                   <div
                     key={reaction.id}
-                    className={`p-3 rounded-xl text-sm ${
-                      isDiscovered
-                        ? 'bg-green-100 border border-green-300'
-                        : 'bg-gray-100 opacity-50'
-                    }`}
+                    className={`p-4 rounded-[1.5rem] border-4 transition-colors ${isDiscovered
+                      ? 'bg-emerald-50 border-emerald-100'
+                      : 'bg-slate-50 border-slate-100 opacity-60'
+                      }`}
                   >
-                    <div className="font-bold">
-                      {isDiscovered ? reaction.name : '???'}
+                    <div className={`font-black text-lg ${isDiscovered ? 'text-[#10B981]' : 'text-slate-400'}`}>
+                      {isDiscovered ? reaction.name : 'Unknown Reaction'}
                     </div>
                     {isDiscovered && (
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className='text-sm font-bold text-emerald-600/80 mt-1'>
                         {reaction.description}
                       </div>
                     )}
@@ -448,68 +457,65 @@ export function VirtualChemistryLab() {
         </div>
 
         {/* Lab Area */}
-        <div className="lg:col-span-2">
+        <div className='lg:col-span-2 flex flex-col'>
           {!isPlaying ? (
             <motion.div
-              className="bg-white rounded-3xl p-8 shadow-lg"
+              className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 md:p-12 shadow-sm flex flex-col items-center justify-center flex-1 text-center'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="text-center mb-8">
-                <div className="text-8xl mb-4">🧪⚗️</div>
-                <h2 className="text-3xl font-bold text-purple-800 mb-2">
-                  Virtual Chemistry Lab
-                </h2>
-                <p className="text-purple-600 text-lg">
-                  Mix chemicals and discover amazing reactions!
-                </p>
-              </div>
+              <div className='text-[7rem] mb-6 drop-shadow-sm hover:scale-110 transition-transform'>🧪⚗️</div>
+              <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
+                Virtual Chemistry Lab
+              </h2>
+              <p className='text-slate-500 text-xl font-bold mb-10 max-w-lg'>
+                Mix chemicals and discover amazing reactions!
+              </p>
 
-              <div className="bg-purple-50 rounded-2xl p-6 mb-8">
-                <h3 className="font-bold text-purple-800 mb-4">How to Experiment:</h3>
-                <ol className="space-y-2 text-purple-700">
-                  <li>1. Select a chemical from the shelf</li>
-                  <li>2. Pinch your thumb and index finger together</li>
-                  <li>3. Move your hand over the beaker</li>
-                  <li>4. Watch for reactions!</li>
-                  <li>5. Try mixing different chemicals</li>
-                </ol>
+              <div className='bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-8 mb-10 w-full text-left'>
+                <h3 className='font-black text-slate-700 text-2xl mb-4'>How to Experiment:</h3>
+                <ul className='space-y-3 text-slate-600 font-bold text-lg'>
+                  <li className='flex items-center gap-3'><span className='text-2xl'>1️⃣</span> Select a chemical from the shelf</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl'>2️⃣</span> Pinch your thumb and index finger together</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl'>3️⃣</span> Move your hand over the beaker to pour</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl'>4️⃣</span> Discover amazing reactions!</li>
+                </ul>
               </div>
 
               <button
                 onClick={() => setIsPlaying(true)}
-                className="w-full py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xl font-bold rounded-2xl hover:from-purple-600 hover:to-blue-600 transition transform hover:scale-105"
+                className='w-full max-w-md py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-full shadow-sm transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Experimenting! 🔬
               </button>
             </motion.div>
           ) : (
-            <div className="space-y-4">
+            <div className='flex flex-col h-full space-y-6'>
               {/* Camera + Canvas */}
-              <div className="relative rounded-3xl overflow-hidden shadow-lg bg-black aspect-video">
+              <div className='relative rounded-[2.5rem] overflow-hidden border-4 border-slate-100 shadow-sm bg-slate-100 flex-1 min-h-[400px]'>
                 <Webcam
                   ref={webcamRef}
-                  className="w-full h-full object-cover"
+                  className='absolute inset-0 w-full h-full object-cover'
                   mirrored
-                  videoConstraints={{ width: 640, height: 480 }}
+                  videoConstraints={{ facingMode: 'user' }}
                 />
                 <canvas
                   ref={canvasRef}
-                  className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                  className='absolute inset-0 w-full h-full pointer-events-none'
                   width={640}
                   height={480}
                 />
 
                 {/* UI Overlay */}
-                <div className="absolute top-4 left-4 px-3 py-1 bg-black/50 backdrop-blur rounded-full">
-                  <span className="text-white text-sm">
-                    {isHandReady ? '✋ Hand Tracking Ready' : '⏳ Loading...'}
+                <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
+                  <span className='text-white font-bold text-sm tracking-wide'>
+                    {isHandReady ? '✅ Hand Tracking Ready' : '⏳ Loading...'}
                   </span>
                 </div>
 
                 {selectedChemical && (
-                  <div className="absolute top-4 right-4 px-3 py-2 bg-purple-500/80 backdrop-blur rounded-full">
-                    <span className="text-white text-sm font-bold">
+                  <div className='absolute top-6 right-6 px-6 py-3 bg-[#3B82F6] backdrop-blur-md rounded-full border-4 border-blue-400 shadow-sm'>
+                    <span className='text-white font-black tracking-wide'>
                       Selected: {selectedChemical.name}
                     </span>
                   </div>
@@ -518,7 +524,7 @@ export function VirtualChemistryLab() {
                 {/* Pouring indicator */}
                 {isPouring && (
                   <motion.div
-                    className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 text-4xl"
+                    className='absolute bottom-1/2 left-1/2 transform -translate-x-1/2 text-6xl drop-shadow-md'
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
@@ -528,35 +534,35 @@ export function VirtualChemistryLab() {
               </div>
 
               {/* Controls */}
-              <div className="flex gap-4">
+              <div className='flex gap-4'>
                 <button
                   onClick={clearBeaker}
-                  className="flex-1 py-3 bg-red-100 text-red-700 rounded-xl font-bold hover:bg-red-200 transition"
+                  className='flex-1 py-4 bg-red-50 hover:bg-red-100 border-4 border-red-200 text-red-600 rounded-[1.5rem] font-black text-lg transition-colors'
                 >
                   🗑️ Empty Beaker
                 </button>
                 <button
                   onClick={() => setIsPlaying(false)}
-                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition"
+                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-100 text-slate-500 rounded-[1.5rem] font-black text-lg transition-colors'
                 >
-                  ⏹️ Stop
+                  ⏹️ Stop Experiment
                 </button>
               </div>
 
               {/* Beaker Contents Display */}
               {beakerContents.length > 0 && (
-                <div className="bg-white rounded-2xl p-4 shadow">
-                  <h3 className="font-bold text-purple-800 mb-2">Beaker Contents:</h3>
-                  <div className="flex flex-wrap gap-2">
+                <div className='bg-white rounded-[2rem] border-4 border-slate-100 p-6 shadow-sm'>
+                  <h3 className='font-black text-slate-800 mb-4 text-xl'>Beaker Contents:</h3>
+                  <div className='flex flex-wrap gap-3'>
                     {beakerContents.map((content) => {
                       const chemical = CHEMICALS.find((c) => c.id === content.chemicalId);
                       return (
                         <span
                           key={content.chemicalId}
-                          className="px-3 py-1 rounded-full text-sm font-medium"
+                          className='px-4 py-2 rounded-full text-base font-bold shadow-sm border border-black/5'
                           style={{
                             backgroundColor: content.color,
-                            color: content.chemicalId === 'baking-soda' ? '#333' : '#FFF',
+                            color: content.chemicalId === 'baking-soda' || content.chemicalId === 'vinegar' ? '#333' : '#FFF',
                           }}
                         >
                           {chemical?.name}: {content.amount}ml
@@ -575,32 +581,32 @@ export function VirtualChemistryLab() {
       <AnimatePresence>
         {showReactionEffect && lastReaction && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center z-50"
+            className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowReactionEffect(false)}
           >
             <motion.div
-              className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-md mx-4"
+              className='bg-white rounded-[3rem] border-4 border-slate-100 p-12 text-center shadow-2xl max-w-md w-full'
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
             >
-              <div className="text-8xl mb-4">
+              <div className='text-[7rem] mb-6 drop-shadow-sm'>
                 {lastReaction.effect === 'bubble' ? '🫧' : '🎉'}
               </div>
-              <h2 className="text-3xl font-bold text-purple-800 mb-2">
+              <h2 className='text-4xl font-black text-[#10B981] mb-4 tracking-tight'>
                 {lastReaction.name}!
               </h2>
-              <p className="text-purple-600 text-lg mb-4">
+              <p className='text-slate-500 font-bold text-xl mb-8'>
                 {lastReaction.description}
               </p>
               <div
-                className="w-24 h-24 rounded-full mx-auto"
+                className='w-32 h-32 rounded-full mx-auto border-4 border-slate-100 shadow-inner'
                 style={{ backgroundColor: lastReaction.resultColor }}
               />
-              <p className="text-sm text-gray-500 mt-4">Tap to continue</p>
+              <p className='text-sm font-bold text-slate-400 mt-8 uppercase tracking-widest'>Tap to see more</p>
             </motion.div>
           </motion.div>
         )}

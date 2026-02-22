@@ -173,7 +173,7 @@ export function AdventureMap() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-lg p-3 mb-3"
+          className="bg-white border-4 border-slate-100 rounded-[2rem] p-3 mb-3"
         >
           <div className="flex items-center gap-2 mb-2">
             <div

@@ -124,6 +124,34 @@ export interface PinchOptions {
   landmarks?: [number, number];
 }
 
+/** One-Euro filter options for smoothing */
+export interface OneEuroFilterOptions {
+  /** Minimum cutoff frequency in Hz. Lower = more smoothing. Default: 1.0 */
+  minCutoff?: number;
+  /** Speed coefficient. Higher = less lag during fast movements. Default: 0.007 */
+  beta?: number;
+  /** Cutoff frequency for derivative filter in Hz. Default: 1.0 */
+  dCutoff?: number;
+}
+
+/** Hand tracking frame with processed data */
+export interface TrackedHandFrame {
+  hands: Landmark[][];
+  handCount: number;
+  primaryHand: Landmark[] | null;
+  rawIndexTip: Point | null;
+  indexTip: Point | null;
+  pinch: PinchResult;
+}
+
+/** Hand tracking runtime metadata */
+export interface HandTrackingRuntimeMeta {
+  timestamp: number;
+  deltaTimeMs: number;
+  fps: number;
+  video: HTMLVideoElement;
+}
+
 /** Segment of connected points */
 export type PointSegment = Point[];
 

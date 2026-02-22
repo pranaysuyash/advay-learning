@@ -40,8 +40,8 @@ apiClient.interceptors.response.use(
         // Retry original request (cookies automatically included)
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        window.location.href = '/login';
+        // Refresh failed, return error so caller can clear auth state
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);

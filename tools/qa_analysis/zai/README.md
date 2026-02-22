@@ -106,9 +106,32 @@ Generates a DOCX report from JSON output (primarily `video_analysis_raw.json`).
 
 ---
 
+### 7) `run_all.sh`
+
+Runs the whole chain in one command:
+
+- key-frame analysis
+- sampled frame analysis
+- quick frame JSON analysis
+- 3-pass video analysis
+- final-frame analysis
+- DOCX report generation
+
+**Arguments**
+1. `framesDir` (default: `evaluations/emoji_match_frames`)
+2. `videoPath` (default: `tools/emoji_match.mov`)
+3. `outputDir` (default: `evaluations`)
+
+**Example**
+
+- `bash tools/qa_analysis/zai/run_all.sh evaluations/emoji_match_frames tools/emoji_match.mov evaluations`
+
+---
+
 ## Notes
 
 - Outputs are JSON artifacts and should be reviewed/curated into docs as needed.
 - Keep generated images/frames as local artifacts unless explicitly needed in docs.
 - These scripts preserve external agent workflows but are now path-agnostic and reusable in this project.
 - For DOCX generation, install `docx` in your Node environment.
+- For TypeScript scripts, use `tsx` (e.g., `npx tsx ...`).

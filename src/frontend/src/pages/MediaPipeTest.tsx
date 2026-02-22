@@ -643,11 +643,10 @@ export function MediaPipeTest() {
                                 if (testStatus === 'running') stopTest();
                                 setActiveTab(tab.id);
                             }}
-                            className={`p-3 rounded-xl border transition text-left ${
-                                activeTab === tab.id
+                            className={`p-3 rounded-xl border transition text-left ${activeTab === tab.id
                                     ? 'bg-blue-500/20 border-blue-500 text-blue-400'
                                     : 'bg-white/5 border-border hover:bg-white/10'
-                            }`}
+                                }`}
                         >
                             <div className="text-2xl mb-1">{tab.icon}</div>
                             <div className="font-semibold text-sm">{tab.label}</div>
@@ -663,7 +662,7 @@ export function MediaPipeTest() {
 
                 {/* Camera View */}
                 <div className="bg-white/10 border border-border rounded-xl p-4 mb-6">
-                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black">
+                    <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100">
                         <Webcam
                             ref={webcamRef}
                             audio={false}

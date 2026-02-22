@@ -171,18 +171,18 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
 
   return (
     <GameContainer title='Music Pinch Beat' score={score} level={Math.max(1, Math.floor(score / 80) + 1)} onHome={goHome}>
-      <div className='absolute inset-0 bg-black'>
+      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
           mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-40'
+          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60' />
+        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-blue-100/40 pointer-events-none' />
 
-        <div className='absolute inset-0 grid grid-cols-3'>
+        <div className='absolute inset-x-4 top-24 bottom-24 grid grid-cols-3 gap-4 md:gap-8'>
           {Array.from({ length: LANE_COUNT }).map((_, laneIndex) => {
             const isTarget = laneIndex === targetLane;
             const isSelected = laneIndex === selectedLane;
@@ -190,19 +190,17 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
             return (
               <div
                 key={laneIndex}
-                className='relative border-x border-white/15 flex items-center justify-center'
+                className='relative flex items-center justify-center'
               >
                 <div
-                  className={`absolute inset-y-8 left-3 right-3 rounded-3xl transition-all ${
-                    isTarget
-                      ? 'bg-amber-300/40 shadow-[0_0_40px_rgba(251,191,36,0.45)]'
-                      : 'bg-white/5'
-                  }`}
+                  className={`absolute inset-0 rounded-[2.5rem] border-4 transition-all duration-300 ${isTarget
+                      ? 'bg-amber-100/50 border-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.5)]'
+                      : 'bg-white/40 border-slate-200'
+                    }`}
                 />
                 <div
-                  className={`relative z-10 mt-6 text-2xl font-black tracking-wide ${
-                    isSelected ? 'text-cyan-200' : 'text-white/85'
-                  }`}
+                  className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
+                    } transition-transform drop-shadow-sm`}
                 >
                   {LANE_LABELS[laneIndex]}
                 </div>
@@ -213,30 +211,30 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
 
         {cursorX !== null && (
           <div
-            className='absolute bottom-16 w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/25 shadow-[0_0_24px_rgba(34,211,238,0.8)] -translate-x-1/2 pointer-events-none'
+            className='absolute bottom-32 w-16 h-16 rounded-full border-4 border-[#3B82F6] bg-blue-100/50 shadow-[0_0_30px_rgba(59,130,246,0.6)] -translate-x-1/2 pointer-events-none transition-all'
             style={{ left: `${cursorX * 100}%` }}
             aria-hidden='true'
           />
         )}
 
-        <div className='absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-black/50 text-white text-sm text-center max-w-[90%]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[300px]'>
           {feedback}
         </div>
 
         {!isPlaying && (
-          <div className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center'>
+          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <button
               type='button'
               onClick={startGame}
-              className='px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-2xl text-lg'
+              className='px-16 py-6 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-[2rem] shadow-sm text-3xl transition-transform hover:scale-105 active:scale-95'
             >
               Start Music Game
             </button>
           </div>
         )}
 
-        <div className='absolute top-16 right-4 px-4 py-2 rounded-xl bg-black/50 text-white text-sm'>
-          Streak: <span className='font-bold text-amber-300'>{streak}</span>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
+          Streak: <span className='font-black text-amber-500 text-2xl ml-2'>{streak}</span>
         </div>
 
         <GameControls controls={controls} position='bottom-right' />

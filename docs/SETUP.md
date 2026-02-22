@@ -20,13 +20,42 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh
 ```
 
 To manually run the gate on your staged changes:
 
 ```bash
 ./scripts/agent_gate.sh --staged
+```
+
+### Secret Scanning Gate (Required)
+
+Commits and pushes now run `scripts/secret_scan.sh`:
+
+- `pre-commit` scans staged content for leaked credentials.
+- `pre-push` scans the pushed commit range for leaked credentials.
+
+Scanner backend:
+
+- Uses local `gitleaks` if installed.
+- Falls back to Docker image `ghcr.io/gitleaks/gitleaks:latest` when `gitleaks` is not installed (Docker daemon must be running).
+
+Manual checks:
+
+```bash
+# Scan staged files
+./scripts/secret_scan.sh --staged
+
+# Scan commit range
+./scripts/secret_scan.sh --range origin/main..HEAD
+```
+
+Temporary bypass (emergency only):
+
+```bash
+SKIP_SECRET_SCAN=1 git commit ...
+SKIP_SECRET_SCAN=1 git push ...
 ```
 
 ## Install uv

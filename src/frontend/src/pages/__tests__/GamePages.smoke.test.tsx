@@ -59,6 +59,11 @@ import { SimonSays } from '../SimonSays';
 import { FingerNumberShow } from '../../games/FingerNumberShow';
 import { WordBuilder } from '../WordBuilder';
 import { EmojiMatch } from '../EmojiMatch';
+import { AirCanvas } from '../AirCanvas';
+import { MirrorDraw } from '../MirrorDraw';
+import { PhonicsSounds } from '../PhonicsSounds';
+import StorySequence from '../StorySequence';
+import ShapeSafari from '../ShapeSafari';
 
 function renderInRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -166,6 +171,46 @@ describe('Game pages smoke tests', () => {
     it('renders without throwing and shows start button', () => {
       expect(() => renderInRouter(<EmojiMatch />)).not.toThrow();
       expect(screen.getByText('Start Emoji Match')).toBeTruthy();
+    });
+  });
+
+  describe('AirCanvas', () => {
+    it('renders without throwing and shows key UI', () => {
+      expect(() => renderInRouter(<AirCanvas />)).not.toThrow();
+      expect(
+        screen.queryByText(/Air Canvas/) ||
+          screen.queryByText(/Loading Air Canvas/),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('MirrorDraw', () => {
+    it('renders without throwing and shows start button', () => {
+      expect(() => renderInRouter(<MirrorDraw />)).not.toThrow();
+      expect(screen.getByText('Start Drawing!')).toBeTruthy();
+    });
+  });
+
+  describe('PhonicsSounds', () => {
+    it('renders without throwing and shows start button', () => {
+      expect(() => renderInRouter(<PhonicsSounds />)).not.toThrow();
+      expect(screen.getByText('Start Phonics!')).toBeTruthy();
+    });
+  });
+
+  describe('StorySequence', () => {
+    it('renders without throwing and shows key UI', () => {
+      expect(() => renderInRouter(<StorySequence />)).not.toThrow();
+      expect(screen.getByText('Story Sequence')).toBeTruthy();
+      expect(screen.getByText('Put the Story in Order!')).toBeTruthy();
+    });
+  });
+
+  describe('ShapeSafari', () => {
+    it('renders without throwing and shows key UI', () => {
+      expect(() => renderInRouter(<ShapeSafari />)).not.toThrow();
+      expect(screen.getByText('Shape Safari')).toBeTruthy();
+      expect(screen.getByText('Shape Safari!')).toBeTruthy();
     });
   });
 });

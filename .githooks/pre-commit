@@ -7,7 +7,15 @@ cd "$repo_root"
 # 1. Agent gate: worklog enforcement
 ./scripts/agent_gate.sh --staged
 
-# 2. Regression check: tests + export comparison + TypeScript
+# 2. Secret scan: block commits that include leaked credentials
+# Skip with SKIP_SECRET_SCAN=1 or --no-verify
+if [[ "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
+  ./scripts/secret_scan.sh --staged
+else
+  echo "[pre-commit] Skipping secret scan (SKIP_SECRET_SCAN=1)"
+fi
+
+# 3. Regression check: tests + export comparison + TypeScript
 # Skip with SKIP_REGRESSION_CHECK=1 or --no-verify
 if [[ "${SKIP_REGRESSION_CHECK:-}" != "1" ]]; then
   ./scripts/regression_check.sh --staged

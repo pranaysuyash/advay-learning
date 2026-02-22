@@ -22,12 +22,12 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         onClick={onClick}
-        whileHover={hover ? { y: -2, boxShadow: '0 10px 30px rgba(61, 64, 91, 0.12)' } : undefined}
+        whileHover={hover ? { y: -4, boxShadow: '0 12px 0 0 rgba(0, 0, 0, 0.05)' } : undefined}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className={`
-          bg-white border border-border rounded-2xl shadow-soft
+          bg-white border-4 border-slate-200 rounded-[2rem] shadow-sm overflow-hidden transition-all
           ${paddings[padding]}
-          ${hover ? 'cursor-pointer' : ''}
+          ${hover ? 'cursor-pointer hover:border-[#3B82F6]' : ''}
           ${className}
         `}
       >
@@ -39,7 +39,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card';
 
-// Card sub-components for consistent layouts
+// Card sub-components
 interface CardHeaderProps {
   title: string;
   subtitle?: string;
@@ -52,13 +52,13 @@ export function CardHeader({ title, subtitle, action, icon }: CardHeaderProps) {
     <div className="flex items-start justify-between mb-4">
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-secondary">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
             {icon}
           </div>
         )}
         <div>
-          <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
-          {subtitle && <p className="text-sm text-text-secondary">{subtitle}</p>}
+          <h3 className="text-xl font-black text-slate-800 tracking-tight">{title}</h3>
+          {subtitle && <p className="text-sm font-semibold text-slate-500">{subtitle}</p>}
         </div>
       </div>
       {action && <div>{action}</div>}
@@ -73,7 +73,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`mt-6 pt-4 border-t border-border ${className}`}>
+    <div className={`mt-6 pt-4 border-t-4 border-slate-100 ${className}`}>
       {children}
     </div>
   );
@@ -94,18 +94,18 @@ export function StatCard({
   trendUp?: boolean;
 }) {
   return (
-    <Card hover>
+    <Card hover className="border-slate-200">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-text-secondary mb-1">{label}</p>
-          <p className="text-2xl font-bold text-text-primary">{value}</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</p>
+          <p className="text-3xl font-black text-slate-800">{value}</p>
           {trend && (
-            <p className={`text-xs mt-1 ${trendUp ? 'text-green-700' : 'text-red-700'}`}>
+            <p className={`text-sm font-bold mt-2 ${trendUp ? 'text-green-500' : 'text-red-500'}`}>
               {trendUp ? '↑' : '↓'} {trend}
             </p>
           )}
         </div>
-        <div className="w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-secondary">
+        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
           {icon}
         </div>
       </div>
@@ -125,12 +125,12 @@ export function FeatureCard({
   onClick?: () => void;
 }) {
   return (
-    <Card hover={!!onClick} onClick={onClick} className="text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-bg-tertiary flex items-center justify-center text-text-secondary">
+    <Card hover={!!onClick} onClick={onClick} className="text-center group">
+      <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-slate-50 group-hover:bg-[#3B82F6]/10 flex items-center justify-center text-slate-400 group-hover:text-[#3B82F6] transition-colors">
         {icon}
       </div>
-      <h3 className="text-lg font-semibold mb-2 text-text-primary">{title}</h3>
-      <p className="text-sm text-text-secondary">{description}</p>
+      <h3 className="text-2xl font-black mb-3 text-slate-800">{title}</h3>
+      <p className="text-base font-semibold text-slate-500">{description}</p>
     </Card>
   );
 }

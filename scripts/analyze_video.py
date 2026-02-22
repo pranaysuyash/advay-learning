@@ -3,7 +3,9 @@ import time
 import google.generativeai as genai
 
 # Setup API Key
-api_key = os.environ.get("GEMINI_API_KEY", "AIzaSyDYXPY95PneMi0m7UTiI6ciY8sQyst2jV8")
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY is required. Set it in your local .env.")
 genai.configure(api_key=api_key)
 
 video_path = "/Users/pranay/Desktop/emoji_match.mov"

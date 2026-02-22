@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettingsStore } from '../store';
 import { Mascot } from './Mascot';
+import { Button } from './ui/Button';
 
 interface OnboardingFlowProps {
   onComplete?: () => void;
@@ -97,16 +98,16 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className='fixed inset-0 bg-slate-900/95 backdrop-blur-sm flex items-center justify-center z-50'
+        className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden'
       >
-        <div className='w-full max-w-lg mx-4'>
-          <div className='flex justify-center gap-2 mb-8'>
+        <div className='w-full max-w-xl mx-4 relative overflow-hidden'>
+          {/* Progress Indicators */}
+          <div className='flex justify-center gap-2 mb-6'>
             {steps.map((step, i) => (
               <motion.div
                 key={step}
-                className={`h-2 rounded-full transition-all ${
-                  i <= currentIndex ? 'bg-orange-500 w-8' : 'bg-slate-600 w-2'
-                }`}
+                className={`h-3 rounded-full transition-all border-2 flex items-center justify-center shadow-sm ${i <= currentIndex ? 'bg-[#10B981] border-[#10B981] w-12' : 'bg-white border-slate-200 w-3'
+                  }`}
                 animate={{ scale: i === currentIndex ? 1.1 : 1 }}
               />
             ))}
@@ -114,12 +115,15 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
 
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -50, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className='bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-700'
+            className='bg-white rounded-[2.5rem] p-10 shadow-2xl border-4 border-slate-100 relative overflow-hidden text-center'
           >
+            <div className='absolute -left-16 -bottom-16 w-48 h-48 bg-[#3B82F6]/10 rounded-full blur-3xl -z-10'></div>
+            <div className='absolute -right-16 -top-16 w-48 h-48 bg-[#E85D04]/10 rounded-full blur-3xl -z-10'></div>
+
             {currentStep === 'welcome' && (
               <WelcomeStep onNext={handleNext} onSkip={handleSkip} />
             )}
@@ -150,32 +154,33 @@ function WelcomeStep({
   onSkip: () => void;
 }) {
   return (
-    <div className='text-center'>
-      <Mascot state='happy' className='mb-4' enableVideo={false} />
+    <>
+      <Mascot state='happy' className='mb-6 -mt-4' responsiveSize="lg" enableVideo={false} />
 
-      <h1 className='text-3xl font-bold text-white mb-3'>
+      <h1 className='text-3xl sm:text-4xl font-black text-slate-800 tracking-tight leading-tight mb-4'>
         Welcome to Learn with Your Hands!
       </h1>
-      <p className='text-slate-300 text-lg mb-8'>
-        Hi! I&apos;m Pip, and I&apos;ll help you learn letters by drawing in the
+      <p className='text-slate-500 font-bold text-lg mb-10'>
+        Hi! I'm Pip, and I'll help you learn letters by drawing in the
         air with your fingers!
       </p>
 
-      <div className='space-y-3'>
-        <button
+      <div className='space-y-4 flex flex-col'>
+        <Button
           onClick={onNext}
-          className='w-full px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg transition shadow-lg'
+          size="lg"
+          fullWidth
         >
-          Let&apos;s Get Started! 🎉
-        </button>
+          Let's Get Started! 🎉
+        </Button>
         <button
           onClick={onSkip}
-          className='w-full px-6 py-3 text-slate-400 hover:text-white font-medium transition'
+          className='w-full px-6 py-4 text-slate-400 hover:text-slate-600 font-bold tracking-widest uppercase transition-colors'
         >
           Skip Tutorial
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -193,18 +198,21 @@ function CameraStep({
   onSkip: () => void;
 }) {
   return (
-    <div className='text-center'>
-      <h2 className='text-2xl font-bold text-white mb-3'>Camera Setup</h2>
-      <p className='text-slate-300 mb-6'>
-        We need camera access to see your hand movements. Don&apos;t worry—your
-        video stays on your device!
+    <>
+      <div className="w-20 h-20 bg-blue-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-sm border-2 border-white">
+        📷
+      </div>
+      <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-4'>Camera Setup</h2>
+      <p className='text-slate-500 font-bold text-lg mb-8'>
+        We need camera access to see your hand movements. Don't worry—your
+        video stays entirely on your device!
       </p>
 
-      <div className='relative w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6 border-2 border-slate-700'>
+      <div className='relative w-full aspect-video bg-slate-100 rounded-[2rem] overflow-hidden mb-8 border-4 border-slate-200 shadow-inner'>
         {status === 'pending' && (
           <div className='absolute inset-0 flex items-center justify-center'>
             <motion.div
-              className='w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full'
+              className='w-16 h-16 border-4 border-[#3B82F6] border-t-transparent rounded-full'
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             />
@@ -222,7 +230,7 @@ function CameraStep({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className='absolute top-4 right-4 bg-green-500 text-white rounded-full p-2'
+              className='absolute top-4 right-4 bg-green-500 text-white rounded-full p-2 border-2 border-white shadow-sm'
             >
               <svg
                 className='w-6 h-6'
@@ -233,7 +241,7 @@ function CameraStep({
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
-                  strokeWidth={3}
+                  strokeWidth={4}
                   d='M5 13l4 4L19 7'
                 />
               </svg>
@@ -241,44 +249,47 @@ function CameraStep({
           </>
         )}
         {status === 'error' && (
-          <div className='absolute inset-0 flex flex-col items-center justify-center p-4'>
-            <div className='text-red-400 text-5xl mb-3'>📷</div>
-            <p className='text-red-400 font-medium mb-2'>
+          <div className='absolute inset-0 flex flex-col items-center justify-center p-6 bg-red-50 text-center text-balance'>
+            <div className='text-red-500 text-5xl mb-4'>🔒</div>
+            <p className='text-red-600 font-black text-xl mb-2'>
               Camera access denied
             </p>
-            <p className='text-slate-400 text-sm text-center'>
+            <p className='text-red-500/80 font-bold text-sm'>
               Please allow camera access in your browser settings to use hand
-              tracking
+              tracking.
             </p>
           </div>
         )}
       </div>
 
-      <div className='space-y-3'>
+      <div className='space-y-4 flex flex-col'>
         {status === 'success' && (
-          <button
+          <Button
             onClick={onNext}
-            className='w-full px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-lg transition shadow-lg'
+            variant="success"
+            size="lg"
+            fullWidth
           >
             Camera Works! Next →
-          </button>
+          </Button>
         )}
         {status === 'error' && (
-          <button
+          <Button
             onClick={onRetry}
-            className='w-full px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg transition shadow-lg'
+            size="lg"
+            fullWidth
           >
             Try Again
-          </button>
+          </Button>
         )}
         <button
           onClick={onSkip}
-          className='w-full px-6 py-3 text-slate-400 hover:text-white font-medium transition'
+          className='w-full px-6 py-4 text-slate-400 hover:text-slate-600 font-bold tracking-widest uppercase transition-colors'
         >
-          {status === 'error' ? 'Continue Without Camera' : 'Skip'}
+          {status === 'error' ? 'Continue Without Camera' : 'Skip Setup'}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -290,18 +301,21 @@ function GestureStep({
   onSkip: () => void;
 }) {
   return (
-    <div className='text-center'>
-      <h2 className='text-2xl font-bold text-white mb-3'>The Pinch Gesture</h2>
-      <p className='text-slate-300 mb-6'>
+    <>
+      <div className="w-20 h-20 bg-green-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-sm border-2 border-white">
+        🤏
+      </div>
+      <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-4'>The Pinch Gesture</h2>
+      <p className='text-slate-500 font-bold text-lg mb-8 text-balance'>
         Touch your thumb and index finger together to draw. Release to stop
         drawing.
       </p>
 
-      <div className='relative h-48 mb-6'>
+      <div className='relative h-56 mb-8 bg-slate-50 rounded-[2rem] border-4 border-slate-100 overflow-hidden'>
         <motion.div
           className='absolute inset-0 flex items-center justify-center'
           animate={{
-            scale: [1, 0.9, 1],
+            scale: [1, 0.95, 1],
           }}
           transition={{
             duration: 1.5,
@@ -311,7 +325,7 @@ function GestureStep({
         >
           <div className='relative'>
             <motion.div
-              className='text-8xl'
+              className='text-[100px] drop-shadow-sm'
               animate={{
                 rotate: [0, -5, 5, 0],
               }}
@@ -324,7 +338,7 @@ function GestureStep({
               🤏
             </motion.div>
             <motion.div
-              className='absolute -top-2 -right-2 w-6 h-6 bg-orange-400 rounded-full'
+              className='absolute -top-2 -right-4 w-10 h-10 bg-[#E85D04]/40 rounded-full blur-sm'
               animate={{
                 scale: [0, 1.2, 0],
                 opacity: [0, 1, 0],
@@ -337,9 +351,9 @@ function GestureStep({
               }}
             />
             <motion.div
-              className='absolute -bottom-4 left-1/2 -translate-x-1/2'
+              className='absolute -bottom-6 left-1/2 -translate-x-1/2'
               animate={{
-                y: [0, 20],
+                y: [0, 24],
                 opacity: [1, 0],
               }}
               transition={{
@@ -349,39 +363,40 @@ function GestureStep({
                 delay: 0.5,
               }}
             >
-              <div className='w-1 h-8 bg-gradient-to-b from-orange-400 to-transparent rounded-full' />
+              <div className='w-2 h-12 bg-gradient-to-b from-[#E85D04] to-transparent rounded-full' />
             </motion.div>
           </div>
         </motion.div>
       </div>
 
-      <div className='grid grid-cols-2 gap-4 mb-6 text-left'>
-        <div className='bg-slate-700/50 rounded-xl p-4'>
-          <div className='text-2xl mb-2'>👆👍</div>
-          <div className='text-white font-medium'>Pinch = Draw</div>
-          <div className='text-slate-400 text-sm'>Fingers together</div>
+      <div className='grid grid-cols-2 gap-4 mb-10 text-left text-balance'>
+        <div className='bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-5'>
+          <div className='text-3xl mb-3'>👆👍</div>
+          <div className='text-slate-800 font-black text-lg'>Pinch = Draw</div>
+          <div className='text-slate-500 font-semibold text-sm'>Fingers together</div>
         </div>
-        <div className='bg-slate-700/50 rounded-xl p-4'>
-          <div className='text-2xl mb-2'>✋</div>
-          <div className='text-white font-medium'>Open = Stop</div>
-          <div className='text-slate-400 text-sm'>Fingers apart</div>
+        <div className='bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] p-5'>
+          <div className='text-3xl mb-3'>✋</div>
+          <div className='text-slate-800 font-black text-lg'>Open = Stop</div>
+          <div className='text-slate-500 font-semibold text-sm'>Fingers apart</div>
         </div>
       </div>
 
-      <div className='space-y-3'>
-        <button
+      <div className='space-y-4 flex flex-col'>
+        <Button
           onClick={onComplete}
-          className='w-full px-6 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg transition shadow-lg'
+          size="lg"
+          fullWidth
         >
           Start Playing! 🎮
-        </button>
+        </Button>
         <button
           onClick={onSkip}
-          className='w-full px-6 py-3 text-slate-400 hover:text-white font-medium transition'
+          className='w-full px-6 py-4 text-slate-400 hover:text-slate-600 font-bold tracking-widest uppercase transition-colors'
         >
-          Skip
+          Skip & Close
         </button>
       </div>
-    </div>
+    </>
   );
 }

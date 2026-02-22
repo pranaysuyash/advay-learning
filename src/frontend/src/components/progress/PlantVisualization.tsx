@@ -46,24 +46,24 @@ export function PlantVisualization({
   return (
     <div className={`relative ${className}`}>
       {/* Soil */}
-      <div className='w-full h-4 bg-amber-600 rounded-b-lg mb-2' />
+      <div className='w-full h-4 bg-[#b45309] rounded-b-xl mb-4 border-2 border-[#78350f]' />
 
       {/* Plant stem and leaves */}
       <svg
         viewBox='0 0 100 100'
         className='w-full h-32'
-        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+        style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
       >
         {/* Main stem */}
         <motion.path
           d={plantPath}
-          stroke='#22c55e'
-          strokeWidth='3'
+          stroke='#10B981'
+          strokeWidth='4'
           fill='none'
           strokeLinecap='round'
           initial={{ pathLength: 0 }}
           animate={{ pathLength: progressPercentage / 100 }}
-          transition={{ duration: 1.5, ease: 'easeInOut' }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
         />
 
         {/* Flowers */}
@@ -74,11 +74,13 @@ export function PlantVisualization({
                 key={i}
                 cx={60 + i * 10}
                 cy={10 + i * 5}
-                r='3'
-                fill='#fbbf24'
+                r='4'
+                fill='#F59E0B'
+                stroke='#FFFFFF'
+                strokeWidth='1.5'
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 1 + i * 0.2, duration: 0.5 }}
+                transition={{ delay: 1 + i * 0.2, duration: 0.5, type: 'spring' }}
               />
             ))}
           </>
@@ -86,17 +88,17 @@ export function PlantVisualization({
       </svg>
 
       {/* Progress indicator */}
-      <div className='text-center mt-2'>
-        <div className='text-sm text-white/80 mb-1'>Growth Progress</div>
-        <div className='w-full bg-white/30 rounded-full h-2'>
+      <div className='text-center mt-4 bg-white p-3 border-2 border-slate-200 rounded-xl shadow-sm'>
+        <div className='text-xs font-bold text-slate-500 uppercase tracking-widest mb-2'>Growth Progress</div>
+        <div className='w-full bg-slate-100 rounded-full h-3 border border-slate-200 overflow-hidden'>
           <motion.div
-            className='bg-green-500 h-2 rounded-full'
+            className='bg-[#10B981] h-full rounded-full border-r border-white/50'
             initial={{ width: 0 }}
             animate={{ width: `${progressPercentage}%` }}
-            transition={{ duration: 1, delay: 0.5 }}
+            transition={{ duration: 1, delay: 0.5, type: 'spring' }}
           />
         </div>
-        <div className='text-xs text-white/60 mt-1'>
+        <div className='text-sm font-black text-slate-700 mt-2'>
           {progressPercentage}% Complete
         </div>
       </div>

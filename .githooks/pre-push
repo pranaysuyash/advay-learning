@@ -4,7 +4,45 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-# Basic safety net: validate the tip commit being pushed.
-head_sha="$(git rev-parse HEAD)"
-./scripts/agent_gate.sh --commit "$head_sha"
+zero_sha='0000000000000000000000000000000000000000'
+scanned_any=false
 
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [[ -z "${local_ref:-}" ]] && continue
+
+  # Deletion push (no local object to scan)
+  if [[ "${local_sha:-}" == "$zero_sha" ]]; then
+    continue
+  fi
+
+  # Keep existing workflow gate safety net for the pushed tip commit.
+  ./scripts/agent_gate.sh --commit "$local_sha"
+
+  if [[ "${SKIP_SECRET_SCAN:-}" == "1" ]]; then
+    echo "[pre-push] Skipping secret scan (SKIP_SECRET_SCAN=1)"
+    scanned_any=true
+    continue
+  fi
+
+  if [[ "${remote_sha:-}" == "$zero_sha" ]]; then
+    # New branch: scan only commits since fork-point with origin/main when available.
+    if git rev-parse --verify --quiet origin/main >/dev/null; then
+      base_sha="$(git merge-base origin/main "$local_sha")"
+      range="${base_sha}..${local_sha}"
+    else
+      range="${local_sha}~1..${local_sha}"
+    fi
+  else
+    range="${remote_sha}..${local_sha}"
+  fi
+
+  ./scripts/secret_scan.sh --range "$range"
+  scanned_any=true
+done
+
+# Fallback for environments where pre-push receives no refs on stdin.
+if [[ "$scanned_any" != true && "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
+  head_sha="$(git rev-parse HEAD)"
+  ./scripts/agent_gate.sh --commit "$head_sha"
+  ./scripts/secret_scan.sh --range "${head_sha}~1..${head_sha}"
+fi

@@ -139,7 +139,7 @@ export function AvatarCapture({
             {/* Camera View */}
             {!capturedPhoto && !isCountdown && (
               <div className="space-y-4">
-                <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
+                <div className="relative w-full aspect-video bg-slate-100 rounded-xl overflow-hidden">
                   <video
                     ref={videoRef}
                     autoPlay
