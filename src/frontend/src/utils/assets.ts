@@ -1,3 +1,5 @@
+import { resolveImageUrl } from './imageAssets';
+
 /**
  * Asset Library - Free CC0 game assets for educational games
  *
@@ -122,28 +124,28 @@ export const WEATHER_BACKGROUNDS: Record<string, Asset> = {
   sunny: {
     id: 'sunny-bg',
     type: 'image',
-    url: '/assets/backgrounds/bg_sunny.png',
+    url: resolveImageUrl('bg-sunny') ?? '/assets/backgrounds/bg_sunny.png',
     license: 'CC0',
     source: 'Kenney.nl',
   },
   rainy: {
     id: 'rainy-bg',
     type: 'image',
-    url: '/assets/backgrounds/bg_rainy.png',
+    url: resolveImageUrl('bg-rainy') ?? '/assets/backgrounds/bg_rainy.png',
     license: 'CC0',
     source: 'Kenney.nl',
   },
   snowy: {
     id: 'snowy-bg',
     type: 'image',
-    url: '/assets/backgrounds/bg_snowy.png',
+    url: resolveImageUrl('bg-snowy') ?? '/assets/backgrounds/bg_snowy.png',
     license: 'CC0',
     source: 'Kenney.nl',
   },
   windy: {
     id: 'windy-bg',
     type: 'image',
-    url: '/assets/backgrounds/bg_sunny.png',
+    url: resolveImageUrl('bg-sunny') ?? '/assets/backgrounds/bg_sunny.png',
     license: 'CC0',
     source: 'Kenney.nl',
   },

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTTS } from '../hooks/useTTS';
+import { getBestImageSource } from '../utils/imageAssets';
 
 interface MascotProps {
   state?: 'idle' | 'happy' | 'thinking' | 'waiting' | 'celebrating';
@@ -19,7 +20,10 @@ interface MascotProps {
   responsiveSize?: 'xs' | 'sm' | 'md' | 'lg' | 'auto';
 }
 
-const MASCOT_IMAGE_SRC = '/assets/images/red_panda_no_bg.png';
+const MASCOT_IMAGE = getBestImageSource('pip-mascot');
+const MASCOT_IMAGE_SRC = MASCOT_IMAGE?.fallbackSrc ?? '/assets/images/red_panda_no_bg.png';
+const MASCOT_IMAGE_WEBP = MASCOT_IMAGE?.webpSrc;
+const MASCOT_IMAGE_OPTIMIZED = Boolean(MASCOT_IMAGE?.useOptimization && MASCOT_IMAGE_WEBP);
 const MASCOT_VIDEO_SRC = '/assets/videos/pip_alpha_v2.webm';
 
 // Random celebration triggers (in milliseconds)
@@ -318,11 +322,8 @@ export function Mascot({
 
         {/* Static Image (shown when video is not playing) */}
         {!showVideo && (
-          <motion.img
-            src={MASCOT_IMAGE_SRC}
-            alt={decorative ? '' : 'Pip the Red Panda'}
-            aria-hidden={decorative ? true : undefined}
-            className='w-full h-full object-contain drop-shadow-lg'
+          <motion.div
+            className='w-full h-full'
             animate={
               bounce
                 ? {
@@ -331,7 +332,21 @@ export function Mascot({
                   }
                 : {}
             }
-          />
+          >
+            <picture>
+              {MASCOT_IMAGE_OPTIMIZED && (
+                <source srcSet={MASCOT_IMAGE_WEBP} type='image/webp' />
+              )}
+              <img
+                src={MASCOT_IMAGE_SRC}
+                alt={decorative ? '' : 'Pip the Red Panda'}
+                aria-hidden={decorative ? true : undefined}
+                loading='lazy'
+                decoding='async'
+                className='w-full h-full object-contain drop-shadow-lg'
+              />
+            </picture>
+          </motion.div>
         )}
 
         {/* Thinking indicator */}

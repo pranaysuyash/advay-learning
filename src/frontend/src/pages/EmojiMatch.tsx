@@ -241,6 +241,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
           tip,
           { width: meta.video.videoWidth, height: meta.video.videoHeight },
           { width: containerRect.width, height: containerRect.height },
+          { mirrored: false },
         )
         : tip;
 
@@ -329,6 +330,8 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         void playPop();
         setSuccessMessage(`You found ${expected.name}!`);
         setShowSuccess(true);
+        // Robust auto-dismiss: ensure popup clears even if SuccessAnimation's onComplete doesn't fire
+        setTimeout(() => setShowSuccess(false), MATCH_PAUSE_MS + 200);
         setLastHitId(hit.id);
         setLastMissId(null);
         setIsTransitioning(true);

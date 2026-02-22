@@ -378,6 +378,16 @@ export default function StorySequence() {
             Watch how stories happen from start to finish!
           </p>
           
+          {/* Big Start Button for Kids */}
+          <button
+            onClick={() => startGame('butterfly')}
+            className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-4 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105 animate-pulse"
+          >
+            🚀 Start Adventure! 🚀
+          </button>
+          
+          <p className="text-slate-500 text-sm mb-4">Or pick your own story:</p>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full">
             {STORY_SEQUENCES.map(story => {
               const diff = getDifficultyDisplay(story.difficulty);
@@ -398,7 +408,7 @@ export default function StorySequence() {
             })}
           </div>
           
-          <div className="mt-6 flex items-center gap-2 text-slate-500 text-sm">
+          <div className="mt-6 flex items-center gap-2 text-slate-500 text-sm bg-blue-50 px-4 py-2 rounded-xl">
             <span className="text-2xl">✋</span>
             <span>Pinch and drag with your hand, or use your mouse!</span>
           </div>

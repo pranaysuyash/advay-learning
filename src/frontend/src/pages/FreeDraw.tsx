@@ -357,20 +357,21 @@ export default function FreeDraw() {
       </div>
       
       <div className="flex flex-col h-full">
-        {/* Toolbar */}
-        <div className="bg-white border-b border-slate-200 px-4 py-2">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            {/* Brush Type Selector */}
-            <div className="flex gap-1">
+        {/* Toolbar - Child Friendly */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-sm">
+          {/* Brush Type Selector - Larger for kids */}
+          <div className="mb-3">
+            <p className="text-sm font-bold text-slate-700 mb-2">🖌️ Pick a Brush:</p>
+            <div className="flex gap-2 flex-wrap">
               {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
                 <button
                   key={type}
                   onClick={() => handleBrushTypeChange(type)}
                   className={`
-                    p-2 rounded-lg text-xl transition-all
+                    p-3 rounded-xl text-2xl transition-all transform hover:scale-110
                     ${gameState.currentBrush.type === type
-                      ? 'bg-blue-100 border-2 border-blue-400'
-                      : 'bg-slate-100 border-2 border-transparent hover:bg-slate-200'
+                      ? 'bg-blue-200 border-3 border-blue-500 shadow-md scale-105'
+                      : 'bg-white border-2 border-slate-200 hover:border-blue-300 shadow-sm'
                     }
                   `}
                   title={BRUSH_PRESETS[type].name}
@@ -379,6 +380,7 @@ export default function FreeDraw() {
                 </button>
               ))}
             </div>
+          </div>
             
             {/* Size Control */}
             <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1">
@@ -441,26 +443,27 @@ export default function FreeDraw() {
             </div>
           </div>
           
-          {/* Color Palette */}
-          <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-500 font-bold">Colors:</span>
-            {COLOR_PALETTE.map(color => (
-              <button
-                key={color}
-                onClick={() => handleColorSelect(color)}
-                className={`
-                  w-8 h-8 rounded-full border-2 transition-all
-                  ${gameState.currentBrush.color === color && !gameState.currentBrush.isRainbow
-                    ? 'border-slate-800 scale-110'
-                    : mixColor1 === color
-                    ? 'border-yellow-400 scale-110'
-                    : 'border-transparent hover:scale-110'
-                  }
-                `}
-                style={{ backgroundColor: color }}
-                title={getColorName(color)}
-              />
-            ))}
+          {/* Color Palette - Larger for kids */}
+          <div className="mt-3">
+            <p className="text-sm font-bold text-slate-700 mb-2">🎨 Pick a Color:</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              {COLOR_PALETTE.map(color => (
+                <button
+                  key={color}
+                  onClick={() => handleColorSelect(color)}
+                  className={`
+                    w-10 h-10 rounded-full border-3 transition-all transform hover:scale-125
+                    ${gameState.currentBrush.color === color && !gameState.currentBrush.isRainbow
+                      ? 'border-slate-800 scale-125 shadow-lg ring-2 ring-blue-300'
+                      : mixColor1 === color
+                      ? 'border-yellow-400 scale-125 shadow-lg'
+                      : 'border-white shadow-md hover:shadow-lg'
+                    }
+                  `}
+                  style={{ backgroundColor: color }}
+                  title={getColorName(color)}
+                />
+              ))}
             
             {/* Rainbow brush button */}
             <button

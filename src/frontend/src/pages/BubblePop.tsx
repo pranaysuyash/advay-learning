@@ -218,12 +218,21 @@ export default function BubblePop() {
             />
           )}
           
-          {/* Instructions overlay (fades out) */}
-          {gameState.poppedCount < 3 && (
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-center text-white/80 text-lg font-bold animate-pulse">
-              Blow into your microphone! 🎤
+          {/* Instructions overlay */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border-2 border-blue-300 flex items-center gap-3 animate-pulse">
+              <span className="text-3xl">🎤</span>
+              <div className="text-left">
+                <p className="font-bold text-blue-800">Blow into your microphone!</p>
+                <p className="text-blue-600 text-sm">The harder you blow, the more bubbles pop!</p>
+              </div>
             </div>
-          )}
+            
+            {/* Blow strength indicator */}
+            <div className="bg-white/80 rounded-full px-4 py-1 text-xs text-slate-600">
+              Blow strength: {isBlowing ? '💨💨💨' : '...'}
+            </div>
+          </div>
         </div>
       )}
       

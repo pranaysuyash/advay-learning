@@ -333,21 +333,28 @@ export default function ShapeSafari() {
     if (!scene) return;
     
     setCurrentScene(scene);
-    
-    // Initialize canvas size
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      canvasSize.current = { width: rect.width, height: rect.height };
-      
-      setGameState(initializeGame(scene, rect.width, rect.height));
-    }
-    
     setShowMenu(false);
     setShowHint(null);
+    
+    // Canvas initialization happens in useEffect after menu is hidden
   };
+  
+  // Initialize canvas after menu is hidden (ensures canvas is rendered and has dimensions)
+  useEffect(() => {
+    if (!showMenu && currentScene && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      
+      // Only initialize if canvas has valid dimensions
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        canvasSize.current = { width: rect.width, height: rect.height };
+        
+        setGameState(initializeGame(currentScene, rect.width, rect.height));
+      }
+    }
+  }, [showMenu, currentScene]);
   
   const handleGameComplete = () => {
     setShowCelebration(true);

@@ -382,14 +382,26 @@ export default function RhymeTime() {
                     
                     {/* Feedback indicators */}
                     {showCorrect && (
-                      <div className="absolute -top-2 -right-2 bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-xl font-bold animate-bounce">
-                        ✓
-                      </div>
+                      <>
+                        <div className="absolute -top-3 -right-3 bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold animate-bounce shadow-lg border-4 border-white">
+                          ✓
+                        </div>
+                        <div className="absolute inset-0 bg-green-400/20 rounded-2xl animate-pulse" />
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap animate-bounce">
+                          Great job! 🎉
+                        </div>
+                      </>
                     )}
                     {showIncorrect && (
-                      <div className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-xl font-bold">
-                        ✗
-                      </div>
+                      <>
+                        <div className="absolute -top-3 -right-3 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">
+                          ✗
+                        </div>
+                        <div className="absolute inset-0 bg-red-400/20 rounded-2xl" />
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                          Try again! 💪
+                        </div>
+                      </>
                     )}
                   </button>
                 );

@@ -35,6 +35,79 @@
 
 ---
 
+### TCK-20260223-001 :: Simulated Customer Interview - Neha (Safety-First Parent)
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 00:15 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Conducted a simulated customer interview with the "Neha — The Safety-First Parent" persona to uncover insights about the Parent Dashboard experience, privacy concerns, and retention blockers.
+
+Scope contract:
+- In-scope:
+  - Interview simulation with Neha persona (32, Mumbai, HR Manager, mother of Aarav 2y8m and Isha 5y)
+  - Focus area: Parent Dashboard (progress tracking, time limits, privacy settings)
+  - Document key insights, pain points, and recommended actions
+- Out-of-scope:
+  - Actual user interviews with real customers
+  - Code implementation of recommendations
+  - UI/UX design changes
+- Behavior change allowed: NO (research only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): docs/WORKLOG_TICKETS.md (this entry)
+- Branch/PR: main
+
+Acceptance Criteria:
+- [x] Interview transcript captured with persona context
+- [x] Key insights identified and categorized by severity
+- [x] Recommended actions documented for Parent Dashboard improvements
+- [x] Findings linked to persona goals/frustrations from USER_PERSONAS.md
+
+Execution log:
+- 2026-02-23 00:15 IST — **OPEN** — Ticket created, interview simulation started
+- 2026-02-23 00:20 IST — Interview transcript completed with 6 key questions
+- 2026-02-23 00:22 IST — Insights table created with severity ratings
+- 2026-02-23 00:25 IST — **DONE** — Research documented, findings summarized
+
+Status updates:
+- 2026-02-23 00:25 IST **DONE** — Simulated interview complete with actionable insights for Parent Dashboard
+
+Key Findings (Evidence):
+
+| Insight | Severity | Implication |
+|---------|----------|-------------|
+| Time breakdown by day not visible | 🔴 High | Can't enforce daily 20-min rule |
+| No "struggle" visibility — only completion | 🔴 High | Missed intervention opportunities |
+| App restart bypasses time limits | 🟡 Medium | Children inadvertently circumvent controls |
+| Camera settings label unclear | 🟡 Medium | Privacy controls cause confusion |
+| No exportable progress reports | 🔴 High | Blocks teacher/parent communication |
+| Green dot = trust signal | ✅ Working | Keep this prominent |
+
+Recommended Actions:
+1. Add daily time breakdown chart — bar chart showing minutes per day
+2. Show attempt counts — "Letter K: 8 attempts, 3 correct" not just ✓
+3. Fix time limit enforcement — track across sessions server-side
+4. Clarify camera settings — "Disable camera" vs "Hide indicator"
+5. Add "Download Progress Report (PDF)" — one-click, WhatsApp-friendly
+6. Keep the green dot — it's working as a privacy trust signal
+
+Source References:
+- Persona: `docs/USER_PERSONAS.md` — Persona 4: Neha — The Safety-First Parent
+- Related Persona: Vikram (Data-Driven Father) — influences renewal decision
+- Target Area: Parent Dashboard — progress tracking, settings, time controls
+
+Next Actions:
+1. Create UX tickets for high-severity findings (time breakdown, struggle visibility, PDF export)
+2. Share insights with product team for dashboard roadmap prioritization
+3. Consider follow-up simulated interviews with other personas (Vikram, Ananya, Dadi)
+
+---
+
 ### TCK-20260218-001 :: Games Exploration, Documentation & Smoke Tests
 
 Type: AUDIT
@@ -38931,3 +39004,90 @@ Remaining follow-up (Inferred):
 Status updates:
 - 2026-02-22 19:52 IST **IN_PROGRESS** — Partial cohort migration complete; next batch required.
 - 2026-02-22 20:35 IST **DONE** — Cohort migration for game hand tracking completed; remaining direct MediaPipe pages are pose/test-specific and intentionally excluded.
+
+---
+
+### TCK-20260223-001 :: UX Remediation - Child Exploratory Testing Issues
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-22 23:50 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Fix critical and high-priority UX issues identified by automated child exploratory testing. 
+Overall score was 41/100 with 1 critical bug and 3 high-priority issues preventing children 
+from successfully playing games independently.
+
+Source:
+- UX Analysis Report: src/frontend/docs/ux-analysis/ux-analysis-report.md
+- Test Script: src/frontend/e2e/child_exploratory_test.spec.ts
+- Generated: 2026-02-22T18:46:24.468Z
+
+Scope contract:
+- In-scope:
+  - Fix CRITICAL: Shape Safari canvas not found
+  - Fix HIGH: Story Sequence missing start button
+  - Fix HIGH: Math Monsters missing instructions
+  - Fix HIGH: Bubble Pop missing mic/blow instructions
+  - Fix MEDIUM: Rhyme Time feedback after selection
+  - Fix MEDIUM: Free Draw brush options visibility
+  - Fix MEDIUM: Story Sequence missing feedback
+  - Re-run UX tests to validate fixes
+  - Update documentation
+- Out-of-scope:
+  - Major game mechanic changes
+  - New game features beyond UX fixes
+  - Performance optimizations (already fast)
+- Behavior change allowed: YES (UX improvements only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): 
+  - src/frontend/src/pages/ShapeSafari.tsx
+  - src/frontend/src/pages/StorySequence.tsx
+  - src/frontend/src/pages/MathMonsters.tsx
+  - src/frontend/src/pages/BubblePop.tsx
+  - src/frontend/src/pages/RhymeTime.tsx
+  - src/frontend/src/pages/FreeDraw.tsx
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Shape Safari: Canvas renders and game is playable
+- [ ] Story Sequence: Clear start button visible on load
+- [ ] Math Monsters: Instructions explain "show fingers to answer"
+- [ ] Bubble Pop: Instructions explain "blow into microphone"
+- [ ] Rhyme Time: Visual feedback when word selected
+- [ ] Free Draw: Brush/tool options clearly visible
+- [ ] All games score >70/100 in re-test
+- [ ] Zero critical issues in UX report
+
+Plan:
+1. Investigate Shape Safari canvas issue (root cause)
+2. Add missing UI elements (buttons, instructions)
+3. Test each fix locally
+4. Run full UX test suite
+5. Document all changes
+
+Execution log:
+- 2026-02-22 23:50 IST - **IN_PROGRESS** — Ticket created, starting work
+- 2026-02-22 23:52 IST - Fixed test script: "Try as Guest" button selector
+- 2026-02-22 23:58 IST - Ran initial UX test, captured baseline report
+- 2026-02-23 00:16 IST - All 6 games tested, report generated with 18 screenshots
+
+Status updates:
+- 2026-02-23 00:16 IST **IN_PROGRESS** — Starting remediation work
+
+Next actions:
+1. Fix Shape Safari canvas rendering
+2. Add start button to Story Sequence
+3. Add instructions to Math Monsters
+4. Add blow instructions to Bubble Pop
+5. Re-run tests and verify improvements
+
+Risks/notes:
+- Canvas issues may be related to initialization timing or CSS
+- Voice input permissions need clear UI guidance for children
+- Instructions should be visual/icon-based for pre-readers
+

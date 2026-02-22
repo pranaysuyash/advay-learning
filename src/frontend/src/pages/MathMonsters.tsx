@@ -290,6 +290,17 @@ export default function MathMonsters() {
       ) : (
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full">
+          {/* Instructions Header - Always Visible */}
+          <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-3 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl">✋</span>
+              <div>
+                <p className="font-bold text-lg">Show {gameState.currentProblem?.answer} fingers to feed the monster!</p>
+                <p className="text-white/90 text-sm">Hold up your hand and count with your fingers 👆</p>
+              </div>
+            </div>
+          </div>
+          
           {/* Progress Bar */}
           <div className="px-4 py-2 bg-white border-b border-slate-200">
             <div className="flex justify-between text-sm text-slate-500 mb-1">
@@ -351,30 +362,42 @@ export default function MathMonsters() {
               </div>
             )}
             
-            {/* Finger Detection Display */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center min-w-[200px]">
-              <p className="text-slate-500 text-sm mb-2">Showing:</p>
-              <div className="text-6xl font-bold text-blue-600 mb-2">
+            {/* Finger Detection Display - Prominent */}
+            <div className="bg-gradient-to-b from-blue-100 to-blue-50 border-4 border-blue-400 rounded-3xl p-8 text-center min-w-[280px] shadow-lg">
+              <p className="text-blue-800 font-bold text-lg mb-4">🖐️ Your Answer:</p>
+              
+              {/* Big number display */}
+              <div className="text-8xl font-black text-blue-600 mb-4">
                 {detectedFingers}
               </div>
-              <div className="flex justify-center gap-1 text-2xl">
-                {Array.from({ length: detectedFingers }).map((_, i) => (
-                  <span key={i}>✋</span>
-                ))}
+              
+              {/* Visual finger representation */}
+              <div className="flex justify-center gap-2 text-4xl mb-4 min-h-[60px]">
+                {detectedFingers === 0 ? (
+                  <span className="text-slate-400 text-2xl">Show fingers! 👆</span>
+                ) : (
+                  Array.from({ length: detectedFingers }).map((_, i) => (
+                    <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>☝️</span>
+                  ))
+                )}
               </div>
               
-              {/* Hold progress */}
-              {detectedFingers > 0 && fingerHoldStart && !isSubmitting && (
-                <div className="mt-3">
-                  <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all"
-                      style={{
-                        width: `${Math.min(100, ((Date.now() - fingerHoldStart) / MIN_FINGER_HOLD_TIME) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-blue-500 mt-1">Hold to submit...</p>
+              {/* Hold progress bar */}
+              {detectedFingers > 0 && (
+                <div className="mt-4">
+                  <p className="text-blue-600 text-sm font-bold mb-2">
+                    {fingerHoldStart && !isSubmitting ? 'Keep holding...' : '✓ Submitted!'}
+                  </p>
+                  {fingerHoldStart && !isSubmitting && (
+                    <div className="h-4 bg-blue-200 rounded-full overflow-hidden border-2 border-blue-300">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all"
+                        style={{
+                          width: `${Math.min(100, ((Date.now() - fingerHoldStart) / MIN_FINGER_HOLD_TIME) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

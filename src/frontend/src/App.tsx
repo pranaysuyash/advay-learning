@@ -5,7 +5,9 @@ import { ToastProvider } from './components/ui/Toast';
 import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { ItemDropToast } from './components/inventory/ItemDropToast';
 import { BackpackButton } from './components/inventory/BackpackButton';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState, type ReactNode } from 'react';
+import { CameraErrorBoundary } from './components/errors/CameraErrorBoundary';
+import { CameraCrashFallback } from './components/errors/CameraCrashFallback';
 
 // Lazy load pages for code splitting
 const Home = lazy(() =>
@@ -200,6 +202,45 @@ const PageLoader = () => (
   </div>
 );
 
+interface CameraSafeRouteProps {
+  gameName: string;
+  children: ReactNode;
+}
+
+function CameraSafeRoute({ gameName, children }: CameraSafeRouteProps) {
+  const [renderKey, setRenderKey] = useState(0);
+  const [fallbackMode, setFallbackMode] = useState(false);
+
+  if (fallbackMode) {
+    return (
+      <CameraCrashFallback
+        gameName={gameName}
+        errorKind='runtime'
+        message='This game can continue with touch or mouse controls while camera tracking is unavailable.'
+        onRetry={() => {
+          setFallbackMode(false);
+          setRenderKey((prev) => prev + 1);
+        }}
+        showHomeAction
+      />
+    );
+  }
+
+  return (
+    <CameraErrorBoundary
+      gameName={gameName}
+      onRetry={() => setRenderKey((prev) => prev + 1)}
+      onFallbackMode={() => setFallbackMode(true)}
+      onErrorClassified={(kind, error) => {
+        console.error(`[CameraBoundary:${gameName}] ${kind}`, error);
+      }}
+      showHomeAction
+    >
+      <div key={renderKey}>{children}</div>
+    </CameraErrorBoundary>
+  );
+}
+
 function App() {
   return (
     <ToastProvider>
@@ -235,7 +276,9 @@ function App() {
               path='/games/alphabet-tracing'
               element={
                 <ProtectedRoute>
-                  <AlphabetGame />
+                  <CameraSafeRoute gameName='Alphabet Tracing'>
+                    <AlphabetGame />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -258,7 +301,9 @@ function App() {
               path='/games/finger-number-show'
               element={
                 <ProtectedRoute>
-                  <FingerNumberShow />
+                  <CameraSafeRoute gameName='Finger Number Show'>
+                    <FingerNumberShow />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -266,7 +311,9 @@ function App() {
               path='/games/connect-the-dots'
               element={
                 <ProtectedRoute>
-                  <ConnectTheDots />
+                  <CameraSafeRoute gameName='Connect The Dots'>
+                    <ConnectTheDots />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -274,7 +321,9 @@ function App() {
               path='/games/letter-hunt'
               element={
                 <ProtectedRoute>
-                  <LetterHunt />
+                  <CameraSafeRoute gameName='Letter Hunt'>
+                    <LetterHunt />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -282,7 +331,9 @@ function App() {
               path='/games/music-pinch-beat'
               element={
                 <ProtectedRoute>
-                  <MusicPinchBeat />
+                  <CameraSafeRoute gameName='Music Pinch Beat'>
+                    <MusicPinchBeat />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -290,7 +341,9 @@ function App() {
               path='/games/steady-hand-lab'
               element={
                 <ProtectedRoute>
-                  <SteadyHandLab />
+                  <CameraSafeRoute gameName='Steady Hand Lab'>
+                    <SteadyHandLab />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -298,7 +351,9 @@ function App() {
               path='/games/shape-pop'
               element={
                 <ProtectedRoute>
-                  <ShapePop />
+                  <CameraSafeRoute gameName='Shape Pop'>
+                    <ShapePop />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -306,7 +361,9 @@ function App() {
               path='/games/color-match-garden'
               element={
                 <ProtectedRoute>
-                  <ColorMatchGarden />
+                  <CameraSafeRoute gameName='Color Match Garden'>
+                    <ColorMatchGarden />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -314,7 +371,9 @@ function App() {
               path='/games/number-tap-trail'
               element={
                 <ProtectedRoute>
-                  <NumberTapTrail />
+                  <CameraSafeRoute gameName='Number Tap Trail'>
+                    <NumberTapTrail />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -322,7 +381,9 @@ function App() {
               path='/games/shape-sequence'
               element={
                 <ProtectedRoute>
-                  <ShapeSequence />
+                  <CameraSafeRoute gameName='Shape Sequence'>
+                    <ShapeSequence />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -338,7 +399,9 @@ function App() {
               path='/games/freeze-dance'
               element={
                 <ProtectedRoute>
-                  <FreezeDance />
+                  <CameraSafeRoute gameName='Freeze Dance'>
+                    <FreezeDance />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -354,7 +417,9 @@ function App() {
               path='/games/chemistry-lab'
               element={
                 <ProtectedRoute>
-                  <VirtualChemistryLab />
+                  <CameraSafeRoute gameName='Virtual Chemistry Lab'>
+                    <VirtualChemistryLab />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -362,7 +427,9 @@ function App() {
               path='/games/word-builder'
               element={
                 <ProtectedRoute>
-                  <WordBuilder />
+                  <CameraSafeRoute gameName='Word Builder'>
+                    <WordBuilder />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -370,7 +437,9 @@ function App() {
               path='/games/emoji-match'
               element={
                 <ProtectedRoute>
-                  <EmojiMatch />
+                  <CameraSafeRoute gameName='Emoji Match'>
+                    <EmojiMatch />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -378,7 +447,9 @@ function App() {
               path='/games/air-canvas'
               element={
                 <ProtectedRoute>
-                  <AirCanvas />
+                  <CameraSafeRoute gameName='Air Canvas'>
+                    <AirCanvas />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -386,7 +457,9 @@ function App() {
               path='/games/mirror-draw'
               element={
                 <ProtectedRoute>
-                  <MirrorDraw />
+                  <CameraSafeRoute gameName='Mirror Draw'>
+                    <MirrorDraw />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -394,7 +467,9 @@ function App() {
               path='/games/phonics-sounds'
               element={
                 <ProtectedRoute>
-                  <PhonicsSounds />
+                  <CameraSafeRoute gameName='Phonics Sounds'>
+                    <PhonicsSounds />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -402,7 +477,9 @@ function App() {
               path='/games/bubble-pop-symphony'
               element={
                 <ProtectedRoute>
-                  <BubblePopSymphony />
+                  <CameraSafeRoute gameName='Bubble Pop Symphony'>
+                    <BubblePopSymphony />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -410,7 +487,9 @@ function App() {
               path='/games/dress-for-weather'
               element={
                 <ProtectedRoute>
-                  <DressForWeather />
+                  <CameraSafeRoute gameName='Dress For Weather'>
+                    <DressForWeather />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -418,7 +497,9 @@ function App() {
               path='/games/story-sequence'
               element={
                 <ProtectedRoute>
-                  <StorySequence />
+                  <CameraSafeRoute gameName='Story Sequence'>
+                    <StorySequence />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -426,7 +507,9 @@ function App() {
               path='/games/shape-safari'
               element={
                 <ProtectedRoute>
-                  <ShapeSafari />
+                  <CameraSafeRoute gameName='Shape Safari'>
+                    <ShapeSafari />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -434,7 +517,9 @@ function App() {
               path='/games/free-draw'
               element={
                 <ProtectedRoute>
-                  <FreeDraw />
+                  <CameraSafeRoute gameName='Free Draw'>
+                    <FreeDraw />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />
@@ -442,7 +527,9 @@ function App() {
               path='/games/math-monsters'
               element={
                 <ProtectedRoute>
-                  <MathMonsters />
+                  <CameraSafeRoute gameName='Math Monsters'>
+                    <MathMonsters />
+                  </CameraSafeRoute>
                 </ProtectedRoute>
               }
             />

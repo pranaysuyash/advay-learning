@@ -37,6 +37,7 @@ import Webcam from 'react-webcam';
 import { useHandTracking } from './useHandTracking';
 import { useHandTrackingRuntime } from './useHandTrackingRuntime';
 import type { HandTrackingRuntimeMeta } from './useHandTrackingRuntime';
+import { useVisionWorkerRuntime } from './useVisionWorkerRuntime';
 import { useGameLoop } from './useGameLoop';
 import type {
   UseHandTrackingOptions,
@@ -45,6 +46,22 @@ import type {
   OneEuroFilterOptions,
 } from '../types/tracking';
 import { createDefaultPinchState } from '../utils/pinchDetection';
+import type { VisionWorkerTransferMode } from '../workers/vision.protocol';
+
+const env = (import.meta as any).env ?? {};
+const VISION_WORKER_ENABLED_BY_ENV =
+  String(env.VITE_VISION_WORKER_ENABLED ?? 'true').toLowerCase() !== 'false';
+const VISION_WORKER_FORCE_MAIN_THREAD =
+  String(env.VITE_VISION_WORKER_FORCE_MAIN_THREAD ?? 'false').toLowerCase() ===
+  'true';
+
+export type GameHandTrackingRuntimeMode = 'main-thread' | 'worker';
+
+interface WorkerRuntimeConfig {
+  enabled: boolean;
+  targetFps?: number;
+  transferMode?: VisionWorkerTransferMode;
+}
 
 export interface UseGameHandTrackingOptions {
   /** Name of the game for logging/debugging */
@@ -73,6 +90,12 @@ export interface UseGameHandTrackingOptions {
   onFrame?: (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => void;
   /** Optional callback when no video frame is available. */
   onNoVideoFrame?: () => void;
+  /** Runtime execution mode. Defaults to worker when supported and enabled. */
+  runtimeMode?: GameHandTrackingRuntimeMode;
+  /** Worker runtime config used when runtimeMode='worker'. */
+  workerConfig?: WorkerRuntimeConfig;
+  /** Called when runtime falls back from worker mode to main thread. */
+  onRuntimeFallback?: (reason: string) => void;
 }
 
 export interface UseGameHandTrackingReturn {
@@ -106,6 +129,19 @@ export interface UseGameHandTrackingReturn {
   webcamRef: RefObject<Webcam | null>;
 }
 
+export function resolveHandTrackingRuntimeMode(params: {
+  requestedMode?: GameHandTrackingRuntimeMode;
+  workerConfig?: WorkerRuntimeConfig;
+  workerSupported: boolean;
+}): GameHandTrackingRuntimeMode {
+  if (VISION_WORKER_FORCE_MAIN_THREAD) return 'main-thread';
+  if (params.requestedMode === 'main-thread') return 'main-thread';
+  if (!VISION_WORKER_ENABLED_BY_ENV) return 'main-thread';
+  if (params.workerConfig && !params.workerConfig.enabled) return 'main-thread';
+  if (!params.workerSupported) return 'main-thread';
+  return params.requestedMode ?? 'worker';
+}
+
 /**
  * High-level hand tracking hook for games
  *
@@ -132,6 +168,9 @@ export function useGameHandTracking(
     isRunning,
     onFrame,
     onNoVideoFrame,
+    runtimeMode,
+    workerConfig,
+    onRuntimeFallback,
   } = options;
 
   const internalWebcamRef = useRef<Webcam>(null);
@@ -143,6 +182,14 @@ export function useGameHandTracking(
   );
   const [fps, setFps] = useState(0);
   const [averageFps, setAverageFps] = useState(0);
+  const [runtimeFallbackReason, setRuntimeFallbackReason] = useState<
+    string | null
+  >(null);
+  const workerRequestedByOptions =
+    runtimeMode !== 'main-thread' &&
+    (workerConfig?.enabled ?? true) &&
+    VISION_WORKER_ENABLED_BY_ENV &&
+    !VISION_WORKER_FORCE_MAIN_THREAD;
 
   // Track pinch state for transitions
   const previousPinchRef = useRef(pinchState);
@@ -166,7 +213,87 @@ export function useGameHandTracking(
     ...handTracking,
   });
 
-  const runtimeEnabled = (isRunning ?? isTracking) && isHandTrackingReady;
+  const {
+    isReady: isWorkerReady,
+    error: workerError,
+    isLoading: isWorkerLoading,
+    supportsWorkerRuntime,
+  } = useVisionWorkerRuntime({
+    isRunning: (isRunning ?? isTracking) && runtimeFallbackReason === null,
+    webcamRef,
+    targetFps,
+    handTracking: {
+      numHands: handTracking.numHands ?? 1,
+      minDetectionConfidence: handTracking.minDetectionConfidence ?? 0.3,
+      minHandPresenceConfidence: handTracking.minHandPresenceConfidence ?? 0.3,
+      minTrackingConfidence: handTracking.minTrackingConfidence ?? 0.3,
+      delegate: handTracking.delegate ?? 'GPU',
+      enableFallback: handTracking.enableFallback ?? true,
+    },
+    pinchOptions: pinch,
+    resetPinchOnNoHand,
+    workerConfig: {
+      enabled:
+        workerRequestedByOptions &&
+        runtimeFallbackReason === null,
+      targetFps: workerConfig?.targetFps,
+      transferMode: workerConfig?.transferMode ?? 'bitmap',
+    },
+    onFrame: useCallback(
+      (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
+        if (frame.indexTip) {
+          setCursor(frame.indexTip);
+        } else {
+          setCursor(null);
+        }
+
+        const currentPinch = frame.pinch.state;
+        setPinchState((prevState) => ({
+          ...prevState,
+          isPinching: currentPinch.isPinching,
+          distance: currentPinch.distance,
+        }));
+
+        previousPinchRef.current = currentPinch;
+        pinchStateRef.current = currentPinch;
+        onFrame?.(frame, meta);
+      },
+      [onFrame],
+    ),
+    onNoVideoFrame: useCallback(() => {
+      setCursor(null);
+      if (resetPinchOnNoHand) {
+        const defaultState = createDefaultPinchState(pinch);
+        setPinchState(defaultState);
+        previousPinchRef.current = defaultState;
+        pinchStateRef.current = defaultState;
+      }
+      onNoVideoFrame?.();
+    }, [onNoVideoFrame, pinch, resetPinchOnNoHand]),
+    onError: useCallback(
+      (error: unknown) => {
+        onError?.(error as Error);
+      },
+      [onError],
+    ),
+    onRuntimeFallback: useCallback(
+      (reason: string) => {
+        setRuntimeFallbackReason(reason);
+        onRuntimeFallback?.(reason);
+      },
+      [onRuntimeFallback],
+    ),
+  });
+
+  const activeRuntimeMode = resolveHandTrackingRuntimeMode({
+    requestedMode: runtimeMode,
+    workerConfig,
+    workerSupported: supportsWorkerRuntime && runtimeFallbackReason === null,
+  });
+  const runtimeEnabled =
+    activeRuntimeMode === 'worker'
+      ? (isRunning ?? isTracking) && isWorkerReady
+      : (isRunning ?? isTracking) && isHandTrackingReady;
 
   // Game loop for consistent timing
   useGameLoop({
@@ -181,7 +308,7 @@ export function useGameHandTracking(
   // Hand tracking runtime
   useHandTrackingRuntime({
     isRunning: runtimeEnabled,
-    handLandmarker: landmarker,
+    handLandmarker: activeRuntimeMode === 'main-thread' ? landmarker : null,
     webcamRef,
     targetFps,
     pinchOptions: pinch,
@@ -208,7 +335,7 @@ export function useGameHandTracking(
         pinchStateRef.current = currentPinch;
         onFrame?.(frame, meta);
       },
-      [onFrame, pinch, resetPinchOnNoHand, smoothing],
+      [activeRuntimeMode, onFrame, pinch, resetPinchOnNoHand, smoothing],
     ),
     onNoVideoFrame: useCallback(() => {
       setCursor(null);
@@ -225,7 +352,7 @@ export function useGameHandTracking(
         console.error(`[${gameName}] Hand tracking error:`, error);
         onError?.(error as Error);
       },
-      [gameName, onError],
+      [activeRuntimeMode, gameName, onError],
     ),
   });
 
@@ -237,7 +364,11 @@ export function useGameHandTracking(
       setIsTracking(true);
 
       // Initialize hand tracking if not ready
-      if (!isHandTrackingReady && !isModelLoading) {
+      if (
+        activeRuntimeMode === 'main-thread' &&
+        !isHandTrackingReady &&
+        !isModelLoading
+      ) {
         await initializeHandTracking();
       }
 
@@ -251,6 +382,7 @@ export function useGameHandTracking(
     isTracking,
     isHandTrackingReady,
     isModelLoading,
+    activeRuntimeMode,
     initializeHandTracking,
     gameName,
     onReady,
@@ -259,9 +391,16 @@ export function useGameHandTracking(
 
   useEffect(() => {
     if (!isRunning) return;
+    if (activeRuntimeMode !== 'main-thread') return;
     if (isHandTrackingReady || isModelLoading) return;
     void initializeHandTracking();
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isRunning]);
+  }, [
+    activeRuntimeMode,
+    initializeHandTracking,
+    isHandTrackingReady,
+    isModelLoading,
+    isRunning,
+  ]);
 
   // Stop tracking
   const stopTracking = useCallback(() => {
@@ -280,22 +419,25 @@ export function useGameHandTracking(
   // Reset tracking
   const resetTracking = useCallback(() => {
     stopTracking();
-    resetHandTracking();
+    if (activeRuntimeMode === 'main-thread') {
+      resetHandTracking();
+    }
     // Clear any pending state
     setCursor(null);
     const defaultState = createDefaultPinchState(pinch);
     setPinchState(defaultState);
     previousPinchRef.current = defaultState;
     pinchStateRef.current = defaultState;
-  }, [stopTracking, resetHandTracking, pinch]);
+  }, [activeRuntimeMode, stopTracking, resetHandTracking, pinch]);
 
   // Reinitialize hand tracking
   const reinitialize = useCallback(async () => {
+    if (activeRuntimeMode !== 'main-thread') return;
     resetHandTracking();
     if (isTracking) {
       await initializeHandTracking();
     }
-  }, [resetHandTracking, isTracking, initializeHandTracking]);
+  }, [activeRuntimeMode, resetHandTracking, isTracking, initializeHandTracking]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -307,9 +449,9 @@ export function useGameHandTracking(
   return {
     isReady:
       (isRunning ?? isTracking) &&
-      isHandTrackingReady &&
-      !isModelLoading &&
-      !handTrackingError,
+      (activeRuntimeMode === 'worker'
+        ? isWorkerReady && !isWorkerLoading && !workerError
+        : isHandTrackingReady && !isModelLoading && !handTrackingError),
     cursor,
     pinch: {
       isPinching: pinchState.isPinching,
@@ -328,8 +470,8 @@ export function useGameHandTracking(
     reinitialize,
     fps,
     averageFps,
-    error: handTrackingError,
-    isLoading: isModelLoading,
+    error: activeRuntimeMode === 'worker' ? workerError : handTrackingError,
+    isLoading: activeRuntimeMode === 'worker' ? isWorkerLoading : isModelLoading,
     webcamRef,
   };
 }
