@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import {
   assetLoader,
@@ -11,6 +12,7 @@ import {
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
 import { mapNormalizedPointToCover } from '../utils/coordinateTransform';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface Brush {
   id: string;
@@ -64,23 +66,9 @@ export function AirCanvas() {
   const [snapshot, setSnapshot] = useState<string | null>(null);
   const colorIndexRef = useRef(0);
   const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
 
   const { playPop, playSuccess } = useSoundEffects();
-
-  const {
-    landmarker: handLandmarker,
-    isLoading: isHandLoading,
-    isReady: isHandReady,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
 
   useEffect(() => {
     let mounted = true;
@@ -140,28 +128,13 @@ export function AirCanvas() {
     setParticles((prev) => [...prev, ...newParticles]);
   }, [selectedBrush, selectedColor, brushSize, getRainbowColor]);
 
-  // Hand tracking loop
-  const detectHand = useCallback(() => {
-    if (!webcamRef.current || !handLandmarker) return;
-
-    const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) {
-      animationFrameRef.current = requestAnimationFrame(detectHand);
-      return;
-    }
-
-    const results = handLandmarker.detectForVideo(video, performance.now());
+  const detectHand = useCallback((frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
+    const video = meta.video;
     const canvas = canvasRef.current;
-    if (!canvas) {
-      animationFrameRef.current = requestAnimationFrame(detectHand);
-      return;
-    }
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      animationFrameRef.current = requestAnimationFrame(detectHand);
-      return;
-    }
+    if (!ctx) return;
 
     // Clear and redraw
     ctx.fillStyle = 'rgba(10, 16, 28, 0.08)';
@@ -174,8 +147,8 @@ export function AirCanvas() {
       ctx.globalAlpha = 1;
     }
 
-    if (results.landmarks && results.landmarks.length > 0) {
-      const landmarks = results.landmarks[0];
+    if (frame.hands.length > 0) {
+      const landmarks = frame.hands[0];
       const indexFinger = landmarks[8];
       const middleFinger = landmarks[12];
       const ringFinger = landmarks[16];
@@ -192,8 +165,8 @@ export function AirCanvas() {
       const mappedPoint = mapNormalizedPointToCover(
         { x: indexFinger.x, y: indexFinger.y },
         {
-          width: video.videoWidth || 640,
-          height: video.videoHeight || 480,
+          width: video?.videoWidth || 640,
+          height: video?.videoHeight || 480,
         },
         { width: canvas.width, height: canvas.height },
         { mirrored: true, clamp: true },
@@ -290,25 +263,35 @@ export function AirCanvas() {
 
       return updated;
     });
+  }, [selectedBrush, selectedColor, brushSize, addParticles, getRainbowColor]);
 
-    animationFrameRef.current = requestAnimationFrame(detectHand);
-  }, [handLandmarker, selectedBrush, selectedColor, brushSize, addParticles, getRainbowColor]);
+  const {
+    isLoading: isHandLoading,
+    isReady: isHandReady,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'AirCanvas',
+    webcamRef,
+    handTracking: {
+      numHands: 1,
+      minDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
+      delegate: 'GPU',
+      enableFallback: true,
+    },
+    isRunning: true,
+    onFrame: detectHand,
+    onNoVideoFrame: () => {
+      setIsDrawing(false);
+    },
+  });
 
   useEffect(() => {
-    if (isHandReady) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      detectHand();
+    if (!isHandReady && !isHandLoading) {
+      void startTracking();
     }
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-    };
-  }, [isHandReady, detectHand]);
+  }, [isHandLoading, isHandReady, startTracking]);
 
   // Clear canvas
   const clearCanvas = () => {

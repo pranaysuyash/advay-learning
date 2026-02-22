@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import {
   isPointInCircle,
@@ -23,6 +21,7 @@ import {
   SOUND_ASSETS,
 } from '../utils/assets';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface GardenTarget {
@@ -45,18 +44,8 @@ const FLOWERS: Array<{ name: string; color: string; emoji: string; assetId: stri
 
 const TARGET_RADIUS = 0.1;
 
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 function buildRoundTargets(): { targets: GardenTarget[]; promptId: number } {
-  const random = random01;
+  const random = randomFloat01;
   const picked = [...FLOWERS]
     .sort(() => random() - 0.5)
     .slice(0, 3)
@@ -74,7 +63,7 @@ function buildRoundTargets(): { targets: GardenTarget[]; promptId: number } {
 
 export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -91,20 +80,6 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const streakRef = useRef(streak);
   const targetsRef = useRef(targets);
   const promptRef = useRef(promptId);
-
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
@@ -149,12 +124,6 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   useEffect(() => {
     promptRef.current = promptId;
   }, [promptId]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -233,16 +202,22 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
     [cursor, playCelebration, playError, playPop, startRound],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'ColorMatchGarden',
+      targetFps: 30,
+      isRunning: isPlaying,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setScore(0);
@@ -256,7 +231,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -299,6 +274,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
       onHome={goHome}
     >
       <div
+        ref={gameAreaRef}
         className='absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100'
         style={{
           backgroundImage: gardenBgSrc
@@ -371,10 +347,14 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
         ))}
 
         {cursor && (
-          <div
-            className='absolute w-10 h-10 rounded-full border-4 border-cyan-300 bg-cyan-300/20 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_26px_rgba(34,211,238,0.7)] pointer-events-none'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
-            aria-hidden='true'
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isPlaying}
+            size={60}
+            color='#22d3ee'
           />
         )}
 

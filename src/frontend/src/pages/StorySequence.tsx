@@ -22,8 +22,7 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { Mascot } from '../components/Mascot';
-import { useHandTracking } from '../hooks/useHandTracking';
-import { useHandTrackingRuntime } from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
   type SequenceCard,
@@ -68,8 +67,6 @@ export default function StorySequence() {
   const dragSourceRef = useRef<{ type: 'slot' | 'pool'; index: number } | null>(null);
   
   // ===== HAND TRACKING =====
-  const { landmarker } = useHandTracking();
-  
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip) return;
     
@@ -91,9 +88,9 @@ export default function StorySequence() {
     }
   }, [draggedCard]);
   
-  useHandTrackingRuntime({
+  useGameHandTracking({
+    gameName: 'StorySequence',
     isRunning: !showMenu && !showCelebration,
-    handLandmarker: landmarker,
     webcamRef,
     onFrame: handleHandFrame,
   });

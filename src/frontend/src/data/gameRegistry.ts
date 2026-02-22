@@ -44,7 +44,7 @@ export interface GameManifest {
   listed: boolean; // false = exists but hidden from gallery (easter egg game?)
 
   // CV requirements
-  cv: ('hand' | 'pose' | 'face')[];
+  cv: ('hand' | 'pose' | 'face' | 'voice')[];
 
   // Item system
   drops: DropEntry[];
@@ -702,6 +702,109 @@ export const GAME_REGISTRY: GameManifest[] = [
     drops: [
       { itemId: 'creature-owl', chance: 0.1 },
       { itemId: 'artifact-first-word', chance: 0.05, minScore: 85 },
+    ],
+    easterEggs: [],
+  },
+
+  // ── Shape Garden (Additional) ─────────────────────────────────────
+  {
+    id: 'shape-safari',
+    name: 'Shape Safari',
+    tagline: 'Trace hidden shapes to discover animals and objects! 🔍',
+    path: '/games/shape-safari',
+    icon: 'target',
+    worldId: 'shape-garden',
+    vibe: 'creative',
+    ageRange: '3-5',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-circle', chance: 0.3 },
+      { itemId: 'shape-square', chance: 0.3 },
+      { itemId: 'shape-triangle', chance: 0.3 },
+      { itemId: 'shape-star', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+
+  // ── Word Workshop (Additional) ────────────────────────────────────
+  {
+    id: 'rhyme-time',
+    name: 'Rhyme Time',
+    tagline: 'Which word rhymes? Listen and choose! 🎵',
+    path: '/games/rhyme-time',
+    icon: 'sparkles',
+    worldId: 'word-workshop',
+    vibe: 'brainy',
+    ageRange: '4-6',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'creature-cat', chance: 0.15 },
+      { itemId: 'creature-dog', chance: 0.15 },
+      { itemId: 'food-apple', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+
+  // ── Creative Corner ───────────────────────────────────────────────
+  {
+    id: 'free-draw',
+    name: 'Free Draw',
+    tagline: 'Paint with your finger! Mix colors and create art! 🎨',
+    path: '/games/free-draw',
+    icon: 'drop',
+    worldId: 'creative-corner',
+    vibe: 'creative',
+    ageRange: '2-6',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'color-rainbow', chance: 0.1 },
+      { itemId: 'tool-paintbrush', chance: 0.2 },
+    ],
+    easterEggs: [],
+  },
+
+  // ── Number Jungle (Additional) ────────────────────────────────────
+  {
+    id: 'math-monsters',
+    name: 'Math Monsters',
+    tagline: 'Feed hungry monsters with your finger counting! 🦖🔢',
+    path: '/games/math-monsters',
+    icon: 'hand',
+    worldId: 'number-jungle',
+    vibe: 'brainy',
+    ageRange: '5-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.15 },
+      { itemId: 'element-au', chance: 0.02, minScore: 90 },
+    ],
+    easterEggs: [],
+  },
+
+  // ── Voice Input (Experimental) ────────────────────────────────────
+  {
+    id: 'bubble-pop',
+    name: 'Bubble Pop',
+    tagline: 'Blow into the mic to pop bubbles! 🫧🎤',
+    path: '/games/bubble-pop',
+    icon: 'drop',
+    worldId: 'creative-corner',
+    vibe: 'active',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['voice'],
+    listed: true,
+    drops: [
+      { itemId: 'color-bubble', chance: 0.2 },
+      { itemId: 'tool-wand', chance: 0.1, minScore: 80 },
     ],
     easterEggs: [],
   },

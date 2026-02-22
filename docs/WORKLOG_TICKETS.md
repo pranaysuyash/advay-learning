@@ -38725,3 +38725,209 @@ Next actions:
 
 Risks/notes:
 - Emoji Match audits cite coordinate mapping failures; remediation must confirm object-cover alignment before declaring fixed.
+
+### TCK-20260222-001 :: Frontend Refactoring Program Umbrella (Evidence-First)
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-02-22 19:52 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+- In-scope:
+  - Utility extraction for haptics/random
+  - Archival of stale backup files
+  - ShapePop canonicalization to active `ShapePop.tsx`
+  - Hand-tracking migration toward `useGameHandTracking` for selected cohorts
+  - Type barrel setup and store alias normalization
+  - Refactoring docs + implementation report synchronization
+  - Any frontend lint/type/test blockers discovered during execution in this repo (unless explicitly excluded by owner)
+- Out-of-scope:
+  - Backend service refactors
+- Behavior change allowed: YES (research-backed improvements only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/pages/*` (camera game pages in scope)
+  - `src/frontend/src/hooks/useGameHandTracking.ts`
+  - `src/frontend/src/utils/*`
+  - `src/frontend/src/types/*`
+  - `archive/backups/frontend-src-2026-02-22/*`
+  - `docs/REFACTORING_OPPORTUNITIES.md`
+- Branch/PR: main
+
+Inputs:
+- Prompt used: `prompts/planning/implementation-planning-v1.0.md`
+- Source artifacts:
+  - `docs/REFACTORING_OPPORTUNITIES.md`
+  - `docs/REFACTORING_OPPORTUNITIES_2026-02-22.md`
+
+Execution log:
+- 2026-02-22 19:52 IST — Started implementation of full-scope refactor plan.
+- 2026-02-22 19:52 IST — **Observed** backup files + `ShapePopRefactored.tsx` archived under `archive/backups/frontend-src-2026-02-22`.
+- 2026-02-22 19:52 IST — **Observed** shared utilities added (`haptics.ts`, `random.ts`) and duplicate local helpers removed from active game pages.
+- 2026-02-22 19:52 IST — **Observed** hand-tracking migration completed for: `ShapePop`, `SteadyHandLab`, `WordBuilder`, `NumberTapTrail`, `ShapeSequence`, `ColorMatchGarden`, `EmojiMatch`.
+- 2026-02-22 19:52 IST — **Observed** TypeScript passes for frontend.
+- 2026-02-22 20:35 IST — **Observed** additional hand-tracking migration completed for: `StorySequence`, `ShapeSafari`, `FreeDraw`, `RhymeTime`, `MathMonsters`, `MusicPinchBeat`, `ConnectTheDots`, `LetterHunt`, `PhonicsSounds`, `BubblePopSymphony`, `MirrorDraw`, `DressForWeather`, `AirCanvas`, `VirtualChemistryLab`, `FreezeDance`, `AlphabetGame`, and `games/FingerNumberShow`.
+- 2026-02-22 20:35 IST — **Observed** frontend type-check + targeted vitest suite still pass after migration wave.
+- 2026-02-22 20:45 IST — **Observed** visual interaction standardization advanced: `GameCursor` normalized-coordinate compatibility added and adopted in `NumberTapTrail`, `ShapeSequence`, `WordBuilder`, `ColorMatchGarden`, `PhonicsSounds`, `ShapePop`, `SteadyHandLab`, `LetterHunt`, `ConnectTheDots`.
+- 2026-02-22 20:45 IST — **Observed** store canonicalization step completed: `store/socialStore.ts` is canonical implementation; `stores/socialStore.ts` converted to backward-compatible shim export.
+- 2026-02-22 21:02 IST — **Observed** repo blockers resolved in-scope: fixed frontend lint/type failures in e2e debug specs, test files, `mathMonstersLogic`, `coordinateTransform`, `BubblePop`, and `gameRegistry` (`voice` CV typing), and removed warning-budget blockers in game component files.
+
+Evidence:
+- **Command**: `cd src/frontend && npm run type-check`
+- **Output**:
+  ```
+  > advay-vision-frontend@0.1.0 type-check
+  > tsc --noEmit
+  ```
+- **Interpretation**: Observed — current frontend code compiles without TypeScript errors.
+
+- **Command**: `cd src/frontend && npx vitest run src/utils/__tests__/haptics.test.ts src/utils/__tests__/random.test.ts src/pages/__tests__/GamePages.smoke.test.tsx`
+- **Output**:
+  ```
+  Test Files  3 passed (3)
+  Tests  24 passed (24)
+  ```
+- **Interpretation**: Observed — utility and smoke coverage for refactor scope passes.
+
+- **Command**: `cd src/frontend && npm run lint`
+- **Output**:
+  ```
+  > eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 1
+  ```
+- **Interpretation**: Observed — lint passes for full frontend workspace.
+
+- **Command**: `cd src/frontend && npx eslint src/components/game/GameCursor.tsx src/pages/NumberTapTrail.tsx src/pages/ShapeSequence.tsx src/pages/WordBuilder.tsx src/pages/ColorMatchGarden.tsx src/pages/PhonicsSounds.tsx src/pages/ShapePop.tsx src/pages/SteadyHandLab.tsx src/pages/LetterHunt.tsx src/pages/ConnectTheDots.tsx src/store/socialStore.ts src/stores/socialStore.ts`
+- **Output**:
+  ```
+  [no errors]
+  ```
+- **Interpretation**: Observed — files touched in visual/store standardization pass lint.
+
+- **Command**: `rg -n "<GameCursor|from '../components/game/GameCursor'" src/frontend/src/pages`
+- **Output**:
+  ```
+  GameCursor usage now present in EmojiMatch, BubblePopSymphony, DressForWeather, ConnectTheDots, ShapeSequence, LetterHunt, ColorMatchGarden, NumberTapTrail, ShapePop, PhonicsSounds, SteadyHandLab, WordBuilder.
+  ```
+- **Interpretation**: Observed — cursor rendering is standardized across major hand-tracking gameplay pages.
+
+- **Command**: `rg -n "from '../stores/socialStore'|stores/socialStore|from '../store/socialStore'" src/frontend/src`
+- **Output**:
+  ```
+  stores/socialStore.ts now re-exports from store/socialStore.ts; active imports resolve to store/socialStore.
+  ```
+- **Interpretation**: Observed — `store/` canonical root established with backward compatibility.
+
+- **Command**: `rg -n "useHandTracking\\(" src/frontend/src/pages src/frontend/src/games`
+- **Output**:
+  ```
+  [no matches]
+  ```
+- **Interpretation**: Observed — no remaining direct `useHandTracking(` usage in pages/games scope.
+
+- **Command**: `rg -n "useHandTrackingRuntime\\(" src/frontend/src/pages src/frontend/src/games`
+- **Output**:
+  ```
+  [no matches]
+  ```
+- **Interpretation**: Observed — no remaining direct `useHandTrackingRuntime(` orchestration in pages/games scope.
+
+- **Command**: `rg -n "detectForVideo\\(" src/frontend/src/pages src/frontend/src/games`
+- **Output**:
+  ```
+  src/frontend/src/pages/MediaPipeTest.tsx:266: ...
+  src/frontend/src/pages/MediaPipeTest.tsx:331: ...
+  src/frontend/src/pages/MediaPipeTest.tsx:375: ...
+  src/frontend/src/pages/SimonSays.tsx:140: ...
+  src/frontend/src/pages/YogaAnimals.tsx:166: ...
+  src/frontend/src/pages/FreezeDance.tsx:106: ...
+  ```
+- **Interpretation**: Observed — remaining direct `detectForVideo` usage is limited to pose/test pipelines, not game hand-runtime orchestration.
+
+Status updates:
+- 2026-02-22 19:52 IST **IN_PROGRESS** — Core phases implemented; remaining cohort migrations scheduled.
+- 2026-02-22 20:35 IST **IN_PROGRESS** — Hand-tracking migration cohorts completed for game pages; remaining umbrella items are visual interaction rollout breadth and final store-directory canonical move.
+- 2026-02-22 20:45 IST **IN_PROGRESS** — Visual cursor standardization and social store canonicalization completed.
+- 2026-02-22 21:02 IST **DONE** — Full frontend lint/type/test blockers addressed in this project scope; umbrella execution complete.
+
+---
+
+### TCK-20260222-002 :: Backup and Refactor Archive Execution
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-22 19:52 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+- In-scope:
+  - Move `.bak`/`.backup` files from active frontend source directories into archive
+  - Archive `ShapePopRefactored.tsx` and preserve canonical `ShapePop.tsx`
+  - Add archive pointer README
+- Out-of-scope:
+  - Deletions from git history
+  - Non-frontend archival
+- Behavior change allowed: NO
+
+Execution log:
+- 2026-02-22 19:52 IST — Moved stale backup files to `archive/backups/frontend-src-2026-02-22/`.
+- 2026-02-22 19:52 IST — Archived `src/frontend/src/pages/ShapePopRefactored.tsx` under `archive/backups/frontend-src-2026-02-22/refactors/`.
+- 2026-02-22 19:52 IST — Added archive pointer `README.md`.
+
+Status updates:
+- 2026-02-22 19:52 IST **DONE** — Archive completed, active source tree cleaned.
+
+---
+
+### TCK-20260222-003 :: Hand Tracking Cohort Migration Batch A/B/C-Partial
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-22 19:52 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+- In-scope:
+  - Migrate targeted pages from direct low-level runtime orchestration to `useGameHandTracking`
+  - Add controlled runtime compatibility options to `useGameHandTracking`
+- Out-of-scope:
+  - Full migration of every camera game in one pass
+- Behavior change allowed: YES (must preserve mechanics)
+
+Files migrated (Observed):
+- `src/frontend/src/pages/ShapePop.tsx`
+- `src/frontend/src/pages/SteadyHandLab.tsx`
+- `src/frontend/src/pages/WordBuilder.tsx`
+- `src/frontend/src/pages/NumberTapTrail.tsx`
+- `src/frontend/src/pages/ShapeSequence.tsx`
+- `src/frontend/src/pages/ColorMatchGarden.tsx`
+- `src/frontend/src/pages/EmojiMatch.tsx`
+- `src/frontend/src/pages/StorySequence.tsx`
+- `src/frontend/src/pages/ShapeSafari.tsx`
+- `src/frontend/src/pages/FreeDraw.tsx`
+- `src/frontend/src/pages/RhymeTime.tsx`
+- `src/frontend/src/pages/MathMonsters.tsx`
+- `src/frontend/src/pages/MusicPinchBeat.tsx`
+- `src/frontend/src/pages/ConnectTheDots.tsx`
+- `src/frontend/src/pages/LetterHunt.tsx`
+- `src/frontend/src/pages/PhonicsSounds.tsx`
+- `src/frontend/src/pages/BubblePopSymphony.tsx`
+- `src/frontend/src/pages/MirrorDraw.tsx`
+- `src/frontend/src/pages/DressForWeather.tsx`
+- `src/frontend/src/pages/AirCanvas.tsx`
+- `src/frontend/src/pages/VirtualChemistryLab.tsx`
+- `src/frontend/src/pages/FreezeDance.tsx`
+- `src/frontend/src/pages/AlphabetGame.tsx`
+- `src/frontend/src/games/FingerNumberShow.tsx`
+
+Remaining follow-up (Inferred):
+- Pose-specific pipelines (`SimonSays`, `YogaAnimals`) and diagnostics page (`MediaPipeTest`) remain on direct MediaPipe APIs by design; no hand-runtime migration required for this ticket.
+
+Status updates:
+- 2026-02-22 19:52 IST **IN_PROGRESS** — Partial cohort migration complete; next batch required.
+- 2026-02-22 20:35 IST **DONE** — Cohort migration for game hand tracking completed; remaining direct MediaPipe pages are pose/test-specific and intentionally excluded.

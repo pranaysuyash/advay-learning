@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useSocialStore, SocialActivity, SocialMetric } from '../stores/socialStore';
+import { useSocialStore, SocialActivity, SocialMetric } from '../store/socialStore';
 import { getSocialResponse, getTurnTakingResponse } from '../data/lumiResponses';
 import { createActivityFromTemplate, getSocialActivityTemplate } from '../data/socialActivities';
 

@@ -6,11 +6,8 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { getLaneFromNormalizedX, pickNextLane } from '../games/musicPinchLogic';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -20,7 +17,6 @@ const LANE_LABELS = ['Sa', 'Re', 'Ga'] as const;
 
 export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -34,20 +30,6 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   const targetLaneRef = useRef(targetLane);
   const streakRef = useRef(streak);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
   useEffect(() => {
@@ -57,12 +39,6 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   useEffect(() => {
     streakRef.current = streak;
   }, [streak]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -113,17 +89,23 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
     [cursorX, playCelebration, playError, playPop, selectedLane],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursorX !== null) setCursorX(null);
-      if (selectedLane !== null) setSelectedLane(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'MusicPinchBeat',
+      targetFps: 30,
+      isRunning: isPlaying,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursorX !== null) setCursorX(null);
+        if (selectedLane !== null) setSelectedLane(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setScore(0);
@@ -136,7 +118,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 

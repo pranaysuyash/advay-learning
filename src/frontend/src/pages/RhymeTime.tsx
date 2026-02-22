@@ -14,19 +14,17 @@
  * - Visual + audio support for pre-readers
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { Mascot } from '../components/Mascot';
-import { useHandTracking } from '../hooks/useHandTracking';
-import { useHandTrackingRuntime } from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
   type RhymeRound,
   type GameState,
   type Difficulty,
-  RHYME_FAMILIES,
   generateRound,
   initializeGame,
   checkAnswer,
@@ -59,8 +57,6 @@ export default function RhymeTime() {
   const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   
   // ===== HAND TRACKING =====
-  const { landmarker } = useHandTracking();
-  
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip || isProcessing) return;
     
@@ -91,9 +87,9 @@ export default function RhymeTime() {
     }
   }, [isProcessing, currentRound]);
   
-  useHandTrackingRuntime({
+  useGameHandTracking({
+    gameName: 'RhymeTime',
     isRunning: !showMenu && !showCelebration && !gameState?.completed,
-    handLandmarker: landmarker,
     webcamRef,
     onFrame: handleHandFrame,
   });

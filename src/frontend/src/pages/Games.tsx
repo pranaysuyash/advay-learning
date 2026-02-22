@@ -6,9 +6,9 @@ import { useProfileStore } from '../store';
 import { Icon } from '../components/Icon';
 import { ProfileSelector } from '../components/ui/ProfileSelector';
 import { getLanguageByCode } from '../data/languages';
-import { getListedGames, getAllWorlds, VIBE_CONFIG, type GameManifest } from '../data/gameRegistry';
+import { getListedGames, getAllWorlds, VIBE_CONFIG } from '../data/gameRegistry';
 import { WORLDS_BY_ID } from '../data/worlds';
-import type { IconName } from '../components/ui/Icon';
+
 import type { Profile } from '../store';
 
 export function Games() {

@@ -144,7 +144,7 @@ export function handToScreenCoordinates(
 
   // Step 1: Convert normalized coordinates to video pixel coordinates
   let videoX = landmark.x * videoWidth;
-  let videoY = landmark.y * videoHeight;
+  const videoY = landmark.y * videoHeight;
 
   // Step 2: Mirror horizontally if camera is mirrored (typical selfie view)
   if (mirrored) {

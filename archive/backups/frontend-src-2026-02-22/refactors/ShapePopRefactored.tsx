@@ -8,8 +8,10 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { triggerHaptic } from '../utils/haptics';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 
 const SHAPES = ['◯', '△', '□', '◇', '☆'] as const;
 const POP_RADIUS = 0.16; // Increased from 0.11 for kids' easier targeting
@@ -17,32 +19,6 @@ const POP_RADIUS = 0.16; // Increased from 0.11 for kids' easier targeting
 // Touch-friendly sizing constants for kids
 const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
 const TARGET_SIZE = 144; // Increased from 144 (w-36 = 9rem = 144px) for kids' fingers
-
-/**
- * Kid-friendly haptic feedback utility
- * Uses longer, softer vibrations appropriate for children
- */
-function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
-
-  const patterns = {
-    success: [50, 30, 50], // Gentle double tap
-    error: [100, 50, 100], // Softer error buzz
-    celebration: [100, 50, 100, 50, 200], // Joyful burst
-  };
-
-  navigator.vibrate(patterns[type]);
-}
-
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
 
 export const ShapePopRefactored = memo(function ShapePopRefactoredComponent() {
   const navigate = useNavigate();
@@ -118,8 +94,8 @@ export const ShapePopRefactored = memo(function ShapePopRefactoredComponent() {
   }, [isPlaying]);
 
   const spawnTarget = useCallback(() => {
-    setTargetCenter(pickRandomPoint(random01(), random01(), 0.18));
-    setTargetShape(SHAPES[Math.floor(random01() * SHAPES.length)] ?? '◯');
+    setTargetCenter(pickRandomPoint(randomFloat01(), randomFloat01(), 0.18));
+    setTargetShape(SHAPES[Math.floor(randomFloat01() * SHAPES.length)] ?? '◯');
   }, []);
 
   // Handle pinch interactions

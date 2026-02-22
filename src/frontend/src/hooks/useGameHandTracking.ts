@@ -31,11 +31,12 @@
  * ```
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import Webcam from 'react-webcam';
 
 import { useHandTracking } from './useHandTracking';
 import { useHandTrackingRuntime } from './useHandTrackingRuntime';
+import type { HandTrackingRuntimeMeta } from './useHandTrackingRuntime';
 import { useGameLoop } from './useGameLoop';
 import type {
   UseHandTrackingOptions,
@@ -64,6 +65,14 @@ export interface UseGameHandTrackingOptions {
   onReady?: () => void;
   /** Callback when hand tracking stops */
   onStopped?: () => void;
+  /** External webcam ref. If omitted, hook creates one. */
+  webcamRef?: RefObject<Webcam | null>;
+  /** Optional controlled running mode for migration from low-level hooks. */
+  isRunning?: boolean;
+  /** Optional runtime frame callback for migration from low-level hooks. */
+  onFrame?: (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => void;
+  /** Optional callback when no video frame is available. */
+  onNoVideoFrame?: () => void;
 }
 
 export interface UseGameHandTrackingReturn {
@@ -93,6 +102,8 @@ export interface UseGameHandTrackingReturn {
   error: Error | null;
   /** Loading state */
   isLoading: boolean;
+  /** Webcam ref to bind in page components */
+  webcamRef: RefObject<Webcam | null>;
 }
 
 /**
@@ -117,9 +128,14 @@ export function useGameHandTracking(
     onError,
     onReady,
     onStopped,
+    webcamRef: externalWebcamRef,
+    isRunning,
+    onFrame,
+    onNoVideoFrame,
   } = options;
 
-  const webcamRef = useRef<Webcam>(null);
+  const internalWebcamRef = useRef<Webcam>(null);
+  const webcamRef = externalWebcamRef ?? internalWebcamRef;
   const [isTracking, setIsTracking] = useState(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [pinchState, setPinchState] = useState(() =>
@@ -150,9 +166,11 @@ export function useGameHandTracking(
     ...handTracking,
   });
 
+  const runtimeEnabled = (isRunning ?? isTracking) && isHandTrackingReady;
+
   // Game loop for consistent timing
   useGameLoop({
-    isRunning: isTracking && isHandTrackingReady,
+    isRunning: runtimeEnabled,
     targetFps,
     onFrame: useCallback((_deltaTime, currentFps) => {
       setFps(currentFps);
@@ -161,8 +179,8 @@ export function useGameHandTracking(
   });
 
   // Hand tracking runtime
-  const { } = useHandTrackingRuntime({
-    isRunning: isTracking && isHandTrackingReady,
+  useHandTrackingRuntime({
+    isRunning: runtimeEnabled,
     handLandmarker: landmarker,
     webcamRef,
     targetFps,
@@ -170,7 +188,7 @@ export function useGameHandTracking(
     resetPinchOnNoHand,
     smoothing,
     onFrame: useCallback(
-      (frame: TrackedHandFrame) => {
+      (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
         // Update cursor position
         if (frame.indexTip) {
           setCursor(frame.indexTip);
@@ -180,13 +198,6 @@ export function useGameHandTracking(
 
         // Update pinch state with transition detection
         const currentPinch = frame.pinch.state;
-        const previousPinch = previousPinchRef.current;
-
-        if (!previousPinch.isPinching && currentPinch.isPinching) {
-        } else if (previousPinch.isPinching && currentPinch.isPinching) {
-        } else if (previousPinch.isPinching && !currentPinch.isPinching) {
-        }
-
         setPinchState((prevState) => ({
           ...prevState,
           isPinching: currentPinch.isPinching,
@@ -195,8 +206,9 @@ export function useGameHandTracking(
 
         previousPinchRef.current = currentPinch;
         pinchStateRef.current = currentPinch;
+        onFrame?.(frame, meta);
       },
-      [pinch, resetPinchOnNoHand, smoothing],
+      [onFrame, pinch, resetPinchOnNoHand, smoothing],
     ),
     onNoVideoFrame: useCallback(() => {
       setCursor(null);
@@ -206,7 +218,8 @@ export function useGameHandTracking(
         previousPinchRef.current = defaultState;
         pinchStateRef.current = defaultState;
       }
-    }, [pinch, resetPinchOnNoHand]),
+      onNoVideoFrame?.();
+    }, [onNoVideoFrame, pinch, resetPinchOnNoHand]),
     onError: useCallback(
       (error: unknown) => {
         console.error(`[${gameName}] Hand tracking error:`, error);
@@ -243,6 +256,12 @@ export function useGameHandTracking(
     onReady,
     onError,
   ]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    if (isHandTrackingReady || isModelLoading) return;
+    void initializeHandTracking();
+  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isRunning]);
 
   // Stop tracking
   const stopTracking = useCallback(() => {
@@ -287,7 +306,7 @@ export function useGameHandTracking(
 
   return {
     isReady:
-      isTracking &&
+      (isRunning ?? isTracking) &&
       isHandTrackingReady &&
       !isModelLoading &&
       !handTrackingError,
@@ -311,6 +330,7 @@ export function useGameHandTracking(
     averageFps,
     error: handTrackingError,
     isLoading: isModelLoading,
+    webcamRef,
   };
 }
 

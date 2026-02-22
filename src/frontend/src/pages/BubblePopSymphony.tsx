@@ -20,8 +20,7 @@ import {
   SOUND_ASSETS,
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
-import { useHandTracking } from '../hooks/useHandTracking';
-import { useHandTrackingRuntime } from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 
 interface Bubble {
@@ -49,18 +48,6 @@ const MUSICAL_NOTES = [
 
 export default function BubblePopSymphony() {
   // Hand tracking with modern hooks
-  const {
-    isReady: isHandTrackingReady,
-    isLoading: isModelLoading,
-    landmarker,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.5,
-    minHandPresenceConfidence: 0.5,
-    minTrackingConfidence: 0.5,
-  });
-
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,
@@ -193,13 +180,6 @@ export default function BubblePopSymphony() {
     [],
   );
 
-  // Initialize hand tracking when game starts
-  useEffect(() => {
-    if (gameStarted && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [gameStarted, isHandTrackingReady, isModelLoading, initializeHandTracking]);
-
   // Hand tracking runtime - replaces manual detection loop
   const handleHandFrame = useCallback(
     (frame: TrackedHandFrame) => {
@@ -223,12 +203,19 @@ export default function BubblePopSymphony() {
     [speak],
   );
 
-  useHandTrackingRuntime({
-    isRunning: gameStarted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    onFrame: handleHandFrame,
-  });
+  const { isReady: isHandTrackingReady, isLoading: isModelLoading, startTracking } =
+    useGameHandTracking({
+      gameName: 'BubblePopSymphony',
+      isRunning: gameStarted,
+      webcamRef,
+      onFrame: handleHandFrame,
+    });
+
+  useEffect(() => {
+    if (gameStarted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameStarted, isHandTrackingReady, isModelLoading, startTracking]);
 
   const createBubbleSet = useCallback((): Bubble[] => {
     const targetSize = getRecommendedTargetSize(screenDims.width);

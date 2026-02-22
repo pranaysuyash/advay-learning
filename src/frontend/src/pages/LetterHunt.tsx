@@ -7,15 +7,13 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { Mascot } from '../components/Mascot';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { hitTestRects } from '../utils/hitTest';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface LetterOption {
@@ -60,21 +58,6 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const lastSelectAtRef = useRef<number>(0);
 
-  // Use centralized hand tracking hook
-  const {
-    landmarker: handLandmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const [useMouseFallback, setUseMouseFallback] = useState<boolean>(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(
@@ -102,18 +85,6 @@ export const LetterHunt = memo(function LetterHuntComponent() {
 
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
-
-  // Initialize hand tracking when game starts
-  useEffect(() => {
-    if (gameStarted && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [
-    gameStarted,
-    isHandTrackingReady,
-    isModelLoading,
-    initializeHandTracking,
-  ]);
 
   // Initialize a round
   useEffect(() => {
@@ -234,7 +205,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     lastSelectAtRef.current = 0;
 
     if (!isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -303,23 +274,37 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     [cursor, hoveredOptionIndex, isPinching, options, handleSelectOption],
   );
 
-  useHandTrackingRuntime({
-    isRunning:
-      gameStarted &&
-      !gameCompleted &&
-      !feedback &&
-      !useMouseFallback &&
-      isHandTrackingReady,
-    handLandmarker,
-    webcamRef,
-    targetFps: 30,
-    onFrame: handleTrackingFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-      if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
-      if (isPinching) setIsPinching(false);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
+    useGameHandTracking({
+      gameName: 'LetterHunt',
+      isRunning:
+        gameStarted &&
+        !gameCompleted &&
+        !feedback &&
+        !useMouseFallback,
+      webcamRef,
+      targetFps: 30,
+      onFrame: handleTrackingFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+        if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
+        if (isPinching) setIsPinching(false);
+      },
+    });
+
+  useEffect(() => {
+    if (gameStarted && !gameCompleted && !useMouseFallback && !feedback && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [
+    feedback,
+    gameCompleted,
+    gameStarted,
+    isHandTrackingReady,
+    isModelLoading,
+    startTracking,
+    useMouseFallback,
+  ]);
 
   useEffect(() => {
     if (!useMouseFallback) return;
@@ -332,6 +317,13 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     (letter) => letter.char === targetLetter,
   );
   const targetLetterColorClass = getLetterColorClass(targetLetterMeta?.color);
+  const cursorViewport =
+    cursor && cameraAreaRef.current
+      ? {
+          x: cameraAreaRef.current.getBoundingClientRect().left + cursor.x,
+          y: cameraAreaRef.current.getBoundingClientRect().top + cursor.y,
+        }
+      : null;
 
   // Menu controls
   const menuControls: GameControl[] = [
@@ -450,11 +442,12 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               )}
 
               {/* Cursor */}
-              {cursor && (
-                <motion.div
-                  className='absolute w-4 h-4 rounded-full bg-pip-orange shadow-soft-lg border-2 border-white/80 pointer-events-none z-30'
-                  animate={{ x: cursor.x - 8, y: cursor.y - 8 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              {cursorViewport && (
+                <GameCursor
+                  position={cursorViewport}
+                  isPinching={isPinching}
+                  isHandDetected={!useMouseFallback}
+                  size={64}
                 />
               )}
 

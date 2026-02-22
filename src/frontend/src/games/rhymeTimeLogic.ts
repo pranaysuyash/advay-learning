@@ -14,7 +14,7 @@
  * - CVC words (consonant-vowel-consonant) are easiest for beginners
  */
 
-import type { Point } from '../types/tracking';
+
 
 export interface RhymeWord {
   word: string;
@@ -268,7 +268,7 @@ export function generateRound(
 }
 
 // Initialize game state
-export function initializeGame(difficulty: Difficulty, totalRounds: number = 10): GameState {
+export function initializeGame(_difficulty: Difficulty, totalRounds: number = 10): GameState {
   return {
     currentRound: 0,
     totalRounds,

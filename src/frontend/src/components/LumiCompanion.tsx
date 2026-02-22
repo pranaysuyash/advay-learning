@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { useSocialStore } from '../stores/socialStore';
+import { useSocialStore } from '../store/socialStore';
 import { Mascot } from './Mascot';
 
 interface LumiCompanionProps {

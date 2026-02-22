@@ -9,11 +9,9 @@ import type { GameControl } from '../components/GameControls';
 import { Mascot } from '../components/Mascot';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { OptionChips } from '../components/game/OptionChips';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
@@ -44,6 +42,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const lastUIUpdateAtRef = useRef(0);
   const permissionHandlerRef = useRef<
     ((this: PermissionStatus, ev: Event) => any) | null
@@ -84,20 +83,6 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     'granted' | 'denied' | 'prompt'
   >('prompt');
   const [showPermissionWarning, setShowPermissionWarning] = useState(false);
-
-  // Use centralized hand tracking hook
-  const {
-    landmarker,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1, // ConnectTheDots only needs one hand
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
 
   // Check camera permission on mount
   useEffect(() => {
@@ -187,13 +172,6 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     };
   }, []);
 
-  // Initialize hand tracking when game starts and enabled
-  useEffect(() => {
-    if (gameStarted && isHandTrackingEnabled && !landmarker) {
-      initializeHandTracking();
-    }
-  }, [gameStarted, isHandTrackingEnabled, landmarker, initializeHandTracking]);
-
   const handleTrackingFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
       const canvas = canvasRef.current;
@@ -227,13 +205,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     [],
   );
 
-  useHandTrackingRuntime({
-    isRunning:
-      gameStarted &&
-      isHandTrackingEnabled &&
-      isHandTrackingReady &&
-      !gameCompleted,
-    handLandmarker: landmarker,
+  useGameHandTracking({
+    gameName: 'ConnectTheDots',
+    isRunning: gameStarted && isHandTrackingEnabled && !gameCompleted,
     webcamRef,
     targetFps: 15,
     onFrame: handleTrackingFrame,
@@ -504,6 +478,13 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     },
   ];
 
+  const normalizedCursor = handCursor
+    ? {
+        x: handCursor.x / 800,
+        y: handCursor.y / 600,
+      }
+    : null;
+
   return (
     <>
       {/* Full Screen Game Mode */}
@@ -515,6 +496,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           onHome={goToHome}
         >
           <div
+            ref={gameAreaRef}
             className='relative w-full h-full bg-white/50'
             role='main'
             aria-label='Connect the Dots drawing game with numbered dots'
@@ -675,36 +657,19 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                   </g>
                 ))}
 
-                {/* Hand cursor */}
-                {handCursor && isHandTrackingEnabled && (
-                  <g>
-                    <circle
-                      cx={handCursor.x}
-                      cy={handCursor.y}
-                      r={isPinching ? 15 : 12}
-                      fill={
-                        isPinching
-                          ? GAME_COLORS.cursorPinch
-                          : GAME_COLORS.cursorIdle
-                      }
-                      fillOpacity={0.7}
-                      stroke={GAME_COLORS.dotStroke}
-                      strokeWidth='2'
-                    />
-                    {isPinching && (
-                      <circle
-                        cx={handCursor.x}
-                        cy={handCursor.y}
-                        r={25}
-                        fill='none'
-                        stroke={GAME_COLORS.cursorPinch}
-                        strokeWidth='2'
-                        opacity='0.5'
-                      />
-                    )}
-                  </g>
-                )}
               </svg>
+            )}
+
+            {normalizedCursor && isHandTrackingEnabled && (
+              <GameCursor
+                position={normalizedCursor}
+                coordinateSpace='normalized'
+                containerRef={gameAreaRef}
+                isPinching={isPinching}
+                isHandDetected
+                size={62}
+                color='#F59E0B'
+              />
             )}
 
             {/* Mascot */}

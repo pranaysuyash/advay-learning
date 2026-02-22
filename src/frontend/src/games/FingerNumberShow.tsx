@@ -10,12 +10,8 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { getLettersForGame, Letter } from '../data/alphabets';
 import { LANGUAGES } from '../data/languages';
 import { countExtendedFingersFromLandmarks } from './fingerCounting';
-// Centralized hand tracking
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { getMaxHandsForDifficultyIndex } from './finger-number-show/handTrackingConfig';
 import { FingerNumberShowMenu } from './finger-number-show/FingerNumberShowMenu';
 import { FingerNumberShowHud } from './finger-number-show/FingerNumberShowHud';
@@ -71,24 +67,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
 
   const desiredMaxHands = getMaxHandsForDifficultyIndex(difficulty);
   const activeMaxHandsRef = useRef<number>(desiredMaxHands);
-  const reinitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Use centralized hand tracking hook
-  const {
-    landmarker: handLandmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-    reset: resetHandTracking,
-  } = useHandTracking({
-    // Default to 2 hands for stability; allow up to 4 in Duo Mode.
-    numHands: desiredMaxHands,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
   const [currentCount, setCurrentCount] = useState<number>(0);
   const [handsDetected, setHandsDetected] = useState<number>(0);
   const [targetNumber, setTargetNumber] = useState<number>(0);
@@ -288,47 +266,6 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
 
   useEffect(() => {
     if (!isPlaying) return;
-    if (isHandTrackingReady || isModelLoading) return;
-    activeMaxHandsRef.current = desiredMaxHands;
-    initializeHandTracking();
-  }, [
-    desiredMaxHands,
-    initializeHandTracking,
-    isHandTrackingReady,
-    isModelLoading,
-    isPlaying,
-  ]);
-
-  useEffect(() => {
-    if (!isPlaying) {
-      if (reinitTimerRef.current) {
-        clearTimeout(reinitTimerRef.current);
-        reinitTimerRef.current = null;
-      }
-      return;
-    }
-
-    if (activeMaxHandsRef.current === desiredMaxHands) return;
-
-    // Reinitialize the model to apply the new max-hands value. The hook's
-    // initialize() short-circuits when an instance exists, so we must reset.
-    resetHandTracking();
-    if (reinitTimerRef.current) clearTimeout(reinitTimerRef.current);
-    reinitTimerRef.current = setTimeout(() => {
-      activeMaxHandsRef.current = desiredMaxHands;
-      initializeHandTracking();
-    }, 0);
-
-    return () => {
-      if (reinitTimerRef.current) {
-        clearTimeout(reinitTimerRef.current);
-        reinitTimerRef.current = null;
-      }
-    };
-  }, [desiredMaxHands, initializeHandTracking, isPlaying, resetHandTracking]);
-
-  useEffect(() => {
-    if (!isPlaying) return;
 
     setNextTarget(difficulty);
   }, [isPlaying, difficulty]);
@@ -488,13 +425,46 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     ],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && isHandTrackingReady,
-    handLandmarker,
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    resetTracking,
+  } = useGameHandTracking({
+    gameName: 'FingerNumberShow',
     webcamRef,
+    handTracking: {
+      numHands: desiredMaxHands,
+      minDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
+      delegate: 'GPU',
+      enableFallback: true,
+    },
     targetFps: 30,
+    isRunning: isPlaying,
     onFrame: handleTrackingFrame,
   });
+
+  useEffect(() => {
+    if (!isPlaying || isHandTrackingReady || isModelLoading) return;
+    activeMaxHandsRef.current = desiredMaxHands;
+    void startTracking();
+  }, [
+    desiredMaxHands,
+    isHandTrackingReady,
+    isModelLoading,
+    isPlaying,
+    startTracking,
+  ]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    if (activeMaxHandsRef.current === desiredMaxHands) return;
+
+    activeMaxHandsRef.current = desiredMaxHands;
+    resetTracking();
+  }, [desiredMaxHands, isPlaying, resetTracking]);
 
   useEffect(() => {
     return () => {

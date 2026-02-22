@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
-import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 export function FreezeDance() {
   const navigate = useNavigate();
@@ -36,20 +38,6 @@ export function FreezeDance() {
   const stabilityRef = useRef(0);
   const handCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Hand tracking hook
-  const {
-    landmarker: handLandmarker,
-    isLoading: isHandLoading,
-    isReady: isHandReady,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playSuccess, playCelebration } = useSoundEffects();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -59,15 +47,29 @@ export function FreezeDance() {
         const vision = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
         );
-        const landmarker = await PoseLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/pose/landmarker/pose_landmarker/float16/1/pose_landmarker.task',
-            delegate: 'GPU',
-          },
-          runningMode: 'VIDEO',
-          numPoses: 1,
-        });
+        let landmarker: PoseLandmarker;
+        try {
+          landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath:
+                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              delegate: 'GPU',
+            },
+            runningMode: 'VIDEO',
+            numPoses: 1,
+          });
+        } catch (e) {
+          console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);
+          landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath:
+                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              delegate: 'CPU',
+            },
+            runningMode: 'VIDEO',
+            numPoses: 1,
+          });
+        }
         poseLandmarkerRef.current = landmarker;
         setIsLoading(false);
       } catch (err) {
@@ -252,60 +254,83 @@ export function FreezeDance() {
     }
   }, [isPlaying, cameraReady, detectPose]);
 
-  // Hand detection during finger challenge
-  const detectHands = useCallback(() => {
-    if (
-      !webcamRef.current ||
-      !handCanvasRef.current ||
-      !handLandmarker ||
-      !cameraReady ||
-      gamePhase !== 'fingerChallenge'
-    )
-      return;
+  const handleFingerChallengeFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!handCanvasRef.current || gamePhase !== 'fingerChallenge') return;
 
-    const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) {
-      requestAnimationFrame(detectHands);
-      return;
-    }
+      const canvas = handCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const results = handLandmarker.detectForVideo(video, performance.now());
-    const canvas = handCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (frame.hands.length > 0) {
+        const landmarks = frame.hands[0];
+        const fingerCount = countExtendedFingersFromLandmarks(
+          landmarks.map((l) => ({ x: l.x, y: l.y, z: l.z })),
+        );
+        setDetectedFingers(fingerCount);
 
-    if (results.landmarks && results.landmarks.length > 0) {
-      const landmarks = results.landmarks[0];
-      const fingerCount = countExtendedFingersFromLandmarks(
-        landmarks.map((l: { x: number; y: number; z?: number }) => ({ x: l.x, y: l.y, z: l.z }))
-      );
-      setDetectedFingers(fingerCount);
+        if (fingerCount === targetFingers && !fingerChallengeComplete) {
+          setFingerChallengeComplete(true);
+          void playSuccess();
+        }
 
-      // Check if challenge is complete
-      if (fingerCount === targetFingers && !fingerChallengeComplete) {
-        setFingerChallengeComplete(true);
-        void playSuccess();
+        landmarks.forEach((lm) => {
+          ctx.beginPath();
+          ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = fingerCount === targetFingers ? '#10B981' : '#F59E0B';
+          ctx.fill();
+        });
+      } else {
+        setDetectedFingers(0);
       }
+    },
+    [fingerChallengeComplete, gamePhase, playSuccess, targetFingers],
+  );
 
-      // Draw hand landmarks
-      landmarks.forEach((lm: { x: number; y: number }) => {
-        ctx.beginPath();
-        ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 4, 0, 2 * Math.PI);
-        ctx.fillStyle = fingerCount === targetFingers ? '#10B981' : '#F59E0B';
-        ctx.fill();
-      });
-    }
-
-    requestAnimationFrame(detectHands);
-  }, [cameraReady, gamePhase, handLandmarker, targetFingers, fingerChallengeComplete, playSuccess]);
+  const {
+    isLoading: isHandLoading,
+    isReady: isHandReady,
+    startTracking: startHandTracking,
+  } = useGameHandTracking({
+    gameName: 'FreezeDance',
+    webcamRef,
+    handTracking: {
+      numHands: 1,
+      minDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
+      delegate: 'GPU',
+      enableFallback: true,
+    },
+    isRunning: cameraReady && isPlaying && gamePhase === 'fingerChallenge',
+    onFrame: handleFingerChallengeFrame,
+    onNoVideoFrame: () => {
+      if (gamePhase === 'fingerChallenge') {
+        setDetectedFingers(0);
+      }
+    },
+  });
 
   useEffect(() => {
-    if (gamePhase === 'fingerChallenge' && cameraReady && isHandReady) {
-      detectHands();
+    if (
+      cameraReady &&
+      isPlaying &&
+      gamePhase === 'fingerChallenge' &&
+      !isHandReady &&
+      !isHandLoading
+    ) {
+      void startHandTracking();
     }
-  }, [gamePhase, cameraReady, isHandReady, detectHands]);
+  }, [
+    cameraReady,
+    gamePhase,
+    isHandLoading,
+    isHandReady,
+    isPlaying,
+    startHandTracking,
+  ]);
 
   const startGame = () => {
     setIsPlaying(true);
@@ -446,7 +471,7 @@ export function FreezeDance() {
                 </div>
                 <h3
                   className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing' ? 'text-[#3B82F6]' :
-                      gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
+                    gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
                     }`}
                 >
                   {gamePhase === 'dancing' ? 'DANCE!' :
@@ -530,7 +555,7 @@ export function FreezeDance() {
               <div className='absolute top-6 right-6 px-5 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-slate-200 shadow-sm'>
                 <span
                   className={`font-black tracking-wide ${gamePhase === 'dancing' ? 'text-[#10B981]' :
-                      gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
+                    gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
                     }`}
                 >
                   {gamePhase === 'dancing' ? '💃 DANCE' :

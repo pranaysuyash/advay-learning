@@ -7,11 +7,8 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import {
   assetLoader,
@@ -59,20 +56,6 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   const isDrawingRef = useRef(false);
   const templateRef = useRef<MirrorTemplate | null>(null);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
   useEffect(() => {
@@ -102,12 +85,6 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   useEffect(() => { userPointsRef.current = userPoints; }, [userPoints]);
   useEffect(() => { isDrawingRef.current = isDrawing; }, [isDrawing]);
   useEffect(() => { templateRef.current = template; }, [template]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   const loadTemplate = useCallback((lvl: number, idx: number) => {
     const templates = getTemplatesForLevel(lvl);
@@ -327,17 +304,24 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
     [submitDrawing],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && !gameCompleted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 24,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      setCursor(null);
-      if (isDrawingRef.current) setIsDrawing(false);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
+    useGameHandTracking({
+      gameName: 'MirrorDraw',
+      isRunning: isPlaying && !gameCompleted,
+      webcamRef,
+      targetFps: 24,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        setCursor(null);
+        if (isDrawingRef.current) setIsDrawing(false);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameCompleted, isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setGameCompleted(false);
@@ -355,7 +339,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 

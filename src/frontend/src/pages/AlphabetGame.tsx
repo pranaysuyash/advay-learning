@@ -40,7 +40,8 @@ import { useAttentionDetection } from '../hooks/useAttentionDetection';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { usePhonics } from '../hooks/usePhonics';
 // Centralized hand tracking hooks
-import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import {
   buildSegments,
   drawSegments,
@@ -55,6 +56,7 @@ import {
 } from '../utils/pinchDetection';
 import { getLetterColorClass } from '../utils/letterColorClass';
 import type { PinchState, Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 // Available languages for the game
 const LANGUAGES = [
@@ -83,21 +85,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isHandPresent, setIsHandPresent] = useState(false);
   const isHandPresentRef = useRef(isHandPresent);
-
-  // Use centralized hand tracking hook
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 2,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
+  const latestTrackingFrameRef = useRef<TrackedHandFrame | null>(null);
 
   // Sound effects and phonics hooks
   const { playCelebration, playPop, playError } = useSoundEffects();
@@ -166,13 +154,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setFeedback(null);
       setAccuracy(0);
 
-      // Initialize hand tracking using centralized hook
-      // Note: We don't check isHandTrackingReady synchronously after this call
-      // because React state doesn't update mid-function. A useEffect monitors it.
       if (!isHandTrackingReady) {
         setIsHandTrackingLoading(true);
         setFeedback(null);
-        initializeHandTracking(); // Don't await - let useEffect handle the result
+        void startTracking();
       } else {
         setFeedback('Pip can see you! 📷');
       }
@@ -270,6 +255,45 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       }
     },
   );
+
+  const handleTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      latestTrackingFrameRef.current = frame;
+    },
+    [],
+  );
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
+    useGameHandTracking({
+      gameName: 'AlphabetGame',
+      webcamRef,
+      handTracking: {
+        numHands: 2,
+        minDetectionConfidence: 0.3,
+        minHandPresenceConfidence: 0.3,
+        minTrackingConfidence: 0.3,
+        delegate: 'GPU',
+        enableFallback: true,
+      },
+      isRunning: isPlaying && !isPaused && !useMouseMode,
+      onFrame: handleTrackingFrame,
+      onNoVideoFrame: () => {
+        latestTrackingFrameRef.current = null;
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !isPaused && !useMouseMode && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [
+    isHandTrackingReady,
+    isModelLoading,
+    isPaused,
+    isPlaying,
+    startTracking,
+    useMouseMode,
+  ]);
 
   const checkProgress = async () => {
     // Minimal, deterministic scoring: ensures the core tracking UX is testable.
@@ -631,8 +655,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setShowCameraErrorModal(false);
     setIsPaused(false);
     setUseMouseMode(false);
-    initializeHandTracking();
-  }, [initializeHandTracking]);
+    void startTracking();
+  }, [startTracking]);
 
   const handleContinueWithMouse = useCallback(() => {
     setShowCameraErrorModal(false);
@@ -792,16 +816,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       }
 
       // Process pinch detection (skip when in mouse/touch fallback or when video/model isn't ready)
-      if (!useMouseMode && hasVideoFrame && video && landmarker) {
-        let results: any;
-        try {
-          results = landmarker.detectForVideo(video, performance.now());
-        } catch {
-          rafIdRef.current = requestAnimationFrame(loop);
-          return;
-        }
-
-        const landmarks = results?.landmarks?.[0];
+      if (!useMouseMode && hasVideoFrame && video) {
+        const landmarks = latestTrackingFrameRef.current?.hands?.[0];
         if (landmarks && landmarks.length >= 9) {
           if (!isHandPresentRef.current) {
             isHandPresentRef.current = true;
@@ -930,7 +946,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   }, [
     isPlaying,
     isPaused,
-    landmarker,
     currentLetter.char,
     currentLetter.color,
     settings.showHints,

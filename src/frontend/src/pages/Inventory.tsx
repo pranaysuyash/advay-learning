@@ -5,13 +5,10 @@ import { useInventoryStore } from '../store';
 import {
   ALL_ITEMS,
   RARITY_CONFIG,
-  getItem,
   type ItemCategory,
-  type Rarity,
   type CollectibleItem,
 } from '../data/collectibles';
-import { RECIPES } from '../data/recipes';
-import { EASTER_EGGS } from '../data/easterEggs';
+
 
 const CATEGORY_CONFIG: Record<
   ItemCategory,
@@ -39,7 +36,6 @@ export function Inventory() {
     ownedItems,
     discoveredRecipes,
     foundEasterEggs,
-    totalDiscoveries,
     getUniqueItemCount,
     getTotalItemCount,
   } = useInventoryStore();

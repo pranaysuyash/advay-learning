@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, type ReactNode } from 'react';
 import {

@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { triggerHaptic } from '../utils/haptics';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const SHAPES = ['◯', '△', '□', '◇', '☆'] as const;
@@ -23,35 +23,9 @@ const POP_RADIUS = 0.16; // Increased from 0.11 for kids' easier targeting
 const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
 const TARGET_SIZE = 144; // Increased from 144 (w-36 = 9rem = 144px) for kids' fingers
 
-/**
- * Kid-friendly haptic feedback utility
- * Uses longer, softer vibrations appropriate for children
- */
-function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
-
-  const patterns = {
-    success: [50, 30, 50], // Gentle double tap
-    error: [100, 50, 100], // Softer error buzz
-    celebration: [100, 50, 100, 50, 200], // Joyful burst
-  };
-
-  navigator.vibrate(patterns[type]);
-}
-
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 export const ShapePop = memo(function ShapePopComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -68,31 +42,11 @@ export const ShapePop = memo(function ShapePopComponent() {
 
   const scoreRef = useRef(score);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
   useEffect(() => {
     scoreRef.current = score;
   }, [score]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -111,8 +65,8 @@ export const ShapePop = memo(function ShapePopComponent() {
   }, [isPlaying]);
 
   const spawnTarget = useCallback(() => {
-    setTargetCenter(pickRandomPoint(random01(), random01(), 0.18));
-    setTargetShape(SHAPES[Math.floor(random01() * SHAPES.length)] ?? '◯');
+    setTargetCenter(pickRandomPoint(randomFloat01(), randomFloat01(), 0.18));
+    setTargetShape(SHAPES[Math.floor(randomFloat01() * SHAPES.length)] ?? '◯');
   }, []);
 
   const handleFrame = useCallback(
@@ -154,16 +108,22 @@ export const ShapePop = memo(function ShapePopComponent() {
     [cursor, playCelebration, playError, playPop, spawnTarget, targetCenter],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'ShapePop',
+      targetFps: 30,
+      isRunning: isPlaying,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setScore(0);
@@ -175,7 +135,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -215,7 +175,7 @@ export const ShapePop = memo(function ShapePopComponent() {
       level={Math.max(1, Math.floor(score / 120) + 1)}
       onHome={goHome}
     >
-      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
+      <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -251,15 +211,14 @@ export const ShapePop = memo(function ShapePopComponent() {
         </div>
 
         {cursor && (
-          <div
-            className='absolute rounded-full border-4 border-[#3B82F6] bg-blue-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(59,130,246,0.5)] pointer-events-none z-20'
-            style={{
-              left: `${cursor.x * 100}%`,
-              top: `${cursor.y * 100}%`,
-              width: `${CURSOR_SIZE}px`,
-              height: `${CURSOR_SIZE}px`,
-            }}
-            aria-hidden='true'
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isPlaying}
+            size={CURSOR_SIZE}
+            color='#3B82F6'
           />
         )}
 

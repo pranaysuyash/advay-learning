@@ -5,21 +5,20 @@ import Webcam from 'react-webcam';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
+import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
 import { distanceBetweenPoints, isPointInCircle } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import { KalmanFilter, isWithinTarget, mapNormalizedPointToCover } from '../utils/coordinateTransform';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
@@ -39,19 +38,8 @@ const TUTORIAL_STEPS = [
   { title: 'Pinch to pick', icon: '🤏', detail: 'Pinch when you are on the right emoji.' },
 ];
 
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 export const EmojiMatch = memo(function EmojiMatchComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerRectRef = useRef<DOMRect | null>(null);
   const startButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -99,20 +87,6 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const showDebug = Boolean((import.meta as any)?.env?.DEV);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
   useEffect(() => { targetsRef.current = targets; }, [targets]);
@@ -126,12 +100,6 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       startTriggeredRef.current = false;
     }
   }, [gameCompleted, isPlaying]);
-
-  useEffect(() => {
-    if (!gameCompleted && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [gameCompleted, initializeHandTracking, isHandTrackingReady, isModelLoading]);
 
   useEffect(() => {
     const updateRect = () => {
@@ -152,7 +120,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   const startRound = useCallback(() => {
     const baseCount = levelRef.current === 1 ? 2 : levelRef.current === 2 ? 3 : 4;
     const adaptiveCount = missCountRef.current >= 3 ? Math.max(2, baseCount - 1) : baseCount;
-    const result = buildRound(adaptiveCount, random01);
+    const result = buildRound(adaptiveCount, randomFloat01);
     setTargets(result.targets);
     setCorrectId(result.correctId);
     setTimeLeft(ROUND_TIME + (missCountRef.current >= 3 ? ADAPTIVE_TIME_BONUS : 0));
@@ -255,10 +223,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     setIsPlaying(true);
     await playStart();
 
-    if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, playStart]);
+  }, [playStart]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
@@ -326,8 +291,11 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       if (isPaused || isTransitioning) return;
 
       const activeTargets = targetsRef.current;
-      const adaptiveHitRadius =
-        missCountRef.current >= 3 ? BASE_HIT_RADIUS + ADAPTIVE_HIT_BONUS : BASE_HIT_RADIUS;
+      const adaptiveHitRadius = getAdaptiveHitRadius(
+        missCountRef.current,
+        BASE_HIT_RADIUS,
+        { adaptiveBonus: ADAPTIVE_HIT_BONUS },
+      );
       const closestTarget = activeTargets
         .map((target) => ({
           target,
@@ -410,25 +378,31 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     ],
   );
 
-  useHandTrackingRuntime({
-    isRunning: !gameCompleted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30,
-    smoothing: {
-      minCutoff: 1.4,
-      beta: 0.02,
-      dCutoff: 1.0,
-    },
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (isHandDetected) setIsHandDetected(false);
-      if (cursorPx) setCursorPx(null);
-      if (rawTip) setRawTip(null);
-      if (isPinching) setIsPinching(false);
-      kalmanRef.current.reset();
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'EmojiMatch',
+      targetFps: 30,
+      isRunning: !gameCompleted,
+      smoothing: {
+        minCutoff: 1.4,
+        beta: 0.02,
+        dCutoff: 1.0,
+      },
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (isHandDetected) setIsHandDetected(false);
+        if (cursorPx) setCursorPx(null);
+        if (rawTip) setRawTip(null);
+        if (isPinching) setIsPinching(false);
+        kalmanRef.current.reset();
+      },
+    });
+
+  useEffect(() => {
+    if (!gameCompleted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameCompleted, isHandTrackingReady, isModelLoading, startTracking]);
 
   const resetGame = () => {
     if (levelTimeoutRef.current) {
@@ -624,9 +598,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
             if (!detected) {
               setIsPaused(true);
               setAutoPaused(true);
-              return;
-            }
-            if (autoPaused) {
+            } else if (autoPaused) {
               setIsPaused(false);
               setAutoPaused(false);
             }

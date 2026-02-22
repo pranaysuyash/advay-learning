@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { assetLoader, SOUND_ASSETS } from '../utils/assets';
 import {
@@ -34,6 +32,7 @@ const CARD_COLORS = [
 
 export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -65,20 +64,6 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const correctCountRef = useRef(correctCount);
   const usedLettersRef = useRef<string[]>(usedLetters);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
   useEffect(() => {
@@ -99,12 +84,6 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   useEffect(() => { levelRef.current = level; }, [level]);
   useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
   useEffect(() => { usedLettersRef.current = usedLetters; }, [usedLetters]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   // Speak the phoneme using TTS
   const speakPhoneme = useCallback((phoneme: Phoneme) => {
@@ -280,16 +259,23 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
     [cursor, nextRound, playCelebration, playError, playPop, targetPhoneme, speakPhoneme],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && !gameCompleted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 24,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
+    useGameHandTracking({
+      gameName: 'PhonicsSounds',
+      isRunning: isPlaying && !gameCompleted,
+      webcamRef,
+      targetFps: 24,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameCompleted, isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   useEffect(() => {
     return () => {
@@ -335,7 +321,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -416,7 +402,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       level={level}
       onHome={goHome}
     >
-      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
+      <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -497,10 +483,13 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Cursor */}
         {cursor && (
-          <div
-            className='absolute w-12 h-12 rounded-full border-4 border-[#F59E0B] bg-amber-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(245,158,11,0.5)] pointer-events-none z-20'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
-            aria-hidden='true'
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isPlaying}
+            size={64}
           />
         )}
 

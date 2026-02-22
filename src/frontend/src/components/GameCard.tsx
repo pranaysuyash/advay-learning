@@ -112,7 +112,7 @@ export const GameCard = memo(function GameCard({
 
                     {/* COMING SOON badge */}
                     {comingSoon && (
-                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-white text-slate-700 text-xs font-black rounded-full shadow-sm tracking-widest uppercase border-2 border-slate-200">
+                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-800 text-white text-xs font-black rounded-full shadow-sm tracking-widest uppercase border-2 border-white">
                             SOON
                         </div>
                     )}

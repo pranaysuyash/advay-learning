@@ -5,6 +5,7 @@ import { RECIPES_BY_ID, findCraftableRecipes, type Recipe } from '../data/recipe
 import { getEasterEggById } from '../data/easterEggs';
 import { getDropTable } from '../data/gameRegistry';
 
+
 export interface OwnedItem {
   itemId: string;
   quantity: number;
@@ -132,7 +133,8 @@ export const useInventoryStore = create<InventoryState>()(
       },
 
       processGameCompletion: (gameId, score) => {
-        const droppedIds = rollDrops(gameId, score);
+        const dropTable = getDropTable(gameId);
+        const droppedIds = rollDropsFromTable(dropTable, score);
         if (droppedIds.length === 0) return [];
 
         const drops: ItemDrop[] = [];

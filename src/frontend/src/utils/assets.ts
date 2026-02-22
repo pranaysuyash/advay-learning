@@ -328,7 +328,8 @@ export class AssetLoader {
       };
 
       audio.onerror = () => {
-        console.error(`Failed to load sound asset: ${asset.id}`);
+        // Silently fail for dummy sound assets to prevent console spam
+        // console.warn(`Failed to load sound asset: ${asset.id}`);
         // Create silent fallback
         const silentAudio = new Audio();
         this.loadedSounds.set(asset.id, silentAudio);

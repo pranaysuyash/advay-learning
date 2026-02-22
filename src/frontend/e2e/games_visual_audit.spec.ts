@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 const BASE = process.env.BASE_URL || 'http://localhost:6173';
 const outDir = 'docs/screenshots/games_visual_audit';

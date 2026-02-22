@@ -162,6 +162,26 @@ const ShapeSafari = lazy(() =>
     default: module.default,
   })),
 );
+const FreeDraw = lazy(() =>
+  import('./pages/FreeDraw').then((module) => ({
+    default: module.default,
+  })),
+);
+const MathMonsters = lazy(() =>
+  import('./pages/MathMonsters').then((module) => ({
+    default: module.default,
+  })),
+);
+const BubblePop = lazy(() =>
+  import('./pages/BubblePop').then((module) => ({
+    default: module.default,
+  })),
+);
+const PhysicsDemo = lazy(() =>
+  import('./pages/PhysicsDemo').then((module) => ({
+    default: module.default,
+  })),
+);
 const InventoryPage = lazy(() =>
   import('./pages/Inventory').then((module) => ({
     default: module.Inventory,
@@ -407,6 +427,38 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShapeSafari />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/free-draw'
+              element={
+                <ProtectedRoute>
+                  <FreeDraw />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/math-monsters'
+              element={
+                <ProtectedRoute>
+                  <MathMonsters />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/bubble-pop'
+              element={
+                <ProtectedRoute>
+                  <BubblePop />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/physics-demo'
+              element={
+                <ProtectedRoute>
+                  <PhysicsDemo />
                 </ProtectedRoute>
               }
             />

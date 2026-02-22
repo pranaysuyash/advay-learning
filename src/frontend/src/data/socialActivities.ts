@@ -7,7 +7,7 @@
  * @see docs/LUMI_COMPANION_CHARACTER_PLAN.md
  */
 
-import { SocialActivity, SocialActivityType } from '../stores/socialStore';
+import { SocialActivity, SocialActivityType } from '../store/socialStore';
 
 export interface SocialActivityTemplate {
   id: string;

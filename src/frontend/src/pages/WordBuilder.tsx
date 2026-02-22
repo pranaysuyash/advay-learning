@@ -3,15 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { triggerHaptic } from '../utils/haptics';
 import { findHitTarget } from '../games/hitTarget';
 import {
   pickWordForLevel,
@@ -19,29 +18,13 @@ import {
   type LetterTarget,
 } from '../games/wordBuilderLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   assetLoader,
   SOUND_ASSETS,
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
-
-/**
- * Kid-friendly haptic feedback utility
- * Uses longer, softer vibrations appropriate for children
- */
-function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
-
-  // Kid-friendly patterns: longer, softer vibrations
-  const patterns = {
-    success: [50, 30, 50], // Gentle double tap
-    error: [100, 50, 100], // Softer error buzz
-    celebration: [100, 50, 100, 50, 200], // Joyful burst
-  };
-
-  navigator.vibrate(patterns[type]);
-}
 
 const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 3;
@@ -50,20 +33,10 @@ const MAX_LEVEL = 3;
 const CURSOR_SIZE = 64; // Increased from 40 (10 * 4) for easier visibility
 const TARGET_SIZE = 120; // Increased from 80 for kids' fingers
 
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 export const WordBuilder = memo(function WordBuilderComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
@@ -83,20 +56,6 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const wordRef = useRef(word);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
-
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
@@ -142,12 +101,6 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   }, []);
 
   useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
-
-  useEffect(() => {
     if (!isPlaying || gameCompleted) return;
 
     const timer = setInterval(() => {
@@ -164,12 +117,12 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   }, [isPlaying, gameCompleted]);
 
   const startNewWord = useCallback(() => {
-    const newWord = pickWordForLevel(levelRef.current, random01);
+    const newWord = pickWordForLevel(levelRef.current, randomFloat01);
     setWord(newWord);
     setStepIndex(0);
     setCompletedLetters([]);
     const distractors = Math.min(3, 2 + Math.floor(levelRef.current / 2));
-    setTargets(createLetterTargets(newWord, distractors, random01));
+    setTargets(createLetterTargets(newWord, distractors, randomFloat01));
     setFeedback(`Spell: ${newWord}`);
   }, []);
 
@@ -251,16 +204,22 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     [completeWord, cursor, playError, playPop],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && !gameCompleted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30, // Increased from 24 for smoother hand tracking (less lag)
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'WordBuilder',
+      targetFps: 30,
+      isRunning: isPlaying && !gameCompleted,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameCompleted, isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setGameCompleted(false);
@@ -275,7 +234,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -327,6 +286,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       onHome={goHome}
     >
       <div
+        ref={gameAreaRef}
         className='absolute inset-0 bg-[#FFF8F0]'
         role='main'
         aria-label='Word Builder spelling game with gesture-based letter selection'
@@ -407,15 +367,14 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           })}
 
           {cursor && (
-            <div
-              className='absolute rounded-full border-4 border-[#3B82F6] bg-blue-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(59,130,246,0.5)] pointer-events-none z-30'
-              style={{
-                left: `${cursor.x * 100}%`,
-                top: `${cursor.y * 100}%`,
-                width: `${CURSOR_SIZE}px`,
-                height: `${CURSOR_SIZE}px`,
-              }}
-              aria-hidden='true'
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={isPlaying}
+              size={CURSOR_SIZE}
+              color='#3B82F6'
             />
           )}
 

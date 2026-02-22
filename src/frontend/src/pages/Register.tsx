@@ -268,7 +268,7 @@ export function Register() {
                           >
                             {LANGUAGES.map((lang) => (
                               <option key={lang.code} value={lang.code}>
-                                {lang.flagIcon && <img src={lang.flagIcon} alt={`${lang.name} flag`} className="inline w-4 h-4 mr-1 object-contain" />} {lang.name}
+                                {lang.name}
                               </option>
                             ))}
                           </select>

@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { triggerHaptic } from '../utils/haptics';
 import { pickTargetPoint, updateHoldProgress } from '../games/steadyHandLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   assetLoader,
@@ -27,35 +27,9 @@ const TARGET_RADIUS = 0.18; // Increased from 0.12 for kids' easier targeting
 const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
 const TARGET_SIZE = 160; // Increased for kids' fingers
 
-/**
- * Kid-friendly haptic feedback utility
- * Uses longer, softer vibrations appropriate for children
- */
-function triggerHaptic(type: 'success' | 'error' | 'celebration'): void {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return;
-
-  const patterns = {
-    success: [50, 30, 50], // Gentle double tap
-    error: [100, 50, 100], // Softer error buzz
-    celebration: [100, 50, 100, 50, 200], // Joyful burst
-  };
-
-  navigator.vibrate(patterns[type]);
-}
-
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -71,32 +45,12 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const holdProgressRef = useRef(holdProgress);
   const celebrationTimeoutRef = useRef<number | undefined>(undefined);
 
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   const { playSuccess, playError, playCelebration, playStart } =
     useSoundEffects();
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;
   }, [holdProgress]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   // Asset preloading for premium polish
   useEffect(() => {
@@ -124,7 +78,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   }, []);
 
   const pickNextTarget = useCallback(() => {
-    setTarget(pickTargetPoint(random01(), random01(), 0.22));
+    setTarget(pickTargetPoint(randomFloat01(), randomFloat01(), 0.22));
   }, []);
 
   const handleFrame = useCallback(
@@ -210,16 +164,22 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     ],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 30,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'SteadyHandLab',
+      targetFps: 30,
+      isRunning: isPlaying,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setIsPlaying(true);
@@ -233,7 +193,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -278,6 +238,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
       onHome={goHome}
     >
       <div
+        ref={gameAreaRef}
         className='absolute inset-0 bg-[#FFF8F0]'
         role='main'
         aria-label='Steady Hand Lab game area with webcam-based hand tracking'
@@ -330,15 +291,14 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         </div>
 
         {cursor && (
-          <div
-            className='absolute rounded-full border-4 border-[#3B82F6] bg-blue-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(59,130,246,0.5)] pointer-events-none z-20'
-            style={{
-              left: `${cursor.x * 100}%`,
-              top: `${cursor.y * 100}%`,
-              width: `${CURSOR_SIZE}px`,
-              height: `${CURSOR_SIZE}px`,
-            }}
-            aria-hidden='true'
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isPlaying}
+            size={CURSOR_SIZE}
+            color='#3B82F6'
           />
         )}
 

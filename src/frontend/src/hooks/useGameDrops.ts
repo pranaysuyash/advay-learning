@@ -1,7 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useInventoryStore } from '../store';
-import { getGameManifest, getRegistryEasterEggs } from '../data/gameRegistry';
-import { rollDrops } from '../data/collectibles';
+import { getRegistryEasterEggs } from '../data/gameRegistry';
 import type { ItemDrop } from '../store';
 
 /**

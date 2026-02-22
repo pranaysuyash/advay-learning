@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type RefObject } from 'react';
 
 /**
  * GameCursor - Mandatory cursor component applying emoji match audit fixes
@@ -18,6 +18,10 @@ import { useEffect, useState } from 'react';
 interface GameCursorProps {
   /** Cursor position in screen coordinates */
   position: { x: number; y: number };
+  /** Coordinate mode for the `position` prop */
+  coordinateSpace?: 'viewport' | 'normalized';
+  /** Container ref required when using normalized coordinates */
+  containerRef?: RefObject<HTMLElement | null>;
 
   /** Cursor size in pixels (default: 70px, minimum: 60px) */
   size?: number;
@@ -61,6 +65,8 @@ interface TrailPoint {
 
 export function GameCursor({
   position,
+  coordinateSpace = 'viewport',
+  containerRef,
   size = 70, // MANDATORY: 60-80px range
   color = '#FFD700', // Bright yellow
   outlineColor = '#000000',
@@ -73,6 +79,18 @@ export function GameCursor({
   icon,
 }: GameCursorProps) {
   const [trail, setTrail] = useState<TrailPoint[]>([]);
+  const resolvedPosition = useMemo(() => {
+    if (coordinateSpace === 'normalized') {
+      const rect = containerRef?.current?.getBoundingClientRect();
+      if (rect) {
+        return {
+          x: rect.left + position.x * rect.width,
+          y: rect.top + position.y * rect.height,
+        };
+      }
+    }
+    return position;
+  }, [containerRef, coordinateSpace, position]);
 
   // MANDATORY: Enforce minimum size
   const cursorSize = Math.max(60, size);
@@ -87,20 +105,20 @@ export function GameCursor({
     if (showTrail && isHandDetected) {
       const now = Date.now();
       const newPoint: TrailPoint = {
-        x: position.x,
-        y: position.y,
+        x: resolvedPosition.x,
+        y: resolvedPosition.y,
         timestamp: now,
       };
 
       // Keep trail of last 5 positions, remove old ones (>300ms)
-      setTrail((prev) => {
-        const updated = [...prev, newPoint];
-        return updated.filter((p) => now - p.timestamp < 300).slice(-5);
-      });
-    } else {
-      setTrail([]);
-    }
-  }, [position.x, position.y, showTrail, isHandDetected]);
+        setTrail((prev) => {
+          const updated = [...prev, newPoint];
+          return updated.filter((p) => now - p.timestamp < 300).slice(-5);
+        });
+      } else {
+        setTrail([]);
+      }
+  }, [resolvedPosition.x, resolvedPosition.y, showTrail, isHandDetected]);
 
   // Don't render if hand not detected
   if (!isHandDetected) {
@@ -143,8 +161,8 @@ export function GameCursor({
       <motion.div
         style={{
           position: 'fixed',
-          left: position.x - cursorSize / 2,
-          top: position.y - cursorSize / 2,
+          left: resolvedPosition.x - cursorSize / 2,
+          top: resolvedPosition.y - cursorSize / 2,
           width: cursorSize,
           height: cursorSize,
           borderRadius: '50%',

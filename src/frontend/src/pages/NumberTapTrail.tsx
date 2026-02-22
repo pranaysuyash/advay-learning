@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useHandTracking } from '../hooks/useHandTracking';
-import {
-  useHandTrackingRuntime,
-  type HandTrackingRuntimeMeta,
-} from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { findHitTarget } from '../games/hitTarget';
 import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
+import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface TrailTarget {
@@ -27,19 +26,9 @@ interface TrailTarget {
 const HIT_RADIUS = 0.1;
 const MAX_LEVEL = 6;
 
-function random01(): number {
-  try {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] / 4294967295;
-  } catch {
-    return Math.random();
-  }
-}
-
 function createRoundTargets(level: number): TrailTarget[] {
   const count = Math.min(4 + level, 9);
-  const points = pickSpacedPoints(count, 0.2, 0.14, random01);
+  const points = pickSpacedPoints(count, 0.2, 0.14, randomFloat01);
 
   return points.map((point, index) => ({
     id: index,
@@ -51,8 +40,8 @@ function createRoundTargets(level: number): TrailTarget[] {
 
 export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const navigate = useNavigate();
-  const webcamRef = useRef<Webcam>(null);
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
@@ -69,20 +58,6 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const expectedIndexRef = useRef(expectedIndex);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
-
-  const {
-    landmarker,
-    isLoading: isModelLoading,
-    isReady: isHandTrackingReady,
-    initialize: initializeHandTracking,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
 
@@ -101,12 +76,6 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
-
-  useEffect(() => {
-    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
-      initializeHandTracking();
-    }
-  }, [initializeHandTracking, isHandTrackingReady, isModelLoading, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying || gameCompleted) return;
@@ -209,16 +178,22 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     [completeLevel, cursor, playError, playPop],
   );
 
-  useHandTrackingRuntime({
-    isRunning: isPlaying && !gameCompleted && isHandTrackingReady,
-    handLandmarker: landmarker,
-    webcamRef,
-    targetFps: 24,
-    onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
-  });
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+    useGameHandTracking({
+      gameName: 'NumberTapTrail',
+      targetFps: 24,
+      isRunning: isPlaying && !gameCompleted,
+      onFrame: handleFrame,
+      onNoVideoFrame: () => {
+        if (cursor !== null) setCursor(null);
+      },
+    });
+
+  useEffect(() => {
+    if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameCompleted, isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const startGame = async () => {
     setGameCompleted(false);
@@ -231,7 +206,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
-      void initializeHandTracking();
+      void startTracking();
     }
   };
 
@@ -276,7 +251,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
 
   return (
     <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome}>
-      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
+      <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -320,10 +295,13 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         ))}
 
         {cursor && (
-          <div
-            className='absolute w-12 h-12 rounded-full border-4 border-[#F59E0B] bg-amber-100/60 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_20px_rgba(245,158,11,0.5)] pointer-events-none z-20'
-            style={{ left: `${cursor.x * 100}%`, top: `${cursor.y * 100}%` }}
-            aria-hidden='true'
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isPlaying}
+            size={64}
           />
         )}
 

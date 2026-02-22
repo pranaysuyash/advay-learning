@@ -2,9 +2,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useHandTracking } from '../hooks/useHandTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 
 interface Chemical {
@@ -114,19 +116,6 @@ export function VirtualChemistryLab() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { playSuccess, playPop } = useSoundEffects();
 
-  const {
-    landmarker: handLandmarker,
-    isLoading: isHandLoading,
-    isReady: isHandReady,
-  } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-  });
-
   // Check for reactions when beaker contents change
   useEffect(() => {
     if (beakerContents.length < 2) return;
@@ -185,17 +174,12 @@ export function VirtualChemistryLab() {
     return () => clearInterval(interval);
   }, [bubbles.length]);
 
-  // Hand tracking for pouring
-  const detectHand = useCallback(() => {
-    if (!webcamRef.current || !handLandmarker || !isPlaying) return;
+  const detectHand = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!isPlaying) return;
 
-    const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) return;
-
-    const results = handLandmarker.detectForVideo(video, performance.now());
-
-    if (results.landmarks && results.landmarks.length > 0) {
-      const landmarks = results.landmarks[0];
+      if (frame.hands.length > 0) {
+        const landmarks = frame.hands[0];
       const indexFinger = landmarks[8]; // Index finger tip
       const thumb = landmarks[4]; // Thumb tip
 
@@ -210,55 +194,74 @@ export function VirtualChemistryLab() {
       );
       const isPinching = pinchDistance < 0.1;
 
-      // Draw hand position on canvas
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw hand position on canvas
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-          // Draw beaker
-          drawBeaker(ctx, canvas.width, canvas.height);
+            // Draw beaker
+            drawBeaker(ctx, canvas.width, canvas.height);
 
-          // Draw hand cursor
-          const handX = (1 - indexFinger.x) * canvas.width;
-          const handY = indexFinger.y * canvas.height;
+            // Draw hand cursor
+            const handX = (1 - indexFinger.x) * canvas.width;
+            const handY = indexFinger.y * canvas.height;
 
-          ctx.beginPath();
-          ctx.arc(handX, handY, 15, 0, 2 * Math.PI);
-          ctx.fillStyle = isPinching ? '#4CAF50' : '#FF9800';
-          ctx.fill();
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          // Draw bubbles
-          bubbles.forEach((b) => {
             ctx.beginPath();
-            ctx.arc(b.x, b.y, b.size, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.arc(handX, handY, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = isPinching ? '#4CAF50' : '#FF9800';
             ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 3;
             ctx.stroke();
-          });
 
-          // Handle pouring
-          if (isPinching && selectedChemical && isOverBeaker && !isPouring) {
-            handlePour();
+            // Draw bubbles
+            bubbles.forEach((b) => {
+              ctx.beginPath();
+              ctx.arc(b.x, b.y, b.size, 0, 2 * Math.PI);
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+              ctx.fill();
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            });
+
+            // Handle pouring
+            if (isPinching && selectedChemical && isOverBeaker && !isPouring) {
+              handlePour();
+            }
           }
         }
       }
-    }
+    },
+    [isPlaying, selectedChemical, isPouring, bubbles],
+  );
 
-    requestAnimationFrame(detectHand);
-  }, [handLandmarker, isPlaying, selectedChemical, isPouring, bubbles, beakerContents]);
+  const {
+    isLoading: isHandLoading,
+    isReady: isHandReady,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'VirtualChemistryLab',
+    webcamRef,
+    handTracking: {
+      numHands: 1,
+      minDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
+      delegate: 'GPU',
+      enableFallback: true,
+    },
+    isRunning: isPlaying,
+    onFrame: detectHand,
+  });
 
   useEffect(() => {
-    if (isPlaying && isHandReady) {
-      detectHand();
+    if (isPlaying && !isHandReady && !isHandLoading) {
+      void startTracking();
     }
-  }, [isPlaying, isHandReady, detectHand]);
+  }, [isHandLoading, isHandReady, isPlaying, startTracking]);
 
   const drawBeaker = (
     ctx: CanvasRenderingContext2D,

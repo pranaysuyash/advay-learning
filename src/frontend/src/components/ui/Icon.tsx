@@ -3,7 +3,7 @@ import { Icon as AssetIcon } from '../Icon';
 import {
   Type, Target, Timer, Flame, Hand, Pencil, Home, Check, Lock, Unlock,
   AlertTriangle, Download, Hourglass, Circle, Sparkles, Heart, Star,
-  Camera, Trophy, Coffee, Droplets, User, Eye, EyeOff, ArrowLeft, X,
+  Camera, Trophy, Coffee, Droplets, Eye, EyeOff, ArrowLeft, X,
   Play, Search, RotateCcw, MousePointer2, ChevronDown, Volume2, VolumeX,
   Shield, Video, ArrowRight, Mail, AlertCircle, CheckCircle, Loader2,
   Settings, HelpCircle, UserRound

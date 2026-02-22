@@ -21,8 +21,7 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { Mascot } from '../components/Mascot';
-import { useHandTracking } from '../hooks/useHandTracking';
-import { useHandTrackingRuntime } from '../hooks/useHandTrackingRuntime';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame, Point } from '../types/tracking';
 import {
   type SafariScene,
@@ -34,7 +33,6 @@ import {
   findShapeAtPoint,
   checkShapeComplete,
   getHint,
-  checkAllShapesFound,
   getShapeDisplayName,
   getProgress,
   calculateFinalScore,
@@ -63,8 +61,6 @@ export default function ShapeSafari() {
   const lastFoundTimeRef = useRef(0);
   
   // ===== HAND TRACKING =====
-  const { landmarker } = useHandTracking();
-  
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip || !canvasRef.current || !gameState?.currentScene) return;
     
@@ -101,9 +97,9 @@ export default function ShapeSafari() {
     }
   }, [gameState, isTracing, activeShape]);
   
-  useHandTrackingRuntime({
+  useGameHandTracking({
+    gameName: 'ShapeSafari',
     isRunning: !showMenu && !showCelebration,
-    handLandmarker: landmarker,
     webcamRef,
     onFrame: handleHandFrame,
   });
@@ -356,7 +352,7 @@ export default function ShapeSafari() {
   const handleGameComplete = () => {
     setShowCelebration(true);
     if (gameState) {
-      const finalScore = calculateFinalScore(gameState);
+      calculateFinalScore(gameState); // Calculate for side effects if any
       setGameState({ ...gameState, completed: true });
     }
   };

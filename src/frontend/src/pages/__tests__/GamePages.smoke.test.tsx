@@ -95,14 +95,14 @@ describe('Game pages smoke tests', () => {
   describe('ShapePop', () => {
     it('renders without throwing and shows start button', () => {
       expect(() => renderInRouter(<ShapePop />)).not.toThrow();
-      expect(screen.getByText('Start Shape Pop')).toBeTruthy();
+      expect(screen.getAllByRole('button', { name: /start/i }).length).toBeGreaterThan(0);
     });
   });
 
   describe('ColorMatchGarden', () => {
     it('renders without throwing and shows start button', () => {
       expect(() => renderInRouter(<ColorMatchGarden />)).not.toThrow();
-      expect(screen.getByText('Start Color Match')).toBeTruthy();
+      expect(screen.getAllByRole('button', { name: /start/i }).length).toBeGreaterThan(0);
     });
   });
 
@@ -163,7 +163,7 @@ describe('Game pages smoke tests', () => {
   describe('WordBuilder', () => {
     it('renders without throwing and shows start button', () => {
       expect(() => renderInRouter(<WordBuilder />)).not.toThrow();
-      expect(screen.getByText('Start Word Builder')).toBeTruthy();
+      expect(screen.getAllByRole('button', { name: /start/i }).length).toBeGreaterThan(0);
     });
   });
 

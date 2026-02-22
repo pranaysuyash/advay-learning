@@ -15,7 +15,7 @@ export function DiscoveryLab() {
     getItemCount,
   } = useInventoryStore();
 
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [, setSelectedRecipe] = useState<Recipe | null>(null);
   const [craftResult, setCraftResult] = useState<{
     success: boolean;
     item?: CollectibleItem;
@@ -255,14 +255,13 @@ function RecipeCard({
   canCraft,
   isDiscovered,
   onCraft,
-  onSelect,
   getItemCount,
 }: {
   recipe: Recipe;
   canCraft: boolean;
   isDiscovered: boolean;
   onCraft: () => void;
-  onSelect: () => void;
+  onSelect?: () => void;
   getItemCount: (id: string) => number;
 }) {
   const outputItem = getItem(recipe.outputId);
