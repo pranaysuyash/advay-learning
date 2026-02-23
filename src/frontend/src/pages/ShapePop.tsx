@@ -9,7 +9,10 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
@@ -20,7 +23,7 @@ const SHAPES = ['◯', '△', '□', '◇', '☆'] as const;
 const POP_RADIUS = 0.16; // Increased from 0.11 for kids' easier targeting
 
 // Touch-friendly sizing constants for kids
-const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
+const CURSOR_SIZE = 84; // Increased for easier visibility
 const TARGET_SIZE = 144; // Increased from 144 (w-36 = 9rem = 144px) for kids' fingers
 
 export const ShapePop = memo(function ShapePopComponent() {
@@ -29,7 +32,6 @@ export const ShapePop = memo(function ShapePopComponent() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(60);
   const [targetCenter, setTargetCenter] = useState<Point>(
     pickRandomPoint(0.4, 0.55, 0.18),
   );
@@ -43,26 +45,12 @@ export const ShapePop = memo(function ShapePopComponent() {
   const scoreRef = useRef(score);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('shape-pop');
 
   useEffect(() => {
     scoreRef.current = score;
   }, [score]);
-
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setIsPlaying(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isPlaying]);
 
   const spawnTarget = useCallback(() => {
     setTargetCenter(pickRandomPoint(randomFloat01(), randomFloat01(), 0.18));
@@ -88,6 +76,10 @@ export const ShapePop = memo(function ShapePopComponent() {
         const nextScore = scoreRef.current + 15;
         setScore(nextScore);
         setFeedback('Pop! Great hit.');
+        if (ttsEnabled) {
+          const praises = ['Great hit!', 'Awesome!', 'Nice one!', 'Keep going!'];
+          void speak(praises[Math.floor(Math.random() * praises.length)]!);
+        }
         void playPop();
         triggerHaptic('success');
 
@@ -95,17 +87,23 @@ export const ShapePop = memo(function ShapePopComponent() {
           setShowCelebration(true);
           triggerHaptic('celebration');
           void playCelebration();
+          if (ttsEnabled) {
+            void speak('Amazing! You are doing great!');
+          }
           setTimeout(() => setShowCelebration(false), 3000); // Slower pacing for kids
         }
 
         spawnTarget();
       } else {
         setFeedback('Close! Move into the ring, then pinch.');
+        if (ttsEnabled) {
+          void speak('Pinch when you are inside the shape!');
+        }
         void playError();
         triggerHaptic('error');
       }
     },
-    [cursor, playCelebration, playError, playPop, spawnTarget, targetCenter],
+    [cursor, playCelebration, playError, playPop, spawnTarget, targetCenter, speak, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
@@ -127,11 +125,13 @@ export const ShapePop = memo(function ShapePopComponent() {
 
   const startGame = async () => {
     setScore(0);
-    setTimeLeft(60);
     setFeedback('Pinch when your finger is inside the shape ring.');
     setCursor(null);
     spawnTarget();
     setIsPlaying(true);
+    if (ttsEnabled) {
+      void speak('Pop the shape by pinching it!');
+    }
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -140,9 +140,9 @@ export const ShapePop = memo(function ShapePopComponent() {
   };
 
   const resetGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     setCursor(null);
-    setTimeLeft(60);
     setFeedback('Pinch when your finger is inside the shape ring.');
   };
 
@@ -188,12 +188,12 @@ export const ShapePop = memo(function ShapePopComponent() {
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
-          Time: <span className={`font-black text-2xl ml-2 ${timeLeft <= 5 ? 'text-[#EF4444]' : 'text-amber-500'}`}>{timeLeft}s</span>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-slate-400 font-bold text-lg'>
+          Take your time! 🌈
         </div>
 
         <div
@@ -207,7 +207,7 @@ export const ShapePop = memo(function ShapePopComponent() {
           aria-hidden='true'
         >
           <div className='absolute inset-0 rounded-full border-[6px] border-[#D946EF] bg-fuchsia-100/30 shadow-[0_0_30px_rgba(217,70,239,0.3)] backdrop-blur-sm' />
-          <div className='absolute inset-0 flex items-center justify-center text-7xl font-black text-[#D946EF] drop-shadow-sm'>
+          <div className='absolute inset-0 flex items-center justify-center text-7xl font-black text-[#D946EF] drop-shadow-[0_4px_0_#E5B86E]'>
             {targetShape}
           </div>
         </div>
@@ -226,16 +226,28 @@ export const ShapePop = memo(function ShapePopComponent() {
 
         {!isPlaying && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🫧</div>
-              <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Shape Pop</h2>
-              <p className='text-slate-500 font-bold text-xl mb-10'>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🫧</div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Shape Pop</h2>
+              <p className='text-text-secondary font-bold text-xl mb-10'>
                 Pinch inside the shapes to pop them!
               </p>
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Pop the shapes!',
+                    'Point with your finger.',
+                    'Pinch inside the shape!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
               <button
                 type='button'
                 onClick={startGame}
-                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Popping!
               </button>

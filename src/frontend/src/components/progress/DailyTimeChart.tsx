@@ -17,21 +17,21 @@ export function DailyTimeChart({ summary }: DailyTimeChartProps) {
   const maxMinutes = Math.max(...dailyBreakdown.map((d) => d.minutes), limitMinutes, 10);
 
   return (
-    <div className="bg-white border-4 border-slate-100 rounded-[2.5rem] p-6 md:p-10 shadow-sm">
+    <div className="bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-6 md:p-10 shadow-[0_4px_0_#E5B86E]">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h3 className="text-2xl md:text-3xl font-black text-slate-800 flex items-center gap-3">
+          <h3 className="text-2xl md:text-3xl font-black text-advay-slate flex items-center gap-3">
             <span className="text-3xl">⏱️</span>
             Daily Play Time
           </h3>
-          <p className="text-slate-500 font-bold mt-1">
+          <p className="text-text-secondary font-bold mt-1">
             Track how much time your child spends learning each day
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-2">
+        <div className="flex items-center gap-2 bg-slate-50 border-2 border-[#F2CC8F] rounded-xl px-4 py-2">
           <UIIcon name="clock" size={18} className="text-slate-400" />
-          <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+          <span className="text-sm font-bold text-text-secondary uppercase tracking-wider">
             Daily Limit: {limitMinutes} min
           </span>
         </div>
@@ -120,7 +120,7 @@ export function DailyTimeChart({ summary }: DailyTimeChartProps) {
                     />
                     {/* Minute label */}
                     {day.minutes > 0 && (
-                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-black text-slate-600">
+                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-black text-advay-slate">
                         {day.minutes}m
                       </div>
                     )}
@@ -147,22 +147,22 @@ export function DailyTimeChart({ summary }: DailyTimeChartProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-8 pt-6 border-t-2 border-slate-100 flex flex-wrap gap-4 justify-center">
+      <div className="mt-8 pt-6 border-t-2 border-[#F2CC8F] flex flex-wrap gap-4 justify-center">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-emerald-400" />
-          <span className="text-sm font-bold text-slate-500">On Track</span>
+          <span className="text-sm font-bold text-text-secondary">On Track</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-yellow-300" />
-          <span className="text-sm font-bold text-slate-500">Near Limit (~80%)</span>
+          <span className="text-sm font-bold text-text-secondary">Near Limit (~80%)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-orange-400" />
-          <span className="text-sm font-bold text-slate-500">Over Limit</span>
+          <span className="text-sm font-bold text-text-secondary">Over Limit</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-slate-100 border border-slate-200" />
-          <span className="text-sm font-bold text-slate-500">No Activity</span>
+          <div className="w-4 h-4 rounded bg-slate-100 border border-[#F2CC8F]" />
+          <span className="text-sm font-bold text-text-secondary">No Activity</span>
         </div>
       </div>
 

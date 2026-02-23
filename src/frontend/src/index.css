@@ -651,3 +651,214 @@ p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ========================================
+   CALM MODE - For Sensory-Sensitive Children
+   Based on Dr. Meera Sharma's recommendations
+   ======================================== */
+
+/* Calm Mode Variables */
+:root {
+  /* Calm Mode Colors - Muted Pastels */
+  --calm-bg: #F5F5F0;
+  --calm-bg-card: #FAFAF8;
+  --calm-primary: #7C9CB5;
+  --calm-primary-hover: #6B8BA4;
+  --calm-accent: #B8A89A;
+  --calm-success: #8FB996;
+  --calm-warning: #D4B896;
+  --calm-border: #E8E4E0;
+  --calm-text: #5A5A5A;
+  --calm-text-secondary: #8A8A8A;
+}
+
+/* Calm Mode Active - Body Level */
+body.calm-mode-active {
+  /* Reduce overall visual stimulation */
+  --bg-primary: var(--calm-bg);
+  --brand-primary: var(--calm-primary);
+  --brand-primary-hover: var(--calm-primary-hover);
+  --brand-accent: var(--calm-accent);
+  --success: var(--calm-success);
+  --warning: var(--calm-warning);
+  --border: var(--calm-border);
+  --text-primary: var(--calm-text);
+  --text-secondary: var(--calm-text-secondary);
+}
+
+/* Calm Mode: Reduce Animation Intensity */
+body.calm-mode-active * {
+  animation-duration: calc(var(--animation-duration, 1s) * 2) !important;
+  transition-duration: calc(var(--transition-duration, 0.2s) * 1.5) !important;
+}
+
+/* Calm Mode: Remove/Reduce Shadows */
+body.calm-mode-active .shadow-sm,
+body.calm-mode-active .shadow,
+body.calm-mode-active .shadow-md,
+body.calm-mode-active .shadow-lg,
+body.calm-mode-active .shadow-xl,
+body.calm-mode-active .shadow-2xl,
+body.calm-mode-active [class*="shadow-["] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Calm Mode: Muted Border Colors */
+body.calm-mode-active [class*="border-[#F2CC8F]"],
+body.calm-mode-active [class*="border-yellow-200"],
+body.calm-mode-active [class*="border-orange-200"] {
+  border-color: var(--calm-border) !important;
+}
+
+/* Calm Mode: Softer Backgrounds */
+body.calm-mode-active [class*="bg-[#FFF8F0]"] {
+  background-color: var(--calm-bg) !important;
+}
+
+body.calm-mode-active [class*="bg-white"] {
+  background-color: var(--calm-bg-card) !important;
+}
+
+/* Calm Mode: Muted Primary Colors */
+body.calm-mode-active [class*="bg-[#3B82F6]"],
+body.calm-mode-active [class*="bg-blue-500"] {
+  background-color: var(--calm-primary) !important;
+}
+
+body.calm-mode-active [class*="text-[#3B82F6]"],
+body.calm-mode-active [class*="text-blue-500"] {
+  color: var(--calm-primary) !important;
+}
+
+body.calm-mode-active [class*="border-[#3B82F6]"] {
+  border-color: var(--calm-primary) !important;
+}
+
+/* Calm Mode: Muted Accent Colors */
+body.calm-mode-active [class*="bg-[#E85D04]"],
+body.calm-mode-active [class*="bg-orange-500"] {
+  background-color: var(--calm-accent) !important;
+}
+
+body.calm-mode-active [class*="text-[#E85D04]"],
+body.calm-mode-active [class*="text-orange-500"] {
+  color: var(--calm-accent) !important;
+}
+
+/* Calm Mode: Muted Success Colors */
+body.calm-mode-active [class*="bg-[#10B981]"],
+body.calm-mode-active [class*="bg-emerald-500"] {
+  background-color: var(--calm-success) !important;
+}
+
+/* Calm Mode: Remove Sparkle/Particle Effects */
+body.calm-mode-active .sparkle,
+body.calm-mode-active .particle,
+body.calm-mode-active [class*="sparkle"],
+body.calm-mode-active [class*="particle"] {
+  display: none !important;
+}
+
+/* Calm Mode: Pause Continuous Animations */
+body.calm-mode-active .animate-pulse,
+body.calm-mode-active .animate-bounce,
+body.calm-mode-active .animate-spin {
+  animation: none !important;
+}
+
+/* Calm Mode: Reduce Confetti/Celebration Effects */
+body.calm-mode-active [class*="confetti"],
+body.calm-mode-active [class*="celebration"] {
+  opacity: 0.3 !important;
+  transform: scale(0.8) !important;
+}
+
+/* Calm Mode: Slower Transitions for All Interactive Elements */
+body.calm-mode-active button,
+body.calm-mode-active a,
+body.calm-mode-active input,
+body.calm-mode-active select {
+  transition-duration: 0.3s !important;
+}
+
+/* Calm Mode: Focus States - Less Jarring */
+body.calm-mode-active *:focus-visible {
+  outline-width: 2px !important;
+  outline-offset: 1px !important;
+}
+
+/* Calm Mode: Typography Adjustments */
+body.calm-mode-active {
+  font-weight: 500; /* Slightly lighter text */
+}
+
+/* Calm Mode: Reduce Header Intensity */
+body.calm-mode-active header {
+  border-bottom-width: 1px !important;
+}
+
+/* Calm Mode: Cards - Softer Appearance */
+body.calm-mode-active [class*="rounded-[2.5rem]"],
+body.calm-mode-active [class*="rounded-3xl"] {
+  border-radius: 1.5rem !important; /* Less pronounced rounding */
+}
+
+/* Calm Mode: Disable Hover Transform Effects */
+body.calm-mode-active [class*="hover:scale-"],
+body.calm-mode-active [class*="hover:translate-"] {
+  transform: none !important;
+}
+
+/* Calm Mode: Navigation - Muted Active State */
+body.calm-mode-active nav [class*="bg-[#3B82F6]"] {
+  background-color: rgba(124, 156, 181, 0.15) !important;
+  color: var(--calm-primary) !important;
+}
+
+/* Data Attribute Approach (Modern) */
+[data-calm-mode="true"] {
+  --animation-speed: 2;
+  --color-intensity: 0.7;
+}
+
+[data-calm-mode="true"] * {
+  animation-duration: calc(var(--animation-duration, 1s) * var(--animation-speed, 2));
+}
+
+/* ========================================
+   CALM MODE UTILITY CLASSES
+   ======================================== */
+
+/* Apply calm mode styles via utility classes */
+.calm-text {
+  color: var(--calm-text);
+}
+
+.calm-bg {
+  background-color: var(--calm-bg);
+}
+
+.calm-border {
+  border-color: var(--calm-border);
+}
+
+.calm-primary {
+  background-color: var(--calm-primary);
+}
+
+.calm-accent {
+  background-color: var(--calm-accent);
+}
+
+/* Animation speed utilities */
+.animate-slow {
+  --animation-duration: 2s;
+}
+
+.animate-normal {
+  --animation-duration: 1s;
+}
+
+.animate-fast {
+  --animation-duration: 0.5s;
+}

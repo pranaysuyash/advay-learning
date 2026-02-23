@@ -154,3 +154,13 @@ junit.xml
 .nuxt/
 .terraform/
 .serverless/
+
+# Ignore local backup dependency folder
+src/frontend/node_modules_old/
+
+# Local package manager cache
+.pnpm-store/
+
+# Local temporary logs
+.tmp_git_log.txt
+.tmp_tests.txt

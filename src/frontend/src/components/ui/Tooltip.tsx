@@ -66,7 +66,7 @@ export function Tooltip({
             <div className="bg-[#2D3748] text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg border border-border whitespace-nowrap">
               {content}
               <div
-                className={`absolute w-0 h-0 border-4 border-transparent ${arrowPositions[position]}`}
+                className={`absolute w-0 h-0 border-3 border-transparent ${arrowPositions[position]}`}
               />
             </div>
           </motion.div>

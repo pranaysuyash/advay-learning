@@ -55,8 +55,8 @@ export function RecommendationCard({
           bg: 'bg-slate-50',
           border: 'border-slate-300',
           iconBg: 'bg-slate-200',
-          iconColor: 'text-slate-600',
-          titleColor: 'text-slate-700',
+          iconColor: 'text-advay-slate',
+          titleColor: 'text-advay-slate',
         };
     }
   };
@@ -68,7 +68,7 @@ export function RecommendationCard({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`p-5 rounded-2xl border-2 ${config.bg} ${config.border} shadow-sm group`}
+      className={`p-5 rounded-2xl border-2 ${config.bg} ${config.border} shadow-[0_4px_0_#E5B86E] group`}
     >
       <div className='flex items-start gap-4'>
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${config.iconBg} border-2 border-white group-hover:scale-110 transition-transform`}>
@@ -78,7 +78,7 @@ export function RecommendationCard({
           <h4 className={`font-black uppercase tracking-wider text-sm ${config.titleColor} mb-1`}>
             {title}
           </h4>
-          <p className='text-base font-bold text-slate-600 leading-snug'>{description}</p>
+          <p className='text-base font-bold text-advay-slate leading-snug'>{description}</p>
         </div>
       </div>
     </motion.div>

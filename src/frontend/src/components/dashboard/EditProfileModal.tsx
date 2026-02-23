@@ -39,13 +39,13 @@ export function EditProfileModal({
         className='bg-bg-secondary rounded-2xl p-6 w-full max-w-md shadow-soft-lg border border-border'
       >
         <h3 className='text-xl font-semibold mb-1'>Edit Profile</h3>
-        <p className='text-slate-600 text-sm mb-6'>
+        <p className='text-advay-slate text-sm mb-6'>
           Update {profile.name}'s information
         </p>
 
         <div className='space-y-4'>
           <div>
-            <label htmlFor='edit-name' className='block text-sm font-medium text-slate-600 mb-2'>
+            <label htmlFor='edit-name' className='block text-sm font-medium text-advay-slate mb-2'>
               Child's Name
             </label>
             <input
@@ -59,7 +59,7 @@ export function EditProfileModal({
           </div>
 
           <div>
-            <label htmlFor='edit-language' className='block text-sm font-medium text-slate-600 mb-2'>
+            <label htmlFor='edit-language' className='block text-sm font-medium text-advay-slate mb-2'>
               Preferred Language
             </label>
             <select
@@ -74,7 +74,7 @@ export function EditProfileModal({
                 </option>
               ))}
             </select>
-            <p className='text-slate-500 text-xs mt-2'>
+            <p className='text-text-secondary text-xs mt-2'>
               This will change the alphabet language in games
             </p>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useInventoryStore } from '../store';
@@ -30,7 +30,7 @@ const CATEGORY_CONFIG: Record<
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG) as ItemCategory[];
 
-export function Inventory() {
+export const Inventory = memo(function Inventory() {
   const navigate = useNavigate();
   const {
     ownedItems,
@@ -72,7 +72,7 @@ export function Inventory() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigate('/games')}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-4 border-slate-100 rounded-2xl font-bold text-slate-500 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border-3 border-[#F2CC8F] rounded-2xl font-bold text-text-secondary hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
             >
               ← Back to Games
             </button>
@@ -87,31 +87,31 @@ export function Inventory() {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-black text-advay-slate tracking-tight">
                 🎒 My <span className="text-[#E85D04]">Backpack</span>
               </h1>
-              <p className="text-lg text-slate-500 font-bold mt-2">
+              <p className="text-lg text-text-secondary font-bold mt-2">
                 Your collection of discoveries, items, and treasures!
               </p>
             </div>
 
             {/* Stats */}
             <div className="flex gap-3">
-              <div className="bg-white border-4 border-slate-100 rounded-2xl px-4 py-3 text-center">
+              <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl px-4 py-3 text-center">
                 <p className="text-2xl font-black text-[#E85D04]">{uniqueCount}</p>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Unique</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Unique</p>
               </div>
-              <div className="bg-white border-4 border-slate-100 rounded-2xl px-4 py-3 text-center">
+              <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl px-4 py-3 text-center">
                 <p className="text-2xl font-black text-[#3B82F6]">{totalCount}</p>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Total</p>
               </div>
-              <div className="bg-white border-4 border-slate-100 rounded-2xl px-4 py-3 text-center">
+              <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl px-4 py-3 text-center">
                 <p className="text-2xl font-black text-[#10B981]">{discoveredRecipes.length}</p>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Recipes</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Recipes</p>
               </div>
-              <div className="bg-white border-4 border-slate-100 rounded-2xl px-4 py-3 text-center">
+              <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl px-4 py-3 text-center">
                 <p className="text-2xl font-black text-[#a855f7]">{foundEasterEggs.length}</p>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Eggs</p>
+                <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Eggs</p>
               </div>
             </div>
           </div>
@@ -121,11 +121,10 @@ export function Inventory() {
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-              selectedCategory === 'all'
+            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedCategory === 'all'
                 ? 'bg-[#3B82F6] text-white shadow-lg'
-                : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-[#3B82F6]'
-            }`}
+                : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
+              }`}
           >
             ✨ All ({ALL_ITEMS.length})
           </button>
@@ -137,11 +136,10 @@ export function Inventory() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                  selectedCategory === cat
+                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedCategory === cat
                     ? 'bg-[#3B82F6] text-white shadow-lg'
-                    : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-[#3B82F6]'
-                }`}
+                    : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
+                  }`}
               >
                 {config.emoji} {config.label}
               </button>
@@ -150,9 +148,9 @@ export function Inventory() {
         </div>
 
         {/* Progress bar */}
-        <div className="bg-white border-4 border-slate-100 rounded-2xl p-4 mb-6">
+        <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-slate-600 text-sm">
+            <span className="font-bold text-advay-slate text-sm">
               {discoveredCount} / {filteredItems.length} discovered
             </span>
             <span className="font-bold text-[#E85D04] text-sm">
@@ -183,11 +181,10 @@ export function Inventory() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedItem(item)}
-                className={`relative aspect-square rounded-2xl border-4 flex flex-col items-center justify-center gap-1 transition-all ${
-                  item.discovered
-                    ? 'bg-white border-slate-100 hover:border-[#E85D04] shadow-sm'
-                    : 'bg-slate-100 border-slate-200 opacity-40'
-                }`}
+                className={`relative aspect-square rounded-2xl border-3 flex flex-col items-center justify-center gap-1 transition-all ${item.discovered
+                    ? 'bg-white border-[#F2CC8F] hover:border-[#E85D04] shadow-[0_4px_0_#E5B86E]'
+                    : 'bg-slate-100 border-[#F2CC8F] opacity-40'
+                  }`}
                 style={
                   item.discovered
                     ? { boxShadow: rarity.glow }
@@ -197,7 +194,7 @@ export function Inventory() {
                 <span className={`text-2xl sm:text-3xl ${!item.discovered ? 'blur-sm' : ''}`}>
                   {item.discovered ? item.emoji : '❓'}
                 </span>
-                <span className="text-[10px] font-bold text-slate-500 truncate w-full text-center px-1">
+                <span className="text-[10px] font-bold text-text-secondary truncate w-full text-center px-1">
                   {item.discovered ? item.name : '???'}
                 </span>
 
@@ -232,7 +229,7 @@ export function Inventory() {
                 initial={{ opacity: 0, scale: 0.8, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 30 }}
-                className="bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl"
+                className="bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ItemDetail item={selectedItem} onClose={() => setSelectedItem(null)} />
@@ -243,7 +240,7 @@ export function Inventory() {
       </motion.div>
     </div>
   );
-}
+});
 
 function ItemDetail({
   item,
@@ -264,7 +261,7 @@ function ItemDetail({
         </p>
         <button
           onClick={onClose}
-          className="px-6 py-3 bg-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-300 transition-colors"
+          className="px-6 py-3 bg-slate-200 text-advay-slate rounded-2xl font-bold hover:bg-slate-300 transition-colors"
         >
           Close
         </button>
@@ -278,7 +275,7 @@ function ItemDetail({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 300 }}
-        className="w-24 h-24 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-4 border-4"
+        className="w-24 h-24 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-4 border-3"
         style={{
           backgroundColor: rarity.bg,
           borderColor: rarity.color,
@@ -288,7 +285,7 @@ function ItemDetail({
         {item.emoji}
       </motion.div>
 
-      <h3 className="text-2xl font-black text-slate-800 mb-1">{item.name}</h3>
+      <h3 className="text-2xl font-black text-advay-slate mb-1">{item.name}</h3>
       <p
         className="text-sm font-bold uppercase tracking-widest mb-4"
         style={{ color: rarity.color }}
@@ -296,7 +293,7 @@ function ItemDetail({
         {rarity.label}
       </p>
 
-      <p className="text-slate-600 font-bold mb-3">{item.description}</p>
+      <p className="text-advay-slate font-bold mb-3">{item.description}</p>
 
       {item.funFact && (
         <div className="bg-[#3B82F6]/10 rounded-2xl p-4 mb-4 text-left">
@@ -310,25 +307,26 @@ function ItemDetail({
         <div className="flex justify-center gap-4 mb-4 text-sm">
           <div className="text-center">
             <p className="font-black text-[#E85D04] text-lg">{item.owned.quantity}</p>
-            <p className="text-slate-500 font-bold">Owned</p>
+            <p className="text-text-secondary font-bold">Owned</p>
           </div>
           <div className="text-center">
             <p className="font-black text-[#3B82F6] text-lg">{item.owned.totalFound}</p>
-            <p className="text-slate-500 font-bold">Total Found</p>
+            <p className="text-text-secondary font-bold">Total Found</p>
           </div>
           <div className="text-center">
             <p className="font-black text-[#10B981] text-lg">{item.owned.sourceGame}</p>
-            <p className="text-slate-500 font-bold">Source</p>
+            <p className="text-text-secondary font-bold">Source</p>
           </div>
         </div>
       )}
 
       <button
         onClick={onClose}
-        className="px-6 py-3 bg-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-300 transition-colors"
+        className="px-6 py-3 bg-slate-200 text-advay-slate rounded-2xl font-bold hover:bg-slate-300 transition-colors"
       >
         Close
       </button>
     </div>
   );
 }
+export default Inventory;

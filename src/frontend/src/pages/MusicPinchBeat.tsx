@@ -8,7 +8,10 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { getLaneFromNormalizedX, pickNextLane } from '../games/musicPinchLogic';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
@@ -31,6 +34,8 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   const streakRef = useRef(streak);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('music-pinch-beat');
 
   useEffect(() => {
     targetLaneRef.current = targetLane;
@@ -72,6 +77,9 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         setStreak(nextStreak);
         setScore((prev) => prev + 10 + Math.min(20, nextStreak * 2));
         setFeedback(`Nice rhythm! ${LANE_LABELS[lane]} lane hit.`);
+        if (ttsEnabled && nextStreak % 5 === 0) {
+          void speak('Great rhythm! Keep going!');
+        }
 
         if (nextStreak > 0 && nextStreak % 5 === 0) {
           setShowCelebration(true);
@@ -84,9 +92,12 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         void playError();
         setStreak(0);
         setFeedback('Missed beat. Move to the glowing lane and pinch again!');
+        if (ttsEnabled) {
+          void speak('Move to the glowing lane and pinch!');
+        }
       }
     },
-    [cursorX, playCelebration, playError, playPop, selectedLane],
+    [cursorX, playCelebration, playError, playPop, selectedLane, speak, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
@@ -115,6 +126,9 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
     setCursorX(null);
     setSelectedLane(null);
     setIsPlaying(true);
+    if (ttsEnabled) {
+      void speak('Move your finger to the glowing lane and pinch to play the beat!');
+    }
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -123,6 +137,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   };
 
   const stopGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     setCursorX(null);
     setSelectedLane(null);
@@ -175,14 +190,14 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
                 className='relative flex items-center justify-center'
               >
                 <div
-                  className={`absolute inset-0 rounded-[2.5rem] border-4 transition-all duration-300 ${isTarget
+                  className={`absolute inset-0 rounded-[2.5rem] border-3 transition-all duration-300 ${isTarget
                       ? 'bg-amber-100/50 border-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.5)]'
-                      : 'bg-white/40 border-slate-200'
+                      : 'bg-white/40 border-[#F2CC8F]'
                     }`}
                 />
                 <div
                   className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
-                    } transition-transform drop-shadow-sm`}
+                    } transition-transform drop-shadow-[0_4px_0_#E5B86E]`}
                 >
                   {LANE_LABELS[laneIndex]}
                 </div>
@@ -193,29 +208,50 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
 
         {cursorX !== null && (
           <div
-            className='absolute bottom-32 w-16 h-16 rounded-full border-4 border-[#3B82F6] bg-blue-100/50 shadow-[0_0_30px_rgba(59,130,246,0.6)] -translate-x-1/2 pointer-events-none transition-all'
+            className='absolute bottom-32 w-[84px] h-[84px] rounded-full border-3 border-[#3B82F6] bg-blue-100/50 shadow-[0_0_30px_rgba(59,130,246,0.6)] -translate-x-1/2 pointer-events-none transition-all'
             style={{ left: `${cursorX * 100}%` }}
             aria-hidden='true'
-          />
+          >
+            <div className='absolute inset-0 flex items-center justify-center text-2xl'>👆</div>
+          </div>
         )}
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[300px]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[300px]'>
           {feedback}
         </div>
 
         {!isPlaying && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <button
-              type='button'
-              onClick={startGame}
-              className='px-16 py-6 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-[2rem] shadow-sm text-3xl transition-transform hover:scale-105 active:scale-95'
-            >
-              Start Music Game
-            </button>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🎵</div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Music Pinch Beat</h2>
+              <p className='text-text-secondary font-bold text-xl mb-10'>
+                Move your finger to the glowing lane and pinch to play the beat!
+              </p>
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Watch for the glowing lane.',
+                    'Move your finger there.',
+                    'Pinch to play the beat!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
+              <button
+                type='button'
+                onClick={startGame}
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+              >
+                Start Music Game
+              </button>
+            </div>
           </div>
         )}
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg'>
           Streak: <span className='font-black text-amber-500 text-2xl ml-2'>{streak}</span>
         </div>
 

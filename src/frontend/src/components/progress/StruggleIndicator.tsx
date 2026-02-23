@@ -60,7 +60,7 @@ export function StruggleIndicator({
         {showLabel && <span>{label}</span>}
       </motion.div>
       {reason && (
-        <span className="text-sm text-slate-500 font-medium hidden sm:inline">
+        <span className="text-sm text-text-secondary font-medium hidden sm:inline">
           {reason}
         </span>
       )}

@@ -24,7 +24,7 @@ export function ItemDropToast() {
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-auto"
           onClick={clearDropToast}
         >
-          <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] shadow-2xl px-6 py-4 flex items-center gap-4 max-w-md">
+          <div className="bg-white/95 backdrop-blur-xl border-3 border-[#F2CC8F] rounded-[2rem] shadow-2xl px-6 py-4 flex items-center gap-4 max-w-md">
             {/* Item icons */}
             <div className="flex -space-x-2">
               {lastDrops.slice(0, 3).map((drop, i) => {
@@ -51,7 +51,7 @@ export function ItemDropToast() {
             <div className="flex-1 min-w-0">
               {lastDrops.length === 1 ? (
                 <>
-                  <p className="font-black text-slate-800 text-sm truncate">
+                  <p className="font-black text-advay-slate text-sm truncate">
                     {lastDrops[0].isNew ? '🆕 New Discovery!' : 'Found!'}{' '}
                     {lastDrops[0].item.name}
                   </p>
@@ -64,10 +64,10 @@ export function ItemDropToast() {
                 </>
               ) : (
                 <>
-                  <p className="font-black text-slate-800 text-sm">
+                  <p className="font-black text-advay-slate text-sm">
                     Found {lastDrops.length} items!
                   </p>
-                  <p className="text-xs font-bold text-slate-500 truncate">
+                  <p className="text-xs font-bold text-text-secondary truncate">
                     {lastDrops.map((d) => d.item.name).join(', ')}
                   </p>
                 </>

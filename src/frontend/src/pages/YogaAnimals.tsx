@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
 // Animal pose definitions with target landmarks
@@ -83,6 +84,7 @@ function calculateAngle(
 
 export function YogaAnimals() {
   const navigate = useNavigate();
+  const { onGameComplete } = useGameDrops('yoga-animals');
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
@@ -344,6 +346,7 @@ export function YogaAnimals() {
   };
 
   const stopGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -367,17 +370,17 @@ export function YogaAnimals() {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <motion.div
-          className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-12 text-center max-w-md w-full shadow-sm'
+          className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
           <div className='text-6xl mb-6 flex justify-center'>
-            <div className='w-24 h-24 border-4 border-[#3B82F6] border-t-transparent rounded-full animate-spin' />
+            <div className='w-24 h-24 border-3 border-[#3B82F6] border-t-transparent rounded-full animate-spin' />
           </div>
-          <h2 className='text-2xl font-black text-slate-800 tracking-tight mb-2'>
+          <h2 className='text-2xl font-black text-advay-slate tracking-tight mb-2'>
             Loading Yoga Animals
           </h2>
-          <p className='text-slate-500 font-bold'>Getting ready for some animal fun...</p>
+          <p className='text-text-secondary font-bold'>Getting ready for some animal fun...</p>
         </motion.div>
       </div>
     );
@@ -387,7 +390,7 @@ export function YogaAnimals() {
   if (error) {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
-        <div className='bg-red-50 rounded-[2.5rem] border-4 border-red-100 p-12 text-center max-w-md w-full shadow-sm'>
+        <div className='bg-red-50 rounded-[2.5rem] border-3 border-red-100 p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'>
           <div className='text-6xl mb-6'>😢</div>
           <h2 className='text-2xl font-black text-red-600 tracking-tight mb-4'>Oops!</h2>
           <p className='text-red-500 font-bold mb-8'>{error}</p>
@@ -408,17 +411,17 @@ export function YogaAnimals() {
       <header className='flex justify-between items-center mb-6 max-w-5xl mx-auto w-full relative z-20'>
         <button
           onClick={() => navigate('/dashboard')}
-          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-bold text-slate-500 transition-colors shadow-sm'
+          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-bold text-text-secondary transition-colors shadow-[0_4px_0_#E5B86E]'
         >
           <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M10 19l-7-7m0 0l7-7m-7 7h18' /></svg>
           <span className='hidden sm:inline'>Back</span>
         </button>
 
-        <h1 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight absolute left-1/2 -translate-x-1/2'>
+        <h1 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight absolute left-1/2 -translate-x-1/2'>
           Yoga Animals
         </h1>
 
-        <div className='bg-amber-50 border-4 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-sm flex items-center gap-2'>
+        <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
           ⭐ <span>{score}</span>
         </div>
       </header>
@@ -427,21 +430,21 @@ export function YogaAnimals() {
         {!isPlaying ? (
           // Pre-game screen
           <motion.div
-            className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 md:p-16 shadow-sm flex-1 flex flex-col items-center justify-center text-center'
+            className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 md:p-16 shadow-[0_4px_0_#E5B86E] flex-1 flex flex-col items-center justify-center text-center'
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className='text-[7rem] mb-6 drop-shadow-sm hover:scale-110 transition-transform'>🦁🌳🐱</div>
+            <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🦁🌳🐱</div>
             <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
               Yoga Animals!
             </h2>
-            <p className='text-slate-500 text-xl md:text-2xl font-bold mb-12 max-w-lg'>
+            <p className='text-text-secondary text-xl md:text-2xl font-bold mb-12 max-w-lg'>
               Copy animal poses with your body!
             </p>
 
-            <div className='bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
-              <h3 className='font-black text-slate-700 text-2xl mb-6'>How to Play:</h3>
-              <ul className='space-y-4 text-slate-600 font-bold text-lg'>
+            <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
+              <h3 className='font-black text-advay-slate text-2xl mb-6'>How to Play:</h3>
+              <ul className='space-y-4 text-advay-slate font-bold text-lg'>
                 <li className='flex items-center gap-3'><span className='text-3xl'>📸</span> Stand in front of your camera</li>
                 <li className='flex items-center gap-3'><span className='text-3xl'>👀</span> Pip will show you an animal pose</li>
                 <li className='flex items-center gap-3'><span className='text-3xl'>🧘</span> Copy the pose and hold it for 2 seconds!</li>
@@ -451,7 +454,7 @@ export function YogaAnimals() {
 
             <button
               onClick={startGame}
-              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-sm transition-all hover:scale-105 active:scale-95'
+              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
               Start Yoga! 🧘
             </button>
@@ -461,23 +464,23 @@ export function YogaAnimals() {
           <div className='flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 min-h-0'>
             {/* Left Column: Current pose card */}
             <motion.div
-              className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 shadow-sm flex flex-col justify-center flex-1 lg:max-w-md'
+              className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 shadow-[0_4px_0_#E5B86E] flex flex-col justify-center flex-1 lg:max-w-md'
               key={currentPoseIndex}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
               <div className='text-center mb-10'>
-                <div className='inline-block bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-sm'>
+                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
                   {currentPose.emoji}
                 </div>
-                <h3 className='text-4xl font-black text-slate-800 tracking-tight mb-4'>
+                <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
                   {currentPose.name}
                 </h3>
-                <p className='text-xl font-bold text-slate-500 mb-8'>
+                <p className='text-xl font-bold text-text-secondary mb-8'>
                   {currentPose.description}
                 </p>
 
-                <div className='bg-blue-50 border-4 border-blue-100 rounded-2xl p-4 inline-block text-left'>
+                <div className='bg-blue-50 border-3 border-blue-100 rounded-2xl p-4 inline-block text-left'>
                   <p className='text-lg text-blue-800 font-bold'>
                     💡 {currentPose.instruction}
                   </p>
@@ -487,11 +490,11 @@ export function YogaAnimals() {
               {/* Progress bars */}
               <div className='space-y-6 mt-auto'>
                 <div>
-                  <div className='flex justify-between font-bold text-slate-500 mb-2 uppercase tracking-wide text-sm'>
+                  <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
                     <span>Pose Match</span>
                     <span className={matchProgress > 70 ? 'text-[#10B981]' : ''}>{Math.round(matchProgress)}%</span>
                   </div>
-                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200/50 p-1'>
+                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
                     <motion.div
                       className={`h-full rounded-full ${matchProgress > 70 ? 'bg-[#10B981]' : 'bg-[#3B82F6]'}`}
                       initial={{ width: 0 }}
@@ -502,13 +505,13 @@ export function YogaAnimals() {
                 </div>
 
                 <div>
-                  <div className='flex justify-between font-bold text-slate-500 mb-2 uppercase tracking-wide text-sm'>
+                  <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
                     <span>Hold the pose!</span>
                     <span className={(holdTime / HOLD_DURATION) >= 1 ? 'text-amber-500' : ''}>
                       {Math.round((holdTime / HOLD_DURATION) * 100)}%
                     </span>
                   </div>
-                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200/50 p-1'>
+                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
                     <motion.div
                       className='h-full bg-[#F59E0B] rounded-full'
                       animate={{ width: `${(holdTime / HOLD_DURATION) * 100}%` }}
@@ -522,7 +525,7 @@ export function YogaAnimals() {
             {/* Right Column: Camera & Controls */}
             <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
               {/* Camera feed */}
-              <div className='relative rounded-[2.5rem] overflow-hidden border-4 border-slate-100 shadow-sm bg-slate-100 flex-1 min-h-[400px]'>
+              <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
                 <Webcam
                   ref={webcamRef}
                   onLoadedData={handleVideoLoad}
@@ -544,7 +547,7 @@ export function YogaAnimals() {
                 </div>
 
                 {/* Match indicator */}
-                <div className={`absolute top-6 right-6 px-6 py-2 backdrop-blur-md rounded-full border-4 shadow-sm transition-colors ${matchProgress > 70 ? 'bg-[#10B981]/90 border-emerald-400' : 'bg-black/40 border-white/20'}`}>
+                <div className={`absolute top-6 right-6 px-6 py-2 backdrop-blur-md rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-colors ${matchProgress > 70 ? 'bg-[#10B981]/90 border-emerald-400' : 'bg-black/40 border-white/20'}`}>
                   <span
                     className={`text-sm font-black tracking-wide ${matchProgress > 70 ? 'text-white' : 'text-white'}`}
                   >
@@ -559,7 +562,7 @@ export function YogaAnimals() {
               <div className='flex gap-4'>
                 <button
                   onClick={stopGame}
-                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-black text-slate-500 shadow-sm transition-all hover:scale-[1.02] active:scale-95 text-lg'
+                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-text-secondary shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
                 >
                   Stop Playing
                 </button>
@@ -567,7 +570,7 @@ export function YogaAnimals() {
                   onClick={() =>
                     setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length)
                   }
-                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-4 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-[1.02] active:scale-95 text-lg'
+                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
                 >
                   Skip Pose ⏭
                 </button>
@@ -586,19 +589,19 @@ export function YogaAnimals() {
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-full shadow-lg'
+                className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-full shadow-lg'
                 initial={{ scale: 0.8, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.8, y: 20, opacity: 0 }}
               >
-                <div className='text-[6rem] mb-6 drop-shadow-sm'>��</div>
+                <div className='text-[6rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>��</div>
                 <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>
                   Amazing!
                 </h2>
-                <p className='text-slate-500 font-bold text-xl mb-6'>
+                <p className='text-text-secondary font-bold text-xl mb-6'>
                   You did the {currentPose.name} pose!
                 </p>
-                <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+                <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
                   +100 Points
                 </div>
               </motion.div>

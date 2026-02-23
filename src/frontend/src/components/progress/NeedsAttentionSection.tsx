@@ -42,7 +42,7 @@ export function NeedsAttentionSection({ summary }: NeedsAttentionSectionProps) {
   const mediumCount = strugglingItems.filter((i) => i.attentionLevel === 'medium').length;
 
   return (
-    <div className="bg-white border-4 border-orange-100 rounded-[2.5rem] p-6 md:p-8 mb-8 shadow-sm">
+    <div className="bg-white border-3 border-orange-100 rounded-[2.5rem] p-6 md:p-8 mb-8 shadow-[0_4px_0_#E5B86E]">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -50,10 +50,10 @@ export function NeedsAttentionSection({ summary }: NeedsAttentionSectionProps) {
             <UIIcon name="warning" size={28} className="text-orange-600" />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-slate-800">
+            <h3 className="text-2xl font-black text-advay-slate">
               Needs Attention
             </h3>
-            <p className="text-slate-500 font-semibold">
+            <p className="text-text-secondary font-semibold">
               {needsAttentionCount} item{needsAttentionCount !== 1 ? 's' : ''} may need extra practice
             </p>
           </div>
@@ -62,7 +62,7 @@ export function NeedsAttentionSection({ summary }: NeedsAttentionSectionProps) {
         {/* Expand/collapse button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border-2 border-slate-200 transition-colors"
+          className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border-2 border-[#F2CC8F] transition-colors"
           aria-label={isExpanded ? 'Collapse' : 'Expand'}
         >
           <motion.div

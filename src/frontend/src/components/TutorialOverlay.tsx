@@ -169,7 +169,7 @@ export function TutorialOverlay({ onDismiss }: TutorialOverlayProps) {
             Got it!
           </button>
 
-          <p className="text-slate-500 text-sm mt-4">
+          <p className="text-text-secondary text-sm mt-4">
             Tap anywhere to dismiss
           </p>
         </motion.div>

@@ -68,7 +68,7 @@ export function ExportButton({ data }: ExportButtonProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-64 bg-white border-2 border-slate-200 rounded-2xl shadow-lg z-50 overflow-hidden"
+              className="absolute right-0 top-full mt-2 w-64 bg-white border-2 border-[#F2CC8F] rounded-2xl shadow-lg z-50 overflow-hidden"
             >
               {/* Copy to Clipboard */}
               <button
@@ -79,7 +79,7 @@ export function ExportButton({ data }: ExportButtonProps) {
                   <UIIcon name="copy" size={18} className="text-blue-500" />
                 </div>
                 <div>
-                  <div className="font-bold text-slate-800">Copy Text</div>
+                  <div className="font-bold text-advay-slate">Copy Text</div>
                   <div className="text-xs text-slate-400">Copy to clipboard</div>
                 </div>
               </button>
@@ -95,7 +95,7 @@ export function ExportButton({ data }: ExportButtonProps) {
                   <UIIcon name="file-text" size={18} className="text-emerald-500" />
                 </div>
                 <div>
-                  <div className="font-bold text-slate-800">Download .txt</div>
+                  <div className="font-bold text-advay-slate">Download .txt</div>
                   <div className="text-xs text-slate-400">Save as text file</div>
                 </div>
               </button>
@@ -111,7 +111,7 @@ export function ExportButton({ data }: ExportButtonProps) {
                   <span className="text-lg">💬</span>
                 </div>
                 <div>
-                  <div className="font-bold text-slate-800">Share to WhatsApp</div>
+                  <div className="font-bold text-advay-slate">Share to WhatsApp</div>
                   <div className="text-xs text-slate-400">Send to teacher/family</div>
                 </div>
               </button>
@@ -155,17 +155,17 @@ export function ExportButtonCompact({ data }: ExportButtonProps) {
     <div className="flex items-center gap-2">
       <button
         onClick={handleCopy}
-        className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl border-2 border-slate-200 transition-colors"
+        className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl border-2 border-[#F2CC8F] transition-colors"
         title="Copy report"
       >
-        <UIIcon name="copy" size={18} className="text-slate-600" />
+        <UIIcon name="copy" size={18} className="text-advay-slate" />
       </button>
       <button
         onClick={() => downloadTextReport(data)}
-        className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl border-2 border-slate-200 transition-colors"
+        className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl border-2 border-[#F2CC8F] transition-colors"
         title="Download report"
       >
-        <UIIcon name="download" size={18} className="text-slate-600" />
+        <UIIcon name="download" size={18} className="text-advay-slate" />
       </button>
       {copied && (
         <span className="text-xs font-bold text-emerald-600">Copied!</span>

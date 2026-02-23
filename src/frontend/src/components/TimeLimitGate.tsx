@@ -17,20 +17,20 @@ export function TimeLimitGate({ minutesUsed, timeLimit, onRequestMoreTime }: Tim
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white border-4 border-orange-200 rounded-[2.5rem] p-8 md:p-12 max-w-lg w-full text-center shadow-lg"
+        className="bg-white border-3 border-orange-200 rounded-[2.5rem] p-8 md:p-12 max-w-lg w-full text-center shadow-lg"
       >
         {/* Icon */}
-        <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-orange-200">
+        <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 border-3 border-orange-200">
           <UIIcon name="clock" size={48} className="text-orange-500" />
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-4">
+        <h1 className="text-3xl md:text-4xl font-black text-advay-slate mb-4">
           Time to Rest! 😴
         </h1>
 
         {/* Message */}
-        <p className="text-lg text-slate-600 font-semibold mb-6">
+        <p className="text-lg text-advay-slate font-semibold mb-6">
           You've played for <span className="text-orange-600 font-bold">{minutesUsed} minutes</span> today.
           That's your daily limit of {timeLimit} minutes!
         </p>
@@ -47,12 +47,12 @@ export function TimeLimitGate({ minutesUsed, timeLimit, onRequestMoreTime }: Tim
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100">
-            <div className="text-3xl font-black text-slate-800">{minutesUsed}m</div>
+          <div className="bg-slate-50 rounded-2xl p-4 border-2 border-[#F2CC8F]">
+            <div className="text-3xl font-black text-advay-slate">{minutesUsed}m</div>
             <div className="text-sm font-bold text-slate-400 uppercase">Played Today</div>
           </div>
-          <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100">
-            <div className="text-3xl font-black text-slate-800">{timeLimit}m</div>
+          <div className="bg-slate-50 rounded-2xl p-4 border-2 border-[#F2CC8F]">
+            <div className="text-3xl font-black text-advay-slate">{timeLimit}m</div>
             <div className="text-sm font-bold text-slate-400 uppercase">Daily Limit</div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export function TimeLimitGate({ minutesUsed, timeLimit, onRequestMoreTime }: Tim
           )}
           <a
             href="/dashboard"
-            className="block w-full px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border-2 border-slate-200 transition-colors"
+            className="block w-full px-6 py-3 bg-slate-100 hover:bg-slate-200 text-advay-slate font-bold rounded-xl border-2 border-[#F2CC8F] transition-colors"
           >
             Back to Dashboard
           </a>

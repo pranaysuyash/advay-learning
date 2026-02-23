@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { memo, useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ type FeatureTab = 'hands' | 'face' | 'posture' | 'gestures';
  * - Posture Detection (33 body landmarks)
  * - Gesture Recognition (open palm, fist, thumbs up, etc.)
  */
-export function MediaPipeTest() {
+export const MediaPipeTest = memo(function MediaPipeTest() {
     const navigate = useNavigate();
     const webcamRef = useRef<Webcam>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -644,8 +644,8 @@ export function MediaPipeTest() {
                                 setActiveTab(tab.id);
                             }}
                             className={`p-3 rounded-xl border transition text-left ${activeTab === tab.id
-                                    ? 'bg-blue-500/20 border-blue-500 text-blue-400'
-                                    : 'bg-white/5 border-border hover:bg-white/10'
+                                ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+                                : 'bg-white/5 border-border hover:bg-white/10'
                                 }`}
                         >
                             <div className="text-2xl mb-1">{tab.icon}</div>
@@ -692,7 +692,7 @@ export function MediaPipeTest() {
                         {testStatus === 'loading' && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                                 <div className="text-center">
-                                    <div className="animate-spin w-12 h-12 border-4 border-white/20 border-t-white rounded-full mx-auto mb-4" />
+                                    <div className="animate-spin w-12 h-12 border-3 border-white/20 border-t-white rounded-full mx-auto mb-4" />
                                     <div className="text-xl font-semibold">Loading MediaPipe...</div>
                                 </div>
                             </div>
@@ -775,6 +775,6 @@ export function MediaPipeTest() {
             </motion.div>
         </section>
     );
-}
+});
 
 export default MediaPipeTest;

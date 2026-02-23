@@ -43,7 +43,7 @@ export function AddChildModal({
 
         <div className='space-y-4'>
           <div>
-            <label htmlFor='child-name' className='block text-sm font-medium text-slate-600 mb-2'>
+            <label htmlFor='child-name' className='block text-sm font-medium text-advay-slate mb-2'>
               Child's Name *
             </label>
             <input
@@ -58,7 +58,7 @@ export function AddChildModal({
           </div>
 
           <div>
-            <label htmlFor='child-age' className='block text-sm font-medium text-slate-600 mb-2'>
+            <label htmlFor='child-age' className='block text-sm font-medium text-advay-slate mb-2'>
               Age (years)
             </label>
             <input
@@ -73,13 +73,13 @@ export function AddChildModal({
               autoComplete='bday'
               className='w-full px-4 py-3 bg-bg-primary border border-border rounded-lg focus:outline-none focus:border-border-strong transition'
             />
-            <p className='text-xs text-slate-600 mt-1'>
+            <p className='text-xs text-advay-slate mt-1'>
               Use decimals for partial years (e.g., 2.5 for 2 years 6 months)
             </p>
           </div>
 
           <div>
-            <label htmlFor='child-language' className='block text-sm font-medium text-slate-600 mb-2'>
+            <label htmlFor='child-language' className='block text-sm font-medium text-advay-slate mb-2'>
               Preferred Language
             </label>
             <select

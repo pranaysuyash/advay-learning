@@ -1,13 +1,15 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { ttsService } from '../services/ai/tts/TTSService';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -48,7 +50,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const [streak, setStreak] = useState(0);
   const [level, setLevel] = useState(1);
   const [round, setRound] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [, setTimeLeft] = useState(20);
   const [targets, setTargets] = useState<PhonicsTarget[]>([]);
   const [targetPhoneme, setTargetPhoneme] = useState<Phoneme | null>(null);
   const [cursor, setCursor] = useState<Point | null>(null);
@@ -66,6 +68,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const usedLettersRef = useRef<string[]>(usedLetters);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('phonics-sounds');
 
   useEffect(() => {
     async function preloadAssets() {
@@ -86,11 +90,12 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
   useEffect(() => { usedLettersRef.current = usedLetters; }, [usedLetters]);
 
-  // Speak the phoneme using TTS (Kokoro primary, Web Speech fallback)
+  // Speak the phoneme using TTS
   const speakPhoneme = useCallback((phoneme: Phoneme) => {
-    ttsService.stop();
-    void ttsService.speak(phoneme.ttsText, { rate: 0.85 });
-  }, []);
+    if (ttsEnabled) {
+      void speak(phoneme.ttsText);
+    }
+  }, [speak, ttsEnabled]);
 
   const startRound = useCallback(() => {
     if (isAdvancingRef.current) return;
@@ -130,7 +135,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         if (prev <= 1) {
           setStreak(0);
           nextRound();
-          return 20;
+          return 60;
         }
         return prev - 1;
       });
@@ -155,11 +160,19 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         assetLoader.playSound('level-complete', 0.55);
         void playCelebration();
         setShowCelebration(true);
+        if (ttsEnabled) {
+          if (levelRef.current >= MAX_LEVEL) {
+            void speak('Congratulations! You are a phonics pro!');
+          } else {
+            void speak('Level complete! Great job!');
+          }
+        }
 
         if (levelTimeoutRef.current) clearTimeout(levelTimeoutRef.current);
         levelTimeoutRef.current = setTimeout(() => {
           setShowCelebration(false);
           if (levelRef.current >= MAX_LEVEL) {
+            onGameComplete();
             setGameCompleted(true);
             setIsPlaying(false);
           } else {
@@ -219,12 +232,18 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         setScore((prev) => prev + 10 + Math.min(15, nextStreak * 3));
         setFeedback(`Yes! ${hit.phoneme.letter} = ${hit.phoneme.exampleWord} ${hit.phoneme.exampleEmoji}`);
         setShowExample(true);
+        if (ttsEnabled) {
+          void speak(`Yes! ${hit.phoneme.letter} as in ${hit.phoneme.exampleWord}!`);
+        }
         assetLoader.playSound('success', 0.45);
         void playPop();
 
         if (nextStreak > 0 && nextStreak % 5 === 0) {
           setShowCelebration(true);
           void playCelebration();
+          if (ttsEnabled) {
+            void speak('Amazing streak! Keep going!');
+          }
           if (celebrationTimeoutRef.current) {
             clearTimeout(celebrationTimeoutRef.current);
           }
@@ -240,6 +259,9 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       } else {
         setStreak(0);
         setFeedback(`That's "${hit.phoneme.sound}". Listen again!`);
+        if (ttsEnabled) {
+          void speak(`That's ${hit.phoneme.sound}. Try again!`);
+        }
         assetLoader.playSound('wrong', 0.35);
         void playError();
         // Re-speak the target phoneme
@@ -251,7 +273,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         }
       }
     },
-    [cursor, nextRound, playCelebration, playError, playPop, targetPhoneme, speakPhoneme],
+    [cursor, nextRound, playCelebration, playError, playPop, targetPhoneme, speakPhoneme, speak, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
@@ -306,7 +328,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
     setRound(1);
     setCorrectCount(0);
     setUsedLetters([]);
-    setTimeLeft(20);
+    setTimeLeft(60);
     setFeedback('Pinch the letter that makes this sound!');
     setCursor(null);
     setShowExample(false);
@@ -342,12 +364,12 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       celebrationTimeoutRef.current = null;
     }
     isAdvancingRef.current = false;
-    ttsService.stop();
+    // TTS cleanup handled by hook
     setIsPlaying(false);
     setGameCompleted(false);
     setTargets([]);
     setCursor(null);
-    setTimeLeft(20);
+    setTimeLeft(60);
     setFeedback('Pinch the letter that makes this sound!');
   };
 
@@ -411,18 +433,18 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-purple-100/40 pointer-events-none' />
 
         {/* Feedback */}
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
-        {/* Timer */}
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
-          Time: <span className={`font-black text-2xl ml-2 ${timeLeft <= 5 ? 'text-[#EF4444]' : 'text-amber-500'}`}>{timeLeft}s</span>
+        {/* Relaxed Timer */}
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-slate-400 font-bold text-lg'>
+          Take your time! 🌈
         </div>
 
         {/* Round info */}
         {targetPhoneme && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg flex items-center gap-3'>
+          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
             <button onClick={repeatSound} className='text-xl mr-1 hover:scale-110 transition-transform active:scale-95'>🔊</button>
             <span className='font-black text-2xl text-[#3B82F6]'>"{targetPhoneme.sound}"</span>
             <span className='text-sm font-bold text-slate-400 uppercase tracking-widest ml-3 bg-slate-100 px-3 py-1 rounded-full'>
@@ -433,7 +455,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Streak */}
         {streak > 0 && (
-          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full border-4 border-orange-200 bg-orange-100/90 text-orange-600 font-black text-lg shadow-sm drop-shadow-sm'>
+          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full border-3 border-orange-200 bg-orange-100/90 text-orange-600 font-black text-lg shadow-[0_4px_0_#E5B86E] drop-shadow-[0_4px_0_#E5B86E]'>
             🔥 {streak} streak!
           </div>
         )}
@@ -452,7 +474,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
             aria-hidden='true'
           >
             <div
-              className='absolute inset-0 rounded-[2.5rem] border-[6px] shadow-sm flex items-center justify-center bg-white'
+              className='absolute inset-0 rounded-[2.5rem] border-[6px] shadow-[0_4px_0_#E5B86E] flex items-center justify-center bg-white'
               style={{
                 borderColor: CARD_COLORS[i % CARD_COLORS.length],
               }}
@@ -462,7 +484,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
                 style={{ backgroundColor: CARD_COLORS[i % CARD_COLORS.length] }}
               />
               <span
-                className='text-6xl font-black drop-shadow-sm'
+                className='text-6xl font-black drop-shadow-[0_4px_0_#E5B86E]'
                 style={{ color: CARD_COLORS[i % CARD_COLORS.length] }}
               >
                 {target.phoneme.letter}
@@ -473,8 +495,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Example word popup */}
         {showExample && targetPhoneme && (
-          <div className='absolute bottom-32 left-1/2 -translate-x-1/2 px-8 py-4 rounded-[2rem] bg-emerald-50 border-4 border-emerald-200 text-emerald-600 shadow-sm text-2xl font-black text-center flex items-center gap-3'>
-            <span className='text-4xl drop-shadow-sm'>{targetPhoneme.letter}</span> = {targetPhoneme.exampleWord} {targetPhoneme.exampleEmoji}
+          <div className='absolute bottom-32 left-1/2 -translate-x-1/2 px-8 py-4 rounded-[2rem] bg-emerald-50 border-3 border-emerald-200 text-emerald-600 shadow-[0_4px_0_#E5B86E] text-2xl font-black text-center flex items-center gap-3'>
+            <span className='text-4xl drop-shadow-[0_4px_0_#E5B86E]'>{targetPhoneme.letter}</span> = {targetPhoneme.exampleWord} {targetPhoneme.exampleEmoji}
           </div>
         )}
 
@@ -486,23 +508,35 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
             containerRef={gameAreaRef}
             isPinching={false}
             isHandDetected={isPlaying}
-            size={64}
+            size={84}
           />
         )}
 
         {/* Pre-game screen */}
         {!isPlaying && !gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🔤🔊</div>
-              <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Phonics Sounds</h2>
-              <p className='text-slate-500 font-bold text-xl mb-10'>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🔤🔊</div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Phonics Sounds</h2>
+              <p className='text-text-secondary font-bold text-xl mb-10'>
                 Listen to the sound, then pinch the right letter!
               </p>
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Listen to the sound.',
+                    'Find the matching letter.',
+                    'Pinch to select!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
               <button
                 type='button'
                 onClick={startGame}
-                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Phonics!
               </button>
@@ -513,11 +547,11 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         {/* Game complete */}
         {gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🏆</div>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🏆</div>
               <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>Phonics Pro! 🔤</h2>
-              <p className='text-xl font-bold text-slate-500 mb-8'>Incredible job mastering all levels!</p>
-              <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+              <p className='text-xl font-bold text-text-secondary mb-8'>Incredible job mastering all levels!</p>
+              <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
                 Final Score: {score}
               </div>
             </div>

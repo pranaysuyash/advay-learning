@@ -14,6 +14,7 @@ interface Settings {
   cameraPermissionState: 'granted' | 'denied' | 'prompt' | 'unknown';
   tutorialCompleted: boolean;
   onboardingCompleted: boolean;
+  calmMode: boolean; // NEW: Calm Mode for sensory-sensitive children
 }
 
 interface SettingsState extends Settings {
@@ -34,6 +35,7 @@ const defaultSettings: Settings = {
   cameraPermissionState: 'unknown',
   tutorialCompleted: false,
   onboardingCompleted: false,
+  calmMode: false, // NEW: Default to off (full experience)
 };
 
 interface SettingsState extends Settings {

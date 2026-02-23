@@ -1,0 +1,213 @@
+/**
+ * SVG Bird Character Styles
+ * Animations for Ruby the Robin
+ */
+
+.svg-bird {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bird-svg {
+  overflow: visible;
+}
+
+/* ===== BODY PARTS ANIMATION ===== */
+
+.bird-body {
+  transition: transform 0.3s ease;
+}
+
+.bird-head {
+  transition: transform 0.2s ease;
+}
+
+.bird-wing {
+  transform-origin: 35px 70px;
+  transition: transform 0.3s ease;
+}
+
+.bird-tail {
+  transform-origin: 15px 60px;
+  transition: transform 0.3s ease;
+}
+
+/* ===== EYE ANIMATIONS ===== */
+
+.bird-eye {
+  transition: ry 0.1s ease;
+}
+
+.bird-eye.blinking {
+  animation: bird-blink 0.15s ease-in-out;
+}
+
+@keyframes bird-blink {
+  0%, 100% { ry: 8; }
+  50% { ry: 0.5; }
+}
+
+.bird-pupil {
+  transition: cx 0.1s ease-out, cy 0.1s ease-out;
+}
+
+/* ===== EXPRESSION ANIMATIONS ===== */
+
+/* Idle - gentle floating */
+.expression-idle .bird-body {
+  animation: bird-float 3s ease-in-out infinite;
+}
+
+.expression-idle .bird-head {
+  animation: bird-head-bob 3s ease-in-out infinite;
+}
+
+@keyframes bird-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes bird-head-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(2deg); }
+}
+
+/* Singing - wing flapping + notes */
+.expression-singing .bird-wing {
+  animation: bird-sing-flap 0.3s ease-in-out infinite;
+}
+
+.expression-singing .bird-head {
+  animation: bird-sing-bob 0.6s ease-in-out infinite;
+}
+
+.expression-singing .bird-beak {
+  animation: bird-beak-open 0.6s ease-in-out infinite;
+}
+
+@keyframes bird-sing-flap {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(-35deg); }
+}
+
+@keyframes bird-sing-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes bird-beak-open {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.1); }
+}
+
+/* Musical notes animation */
+.bird-note {
+  opacity: 0;
+  animation: note-float 1.5s ease-out infinite;
+}
+
+.note-1 {
+  animation-delay: 0s;
+}
+
+.note-2 {
+  animation-delay: 0.3s;
+}
+
+.note-3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes note-float {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(5px, -5px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(15px, -30px) scale(0.8);
+  }
+}
+
+/* Happy - bounce */
+.expression-happy .bird-body {
+  animation: bird-happy-bounce 0.6s ease-in-out;
+}
+
+.expression-happy .bird-wing {
+  animation: bird-happy-wing 0.6s ease-in-out;
+}
+
+@keyframes bird-happy-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+@keyframes bird-happy-wing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-30deg); }
+  75% { transform: rotate(-10deg); }
+}
+
+/* Thinking - head tilt */
+.expression-thinking .bird-head {
+  animation: bird-think-tilt 2s ease-in-out infinite;
+}
+
+.expression-thinking .bird-wing {
+  transform: rotate(5deg);
+}
+
+@keyframes bird-think-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(15deg); }
+}
+
+/* Surprised - pop effect */
+.expression-surprised .bird-body {
+  animation: bird-surprised-pop 0.4s ease-out;
+}
+
+.expression-surprised .bird-head {
+  animation: bird-surprised-head 0.4s ease-out;
+}
+
+@keyframes bird-surprised-pop {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bird-surprised-head {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+/* ===== HOVER EFFECTS ===== */
+
+.svg-bird:hover .bird-body {
+  filter: url(#glow);
+}
+
+.svg-bird:hover .bird-wing {
+  transform: rotate(-10deg);
+}
+
+/* ===== TAIL WAG ===== */
+
+.expression-idle .bird-tail,
+.expression-happy .bird-tail {
+  animation: bird-tail-wag 2s ease-in-out infinite;
+}
+
+@keyframes bird-tail-wag {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}

@@ -26,7 +26,7 @@ export function EmptyState({ onAddChild }: EmptyStateProps) {
       <h2 className='text-2xl font-semibold mb-2'>
         No Children Added Yet
       </h2>
-      <p className='text-slate-600 mb-6'>
+      <p className='text-advay-slate mb-6'>
         Add a child profile to start tracking their learning progress.
       </p>
       <Button

@@ -1,0 +1,26 @@
+{
+  "welcome": {
+    "title": "Welcome back, {{name}}!",
+    "titleAnonymous": "Welcome back, Explorer!",
+    "subtitle": "What magical adventure should we go on today?"
+  },
+  "stars": {
+    "label": "Stars"
+  },
+  "actions": {
+    "exportProgress": "Export progress data",
+    "settings": "Settings"
+  },
+  "featuredGames": {
+    "title": "Featured Games",
+    "seeAll": "See All",
+    "playNow": "Play Now!"
+  },
+  "learningMap": {
+    "title": "Your Learning Map",
+    "subtitle": "Explore islands and complete quests!"
+  },
+  "demo": {
+    "completed": "Demo completed! Ready to try with camera?"
+  }
+}

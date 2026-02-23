@@ -7,6 +7,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -57,6 +58,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   const templateRef = useRef<MirrorTemplate | null>(null);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { onGameComplete } = useGameDrops('mirror-draw');
 
   useEffect(() => {
     let mounted = true;
@@ -234,6 +236,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
           levelTimeoutRef.current = setTimeout(() => {
             setShowCelebration(false);
             if (level >= MAX_LEVEL) {
+              onGameComplete();
               setGameCompleted(true);
               setIsPlaying(false);
             } else {
@@ -434,14 +437,14 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className='absolute top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl bg-white border-4 border-slate-200 text-slate-800 font-bold tracking-wide text-lg text-center max-w-[90%] shadow-sm z-10'
+            className='absolute top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl bg-white border-3 border-[#F2CC8F] text-advay-slate font-bold tracking-wide text-lg text-center max-w-[90%] shadow-[0_4px_0_#E5B86E] z-10'
           >
             {feedback}
           </motion.div>
         </AnimatePresence>
 
         {template && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-2xl bg-white border-4 border-slate-200 text-slate-800 font-bold text-lg shadow-sm z-10'>
+          <div className='absolute top-6 left-6 px-6 py-3 rounded-2xl bg-white border-3 border-[#F2CC8F] text-advay-slate font-bold text-lg shadow-[0_4px_0_#E5B86E] z-10'>
             {template.emoji} {template.name}
             <span className='text-sm text-slate-400 font-black ml-3 bg-slate-100 px-3 py-1 rounded-lg'>
               {templateIndex + 1}/{getTemplatesForLevel(level).length}
@@ -453,7 +456,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`absolute top-6 right-6 px-6 py-3 rounded-2xl border-4 font-black text-xl shadow-sm z-10 ${lastScore.passed ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'
+            className={`absolute top-6 right-6 px-6 py-3 rounded-2xl border-3 font-black text-xl shadow-[0_4px_0_#E5B86E] z-10 ${lastScore.passed ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'
               }`}
           >
             {'⭐'.repeat(lastScore.stars)}{'☆'.repeat(3 - lastScore.stars)}
@@ -468,15 +471,15 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
             className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-20'
           >
             <div className='text-8xl drop-shadow-xl'>🎨</div>
-            <div className='bg-white p-8 rounded-[2.5rem] border-4 border-slate-200 shadow-xl max-w-lg text-center flex flex-col items-center'>
-              <h2 className='text-4xl font-black text-slate-800 mb-4 tracking-tight'>Mirror Draw</h2>
-              <p className='text-slate-500 font-bold text-lg mb-8 leading-relaxed'>
+            <div className='bg-white p-8 rounded-[2.5rem] border-3 border-[#F2CC8F] shadow-xl max-w-lg text-center flex flex-col items-center'>
+              <h2 className='text-4xl font-black text-advay-slate mb-4 tracking-tight'>Mirror Draw</h2>
+              <p className='text-text-secondary font-bold text-lg mb-8 leading-relaxed'>
                 See the shape on the left? Trace its mirror on the right side!
               </p>
               <button
                 type='button'
                 onClick={startGame}
-                className='px-10 py-5 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black rounded-2xl text-xl uppercase tracking-wider border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all w-full leading-none'
+                className='px-10 py-5 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black rounded-2xl text-xl uppercase tracking-wider border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all w-full leading-none'
               >
                 Start Drawing!
               </button>
@@ -490,14 +493,14 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
             animate={{ opacity: 1, scale: 1 }}
             className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-20'
           >
-            <div className='bg-white p-10 rounded-[2.5rem] border-4 border-[#F59E0B] shadow-xl max-w-lg text-center flex flex-col items-center'>
+            <div className='bg-white p-10 rounded-[2.5rem] border-3 border-[#F59E0B] shadow-xl max-w-lg text-center flex flex-col items-center'>
               <div className='text-6xl mb-4'>🏆</div>
-              <h2 className='text-4xl font-black text-slate-800 mb-2'>Symmetry Master!</h2>
+              <h2 className='text-4xl font-black text-advay-slate mb-2'>Symmetry Master!</h2>
               <p className='text-[#F59E0B] font-black text-2xl mb-8'>Final Score: {score}</p>
               <button
                 type='button'
                 onClick={goHome}
-                className='px-10 py-5 bg-[#E85D04] hover:bg-[#ff6c14] text-white font-black rounded-2xl text-xl uppercase tracking-wider border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all w-full leading-none'
+                className='px-10 py-5 bg-[#E85D04] hover:bg-[#ff6c14] text-white font-black rounded-2xl text-xl uppercase tracking-wider border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all w-full leading-none'
               >
                 Return Home
               </button>

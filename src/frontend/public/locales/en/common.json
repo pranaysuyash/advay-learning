@@ -1,0 +1,60 @@
+{
+  "app": {
+    "name": "Advay Vision Learning",
+    "tagline": "Active Discovery Vision AI for Youth"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "games": "Games",
+    "progress": "Progress",
+    "settings": "Settings",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "save": "Save",
+    "done": "Done",
+    "close": "Close"
+  },
+  "buttons": {
+    "start": "Start",
+    "stop": "Stop",
+    "play": "Play",
+    "pause": "Pause",
+    "continue": "Continue",
+    "retry": "Try Again",
+    "skip": "Skip",
+    "confirm": "Confirm",
+    "download": "Download",
+    "share": "Share",
+    "copy": "Copy",
+    "export": "Export"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "offline": "You're offline",
+    "online": "Back online"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "camera": "Camera access is needed for hand tracking games.",
+    "permission": "Permission denied. Please allow access in settings.",
+    "timeout": "Request timed out. Please try again."
+  },
+  "time": {
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow"
+  }
+}

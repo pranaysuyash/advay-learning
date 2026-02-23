@@ -23,7 +23,7 @@ export function StatsBar({ stats }: StatsBarProps) {
           <UIIcon
             name={stat.iconName}
             size={16}
-            className='text-slate-500'
+            className='text-text-secondary'
             aria-label={
               stat.iconName === 'letters' ? 'Letters learned' :
               stat.iconName === 'target' ? 'Target accuracy goal' :
@@ -31,7 +31,7 @@ export function StatsBar({ stats }: StatsBarProps) {
               stat.iconName === 'hand' ? 'Hand tracking activity' : 'Statistics icon'
             }
           />
-          <span className='text-sm text-slate-600'>{stat.label}:</span>
+          <span className='text-sm text-advay-slate'>{stat.label}:</span>
           <span className='text-sm font-semibold text-text-primary'>
             {stat.value}
           </span>

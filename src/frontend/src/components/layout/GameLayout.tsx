@@ -58,7 +58,7 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
         const containerBase =
             variant === 'hero'
                 ? 'relative bg-[#FFF8F0] overflow-hidden w-full h-full'
-                : 'relative bg-[#FFF8F0] rounded-[2.5rem] overflow-hidden aspect-video shadow-sm border-4 border-slate-100';
+                : 'relative bg-[#FFF8F0] rounded-[2.5rem] overflow-hidden aspect-video shadow-[0_4px_0_#E5B86E] border-3 border-[#F2CC8F]';
         const canvasBase =
             variant === 'hero'
                 ? 'absolute inset-0 w-full h-full touch-none cursor-crosshair z-30'

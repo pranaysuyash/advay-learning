@@ -14,11 +14,13 @@
  * - Visual + audio support for pre-readers
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { Mascot } from '../components/Mascot';
+import { SVGBird } from '../components/characters/SVGBird';
+import { useAudio } from '../utils/hooks/useAudio';
+import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
@@ -38,18 +40,31 @@ import {
 } from '../games/rhymeTimeLogic';
 
 export default function RhymeTime() {
+  // ===== AUDIO =====
+  const { playSuccess, playError, playClick, playChirp, playCelebration } = useAudio();
+  
   // ===== GAME STATE =====
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentRound, setCurrentRound] = useState<RhymeRound | null>(null);
   const [showMenu, setShowMenu] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [birdExpression, setBirdExpression] = useState<'idle' | 'singing' | 'happy' | 'thinking'>('idle');
   
   // Interaction state
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Initialize audio
+  useEffect(() => {
+    const handleInteraction = () => {
+      // Audio initialized via useAudio hook
+    };
+    document.addEventListener('click', handleInteraction, { once: true });
+    return () => document.removeEventListener('click', handleInteraction);
+  }, []);
   
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
@@ -96,6 +111,7 @@ export default function RhymeTime() {
   
   // ===== GAME FLOW =====
   const startGame = (selectedDifficulty: Difficulty) => {
+    playClick();
     setDifficulty(selectedDifficulty);
     const newGameState = initializeGame(selectedDifficulty, 10);
     setGameState(newGameState);
@@ -106,6 +122,7 @@ export default function RhymeTime() {
     setShowMenu(false);
     setShowFeedback(null);
     setSelectedOption(null);
+    setBirdExpression('singing');
     
     // Speak target word
     setTimeout(() => speakWord(round.targetWord.word), 500);
@@ -120,6 +137,16 @@ export default function RhymeTime() {
     const isCorrect = checkAnswer(optionWord, currentRound.correctAnswer);
     setShowFeedback(isCorrect ? 'correct' : 'incorrect');
     
+    // Audio and bird expression feedback
+    if (isCorrect) {
+      playSuccess();
+      playChirp();
+      setBirdExpression('happy');
+    } else {
+      playError();
+      setBirdExpression('thinking');
+    }
+    
     // Speak the selected word
     speakWord(optionWord);
     
@@ -131,6 +158,7 @@ export default function RhymeTime() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     if (newGameState.completed) {
+      playCelebration();
       setShowCelebration(true);
     } else {
       // Generate next round
@@ -138,6 +166,7 @@ export default function RhymeTime() {
       setCurrentRound(nextRound);
       setShowFeedback(null);
       setSelectedOption(null);
+      setBirdExpression('singing');
       
       // Speak new target word
       setTimeout(() => speakWord(nextRound.targetWord.word), 300);
@@ -147,12 +176,14 @@ export default function RhymeTime() {
   };
   
   const handlePlayAgain = () => {
+    playClick();
     if (difficulty) {
       startGame(difficulty);
     }
   };
   
   const handleShowMenu = () => {
+    playClick();
     setShowMenu(true);
     setGameState(null);
     setCurrentRound(null);
@@ -160,8 +191,10 @@ export default function RhymeTime() {
   };
   
   const handleSpeakTarget = () => {
+    playClick();
     if (currentRound) {
       speakWord(currentRound.targetWord.word);
+      setBirdExpression('singing');
     }
   };
   
@@ -187,8 +220,8 @@ export default function RhymeTime() {
       {showMenu ? (
         // ===== DIFFICULTY SELECTION MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <Mascot state="happy" responsiveSize="lg" className="mb-4" />
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Rhyme Time!</h2>
+          <SVGBird expression="singing" size="lg" className="mb-4 animate-float" />
+          <h2 className="text-2xl font-bold text-advay-slate mb-2">Rhyme Time!</h2>
           
           {/* Goal Statement with Semantic Attributes */}
           <div 
@@ -207,7 +240,7 @@ export default function RhymeTime() {
             </div>
           </div>
           
-          <p className="text-slate-500 mb-6 text-sm text-center max-w-md">
+          <p className="text-text-secondary mb-6 text-sm text-center max-w-md">
             Rhyming helps you learn to read! 🔤
           </p>
           
@@ -218,7 +251,7 @@ export default function RhymeTime() {
                 <button
                   key={diff}
                   onClick={() => startGame(diff)}
-                  className="bg-white border-2 border-slate-200 hover:border-blue-400 rounded-xl p-6 transition-all transform hover:scale-105 text-center group shadow-sm"
+                  className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-6 transition-all transform hover:scale-105 text-center group shadow-[0_4px_0_#E5B86E]"
                 >
                   <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
                     {diff === 'easy' ? '🌱' : diff === 'medium' ? '🌿' : '🌳'}
@@ -226,7 +259,7 @@ export default function RhymeTime() {
                   <h3 className={`font-bold text-lg mb-1 ${display.color}`}>
                     {display.label}
                   </h3>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-text-secondary text-xs">
                     {diff === 'easy' && '3 simple rhymes'}
                     {diff === 'medium' && '6 rhyme families'}
                     {diff === 'hard' && '10 rhyme families'}
@@ -248,7 +281,7 @@ export default function RhymeTime() {
             </div>
           </div>
           
-          <div className="mt-6 flex items-center gap-2 text-slate-500 text-sm">
+          <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm">
             <span className="text-2xl">✋</span>
             <span>Point and pinch to select, or use your mouse!</span>
           </div>
@@ -259,7 +292,7 @@ export default function RhymeTime() {
           <div className="text-6xl mb-4">
             {getStarRating(accuracy) >= 3 ? '🏆' : getStarRating(accuracy) >= 2 ? '⭐' : '👏'}
           </div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">
+          <h2 className="text-3xl font-bold text-advay-slate mb-2">
             {getPerformanceFeedback(accuracy).message}
           </h2>
           
@@ -274,22 +307,22 @@ export default function RhymeTime() {
             ))}
           </div>
           
-          <div className="bg-white rounded-xl p-6 shadow-sm mb-6 text-center">
+          <div className="bg-white rounded-xl p-6 shadow-[0_4px_0_#E5B86E] mb-6 text-center">
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-slate-500 text-sm">Final Score</p>
+                <p className="text-text-secondary text-sm">Final Score</p>
                 <p className="text-3xl font-bold text-blue-600">{gameState.score}</p>
               </div>
               <div>
-                <p className="text-slate-500 text-sm">Accuracy</p>
+                <p className="text-text-secondary text-sm">Accuracy</p>
                 <p className="text-3xl font-bold text-green-600">{accuracy}%</p>
               </div>
               <div>
-                <p className="text-slate-500 text-sm">Best Streak</p>
+                <p className="text-text-secondary text-sm">Best Streak</p>
                 <p className="text-2xl font-bold text-orange-500">{gameState.maxStreak} 🔥</p>
               </div>
               <div>
-                <p className="text-slate-500 text-sm">Correct</p>
+                <p className="text-text-secondary text-sm">Correct</p>
                 <p className="text-2xl font-bold text-purple-600">
                   {gameState.correctAnswers}/{gameState.totalRounds}
                 </p>
@@ -300,7 +333,7 @@ export default function RhymeTime() {
           <div className="flex gap-3">
             <button
               onClick={handleShowMenu}
-              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl font-bold transition-colors"
             >
               Back to Menu
             </button>
@@ -315,9 +348,12 @@ export default function RhymeTime() {
       ) : (
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full p-4">
-          {/* Mascot cheering */}
+          {/* Bird cheering */}
           <div className="absolute top-16 right-4">
-            <Mascot state={showFeedback === 'correct' ? 'celebrating' : 'happy'} responsiveSize="sm" />
+            <SVGBird 
+              expression={showFeedback === 'correct' ? 'happy' : 'idle'} 
+              size="sm" 
+            />
           </div>
           
           {/* Goal Banner with Semantic Attributes */}
@@ -338,7 +374,7 @@ export default function RhymeTime() {
           
           {/* Progress Bar */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-slate-500 mb-1">
+            <div className="flex justify-between text-sm text-text-secondary mb-1">
               <span>Round {progress.current} of {progress.total}</span>
               <span>Score: {gameState?.score || 0}</span>
             </div>
@@ -359,17 +395,26 @@ export default function RhymeTime() {
             </div>
           )}
           
+          {/* Bird Character */}
+          <div className="flex justify-center mb-4">
+            <SVGBird 
+              expression={birdExpression} 
+              size="md" 
+              eyeTracking={true}
+              onClick={handleSpeakTarget}
+            />
+          </div>
+          
           {/* Question */}
           <div className="text-center mb-6">
-            <p className="text-slate-600 mb-2 font-bold text-lg">Which word rhymes with...</p>
+            <p className="text-advay-slate mb-2 font-bold text-lg">Which word rhymes with...</p>
             
             <button
               onClick={handleSpeakTarget}
-              className="inline-flex items-center gap-3 bg-white border-2 border-blue-200 hover:border-blue-400 rounded-2xl px-8 py-4 transition-all transform hover:scale-105 shadow-sm"
+              className="inline-flex items-center gap-3 bg-white border-2 border-blue-200 hover:border-blue-400 rounded-2xl px-8 py-4 transition-all transform hover:scale-105 shadow-[0_4px_0_#E5B86E]"
             >
-              <span className="text-6xl">{currentRound?.targetWord.emoji}</span>
               <div className="text-left">
-                <span className="text-4xl font-black text-slate-800 uppercase tracking-wider">
+                <span className="text-4xl font-black text-advay-slate uppercase tracking-wider">
                   {currentRound?.targetWord.word}
                 </span>
                 <div className="text-blue-400 text-sm flex items-center gap-1">
@@ -397,7 +442,7 @@ export default function RhymeTime() {
                     onClick={() => handleSelectOption(option.word.word)}
                     disabled={isProcessing}
                     className={`
-                      relative p-6 rounded-2xl border-4 transition-all transform
+                      relative p-6 rounded-2xl border-3 transition-all transform
                       ${showCorrect
                         ? 'bg-green-100 border-green-400 scale-105'
                         : showIncorrect
@@ -406,20 +451,20 @@ export default function RhymeTime() {
                         ? 'bg-blue-100 border-blue-400'
                         : isHovered
                         ? 'bg-blue-50 border-blue-300 scale-105 shadow-lg'
-                        : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-md'
+                        : 'bg-white border-[#F2CC8F] hover:border-blue-300 hover:shadow-md'
                       }
                       ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'}
                     `}
                   >
-                    <div className="text-5xl mb-2">{option.word.emoji}</div>
-                    <div className="text-xl font-bold text-slate-800 uppercase">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 mb-3 mx-auto animate-pop-in" />
+                    <div className="text-xl font-bold text-advay-slate uppercase">
                       {option.word.word}
                     </div>
                     
                     {/* Feedback indicators */}
                     {showCorrect && (
                       <>
-                        <div className="absolute -top-3 -right-3 bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold animate-bounce shadow-lg border-4 border-white">
+                        <div className="absolute -top-3 -right-3 bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold animate-bounce shadow-lg border-3 border-white">
                           ✓
                         </div>
                         <div className="absolute inset-0 bg-green-400/20 rounded-2xl animate-pulse" />
@@ -430,7 +475,7 @@ export default function RhymeTime() {
                     )}
                     {showIncorrect && (
                       <>
-                        <div className="absolute -top-3 -right-3 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg border-4 border-white">
+                        <div className="absolute -top-3 -right-3 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg border-3 border-white">
                           ✗
                         </div>
                         <div className="absolute inset-0 bg-red-400/20 rounded-2xl" />

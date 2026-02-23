@@ -83,34 +83,34 @@ export function DiscoveryLab() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigate('/inventory')}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-4 border-slate-100 rounded-2xl font-bold text-slate-500 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border-3 border-[#F2CC8F] rounded-2xl font-bold text-text-secondary hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
             >
               🎒 Back to Backpack
             </button>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-black text-advay-slate tracking-tight">
             🧪 Discovery <span className="text-[#a855f7]">Lab</span>
           </h1>
-          <p className="text-lg text-slate-500 font-bold mt-2">
+          <p className="text-lg text-text-secondary font-bold mt-2">
             Combine items from your backpack to discover new things!
           </p>
         </header>
 
         {/* Discovery Stats */}
-        <div className="bg-white border-4 border-slate-100 rounded-2xl p-4 mb-8 flex items-center justify-between">
+        <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl p-4 mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-2xl font-black text-[#a855f7]">{discoveredRecipes.length}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Discovered</p>
+              <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Discovered</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-black text-slate-400">{RECIPES.length}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total</p>
+              <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Total</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="font-bold text-slate-500 text-sm">
+            <p className="font-bold text-text-secondary text-sm">
               {Math.round((discoveredRecipes.length / RECIPES.length) * 100)}% complete
             </p>
           </div>
@@ -119,7 +119,7 @@ export function DiscoveryLab() {
         {/* Craftable NOW */}
         {craftableRecipes.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-2xl font-black text-slate-800 mb-4">
+            <h2 className="text-2xl font-black text-advay-slate mb-4">
               ✨ Ready to Craft ({craftableRecipes.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -141,7 +141,7 @@ export function DiscoveryLab() {
         {/* Hints — recipes you have SOME ingredients for */}
         {partialRecipes.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-2xl font-black text-slate-800 mb-4">
+            <h2 className="text-2xl font-black text-advay-slate mb-4">
               💡 Almost There... ({partialRecipes.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -163,7 +163,7 @@ export function DiscoveryLab() {
         {/* Already Discovered */}
         {discoveredRecipes.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-2xl font-black text-slate-800 mb-4">
+            <h2 className="text-2xl font-black text-advay-slate mb-4">
               📖 Discovered Recipes ({discoveredRecipes.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -220,7 +220,7 @@ export function DiscoveryLab() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl text-center"
+                className="bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl text-center"
                 onClick={(e) => e.stopPropagation()}
               >
                 {craftResult.success && craftResult.item ? (
@@ -229,7 +229,7 @@ export function DiscoveryLab() {
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                      className="w-28 h-28 rounded-3xl flex items-center justify-center text-6xl mx-auto mb-6 border-4"
+                      className="w-28 h-28 rounded-3xl flex items-center justify-center text-6xl mx-auto mb-6 border-3"
                       style={{
                         backgroundColor: RARITY_CONFIG[craftResult.item.rarity].bg,
                         borderColor: RARITY_CONFIG[craftResult.item.rarity].color,
@@ -238,7 +238,7 @@ export function DiscoveryLab() {
                     >
                       {craftResult.item.emoji}
                     </motion.div>
-                    <h3 className="text-2xl font-black text-slate-800 mb-2">
+                    <h3 className="text-2xl font-black text-advay-slate mb-2">
                       {craftResult.celebration}
                     </h3>
                     {craftResult.scienceFact && (
@@ -287,10 +287,10 @@ function RecipeCard({
 
   return (
     <div
-      className={`bg-white border-4 rounded-2xl p-4 transition-all ${
+      className={`bg-white border-3 rounded-2xl p-4 transition-all ${
         canCraft
           ? 'border-[#a855f7] shadow-lg hover:shadow-xl'
-          : 'border-slate-100 opacity-80'
+          : 'border-[#F2CC8F] opacity-80'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -310,7 +310,7 @@ function RecipeCard({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-black text-slate-800 text-sm">
+          <h3 className="font-black text-advay-slate text-sm">
             {isDiscovered && outputItem ? outputItem.name : recipe.hint}
           </h3>
 

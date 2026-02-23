@@ -267,21 +267,21 @@ export function DemoInterface({ onComplete, onExit }: DemoInterfaceProps) {
 
         {/* Score and Progress */}
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+          <div className='bg-white rounded-lg p-4 text-center shadow-[0_4px_0_#E5B86E] border'>
             <div className='text-2xl font-bold text-blue-600'>{score}</div>
             <div className='text-sm text-text-secondary'>Points</div>
           </div>
-          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+          <div className='bg-white rounded-lg p-4 text-center shadow-[0_4px_0_#E5B86E] border'>
             <div className='text-2xl font-bold text-green-600'>{attempts}</div>
             <div className='text-sm text-text-secondary'>Attempts</div>
           </div>
-          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+          <div className='bg-white rounded-lg p-4 text-center shadow-[0_4px_0_#E5B86E] border'>
             <div className='text-2xl font-bold text-purple-600'>
               {letters.indexOf(currentLetter) + 1}
             </div>
             <div className='text-sm text-text-secondary'>Letter</div>
           </div>
-          <div className='bg-white rounded-lg p-4 text-center shadow-sm border'>
+          <div className='bg-white rounded-lg p-4 text-center shadow-[0_4px_0_#E5B86E] border'>
             <div className='text-2xl font-bold text-orange-600'>
               {Math.round(
                 ((letters.indexOf(currentLetter) + 1) / letters.length) * 100,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { API_URL, authApi, profileApi, progressApi } from './api';
+import { API_URL, authApi, issueReportsApi, profileApi, progressApi } from './api';
 
 describe('API Service', () => {
   describe('API_URL', () => {
@@ -56,6 +56,20 @@ describe('API Service', () => {
       expect(typeof progressApi.getProgress).toBe('function');
       expect(typeof progressApi.saveProgress).toBe('function');
       expect(typeof progressApi.getStats).toBe('function');
+    });
+  });
+
+  describe('issueReportsApi', () => {
+    it('should have all required methods', () => {
+      expect(issueReportsApi.createSession).toBeDefined();
+      expect(issueReportsApi.uploadClip).toBeDefined();
+      expect(issueReportsApi.finalizeReport).toBeDefined();
+    });
+
+    it('should export functions', () => {
+      expect(typeof issueReportsApi.createSession).toBe('function');
+      expect(typeof issueReportsApi.uploadClip).toBe('function');
+      expect(typeof issueReportsApi.finalizeReport).toBe('function');
     });
   });
 });

@@ -3,6 +3,7 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +38,9 @@ import { LoadingState } from '../components/LoadingState';
 import useInactivityDetector from '../hooks/useInactivityDetector';
 import { usePostureDetection } from '../hooks/usePostureDetection';
 import { useAttentionDetection } from '../hooks/useAttentionDetection';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
 import { usePhonics } from '../hooks/usePhonics';
 import { useCameraPermission } from '../hooks/useCameraPermission';
 import { useInitialCameraPermission } from '../hooks/useInitialCameraPermission';
@@ -56,7 +59,6 @@ import {
   detectPinch,
   createDefaultPinchState,
 } from '../utils/pinchDetection';
-import { getLetterColorClass } from '../utils/letterColorClass';
 import type { PinchState, Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
@@ -121,6 +123,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Sound effects and phonics hooks
   const { playCelebration, playPop, playError } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('alphabet-tracing');
   const { speakWordExample } = usePhonics();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -226,6 +230,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   };
 
   const stopGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     setIsDrawing(false);
     setIsPinching(false);
@@ -393,12 +398,18 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         origin: { y: CONFETTI_ORIGIN_Y },
       });
       setFeedback('Amazing! Pip is so proud! 🎉');
+      if (ttsEnabled) {
+        void speak(`Amazing! You traced ${currentLetter.name}!`);
+      }
       setScore((s) => s + Math.round(nextAccuracy));
       setStreak((s) => s + 1);
       setCelebrationTitle(`You traced ${currentLetter.name}!`);
       setShowCelebration(true);
     } else {
       setFeedback('Good try! Draw the whole letter! 🌟');
+      if (ttsEnabled) {
+        void speak('Keep going! Trace the whole letter!');
+      }
       setStreak(0);
       try {
         playPop(); // Encouraging feedback
@@ -493,29 +504,25 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     currentProfile,
     isLoading: isProfilesLoading,
     fetchProfiles,
+    error: profilesError,
   } = useProfileStore();
+
+  // Single, stable initialization effect for profiles
+  const hasFetchedRef = useRef(false);
+  useEffect(() => {
+    if (!hasFetchedRef.current && profiles.length === 0) {
+      hasFetchedRef.current = true;
+      fetchProfiles().catch(() => {
+        // Error handled in store
+      });
+    }
+  }, [fetchProfiles, profiles.length]);
 
   // Auto-select first available profile if none provided
   const resolvedProfileId = profileId ?? currentProfile?.id ?? profiles[0]?.id;
   const profile = resolvedProfileId
     ? profiles.find((p: Profile) => p.id === resolvedProfileId)
     : undefined;
-
-  // Force fetch profiles if none available
-  useEffect(() => {
-    if (profiles.length === 0 && !isProfilesLoading) {
-      fetchProfiles();
-    }
-  }, [fetchProfiles, isProfilesLoading, profiles.length]);
-
-  // Give it a moment then try to resolve again
-  const [resolved, setResolved] = useState(false);
-  useEffect(() => {
-    if (!resolved && !resolvedProfileId && profiles.length > 0) {
-      // Re-resolve after profiles load
-      setResolved(true);
-    }
-  }, [resolved, resolvedProfileId, profiles.length]);
 
   // Game language is determined by profile's preferred_language
   // This ensures consistency across the app
@@ -577,17 +584,22 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     handleWellnessReminderPostpone();
   };
 
-  const LETTERS = getLettersForGame(selectedLanguage);
+  const LETTERS = useMemo(() => getLettersForGame(selectedLanguage), [selectedLanguage]);
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
-  const currentLetter = LETTERS[currentLetterIndex] ?? LETTERS[0];
+  const currentLetter = useMemo(
+    () => LETTERS[currentLetterIndex] ?? LETTERS[0],
+    [LETTERS, currentLetterIndex],
+  );
   const [pendingCount, setPendingCount] = useState<number>(0);
-  const letterColorClass = getLetterColorClass(currentLetter.color);
-  const accuracyColorClass =
-    accuracy >= 70
-      ? 'text-text-success'
-      : accuracy >= 40
-        ? 'text-text-warning'
-        : 'text-text-error';
+  const accuracyColorClass = useMemo(
+    () =>
+      accuracy >= 70
+        ? 'text-text-success'
+        : accuracy >= 40
+          ? 'text-text-warning'
+          : 'text-text-error',
+    [accuracy],
+  );
 
   // Restore session on mount (if valid)
   useEffect(() => {
@@ -673,7 +685,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     setFeedback('Use your finger to draw! 👆');
   }, []);
 
-  // Exit handlers - using empty deps since stopGame and navigate are stable
+  // Exit handlers
   const handleSaveAndExit = useCallback(() => {
     setShowCameraErrorModal(false);
     clearAlphabetGameSession();
@@ -695,7 +707,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     saveAlphabetGameSession(sessionData);
     stopGame();
     navigate('/dashboard');
-  }, []);
+  }, [currentLetterIndex, score, streak, selectedLanguage, useMouseMode]);
 
   const handleCancelExit = useCallback(() => {
     setShowExitModal(false);
@@ -862,8 +874,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             const cx = smoothedTipRef.current.x * canvas.width;
             const cy = smoothedTipRef.current.y * canvas.height;
             const radius = Math.max(
-              6,
-              Math.round(Math.min(canvas.width, canvas.height) * 0.012),
+              10,
+              Math.round(Math.min(canvas.width, canvas.height) * 0.018),
             );
 
             ctx.save();
@@ -1046,6 +1058,61 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     [],
   );
 
+  // Define game controls
+  const gameControls = useMemo<GameControl[]>(
+    () => [
+      {
+        id: 'clear',
+        icon: 'x',
+        label: 'Clear',
+        onClick: clearDrawing,
+        variant: 'danger',
+      },
+      {
+        id: 'check',
+        icon: 'check',
+        label: 'Check',
+        ariaLabel: 'Check my tracing',
+        onClick: checkProgress,
+        variant: 'success',
+      },
+      {
+        id: 'skip',
+        icon: 'play',
+        label: 'Skip',
+        onClick: nextLetter,
+        variant: 'primary',
+      },
+    ],
+    [clearDrawing, checkProgress, nextLetter],
+  );
+
+  // Define menu controls
+  const menuControls = useMemo<GameControl[]>(
+    () => [
+      {
+        id: 'home',
+        icon: 'home',
+        label: 'Home',
+        onClick: goToHome,
+        variant: 'secondary',
+      },
+      {
+        id: 'start',
+        icon: isModelLoading ? 'timer' : 'sparkles',
+        label: isModelLoading
+          ? 'Loading hand tracking...'
+          : cameraPermission === 'denied'
+            ? 'Play with Mouse/Touch'
+            : 'Start Learning!',
+        onClick: startGame,
+        variant: 'success',
+        disabled: isModelLoading,
+      },
+    ],
+    [goToHome, isModelLoading, cameraPermission, startGame],
+  );
+
   // If no profile is available yet, show a loading state with option to continue as guest
   if (!resolvedProfileId) {
     // Allow continuing without profile after a brief loading period
@@ -1057,6 +1124,57 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <p className='text-text-secondary'>
               Loading your child&apos;s profile...
             </p>
+          </div>
+        </section>
+      );
+    }
+
+    // Show error message if fetch failed
+    if (profilesError) {
+      return (
+        <section className='min-h-[60vh] flex items-center justify-center px-4'>
+          <div className='text-center max-w-md'>
+            <div className='text-6xl mb-4'>⚠️</div>
+            <h2 className='text-2xl font-bold mb-2'>Unable to Load Profile</h2>
+            <p className='text-text-secondary mb-6'>
+              {profilesError}
+            </p>
+            <div className='space-y-3'>
+              <button
+                type='button'
+                onClick={() => {
+                  hasFetchedRef.current = false;
+                  fetchProfiles();
+                }}
+                className='w-full px-5 py-3 bg-gradient-to-r from-pip-orange to-pip-rust text-white rounded-xl font-bold shadow-soft hover:scale-105 transition-transform'
+              >
+                Try Again
+              </button>
+              <button
+                type='button'
+                onClick={() => {
+                  // Set a guest profile ID to bypass the check
+                  useProfileStore.setState({
+                    currentProfile: {
+                      id: 'guest',
+                      name: 'Guest',
+                      preferred_language: 'en',
+                      created_at: new Date().toISOString(),
+                    },
+                  });
+                }}
+                className='w-full px-5 py-3 bg-white border border-border rounded-xl font-bold text-advay-slate shadow-soft hover:bg-bg-tertiary transition'
+              >
+                Play as Guest
+              </button>
+              <button
+                type='button'
+                onClick={() => navigate('/login')}
+                className='w-full px-5 py-3 text-text-secondary hover:text-text-primary transition'
+              >
+                Go to Login
+              </button>
+            </div>
           </div>
         </section>
       );
@@ -1130,55 +1248,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     );
   }
 
-  // Define game controls
-  const gameControls: GameControl[] = [
-    {
-      id: 'clear',
-      icon: 'x',
-      label: 'Clear',
-      onClick: clearDrawing,
-      variant: 'danger',
-    },
-    {
-      id: 'check',
-      icon: 'check',
-      label: 'Check',
-      ariaLabel: 'Check my tracing',
-      onClick: checkProgress,
-      variant: 'success',
-    },
-    {
-      id: 'skip',
-      icon: 'play',
-      label: 'Skip',
-      onClick: nextLetter,
-      variant: 'primary',
-    },
-  ];
-
-  // Define menu controls
-  const menuControls: GameControl[] = [
-    {
-      id: 'home',
-      icon: 'home',
-      label: 'Home',
-      onClick: goToHome,
-      variant: 'secondary',
-    },
-    {
-      id: 'start',
-      icon: isModelLoading ? 'timer' : 'sparkles',
-      label: isModelLoading
-        ? 'Loading hand tracking...'
-        : cameraPermission === 'denied'
-          ? 'Play with Mouse/Touch'
-          : 'Start Learning!',
-      onClick: startGame,
-      variant: 'success',
-      disabled: isModelLoading,
-    },
-  ];
-
   const overlayVisibility = getAlphabetGameOverlayVisibility({
     showWellnessReminder,
     hasWellnessReminderType: !!wellnessReminderType,
@@ -1218,16 +1287,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className='bg-white border-4 border-slate-200 rounded-[1.25rem] p-4 mb-6 shadow-sm absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
+              className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-5 mb-6 shadow-[0_4px_0_#E5B86E] absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
             >
-              <div className='flex justify-between items-center mb-2'>
+              <div className='flex justify-between items-center mb-3'>
                 <label
                   htmlFor='accuracy-progress'
-                  className='text-text-secondary'
+                  className='text-text-secondary font-bold uppercase tracking-widest text-sm'
                 >
                   Tracing Accuracy
                 </label>
-                <span className={`font-bold ${accuracyColorClass}`}>
+                <span className={`font-black text-lg ${accuracyColorClass}`}>
                   {accuracy}%
                 </span>
               </div>
@@ -1235,7 +1304,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 id='accuracy-progress'
                 value={accuracy}
                 max={100}
-                className='w-full h-3 rounded-full'
+                className='w-full h-4 rounded-full'
               />
             </motion.div>
             <GameLayout
@@ -1265,8 +1334,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             >
               {/* Instruction Overlay with High Contrast */}
               <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
-                <div className='inline-block px-8 py-4 rounded-[2rem] bg-white border-4 border-slate-200 shadow-sm transition-all duration-300 transform hover:scale-105'>
-                  <p className='text-slate-800 text-xl md:text-2xl font-black tracking-wide'>
+                <div className='inline-block px-8 py-4 rounded-[2rem] bg-[#F2CC8F] text-advay-slate shadow-[0_6px_0_#E5B86E] transition-all duration-300 transform hover:scale-105'>
+                  <p className='text-xl md:text-2xl font-extrabold tracking-wide'>
                     {isDrawing ? 'Trace the letter!' : 'Pinch 🤏 to draw'}
                   </p>
                 </div>
@@ -1275,11 +1344,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               {/* Pinch Status (hidden in mouse mode) */}
               {!useMouseMode && (
                 <div className='absolute top-28 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
-                  <div className='px-5 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-700 shadow-sm text-sm md:text-base font-bold'>
+                  <div className='px-5 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-sm md:text-base font-bold'>
                     {isHandPresent ? (
                       isPinching ? (
                         <span className='flex items-center gap-2'>
-                          <span className='inline-block w-3 h-3 rounded-full bg-pip-orange shadow-sm' />
+                          <span className='inline-block w-3 h-3 rounded-full bg-pip-orange shadow-[0_4px_0_#E5B86E]' />
                           Pinching… Draw!
                         </span>
                       ) : (
@@ -1301,20 +1370,20 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               {/* Consistent letter prompt - stays in one place */}
               {isPlaying && showLetterPrompt && (
                 <div className='absolute top-4 left-4 z-10'>
-                  <div className='bg-white px-6 py-5 rounded-[2rem] border-4 border-slate-200 text-slate-800 shadow-sm'>
+                  <div className='bg-white px-6 py-5 rounded-[2rem] border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
                     <div className='flex items-center gap-4'>
                       {/* Big letter */}
                       <div
-                        className={`text-5xl md:text-6xl font-black leading-none ${letterColorClass}`}
+                        className={`text-5xl md:text-6xl font-black leading-none text-advay-slate`}
                       >
                         {currentLetter.char}
                       </div>
                       {/* Letter name and instruction */}
                       <div className='flex flex-col'>
-                        <span className='text-xs md:text-sm font-bold uppercase tracking-widest text-slate-400'>
+                        <span className='text-xs md:text-sm font-bold uppercase tracking-widest text-text-secondary'>
                           Draw this letter
                         </span>
-                        <span className='text-base md:text-xl font-black text-slate-800 tracking-tight'>
+                        <span className='text-base md:text-xl font-extrabold text-advay-slate tracking-tight mt-1'>
                           {currentLetter.name}
                         </span>
                         {currentLetter.icon && (
@@ -1322,7 +1391,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                             <img
                               src={Array.isArray(currentLetter.icon) ? currentLetter.icon[0] : currentLetter.icon}
                               alt={currentLetter.name}
-                              className='w-full h-full object-contain drop-shadow-sm'
+                              className='w-full h-full object-contain drop-shadow-[0_4px_0_#E5B86E]'
                               onError={(e) => {
                                 // Hide broken images gracefully
                                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1364,23 +1433,23 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         </GameContainer>
       ) : (
         /* Pre-Game UI - Menu Screen */
-        <section className='max-w-7xl mx-auto px-4 py-6 md:py-8'>
+        <section className='bg-discovery-cream min-h-screen max-w-7xl mx-auto px-4 py-8 md:py-12'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             {/* Header */}
-            <header className='flex flex-col sm:flex-row justify-between items-start gap-4 mb-6'>
+            <header className='flex flex-col sm:flex-row justify-between items-start gap-4 mb-8'>
               <div>
-                <h1 className='text-2xl md:text-3xl font-bold'>
+                <h1 className='text-h1 md:text-[2.5rem] font-extrabold text-advay-slate tracking-tight'>
                   Learning Game
                 </h1>
-                <p className='text-text-secondary text-sm md:text-base'>
+                <p className='text-text-secondary text-base md:text-lg font-bold mt-2'>
                   Trace letters with your finger!
                 </p>
               </div>
-              <div className='bg-white border-4 border-slate-200 rounded-[1.25rem] px-5 py-4 shadow-sm w-full sm:w-auto'>
-                <output className='text-2xl md:text-3xl font-black text-[#10B981] block text-left sm:text-right mb-1'>
+              <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl px-6 py-5 shadow-[0_8px_0_#E5B86E] w-full sm:w-auto relative top-[-4px]'>
+                <output className='text-3xl md:text-4xl font-black text-pip-orange block text-left sm:text-right mb-1'>
                   Score: {score}
                 </output>
                 <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mt-1'>
@@ -1409,21 +1478,21 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               {/* Left column: current letter + status */}
               <div className='space-y-6'>
                 {/* Animated Letter Display */}
-                <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 shadow-sm'>
+                <div className='bg-discovery-cream border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 shadow-[0_8px_0_#E5B86E] relative top-[-4px]'>
                   <div className='flex flex-col items-center justify-center gap-6'>
                     <div className='text-center'>
                       <div
-                        className={`text-9xl md:text-[12rem] font-black mb-4 ${letterColorClass} drop-shadow-sm`}
+                        className={`text-9xl md:text-[12rem] font-black mb-4 text-advay-slate drop-shadow-[0_4px_0_#E5B86E]`}
                       >
                         {currentLetter.char}
                       </div>
                       {currentLetter.transliteration && (
-                        <div className='text-base md:text-xl text-slate-400 mt-2 font-black uppercase tracking-widest'>
+                        <div className='text-base md:text-lg text-text-secondary mt-2 font-black uppercase tracking-widest'>
                           {currentLetter.transliteration}
                         </div>
                       )}
                     </div>
-                    <div className='w-32 h-32 mb-4 bg-slate-50 rounded-[2rem] p-6 border-4 border-slate-100'>
+                    <div className='w-32 h-32 mb-4 bg-pip-cream rounded-3xl p-6 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
                       <UIIcon
                         src={getAllIcons(currentLetter)}
                         alt={currentLetter.name}
@@ -1433,11 +1502,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       />
                     </div>
                     <div className='text-center'>
-                      <div className='text-4xl font-black text-slate-800 tracking-tight'>
+                      <div className='text-4xl font-black text-advay-slate tracking-tight'>
                         {currentLetter.name}
                       </div>
                       {currentLetter.pronunciation && (
-                        <div className='text-xl text-slate-500 mt-3 font-bold'>
+                        <div className='text-xl text-text-secondary mt-3 font-bold'>
                           "{currentLetter.pronunciation}"
                         </div>
                       )}
@@ -1449,12 +1518,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className='bg-white border-4 border-slate-100 rounded-[1.5rem] p-5 shadow-sm'
+                  className='bg-white border-3 border-[#F2CC8F] rounded-2xl p-5 shadow-[0_4px_0_#E5B86E] relative top-[-2px]'
                 >
                   <div className='flex justify-between items-center mb-3'>
                     <label
                       htmlFor='accuracy-progress'
-                      className='text-slate-500 font-bold uppercase tracking-widest text-sm'
+                      className='text-text-secondary font-bold uppercase tracking-widest text-sm'
                     >
                       Tracing Accuracy
                     </label>
@@ -1519,12 +1588,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               {/* Right column: setup + start */}
               <div className='space-y-6'>
                 {/* Menu Screen */}
-                <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 text-center relative overflow-hidden shadow-sm'>
+                <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 text-center relative overflow-hidden shadow-[0_8px_0_#E5B86E] top-[-4px]'>
                   {/* Decorative elements */}
                   <div className='absolute inset-0 opacity-10 pointer-events-none'>
-                    <div className='absolute top-10 left-10 w-32 h-32 rounded-full bg-[#3B82F6] blur-3xl'></div>
-                    <div className='absolute bottom-20 right-16 w-40 h-40 rounded-full bg-[#E85D04] blur-3xl'></div>
-                    <div className='absolute top-1/2 right-1/4 w-24 h-24 rounded-full bg-[#10B981] blur-3xl'></div>
+                    <div className='absolute top-10 left-10 w-32 h-32 rounded-full bg-vision-blue blur-3xl'></div>
+                    <div className='absolute bottom-20 right-16 w-40 h-40 rounded-full bg-pip-orange blur-3xl'></div>
+                    <div className='absolute top-1/2 right-1/4 w-24 h-24 rounded-full bg-success blur-3xl'></div>
                   </div>
 
                   {/* Mascot Preview */}
@@ -1532,17 +1601,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     <Mascot state='happy' />
                   </div>
 
-                  <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 rounded-full flex items-center justify-center border-4 border-blue-100 relative z-10'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-pip-cream rounded-full flex items-center justify-center border-3 border-pip-orange/20 relative z-10'>
                     <img
                       src='/assets/images/onboarding-hand.svg'
                       alt='Hand tracking'
-                      className='w-20 h-20 object-contain drop-shadow-sm'
+                      className='w-20 h-20 object-contain drop-shadow-[0_4px_0_#E5B86E]'
                     />
                   </div>
-                  <h2 className='text-4xl font-black mb-4 text-slate-800 tracking-tight relative z-10'>
+                  <h2 className='text-h2 md:text-4xl font-black mb-4 text-advay-slate tracking-tight relative z-10'>
                     Ready to Learn?
                   </h2>
-                  <p className='text-slate-500 font-bold mb-10 max-w-sm mx-auto text-lg leading-relaxed relative z-10'>
+                  <p className='text-text-secondary font-bold mb-10 max-w-sm mx-auto text-lg leading-relaxed relative z-10'>
                     Use your hand to trace letters! The camera will track your
                     finger movements.
                   </p>
@@ -1565,9 +1634,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                               setSelectedLanguage(lang.code);
                               setCurrentLetterIndex(0);
                             }}
-                            className={`px-6 py-3 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
-                              ? 'bg-pip-orange text-white shadow-soft-lg'
-                              : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white'
+                            className={`px-6 py-3 rounded-2xl font-extrabold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
+                              ? 'bg-pip-orange text-white shadow-[0_6px_0_#D4561C] relative top-[-6px]'
+                              : 'bg-discovery-cream text-advay-slate border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-4px] hover:bg-white'
                               }`}
                           >
                             <span className='mr-3 text-xl'>{lang.flag}</span>
@@ -1662,16 +1731,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className='bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-slate-200'
+              className='bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-3 border-[#F2CC8F]'
             >
-              <div className='flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-4 border-blue-100'>
+              <div className='flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-3 border-blue-100'>
                 <Mascot state='waiting' message='Paused! Take a breather.' />
               </div>
               <div className='text-center mb-8'>
-                <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-2'>
+                <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-2'>
                   Game Paused
                 </h2>
-                <p className='text-slate-500 font-bold text-lg'>
+                <p className='text-text-secondary font-bold text-lg'>
                   Your progress is saved. Ready to continue?
                 </p>
               </div>
@@ -1682,7 +1751,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     setIsPaused(false);
                     setFeedback("Welcome back! Let's draw more letters! 🎨");
                   }}
-                  className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-3'
+                  className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 flex items-center justify-center gap-3'
                 >
                   <UIIcon name='check' size={28} />
                   Resume Game
@@ -1693,7 +1762,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     setIsPaused(false);
                     setShowExitModal(true);
                   }}
-                  className='w-full px-6 py-4 min-h-[64px] bg-slate-50 text-slate-600 border-4 border-slate-200 rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3'
+                  className='w-full px-6 py-4 min-h-[64px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3'
                 >
                   <UIIcon name='home' size={24} />
                   Exit to Home

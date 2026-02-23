@@ -13,10 +13,37 @@ This index consolidates all persona interview findings. For complete transcripts
 | Neha (Safety-First) | WORKLOG_TICKETS.md (TCK-20260223-001) | ✅ DONE | 6 P0/P1 features implemented |
 | Vikram (Data-Driven) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-007) | ✅ DONE | 7 findings, 6 recommendations |
 | Ananya (Working Mom) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-008) | ✅ DONE | 8 findings, 7 recommendations |
+| Dadi (Non-Tech Guardian) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-009) | ✅ DONE | 9 findings, Hindi UI critical |
+| Dr. Meera Sharma (Child Psychologist) | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | ✅ DONE | 8 findings, cognitive load focus |
 
-**Total Interviews Completed**: 3  
-**Total Findings Documented**: 21  
-**Total Recommendations**: 19 (11 P0, 8 P1)
+**Total Interviews Completed**: 5  
+**Total Findings Documented**: 38  
+**Total Recommendations**: 34 (19 P0, 15 P1)  
+**Technical Audits**: 1 (Language Infrastructure Gap — TCK-20260223-010)  
+**Implementations Completed**: 2 (Global i18n Infrastructure — TCK-20260223-011, Extended UI Translations — TCK-20260223-012)
+
+## Critical Technical Discovery → RESOLVED
+
+**TCK-20260223-010: Language Infrastructure Gap**  
+**TCK-20260223-011: Global i18n Infrastructure** ✅
+
+Dadi's finding "Hindi. Poora app Hindi mein hona chahiye" is now **addressed**:
+
+| Before | After (TCK-20260223-011) |
+|--------|--------------------------|
+| ❌ No i18n library | ✅ react-i18next implemented |
+| ❌ No translation files | ✅ 15 languages configured |
+| ❌ Hardcoded English UI | ✅ Settings page translated (POC) |
+| ❌ ~500 strings to translate | ✅ Infrastructure ready for gradual translation |
+
+**Implementation Highlights:**
+- **15 Languages**: English, Hindi, Chinese, Spanish, Arabic + 10 Indian languages
+- **Lazy Loading**: Only active language loaded (performance optimized)
+- **RTL Support**: Arabic ready (direction switching)
+- **Auto-Detection**: Browser language → localStorage persistence
+- **Extensible**: Add new language in 3 steps (config, files, translate)
+
+**Next Phase**: Gradual UI translation (dashboard, games, auth namespaces)
 
 ---
 
@@ -75,7 +102,8 @@ This index consolidates all persona interview findings. For complete transcripts
 | 2   | Vikram — Data-Driven Father        | Progress Data & Metrics  | ✅ DONE | 2026-02-23 |
 | 3   | Ananya — Overwhelmed Working Mom   | Onboarding & Engagement  | ✅ DONE | 2026-02-23 |
 | 4   | Dadi — Non-Tech Guardian           | Accessibility & Language | ✅ DONE | 2026-02-23 |
-| 5   | TBD                                | TBD                      | 🔜 NEXT | —          |
+| 5   | Dr. Meera Sharma — Child Psychologist | Development & Cognition | ✅ DONE | 2026-02-23 |
+| 6   | TBD                                | TBD                      | 🔜 NEXT | —          |
 
 ---
 
@@ -262,7 +290,8 @@ Following the mandatory workflow:
 
 | Severity   | Finding                         | Impact                                                |
 | ---------- | ------------------------------- | ----------------------------------------------------- |
-| 🔴 CRITICAL| No Hindi support                | "Nahi toh main use nahi kar paungi" (Can't use it)   |
+| 🔴 CRITICAL| No Hindi UI support             | "Nahi toh main use nahi kar paungi" (Can't use it)   |
+| 🔴 CRITICAL| Language setting incomplete     | Only game content Hindi, UI stays English            |
 | 🔴 HIGH    | English-only UI barrier         | Feels "stupid" — was principal, now can't press button|
 | 🔴 HIGH    | Camera permission in English    | Always taps "Don't Allow" — game breaks               |
 | 🔴 HIGH    | Small text/icons invisible      | Not visible even with glasses                         |
@@ -313,65 +342,226 @@ Following the mandatory workflow:
 | **Payment**         | Secure, transparent pricing             | Justified by data vs tuition         | **UPI required**, price-sensitive      | Never pays — parent handles             |
 | **Trust Signals**   | Green dot, "video stays on device"      | Curriculum badges, accuracy slopes   | App doesn't crash, works offline       | Nothing breaks, can ask for help        |
 | **Churn Triggers**  | Privacy concerns, no time controls      | Flat data, no curriculum mapping     | **Crashes, no offline, complex setup** | **English UI, small text, errors**      |
-| **Key Decision**    | Converts trial → paid                   | Decides Month 3+ renewal             | Viral spread (200+ WhatsApp group)     |
+| **Key Decision**    | Converts trial → paid                   | Decides Month 3+ renewal             | Viral spread (200+ WhatsApp group)     | Enables daily usage (childcare)         |
 
 ### Combined Insights
 
-Together, Neha, Vikram, and Ananya represent **three critical decision points**:
+Together, Neha, Vikram, Ananya, and Dadi represent **four critical ecosystem roles**:
 - **Neha** decides to *start* (safety, ease of use, child engagement)
 - **Vikram** decides to *continue* (learning proof, curriculum value, data)
 - **Ananya** decides to *recommend* (convenience, reliability, viral growth)
+- **Dadi** enables *daily usage* (grandparent caregiver, 9 AM - 5 PM coverage)
 
 **Coverage Gaps Identified**:
 
-| Area | Neha | Vikram | Ananya | Status |
-|------|------|--------|--------|--------|
-| Time tracking | ✅ | — | — | Implemented |
-| Struggle visibility | ✅ | — | — | Implemented |
-| Export/sharing | ✅ | ✅ | ✅ | Implemented |
-| Privacy indicators | ✅ | — | — | Implemented |
-| Guest mode | — | — | 🔴 | **P0 Gap** |
-| Offline mode | — | — | 🔴 | **P0 Gap** |
-| UPI payment | — | — | 🔴 | **P0 Gap** |
-| Skill breakdown charts | — | 🔴 | — | Pending |
-| Curriculum alignment | — | 🔴 | — | Pending |
-| Competitive benchmarking | — | 🔴 | — | Pending |
-| Automated weekly reports | — | 🔴 | — | Pending |
-| Crash stability | — | — | 🔴 | **P0 Gap** |
+| Area | Neha | Vikram | Ananya | Dadi | Status |
+|------|------|--------|--------|------|--------|
+| Time tracking | ✅ | — | — | — | Implemented |
+| Struggle visibility | ✅ | — | — | — | Implemented |
+| Export/sharing | ✅ | ✅ | ✅ | — | Implemented |
+| Privacy indicators | ✅ | — | — | — | Implemented |
+| **i18n Infrastructure** | — | — | — | ✅ | **DONE** (TCK-20260223-011) |
+| Guest mode | — | — | 🔴 | 🔴 | **P0 Gap** |
+| Offline mode | — | — | 🔴 | — | **P0 Gap** |
+| UPI payment | — | — | 🔴 | — | **P0 Gap** |
+| Hindi UI translation | — | — | — | 🟡 | In Progress (core) |
+| "Dadi Mode" (one button) | — | — | — | 🔴 | **P0 Gap** |
+| Large text mode | — | — | — | 🔴 | **P0 Gap** |
+| Pre-approved camera | — | — | — | 🔴 | **P0 Gap** |
+| Skill breakdown charts | — | 🔴 | — | — | Pending |
+| Curriculum alignment | — | 🔴 | — | — | Pending |
+| Competitive benchmarking | — | 🔴 | — | — | Pending |
+| Automated weekly reports | — | 🔴 | — | — | Pending |
+| Crash stability | — | — | 🔴 | — | **P0 Gap** |
 
 **Priority Matrix**:
+- ✅ **COMPLETED**: i18n Infrastructure (15 languages, lazy loading, RTL support) — TCK-20260223-011
+- **P0 (Critical)**: Hindi UI translation, "Dadi Mode", Large text mode, Pre-approved camera (Dadi blockers)
 - **P0 (Immediate)**: Guest mode, Offline mode, UPI payment, Crash fixes (Ananya blockers)
 - **P1 (Short-term)**: Skill breakdown, Curriculum alignment, Weekly reports (Vikram retention)
-- **P2 (Medium-term)**: Competitive benchmarking, Timed session mode (Nice-to-have)
+- **P2 (Medium-term)**: Competitive benchmarking, Timed session mode, Gesture guardrails (Nice-to-have)
 
 ---
 
 ## Next Interview Recommendation
 
-**Recommended**: Dadi — The Non-Tech Guardian
+**Recommended**: Ms. Deepa — The Preschool Teacher
 
 **Rationale**:
 
-- Only caregiver persona not yet interviewed (grandparent vs. parent)
-- Tests UI simplicity for non-English, non-tech users
-- Validates Hindi UI translation effectiveness (62, Hindi-only)
-- Critical for Indian market — grandparents often daytime caregivers
-- Different use case entirely: "Tap here, game starts" — nothing else
+- B2B channel not yet validated (₹100/student/year pricing)
+- Different use case: 25 children, 1 tablet, 45-minute activity periods
+- Institutional requirements vs. parent needs
+- Bulk reporting for parent-teacher meetings
+- Currently have 4 parent/caregiver perspectives — need institutional view
 
-**Suggested Focus Area**: 
-- One-button interface test
-- Hindi language support validation
-- Error recovery (what happens when she accidentally taps Settings?)
-- Camera permission flow (will always tap "Don't Allow" if in English)
-
-**Alternative**: Ms. Deepa — The Preschool Teacher
-- B2B channel validation (school pricing at ₹100/student/year)
-- Classroom mode requirements (25 kids, 1 tablet)
-- Bulk reporting needs
-- Different from parent personas (logistics vs. emotional)
+**Suggested Focus Area**:
+- Classroom mode: Quick-switch roster (25 profiles, no login per child)
+- Bulk progress reports ("15 of 25 mastered letter tracing")
+- Offline-first (school WiFi unreliable)
+- Audio fallback (visual instructions for noisy classrooms)
+- Curriculum mapping (NCERT/NEP learning outcomes for credibility)
 
 **Alternative**: Kabir — The Competitive Learner (Child)
-- Upper age boundary (7y 3m) — retention risk
-- "Babyish" UI feedback
+- Upper age boundary (7y 3m) — biggest churn risk
+- "Babyish" UI feedback (will tell father "this is boring")
 - Needs challenge/mastery validation
-- Different from toddler personas (Meera, Aarav)
+- Different from toddler personas (Aarav, Meera)
+- Would validate age-adaptive UI needs
+
+**Alternative**: Riya — The Parenting Micro-Influencer
+- Growth channel validation (₹80-120 CAC)
+- Shareable content requirements
+- Referral program needs
+- Authenticity concerns (will share broken features publicly)
+
+---
+
+### 5. Dr. Meera Sharma — Child Psychologist & Developmental Specialist
+
+**Date**: 2026-02-23  
+**Status**: ✅ COMPLETED  
+**Full Transcript**: `docs/personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md`
+
+#### Profile
+
+- **Age**: 42
+- **Location**: Mumbai, India
+- **Occupation**: Child Psychologist / Developmental Specialist
+- **Experience**: 15 years in child development, digital learning tools researcher
+- **Current Role**: Consultant for ed-tech startups, runs child development clinic
+- **Primary Concern**: Cognitive load, developmental appropriateness, screen time impact
+- **Key Trait**: Evaluates apps through lens of developmental psychology and cognitive science
+
+#### Interview Focus Area
+
+- Cognitive load assessment during gameplay
+- Dopamine/reward system analysis
+- Developmental appropriateness by age group
+- Physical development via hand-tracking games
+- Sensory sensitivity considerations
+
+#### Key Findings
+
+| Severity   | Finding                              | Impact                                                   |
+| ---------- | ------------------------------------ | -------------------------------------------------------- |
+| 🔴 HIGH    | Celebration cognitive overload       | 4+ simultaneous sensory inputs dilute learning           |
+| 🔴 HIGH    | No Calm Mode for sensory sensitivity | Children shut down with bright/fast stimuli              |
+| 🔴 HIGH    | Age ranges too broad (2-8 years)     | 2yo and 8yo are cognitively completely different         |
+| 🔴 HIGH    | Extrinsic rewards undermine motivation | Stars create dopamine loops, reduce intrinsic drive    |
+| 🟡 MEDIUM  | No adaptive difficulty               | Static Easy/Medium/Hard doesn't respond to performance   |
+| 🟡 MEDIUM  | Missing SEL opportunities            | No emotional coaching during failures                    |
+| 🟡 MEDIUM  | Parents as administrators only       | Missing co-learner features, conversation starters       |
+| ✅ POSITIVE| Hand-tracking supports physical dev  | Active movement vs passive screen time                   |
+
+#### Top Recommendations
+
+**P0 (Immediate)**:
+1. **Calm Mode** — Muted colors, slower animations, no background music for sensory-sensitive children
+2. **Reduce Celebration Overload** — Sequence celebrations (animation → wait 1s → voice), not simultaneous
+3. **Split Age Categories** — "Early Explorers (2-3)", "Little Learners (4-5)", "Big Kids (6-8)"
+
+**P1 (Medium-term)**:
+4. **Adaptive Difficulty** — Auto-adjust based on success/failure patterns
+5. **Reduce Extrinsic Rewards** — Option to hide stars, focus on process praise
+6. **SEL Integration** — Emotional coaching: "It's okay to feel frustrated"
+
+**Leverage (Marketing)**:
+7. **Market "Active Screen Time"** — Hand-tracking games require movement, unlike passive apps
+
+#### Critical Insight
+
+> *"Stars and rewards create dopamine loops. Children play for the reward, not the learning. That's addiction, not education."*
+
+> *"The hand-tracking is brilliant. Most screen time is passive. This is active. That's developmentally appropriate."*
+
+> *"Where's the 'Calm Mode'? Some children shut down with bright colors and fast sounds. You're losing them."*
+
+#### Related Worklog Tickets
+
+- TCK-20260223-013: Implement Calm Mode for Sensory-Sensitive Children
+- TCK-20260223-014: Reduce Celebration Cognitive Overload
+- TCK-20260223-015: Add Adaptive Difficulty System
+- TCK-20260223-016: Split Age Categories (2-3, 4-5, 6-8)
+
+---
+
+## Priority Matrix (All Personas)
+
+### P0 Critical (Implement Next)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Calm Mode for sensory sensitivity | Dr. Sharma | TCK-20260223-013 |
+| Reduce celebration cognitive overload | Dr. Sharma | TCK-20260223-014 |
+| Guest mode for instant play | Ananya | TCK-20260223-008 |
+| Offline mode for Tier 2/3 | Ananya | TCK-20260223-008 |
+| Hindi UI full translation | Dadi | TCK-20260223-012 (partial) |
+| UPI payment option | Ananya | TCK-20260223-008 |
+| App crash stability | Ananya | TCK-20260223-008 |
+| Dadi Mode (one-button interface) | Dadi | — |
+
+### P1 Important (Schedule Soon)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Adaptive difficulty system | Dr. Sharma | TCK-20260223-015 |
+| Split age categories (2-3, 4-5, 6-8) | Dr. Sharma | TCK-20260223-016 |
+| Skill breakdown with trends | Vikram | TCK-20260223-007 |
+| Weekly automated reports | Vikram | TCK-20260223-007 |
+| Curriculum alignment tags | Vikram | TCK-20260223-007 |
+| WhatsApp share integration | Ananya | TCK-20260223-008 |
+| Reduce extrinsic rewards option | Dr. Sharma | — |
+
+### P2 Nice-to-Have
+
+| Finding | Source |
+|---------|--------|
+| SEL emotional coaching | Dr. Sharma |
+| Parent co-learner features | Dr. Sharma |
+| Percentile benchmarking | Vikram |
+| CSV export for data parents | Vikram |
+| Competitive multiplayer | Kabir (future persona) |
+
+---
+
+## Remaining Persona Candidates
+
+### Ms. Deepa — The School Teacher
+
+- **Segment**: Primary school educators
+- **Concern**: Classroom integration, bulk progress reports, curriculum alignment
+- **Value**: B2B channel, credibility through school adoption
+- **Suggested Area**: Teacher dashboard, class management, NCERT/NEP mapping
+
+### Kabir — The Competitive Learner (Child, 7y)
+
+- **Segment**: Upper age boundary, biggest churn risk
+- **Concern**: "Babyish" UI, needs challenge, mastery validation
+- **Value**: Validates age-adaptive UI needs
+- **Suggested Area**: Challenge modes, leaderboards (appropriate), complexity scaling
+
+### Riya — The Parenting Micro-Influencer
+
+- **Segment**: Growth channel validation
+- **Concern**: Shareable content, referral programs, authenticity
+- **Value**: Viral growth, social proof
+- **Suggested Area**: Share features, referral mechanics, content creation tools
+
+---
+
+## Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| **Interviews Completed** | 5 |
+| **Total Findings** | 38 |
+| **Total Recommendations** | 34 |
+| **P0 Critical** | 19 |
+| **P1 Important** | 15 |
+| **Tickets Created** | 16 |
+| **Features Implemented** | 7 |
+
+---
+
+*Last Updated: 2026-02-23*

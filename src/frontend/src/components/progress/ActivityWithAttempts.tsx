@@ -62,20 +62,20 @@ export function ActivityWithAttempts({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="flex items-center gap-4 p-4 bg-white border-2 border-slate-100 rounded-2xl hover:border-slate-200 transition-colors"
+      className="flex items-center gap-4 p-4 bg-white border-2 border-[#F2CC8F] rounded-2xl hover:border-[#F2CC8F] transition-colors"
     >
       {/* Attention dot */}
       <StruggleDot attentionLevel={attentionLevel} size="md" />
 
       {/* Activity icon */}
-      <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center border-2 border-slate-100 shrink-0">
+      <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center border-2 border-[#F2CC8F] shrink-0">
         <UIIcon name={iconName as any} size={24} className="text-slate-400" />
       </div>
 
       {/* Activity info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h4 className="font-bold text-slate-800 truncate">{activityLabel}</h4>
+          <h4 className="font-bold text-advay-slate truncate">{activityLabel}</h4>
           <span className="text-xs text-slate-400 font-medium">
             {new Date(item.completed_at).toLocaleDateString('en-US', {
               month: 'short',
@@ -96,13 +96,13 @@ export function ActivityWithAttempts({
           {/* Attempts */}
           <div className="flex items-center gap-1">
             <span className="text-xs font-bold text-slate-400 uppercase">Attempts</span>
-            <span className={`font-black ${attempts > 3 ? 'text-orange-600' : 'text-slate-700'}`}>
+            <span className={`font-black ${attempts > 3 ? 'text-orange-600' : 'text-advay-slate'}`}>
               {attempts}
             </span>
           </div>
           
           {/* Format text */}
-          <span className="text-xs text-slate-500 font-medium">
+          <span className="text-xs text-text-secondary font-medium">
             ({formatAttempts(attempts)})
           </span>
         </div>
@@ -134,7 +134,7 @@ export function ActivityWithAttemptsCompact({
     <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
       <div className="flex items-center gap-2">
         <StruggleDot attentionLevel={attentionLevel} size="sm" />
-        <span className="font-semibold text-slate-700 text-sm">{activityLabel}</span>
+        <span className="font-semibold text-advay-slate text-sm">{activityLabel}</span>
       </div>
       <div className="flex items-center gap-3 text-xs">
         <span className={`font-bold ${getScoreColor(item.score)}`}>

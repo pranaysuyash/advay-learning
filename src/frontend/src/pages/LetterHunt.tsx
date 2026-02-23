@@ -10,7 +10,10 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -67,7 +70,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
 
   const [score, setScore] = useState<number>(0);
   const [level, setLevel] = useState<number>(1);
-  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [timeLeft, setTimeLeft] = useState<number>(60);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [gameCompleted, setGameCompleted] = useState<boolean>(false);
   const [targetLetter, setTargetLetter] = useState<string>('');
@@ -82,6 +85,8 @@ export const LetterHunt = memo(function LetterHuntComponent() {
 
   // Sound effects
   const { playCelebration, playSuccess, playError } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('letter-hunt');
 
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
@@ -93,6 +98,11 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     const randomIndex = Math.floor(Math.random() * alphabet.letters.length);
     const target = alphabet.letters[randomIndex].char;
     setTargetLetter(target);
+
+    // Announce the target letter with TTS
+    if (ttsEnabled) {
+      void speak(`Find the letter ${target}!`);
+    }
 
     const newOptions: LetterOption[] = [];
     newOptions.push({
@@ -121,7 +131,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     }
 
     setOptions(newOptions.sort(() => Math.random() - 0.5));
-  }, [round, gameStarted, alphabet]);
+  }, [round, gameStarted, alphabet, ttsEnabled, speak]);
 
   // Timer effect
   useEffect(() => {
@@ -155,6 +165,9 @@ export const LetterHunt = memo(function LetterHuntComponent() {
         playSuccess();
         setScore((prev) => prev + timeLeft * 5);
         setFeedback({ message: 'Correct! Great job!', type: 'success' });
+        if (ttsEnabled) {
+          void speak('Correct! Great job!');
+        }
         setTimeout(nextRound, 1500);
       } else {
         playError();
@@ -162,22 +175,33 @@ export const LetterHunt = memo(function LetterHuntComponent() {
           message: `Oops! That was ${option.char}, not ${targetLetter}`,
           type: 'error',
         });
+        if (ttsEnabled) {
+          void speak(`Try again! Find the letter ${targetLetter}!`);
+        }
         setTimeout(nextRound, 1500);
       }
     },
-    [targetLetter, timeLeft, playSuccess, playError],
+    [targetLetter, timeLeft, playSuccess, playError, speak, ttsEnabled],
   );
 
   const nextRound = () => {
     setFeedback(null);
-    setTimeLeft(30);
+    setTimeLeft(60);
 
     if (round >= totalRounds) {
       playCelebration();
       setShowCelebration(true);
+      if (ttsEnabled) {
+        if (level >= 3) {
+          void speak("You finished all levels! You're a letter expert!");
+        } else {
+          void speak('Level complete! Next level!');
+        }
+      }
       if (level >= 3) {
         setTimeout(() => {
           setShowCelebration(false);
+          onGameComplete();
           setGameCompleted(true);
         }, 2500);
       } else {
@@ -198,11 +222,15 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     setScore(0);
     setLevel(1);
     setRound(1);
-    setTimeLeft(30);
+    setTimeLeft(60);
     setCursor(null);
     setHoveredOptionIndex(null);
     setIsPinching(false);
     lastSelectAtRef.current = 0;
+
+    if (ttsEnabled) {
+      void speak('Find the target letter!');
+    }
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();
@@ -215,7 +243,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     setScore(0);
     setLevel(1);
     setRound(1);
-    setTimeLeft(30);
+    setTimeLeft(60);
     setFeedback(null);
     setCursor(null);
     setHoveredOptionIndex(null);
@@ -396,7 +424,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             {/* Camera Area */}
             <figure
               ref={cameraAreaRef}
-              className='relative w-full h-full overflow-hidden m-0 border-4 border-slate-100 rounded-[2.5rem]'
+              className='relative w-full h-full overflow-hidden m-0 border-3 border-[#F2CC8F] rounded-[2.5rem]'
             >
               <Webcam
                 ref={webcamRef}
@@ -410,7 +438,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
 
               {/* Top HUD */}
               <div className='absolute inset-x-0 top-0 p-6 flex flex-wrap gap-4 items-start justify-between pointer-events-none z-10'>
-                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-4 border-slate-200 shadow-sm'>
+                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                   <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-1'>Find this letter</div>
                   <div className='flex items-baseline gap-3'>
                     <div
@@ -418,16 +446,16 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                     >
                       {targetLetter}
                     </div>
-                    <div className='text-lg font-bold text-slate-600'>
+                    <div className='text-lg font-bold text-advay-slate'>
                       {targetLetterMeta?.name}
                     </div>
                   </div>
                 </div>
 
-                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-4 border-slate-200 shadow-sm text-right'>
-                  <div className='text-xl font-bold text-slate-500 mb-1'>Score: <span className='text-[#10B981] font-black'>{score}</span></div>
+                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-right'>
+                  <div className='text-xl font-bold text-text-secondary mb-1'>Score: <span className='text-[#10B981] font-black'>{score}</span></div>
                   <div className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
-                    Level {level} · Round {round}/{totalRounds} · <span className='text-[#F59E0B]'>{timeLeft}s</span>
+                    Level {level} · Round {round}/{totalRounds} · <span className='text-slate-400'>Take your time! 🌈</span>
                   </div>
                 </div>
               </div>
@@ -435,7 +463,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               {/* Tracking status */}
               {!isHandTrackingReady && (
                 <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'>
-                  <div className='bg-white/95 backdrop-blur-sm px-8 py-4 rounded-full border-4 border-slate-200 text-slate-700 shadow-sm font-bold text-lg'>
+                  <div className='bg-white/95 backdrop-blur-sm px-8 py-4 rounded-full border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] font-bold text-lg'>
                     {isModelLoading
                       ? 'Loading hand tracking…'
                       : 'Hand tracking unavailable'}
@@ -449,13 +477,13 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                   position={cursorViewport}
                   isPinching={isPinching}
                   isHandDetected={!useMouseFallback}
-                  size={64}
+                  size={84}
                 />
               )}
 
               {/* Options overlay */}
               <div className='absolute inset-x-0 bottom-0 p-6 z-10'>
-                <div className='bg-white/90 backdrop-blur-md rounded-[2rem] border-4 border-slate-100 p-6 shadow-sm'>
+                <div className='bg-white/90 backdrop-blur-md rounded-[2rem] border-3 border-[#F2CC8F] p-6 shadow-[0_4px_0_#E5B86E]'>
                   <div className='text-sm font-bold text-slate-400 mb-4 flex items-center justify-between uppercase tracking-wider'>
                     <span>Point with your index finger · Pinch to select</span>
                     <span className='text-amber-500'>
@@ -480,9 +508,9 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                               ? () => handleSelectOption(option)
                               : undefined
                           }
-                          className={`flex-1 min-w-0 rounded-[1.5rem] px-4 py-6 border-4 text-center transition-all min-h-[56px] ${hoveredOptionIndex === idx
-                            ? `border-[#10B981] bg-emerald-50 scale-105 shadow-sm`
-                            : `border-slate-100 bg-white hover:bg-slate-50 hover:scale-105 shadow-sm`
+                          className={`flex-1 min-w-0 rounded-[1.5rem] px-4 py-6 border-3 text-center transition-all min-h-[56px] ${hoveredOptionIndex === idx
+                            ? `border-[#10B981] bg-emerald-50 scale-105 shadow-[0_4px_0_#E5B86E]`
+                            : `border-[#F2CC8F] bg-white hover:bg-slate-50 hover:scale-105 shadow-[0_4px_0_#E5B86E]`
                             }`}
                         >
                           <div
@@ -490,7 +518,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                           >
                             {option.char}
                           </div>
-                          <div className='text-sm font-bold text-slate-500 truncate'>
+                          <div className='text-sm font-bold text-text-secondary truncate'>
                             {option.name}
                           </div>
                         </button>
@@ -505,7 +533,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-8 py-4 text-center font-bold text-xl pointer-events-none z-40 border-4 shadow-sm ${feedback.type === 'success'
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-8 py-4 text-center font-bold text-xl pointer-events-none z-40 border-3 shadow-[0_4px_0_#E5B86E] ${feedback.type === 'success'
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                     : 'bg-red-50 border-red-200 text-red-700'
                     }`}
@@ -546,13 +574,13 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             {/* Header */}
             <header className='flex justify-between items-center mb-10'>
               <div>
-                <h1 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight'>Letter Hunt</h1>
-                <p className='text-slate-500 font-bold text-lg mt-2'>
+                <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>Letter Hunt</h1>
+                <p className='text-text-secondary font-bold text-lg mt-2'>
                   Find the target letter among the options!
                 </p>
               </div>
 
-              <div className='text-right bg-white border-4 border-amber-100 rounded-[2rem] px-8 py-4 shadow-sm'>
+              <div className='text-right bg-white border-3 border-amber-100 rounded-[2rem] px-8 py-4 shadow-[0_4px_0_#E5B86E]'>
                 <output className='block text-3xl font-black text-amber-500'>
                   Score: {score}
                 </output>
@@ -569,10 +597,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             </header>
 
             {/* Game Area */}
-            <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 mb-8 shadow-sm flex-1 flex flex-col justify-center'>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 mb-8 shadow-[0_4px_0_#E5B86E] flex-1 flex flex-col justify-center'>
               {!gameStarted ? (
                 <div className='flex flex-col items-center justify-center py-6'>
-                  <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 border-4 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-sm hover:scale-110 transition-transform'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
                     <img
                       src='/assets/images/letter-hunt.svg'
                       alt='Letter Hunt'
@@ -580,21 +608,33 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         e.currentTarget.parentElement!.innerText = '🔎';
-                        e.currentTarget.parentElement!.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-4 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-sm hover:scale-110 transition-transform';
+                        e.currentTarget.parentElement!.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
                       }}
                     />
                   </div>
 
-                  <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-4'>
+                  <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-4'>
                     Letter Hunt Challenge
                   </h2>
-                  <p className='text-slate-500 font-bold text-lg mb-10 max-w-lg text-center leading-relaxed'>
+                  <p className='text-text-secondary font-bold text-lg mb-10 max-w-lg text-center leading-relaxed'>
                     Use your camera to control a cursor with your index finger,
                     then pinch (thumb + index) to select the matching letter.
                     Complete all rounds to advance to the next level.
                   </p>
 
                   {/* Standardized Menu Controls */}
+                  {ttsEnabled && (
+                    <VoiceInstructions
+                      instructions={[
+                        'Find the target letter.',
+                        'Point with your finger.',
+                        'Pinch to select!',
+                      ]}
+                      autoSpeak={true}
+                      showReplayButton={true}
+                      replayButtonPosition='bottom-right'
+                    />
+                  )}
                   <GameControls
                     controls={menuControls}
                     position='bottom-center'
@@ -603,15 +643,15 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               ) : (
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-8'>
-                  <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-4 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-sm hover:scale-110 transition-transform'>
+                  <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-3 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
                     🏆
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-3'>
                     Congratulations!
                   </h2>
-                  <p className='text-xl font-bold text-slate-500 mb-8'>You completed all levels!</p>
-                  <div className='text-3xl font-black text-amber-500 mb-10 bg-amber-50 px-8 py-4 rounded-full border-4 border-amber-100'>
+                  <p className='text-xl font-bold text-text-secondary mb-8'>You completed all levels!</p>
+                  <div className='text-3xl font-black text-amber-500 mb-10 bg-amber-50 px-8 py-4 rounded-full border-3 border-amber-100'>
                     Final Score: {score}
                   </div>
 
@@ -625,11 +665,11 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             </div>
 
             {/* Game Instructions */}
-            <div className='bg-slate-50 border-4 border-slate-100 rounded-[2rem] p-8 shadow-sm'>
-              <h2 className='text-xl font-black text-slate-700 tracking-tight mb-4'>
+            <div className='bg-slate-50 border-3 border-[#F2CC8F] rounded-[2rem] p-8 shadow-[0_4px_0_#E5B86E]'>
+              <h2 className='text-xl font-black text-advay-slate tracking-tight mb-4'>
                 How to Play
               </h2>
-              <ul className='space-y-3 text-slate-600 font-bold'>
+              <ul className='space-y-3 text-advay-slate font-bold'>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> A target letter appears on the camera screen</li>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Move your index finger to control the cursor</li>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Pinch (thumb + index) while hovering a tile to select it</li>

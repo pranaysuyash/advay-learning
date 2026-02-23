@@ -93,12 +93,12 @@ export function SimpleTutorial({ onComplete, onSkip, mode }: SimpleTutorialProps
             </motion.div>
 
             {/* Title */}
-            <h2 className='text-2xl md:text-3xl font-bold text-slate-800 mb-3'>
+            <h2 className='text-2xl md:text-3xl font-bold text-advay-slate mb-3'>
               {currentStepData.title}
             </h2>
 
             {/* Description */}
-            <p className='text-slate-600 text-lg leading-relaxed mb-4'>
+            <p className='text-advay-slate text-lg leading-relaxed mb-4'>
               {currentStepData.description}
             </p>
 
@@ -132,7 +132,7 @@ export function SimpleTutorial({ onComplete, onSkip, mode }: SimpleTutorialProps
           <div className='flex justify-between items-center gap-4'>
             <button
               onClick={onSkip}
-              className='px-4 py-2 text-slate-400 hover:text-slate-600 font-medium transition'
+              className='px-4 py-2 text-slate-400 hover:text-advay-slate font-medium transition'
             >
               Skip
             </button>

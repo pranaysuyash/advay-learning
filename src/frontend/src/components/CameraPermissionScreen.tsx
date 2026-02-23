@@ -47,10 +47,10 @@ export function CameraPermissionScreen({
             >
               👋
             </motion.div>
-            <h1 className='text-2xl md:text-3xl font-bold text-slate-800 mb-2'>
+            <h1 className='text-2xl md:text-3xl font-bold text-advay-slate mb-2'>
               Hi! I'm {mascotName}!
             </h1>
-            <p className='text-slate-600 text-lg'>
+            <p className='text-advay-slate text-lg'>
               Let's play and learn together!
             </p>
           </div>
@@ -71,7 +71,7 @@ export function CameraPermissionScreen({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onUseTouchMode}
-              className='w-full py-4 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-3 border-2 border-slate-200'
+              className='w-full py-4 px-6 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-3 border-2 border-[#F2CC8F]'
             >
               <UIIcon name='hand' size={24} />
               <span>Use Finger/Mouse 👆</span>
@@ -98,7 +98,7 @@ export function CameraPermissionScreen({
                 >
                   <div className='mt-3 bg-slate-100 rounded-xl p-4 aspect-video flex items-center justify-center'>
                     {/* Placeholder for demo video */}
-                    <div className='text-center text-slate-500'>
+                    <div className='text-center text-text-secondary'>
                       <UIIcon name='video' size={48} className='mx-auto mb-2 opacity-50' />
                       <p className='text-sm'>Demo video coming soon!</p>
                       <p className='text-xs mt-1'>Shows hand tracking in action</p>

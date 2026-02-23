@@ -7,9 +7,12 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
 import { findHitTarget } from '../games/hitTarget';
 import {
@@ -30,7 +33,7 @@ const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 3;
 
 // Touch-friendly sizing constants for kids
-const CURSOR_SIZE = 64; // Increased from 40 (10 * 4) for easier visibility
+const CURSOR_SIZE = 84; // Increased for easier visibility
 const TARGET_SIZE = 120; // Increased from 80 for kids' fingers
 
 export const WordBuilder = memo(function WordBuilderComponent() {
@@ -58,6 +61,8 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const timeLeftRef = useRef(timeLeft);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('word-builder');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -124,7 +129,10 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     const distractors = Math.min(3, 2 + Math.floor(levelRef.current / 2));
     setTargets(createLetterTargets(newWord, distractors, randomFloat01));
     setFeedback(`Spell: ${newWord}`);
-  }, []);
+    if (ttsEnabled) {
+      void speak(`Spell the word: ${newWord}!`);
+    }
+  }, [speak, ttsEnabled]);
 
   useEffect(() => {
     if (!isPlaying || gameCompleted) return;
@@ -142,6 +150,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     levelTimeoutRef.current = setTimeout(() => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
+        onGameComplete();
         setGameCompleted(true);
         setIsPlaying(false);
       } else {
@@ -190,18 +199,27 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
         if (nextStep >= currentWord.length) {
           setFeedback(`${currentWord} complete!`);
+          if (ttsEnabled) {
+            void speak(`Great job! You spelled ${currentWord}!`);
+          }
           triggerHaptic('celebration');
           completeWord();
         } else {
           setFeedback(`Great! Next: "${currentWord[nextStep]}"`);
+          if (ttsEnabled) {
+            void speak(`Great! Next letter: ${currentWord[nextStep]!}`);
+          }
         }
       } else {
         setFeedback(`That's "${hit.letter}". Find "${expectedLetter}".`);
+        if (ttsEnabled) {
+          void speak(`That's ${hit.letter}. Find ${expectedLetter}!`);
+        }
         void playError();
         triggerHaptic('error');
       }
     },
-    [completeWord, cursor, playError, playPop],
+    [completeWord, cursor, playError, playPop, speak, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
@@ -231,6 +249,9 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     setFeedback('Pinch letters to spell the word!');
     setCursor(null);
     setIsPlaying(true);
+    if (ttsEnabled) {
+      void speak('Spell the word by pinching the letters!');
+    }
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -302,7 +323,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           aria-hidden='true'
         />
 
-        <div className='absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-[3rem] border-[8px] border-slate-100 shadow-sm overflow-hidden'>
+        <div className='absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-[3rem] border-[8px] border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
           <Webcam
             ref={webcamRef}
             audio={false}
@@ -311,16 +332,18 @@ export const WordBuilder = memo(function WordBuilderComponent() {
             videoConstraints={{ facingMode: 'user' }}
           />
 
-          <div className='absolute top-8 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px] z-20'>
+          <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+
+          <div className='absolute top-8 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
             {feedback}
           </div>
 
-          <div className='absolute top-8 right-8 px-6 py-3 rounded-[1.5rem] bg-amber-50 border-4 border-amber-100 text-amber-500 font-black text-xl shadow-sm z-20'>
-            ⏰ <span className='text-amber-500'>{timeLeft}s</span>
+          <div className='absolute top-8 right-8 px-6 py-3 rounded-[1.5rem] bg-white/95 border-3 border-[#F2CC8F] text-slate-400 font-bold text-xl shadow-[0_4px_0_#E5B86E] z-20'>
+            Take your time! 🌈
           </div>
 
           {word && (
-            <div className='absolute top-8 left-8 px-8 py-4 rounded-[2rem] bg-white border-4 border-slate-100 shadow-sm z-20'>
+            <div className='absolute top-8 left-8 px-8 py-4 rounded-[2rem] bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] z-20'>
               <span className='font-black tracking-widest text-3xl flex gap-2'>
                 {word.split('').map((letter, i) => (
                   <span
@@ -357,7 +380,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                 aria-hidden='true'
               >
                 <div
-                  className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-5xl shadow-sm ${isExpected
+                  className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-5xl shadow-[0_4px_0_#E5B86E] ${isExpected
                       ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B] z-10 scale-110'
                       : 'border-[#3B82F6] bg-blue-50 text-[#3B82F6]'
                     }`}
@@ -382,16 +405,28 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
           {!isPlaying && !gameCompleted && (
             <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-40 flex items-center justify-center rounded-[2.5rem]'>
-              <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-                <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🔤</div>
-                <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Word Builder</h2>
-                <p className='text-slate-500 font-bold text-xl mb-10'>
+              <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
+                <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🔤</div>
+                <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Word Builder</h2>
+                <p className='text-text-secondary font-bold text-xl mb-10'>
                   Pinch the letters in the correct order!
                 </p>
+                {ttsEnabled && (
+                  <VoiceInstructions
+                    instructions={[
+                      'Spell the word.',
+                      'Find the letters in order.',
+                      'Pinch to select!',
+                    ]}
+                    autoSpeak={true}
+                    showReplayButton={true}
+                    replayButtonPosition='bottom-right'
+                  />
+                )}
                 <button
                   type='button'
                   onClick={startGame}
-                  className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+                  className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
                 >
                   Start Spelling
                 </button>
@@ -401,8 +436,8 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
           {gameCompleted && (
             <div className='absolute inset-0 bg-emerald-900/40 backdrop-blur-sm z-40 flex items-center justify-center rounded-[2.5rem]'>
-              <div className='bg-white border-4 border-emerald-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-                <div className='text-[6rem] mb-4 drop-shadow-sm'>🏆</div>
+              <div className='bg-white border-3 border-emerald-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
+                <div className='text-[6rem] mb-4 drop-shadow-[0_4px_0_#E5B86E]'>🏆</div>
                 <h2 className='text-4xl font-black text-[#10B981] mb-2'>
                   Word Master!
                 </h2>

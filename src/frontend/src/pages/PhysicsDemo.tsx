@@ -199,25 +199,25 @@ export default function PhysicsDemo() {
     <GameContainer title="Physics Demo" onHome={() => {}}>
       <div className="flex flex-col h-full bg-slate-50">
         {/* Stats Bar */}
-        <div className="flex justify-between items-center p-4 bg-white shadow-sm">
+        <div className="flex justify-between items-center p-4 bg-white shadow-[0_4px_0_#E5B86E]">
           <div className="flex gap-6">
             <div>
-              <span className="text-slate-500 text-sm">Score:</span>
+              <span className="text-text-secondary text-sm">Score:</span>
               <span className="font-bold text-blue-600 ml-2 text-xl">{gameState.score}</span>
             </div>
             <div>
-              <span className="text-slate-500 text-sm">Level:</span>
+              <span className="text-text-secondary text-sm">Level:</span>
               <span className="font-bold text-purple-600 ml-2">{gameState.level}</span>
             </div>
             <div>
-              <span className="text-slate-500 text-sm">Sorted:</span>
+              <span className="text-text-secondary text-sm">Sorted:</span>
               <span className="font-bold text-green-600 ml-2">{gameState.ballsSorted}</span>
             </div>
           </div>
           
           {/* Next Ball Preview */}
           <div className="flex items-center gap-3">
-            <span className="text-slate-500 text-sm">Next:</span>
+            <span className="text-text-secondary text-sm">Next:</span>
             <div
               className="w-8 h-8 rounded-full border-2 border-white shadow-md"
               style={{ backgroundColor: nextColor }}
@@ -244,7 +244,7 @@ export default function PhysicsDemo() {
           />
           
           {/* Instructions */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-slate-500 text-sm bg-white/80 px-4 py-2 rounded-lg">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center text-text-secondary text-sm bg-white/80 px-4 py-2 rounded-lg">
             Click anywhere to drop a ball! Match colors to the buckets.
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function PhysicsDemo() {
                   className="w-4 h-4 rounded-full"
                   style={{ backgroundColor: color.hex }}
                 />
-                <span className="text-xs text-slate-500">{color.name}</span>
+                <span className="text-xs text-text-secondary">{color.name}</span>
               </div>
             ))}
           </div>

@@ -8,6 +8,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { useAudio } from '../utils/hooks/useAudio';
+import '../styles/animations.css';
 import { useMicrophoneInput } from '../hooks/useMicrophoneInput';
 import {
   initializeGame,
@@ -25,21 +27,24 @@ const TARGET_FPS = 60;
 const FRAME_TIME = 1000 / TARGET_FPS;
 
 export default function BubblePop() {
+  // Audio
+  const { playClick, playLevelUp } = useAudio();
+
   // Game state
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
-  
+
   // Animation refs
   const lastFrameTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
-  
+
   // Keep ref in sync
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
-  
+
   // Microphone input for blow detection
   const { isActive, volume, isBlowing, error, start, stop } = useMicrophoneInput({
     blowThreshold: 0.25,
@@ -53,52 +58,53 @@ export default function BubblePop() {
       });
     },
   });
-  
+
   // Game loop
   const gameLoop = useCallback((timestamp: number) => {
     if (!lastFrameTimeRef.current) {
       lastFrameTimeRef.current = timestamp;
     }
-    
+
     const deltaTime = timestamp - lastFrameTimeRef.current;
-    
+
     if (deltaTime >= FRAME_TIME) {
       setGameState(prev => {
         let newState = updateBubbles(prev, deltaTime);
-        
+
         // Check for blow hits based on volume
         if (isActive && volume > 0.2) {
           newState = checkBlowHits(newState, volume);
         }
-        
+
         // Level up every 10 pops
-        if (newState.poppedCount > 0 && newState.poppedCount % 10 === 0 && 
-            newState.poppedCount !== prev.poppedCount) {
+        if (newState.poppedCount > 0 && newState.poppedCount % 10 === 0 &&
+          newState.poppedCount !== prev.poppedCount) {
           newState = { ...newState, level: Math.min(10, newState.level + 1) };
+          playLevelUp();
         }
-        
+
         return newState;
       });
-      
+
       lastFrameTimeRef.current = timestamp;
     }
-    
+
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [isActive, volume]);
-  
+  }, [isActive, volume, playLevelUp]);
+
   // Start/stop game loop
   useEffect(() => {
     if (gameState.isPlaying && !showMenu) {
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     }
-    
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [gameState.isPlaying, showMenu, gameLoop]);
-  
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -108,24 +114,26 @@ export default function BubblePop() {
       }
     };
   }, [stop]);
-  
+
   const handleStart = async () => {
+    playClick();
     // Start microphone
     await start();
-    
+
     setGameState(startGame(initializeGame()));
     setShowMenu(false);
     setShowCelebration(false);
   };
-  
+
   const handleStop = () => {
+    playClick();
     stop();
     setGameState(endGame(gameState));
     setShowMenu(true);
   };
-  
+
   const stats = getStats(gameState);
-  
+
   return (
     <GameContainer title="Bubble Pop" onHome={handleStop}>
       {/* Microphone permission/error display */}
@@ -134,15 +142,15 @@ export default function BubblePop() {
           {error}
         </div>
       )}
-      
+
       {showMenu ? (
         // Menu Screen
         <div className="flex flex-col items-center justify-center h-full p-6">
           <div className="text-8xl mb-4 animate-bounce">🫧</div>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bubble Pop!</h2>
-          
+
           {/* Goal Statement with Semantic Attributes */}
-          <div 
+          <div
             data-ux-goal="Blow into the microphone to pop bubbles and score points!"
             data-ux-instruction="Get close to the microphone and blow as hard as you can"
             data-ux-action="blow"
@@ -157,19 +165,19 @@ export default function BubblePop() {
               </div>
             </div>
           </div>
-          
+
           {/* Microphone Warning */}
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3">
             <span className="text-3xl">🎤</span>
             <div>
               <h3 className="font-bold text-yellow-800 mb-1">You need a microphone!</h3>
               <p className="text-yellow-700 text-sm">
-                This game uses your microphone to detect when you blow. 
+                This game uses your microphone to detect when you blow.
                 Make sure to <strong>allow microphone access</strong> when prompted.
               </p>
             </div>
           </div>
-          
+
           <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
             <ol className="text-blue-700 text-sm space-y-3">
@@ -191,7 +199,7 @@ export default function BubblePop() {
               </li>
             </ol>
           </div>
-          
+
           <button
             onClick={handleStart}
             className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
@@ -200,7 +208,7 @@ export default function BubblePop() {
             Start Blowing!
             <span>💨</span>
           </button>
-          
+
           <p className="text-xs text-slate-400 mt-4">
             First game with microphone input! 🔬
           </p>
@@ -224,15 +232,14 @@ export default function BubblePop() {
                 <span className="font-bold text-green-600 ml-1">{gameState.poppedCount}</span>
               </div>
             </div>
-            
+
             {/* Volume indicator */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500">Blow:</span>
               <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-75 ${
-                    isBlowing ? 'bg-red-500' : 'bg-blue-500'
-                  }`}
+                  className={`h-full transition-all duration-75 ${isBlowing ? 'bg-red-500' : 'bg-blue-500'
+                    }`}
                   style={{ width: `${volume * 100}%` }}
                 />
               </div>
@@ -241,24 +248,24 @@ export default function BubblePop() {
               )}
             </div>
           </div>
-          
+
           {/* Bubbles */}
           {gameState.bubbles.map((bubble) => (
             <BubbleView key={bubble.id} bubble={bubble} />
           ))}
-          
+
           {/* Blow effect overlay */}
           {isBlowing && (
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,${volume * 0.5}) 0%, transparent 50%)`,
               }}
             />
           )}
-          
+
           {/* Instructions Header with Semantic Attributes */}
-          <div 
+          <div
             data-ux-goal="Blow into the microphone to pop bubbles and score points!"
             data-ux-instruction="Get close to the microphone and blow as hard as you can"
             data-ux-action="blow"
@@ -270,7 +277,7 @@ export default function BubblePop() {
               <p className="font-black">GOAL: Blow into your microphone to pop bubbles! 💨</p>
             </div>
           </div>
-          
+
           {/* Instructions overlay at bottom */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border-4 border-blue-400 flex items-center gap-4">
@@ -281,15 +288,14 @@ export default function BubblePop() {
                 <p className="text-slate-500 text-sm mt-1">{isBlowing ? '💨 Great! Keep blowing!' : '👄 Get close to the mic and blow!'}</p>
               </div>
             </div>
-            
+
             {/* Visual blow meter */}
             <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
               <span className="text-sm font-bold text-slate-600">Blow Power:</span>
               <div className="w-32 h-4 bg-slate-200 rounded-full overflow-hidden border-2 border-slate-300">
                 <div
-                  className={`h-full transition-all duration-100 ${
-                    volume > 0.5 ? 'bg-red-500' : volume > 0.25 ? 'bg-yellow-500' : 'bg-blue-500'
-                  }`}
+                  className={`h-full transition-all duration-100 ${volume > 0.5 ? 'bg-red-500' : volume > 0.25 ? 'bg-yellow-500' : 'bg-blue-500'
+                    }`}
                   style={{ width: `${Math.min(100, volume * 100)}%` }}
                 />
               </div>
@@ -298,7 +304,7 @@ export default function BubblePop() {
           </div>
         </div>
       )}
-      
+
       {/* Celebration */}
       <CelebrationOverlay
         show={showCelebration}
@@ -314,9 +320,9 @@ export default function BubblePop() {
 // Bubble component
 function BubbleView({ bubble }: { bubble: Bubble }) {
   if (bubble.isPopped) return null;
-  
+
   const wobbleX = Math.sin(bubble.wobble) * 20;
-  
+
   return (
     <div
       className="absolute rounded-full transition-transform"

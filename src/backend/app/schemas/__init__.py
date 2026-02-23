@@ -8,6 +8,13 @@ from app.schemas.game import (
     GameList,
     GameUpdate,
 )
+from app.schemas.issue_report import (
+    IssueReportFinalize,
+    IssueReportResponse,
+    IssueReportSession,
+    IssueReportSessionCreate,
+    IssueReportUploadResponse,
+)
 from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
 from app.schemas.progress import Progress, ProgressCreate, ProgressUpdate
 from app.schemas.token import Token, TokenPayload
@@ -32,4 +39,9 @@ __all__ = [
     "GameUpdate",
     "GameList",
     "GameFilter",
+    "IssueReportSessionCreate",
+    "IssueReportSession",
+    "IssueReportUploadResponse",
+    "IssueReportFinalize",
+    "IssueReportResponse",
 ]

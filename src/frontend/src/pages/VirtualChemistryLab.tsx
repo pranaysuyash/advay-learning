@@ -4,7 +4,9 @@ import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -114,9 +116,11 @@ export function VirtualChemistryLab() {
   const [discoveredReactions, setDiscoveredReactions] = useState<Set<string>>(new Set());
   const [isPouring, setIsPouring] = useState(false);
   const [bubbles, setBubbles] = useState<Array<{ x: number; y: number; size: number; speed: number }>>([]);
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { playSuccess, playPop } = useSoundEffects();
+  const { onGameComplete } = useGameDrops('chemistry-lab');
 
   useGameSessionProgress({
     gameName: 'Virtual Chemistry Lab',
@@ -367,15 +371,15 @@ export function VirtualChemistryLab() {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <motion.div
-          className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-12 text-center max-w-md w-full shadow-sm'
+          className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
           <div className='text-6xl mb-6'>🧪</div>
-          <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-2'>
+          <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-2'>
             Loading Chemistry Lab
           </h2>
-          <p className='text-slate-500 font-bold'>Getting safety goggles ready...</p>
+          <p className='text-text-secondary font-bold'>Getting safety goggles ready...</p>
         </motion.div>
       </div>
     );
@@ -388,15 +392,15 @@ export function VirtualChemistryLab() {
       <header className='flex justify-between items-center mb-6 max-w-7xl mx-auto'>
         <button
           onClick={() => navigate('/dashboard')}
-          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] font-bold text-slate-500 transition-colors shadow-sm'
+          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-bold text-text-secondary transition-colors shadow-[0_4px_0_#E5B86E]'
         >
           <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M10 19l-7-7m0 0l7-7m-7 7h18' /></svg>
           <span className='hidden sm:inline'>Back</span>
         </button>
-        <h1 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight text-center flex-1'>
+        <h1 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight text-center flex-1'>
           Virtual Chemistry Lab
         </h1>
-        <div className='bg-amber-50 border-4 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-sm flex items-center gap-2'>
+        <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
           ⭐ {score}
         </div>
       </header>
@@ -404,9 +408,9 @@ export function VirtualChemistryLab() {
       <div className='max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Chemical Shelf */}
         <div className='lg:col-span-1 space-y-6'>
-          <div className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-6 shadow-sm'>
-            <h2 className='text-2xl font-black text-slate-800 tracking-tight mb-2'>Chemical Shelf</h2>
-            <p className='text-slate-500 font-bold mb-6'>
+          <div className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-6 shadow-[0_4px_0_#E5B86E]'>
+            <h2 className='text-2xl font-black text-advay-slate tracking-tight mb-2'>Chemical Shelf</h2>
+            <p className='text-text-secondary font-bold mb-6'>
               Select a chemical, then pinch your fingers over the beaker to pour!
             </p>
 
@@ -415,9 +419,9 @@ export function VirtualChemistryLab() {
                 <motion.button
                   key={chemical.id}
                   onClick={() => setSelectedChemical(chemical)}
-                  className={`p-4 rounded-[1.5rem] border-4 transition-all text-left ${selectedChemical?.id === chemical.id
+                  className={`p-4 rounded-[1.5rem] border-3 transition-all text-left ${selectedChemical?.id === chemical.id
                     ? 'border-[#3B82F6] bg-blue-50'
-                    : 'border-slate-100 hover:border-slate-300 bg-white'
+                    : 'border-[#F2CC8F] hover:border-slate-300 bg-white'
                     }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -426,17 +430,17 @@ export function VirtualChemistryLab() {
                     className='w-12 h-12 rounded-full mb-3 shadow-inner'
                     style={{ backgroundColor: chemical.color }}
                   />
-                  <div className='text-sm font-black text-slate-700 tracking-wide'>{chemical.symbol}</div>
-                  <div className='text-xs font-bold text-slate-500 truncate'>{chemical.name}</div>
+                  <div className='text-sm font-black text-advay-slate tracking-wide'>{chemical.symbol}</div>
+                  <div className='text-xs font-bold text-text-secondary truncate'>{chemical.name}</div>
                 </motion.button>
               ))}
             </div>
           </div>
 
           {/* Discovery Book */}
-          <div className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-6 shadow-sm'>
+          <div className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-6 shadow-[0_4px_0_#E5B86E]'>
             <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-2xl font-black text-slate-800 tracking-tight'>
+              <h2 className='text-2xl font-black text-advay-slate tracking-tight'>
                 Discovery Book 📖
               </h2>
               <span className='bg-[#10B981]/10 text-[#10B981] px-3 py-1 rounded-full text-sm font-black'>
@@ -449,9 +453,9 @@ export function VirtualChemistryLab() {
                 return (
                   <div
                     key={reaction.id}
-                    className={`p-4 rounded-[1.5rem] border-4 transition-colors ${isDiscovered
+                    className={`p-4 rounded-[1.5rem] border-3 transition-colors ${isDiscovered
                       ? 'bg-emerald-50 border-emerald-100'
-                      : 'bg-slate-50 border-slate-100 opacity-60'
+                      : 'bg-slate-50 border-[#F2CC8F] opacity-60'
                       }`}
                   >
                     <div className={`font-black text-lg ${isDiscovered ? 'text-[#10B981]' : 'text-slate-400'}`}>
@@ -473,21 +477,21 @@ export function VirtualChemistryLab() {
         <div className='lg:col-span-2 flex flex-col'>
           {!isPlaying ? (
             <motion.div
-              className='bg-white rounded-[2.5rem] border-4 border-slate-100 p-8 md:p-12 shadow-sm flex flex-col items-center justify-center flex-1 text-center'
+              className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] flex flex-col items-center justify-center flex-1 text-center'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className='text-[7rem] mb-6 drop-shadow-sm hover:scale-110 transition-transform'>🧪⚗️</div>
+              <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🧪⚗️</div>
               <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
                 Virtual Chemistry Lab
               </h2>
-              <p className='text-slate-500 text-xl font-bold mb-10 max-w-lg'>
+              <p className='text-text-secondary text-xl font-bold mb-10 max-w-lg'>
                 Mix chemicals and discover amazing reactions!
               </p>
 
-              <div className='bg-[#FFF8F0] border-4 border-slate-100 rounded-[2rem] p-8 mb-10 w-full text-left'>
-                <h3 className='font-black text-slate-700 text-2xl mb-4'>How to Experiment:</h3>
-                <ul className='space-y-3 text-slate-600 font-bold text-lg'>
+              <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-10 w-full text-left'>
+                <h3 className='font-black text-advay-slate text-2xl mb-4'>How to Experiment:</h3>
+                <ul className='space-y-3 text-advay-slate font-bold text-lg'>
                   <li className='flex items-center gap-3'><span className='text-2xl'>1️⃣</span> Select a chemical from the shelf</li>
                   <li className='flex items-center gap-3'><span className='text-2xl'>2️⃣</span> Pinch your thumb and index finger together</li>
                   <li className='flex items-center gap-3'><span className='text-2xl'>3️⃣</span> Move your hand over the beaker to pour</li>
@@ -497,7 +501,7 @@ export function VirtualChemistryLab() {
 
               <button
                 onClick={() => setIsPlaying(true)}
-                className='w-full max-w-md py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-full shadow-sm transition-transform hover:scale-[1.02] active:scale-95'
+                className='w-full max-w-md py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-full shadow-[0_4px_0_#E5B86E] transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Experimenting! 🔬
               </button>
@@ -505,7 +509,7 @@ export function VirtualChemistryLab() {
           ) : (
             <div className='flex flex-col h-full space-y-6'>
               {/* Camera + Canvas */}
-              <div className='relative rounded-[2.5rem] overflow-hidden border-4 border-slate-100 shadow-sm bg-slate-100 flex-1 min-h-[400px]'>
+              <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
                 <Webcam
                   ref={webcamRef}
                   className='absolute inset-0 w-full h-full object-cover'
@@ -527,7 +531,7 @@ export function VirtualChemistryLab() {
                 </div>
 
                 {selectedChemical && (
-                  <div className='absolute top-6 right-6 px-6 py-3 bg-[#3B82F6] backdrop-blur-md rounded-full border-4 border-blue-400 shadow-sm'>
+                  <div className='absolute top-6 right-6 px-6 py-3 bg-[#3B82F6] backdrop-blur-md rounded-full border-3 border-blue-400 shadow-[0_4px_0_#E5B86E]'>
                     <span className='text-white font-black tracking-wide'>
                       Selected: {selectedChemical.name}
                     </span>
@@ -549,14 +553,20 @@ export function VirtualChemistryLab() {
               {/* Controls */}
               <div className='flex gap-4'>
                 <button
+                  onClick={() => setIsIssueModalOpen(true)}
+                  className='flex-1 py-4 bg-amber-50 hover:bg-amber-100 border-3 border-amber-200 text-amber-700 rounded-[1.5rem] font-black text-lg transition-colors'
+                >
+                  Report Issue 🎥
+                </button>
+                <button
                   onClick={clearBeaker}
-                  className='flex-1 py-4 bg-red-50 hover:bg-red-100 border-4 border-red-200 text-red-600 rounded-[1.5rem] font-black text-lg transition-colors'
+                  className='flex-1 py-4 bg-red-50 hover:bg-red-100 border-3 border-red-200 text-red-600 rounded-[1.5rem] font-black text-lg transition-colors'
                 >
                   🗑️ Empty Beaker
                 </button>
                 <button
-                  onClick={() => setIsPlaying(false)}
-                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-100 text-slate-500 rounded-[1.5rem] font-black text-lg transition-colors'
+                  onClick={() => { onGameComplete(); setIsPlaying(false); }}
+                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] text-text-secondary rounded-[1.5rem] font-black text-lg transition-colors'
                 >
                   ⏹️ Stop Experiment
                 </button>
@@ -564,15 +574,15 @@ export function VirtualChemistryLab() {
 
               {/* Beaker Contents Display */}
               {beakerContents.length > 0 && (
-                <div className='bg-white rounded-[2rem] border-4 border-slate-100 p-6 shadow-sm'>
-                  <h3 className='font-black text-slate-800 mb-4 text-xl'>Beaker Contents:</h3>
+                <div className='bg-white rounded-[2rem] border-3 border-[#F2CC8F] p-6 shadow-[0_4px_0_#E5B86E]'>
+                  <h3 className='font-black text-advay-slate mb-4 text-xl'>Beaker Contents:</h3>
                   <div className='flex flex-wrap gap-3'>
                     {beakerContents.map((content) => {
                       const chemical = CHEMICALS.find((c) => c.id === content.chemicalId);
                       return (
                         <span
                           key={content.chemicalId}
-                          className='px-4 py-2 rounded-full text-base font-bold shadow-sm border border-black/5'
+                          className='px-4 py-2 rounded-full text-base font-bold shadow-[0_4px_0_#E5B86E] border border-black/5'
                           style={{
                             backgroundColor: content.color,
                             color: content.chemicalId === 'baking-soda' || content.chemicalId === 'vinegar' ? '#333' : '#FFF',
@@ -601,22 +611,22 @@ export function VirtualChemistryLab() {
             onClick={() => setShowReactionEffect(false)}
           >
             <motion.div
-              className='bg-white rounded-[3rem] border-4 border-slate-100 p-12 text-center shadow-2xl max-w-md w-full'
+              className='bg-white rounded-[3rem] border-3 border-[#F2CC8F] p-12 text-center shadow-2xl max-w-md w-full'
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
             >
-              <div className='text-[7rem] mb-6 drop-shadow-sm'>
+              <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
                 {lastReaction.effect === 'bubble' ? '🫧' : '🎉'}
               </div>
               <h2 className='text-4xl font-black text-[#10B981] mb-4 tracking-tight'>
                 {lastReaction.name}!
               </h2>
-              <p className='text-slate-500 font-bold text-xl mb-8'>
+              <p className='text-text-secondary font-bold text-xl mb-8'>
                 {lastReaction.description}
               </p>
               <div
-                className='w-32 h-32 rounded-full mx-auto border-4 border-slate-100 shadow-inner'
+                className='w-32 h-32 rounded-full mx-auto border-3 border-[#F2CC8F] shadow-inner'
                 style={{ backgroundColor: lastReaction.resultColor }}
               />
               <p className='text-sm font-bold text-slate-400 mt-8 uppercase tracking-widest'>Tap to see more</p>
@@ -624,6 +634,20 @@ export function VirtualChemistryLab() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <IssueReportFlowModal
+        isOpen={isIssueModalOpen}
+        onClose={() => setIsIssueModalOpen(false)}
+        sourceCanvas={canvasRef.current}
+        gameId='virtual-chemistry-lab'
+        activityId='mixing-experiment'
+        cameraMaskRegion={{
+          x: 16,
+          y: 344,
+          width: 160,
+          height: 120,
+        }}
+      />
     </div>
   );
 }

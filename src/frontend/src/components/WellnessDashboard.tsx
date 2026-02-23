@@ -108,7 +108,7 @@ const WellnessDashboard: React.FC<WellnessDashboardProps> = ({
   const attentionStatus = getWellnessStatus(metrics.attentionScore);
 
   return (
-    <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+    <div className='bg-white/10 border border-border rounded-xl p-6 shadow-[0_4px_0_#E5B86E]'>
       <div className='flex justify-between items-center mb-6'>
         <h2 className='text-xl font-bold text-white'>
           Child Wellness Dashboard

@@ -497,14 +497,17 @@ export default function DressForWeather() {
 
       {/* Weather indicator */}
       {gameStarted && (
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] px-8 py-4 border-4 border-slate-200 shadow-sm flex items-center gap-6'>
-          <span className='text-5xl drop-shadow-sm'>{level.weatherEmoji}</span>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] px-8 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] flex items-center gap-6'>
+          <span className='text-5xl drop-shadow-[0_4px_0_#E5B86E]'>{level.weatherEmoji}</span>
           <div>
-            <h2 className='text-2xl font-black text-slate-800 tracking-tight m-0'>
+            <h2 className='text-2xl font-black text-advay-slate tracking-tight m-0'>
               {level.weatherName}
             </h2>
-            <p className='text-lg font-bold text-slate-500 m-0'>
+            <p className='text-lg font-bold text-text-secondary m-0'>
               Score: <span className='text-[#10B981]'>{score}</span>
+            </p>
+            <p className='text-sm font-bold text-slate-400 m-0 mt-1'>
+              Take your time! 🌈
             </p>
           </div>
         </div>
@@ -513,22 +516,22 @@ export default function DressForWeather() {
       {/* Start screen */}
       {!gameStarted && (
         <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-slate-50/40 backdrop-blur-sm z-20'>
-          <div className='flex flex-col items-center justify-center bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center max-w-2xl w-[90%]'>
-            <div className='w-32 h-32 mb-6 bg-slate-50 rounded-[2rem] p-6 border-4 border-slate-100 flex items-center justify-center text-[5rem] drop-shadow-md hover:scale-110 transition-transform cursor-pointer'>
+          <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
+            <div className='w-32 h-32 mb-6 bg-slate-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center text-[5rem] drop-shadow-md hover:scale-110 transition-transform cursor-pointer'>
               🌦️
             </div>
 
-            <h1 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-4 drop-shadow-sm'>
+            <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>
               Dress for Weather 👕
             </h1>
 
-            <p className='text-slate-500 font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
+            <p className='text-text-secondary font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
               Dress the character for different weather! Drag the right clothes!
             </p>
 
             <button
               onClick={startGame}
-              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-sm transition-all hover:scale-105 active:scale-95'
+              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
               Start Game! 🚀
             </button>
@@ -562,11 +565,13 @@ export default function DressForWeather() {
       {gameStarted && isHandDetected && (
         <GameCursor
           position={cursorPosition}
-          size={70}
+          size={84}
           isPinching={isPinching}
           isHandDetected={isHandDetected}
           showTrail={true}
           pulseAnimation={true}
+          highContrast={true}
+          icon='👆'
         />
       )}
 

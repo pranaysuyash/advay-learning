@@ -7,6 +7,7 @@ import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -76,6 +77,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
   const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('shape-sequence');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -136,6 +138,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     levelTimeoutRef.current = setTimeout(() => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
+        onGameComplete();
         setGameCompleted(true);
         setIsPlaying(false);
         if (ttsEnabled) {
@@ -299,17 +302,17 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg'>
           <span className='text-slate-400'>Take your time! 🌈</span>
         </div>
 
-        <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg flex items-center gap-3'>
+        <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
           Sequence:
-          <span className='font-black text-2xl tracking-widest text-[#D946EF] drop-shadow-sm ml-2'>
+          <span className='font-black text-2xl tracking-widest text-[#D946EF] drop-shadow-[0_4px_0_#E5B86E] ml-2'>
             {sequenceShapes.join(' ')}
           </span>
         </div>
@@ -324,7 +327,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-[2rem] border-[6px] shadow-sm flex items-center justify-center font-black text-5xl transition-colors ${isExpected
+                className={`absolute inset-0 rounded-[2rem] border-[6px] shadow-[0_4px_0_#E5B86E] flex items-center justify-center font-black text-5xl transition-colors ${isExpected
                     ? 'border-[#D946EF] bg-fuchsia-50 text-[#D946EF]'
                     : 'border-[#3B82F6] bg-white text-[#3B82F6]'
                   }`}
@@ -351,16 +354,16 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
         {!isPlaying && !gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🔢</div>
-              <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Shape Sequence</h2>
-              <p className='text-slate-500 font-bold text-xl mb-10'>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🔢</div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Shape Sequence</h2>
+              <p className='text-text-secondary font-bold text-xl mb-10'>
                 Pinch the shapes in the shown order.
               </p>
               <button
                 type='button'
                 onClick={startGame}
-                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Shape Sequence
               </button>
@@ -383,11 +386,11 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
         {gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🏆</div>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🏆</div>
               <h2 className='text-4xl font-black text-[#D946EF] tracking-tight mb-2'>Sequence Master!</h2>
-              <p className='text-xl font-bold text-slate-500 mb-8'>Incredible job memorizing the order!</p>
-              <div className='inline-block bg-amber-50 border-4 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+              <p className='text-xl font-bold text-text-secondary mb-8'>Incredible job memorizing the order!</p>
+              <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
                 Final Score: {score}
               </div>
             </div>

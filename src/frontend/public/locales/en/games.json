@@ -1,0 +1,53 @@
+{
+  "header": {
+    "title": "Play &",
+    "highlight": "Discover",
+    "subtitle": "Explore worlds, collect items, and discover amazing things."
+  },
+  "stats": {
+    "gamesReady": "Games<br/>Ready",
+    "playingAs": "Playing as"
+  },
+  "worlds": {
+    "all": "✨ All Worlds"
+  },
+  "gameCard": {
+    "playIn": "Play in {{language}}",
+    "jumpIn": "Jump In!",
+    "years": "years"
+  },
+  "info": {
+    "special": {
+      "title": "What Makes This Special",
+      "features": [
+        "Your hands and body ARE the controller — no buttons needed",
+        "Collect items, discover recipes, and find hidden easter eggs",
+        "Explore different worlds — each one full of surprises",
+        "100% ad-free and runs privately on your device"
+      ]
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "steps": [
+        "Alphabet Tracing uses the language from your child's profile.",
+        "Change language in Settings or by editing their profile card.",
+        "Progress & Stars are tracked separately for each learning language!",
+        "Allow camera access on the next screen to play safely."
+      ],
+      "cameraWarning": "Allow camera access on the next screen to play safely."
+    }
+  },
+  "profilePicker": {
+    "title": "Who's Playing?",
+    "subtitle": "Select a profile to start playing",
+    "addNew": "+ Add New Profile",
+    "cancel": "Cancel & Go Back"
+  },
+  "languages": {
+    "en": "English",
+    "hi": "Hindi",
+    "kn": "Kannada",
+    "te": "Telugu",
+    "ta": "Tamil"
+  }
+}

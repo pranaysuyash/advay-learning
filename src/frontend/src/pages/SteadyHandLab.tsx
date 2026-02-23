@@ -9,7 +9,10 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
 import { pickTargetPoint, updateHoldProgress } from '../games/steadyHandLogic';
 import type { Point } from '../types/tracking';
@@ -24,7 +27,7 @@ import {
 const TARGET_RADIUS = 0.18; // Increased from 0.12 for kids' easier targeting
 
 // Touch-friendly sizing constants for kids
-const CURSOR_SIZE = 64; // Increased from 40 for easier visibility
+const CURSOR_SIZE = 84; // Increased for easier visibility
 const TARGET_SIZE = 160; // Increased for kids' fingers
 
 export const SteadyHandLab = memo(function SteadyHandLabComponent() {
@@ -47,6 +50,8 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
 
   const { playSuccess, playError, playCelebration, playStart } =
     useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('steady-hand-lab');
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;
@@ -127,6 +132,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         holdProgressRef.current = 0;
         setHoldProgress(0);
         setFeedback('Excellent control! New target unlocked.');
+        if (ttsEnabled) {
+          void speak('Great job! You held steady!');
+        }
         void playSuccess();
         triggerHaptic('success');
 
@@ -134,6 +142,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           setShowCelebration(true);
           triggerHaptic('celebration');
           void playCelebration();
+          if (ttsEnabled) {
+            void speak('Amazing! You are doing great!');
+          }
           celebrationTimeoutRef.current = window.setTimeout(
             () => setShowCelebration(false),
             3000,
@@ -147,6 +158,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         nextProgress < currentProgress
       ) {
         setFeedback('Almost there. Move back into the ring and hold steady.');
+        if (ttsEnabled && currentProgress > 0.6) {
+          void speak('Keep your finger inside the ring!');
+        }
         if (currentProgress > 0.6 && nextProgress < 0.35) {
           void playError();
           triggerHaptic('error');
@@ -161,6 +175,8 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
       playSuccess,
       round,
       target,
+      speak,
+      ttsEnabled,
     ],
   );
 
@@ -190,6 +206,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     holdProgressRef.current = 0;
     setHoldProgress(0);
     pickNextTarget();
+    if (ttsEnabled) {
+      void speak('Hold your finger inside the ring!');
+    }
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -198,6 +217,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   };
 
   const resetGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     setCursor(null);
     holdProgressRef.current = 0;
@@ -262,7 +282,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
@@ -277,14 +299,14 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           aria-hidden='true'
         >
           <div
-            className='absolute inset-0 rounded-full border-[8px] border-[#10B981] shadow-sm'
+            className='absolute inset-0 rounded-full border-[8px] border-[#10B981] shadow-[0_4px_0_#E5B86E]'
             style={{
               transform: `scale(${ringScale})`,
               transition: 'transform 100ms linear',
             }}
           />
-          <div className='absolute inset-4 rounded-full border-4 border-emerald-200/60' />
-          <div className='absolute inset-x-6 bottom-4 h-3 rounded-full bg-white/50 overflow-hidden border-2 border-slate-200/50'>
+          <div className='absolute inset-4 rounded-full border-3 border-emerald-200/60' />
+          <div className='absolute inset-x-6 bottom-4 h-3 rounded-full bg-white/50 overflow-hidden border-2 border-[#F2CC8F]/50'>
             <div
               className='h-full bg-[#10B981] transition-[width] duration-100 rounded-full'
               style={{ width: `${holdProgress * 100}%` }}
@@ -306,16 +328,28 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
 
         {!isPlaying && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
-            <div className='bg-white border-4 border-slate-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-sm'>
-              <div className='text-[5rem] mb-4 drop-shadow-sm hover:scale-110 transition-transform'>🖐️</div>
-              <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4'>Steady Hand</h2>
-              <p className='text-slate-500 font-bold text-xl mb-10'>
+            <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🖐️</div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Steady Hand</h2>
+              <p className='text-text-secondary font-bold text-xl mb-10'>
                 Hold your finger steady inside the rings!
               </p>
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Hold your finger inside the ring.',
+                    'Keep it steady!',
+                    'Fill the bar to win!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
               <button
                 type='button'
                 onClick={startGame}
-                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-sm text-2xl transition-transform hover:scale-[1.02] active:scale-95'
+                className='w-full px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black rounded-full shadow-[0_4px_0_#E5B86E] text-2xl transition-transform hover:scale-[1.02] active:scale-95'
               >
                 Start Steady Hand
               </button>

@@ -344,7 +344,7 @@ export default function BubblePopSymphony() {
   }, [speak]);
 
   return (
-    <div className='w-screen h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 relative'>
+    <div className='w-screen h-screen overflow-hidden bg-discovery-cream relative'>
       <Webcam
         ref={webcamRef}
         audio={false}
@@ -364,12 +364,12 @@ export default function BubblePopSymphony() {
 
       {gameStarted && (
         <>
-          <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white rounded-[1.5rem] px-8 py-4 border-4 border-slate-200 shadow-sm'>
-            <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight m-0 drop-shadow-sm'>
+          <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white rounded-[1.5rem] px-8 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+            <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight m-0 drop-shadow-[0_4px_0_#E5B86E]'>
               🎵 Score: <span className="text-[#10B981]">{score}</span>
             </h2>
           </div>
-          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-base shadow-sm'>
+          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-base shadow-[0_4px_0_#E5B86E]'>
             Take your time 🌈 Pop the bubbles!
           </div>
         </>
@@ -377,24 +377,24 @@ export default function BubblePopSymphony() {
 
       {!gameStarted && (
         <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-white/40 backdrop-blur-sm z-20'>
-          <div className='flex flex-col items-center justify-center bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center max-w-2xl w-[90%]'>
-            <div className='w-32 h-32 mb-6 bg-blue-50 rounded-[2rem] p-6 border-4 border-slate-100'>
+          <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
+            <div className='w-32 h-32 mb-6 bg-blue-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F]'>
               <div className='text-[5rem] leading-none drop-shadow-md hover:scale-110 transition-transform cursor-pointer'>
                 🎈
               </div>
             </div>
 
-            <h1 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-4 drop-shadow-sm'>
+            <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>
               Bubble Pop Symphony 🎵
             </h1>
 
-            <p className='text-slate-500 font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
+            <p className='text-text-secondary font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
               Pop the bubbles by pinching them! Each one makes a musical note!
             </p>
 
             <button
               onClick={startGame}
-              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-sm transition-all hover:scale-105 active:scale-95'
+              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
               Start Game! 🚀
             </button>

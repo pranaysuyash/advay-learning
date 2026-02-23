@@ -17,11 +17,12 @@
  * - Supports mouse fallback
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { Mascot } from '../components/Mascot';
+import { useAudio } from '../utils/hooks/useAudio';
+import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
@@ -40,6 +41,9 @@ import {
 } from '../games/storySequenceLogic';
 
 export default function StorySequence() {
+  // ===== AUDIO =====
+  const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
+  
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentStory, setCurrentStory] = useState<SequenceStory | null>(null);
@@ -65,6 +69,13 @@ export default function StorySequence() {
   const poolRef = useRef<HTMLDivElement>(null);
   const isPinchingRef = useRef(false);
   const dragSourceRef = useRef<{ type: 'slot' | 'pool'; index: number } | null>(null);
+  
+  // ===== AUDIO EFFECTS =====
+  useEffect(() => {
+    if (lastPlacedSlot !== null && gameState && isSlotCorrect(gameState.slots, lastPlacedSlot)) {
+      playSuccess();
+    }
+  }, [lastPlacedSlot, gameState]);
   
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
@@ -176,6 +187,9 @@ export default function StorySequence() {
     });
     
     if (droppedInSlot !== null) {
+      // Play flip sound when placing card
+      playFlip();
+      
       // Place card in slot
       const { newSlots, newPool } = placeCard(
         draggedCard,
@@ -309,6 +323,7 @@ export default function StorySequence() {
   
   // ===== GAME FLOW =====
   const startGame = (storyId: string) => {
+    playClick();
     const story = STORY_SEQUENCES.find(s => s.id === storyId);
     if (!story) return;
     
@@ -321,6 +336,7 @@ export default function StorySequence() {
   };
   
   const handleGameComplete = () => {
+    playCelebration();
     setShowCelebration(true);
     if (gameState) {
       setGameState({ ...gameState, completed: true });
@@ -328,6 +344,7 @@ export default function StorySequence() {
   };
   
   const handleNextStory = () => {
+    playClick();
     // Pick a different story
     const availableStories = STORY_SEQUENCES.filter(s => s.id !== selectedStoryId);
     const nextStory = availableStories[Math.floor(Math.random() * availableStories.length)];
@@ -335,6 +352,7 @@ export default function StorySequence() {
   };
   
   const handleShowMenu = () => {
+    playClick();
     setShowMenu(true);
     setGameState(null);
     setCurrentStory(null);
@@ -342,6 +360,7 @@ export default function StorySequence() {
   };
   
   const handleShowHint = () => {
+    playClick();
     if (!gameState) return;
     const hint = getHint(gameState);
     if (hint) {
@@ -371,9 +390,19 @@ export default function StorySequence() {
       {showMenu ? (
         // ===== STORY SELECTION MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <Mascot state="happy" responsiveSize="lg" className="mb-4" />
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Put the Story in Order!</h2>
-          <p className="text-slate-600 mb-6 text-center max-w-md">
+          {/* Story Book Icon */}
+          <div className="relative mb-4">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg animate-float">
+              <svg viewBox="0 0 100 100" className="w-16 h-16 text-white">
+                <rect x="15" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.9" />
+                <rect x="50" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.7" />
+                <line x1="50" y1="25" x2="50" y2="75" stroke="white" strokeWidth="2" />
+              </svg>
+            </div>
+            <div className="absolute -top-2 -right-2 text-3xl animate-bounce">✨</div>
+          </div>
+          <h2 className="text-2xl font-bold text-advay-slate mb-2">Put the Story in Order!</h2>
+          <p className="text-advay-slate mb-6 text-center max-w-md">
             Drag the picture cards to arrange them in the right order. 
             Watch how stories happen from start to finish!
           </p>
@@ -383,12 +412,12 @@ export default function StorySequence() {
             data-ux-goal="Arrange the picture cards in the right order to tell the story!"
             data-ux-instruction="Drag cards from the bottom to the numbered slots above"
             onClick={() => startGame('butterfly')}
-            className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-4 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105 animate-pulse"
+            className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-3 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105"
           >
             🚀 Start Adventure! 🚀
           </button>
           
-          <p className="text-slate-500 text-sm mb-4">Or pick your own story:</p>
+          <p className="text-text-secondary text-sm mb-4">Or pick your own story:</p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full">
             {STORY_SEQUENCES.map(story => {
@@ -397,10 +426,10 @@ export default function StorySequence() {
                 <button
                   key={story.id}
                   onClick={() => startGame(story.id)}
-                  className="bg-white border-2 border-slate-200 hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-sm"
+                  className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-[0_4px_0_#E5B86E]"
                 >
                   <div className="text-4xl mb-2">{story.cards[0]?.emoji}</div>
-                  <h3 className="font-bold text-slate-800 text-sm mb-1 group-hover:text-blue-500">
+                  <h3 className="font-bold text-advay-slate text-sm mb-1 group-hover:text-blue-500">
                     {story.title}
                   </h3>
                   <p className={`text-xs ${diff.color} font-medium`}>{diff.label}</p>
@@ -410,7 +439,7 @@ export default function StorySequence() {
             })}
           </div>
           
-          <div className="mt-6 flex items-center gap-2 text-slate-500 text-sm bg-blue-50 px-4 py-2 rounded-xl">
+          <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm bg-blue-50 px-4 py-2 rounded-xl">
             <span className="text-2xl">✋</span>
             <span>Pinch and drag with your hand, or use your mouse!</span>
           </div>
@@ -442,11 +471,11 @@ export default function StorySequence() {
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">{currentStory?.title}</h2>
-              <p className="text-slate-600 text-sm">{currentStory?.description}</p>
+              <h2 className="text-xl font-bold text-advay-slate">{currentStory?.title}</h2>
+              <p className="text-advay-slate text-sm">{currentStory?.description}</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-slate-600 text-sm">
+              <div className="text-advay-slate text-sm">
                 Correct: <span className="text-green-500 font-bold">{correctCount}/{totalSlots}</span>
               </div>
               <button
@@ -520,9 +549,9 @@ export default function StorySequence() {
             {/* Card Pool */}
             <div
               ref={poolRef}
-              className="bg-white border-2 border-slate-200 rounded-xl p-4 min-h-[120px]"
+              className="bg-white border-2 border-[#F2CC8F] rounded-xl p-4 min-h-[120px]"
             >
-              <p className="text-slate-500 text-sm mb-3 text-center">
+              <p className="text-text-secondary text-sm mb-3 text-center">
                 {gameState?.pool.length === 0 
                   ? 'All cards placed! Is the order correct?' 
                   : 'Drag cards from here to the numbered slots above'}
@@ -551,14 +580,14 @@ export default function StorySequence() {
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="bg-white rounded-2xl p-8 text-center max-w-md">
                 <div className="text-6xl mb-4">🎉</div>
-                <h3 className="text-2xl font-bold text-slate-800 mb-2">Story Complete!</h3>
-                <p className="text-slate-600 mb-4">
+                <h3 className="text-2xl font-bold text-advay-slate mb-2">Story Complete!</h3>
+                <p className="text-advay-slate mb-4">
                   Great job arranging the {currentStory?.title.toLowerCase()} story!
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={handleShowMenu}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-lg transition-colors"
                   >
                     Back to Menu
                   </button>

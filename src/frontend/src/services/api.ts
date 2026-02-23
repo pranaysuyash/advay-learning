@@ -1,4 +1,11 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import type {
+  IssueReportFinalizePayload,
+  IssueReportResponse,
+  IssueReportSessionCreatePayload,
+  IssueReportSessionResponse,
+  IssueReportUploadResponse,
+} from '../types/issueReporting';
 
 const env = (import.meta as any).env ?? {};
 const API_VERSION = env.VITE_API_VERSION || 'v1';
@@ -23,10 +30,12 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as any;
 
-    if (error.response?.status === 401 && originalRequest) {
-      // Token expired, try to refresh using cookie
+    // Only attempt refresh once per request to prevent infinite loops
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
         // The refresh endpoint reads refresh_token from cookie and sets new cookies
         await axios.post(
@@ -125,6 +134,22 @@ export const progressApi = {
     apiClient.post('/progress/', data, { params: { profile_id: profileId } }),
   getStats: (profileId: string) =>
     apiClient.get('/progress/stats', { params: { profile_id: profileId } }),
+};
+
+// Issue Reporting API
+export const issueReportsApi = {
+  createSession: (payload: IssueReportSessionCreatePayload) =>
+    apiClient.post<IssueReportSessionResponse>('/issue-reports/sessions', payload),
+
+  uploadClip: (reportId: string, formData: FormData) =>
+    apiClient.post<IssueReportUploadResponse>(`/issue-reports/${reportId}/clip`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+
+  finalizeReport: (reportId: string, payload: IssueReportFinalizePayload) =>
+    apiClient.post<IssueReportResponse>(`/issue-reports/${reportId}/finalize`, payload),
 };
 
 export default apiClient;

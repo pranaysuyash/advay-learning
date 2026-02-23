@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store';
 import { authApi } from '../services/api';
@@ -7,6 +8,7 @@ import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
 
 export function Login() {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +49,7 @@ export function Login() {
 
     // Basic client-side validation only on explicit submit
     if (!email.trim() || !password.trim()) {
-      setInlineError('Please enter your email and password.');
+      setInlineError(t('login.errors.emptyFields'));
       if (!email.trim()) {
         emailInputRef.current?.focus();
       } else {
@@ -98,11 +100,11 @@ export function Login() {
         <div className='relative z-10 text-center flex flex-col items-center max-w-lg'>
           <Mascot state='happy' responsiveSize='lg' className='mb-8 drop-shadow-2xl' />
           <h1 className='text-5xl font-extrabold text-white mb-6 leading-tight'>
-            Learn with your <br />
-            <span className='text-yellow-300'>whole body.</span>
+            {t('login.title').split(t('login.highlight'))[0]} <br />
+            <span className='text-yellow-300'>{t('login.highlight')}</span>
           </h1>
           <p className='text-xl text-white/90 font-medium'>
-            Join Pip on a magical learning adventure where moving is learning!
+            {t('login.subtitle')}
           </p>
         </div>
       </div>
@@ -113,8 +115,8 @@ export function Login() {
         <header className='p-6 lg:p-8 flex justify-between items-center z-10'>
           <Link
             to='/'
-            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-slate-200 text-slate-600 hover:border-[#E85D04] hover:text-[#E85D04] hover:scale-105 transition shadow-sm'
-            aria-label='Back to home'
+            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#E85D04] hover:text-[#E85D04] hover:scale-105 transition shadow-[0_4px_0_#E5B86E]'
+            aria-label={t('aria.backToHome')}
           >
             <UIIcon name='back' size={24} />
           </Link>
@@ -129,8 +131,8 @@ export function Login() {
             animate={{ opacity: 1, y: 0 }}
             className='w-full'
           >
-            <h2 className='text-4xl font-extrabold text-slate-800 mb-2'>Welcome Back!</h2>
-            <p className='text-lg text-slate-500 font-medium mb-8'>Ready for more adventures?</p>
+            <h2 className='text-4xl font-extrabold text-advay-slate mb-2'>Welcome Back!</h2>
+            <p className='text-lg text-text-secondary font-medium mb-8'>Ready for more adventures?</p>
 
             {(error || inlineError) && (
               <div className='bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 font-medium shadow-[0_4px_0_0_rgba(239,68,68,0.2)]'>
@@ -152,7 +154,7 @@ export function Login() {
 
             <form onSubmit={handleSubmit} className='space-y-5' noValidate>
               <div>
-                <label htmlFor='email-input' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                <label htmlFor='email-input' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                   Email Address
                 </label>
                 <div className='relative group'>
@@ -166,8 +168,8 @@ export function Login() {
                       setEmail(e.target.value);
                       if (inlineError) setInlineError('');
                     }}
-                    className='w-full bg-white border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all shadow-sm'
-                    placeholder='parent@example.com'
+                    className='w-full bg-white border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all shadow-[0_4px_0_#E5B86E]'
+                    placeholder={t('login.emailPlaceholder')}
                     required
                   />
                 </div>
@@ -175,7 +177,7 @@ export function Login() {
 
               <div>
                 <div className='flex justify-between items-center mb-2 px-1'>
-                  <label htmlFor='password-input' className='text-sm font-bold text-slate-700'>
+                  <label htmlFor='password-input' className='text-sm font-bold text-advay-slate'>
                     Password
                   </label>
                   <Link to='/forgot-password' className='text-sm font-bold text-[#3B82F6] hover:text-blue-700 hover:underline'>
@@ -194,20 +196,20 @@ export function Login() {
                       if (inlineError) setInlineError('');
                     }}
                     onKeyDown={handleKeyDown}
-                    className='w-full bg-white border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-12 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all shadow-sm'
-                    placeholder='••••••••'
+                    className='w-full bg-white border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-12 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all shadow-[0_4px_0_#E5B86E]'
+                    placeholder={t('login.passwordPlaceholder')}
                     required
                   />
                   <button
                     type='button'
                     onClick={() => setShowPassword(!showPassword)}
-                    className='absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1 transition-colors'
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className='absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-advay-slate focus:outline-none p-1 transition-colors'
+                    aria-label={showPassword ? t('aria.hidePassword') : t('aria.showPassword')}
                   >
                     <UIIcon name={showPassword ? 'eye-off' : 'eye'} size={20} />
                   </button>
                 </div>
-                {capsLockOn && <p className='mt-2 text-sm font-bold text-amber-600 px-1'>⚠️ Caps Lock is on</p>}
+                {capsLockOn && <p className='mt-2 text-sm font-bold text-amber-600 px-1'>{t('login.capsLockWarning')}</p>}
               </div>
 
               {showResend && (
@@ -216,22 +218,22 @@ export function Login() {
                   onClick={handleResendVerification}
                   className='text-sm font-bold text-[#E85D04] hover:text-orange-700 hover:underline px-1 w-full text-left'
                 >
-                  Didn't receive verification email? Resend it.
+                  {t('login.resendVerification')}
                 </button>
               )}
 
               <button
                 type='submit'
                 disabled={isLoading}
-                className='w-full py-4 mt-6 bg-[#E85D04] hover:bg-[#D4561C] text-white font-black text-xl rounded-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
+                className='w-full py-4 mt-6 bg-[#E85D04] hover:bg-[#D4561C] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
               >
                 {isLoading ? (
                   <span className='flex items-center justify-center gap-2'>
-                    <UIIcon name={'loader' as any} className='animate-spin' size={24} /> Logging in...
+                    <UIIcon name={'loader' as any} className='animate-spin' size={24} /> {t('login.loadingText')}
                   </span>
                 ) : (
                   <span className='flex items-center justify-center gap-2'>
-                    Let's Go! <span className='group-hover:translate-x-1 transition-transform'>🚀</span>
+                    {t('login.submitButton')} <span className='group-hover:translate-x-1 transition-transform'>🚀</span>
                   </span>
                 )}
               </button>
@@ -239,9 +241,9 @@ export function Login() {
 
             <div className='mt-10 text-center'>
               <div className='relative flex items-center mb-6'>
-                <div className='flex-grow border-t-2 border-slate-200'></div>
-                <span className='flex-shrink-0 mx-4 text-slate-400 font-bold uppercase tracking-wider text-sm'>Or</span>
-                <div className='flex-grow border-t-2 border-slate-200'></div>
+                <div className='flex-grow border-t-2 border-[#F2CC8F]'></div>
+                <span className='flex-shrink-0 mx-4 text-slate-400 font-bold uppercase tracking-wider text-sm'>{t('login.divider')}</span>
+                <div className='flex-grow border-t-2 border-[#F2CC8F]'></div>
               </div>
 
               <button
@@ -251,12 +253,12 @@ export function Login() {
                   // Timeout helps router settle before redirect
                   setTimeout(() => navigate('/dashboard'), 50);
                 }}
-                className='w-full py-3.5 bg-white text-slate-700 font-bold text-lg rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-3 active:scale-[0.98]'
+                className='w-full py-3.5 bg-white text-advay-slate font-bold text-lg rounded-2xl border-2 border-[#F2CC8F] hover:border-slate-300 hover:bg-slate-50 transition shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3 active:scale-[0.98]'
               >
-                <span className='text-2xl'>🌟</span> Try as Guest
+                <span className='text-2xl'>🌟</span> {t('login.guestButton')}
               </button>
 
-              <p className='mt-8 text-slate-500 font-medium text-lg'>
+              <p className='mt-8 text-text-secondary font-medium text-lg'>
                 New here?{' '}
                 <Link to='/register' className='text-[#E85D04] font-bold hover:underline ml-1'>
                   Create an account

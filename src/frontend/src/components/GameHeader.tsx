@@ -74,20 +74,20 @@ export const GameHeader = memo(function GameHeader({
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8 pointer-events-none"
         >
             {/* Left side - Title and back button */}
-            <div className="flex items-center gap-4 bg-white/80 p-3 pr-6 rounded-[2rem] border-4 border-white shadow-sm backdrop-blur-md">
+            <div className="flex items-center gap-4 bg-white/80 p-3 pr-6 rounded-[2rem] border-3 border-white shadow-[0_4px_0_#E5B86E] backdrop-blur-md">
                 {showBackButton && (
                     <button
                         onClick={handleBack}
-                        className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-[1.25rem] border-2 border-slate-200 transition-colors focus:outline-none focus:border-[#3B82F6] pointer-events-auto shadow-sm"
+                        className="p-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-[1.25rem] border-2 border-[#F2CC8F] transition-colors focus:outline-none focus:border-[#3B82F6] pointer-events-auto shadow-[0_4px_0_#E5B86E]"
                         aria-label="Go back"
                     >
                         <UIIcon name="back" size={24} />
                     </button>
                 )}
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{title}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black text-advay-slate tracking-tight">{title}</h1>
                     {subtitle && (
-                        <p className="text-slate-500 font-bold text-sm sm:text-base mt-0.5">{subtitle}</p>
+                        <p className="text-text-secondary font-bold text-sm sm:text-base mt-0.5">{subtitle}</p>
                     )}
                 </div>
             </div>
@@ -97,7 +97,7 @@ export const GameHeader = memo(function GameHeader({
 
                 {/* Level display */}
                 {level !== undefined && (
-                    <div className="flex items-center gap-2 bg-[#3B82F6] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                    <div className="flex items-center gap-2 bg-[#3B82F6] px-4 py-2 sm:py-3 rounded-[1.25rem] border-3 border-[#000000] shadow-[0_4px_0_0_#000000]">
                         <span className="text-sm font-bold text-blue-100 uppercase tracking-widest">Level</span>
                         <span className="font-black text-white text-lg sm:text-xl">{level}</span>
                     </div>
@@ -105,7 +105,7 @@ export const GameHeader = memo(function GameHeader({
 
                 {/* Score display */}
                 {score !== undefined && (
-                    <div className="flex items-center gap-2 bg-[#E85D04] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                    <div className="flex items-center gap-2 bg-[#E85D04] px-4 py-2 sm:py-3 rounded-[1.25rem] border-3 border-[#000000] shadow-[0_4px_0_0_#000000]">
                         <UIIcon name="star" size={20} className="text-yellow-300" />
                         <output className="font-black text-white text-lg sm:text-xl">{score}</output>
                     </div>
@@ -113,7 +113,7 @@ export const GameHeader = memo(function GameHeader({
 
                 {/* Streak display */}
                 {streak !== undefined && streak > 0 && (
-                    <div className="flex items-center gap-2 bg-[#F59E0B] px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000]">
+                    <div className="flex items-center gap-2 bg-[#F59E0B] px-4 py-2 sm:py-3 rounded-[1.25rem] border-3 border-[#000000] shadow-[0_4px_0_0_#000000]">
                         <span className="text-yellow-100 text-lg">🔥</span>
                         <span className="font-black text-white text-lg sm:text-xl">{streak}</span>
                     </div>
@@ -121,7 +121,7 @@ export const GameHeader = memo(function GameHeader({
 
                 {/* Timer display */}
                 {timeLeft !== undefined && (
-                    <div className={`flex items-center gap-2 px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-[#000000] shadow-[0_4px_0_0_#000000] ${timeLeft <= 10
+                    <div className={`flex items-center gap-2 px-4 py-2 sm:py-3 rounded-[1.25rem] border-3 border-[#000000] shadow-[0_4px_0_0_#000000] ${timeLeft <= 10
                         ? 'bg-red-500 animate-pulse'
                         : timeLeft <= 30
                             ? 'bg-[#F59E0B]'
@@ -138,10 +138,10 @@ export const GameHeader = memo(function GameHeader({
                 {infoItems.map((item, index) => (
                     <div
                         key={index}
-                        className="flex items-center gap-2 bg-white px-4 py-2 sm:py-3 rounded-[1.25rem] border-4 border-slate-200 shadow-sm"
+                        className="flex items-center gap-2 bg-white px-4 py-2 sm:py-3 rounded-[1.25rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]"
                     >
-                        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
-                        <span className="font-black text-slate-800 text-lg">{item.value}</span>
+                        <span className="text-sm font-bold text-text-secondary uppercase tracking-widest">{item.label}</span>
+                        <span className="font-black text-advay-slate text-lg">{item.value}</span>
                     </div>
                 ))}
 

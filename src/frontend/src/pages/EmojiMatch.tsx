@@ -529,7 +529,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         setAutoPaused(false);
       }}
     >
-      <div ref={containerRef} className='absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 overflow-hidden'>
+      <div ref={containerRef} className='absolute inset-0 bg-discovery-cream overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -541,18 +541,18 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
 
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-700 font-bold text-base md:text-lg text-center shadow-sm min-w-max'>
+        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate font-bold text-base md:text-lg text-center shadow-[0_4px_0_#E5B86E] min-w-max'>
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-base shadow-sm'>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-base shadow-[0_4px_0_#E5B86E]'>
           {timeLeft > 15 ? 'Take your time 🌈' : 'Almost there, keep going!'}
         </div>
 
         {promptTarget && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-500 text-lg shadow-sm'>
+          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary text-lg shadow-[0_4px_0_#E5B86E]'>
             <span className='font-bold uppercase tracking-widest text-xs mr-2 opacity-60'>Find</span>
-            <span className='font-black text-slate-800 tracking-tight text-xl'>{promptTarget.name}</span>
+            <span className='font-black text-advay-slate tracking-tight text-xl'>{promptTarget.name}</span>
             <span className='text-xs font-bold text-slate-400 ml-3 uppercase tracking-wider'>
               Round {round} of {ROUNDS_PER_LEVEL}
             </span>
@@ -587,7 +587,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-full border-4 shadow-sm transition-transform ${isHit ? 'scale-110' : ''
+                className={`absolute inset-0 rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-transform ${isHit ? 'scale-110' : ''
                   }`}
                 style={{
                   borderColor: target.color,
@@ -626,7 +626,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         )}
 
         {isPlaying && !isHandDetected && (
-          <div className='absolute bottom-28 left-1/2 -translate-x-1/2 rounded-full bg-white/95 border-4 border-amber-200 px-6 py-3 text-sm md:text-base font-bold text-amber-800 shadow-md'>
+          <div className='absolute bottom-28 left-1/2 -translate-x-1/2 rounded-full bg-white/95 border-3 border-amber-200 px-6 py-3 text-sm md:text-base font-bold text-amber-800 shadow-md'>
             Show your hand to see the yellow cursor 👆
           </div>
         )}
@@ -656,13 +656,13 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
                   {TUTORIAL_STEPS.map((step) => (
                     <div
                       key={step.title}
-                      className='flex flex-col items-center gap-3 rounded-[2.5rem] bg-white border-4 border-slate-100 px-8 py-6 w-72 text-center shadow-sm hover:scale-105 transition-transform'
+                      className='flex flex-col items-center gap-3 rounded-[2.5rem] bg-white border-3 border-[#F2CC8F] px-8 py-6 w-72 text-center shadow-[0_4px_0_#E5B86E] hover:scale-105 transition-transform'
                     >
-                      <div className='flex items-center justify-center w-20 h-20 bg-blue-50 rounded-[1.5rem] border-4 border-blue-100 text-[3.5rem] drop-shadow-sm mb-2'>
+                      <div className='flex items-center justify-center w-20 h-20 bg-blue-50 rounded-[1.5rem] border-3 border-blue-100 text-[3.5rem] drop-shadow-[0_4px_0_#E5B86E] mb-2'>
                         {step.icon}
                       </div>
-                      <div className='text-xl font-black text-slate-800 tracking-tight'>{step.title}</div>
-                      <div className='text-base font-bold text-slate-500'>{step.detail}</div>
+                      <div className='text-xl font-black text-advay-slate tracking-tight'>{step.title}</div>
+                      <div className='text-base font-bold text-text-secondary'>{step.detail}</div>
                     </div>
                   ))}
                 </div>
@@ -671,7 +671,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
                 ref={startButtonRef}
                 type='button'
                 onClick={startGame}
-                className='px-16 py-6 rounded-[2rem] bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-200 hover:border-blue-300 text-white font-black text-3xl shadow-sm hover:scale-105 active:scale-95 transition-all'
+                className='px-16 py-6 rounded-[2rem] bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white font-black text-3xl shadow-[0_4px_0_#E5B86E] hover:scale-105 active:scale-95 transition-all'
               >
                 Start Emoji Match
               </button>
@@ -692,12 +692,12 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
 
         {isPaused && isPlaying && (
           <div className='absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-50'>
-            <div className='rounded-[2.5rem] bg-white border-4 border-slate-200 p-10 text-center shadow-2xl max-w-md w-[90%]'>
-              <div className='flex items-center justify-center w-24 h-24 mx-auto bg-amber-50 rounded-[1.5rem] border-4 border-amber-100 text-5xl mb-6'>
+            <div className='rounded-[2.5rem] bg-white border-3 border-[#F2CC8F] p-10 text-center shadow-2xl max-w-md w-[90%]'>
+              <div className='flex items-center justify-center w-24 h-24 mx-auto bg-amber-50 rounded-[1.5rem] border-3 border-amber-100 text-5xl mb-6'>
                 ⏸️
               </div>
-              <div className='text-3xl font-black text-slate-800 tracking-tight mb-3'>Paused</div>
-              <div className='text-lg font-bold text-slate-500'>Pinch or press Resume to continue.</div>
+              <div className='text-3xl font-black text-advay-slate tracking-tight mb-3'>Paused</div>
+              <div className='text-lg font-bold text-text-secondary'>Pinch or press Resume to continue.</div>
             </div>
           </div>
         )}
@@ -711,12 +711,12 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
 
         {gameCompleted && (
           <div className='absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-40'>
-            <div className='flex flex-col items-center gap-6 bg-white border-4 border-slate-100 rounded-[3rem] p-12 shadow-sm text-center max-w-2xl'>
+            <div className='flex flex-col items-center gap-6 bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl'>
               <div className='text-7xl mb-2 hover:scale-110 transition-transform'>🥰</div>
-              <h2 className='text-4xl md:text-5xl font-black text-slate-800 tracking-tight'>
+              <h2 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>
                 Emotion Expert!
               </h2>
-              <p className='text-2xl font-bold text-slate-500 mb-2'>
+              <p className='text-2xl font-bold text-text-secondary mb-2'>
                 Final Score: <span className='text-[#10B981] text-3xl'>{score}</span>
               </p>
             </div>

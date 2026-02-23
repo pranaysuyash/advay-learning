@@ -25,7 +25,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         whileHover={hover ? { y: -4, boxShadow: '0 12px 0 0 rgba(0, 0, 0, 0.05)' } : undefined}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className={`
-          bg-white border-4 border-slate-200 rounded-[2rem] shadow-sm overflow-hidden transition-all
+          bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_4px_0_#E5B86E] overflow-hidden transition-all
           ${paddings[padding]}
           ${hover ? 'cursor-pointer hover:border-[#3B82F6]' : ''}
           ${className}
@@ -52,13 +52,13 @@ export function CardHeader({ title, subtitle, action, icon }: CardHeaderProps) {
     <div className="flex items-start justify-between mb-4">
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-text-secondary">
             {icon}
           </div>
         )}
         <div>
-          <h3 className="text-xl font-black text-slate-800 tracking-tight">{title}</h3>
-          {subtitle && <p className="text-sm font-semibold text-slate-500">{subtitle}</p>}
+          <h3 className="text-xl font-black text-advay-slate tracking-tight">{title}</h3>
+          {subtitle && <p className="text-sm font-semibold text-text-secondary">{subtitle}</p>}
         </div>
       </div>
       {action && <div>{action}</div>}
@@ -73,7 +73,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`mt-6 pt-4 border-t-4 border-slate-100 ${className}`}>
+    <div className={`mt-6 pt-4 border-t-4 border-[#F2CC8F] ${className}`}>
       {children}
     </div>
   );
@@ -94,11 +94,11 @@ export function StatCard({
   trendUp?: boolean;
 }) {
   return (
-    <Card hover className="border-slate-200">
+    <Card hover className="border-[#F2CC8F]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</p>
-          <p className="text-3xl font-black text-slate-800">{value}</p>
+          <p className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-1">{label}</p>
+          <p className="text-3xl font-black text-advay-slate">{value}</p>
           {trend && (
             <p className={`text-sm font-bold mt-2 ${trendUp ? 'text-green-500' : 'text-red-500'}`}>
               {trendUp ? '↑' : '↓'} {trend}
@@ -129,8 +129,8 @@ export function FeatureCard({
       <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-slate-50 group-hover:bg-[#3B82F6]/10 flex items-center justify-center text-slate-400 group-hover:text-[#3B82F6] transition-colors">
         {icon}
       </div>
-      <h3 className="text-2xl font-black mb-3 text-slate-800">{title}</h3>
-      <p className="text-base font-semibold text-slate-500">{description}</p>
+      <h3 className="text-2xl font-black mb-3 text-advay-slate">{title}</h3>
+      <p className="text-base font-semibold text-text-secondary">{description}</p>
     </Card>
   );
 }

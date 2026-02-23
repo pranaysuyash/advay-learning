@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAuthStore, useSettingsStore } from '../store';
@@ -26,14 +27,14 @@ const DynamicFeatureCard = ({
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ y: -10, scale: 1.02 }}
-      className={`bg-white rounded-[2rem] p-8 border-4 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] relative overflow-hidden`}
+      className={`bg-white rounded-[2rem] p-8 border-3 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] relative overflow-hidden`}
       style={{ borderColor: color }}
     >
-      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-sm`} style={{ backgroundColor: `${color}20`, color: color }}>
+      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-[0_4px_0_#E5B86E]`} style={{ backgroundColor: `${color}20`, color: color }}>
         <Icon size={40} />
       </div>
-      <h3 className="text-2xl font-black text-slate-800 mb-4">{title}</h3>
-      <p className="text-slate-600 font-bold text-lg leading-relaxed">{description}</p>
+      <h3 className="text-2xl font-black text-advay-slate mb-4">{title}</h3>
+      <p className="text-advay-slate font-bold text-lg leading-relaxed">{description}</p>
 
       {/* Decorative background blob */}
       <div
@@ -44,7 +45,7 @@ const DynamicFeatureCard = ({
   );
 };
 
-export function Home() {
+export const Home = memo(function Home() {
   const { isAuthenticated } = useAuthStore();
   const { onboardingCompleted, setDemoMode } = useSettingsStore();
   const navigate = useNavigate();
@@ -68,13 +69,13 @@ export function Home() {
         {/* HEADER */}
         <header className="absolute top-0 w-full z-50 px-6 py-6 md:px-12 md:py-8 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#3B82F6] rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+            <div className="w-12 h-12 bg-[#3B82F6] rounded-full flex items-center justify-center shadow-[0_4px_0_#E5B86E] border-2 border-white">
               <Sparkles className="text-white" size={24} />
             </div>
-            <span className="font-extrabold text-2xl text-slate-800 tracking-tight hidden sm:block">Advay<span className="text-[#3B82F6]">Learning</span></span>
+            <span className="font-extrabold text-2xl text-advay-slate tracking-tight hidden sm:block">Advay<span className="text-[#3B82F6]">Learning</span></span>
           </div>
           <div className="flex gap-4">
-            <Link to="/login" className="px-6 py-3 text-slate-700 font-bold text-lg hover:text-[#3B82F6] transition-colors">
+            <Link to="/login" className="px-6 py-3 text-advay-slate font-bold text-lg hover:text-[#3B82F6] transition-colors">
               Log In
             </Link>
             <Link to="/register" className="px-6 py-3 bg-[#E85D04] text-white font-black text-lg rounded-full shadow-[0_4px_0_0_#D05303] active:translate-y-[4px] active:shadow-none hover:bg-[#ff6c14] transition-all">
@@ -107,7 +108,7 @@ export function Home() {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-block mb-8 px-6 py-3 bg-white text-[#E85D04] rounded-full font-black text-sm tracking-widest border-2 border-orange-200 shadow-sm uppercase"
+              className="inline-block mb-8 px-6 py-3 bg-white text-[#E85D04] rounded-full font-black text-sm tracking-widest border-2 border-orange-200 shadow-[0_4px_0_#E5B86E] uppercase"
             >
               ✨ The magic camera playground
             </motion.div>
@@ -119,7 +120,7 @@ export function Home() {
               </span>
             </h1>
 
-            <p className='text-2xl text-slate-600 mb-12 max-w-3xl mx-auto font-bold leading-relaxed'>
+            <p className='text-2xl text-advay-slate mb-12 max-w-3xl mx-auto font-bold leading-relaxed'>
               Put down the tablet. Watch your kids solve math with their fingers, do yoga poses, and trace letters in mid-air!
             </p>
 
@@ -127,7 +128,7 @@ export function Home() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <button
                   onClick={() => navigate('/register')}
-                  className="w-full bg-[#E85D04] hover:bg-[#ff6c14] text-white px-10 py-5 rounded-full font-black text-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-3"
+                  className="w-full bg-[#E85D04] hover:bg-[#ff6c14] text-white px-10 py-5 rounded-full font-black text-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-3"
                 >
                   Create a Profile <span className="text-3xl">🚀</span>
                 </button>
@@ -136,7 +137,7 @@ export function Home() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <button
                   onClick={startDemo}
-                  className="w-full bg-white text-[#3B82F6] border-4 border-[#3B82F6] px-10 py-5 rounded-full font-black text-2xl shadow-[0_6px_0_0_#2563EB] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-sm flex items-center justify-center gap-3"
+                  className="w-full bg-white text-[#3B82F6] border-3 border-[#3B82F6] px-10 py-5 rounded-full font-black text-2xl shadow-[0_6px_0_0_#2563EB] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3"
                 >
                   <Sparkles size={28} /> Try The Magic
                 </button>
@@ -156,8 +157,8 @@ export function Home() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
             <div className="text-center mb-20">
-              <h2 className="text-5xl md:text-6xl font-black text-slate-800 mb-6 tracking-tight">Digital Magic, Physical Reality.</h2>
-              <p className="text-2xl text-slate-500 font-bold max-w-3xl mx-auto leading-relaxed">Turn passive screen time into an active, full-body learning experience.</p>
+              <h2 className="text-5xl md:text-6xl font-black text-advay-slate mb-6 tracking-tight">Digital Magic, Physical Reality.</h2>
+              <p className="text-2xl text-text-secondary font-bold max-w-3xl mx-auto leading-relaxed">Turn passive screen time into an active, full-body learning experience.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -194,7 +195,7 @@ export function Home() {
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="bg-slate-800 p-10 rounded-[2.5rem] border-4 border-slate-700 shadow-2xl relative"
+                className="bg-slate-800 p-10 rounded-[2.5rem] border-3 border-slate-700 shadow-2xl relative"
               >
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#10B981]/20 rounded-full blur-3xl"></div>
                 <ShieldCheck size={80} className="text-[#10B981] mb-8 relative z-10" />
@@ -206,7 +207,7 @@ export function Home() {
                     "Camera-Based Sleep Lock: The game pauses automatically when parents leave the room or kids get too close.",
                   ].map((item, i) => (
                     <li key={i} className="flex gap-4 items-start">
-                      <div className="w-10 h-10 rounded-full bg-[#10B981] text-slate-900 flex items-center justify-center font-black text-xl shrink-0 shadow-sm">✓</div>
+                      <div className="w-10 h-10 rounded-full bg-[#10B981] text-slate-900 flex items-center justify-center font-black text-xl shrink-0 shadow-[0_4px_0_#E5B86E]">✓</div>
                       <p className="text-xl text-slate-300 font-bold leading-relaxed">{item}</p>
                     </li>
                   ))}
@@ -222,7 +223,7 @@ export function Home() {
               <p className="text-2xl text-slate-400 mb-12 font-bold leading-relaxed">
                 We built Advay Learning on WebAssembly. That means our complex Computer Vision runs entirely inside your device browser. Uncompromising privacy by design.
               </p>
-              <button onClick={() => navigate('/register')} className="bg-[#FFF8F0] text-slate-900 hover:bg-white text-2xl font-black px-12 py-6 rounded-full border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-xl inline-block max-w-full">
+              <button onClick={() => navigate('/register')} className="bg-[#FFF8F0] text-slate-900 hover:bg-white text-2xl font-black px-12 py-6 rounded-full border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-xl inline-block max-w-full">
                 Create Child Profile
               </button>
             </div>
@@ -241,4 +242,5 @@ export function Home() {
       </div>
     </>
   );
-}
+});
+export default Home;

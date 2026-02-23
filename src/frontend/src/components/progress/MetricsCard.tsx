@@ -63,8 +63,8 @@ export function MetricCard({
           bg: 'bg-slate-50',
           border: 'border-slate-300',
           iconBg: 'bg-slate-300',
-          iconColor: 'text-slate-700',
-          text: 'text-slate-700',
+          iconColor: 'text-advay-slate',
+          text: 'text-advay-slate',
           bar: 'bg-slate-400',
         };
     }
@@ -77,26 +77,26 @@ export function MetricCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`p-6 rounded-[2rem] border-4 ${colors.border} ${colors.bg} shadow-sm relative overflow-hidden`}
+      className={`p-6 rounded-[2rem] border-3 ${colors.border} ${colors.bg} shadow-[0_4px_0_#E5B86E] relative overflow-hidden`}
     >
       <div className={`absolute -right-4 -top-4 w-24 h-24 ${colors.iconBg}/10 rounded-full blur-2xl`}></div>
 
       <div className='flex items-center gap-4 mb-6 relative z-10'>
-        <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center ${colors.iconBg} shadow-sm border-2 border-white`}>
+        <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center ${colors.iconBg} shadow-[0_4px_0_#E5B86E] border-2 border-white`}>
           <UIIcon name={icon as any} size={28} className={colors.iconColor} />
         </div>
         <div>
-          <h3 className='text-2xl font-black text-slate-800 tracking-tight'>{title}</h3>
+          <h3 className='text-2xl font-black text-advay-slate tracking-tight'>{title}</h3>
           <p className={`font-bold uppercase tracking-wider text-sm ${colors.text}`}>{level}</p>
         </div>
       </div>
 
       <div className='mb-4 relative z-10'>
         <div className='flex justify-between items-end mb-2'>
-          <span className='font-bold text-slate-500 uppercase tracking-wider text-sm'>Score</span>
+          <span className='font-bold text-text-secondary uppercase tracking-wider text-sm'>Score</span>
           <span className={`font-black text-xl ${colors.text}`}>{score}<span className="text-slate-400 text-sm">/100</span></span>
         </div>
-        <div className='w-full bg-white border-2 border-slate-200 rounded-full h-4 overflow-hidden'>
+        <div className='w-full bg-white border-2 border-[#F2CC8F] rounded-full h-4 overflow-hidden'>
           <motion.div
             className={`h-full ${colors.bar} rounded-full border-r-2 border-white/50`}
             initial={{ width: 0 }}
@@ -106,7 +106,7 @@ export function MetricCard({
         </div>
       </div>
 
-      <p className='text-base font-semibold text-slate-600 relative z-10'>{description}</p>
+      <p className='text-base font-semibold text-advay-slate relative z-10'>{description}</p>
     </motion.div>
   );
 }

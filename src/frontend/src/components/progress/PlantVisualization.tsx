@@ -88,9 +88,9 @@ export function PlantVisualization({
       </svg>
 
       {/* Progress indicator */}
-      <div className='text-center mt-4 bg-white p-3 border-2 border-slate-200 rounded-xl shadow-sm'>
-        <div className='text-xs font-bold text-slate-500 uppercase tracking-widest mb-2'>Growth Progress</div>
-        <div className='w-full bg-slate-100 rounded-full h-3 border border-slate-200 overflow-hidden'>
+      <div className='text-center mt-4 bg-white p-3 border-2 border-[#F2CC8F] rounded-xl shadow-[0_4px_0_#E5B86E]'>
+        <div className='text-xs font-bold text-text-secondary uppercase tracking-widest mb-2'>Growth Progress</div>
+        <div className='w-full bg-slate-100 rounded-full h-3 border border-[#F2CC8F] overflow-hidden'>
           <motion.div
             className='bg-[#10B981] h-full rounded-full border-r border-white/50'
             initial={{ width: 0 }}
@@ -98,7 +98,7 @@ export function PlantVisualization({
             transition={{ duration: 1, delay: 0.5, type: 'spring' }}
           />
         </div>
-        <div className='text-sm font-black text-slate-700 mt-2'>
+        <div className='text-sm font-black text-advay-slate mt-2'>
           {progressPercentage}% Complete
         </div>
       </div>

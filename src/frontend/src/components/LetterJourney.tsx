@@ -54,7 +54,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
   });
 
   return (
-    <div className='bg-white/10 border border-border rounded-xl p-6 shadow-sm'>
+    <div className='bg-white/10 border border-border rounded-xl p-6 shadow-[0_4px_0_#E5B86E]'>
       <h2 className='text-2xl font-bold mb-2'>Letter Journey</h2>
       <p className='text-slate-300 mb-6'>
         Master 3 letters in each batch to unlock the next! (
@@ -132,7 +132,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                           isMastered
                             ? 'bg-green-500/30 border-2 border-green-500 shadow-md'
                             : isUnlocked
-                              ? 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-sm'
+                              ? 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-[0_4px_0_#E5B86E]'
                               : 'bg-white/10 border border-border opacity-70'
                         }
                       `}

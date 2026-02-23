@@ -14,7 +14,7 @@ export function BackpackButton() {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={() => navigate('/inventory')}
-      className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-white border-4 border-slate-100 rounded-full shadow-lg flex items-center justify-center text-3xl hover:border-[#E85D04] transition-colors group"
+      className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-white border-3 border-[#F2CC8F] rounded-full shadow-lg flex items-center justify-center text-3xl hover:border-[#E85D04] transition-colors group"
       aria-label={`Backpack — ${totalItems} items`}
     >
       <span className="group-hover:animate-bounce">🎒</span>

@@ -37,7 +37,7 @@ export function CameraThumbnail({
 
     return (
         <div
-            className={`absolute ${POSITION_CLASSES[position]} z-30 rounded-xl overflow-hidden border-4 shadow-lg`}
+            className={`absolute ${POSITION_CLASSES[position]} z-30 rounded-xl overflow-hidden border-3 shadow-lg`}
             style={{
                 width: '160px',
                 height: '120px',

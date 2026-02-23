@@ -97,7 +97,7 @@ export function Register() {
         <header className='p-6 lg:p-8 flex justify-between items-center z-10 sticky top-0 bg-[#FFF8F0]/90 backdrop-blur-md'>
           <Link
             to='/'
-            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-slate-200 text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] hover:scale-105 transition shadow-sm'
+            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6] hover:text-[#3B82F6] hover:scale-105 transition shadow-[0_4px_0_#E5B86E]'
             aria-label='Back to home'
           >
             <UIIcon name='back' size={24} />
@@ -113,8 +113,8 @@ export function Register() {
             animate={{ opacity: 1, y: 0 }}
             className='w-full'
           >
-            <h2 className='text-4xl font-extrabold text-slate-800 mb-2'>Create Account</h2>
-            <p className='text-lg text-slate-500 font-medium mb-8'>Join thousands of active learners today.</p>
+            <h2 className='text-4xl font-extrabold text-advay-slate mb-2'>Create Account</h2>
+            <p className='text-lg text-text-secondary font-medium mb-8'>Join thousands of active learners today.</p>
 
             {error && (
               <div className='bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 font-medium shadow-[0_4px_0_0_rgba(239,68,68,0.2)]'>
@@ -128,15 +128,15 @@ export function Register() {
             <form onSubmit={handleSubmit} className='space-y-6'>
 
               {/* PARENT DETAILS SECTION */}
-              <div className='bg-white p-6 rounded-3xl border-2 border-slate-200 shadow-sm'>
-                <h3 className='text-xl font-bold text-slate-800 mb-4 flex items-center gap-2'>
+              <div className='bg-white p-6 rounded-3xl border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+                <h3 className='text-xl font-bold text-advay-slate mb-4 flex items-center gap-2'>
                   <span className='bg-[#3B82F6] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm'>1</span>
                   Parent Details
                 </h3>
 
                 <div className='space-y-4'>
                   <div>
-                    <label htmlFor='email' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                    <label htmlFor='email' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                       Email Address
                     </label>
                     <div className='relative group'>
@@ -146,7 +146,7 @@ export function Register() {
                         type='email'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
+                        className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
                         placeholder='parent@example.com'
                         required
                       />
@@ -155,7 +155,7 @@ export function Register() {
 
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <label htmlFor='password' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                      <label htmlFor='password' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                         Password
                       </label>
                       <div className='relative group'>
@@ -165,7 +165,7 @@ export function Register() {
                           type='password'
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
+                          className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
                           placeholder='Min 8 chars'
                           required
                           minLength={8}
@@ -173,7 +173,7 @@ export function Register() {
                       </div>
                     </div>
                     <div>
-                      <label htmlFor='confirm-password' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                      <label htmlFor='confirm-password' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                         Confirm Password
                       </label>
                       <div className='relative group'>
@@ -183,7 +183,7 @@ export function Register() {
                           type='password'
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
+                          className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
                           placeholder='Confirm'
                           required
                           minLength={8}
@@ -195,9 +195,9 @@ export function Register() {
               </div>
 
               {/* CHILD PROFILE SECTION */}
-              <div className='bg-white p-6 rounded-3xl border-2 border-slate-200 shadow-sm'>
+              <div className='bg-white p-6 rounded-3xl border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <div className='flex justify-between items-center mb-4'>
-                  <h3 className='text-xl font-bold text-slate-800 flex items-center gap-2'>
+                  <h3 className='text-xl font-bold text-advay-slate flex items-center gap-2'>
                     <span className='bg-[#E85D04] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm'>2</span>
                     Learner Profile
                   </h3>
@@ -224,7 +224,7 @@ export function Register() {
                       className='space-y-4 overflow-hidden'
                     >
                       <div className='pt-2'>
-                        <label htmlFor='childName' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                        <label htmlFor='childName' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                           What's the explorer's name?
                         </label>
                         <input
@@ -232,7 +232,7 @@ export function Register() {
                           type='text'
                           value={childName}
                           onChange={(e) => setChildName(e.target.value)}
-                          className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 px-4 text-slate-800 font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all'
+                          className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 px-4 text-advay-slate font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all'
                           placeholder='Leo'
                           required={showChildFields}
                         />
@@ -240,14 +240,14 @@ export function Register() {
 
                       <div className='grid grid-cols-2 gap-4'>
                         <div>
-                          <label htmlFor='childAge' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                          <label htmlFor='childAge' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                             Age
                           </label>
                           <select
                             id='childAge'
                             value={childAge}
                             onChange={(e) => setChildAge(Number(e.target.value))}
-                            className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 px-4 text-slate-800 font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all appearance-none cursor-pointer'
+                            className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 px-4 text-advay-slate font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all appearance-none cursor-pointer'
                           >
                             {[3, 4, 5, 6, 7, 8].map((age) => (
                               <option key={age} value={age}>
@@ -257,14 +257,14 @@ export function Register() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor='childLanguage' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                          <label htmlFor='childLanguage' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                             Language
                           </label>
                           <select
                             id='childLanguage'
                             value={childLanguage}
                             onChange={(e) => setChildLanguage(e.target.value)}
-                            className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 px-4 text-slate-800 font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all appearance-none cursor-pointer'
+                            className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 px-4 text-advay-slate font-semibold focus:outline-none focus:border-[#E85D04] focus:ring-4 focus:ring-[#E85D04]/20 transition-all appearance-none cursor-pointer'
                           >
                             {LANGUAGES.map((lang) => (
                               <option key={lang.code} value={lang.code}>
@@ -282,7 +282,7 @@ export function Register() {
               <button
                 type='submit'
                 disabled={isLoading || isCreatingProfile}
-                className='w-full py-4 mt-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xl rounded-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
+                className='w-full py-4 mt-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
               >
                 {isLoading || isCreatingProfile ? (
                   <span className='flex items-center justify-center gap-2'>
@@ -296,7 +296,7 @@ export function Register() {
               </button>
             </form>
 
-            <p className='mt-8 text-slate-500 font-medium text-lg text-center'>
+            <p className='mt-8 text-text-secondary font-medium text-lg text-center'>
               Already have an account?{' '}
               <Link to='/login' className='text-[#3B82F6] font-bold hover:underline ml-1'>
                 Sign in

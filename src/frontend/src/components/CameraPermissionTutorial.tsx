@@ -76,7 +76,7 @@ export function CameraPermissionTutorial({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className='bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-4 border-yellow-300'
+        className='bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-3 border-yellow-300'
       >
         {/* Header with Progress */}
         <div className='bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 text-white p-6 relative'>
@@ -139,7 +139,7 @@ export function CameraPermissionTutorial({
               </div>
 
               {/* Visual Demo */}
-              <div className='bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm'>
+              <div className='bg-white border-2 border-gray-200 rounded-xl p-4 shadow-[0_4px_0_#E5B86E]'>
                 {currentStep === 1 && (
                   <div className='flex justify-center gap-8 py-4'>
                     <div className='text-center'>

@@ -42,7 +42,7 @@ export function BlowDetectorDemo() {
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-lg max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-slate-800 mb-4">🎈 Blow the Balloon!</h2>
+      <h2 className="text-2xl font-bold text-advay-slate mb-4">🎈 Blow the Balloon!</h2>
       
       {error && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
@@ -60,14 +60,14 @@ export function BlowDetectorDemo() {
             boxShadow: isBlowing ? '0 0 20px rgba(255, 107, 157, 0.5)' : 'none',
           }}
         />
-        <p className="text-slate-500 mt-2 text-sm">
+        <p className="text-text-secondary mt-2 text-sm">
           {balloonSize >= 200 ? '🎉 Pop!' : 'Blow to inflate!'}
         </p>
       </div>
 
       <div className="space-y-3 mb-4">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Volume:</span>
+          <span className="text-text-secondary">Volume:</span>
           <span className="font-mono">{Math.round(volume * 100)}%</span>
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -85,12 +85,12 @@ export function BlowDetectorDemo() {
       </div>
 
       <div className="flex justify-between items-center mb-4">
-        <div className="text-slate-600">
+        <div className="text-advay-slate">
           Score: <span className="font-bold text-pink-600">{score}</span>
         </div>
         <button
           onClick={() => setScore(0)}
-          className="text-xs text-slate-400 hover:text-slate-600"
+          className="text-xs text-slate-400 hover:text-advay-slate"
         >
           Reset
         </button>

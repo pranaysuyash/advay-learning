@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   useAuthStore,
   useProfileStore,
@@ -61,7 +62,8 @@ const RECOMMENDED_GAMES = [
   }
 ];
 
-export function Dashboard() {
+export const Dashboard = memo(function Dashboard() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const { isGuest, guestSession } = useAuthStore();
   const { profiles, currentProfile, setCurrentProfile, fetchProfiles } = useProfileStore();
@@ -139,7 +141,7 @@ export function Dashboard() {
       {/* Demo Interface */}
       {demoMode && !hasBasicCameraSupport() && (
         <DemoInterface
-          onComplete={() => showToast('Demo completed! Ready to try with camera?', 'success')}
+          onComplete={() => showToast(t('dashboard:demo.completed'), 'success')}
           onExit={() => { setDemoMode(false); navigate('/'); }}
         />
       )}
@@ -150,10 +152,12 @@ export function Dashboard() {
           <Mascot state='happy' responsiveSize='sm' hideOnMobile={false} className="hidden sm:block" />
           <div>
             <h1 className='text-3xl sm:text-4xl font-extrabold text-[#1E293B]'>
-              Welcome back, {defaultProfile?.name || 'Explorer'}! <span className="text-yellow-400">🌟</span>
+              {defaultProfile?.name
+                ? t('dashboard:welcome.title', { name: defaultProfile.name })
+                : t('dashboard:welcome.titleAnonymous')} <span className="text-yellow-400">🌟</span>
             </h1>
             <p className='text-lg font-medium text-slate-500 mt-1'>
-              What magical adventure should we go on today?
+              {t('dashboard:welcome.subtitle')}
             </p>
           </div>
         </div>
@@ -171,14 +175,14 @@ export function Dashboard() {
               onClick={handleExport}
               disabled={exporting || profiles.length === 0}
               className='w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 rounded-full text-slate-500 hover:text-[#3B82F6] hover:border-[#3B82F6] transition shadow-sm disabled:opacity-50'
-              title='Export progress data'
+              title={t('dashboard:actions.exportProgress')}
             >
               <UIIcon name={'download' as any} size={24} />
             </button>
             <Link
               to='/settings'
               className='w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 rounded-full text-slate-500 hover:text-[#3B82F6] hover:border-[#3B82F6] transition shadow-sm'
-              title='Settings'
+              title={t('dashboard:actions.settings')}
             >
               <UIIcon name={'settings' as any} size={24} />
             </Link>
@@ -212,7 +216,7 @@ export function Dashboard() {
               <span className="text-[#E85D04]">Featured Games</span> 🎮
             </h2>
             <Link to="/games" className='text-lg font-bold text-[#3B82F6] hover:underline'>
-              See All →
+              {t('dashboard:featuredGames.seeAll')} →
             </Link>
           </div>
 
@@ -223,7 +227,7 @@ export function Dashboard() {
                 {...game}
                 animationDelay={idx * 0.1}
                 isNew={game.isNew}
-                buttonText="Play Now!"
+                buttonText={t('dashboard:featuredGames.playNow')}
                 onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
                 reducedMotion={false}
               />
@@ -240,9 +244,9 @@ export function Dashboard() {
           <div className='flex items-center justify-between mb-8 relative z-10'>
             <div>
               <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-                Your Learning Map 🗺️
+                {t('dashboard:learningMap.title')} 🗺️
               </h2>
-              <p className='text-slate-500 font-medium'>Explore islands and complete quests!</p>
+              <p className='text-slate-500 font-medium'>{t('dashboard:learningMap.subtitle')}</p>
             </div>
           </div>
 
@@ -254,4 +258,5 @@ export function Dashboard() {
       </main>
     </div>
   );
-}
+});
+

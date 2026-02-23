@@ -7,6 +7,8 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
   assetLoader,
   PAINT_ASSETS,
@@ -15,6 +17,7 @@ import {
 } from '../utils/assets';
 import { mapNormalizedPointToCover } from '../utils/coordinateTransform';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
 
 interface Brush {
   id: string;
@@ -66,11 +69,13 @@ export function AirCanvas() {
   const [brushSize, setBrushSize] = useState(1);
   const [showUI, setShowUI] = useState(true);
   const [snapshot, setSnapshot] = useState<string | null>(null);
+  const [showIssueReport, setShowIssueReport] = useState(false);
   const colorIndexRef = useRef(0);
   const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
 
   const { playPop, playSuccess } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
   useGameSessionProgress({
     gameName: 'Air Canvas',
@@ -355,14 +360,14 @@ export function AirCanvas() {
     return (
       <div className="min-h-[100dvh] bg-[#FFF8F0] flex flex-col items-center justify-center p-4">
         <motion.div
-          className="text-center bg-white border-4 border-slate-100 rounded-[2.5rem] p-12 shadow-sm max-w-md w-full"
+          className="text-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-12 shadow-[0_4px_0_#E5B86E] max-w-md w-full"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-4 border-blue-100 drop-shadow-sm">✨</div>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4">Loading Air Canvas...</h2>
-          <div className="w-16 h-16 border-8 border-slate-100 border-t-[#3B82F6] rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-xl font-bold text-slate-500">Preparing magic brushes...</p>
+          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E]">✨</div>
+          <h2 className="text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4">Loading Air Canvas...</h2>
+          <div className="w-16 h-16 border-8 border-[#F2CC8F] border-t-[#3B82F6] rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-xl font-bold text-text-secondary">Preparing magic brushes...</p>
         </motion.div>
       </div>
     );
@@ -374,19 +379,27 @@ export function AirCanvas() {
       <header className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
         <button
           onClick={() => navigate('/games')}
-          className="pointer-events-auto px-6 py-3 bg-white hover:bg-slate-50 border-4 border-slate-200/50 rounded-[1.5rem] font-bold text-slate-700 shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+          className="pointer-events-auto px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F]/50 rounded-[1.5rem] font-bold text-advay-slate shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
         >
           <span className="text-xl">←</span> Back
         </button>
         <div className="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-3 rounded-[2rem]">
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas ✨</h1>
         </div>
-        <button
-          onClick={() => setShowUI(!showUI)}
-          className="pointer-events-auto px-6 py-3 bg-[#F59E0B] hover:bg-amber-500 border-4 border-amber-300 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95 text-lg"
-        >
-          {showUI ? 'Hide Tools 👁️' : 'Show Tools 🎨'}
-        </button>
+        <div className="pointer-events-auto flex items-center gap-3">
+          <button
+            onClick={() => setShowIssueReport(true)}
+            className="px-5 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-base md:text-lg"
+          >
+            Report Issue 🎥
+          </button>
+          <button
+            onClick={() => setShowUI(!showUI)}
+            className="px-6 py-3 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-lg"
+          >
+            {showUI ? 'Hide Tools 👁️' : 'Show Tools 🎨'}
+          </button>
+        </div>
       </header>
 
       {/* Canvas */}
@@ -418,7 +431,7 @@ export function AirCanvas() {
             transition={{ type: 'spring', bounce: 0.3 }}
           >
             {/* Brushes */}
-            <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 mb-3 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
+            <div className="bg-white/95 backdrop-blur-xl border-3 border-[#F2CC8F] rounded-[2rem] p-4 mb-3 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {BRUSHES.map((brush) => (
                   <button
@@ -427,10 +440,13 @@ export function AirCanvas() {
                       setSelectedBrush(brush);
                       assetLoader.playSound('pop', 0.28);
                       void playPop();
+                      if (ttsEnabled) {
+                        void speak(`${brush.name} brush selected!`);
+                      }
                     }}
-                    className={`flex-shrink-0 px-6 py-3 rounded-[1.5rem] font-bold transition-all border-4 flex items-center gap-2 ${selectedBrush.id === brush.id
-                      ? 'bg-[#E85D04] border-[#D00000] text-white shadow-sm -translate-y-1'
-                      : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200'
+                    className={`flex-shrink-0 px-6 py-3 rounded-[1.5rem] font-bold transition-all border-3 flex items-center gap-2 ${selectedBrush.id === brush.id
+                      ? 'bg-[#E85D04] border-[#D00000] text-white shadow-[0_4px_0_#E5B86E] -translate-y-1'
+                      : 'bg-white border-[#F2CC8F] text-advay-slate hover:bg-slate-50 hover:border-[#F2CC8F]'
                       }`}
                   >
                     <span className="text-2xl">{brush.icon}</span>
@@ -442,7 +458,7 @@ export function AirCanvas() {
 
             <div className="flex flex-col md:flex-row gap-3">
               {/* Colors */}
-              <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 flex-1 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
+              <div className="bg-white/95 backdrop-blur-xl border-3 border-[#F2CC8F] rounded-[2rem] p-4 flex-1 shadow-[0_8px_0_0_rgba(241,245,249,1)]">
                 <div className="flex gap-2 flex-wrap justify-center items-center h-full">
                   {COLORS.map((color) => (
                     <button
@@ -454,14 +470,14 @@ export function AirCanvas() {
                       }}
                       title={`Select color ${color}`}
                       aria-label={`Select color ${color}`}
-                      className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-4 transition-transform ${selectedColor === color ? 'border-slate-800 scale-110 shadow-md' : 'border-white/50 shadow-sm hover:scale-105'
+                      className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-3 transition-transform ${selectedColor === color ? 'border-slate-800 scale-110 shadow-md' : 'border-white/50 shadow-[0_4px_0_#E5B86E] hover:scale-105'
                         }`}
                       style={{ backgroundColor: color }}
                     />
                   ))}
                   <button
                     onClick={randomColor}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform flex items-center justify-center text-xl"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-3 border-white shadow-[0_4px_0_#E5B86E] hover:scale-105 transition-transform flex items-center justify-center text-xl"
                     title="Random Color"
                   >
                     🎲
@@ -470,22 +486,22 @@ export function AirCanvas() {
               </div>
 
               {/* Controls */}
-              <div className="bg-white/95 backdrop-blur-xl border-4 border-slate-100 rounded-[2rem] p-4 flex gap-3 justify-center shadow-[0_8px_0_0_rgba(241,245,249,1)]">
+              <div className="bg-white/95 backdrop-blur-xl border-3 border-[#F2CC8F] rounded-[2rem] p-4 flex gap-3 justify-center shadow-[0_8px_0_0_rgba(241,245,249,1)]">
                 <button
                   onClick={cycleBrushSize}
-                  className="px-6 py-3 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-400 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95"
+                  className="px-6 py-3 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-400 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95"
                 >
                   Size: {brushSize}x
                 </button>
                 <button
                   onClick={clearCanvas}
-                  className="px-6 py-3 bg-red-100 hover:bg-red-200 border-4 border-red-200 rounded-[1.5rem] font-black text-red-600 shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                  className="px-6 py-3 bg-red-100 hover:bg-red-200 border-3 border-red-200 rounded-[1.5rem] font-black text-red-600 shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
                   <span>🗑️</span> Clear
                 </button>
                 <button
                   onClick={takeSnapshot}
-                  className="px-6 py-3 bg-[#10B981] hover:bg-emerald-500 border-4 border-emerald-400 rounded-[1.5rem] font-black text-white shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                  className="px-6 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-400 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
                   <span>📸</span> Snap
                 </button>
@@ -504,20 +520,34 @@ export function AirCanvas() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
-            <div className="bg-white/95 backdrop-blur-md border-4 border-amber-200 rounded-[2.5rem] p-10 text-center shadow-lg">
+            <div className="bg-white/95 backdrop-blur-md border-3 border-amber-200 rounded-[2.5rem] p-10 text-center shadow-lg">
               <div className="text-[6rem] mb-4 drop-shadow-md">🖐️</div>
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Open Hand to Draw!</h2>
+              <h2 className="text-3xl font-black text-advay-slate tracking-tight mb-2">Open Hand to Draw!</h2>
               <div className="inline-block bg-slate-100 rounded-full px-6 py-2 mt-2">
-                <p className="text-lg font-bold text-slate-500">Close fingers to pause</p>
+                <p className="text-lg font-bold text-text-secondary">Close fingers to pause</p>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Voice Instructions Tutorial */}
+      {ttsEnabled && isHandReady && (
+        <VoiceInstructions
+          instructions={[
+            'Open your hand to draw.',
+            'Move your finger to paint.',
+            'Close fingers to pause.',
+          ]}
+          autoSpeak={true}
+          showReplayButton={true}
+          replayButtonPosition='top-right'
+        />
+      )}
+
       {/* Status */}
       <div className="absolute top-24 left-6 z-10 pointer-events-none">
-        <div className="bg-black/40 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 flex gap-4 items-center shadow-sm">
+        <div className="bg-black/40 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 flex gap-4 items-center shadow-[0_4px_0_#E5B86E]">
           <span className="text-white font-bold tracking-wide">
             {isHandReady ? '🟢 Hand Ready' : '⏳ Loading...'}
           </span>
@@ -541,12 +571,12 @@ export function AirCanvas() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="bg-white border-4 border-slate-100 rounded-[3rem] p-10 max-w-2xl w-full shadow-2xl">
+            <div className="bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-10 max-w-2xl w-full shadow-2xl">
               <div className="text-center mb-6">
                 <span className="text-[4rem] inline-block mb-2">🎨</span>
-                <h2 className="text-4xl font-black text-slate-800 tracking-tight">Your Masterpiece!</h2>
+                <h2 className="text-4xl font-black text-advay-slate tracking-tight">Your Masterpiece!</h2>
               </div>
-              <div className="border-4 border-slate-200 rounded-[2rem] overflow-hidden mb-8 shadow-inner">
+              <div className="border-3 border-[#F2CC8F] rounded-[2rem] overflow-hidden mb-8 shadow-inner">
                 <img
                   src={snapshot}
                   alt="Your drawing"
@@ -556,13 +586,13 @@ export function AirCanvas() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={downloadSnapshot}
-                  className="flex-1 py-4 bg-[#3B82F6] hover:bg-blue-600 border-4 border-blue-400 rounded-[1.5rem] font-black text-white text-xl shadow-[0_6px_0_0_rgba(59,130,246,0.6)] hover:shadow-none hover:translate-y-[6px] transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-4 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-400 rounded-[1.5rem] font-black text-white text-xl shadow-[0_6px_0_0_rgba(59,130,246,0.6)] hover:shadow-none hover:translate-y-[6px] transition-all flex items-center justify-center gap-2"
                 >
                   <span>💾</span> Download
                 </button>
                 <button
                   onClick={() => setSnapshot(null)}
-                  className="flex-1 py-4 bg-white hover:bg-slate-50 border-4 border-slate-200 rounded-[1.5rem] font-black text-slate-600 text-xl shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
+                  className="flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-advay-slate text-xl shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                 >
                   Keep Drawing
                 </button>
@@ -571,6 +601,20 @@ export function AirCanvas() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <IssueReportFlowModal
+        isOpen={showIssueReport}
+        onClose={() => setShowIssueReport(false)}
+        sourceCanvas={canvasRef.current}
+        gameId='air-canvas'
+        activityId='drawing-session'
+        cameraMaskRegion={{
+          x: 1280 - 160 - 16,
+          y: 720 - 120 - 16,
+          width: 160,
+          height: 120,
+        }}
+      />
     </div>
   );
 }

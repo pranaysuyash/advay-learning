@@ -36,7 +36,7 @@ export function CollapsibleSection({
             initial={{ rotate: isOpen ? 90 : 0 }}
             animate={{ rotate: isOpen ? 0 : 90 }}
             transition={{ duration: 0.2 }}
-            className="text-slate-500"
+            className="text-text-secondary"
           >
             ▼
           </motion.div>

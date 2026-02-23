@@ -27,19 +27,19 @@ function getButtonClassName({
   className?: string;
 }) {
   const baseStyles =
-    'inline-flex items-center justify-center font-black rounded-2xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border-4 active:translate-y-[6px] active:shadow-none';
+    'inline-flex items-center justify-center font-black rounded-2xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border-3 active:translate-y-[6px] active:shadow-none';
 
   const variants: Record<ButtonVariant, string> = {
     primary:
       'bg-[#E85D04] text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-[#ff6c14]',
     secondary:
-      'bg-white text-slate-800 border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-slate-50',
+      'bg-white text-advay-slate border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-slate-50',
     danger:
       'bg-red-500 text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-red-600',
     success:
       'bg-green-500 text-white border-[#000000] shadow-[0_6px_0_0_#000000] hover:bg-green-600',
     ghost:
-      'bg-transparent text-slate-600 border-transparent active:translate-y-0 active:shadow-none hover:bg-slate-100 hover:text-slate-900',
+      'bg-transparent text-advay-slate border-transparent active:translate-y-0 active:shadow-none hover:bg-slate-100 hover:text-slate-900',
   };
 
   const sizes: Record<ButtonSize, string> = {

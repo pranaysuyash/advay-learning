@@ -31,16 +31,16 @@ export function AdventureMap() {
     : [];
 
   return (
-    <div className="bg-[#FDF8F3] border border-stone-200 rounded-xl p-4 shadow-sm">
+    <div className="bg-[#FDF8F3] border border-stone-200 rounded-xl p-4 shadow-[0_4px_0_#E5B86E]">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-bold text-slate-800">Pip's Adventure Map</h3>
+        <h3 className="text-lg font-bold text-advay-slate">Pip's Adventure Map</h3>
         <div className="flex items-center gap-2 text-amber-500">
           <span>⭐</span>
           <span className="font-bold">{totalXp} XP</span>
         </div>
       </div>
 
-      <p className="text-sm text-slate-600 mb-3">
+      <p className="text-sm text-advay-slate mb-3">
         Complete quests to unlock new islands!
       </p>
 

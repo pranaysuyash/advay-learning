@@ -80,7 +80,7 @@ export function GameTutorial({ onComplete, onSkip, onSkipCamera }: GameTutorialP
               <div className='mb-4'>
                 <div className='flex items-center justify-center mb-3'>
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${currentStep === 0 ? 'bg-brand-primary text-white' : 'bg-brand-accent text-brand-primary'}`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-3 ${currentStep === 0 ? 'bg-brand-primary text-white' : 'bg-brand-accent text-brand-primary'}`}
                   >
                     <span className='text-xl font-bold'>{currentStep + 1}</span>
                   </div>

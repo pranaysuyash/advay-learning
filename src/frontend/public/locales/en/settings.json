@@ -1,0 +1,61 @@
+{
+  "title": "Settings",
+  "sections": {
+    "learning": "Learning Preferences",
+    "device": "Device & Camera",
+    "parental": "Parental Controls"
+  },
+  "language": {
+    "label": "UI Language",
+    "description": "Choose your preferred language for the app interface"
+  },
+  "gameLanguage": {
+    "label": "Game Content Language",
+    "description": "Language for letters, numbers, and game instructions"
+  },
+  "difficulty": {
+    "label": "Game Difficulty",
+    "options": {
+      "easy": "Easy - Guided learning",
+      "medium": "Medium - Standard pace",
+      "hard": "Hard - Less hints & faster"
+    }
+  },
+  "sound": {
+    "label": "Sound Effects",
+    "description": "Bouncy app feedback sounds"
+  },
+  "camera": {
+    "label": "Camera for Games",
+    "enabled": "Camera is ON — Used for hand tracking games. Video stays on this device only.",
+    "disabled": "Camera is OFF — Games will use touch/click instead of hand gestures.",
+    "privacy": "Privacy Indicator",
+    "privacyDescription": "When camera is active, a green dot appears. Video is processed on your device only — we never see or store it."
+  },
+  "aiMode": {
+    "label": "AI Processing Mode",
+    "gpu": "Hardware Accelerated (GPU)",
+    "cpu": "Compatibility Mode (CPU)",
+    "description": "Use GPU for smoothest tracking. Switch to CPU if app crashes or freezes."
+  },
+  "timeLimit": {
+    "label": "Daily Time Limit",
+    "options": {
+      "none": "No Limit",
+      "15": "15 minutes",
+      "30": "30 minutes",
+      "60": "1 hour"
+    }
+  },
+  "hints": {
+    "label": "Show Tracing Hints",
+    "description": "Visual guides for drawing"
+  },
+  "calmMode": {
+    "label": "Calm Mode",
+    "description": "Softer colors, slower animations, no background music",
+    "helper": "For children who get overwhelmed by bright colors and fast sounds",
+    "enabled": "Calm Mode is ON",
+    "enabledDescription": "Games will use muted colors, slower animations, and only essential sounds. Celebrations will be gentler."
+  }
+}

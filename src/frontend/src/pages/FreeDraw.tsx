@@ -20,7 +20,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
-import { Mascot } from '../components/Mascot';
+import { useAudio } from '../utils/hooks/useAudio';
+import '../styles/animations.css';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame, Point } from '../types/tracking';
@@ -49,6 +50,9 @@ import {
 } from '../games/freeDrawLogic';
 
 export default function FreeDraw() {
+  // ===== AUDIO =====
+  const { playClick, playSuccess } = useAudio();
+  
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
@@ -297,14 +301,24 @@ export default function FreeDraw() {
   };
   
   // ===== ACTION HANDLERS =====
-  const handleUndo = () => setGameState(prev => undo(prev));
-  const handleRedo = () => setGameState(prev => redo(prev));
-  const handleClear = () => setGameState(prev => clearCanvas(prev));
+  const handleUndo = () => {
+    playClick();
+    setGameState(prev => undo(prev));
+  };
+  const handleRedo = () => {
+    playClick();
+    setGameState(prev => redo(prev));
+  };
+  const handleClear = () => {
+    playClick();
+    setGameState(prev => clearCanvas(prev));
+  };
   
   const handleSave = () => {
     const canvas = canvasRef.current;
     if (!canvas || isCanvasEmpty(gameState)) return;
     
+    playSuccess();
     const dataUrl = exportCanvas(canvas);
     
     // Create download link
@@ -318,10 +332,12 @@ export default function FreeDraw() {
   };
   
   const handleBrushTypeChange = (type: BrushType) => {
+    playClick();
     setGameState(prev => setBrushType(prev, type));
   };
   
   const handleColorSelect = (color: string) => {
+    playClick();
     if (showColorMixer) {
       if (!mixColor1) {
         setMixColor1(color);
@@ -331,6 +347,7 @@ export default function FreeDraw() {
         setGameState(prev => setBrushColor(prev, mixedColor));
         setMixColor1(null);
         setShowColorMixer(false);
+        playSuccess();
       }
     } else {
       setGameState(prev => setBrushColor(prev, color));
@@ -338,10 +355,12 @@ export default function FreeDraw() {
   };
   
   const handleSizeChange = (delta: number) => {
+    playClick();
     setGameState(prev => setBrushSize(prev, prev.currentBrush.size + delta));
   };
   
   const handleBackgroundChange = (color: string) => {
+    playClick();
     setGameState(prev => setBackgroundColor(prev, color));
   };
   
@@ -361,9 +380,20 @@ export default function FreeDraw() {
       {showMenu ? (
         // ===== START MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <Mascot state="happy" responsiveSize="lg" className="mb-2" />
-          <div className="text-6xl mb-2">🎨</div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">Free Draw Studio!</h2>
+          {/* CSS Art Palette Icon */}
+          <div className="relative mb-4">
+            <div className="w-28 h-20 rounded-full bg-gradient-to-br from-amber-700 to-amber-900 shadow-lg animate-float rotate-12">
+              {/* Paint blobs */}
+              <div className="absolute top-3 left-4 w-6 h-6 rounded-full bg-red-500 animate-pulse" />
+              <div className="absolute top-2 left-10 w-5 h-5 rounded-full bg-blue-500 animate-pulse delay-100" />
+              <div className="absolute top-6 left-14 w-6 h-6 rounded-full bg-green-500 animate-pulse delay-200" />
+              <div className="absolute top-8 left-6 w-5 h-5 rounded-full bg-yellow-400 animate-pulse delay-300" />
+              {/* Thumb hole */}
+              <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-6 bg-white/20 rounded-full" />
+            </div>
+            <div className="absolute -bottom-2 -right-2 text-3xl animate-bounce">✨</div>
+          </div>
+          <h2 className="text-3xl font-bold text-advay-slate mb-2">Free Draw Studio!</h2>
           
           {/* Goal Statement with Semantic Attributes */}
           <div 
@@ -401,12 +431,15 @@ export default function FreeDraw() {
           </div>
           
           <button
-            onClick={() => setShowMenu(false)}
+            onClick={() => {
+              playClick();
+              setShowMenu(false);
+            }}
             className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
           >
-            <span>🎨</span>
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-pink-500" />
             Start Drawing!
-            <span>✨</span>
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500" />
           </button>
         </div>
       ) : (
@@ -417,7 +450,7 @@ export default function FreeDraw() {
           data-ux-goal="Draw and create beautiful art using different brushes and colors!"
           data-ux-instruction="Pinch your fingers and move your hand to draw"
           data-ux-action="pinch-and-draw"
-          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-sm"
+          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
         >
           <div className="flex items-center justify-center gap-2">
             <span className="text-xl">🎯</span>
@@ -426,10 +459,10 @@ export default function FreeDraw() {
         </div>
         
         {/* Toolbar - Child Friendly */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-sm">
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-[0_4px_0_#E5B86E]">
           {/* Brush Type Selector - Larger for kids */}
           <div className="mb-3">
-            <p className="text-sm font-bold text-slate-700 mb-2">🖌️ Pick a Brush:</p>
+            <p className="text-sm font-bold text-advay-slate mb-2">🖌️ Pick a Brush:</p>
             <div className="flex gap-2 flex-wrap">
               {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
                 <button
@@ -439,7 +472,7 @@ export default function FreeDraw() {
                     p-3 rounded-xl text-2xl transition-all transform hover:scale-110
                     ${gameState.currentBrush.type === type
                       ? 'bg-blue-200 border-3 border-blue-500 shadow-md scale-105'
-                      : 'bg-white border-2 border-slate-200 hover:border-blue-300 shadow-sm'
+                      : 'bg-white border-2 border-[#F2CC8F] hover:border-blue-300 shadow-[0_4px_0_#E5B86E]'
                     }
                   `}
                   title={BRUSH_PRESETS[type].name}
@@ -466,7 +499,7 @@ export default function FreeDraw() {
                     height: Math.max(4, gameState.currentBrush.size / 3),
                   }}
                 />
-                <span className="text-xs text-slate-600 w-8 text-center">
+                <span className="text-xs text-advay-slate w-8 text-center">
                   {gameState.currentBrush.size}px
                 </span>
               </div>
@@ -514,7 +547,7 @@ export default function FreeDraw() {
           
           {/* Color Palette - Larger for kids */}
           <div className="mt-3">
-            <p className="text-sm font-bold text-slate-700 mb-2">🎨 Pick a Color:</p>
+            <p className="text-sm font-bold text-advay-slate mb-2">🎨 Pick a Color:</p>
             <div className="flex items-center gap-3 flex-wrap">
               {COLOR_PALETTE.map(color => (
                 <button
@@ -578,7 +611,7 @@ export default function FreeDraw() {
           
           {/* Background Color */}
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-slate-500 font-bold">Background:</span>
+            <span className="text-xs text-text-secondary font-bold">Background:</span>
             {BACKGROUND_COLORS.map(color => (
               <button
                 key={color}
@@ -627,7 +660,7 @@ export default function FreeDraw() {
         </div>
         
         {/* Footer */}
-        <div className="bg-white border-t border-slate-200 px-4 py-2 flex justify-between items-center text-xs text-slate-500">
+        <div className="bg-white border-t border-[#F2CC8F] px-4 py-2 flex justify-between items-center text-xs text-text-secondary">
           <div>
             Brush: {BRUSH_PRESETS[gameState.currentBrush.type].name} | 
             Color: {getColorName(gameState.currentBrush.color)} |

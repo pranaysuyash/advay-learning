@@ -111,7 +111,7 @@ export function ResetPassword() {
         <header className='p-6 lg:p-8 flex justify-between items-center z-10 sticky top-0 bg-[#FFF8F0]/90 backdrop-blur-md'>
           <Link
             to='/login'
-            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-slate-200 text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] hover:scale-105 transition shadow-sm'
+            className='inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6] hover:text-[#3B82F6] hover:scale-105 transition shadow-[0_4px_0_#E5B86E]'
             aria-label='Back to login'
           >
             <UIIcon name={'back' as any} size={24} />
@@ -129,15 +129,15 @@ export function ResetPassword() {
           >
             {status === 'success' && (
               <div className='text-center'>
-                <div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-green-200'>
+                <div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-3 border-green-200'>
                   <UIIcon name={'check-circle' as any} size={40} className='text-green-500' />
                 </div>
-                <h2 className='text-4xl font-extrabold text-slate-800 mb-4'>Password Reset!</h2>
-                <p className='text-lg text-slate-500 font-medium mb-8'>Your password has been updated. Redirecting to login...</p>
+                <h2 className='text-4xl font-extrabold text-advay-slate mb-4'>Password Reset!</h2>
+                <p className='text-lg text-text-secondary font-medium mb-8'>Your password has been updated. Redirecting to login...</p>
 
                 <Link
                   to='/login'
-                  className='inline-flex items-center justify-center w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xl rounded-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all'
+                  className='inline-flex items-center justify-center w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all'
                 >
                   Go to Login Now
                 </Link>
@@ -146,16 +146,16 @@ export function ResetPassword() {
 
             {status === 'invalid' && (
               <div className='text-center'>
-                <div className='w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-red-200'>
+                <div className='w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-3 border-red-200'>
                   <UIIcon name={'alert-circle' as any} size={40} className='text-red-500' />
                 </div>
-                <h2 className='text-4xl font-extrabold text-slate-800 mb-4'>Invalid Link</h2>
-                <p className='text-lg text-slate-500 font-medium mb-8'>
+                <h2 className='text-4xl font-extrabold text-advay-slate mb-4'>Invalid Link</h2>
+                <p className='text-lg text-text-secondary font-medium mb-8'>
                   This password reset link is invalid or has expired. Please request a new one.
                 </p>
                 <Link
                   to='/forgot-password'
-                  className='inline-flex items-center justify-center w-full py-4 bg-[#E85D04] hover:bg-[#D05303] text-white font-black text-xl rounded-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all group'
+                  className='inline-flex items-center justify-center w-full py-4 bg-[#E85D04] hover:bg-[#D05303] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all group'
                 >
                   Request New Link <span className='group-hover:translate-x-1 transition-transform ml-2'>➡️</span>
                 </Link>
@@ -164,8 +164,8 @@ export function ResetPassword() {
 
             {status !== 'success' && status !== 'invalid' && (
               <>
-                <h2 className='text-4xl font-extrabold text-slate-800 mb-2'>Create New Password</h2>
-                <p className='text-lg text-slate-500 font-medium mb-8'>Enter your strong new password below.</p>
+                <h2 className='text-4xl font-extrabold text-advay-slate mb-2'>Create New Password</h2>
+                <p className='text-lg text-text-secondary font-medium mb-8'>Enter your strong new password below.</p>
 
                 {error && (
                   <div className='bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 font-medium shadow-[0_4px_0_0_rgba(239,68,68,0.2)]'>
@@ -177,9 +177,9 @@ export function ResetPassword() {
                 )}
 
                 <form onSubmit={handleSubmit} className='space-y-6'>
-                  <div className='bg-white p-6 rounded-3xl border-2 border-slate-200 shadow-sm space-y-4'>
+                  <div className='bg-white p-6 rounded-3xl border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] space-y-4'>
                     <div>
-                      <label htmlFor='newPassword' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                      <label htmlFor='newPassword' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                         New Password
                       </label>
                       <div className='relative group mb-1'>
@@ -192,7 +192,7 @@ export function ResetPassword() {
                             setNewPassword(e.target.value);
                             if (passwordError) validatePassword(e.target.value);
                           }}
-                          className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
+                          className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
                           placeholder='Enter new password'
                           required
                           disabled={status === 'loading'}
@@ -222,7 +222,7 @@ export function ResetPassword() {
                     </div>
 
                     <div>
-                      <label htmlFor='confirmPassword' className='block text-sm font-bold text-slate-700 mb-2 px-1'>
+                      <label htmlFor='confirmPassword' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                         Confirm Password
                       </label>
                       <div className='relative group mb-1'>
@@ -232,7 +232,7 @@ export function ResetPassword() {
                           type='password'
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className='w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
+                          className='w-full bg-slate-50 border-2 border-[#F2CC8F] rounded-2xl py-3 pl-12 pr-4 text-advay-slate font-semibold focus:outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-[#3B82F6]/20 transition-all'
                           placeholder='Confirm new password'
                           required
                           disabled={status === 'loading'}
@@ -247,7 +247,7 @@ export function ResetPassword() {
                   <button
                     type='submit'
                     disabled={status === 'loading' || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-                    className='w-full py-4 bg-[#E85D04] hover:bg-[#D05303] text-white font-black text-xl rounded-2xl border-4 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
+                    className='w-full py-4 bg-[#E85D04] hover:bg-[#D05303] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
                   >
                     {status === 'loading' ? (
                       <span className='flex items-center justify-center gap-2'>
