@@ -13,6 +13,8 @@ import { GameCursor } from '../components/game/GameCursor';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   assetLoader,
@@ -71,6 +73,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
   // Sound effects
   const { playCelebration, playPop } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
   const [isPinching, setIsPinching] = useState(false);
@@ -369,6 +372,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     setScore(0);
     setLevel(1);
     // timeLeft will be set by the dots initialization effect based on difficulty
+    if (ttsEnabled) {
+      void speak('Connect the dots in order! Pinch each number!');
+    }
   };
 
   const handleDotClick = (dotId: number) => {
@@ -382,6 +388,17 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
       playPop(); // Play pop - guard in case audio unavailable
     } catch (err) {
       /* ignore audio errors in test/env */
+    }
+
+    // Voice feedback for dot connection
+    if (ttsEnabled) {
+      const totalDots = dotsRef.current.length;
+      const currentDotNum = dotId + 1;
+      if (currentDotNum === totalDots) {
+        void speak('Great job! You connected all the dots!');
+      } else if (currentDotNum % 3 === 0) {
+        void speak(`${currentDotNum} dots connected! Keep going!`);
+      }
     }
 
     // Update dots using functional update to avoid captured-state races
@@ -511,34 +528,12 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
               }}
               aria-hidden='true'
             />
+            <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-            {/* Timer Display - Top Center */}
+            {/* Relaxed Message - Top Center */}
             <div className='absolute top-4 left-1/2 -translate-x-1/2 z-40'>
-              <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-[1.25rem] border-4 shadow-sm backdrop-blur-md ${timeLeft <= 10
-                    ? 'bg-red-500 border-[#000000] text-white animate-pulse'
-                    : timeLeft <= 30
-                      ? 'bg-[#F59E0B] border-[#000000] text-white'
-                      : 'bg-white border-slate-200 text-slate-700'
-                  }`}
-              >
-                <UIIcon
-                  name='timer'
-                  size={18}
-                  className={
-                    timeLeft <= 30
-                      ? 'text-white'
-                      : 'text-slate-400'
-                  }
-                />
-                <span
-                  className={`font-black tabular-nums text-lg ${timeLeft <= 30
-                      ? 'text-white'
-                      : 'text-slate-700'
-                    }`}
-                >
-                  {timeLeft}s
-                </span>
+              <div className='flex items-center gap-2 px-4 py-2 rounded-[1.25rem] border-4 border-slate-200 shadow-sm backdrop-blur-md bg-white text-slate-500'>
+                <span className='font-bold'>Take your time! 🌈</span>
               </div>
             </div>
 
@@ -669,7 +664,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 containerRef={gameAreaRef}
                 isPinching={isPinching}
                 isHandDetected
-                size={62}
+                size={84}
                 color='#F59E0B'
               />
             )}
@@ -778,6 +773,20 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                     controls={menuControls}
                     position='bottom-center'
                   />
+
+                  {ttsEnabled && (
+                    <VoiceInstructions
+                      instructions={[
+                        'Connect the dots in order.',
+                        'Start with number one.',
+                        'Pinch each dot to connect it.',
+                        'Complete the picture!',
+                      ]}
+                      autoSpeak={true}
+                      showReplayButton={true}
+                      replayButtonPosition='bottom-right'
+                    />
+                  )}
                 </div>
               ) : (
                 /* Game Completed Screen */

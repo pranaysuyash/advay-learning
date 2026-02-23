@@ -11,6 +11,7 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { findHitTarget } from '../games/hitTarget';
 import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
@@ -228,10 +229,13 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     setGameCompleted(false);
     setScore(0);
     setLevel(1);
-    setTimeLeft(80);
+    setTimeLeft(60);
     setFeedback('Pinch the shapes in the shown order.');
     setCursor(null);
     setIsPlaying(true);
+    if (ttsEnabled) {
+      void speak('Pinch the shapes in the shown order!');
+    }
     await playStart();
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -251,7 +255,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     setOrder([]);
     setStepIndex(0);
     setCursor(null);
-    setTimeLeft(80);
+    setTimeLeft(60);
     setFeedback('Pinch the shapes in the shown order.');
   };
 
@@ -293,14 +297,14 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 pointer-events-none' />
+        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-600 font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg'>
-          Time: <span className={`font-black text-2xl ml-2 ${timeLeft <= 5 ? 'text-[#EF4444]' : 'text-amber-500'}`}>{timeLeft}s</span>
+          <span className='text-slate-400'>Take your time! 🌈</span>
         </div>
 
         <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-4 border-slate-200 shadow-sm text-slate-500 font-bold text-lg flex items-center gap-3'>
@@ -339,7 +343,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
             containerRef={gameAreaRef}
             isPinching={false}
             isHandDetected={isPlaying}
-            size={64}
+            size={84}
             icon='👆'
             state={isPlaying ? 'tracking' : 'idle'}
           />
@@ -360,6 +364,19 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
               >
                 Start Shape Sequence
               </button>
+
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Pinch the shapes in the shown order.',
+                    'Follow the sequence!',
+                    'Start from the first shape.',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
             </div>
           </div>
         )}

@@ -74,7 +74,8 @@ This index consolidates all persona interview findings. For complete transcripts
 | 1   | Neha — Safety-First Parent         | Parent Dashboard         | ✅ DONE | 2026-02-23 |
 | 2   | Vikram — Data-Driven Father        | Progress Data & Metrics  | ✅ DONE | 2026-02-23 |
 | 3   | Ananya — Overwhelmed Working Mom   | Onboarding & Engagement  | ✅ DONE | 2026-02-23 |
-| 4   | TBD                                | TBD                      | 🔜 NEXT | —          |
+| 4   | Dadi — Non-Tech Guardian           | Accessibility & Language | ✅ DONE | 2026-02-23 |
+| 5   | TBD                                | TBD                      | 🔜 NEXT | —          |
 
 ---
 
@@ -234,18 +235,84 @@ Following the mandatory workflow:
 
 ---
 
+### 4. Dadi — The Non-Tech Guardian
+
+**Date**: 2026-02-23
+**Status**: ✅ COMPLETED
+
+#### Profile
+
+- **Age**: 62
+- **Location**: Lucknow, Uttar Pradesh
+- **Occupation**: Retired school principal (35 years experience)
+- **Grandchildren**: Aarav (2y 8m) and Kabir (7y 3m)
+- **Tech Savviness**: Low — WhatsApp video calls only; struggles with app navigation
+- **Primary Concern**: Not "breaking anything" on the device
+- **Language**: Hindi only; cannot read English UI
+- **Context**: Daytime caregiver while parents work
+
+#### Interview Focus Area
+
+- One-button interface for non-tech users
+- Hindi language support validation
+- Error recovery without panic
+- Accidental navigation prevention
+
+#### Key Findings
+
+| Severity   | Finding                         | Impact                                                |
+| ---------- | ------------------------------- | ----------------------------------------------------- |
+| 🔴 CRITICAL| No Hindi support                | "Nahi toh main use nahi kar paungi" (Can't use it)   |
+| 🔴 HIGH    | English-only UI barrier         | Feels "stupid" — was principal, now can't press button|
+| 🔴 HIGH    | Camera permission in English    | Always taps "Don't Allow" — game breaks               |
+| 🔴 HIGH    | Small text/icons invisible      | Not visible even with glasses                         |
+| 🔴 HIGH    | Accidental navigation = panic   | Swipe to Settings → closes app, waits for help        |
+| 🔴 HIGH    | Profile selection confusing     | Guesses which grandchild — often wrong                |
+| 🔴 HIGH    | Needs "one big button" mode     | "Bas ek bada sa button. Aarav ki photo."             |
+| 🟡 MEDIUM  | Home button exits, no recovery  | Full restart, re-selection needed                     |
+| 🟡 MEDIUM  | Fear of "breaking" device       | Emotional barrier — won't explore                     |
+
+#### Solutions Recommended
+
+**P0 (Immediate)**:
+1. Full Hindi UI translation — All labels, buttons, modals in Hindi
+2. "Dadi Mode" — Grandparent interface: one giant button per child with photo
+3. Pre-approved camera permission — Parent config, Dadi never sees English popup
+4. Large text mode — 24px+ minimum, high contrast
+
+**P1 (Medium-term)**:
+5. Child-proof game container — Home button → rest mode, auto-resume
+6. Gesture guardrails — Disable swipe, prevent accidental Settings
+7. Audio-first instructions — Pip speaks in Hindi
+
+#### Key Quote
+
+> *"Main toh principal thi... 35 saal school chalaya. Ab ek chhota sa button daba nahi paati."*  
+> *(I was a principal... ran school for 35 years. Now can't press a small button.)*
+
+> *"Hindi. Poora app Hindi mein hona chahiye. Nahi toh main use nahi kar paungi."*  
+> *(Hindi. Whole app should be in Hindi. Otherwise I can't use it.)*
+
+#### Documentation
+
+- Worklog: `docs/WORKLOG_ADDENDUM_v3.md` (TCK-20260223-009)
+- Full transcript in Hindi/English captured in worklog entry
+
+---
+
 ## Interview Insights Comparison
 
-### Combined Persona Insights — Three Perspectives
+### Combined Persona Insights — Four Perspectives
 
-| Aspect              | Neha (Safety-First)                     | Vikram (Data-Driven)                 | Ananya (Working Mom)                    |
-| ------------------- | --------------------------------------- | ------------------------------------ | --------------------------------------- |
-| **Primary Focus**   | Safety, privacy, screen time            | Learning metrics, ROI, curriculum    | Convenience, independent play, price   |
-| **Dashboard Needs** | Time tracking, daily limits             | Trend charts, skill breakdowns       | Simple status (safe/learning/playing)  |
-| **Onboarding**      | Wants privacy explanation               | Wants curriculum alignment proof     | **Needs guest mode** — 5+ min = drop   |
-| **Payment**         | Secure, transparent pricing             | Justified by data vs tuition         | **UPI required**, price-sensitive      |
-| **Trust Signals**   | Green dot, "video stays on device"      | Curriculum badges, accuracy slopes   | App doesn't crash, works offline       |
-| **Churn Triggers**  | Privacy concerns, no time controls      | Flat data, no curriculum mapping     | **Crashes, no offline, complex setup** |
+| Aspect              | Neha (Safety-First)                     | Vikram (Data-Driven)                 | Ananya (Working Mom)                    | Dadi (Non-Tech Guardian)                |
+| ------------------- | --------------------------------------- | ------------------------------------ | --------------------------------------- | ---------------------------------------- |
+| **Primary Focus**   | Safety, privacy, screen time            | Learning metrics, ROI, curriculum    | Convenience, independent play, price   | Simplicity, Hindi language, no errors   |
+| **Dashboard Needs** | Time tracking, daily limits             | Trend charts, skill breakdowns       | Simple status (safe/learning/playing)  | No dashboard — one button only          |
+| **Onboarding**      | Wants privacy explanation               | Wants curriculum alignment proof     | **Needs guest mode** — 5+ min = drop   | **Needs pre-config by parent**          |
+| **Language**        | English + Hindi OK                      | English preferred                    | Hindi preferred                        | **Hindi ONLY** — cannot read English    |
+| **Payment**         | Secure, transparent pricing             | Justified by data vs tuition         | **UPI required**, price-sensitive      | Never pays — parent handles             |
+| **Trust Signals**   | Green dot, "video stays on device"      | Curriculum badges, accuracy slopes   | App doesn't crash, works offline       | Nothing breaks, can ask for help        |
+| **Churn Triggers**  | Privacy concerns, no time controls      | Flat data, no curriculum mapping     | **Crashes, no offline, complex setup** | **English UI, small text, errors**      |
 | **Key Decision**    | Converts trial → paid                   | Decides Month 3+ renewal             | Viral spread (200+ WhatsApp group)     |
 
 ### Combined Insights

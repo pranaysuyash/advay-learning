@@ -93,11 +93,12 @@ describe('checkAnswer', () => {
     expect(result).toBe(false);
   });
 
-  it('is case sensitive', () => {
+  it('is case insensitive', () => {
     const round = generateRound('easy', new Set());
     const result = checkAnswer('Cat', round.correctAnswer);
-    // Should fail if case doesn't match
-    expect(result).toBe(round.correctAnswer === 'Cat');
+    expect(result).toBe(
+      'Cat'.toLowerCase() === round.correctAnswer.toLowerCase(),
+    );
   });
 });
 

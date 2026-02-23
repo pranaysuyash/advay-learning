@@ -17,6 +17,38 @@ This file holds:
 
 ---
 
+### TCK-20260223-008 :: Pre-Commit Noise Reduction (jsdom media stubs)
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-02-23 17:40 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+- In-scope:
+  - Reduce non-actionable jsdom media warnings in unit tests.
+  - Keep browser/E2E playback behavior unchanged.
+- Out-of-scope:
+  - E2E audio behavior changes.
+  - Feature-level game logic changes.
+- Behavior change allowed: YES (test/runtime initialization hardening only).
+
+Targets:
+- `src/frontend/src/test/setup.ts`
+- `src/frontend/src/services/ai/tts/TTSService.ts`
+
+Execution log:
+- 2026-02-23 17:40 IST — Replaced `vi.spyOn` media/canvas mocks with stable `Object.defineProperty` stubs in `setup.ts` to avoid restoration back to jsdom unimplemented methods during suite execution.
+- 2026-02-23 17:41 IST — Added test-environment guard in `TTSService` to skip pregen preload and Kokoro initialization under `MODE=test`.
+- 2026-02-23 17:42 IST — Validation:
+  - `cd src/frontend && npm run -s test -- src/pages/__tests__/Login.test.tsx src/pages/__tests__/Home.test.tsx src/pages/__tests__/Game.smoke.test.tsx` (pass)
+  - `cd src/frontend && npm run -s type-check` (pass)
+  - `cd src/frontend && npm run -s lint` (pass)
+
+Status updates:
+- 2026-02-23 17:42 IST **IN_PROGRESS** — Changes verified; awaiting commit.
+
 ### TCK-20260223-001 :: Verify AlphabetGamePage audit vs codebase
 Type: VERIFICATION
 Owner: Pranay
@@ -1872,6 +1904,163 @@ Evidence:
 - Interview transcript: 8 questions, detailed responses
 - Key findings: 8 insights (4 P0, 4 P1)
 - Recommended actions: 7 items documented
+- Documentation: PERSONA_INTERVIEWS_INDEX.md updated
+
+---
+
+## TCK-20260223-008 :: Media Test Noise Cleanup (2026-02-23 17:39 IST)
+
+Type: HARDENING
+Status: DONE
+
+Execution log:
+- Added global jsdom test stubs in `src/frontend/src/test/setup.ts` for `HTMLMediaElement.play/pause/load`.
+- Added canvas context shim in `src/frontend/src/test/setup.ts` to avoid `getContext` not-implemented errors in unit tests.
+- Added speech synthesis shim in `src/frontend/src/test/setup.ts` for hooks/components that query it.
+
+Verification:
+- Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/Home.test.tsx`
+- Output: pass (media method not-implemented warnings removed).
+- Command: `cd src/frontend && npm run -s test -- src/utils/__tests__/semanticHtmlAccess.test.tsx`
+- Output: pass (canvas/media not-implemented warnings removed).
+- Command: `cd src/frontend && npm run -s type-check && npm run -s lint`
+- Output: pass.
+
+Notes:
+- Remaining console output is primarily feature warnings/logs (`KokoroTTS` worker availability, React Router future flags), not jsdom media API gaps.
+
+
+### TCK-20260223-009 :: Simulated Customer Interview - Dadi (Non-Tech Guardian)
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 16:50 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Conduct simulated customer interview with Dadi persona to understand needs of non-tech, non-English speaking grandparent caregivers. Critical for Indian market where grandparents are often daytime caregivers while parents work.
+
+Scope contract:
+- In-scope:
+  - Interview simulation with Dadi persona (62, Lucknow, retired principal, grandmother of Aarav 2y 8m and Kabir 7y 3m)
+  - Focus areas: One-button interface, Hindi language support, error recovery, accidental navigation
+  - Identify UI patterns that prevent panic and enable independent grandparent caregiving
+- Out-of-scope:
+  - Actual user interviews with real customers
+  - Implementation of recommendations
+- Behavior change allowed: NO (research only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): docs/PERSONA_INTERVIEWS_INDEX.md
+- Branch/PR: main
+
+Persona Context (from USER_PERSONAS.md):
+- **Dadi**: 62, Lucknow, Uttar Pradesh, retired school principal
+- **Children in care**: Grandsons Aarav (2y 8m) and Kabir (7y 3m)
+- **Tech Savviness**: Low (can make WhatsApp video calls; struggles with app navigation)
+- **Primary Concern**: Not "breaking anything" on the device
+- **Language**: Hindi only; cannot read English UI
+
+Research Notes:
+- Current UI: English-only navigation labels ("Settings," "Progress," "Start Game")
+- Camera permission popups appear in English (system default)
+- Small text links, gear icons may be invisible
+- No "big button" mode for elderly users
+- Accidental swipe can navigate to Settings → user panics, closes app
+- Needs predictable flow: "Tap here, game starts, child plays"
+
+Execution log:
+- 2026-02-23 16:50 IST — **OPEN** — Ticket created, interview preparation started
+
+Status updates:
+- 2026-02-23 16:50 IST **IN_PROGRESS** — Beginning interview simulation
+
+Planned Questions:
+1. How do you currently start the app for the grandchildren?
+2. What happens when you see English words on screen?
+3. Have you ever accidentally gone to a different screen? What did you do?
+4. What would make you feel confident using this without asking for help?
+5. How should the app look when you first open it?
+6. What if the child taps something by mistake while playing?
+
+---
+
+Interview Transcript Summary:
+
+**Opening the App:**
+- Finds red button, but then must select from "Profiles"
+- Cannot read English — guesses which profile for which grandchild
+- Everything looks "small-small" and same to her
+
+**English UI Barrier:**
+- Only recognizes "WhatsApp" and "Phone" in English
+- All other text is meaningless
+- Feels "stupid" asking for help — was a principal for 35 years
+
+**Accidental Navigation:**
+- Aarav swiped to "Settings" (gear icon)
+- Panicked, closed entire app
+- Waited for Neha to return
+- Fear of "breaking" the device
+
+**Camera Permission:**
+- Popup in English: "Allow" / "Don't Allow"
+- Always presses "Don't Allow" (doesn't understand)
+- Game doesn't work, Kabir says "Dadi pressed wrong"
+- Must dig into Settings to fix — difficult
+
+**What She Wants:**
+- "Bas ek bada sa button. Aarav ki photo." (One big button, Aarav's photo)
+- "Likhna chahiye: 'Aarav ke liye yahan dabayein.'" (Write: "Press here for Aarav")
+- No Settings, no Progress — nothing else
+- If navigates away: "Kya aapko wapas jaana hai?" in Hindi
+
+**Home Button Problem:**
+- Aarav pressed Home button
+- Game closed, had to restart, re-select profile
+- Got angry, scared of breaking something
+- Did nothing until Neha came
+
+**Most Critical Need:**
+- "Hindi. Poora app Hindi mein hona chahiye."
+- "Nahi toh main use nahi kar paungi." (Otherwise I can't use it)
+- Big text visible with glasses
+- If wrong button pressed, child shouldn't cry — game should return
+
+Key Findings:
+| Insight | Severity | Impact |
+|---------|----------|--------|
+| English-only UI barrier | 🔴 HIGH | Cannot read — feels "stupid," asks for help |
+| Camera permission in English | 🔴 HIGH | Always taps "Don't Allow" — game breaks |
+| Small text/icons invisible | 🔴 HIGH | Gear icon, links not visible with glasses |
+| Accidental navigation = panic | 🔴 HIGH | Swipe to Settings → closes app, waits for help |
+| Profile selection confusing | 🔴 HIGH | Guesses which grandchild — often wrong |
+| No Hindi support | 🔴 CRITICAL | "Nahi toh main use nahi kar paungi" |
+| Needs "one big button" mode | 🔴 HIGH | "Bas ek bada sa button. Aarav ki photo." |
+| Home button exits, no recovery | 🟡 MEDIUM | Full restart, re-selection needed |
+| Fear of "breaking" device | 🟡 MEDIUM | Emotional barrier — won't explore |
+
+Recommended Actions (P0):
+1. Full Hindi UI translation (all labels, buttons, modals)
+2. "Dadi Mode" — Grandparent interface with one giant button per child
+3. Pre-approved camera permission (parent config, Dadi never sees popup)
+4. Large text mode (24px+ minimum, high contrast)
+
+Recommended Actions (P1):
+5. Child-proof game container (Home button → rest mode, auto-resume)
+6. Gesture guardrails (disable swipe, prevent accidental Settings)
+7. Audio-first instructions (Pip speaks in Hindi)
+
+Status updates:
+- 2026-02-23 16:50 IST **IN_PROGRESS** — Interview started
+- 2026-02-23 17:05 IST **DONE** — Interview complete, 9 findings documented
+
+Evidence:
+- Interview transcript: 6 questions, responses in Hindi/English
+- Key findings: 9 insights (5 P0, 4 P1)
+- Critical quote: "Nahi toh main use nahi kar paungi" (Otherwise I can't use it)
 - Documentation: PERSONA_INTERVIEWS_INDEX.md updated
 
 ---

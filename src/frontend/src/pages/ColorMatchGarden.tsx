@@ -10,6 +10,8 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
   isPointInCircle,
   pickSpacedPoints,
@@ -68,7 +70,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(75);
+  const [_timeLeft, setTimeLeft] = useState(60);
   const [targets, setTargets] = useState<GardenTarget[]>([]);
   const [promptId, setPromptId] = useState<number>(0);
   const [cursor, setCursor] = useState<Point | null>(null);
@@ -82,6 +84,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const promptRef = useRef(promptId);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
   useEffect(() => {
     let mounted = true;
@@ -181,6 +184,9 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
         setStreak(nextStreak);
         setScore(nextScore);
         setFeedback(`Yes! ${expected.name} flower collected.`);
+        if (ttsEnabled) {
+          void speak(`Yes! ${expected.name}! Great job!`);
+        }
         assetLoader.playSound('pop', 0.5);
         void playPop();
 
@@ -188,6 +194,9 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           setShowCelebration(true);
           assetLoader.playSound('success', 0.75);
           void playCelebration();
+          if (ttsEnabled) {
+            void speak('Amazing streak! Six in a row!');
+          }
           setTimeout(() => setShowCelebration(false), 1800);
         }
 
@@ -195,11 +204,14 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
       } else {
         setStreak(0);
         setFeedback(`That was ${hitTarget.name}. Find ${expected.name}.`);
+        if (ttsEnabled) {
+          void speak(`Try again! Find the ${expected.name} flower!`);
+        }
         assetLoader.playSound('wrong', 0.65);
         void playError();
       }
     },
-    [cursor, playCelebration, playError, playPop, startRound],
+    [cursor, playCelebration, playError, playPop, speak, startRound, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
@@ -222,11 +234,16 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const startGame = async () => {
     setScore(0);
     setStreak(0);
-    setTimeLeft(75);
+    setTimeLeft(60);
     setFeedback('Pinch the flower with the asked color.');
     setCursor(null);
     startRound();
     setIsPlaying(true);
+    if (ttsEnabled) {
+      const prompt = promptRef.current;
+      const targetName = targetsRef.current[prompt]?.name ?? 'the color';
+      void speak(`Find the ${targetName} flower!`);
+    }
     assetLoader.playSound('pop', 0.5);
     await playStart();
 
@@ -238,7 +255,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const resetGame = () => {
     setIsPlaying(false);
     setCursor(null);
-    setTimeLeft(75);
+    setTimeLeft(60);
     setFeedback('Pinch the flower with the asked color.');
   };
 
@@ -294,14 +311,14 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-700 shadow-sm text-base md:text-lg font-bold min-w-max'>
           {feedback}
         </div>
 
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-lg shadow-sm'>
-          Time: <span className='font-black text-[#F59E0B]'>{timeLeft}s</span>
+          Take your time! 🌈
         </div>
 
         {promptTarget && (
@@ -355,7 +372,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
             containerRef={gameAreaRef}
             isPinching={false}
             isHandDetected={isPlaying}
-            size={60}
+            size={84}
             color='#22d3ee'
           />
         )}
@@ -381,6 +398,19 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
               >
                 Start Game! 🚀
               </button>
+
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Find the flower with the matching color.',
+                    'Pinch the flower to collect it!',
+                    'Match as many as you can!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
             </div>
           </div>
         )}

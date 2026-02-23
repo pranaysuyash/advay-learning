@@ -70,6 +70,8 @@ const LANGUAGE_VOICE_MAP: Record<string, string> = {
  * ```
  */
 export class TTSService {
+  private readonly isTestEnv: boolean = (import.meta as any).env?.MODE === 'test';
+
   // Tier 3: Web Speech API (always available)
   private synth: SpeechSynthesis | null = null;
   private voices: SpeechSynthesisVoice[] = [];
@@ -98,8 +100,9 @@ export class TTSService {
     // Initialize Kokoro engine instance (Tier 2) — doesn't load model yet
     this.kokoroEngine = new KokoroTTSEngine();
 
-    // Preload pre-generated audio cache (Tier 1)
-    if (typeof window !== 'undefined') {
+    // Preload pre-generated audio cache (Tier 1). Skip in unit tests to reduce
+    // noise and avoid media setup work in jsdom.
+    if (typeof window !== 'undefined' && !this.isTestEnv) {
       PregenAudioCache.preloadAll();
     }
   }
@@ -164,6 +167,7 @@ export class TTSService {
    * Safe to call multiple times.
    */
   initKokoro(): void {
+    if (this.isTestEnv) return;
     if (this.enginePreference === 'web-speech') return;
     this.kokoroEngine.init().catch((err) => {
       console.warn('[TTSService] Kokoro init failed, will use fallback:', err);
