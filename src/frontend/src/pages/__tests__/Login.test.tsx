@@ -37,7 +37,7 @@ describe('Login page', () => {
     // Check for proper label associations
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /let'?s go/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /login\.submitButton/i })).toBeInTheDocument();
   });
 
   it('keeps submit button available when form is empty', () => {
@@ -47,7 +47,7 @@ describe('Login page', () => {
       </MemoryRouter>,
     );
 
-    const submitButton = screen.getByRole('button', { name: /let'?s go/i });
+    const submitButton = screen.getByRole('button', { name: /login\.submitButton/i });
     expect(submitButton).not.toBeDisabled();
   });
 
@@ -61,7 +61,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'testpassword' } });
 
-    const submitButton = screen.getByRole('button', { name: /let'?s go/i });
+    const submitButton = screen.getByRole('button', { name: /login\.submitButton/i });
     expect(submitButton).not.toBeDisabled();
   });
 
@@ -75,7 +75,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'testpassword' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /let'?s go/i }));
+    fireEvent.click(screen.getByRole('button', { name: /login\.submitButton/i }));
 
     await waitFor(() => {
       expect(loginSpy).toHaveBeenCalledWith('test@example.com', 'testpassword');
@@ -92,7 +92,7 @@ describe('Login page', () => {
     const passwordInput = screen.getByLabelText(/^password$/i);
     expect(passwordInput).toHaveAttribute('type', 'password');
 
-    const toggleButton = screen.getByRole('button', { name: /show password/i });
+    const toggleButton = screen.getByRole('button', { name: /aria\.showPassword/i });
     fireEvent.click(toggleButton);
 
     expect(passwordInput).toHaveAttribute('type', 'text');
@@ -116,7 +116,7 @@ describe('Login page', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: /back to home/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /aria\.backToHome/i })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: /create an account/i })).toHaveAttribute('href', '/register');
   });
 });

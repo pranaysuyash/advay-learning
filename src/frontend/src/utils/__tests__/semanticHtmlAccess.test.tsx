@@ -346,8 +346,8 @@ describe('Semantic HTML Accessibility', () => {
     it('should have game card/action elements for content cards', async () => {
       const { container } = renderWithRouter(<Dashboard />);
 
-      const playNowButtons = Array.from(container.querySelectorAll('button')).filter(
-        (btn) => /play now/i.test(btn.textContent ?? ''),
+      const playNowButtons = Array.from(container.querySelectorAll('button')).filter((btn) =>
+        /(play now|featuredGames\.playNow|dashboard:featuredGames\.playNow)/i.test(btn.textContent ?? ''),
       );
       expect(playNowButtons.length).toBeGreaterThan(0);
     });
@@ -363,7 +363,7 @@ describe('Semantic HTML Accessibility', () => {
       const { container } = renderWithRouter(<Dashboard />);
 
       const learningMapSection = Array.from(container.querySelectorAll('section')).find((section) =>
-        /learning map/i.test(section.textContent ?? ''),
+        /(learning map|learningMap\.title|dashboard:learningMap\.title)/i.test(section.textContent ?? ''),
       );
       expect(learningMapSection).toBeTruthy();
     });
