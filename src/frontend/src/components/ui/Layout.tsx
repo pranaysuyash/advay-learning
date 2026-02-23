@@ -91,7 +91,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       <footer className='bg-slate-800 border-t-4 border-slate-900 overflow-hidden relative'>
-        <div className='absolute inset-0 bg-[url("/assets/images/noise.png")] opacity-10 pointer-events-none mix-blend-overlay'></div>
+        <div className='absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[length:14px_14px] opacity-20 pointer-events-none mix-blend-overlay'></div>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10 text-center'>
           <div className='flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-slate-400'>
             <p>© {new Date().getFullYear()} Advay Learning</p>

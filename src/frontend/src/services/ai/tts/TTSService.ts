@@ -1,286 +1,221 @@
 /**
- * TTSService - Text-to-Speech Service using Web Speech API
+ * TTSService — Text-to-Speech Service (Strategy Pattern)
  *
- * This service provides a friendly voice for Pip the mascot.
- * Uses the browser's built-in speech synthesis for zero-latency,
- * privacy-friendly TTS without external API calls.
+ * Manages TTS providers with automatic fallback:
+ *   1. Kokoro 82M (on-device, natural voice, WebGPU/WASM)
+ *   2. Web Speech API (browser built-in, robotic but universal)
  *
- * @see docs/audit/ai-phase1-readiness-audit.md
- * @see docs/ai-native/ARCHITECTURE.md
+ * The service initializes Kokoro asynchronously. While loading (or if
+ * it fails), all speak() calls are routed to the Web Speech fallback.
+ *
+ * @see TTSProvider.ts for the provider interface
+ * @see KokoroTTSProvider.ts for the primary SOTA provider
+ * @see WebSpeechTTSProvider.ts for the browser fallback
  */
 
-export interface TTSOptions {
-  /** Speech rate: 0.1 to 10 (default: 1.0) */
-  rate?: number;
-  /** Voice pitch: 0 to 2 (default: 1.0) */
-  pitch?: number;
-  /** Volume: 0 to 1 (default: 1.0) */
-  volume?: number;
-  /** Language code (e.g., 'en-US', 'hi-IN') */
-  lang?: string;
-  /** Preferred voice name (browser-specific) */
-  voiceName?: string;
-}
+import type { TTSProvider, TTSProviderOptions } from './TTSProvider';
+import { KokoroTTSProvider } from './KokoroTTSProvider';
+import { WebSpeechTTSProvider } from './WebSpeechTTSProvider';
 
-export interface TTSVoiceInfo {
-  name: string;
-  lang: string;
-  default: boolean;
-  localService: boolean;
-}
+// Re-export for backward compatibility
+export type TTSOptions = TTSProviderOptions;
 
-// Pip's default voice settings - friendly and slightly higher pitched
-const PIP_VOICE_DEFAULTS: TTSOptions = {
-  rate: 1.0,      // Normal speed for clarity
-  pitch: 1.2,     // Slightly higher = friendlier for kids
-  volume: 1.0,
-  lang: 'en-US',
-};
-
-// Language code mapping for multi-language support
-const LANGUAGE_VOICE_MAP: Record<string, string> = {
-  en: 'en-US',
-  hi: 'hi-IN',
-  kn: 'kn-IN',
-  te: 'te-IN',
-  ta: 'ta-IN',
-};
-
-/**
- * TTSService class
- *
- * Usage:
- * ```typescript
- * import { ttsService } from '@/services/ai/tts/TTSService';
- *
- * // Simple usage
- * await ttsService.speak("Hello! I'm Pip!");
- *
- * // With options
- * await ttsService.speak("Great job!", { rate: 1.2, pitch: 1.3 });
- *
- * // Check if available
- * if (ttsService.isAvailable()) {
- *   await ttsService.speak("TTS is working!");
- * }
- * ```
- */
 export class TTSService {
-  private synth: SpeechSynthesis | null = null;
-  private enabled: boolean = true;
-  private volume: number = 1.0;
-  private voices: SpeechSynthesisVoice[] = [];
-  private voicesLoaded: boolean = false;
-  private defaultOptions: TTSOptions = { ...PIP_VOICE_DEFAULTS };
+  private primary: TTSProvider;
+  private fallback: TTSProvider;
+  private activeProvider: TTSProvider | null = null;
+  private enabled = true;
+  private volume = 1.0;
+  private initPromise: Promise<void> | null = null;
+  private _isReady = false;
 
   constructor() {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      this.synth = window.speechSynthesis;
-      this.loadVoices();
+    this.fallback = new WebSpeechTTSProvider();
+    this.primary = new KokoroTTSProvider();
 
-      // Chrome loads voices asynchronously
-      if (this.synth.onvoiceschanged !== undefined) {
-        this.synth.onvoiceschanged = () => this.loadVoices();
+    const mode = String((import.meta as any).env?.MODE ?? '').toLowerCase();
+    const isVitest =
+      typeof process !== 'undefined' &&
+      typeof process.env !== 'undefined' &&
+      (process.env.VITEST === 'true' || process.env.NODE_ENV === 'test');
+    const isTestRuntime = mode === 'test' || isVitest;
+
+    if (isTestRuntime) {
+      // Prevent heavy model startup inside test workers.
+      void this.fallback.init().then((ready) => {
+        if (ready) this.activeProvider = this.fallback;
+      });
+      this._isReady = true;
+      return;
+    }
+
+    // Start initialization immediately
+    this.initPromise = this.initialize();
+  }
+
+  /**
+   * Initialize providers: try Kokoro first, fall back to Web Speech.
+   * This runs in the background — speak() works immediately via fallback.
+   */
+  private async initialize(): Promise<void> {
+    // Always init the fallback first (instant, no model download)
+    const fallbackReady = await this.fallback.init();
+    if (fallbackReady) {
+      this.activeProvider = this.fallback;
+      this._isReady = true;
+      console.log(`[TTSService] Fallback ready: ${this.fallback.name}`);
+    }
+
+    // Then try to load Kokoro (may take seconds on first load due to model download)
+    try {
+      const primaryReady = await this.primary.init();
+      if (primaryReady) {
+        this.activeProvider = this.primary;
+        console.log(`[TTSService] ✨ Primary ready: ${this.primary.name}`);
+      } else {
+        console.log('[TTSService] Primary unavailable, using fallback');
       }
+    } catch (error) {
+      console.warn('[TTSService] Primary init failed, using fallback:', error);
     }
+
+    this._isReady = true;
   }
 
-  /**
-   * Load available voices from the browser
-   */
-  private loadVoices(): void {
-    if (!this.synth) return;
-
-    this.voices = this.synth.getVoices();
-    this.voicesLoaded = this.voices.length > 0;
-
-    if (this.voicesLoaded) {
-      console.log(`[TTSService] Loaded ${this.voices.length} voices`);
-    }
-  }
-
-  /**
-   * Check if TTS is available in this browser
-   */
+  /** Whether any TTS provider is ready */
   isAvailable(): boolean {
-    return this.synth !== null;
+    return this._isReady && this.activeProvider !== null;
   }
 
-  /**
-   * Check if TTS is enabled (user setting)
-   */
+  /** Whether TTS is enabled (user setting) */
   isEnabled(): boolean {
     return this.enabled && this.isAvailable();
   }
 
-  /**
-   * Get list of available voices
-   */
-  getVoices(): TTSVoiceInfo[] {
-    return this.voices.map((voice) => ({
-      name: voice.name,
-      lang: voice.lang,
-      default: voice.default,
-      localService: voice.localService,
-    }));
+  /** Whether TTS is currently speaking */
+  isSpeaking(): boolean {
+    return this.activeProvider?.isSpeaking() ?? false;
+  }
+
+  /** Name of the active provider ("Kokoro 82M (On-Device)" or "Web Speech API (Browser)") */
+  getProviderName(): string {
+    return this.activeProvider?.name ?? 'None';
+  }
+
+  /** Whether the primary (Kokoro) provider is active (not the fallback) */
+  isPrimaryActive(): boolean {
+    return this.activeProvider === this.primary && this.primary.isReady();
   }
 
   /**
-   * Find the best voice for a given language
+   * Speak text with optional configuration.
+   * Routes to the best available provider.
+   * Automatically cancels any in-progress speech first.
    */
-  private findVoiceForLanguage(lang: string): SpeechSynthesisVoice | null {
-    if (!this.voices.length) return null;
+  async speak(text: string, options?: TTSOptions): Promise<void> {
+    if (!this.enabled) return;
 
-    // Try exact match first
-    let voice = this.voices.find((v) => v.lang === lang);
-    if (voice) return voice;
-
-    // Try language prefix (e.g., 'en' for 'en-US')
-    const langPrefix = lang.split('-')[0];
-    voice = this.voices.find((v) => v.lang.startsWith(langPrefix));
-    if (voice) return voice;
-
-    // Fall back to default or first available
-    return this.voices.find((v) => v.default) || this.voices[0] || null;
-  }
-
-  /**
-   * Speak text with optional configuration
-   *
-   * @param text - The text to speak
-   * @param options - Optional TTS configuration
-   * @returns Promise that resolves when speech completes
-   */
-  speak(text: string, options?: TTSOptions): Promise<void> {
-    // Don't speak if disabled or unavailable
-    if (!this.enabled || !this.synth) {
-      return Promise.resolve();
-    }
-
-    // Cancel any ongoing speech
+    // Always cancel previous speech to prevent overlap
     this.stop();
 
-    return new Promise((resolve, reject) => {
-      const mergedOptions = { ...this.defaultOptions, ...options };
+    // Wait for initialization if still pending
+    if (this.initPromise) {
+      await this.initPromise;
+    }
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = mergedOptions.rate ?? 1.0;
-      utterance.pitch = mergedOptions.pitch ?? 1.0;
-      utterance.volume = Math.min(mergedOptions.volume ?? 1.0, this.volume);
+    if (!this.activeProvider) return;
 
-      // Set language
-      const lang = mergedOptions.lang || PIP_VOICE_DEFAULTS.lang!;
-      utterance.lang = lang;
+    const mergedOptions: TTSProviderOptions = {
+      ...options,
+      volume: Math.min(options?.volume ?? 1.0, this.volume),
+    };
 
-      // Try to find a matching voice
-      const voice = this.findVoiceForLanguage(lang);
-      if (voice) {
-        utterance.voice = voice;
+    try {
+      await this.activeProvider.speak(text, mergedOptions);
+    } catch (error) {
+      // If primary fails, try fallback
+      if (this.activeProvider === this.primary && this.fallback.isReady()) {
+        console.warn('[TTSService] Primary failed, falling back:', error);
+        await this.fallback.speak(text, mergedOptions);
       }
-
-      utterance.onend = () => {
-        resolve();
-      };
-
-      utterance.onerror = (event) => {
-        // Don't reject on 'interrupted' - that's expected when we call stop()
-        if (event.error === 'interrupted') {
-          resolve();
-        } else {
-          console.error('[TTSService] Speech error:', event.error);
-          reject(new Error(`Speech synthesis error: ${event.error}`));
-        }
-      };
-
-      this.synth!.speak(utterance);
-    });
+    }
   }
 
   /**
-   * Speak text in a specific language (convenience method)
-   *
-   * @param text - The text to speak
-   * @param languageCode - Language code ('en', 'hi', 'kn', 'te', 'ta')
+   * Speak text in a specific language (convenience method).
    */
-  speakInLanguage(text: string, languageCode: string): Promise<void> {
-    const lang = LANGUAGE_VOICE_MAP[languageCode] || 'en-US';
-    return this.speak(text, { lang });
+  async speakInLanguage(text: string, languageCode: string): Promise<void> {
+    const langMap: Record<string, string> = {
+      en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', te: 'te-IN', ta: 'ta-IN',
+    };
+    return this.speak(text, { lang: langMap[languageCode] || 'en-US' });
   }
 
-  /**
-   * Stop any ongoing speech
-   */
+  /** Stop any ongoing speech */
   stop(): void {
-    if (this.synth) {
-      this.synth.cancel();
-    }
+    this.activeProvider?.stop();
   }
 
-  /**
-   * Pause speech
-   */
+  /** Pause speech (Web Speech only) */
   pause(): void {
-    if (this.synth) {
-      this.synth.pause();
+    // Only Web Speech API supports pause/resume natively
+    if (this.activeProvider === this.fallback) {
+      (this.fallback as any).synth?.pause?.();
     }
   }
 
-  /**
-   * Resume paused speech
-   */
+  /** Resume paused speech */
   resume(): void {
-    if (this.synth) {
-      this.synth.resume();
+    if (this.activeProvider === this.fallback) {
+      (this.fallback as any).synth?.resume?.();
     }
   }
 
-  /**
-   * Check if currently speaking
-   */
-  isSpeaking(): boolean {
-    return this.synth?.speaking ?? false;
-  }
-
-  /**
-   * Enable or disable TTS
-   *
-   * @param enabled - Whether TTS should be enabled
-   */
+  /** Enable or disable TTS */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    if (!enabled) {
-      this.stop();
-    }
+    if (!enabled) this.stop();
   }
 
-  /**
-   * Set the master volume
-   *
-   * @param volume - Volume level from 0 to 1
-   */
+  /** Set master volume (0 to 1) */
   setVolume(volume: number): void {
     this.volume = Math.max(0, Math.min(1, volume));
   }
 
-  /**
-   * Get current volume
-   */
+  /** Get current volume */
   getVolume(): number {
     return this.volume;
   }
 
-  /**
-   * Set default options for all speech
-   */
-  setDefaultOptions(options: Partial<TTSOptions>): void {
-    this.defaultOptions = { ...this.defaultOptions, ...options };
+  /** Set default TTS options (backward compatibility) */
+  setDefaultOptions(_options: Partial<TTSOptions>): void {
+    // No-op for backward compat — options are per-call now
   }
 
-  /**
-   * Reset to Pip's default voice settings
-   */
+  /** Get available voices (backward compatibility) */
+  getVoices(): Array<{ name: string; lang: string; default: boolean; localService: boolean }> {
+    // Return Web Speech voices for backward compat
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      return window.speechSynthesis.getVoices().map((v) => ({
+        name: v.name,
+        lang: v.lang,
+        default: v.default,
+        localService: v.localService,
+      }));
+    }
+    return [];
+  }
+
+  /** Reset to defaults (backward compatibility) */
   resetToDefaults(): void {
-    this.defaultOptions = { ...PIP_VOICE_DEFAULTS };
+    this.volume = 1.0;
+  }
+
+  /** Clean up all resources */
+  dispose(): void {
+    this.primary.dispose();
+    this.fallback.dispose();
+    this.activeProvider = null;
   }
 }
 

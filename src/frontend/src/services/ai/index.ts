@@ -6,4 +6,4 @@
  */
 
 // TTS (Text-to-Speech)
-export { TTSService, ttsService, type TTSOptions, type TTSVoiceInfo } from './tts';
+export { TTSService, ttsService, type TTSOptions } from './tts';

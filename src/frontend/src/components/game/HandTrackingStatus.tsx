@@ -49,6 +49,8 @@ export function HandTrackingStatus({
 }: HandTrackingStatusProps) {
   const { speak } = useTTS();
   const previousDetectedRef = useRef<boolean>(isHandDetected);
+  const lastSpokenRef = useRef<number>(0); // Cooldown to prevent rapid-fire speech
+  const SPEAK_COOLDOWN_MS = 8000; // Only speak hand-lost message once per 8 seconds
 
   // Notify parent component when detection state changes
   useEffect(() => {
@@ -57,9 +59,13 @@ export function HandTrackingStatus({
 
     onHandDetectionChange?.(isHandDetected);
 
-    // Voice prompt when hand is lost
+    // Voice prompt when hand is lost (with cooldown to prevent overlap)
     if (!isHandDetected && voicePrompt) {
-      speak("I can't see your hand! Show it to the camera!");
+      const now = Date.now();
+      if (now - lastSpokenRef.current > SPEAK_COOLDOWN_MS) {
+        lastSpokenRef.current = now;
+        speak("Show your hand to the camera!");
+      }
     }
   }, [isHandDetected, onHandDetectionChange, speak, voicePrompt]);
 

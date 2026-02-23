@@ -157,18 +157,43 @@ export function Settings() {
                   </div>
                   <div className='p-8 space-y-8'>
 
+                    {/* Camera Enable Toggle - Clearer Labeling */}
                     <div className='flex items-center justify-between'>
-                      <div>
-                        <div className='font-black text-slate-700 text-lg'>Enable Tracking</div>
-                        <div className='text-sm font-bold text-slate-500 mt-1 max-w-[200px] leading-tight'>Camera required. Video never leaves this device.</div>
+                      <div className="flex-1 pr-4">
+                        <div className='font-black text-slate-700 text-lg flex items-center gap-2'>
+                          {settings.cameraEnabled ? '📷' : '🚫'} Camera for Games
+                        </div>
+                        <div className='text-sm font-bold text-slate-500 mt-2 leading-relaxed'>
+                          {settings.cameraEnabled 
+                            ? '✅ Camera is ON — Used for hand tracking games. Video stays on this device only.' 
+                            : '❌ Camera is OFF — Games will use touch/click instead of hand gestures.'}
+                        </div>
                       </div>
                       <button
                         onClick={handleCameraToggle}
+                        aria-label={settings.cameraEnabled ? 'Turn camera off' : 'Turn camera on'}
                         className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.cameraEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
                         <div className={`w-6 h-6 bg-white rounded-full shadow-sm transition-transform ${settings.cameraEnabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
+
+                    {/* Privacy Indicator Explanation */}
+                    {settings.cameraEnabled && (
+                      <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200'>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white shadow-sm shrink-0 mt-0.5 animate-pulse" />
+                          <div>
+                            <div className="font-black text-lg">Privacy Indicator</div>
+                            <div className="text-sm font-bold text-blue-600 mt-1">
+                              When camera is active, a green dot appears on screen. 
+                              This means video is being processed on your device only — 
+                              we never see or store it.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {cameraPermission === 'granted' && (
                       <div className='px-5 py-4 rounded-[1.5rem] bg-emerald-50 text-emerald-700 border-4 border-emerald-200 flex items-center gap-3 font-black text-lg'>

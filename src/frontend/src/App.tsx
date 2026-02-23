@@ -179,6 +179,11 @@ const BubblePop = lazy(() =>
     default: module.default,
   })),
 );
+const RhymeTime = lazy(() =>
+  import('./pages/RhymeTime').then((module) => ({
+    default: module.default,
+  })),
+);
 const PhysicsDemo = lazy(() =>
   import('./pages/PhysicsDemo').then((module) => ({
     default: module.default,
@@ -538,6 +543,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BubblePop />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/games/rhyme-time'
+              element={
+                <ProtectedRoute>
+                  <RhymeTime />
                 </ProtectedRoute>
               }
             />

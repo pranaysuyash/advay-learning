@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import {
   assetLoader,
@@ -392,10 +393,12 @@ export function AirCanvas() {
       {/* Webcam (hidden but functional) */}
       <Webcam
         ref={webcamRef}
-        className="absolute bottom-4 right-4 w-48 h-36 rounded-xl opacity-50"
+        style={{ display: 'none' }}
         mirrored
         videoConstraints={{ width: 640, height: 480 }}
       />
+
+      <CameraThumbnail isHandDetected={isHandReady} position="bottom-right" />
 
       {/* UI Panel */}
       <AnimatePresence>

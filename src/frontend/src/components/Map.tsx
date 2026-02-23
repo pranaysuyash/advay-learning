@@ -7,6 +7,10 @@ import {
   isIslandUnlocked,
   getIslandById,
 } from '../data/quests';
+import { resolveImageUrl } from '../utils/imageAssets';
+
+const ADVENTURE_MAP_IMAGE =
+  resolveImageUrl('adventure-map') ?? '/assets/images/adventure-map.png';
 
 export function AdventureMap() {
   const { unlockedIslands, badges, completedQuests, totalXp, unlockIsland } =
@@ -54,7 +58,7 @@ export function AdventureMap() {
 
           {/* Map Background Image */}
           <image
-            href="/assets/images/adventure-map.png"
+            href={ADVENTURE_MAP_IMAGE}
             width="1024"
             height="1024"
             preserveAspectRatio="xMidYMid slice"

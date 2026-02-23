@@ -205,7 +205,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
     [],
   );
 
-  useGameHandTracking({
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
     gameName: 'ConnectTheDots',
     isRunning: gameStarted && isHandTrackingEnabled && !gameCompleted,
     webcamRef,
@@ -494,6 +494,8 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           score={score}
           level={level}
           onHome={goToHome}
+          isHandDetected={isHandTrackingReady}
+          isPlaying={gameStarted && !gameCompleted}
         >
           <div
             ref={gameAreaRef}

@@ -10,6 +10,13 @@ vi.mock('react-webcam', () => ({
   )),
 }));
 
+vi.mock('../../hooks/useTTS', () => ({
+  useTTS: () => ({
+    speakInLanguage: vi.fn(),
+    isEnabled: false,
+  }),
+}));
+
 // @mediapipe/tasks-vision is already mocked globally in setupTests.ts
 
 // Mock AudioContext for useSoundEffects

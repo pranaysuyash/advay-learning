@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { CameraErrorBoundary } from '../errors/CameraErrorBoundary';
+import { CameraErrorBoundary } from '../CameraErrorBoundary';
 
 function Thrower() {
   throw new Error('camera permission denied by user');

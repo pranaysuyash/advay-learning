@@ -3,6 +3,10 @@ import {
   UnifiedMetrics,
   HolisticScorecard,
   PlantGrowth,
+  DailyTimeBreakdown,
+  TimeBreakdownSummary,
+  StruggleAnalysis,
+  StruggleSummary,
 } from '../types/progress';
 
 /**
@@ -371,4 +375,141 @@ function getConsistencyDescription(level: string, recentDays: number): string {
     default:
       return 'Consistency data being analyzed';
   }
+}
+
+/**
+ * Calculate daily time breakdown for parent monitoring
+ * Estimates time based on activity count (3 min per activity average)
+ */
+export function calculateDailyTimeBreakdown(
+  progress: ProgressItem[],
+  limitMinutes: number = 20,
+): TimeBreakdownSummary {
+  const today = new Date();
+  const days: DailyTimeBreakdown[] = [];
+
+  // Generate last 7 days
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+    // Count activities for this day
+    const dayActivities = progress.filter((p) => {
+      const activityDate = new Date(p.completed_at).toISOString().split('T')[0];
+      return activityDate === dateStr;
+    });
+
+    const activityCount = dayActivities.length;
+    // Estimate: ~3 minutes per activity on average
+    const minutes = Math.round(activityCount * 3);
+
+    days.push({
+      date: dateStr,
+      dayName,
+      minutes,
+      activityCount,
+      isToday: i === 0,
+      exceedsLimit: minutes > limitMinutes,
+    });
+  }
+
+  const totalMinutesWeek = days.reduce((sum, d) => sum + d.minutes, 0);
+  const averageMinutesPerDay = Math.round(totalMinutesWeek / 7);
+  const daysExceededLimit = days.filter((d) => d.exceedsLimit).length;
+
+  return {
+    dailyBreakdown: days,
+    averageMinutesPerDay,
+    totalMinutesWeek,
+    daysExceededLimit,
+    limitMinutes,
+  };
+}
+
+/**
+ * Analyze items where child may be struggling for parent intervention
+ * High attention: >5 attempts OR <50% accuracy
+ * Medium attention: 3-5 attempts OR 50-70% accuracy
+ * Low attention: 2 attempts with good accuracy
+ */
+export function analyzeStruggles(
+  progress: ProgressItem[],
+): StruggleSummary {
+  const analyzed: StruggleAnalysis[] = progress.map((item) => {
+    const attempts = item.attempt_count ?? 1;
+    let attentionLevel: StruggleAnalysis['attentionLevel'] = 'none';
+    let reason = '';
+
+    if (attempts > 5 || item.score < 50) {
+      attentionLevel = 'high';
+      if (attempts > 5 && item.score < 50) {
+        reason = `Struggling with ${attempts} attempts and low accuracy`;
+      } else if (attempts > 5) {
+        reason = `Required ${attempts} attempts to complete`;
+      } else {
+        reason = `Low accuracy (${Math.round(item.score)}%)`;
+      }
+    } else if (attempts >= 3 || item.score < 70) {
+      attentionLevel = 'medium';
+      if (attempts >= 3) {
+        reason = `Took ${attempts} attempts — may need more practice`;
+      } else {
+        reason = `Accuracy could improve (${Math.round(item.score)}%)`;
+      }
+    } else if (attempts === 2) {
+      attentionLevel = 'low';
+      reason = 'Completed in 2 attempts';
+    }
+
+    return {
+      item,
+      effectiveAttempts: attempts,
+      attentionLevel,
+      reason,
+    };
+  });
+
+  const strugglingItems = analyzed.filter(
+    (a) => a.attentionLevel === 'high' || a.attentionLevel === 'medium',
+  );
+
+  const recommendations: string[] = [];
+  const highCount = analyzed.filter((a) => a.attentionLevel === 'high').length;
+  const mediumCount = analyzed.filter((a) => a.attentionLevel === 'medium').length;
+
+  if (highCount > 0) {
+    recommendations.push(
+      `${highCount} item${highCount !== 1 ? 's' : ''} need${highCount === 1 ? 's' : ''} focused practice. Consider sitting with your child for these.`,
+    );
+  }
+  if (mediumCount > 0) {
+    recommendations.push(
+      `${mediumCount} item${mediumCount !== 1 ? 's' : ''} may benefit from additional practice.`,
+    );
+  }
+  if (highCount === 0 && mediumCount === 0) {
+    recommendations.push('Great progress! No items need special attention right now.');
+  }
+
+  return {
+    strugglingItems: strugglingItems.sort(
+      (a, b) => b.effectiveAttempts - a.effectiveAttempts,
+    ),
+    totalTracked: progress.length,
+    needsAttentionCount: strugglingItems.length,
+    recommendations,
+  };
+}
+
+/**
+ * Get attempt display with appropriate formatting
+ */
+export function formatAttempts(attemptCount: number | undefined): string {
+  const attempts = attemptCount ?? 1;
+  if (attempts === 1) return '1st try';
+  if (attempts === 2) return '2nd try';
+  if (attempts === 3) return '3rd try';
+  return `${attempts}th try`;
 }

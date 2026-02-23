@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useProfileStore } from '../store';
@@ -9,8 +9,13 @@ import { UIIcon } from '../components/ui/Icon';
 import { PlantVisualization } from '../components/progress/PlantVisualization';
 import { MetricCard } from '../components/progress/MetricsCard';
 import { RecommendationCard } from '../components/progress/RecommendationCard';
+import { DailyTimeChart } from '../components/progress/DailyTimeChart';
+import { NeedsAttentionSection } from '../components/progress/NeedsAttentionSection';
+import { ExportButton } from '../components/progress/ExportButton';
 import { useProgressMetrics } from '../hooks/useProgressMetrics';
-import { ProgressItem, ProgressStats } from '../types/progress';
+import { calculateDailyTimeBreakdown, analyzeStruggles } from '../utils/progressCalculations';
+import { generateReportData, ReportData } from '../utils/reportExport';
+import { ProgressItem, ProgressStats, TimeBreakdownSummary, StruggleSummary } from '../types/progress';
 
 export function Progress() {
   const navigate = useNavigate();
@@ -26,12 +31,32 @@ export function Progress() {
   const [error, setError] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [syncing, setSyncing] = useState<boolean>(false);
-  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'all'>(
-    'all',
-  );
+  const [timeBreakdown, setTimeBreakdown] = useState<TimeBreakdownSummary | null>(null);
+  const [struggleSummary, setStruggleSummary] = useState<StruggleSummary | null>(null);
 
   const { metrics, scorecard, honestStats, plantGrowth } =
     useProgressMetrics(progress);
+
+  // Calculate daily time breakdown when progress changes
+  useEffect(() => {
+    if (progress.length > 0) {
+      const breakdown = calculateDailyTimeBreakdown(progress, 20); // 20 min default limit
+      setTimeBreakdown(breakdown);
+      const struggles = analyzeStruggles(progress);
+      setStruggleSummary(struggles);
+    } else {
+      setTimeBreakdown(null);
+      setStruggleSummary(null);
+    }
+  }, [progress]);
+
+  // Generate report data for export
+  const reportData: ReportData | null = useMemo(() => {
+    if (!selectedProfileId || progress.length === 0) return null;
+    const profile = profiles.find((p) => p.id === selectedProfileId);
+    const childName = profile?.name || 'Child';
+    return generateReportData(childName, progress);
+  }, [progress, profiles, selectedProfileId]);
 
   useEffect(() => {
     fetchProfiles();
@@ -96,22 +121,8 @@ export function Progress() {
           </div>
 
           <div className='flex flex-wrap items-center gap-4 bg-white p-3 rounded-[1.5rem] border-4 border-slate-100 shadow-sm'>
-            {/* Period Selector */}
-            <div className='flex bg-slate-50 border-2 border-slate-200 rounded-xl p-1'>
-              {(['week', 'month', 'all'] as const).map((period) => (
-                <button
-                  key={period}
-                  type='button'
-                  onClick={() => setReportPeriod(period)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors ${reportPeriod === period
-                      ? 'bg-[#E85D04] text-white shadow-sm'
-                      : 'text-slate-500 hover:bg-slate-200'
-                    }`}
-                >
-                  {period}
-                </button>
-              ))}
-            </div>
+            {/* Export Button */}
+            {reportData && <ExportButton data={reportData} />}
 
             {/* Pending indicator */}
             {pendingCount > 0 && (
@@ -236,6 +247,11 @@ export function Progress() {
 
         {!loading && !error && stats && (
           <>
+            {/* Needs Attention Section - Shows struggling items */}
+            {struggleSummary && (
+              <NeedsAttentionSection summary={struggleSummary} />
+            )}
+
             {/* Plant Visualization Section */}
             <div className='bg-white border-4 border-slate-100 rounded-[2.5rem] p-8 md:p-12 mb-12 shadow-sm relative overflow-hidden'>
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/5 rounded-bl-full -z-10"></div>
@@ -307,6 +323,13 @@ export function Progress() {
                 </div>
               </div>
             </div>
+
+            {/* Daily Time Breakdown Chart */}
+            {timeBreakdown && (
+              <div className='mb-12'>
+                <DailyTimeChart summary={timeBreakdown} />
+              </div>
+            )}
 
             {/* Unified Metrics Section */}
             <div className='mb-12'>

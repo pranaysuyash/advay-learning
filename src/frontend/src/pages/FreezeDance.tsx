@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -391,7 +392,8 @@ export function FreezeDance() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8 font-sans'>
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8 font-sans relative'>
+      <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
       <header className='flex justify-between items-center mb-8 max-w-5xl mx-auto'>
         <button
           onClick={() => navigate('/games')}

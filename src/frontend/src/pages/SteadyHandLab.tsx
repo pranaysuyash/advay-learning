@@ -236,6 +236,8 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
       score={score}
       level={round}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div
         ref={gameAreaRef}

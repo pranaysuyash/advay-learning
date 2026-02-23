@@ -206,29 +206,29 @@ export function generateRound(
   usedFamilies: Set<string>
 ): RhymeRound {
   const config = DIFFICULTY_CONFIGS[difficulty];
-  
+
   // Pick a rhyme family (avoid recently used if possible)
   let availableFamilies = RHYME_FAMILIES.filter(f => config.families.includes(f.family));
   const unusedFamilies = availableFamilies.filter(f => !usedFamilies.has(f.family));
-  
+
   if (unusedFamilies.length > 0) {
     availableFamilies = unusedFamilies;
   }
-  
+
   const targetFamily = availableFamilies[Math.floor(Math.random() * availableFamilies.length)];
-  
+
   // Pick target word
   const targetWord = targetFamily.words[Math.floor(Math.random() * targetFamily.words.length)];
-  
+
   // Generate options
   const options: RhymeOption[] = [
     { word: targetWord, isCorrect: true, family: targetFamily.family },
   ];
-  
+
   // Add correct family distractors
   const otherFamilyWords = targetFamily.words.filter(w => w.word !== targetWord.word);
   const shuffledFamilyWords = [...otherFamilyWords].sort(() => Math.random() - 0.5);
-  
+
   // Add one distractor from same family (if available)
   if (shuffledFamilyWords.length > 0 && config.useSimilarFamilies) {
     options.push({
@@ -237,15 +237,15 @@ export function generateRound(
       family: targetFamily.family,
     });
   }
-  
+
   // Add distractors from other families
   const otherFamilies = RHYME_FAMILIES.filter(f => f.family !== targetFamily.family);
   const shuffledOtherFamilies = [...otherFamilies].sort(() => Math.random() - 0.5);
-  
+
   while (options.length < config.optionCount && shuffledOtherFamilies.length > 0) {
     const distractorFamily = shuffledOtherFamilies.shift()!;
     const distractorWord = distractorFamily.words[Math.floor(Math.random() * distractorFamily.words.length)];
-    
+
     // Avoid duplicate words
     if (!options.some(o => o.word.word === distractorWord.word)) {
       options.push({
@@ -255,10 +255,10 @@ export function generateRound(
       });
     }
   }
-  
+
   // Shuffle options
   options.sort(() => Math.random() - 0.5);
-  
+
   return {
     targetWord,
     targetFamily: targetFamily.family,
@@ -295,17 +295,17 @@ export function processAnswer(
 ): GameState {
   const newStreak = isCorrect ? gameState.streak + 1 : 0;
   const points = isCorrect ? 10 + Math.min(gameState.streak * 2, 20) : 0;
-  
+
   const newUsedFamilies = new Set(gameState.usedFamilies);
   newUsedFamilies.add(family);
-  
+
   // Keep only last 3 families to avoid repetition
   if (newUsedFamilies.size > 3) {
     const familiesArray = Array.from(newUsedFamilies);
     newUsedFamilies.clear();
     familiesArray.slice(-3).forEach(f => newUsedFamilies.add(f));
   }
-  
+
   return {
     ...gameState,
     currentRound: gameState.currentRound + 1,
@@ -341,14 +341,11 @@ export function getDifficultyDisplay(difficulty: Difficulty): { label: string; c
   }
 }
 
-// Text-to-speech for words
+// Text-to-speech for words (routes through Kokoro TTS)
 export function speakWord(word: string): void {
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.rate = 0.8;
-    utterance.pitch = 1.1;
-    window.speechSynthesis.speak(utterance);
-  }
+  import('../services/ai/tts/TTSService').then(({ ttsService }) => {
+    void ttsService.speak(word, { rate: 0.8 });
+  });
 }
 
 // Get example sentence for family

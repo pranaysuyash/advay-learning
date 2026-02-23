@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { GameCursor } from '../components/game/GameCursor';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
@@ -22,9 +22,9 @@ import { randomFloat01 } from '../utils/random';
 import { KalmanFilter, isWithinTarget, mapNormalizedPointToCover } from '../utils/coordinateTransform';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
-const BASE_HIT_RADIUS = 0.18;
-const ADAPTIVE_HIT_BONUS = 0.06;
-const SNAP_RADIUS = 0.06;
+const BASE_HIT_RADIUS = 0.22;
+const ADAPTIVE_HIT_BONUS = 0.08;
+const SNAP_RADIUS = 0.1;
 const ROUNDS_PER_LEVEL = 10;
 const MAX_LEVEL = 3;
 const ROUND_TIME = 60;
@@ -497,6 +497,8 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       score={score}
       level={level}
       onHome={goHome}
+      isHandDetected={isHandDetected}
+      isPlaying={isPlaying}
       onPause={() => {
         if (!isPlaying) return;
         setIsPaused((prev) => !prev);
@@ -512,14 +514,15 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
+
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-700 font-bold text-base md:text-lg text-center shadow-sm min-w-max'>
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-lg shadow-sm'>
-          Time left: <span className='font-black text-[#F59E0B]'>{timeLeft}s</span>
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-base shadow-sm'>
+          {timeLeft > 15 ? 'Take your time 🌈' : 'Almost there, keep going!'}
         </div>
 
         {promptTarget && (
@@ -555,7 +558,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
           return (
             <div
               key={target.id}
-              className='absolute w-[clamp(140px,20vw,420px)] h-[clamp(140px,20vw,420px)] -translate-x-1/2 -translate-y-1/2 pointer-events-none'
+              className='absolute w-[clamp(170px,22vw,440px)] h-[clamp(170px,22vw,440px)] -translate-x-1/2 -translate-y-1/2 pointer-events-none'
               style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
               aria-hidden='true'
             >
@@ -578,7 +581,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
                   background: `radial-gradient(circle at 30% 30%, ${target.color}22, transparent)`
                 }}
               />
-              <div className='absolute inset-0 flex items-center justify-center text-5xl'>
+              <div className='absolute inset-0 flex items-center justify-center text-6xl md:text-7xl'>
                 {target.emoji}
               </div>
             </div>
@@ -586,12 +589,22 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         })}
 
         {cursorPx && (
-          <GameCursor
+          <CursorEmbodiment
+            gameName='EmojiMatch'
             position={cursorPx}
             isPinching={isPinching}
             isHandDetected={isHandDetected}
+            icon='👆'
+            size={84}
             highContrast
+            state={showSuccess ? 'success' : isPinching ? 'pinching' : 'tracking'}
           />
+        )}
+
+        {isPlaying && !isHandDetected && (
+          <div className='absolute bottom-28 left-1/2 -translate-x-1/2 rounded-full bg-white/95 border-4 border-amber-200 px-6 py-3 text-sm md:text-base font-bold text-amber-800 shadow-md'>
+            Show your hand to see the yellow cursor 👆
+          </div>
         )}
 
         <HandTrackingStatus

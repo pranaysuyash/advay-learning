@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import { ttsService } from '../services/ai/tts/TTSService';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -85,16 +86,10 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
   useEffect(() => { usedLettersRef.current = usedLetters; }, [usedLetters]);
 
-  // Speak the phoneme using TTS
+  // Speak the phoneme using TTS (Kokoro primary, Web Speech fallback)
   const speakPhoneme = useCallback((phoneme: Phoneme) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(phoneme.ttsText);
-      utterance.rate = 0.85;
-      utterance.pitch = 1.2;
-      utterance.volume = 1.0;
-      window.speechSynthesis.speak(utterance);
-    }
+    ttsService.stop();
+    void ttsService.speak(phoneme.ttsText, { rate: 0.85 });
   }, []);
 
   const startRound = useCallback(() => {
@@ -347,7 +342,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       celebrationTimeoutRef.current = null;
     }
     isAdvancingRef.current = false;
-    window.speechSynthesis?.cancel();
+    ttsService.stop();
     setIsPlaying(false);
     setGameCompleted(false);
     setTargets([]);
@@ -401,6 +396,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       score={score}
       level={level}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam

@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TooltipProps {
@@ -15,19 +15,18 @@ export function Tooltip({
   delay = 0.3,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [timer, setTimer] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
-    const newTimer = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setIsVisible(true);
     }, delay * 1000);
-    setTimer(newTimer);
   };
 
   const handleMouseLeave = () => {
-    if (timer) {
-      clearTimeout(timer);
-      setTimer(null);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
     setIsVisible(false);
   };

@@ -23,4 +23,10 @@ describe('imageAssets helper', () => {
     const resolved = resolveImageUrl('adventure-map');
     expect(resolved).toContain('adventure-map');
   });
+
+  it('includes webp + fallback metadata for converted mascot assets', () => {
+    const illustration = getBestImageSource('pip-mascot-illustration');
+    expect(illustration?.fallbackSrc).toContain('pip_mascot.png');
+    expect(illustration?.webpSrc).toContain('pip_mascot.webp');
+  });
 });

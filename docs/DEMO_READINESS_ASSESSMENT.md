@@ -93,19 +93,10 @@
 
 ### 🔴 P0 - Demo Blockers
 
-#### 1. TypeScript Compilation Errors (10 errors)
+#### 1. TypeScript Compilation Errors (historical, now resolved)
 
-**Impact**: Code quality signal, potential runtime bugs
-
-**Errors**:
-
-- WellnessDashboard: Undefined variables (`postureLoading`, `attentionLoading`)
-- WellnessReminder: Invalid icon name (`'close'`)
-- AlphabetGame: Unused variables (3 instances)
-- Hooks: Unused functions (2 instances)
-
-**Fix Effort**: 1-2 hours (simple cleanup)
-**Priority**: Must fix before showcasing code quality
+**Current status (2026-02-23)**: ✅ `npm run type-check` passes on current branch  
+**Note**: The previously listed 10 TypeScript issues were from an earlier snapshot and are no longer reproducible in current frontend checks.
 
 #### 2. Incomplete Input Method Coverage
 
@@ -440,3 +431,17 @@ The MediaPipe integration, architecture, and breadth of work are showcase-worthy
 > #EdTech #MediaPipe #ComputerVision #React #BuildingInPublic
 
 **Go for it! The work is demo-ready. 🎯**
+
+---
+
+## Update (2026-02-23 13:15 IST) - Current Branch Reality Check
+
+`Observed` on current branch:
+- Frontend type-check passes: `cd src/frontend && npm run -s type-check`
+- Frontend lint passes: `cd src/frontend && npm run -s lint`
+- Targeted P0 test suites pass (worker protocol/runtime mode, camera error boundary, image helper, and smoke routes)
+
+`Observed` additional pilot implementation:
+- EmojiMatch now uses a feature-flag-aware cursor embodiment path (`CursorEmbodiment`) with soft cartoon hand support and dot fallback.
+
+This update supersedes any stale blocker phrasing that implied active TypeScript/lint failures at this snapshot.

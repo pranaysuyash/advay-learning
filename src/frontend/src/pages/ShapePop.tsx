@@ -174,6 +174,8 @@ export const ShapePop = memo(function ShapePopComponent() {
       score={score}
       level={Math.max(1, Math.floor(score / 120) + 1)}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam

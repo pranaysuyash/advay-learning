@@ -436,7 +436,11 @@ export default function ShapeSafari() {
             ))}
           </div>
           
-          <div className="mt-6 flex items-center gap-2 text-slate-500 text-sm">
+          <div 
+            data-ux-goal={`Find ${currentScene?.targetCount} hidden shapes to discover animals and objects!`}
+            data-ux-instruction="Move your finger near shapes to see them glow, then trace around them"
+            className="mt-6 flex items-center gap-2 text-slate-500 text-sm bg-green-50 px-4 py-2 rounded-xl"
+          >
             <span className="text-2xl">✋</span>
             <span>Move your finger near shapes to see them glow, then trace around them!</span>
           </div>
@@ -444,6 +448,20 @@ export default function ShapeSafari() {
       ) : (
         // ===== GAME AREA =====
         <div className="flex flex-col h-full">
+          {/* Goal Banner with Semantic Attributes */}
+          <div 
+            data-ux-goal={`Find ${progress.total} hidden shapes to discover animals and objects!`}
+            data-ux-instruction="Move your finger near shapes to see them glow, then trace around them"
+            data-ux-action="trace"
+            data-ux-progress={`${progress.found}/${progress.total} shapes found`}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 text-center shadow-sm"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xl">🎯</span>
+              <p className="font-black">GOAL: Find {progress.total} hidden {currentScene?.targetShape}s to discover animals!</p>
+            </div>
+          </div>
+          
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 bg-white/50 border-b border-slate-200">
             <div>

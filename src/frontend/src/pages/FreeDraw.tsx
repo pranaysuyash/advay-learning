@@ -20,6 +20,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { Mascot } from '../components/Mascot';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame, Point } from '../types/tracking';
@@ -50,6 +51,7 @@ import {
 export default function FreeDraw() {
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
+  const [showMenu, setShowMenu] = useState(true);
   const [showColorMixer, setShowColorMixer] = useState(false);
   const [mixColor1, setMixColor1] = useState<string | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
@@ -345,7 +347,7 @@ export default function FreeDraw() {
   
   // ===== RENDER =====
   return (
-    <GameContainer title="Free Draw" onHome={() => {}} showScore={false}>
+    <GameContainer title="Free Draw" onHome={() => setShowMenu(true)} showScore={false}>
       {/* Hidden webcam */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
         <Webcam
@@ -356,7 +358,73 @@ export default function FreeDraw() {
         />
       </div>
       
-      <div className="flex flex-col h-full">
+      {showMenu ? (
+        // ===== START MENU =====
+        <div className="flex flex-col items-center justify-center h-full p-6">
+          <Mascot state="happy" responsiveSize="lg" className="mb-2" />
+          <div className="text-6xl mb-2">🎨</div>
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">Free Draw Studio!</h2>
+          
+          {/* Goal Statement with Semantic Attributes */}
+          <div 
+            data-ux-goal="Draw and create beautiful art using different brushes and colors!"
+            data-ux-instruction="Pinch your fingers and move your hand to draw on the canvas"
+            data-ux-action="pinch-and-draw"
+            className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <p className="font-bold text-blue-800">GOAL:</p>
+                <p className="text-blue-700">Create beautiful art with brushes!</p>
+                <p className="text-blue-600 text-sm">✋ Pinch → 🖌️ Draw → 🎨 Create!</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-purple-50 rounded-xl p-6 max-w-md mb-6">
+            <h3 className="font-bold text-purple-800 mb-3">How to Play:</h3>
+            <ol className="text-purple-700 text-sm space-y-2">
+              <li className="flex items-center gap-2">
+                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">1</span>
+                <span>Pick a brush and color</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">2</span>
+                <span>Pinch your fingers to draw</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">3</span>
+                <span>Create your masterpiece!</span>
+              </li>
+            </ol>
+          </div>
+          
+          <button
+            onClick={() => setShowMenu(false)}
+            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
+          >
+            <span>🎨</span>
+            Start Drawing!
+            <span>✨</span>
+          </button>
+        </div>
+      ) : (
+        // ===== GAME SCREEN =====
+        <div className="flex flex-col h-full">
+        {/* Goal Banner with Semantic Attributes */}
+        <div 
+          data-ux-goal="Draw and create beautiful art using different brushes and colors!"
+          data-ux-instruction="Pinch your fingers and move your hand to draw"
+          data-ux-action="pinch-and-draw"
+          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-sm"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xl">🎯</span>
+            <p className="font-bold">GOAL: Create beautiful art! Pick a brush and start drawing!</p>
+          </div>
+        </div>
+        
         {/* Toolbar - Child Friendly */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-sm">
           {/* Brush Type Selector - Larger for kids */}
@@ -381,9 +449,9 @@ export default function FreeDraw() {
               ))}
             </div>
           </div>
-            
-            {/* Size Control */}
-            <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              {/* Size Control */}
+              <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1">
               <button
                 onClick={() => handleSizeChange(-5)}
                 className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
@@ -410,8 +478,8 @@ export default function FreeDraw() {
               </button>
             </div>
             
-            {/* Actions */}
-            <div className="flex gap-2">
+              {/* Actions */}
+              <div className="flex gap-2 flex-wrap">
               <button
                 onClick={handleUndo}
                 disabled={gameState.undoStack.length === 0}
@@ -440,6 +508,7 @@ export default function FreeDraw() {
               >
                 💾 Save
               </button>
+              </div>
             </div>
           </div>
           
@@ -569,6 +638,7 @@ export default function FreeDraw() {
           </div>
         </div>
       </div>
+      )}
     </GameContainer>
   );
 }

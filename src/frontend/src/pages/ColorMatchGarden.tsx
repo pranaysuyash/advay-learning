@@ -272,6 +272,8 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
       score={score}
       level={Math.max(1, Math.floor(score / 100) + 1)}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div
         ref={gameAreaRef}

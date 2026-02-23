@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import {
   VoiceInstructions,
@@ -474,6 +475,8 @@ export default function DressForWeather() {
         videoConstraints={{ width: 1280, height: 720, facingMode: 'user' }}
         style={{ display: 'none' }}
       />
+
+      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
 
       {/* Hand tracking status */}
       <HandTrackingStatus

@@ -1199,6 +1199,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           level={currentLetterIndex + 1}
           onHome={() => setShowExitModal(true)}
           onPause={() => setIsPaused(!isPaused)}
+          isHandDetected={isHandTrackingReady}
+          isPlaying={isPlaying}
         >
           <div className='relative w-full h-full'>
             {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}

@@ -380,6 +380,8 @@ export default function StorySequence() {
           
           {/* Big Start Button for Kids */}
           <button
+            data-ux-goal="Arrange the picture cards in the right order to tell the story!"
+            data-ux-instruction="Drag cards from the bottom to the numbered slots above"
             onClick={() => startGame('butterfly')}
             className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-4 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105 animate-pulse"
           >
@@ -422,6 +424,21 @@ export default function StorySequence() {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
+          {/* Instructions Header with Semantic Attributes */}
+          <div 
+            data-ux-goal="Arrange the picture cards in the right order to tell the story!"
+            data-ux-instruction="Drag cards from the bottom pool to the numbered slots above"
+            data-ux-action="drag-and-drop"
+            data-ux-progress={`${correctCount}/${totalSlots} cards correct`}
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl mb-4 shadow-lg border-2 border-indigo-300"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-2xl">🎯</span>
+              <p className="font-black text-lg">GOAL: Drag cards to numbered slots in the RIGHT ORDER!</p>
+              <span className="text-2xl">1️⃣→2️⃣→3️⃣</span>
+            </div>
+          </div>
+          
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -443,8 +460,23 @@ export default function StorySequence() {
           
           {/* Hint Banner */}
           {showHint && (
-            <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4 text-yellow-800 text-center animate-pulse">
+            <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 mb-4 text-yellow-800 text-center animate-pulse text-lg font-bold">
               💡 {showHint}
+            </div>
+          )}
+          
+          {/* Feedback Banner for card placement */}
+          {lastPlacedSlot !== null && (
+            <div className={`
+              rounded-lg p-3 mb-4 text-center text-lg font-bold animate-bounce
+              ${isSlotCorrect(gameState!.slots, lastPlacedSlot) 
+                ? 'bg-green-100 border-2 border-green-400 text-green-700' 
+                : 'bg-orange-100 border-2 border-orange-400 text-orange-700'
+              }
+            `}>
+              {isSlotCorrect(gameState!.slots, lastPlacedSlot) 
+                ? '✅ Perfect! That card is in the right spot!' 
+                : '🤔 That card might go somewhere else. Try dragging it to a different slot!'}
             </div>
           )}
           

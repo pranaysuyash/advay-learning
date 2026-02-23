@@ -410,6 +410,8 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
       score={score}
       level={level}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div className='absolute inset-0 bg-[#FFF8F0]'>
         <Webcam

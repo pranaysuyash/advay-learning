@@ -189,9 +189,24 @@ export default function RhymeTime() {
         <div className="flex flex-col items-center justify-center h-full p-6">
           <Mascot state="happy" responsiveSize="lg" className="mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Rhyme Time!</h2>
-          <p className="text-slate-600 mb-2 text-center max-w-md">
-            Which word rhymes? Listen and choose!
-          </p>
+          
+          {/* Goal Statement with Semantic Attributes */}
+          <div 
+            data-ux-goal="Match words that sound the same to help the bird sing!"
+            data-ux-instruction="Click the word that sounds the same as the target word"
+            data-ux-action="click"
+            className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4 max-w-md border-2 border-purple-300"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <p className="font-bold text-purple-800">GOAL:</p>
+                <p className="text-purple-700">Match words that sound the same!</p>
+                <p className="text-purple-600 text-sm">🎵 Cat → Bat, Dog → Frog 🎵</p>
+              </div>
+            </div>
+          </div>
+          
           <p className="text-slate-500 mb-6 text-sm text-center max-w-md">
             Rhyming helps you learn to read! 🔤
           </p>
@@ -300,6 +315,27 @@ export default function RhymeTime() {
       ) : (
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full p-4">
+          {/* Mascot cheering */}
+          <div className="absolute top-16 right-4">
+            <Mascot state={showFeedback === 'correct' ? 'celebrating' : 'happy'} responsiveSize="sm" />
+          </div>
+          
+          {/* Goal Banner with Semantic Attributes */}
+          <div 
+            data-ux-goal="Match the word that rhymes with the target word"
+            data-ux-instruction="Click the word that sounds the same"
+            data-ux-progress={`${gameState?.correctAnswers || 0}/${gameState?.totalRounds || 10}`}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl mb-4 text-center shadow-lg border-2 border-purple-300"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <p className="font-black text-lg">GOAL: Match the rhyming word!</p>
+                <p className="text-purple-100 text-sm">Click the word that sounds like {currentRound?.targetWord.word || 'CAT'}</p>
+              </div>
+            </div>
+          </div>
+          
           {/* Progress Bar */}
           <div className="mb-4">
             <div className="flex justify-between text-sm text-slate-500 mb-1">
@@ -325,7 +361,7 @@ export default function RhymeTime() {
           
           {/* Question */}
           <div className="text-center mb-6">
-            <p className="text-slate-600 mb-4">Which word rhymes with...</p>
+            <p className="text-slate-600 mb-2 font-bold text-lg">Which word rhymes with...</p>
             
             <button
               onClick={handleSpeakTarget}
@@ -409,19 +445,33 @@ export default function RhymeTime() {
             </div>
           </div>
           
-          {/* Feedback message */}
+          {/* Feedback message - Full screen overlay */}
           {showFeedback && (
             <div className={`
-              text-center py-3 px-6 rounded-xl font-bold text-lg animate-pulse
-              ${showFeedback === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
+              fixed inset-0 flex items-center justify-center z-50 pointer-events-none
+              ${showFeedback === 'correct' ? 'bg-green-500/30' : 'bg-red-500/30'}
             `}>
-              {showFeedback === 'correct' ? (
-                <span>🎉 Correct! They rhyme!</span>
-              ) : (
-                <span>
-                  ❌ Not quite! The answer was <span className="uppercase">{currentRound?.correctAnswer}</span>
-                </span>
-              )}
+              <div className={`
+                pointer-events-auto text-center py-6 px-10 rounded-3xl font-black text-3xl shadow-2xl border-8 animate-bounce
+                ${showFeedback === 'correct' 
+                  ? 'bg-green-500 text-white border-green-300' 
+                  : 'bg-red-500 text-white border-red-300'
+                }
+              `}>
+                {showFeedback === 'correct' ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-5xl">🎉</span>
+                    <span>CORRECT!</span>
+                    <span className="text-lg font-normal">They rhyme! 🎵</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-5xl">💪</span>
+                    <span>TRY AGAIN!</span>
+                    <span className="text-lg font-normal">Answer: <span className="uppercase">{currentRound?.correctAnswer}</span></span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           

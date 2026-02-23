@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { UIIcon } from './ui/Icon';
+import { CameraThumbnail } from './game/CameraThumbnail';
 
 interface GameContainerProps {
   children: ReactNode;
@@ -11,6 +12,10 @@ interface GameContainerProps {
   onSettings?: () => void;
   showScore?: boolean;
   className?: string;
+  /** Pass hand detection state to show camera thumbnail (optional) */
+  isHandDetected?: boolean;
+  /** Whether the game is actively playing (shows thumbnail only during play) */
+  isPlaying?: boolean;
 }
 
 /**
@@ -32,6 +37,8 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   onSettings,
   showScore = true,
   className = '',
+  isHandDetected,
+  isPlaying,
 }) => {
   return (
     <div className={`fixed inset-0 bg-[#FFF8F0] font-nunito flex flex-col overflow-hidden ${className}`}>
@@ -95,7 +102,16 @@ export const GameContainer: React.FC<GameContainerProps> = ({
       </header>
 
       {/* Full-Screen Game Area */}
-      <main className='flex-1 relative overflow-hidden bg-white/50'>{children}</main>
+      <main className='flex-1 relative overflow-hidden bg-white/50'>
+        {children}
+        {/* Camera thumbnail for hand-tracking games */}
+        {isHandDetected !== undefined && (
+          <CameraThumbnail
+            isHandDetected={!!isHandDetected}
+            visible={isPlaying !== false}
+          />
+        )}
+      </main>
     </div>
   );
 };

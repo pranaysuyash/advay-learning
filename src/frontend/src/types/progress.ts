@@ -8,6 +8,7 @@ export interface ProgressItem {
   content_id: string;
   score: number;
   completed_at: string;
+  attempt_count?: number; // Number of attempts to complete (undefined = not tracked, assume 1)
 }
 
 export interface ProgressStats {
@@ -65,4 +66,41 @@ export interface PlantGrowth {
   progress: number;
   nextMilestone: string;
   flowerCount: number;
+}
+
+/**
+ * Daily time breakdown for parent monitoring
+ */
+export interface DailyTimeBreakdown {
+  date: string; // ISO date string YYYY-MM-DD
+  dayName: string; // 'Mon', 'Tue', etc.
+  minutes: number; // Estimated minutes played
+  activityCount: number; // Number of activities completed
+  isToday: boolean;
+  exceedsLimit: boolean;
+}
+
+export interface TimeBreakdownSummary {
+  dailyBreakdown: DailyTimeBreakdown[];
+  averageMinutesPerDay: number;
+  totalMinutesWeek: number;
+  daysExceededLimit: number;
+  limitMinutes: number;
+}
+
+/**
+ * Struggle tracking for parent intervention
+ */
+export interface StruggleAnalysis {
+  item: ProgressItem;
+  effectiveAttempts: number;
+  attentionLevel: 'none' | 'low' | 'medium' | 'high';
+  reason: string;
+}
+
+export interface StruggleSummary {
+  strugglingItems: StruggleAnalysis[];
+  totalTracked: number;
+  needsAttentionCount: number;
+  recommendations: string[];
 }

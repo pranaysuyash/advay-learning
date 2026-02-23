@@ -389,6 +389,8 @@ export const LetterHunt = memo(function LetterHuntComponent() {
           score={score}
           level={level}
           onHome={goToHome}
+          isHandDetected={isHandTrackingReady}
+          isPlaying={gameStarted && !gameCompleted}
         >
           <div className='relative w-full h-full bg-[#FFF8F0]'>
             {/* Camera Area */}

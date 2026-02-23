@@ -49,7 +49,7 @@ Command: `cd src/frontend && npm run lint`
 Result: pass
 
 Command:
-`cd src/frontend && npm run test -- src/components/__tests__/CameraErrorBoundary.test.tsx src/workers/__tests__/vision.protocol.test.ts src/hooks/__tests__/useGameHandTracking.runtimeMode.test.ts src/utils/__tests__/imageAssets.test.ts`
+`cd src/frontend && npm run test -- src/components/errors/__tests__/CameraErrorBoundary.test.tsx src/workers/__tests__/vision.protocol.test.ts src/hooks/__tests__/useGameHandTracking.runtimeMode.test.ts src/utils/__tests__/imageAssets.test.ts`
 Result: 4 files passed, 11 tests passed
 
 Command: `cd src/frontend && npm run test -- src/pages/__tests__/GamePages.smoke.test.tsx`
@@ -57,7 +57,7 @@ Result: 1 file passed, 18 tests passed
 
 ## Added Tests
 
-- `src/frontend/src/components/__tests__/CameraErrorBoundary.test.tsx`
+- `src/frontend/src/components/errors/__tests__/CameraErrorBoundary.test.tsx`
 - `src/frontend/src/workers/__tests__/vision.protocol.test.ts`
 - `src/frontend/src/hooks/__tests__/useGameHandTracking.runtimeMode.test.ts`
 - `src/frontend/src/utils/__tests__/imageAssets.test.ts`
@@ -67,3 +67,26 @@ Result: 1 file passed, 18 tests passed
 1. Run device-lab validation for Tier B iPad Safari to measure runtime fallback behavior under real camera conditions.
 2. Add optional telemetry sink for runtime fallback reasons beyond console logging.
 3. Expand `<picture>` migration to additional high-impact image surfaces where feasible without gameplay/layout regressions.
+
+---
+
+## Addendum (2026-02-23 13:15 IST): Fresh Branch Re-Validation
+
+After subsequent parallel edits, P0 gates were re-run and re-confirmed on current branch state.
+
+### Commands
+
+- `cd src/frontend && npm run -s type-check`
+- `cd src/frontend && npm run -s lint`
+- `cd src/frontend && npm run -s test -- src/components/errors/__tests__/CameraErrorBoundary.test.tsx src/hooks/__tests__/useGameHandTracking.runtimeMode.test.ts src/workers/__tests__/vision.protocol.test.ts src/utils/__tests__/imageAssets.test.ts src/pages/__tests__/GamePages.smoke.test.tsx src/pages/__tests__/CameraRoutes.smoke.test.tsx`
+
+### Results
+
+- Type-check: pass
+- Lint: pass
+- Targeted tests: pass
+
+### Notes
+
+- Re-validation included fixes for transient branch regressions in camera page references and Progress-page JSX/comment linting.
+- P0 platform paths (worker offload, camera boundaries, image helper) remain intact and tested.

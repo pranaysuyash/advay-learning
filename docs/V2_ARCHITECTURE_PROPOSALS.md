@@ -321,14 +321,14 @@ These areas significantly impact production readiness but aren't mentioned:
 
 #### 🚨 1. Image & Asset Optimization (CRITICAL)
 
-**Current state:** No image optimization detected  
+**Current state (updated 2026-02-23):** Partially implemented (WebP + targeted lazy loading + fallback helper)  
 **Impact:** 60-70% of bundle size can be eliminated with WebP + responsive images + lazy loading
 
 **Timeline:** Week 1
 
 #### 🚨 2. Error Boundaries (CRITICAL FOR RELIABILITY)
 
-**Current state:** NO error boundaries detected  
+**Current state (updated 2026-02-23):** Implemented for camera game route composition  
 **Risk:** If MediaPipe crashes, entire app goes blank (kids see white screen)
 
 **Timeline:** Week 1
@@ -353,9 +353,9 @@ These areas significantly impact production readiness but aren't mentioned:
 
 **Week 1 (P0 - Core Performance):**
 
-- [ ] Web Workers (ML offloading) – TCK-20260222-WW1
-- [ ] Image optimization (WebP + lazy loading) – TCK-20260222-IMG1
-- [ ] Error boundaries (prevent blank screens) – TCK-20260222-EB1
+- [x] Web Workers (ML offloading) – implemented via `useVisionWorkerRuntime` + `vision.worker.ts` + fallback path (2026-02-23)
+- [x] Image optimization (WebP + lazy loading) – WebP variants + fallback helper + safe lazy-loading applied to prioritized/active assets and remaining PNG variants generated (2026-02-23)
+- [x] Error boundaries (prevent blank screens) – implemented via `CameraErrorBoundary`/`CameraCrashFallback` and route wrappers (2026-02-23)
 
 **Week 2 (P1 - Delight & Monitoring):**
 
@@ -379,7 +379,7 @@ These areas significantly impact production readiness but aren't mentioned:
 **Adopt:**
 
 - Proposal 1: Already done ✅
-- Proposal 3: Web Workers (P0, immediate) 🔴
+- Proposal 3: Web Workers (P0, immediate) ✅ Implemented (2026-02-23)
 - Proposal 5: Howler.js (P1, week 2) 🟠
 - Proposal 6: Lottie (P1, week 2) 🟠
 

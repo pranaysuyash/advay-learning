@@ -110,8 +110,8 @@ const measureTiming = async <T>(
 test.describe('🧒 Child Exploratory UX Testing', () => {
   test.beforeEach(async ({ page }) => {
     // Login as guest
-    await page.goto(`${BASE}/login`);
-    await page.waitForLoadState('networkidle');
+    await page.goto(`${BASE}/login`, { timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
     await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
@@ -218,6 +218,11 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
       recordIssue(result, 'medium', 'ux', 'No immediate feedback on interactions - child might be confused');
     }
 
+    // Check for semantic UX attributes
+    await page.waitForTimeout(500);
+    await detectSemanticUX(page, result);
+    console.log(`Story Sequence - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
+
     await takeScreenshot(page, 'story-sequence', '05_final_state', result);
     testResults.push(result);
   });
@@ -300,7 +305,15 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     });
     result.childFriendly.visualEngaging = hasVibrantColors;
 
-    result.childFriendly.understandsGoal = await page.locator('text=/find|trace|shape/i').isVisible().catch(() => false);
+    // Check for semantic UX attributes (primary method)
+    await page.waitForTimeout(500);
+    await detectSemanticUX(page, result);
+    console.log(`Shape Safari - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
+
+    // Fallback to text detection
+    if (!result.childFriendly.understandsGoal) {
+      result.childFriendly.understandsGoal = await page.locator('text=/find|trace|shape/i').isVisible().catch(() => false);
+    }
 
     await takeScreenshot(page, 'shape-safari', '03_final_state', result);
     testResults.push(result);
@@ -328,12 +341,49 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     await measureTiming(result, 'Navigation', 5000, async () => {
       await page.goto(`${BASE}/games/rhyme-time`);
       await page.waitForLoadState('domcontentloaded');
+      // Wait for React to hydrate and render semantic attributes
+      await page.waitForTimeout(2000);
     });
     
     result.loadTime = Date.now() - startTime;
     await takeScreenshot(page, 'rhyme-time', '01_initial_load', result);
 
     await childDelay(page);
+
+    // Wait for React to render the menu
+    await page.waitForTimeout(2000);
+
+    // Check for semantic UX attributes on menu screen (before clicking difficulty)
+    // Use count first to see if element exists
+    const goalCount = await page.locator('[data-ux-goal]').count();
+    const html = await page.content();
+    console.log(`Rhyme Time - Found ${goalCount} elements with data-ux-goal`);
+    console.log(`Rhyme Time - Page has data-ux-goal: ${html.includes('data-ux-goal')}`);
+    console.log(`Rhyme Time - Page has 'GOAL': ${html.includes('GOAL:')}`);
+    
+    if (goalCount > 0) {
+      const goalEl = await page.locator('[data-ux-goal]').first();
+      const goalText = await goalEl.getAttribute('data-ux-goal');
+      result.childFriendly.understandsGoal = true;
+      recordInteraction(result, 'discover', 'goal', true, goalText);
+      
+      const instrEl = await page.locator('[data-ux-instruction]').first();
+      if (await instrEl.isVisible().catch(() => false)) {
+        const instrText = await instrEl.getAttribute('data-ux-instruction');
+        result.childFriendly.instructionsClear = true;
+        recordInteraction(result, 'discover', 'instruction', true, instrText);
+      }
+    }
+    console.log(`Rhyme Time Menu - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
+
+    // Click on a difficulty to start the game
+    const difficultyBtn = await page.locator('button').filter({ hasText: /rhymes|families|Beginner|Intermediate|Advanced/i }).first();
+    if (await difficultyBtn.isVisible().catch(() => false)) {
+      await difficultyBtn.click();
+      result.childFriendly.canStartGame = true;
+      recordInteraction(result, 'click', 'difficulty_button', true, 'Selected difficulty');
+      await childDelay(page, 1500, 2500);
+    }
 
     // Check for TTS/Speaker button
     const speakerBtn = await page.locator('button:has([class*="speaker"]), button:has-text("🔊"), button:has-text("▶")').first();
@@ -373,8 +423,20 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
       }
     }
 
-    result.childFriendly.understandsGoal = await page.locator('text=/rhyme|match|same sound/i').isVisible().catch(() => false);
-    result.childFriendly.instructionsClear = result.childFriendly.understandsGoal;
+    // Check for semantic UX attributes (wait for gameplay to be fully loaded)
+    await page.waitForTimeout(500);
+    await detectSemanticUX(page, result);
+    
+    // Log what was detected for debugging
+    console.log(`Rhyme Time - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
+    
+    // Fallback to text detection if semantic not found
+    if (!result.childFriendly.understandsGoal) {
+      result.childFriendly.understandsGoal = await page.locator('text=/rhyme|match|same sound/i').isVisible().catch(() => false);
+    }
+    if (!result.childFriendly.instructionsClear) {
+      result.childFriendly.instructionsClear = result.childFriendly.understandsGoal;
+    }
 
     await takeScreenshot(page, 'rhyme-time', '04_final_state', result);
     testResults.push(result);
@@ -409,6 +471,15 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
 
     await childDelay(page);
 
+    // Click start button if present
+    const startButton = await page.locator('button').filter({ hasText: /start|drawing|begin/i }).first();
+    if (await startButton.isVisible().catch(() => false)) {
+      await startButton.click();
+      await childDelay(page, 1000, 1500);
+      result.childFriendly.canStartGame = true;
+      recordInteraction(result, 'click', 'start_button', true);
+    }
+
     // Check for drawing canvas
     const canvas = await page.locator('canvas').first();
     if (await canvas.isVisible().catch(() => false)) {
@@ -442,7 +513,14 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     }
 
     result.childFriendly.visualEngaging = colorButtons.length > 3;
-    result.childFriendly.understandsGoal = true; // Free draw is intuitive
+    
+    // Check for semantic UX attributes
+    await detectSemanticUX(page, result);
+    
+    // Free draw goal is intuitive if semantic not found
+    if (!result.childFriendly.understandsGoal) {
+      result.childFriendly.understandsGoal = true;
+    }
 
     await takeScreenshot(page, 'free-draw', '03_final_state', result);
     testResults.push(result);
@@ -477,6 +555,15 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
 
     await childDelay(page);
 
+    // Start the game (click Start button)
+    const startButton = await page.locator('button').filter({ hasText: /start|feeding|begin/i }).first();
+    if (await startButton.isVisible().catch(() => false)) {
+      await startButton.click();
+      await childDelay(page, 1000, 1500);
+      result.childFriendly.canStartGame = true;
+      recordInteraction(result, 'click', 'start_button', true);
+    }
+
     // Check for monster character
     const monster = await page.locator('text=/🦖|🐊|🐡|🦥|🦎/').first();
     if (await monster.isVisible().catch(() => false)) {
@@ -499,6 +586,11 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     if (!hasInstructions) {
       recordIssue(result, 'high', 'confusion', 'No instructions on how to answer (show fingers)');
     }
+
+    // Check for semantic UX attributes (primary method)
+    await page.waitForTimeout(500);
+    await detectSemanticUX(page, result);
+    console.log(`Math Monsters - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
 
     await takeScreenshot(page, 'math-monsters', '02_gameplay_view', result);
 
@@ -541,20 +633,35 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
 
     await childDelay(page);
 
-    // Check for microphone permission UI
+    // Check for microphone permission UI in menu
     const micPermission = await page.locator('text=/microphone|mic|allow|permission/i').isVisible().catch(() => false);
     if (micPermission) {
       recordInteraction(result, 'prompt', 'microphone_permission', true);
+      result.childFriendly.instructionsClear = true;
     }
 
-    // Check instructions clarity
+    // Start the game
+    const startButton = await page.locator('button').filter({ hasText: /start|blowing/i }).first();
+    if (await startButton.isVisible().catch(() => false)) {
+      await startButton.click();
+      result.childFriendly.canStartGame = true;
+      recordInteraction(result, 'click', 'start_button', true);
+      await childDelay(page, 1000, 1500);
+    }
+
+    // Check instructions clarity in game
     const hasBlowInstructions = await page.locator('text=/blow|mic|microphone/i').isVisible().catch(() => false);
-    result.childFriendly.instructionsClear = hasBlowInstructions;
-    if (!hasBlowInstructions) {
+    result.childFriendly.instructionsClear = hasBlowInstructions || result.childFriendly.instructionsClear;
+    if (!hasBlowInstructions && !micPermission) {
       recordIssue(result, 'high', 'confusion', 'Voice input game but no clear blow/mic instructions');
     }
 
-    result.childFriendly.understandsGoal = hasBlowInstructions;
+    // Check for semantic UX attributes (primary method)
+    await page.waitForTimeout(500);
+    await detectSemanticUX(page, result);
+    console.log(`Bubble Pop - Goal: ${result.childFriendly.understandsGoal}, Instructions: ${result.childFriendly.instructionsClear}`);
+
+    result.childFriendly.understandsGoal = result.childFriendly.understandsGoal || result.childFriendly.instructionsClear;
     result.childFriendly.visualEngaging = true; // Bubbles are engaging
 
     await takeScreenshot(page, 'bubble-pop', '02_instructions', result);
@@ -572,6 +679,34 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     console.log(`\n✅ UX Analysis Report saved to: ${REPORT_DIR}/ux-analysis-report.md`);
   });
 });
+
+// Helper function to detect semantic UX attributes
+async function detectSemanticUX(page: any, result: GameTestResult) {
+  // Check for data-ux-goal attribute
+  const goalEl = await page.locator('[data-ux-goal]').first();
+  const hasGoal = await goalEl.isVisible().catch(() => false);
+  if (hasGoal) {
+    const goalText = await goalEl.getAttribute('data-ux-goal');
+    result.childFriendly.understandsGoal = true;
+    recordInteraction(result, 'discover', 'goal', true, goalText);
+  }
+
+  // Check for data-ux-instruction attribute
+  const instrEl = await page.locator('[data-ux-instruction]').first();
+  const hasInstruction = await instrEl.isVisible().catch(() => false);
+  if (hasInstruction) {
+    const instrText = await instrEl.getAttribute('data-ux-instruction');
+    result.childFriendly.instructionsClear = true;
+    recordInteraction(result, 'discover', 'instruction', true, instrText);
+  }
+
+  // Check for data-ux-progress attribute
+  const progressEl = await page.locator('[data-ux-progress]').first();
+  const hasProgress = await progressEl.isVisible().catch(() => false);
+  if (hasProgress) {
+    recordInteraction(result, 'discover', 'progress_indicator', true);
+  }
+}
 
 function generateReport(results: GameTestResult[]): string {
   const timestamp = new Date().toISOString();

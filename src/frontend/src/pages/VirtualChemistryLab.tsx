@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
@@ -180,19 +181,19 @@ export function VirtualChemistryLab() {
 
       if (frame.hands.length > 0) {
         const landmarks = frame.hands[0];
-      const indexFinger = landmarks[8]; // Index finger tip
-      const thumb = landmarks[4]; // Thumb tip
+        const indexFinger = landmarks[8]; // Index finger tip
+        const thumb = landmarks[4]; // Thumb tip
 
-      // Check if hand is over beaker area (bottom center of screen)
-      const isOverBeaker =
-        indexFinger.y > 0.5 && indexFinger.x > 0.3 && indexFinger.x < 0.7;
+        // Check if hand is over beaker area (bottom center of screen)
+        const isOverBeaker =
+          indexFinger.y > 0.5 && indexFinger.x > 0.3 && indexFinger.x < 0.7;
 
-      // Check if pinching (thumb and index close together)
-      const pinchDistance = Math.sqrt(
-        Math.pow(indexFinger.x - thumb.x, 2) +
-        Math.pow(indexFinger.y - thumb.y, 2)
-      );
-      const isPinching = pinchDistance < 0.1;
+        // Check if pinching (thumb and index close together)
+        const pinchDistance = Math.sqrt(
+          Math.pow(indexFinger.x - thumb.x, 2) +
+          Math.pow(indexFinger.y - thumb.y, 2)
+        );
+        const isPinching = pinchDistance < 0.1;
 
         // Draw hand position on canvas
         const canvas = canvasRef.current;
@@ -373,7 +374,8 @@ export function VirtualChemistryLab() {
   }
 
   return (
-    <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 font-sans'>
+    <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 font-sans relative'>
+      <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
       {/* Header */}
       <header className='flex justify-between items-center mb-6 max-w-7xl mx-auto'>
         <button

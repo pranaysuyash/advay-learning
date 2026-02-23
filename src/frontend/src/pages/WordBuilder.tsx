@@ -284,6 +284,8 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       score={score}
       level={level}
       onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
       <div
         ref={gameAreaRef}

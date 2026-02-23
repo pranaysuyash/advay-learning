@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { GameCursor } from '../components/game/GameCursor';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -250,7 +250,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const expectedTarget = targets[expectedIndex];
 
   return (
-    <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome}>
+    <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}
@@ -295,13 +295,16 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         ))}
 
         {cursor && (
-          <GameCursor
+          <CursorEmbodiment
+            gameName='NumberTapTrail'
             position={cursor}
             coordinateSpace='normalized'
             containerRef={gameAreaRef}
             isPinching={false}
             isHandDetected={isPlaying}
             size={64}
+            icon='👆'
+            state={isPlaying ? 'tracking' : 'idle'}
           />
         )}
 

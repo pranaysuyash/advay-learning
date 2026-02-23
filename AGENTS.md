@@ -180,6 +180,24 @@ EOF
 echo "Added to tools/README.md with usage examples"
 ```
 
+### 8. Default Execution Lifecycle (Mandatory Unless User Overrides)
+
+For normal task execution in this repo, agents should follow this sequence by default:
+
+1. Analysis
+2. Document (baseline scope/evidence anchors)
+3. Plan
+4. Research
+5. Document (decision log)
+6. Implement
+7. Test
+8. Document (results/evidence)
+
+Interpretation rules:
+- This lifecycle is the normal path for any new task unless the user explicitly asks to skip/reorder.
+- “Document” steps must update the appropriate repo artifacts (for example worklog, audits, implementation reports) with Observed/Inferred/Unknown discipline.
+- For very small requests, steps can be compressed, but evidence and final documentation updates still apply when code or docs are changed.
+
 ---
 
 ## Agent Workflow

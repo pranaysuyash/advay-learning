@@ -54,6 +54,30 @@ const IMAGE_ASSETS: Record<string, ImageAssetSource> = {
     webpSrc: '/assets/images/pip_sprite_sheet.webp',
     lazy: true,
   },
+  'pip-mascot-illustration': {
+    id: 'pip-mascot-illustration',
+    fallbackSrc: '/assets/images/pip_mascot.png',
+    webpSrc: '/assets/images/pip_mascot.webp',
+    lazy: true,
+  },
+  'pip-mascot-original': {
+    id: 'pip-mascot-original',
+    fallbackSrc: '/assets/images/pip_mascot_original.png',
+    webpSrc: '/assets/images/pip_mascot_original.webp',
+    lazy: true,
+  },
+  'red-panda-cropped': {
+    id: 'red-panda-cropped',
+    fallbackSrc: '/assets/images/red_panda_no_bg_cropped.png',
+    webpSrc: '/assets/images/red_panda_no_bg_cropped.webp',
+    lazy: true,
+  },
+  'red-panda-cropped-tight': {
+    id: 'red-panda-cropped-tight',
+    fallbackSrc: '/assets/images/red_panda_no_bg_cropped_tight.png',
+    webpSrc: '/assets/images/red_panda_no_bg_cropped_tight.webp',
+    lazy: true,
+  },
 };
 
 export function getImageAsset(assetId: string): ImageAssetSource | null {

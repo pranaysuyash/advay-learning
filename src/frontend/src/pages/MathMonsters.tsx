@@ -19,6 +19,7 @@ import { useCallback, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { Mascot } from '../components/Mascot';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
@@ -202,11 +203,24 @@ export default function MathMonsters() {
       {showMenu ? (
         // ===== START MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <div className="text-8xl mb-4">🦖</div>
+          <Mascot state="happy" responsiveSize="lg" className="mb-2" />
+          <div className="text-6xl mb-2">🦖</div>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Math Monsters!</h2>
-          <p className="text-slate-600 mb-6 text-center max-w-md">
-            The monsters are hungry! Show them numbers with your fingers to feed them!
-          </p>
+          
+          {/* Goal Statement with Semantic Attributes */}
+          <div 
+            data-ux-goal="Show the correct number of fingers to solve math problems and feed hungry monsters!"
+            className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-4 mb-4 max-w-md border-2 border-orange-300"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <p className="font-bold text-orange-800">GOAL:</p>
+                <p className="text-orange-700">Show fingers to solve math and feed monsters!</p>
+                <p className="text-orange-600 text-sm">✋ 2+3=5 → Show 5 fingers!</p>
+              </div>
+            </div>
+          </div>
           
           <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
@@ -290,13 +304,19 @@ export default function MathMonsters() {
       ) : (
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full">
-          {/* Instructions Header - Always Visible */}
-          <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-3 text-center">
+          {/* Goal Banner with Semantic Attributes */}
+          <div 
+            data-ux-goal={`Show ${gameState.currentProblem?.answer} fingers to solve the math problem and feed the monster!`}
+            data-ux-instruction="Hold up your hand and count with your fingers"
+            data-ux-action="finger-counting"
+            data-ux-progress={`${gameState.problemsSolved}/${gameState.problemsInLevel}`}
+            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 text-center shadow-lg"
+          >
             <div className="flex items-center justify-center gap-3">
-              <span className="text-3xl">✋</span>
+              <span className="text-3xl">🎯</span>
               <div>
-                <p className="font-bold text-lg">Show {gameState.currentProblem?.answer} fingers to feed the monster!</p>
-                <p className="text-white/90 text-sm">Hold up your hand and count with your fingers 👆</p>
+                <p className="font-black text-lg">GOAL: Show {gameState.currentProblem?.answer} fingers to feed the monster!</p>
+                <p className="text-white/90 text-sm font-medium">Hold up your hand and count with your fingers 👆</p>
               </div>
             </div>
           </div>
@@ -322,14 +342,19 @@ export default function MathMonsters() {
             )}
           </div>
           
+          {/* Mascot helper */}
+          <div className="absolute top-20 right-4 z-10">
+            <Mascot state={showFeedback === 'correct' ? 'celebrating' : showFeedback === 'incorrect' ? 'thinking' : 'happy'} responsiveSize="sm" />
+          </div>
+          
           {/* Monster & Problem Area */}
           <div className="flex-1 flex flex-col items-center justify-center p-4">
             {/* Monster */}
             <div 
-              className="text-9xl mb-4 transition-transform"
+              className="text-9xl mb-4 transition-transform animate-bounce"
               style={{
                 transform: showFeedback === 'correct' ? 'scale(1.1)' : showFeedback === 'incorrect' ? 'shake' : 'scale(1)',
-                animation: showFeedback === 'incorrect' ? 'shake 0.5s' : undefined,
+                animation: showFeedback === 'incorrect' ? 'shake 0.5s' : 'bounce 2s infinite',
               }}
             >
               {monster.emoji}

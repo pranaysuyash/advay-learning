@@ -152,7 +152,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   ];
 
   return (
-    <GameContainer title='Music Pinch Beat' score={score} level={Math.max(1, Math.floor(score / 80) + 1)} onHome={goHome}>
+    <GameContainer title='Music Pinch Beat' score={score} level={Math.max(1, Math.floor(score / 80) + 1)} onHome={goHome} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
       <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <Webcam
           ref={webcamRef}

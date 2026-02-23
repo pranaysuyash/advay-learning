@@ -138,32 +138,71 @@ export default function BubblePop() {
       {showMenu ? (
         // Menu Screen
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <div className="text-8xl mb-4">🫧</div>
+          <div className="text-8xl mb-4 animate-bounce">🫧</div>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bubble Pop!</h2>
-          <p className="text-slate-600 mb-6 text-center max-w-md">
-            Blow into the microphone to pop the bubbles! 
-            The stronger you blow, the more bubbles you pop.
-          </p>
+          
+          {/* Goal Statement with Semantic Attributes */}
+          <div 
+            data-ux-goal="Blow into the microphone to pop bubbles and score points!"
+            data-ux-instruction="Get close to the microphone and blow as hard as you can"
+            data-ux-action="blow"
+            className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <p className="font-bold text-blue-800">GOAL:</p>
+                <p className="text-blue-700">Blow bubbles to pop them and score!</p>
+                <p className="text-blue-600 text-sm">🎤 Blow hard → 💨 Pop! → ⭐ Score!</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Microphone Warning */}
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3">
+            <span className="text-3xl">🎤</span>
+            <div>
+              <h3 className="font-bold text-yellow-800 mb-1">You need a microphone!</h3>
+              <p className="text-yellow-700 text-sm">
+                This game uses your microphone to detect when you blow. 
+                Make sure to <strong>allow microphone access</strong> when prompted.
+              </p>
+            </div>
+          </div>
           
           <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
-            <ol className="text-blue-700 text-sm space-y-2">
-              <li>1. Allow microphone access</li>
-              <li>2. Bubbles float up from the bottom</li>
-              <li>3. Blow into your microphone to pop them!</li>
-              <li>4. Don&apos;t let them float away!</li>
+            <ol className="text-blue-700 text-sm space-y-3">
+              <li className="flex items-center gap-2">
+                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">1</span>
+                <span>Click "Start" and allow microphone access</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">2</span>
+                <span>Bubbles float up from the bottom</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">3</span>
+                <span><strong>Blow into your microphone</strong> to pop them! 💨</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">4</span>
+                <span>Don&apos;t let them float away!</span>
+              </li>
             </ol>
           </div>
           
           <button
             onClick={handleStart}
-            className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-xl transition-colors shadow-lg"
+            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
           >
-            Start Blowing! 🎤
+            <span>🎤</span>
+            Start Blowing!
+            <span>💨</span>
           </button>
           
           <p className="text-xs text-slate-400 mt-4">
-            First game with microphone input!
+            First game with microphone input! 🔬
           </p>
         </div>
       ) : (
@@ -218,19 +257,43 @@ export default function BubblePop() {
             />
           )}
           
-          {/* Instructions overlay */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border-2 border-blue-300 flex items-center gap-3 animate-pulse">
-              <span className="text-3xl">🎤</span>
+          {/* Instructions Header with Semantic Attributes */}
+          <div 
+            data-ux-goal="Blow into the microphone to pop bubbles and score points!"
+            data-ux-instruction="Get close to the microphone and blow as hard as you can"
+            data-ux-action="blow"
+            data-ux-progress={`${gameState.poppedCount} bubbles popped`}
+            className="absolute top-16 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center z-10 shadow-lg"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-2xl">🎯</span>
+              <p className="font-black">GOAL: Blow into your microphone to pop bubbles! 💨</p>
+            </div>
+          </div>
+          
+          {/* Instructions overlay at bottom */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border-4 border-blue-400 flex items-center gap-4">
+              <div className="text-4xl animate-bounce">🎤</div>
               <div className="text-left">
-                <p className="font-bold text-blue-800">Blow into your microphone!</p>
-                <p className="text-blue-600 text-sm">The harder you blow, the more bubbles pop!</p>
+                <p className="font-bold text-blue-800 text-lg">Blow into your microphone!</p>
+                <p className="text-blue-600">The harder you blow, the more bubbles pop! 💨</p>
+                <p className="text-slate-500 text-sm mt-1">{isBlowing ? '💨 Great! Keep blowing!' : '👄 Get close to the mic and blow!'}</p>
               </div>
             </div>
             
-            {/* Blow strength indicator */}
-            <div className="bg-white/80 rounded-full px-4 py-1 text-xs text-slate-600">
-              Blow strength: {isBlowing ? '💨💨💨' : '...'}
+            {/* Visual blow meter */}
+            <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-600">Blow Power:</span>
+              <div className="w-32 h-4 bg-slate-200 rounded-full overflow-hidden border-2 border-slate-300">
+                <div
+                  className={`h-full transition-all duration-100 ${
+                    volume > 0.5 ? 'bg-red-500' : volume > 0.25 ? 'bg-yellow-500' : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${Math.min(100, volume * 100)}%` }}
+                />
+              </div>
+              <span className="text-lg">{isBlowing ? '💨💨💨' : '💤'}</span>
             </div>
           </div>
         </div>

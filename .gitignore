@@ -131,6 +131,7 @@ docs/ux_audit/**/keyframe_*_small.jpg
 audit-screenshots/
 src/frontend/docs/screenshots/
 src/frontend/docs/audit/screenshots/
+src/frontend/docs/ux-analysis/screenshots/
 tools/**/frames/*
 tools/**/*_frames/*
 tools/**/screenshots/
