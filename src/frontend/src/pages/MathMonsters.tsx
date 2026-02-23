@@ -210,6 +210,7 @@ export default function MathMonsters() {
           {/* Goal Statement with Semantic Attributes */}
           <div 
             data-ux-goal="Show the correct number of fingers to solve math problems and feed hungry monsters!"
+            data-ux-instruction="Hold up your fingers to show the answer - the game counts them automatically!"
             className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-4 mb-4 max-w-md border-2 border-orange-300"
           >
             <div className="flex items-center gap-3">
@@ -226,8 +227,8 @@ export default function MathMonsters() {
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
             <ol className="text-blue-700 text-sm space-y-2">
               <li>1. Look at the math problem</li>
-              <li>2. Show the answer with your fingers</li>
-              <li>3. Hold your fingers up for 2 seconds</li>
+              <li>2. <strong>Show the answer with your fingers</strong></li>
+              <li>3. <strong>Hold your hand up for 2 seconds</strong></li>
               <li>4. Feed the monster!</li>
             </ol>
           </div>
@@ -351,6 +352,8 @@ export default function MathMonsters() {
           <div className="flex-1 flex flex-col items-center justify-center p-4">
             {/* Monster */}
             <div 
+              data-testid="monster-character"
+              data-monster-emoji={monster.emoji}
               className="text-9xl mb-4 transition-transform animate-bounce"
               style={{
                 transform: showFeedback === 'correct' ? 'scale(1.1)' : showFeedback === 'incorrect' ? 'shake' : 'scale(1)',

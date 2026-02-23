@@ -9,6 +9,8 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 export function FreezeDance() {
@@ -41,6 +43,14 @@ export function FreezeDance() {
 
   const { playSuccess, playCelebration } = useSoundEffects();
   const { speak, isEnabled: ttsEnabled } = useTTS();
+
+  useGameSessionProgress({
+    gameName: 'Freeze Dance',
+    score,
+    level: round,
+    isPlaying,
+    metaData: { game_phase: gamePhase },
+  });
 
   useEffect(() => {
     async function initPose() {
@@ -183,14 +193,20 @@ export function FreezeDance() {
   useEffect(() => {
     if (!isPlaying) return;
 
-    const danceDuration = 8000 + Math.random() * 4000;
-    const freezeDuration = 3000;
-    const fingerChallengeDuration = 5000;
+    // Slower phases for toddler-friendly gameplay
+    const danceDuration = 10000 + Math.random() * 3000; // 10-13s (was 8-12s)
+    const freezeDuration = 3500; // 3.5s (was 3s)
+    const fingerChallengeDuration = 6000; // 6s (was 5s)
 
     setGamePhase('dancing');
     setIsFrozen(false);
     setShowHandOverlay(false);
     setFingerChallengeComplete(false);
+    
+    // Voice cue for dancing phase
+    if (ttsEnabled) {
+      void speak("Dance dance dance!");
+    }
 
     const danceTimer = setTimeout(() => {
       // FREEZE phase - pose only
@@ -212,8 +228,8 @@ export function FreezeDance() {
           setShowHandOverlay(true);
 
           if (ttsEnabled) {
-            const targetText = target === 0 ? 'fist' : `${target} finger${target !== 1 ? 's' : ''}`;
-            void speak(`Freeze! Show ${targetText}!`);
+            const targetText = target === 0 ? 'a fist' : `${target} finger${target !== 1 ? 's' : ''}`;
+            void speak(`Freeze! Show me ${targetText}!`);
           }
 
           const fingerTimer = setTimeout(() => {
@@ -242,8 +258,19 @@ export function FreezeDance() {
       if (roundScore > 50) {
         void playCelebration();
         setShowCelebration(true);
+        if (ttsEnabled) {
+          if (fingerChallengeComplete) {
+            void speak("Amazing! You froze perfectly and showed the right fingers!");
+          } else {
+            void speak("Great freeze! You held so still!");
+          }
+        }
         setTimeout(() => setShowCelebration(false), 1500);
+      } else if (ttsEnabled && roundScore > 0) {
+        void speak("Good try! Hold even stiller next time!");
       }
+    } else if (ttsEnabled) {
+      void speak("You moved! Try to hold super still next time!");
     }
 
     setRound((r) => r + 1);
@@ -337,6 +364,9 @@ export function FreezeDance() {
     setIsPlaying(true);
     setScore(0);
     setRound(1);
+    if (ttsEnabled) {
+      void speak("Let's play Freeze Dance! Dance when I say dance, and freeze when I say freeze!");
+    }
   };
 
   const stopGame = () => {
@@ -393,6 +423,9 @@ export function FreezeDance() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8 font-sans relative'>
+      {/* Background blur overlay for clean look */}
+      <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
+      
       <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
       <header className='flex justify-between items-center mb-8 max-w-5xl mx-auto'>
         <button
@@ -402,9 +435,14 @@ export function FreezeDance() {
           ← Back
         </button>
         <h1 className='text-3xl font-black text-slate-800 tracking-tight'>Freeze Dance</h1>
-        <div className='px-6 py-3 bg-white border-4 border-amber-100 rounded-full shadow-sm'>
-          <span className='font-bold text-amber-500 tracking-wide'>SCORE: </span>
-          <span className='font-black text-amber-500 text-xl'>{score}</span>
+        <div className='flex items-center gap-4'>
+          <div className='px-6 py-3 bg-white border-4 border-amber-100 rounded-full shadow-sm'>
+            <span className='font-bold text-amber-500 tracking-wide'>SCORE: </span>
+            <span className='font-black text-amber-500 text-xl'>{score}</span>
+          </div>
+          <div className='px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-slate-200 shadow-sm'>
+            <span className='text-slate-500 font-bold text-sm'>Take your time! 🌈</span>
+          </div>
         </div>
       </header>
 
@@ -459,6 +497,20 @@ export function FreezeDance() {
             >
               Start Dancing! 🎵
             </button>
+
+            {ttsEnabled && (
+              <VoiceInstructions
+                instructions={[
+                  'Stand in front of your camera.',
+                  'Dance when I say dance!',
+                  'Freeze when I say freeze!',
+                  'Hold super still to win!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            )}
           </motion.div>
         ) : (
           <div className='space-y-6'>

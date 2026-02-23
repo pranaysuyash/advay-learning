@@ -10,6 +10,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
 import { findHitTarget } from '../games/hitTarget';
 import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
@@ -58,7 +59,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(80);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [targets, setTargets] = useState<SequenceTarget[]>([]);
   const [order, setOrder] = useState<number[]>([]);
   const [stepIndex, setStepIndex] = useState(0);
@@ -73,6 +74,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
   const timeLeftRef = useRef(timeLeft);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -118,6 +120,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     setOrder(round.order);
     setStepIndex(0);
     setFeedback('Pinch the first shape in the sequence.');
+    if (ttsEnabled) {
+      void speak('Pinch the shapes in the shown order!');
+    }
   }, [isPlaying, level, gameCompleted]);
 
   const completeLevel = useCallback(() => {
@@ -132,6 +137,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
       if (levelRef.current >= MAX_LEVEL) {
         setGameCompleted(true);
         setIsPlaying(false);
+        if (ttsEnabled) {
+          void speak("You finished all levels! You're a shape expert!");
+        }
       } else {
         setLevel((prev) => prev + 1);
       }
@@ -158,6 +166,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
       if (!hit) {
         setFeedback('Pinch directly on a shape.');
+        if (ttsEnabled) {
+          void speak('Pinch a shape!');
+        }
         void playError();
         return;
       }
@@ -168,6 +179,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
       if (hit.id !== expectedId) {
         setStepIndex(0);
         setFeedback('Wrong order. Sequence reset to start.');
+        if (ttsEnabled) {
+          void speak('Oops! Start again from the first shape!');
+        }
         void playError();
         return;
       }
@@ -179,12 +193,18 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
       if (nextStep >= orderRef.current.length) {
         setFeedback(`Level ${levelRef.current} sequence complete!`);
+        if (ttsEnabled) {
+          void speak(`Level ${levelRef.current} complete! Amazing!`);
+        }
         completeLevel();
       } else {
         setFeedback(`Great! Next shape ${nextStep + 1}/${orderRef.current.length}.`);
+        if (ttsEnabled) {
+          void speak('Great! Next shape!');
+        }
       }
     },
-    [completeLevel, cursor, playError, playPop],
+    [completeLevel, cursor, playError, playPop, speak, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =

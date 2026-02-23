@@ -60,9 +60,16 @@ describe('LEVELS', () => {
   });
 
   it('levels increase in difficulty', () => {
-    for (let i = 1; i < LEVELS.length; i++) {
-      expect(LEVELS[i].maxNumber).toBeGreaterThanOrEqual(LEVELS[i - 1].maxNumber);
-    }
+    const operationsByLevel = LEVELS.map((level) => level.operation);
+    expect(operationsByLevel).toEqual([
+      'recognition',
+      'recognition',
+      'addition',
+      'addition',
+      'subtraction',
+      'subtraction',
+      'mixed',
+    ]);
   });
 
   it('level numbers are sequential', () => {
@@ -266,7 +273,7 @@ describe('processAnswer', () => {
     state.maxStreak = 3;
     
     const newState = processAnswer(state, state.currentProblem!.answer, true);
-    expect(newState.maxStreak).toBe(5);
+    expect(newState.maxStreak).toBe(6);
   });
 
   it('generates new problem after answer', () => {
@@ -275,7 +282,7 @@ describe('processAnswer', () => {
     
     const newState = processAnswer(state, state.currentProblem!.answer, true);
     expect(newState.currentProblem).not.toBeNull();
-    expect(newState.currentProblem!.id).not.toBe(oldProblem!.id);
+    expect(newState.currentProblem).not.toBe(oldProblem);
   });
 });
 

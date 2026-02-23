@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import {
@@ -70,6 +71,12 @@ export function AirCanvas() {
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
 
   const { playPop, playSuccess } = useSoundEffects();
+
+  useGameSessionProgress({
+    gameName: 'Air Canvas',
+    score: particleCount,
+    metaData: { brush: selectedBrush.id, brush_size: brushSize },
+  });
 
   useEffect(() => {
     let mounted = true;

@@ -83,7 +83,7 @@ export function VoiceInstructions({
     setIsSpeaking(true);
     onSpeechStart?.();
 
-    ttsService.speak(textToSpeak, { rate, pitch, voiceId: voiceName, lang }).then(() => {
+    ttsService.speak(textToSpeak, { rate, pitch, voiceName, lang }).then(() => {
       setIsSpeaking(false);
       onSpeechEnd?.();
     }).catch(() => {

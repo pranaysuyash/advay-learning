@@ -59,15 +59,19 @@ if command -v docker >/dev/null 2>&1; then
   fi
 fi
 
-gitleaks_config_args=()
+gitleaks_config_file=""
 if [[ -f ".gitleaks.toml" ]]; then
-  gitleaks_config_args=(--config ".gitleaks.toml")
+  gitleaks_config_file=".gitleaks.toml"
 fi
 
 run_gitleaks_detect_no_git() {
   local source_dir="$1"
   if [[ "$has_local_gitleaks" == true ]]; then
-    gitleaks detect --no-git --source "$source_dir" --redact --exit-code 1 "${gitleaks_config_args[@]}"
+    if [[ -n "$gitleaks_config_file" ]]; then
+      gitleaks detect --no-git --source "$source_dir" --redact --exit-code 1 --config "$gitleaks_config_file"
+    else
+      gitleaks detect --no-git --source "$source_dir" --redact --exit-code 1
+    fi
     return
   fi
 
@@ -86,16 +90,28 @@ run_gitleaks_detect_no_git() {
 run_gitleaks_git_range() {
   local range="$1"
   if [[ "$has_local_gitleaks" == true ]]; then
-    gitleaks git --log-opts "$range" --redact --exit-code 1 "${gitleaks_config_args[@]}"
+    if [[ -n "$gitleaks_config_file" ]]; then
+      gitleaks git --log-opts "$range" --redact --exit-code 1 --config "$gitleaks_config_file"
+    else
+      gitleaks git --log-opts "$range" --redact --exit-code 1
+    fi
     return
   fi
 
   if [[ "$has_docker" == true ]]; then
-    docker run --rm \
-      -v "${repo_root}:/repo" \
-      -w /repo \
-      ghcr.io/gitleaks/gitleaks:latest \
-      git --log-opts "$range" --redact --exit-code 1 "${gitleaks_config_args[@]}"
+    if [[ -n "$gitleaks_config_file" ]]; then
+      docker run --rm \
+        -v "${repo_root}:/repo" \
+        -w /repo \
+        ghcr.io/gitleaks/gitleaks:latest \
+        git --log-opts "$range" --redact --exit-code 1 --config "$gitleaks_config_file"
+    else
+      docker run --rm \
+        -v "${repo_root}:/repo" \
+        -w /repo \
+        ghcr.io/gitleaks/gitleaks:latest \
+        git --log-opts "$range" --redact --exit-code 1
+    fi
     return
   fi
 

@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { useInventoryStore } from '../store';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useInventoryStore, useProfileStore } from '../store';
 import { getItem, RARITY_CONFIG, type CollectibleItem } from '../data/collectibles';
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
+import { recordProgressActivity } from '../services/progressTracking';
 
 export function DiscoveryLab() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentProfileId = useProfileStore((state) => state.currentProfile?.id);
   const {
     ownedItems,
     discoveredRecipes,
@@ -38,7 +41,23 @@ export function DiscoveryLab() {
   );
 
   const handleCraft = (recipe: Recipe) => {
+    const wasNewDiscovery = !discoveredRecipes.includes(recipe.id);
     const result = craft(recipe.id);
+    void recordProgressActivity({
+      profileId: currentProfileId,
+      activityType: 'discovery_craft',
+      contentId: `recipe-${recipe.id}`,
+      score: result.success ? 100 : 0,
+      routePath: location.pathname,
+      metaData: {
+        recipe_id: recipe.id,
+        recipe_output_id: recipe.outputId,
+        success: result.success,
+        is_new_discovery: result.success && wasNewDiscovery,
+        output_item_id: result.outputItem?.id,
+      },
+    });
+
     if (result.success) {
       setCraftResult({
         success: true,

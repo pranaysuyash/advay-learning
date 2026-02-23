@@ -1,221 +1,345 @@
 /**
- * TTSService — Text-to-Speech Service (Strategy Pattern)
+ * TTSService - Three-tier Text-to-Speech Service
  *
- * Manages TTS providers with automatic fallback:
- *   1. Kokoro 82M (on-device, natural voice, WebGPU/WASM)
- *   2. Web Speech API (browser built-in, robotic but universal)
+ * Provides a friendly voice for Pip the mascot using a three-tier strategy:
+ *   1. Pre-generated audio (instant .wav playback for static phrases)
+ *   2. Kokoro-82M in-browser neural TTS (for dynamic phrases)
+ *   3. Web Speech API fallback (always available)
  *
- * The service initializes Kokoro asynchronously. While loading (or if
- * it fails), all speak() calls are routed to the Web Speech fallback.
+ * Game components don't need to know which tier is active — the
+ * speak() API is identical regardless of engine.
  *
- * @see TTSProvider.ts for the provider interface
- * @see KokoroTTSProvider.ts for the primary SOTA provider
- * @see WebSpeechTTSProvider.ts for the browser fallback
+ * @see docs/TTS_EVALUATION.md
+ * @see docs/research/LOCAL_TTS_STRATEGY.md
  */
 
-import type { TTSProvider, TTSProviderOptions } from './TTSProvider';
-import { KokoroTTSProvider } from './KokoroTTSProvider';
-import { WebSpeechTTSProvider } from './WebSpeechTTSProvider';
+import { PregenAudioCache } from './PregenAudioCache';
+import { KokoroTTSEngine, KokoroStatus } from './KokoroTTSEngine';
 
-// Re-export for backward compatibility
-export type TTSOptions = TTSProviderOptions;
+export interface TTSOptions {
+  /** Speech rate: 0.1 to 10 (default: 1.0) */
+  rate?: number;
+  /** Voice pitch: 0 to 2 (default: 1.0) */
+  pitch?: number;
+  /** Volume: 0 to 1 (default: 1.0) */
+  volume?: number;
+  /** Language code (e.g., 'en-US', 'hi-IN') */
+  lang?: string;
+  /** Preferred voice name (browser-specific) */
+  voiceName?: string;
+  /** Kokoro voice preset (e.g. 'af_heart', 'af_bella') */
+  kokoroVoice?: string;
+}
 
+export interface TTSVoiceInfo {
+  name: string;
+  lang: string;
+  default: boolean;
+  localService: boolean;
+}
+
+export type TTSEngine = 'auto' | 'kokoro' | 'web-speech';
+export type ActiveEngine = 'pregen' | 'kokoro' | 'web-speech';
+
+// Pip's default voice settings - friendly and slightly higher pitched
+const PIP_VOICE_DEFAULTS: TTSOptions = {
+  rate: 1.0,
+  pitch: 1.2,
+  volume: 1.0,
+  lang: 'en-US',
+};
+
+// Language code mapping for multi-language support
+const LANGUAGE_VOICE_MAP: Record<string, string> = {
+  en: 'en-US',
+  hi: 'hi-IN',
+  kn: 'kn-IN',
+  te: 'te-IN',
+  ta: 'ta-IN',
+};
+
+/**
+ * TTSService class — three-tier TTS strategy
+ *
+ * Usage (unchanged from before):
+ * ```typescript
+ * import { ttsService } from '@/services/ai/tts/TTSService';
+ *
+ * await ttsService.speak("Hello! I'm Pip!");           // auto-selects best engine
+ * await ttsService.speak("Great job!", { rate: 1.2 }); // options still work
+ * ```
+ */
 export class TTSService {
-  private primary: TTSProvider;
-  private fallback: TTSProvider;
-  private activeProvider: TTSProvider | null = null;
-  private enabled = true;
-  private volume = 1.0;
-  private initPromise: Promise<void> | null = null;
-  private _isReady = false;
+  // Tier 3: Web Speech API (always available)
+  private synth: SpeechSynthesis | null = null;
+  private voices: SpeechSynthesisVoice[] = [];
+  private voicesLoaded: boolean = false;
+
+  // Tier 2: Kokoro-82M engine
+  private kokoroEngine: KokoroTTSEngine;
+
+  // General state
+  private enabled: boolean = true;
+  private volume: number = 1.0;
+  private enginePreference: TTSEngine = 'auto';
+  private defaultOptions: TTSOptions = { ...PIP_VOICE_DEFAULTS };
+  private _lastActiveEngine: ActiveEngine = 'web-speech';
 
   constructor() {
-    this.fallback = new WebSpeechTTSProvider();
-    this.primary = new KokoroTTSProvider();
-
-    const mode = String((import.meta as any).env?.MODE ?? '').toLowerCase();
-    const isVitest =
-      typeof process !== 'undefined' &&
-      typeof process.env !== 'undefined' &&
-      (process.env.VITEST === 'true' || process.env.NODE_ENV === 'test');
-    const isTestRuntime = mode === 'test' || isVitest;
-
-    if (isTestRuntime) {
-      // Prevent heavy model startup inside test workers.
-      void this.fallback.init().then((ready) => {
-        if (ready) this.activeProvider = this.fallback;
-      });
-      this._isReady = true;
-      return;
+    // Initialize Web Speech API (Tier 3)
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      this.synth = window.speechSynthesis;
+      this.loadVoices();
+      if (this.synth.onvoiceschanged !== undefined) {
+        this.synth.onvoiceschanged = () => this.loadVoices();
+      }
     }
 
-    // Start initialization immediately
-    this.initPromise = this.initialize();
+    // Initialize Kokoro engine instance (Tier 2) — doesn't load model yet
+    this.kokoroEngine = new KokoroTTSEngine();
+
+    // Preload pre-generated audio cache (Tier 1)
+    if (typeof window !== 'undefined') {
+      PregenAudioCache.preloadAll();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Web Speech API helpers (Tier 3)
+  // ---------------------------------------------------------------------------
+
+  private loadVoices(): void {
+    if (!this.synth) return;
+    this.voices = this.synth.getVoices();
+    this.voicesLoaded = this.voices.length > 0;
+    if (this.voicesLoaded) {
+      console.log(`[TTSService] Loaded ${this.voices.length} Web Speech voices`);
+    }
+  }
+
+  private findVoiceForLanguage(lang: string): SpeechSynthesisVoice | null {
+    if (!this.voices.length) return null;
+    let voice = this.voices.find((v) => v.lang === lang);
+    if (voice) return voice;
+    const langPrefix = lang.split('-')[0];
+    voice = this.voices.find((v) => v.lang.startsWith(langPrefix));
+    if (voice) return voice;
+    return this.voices.find((v) => v.default) || this.voices[0] || null;
+  }
+
+  private webSpeechSpeak(text: string, options: TTSOptions): Promise<void> {
+    if (!this.synth) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = options.rate ?? 1.0;
+      utterance.pitch = options.pitch ?? 1.0;
+      utterance.volume = Math.min(options.volume ?? 1.0, this.volume);
+      const lang = options.lang || PIP_VOICE_DEFAULTS.lang!;
+      utterance.lang = lang;
+      const voice = this.findVoiceForLanguage(lang);
+      if (voice) utterance.voice = voice;
+
+      utterance.onend = () => resolve();
+      utterance.onerror = (event) => {
+        if (event.error === 'interrupted') {
+          resolve();
+        } else {
+          console.error('[TTSService] Web Speech error:', event.error);
+          reject(new Error(`Speech synthesis error: ${event.error}`));
+        }
+      };
+
+      this.synth!.speak(utterance);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Kokoro engine management (Tier 2)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Initialize the Kokoro neural TTS engine.
+   * Call this early (e.g. on app mount) to begin model download.
+   * Safe to call multiple times.
+   */
+  initKokoro(): void {
+    if (this.enginePreference === 'web-speech') return;
+    this.kokoroEngine.init().catch((err) => {
+      console.warn('[TTSService] Kokoro init failed, will use fallback:', err);
+    });
   }
 
   /**
-   * Initialize providers: try Kokoro first, fall back to Web Speech.
-   * This runs in the background — speak() works immediately via fallback.
+   * Get Kokoro model status
    */
-  private async initialize(): Promise<void> {
-    // Always init the fallback first (instant, no model download)
-    const fallbackReady = await this.fallback.init();
-    if (fallbackReady) {
-      this.activeProvider = this.fallback;
-      this._isReady = true;
-      console.log(`[TTSService] Fallback ready: ${this.fallback.name}`);
-    }
-
-    // Then try to load Kokoro (may take seconds on first load due to model download)
-    try {
-      const primaryReady = await this.primary.init();
-      if (primaryReady) {
-        this.activeProvider = this.primary;
-        console.log(`[TTSService] ✨ Primary ready: ${this.primary.name}`);
-      } else {
-        console.log('[TTSService] Primary unavailable, using fallback');
-      }
-    } catch (error) {
-      console.warn('[TTSService] Primary init failed, using fallback:', error);
-    }
-
-    this._isReady = true;
+  getKokoroStatus(): KokoroStatus {
+    return this.kokoroEngine.getStatus();
   }
 
-  /** Whether any TTS provider is ready */
+  /**
+   * Get Kokoro model loading progress (0-100)
+   */
+  getKokoroProgress(): number {
+    return this.kokoroEngine.getLoadProgress();
+  }
+
+  /**
+   * Subscribe to Kokoro engine events
+   */
+  onKokoroEvent(callback: Parameters<KokoroTTSEngine['on']>[0]): () => void {
+    return this.kokoroEngine.on(callback);
+  }
+
+  /**
+   * Get which engine was last used
+   */
+  get lastActiveEngine(): ActiveEngine {
+    return this._lastActiveEngine;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Public API (identical interface as before)
+  // ---------------------------------------------------------------------------
+
   isAvailable(): boolean {
-    return this._isReady && this.activeProvider !== null;
+    return this.synth !== null || this.kokoroEngine.isReady();
   }
 
-  /** Whether TTS is enabled (user setting) */
   isEnabled(): boolean {
     return this.enabled && this.isAvailable();
   }
 
-  /** Whether TTS is currently speaking */
-  isSpeaking(): boolean {
-    return this.activeProvider?.isSpeaking() ?? false;
-  }
-
-  /** Name of the active provider ("Kokoro 82M (On-Device)" or "Web Speech API (Browser)") */
-  getProviderName(): string {
-    return this.activeProvider?.name ?? 'None';
-  }
-
-  /** Whether the primary (Kokoro) provider is active (not the fallback) */
-  isPrimaryActive(): boolean {
-    return this.activeProvider === this.primary && this.primary.isReady();
+  getVoices(): TTSVoiceInfo[] {
+    return this.voices.map((voice) => ({
+      name: voice.name,
+      lang: voice.lang,
+      default: voice.default,
+      localService: voice.localService,
+    }));
   }
 
   /**
    * Speak text with optional configuration.
-   * Routes to the best available provider.
-   * Automatically cancels any in-progress speech first.
+   *
+   * Uses three-tier strategy:
+   *   1. Check pre-generated audio cache → instant playback
+   *   2. If Kokoro ready → neural TTS
+   *   3. Fallback → Web Speech API
    */
-  async speak(text: string, options?: TTSOptions): Promise<void> {
-    if (!this.enabled) return;
+  speak(text: string, options?: TTSOptions): Promise<void> {
+    if (!this.enabled) return Promise.resolve();
 
-    // Always cancel previous speech to prevent overlap
+    // Stop any ongoing speech across all engines
     this.stop();
 
-    // Wait for initialization if still pending
-    if (this.initPromise) {
-      await this.initPromise;
+    const mergedOptions = { ...this.defaultOptions, ...options };
+    const effectiveVolume = Math.min(mergedOptions.volume ?? 1.0, this.volume);
+
+    // Tier 1: Pre-generated audio (instant, highest quality)
+    if (PregenAudioCache.has(text)) {
+      this._lastActiveEngine = 'pregen';
+      console.log('[TTSService] Engine: pregen');
+      return PregenAudioCache.play(text, effectiveVolume).catch((err) => {
+        console.warn('[TTSService] Pregen playback failed, falling back:', err);
+        return this.speakWithFallback(text, mergedOptions);
+      });
     }
 
-    if (!this.activeProvider) return;
-
-    const mergedOptions: TTSProviderOptions = {
-      ...options,
-      volume: Math.min(options?.volume ?? 1.0, this.volume),
-    };
-
-    try {
-      await this.activeProvider.speak(text, mergedOptions);
-    } catch (error) {
-      // If primary fails, try fallback
-      if (this.activeProvider === this.primary && this.fallback.isReady()) {
-        console.warn('[TTSService] Primary failed, falling back:', error);
-        await this.fallback.speak(text, mergedOptions);
-      }
-    }
+    return this.speakWithFallback(text, mergedOptions);
   }
 
   /**
-   * Speak text in a specific language (convenience method).
+   * Try Kokoro, then Web Speech API
    */
-  async speakInLanguage(text: string, languageCode: string): Promise<void> {
-    const langMap: Record<string, string> = {
-      en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', te: 'te-IN', ta: 'ta-IN',
-    };
-    return this.speak(text, { lang: langMap[languageCode] || 'en-US' });
+  private speakWithFallback(text: string, options: TTSOptions): Promise<void> {
+    const useKokoro =
+      this.enginePreference !== 'web-speech' && this.kokoroEngine.isReady();
+
+    if (useKokoro) {
+      this._lastActiveEngine = 'kokoro';
+      console.log('[TTSService] Engine: kokoro');
+      const effectiveVolume = Math.min(options.volume ?? 1.0, this.volume);
+      return this.kokoroEngine
+        .speak(text, effectiveVolume, options.kokoroVoice)
+        .catch((err) => {
+          console.warn('[TTSService] Kokoro failed, falling back to Web Speech:', err);
+          this._lastActiveEngine = 'web-speech';
+          return this.webSpeechSpeak(text, options);
+        });
+    }
+
+    // Tier 3: Web Speech API
+    this._lastActiveEngine = 'web-speech';
+    console.log('[TTSService] Engine: web-speech');
+    return this.webSpeechSpeak(text, options);
   }
 
-  /** Stop any ongoing speech */
+  speakInLanguage(text: string, languageCode: string): Promise<void> {
+    const lang = LANGUAGE_VOICE_MAP[languageCode] || 'en-US';
+    return this.speak(text, { lang });
+  }
+
   stop(): void {
-    this.activeProvider?.stop();
+    // Stop all engines
+    if (this.synth) this.synth.cancel();
+    PregenAudioCache.stop();
+    this.kokoroEngine.stop();
   }
 
-  /** Pause speech (Web Speech only) */
   pause(): void {
-    // Only Web Speech API supports pause/resume natively
-    if (this.activeProvider === this.fallback) {
-      (this.fallback as any).synth?.pause?.();
-    }
+    if (this.synth) this.synth.pause();
   }
 
-  /** Resume paused speech */
   resume(): void {
-    if (this.activeProvider === this.fallback) {
-      (this.fallback as any).synth?.resume?.();
-    }
+    if (this.synth) this.synth.resume();
   }
 
-  /** Enable or disable TTS */
+  isSpeaking(): boolean {
+    return this.synth?.speaking ?? false;
+  }
+
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
     if (!enabled) this.stop();
   }
 
-  /** Set master volume (0 to 1) */
   setVolume(volume: number): void {
     this.volume = Math.max(0, Math.min(1, volume));
   }
 
-  /** Get current volume */
   getVolume(): number {
     return this.volume;
   }
 
-  /** Set default TTS options (backward compatibility) */
-  setDefaultOptions(_options: Partial<TTSOptions>): void {
-    // No-op for backward compat — options are per-call now
-  }
-
-  /** Get available voices (backward compatibility) */
-  getVoices(): Array<{ name: string; lang: string; default: boolean; localService: boolean }> {
-    // Return Web Speech voices for backward compat
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      return window.speechSynthesis.getVoices().map((v) => ({
-        name: v.name,
-        lang: v.lang,
-        default: v.default,
-        localService: v.localService,
-      }));
+  /**
+   * Set the preferred TTS engine
+   */
+  setEnginePreference(engine: TTSEngine): void {
+    this.enginePreference = engine;
+    if (engine === 'kokoro' || engine === 'auto') {
+      this.initKokoro();
     }
-    return [];
   }
 
-  /** Reset to defaults (backward compatibility) */
+  getEnginePreference(): TTSEngine {
+    return this.enginePreference;
+  }
+
+  setDefaultOptions(options: Partial<TTSOptions>): void {
+    this.defaultOptions = { ...this.defaultOptions, ...options };
+  }
+
   resetToDefaults(): void {
-    this.volume = 1.0;
+    this.defaultOptions = { ...PIP_VOICE_DEFAULTS };
   }
 
-  /** Clean up all resources */
+  /**
+   * Dispose of all engines (call on app unmount)
+   */
   dispose(): void {
-    this.primary.dispose();
-    this.fallback.dispose();
-    this.activeProvider = null;
+    this.stop();
+    this.kokoroEngine.dispose();
   }
 }
 

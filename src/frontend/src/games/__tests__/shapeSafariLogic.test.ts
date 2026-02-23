@@ -30,11 +30,11 @@ describe('SAFARI_SCENES', () => {
     expect(SAFARI_SCENES).toHaveLength(5);
   });
 
-  it('each theme has id, name, background, and shapes', () => {
+  it('each theme has id, name, background color, and shapes', () => {
     for (const theme of SAFARI_SCENES) {
       expect(typeof theme.id).toBe('string');
       expect(typeof theme.name).toBe('string');
-      expect(typeof theme.background).toBe('string');
+      expect(typeof theme.backgroundColor).toBe('string');
       expect(Array.isArray(theme.shapes)).toBe(true);
       expect(theme.shapes.length).toBeGreaterThan(0);
     }
@@ -68,7 +68,7 @@ describe('getRandomScene', () => {
     const scene = getRandomScene();
     expect(scene).toHaveProperty('id');
     expect(scene).toHaveProperty('name');
-    expect(scene).toHaveProperty('background');
+    expect(scene).toHaveProperty('backgroundColor');
     expect(scene).toHaveProperty('shapes');
     expect(Array.isArray(scene.shapes)).toBe(true);
   });
@@ -77,8 +77,8 @@ describe('getRandomScene', () => {
     const scene = getRandomScene();
     for (const shape of scene.shapes) {
       expect(shape).toHaveProperty('type');
-      expect(shape).toHaveProperty('normalizedCenter');
-      expect(shape).toHaveProperty('normalizedSize');
+      expect(shape).toHaveProperty('position');
+      expect(shape).toHaveProperty('size');
       expect(shape).toHaveProperty('isFound');
       expect(typeof shape.isFound).toBe('boolean');
     }
@@ -124,12 +124,13 @@ describe('findShapeAtPoint', () => {
 
   it('returns shape when point is near shape', () => {
     const scene = getRandomScene();
-    const shapes = scene.shapes;
+    const state = initializeGame(scene, 800, 600);
+    const shapes = state.currentScene!.shapes;
     const shape = shapes[0];
-    // Point near shape center
+    // Point near shape center (normalized coordinates)
     const point = {
-      x: shape.normalizedCenter.x * 800,
-      y: shape.normalizedCenter.y * 600,
+      x: shape.position.x,
+      y: shape.position.y,
     };
     
     const result = findShapeAtPoint(point, shapes, 800, 600, 100);
@@ -139,31 +140,34 @@ describe('findShapeAtPoint', () => {
 
 describe('checkShapeComplete', () => {
   it('returns false for empty trace', () => {
-    const result = checkShapeComplete([]);
+    const state = initializeGame(getRandomScene(), 800, 600);
+    const shape = state.currentScene!.shapes[0];
+    const result = checkShapeComplete([], shape, 800, 600);
     expect(result).toBe(false);
   });
 
   it('returns false for trace with few points', () => {
-    const result = checkShapeComplete([{ x: 0.5, y: 0.5 }]);
+    const state = initializeGame(getRandomScene(), 800, 600);
+    const shape = state.currentScene!.shapes[0];
+    const result = checkShapeComplete([{ x: 0.5, y: 0.5 }], shape, 800, 600);
     expect(result).toBe(false);
   });
 
-  it('returns true for trace with many points', () => {
-    const trace = Array.from({ length: 50 }, (_, i) => ({
-      x: 0.5 + i * 0.01,
-      y: 0.5 + i * 0.01,
-    }));
-    const result = checkShapeComplete(trace);
+  it('returns true for accurate trace', () => {
+    const state = initializeGame(SAFARI_SCENES[0], 800, 600);
+    const shape = state.currentScene!.shapes[0];
+    const result = checkShapeComplete(shape.normalizedPath, shape, 800, 600);
     expect(result).toBe(true);
   });
 });
 
 describe('getHint', () => {
   it('returns null when all shapes found', () => {
-    const scene = getRandomScene();
-    const state = initializeGame(scene, 800, 600);
-    // Mark all shapes as found
-    scene.shapes.forEach(s => state.foundShapes.add(s.id));
+    const state = initializeGame(getRandomScene(), 800, 600);
+    state.currentScene!.shapes.forEach((s) => {
+      s.isFound = true;
+      state.foundShapes.add(s.id);
+    });
     
     const hint = getHint(state);
     expect(hint).toBeNull();
@@ -188,9 +192,8 @@ describe('checkAllShapesFound', () => {
   });
 
   it('returns true when all shapes found', () => {
-    const scene = getRandomScene();
-    const state = initializeGame(scene, 800, 600);
-    scene.shapes.forEach(s => {
+    const state = initializeGame(getRandomScene(), 800, 600);
+    state.currentScene!.shapes.forEach(s => {
       state.foundShapes.add(s.id);
       s.isFound = true;
     });

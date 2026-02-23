@@ -9,6 +9,7 @@ import {
   GAME_INSTRUCTIONS,
   useVoiceInstructions,
 } from '../components/game/VoiceInstructions';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   TargetSystem,
   generateTargets,
@@ -70,6 +71,12 @@ export default function BubblePopSymphony() {
   const [screenDims, setScreenDims] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
+  });
+
+  useGameSessionProgress({
+    gameName: 'Bubble Pop Symphony',
+    score,
+    isPlaying: gameStarted,
   });
 
   const getAudioContext = useCallback(() => {
@@ -243,9 +250,10 @@ export default function BubblePopSymphony() {
         note: noteData.note,
         pitch: noteData.pitch,
         bubbleAssetId,
+        // Slower movement for toddler-friendly gameplay
         velocity: {
-          x: (Math.random() - 0.5) * 0.55,
-          y: (Math.random() - 0.5) * 0.55,
+          x: (Math.random() - 0.5) * 0.35,
+          y: (Math.random() - 0.5) * 0.35,
         },
         isActive: true,
       };
@@ -300,7 +308,16 @@ export default function BubblePopSymphony() {
         playNote(hitBubble.pitch);
         assetLoader.playSound('pop', 0.45);
         setShowSuccess(true);
-        setScore((current) => current + 1);
+        setScore((current) => {
+          const newScore = current + 1;
+          // Voice feedback for first pop and milestones
+          if (newScore === 1) {
+            speak('Great job! You popped a bubble!');
+          } else if (newScore === 5 || newScore === 10 || newScore === 15 || newScore === 20) {
+            speak(`Amazing! ${newScore} bubbles popped!`);
+          }
+          return newScore;
+        });
 
         const remaining = prev.filter((bubble) => bubble.id !== target.id);
 
@@ -346,11 +363,16 @@ export default function BubblePopSymphony() {
       />
 
       {gameStarted && (
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white rounded-[1.5rem] px-8 py-4 border-4 border-slate-200 shadow-sm'>
-          <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight m-0 drop-shadow-sm'>
-            🎵 Score: <span className="text-[#10B981]">{score}</span>
-          </h2>
-        </div>
+        <>
+          <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white rounded-[1.5rem] px-8 py-4 border-4 border-slate-200 shadow-sm'>
+            <h2 className='text-3xl md:text-4xl font-black text-slate-800 tracking-tight m-0 drop-shadow-sm'>
+              🎵 Score: <span className="text-[#10B981]">{score}</span>
+            </h2>
+          </div>
+          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white border-4 border-slate-200 text-slate-500 font-bold text-base shadow-sm'>
+            Take your time 🌈 Pop the bubbles!
+          </div>
+        </>
       )}
 
       {!gameStarted && (
@@ -400,14 +422,19 @@ export default function BubblePopSymphony() {
         />
       )}
 
+      {/* Background blur overlay for clean look */}
+      <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
+
       {gameStarted && isHandDetected && (
         <GameCursor
           position={cursorPosition}
-          size={70}
+          size={84}
           isPinching={isPinching}
           isHandDetected={isHandDetected}
           showTrail={true}
           pulseAnimation={true}
+          highContrast={true}
+          icon='👆'
         />
       )}
 

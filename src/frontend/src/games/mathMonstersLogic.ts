@@ -149,7 +149,7 @@ export const LEVELS: Level[] = [
     operation: 'recognition',
     maxNumber: 5,
     problemsToAdvance: 5,
-    monsters: ['nibbles'],
+    monsters: ['munchy'],
     hintText: 'Show the number with your fingers!',
   },
   {
@@ -157,7 +157,7 @@ export const LEVELS: Level[] = [
     operation: 'recognition',
     maxNumber: 10,
     problemsToAdvance: 5,
-    monsters: ['nibbles', 'munchy'],
+    monsters: ['munchy', 'nibbles'],
     hintText: 'Use both hands for numbers bigger than 5!',
   },
   {

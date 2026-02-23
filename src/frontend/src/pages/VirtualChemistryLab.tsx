@@ -7,6 +7,7 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 
@@ -116,6 +117,13 @@ export function VirtualChemistryLab() {
 
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { playSuccess, playPop } = useSoundEffects();
+
+  useGameSessionProgress({
+    gameName: 'Virtual Chemistry Lab',
+    score,
+    level: discoveredReactions.size,
+    isPlaying,
+  });
 
   // Check for reactions when beaker contents change
   useEffect(() => {

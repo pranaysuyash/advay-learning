@@ -94,6 +94,13 @@ This document governs how AI agents (including myself and others) work on the Ad
 - **Prompts**: `prompts/` - All AI prompts
 - **Code**: Repository itself
 
+### 2.1 Worklog Write Policy (Supersedes Legacy Mentions)
+
+- Active task updates must be written to `docs/WORKLOG_ADDENDUM_*.md`.
+- `docs/WORKLOG_TICKETS.md` is protected and treated as a curated index/history file.
+- Direct edits to `docs/WORKLOG_TICKETS.md` are allowed only for explicit curation tasks and require intentional override in local gates.
+- If any instruction below says “update `docs/WORKLOG_TICKETS.md`”, interpret it as “update a `docs/WORKLOG_ADDENDUM_*.md` file” unless the user explicitly requests ticket-file curation.
+
 ### 3. Scope Discipline
 
 - One audit = One file

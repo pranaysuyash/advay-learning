@@ -564,9 +564,13 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
       recordInteraction(result, 'click', 'start_button', true);
     }
 
-    // Check for monster character
-    const monster = await page.locator('text=/🦖|🐊|🐡|🦥|🦎/').first();
-    if (await monster.isVisible().catch(() => false)) {
+    // Wait for gameplay screen to fully render
+    await childDelay(page, 500, 800);
+    
+    // Check for monster character (all monster emojis: 🦖🐊🐰🐻🦊)
+    const monster = await page.locator('text=/🦖|🐊|🐰|🐻|🦊/').first();
+    const monsterByTestId = await page.locator('[data-testid="monster-character"]').first();
+    if ((await monster.isVisible().catch(() => false)) || (await monsterByTestId.isVisible().catch(() => false))) {
       recordInteraction(result, 'discover', 'monster_character', true);
       result.childFriendly.visualEngaging = true;
     } else {
@@ -580,10 +584,11 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
       recordInteraction(result, 'discover', 'math_problem', true);
     }
 
-    // Check for finger counting instructions
-    const hasInstructions = await page.locator('text=/finger|hand|show/i').isVisible().catch(() => false);
-    result.childFriendly.instructionsClear = hasInstructions;
-    if (!hasInstructions) {
+    // Check for finger counting instructions (check both semantic and text)
+    const hasTextInstructions = await page.locator('text=/finger|hand|show/i').isVisible().catch(() => false);
+    const hasSemanticInstructions = await page.locator('[data-ux-instruction]').first().isVisible().catch(() => false);
+    result.childFriendly.instructionsClear = hasTextInstructions || hasSemanticInstructions;
+    if (!result.childFriendly.instructionsClear) {
       recordIssue(result, 'high', 'confusion', 'No instructions on how to answer (show fingers)');
     }
 

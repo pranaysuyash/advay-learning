@@ -9,6 +9,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  worker: {
+    format: 'es',
+  },
+  optimizeDeps: {
+    exclude: ['kokoro-js'],
+  },
   server: {
     port: 6173,
     proxy: {

@@ -16,9 +16,10 @@ describe('ConnectTheDots component - regression', () => {
     const startButton = screen.getByRole('button', { name: /start game/i });
     fireEvent.click(startButton);
 
-    // Wait for the dots to render (dot number '1' should be present)
-    const firstDotText = await screen.findByText('1');
-    expect(firstDotText).toBeTruthy();
+    // Wait for dots to render and pick the first circle from the overlay SVG.
+    await waitFor(() => {
+      expect(document.querySelector('svg[viewBox="0 0 800 600"] circle')).toBeTruthy();
+    });
 
     // Find the canvas and stub its getBoundingClientRect so clicks map cleanly
     const canvas = document.querySelector('canvas') as HTMLCanvasElement;
@@ -38,10 +39,7 @@ describe('ConnectTheDots component - regression', () => {
         toJSON: () => {},
       }) as DOMRect;
 
-    // Locate the circle for dot 1 via its text's parent <g>
-    const group = firstDotText.closest('g');
-    expect(group).toBeTruthy();
-    const circle = group!.querySelector('circle');
+    const circle = document.querySelector('svg[viewBox="0 0 800 600"] circle');
     expect(circle).toBeTruthy();
 
     const cx = Number(circle!.getAttribute('cx'));
@@ -57,9 +55,8 @@ describe('ConnectTheDots component - regression', () => {
       expect(indicator!.textContent).toMatch(/#2/);
     });
 
-    // Re-query the circle after state update to ensure it still exists
-    const updatedGroup = screen.getByText('1').closest('g');
-    const updatedCircle = updatedGroup!.querySelector('circle');
+    // Re-query to ensure a dot circle still exists after state update.
+    const updatedCircle = document.querySelector('svg[viewBox="0 0 800 600"] circle');
     expect(updatedCircle).toBeTruthy();
     // Visual fill style may depend on CSS variables in the test environment;
     // the key regression is the index advancement which we already assert above.
@@ -74,10 +71,10 @@ describe('ConnectTheDots component - regression', () => {
     const startButton = screen.getByRole('button', { name: /start game/i });
     fireEvent.click(startButton);
 
-    // Wait for dots
-    const firstDotText = await screen.findByText('1');
-    const group = firstDotText.closest('g');
-    const circle = group!.querySelector('circle')!;
+    await waitFor(() => {
+      expect(document.querySelector('svg[viewBox="0 0 800 600"] circle')).toBeTruthy();
+    });
+    const circle = document.querySelector('svg[viewBox="0 0 800 600"] circle')!;
     const cx = Number(circle.getAttribute('cx'));
     const cy = Number(circle.getAttribute('cy'));
 

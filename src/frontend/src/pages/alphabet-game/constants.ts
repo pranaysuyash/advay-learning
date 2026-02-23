@@ -1,0 +1,30 @@
+export const ALPHABET_GAME_SESSION_KEY = 'alphabetGameSession';
+export const ALPHABET_GAME_TUTORIAL_KEY = 'tutorialCompleted';
+
+export const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+export const MIN_DRAW_POINTS_FOR_CHECK = 20;
+export const MIN_FEEDBACK_ACCURACY = 20;
+export const MAX_ACCURACY = 100;
+export const BASE_ACCURACY = 60;
+export const ACCURACY_POINT_DIVISOR = 20;
+export const ACCURACY_SUCCESS_THRESHOLD = 70;
+
+export const CONFETTI_PARTICLE_COUNT = 100;
+export const CONFETTI_SPREAD = 70;
+export const CONFETTI_ORIGIN_Y = 0.6;
+
+export const WELLNESS_INTERVAL_MS = 60_000;
+export const INACTIVITY_TIMEOUT_MS = 60_000;
+export const HYDRATION_REMINDER_MINUTES = 20;
+
+export const MAX_DRAWN_POINTS = 6000;
+export const POINT_MIN_DISTANCE = 0.002;
+export const TIP_SMOOTHING_ALPHA = 0.35;
+
+export const HAND_TRACKING_CONFIDENCE = 0.3;
+
+export const WELLNESS_ACTIVE_THRESHOLD_MINUTES = 15;
+export const WELLNESS_HYDRATION_THRESHOLD_MINUTES = 10;
+export const WELLNESS_STRETCH_THRESHOLD_MINUTES = 20;
+export const WELLNESS_SCREEN_TIME_THRESHOLD_MINUTES = 30;

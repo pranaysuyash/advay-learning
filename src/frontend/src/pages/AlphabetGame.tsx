@@ -39,6 +39,8 @@ import { usePostureDetection } from '../hooks/usePostureDetection';
 import { useAttentionDetection } from '../hooks/useAttentionDetection';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { usePhonics } from '../hooks/usePhonics';
+import { useCameraPermission } from '../hooks/useCameraPermission';
+import { useInitialCameraPermission } from '../hooks/useInitialCameraPermission';
 // Centralized hand tracking hooks
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -57,6 +59,36 @@ import {
 import { getLetterColorClass } from '../utils/letterColorClass';
 import type { PinchState, Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import {
+  ACCURACY_POINT_DIVISOR,
+  ACCURACY_SUCCESS_THRESHOLD,
+  ALPHABET_GAME_TUTORIAL_KEY,
+  BASE_ACCURACY,
+  CONFETTI_ORIGIN_Y,
+  CONFETTI_PARTICLE_COUNT,
+  CONFETTI_SPREAD,
+  HAND_TRACKING_CONFIDENCE,
+  HYDRATION_REMINDER_MINUTES,
+  INACTIVITY_TIMEOUT_MS,
+  MAX_ACCURACY,
+  MAX_DRAWN_POINTS,
+  MIN_DRAW_POINTS_FOR_CHECK,
+  MIN_FEEDBACK_ACCURACY,
+  POINT_MIN_DISTANCE,
+  TIP_SMOOTHING_ALPHA,
+  WELLNESS_ACTIVE_THRESHOLD_MINUTES,
+  WELLNESS_HYDRATION_THRESHOLD_MINUTES,
+  WELLNESS_INTERVAL_MS,
+  WELLNESS_SCREEN_TIME_THRESHOLD_MINUTES,
+  WELLNESS_STRETCH_THRESHOLD_MINUTES,
+} from './alphabet-game/constants';
+import {
+  clearAlphabetGameSession,
+  loadAlphabetGameSession,
+  saveAlphabetGameSession,
+  warnAlphabetGame,
+} from './alphabet-game/sessionPersistence';
+import { getAlphabetGameOverlayVisibility } from './alphabet-game/overlayState';
 
 // Available languages for the game
 const LANGUAGES = [
@@ -72,7 +104,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   useAuthStore();
-  useProgressStore();
+  const markLetterAttempt = useProgressStore((state) => state.markLetterAttempt);
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -118,6 +150,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     'granted' | 'denied' | 'prompt'
   >('prompt');
   const [showPermissionWarning, setShowPermissionWarning] = useState(false);
+  const {
+    requestPermission: requestCameraPermission,
+    error: cameraPermissionError,
+  } = useCameraPermission();
 
   // Pause/Recovery state
   const [isPaused, setIsPaused] = useState(false);
@@ -145,8 +181,19 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
     // Check camera permission before starting
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop());
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        setCameraPermission('denied');
+        setShowPermissionWarning(true);
+        setUseMouseMode(true);
+        setIsPlaying(true);
+        if (cameraPermissionError) {
+          warnAlphabetGame('Camera permission denied in start flow', cameraPermissionError);
+        }
+        setFeedback("Let's use your finger to draw! 👆");
+        return;
+      }
+
       setCameraPermission('granted');
       setShowPermissionWarning(false);
       setUseMouseMode(false);
@@ -167,7 +214,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         startPostureMonitoring(webcamRef.current.video);
         startAttentionMonitoring(webcamRef.current.video);
       }
-    } catch {
+    } catch (error) {
+      warnAlphabetGame('Camera permission check failed at game start', error);
       setCameraPermission('denied');
       setShowPermissionWarning(true);
       setUseMouseMode(true);
@@ -269,9 +317,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       webcamRef,
       handTracking: {
         numHands: 2,
-        minDetectionConfidence: 0.3,
-        minHandPresenceConfidence: 0.3,
-        minTrackingConfidence: 0.3,
+        minDetectionConfidence: HAND_TRACKING_CONFIDENCE,
+        minHandPresenceConfidence: HAND_TRACKING_CONFIDENCE,
+        minTrackingConfidence: HAND_TRACKING_CONFIDENCE,
         delegate: 'GPU',
         enableFallback: true,
       },
@@ -298,24 +346,28 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const checkProgress = async () => {
     // Minimal, deterministic scoring: ensures the core tracking UX is testable.
     const points = drawnPointsRef.current.length;
-    if (points < 20) {
-      setAccuracy(20);
+    if (points < MIN_DRAW_POINTS_FOR_CHECK) {
+      setAccuracy(MIN_FEEDBACK_ACCURACY);
+      markLetterAttempt(selectedLanguage, currentLetter.char, MIN_FEEDBACK_ACCURACY);
       setFeedback('Draw more of the letter first! ✏️');
       setStreak(0);
       try {
         // Sound playback may not be available in some test environments; guard it.
         playError(); // Gentle reminder sound
-      } catch (err) {
-        // Ignore sound errors so UI state updates still occur in headless tests
-        // Observed in test env: AudioContext is not implemented
+      } catch (error) {
+        warnAlphabetGame('Unable to play error sound', error);
       }
       return;
     }
 
-    const nextAccuracy = Math.min(100, 60 + Math.floor(points / 20));
+    const nextAccuracy = Math.min(
+      MAX_ACCURACY,
+      BASE_ACCURACY + Math.floor(points / ACCURACY_POINT_DIVISOR),
+    );
     setAccuracy(nextAccuracy);
+    markLetterAttempt(selectedLanguage, currentLetter.char, nextAccuracy);
 
-    if (nextAccuracy >= 70) {
+    if (nextAccuracy >= ACCURACY_SUCCESS_THRESHOLD) {
       // Ensure only one overlay is visible at a time (simplified overlay stack)
       setIsPaused(false);
       setShowExitModal(false);
@@ -326,19 +378,19 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Play celebration sounds and phonics. Guard against envs without audio/speech.
       try {
         playCelebration();
-      } catch (err) {
-        /* ignore */
+      } catch (error) {
+        warnAlphabetGame('Unable to play celebration sound', error);
       }
       try {
         speakWordExample(currentLetter.char, selectedLanguage);
-      } catch (err) {
-        /* ignore */
+      } catch (error) {
+        warnAlphabetGame('Unable to play phonics word example', error);
       }
 
       confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
+        particleCount: CONFETTI_PARTICLE_COUNT,
+        spread: CONFETTI_SPREAD,
+        origin: { y: CONFETTI_ORIGIN_Y },
       });
       setFeedback('Amazing! Pip is so proud! 🎉');
       setScore((s) => s + Math.round(nextAccuracy));
@@ -350,8 +402,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setStreak(0);
       try {
         playPop(); // Encouraging feedback
-      } catch (err) {
-        // Ignore
+      } catch (error) {
+        warnAlphabetGame('Unable to play pop sound', error);
       }
     }
   };
@@ -380,12 +432,20 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const handleTutorialComplete = () => {
     setTutorialCompleted(true);
     setShowHandTutorial(true);
-    localStorage.setItem('tutorialCompleted', 'true');
+    try {
+      localStorage.setItem(ALPHABET_GAME_TUTORIAL_KEY, 'true');
+    } catch (error) {
+      warnAlphabetGame('Unable to save tutorial completion state', error);
+    }
   };
 
   const handleSkipTutorial = () => {
     setTutorialCompleted(true);
-    localStorage.setItem('tutorialCompleted', 'true');
+    try {
+      localStorage.setItem(ALPHABET_GAME_TUTORIAL_KEY, 'true');
+    } catch (error) {
+      warnAlphabetGame('Unable to save tutorial skip state', error);
+    }
   };
 
   const handleHandTutorialComplete = () => {
@@ -409,54 +469,20 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   useEffect(() => {
     const hasCompletedTutorial =
-      localStorage.getItem('tutorialCompleted') === 'true';
+      localStorage.getItem(ALPHABET_GAME_TUTORIAL_KEY) === 'true';
     setTutorialCompleted(hasCompletedTutorial);
 
     // Fetch profiles to ensure we have the latest data
     useProfileStore.getState().fetchProfiles();
-
-    // Check camera permission on mount
-    const checkCameraPermission = async () => {
-      try {
-        // Try using the Permissions API first
-        const result = await navigator.permissions.query({
-          name: 'camera' as PermissionName,
-        });
-        setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-        setShowPermissionWarning(result.state === 'denied');
-
-        // Listen for permission changes
-        result.addEventListener('change', () => {
-          setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-          setShowPermissionWarning(result.state === 'denied');
-        });
-      } catch {
-        // Fallback: try to get user media to check permission, but guard for test envs
-        if (
-          navigator.mediaDevices &&
-          typeof navigator.mediaDevices.getUserMedia === 'function'
-        ) {
-          navigator.mediaDevices
-            .getUserMedia({ video: true })
-            .then((stream) => {
-              stream.getTracks().forEach((track) => track.stop());
-              setCameraPermission('granted');
-              setShowPermissionWarning(false);
-            })
-            .catch(() => {
-              setCameraPermission('denied');
-              setShowPermissionWarning(true);
-            });
-        } else {
-          // No mediaDevices available (e.g., in headless test environment) — assume denied
-          setCameraPermission('denied');
-          setShowPermissionWarning(true);
-        }
-      }
-    };
-
-    checkCameraPermission();
   }, []);
+
+  // Bootstrap camera permission on mount (Permissions API + getUserMedia fallback)
+  useInitialCameraPermission(
+    setCameraPermission,
+    setShowPermissionWarning,
+    'AlphabetGame permission bootstrap',
+    warnAlphabetGame,
+  );
 
   // Get profile ID from route state (passed from Dashboard)
   const profileId = (location.state as any)?.profileId as string | undefined;
@@ -507,7 +533,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     // Track active time (when game is being played)
     const activeTimer = setInterval(() => {
       setActiveTime((prev) => prev + 1);
-    }, 60000); // Every minute
+    }, WELLNESS_INTERVAL_MS); // Every minute
 
     return () => clearInterval(activeTimer);
   }, [isPlaying]);
@@ -516,7 +542,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const { resetTimer: resetInactivityTimer } = useInactivityDetector(() => {
     setWellnessReminderType('inactive');
     setShowWellnessReminder(true);
-  }, 60000); // Trigger after 1 minute of inactivity
+  }, INACTIVITY_TIMEOUT_MS); // Trigger after 1 minute of inactivity
 
   // Hydration reminder effect - remind every 20 minutes of active play
   // Hydration reminder effect - remind every 20 minutes of active play
@@ -525,12 +551,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
     const hydrationInterval = setInterval(() => {
       // Show hydration reminder every 20 minutes of active play
-      if (activeTime > 0 && activeTime % 20 === 0 && activeTime >= 20) {
+      if (
+        activeTime > 0 &&
+        activeTime % HYDRATION_REMINDER_MINUTES === 0 &&
+        activeTime >= HYDRATION_REMINDER_MINUTES
+      ) {
         setWellnessReminderType('water');
         setShowWellnessReminder(true);
         setHydrationReminderCount((prevCount) => prevCount + 1);
       }
-    }, 60000); // Check every minute
+    }, WELLNESS_INTERVAL_MS); // Check every minute
 
     return () => clearInterval(hydrationInterval);
   }, [isPlaying, activeTime]);
@@ -559,24 +589,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         ? 'text-text-warning'
         : 'text-text-error';
 
-  const loadSessionState = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('alphabetGameSession');
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
-          return data;
-        }
-      }
-    } catch {
-      // Ignore parse/localStorage errors
-    }
-    return null;
-  }, []);
-
   // Restore session on mount (if valid)
   useEffect(() => {
-    const data = loadSessionState();
+    const data = loadAlphabetGameSession();
     if (data) {
       if (typeof data.currentLetterIndex === 'number') {
         setCurrentLetterIndex(data.currentLetterIndex);
@@ -588,7 +603,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       if (typeof data.useMouseMode === 'boolean')
         setUseMouseMode(data.useMouseMode);
     }
-  }, [loadSessionState]);
+  }, []);
 
   // Save session periodically while playing
   useEffect(() => {
@@ -601,14 +616,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         useMouseMode,
         timestamp: Date.now(),
       };
-      try {
-        localStorage.setItem(
-          'alphabetGameSession',
-          JSON.stringify(sessionData),
-        );
-      } catch {
-        // Ignore localStorage errors in test environments
-      }
+      saveAlphabetGameSession(sessionData);
     }
   }, [
     isPlaying,
@@ -668,7 +676,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Exit handlers - using empty deps since stopGame and navigate are stable
   const handleSaveAndExit = useCallback(() => {
     setShowCameraErrorModal(false);
-    localStorage.removeItem('alphabetGameSession');
+    clearAlphabetGameSession();
     stopGame();
     navigate('/dashboard');
   }, []);
@@ -684,11 +692,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       useMouseMode,
       timestamp: Date.now(),
     };
-    try {
-      localStorage.setItem('alphabetGameSession', JSON.stringify(sessionData));
-    } catch {
-      // Ignore localStorage errors
-    }
+    saveAlphabetGameSession(sessionData);
     stopGame();
     navigate('/dashboard');
   }, []);
@@ -839,17 +843,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
           // Exponential smoothing for cursor + drawing input to reduce jitter
           // alpha closer to 1 = more responsive; closer to 0 = smoother.
-          const alpha = 0.35;
           if (!smoothedTipRef.current) {
             smoothedTipRef.current = nextTip;
           } else {
             smoothedTipRef.current = {
               x:
                 smoothedTipRef.current.x +
-                (nextTip.x - smoothedTipRef.current.x) * alpha,
+                (nextTip.x - smoothedTipRef.current.x) * TIP_SMOOTHING_ALPHA,
               y:
                 smoothedTipRef.current.y +
-                (nextTip.y - smoothedTipRef.current.y) * alpha,
+                (nextTip.y - smoothedTipRef.current.y) * TIP_SMOOTHING_ALPHA,
             };
           }
 
@@ -898,7 +901,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                 )
               ) {
                 drawnPointsRef.current.push(nextPoint);
-                if (drawnPointsRef.current.length > 6000) {
+                if (drawnPointsRef.current.length > MAX_DRAWN_POINTS) {
                   drawnPointsRef.current.shift();
                 }
               }
@@ -1005,7 +1008,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       // Only add point if moved enough
       const lastPoint =
         drawnPointsRef.current[drawnPointsRef.current.length - 1];
-      const minDistance = 0.002;
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
@@ -1014,13 +1016,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           )
           : Infinity;
 
-      if (dist > minDistance) {
+      if (dist > POINT_MIN_DISTANCE) {
         lastDrawPointRef.current = point;
         drawnPointsRef.current.push({
           x: point.x / canvas.width,
           y: point.y / canvas.height,
         });
-        if (drawnPointsRef.current.length > 6000) {
+        if (drawnPointsRef.current.length > MAX_DRAWN_POINTS) {
           drawnPointsRef.current.shift();
         }
       }
@@ -1177,6 +1179,15 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     },
   ];
 
+  const overlayVisibility = getAlphabetGameOverlayVisibility({
+    showWellnessReminder,
+    hasWellnessReminderType: !!wellnessReminderType,
+    showCelebration,
+    showExitModal,
+    showCameraErrorModal,
+    isPaused,
+  });
+
   return (
     <>
       {!tutorialCompleted && (
@@ -1307,8 +1318,16 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                           {currentLetter.name}
                         </span>
                         {currentLetter.icon && (
-                          <span className='text-2xl mt-1 drop-shadow-sm'>
-                            {currentLetter.icon}
+                          <span className='inline-block w-12 h-12 mt-1'>
+                            <img
+                              src={Array.isArray(currentLetter.icon) ? currentLetter.icon[0] : currentLetter.icon}
+                              alt={currentLetter.name}
+                              className='w-full h-full object-contain drop-shadow-sm'
+                              onError={(e) => {
+                                // Hide broken images gracefully
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
                           </span>
                         )}
                       </div>
@@ -1598,100 +1617,91 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           setWellnessReminderType('stretch');
           setShowWellnessReminder(true);
         }}
-        activeThreshold={15}
-        hydrationThreshold={10}
-        stretchThreshold={20}
-        screenTimeThreshold={30}
+        activeThreshold={WELLNESS_ACTIVE_THRESHOLD_MINUTES}
+        hydrationThreshold={WELLNESS_HYDRATION_THRESHOLD_MINUTES}
+        stretchThreshold={WELLNESS_STRETCH_THRESHOLD_MINUTES}
+        screenTimeThreshold={WELLNESS_SCREEN_TIME_THRESHOLD_MINUTES}
       />
 
       {/* Wellness Reminder */}
-      {showWellnessReminder &&
-        wellnessReminderType &&
-        !showCelebration &&
-        !showExitModal &&
-        !showCameraErrorModal &&
-        !isPaused && (
-          <WellnessReminder
-            alerts={[
-              {
-                id: '1',
-                type: wellnessReminderType as any,
-                message:
-                  wellnessReminderType === 'break'
-                    ? 'Time for a break! Rest your eyes and stretch.'
-                    : wellnessReminderType === 'water'
-                      ? hydrationReminderCount > 1
-                        ? `Time for a drink of water! (You've had ${hydrationReminderCount} water reminders.)`
-                        : 'Time for a drink of water!'
-                      : wellnessReminderType === 'stretch'
-                        ? 'Time to stretch your body!'
-                        : 'Are you still there?',
-                timestamp: Date.now(),
-                acknowledged: false,
-              },
-            ]}
-            onAcknowledge={() => handleWellnessReminderDismiss()}
-            onDismiss={() => handleWellnessReminderDismiss()}
-          />
-        )}
+      {overlayVisibility.wellnessReminder && wellnessReminderType && (
+        <WellnessReminder
+          alerts={[
+            {
+              id: '1',
+              type: wellnessReminderType as any,
+              message:
+                wellnessReminderType === 'break'
+                  ? 'Time for a break! Rest your eyes and stretch.'
+                  : wellnessReminderType === 'water'
+                    ? hydrationReminderCount > 1
+                      ? `Time for a drink of water! (You've had ${hydrationReminderCount} water reminders.)`
+                      : 'Time for a drink of water!'
+                    : wellnessReminderType === 'stretch'
+                      ? 'Time to stretch your body!'
+                      : 'Are you still there?',
+              timestamp: Date.now(),
+              acknowledged: false,
+            },
+          ]}
+          onAcknowledge={() => handleWellnessReminderDismiss()}
+          onDismiss={() => handleWellnessReminderDismiss()}
+        />
+      )}
 
       {/* Pause Modal */}
       <AnimatePresence>
-        {isPaused &&
-          !showExitModal &&
-          !showCameraErrorModal &&
-          !showWellnessReminder &&
-          !showCelebration && (
+        {overlayVisibility.pauseModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4'
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4'
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className='bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-slate-200'
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className='bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-4 border-slate-200'
-              >
-                <div className='flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-4 border-blue-100'>
-                  <Mascot state='waiting' message='Paused! Take a breather.' />
-                </div>
-                <div className='text-center mb-8'>
-                  <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-2'>
-                    Game Paused
-                  </h2>
-                  <p className='text-slate-500 font-bold text-lg'>
-                    Your progress is saved. Ready to continue?
-                  </p>
-                </div>
-                <div className='space-y-4'>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setIsPaused(false);
-                      setFeedback("Welcome back! Let's draw more letters! 🎨");
-                    }}
-                    className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-3'
-                  >
-                    <UIIcon name='check' size={28} />
-                    Resume Game
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setIsPaused(false);
-                      setShowExitModal(true);
-                    }}
-                    className='w-full px-6 py-4 min-h-[64px] bg-slate-50 text-slate-600 border-4 border-slate-200 rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3'
-                  >
-                    <UIIcon name='home' size={24} />
-                    Exit to Home
-                  </button>
-                </div>
-              </motion.div>
+              <div className='flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-4 border-blue-100'>
+                <Mascot state='waiting' message='Paused! Take a breather.' />
+              </div>
+              <div className='text-center mb-8'>
+                <h2 className='text-3xl font-black text-slate-800 tracking-tight mb-2'>
+                  Game Paused
+                </h2>
+                <p className='text-slate-500 font-bold text-lg'>
+                  Your progress is saved. Ready to continue?
+                </p>
+              </div>
+              <div className='space-y-4'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setIsPaused(false);
+                    setFeedback("Welcome back! Let's draw more letters! 🎨");
+                  }}
+                  className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-3'
+                >
+                  <UIIcon name='check' size={28} />
+                  Resume Game
+                </button>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setIsPaused(false);
+                    setShowExitModal(true);
+                  }}
+                  className='w-full px-6 py-4 min-h-[64px] bg-slate-50 text-slate-600 border-4 border-slate-200 rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3'
+                >
+                  <UIIcon name='home' size={24} />
+                  Exit to Home
+                </button>
+              </div>
             </motion.div>
-          )}
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Camera Error Modal */}
@@ -1713,13 +1723,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
       {/* Celebration Overlay */}
       <CelebrationOverlay
-        show={
-          showCelebration &&
-          !showExitModal &&
-          !showCameraErrorModal &&
-          !isPaused &&
-          !showWellnessReminder
-        }
+        show={overlayVisibility.celebrationOverlay}
         letter={currentLetter.char}
         accuracy={accuracy}
         message={celebrationTitle}

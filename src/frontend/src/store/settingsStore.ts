@@ -7,6 +7,7 @@ interface Settings {
   difficulty: string;
   cameraEnabled: boolean;
   soundEnabled: boolean;
+  ttsEngine: 'auto' | 'kokoro' | 'web-speech'; // TTS engine preference
   timeLimit: number;
   showHints: boolean;
   handTrackingDelegate: 'GPU' | 'CPU'; // NEW: Hand tracking delegate preference
@@ -26,6 +27,7 @@ const defaultSettings: Settings = {
   difficulty: 'medium', // Default to medium (more letters than easy)
   cameraEnabled: false, // Default to off for privacy
   soundEnabled: true,
+  ttsEngine: 'auto', // Auto: try Kokoro neural TTS, fallback to Web Speech API
   timeLimit: 0, // No limit
   showHints: true,
   handTrackingDelegate: 'GPU', // NEW: Default to GPU for best performance

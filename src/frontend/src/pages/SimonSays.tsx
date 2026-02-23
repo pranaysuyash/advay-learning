@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
 interface BodyAction {
   name: string;
@@ -70,6 +71,13 @@ export function SimonSays() {
 
   const currentAction = BODY_ACTIONS[currentActionIndex];
   const HOLD_DURATION = 2000;
+
+  useGameSessionProgress({
+    gameName: 'Simon Says',
+    score,
+    level: round,
+    isPlaying,
+  });
 
   const holdTimeRef = useRef(0);
   const lastPoseRef = useRef<any[] | null>(null);

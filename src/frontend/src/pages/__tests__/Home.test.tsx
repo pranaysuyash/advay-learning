@@ -9,27 +9,23 @@ beforeEach(() => {
   useAuthStore.setState({ isAuthenticated: false });
   useSettingsStore.setState({
     hydrated: true,
-    onboardingCompleted: false,
+    onboardingCompleted: true,
     demoMode: false,
   });
 });
 
 describe('Home landing', () => {
-  it('renders Try Demo CTA and Get Started', () => {
+  it('renders primary CTAs', () => {
     render(
       <MemoryRouter>
         <Home />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('button', { name: /Try Demo/i })).toBeDefined();
-    // multiple 'Get Started' variations may exist (onboarding + main CTA); ensure at least one exists
-    const getStartedBtns = screen.getAllByRole('button', {
-      name: /Get Started/i,
-    });
-    expect(getStartedBtns.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole('button', { name: /Create a Profile/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Try The Magic/i })).toBeDefined();
   });
 
-  it('clicking Try Demo sets demoMode and does not request camera permission', async () => {
+  it('clicking Try The Magic sets demoMode and does not request camera permission', async () => {
     // Mock getUserMedia to fail loudly if called
     const mockGetUserMedia = vi.fn(() =>
       Promise.reject(new Error('should not be called')),
@@ -45,7 +41,7 @@ describe('Home landing', () => {
       </MemoryRouter>,
     );
 
-    const btn = screen.getByRole('button', { name: /Try Demo/i });
+    const btn = screen.getByRole('button', { name: /Try The Magic/i });
     fireEvent.click(btn);
 
     // demo mode should be enabled in the settings store
@@ -55,19 +51,16 @@ describe('Home landing', () => {
     expect(mockGetUserMedia).not.toHaveBeenCalled();
   });
 
-  it('mascot is decorative (aria-hidden) and not hidden on mobile', () => {
+  it('renders feature section heading', () => {
     const { container } = render(
       <MemoryRouter>
         <Home />
       </MemoryRouter>,
     );
 
-    // decorative mascot should be aria-hidden
-    const ariaHiddenEl = container.querySelector('[aria-hidden="true"]');
-    expect(ariaHiddenEl).toBeTruthy();
-
-    // mascot is now visible on mobile (it used to be `.hidden` on small screens)
-    const hiddenAncestor = ariaHiddenEl?.closest('.hidden');
-    expect(hiddenAncestor).toBeNull();
+    const featuresHeading = Array.from(container.querySelectorAll('h2')).find((el) =>
+      /Digital Magic, Physical Reality/i.test(el.textContent ?? ''),
+    );
+    expect(featuresHeading).toBeTruthy();
   });
 });

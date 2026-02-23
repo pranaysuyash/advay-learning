@@ -8,6 +8,7 @@ import { BackpackButton } from './components/inventory/BackpackButton';
 import { Suspense, lazy, useState, type ReactNode } from 'react';
 import { CameraErrorBoundary } from './components/errors/CameraErrorBoundary';
 import { CameraCrashFallback } from './components/errors/CameraCrashFallback';
+import { useProgressSync } from './hooks/useProgressSync';
 
 // Lazy load pages for code splitting
 const Home = lazy(() =>
@@ -247,6 +248,8 @@ function CameraSafeRoute({ gameName, children }: CameraSafeRouteProps) {
 }
 
 function App() {
+  useProgressSync();
+
   return (
     <ToastProvider>
       <ConfirmProvider>

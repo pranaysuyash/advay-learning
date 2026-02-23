@@ -23,6 +23,7 @@ import {
   createSVGIcon,
 } from '../utils/assets';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
 
 /**
@@ -216,6 +217,14 @@ export default function DressForWeather() {
   const [screenDims, setScreenDims] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
+  });
+
+  useGameSessionProgress({
+    gameName: 'Dress for Weather',
+    score,
+    level: currentLevel + 1,
+    isPlaying: gameStarted,
+    metaData: { weather: LEVELS[currentLevel]?.weather },
   });
 
   useEffect(() => {

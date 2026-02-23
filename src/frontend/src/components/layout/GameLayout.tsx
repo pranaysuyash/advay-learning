@@ -47,7 +47,7 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
             onCameraPermission,
             onCameraError,
             mirrored = true,
-            highContrast = false,
+            highContrast: _highContrast = false,
             canvasEvents = {},
             children,
             variant = 'card',
@@ -78,10 +78,11 @@ export const GameLayout = forwardRef<HTMLDivElement, GameLayoutProps>(
                     </div>
                 )}
 
-                {/* Webcam Layer (base) */}
+                {/* Webcam Layer (hidden visually - CameraThumbnail provides visual feedback) */}
+                {/* The element must remain in the DOM for MediaPipe hand tracking to read video frames */}
                 <Webcam
                     ref={webcamRef}
-                    className={`absolute inset-0 w-full h-full object-cover z-10 ${highContrast ? 'opacity-60' : ''}`}
+                    className="absolute w-0 h-0 opacity-0 pointer-events-none"
                     mirrored={mirrored}
                     videoConstraints={{ width: 640, height: 480 }}
                     onUserMedia={() => onCameraPermission?.('granted')}

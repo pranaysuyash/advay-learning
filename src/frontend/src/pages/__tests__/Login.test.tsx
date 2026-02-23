@@ -37,18 +37,18 @@ describe('Login page', () => {
     // Check for proper label associations
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /let'?s go/i })).toBeInTheDocument();
   });
 
-  it('disables submit button when form is empty', () => {
+  it('keeps submit button available when form is empty', () => {
     render(
       <MemoryRouter>
         <Login />
       </MemoryRouter>,
     );
 
-    const submitButton = screen.getByRole('button', { name: /sign in/i });
-    expect(submitButton).toBeDisabled();
+    const submitButton = screen.getByRole('button', { name: /let'?s go/i });
+    expect(submitButton).not.toBeDisabled();
   });
 
   it('enables submit button when email and password are filled', () => {
@@ -61,7 +61,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'testpassword' } });
 
-    const submitButton = screen.getByRole('button', { name: /sign in/i });
+    const submitButton = screen.getByRole('button', { name: /let'?s go/i });
     expect(submitButton).not.toBeDisabled();
   });
 
@@ -75,7 +75,7 @@ describe('Login page', () => {
     fireEvent.change(screen.getByLabelText(/email address/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'testpassword' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    fireEvent.click(screen.getByRole('button', { name: /let'?s go/i }));
 
     await waitFor(() => {
       expect(loginSpy).toHaveBeenCalledWith('test@example.com', 'testpassword');
@@ -98,25 +98,25 @@ describe('Login page', () => {
     expect(passwordInput).toHaveAttribute('type', 'text');
   });
 
-  it('has forgot password and sign up links', () => {
+  it('has forgot and sign up links', () => {
     render(
       <MemoryRouter>
         <Login />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: /forgot password/i })).toHaveAttribute('href', '/forgot-password');
-    expect(screen.getByRole('link', { name: /create account/i })).toHaveAttribute('href', '/register');
+    expect(screen.getByRole('link', { name: /forgot\?/i })).toHaveAttribute('href', '/forgot-password');
+    expect(screen.getByRole('link', { name: /create an account/i })).toHaveAttribute('href', '/register');
   });
 
-  it('has privacy and terms links', () => {
+  it('has navigation links for home and register', () => {
     render(
       <MemoryRouter>
         <Login />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute('href', '/privacy');
-    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute('href', '/terms');
+    expect(screen.getByRole('link', { name: /back to home/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /create an account/i })).toHaveAttribute('href', '/register');
   });
 });

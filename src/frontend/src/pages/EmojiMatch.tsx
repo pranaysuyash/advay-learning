@@ -11,6 +11,7 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
@@ -88,6 +89,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   const showDebug = Boolean((import.meta as any)?.env?.DEV);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { onGameComplete } = useGameDrops('emoji-match');
 
   useEffect(() => { targetsRef.current = targets; }, [targets]);
   useEffect(() => { correctIdRef.current = correctId; }, [correctId]);
@@ -144,12 +146,20 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       setCelebrationEmoji('🎉');
       setCelebrationMessage(`Level ${levelRef.current} complete!`);
       setShowCelebration(true);
+      if (ttsEnabled) {
+        if (levelRef.current >= MAX_LEVEL) {
+          void speak("You're an emotion expert! Amazing job!");
+        } else {
+          void speak(`Level ${levelRef.current} complete! Great job!`);
+        }
+      }
       playCelebration();
 
       levelTimeoutRef.current = setTimeout(() => {
         setShowCelebration(false);
         setCelebrationMessage(null);
         if (levelRef.current >= MAX_LEVEL) {
+          onGameComplete();
           setGameCompleted(true);
           setIsPlaying(false);
         } else {
@@ -168,7 +178,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       setRound(next);
       startRound();
     }
-  }, [playCelebration, startRound]);
+  }, [playCelebration, speak, startRound, ttsEnabled]);
 
   useEffect(() => {
     if (roundTimerRef.current) clearInterval(roundTimerRef.current);
@@ -221,9 +231,12 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     setLastMissId(null);
     missCountRef.current = 0;
     setIsPlaying(true);
+    if (ttsEnabled) {
+      void speak("Let's play Emoji Match! Show me your hand!");
+    }
     await playStart();
 
-  }, [playStart]);
+  }, [playStart, speak, ttsEnabled]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
@@ -327,6 +340,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         setMissCount(0);
         setScore((prev) => prev + 10 + Math.min(15, nextStreak * 3));
         setFeedback(`Yes! That's the ${expected.name} emoji!`);
+        if (ttsEnabled) {
+          void speak(`Yes! That's the ${expected.name} emoji!`);
+        }
         void playPop();
         setSuccessMessage(`You found ${expected.name}!`);
         setShowSuccess(true);
@@ -342,6 +358,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
           setCelebrationEmoji(expected.emoji);
           setCelebrationMessage('Great job!');
           setShowCelebration(true);
+          if (ttsEnabled) {
+            void speak('Amazing! Five in a row!');
+          }
           void playCelebration();
           setTimeout(() => {
             setShowCelebration(false);
@@ -358,6 +377,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         setStreak(0);
         setMissCount((current) => current + 1);
         setFeedback(`Oops! That's ${hit.name}. Find ${expected.name}.`);
+        if (ttsEnabled) {
+          void speak(`Try again! Find the ${expected.name} emoji!`);
+        }
         void playError();
         setLastMissId(hit.id);
         setLastHitId(null);
@@ -377,7 +399,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       playCelebration,
       playError,
       playPop,
+      speak,
       startGame,
+      ttsEnabled,
     ],
   );
 

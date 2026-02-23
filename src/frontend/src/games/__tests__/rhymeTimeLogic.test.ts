@@ -110,9 +110,9 @@ describe('initializeGame', () => {
     expect(state).toHaveProperty('score', 0);
     expect(state).toHaveProperty('streak', 0);
     expect(state).toHaveProperty('maxStreak', 0);
-    expect(state).toHaveProperty('answers');
+    expect(state).toHaveProperty('correctAnswers', 0);
+    expect(state).toHaveProperty('usedFamilies');
     expect(state).toHaveProperty('completed', false);
-    expect(state).toHaveProperty('difficulty');
   });
 
   it('default rounds is 10', () => {
@@ -126,7 +126,7 @@ describe('processAnswer', () => {
     const state = initializeGame('easy', 5);
     const round = generateRound('easy', new Set());
     
-    const newState = processAnswer(state, round, true);
+    const newState = processAnswer(state, true, round.targetFamily);
     expect(newState.currentRound).toBe(1);
   });
 
@@ -134,11 +134,11 @@ describe('processAnswer', () => {
     const state = initializeGame('easy', 5);
     const round = generateRound('easy', new Set());
     
-    const newState = processAnswer(state, round, true);
+    const newState = processAnswer(state, true, round.targetFamily);
     expect(newState.streak).toBe(1);
     
-    const round2 = generateRound('easy', new Set());
-    const newState2 = processAnswer(newState, round2, true);
+    const round2 = generateRound('easy', newState.usedFamilies);
+    const newState2 = processAnswer(newState, true, round2.targetFamily);
     expect(newState2.streak).toBe(2);
   });
 
@@ -147,18 +147,17 @@ describe('processAnswer', () => {
     state.streak = 3;
     const round = generateRound('easy', new Set());
     
-    const newState = processAnswer(state, round, false);
+    const newState = processAnswer(state, false, round.targetFamily);
     expect(newState.streak).toBe(0);
   });
 
-  it('records answer in history', () => {
+  it('updates correct answer count when correct', () => {
     const state = initializeGame('easy', 5);
     const round = generateRound('easy', new Set());
     
-    const newState = processAnswer(state, round, true);
-    expect(newState.answers).toHaveLength(1);
-    expect(newState.answers[0]).toHaveProperty('correct', true);
-    expect(newState.answers[0]).toHaveProperty('word');
+    const newState = processAnswer(state, true, round.targetFamily);
+    expect(newState.correctAnswers).toBe(1);
+    expect(newState.currentRound).toBe(1);
   });
 
   it('marks completed after final round', () => {
@@ -166,7 +165,7 @@ describe('processAnswer', () => {
     state.currentRound = 1;
     const round = generateRound('easy', new Set());
     
-    const newState = processAnswer(state, round, true);
+    const newState = processAnswer(state, true, round.targetFamily);
     expect(newState.completed).toBe(true);
   });
 });
@@ -180,11 +179,8 @@ describe('calculateAccuracy', () => {
 
   it('calculates based on correct answers', () => {
     const state = initializeGame('easy', 5);
-    state.answers = [
-      { correct: true, word: 'cat', timestamp: Date.now() },
-      { correct: true, word: 'hat', timestamp: Date.now() },
-      { correct: false, word: 'dog', timestamp: Date.now() },
-    ];
+    state.currentRound = 3;
+    state.correctAnswers = 2;
     
     const accuracy = calculateAccuracy(state);
     expect(accuracy).toBe(67); // 2/3 rounded
@@ -192,10 +188,8 @@ describe('calculateAccuracy', () => {
 
   it('returns 100 for all correct', () => {
     const state = initializeGame('easy', 5);
-    state.answers = [
-      { correct: true, word: 'cat', timestamp: Date.now() },
-      { correct: true, word: 'hat', timestamp: Date.now() },
-    ];
+    state.currentRound = 2;
+    state.correctAnswers = 2;
     
     const accuracy = calculateAccuracy(state);
     expect(accuracy).toBe(100);

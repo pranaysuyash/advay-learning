@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
@@ -99,6 +100,13 @@ export function YogaAnimals() {
 
   const currentPose = ANIMAL_POSES[currentPoseIndex];
   const HOLD_DURATION = 2000; // 2 seconds to hold pose
+
+  useGameSessionProgress({
+    gameName: 'Yoga Animals',
+    score,
+    level: currentPoseIndex + 1,
+    isPlaying,
+  });
 
   // Initialize Pose Landmarker
   useEffect(() => {

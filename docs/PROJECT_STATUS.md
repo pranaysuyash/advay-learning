@@ -182,6 +182,100 @@
 
 ## Next Steps Options
 
+---
+
+## Real-Use Validation Checklists (Addendum — 2026-02-23)
+
+Use these to validate the app under real-world conditions (devices, lighting, noisy rooms, low-end hardware). Each checklist is meant to be checked off with observed evidence (video, logs, screenshots).
+
+### 1) Camera UX + Reliability (Device Matrix)
+
+**Devices to validate:** Low-end Android tablet, iPad (Safari), mid-tier Android phone, MacBook webcam.
+
+- [ ] Camera permission prompt appears with clear explanation (first-time user).
+- [ ] Permission denial shows recovery path (retry + settings guide).
+- [ ] Hand tracking engages within 3 seconds after permission granted.
+- [ ] Tracking remains stable in low light (basic message shown if quality low).
+- [ ] Hand cursor/indicator visible and responsive.
+- [ ] App recovers after camera disconnect (USB unplug / tab background).
+- [ ] No crash or white screen during rapid gesture movement.
+- [ ] FPS remains ≥ 30 during gameplay on tablet.
+
+**Evidence required:**
+- 2–3 short videos (30–60s) per device
+- FPS log or on-screen FPS overlay (if available)
+
+---
+
+### 2) Alphabet Learning Loop Effectiveness
+
+**Goal:** Validate whether multi-sensory loop improves retention and clarity.
+
+- [ ] Letter shown + object displayed (A → Apple, etc.).
+- [ ] App speaks letter name and phoneme clearly.
+- [ ] Child can trace successfully within 2 attempts.
+- [ ] Child correctly matches object after tracing (≥ 70% accuracy).
+- [ ] Child can repeat same letter after 5 minutes without prompt (retention).
+- [ ] Child can identify the sound when letter is hidden (phoneme recall).
+
+**Evidence required:**
+- 3–5 child sessions (with parental consent)
+- Success/attempt logs per letter
+
+---
+
+### 3) Emoji Match Playability (Toddler Validation)
+
+**Goal:** Resolve S1 blockers before shipping to 2–4 year olds.
+
+- [ ] Target hitbox large enough for toddler motor control.
+- [ ] Timer pacing feels calm (no visible anxiety/frustration).
+- [ ] Hand cursor always visible and clearly distinct.
+- [ ] Toddler can complete 1 round in ≤ 3 attempts.
+- [ ] Child expresses desire to play again.
+
+**Evidence required:**
+- 2–3 toddler playtests with video + observer notes
+
+---
+
+### 4) Performance & Stability (Production-like)
+
+- [ ] Cold start load time < 8s on tablet.
+- [ ] Interaction latency < 100ms for core actions.
+- [ ] No memory growth > 15% after 15-minute session.
+- [ ] No visual jank during hand tracking transitions.
+- [ ] Errors logged properly (Sentry/Web Vitals).
+
+**Evidence required:**
+- Lighthouse/Web Vitals report
+- Memory timeline screenshot (DevTools)
+- Error log sample
+
+---
+
+### 5) Parent Value Experience (Conversion Readiness)
+
+- [ ] Parent sees progress summary within 60 seconds.
+- [ ] “Next step” recommendation is clear and actionable.
+- [ ] Parent understands what child learned today (1–2 sentences).
+- [ ] Parent can find settings without help.
+- [ ] Parent can understand pricing and value in < 90 seconds.
+
+**Evidence required:**
+- 3 parent walkthroughs (video or recorded notes)
+- Time-to-value metrics
+
+---
+
+### Validation Outcome Scoring (Simple)
+
+- **PASS**: All checklist items met, no blocker issues
+- **PARTIAL**: Minor issues noted but gameplay/learning still works
+- **FAIL**: Any blocker (camera unusable, toddler can’t play, or crashes)
+
+Document pass/fail results in worklog addendum (v3) with evidence references.
+
 ### Option A: Continue Security Hardening (Recommended)
 
 Focus on remaining P1 security tickets:

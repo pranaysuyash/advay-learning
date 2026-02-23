@@ -118,6 +118,8 @@ export const progressApi = {
       score: number;
       duration_seconds?: number;
       meta_data?: Record<string, any>;
+      idempotency_key?: string;
+      timestamp?: string;
     },
   ) =>
     apiClient.post('/progress/', data, { params: { profile_id: profileId } }),

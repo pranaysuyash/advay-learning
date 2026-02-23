@@ -13,7 +13,9 @@ vi.mock('react-webcam', () => ({
 }));
 vi.mock('@mediapipe/tasks-vision', () => ({
   FilesetResolver: { forVisionTasks: async () => ({}) },
-  HandLandmarker: { createFromOptions: async () => ({}) },
+  HandLandmarker: { createFromOptions: async () => ({ detectForVideo: () => [], close: () => {} }) },
+  PoseLandmarker: { createFromOptions: async () => ({ detectForVideo: () => ({}), close: () => {} }) },
+  FaceLandmarker: { createFromOptions: async () => ({ detectForVideo: () => ({}), close: () => {} }) },
 }));
 
 describe('Game pending indicator', () => {

@@ -522,6 +522,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       id: 'repeat',
       icon: 'play',
       label: 'Repeat',
+      ariaLabel: 'Repeat the target instruction (Space or Enter to activate)',
       onClick: () => {
         if (!ttsEnabled || !ttsAvailable) {
           setFeedback('Voice is not available on this device.');
@@ -541,6 +542,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       id: 'stop',
       icon: 'x',
       label: 'Stop',
+      ariaLabel: 'Stop the game (Space or Enter to activate)',
       onClick: stopGame,
       variant: 'danger',
     },
@@ -552,6 +554,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       id: 'home',
       icon: 'home',
       label: 'Home',
+      ariaLabel: 'Go back to home screen',
       onClick: goToHome,
       variant: 'secondary',
     },
@@ -561,14 +564,44 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const startButtonControl: GameControl = {
     id: 'start',
     icon: 'play',
-    label: 'Start Game',
+    label: isModelLoading ? 'Loading...' : 'Start Game',
+    ariaLabel: isModelLoading 
+      ? 'Loading hand tracking model, please wait' 
+      : 'Start the game (Space or Enter to activate)',
     onClick: startGame,
     variant: 'success',
     disabled: isModelLoading,
   };
 
+  // Keyboard accessibility: Space/Enter to start/stop game
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (!isPlaying) {
+          startButtonControl.onClick();
+        } else {
+          // Find stop control and execute it
+          const stopControl = gameControls.find((c) => c.label === 'Stop');
+          stopControl?.onClick();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, startButtonControl, gameControls]);
+
   return (
     <>
+      {/* Screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {feedback}
+      </div>
+      <div aria-live="assertive" aria-atomic="true" className="sr-only">
+        {isDetectedMatch ? `Match! You showed ${targetNumber}` : ''}
+      </div>
+
       {!isPlaying ? (
         <FingerNumberShowMenu
           gameMode={gameMode}
@@ -597,16 +630,23 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
           level={difficulty + 1}
           onHome={goToHome}
         >
-          <div className='relative w-full h-full'>
+          <div 
+            className='relative w-full h-full'
+            role="application"
+            aria-label={`${gameMode === 'letters' ? 'Letter' : 'Number'} counting game. Show your fingers to match the target.`}
+            tabIndex={0}
+          >
             <Webcam
               ref={webcamRef}
               className='absolute inset-0 w-full h-full object-cover'
               mirrored
               videoConstraints={{ width: 640, height: 480 }}
+              aria-label="Camera feed for hand tracking. Video is processed on your device only."
             />
             <canvas
               ref={canvasRef}
               className='absolute inset-0 w-full h-full'
+              aria-hidden="true"
             />
 
             <FingerNumberShowHud

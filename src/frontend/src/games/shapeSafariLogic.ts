@@ -794,7 +794,7 @@ export function getShapeDisplayName(type: ShapeType): string {
     diamond: 'Diamond',
     heart: 'Heart',
   };
-  return names[type];
+  return names[type] ?? 'Shape';
 }
 
 // Get progress
