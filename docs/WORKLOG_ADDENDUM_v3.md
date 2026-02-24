@@ -2681,3 +2681,63 @@ Next Steps:
 Status updates:
 - [2026-02-24 14:30 IST] **DONE** — All quick wins complete, UI components ready
 
+
+---
+
+### TCK-20260224-031 :: REGRESSION FOUND - Add Child Functionality Missing
+
+Type: BUG/REGRESSION
+Owner: Pranay
+Created: 2026-02-24 14:45 IST
+Status: **OPEN**
+Priority: **P0 (Critical)**
+
+Description:
+During Dashboard refactoring, the "Add Child" functionality was extracted into AddChildModal component but never re-integrated into Dashboard.tsx. Users cannot add new child profiles.
+
+Evidence:
+- AddChildModal.tsx exists at: src/frontend/src/components/dashboard/AddChildModal.tsx
+- Dashboard.tsx imports: NO import of AddChildModal
+- Dashboard.tsx has: Multi-profile selector (lines 194-208) but NO "Add Child" button
+- Dashboard.tsx useState: Only `[exporting, setExporting]` - no modal state
+
+Root Cause:
+Dashboard refactoring (TCK-20260202-001) extracted components but integration was incomplete. The AddChildModal was created but Dashboard never got the trigger button or state management.
+
+Impact:
+- New users cannot add children after initial setup
+- Parents with multiple children cannot add more profiles
+- Critical user journey broken
+
+Scope contract:
+- In-scope:
+  - Add "Add Child" button to Dashboard profile selector
+  - Integrate AddChildModal into Dashboard
+  - Wire up form submission to profile store
+  - Test end-to-end child creation
+- Out-of-scope:
+  - Backend API changes (assumed working)
+  - Edit profile functionality (already exists separately)
+- Behavior change allowed: NO (fixing regression)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/Dashboard.tsx (add integration)
+  - src/frontend/src/components/dashboard/AddChildModal.tsx (verify working)
+- Branch/PR: main
+
+Plan:
+1. Add useState for showAddModal, child form fields
+2. Import AddChildModal in Dashboard
+3. Add "+" or "Add Child" button to profile selector
+4. Wire onSubmit to profile store create action
+5. Test creating new child profile
+
+Execution log:
+- [2026-02-24 14:45 IST] Identified regression | Evidence: Dashboard.tsx missing AddChild integration
+- [2026-02-24 14:45 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+Status updates:
+- [2026-02-24 14:45 IST] **OPEN** — Regression confirmed, fix in progress
+

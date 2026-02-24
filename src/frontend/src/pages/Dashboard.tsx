@@ -16,6 +16,7 @@ import { hasBasicCameraSupport } from '../utils/featureDetection';
 import { useToast } from '../components/ui/useToast';
 import { AdventureMap } from '../components/Map';
 import type { IconName } from '../components/ui/Icon';
+import { AddChildModal } from '../components/dashboard/AddChildModal';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -66,12 +67,19 @@ export const Dashboard = memo(function Dashboard() {
   const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const { isGuest, guestSession } = useAuthStore();
-  const { profiles, currentProfile, setCurrentProfile, fetchProfiles } = useProfileStore();
+  const { profiles, currentProfile, setCurrentProfile, fetchProfiles, createProfile } = useProfileStore();
   const { letterProgress } = useProgressStore();
   const { demoMode, setDemoMode } = useSettingsStore();
   const { showToast } = useToast();
 
   const [exporting, setExporting] = useState(false);
+  
+  // Add Child Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [childName, setChildName] = useState('');
+  const [childAge, setChildAge] = useState(5);
+  const [childLanguage, setChildLanguage] = useState('en');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isGuest) {
@@ -135,6 +143,29 @@ export const Dashboard = memo(function Dashboard() {
     URL.revokeObjectURL(url);
     setExporting(false);
   };
+  
+  const handleAddChild = async () => {
+    if (!childName.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      await createProfile({
+        name: childName.trim(),
+        age: childAge,
+        preferred_language: childLanguage,
+      });
+      await fetchProfiles();
+      setShowAddModal(false);
+      setChildName('');
+      setChildAge(5);
+      setChildLanguage('en');
+      showToast(t('dashboard:profile.childAdded'), 'success');
+    } catch (error) {
+      showToast(t('dashboard:profile.childAddError'), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-[#FFF8F0] font-nunito pb-24'>
@@ -190,8 +221,8 @@ export const Dashboard = memo(function Dashboard() {
         </div>
       </header>
 
-      {/* MULTI-PROFILE SELECTOR (Subtle pill style if multiple) */}
-      {!isGuest && profiles.length > 1 && (
+      {/* MULTI-PROFILE SELECTOR with Add Child */}
+      {!isGuest && (
         <div className='px-6 lg:px-12 mb-8'>
           <div className='inline-flex items-center gap-2 bg-white p-1 rounded-full border-2 border-slate-100 shadow-sm'>
             {profiles.map(p => (
@@ -203,6 +234,15 @@ export const Dashboard = memo(function Dashboard() {
                 {p.name}
               </button>
             ))}
+            {/* ADD CHILD BUTTON */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className='px-3 py-1.5 rounded-full text-sm font-bold text-slate-400 hover:bg-slate-50 hover:text-[#3B82F6] transition border-2 border-dashed border-slate-200 hover:border-[#3B82F6] flex items-center gap-1'
+              title={t('dashboard:profile.addChild', 'Add Child')}
+            >
+              <span>+</span>
+              <span className='hidden sm:inline'>{t('dashboard:profile.addChild', 'Add')}</span>
+            </button>
           </div>
         </div>
       )}
@@ -256,6 +296,20 @@ export const Dashboard = memo(function Dashboard() {
         </section>
 
       </main>
+      
+      {/* ADD CHILD MODAL */}
+      <AddChildModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        childName={childName}
+        onChildNameChange={setChildName}
+        childAge={childAge}
+        onChildAgeChange={setChildAge}
+        childLanguage={childLanguage}
+        onChildLanguageChange={setChildLanguage}
+        onSubmit={handleAddChild}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 });
