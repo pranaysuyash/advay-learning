@@ -212,3 +212,73 @@ Status updates:
 - [2026-02-24 20:10 IST] **IN_PROGRESS** — Ticket created, beginning implementation
 - [2026-02-24 20:13 IST] **DONE** — ShapePop toddler enhancements complete
 
+---
+
+### TCK-20260224-005 :: WordBuilder Toddler-Friendly Enhancements
+
+Type: REMEDIATION  
+Owner: Pranay  
+Created: 2026-02-24 20:20 IST  
+Status: **IN_PROGRESS**  
+Priority: P1
+
+Description:
+Apply toddler-friendly enhancements to WordBuilder game following the pattern from previous batch fixes. This is the last medium priority hand-tracking game from GAMES_TO_FIX_2026-02-23.md audit.
+
+Source:
+- Audit file: `docs/audit/GAMES_TO_FIX_2026-02-23.md`
+- Pattern reference: `docs/audit/BATCH_FIX_4_GAMES_2026-02-23.md`
+
+Scope contract:
+- In-scope:
+  - Cursor: Add highContrast={true} and icon='👆' to GameCursor
+  - Background: Add backdrop-blur-sm to background overlay
+  - Voice: Enhance game start message to be more engaging
+- Out-of-scope:
+  - Core game logic changes
+  - Target size (already 120px for kids)
+  - "Take your time" message (already present)
+- Behavior change allowed: YES (UI/UX enhancements only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/WordBuilder.tsx`
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] Cursor shows 84px with high contrast and 👆 icon
+- [ ] Background has backdrop-blur-sm overlay
+- [ ] Game start voice is engaging: "Let's build words together! Show me your hand!"
+- [ ] Type-check and lint pass
+- [ ] No regressions in existing functionality
+
+Execution log:
+- [2026-02-24 20:20 IST] Analysis complete | Evidence: WordBuilder.tsx audit
+  - Cursor size: 84px ✅ (already correct via CURSOR_SIZE constant)
+  - Target size: 120px ✅ (already kid-friendly via TARGET_SIZE constant)
+  - "Take your time!" badge: present ✅ (line 342)
+  - VoiceInstructions: present ✅
+  - backdrop-blur-sm on start overlay: present ✅
+  - Missing: highContrast, icon props on GameCursor
+  - Missing: backdrop-blur-sm on background gradient
+  - Voice: Could be more engaging
+
+Plan:
+1. Update GameCursor to add highContrast={true} and icon='👆'
+2. Update background div to add backdrop-blur-sm
+3. Enhance startGame voice message
+4. Run type-check and lint
+5. Verify no regressions
+
+Execution log (continued):
+- [2026-02-24 20:22 IST] Implementation complete | Evidence: git diff
+  - Change 1: Added backdrop-blur-sm to background gradient (line 335)
+  - Change 2: Added highContrast={true} and icon='👆' to GameCursor (lines 403-404)
+  - Change 3: Enhanced game start voice message (line 253)
+- [2026-02-24 20:23 IST] Type-check passed | Evidence: tsc --noEmit (no errors)
+- [2026-02-24 20:23 IST] Lint check passed for WordBuilder.tsx | Evidence: No WordBuilder-specific errors
+
+Status updates:
+- [2026-02-24 20:20 IST] **IN_PROGRESS** — Ticket created, beginning implementation
+- [2026-02-24 20:23 IST] **DONE** — WordBuilder toddler enhancements complete
+

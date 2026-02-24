@@ -2565,3 +2565,9 @@ Next actions:
 2. Download Platformer Kit
 3. Start integrating assets into games
 
+---
+
+## TCK-20260224-029 :: Language Config Unification
+
+Type: REMEDIATION
+Status: **DONE**
