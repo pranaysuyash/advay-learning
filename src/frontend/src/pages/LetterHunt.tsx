@@ -455,7 +455,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-right'>
                   <div className='text-xl font-bold text-text-secondary mb-1'>Score: <span className='text-[#10B981] font-black'>{score}</span></div>
                   <div className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
-                    Level {level} · Round {round}/{totalRounds} · <span className='text-slate-400'>Take your time! 🌈</span>
+                    Level {level} · Round {round}/{totalRounds} · <span className='text-slate-400'>Take your time!</span>
                   </div>
                 </div>
               </div>
@@ -643,8 +643,8 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               ) : (
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-8'>
-                  <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-3 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
-                    🏆
+                  <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-3 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform text-amber-500'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-3'>
@@ -686,7 +686,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             accuracy={100}
             message={
               level >= 3
-                ? 'Amazing! All levels complete! 🏆'
+                ? 'Amazing! All levels complete!'
                 : `Level ${level} Complete!`
             }
             onComplete={() => setShowCelebration(false)}
