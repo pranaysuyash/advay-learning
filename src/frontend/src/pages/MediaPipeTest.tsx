@@ -496,10 +496,19 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
         addLog('Test stopped');
     };
 
-    // Get gesture emoji
-    const gestureEmoji = useMemo(() => {
-        if (!currentGesture) return '❓';
-        return GestureRecognizer.getGestureEmoji(currentGesture);
+    // Get gesture icon
+    const gestureIconName = useMemo(() => {
+        if (!currentGesture) return 'help-circle';
+        // Map gestures to icon names
+        const gestureMap: Record<string, string> = {
+            'open_palm': 'hand',
+            'fist': 'circle',
+            'thumbs_up': 'thumbs-up',
+            'thumbs_down': 'thumbs-down',
+            'victory': 'peace',
+            'pointing': 'mouse-pointer',
+        };
+        return gestureMap[currentGesture] || 'hand';
     }, [currentGesture]);
 
     // Render stats based on active tab
@@ -522,7 +531,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                         </div>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
                             <div className="text-3xl font-bold text-green-400">
-                                {testStatus === 'running' ? '✓' : testStatus === 'loading' ? '⏳' : '○'}
+                                {testStatus === 'running' ? <UIIcon name="check" size={28} className="inline-block text-green-400" /> : testStatus === 'loading' ? <UIIcon name="hourglass" size={28} className="inline-block text-amber-400" /> : <UIIcon name="circle" size={28} className="inline-block text-slate-400" />}
                             </div>
                             <div className="text-sm text-white/60">Status</div>
                         </div>
@@ -533,7 +542,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                 return (
                     <>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
-                            <div className="text-4xl">{gestureEmoji}</div>
+                            <div className="text-4xl"><UIIcon name={gestureIconName as any} size={36} className="inline-block text-blue-400" /></div>
                             <div className="text-sm text-white/60">Gesture</div>
                         </div>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
@@ -558,14 +567,14 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                     <>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
                             <div className={`text-3xl font-bold ${faceDetected ? 'text-green-400' : 'text-red-400'}`}>
-                                {faceDetected ? '👤' : '❌'}
+                                {faceDetected ? <UIIcon name="camera" size={28} className="inline-block" /> : <UIIcon name="x" size={28} className="inline-block" />}
                             </div>
                             <div className="text-sm text-white/60">Face</div>
                         </div>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
                             <div className="flex justify-center gap-2">
-                                <span className={`text-2xl ${leftEyeOpen ? '' : 'opacity-30'}`}>👁️</span>
-                                <span className={`text-2xl ${rightEyeOpen ? '' : 'opacity-30'}`}>👁️</span>
+                                <UIIcon name="eye" size={24} className={`${leftEyeOpen ? 'text-blue-400' : 'opacity-30'}`} />
+                                <UIIcon name="eye" size={24} className={`${rightEyeOpen ? 'text-blue-400' : 'opacity-30'}`} />
                             </div>
                             <div className="text-sm text-white/60">Eyes</div>
                         </div>
@@ -585,7 +594,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                     <>
                         <div className="bg-white/10 border border-border rounded-xl p-4 text-center">
                             <div className={`text-3xl font-bold ${poseDetected ? 'text-green-400' : 'text-red-400'}`}>
-                                {poseDetected ? '🧍' : '❌'}
+                                {poseDetected ? <UIIcon name="body" size={28} className="inline-block" /> : <UIIcon name="x" size={28} className="inline-block" />}
                             </div>
                             <div className="text-sm text-white/60">Pose</div>
                         </div>
@@ -606,11 +615,11 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
         }
     };
 
-    const tabConfig: { id: FeatureTab; label: string; icon: string; description: string }[] = [
-        { id: 'hands', label: 'Hand Tracking', icon: '✋', description: '21 landmarks per hand' },
-        { id: 'gestures', label: 'Gestures', icon: '👆', description: 'Fist, thumbs up, peace...' },
-        { id: 'face', label: 'Face Mesh', icon: '👤', description: '468 landmarks, eye tracking' },
-        { id: 'posture', label: 'Body Pose', icon: '🧍', description: '33 body landmarks' },
+    const tabConfig: { id: FeatureTab; label: string; iconName: string; description: string }[] = [
+        { id: 'hands', label: 'Hand Tracking', iconName: 'hand', description: '21 landmarks per hand' },
+        { id: 'gestures', label: 'Gestures', iconName: 'mouse-pointer', description: 'Fist, thumbs up, peace...' },
+        { id: 'face', label: 'Face Mesh', iconName: 'camera', description: '468 landmarks, eye tracking' },
+        { id: 'posture', label: 'Body Pose', iconName: 'body', description: '33 body landmarks' },
     ];
 
     return (
@@ -648,7 +657,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                                 : 'bg-white/5 border-border hover:bg-white/10'
                                 }`}
                         >
-                            <div className="text-2xl mb-1">{tab.icon}</div>
+                            <div className="text-2xl mb-1"><UIIcon name={tab.iconName as any} size={24} className="inline-block" /></div>
                             <div className="font-semibold text-sm">{tab.label}</div>
                             <div className="text-xs text-white/50">{tab.description}</div>
                         </button>
@@ -701,7 +710,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                         {testStatus === 'error' && (
                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
                                 <div className="text-center">
-                                    <div className="text-4xl mb-4">❌</div>
+                                    <div className="text-4xl mb-4"><UIIcon name="x" size={48} className="inline-block text-red-400" /></div>
                                     <div className="text-xl font-semibold text-red-400">Error</div>
                                     <button
                                         onClick={stopTest}
@@ -732,7 +741,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                         {/* Gesture overlay */}
                         {testStatus === 'running' && activeTab === 'gestures' && currentGesture && (
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 px-6 py-3 rounded-xl text-center">
-                                <div className="text-4xl mb-1">{gestureEmoji}</div>
+                                <div className="text-4xl mb-1"><UIIcon name={gestureIconName as any} size={40} className="inline-block text-blue-400" /></div>
                                 <div className="font-semibold">{GestureRecognizer.getGestureDescription(currentGesture)}</div>
                             </div>
                         )}
@@ -756,19 +765,19 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                 {/* Feature Legend */}
                 <div className="mt-6 grid grid-cols-4 gap-4 text-sm">
                     <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3">
-                        <div className="font-semibold text-green-400 mb-1">✋ Hands</div>
+                        <div className="font-semibold text-green-400 mb-1 flex items-center gap-2"><UIIcon name="hand" size={18} className="inline-block" /> Hands</div>
                         <div className="text-white/60">21 landmarks, connections, finger counting</div>
                     </div>
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
-                        <div className="font-semibold text-blue-400 mb-1">👆 Gestures</div>
+                        <div className="font-semibold text-blue-400 mb-1 flex items-center gap-2"><UIIcon name="mouse-pointer" size={18} className="inline-block" /> Gestures</div>
                         <div className="text-white/60">8 gesture types with confidence scores</div>
                     </div>
                     <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3">
-                        <div className="font-semibold text-purple-400 mb-1">👤 Face</div>
+                        <div className="font-semibold text-purple-400 mb-1 flex items-center gap-2"><UIIcon name="camera" size={18} className="inline-block" /> Face</div>
                         <div className="text-white/60">468 landmarks, eyes, lips, blink detection</div>
                     </div>
                     <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
-                        <div className="font-semibold text-yellow-400 mb-1">🧍 Pose</div>
+                        <div className="font-semibold text-yellow-400 mb-1 flex items-center gap-2"><UIIcon name="body" size={18} className="inline-block" /> Pose</div>
                         <div className="text-white/60">33 body points, posture analysis</div>
                     </div>
                 </div>

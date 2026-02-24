@@ -713,7 +713,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         {gameCompleted && (
           <div className='absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-40'>
             <div className='flex flex-col items-center gap-6 bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl'>
-              <div className='text-6xl mb-2 hover:scale-110 transition-transform text-pip-orange'>🥰</div>
+              <div className='text-5xl mb-2 hover:scale-110 transition-transform text-pip-orange font-bold'>:)</div>
               <h2 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>
                 Emotion Expert!
               </h2>

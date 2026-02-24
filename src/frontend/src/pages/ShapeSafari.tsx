@@ -504,7 +504,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
             className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
           >
             <div className="flex items-center justify-center gap-2">
-              <span className="text-xl">🎯</span>
+              <span className="text-xl">◎</span>
               <p className="font-black">GOAL: Find {progress.total} hidden {currentScene?.targetShape}s to discover animals!</p>
             </div>
           </div>
@@ -564,7 +564,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
             {gameState?.completed && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-                  <div className="text-6xl mb-4">🎉</div>
+                  <div className="text-5xl mb-4 font-bold text-emerald-500">★</div>
                   <h3 className="text-2xl font-bold text-advay-slate mb-2">Scene Complete!</h3>
                   <p className="text-advay-slate mb-2">
                     You found all the shapes in {currentScene?.name}!

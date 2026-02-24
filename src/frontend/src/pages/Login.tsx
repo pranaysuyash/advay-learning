@@ -233,7 +233,7 @@ export function Login() {
                   </span>
                 ) : (
                   <span className='flex items-center justify-center gap-2'>
-                    {t('login.submitButton')} <span className='group-hover:translate-x-1 transition-transform'>🚀</span>
+                    {t('login.submitButton')} <UIIcon name="arrow-right" size={20} className="group-hover:translate-x-1 transition-transform" />
                   </span>
                 )}
               </button>
@@ -255,7 +255,7 @@ export function Login() {
                 }}
                 className='w-full py-3.5 bg-white text-advay-slate font-bold text-lg rounded-2xl border-2 border-[#F2CC8F] hover:border-slate-300 hover:bg-slate-50 transition shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3 active:scale-[0.98]'
               >
-                <span className='text-2xl'>🌟</span> {t('login.guestButton')}
+                <UIIcon name="star" size={24} className="text-amber-500" /> {t('login.guestButton')}
               </button>
 
               <p className='mt-8 text-text-secondary font-medium text-lg'>

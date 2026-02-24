@@ -22,7 +22,7 @@ const RECOMMENDED_GAMES = [
   {
     id: 'alphabet-tracing',
     title: 'Draw Letters',
-    description: 'Draw letters with your finger and see them come alive! 🎉',
+    description: 'Draw letters with your finger and see them come alive!',
     path: '/games/alphabet-tracing',
     icon: 'letters' as IconName,
     ageRange: '2-8 years',
@@ -42,7 +42,7 @@ const RECOMMENDED_GAMES = [
   {
     id: 'music-pinch-beat',
     title: 'Music Pinch Beat',
-    description: 'Pinch on glowing lanes to play rhythm beats! 🎵',
+    description: 'Pinch on glowing lanes to play rhythm beats!',
     path: '/games/music-pinch-beat',
     icon: 'sparkles' as IconName,
     ageRange: '3-7 years',
@@ -53,7 +53,7 @@ const RECOMMENDED_GAMES = [
   {
     id: 'connect-the-dots',
     title: 'Connect Dots',
-    description: 'Connect the dots to make fun pictures! 🎨',
+    description: 'Connect the dots to make fun pictures!',
     path: '/games/connect-the-dots',
     icon: 'target' as IconName,
     ageRange: '3-6 years',
@@ -154,7 +154,7 @@ export const Dashboard = memo(function Dashboard() {
             <h1 className='text-3xl sm:text-4xl font-extrabold text-[#1E293B]'>
               {defaultProfile?.name
                 ? t('dashboard:welcome.title', { name: defaultProfile.name })
-                : t('dashboard:welcome.titleAnonymous')} <span className="text-yellow-400">🌟</span>
+                : t('dashboard:welcome.titleAnonymous')} <span className="text-yellow-400">★</span>
             </h1>
             <p className='text-lg font-medium text-slate-500 mt-1'>
               {t('dashboard:welcome.subtitle')}
@@ -213,7 +213,7 @@ export const Dashboard = memo(function Dashboard() {
         <section>
           <div className='flex justify-between items-end mb-6'>
             <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-              <span className="text-[#E85D04]">Featured Games</span> 🎮
+              <span className="text-[#E85D04]">Featured Games</span>
             </h2>
             <Link to="/games" className='text-lg font-bold text-[#3B82F6] hover:underline'>
               {t('dashboard:featuredGames.seeAll')} →

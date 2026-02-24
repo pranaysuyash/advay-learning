@@ -1188,7 +1188,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       return (
         <section className='min-h-[60vh] flex items-center justify-center px-4'>
           <div className='text-center max-w-md'>
-            <div className='text-6xl mb-4'>🎮</div>
+            <div className='text-5xl mb-4 font-bold text-blue-500'>Aa</div>
             <h2 className='text-2xl font-bold mb-2'>Ready to Learn!</h2>
             <p className='text-text-secondary mb-6'>
               Create a profile to save your progress, or start playing right away!
@@ -1339,7 +1339,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
                 <div className='inline-block px-8 py-4 rounded-[2rem] bg-[#F2CC8F] text-advay-slate shadow-[0_6px_0_#E5B86E] transition-all duration-300 transform hover:scale-105'>
                   <p className='text-xl md:text-2xl font-extrabold tracking-wide'>
-                    {isDrawing ? 'Trace the letter!' : 'Pinch 🤏 to draw'}
+                    {isDrawing ? 'Trace the letter!' : 'Pinch to draw'}
                   </p>
                 </div>
               </div>
@@ -1357,7 +1357,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       ) : (
                         <span className='flex items-center gap-2'>
                           <span className='inline-block w-3 h-3 rounded-full bg-slate-200 shadow-inner' />
-                          Hand seen — pinch 🤏 to draw
+                          Hand seen — pinch to draw
                         </span>
                       )
                     ) : (

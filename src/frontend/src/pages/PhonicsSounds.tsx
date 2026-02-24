@@ -439,7 +439,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Relaxed Timer */}
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-slate-400 font-bold text-lg'>
-          Take your time! 🌈
+          Take your time!
         </div>
 
         {/* Round info */}
@@ -548,7 +548,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         {gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
-              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🏆</div>
+              <div className='text-5xl mb-4 text-amber-500 font-bold drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>★</div>
               <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>Phonics Pro! 🔤</h2>
               <p className='text-xl font-bold text-text-secondary mb-8'>Incredible job mastering all levels!</p>
               <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
@@ -564,7 +564,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       {showCelebration && (
         <CelebrationOverlay
           show={showCelebration}
-          letter={targetPhoneme?.exampleEmoji ?? '🎉'}
+          letter={targetPhoneme?.exampleEmoji ?? ''}
           accuracy={100}
           message={level >= MAX_LEVEL ? 'All levels complete!' : `Level ${level} complete!`}
           onComplete={() => setShowCelebration(false)}

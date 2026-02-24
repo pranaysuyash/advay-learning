@@ -65,7 +65,7 @@ export default function PhysicsDemo() {
                 setTimeout(() => setFeedback(null), 1000);
                 break;
               case 'levelup':
-                setFeedback(`🎉 Level ${event.level}!`);
+                setFeedback(`Level ${event.level}!`);
                 setTimeout(() => setFeedback(null), 2000);
                 break;
             }

@@ -307,7 +307,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         </div>
 
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg'>
-          <span className='text-slate-400'>Take your time! 🌈</span>
+          <span className='text-slate-400'>Take your time!</span>
         </div>
 
         <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
@@ -347,7 +347,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
             isPinching={false}
             isHandDetected={isPlaying}
             size={84}
-            icon='👆'
+            icon='point'
             state={isPlaying ? 'tracking' : 'idle'}
           />
         )}
@@ -355,7 +355,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         {!isPlaying && !gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
-              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🔢</div>
+              <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-blue-100 rounded-3xl border-4 border-blue-200'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 20-1.25-2.5L6 18"/><path d="M10 4 8.5 6.5 6 6"/><path d="m14 20 1.25-2.5L18 18"/><path d="m14 4 1.25 2.5L18 6"/><path d="M17 10h-6"/><path d="M17 14h-6"/></svg>
+              </div>
               <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Shape Sequence</h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>
                 Pinch the shapes in the shown order.
@@ -387,7 +389,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         {gameCompleted && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
-              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🏆</div>
+              <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-amber-100 rounded-3xl border-4 border-amber-200'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
               <h2 className='text-4xl font-black text-[#D946EF] tracking-tight mb-2'>Sequence Master!</h2>
               <p className='text-xl font-bold text-text-secondary mb-8'>Incredible job memorizing the order!</p>
               <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>

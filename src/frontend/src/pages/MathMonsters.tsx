@@ -282,7 +282,7 @@ export default function MathMonsters() {
             className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-4 mb-4 max-w-md border-2 border-orange-300"
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <span className="text-3xl">◎</span>
               <div>
                 <p className="font-bold text-orange-800">GOAL:</p>
                 <p className="text-orange-700">Show fingers to solve math and feed monsters!</p>
@@ -318,13 +318,13 @@ export default function MathMonsters() {
             onClick={startGame}
             className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold text-xl transition-colors shadow-lg hover-lift"
           >
-            Start Feeding! 🍕
+            Start Feeding!
           </button>
         </div>
       ) : gameState.completed ? (
         // ===== GAME COMPLETE =====
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <div className="text-6xl mb-4">🏆</div>
+          <div className="text-5xl mb-4 text-amber-500 font-bold">★</div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">You Fed All The Monsters!</h2>
           
           <div className="flex gap-1 mb-4">
@@ -386,7 +386,7 @@ export default function MathMonsters() {
             className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 text-center shadow-lg"
           >
             <div className="flex items-center justify-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <span className="text-3xl">◎</span>
               <div>
                 <p className="font-black text-lg">GOAL: Show {gameState.currentProblem?.answer} fingers to feed the monster!</p>
                 <p className="text-white/90 text-sm font-medium">Hold up your hand and count with your fingers 👆</p>

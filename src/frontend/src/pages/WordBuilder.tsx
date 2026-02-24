@@ -339,7 +339,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           </div>
 
           <div className='absolute top-8 right-8 px-6 py-3 rounded-[1.5rem] bg-white/95 border-3 border-[#F2CC8F] text-slate-400 font-bold text-xl shadow-[0_4px_0_#E5B86E] z-20'>
-            Take your time! 🌈
+            Take your time!
           </div>
 
           {word && (
@@ -437,7 +437,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           {gameCompleted && (
             <div className='absolute inset-0 bg-emerald-900/40 backdrop-blur-sm z-40 flex items-center justify-center rounded-[2.5rem]'>
               <div className='bg-white border-3 border-emerald-100 rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
-                <div className='text-[6rem] mb-4 drop-shadow-[0_4px_0_#E5B86E]'>🏆</div>
+                <div className='text-5xl mb-4 text-amber-500 font-bold drop-shadow-[0_4px_0_#E5B86E]'>★</div>
                 <h2 className='text-4xl font-black text-[#10B981] mb-2'>
                   Word Master!
                 </h2>

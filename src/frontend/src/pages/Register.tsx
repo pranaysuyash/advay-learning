@@ -290,7 +290,7 @@ export function Register() {
                   </span>
                 ) : (
                   <span className='flex items-center justify-center gap-2'>
-                    Create Account <span className='group-hover:translate-x-1 transition-transform'>🪄</span>
+                    Create Account <UIIcon name="sparkles" size={20} className="group-hover:translate-x-1 transition-transform text-amber-300" />
                   </span>
                 )}
               </button>

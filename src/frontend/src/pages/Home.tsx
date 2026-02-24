@@ -130,7 +130,7 @@ export const Home = memo(function Home() {
                   onClick={() => navigate('/register')}
                   className="w-full bg-[#E85D04] hover:bg-[#ff6c14] text-white px-10 py-5 rounded-full font-black text-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-3"
                 >
-                  Create a Profile <span className="text-3xl">🚀</span>
+                  Create a Profile
                 </button>
               </motion.div>
 
