@@ -10,11 +10,28 @@
 
 | # | Issue | Current Status | Action Needed |
 |---|-------|----------------|---------------|
-| 1 | **Add Child Profile from Dashboard** - `AddChildModal` exists but isn't used | Component built, not integrated | Wire up modal to Dashboard with "+" button |
+| 1 | **Add Child Profile from Dashboard** - REMOVED in commit 29900a6 | Worked before, now missing | Restore functionality using existing components |
 | 2 | **Connect-the-Dots camera mode** - Falls back to mouse | Needs verification | Test and fix if broken |
 | 3 | **Finger counting edge cases** - 0, 5, 10, two hands | Algorithm needs refinement | Test and fix detection |
 
-**Note:** The original suggestion saying "broken flow to Settings" was outdated. Current state: No add-child button exists in Dashboard at all. The modal exists but needs to be integrated.
+### Profile Creation - What Actually Happened
+
+**Historical Context:**
+- ✅ **Jan 30, 2026 (commit dca9b38)**: "Add Child" button was added to Dashboard with full modal functionality
+- ✅ **Feb 2, 2026 (commit 29900a6)**: Dashboard completely rewritten, Add Child functionality **REMOVED**
+- ✅ **Current state**: `AddChildModal` component still exists, `EmptyState` component exists with `onAddChild` callback, but **Dashboard doesn't use them**
+
+**Components Available (Already Built):**
+- `src/frontend/src/components/dashboard/AddChildModal.tsx` ✅ Complete
+- `src/frontend/src/components/dashboard/EmptyState.tsx` ✅ Complete with `onAddChild` prop
+- `src/frontend/src/store/profileStore.ts` ✅ Has `createProfile` method
+
+**What Was Lost:**
+- The "+" button to add more children after registration
+- The modal trigger in Dashboard
+- Profile editing functionality
+
+**Fix Required:** Restore the Add Child integration in Dashboard.tsx (approximately 50 lines of code based on commit dca9b38)
 
 ---
 
@@ -270,7 +287,7 @@
 
 | Rank | Action | Impact | Effort | Category |
 |------|--------|--------|--------|----------|
-| 1 | Integrate AddChildModal into Dashboard | High | Low | UX |
+| 1 | **Restore Add Child functionality** (removed in Feb 2 refactor) | High | Low | UX |
 | 2 | Implement 3-game daily free tier | High | Medium | Monetization |
 | 3 | Create referral program (+15 days) | High | Medium | Growth |
 | 4 | Add letter pronunciation audio | High | Medium | Content |
@@ -320,6 +337,38 @@
 | Password strength requirements | 2026-01-29 | Backend validation |
 | Input validation | 2026-01-29 | UUID, email, age validation |
 | Parent verification for deletion | 2026-01-29 | Password confirmation |
+
+---
+
+## 🔍 Investigation Findings (2026-02-23)
+
+### Profile Creation Feature - Full Timeline
+
+**You were absolutely right** - the feature existed and was removed. Here's the evidence:
+
+| Date | Commit | Action |
+|------|--------|--------|
+| Jan 30, 2026 | `dca9b38` | ✅ Added "Add Child" button to Dashboard inline with child selector |
+| Jan 30, 2026 | `12d156d` | ✅ Implemented AddChildModal and EditProfileModal components |
+| Feb 2, 2026 | `29900a6` | ❌ **REMOVED** - Dashboard completely rewritten, add child functionality lost |
+
+**Evidence in Git:**
+```bash
+# Shows the Add Child functionality was deleted
+git diff dca9b38 HEAD -- src/frontend/src/pages/Dashboard.tsx
+# Lines removed: showAddModal state, handleCreateProfile, AddChildModal JSX
+```
+
+**Why This Matters:**
+- The UX_IMPROVEMENTS.md suggestion was **partially outdated** - it said "broken flow to Settings" when actually the feature was **completely removed**
+- Your existing profiles with two kids were likely created **before Feb 2, 2026** or during registration
+- Current users **cannot** add more children after signup (only during registration)
+
+**Fix is Easy:**
+- Components are already built: `AddChildModal.tsx`, `EmptyState.tsx`
+- Store already has: `createProfile` method
+- Just need to: Wire up modal state and trigger in Dashboard.tsx
+- Estimated effort: 30-60 minutes (restore ~50 lines from commit dca9b38)
 
 ---
 

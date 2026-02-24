@@ -400,7 +400,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         spread: CONFETTI_SPREAD,
         origin: { y: CONFETTI_ORIGIN_Y },
       });
-      setFeedback('Amazing! Pip is so proud! 🎉');
+      setFeedback('Amazing! Pip is so proud!');
       if (ttsEnabled) {
         void speak(`Amazing! You traced ${currentLetter.name}!`);
       }
@@ -409,7 +409,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       setCelebrationTitle(`You traced ${currentLetter.name}!`);
       setShowCelebration(true);
     } else {
-      setFeedback('Good try! Draw the whole letter! 🌟');
+      setFeedback('Good try! Draw the whole letter!');
       if (ttsEnabled) {
         void speak('Keep going! Trace the whole letter!');
       }
@@ -734,9 +734,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       ) {
         setIsPaused((prev) => !prev);
         if (!isPaused) {
-          setFeedback('Time for a break! Pip is waiting for you! 🐼');
+          setFeedback('Time for a break! Pip is waiting for you!');
         } else {
-          setFeedback("Welcome back! Let's draw more letters! 🎨");
+          setFeedback("Welcome back! Let's draw more letters!");
         }
       }
     };
@@ -1501,7 +1501,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                         alt={currentLetter.name}
                         size={128}
                         className='w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform cursor-pointer'
-                        fallback={currentLetter.emoji || '✨'}
+                        fallback={currentLetter.emoji || ''}
                       />
                     </div>
                     <div className='text-center'>
@@ -1753,7 +1753,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   type='button'
                   onClick={() => {
                     setIsPaused(false);
-                    setFeedback("Welcome back! Let's draw more letters! 🎨");
+                    setFeedback("Welcome back! Let's draw more letters!");
                   }}
                   className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 flex items-center justify-center gap-3'
                 >

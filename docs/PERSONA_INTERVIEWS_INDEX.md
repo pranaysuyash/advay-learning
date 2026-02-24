@@ -16,6 +16,7 @@ This index consolidates all persona interview findings. For complete transcripts
 | Dadi (Non-Tech Guardian) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-009) | ✅ DONE | 9 findings, Hindi UI critical |
 | Dr. Meera Sharma (Child Psychologist) | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | ✅ DONE | 8 findings, cognitive load focus |
 | Ms. Deepa (School Teacher) | personas/TEACHER_Ms_Deepa.md | ✅ DONE | 7 findings, curriculum & B2B focus |
+| Kabir (Competitive Learner, 7y) | personas/CHILD_Kabir_Competitive_Learner.md | ✅ DONE | 7 findings, upper age churn risk |
 
 **Total Interviews Completed**: 6  
 **Total Findings Documented**: 45  
@@ -105,7 +106,8 @@ Dadi's finding "Hindi. Poora app Hindi mein hona chahiye" is now **addressed**:
 | 4   | Dadi — Non-Tech Guardian           | Accessibility & Language | ✅ DONE | 2026-02-23 |
 | 5   | Dr. Meera Sharma — Child Psychologist | Development & Cognition | ✅ DONE | 2026-02-23 |
 | 6   | Ms. Deepa — School Teacher         | Curriculum & Classroom   | ✅ DONE | 2026-02-24 |
-| 7   | TBD                                | TBD                      | 🔜 NEXT | —          |
+| 7   | Kabir — Competitive Learner (7y)   | Upper Age / Churn Risk   | ✅ DONE | 2026-02-24 |
+| 8   | TBD                                | TBD                      | 🔜 NEXT | —          |
 
 ---
 
@@ -694,6 +696,150 @@ Together, Neha, Vikram, Ananya, and Dadi represent **four critical ecosystem rol
 2. **Riya — The Parenting Micro-Influencer**
    - Growth channel validation
    - Needs: Shareable content, referral programs, authenticity
+
+---
+
+*Last Updated: 2026-02-24*
+
+---
+
+### 7. Kabir — The Competitive Learner (Age 7y 3m)
+
+**Date**: 2026-02-24  
+**Status**: ✅ COMPLETED  
+**Full Transcript**: `docs/personas/CHILD_Kabir_Competitive_Learner.md`  
+**Parent Connection**: Son of Vikram (Data-Driven Father — TCK-20260223-007)
+
+#### Profile
+
+- **Age**: 7 years, 3 months
+- **Location**: Hyderabad, Telangana
+- **Grade**: Grade 2 (CBSE)
+- **Language**: English, Hindi, exposure to Telugu
+- **Tech Comfort**: High (plays Roblox, Minecraft, chess apps)
+- **Primary Concern**: "This is baby stuff" — content too simple for his age
+- **Key Trait**: Biggest churn risk; will tell father app is "boring"
+
+#### Interview Focus Area
+
+- Age-appropriate content for 6-8 year olds (upper age boundary)
+- Competitive motivation and progression systems
+- UI perception ("babyish" vs "cool")
+- Social features and peer comparison
+
+#### Key Findings
+
+| Severity   | Finding                              | Impact                                                   |
+| ---------- | ------------------------------------ | -------------------------------------------------------- |
+| 🔴 CRITICAL| No Grade 2-3 content                 | "Done all levels" — no reason to continue                |
+| 🔴 HIGH    | UI perceived as "babyish"            | Won't use in front of friends; social embarrassment      |
+| 🔴 HIGH    | No competitive progression           | 1,247 stars with no purpose; no motivation loop          |
+| 🔴 HIGH    | Progress not "real learning"         | Dad disappointed; can't demonstrate new skills           |
+| 🟡 MEDIUM  | Missing social features              | Wants friend challenges, class leaderboards              |
+| 🟡 MEDIUM  | Content lacks depth                  | No science, projects, or real-world connection           |
+| 🟡 MEDIUM  | UX friction points                   | Forced progression, slow animations, no dark mode        |
+
+#### Top Recommendations
+
+**P0 (Critical - Churn Prevention)**:
+1. **Grade 2-3 Content Expansion** — Cursive, 2-digit math, complex words
+2. **"Big Kid Mode"** — Age-adaptive UI (darker colors, cooler themes)
+
+**P1 (High Priority)**:
+3. **Competitive Progression** — Percentile rankings, skill tiers, streaks
+4. **Visible Skill Advancement** — "This week: Cursive A-G mastered!"
+5. **Friend Challenges** — Head-to-head tracing races
+
+**P2 (Medium Priority)**:
+6. **Science & Project Content** — Physics, space, build-a-robot projects
+7. **Dark Mode** — Essential for independent older child usage
+
+#### Critical Insight
+
+> *"This is baby stuff. I'm in Grade 2. I know my letters."*
+
+> *"My friends would laugh if they saw me using this. The mascot is for little kids."*
+
+> *"My dad asks 'Did you learn something new?' And I have to say 'I practiced letters.' But I already KNOW letters!"*
+
+#### Connection to Parent Persona
+
+Kabir is **Vikram's son**. His feedback validates Vikram's data-driven concerns:
+
+| Vikram's Concern | Kabir's Validation |
+|------------------|-------------------|
+| "Will content get stale?" | "I've done all the levels" |
+| "Needs to prove learning" | "Dad looks disappointed" |
+| "Entertainment vs education?" | "This is baby stuff, not real learning" |
+
+**Combined Impact**: If Kabir says "this is boring," Vikram cancels subscription.
+
+#### Documentation
+
+- Persona file: `docs/personas/CHILD_Kabir_Competitive_Learner.md`
+- Worklog tickets: TCK-20260224-021 through TCK-20260224-024
+
+---
+
+## Updated Priority Matrix (All 7 Personas)
+
+### P0 Critical (Implement Next)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Calm Mode (sensory sensitivity) | Dr. Sharma | ✅ TCK-20260223-013 DONE |
+| **Grade 2-3 Content Expansion** | Kabir | **NEW** TCK-20260224-021 |
+| **"Big Kid Mode" UI** | Kabir | **NEW** TCK-20260224-022 |
+| NCERT/NEP curriculum mapping | Ms. Deepa | TCK-20260224-017 |
+| Offline mode for classroom/Tier 2-3 | Ananya + Ms. Deepa | TCK-20260223-008 |
+| Guest mode for instant play | Ananya | TCK-20260223-008 |
+| Hindi UI full translation | Dadi | TCK-20260223-012 (partial) |
+| UPI payment option | Ananya | TCK-20260223-008 |
+| Classroom mode (shared devices) | Ms. Deepa | TCK-20260224-018 |
+
+### P1 Important (Schedule Soon)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Competitive progression system | Kabir | **NEW** TCK-20260224-023 |
+| Social features (friend challenges) | Kabir | **NEW** TCK-20260224-024 |
+| Teacher dashboard | Ms. Deepa | TCK-20260224-019 |
+| Inclusive Mode | Ms. Deepa | TCK-20260224-020 |
+| Adaptive difficulty | Dr. Sharma | TCK-20260223-015 |
+| Split age categories | Dr. Sharma | TCK-20260223-016 |
+
+---
+
+## Updated Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| **Interviews Completed** | 7 |
+| **Total Findings** | 52 |
+| **Total Recommendations** | 48 |
+| **P0 Critical** | 25 |
+| **P1 Important** | 23 |
+| **Tickets Created** | 24 |
+| **Features Implemented** | 7 |
+
+### Persona Coverage
+
+| Stakeholder | Persona | Status | Key Contribution |
+|-------------|---------|--------|------------------|
+| Parent (Safety) | Neha | ✅ Done | Privacy, time limits, progress visibility |
+| Parent (Data) | Vikram | ✅ Done | Metrics, curriculum alignment, reports |
+| Parent (Working) | Ananya | ✅ Done | Guest mode, offline, UPI, viral features |
+| Guardian (Non-tech) | Dadi | ✅ Done | Hindi UI, accessibility, simplicity |
+| Expert (Psychology) | Dr. Sharma | ✅ Done | Calm Mode, cognitive load, development |
+| Educator (Teacher) | Ms. Deepa | ✅ Done | Curriculum mapping, B2B, classroom use |
+| **Child (Upper Age)** | **Kabir** | **✅ Done** | **Churn risk, competitive features, content depth** |
+
+### Remaining Personas
+
+1. **Riya — The Parenting Micro-Influencer**
+   - Growth channel validation
+   - Shareable content requirements
+   - Referral program needs
 
 ---
 

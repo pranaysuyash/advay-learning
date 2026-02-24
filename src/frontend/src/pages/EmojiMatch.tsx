@@ -17,6 +17,7 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
+import { UIIcon } from '../components/ui/Icon';
 import { distanceBetweenPoints, isPointInCircle } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -34,10 +35,10 @@ const MATCH_PAUSE_MS = 1400;
 const LEVEL_PAUSE_MS = 2200;
 const START_TARGET_FALLBACK_RADIUS = 120;
 const TUTORIAL_STEPS = [
-  { title: 'Show your hand', icon: '👋', detail: 'Hold your hand in front of the camera.' },
-  { title: 'Move the dot', icon: '🟡', detail: 'Move the dot to the matching emoji.' },
-  { title: 'Pinch to pick', icon: '🤏', detail: 'Pinch when you are on the right emoji.' },
-];
+  { title: 'Show your hand', icon: 'hand', detail: 'Hold your hand in front of the camera.' },
+  { title: 'Move the dot', icon: 'target', detail: 'Move the dot to the matching emoji.' },
+  { title: 'Pinch to pick', icon: 'circle', detail: 'Pinch when you are on the right emoji.' },
+] as const;
 
 export const EmojiMatch = memo(function EmojiMatchComponent() {
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   const [feedback, setFeedback] = useState('Pinch the matching emoji!');
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
-  const [celebrationEmoji, setCelebrationEmoji] = useState('🎉');
+  
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('Great job!');
   const [lastHitId, setLastHitId] = useState<number | null>(null);
@@ -143,7 +144,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     if (roundRef.current >= ROUNDS_PER_LEVEL) {
       if (levelTimeoutRef.current) clearTimeout(levelTimeoutRef.current);
 
-      setCelebrationEmoji('🎉');
+      
       setCelebrationMessage(`Level ${levelRef.current} complete!`);
       setShowCelebration(true);
       if (ttsEnabled) {
@@ -355,7 +356,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         highlightTimeoutRef.current = setTimeout(() => setLastHitId(null), 900);
 
         if (nextStreak > 0 && nextStreak % 5 === 0) {
-          setCelebrationEmoji(expected.emoji);
+          
           setCelebrationMessage('Great job!');
           setShowCelebration(true);
           if (ttsEnabled) {
@@ -463,7 +464,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     setMissCount(0);
     setShowCelebration(false);
     setCelebrationMessage(null);
-    setCelebrationEmoji('🎉');
+    
     setShowSuccess(false);
     setSuccessMessage('Great job!');
     setShowTutorial(true);
@@ -546,7 +547,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         </div>
 
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-base shadow-[0_4px_0_#E5B86E]'>
-          {timeLeft > 15 ? 'Take your time 🌈' : 'Almost there, keep going!'}
+          {timeLeft > 15 ? 'Take your time!' : 'Almost there, keep going!'}
         </div>
 
         {promptTarget && (
@@ -658,8 +659,8 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
                       key={step.title}
                       className='flex flex-col items-center gap-3 rounded-[2.5rem] bg-white border-3 border-[#F2CC8F] px-8 py-6 w-72 text-center shadow-[0_4px_0_#E5B86E] hover:scale-105 transition-transform'
                     >
-                      <div className='flex items-center justify-center w-20 h-20 bg-blue-50 rounded-[1.5rem] border-3 border-blue-100 text-[3.5rem] drop-shadow-[0_4px_0_#E5B86E] mb-2'>
-                        {step.icon}
+                      <div className='flex items-center justify-center w-20 h-20 bg-blue-50 rounded-[1.5rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E] mb-2'>
+                        <UIIcon name={step.icon as any} size={40} className="text-blue-500" />
                       </div>
                       <div className='text-xl font-black text-advay-slate tracking-tight'>{step.title}</div>
                       <div className='text-base font-bold text-text-secondary'>{step.detail}</div>
@@ -712,7 +713,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         {gameCompleted && (
           <div className='absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-40'>
             <div className='flex flex-col items-center gap-6 bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl'>
-              <div className='text-7xl mb-2 hover:scale-110 transition-transform'>🥰</div>
+              <div className='text-6xl mb-2 hover:scale-110 transition-transform text-pip-orange'>🥰</div>
               <h2 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>
                 Emotion Expert!
               </h2>
@@ -729,7 +730,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
       {showCelebration && celebrationMessage && (
         <CelebrationOverlay
           show={showCelebration}
-          letter={celebrationEmoji}
+          letter="★"
           accuracy={100}
           message={celebrationMessage}
           onComplete={() => {

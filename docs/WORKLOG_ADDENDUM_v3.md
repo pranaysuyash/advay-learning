@@ -910,3 +910,210 @@ Next actions:
 1. Continue remaining emoji migrations in AlphabetGame (feedback emojis)
 2. Proceed to EmojiMatch (Tier 1, 1,180 usages)
 
+
+
+### TCK-20260224-021 :: Grade 2-3 Content Expansion
+
+Type: CONTENT
+Owner: Pranay
+Created: 2026-02-24 00:30 IST
+Status: **OPEN**
+Priority: P0 (Critical - Churn Prevention)
+
+Description:
+Add Grade 2-3 level content for 6-8 year olds. Current app stops at Grade 1 level (basic letters, counting to 10). Kabir (7y) says "I've done all the levels" and has no reason to continue. This is the biggest churn risk in the upper age range.
+
+Scope contract:
+- In-scope:
+  - Cursive writing (letters and simple words)
+  - 2-digit arithmetic (addition/subtraction with carrying)
+  - Complex vocabulary (multi-syllable words, not just "cat/dog")
+  - Reading comprehension passages (Grade 2-3 level)
+  - Age-appropriate themes: Space, dinosaurs, robots, sports
+  - "Next Level" unlock system visible to children
+- Out-of-scope:
+  - Full K-5 curriculum (focus on Grades 2-3)
+  - Foreign languages beyond what exists
+- Behavior change allowed: YES (new content)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/data/curriculum/grade2-3/
+  - src/pages/Games.tsx (filter by grade level)
+  - src/components/GameCard.tsx (grade badge)
+- Branch/PR: main
+
+Inputs:
+- Source: Kabir interview (Competitive Learner, Age 7)
+- Finding: "I've done all the levels. This is baby stuff."
+- Connection: Validates Vikram's (father) concern about stale content
+
+Plan:
+1. Research Grade 2-3 curriculum standards (CBSE, NCERT)
+2. Design cursive tracing activities
+3. Create 2-digit math games
+4. Write age-appropriate reading passages
+5. Add "Grade Level" filter to games page
+6. Implement "Unlock Next Grade" celebration
+7. Update progress tracking for multi-grade
+
+Execution log:
+- [2026-02-24 00:30 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+Status updates:
+- [2026-02-24 00:30 IST] **OPEN** — Ticket created, awaiting implementation
+
+---
+
+### TCK-20260224-022 :: "Big Kid Mode" (Age-Adaptive UI)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:32 IST
+Status: **OPEN**
+Priority: P0 (Critical - Upper Age Retention)
+
+Description:
+Implement "Big Kid Mode" — an age-adaptive UI for 6-8 year olds that replaces "babyish" design with "cool" aesthetics. Kabir says mascot/UI is for "little kids" and his friends would laugh. Darker colors, customizable avatars, faster animations.
+
+Scope contract:
+- In-scope:
+  - "Big Kid Mode" toggle in settings (auto-suggested for 6y+)
+  - Darker/muted color scheme option
+  - Character customization: Choose avatar (robot, ninja, astronaut, dragon)
+  - Less "cute" mascot animations (or option to hide)
+  - Faster transitions (no slow bouncy effects)
+  - Age-appropriate language: "Solid!" not "Amazing!"
+- Out-of-scope:
+  - Full theme system for all ages
+  - Third-party character licensing
+- Behavior change allowed: YES (UI mode)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/store/settingsStore.ts (bigKidMode setting)
+  - src/components/Mascot.tsx (adapt animations)
+  - src/components/ui/Layout.tsx (theme colors)
+  - src/pages/Settings.tsx (toggle + avatar picker)
+- Branch/PR: main
+
+Inputs:
+- Source: Kabir interview
+- Finding: "My friends would laugh if they saw me using this. The mascot is for little kids."
+
+Plan:
+1. Add bigKidMode setting to store
+2. Create avatar selection component (6 options)
+3. Implement dark theme color palette
+4. Add fast-forward/skip animation option
+5. Update mascot animations based on mode
+6. Change feedback language based on mode
+7. Auto-suggest mode based on age in profile
+
+Execution log:
+- [2026-02-24 00:32 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+### TCK-20260224-023 :: Competitive Progression System
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:35 IST
+Status: **OPEN**
+Priority: P1 (High - Engagement)
+
+Description:
+Add competitive progression mechanics: percentile rankings, skill tiers (Bronze→Silver→Gold→Platinum→Diamond), streaks, weekly challenges. Kabir has 1,247 stars with no purpose. Needs motivation loop for competitive learners.
+
+Scope contract:
+- In-scope:
+  - Percentile ranking: "Faster than 78% of 7-year-olds"
+  - Skill tier system with visual badges
+  - Weekly challenges with leaderboards
+  - Streak system (7-day, 30-day)
+  - Spendable currency: Stars buy avatar items, themes, badges
+  - "Top 10%" weekly recognition
+- Out-of-scope:
+  - Real-money purchases (keep it educational)
+  - Public leaderboards with names (privacy)
+- Behavior change allowed: YES (gamification)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - New: src/utils/ranking.ts
+  - src/store/progressStore.ts (tiers, streaks)
+  - src/components/Progress.tsx (tier display)
+  - src/pages/Dashboard.tsx (challenges)
+- Branch/PR: main
+
+Inputs:
+- Source: Kabir interview
+- Finding: "I have 1,247 stars. They don't mean anything. I want to know: Am I better than other kids?"
+
+Plan:
+1. Design skill tier system (5 tiers, progression rules)
+2. Implement percentile calculation (anonymous aggregation)
+3. Create weekly challenge system
+4. Add streak tracking with rewards
+5. Build "Star Shop" for spending currency
+6. Design tier badges and animations
+7. Add challenge notifications
+
+Execution log:
+- [2026-02-24 00:35 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+### TCK-20260224-024 :: Social Features (Friend Challenges)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:38 IST
+Status: **OPEN**
+Priority: P1 (Medium-High - Peer Motivation)
+
+Description:
+Add social features for peer competition: friend challenges, class leaderboards, head-to-head races. Kabir wants to challenge his friend Arjun. "I bet I can trace faster than you!" Needs privacy controls.
+
+Scope contract:
+- In-scope:
+  - Friend challenges: "Challenge [Name] to a tracing race!"
+  - Head-to-head mode: Two kids play simultaneously
+  - Class leaderboard (anonymous: "Player #3")
+  - Privacy controls: Opt-in to share scores
+  - Hide struggling areas from peers
+  - Team challenges: "Your class vs. others" (aggregated)
+- Out-of-scope:
+  - Open chat between children (COPPA/safety)
+  - Public social profiles
+- Behavior change allowed: YES (social features)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - New: src/components/social/
+  - Backend: friend connections, challenge system
+  - src/pages/Games.tsx (challenge mode)
+- Branch/PR: main
+
+Inputs:
+- Source: Kabir interview
+- Finding: "I want to challenge Arjun. Like: 'I bet I can trace faster than you!' And we both do it and see who wins."
+
+Plan:
+1. Design friend connection system (parent-approved)
+2. Build challenge creation/joining flow
+3. Implement head-to-head game mode
+4. Create anonymous leaderboard system
+5. Add privacy controls to settings
+6. Design challenge notifications
+7. Parent consent flow for social features
+
+Execution log:
+- [2026-02-24 00:38 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---

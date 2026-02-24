@@ -653,7 +653,7 @@ This section tracks which personas have been interviewed, key findings, and impl
 | Dadi (Grandmother) | Decision Maker | ✅ 2026-02-23 | 9 findings, Hindi UI critical | P0 confirmed |
 | Dr. Meera Sharma | Expert/Advisor | ✅ 2026-02-23 | 8 findings, Calm Mode | NEW — P0 |
 | Ms. Deepa (Teacher) | Institutional | ✅ 2026-02-24 | 7 findings, B2B blocker | **P0** (was P2) |
-| Kabir (Competitive Learner) | End User | ⏳ Not started | — | — |
+| Kabir (Competitive Learner) | End User | ✅ 2026-02-24 | 7 findings, churn risk | **P0** |
 | Riya (Influencer) | Growth | ⏳ Not started | — | — |
 
 ### Interview Documentation
@@ -666,6 +666,7 @@ This section tracks which personas have been interviewed, key findings, and impl
 | Dadi | WORKLOG_ADDENDUM_v3.md (TCK-20260223-009) | TCK-20260223-009 to 011 |
 | Dr. Meera Sharma | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | TCK-20260223-013 to 016 |
 | Ms. Deepa | personas/TEACHER_Ms_Deepa.md | TCK-20260224-017 to 020 |
+| Kabir | personas/CHILD_Kabir_Competitive_Learner.md | TCK-20260224-021 to 024 |
 
 ### Key Findings Summary by Persona
 
@@ -710,6 +711,38 @@ This section tracks which personas have been interviewed, key findings, and impl
 
 ---
 
+#### Kabir — The Competitive Learner (Age 7, NEW)
+
+**Persona Type:** End User (Upper Age Boundary — Critical Churn Risk)  
+**Interview Date:** 2026-02-24  
+**Document:** `docs/personas/CHILD_Kabir_Competitive_Learner.md`  
+**Priority Update:** — (New persona, P0 findings)
+
+**Critical Finding:** Content ends at Grade 1 level. Kabir (Grade 2) says "I've done all the levels." This is the **biggest churn risk** — 7-8 year olds leave when content runs out.
+
+**Top Recommendations:**
+1. Grade 2-3 Content Expansion — Cursive, 2-digit math, complex words (TCK-20260224-021)
+2. "Big Kid Mode" — Age-adaptive UI with darker colors, cooler themes (TCK-20260224-022)
+3. Competitive Progression — Percentile rankings, skill tiers, streaks (TCK-20260224-023)
+4. Social Features — Friend challenges, class leaderboards (TCK-20260224-024)
+
+**Key Quote:**
+> "This is baby stuff. I'm in Grade 2. I know my letters."
+
+> "My friends would laugh if they saw me using this. The mascot is for little kids."
+
+> "My dad asks 'Did you learn something new?' And I have to say 'I practiced letters.' But I already KNOW letters!"
+
+**Connection to Parent Persona:**
+Kabir is **Vikram's son**. His feedback validates Vikram's data-driven concerns:
+- Vikram: "Will content get stale?" → Kabir: "I've done all the levels"
+- Vikram: "Needs to prove learning" → Kabir: "Dad looks disappointed"
+- Vikram: "Entertainment vs education?" → Kabir: "This is baby stuff, not real learning"
+
+**Combined Impact:** If Kabir says "this is boring," Vikram cancels subscription.
+
+---
+
 ### Implementation Progress
 
 | Ticket | Description | Status | Persona |
@@ -729,6 +762,10 @@ This section tracks which personas have been interviewed, key findings, and impl
 | TCK-20260224-018 | Classroom Mode | 📝 OPEN | Ms. Deepa |
 | TCK-20260224-019 | Teacher Dashboard | 📝 OPEN | Ms. Deepa |
 | TCK-20260224-020 | Inclusive Mode | 📝 OPEN | Ms. Deepa |
+| TCK-20260224-021 | Grade 2-3 Content Expansion | 📝 OPEN | Kabir |
+| TCK-20260224-022 | "Big Kid Mode" UI | 📝 OPEN | Kabir |
+| TCK-20260224-023 | Competitive Progression System | 📝 OPEN | Kabir |
+| TCK-20260224-024 | Social Features | 📝 OPEN | Kabir |
 
 ---
 
@@ -754,18 +791,22 @@ Based on interview findings, the priority framework has been updated:
 
 **P0 (Critical - Implement Next):**
 1. Calm Mode (sensory sensitivity) — Dr. Sharma ✅ DONE
-2. NCERT/NEP curriculum mapping — Ms. Deepa (B2B blocker)
-3. Guest mode + Offline mode — Ananya (Tier 2/3 India)
-4. Hindi UI full translation — Dadi (accessibility)
-5. UPI payment — Ananya (India market)
-6. Classroom Mode — Ms. Deepa (B2B enablement)
+2. **Grade 2-3 Content Expansion** — Kabir (churn risk)
+3. **"Big Kid Mode" UI** — Kabir (upper age retention)
+4. NCERT/NEP curriculum mapping — Ms. Deepa (B2B blocker)
+5. Guest mode + Offline mode — Ananya (Tier 2/3 India)
+6. Hindi UI full translation — Dadi (accessibility)
+7. UPI payment — Ananya (India market)
+8. Classroom Mode — Ms. Deepa (B2B enablement)
 
 **P1 (Important - Schedule Soon):**
 1. Teacher dashboard — Ms. Deepa
 2. Inclusive Mode — Ms. Deepa
-3. Adaptive difficulty — Dr. Sharma
-4. Split age categories — Dr. Sharma
-5. Celebration overload fix — Dr. Sharma
+3. **Competitive Progression System** — Kabir (engagement)
+4. **Social Features** — Kabir (peer motivation)
+5. Adaptive difficulty — Dr. Sharma
+6. Split age categories — Dr. Sharma
+7. Celebration overload fix — Dr. Sharma
 
 ---
 
@@ -776,3 +817,4 @@ Based on interview findings, the priority framework has been updated:
 | 1.0 | 2026-02-22 | Antigravity | Initial comprehensive persona document |
 | 1.1 | 2026-02-22 | Antigravity | Removed India-first framing (product is global); added Methodology & Prompts appendix |
 | 1.2 | 2026-02-24 | Kimi Code CLI | Added Persona Interview Tracking appendix; updated Ms. Deepa priority P2→P0; added Dr. Meera Sharma as new Expert persona |
+| 1.3 | 2026-02-24 | Kimi Code CLI | Added Kabir (Competitive Learner) interview; updated stats: 7 interviews, 52 findings, 48 recommendations; added Grade 2-3 content and Big Kid Mode to P0 priorities
