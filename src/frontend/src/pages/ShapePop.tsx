@@ -130,7 +130,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     spawnTarget();
     setIsPlaying(true);
     if (ttsEnabled) {
-      void speak('Pop the shape by pinching it!');
+      void speak("Let's pop some shapes! Show me your hand!");
     }
     await playStart();
 
@@ -186,7 +186,7 @@ export const ShapePop = memo(function ShapePopComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 pointer-events-none' />
+        <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
@@ -221,6 +221,8 @@ export const ShapePop = memo(function ShapePopComponent() {
             isHandDetected={isPlaying}
             size={CURSOR_SIZE}
             color='#3B82F6'
+            highContrast={true}
+            icon='👆'
           />
         )}
 
