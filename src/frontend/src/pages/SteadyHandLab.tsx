@@ -207,7 +207,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     setHoldProgress(0);
     pickNextTarget();
     if (ttsEnabled) {
-      void speak('Hold your finger inside the ring!');
+      void speak("Let's test your steady hand! Show me your finger!");
     }
     await playStart();
 
@@ -282,10 +282,14 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
-        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+        <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
+        </div>
+
+        <div className='absolute top-20 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white/90 backdrop-blur-sm border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+          <span className='text-slate-400 font-bold text-sm'>Take your time!</span>
         </div>
 
         <div
@@ -323,6 +327,8 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
             isHandDetected={isPlaying}
             size={CURSOR_SIZE}
             color='#3B82F6'
+            highContrast={true}
+            icon='👆'
           />
         )}
 
