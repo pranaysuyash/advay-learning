@@ -803,7 +803,7 @@ export const GAME_REGISTRY: GameManifest[] = [
     cv: ['voice'],
     listed: true,
     drops: [
-      { itemId: 'color-bubble', chance: 0.2 },
+      { itemId: 'color-blue', chance: 0.2 },
       { itemId: 'tool-wand', chance: 0.1, minScore: 80 },
     ],
     easterEggs: [],

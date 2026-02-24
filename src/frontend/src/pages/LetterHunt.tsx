@@ -229,7 +229,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
     lastSelectAtRef.current = 0;
 
     if (ttsEnabled) {
-      void speak('Find the target letter!');
+      void speak("Let's hunt for letters! Show me your hand!");
     }
 
     if (!isHandTrackingReady && !isModelLoading) {
@@ -434,7 +434,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 videoConstraints={{ facingMode: 'user' }}
               />
 
-              <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 pointer-events-none' />
+              <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
               {/* Top HUD */}
               <div className='absolute inset-x-0 top-0 p-6 flex flex-wrap gap-4 items-start justify-between pointer-events-none z-10'>
@@ -478,6 +478,8 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                   isPinching={isPinching}
                   isHandDetected={!useMouseFallback}
                   size={84}
+                  highContrast={true}
+                  icon='👆'
                 />
               )}
 

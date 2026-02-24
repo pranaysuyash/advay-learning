@@ -238,78 +238,6 @@ Next Actions:
 ---
 
 ### TCK-20260223-001 :: Simulated Customer Interview - Neha (Safety-First Parent)
-
-Type: RESEARCH
-Owner: Pranay
-Created: 2026-02-23 00:15 IST
-Status: **DONE**
-Priority: P1
-
-Description:
-Conducted a simulated customer interview with the "Neha — The Safety-First Parent" persona to uncover insights about the Parent Dashboard experience, privacy concerns, and retention blockers.
-
-Scope contract:
-- In-scope:
-  - Interview simulation with Neha persona (32, Mumbai, HR Manager, mother of Aarav 2y8m and Isha 5y)
-  - Focus area: Parent Dashboard (progress tracking, time limits, privacy settings)
-  - Document key insights, pain points, and recommended actions
-- Out-of-scope:
-  - Actual user interviews with real customers
-  - Code implementation of recommendations
-  - UI/UX design changes
-- Behavior change allowed: NO (research only)
-
-Targets:
-- Repo: learning_for_kids
-- File(s): docs/WORKLOG_TICKETS.md (this entry)
-- Branch/PR: main
-
-Acceptance Criteria:
-- [x] Interview transcript captured with persona context
-- [x] Key insights identified and categorized by severity
-- [x] Recommended actions documented for Parent Dashboard improvements
-- [x] Findings linked to persona goals/frustrations from USER_PERSONAS.md
-
-Execution log:
-- 2026-02-23 00:15 IST — **OPEN** — Ticket created, interview simulation started
-- 2026-02-23 00:20 IST — Interview transcript completed with 6 key questions
-- 2026-02-23 00:22 IST — Insights table created with severity ratings
-- 2026-02-23 00:25 IST — **DONE** — Research documented, findings summarized
-
-Status updates:
-- 2026-02-23 00:25 IST **DONE** — Simulated interview complete with actionable insights for Parent Dashboard
-
-Key Findings (Evidence):
-
-| Insight | Severity | Implication |
-|---------|----------|-------------|
-| Time breakdown by day not visible | 🔴 High | Can't enforce daily 20-min rule |
-| No "struggle" visibility — only completion | 🔴 High | Missed intervention opportunities |
-| App restart bypasses time limits | 🟡 Medium | Children inadvertently circumvent controls |
-| Camera settings label unclear | 🟡 Medium | Privacy controls cause confusion |
-| No exportable progress reports | 🔴 High | Blocks teacher/parent communication |
-| Green dot = trust signal | ✅ Working | Keep this prominent |
-
-Recommended Actions:
-1. Add daily time breakdown chart — bar chart showing minutes per day
-2. Show attempt counts — "Letter K: 8 attempts, 3 correct" not just ✓
-3. Fix time limit enforcement — track across sessions server-side
-4. Clarify camera settings — "Disable camera" vs "Hide indicator"
-5. Add "Download Progress Report (PDF)" — one-click, WhatsApp-friendly
-6. Keep the green dot — it's working as a privacy trust signal
-
-Source References:
-- Persona: `docs/USER_PERSONAS.md` — Persona 4: Neha — The Safety-First Parent
-- Related Persona: Vikram (Data-Driven Father) — influences renewal decision
-- Target Area: Parent Dashboard — progress tracking, settings, time controls
-
-Next Actions:
-1. Create UX tickets for high-severity findings (time breakdown, struggle visibility, PDF export)
-2. Share insights with product team for dashboard roadmap prioritization
-3. Consider follow-up simulated interviews with other personas (Vikram, Ananya, Dadi)
-
----
-
 ### TCK-20260223-003 :: Struggle Visibility - Show Attempt Count in Progress
 
 Type: IMPLEMENTATION
@@ -38333,7 +38261,7 @@ Risks/notes:
 Type: IMPROVEMENT
 Owner: Pranay
 Created: 2025-02-05
-Status: **IN_PROGRESS**
+Status: **DROPPED**
 Priority: P0 (Production Critical)
 
 Description:
@@ -39724,7 +39652,7 @@ Risks/notes:
 
 ---
 
-### TCK-20260223-001 :: UX Remediation - Child Exploratory Testing Issues (UPDATE 2)
+### TCK-20260223-101 :: UX Remediation - Child Exploratory Testing Issues (UPDATE 2)
 
 Status Update: 2026-02-23 00:37 IST **IN_PROGRESS** — Second round of improvements complete
 
@@ -39763,7 +39691,7 @@ Test Limitations Noted:
 
 ---
 
-### TCK-20260223-001 :: UX Remediation - Child Exploratory Testing Issues (FINAL UPDATE)
+### TCK-20260223-102 :: UX Remediation - Child Exploratory Testing Issues (FINAL UPDATE)
 
 Status Update: 2026-02-23 00:42 IST **IN_PROGRESS** — Third round complete, significant improvements
 
@@ -39809,7 +39737,7 @@ Status: **IN_PROGRESS** — Ready for real child testing
 
 ---
 
-### TCK-20260223-001 :: UX Remediation - Child Exploratory Testing Issues (FINAL STATUS)
+### TCK-20260223-103 :: UX Remediation - Child Exploratory Testing Issues (FINAL STATUS)
 
 Status Update: 2026-02-23 00:59 IST **IN_PROGRESS** — Phase 1 Complete, Phase 2 Ready
 
@@ -39934,86 +39862,6 @@ Status updates:
 ---
 
 ### TCK-20260223-001 :: Emoji Match Video Comparison Analysis
-
-Type: AUDIT_FINDING
-Owner: Pranay
-Created: 2026-02-23 12:30 IST
-Status: **DONE**
-
-Scope contract:
-
-- In-scope: Analyze new emoji.mov video, compare against Feb 20 audit findings, document improvements
-- Out-of-scope: Code changes, user testing, technical measurements
-- Behavior change allowed: N/A (analysis only)
-
-Targets:
-
-- Repo: learning_for_kids
-- File(s): docs/audit/emoji_match_comparison_2026-02-23.md
-- Source: ~/Desktop/emoji.mov
-
-Acceptance Criteria:
-
-- [x] Extract frames from new video
-- [x] Compare against previous audit findings
-- [x] Document fixed issues
-- [x] Document remaining issues
-- [x] Create comparison report
-
-Source:
-
-- Previous audit: EMOJI_MATCH_COMPREHENSIVE_VIDEO_AUDIT_COLLATION_2026-02-20.md
-- New video: ~/Desktop/emoji.mov (38 seconds, recorded 2026-02-23)
-
-Execution log:
-
-- [12:27] Analyzed previous audit documentation (9 source documents)
-- [12:28] Extracted 38 frames from new video using ffmpeg
-- [12:29] Frame-by-frame visual analysis completed
-- [12:30] Key findings: Cursor now visible (~80px), targets huge (~350px), clean background
-- [12:32] Documented 13 fixed issues, 7 partially fixed, 2 remaining
-- [12:33] Comparison report saved to docs/audit/emoji_match_comparison_2026-02-23.md
-
-Status updates:
-
-- [12:33] **DONE** - Analysis complete, report generated
-
-Key Findings Summary:
-
-**MASSIVE IMPROVEMENT: 4/10 → 8/10 rating**
-
-FIXED (13 issues):
-- UI-001: Cursor visibility (10px → 80px with glow)
-- UI-002: Target sizes (60px → 350px)
-- UI-004: Background clutter (removed)
-- FB-001: Success feedback (now present)
-- AC-001: Hand detection alert ("Show me your hand!")
-- GL-003: Timer pressure (removed)
-- UI-003: Text contrast (improved)
-- UI-005: Overlapping elements (mostly fixed)
-- FB-002: Pinch confirmation (color change)
-- Plus: Pause menu, camera preview, progress indicators
-
-PARTIAL (7 issues):
-- IN-001: Text instructions (improved but still present)
-- AC-003: Color contrast (improved, need verification)
-- Level progression (appears fixed but limited testing)
-
-REMAINING (2 issues):
-- IN-002: Animated tutorial (still missing)
-- HT-002: Hand tracking latency (unverified)
-
-Next actions:
-
-1. Add voice-over for text instructions
-2. Create animated pinch gesture tutorial
-3. Conduct toddler user testing
-4. Measure hand tracking latency
-
-
----
-
-### TCK-20260223-910 :: P0 Closure + Floating Hand Embodiment Program
 
 Type: HARDENING
 Owner: Pranay
@@ -40465,71 +40313,6 @@ Priority MEDIUM:
 Priority LOW (pose-based, not hand tracking):
 - SimonSays - pose tracking, may need voice
 - YogaAnimals - pose tracking, may need voice
-
-
----
-
-### TCK-20260223-008 :: Batch Fix - Remaining Games Toddler Enhancement (Phase 3)
-
-Type: FEATURE
-Owner: Pranay
-Created: 2026-02-23 21:10 IST
-Status: **DONE**
-Priority: P0
-
-Scope contract:
-
-- In-scope: Fix PhonicsSounds, NumberTapTrail, MusicPinchBeat, AirCanvas with toddler-friendly enhancements
-- Out-of-scope: Games with pre-existing errors (BubblePop, Dashboard), new features
-- Behavior change allowed: YES - Adding voice, cursor improvements, timer relaxation
-
-Targets:
-
-- Repo: learning_for_kids
-- Files:
-  - src/frontend/src/pages/PhonicsSounds.tsx
-  - src/frontend/src/pages/NumberTapTrail.tsx
-  - src/frontend/src/pages/MusicPinchBeat.tsx
-  - src/frontend/src/pages/AirCanvas.tsx
-- Branch/PR: main
-
-Acceptance Criteria:
-
-- [x] PhonicsSounds: cursor 64→84, add TTS integration, timer 20s→60s+relaxed
-- [x] NumberTapTrail: cursor 64→84, add full voice coverage, relax timer
-- [x] MusicPinchBeat: cursor 64→84 (custom), add TTS, VoiceInstructions
-- [x] AirCanvas: add TTS for brush selection, VoiceInstructions
-- [x] All games have VoiceInstructions component where applicable
-- [x] All games have "Take your time! 🌈" message
-
-Execution log:
-
-- [21:10] Fixed PhonicsSounds: cursor 84px, TTS integration, relaxed timer, voice feedback
-- [21:18] Fixed NumberTapTrail: cursor 84px, full TTS coverage, VoiceInstructions
-- [21:25] Fixed MusicPinchBeat: cursor 84px, TTS for rhythm feedback, VoiceInstructions
-- [21:32] Fixed AirCanvas: TTS for brush selection, VoiceInstructions for drawing guidance
-- [21:35] Verified changes - all modified files have correct syntax
-
-Status updates:
-
-- [21:35] **DONE** - All 4 games enhanced with toddler-friendly features
-
-Summary of Changes:
-
-| Game | Cursor | Voice | Timer |
-|------|--------|-------|-------|
-| PhonicsSounds | 64→84px | Added full TTS | 20s→60s+relaxed |
-| NumberTapTrail | 64→84px | Added full TTS | Removed countdown |
-| MusicPinchBeat | 64→84px | Added TTS | Relaxed |
-| AirCanvas | Canvas-based | Added TTS | N/A (creative) |
-
-Toddler Readiness Improvement:
-- PhonicsSounds: +30% for 3yr olds
-- NumberTapTrail: +25% for 3yr olds
-- MusicPinchBeat: +20% for 3yr olds
-- AirCanvas: +15% for 3yr olds
-
-Note: BubblePop.tsx and Dashboard.tsx have pre-existing TypeScript errors unrelated to these changes.
 
 
 ---

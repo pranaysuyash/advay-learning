@@ -76,7 +76,8 @@ export class PregenAudioCache {
         const path = PHRASE_MAP[normalized];
 
         if (!path) {
-            throw new Error(`[PregenAudioCache] No pre-generated audio for: "${text}"`);
+            console.warn(`[PregenAudioCache] No pre-generated audio for: "${text}"`);
+            return Promise.reject(new Error("Not found"));
         }
 
         let audio = audioCache.get(path);

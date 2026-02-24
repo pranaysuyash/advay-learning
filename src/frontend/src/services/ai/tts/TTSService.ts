@@ -271,6 +271,9 @@ export class TTSService {
           this._lastActiveEngine = 'web-speech';
           return this.webSpeechSpeak(text, options);
         });
+    } else if (this.enginePreference !== 'web-speech' && this.kokoroEngine.getStatus() === 'loading') {
+      // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
+      console.log('[TTSService] Kokoro is still loading, falling back to Web Speech temporarily');
     }
 
     // Tier 3: Web Speech API

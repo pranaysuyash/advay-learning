@@ -488,3 +488,80 @@ Next actions:
 1. Extend E2E coverage to `VirtualChemistryLab` report flow (same parent-gated path)
 2. Add negative-path Playwright tests (session create failure, upload failure, finalize failure)
 3. Move backend issue reports from temporary in-memory store to DB-backed persistence + retention jobs
+
+---
+
+## TCK-20260224-031 :: Issue Reporting Upload MIME Normalization (415 Fix)
+
+Type: BUGFIX
+Owner: Pranay
+Created: 2026-02-24
+Status: **DONE**
+Priority: P1
+
+Prompt/persona traceability:
+
+- Prompt used: `prompts/remediation/implementation-v1.6.1.md` (applied as focused bug remediation flow)
+- Audit axis/lens: Correctness + API contract compatibility
+
+Scope contract:
+
+- In-scope:
+  - Normalize codec-qualified upload MIME values before backend allowlist validation
+  - Add backend regression tests for accepted codec-qualified WebM and rejected non-video MIME
+  - Verify with targeted backend test command
+- Out-of-scope:
+  - DB persistence migration for issue reports
+  - Frontend recorder/upload flow changes
+  - MIME sniffing from file bytes
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/backend/app/api/v1/endpoints/issue_reports.py` (update)
+  - `src/backend/tests/test_issue_reports.py` (new)
+  - `docs/WORKLOG_ADDENDUM_VIDEO_ISSUE_REPORTING_2026-02-23.md` (update)
+- Branch/PR: main
+
+Execution log:
+
+- [2026-02-24] Reviewed commits from last 24h and narrowed to issue-reporting flow changes for concrete regressions
+- [2026-02-24] Confirmed backend strict allowlist (`video/webm`, `video/mp4`) and frontend codec-qualified MIME emission (`video/webm;codecs=vp9,opus`)
+- [2026-02-24] Added `normalize_video_mime_type()` and applied normalization before allowlist check in clip upload endpoint
+- [2026-02-24] Added targeted backend tests for MIME normalization and rejection behavior
+- [2026-02-24] Executed targeted backend tests in project virtualenv
+
+Evidence:
+
+- Observed: `src/backend/app/api/v1/endpoints/issue_reports.py` previously validated raw MIME string against exact allowlist values
+- Observed: `src/frontend/src/hooks/useIssueRecorder.ts` candidates include codec-qualified MIME types (e.g. `video/webm;codecs=vp9,opus`)
+- Observed: Backend now normalizes MIME to base type via `split(';', 1)[0].strip().lower()` before allowlist check
+- Observed: New tests in `src/backend/tests/test_issue_reports.py` cover codec-qualified accept and non-video reject cases
+- Command: `cd src/backend && . .venv/bin/activate && pytest -q tests/test_issue_reports.py`
+- Output: `2 passed`
+- Inferred: Uploads with codec parameters from browser `MediaRecorder` will no longer fail with 415 when base type is allowed
+- Unknown: Real-world browser/device MIME diversity beyond WebM/MP4 until expanded integration/device tests
+
+Status updates:
+
+- [2026-02-24] **DONE** — MIME normalization implemented and regression tests passing
+
+### Delta update (2026-02-24) — Frontend/API MIME Contract Test
+
+Execution delta:
+
+- [2026-02-24] Added integration-style service test `src/frontend/src/services/__tests__/issueReportingApi.integration.test.ts`
+- [2026-02-24] Test verifies codec-qualified MIME (`video/webm;codecs=vp9,opus`) is sent in multipart form data and normalized MIME (`video/webm`) is handled from backend response
+- [2026-02-24] Ran focused Vitest execution for the new integration test file
+
+Evidence delta:
+
+- Observed: `issueReportsApi.uploadClip` called with expected route and multipart headers
+- Observed: Sent `FormData` includes `mime_type=video/webm;codecs=vp9,opus` and clip filename `issue_rep_codec.webm`
+- Observed: Response assertion expects backend-normalized `mime_type=video/webm`
+- Command: `cd src/frontend && npx vitest run src/services/__tests__/issueReportingApi.integration.test.ts`
+- Output: `1 passed`
+- Inferred: Frontend upload path now has contract coverage for codec-qualified MIME interoperability with backend normalization
+- Unknown: Cross-browser MediaRecorder MIME variants not explicitly covered by this single test

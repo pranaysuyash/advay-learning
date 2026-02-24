@@ -27,6 +27,13 @@ ISSUE_REPORT_STORAGE_DIR = Path("storage/issue_reports")
 ISSUE_REPORTS: Dict[str, Dict[str, Any]] = {}
 
 
+def normalize_video_mime_type(value: str | None) -> str:
+    """Normalize MIME string to a base media type (drop codec parameters)."""
+    if not value:
+        return "application/octet-stream"
+    return value.split(";", 1)[0].strip().lower()
+
+
 @router.post("/sessions", response_model=IssueReportSession)
 async def create_issue_report_session(
     payload: IssueReportSessionCreate,
@@ -72,7 +79,7 @@ async def upload_issue_report_clip(
             detail="Not enough permissions",
         )
 
-    detected_mime = mime_type or clip.content_type or "application/octet-stream"
+    detected_mime = normalize_video_mime_type(mime_type or clip.content_type)
     if detected_mime not in ALLOWED_VIDEO_MIME_TYPES:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
