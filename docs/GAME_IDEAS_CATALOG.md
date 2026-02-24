@@ -207,12 +207,13 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 
 ---
 
-## ✋ MOTOR SKILLS GAMES (9)
+## ✋ MOTOR SKILLS GAMES (10)
 
 | # | Game | Concept | Priority |
 |---|------|---------|----------|
 | 34 | Mirror Draw | Complete symmetry | P0 ⭐ |
 | 35 | Shape Safari | Find shapes in scenes | P0 ⭐ |
+| 68 | Platform Runner | Hand-tracked side-scroller | P0 ⭐ |
 | 36 | Connect the Dots | Number/letter sequence | 🔜 Coming |
 | 37 | Maze Runner | Navigate hand through maze | P2 |
 | 38 | Path Following | Stay on the winding path | P2 |
@@ -379,12 +380,12 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 |----------|-------|------|--------|---------|
 | Literacy | 20 | 1 | 1 | 18 |
 | Numeracy | 13 | 1 | 0 | 12 |
-| Motor | 9 | 0 | 1 | 8 |
+| Motor | 10 | 0 | 1 | 9 |
 | Logic | 8 | 0 | 0 | 8 |
 | Creative | 6 | 0 | 0 | 6 |
 | Knowledge | 6 | 0 | 0 | 6 |
 | Audio | 5 | 0 | 0 | 5 |
-| **TOTAL** | **67** | **2** | **2** | **63** |
+| **TOTAL** | **68** | **2** | **2** | **64** |
 
 ---
 

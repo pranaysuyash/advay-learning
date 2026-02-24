@@ -11,7 +11,7 @@
 
 **Current State**: 13 games exist. They're solid but need broader skill coverage.
 
-**Target State**: Add 3 new P0 games that:
+**Target State**: Add 4 new P0 games that:
 1. Fill critical skill gaps (phonics, fine motor, spatial reasoning)
 2. Use existing infrastructure (audio, CV, Pip/Lumi)
 3. Drive engagement through new mechanics
@@ -21,6 +21,7 @@
 1. **Phonics Sounds** — Letter-to-sound association (audio-visual)
 2. **Mirror Draw** — Hand-tracking fine motor control (drawing, hand-eye coordination)
 3. **Shape Safari** — Pose-based navigation (gross motor, spatial awareness)
+4. **Platform Runner** — Hand-tracking side-scroller (gross motor, action-reaction)
 
 **Key dependencies**: 
 - Initiative 1 (Visual Transformation) for visual consistency
@@ -155,6 +156,37 @@
 - Level 1: 3 shapes, open field (easy navigation)
 - Level 2: 5 shapes, 2 obstacles (balance, squat)
 - Level 3: 7 shapes, 3 obstacles + timed (challenge)
+
+---
+
+### Game 4: Platform Runner
+
+**Category**: Gross Motor / Hand-Eye Coordination
+**Age Target**: 3-8 years  
+**Concept**: Side-scrolling endless runner controlled by hand height
+
+**Gameplay Loop** (60-120 seconds per round):
+1. **Setup**: Camera tracks child's hand (Y-axis)
+2. **Action**: Character auto-runs right. Child raises/lowers hand to move character up/down.
+3. **Obstacles**: Dodge slimes and bees spawning from the right.
+4. **Collectibles**: Grab coins, stars, and gems for points.
+5. **Feedback**: Audio cues for jumps, collecting items, taking damage.
+6. **End**: Game over when 3 hearts are lost.
+
+**Success criteria**:
+- Child learns spatial awareness and practices gross motor control
+- Engagement through fast-paced action/reaction loop
+
+**Unique mechanic**:
+- Direct Y-axis hand mapping to character position
+- Side-scrolling infinite runner
+
+**Technical requirements**:
+- Hand tracking (MediaPipe hands)
+- HTML5 Canvas for rendering sprites
+- Collision detection (AABB)
+
+**Implementation complexity**: MEDIUM (3-4 days)
 
 ---
 
