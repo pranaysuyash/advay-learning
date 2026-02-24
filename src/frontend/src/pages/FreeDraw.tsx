@@ -18,6 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Palette, Paintbrush, Trash2, Save, Hand, Sparkles, Target } from 'lucide-react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -412,7 +413,9 @@ export default function FreeDraw() {
               {/* Thumb hole */}
               <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-6 bg-white/20 rounded-full" />
             </div>
-            <div className="absolute -bottom-2 -right-2 text-3xl animate-bounce">✨</div>
+            <div className="absolute -bottom-2 -right-2 animate-bounce">
+              <Sparkles className="w-8 h-8 text-yellow-400" />
+            </div>
           </div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">Free Draw Studio!</h2>
 
@@ -424,11 +427,13 @@ export default function FreeDraw() {
             className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <Target className="w-8 h-8 text-blue-600" />
               <div>
                 <p className="font-bold text-blue-800">GOAL:</p>
                 <p className="text-blue-700">Create beautiful art with brushes!</p>
-                <p className="text-blue-600 text-sm">✋ Pinch → 🖌️ Draw → 🎨 Create!</p>
+                <p className="text-blue-600 text-sm flex items-center gap-1">
+                  <Hand className="w-4 h-4 inline" /> Pinch → <Paintbrush className="w-4 h-4 inline" /> Draw → <Palette className="w-4 h-4 inline" /> Create!
+                </p>
               </div>
             </div>
           </div>
@@ -474,7 +479,7 @@ export default function FreeDraw() {
             className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
           >
             <div className="flex items-center justify-center gap-2">
-              <span className="text-xl">🎯</span>
+              <Target className="w-6 h-6" />
               <p className="font-bold">GOAL: Create beautiful art! Pick a brush and start drawing!</p>
             </div>
           </div>
@@ -483,7 +488,9 @@ export default function FreeDraw() {
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-[0_4px_0_#E5B86E]">
             {/* Brush Type Selector - Larger for kids */}
             <div className="mb-3">
-              <p className="text-sm font-bold text-advay-slate mb-2">🖌️ Pick a Brush:</p>
+              <p className="text-sm font-bold text-advay-slate mb-2 flex items-center gap-2">
+                <Paintbrush className="w-5 h-5" /> Pick a Brush:
+              </p>
               <div className="flex gap-2 flex-wrap">
                 {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
                   <button
@@ -553,14 +560,14 @@ export default function FreeDraw() {
                   disabled={isCanvasEmpty(gameState)}
                   className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
                 >
-                  🗑️ Clear
+                  <Trash2 className="w-4 h-4 inline mr-1" /> Clear
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isCanvasEmpty(gameState)}
                   className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
                 >
-                  💾 Save
+                  <Save className="w-4 h-4 inline mr-1" /> Save
                 </button>
               </div>
             </div>
@@ -568,7 +575,9 @@ export default function FreeDraw() {
 
           {/* Color Palette - Larger for kids */}
           <div className="mt-3">
-            <p className="text-sm font-bold text-advay-slate mb-2">🎨 Pick a Color:</p>
+            <p className="text-sm font-bold text-advay-slate mb-2 flex items-center gap-2">
+              <Palette className="w-5 h-5" /> Pick a Color:
+            </p>
             <div className="flex items-center gap-3 flex-wrap">
               {COLOR_PALETTE.map(color => (
                 <button
@@ -603,7 +612,7 @@ export default function FreeDraw() {
                 }}
                 title="Rainbow"
               >
-                🌈
+                <span className="text-xs font-bold">Rainbow</span>
               </button>
 
               {/* Color Mixer Toggle */}
@@ -620,7 +629,7 @@ export default function FreeDraw() {
                   }
               `}
               >
-                🎨 Mix Colors
+                <Palette className="w-4 h-4 inline mr-1" /> Mix Colors
               </button>
 
               {showColorMixer && (
@@ -665,7 +674,9 @@ export default function FreeDraw() {
             {isCanvasEmpty(gameState) && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center text-slate-400">
-                  <div className="text-6xl mb-4">✋</div>
+                  <div className="mb-4">
+                    <Hand className="w-16 h-16 text-slate-400 mx-auto" />
+                  </div>
                   <p className="text-lg font-bold">Pinch and move to draw!</p>
                   <p className="text-sm">Shake hand to clear</p>
                 </div>

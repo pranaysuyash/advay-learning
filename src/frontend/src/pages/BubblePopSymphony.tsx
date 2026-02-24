@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import { Music, Play } from 'lucide-react';
 import Webcam from 'react-webcam';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
@@ -40,13 +41,20 @@ interface Bubble {
   isActive?: boolean;
 }
 
+// SVG Circle component for bubble content
+const CircleIcon = ({ color, size }: { color: string; size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <circle cx="12" cy="12" r="10" />
+  </svg>
+);
+
 const MUSICAL_NOTES = [
-  { note: 'C4', pitch: 261.63, color: '#FF6B6B', emoji: '🎈' },
-  { note: 'D4', pitch: 293.66, color: '#4ECDC4', emoji: '🫧' },
-  { note: 'E4', pitch: 329.63, color: '#45B7D1', emoji: '⚽' },
-  { note: 'F4', pitch: 349.23, color: '#FFA500', emoji: '🏀' },
-  { note: 'G4', pitch: 392.0, color: '#FFD700', emoji: '🎾' },
-  { note: 'A4', pitch: 440.0, color: '#95E1D3', emoji: '🎯' },
+  { note: 'C4', pitch: 261.63, color: '#FF6B6B', icon: 'circle' as const },
+  { note: 'D4', pitch: 293.66, color: '#4ECDC4', icon: 'circle' as const },
+  { note: 'E4', pitch: 329.63, color: '#45B7D1', icon: 'circle' as const },
+  { note: 'F4', pitch: 349.23, color: '#FFA500', icon: 'circle' as const },
+  { note: 'G4', pitch: 392.0, color: '#FFD700', icon: 'circle' as const },
+  { note: 'A4', pitch: 440.0, color: '#95E1D3', icon: 'circle' as const },
 ] as const;
 
 export default function BubblePopSymphony() {
@@ -153,7 +161,7 @@ export default function BubblePopSymphony() {
   }, []);
 
   const buildBubbleVisual = useCallback(
-    (assetId: string, fallbackEmoji: string, size: number) => {
+    (assetId: string, noteColor: string, size: number) => {
       const loaded = assetLoader.getImage(assetId);
 
       if (loaded?.src) {
@@ -179,13 +187,17 @@ export default function BubblePopSymphony() {
                 filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
               }}
             >
-              {fallbackEmoji}
+              <CircleIcon color={noteColor} size={Math.round(size * 0.38)} />
             </span>
           </div>
         );
       }
 
-      return <span style={{ fontSize: size * 0.7 }}>{fallbackEmoji}</span>;
+      return (
+        <span style={{ fontSize: size * 0.7 }}>
+          <CircleIcon color={noteColor} size={Math.round(size * 0.7)} />
+        </span>
+      );
     },
     [],
   );
@@ -247,7 +259,7 @@ export default function BubblePopSymphony() {
       return {
         id: `bubble-${Date.now()}-${index}`,
         ...pos,
-        content: buildBubbleVisual(bubbleAssetId, noteData.emoji, bubbleSize),
+        content: buildBubbleVisual(bubbleAssetId, noteData.color, bubbleSize),
         color: noteData.color,
         note: noteData.note,
         pitch: noteData.pitch,
@@ -367,12 +379,12 @@ export default function BubblePopSymphony() {
       {gameStarted && (
         <>
           <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white rounded-[1.5rem] px-8 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-            <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight m-0 drop-shadow-[0_4px_0_#E5B86E]'>
-              🎵 Score: <span className="text-[#10B981]">{score}</span>
+            <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight m-0 drop-shadow-[0_4px_0_#E5B86E] flex items-center gap-3'>
+              <Music className="w-8 h-8 text-[#F2CC8F]" /> Score: <span className="text-[#10B981]">{score}</span>
             </h2>
           </div>
           <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-base shadow-[0_4px_0_#E5B86E]'>
-            Take your time 🌈 Pop the bubbles!
+            Take your time! Pop the bubbles!
           </div>
         </>
       )}
@@ -380,14 +392,12 @@ export default function BubblePopSymphony() {
       {!gameStarted && (
         <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-white/40 backdrop-blur-sm z-20'>
           <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
-            <div className='w-32 h-32 mb-6 bg-blue-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F]'>
-              <div className='text-[5rem] leading-none drop-shadow-md hover:scale-110 transition-transform cursor-pointer'>
-                🎈
-              </div>
+            <div className='w-32 h-32 mb-6 bg-blue-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center'>
+              <Music className="w-16 h-16 text-[#3B82F6] drop-shadow-md hover:scale-110 transition-transform cursor-pointer" />
             </div>
 
-            <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>
-              Bubble Pop Symphony 🎵
+            <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3'>
+              Bubble Pop Symphony <Music className="w-10 h-10 text-[#F2CC8F]" />
             </h1>
 
             <p className='text-text-secondary font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
@@ -396,9 +406,9 @@ export default function BubblePopSymphony() {
 
             <button
               onClick={startGame}
-              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
+              className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 mx-auto'
             >
-              Start Game! 🚀
+              <Play className="w-7 h-7" /> Start Game!
             </button>
           </div>
 
@@ -436,14 +446,14 @@ export default function BubblePopSymphony() {
           showTrail={true}
           pulseAnimation={true}
           highContrast={true}
-          icon='👆'
+          icon='pointer'
         />
       )}
 
       <SuccessAnimation
         show={showSuccess}
         type='confetti'
-        message='Pop! 🎵'
+        message='Pop!'
         duration={1500}
         onComplete={() => setShowSuccess(false)}
       />

@@ -273,42 +273,34 @@ Define audio asset requirements and production/licensing approach.
 
 ---
 
-### 3.6 RESEARCH-006: Legal & Compliance
+### 3.6 RESEARCH-006: Privacy Guardrails & Store Policies
 
 **Priority:** P1 - High
-**Category:** Legal
-**Estimated Effort:** 2 days
+**Category:** Legal/Policy
+**Estimated Effort:** 1-2 days
 
 #### Objective
 
-Understand all legal requirements for a kids' app operating in India and potentially globally.
+Define pragmatic privacy guardrails for a solo-developer scope and ensure alignment with platform policies for kids' apps.
 
 #### Research Questions
 
-1. What does India's DPDP Act require for children's data?
-2. How does COPPA (US) apply if we expand globally?
-3. What are Google Play and Apple App Store policies for kids' apps?
-4. What parental consent mechanisms are required?
-5. What content moderation is required?
-6. What are the liability considerations for camera-based apps?
-7. Do we need any specific certifications (kidSAFE, etc.)?
+1. What privacy disclosures are expected for a kids' **web app**?
+2. How do we clearly state **"no video storage"** in product copy?
+4. What content moderation is required (if any UGC exists)?
+5. What are the safety considerations for camera-based apps?
+6. What disclaimers and trust signals reduce parent anxiety?
 
 #### Deliverables
 
-- [ ] Legal requirements checklist (India-focused)
-- [ ] Privacy policy template for kids' apps
-- [ ] Parental consent flow design
-- [ ] Data handling requirements document
-- [ ] App store compliance checklist
+- [ ] Privacy guardrails checklist (no video storage, redaction enforced)
+- [ ] Web app privacy copy templates (plain language)
+- [ ] Data handling summary (what we do NOT store)
 
 #### Sources to Research
 
-- India DPDP Act text and guidelines
-- COPPA regulations and FTC guidance
-- App store developer policies
-- kidSAFE certification requirements
-- Similar apps' privacy policies
-- Legal expert consultation (if budget allows)
+- Kids app privacy best practices (non-legal guidance)
+- Similar web apps' privacy disclosures (plain language)
 
 ---
 
@@ -440,7 +432,7 @@ Define what data to collect, how to analyze it, and how to use insights while re
 
 1. What metrics matter most for a kids' learning app?
 2. How do we measure learning outcomes vs. engagement?
-3. What analytics tools are COPPA/DPDP compliant?
+3. What privacy-first analytics tools avoid collecting PII?
 4. How do we A/B test with children ethically?
 5. What dashboards/reports do we need internally?
 6. How do we use data to improve content?
@@ -459,7 +451,6 @@ Define what data to collect, how to analyze it, and how to use insights while re
 - Privacy-first analytics tools
 - EdTech metrics benchmarks
 - Kids' app analytics case studies
-- COPPA-compliant analytics guidance
 - Learning analytics research
 
 ---
@@ -476,29 +467,25 @@ Define how the app will be built, distributed, and updated across platforms.
 
 #### Research Questions
 
-1. PWA vs. React Native vs. Native app - which is best for camera-heavy apps?
-2. What are the Play Store/App Store requirements for kids' apps?
-3. How do we handle app updates without disrupting learning progress?
-4. What's the optimal app size for Indian market (data constraints)?
-5. How do we implement staged rollouts for testing?
-6. What's the CI/CD pipeline for kids' apps (extra testing needed)?
-7. How do we handle device fragmentation in Android?
+1. PWA vs. standard web app - which is best for camera-heavy use?
+2. How do we handle updates without disrupting learning progress?
+3. What's the optimal bundle size for Indian market (data constraints)?
+4. How do we implement staged rollouts for testing (feature flags, canary)?
+5. What's the CI/CD pipeline for a kids' **web app** (extra testing needed)?
+6. How do we handle device fragmentation in browsers?
 
 #### Deliverables
 
-- [ ] Platform decision document (PWA vs Native)
-- [ ] App store submission checklist
+- [ ] Platform decision document (Web vs PWA)
 - [ ] Update strategy document
 - [ ] CI/CD pipeline design
-- [ ] Device testing matrix
+- [ ] Device/browser testing matrix
 
 #### Sources to Research
 
-- Play Store Kids category requirements
-- Apple App Store Kids category guidelines
 - PWA camera/ML performance benchmarks
 - Indian smartphone market data
-- Similar apps' distribution strategies
+- Similar web apps' distribution strategies
 
 ---
 

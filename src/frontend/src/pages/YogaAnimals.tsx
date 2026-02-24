@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { Dog, Cat, TreeDeciduous, Bird, Bug, Sparkles, Camera, Eye, Activity, Lightbulb, CheckCircle2, Loader2, Target, SkipForward } from 'lucide-react';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
   name: string;
-  emoji: string;
+  icon: React.ReactNode;
   description: string;
   instruction: string;
   // Target angles for key body parts
@@ -26,14 +27,14 @@ interface AnimalPose {
 const ANIMAL_POSES: AnimalPose[] = [
   {
     name: 'Lion',
-    emoji: '🦁',
+    icon: <Bug className="w-16 h-16" />,
     description: 'Be a fierce lion!',
     instruction: 'Put your hands up like claws and open your mouth wide!',
     targets: { leftArmAngle: 45, rightArmAngle: 45, torsoAngle: 0 },
   },
   {
     name: 'Cat',
-    emoji: '🐱',
+    icon: <Cat className="w-16 h-16" />,
     description: 'Stretch like a cat!',
     instruction:
       'Get on all fours and arch your back up like a stretching cat!',
@@ -41,28 +42,28 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
   {
     name: 'Tree',
-    emoji: '🌳',
+    icon: <TreeDeciduous className="w-16 h-16" />,
     description: 'Stand tall like a tree!',
     instruction: 'Stand on one leg, with arms stretched up like branches!',
     targets: { leftLegAngle: 90, rightLegAngle: 0, torsoAngle: 0 },
   },
   {
     name: 'Dog',
-    emoji: '🐕',
+    icon: <Dog className="w-16 h-16" />,
     description: 'Be a happy dog!',
     instruction: 'Crouch down and stick your arms out like paws!',
     targets: { leftArmAngle: 90, rightArmAngle: 90, torsoAngle: -20 },
   },
   {
     name: 'Frog',
-    emoji: '🐸',
+    icon: <Bug className="w-16 h-16" />,
     description: 'Jump like a frog!',
     instruction: 'Squat down with hands on the ground, then jump up!',
     targets: { leftLegAngle: 20, rightLegAngle: 20, torsoAngle: -45 },
   },
   {
     name: 'Bird',
-    emoji: '🐦',
+    icon: <Bird className="w-16 h-16" />,
     description: 'Fly like a bird!',
     instruction: 'Stand with arms out wide like wings and flap!',
     targets: { leftArmAngle: 170, rightArmAngle: 170, torsoAngle: 0 },
@@ -391,7 +392,14 @@ export function YogaAnimals() {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <div className='bg-red-50 rounded-[2.5rem] border-3 border-red-100 p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'>
-          <div className='text-6xl mb-6'>😢</div>
+          <div className='text-6xl mb-6 flex justify-center'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+              <line x1="9" x2="9.01" y1="9" y2="9"/>
+              <line x1="15" x2="15.01" y1="9" y2="9"/>
+            </svg>
+          </div>
           <h2 className='text-2xl font-black text-red-600 tracking-tight mb-4'>Oops!</h2>
           <p className='text-red-500 font-bold mb-8'>{error}</p>
           <button
@@ -422,7 +430,7 @@ export function YogaAnimals() {
         </h1>
 
         <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-          ⭐ <span>{score}</span>
+          <Sparkles className="w-6 h-6" /> <span>{score}</span>
         </div>
       </header>
 
@@ -434,7 +442,11 @@ export function YogaAnimals() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🦁🌳🐱</div>
+            <div className='flex items-center justify-center gap-4 mb-6'>
+              <Bug className="w-20 h-20 text-emerald-500 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform" />
+              <TreeDeciduous className="w-20 h-20 text-emerald-600 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform" />
+              <Cat className="w-20 h-20 text-amber-500 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform" />
+            </div>
             <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
               Yoga Animals!
             </h2>
@@ -445,10 +457,10 @@ export function YogaAnimals() {
             <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
               <h3 className='font-black text-advay-slate text-2xl mb-6'>How to Play:</h3>
               <ul className='space-y-4 text-advay-slate font-bold text-lg'>
-                <li className='flex items-center gap-3'><span className='text-3xl'>📸</span> Stand in front of your camera</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>👀</span> Pip will show you an animal pose</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>🧘</span> Copy the pose and hold it for 2 seconds!</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>⭐</span> Earn stars for each pose you master</li>
+                <li className='flex items-center gap-3'><Camera className="w-8 h-8 text-blue-500" /> Stand in front of your camera</li>
+                <li className='flex items-center gap-3'><Eye className="w-8 h-8 text-purple-500" /> Pip will show you an animal pose</li>
+                <li className='flex items-center gap-3'><Activity className="w-8 h-8 text-emerald-500" /> Copy the pose and hold it for 2 seconds!</li>
+                <li className='flex items-center gap-3'><Sparkles className="w-8 h-8 text-amber-500" /> Earn stars for each pose you master</li>
               </ul>
             </div>
 
@@ -456,7 +468,7 @@ export function YogaAnimals() {
               onClick={startGame}
               className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
-              Start Yoga! 🧘
+              Start Yoga! <Activity className="w-6 h-6 inline-block ml-1" />
             </button>
           </motion.div>
         ) : (
@@ -470,8 +482,8 @@ export function YogaAnimals() {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className='text-center mb-10'>
-                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
-                  {currentPose.emoji}
+                <div className='inline-flex items-center justify-center bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
+                  {currentPose.icon}
                 </div>
                 <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
                   {currentPose.name}
@@ -481,8 +493,8 @@ export function YogaAnimals() {
                 </p>
 
                 <div className='bg-blue-50 border-3 border-blue-100 rounded-2xl p-4 inline-block text-left'>
-                  <p className='text-lg text-blue-800 font-bold'>
-                    💡 {currentPose.instruction}
+                  <p className='text-lg text-blue-800 font-bold flex items-center gap-2'>
+                    <Lightbulb className="w-5 h-5" /> {currentPose.instruction}
                   </p>
                 </div>
               </div>
@@ -541,18 +553,18 @@ export function YogaAnimals() {
 
                 {/* Pose indicator */}
                 <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
-                  <span className='text-white font-bold text-sm tracking-wide'>
-                    {cameraReady ? '✅ Camera Ready' : '⏳ Loading...'}
+                  <span className='text-white font-bold text-sm tracking-wide flex items-center gap-1'>
+                    {cameraReady ? <><CheckCircle2 className="w-4 h-4" /> Camera Ready</> : <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>}
                   </span>
                 </div>
 
                 {/* Match indicator */}
                 <div className={`absolute top-6 right-6 px-6 py-2 backdrop-blur-md rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-colors ${matchProgress > 70 ? 'bg-[#10B981]/90 border-emerald-400' : 'bg-black/40 border-white/20'}`}>
                   <span
-                    className={`text-sm font-black tracking-wide ${matchProgress > 70 ? 'text-white' : 'text-white'}`}
+                    className={`text-sm font-black tracking-wide flex items-center gap-1 ${matchProgress > 70 ? 'text-white' : 'text-white'}`}
                   >
                     {matchProgress > 70
-                      ? '🎯 Perfect Match!'
+                      ? <><Target className="w-4 h-4" /> Perfect Match!</>
                       : `${Math.round(matchProgress)}% Matched`}
                   </span>
                 </div>
@@ -572,7 +584,7 @@ export function YogaAnimals() {
                   }
                   className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
                 >
-                  Skip Pose ⏭
+                  Skip Pose <SkipForward className="w-5 h-5 inline-block ml-1" />
                 </button>
               </div>
             </div>
@@ -594,7 +606,16 @@ export function YogaAnimals() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.8, y: 20, opacity: 0 }}
               >
-                <div className='text-[6rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>��</div>
+                <div className='flex justify-center mb-6'>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500 drop-shadow-[0_4px_0_#E5B86E]">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                  </svg>
+                </div>
                 <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>
                   Amazing!
                 </h2>

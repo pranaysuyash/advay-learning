@@ -375,7 +375,7 @@ export function VirtualChemistryLab() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <div className='text-6xl mb-6'>🧪</div>
+          <div className='mb-6 flex justify-center'><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 2v7.31'/><path d='M14 2v7.31'/><path d='M8.5 2h7'/><path d='M14 9.3a6.5 6.5 0 1 1-4 0'/></svg></div>
           <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-2'>
             Loading Chemistry Lab
           </h2>
@@ -401,7 +401,8 @@ export function VirtualChemistryLab() {
           Virtual Chemistry Lab
         </h1>
         <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-          ⭐ {score}
+          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='#F59E0B' stroke='#F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>
+          <span>{score}</span>
         </div>
       </header>
 
@@ -440,8 +441,9 @@ export function VirtualChemistryLab() {
           {/* Discovery Book */}
           <div className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-6 shadow-[0_4px_0_#E5B86E]'>
             <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-2xl font-black text-advay-slate tracking-tight'>
-                Discovery Book 📖
+              <h2 className='text-2xl font-black text-advay-slate tracking-tight flex items-center gap-2'>
+                Discovery Book
+                <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/></svg>
               </h2>
               <span className='bg-[#10B981]/10 text-[#10B981] px-3 py-1 rounded-full text-sm font-black'>
                 {discoveredReactions.size}/{REACTIONS.length}
@@ -481,7 +483,7 @@ export function VirtualChemistryLab() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🧪⚗️</div>
+              <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex gap-4 justify-center'><svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 2v7.31'/><path d='M14 2v7.31'/><path d='M8.5 2h7'/><path d='M14 9.3a6.5 6.5 0 1 1-4 0'/></svg><svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 24 24' fill='none' stroke='#a855f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12h20'/><path d='M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6'/><path d='M12 2v10'/><path d='M12 2a5 5 0 0 1 5 5v5H7V7a5 5 0 0 1 5-5Z'/></svg></div>
               <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
                 Virtual Chemistry Lab
               </h2>
@@ -492,10 +494,10 @@ export function VirtualChemistryLab() {
               <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-10 w-full text-left'>
                 <h3 className='font-black text-advay-slate text-2xl mb-4'>How to Experiment:</h3>
                 <ul className='space-y-3 text-advay-slate font-bold text-lg'>
-                  <li className='flex items-center gap-3'><span className='text-2xl'>1️⃣</span> Select a chemical from the shelf</li>
-                  <li className='flex items-center gap-3'><span className='text-2xl'>2️⃣</span> Pinch your thumb and index finger together</li>
-                  <li className='flex items-center gap-3'><span className='text-2xl'>3️⃣</span> Move your hand over the beaker to pour</li>
-                  <li className='flex items-center gap-3'><span className='text-2xl'>4️⃣</span> Discover amazing reactions!</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl font-black text-[#3B82F6] w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base'>1</span> Select a chemical from the shelf</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl font-black text-[#3B82F6] w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base'>2</span> Pinch your thumb and index finger together</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl font-black text-[#3B82F6] w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base'>3</span> Move your hand over the beaker to pour</li>
+                  <li className='flex items-center gap-3'><span className='text-2xl font-black text-[#3B82F6] w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base'>4</span> Discover amazing reactions!</li>
                 </ul>
               </div>
 
@@ -503,7 +505,7 @@ export function VirtualChemistryLab() {
                 onClick={() => setIsPlaying(true)}
                 className='w-full max-w-md py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-full shadow-[0_4px_0_#E5B86E] transition-transform hover:scale-[1.02] active:scale-95'
               >
-                Start Experimenting! 🔬
+                Start Experimenting!
               </button>
             </motion.div>
           ) : (
@@ -526,7 +528,7 @@ export function VirtualChemistryLab() {
                 {/* UI Overlay */}
                 <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
                   <span className='text-white font-bold text-sm tracking-wide'>
-                    {isHandReady ? '✅ Hand Tracking Ready' : '⏳ Loading...'}
+                    {isHandReady ? 'Hand Tracking Ready' : 'Loading...'}
                   </span>
                 </div>
 
@@ -545,7 +547,7 @@ export function VirtualChemistryLab() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    💧
+                    <svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='#3B82F6' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/></svg>
                   </motion.div>
                 )}
               </div>
@@ -556,19 +558,19 @@ export function VirtualChemistryLab() {
                   onClick={() => setIsIssueModalOpen(true)}
                   className='flex-1 py-4 bg-amber-50 hover:bg-amber-100 border-3 border-amber-200 text-amber-700 rounded-[1.5rem] font-black text-lg transition-colors'
                 >
-                  Report Issue 🎥
+                  Report Issue
                 </button>
                 <button
                   onClick={clearBeaker}
                   className='flex-1 py-4 bg-red-50 hover:bg-red-100 border-3 border-red-200 text-red-600 rounded-[1.5rem] font-black text-lg transition-colors'
                 >
-                  🗑️ Empty Beaker
+                  Empty Beaker
                 </button>
                 <button
                   onClick={() => { onGameComplete(); setIsPlaying(false); }}
                   className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] text-text-secondary rounded-[1.5rem] font-black text-lg transition-colors'
                 >
-                  ⏹️ Stop Experiment
+                  Stop Experiment
                 </button>
               </div>
 
@@ -617,7 +619,11 @@ export function VirtualChemistryLab() {
               exit={{ scale: 0, rotate: 180 }}
             >
               <div className='text-[7rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
-                {lastReaction.effect === 'bubble' ? '🫧' : '🎉'}
+                {lastReaction.effect === 'bubble' ? (
+                      <svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 24 24' fill='none' stroke='#4FC3F7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='7.5' cy='7.5' r='2.5'/><circle cx='17' cy='9' r='3'/><circle cx='9' cy='16' r='4'/></svg>
+                    ) : (
+                      <svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 24 24' fill='none' stroke='#10B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg>
+                    )}
               </div>
               <h2 className='text-4xl font-black text-[#10B981] mb-4 tracking-tight'>
                 {lastReaction.name}!

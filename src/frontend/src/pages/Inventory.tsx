@@ -1,6 +1,7 @@
 import { memo, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { FlaskConical, Backpack, Sparkles, BadgeHelp, Lightbulb } from 'lucide-react';
 import { useInventoryStore } from '../store';
 import {
   ALL_ITEMS,
@@ -81,14 +82,16 @@ export const Inventory = memo(function Inventory() {
               onClick={() => navigate('/discovery-lab')}
               className="flex items-center gap-2 px-6 py-3 bg-[#E85D04] text-white rounded-2xl font-black text-lg hover:bg-[#d45304] transition-colors shadow-lg"
             >
-              🧪 Discovery Lab
+              <FlaskConical className="w-5 h-5" />
+              Discovery Lab
             </button>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl sm:text-5xl font-black text-advay-slate tracking-tight">
-                🎒 My <span className="text-[#E85D04]">Backpack</span>
+              <h1 className="text-4xl sm:text-5xl font-black text-advay-slate tracking-tight flex items-center gap-3">
+                <Backpack className="w-10 h-10 sm:w-12 sm:h-12 text-[#E85D04]" />
+                My <span className="text-[#E85D04]">Backpack</span>
               </h1>
               <p className="text-lg text-text-secondary font-bold mt-2">
                 Your collection of discoveries, items, and treasures!
@@ -126,7 +129,10 @@ export const Inventory = memo(function Inventory() {
                 : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
               }`}
           >
-            ✨ All ({ALL_ITEMS.length})
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              All ({ALL_ITEMS.length})
+            </span>
           </button>
           {CATEGORIES.map((cat) => {
             const config = CATEGORY_CONFIG[cat];
@@ -254,7 +260,9 @@ function ItemDetail({
   if (!item.discovered) {
     return (
       <div className="text-center">
-        <div className="text-6xl mb-4 opacity-30">❓</div>
+        <div className="flex justify-center mb-4">
+          <BadgeHelp className="w-16 h-16 text-slate-300" />
+        </div>
         <h3 className="text-2xl font-black text-slate-400 mb-2">Undiscovered</h3>
         <p className="text-slate-400 font-bold mb-6">
           Keep playing games to discover this item!
@@ -297,8 +305,9 @@ function ItemDetail({
 
       {item.funFact && (
         <div className="bg-[#3B82F6]/10 rounded-2xl p-4 mb-4 text-left">
-          <p className="text-sm font-bold text-[#3B82F6]">
-            💡 Fun Fact: {item.funFact}
+          <p className="text-sm font-bold text-[#3B82F6] flex items-center gap-1">
+            <Lightbulb className="w-4 h-4" />
+            Fun Fact: {item.funFact}
           </p>
         </div>
       )}

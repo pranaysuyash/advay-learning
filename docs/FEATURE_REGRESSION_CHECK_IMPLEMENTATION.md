@@ -209,22 +209,37 @@ When you (the AI agent) encounter this check during commit:
    git diff HEAD -- <file>
    ```
 
-2. **Manually verify functionality:**
-   - Compare old vs new side-by-side
-   - Check if ALL user-facing features are preserved
-   - Look for removed state that might break UI
-   - Check if child components still get necessary props
+2. **Evaluate if the change is IMPROVEMENT:**
 
-3. **Ask yourself:**
+   | What You See | Verdict | Action |
+   |--------------|---------|--------|
+   | **NEW** features/functions added | ✅ **PERFECT** | Commit it - this is additive |
+   | **BETTER** code quality, same features | ✅ **GOOD** | Commit it - this is improvement |
+   | **SPLIT** into multiple files | ⚠️ **VERIFY ALL** | Check comprehensiveness across all files |
+   | **LESS** functionality than before | ❌ **REGRESSION** | Fix it before committing |
+
+3. **For REFACTORS that split files (SPECIAL CASE):**
+   
+   When a file is refactored into multiple files (e.g., `Dashboard.tsx` → `Dashboard/Header.tsx`, `Dashboard/Content.tsx`, etc.):
+   
+   - **Check ALL files in the commit together** - don't evaluate in isolation
+   - **Verify sum is comprehensive:** Is `Header.tsx + Content.tsx + ...` ≥ original `Dashboard.tsx`?
+   - **Track moved functions:** If `handleCreateProfile` moved to `ProfileManager.ts`, is it imported and called?
+   - **Check state comprehensiveness:** Is state properly managed across the new file boundary?
+   - **Look for orphans:** Functions defined in new files but never called from anywhere?
+
+4. **Manual verification checklist:**
+   - "Does this change ADD value or just REMOVE code?"
    - "Can users still do everything they could before?"
    - "Are there orphaned components (built but not used)?"
    - "Were state variables deleted but not migrated?"
-   - "Is this a pure refactor or a breaking change?"
+   - "Is this purely additive/improvement, or reductive?"
 
-4. **Take action:**
-   - **If unintentional:** Restore the missing functionality
-   - **If intentional:** Document WHY in commit message
-   - **If unsure:** Ask the user before committing
+5. **Take action:**
+   - **If improvement/additive:** ✅ Proceed with commit
+   - **If regression (less functionality):** ❌ Restore the missing functionality
+   - **If intentional refactor:** 📝 Document WHY and show functional equivalence
+   - **If unsure:** ❓ Ask the user before committing
 
 ### Real Example (Dashboard Regression)
 
@@ -240,12 +255,15 @@ State variables removed: 5
 ```
 
 **What you should have done:**
-1. Checked if AddChildModal was still integrated (it wasn't)
-2. Realized users couldn't add children after registration
-3. Restored the handleCreateProfile and modal wiring
-4. OR asked user: "I'm refactoring Dashboard - can I remove Add Child functionality?"
+1. **Classified the change:** ❌ REGRESSION (removing functionality, not improving)
+2. Checked if AddChildModal was still integrated (it wasn't)
+3. Realized users couldn't add children after registration
+4. **RESTORED** the handleCreateProfile and modal wiring
+5. OR asked user: "Dashboard refactor would remove Add Child - should I preserve it or is there a replacement?"
 
-**Remember:** This check exists because previous agents (possibly you) made this mistake. Learn from it.
+**Key Insight:** The Feb 2 refactor claimed to be "Comprehensive UI/UX improvements" but was actually functionality-reductive. The new Dashboard looked better but did less. **The check correctly identified this as regression, not improvement.**
+
+**Principle:** Additive changes (more features, better code) are encouraged. Reductive changes need explicit justification. When in doubt, verify comprehensiveness or ask.
 
 ---
 

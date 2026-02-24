@@ -4549,7 +4549,7 @@ Next actions:
 - Implement mascot character and celebration system
 - Add progress visualization and audio feedback
 - Plan child user testing sessions
-- Review COPPA compliance requirements
+- Review privacy guardrails (no video storage, camera redaction)
 
 Risks/notes:
 
@@ -16918,7 +16918,7 @@ Status: **DONE**
   - Audit of `src/backend/app/core/security.py`
   - Audit of `src/backend/app/api/v1/endpoints/auth.py`
   - Security posture assessment
-  - Compliance evaluation (OWASP, COPPA)
+  - Compliance evaluation (OWASP, privacy guardrails)
   - Performance analysis
 - Out-of-scope:
   - Implementation of fixes
@@ -18471,7 +18471,7 @@ Scope contract:
 - In-scope:
   - P0: Achievement-triggered celebrations, particle effects, audio feedback, gamified progress
   - P1: Themes, avatars, animations, widgets
-  - P2: Accessibility compliance, screen time management, COPPA features
+  - P2: Accessibility compliance, screen time management, privacy guardrails
   - Project coordination, ticket creation, and progress tracking
 - Out-of-scope:
   - Backend API changes (unless required for new features)
@@ -24151,7 +24151,7 @@ Risks/notes:
 - Technical feasibility verified as HIGH for all documented features
 - Child age range (4-10 years) - ensure age-appropriate design throughout
 - Performance budget management critical (25-30 FPS target)
-- Parent controls essential for COPPA compliance
+- Parent controls essential for privacy trust
 - Accessibility is non-negotiable (WCAG AA required)
 
 ---
@@ -32379,7 +32379,7 @@ Status: **DONE**
 Priority: P0
 
 Description:
-Add parent gate to Settings page to prevent children from accidentally changing settings. COPPA compliance requirement.
+Add parent gate to Settings page to prevent children from accidentally changing settings. Privacy/trust requirement.
 
 Scope contract:
 - In-scope:
@@ -32873,7 +32873,7 @@ Scope contract:
   - Track game-specific metrics (accuracy, attempts, scores)
   - Track engagement patterns
   - Store in backend database
-- Out-of-scope: Third-party analytics (COPPA)
+- Out-of-scope: Third-party analytics (privacy-first)
 - Behavior change allowed: YES (new feature)
 
 Targets:
@@ -33007,7 +33007,7 @@ Status updates:
 
 ---
 
-### TCK-20260201-004 :: Analytics Implementation - Privacy Compliance
+### TCK-20260201-004 :: Analytics Implementation - Privacy Guardrails
 
 Type: COMPLIANCE
 Owner: Extracted from audit
@@ -33016,15 +33016,14 @@ Status: **DONE**
 Priority: P0
 
 Description:
-Ensure analytics implementation is COPPA/GDPR compliant with first-party only tracking and proper data handling.
+Ensure analytics implementation follows strict privacy guardrails (first-party only, no PII, no video storage).
 
 Scope contract:
 - In-scope:
-  - COPPA compliance documentation
-  - GDPR compliance documentation
   - First-party analytics only (no third-party)
-  - Data retention policies
-  - Parental consent flows
+  - No PII collection (child names, emails, images)
+  - Data retention policy (minimal, time-bounded)
+  - Explicit statement: no camera recordings stored
 - Out-of-scope: Legal review (external)
 - Behavior change allowed: YES (compliance requirements)
 
@@ -33032,20 +33031,19 @@ Targets:
 - Repo: learning_for_kids
 - File(s):
   - docs/PRIVACY_POLICY.md (NEW)
-  - docs/COPPA_COMPLIANCE.md (NEW)
-  - src/frontend/src/components/ConsentFlow.tsx (NEW)
+  - docs/PRIVACY_GUARDRAILS.md (NEW)
 - Branch/PR: main
 
 Acceptance Criteria:
-- [ ] COPPA compliance documented
-- [ ] GDPR compliance documented
+- [ ] Privacy guardrails documented (plain language)
 - [ ] No third-party trackers used
+- [ ] No PII collected in analytics
 - [ ] Data retention policy defined
-- [ ] Parental consent implemented
+- [ ] No camera recordings stored
 
 Source:
 - Audit file: `docs/audit/ANALYTICS_RESEARCH_COMPLETE_2026-01-31.md`
-- Finding: Current State - No COPPA/GDPR documentation
+- Finding: Current State - No privacy guardrails documentation
 - Evidence: Line 3 - Ticket: TCK-20260201-004
 
 Execution log:
@@ -40996,4 +40994,57 @@ Key Findings:
 
 **Full Research Document:**
 docs/FEATURE_RESEARCH_INITIATIVE_2026-02-24.md
+
+
+---
+
+### TCK-20260224-002 :: Database Configuration Validation & Documentation Correction
+
+Type: DOCUMENTATION | CLEANUP
+Owner: Pranay
+Created: 2026-02-24 07:15 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Validate actual database configuration and correct documentation that incorrectly stated SQLite was in use.
+
+Findings:
+
+**Observed (Code Review):**
+- src/backend/.env: DATABASE_URL=postgresql+asyncpg://postgres@localhost:5432/advay_learning
+- src/backend/app/db/session.py: PostgreSQL connection pool configured (10 base + 20 overflow)
+- src/backend/app/core/config.py: DATABASE_URL required setting
+- No SQLite database file exists in backend directory
+
+**Incorrect Documentation:**
+- FEATURE_RESEARCH_INITIATIVE_2026-02-24.md incorrectly stated "SQLite" as current state
+- Research document mentioned "PostgreSQL migration" as future need
+
+**Correction Actions:**
+
+1. Archived legacy script: `user_query.py` → `user_query.py.legacy` (was using sqlite3 directly)
+2. Updated research document to reflect PostgreSQL is already configured
+3. Updated scaling table: PostgreSQL ✅, Redis for cache (future)
+4. Updated decision log: Redis caching (not PostgreSQL migration)
+
+Validation:
+
+```bash
+# Confirmed PostgreSQL active
+cat src/backend/.env | grep DATABASE_URL
+# Output: DATABASE_URL=postgresql+asyncpg://postgres@localhost:5432/advay_learning
+
+# Confirmed no SQLite
+ls src/backend/*.db
+# Output: No such file
+
+# Tests pass
+npm run test
+# Output: 76 passed (762 tests)
+```
+
+Status updates:
+
+- [07:15] **DONE** - Documentation corrected, legacy script archived
 

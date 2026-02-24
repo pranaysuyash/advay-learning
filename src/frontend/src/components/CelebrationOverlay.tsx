@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface CelebrationOverlayProps {
     show: boolean;
-    letter: string;
+    letter: React.ReactNode;
     accuracy: number;
     onComplete: () => void;
     /** Optional: custom message from Pip */
@@ -43,7 +43,7 @@ function ConfettiParticle({ delay, color }: { delay: number; color: string }) {
 }
 
 // Star burst component
-function StarBurst({ letter }: { letter: string }) {
+function StarBurst({ letter }: { letter: React.ReactNode }) {
     return (
         <motion.div
             className="relative"

@@ -16,6 +16,23 @@
 
 import { useCallback, useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
+import {
+  Target,
+  Music,
+  Languages,
+  Sprout,
+  TreeDeciduous,
+  Hand,
+  Flame,
+  RefreshCw,
+  Volume2,
+  Check,
+  X,
+  PartyPopper,
+  Dumbbell,
+  Lightbulb,
+  Star,
+} from 'lucide-react';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { SVGBird } from '../components/characters/SVGBird';
@@ -253,11 +270,11 @@ export default function RhymeTime() {
             className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4 max-w-md border-2 border-purple-300"
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <Target className="w-8 h-8 text-purple-600" />
               <div>
                 <p className="font-bold text-purple-800">GOAL:</p>
                 <p className="text-purple-700">Match words that sound the same!</p>
-                <p className="text-purple-600 text-sm">🎵 Cat → Bat, Dog → Frog 🎵</p>
+                <p className="text-purple-600 text-sm flex items-center justify-center gap-1"><Music className="w-4 h-4" /> Cat → Bat, Dog → Frog <Music className="w-4 h-4" /></p>
               </div>
             </div>
           </div>
@@ -279,7 +296,7 @@ export default function RhymeTime() {
           )}
           
           <p className="text-text-secondary mb-6 text-sm text-center max-w-md">
-            Rhyming helps you learn to read! 🔤
+            Rhyming helps you learn to read! <Languages className="w-4 h-4 inline" />
           </p>
           
           <div className="grid grid-cols-3 gap-4 max-w-2xl w-full">
@@ -292,7 +309,7 @@ export default function RhymeTime() {
                   className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-6 transition-all transform hover:scale-105 text-center group shadow-[0_4px_0_#E5B86E]"
                 >
                   <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                    {diff === 'easy' ? '🌱' : diff === 'medium' ? '🌿' : '🌳'}
+                    {diff === 'easy' ? <Sprout className="w-10 h-10 mx-auto text-green-500" /> : diff === 'medium' ? <Sprout className="w-10 h-10 mx-auto text-green-600" /> : <TreeDeciduous className="w-10 h-10 mx-auto text-green-700" />}
                   </div>
                   <h3 className={`font-bold text-lg mb-1 ${display.color}`}>
                     {display.label}
@@ -313,14 +330,14 @@ export default function RhymeTime() {
               Which word rhymes with <span className="font-bold">CAT</span>?
             </p>
             <div className="flex gap-2 justify-center">
-              <span className="bg-white px-3 py-1 rounded-lg text-sm">🐕 DOG</span>
-              <span className="bg-green-100 px-3 py-1 rounded-lg text-sm font-bold">🦇 BAT ✓</span>
-              <span className="bg-white px-3 py-1 rounded-lg text-sm">🚗 CAR</span>
+              <span className="bg-white px-3 py-1 rounded-lg text-sm">DOG</span>
+              <span className="bg-green-100 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1">BAT <Check className="w-3 h-3" /></span>
+              <span className="bg-white px-3 py-1 rounded-lg text-sm">CAR</span>
             </div>
           </div>
           
           <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm">
-            <span className="text-2xl">✋</span>
+            <Hand className="w-6 h-6 text-orange-500" />
             <span>Point and pinch to select, or use your mouse!</span>
           </div>
         </div>
@@ -328,7 +345,13 @@ export default function RhymeTime() {
         // ===== GAME COMPLETE SCREEN =====
         <div className="flex flex-col items-center justify-center h-full p-6">
           <div className="text-6xl mb-4">
-            {getStarRating(accuracy) >= 3 ? '🏆' : getStarRating(accuracy) >= 2 ? '⭐' : '👏'}
+            {getStarRating(accuracy) >= 3 ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            ) : getStarRating(accuracy) >= 2 ? (
+              <Star className="w-16 h-16 text-yellow-400 fill-yellow-400" />
+            ) : (
+              <span className="text-6xl">Great job!</span>
+            )}
           </div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">
             {getPerformanceFeedback(accuracy).message}
@@ -340,7 +363,7 @@ export default function RhymeTime() {
                 key={i}
                 className={`text-4xl ${i < getStarRating(accuracy) ? 'text-yellow-400' : 'text-gray-300'}`}
               >
-                ⭐
+                <Star className="text-4xl text-yellow-400 fill-yellow-400" />
               </span>
             ))}
           </div>
@@ -357,7 +380,7 @@ export default function RhymeTime() {
               </div>
               <div>
                 <p className="text-text-secondary text-sm">Best Streak</p>
-                <p className="text-2xl font-bold text-orange-500">{gameState.maxStreak} 🔥</p>
+                <p className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">{gameState.maxStreak} <Flame className="w-6 h-6" /></p>
               </div>
               <div>
                 <p className="text-text-secondary text-sm">Correct</p>
@@ -379,7 +402,7 @@ export default function RhymeTime() {
               onClick={handlePlayAgain}
               className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-colors"
             >
-              Play Again 🔄
+              <span className="flex items-center gap-2"><RefreshCw className="w-5 h-5" /> Play Again</span>
             </button>
           </div>
         </div>
@@ -402,7 +425,7 @@ export default function RhymeTime() {
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl mb-4 text-center shadow-lg border-2 border-purple-300"
           >
             <div className="flex items-center justify-center gap-3">
-              <span className="text-2xl">🎯</span>
+              <Target className="w-6 h-6" />
               <div>
                 <p className="font-black text-lg">GOAL: Match the rhyming word!</p>
                 <p className="text-purple-100 text-sm">Click the word that sounds like {currentRound?.targetWord.word || 'CAT'}</p>
@@ -428,7 +451,7 @@ export default function RhymeTime() {
           {gameState && gameState.streak > 1 && (
             <div className="text-center mb-2">
               <span className="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold">
-                🔥 {gameState.streak} streak!
+                <Flame className="w-4 h-4 inline" /> {gameState.streak} streak!
               </span>
             </div>
           )}
@@ -456,7 +479,7 @@ export default function RhymeTime() {
                   {currentRound?.targetWord.word}
                 </span>
                 <div className="text-blue-400 text-sm flex items-center gap-1">
-                  <span>🔊 Click to hear</span>
+                  <span className="flex items-center gap-1"><Volume2 className="w-4 h-4" /> Click to hear</span>
                 </div>
               </div>
             </button>
@@ -502,23 +525,23 @@ export default function RhymeTime() {
                     {/* Feedback indicators */}
                     {showCorrect && (
                       <>
-                        <div className="absolute -top-3 -right-3 bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold animate-bounce shadow-lg border-3 border-white">
-                          ✓
+                        <div className="absolute -top-3 -right-3 bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center animate-bounce shadow-lg border-3 border-white">
+                          <Check className="w-6 h-6" />
                         </div>
                         <div className="absolute inset-0 bg-green-400/20 rounded-2xl animate-pulse" />
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap animate-bounce">
-                          Great job! 🎉
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap animate-bounce flex items-center gap-1">
+                          Great job! <PartyPopper className="w-4 h-4" />
                         </div>
                       </>
                     )}
                     {showIncorrect && (
                       <>
-                        <div className="absolute -top-3 -right-3 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg border-3 border-white">
-                          ✗
+                        <div className="absolute -top-3 -right-3 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-3 border-white">
+                          <X className="w-6 h-6" />
                         </div>
                         <div className="absolute inset-0 bg-red-400/20 rounded-2xl" />
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                          Try again! 💪
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-1">
+                          Try again! <Dumbbell className="w-4 h-4" />
                         </div>
                       </>
                     )}
@@ -543,13 +566,13 @@ export default function RhymeTime() {
               `}>
                 {showFeedback === 'correct' ? (
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-5xl">🎉</span>
+                    <PartyPopper className="w-12 h-12" />
                     <span>CORRECT!</span>
-                    <span className="text-lg font-normal">They rhyme! 🎵</span>
+                    <span className="text-lg font-normal flex items-center gap-1">They rhyme! <Music className="w-4 h-4" /></span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-5xl">💪</span>
+                    <Dumbbell className="w-12 h-12" />
                     <span>TRY AGAIN!</span>
                     <span className="text-lg font-normal">Answer: <span className="uppercase">{currentRound?.correctAnswer}</span></span>
                   </div>
@@ -562,7 +585,7 @@ export default function RhymeTime() {
           {currentRound && (
             <div className="mt-4 text-center">
               <p className="text-slate-400 text-sm italic">
-                💡 {getExampleSentence(currentRound.targetFamily)}
+                <span className="flex items-center gap-1"><Lightbulb className="w-4 h-4" /> {getExampleSentence(currentRound.targetFamily)}</span>
               </p>
             </div>
           )}
@@ -572,7 +595,7 @@ export default function RhymeTime() {
       {/* Celebration Overlay */}
       <CelebrationOverlay
         show={showCelebration}
-        letter="✓"
+        letter={<Check className="w-6 h-6" />}
         accuracy={accuracy}
         onComplete={() => setShowCelebration(false)}
         message={`Game Complete! ${getStarRating(accuracy)} stars!`}

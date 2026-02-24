@@ -415,10 +415,12 @@ The audit-to-ticket gap exists because:
 - [ ] Review your diff: `git diff --staged` or `git diff HEAD`
 - [ ] **FEATURE REGRESSION CHECK** (critical for >10% LOC changes):
   - [ ] For modified files with significant changes, compare to previous version
-  - [ ] Ask: "Does the new version preserve ALL user-facing functionality?"
+  - [ ] Ask: "Does the new version IMPROVE on the old (not just preserve)?"
+  - [ ] Verify ADDITIVE changes: new features, better code quality = ✅ GOOD
+  - [ ] For REFACTORS that split files: check ALL files together for comprehensiveness
   - [ ] Check for accidentally removed functions, state variables, exports
   - [ ] Check for orphaned components (built but not used)
-  - [ ] If functionality removed: document WHY or RESTORE it
+  - [ ] If functionality removed: document WHY and what replaces it, or RESTORE it
 - [ ] Run pre-commit checks locally: `./scripts/agent_gate.sh --staged`
 - [ ] Ensure worklog addendum is updated for code changes
 - [ ] Write meaningful commit message explaining WHAT and WHY
@@ -706,25 +708,38 @@ The pre-commit hook runs these checks in order:
    git diff HEAD -- <file>
    ```
 
-3. **Verify functionality preservation:**
-   - Ask: "Can users still do everything they could before?"
-   - Check: Are all buttons/actions still present?
-   - Check: Are state variables properly migrated (not just deleted)?
-   - Check: Are child components still receiving necessary props?
+3. **Verify IMPROVEMENT (not just preservation):**
+   | Change Type | Verdict | Action |
+   |-------------|---------|--------|
+   | **NEW** features/functions added | ✅ GOOD | Commit it |
+   | **BETTER** code, same features | ✅ GOOD | Commit it |
+   | **SPLIT** into multiple files | ⚠️ CHECK ALL | Verify sum is comprehensive |
+   | **LESS** functionality | ❌ REGRESSION | Fix it |
 
-4. **If functionality was removed UNINTENTIONALLY:**
+4. **For REFACTORS that split files:**
+   - Check ALL related files in the same commit together
+   - Ask: "Is the SUM of new files ≥ original file in functionality?"
+   - Verify no functions are orphaned (defined but never called)
+   - Ensure state is comprehensively handled across all files
+   - Check that moved functions are properly imported and used
+
+5. **If functionality was removed UNINTENTIONALLY:**
    - STOP and restore it
    - Reference the old version: `git show HEAD:<file>`
    - Preserve user-facing behavior even if implementation changes
+   - Remember: Additive changes are encouraged, reductive changes need justification
 
-5. **If removal was INTENTIONAL:**
+6. **If removal was INTENTIONAL (rare):**
    - Document WHY in your commit message
-   - Example: "Removes handleCreateProfile from Dashboard - now handled by AddChildModal directly"
+   - Explain what replaces the removed functionality
+   - Example: "Consolidates handleCreateProfile and handleUpdateProfile into unified profileManager.ts for single source of truth"
    - Ensure no orphaned components exist
 
-6. **When in doubt:**
+7. **When in doubt:**
    - Ask the user before committing
    - Better to verify than to regress
+
+**Core Principle:** New code should be **ADDITIVE** or **IMPROVEMENT**, never reductive unless explicitly discussed and justified.
 
 **Example of what it catches:**
 The Dashboard.tsx refactor (commit 29900a6) removed `handleCreateProfile`, `showAddModal`, and 5 state variables - breaking the "Add Child" feature. This check would have flagged:

@@ -136,9 +136,9 @@ export function Settings() {
                         onChange={(e) => settings.updateSettings({ difficulty: e.target.value })}
                         className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
-                        <option value='easy'>🟢 {t('settings:difficulty.options.easy')}</option>
-                        <option value='medium'>🟡 {t('settings:difficulty.options.medium')}</option>
-                        <option value='hard'>🔴 {t('settings:difficulty.options.hard')}</option>
+                        <option value='easy'>{t('settings:difficulty.options.easy')}</option>
+                        <option value='medium'>{t('settings:difficulty.options.medium')}</option>
+                        <option value='hard'>{t('settings:difficulty.options.hard')}</option>
                       </select>
                     </div>
 
@@ -159,13 +159,13 @@ export function Settings() {
                     <div className='flex items-center justify-between pt-6 border-t-4 border-[#F2CC8F]'>
                       <div>
                         <div className='font-black text-advay-slate text-lg flex items-center gap-2'>
-                          <span>🌿</span> Calm Mode
+                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#10B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z'/><path d='M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12'/></svg> Calm Mode
                         </div>
                         <div className='text-base font-bold text-text-secondary mt-1'>
                           Softer colors, slower animations, no background music
                         </div>
                         <div className='text-sm text-blue-600 mt-2 font-medium bg-blue-50 px-3 py-2 rounded-xl border border-blue-100'>
-                          💡 For children who get overwhelmed by bright colors and fast sounds
+                          For children who get overwhelmed by bright colors and fast sounds
                         </div>
                       </div>
                       <button
@@ -180,7 +180,7 @@ export function Settings() {
                     {settings.calmMode && (
                       <div className='px-5 py-4 rounded-[1.5rem] bg-teal-50 text-teal-700 border-3 border-teal-200'>
                         <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-teal-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center text-white text-sm">✓</div>
+                          <div className="w-6 h-6 rounded-full bg-teal-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg></div>
                           <div>
                             <div className="font-black text-lg">Calm Mode is ON</div>
                             <div className="text-sm font-bold text-teal-600 mt-1">
@@ -208,12 +208,12 @@ export function Settings() {
                     <div className='flex items-center justify-between'>
                       <div className="flex-1 pr-4">
                         <div className='font-black text-advay-slate text-lg flex items-center gap-2'>
-                          {settings.cameraEnabled ? '📷' : '🚫'} Camera for Games
+                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke={settings.cameraEnabled ? '#10B981' : '#EF4444'} stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z'/><circle cx='12' cy='13' r='3'/></svg> Camera for Games
                         </div>
                         <div className='text-sm font-bold text-text-secondary mt-2 leading-relaxed'>
                           {settings.cameraEnabled 
-                            ? '✅ Camera is ON — Used for hand tracking games. Video stays on this device only.' 
-                            : '❌ Camera is OFF — Games will use touch/click instead of hand gestures.'}
+                            ? 'Camera is ON — Used for hand tracking games. Video stays on this device only.' 
+                            : 'Camera is OFF — Games will use touch/click instead of hand gestures.'}
                         </div>
                       </div>
                       <button
@@ -260,8 +260,8 @@ export function Settings() {
                         onChange={(e) => settings.updateSettings({ handTrackingDelegate: e.target.value as 'GPU' | 'CPU' })}
                         className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-purple-500/20 focus:border-[#8B5CF6] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100 mb-3'
                       >
-                        <option value='GPU'>⚡ Hardware Accelerated (GPU)</option>
-                        <option value='CPU'>🐌 Compatibility Mode (CPU)</option>
+                        <option value='GPU'>Hardware Accelerated (GPU)</option>
+                        <option value='CPU'>Compatibility Mode (CPU)</option>
                       </select>
                       <p className='text-sm font-bold text-text-secondary leading-relaxed'>
                         Use GPU for the smoothest tracking. Switch to CPU if the app crashes or freezes.
@@ -293,10 +293,10 @@ export function Settings() {
                         onChange={(e) => settings.updateSettings({ timeLimit: parseInt(e.target.value) })}
                         className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-orange-500/20 focus:border-[#E85D04] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
-                        <option value={0}>♾️ No Limit</option>
-                        <option value={15}>⏱️ 15 minutes</option>
-                        <option value={30}>⏱️ 30 minutes</option>
-                        <option value={60}>⏱️ 1 hour</option>
+                        <option value={0}>No Limit</option>
+                        <option value={15}>15 minutes</option>
+                        <option value={30}>30 minutes</option>
+                        <option value={60}>1 hour</option>
                       </select>
                     </div>
 

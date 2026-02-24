@@ -160,14 +160,18 @@ Following successful toddler UX enhancements (18 games improved, 91/100 overall 
 - Kokoro TTS: On-device, privacy-preserving
 - Vite: Fast builds, modern tooling
 - Python FastAPI: Scalable backend
+- **PostgreSQL**: Already configured with connection pooling (10 base + 20 overflow)
 
 **Scaling Considerations:**
 | Feature | Current State | Scaling Needs |
 |---------|---------------|---------------|
 | Users | Single-server | Load balancer, multiple instances |
-| Progress Data | SQLite | PostgreSQL for concurrent writes |
+| Database | PostgreSQL ✅ | Read replicas for >100k users |
 | Assets | Bundled | CDN for global delivery |
 | Real-time | Polling | WebSockets for live features |
+| Cache | None | Redis for sessions/rate limiting |
+
+**Note:** SQLite reference in `user_query.py` was an old utility script - now archived. Production uses PostgreSQL exclusively.
 
 ---
 
@@ -279,7 +283,7 @@ Following successful toddler UX enhancements (18 games improved, 91/100 overall 
 | **Prioritize Phonics Games** | Biggest learning gap (ages 4-6) | Delay other game types |
 | **Achievement before STT** | Higher ROI, lower risk | STT is "flashier" but harder |
 | **Parent Reports first** | Easier than dashboard, high parent value | Less visual than dashboard |
-| **PostgreSQL later** | Current SQLite adequate for <10k users | May need sooner if growth spikes |
+| **Redis caching** | Current PostgreSQL adequate for <100k users | Add Redis when scaling beyond |
 
 ---
 

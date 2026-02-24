@@ -350,6 +350,54 @@ We must ensure **no camera recordings are stored**. For issue reporting, only re
 
 ---
 
+### SEC-004: Privacy Trust Signals (Always-On Indicator + Copy)
+**Priority**: P1  
+**Effort**: 1 day  
+**Source**: docs/CAMERA_PRIVACY_CLARIFICATION.md + trust concerns
+
+**Issue**:
+Parents need a constant, simple signal that the camera is used only for hand tracking and never recorded. Current UI is inconsistent across screens.
+
+**Solutions**:
+1. Always-on camera indicator (icon + “Hand tracking on” text)
+2. Short privacy copy: “Camera is never recorded or stored”
+3. Place indicator on all camera-enabled screens
+
+**Acceptance**:
+- [ ] Indicator visible whenever camera is active
+- [ ] Copy present and readable on all relevant screens
+- [ ] No screen with camera access lacks indicator
+
+**Related files**:
+- `src/frontend/src/components/game/CameraThumbnail.tsx`
+- `src/frontend/src/components/CameraPermissionScreen.tsx`
+
+---
+
+### SEC-005: Redaction Test Harness (Issue Reporting)
+**Priority**: P1  
+**Effort**: 1 day  
+**Source**: issue reporting reliability needs
+
+**Issue**:
+We need a repeatable way to verify that issue report captures never include unredacted camera regions.
+
+**Solutions**:
+1. Add automated checks for redaction overlays before upload
+2. Add a visual test snapshot for redaction mask coverage
+3. Block upload when mask coverage is missing or incomplete
+
+**Acceptance**:
+- [ ] Automated redaction checks pass before upload
+- [ ] Visual test verifies camera region is always masked
+- [ ] Upload blocked on missing/incomplete mask
+
+**Related files**:
+- Issue reporting capture utilities
+- Screenshot test harness
+
+---
+
 ### SEC-002: Input Validation & XSS Prevention
 **Priority**: P1  
 **Effort**: 1-2 days  
@@ -635,30 +683,30 @@ Backend monitoring planned, but frontend errors not tracked. App crashes silentl
 | UX/Accessibility | - | 4 | 1 | - |
 | Accessibility | 1 | 2 | 1 | - |
 | Performance | 1 | 1 | 1 | - |
-| Security/Privacy | - | 3 | - | - |
+| Security/Privacy | - | 5 | - | - |
 | Content | - | 1 | 2 | 1 |
 | Mobile | - | 1 | 1 | - |
 | Analytics | - | - | 2 | - |
 | DevOps | - | 1 | 1 | - |
-| **TOTAL** | **2** | **13** | **9** | **1** |
+| **TOTAL** | **2** | **15** | **9** | **1** |
 
 ---
 
 ## Effort Estimation
 
-**Quick Wins (<1 day)**: 8 items
-- UX-004, A11Y-001, SEC-003, DEVOPS-001 partial, etc.
-- **Total effort**: 1 week solo
+**Quick Wins (<1 day)**: 10 items
+- UX-004, A11Y-001, SEC-003, SEC-004, SEC-005, DEVOPS-001 partial, etc.
+- **Total effort**: ~1.5 weeks solo
 
-**Medium (1-3 days)**: 18 items
+**Medium (1-3 days)**: 15 items
 - UX-002, UX-003, A11Y-002, PERF-001, etc.
-- **Total effort**: 3-4 weeks solo
+- **Total effort**: ~3 weeks solo
 
 **Large (3+ days)**: 2 items
 - A11Y-003 (full accessibility), CONTENT-001 (curriculum redesign)
 - **Total effort**: 1-2 weeks each
 
-**Grand total**: 5-6 weeks 1 developer, or 2-3 weeks with 2 developers working in parallel.
+**Grand total**: ~6-7 weeks 1 developer, or 3-4 weeks with 2 developers working in parallel.
 
 ---
 

@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useRef, useCallback } from 'react';
+import { Hand, Star, Camera, Ear, Gamepad2, Check, Hourglass, SkipForward, PartyPopper, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,9 +10,53 @@ import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
+// Icon components for body actions
+const HeadIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <circle cx="12" cy="10" r="5" />
+    <path d="M12 15v3" />
+    <path d="M9 18h6" />
+  </svg>
+);
+
+const WaveIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <path d="M12 2v4M8 6l-2 2M16 6l2 2M7 10l-3 2M17 10l3 2M6 14l-2 3M18 14l2 3M8 18l-1 3M16 18l1 3" strokeLinecap="round" />
+  </svg>
+);
+
+const ArmsUpIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <path d="M12 4v10M7 9l5-5 5 5M7 14l-2 6M17 14l2 6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const HipsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <path d="M8 12v6M16 12v6M12 8v10" strokeLinecap="round" />
+    <circle cx="8" cy="10" r="2" />
+    <circle cx="16" cy="10" r="2" />
+  </svg>
+);
+
+const TRexIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <path d="M6 12l3-3 3 3M12 12l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 9v6M15 9v6" strokeLinecap="round" />
+  </svg>
+);
+
+const ShouldersIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full">
+    <path d="M4 10h16M6 10v4M18 10v4" strokeLinecap="round" />
+    <circle cx="6" cy="8" r="2" />
+    <circle cx="18" cy="8" r="2" />
+  </svg>
+);
+
 interface BodyAction {
   name: string;
-  emoji: string;
+  icon: React.ReactNode;
   instruction: string;
   landmark: string;
 }
@@ -19,37 +64,37 @@ interface BodyAction {
 const BODY_ACTIONS: BodyAction[] = [
   {
     name: 'Touch Head',
-    emoji: '🙂',
+    icon: <HeadIcon />,
     instruction: 'Touch your head with both hands!',
     landmark: 'head',
   },
   {
     name: 'Wave',
-    emoji: '👋',
+    icon: <WaveIcon />,
     instruction: 'Wave hello with one hand!',
     landmark: 'wave',
   },
   {
     name: 'Arms Up',
-    emoji: '🙌',
+    icon: <ArmsUpIcon />,
     instruction: 'Put both arms up in the air!',
     landmark: 'armsUp',
   },
   {
     name: 'Hands On Hips',
-    emoji: '💪',
+    icon: <HipsIcon />,
     instruction: 'Put your hands on your hips!',
     landmark: 'handsOnHips',
   },
   {
     name: 'T-Rex Arms',
-    emoji: '🦖',
+    icon: <TRexIcon />,
     instruction: 'Bend both elbows like T-Rex!',
     landmark: 'tRex',
   },
   {
     name: 'Touch Shoulders',
-    emoji: '💪',
+    icon: <ShouldersIcon />,
     instruction: 'Touch both shoulders with your hands!',
     landmark: 'shoulders',
   },
@@ -309,7 +354,7 @@ export const SimonSays = memo(function SimonSays() {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <div className='bg-red-50 rounded-[2.5rem] border-3 border-red-100 p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'>
-          <div className='text-6xl mb-6'>😢</div>
+          <div className='w-16 h-16 mx-auto mb-6 text-red-400'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full"><circle cx="12" cy="12" r="10" /><path d="M9 10h.01M15 10h.01" strokeLinecap="round" /><path d="M9 16c1.5-1 3-1 4.5 0" /></svg></div>
           <h2 className='text-2xl font-black text-red-600 tracking-tight mb-4'>Oops!</h2>
           <p className='text-red-500 font-bold mb-8'>{error}</p>
           <button
@@ -340,7 +385,7 @@ export const SimonSays = memo(function SimonSays() {
         </h1>
 
         <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-          ⭐ <span>{score}</span>
+          <Star className="w-6 h-6 fill-amber-500" /> <span>{score}</span>
         </div>
       </header>
 
@@ -351,7 +396,9 @@ export const SimonSays = memo(function SimonSays() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className='text-[8rem] mb-8 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🧠</div>
+            <div className='w-32 h-32 mb-8 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform mx-auto'>
+              <Brain className="w-full h-full" strokeWidth={1.5} />
+            </div>
             <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
               Simon Says!
             </h2>
@@ -362,11 +409,11 @@ export const SimonSays = memo(function SimonSays() {
             <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
               <h3 className='font-black text-advay-slate text-2xl mb-6'>How to Play:</h3>
               <ul className='space-y-4 text-advay-slate font-bold text-lg'>
-                <li className='flex items-center gap-3'><span className='text-3xl'>📸</span> Stand directly in front of your camera</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>👂</span> Listen carefully to what Simon says</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>🏃</span> Do the action with your whole body!</li>
-                <li className='flex items-center gap-3'><span className='text-3xl'>⏸️</span> Hold the pose steady to complete it</li>
-                {gameMode === 'combo' && <li className='flex items-center gap-3'><span className='text-3xl'>✋</span> Also show the correct number of fingers!</li>}
+                <li className='flex items-center gap-3'><Camera className="w-8 h-8 text-blue-500" /> Stand directly in front of your camera</li>
+                <li className='flex items-center gap-3'><Ear className="w-8 h-8 text-pink-500" /> Listen carefully to what Simon says</li>
+                <li className='flex items-center gap-3'><div className="w-8 h-8 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-green-500"><path d="M4 16v-4M8 14v-2M12 12V8M16 10V6M20 8V4" strokeLinecap="round" /><circle cx="12" cy="18" r="2" /></svg></div> Do the action with your whole body!</li>
+                <li className='flex items-center gap-3'><div className="w-8 h-8 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-amber-500"><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M10 8v8M14 8v8" /></svg></div> Hold the pose steady to complete it</li>
+                {gameMode === 'combo' && <li className='flex items-center gap-3'><Hand className="w-8 h-8 text-purple-500" /> Also show the correct number of fingers!</li>}
               </ul>
             </div>
 
@@ -378,7 +425,7 @@ export const SimonSays = memo(function SimonSays() {
                   : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
                   }`}
               >
-                <span className='text-3xl block mb-2'>🏃‍♂️</span>
+                <span className='text-3xl block mb-2 flex justify-center'><div className="w-10 h-10"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-full h-full"><circle cx="12" cy="6" r="3" /><path d="M8 10v10M16 10v10M8 14h8" strokeLinecap="round" /></svg></div></span>
                 Classic
               </button>
               <button
@@ -388,16 +435,16 @@ export const SimonSays = memo(function SimonSays() {
                   : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
                   }`}
               >
-                <span className='text-3xl block mb-2'>✋</span>
+                <span className='text-3xl block mb-2 flex justify-center'><Hand className="w-10 h-10" /></span>
                 Combo
               </button>
             </div>
 
             <button
               onClick={startGame}
-              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
+              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3'
             >
-              Start Playing! 🎮
+              Start Playing! <Gamepad2 className="w-8 h-8" />
             </button>
           </motion.div>
         ) : (
@@ -410,8 +457,8 @@ export const SimonSays = memo(function SimonSays() {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className='text-center mb-10'>
-                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
-                  {currentAction.emoji}
+                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 w-28 h-28 mb-6 drop-shadow-[0_4px_0_#E5B86E] text-advay-slate'>
+                  {currentAction.icon}
                 </div>
                 <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
                   {currentAction.name}
@@ -497,8 +544,8 @@ export const SimonSays = memo(function SimonSays() {
                   height={360}
                 />
                 <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
-                  <span className='text-white font-bold text-sm tracking-wide'>
-                    {cameraReady ? '✅ Camera Active' : '⌛ Warming up...'}
+                  <span className='text-white font-bold text-sm tracking-wide flex items-center gap-2'>
+                    {cameraReady ? <><Check className="w-4 h-4" /> Camera Active</> : <><Hourglass className="w-4 h-4" /> Warming up...</>}
                   </span>
                 </div>
               </div>
@@ -518,9 +565,9 @@ export const SimonSays = memo(function SimonSays() {
                     }
                     holdTimeRef.current = 0;
                   }}
-                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
+                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg flex items-center justify-center gap-2'
                 >
-                  Skip Pose ⏭
+                  Skip Pose <SkipForward className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -542,7 +589,9 @@ export const SimonSays = memo(function SimonSays() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.8, y: 20, opacity: 0 }}
               >
-                <div className='text-[6rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>🎉</div>
+                <div className='w-24 h-24 mx-auto mb-6 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E]'>
+                  <PartyPopper className="w-full h-full" strokeWidth={1.5} />
+                </div>
                 <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-4'>
                   Great Pose!
                 </h2>

@@ -9,14 +9,25 @@
 # AGENT INSTRUCTIONS:
 # When this check triggers (shows warnings about removed functions/state):
 # 1. DO NOT just bypass with --no-verify
-# 2. Compare old vs new version MANUALLY to understand what was lost
-# 3. Ask: "Does the new version preserve ALL user-facing functionality?"
-# 4. If functionality was removed unintentionally - RESTORE IT before committing
-# 5. If removal was intentional - document WHY in the commit message
-# 6. When in doubt, ask the user before committing
+# 2. Compare old vs new version MANUALLY to understand what changed
+# 3. Ask: "Does the new version IMPROVE on the old (not just preserve)?"
+#    - New features/functions added? ✅ GOOD
+#    - Same functionality but better code? ✅ GOOD  
+#    - Same functionality split into multiple files? ✅ CHECK ALL FILES TOGETHER
+#    - Less functionality than before? ❌ REGRESSION - FIX IT
+# 4. For REFACTORS that split files: Check the SUM of all new files vs original
+#    - Functions moved to new file? Ensure they're called/used
+#    - State split across components? Ensure no gaps
+#    - Verify comprehensiveness: nothing lost in the split
+# 5. If functionality was removed unintentionally - RESTORE IT before committing
+# 6. If removal was intentional (rare) - document WHY and what replaces it
+# 7. When in doubt, ask the user before committing
+#
+# PRINCIPLE: New code should be ADDITIVE or IMPROVEMENT, never reductive unless
+# explicitly discussed. Refactors must be COMPREHENSIVE - all pieces accounted for.
 #
 # Remember: This automated check is a SAFETY NET, not a replacement for
-# thoughtful code review by the agent. Always verify your changes.
+# thoughtful code review by the agent. Always verify your changes improve the codebase.
 
 set -euo pipefail
 
@@ -287,20 +298,25 @@ check_feature_regression() {
     log_error "1. COMPARE versions side-by-side:"
     log_error "   git diff HEAD -- $file"
     log_error ""
-    log_error "2. ASK: Does the new version preserve ALL user-facing functionality?"
-    log_error "   - Can users still do what they could do before?"
-    log_error "   - Are all buttons/features still accessible?"
-    log_error "   - Check for removed state variables (may break UI)"
+    log_error "2. VERIFY THE CHANGE IS IMPROVEMENT (not just different):"
+    log_error "   ✅ NEW features/functions added? GOOD - commit it"
+    log_error "   ✅ BETTER code quality with same features? GOOD - commit it"
+    log_error "   ✅ SPLIT into multiple files? Check ALL files together for completeness"
+    log_error "   ❌ LESS functionality than before? REGRESSION - FIX IT"
     log_error ""
-    log_error "3. IF functionality was removed UNINTENTIONALLY:"
-    log_error "   → RESTORE IT before committing"
+    log_error "3. FOR REFACTORS THAT SPLIT FILES:"
+    log_error "   - Check all related files in the same commit"
+    log_error "   - Ensure functions moved are properly imported/used"
+    log_error "   - Verify state is comprehensively handled (no gaps)"
+    log_error "   - Ask: 'Is the SUM of new files ≥ original file?'"
     log_error ""
-    log_error "4. IF removal was INTENTIONAL:"
-    log_error "   → Document WHY in your commit message"
-    log_error "   → Example: 'Removes X because Y is now handled by Z'"
+    log_error "4. IF REGRESSION (functionality lost):"
+    log_error "   → RESTORE the missing functionality"
+    log_error "   → OR document WHY and what replaces it"
     log_error ""
     log_error "5. WHEN IN DOUBT: Ask the user before committing"
     log_error ""
+    log_error "PRINCIPLE: Code should be ADDITIVE or IMPROVEMENT, never reductive."
     log_error "═══════════════════════════════════════════════════════════════"
     log_error ""
     log_error "To bypass ONLY if you've verified thoroughly:"
@@ -362,6 +378,41 @@ main() {
   
   log_warn "${#files_to_check[@]} file(s) exceed threshold - checking for regressions..."
   echo ""
+  
+  # Detect potential file splits (new files in same directory as modified files)
+  local new_files
+  new_files=$(git diff --cached --name-only --diff-filter=A | grep -E '\.(tsx?|jsx?|py)$' || true)
+  
+  if [[ -n "$new_files" && ${#files_to_check[@]} -gt 0 ]]; then
+    log_info "New files detected - checking for potential file splits..."
+    
+    # For each significantly modified file, check if new files are in same directory
+    for i in "${!files_to_check[@]}"; do
+      local modified_file="${files_to_check[$i]}"
+      local change="${file_changes[$i]}"
+      local dir
+      dir=$(dirname "$modified_file")
+      
+      # Check if any new files are in the same directory or subdirectory
+      local related_new_files
+      related_new_files=$(echo "$new_files" | grep "^$dir/" || true)
+      
+      if [[ -n "$related_new_files" && "$change" -gt 30 ]]; then
+        log_warn ""
+        log_warn "⚠️  POTENTIAL FILE SPLIT DETECTED:"
+        log_warn "   Modified: $modified_file (${change}% changed)"
+        log_warn "   New files in same directory:"
+        echo "$related_new_files" | while read -r new_file; do
+          [[ -n "$new_file" ]] && log_warn "     + $new_file"
+        done
+        log_warn ""
+        log_warn "   AGENT: Verify the SUM of all files preserves original functionality!"
+        log_warn "   Check: Are all functions from the original file accounted for?"
+        log_warn ""
+      fi
+    done
+    echo ""
+  fi
   
   local exit_code=0
   
