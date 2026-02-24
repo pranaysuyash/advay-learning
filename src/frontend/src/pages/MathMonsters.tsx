@@ -20,6 +20,7 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CSSMonster } from '../components/characters/CSSMonster';
+import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
@@ -304,10 +305,13 @@ export default function MathMonsters() {
           <div className="flex gap-4 mb-6">
             {MONSTERS.map(m => (
               <div key={m.id} className="text-center">
-                <CSSMonster
-                  type={m.id as 'munchy' | 'crunchy' | 'nibbles' | 'snoozy' | 'zippy'}
-                  expression="idle"
-                  size="sm"
+                <KenneyCharacter
+                  type={(m.id === 'munchy' ? 'beige' : 
+                        m.id === 'crunchy' ? 'green' :
+                        m.id === 'nibbles' ? 'pink' :
+                        m.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
+                  animation="idle"
+                  size="md"
                 />
                 <div className="text-xs text-text-secondary mt-1">{m.name}</div>
               </div>
@@ -427,13 +431,18 @@ export default function MathMonsters() {
           
           {/* Monster & Problem Area */}
           <div className="flex-1 flex flex-col items-center justify-center p-4">
-            {/* Monster - CSS Animated Character */}
+            {/* Monster - Kenney Character */}
             <div className="mb-4">
-              <CSSMonster
-                type={monster.id as 'munchy' | 'crunchy' | 'nibbles' | 'snoozy' | 'zippy'}
-                expression={monsterExpression}
-                size="xl"
-                eyeTracking={true}
+              <KenneyCharacter
+                type={(monster.id === 'munchy' ? 'beige' : 
+                      monster.id === 'crunchy' ? 'green' :
+                      monster.id === 'nibbles' ? 'pink' :
+                      monster.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
+                animation={monsterExpression === 'eating' ? 'jump' :
+                          monsterExpression === 'happy' ? 'walk' :
+                          monsterExpression === 'sad' ? 'hit' :
+                          monsterExpression === 'hungry' ? 'climb' : 'idle'}
+                size="lg"
               />
             </div>
             

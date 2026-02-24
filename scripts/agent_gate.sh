@@ -12,6 +12,7 @@ Purpose:
   - Addendum worklog updates required for code/audit changes
   - WORKLOG_TICKETS.md is protected by default (curation-only path)
   - Audit artifacts must reference a TCK ticket id
+  - Changed tickets must include a unique Ticket Stamp
   - Tickets marked DONE must include evidence (Command/Output or explicit Unknown markers)
 USAGE
 }
@@ -94,6 +95,17 @@ if echo "$changed_paths" | rg -q '^docs/audit/.*\.md$'; then
 fi
 
 if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true ]]; then
+  # Enforce globally unique ticket stamps across worklog files.
+  duplicate_stamp_lines="$(
+    rg -n '^Ticket Stamp:[[:space:]]+STAMP-[0-9]{8}T[0-9]{6}Z-[A-Za-z0-9_.-]+(-[A-Za-z0-9]{4})?$' docs/WORKLOG_*.md \
+      | sed -E 's/^[^:]+:[0-9]+:Ticket Stamp:[[:space:]]+//' \
+      | sort \
+      | uniq -d || true
+  )"
+  if [[ -n "${duplicate_stamp_lines//$'\n'/}" ]]; then
+    die "duplicate Ticket Stamp detected across worklogs:\n${duplicate_stamp_lines}\nUse scripts/new_ticket_stamp.sh to generate a unique stamp."
+  fi
+
   # Do not retroactively enforce evidence on historical tickets. Only enforce
   # tickets that are actually modified in this staged/commit payload.
   if [[ "${ALLOW_WORKLOG_TICKETS_EDIT:-}" == "1" ]]; then
@@ -141,11 +153,23 @@ if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true 
         ticket="";
         ticket_id="";
         status="";
+        hasStamp=0;
+        stampValid=0;
         hasEvidence=0;
         hasCommand=0;
         hasUnknown=0;
       }
       function flush() {
+        if (in_ticket && changed[ticket_id] == 1) {
+          if (!hasStamp) {
+            printf("Ticket %s is missing `Ticket Stamp:`. Use scripts/new_ticket_stamp.sh <agent-name>.\n", ticket);
+            exit 3;
+          }
+          if (!stampValid) {
+            printf("Ticket %s has invalid Ticket Stamp format. Expected: STAMP-YYYYMMDDTHHMMSSZ-agent[-abcd].\n", ticket);
+            exit 3;
+          }
+        }
         if (in_ticket && status == "DONE" && changed[ticket_id] == 1) {
           if (!hasEvidence) {
             printf("Ticket %s is DONE but has no Evidence section.\n", ticket);
@@ -163,12 +187,20 @@ if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true 
         ticket=$0;
         ticket_id=$2;
         status="";
+        hasStamp=0;
+        stampValid=0;
         hasEvidence=0;
         hasCommand=0;
         hasUnknown=0;
         next;
       }
       in_ticket {
+        if ($0 ~ /^Ticket Stamp:[[:space:]]+/) {
+          hasStamp=1;
+          if ($0 ~ /^Ticket Stamp:[[:space:]]+STAMP-[0-9]{8}T[0-9]{6}Z-[A-Za-z0-9_.-]+(-[A-Za-z0-9]{4})?$/) {
+            stampValid=1;
+          }
+        }
         if ($0 ~ /^Status:[[:space:]]+/) {
           gsub(/^Status:[[:space:]]+/, "", $0);
           status=$0;

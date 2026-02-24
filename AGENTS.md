@@ -679,6 +679,7 @@ The pre-commit hook runs these checks in order:
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
 - If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_*.md`.
 - Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
+- Any changed ticket entry must include a unique `Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent[-abcd]`.
 - Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
 
 #### 2. Secret Scan (`scripts/secret_scan.sh`)
@@ -997,11 +998,15 @@ cd src/frontend && npm run lint
 
 ```markdown
 ## TCK-YYYYMMDD-### :: [Short Title]
+Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent-abcd
 
 Type: [AUDIT|REMEDIATION|HARDENING|REVIEW|VERIFICATION|POST_MERGE|TRIAGE]
 Owner: Pranay
 Created: [YYYY-MM-DD HH:MM TZ]
 Status: [OPEN|IN_PROGRESS|BLOCKED|DONE|DROPPED]
+
+# Generate a unique stamp:
+# scripts/new_ticket_stamp.sh <agent-name>
 
 Scope contract:
 

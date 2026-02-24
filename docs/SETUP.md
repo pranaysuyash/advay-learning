@@ -20,13 +20,20 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh
 ```
 
 To manually run the gate on your staged changes:
 
 ```bash
 ./scripts/agent_gate.sh --staged
+```
+
+To generate a unique ticket stamp for worklog entries:
+
+```bash
+./scripts/new_ticket_stamp.sh codex
+# -> STAMP-20260224T220000Z-codex-ab12
 ```
 
 ### Secret Scanning Gate (Required)
