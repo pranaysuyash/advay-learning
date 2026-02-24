@@ -2615,3 +2615,27 @@ Next actions:
 1. Implement quick wins (30 min - 2 hours each)
 2. Download UI Pack after validating this approach
 
+
+
+---
+
+## TCK-20260224-031 :: Language Config Unification - Single Source of Truth
+
+Type: REMEDIATION
+Owner: GitHub Copilot (Agent)
+Created: 2026-02-24 14:32 IST
+Status: **DONE**
+Ticket Stamp: STAMP-20260224T143200Z-copilot-lang-config
+Priority: P2
+
+Key Changes:
+1. Refactored languages.ts to import from i18n/config
+2. Added getAllLanguages() helper
+3. Created 19 unit tests
+4. Updated audit artifact
+
+Results:
+- Single source of truth established
+- All tests pass (19 passed)
+- Full backward compatibility verified
+- Drift prevention tests added

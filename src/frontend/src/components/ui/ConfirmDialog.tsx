@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './Icon';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 interface ConfirmOptions {
   title: string;
@@ -92,6 +93,24 @@ function ConfirmDialog({
   const reducedMotion = useReducedMotion();
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const { playPop, playClick } = useAudio();
+
+  // Play pop sound when dialog opens
+  useEffect(() => {
+    if (dialog.isOpen) {
+      playPop();
+    }
+  }, [dialog.isOpen, playPop]);
+
+  const handleConfirm = () => {
+    playClick();
+    onConfirm();
+  };
+
+  const handleCancel = () => {
+    playClick();
+    onCancel();
+  };
 
   // Focus cancel button when dialog opens
   useEffect(() => {
@@ -171,7 +190,7 @@ function ConfirmDialog({
             animate={{ opacity: 1 }}
             exit={reducedMotion ? { opacity: 0 } : { opacity: 0 }}
             className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50'
-            onClick={onCancel}
+            onClick={handleCancel}
           />
           <dialog
             ref={dialogRef}
@@ -224,14 +243,14 @@ function ConfirmDialog({
                 <button
                   ref={cancelButtonRef}
                   type='button'
-                  onClick={onCancel}
+                  onClick={handleCancel}
                   className='px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50'
                 >
                   {dialog.cancelText}
                 </button>
                 <button
                   type='button'
-                  onClick={onConfirm}
+                  onClick={handleConfirm}
                   className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition border-b-4 active:border-b-0 active:translate-y-1 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#1a1a2e] ${styles.confirmBtn}`}
                 >
                   {dialog.confirmText}

@@ -60,10 +60,10 @@ export interface GameManifest {
 // ─── VIBE CONFIG ────────────────────────────────────────────────────────
 
 export const VIBE_CONFIG: Record<GameVibe, { label: string; emoji: string; color: string }> = {
-  chill:    { label: 'Chill',    emoji: '😌', color: '#10B981' },
-  active:   { label: 'Active',   emoji: '⚡', color: '#F59E0B' },
+  chill: { label: 'Chill', emoji: '😌', color: '#10B981' },
+  active: { label: 'Active', emoji: '⚡', color: '#F59E0B' },
   creative: { label: 'Creative', emoji: '🎨', color: '#A855F7' },
-  brainy:   { label: 'Brainy',   emoji: '🧠', color: '#3B82F6' },
+  brainy: { label: 'Brainy', emoji: '🧠', color: '#3B82F6' },
 };
 
 // ─── THE REGISTRY ───────────────────────────────────────────────────────
@@ -787,6 +787,36 @@ export const GAME_REGISTRY: GameManifest[] = [
       { itemId: 'element-au', chance: 0.02, minScore: 90 },
     ],
     easterEggs: [],
+  },
+
+  // ── Platform World ────────────────────────────────────────────────
+  {
+    id: 'platformer-runner',
+    name: 'Platform Runner',
+    tagline: 'Raise your hand to jump, dodge slimes, grab coins! 🏃⭐',
+    path: '/games/platformer-runner',
+    icon: 'sparkles',
+    worldId: 'platform-world',
+    vibe: 'active',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.25 },
+      { itemId: 'color-rainbow', chance: 0.15, minScore: 70 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-coin-king',
+        name: 'Coin King',
+        description: 'Collect 20 coins in one run!',
+        trigger: 'coins-20',
+        reward: { itemId: 'shape-star', quantity: 2 },
+        hint: 'Grab every shiny coin you see…',
+        difficulty: 'medium',
+      },
+    ],
   },
 
   // ── Voice Input (Experimental) ────────────────────────────────────

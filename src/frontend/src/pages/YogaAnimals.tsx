@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { Dog, Cat, TreeDeciduous, Bird, Bug, Sparkles, Camera, Eye, Activity, Lightbulb, CheckCircle2, Loader2, Target, SkipForward } from 'lucide-react';
+import { Dog, Cat, TreeDeciduous, Bird, Sparkles, Camera, Eye, Activity, Lightbulb, CheckCircle2, Loader2, Target, SkipForward } from 'lucide-react';
+import { KenneyEnemy } from '../components/characters/KenneyCharacter';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
@@ -56,7 +57,7 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
   {
     name: 'Frog',
-    icon: <Bug className="w-16 h-16" />,
+    icon: <KenneyEnemy type="frog" animation="jump" size="lg" />,
     description: 'Jump like a frog!',
     instruction: 'Squat down with hands on the ground, then jump up!',
     targets: { leftLegAngle: 20, rightLegAngle: 20, torsoAngle: -45 },

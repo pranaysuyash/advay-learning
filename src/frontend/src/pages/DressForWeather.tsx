@@ -31,6 +31,7 @@ import {
   RainbowIcon,
 } from '../components/ClothingSVGs';
 
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
@@ -198,6 +199,7 @@ const LEVELS: Level[] = [
 
 export default function DressForWeather() {
   // Hand tracking with modern hooks
+  const { onGameComplete } = useGameDrops('dress-for-weather');
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,

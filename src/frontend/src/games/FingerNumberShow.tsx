@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useTTS } from '../hooks/useTTS';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -75,7 +75,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
-  const { playCelebration, playSuccess } = useSoundEffects();
+  const { playFanfare: playCelebration, playSuccess, playPop } = useAudio();
   const { onGameComplete } = useGameDrops('finger-number-show');
 
   // Language and mode selection
@@ -288,8 +288,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
       const video = meta.video;
       if (!video) return;
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
       if (
@@ -496,6 +496,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   };
 
   const goToHome = () => {
+    playPop();
     stopGame();
     navigate('/dashboard');
   };
@@ -511,8 +512,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const isDetectedMatch =
     gameMode === 'letters'
       ? targetLetter &&
-        currentCount === getLetterNumberValue(targetLetter) &&
-        handsDetected > 0
+      currentCount === getLetterNumberValue(targetLetter) &&
+      handsDetected > 0
       : targetNumber === 0
         ? currentCount === 0 && handsDetected > 0
         : currentCount === targetNumber;
@@ -568,8 +569,8 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     id: 'start',
     icon: 'play',
     label: isModelLoading ? 'Loading...' : 'Start Game',
-    ariaLabel: isModelLoading 
-      ? 'Loading hand tracking model, please wait' 
+    ariaLabel: isModelLoading
+      ? 'Loading hand tracking model, please wait'
       : 'Start the game (Space or Enter to activate)',
     onClick: startGame,
     variant: 'success',
@@ -633,7 +634,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
           level={difficulty + 1}
           onHome={goToHome}
         >
-          <div 
+          <div
             className='relative w-full h-full'
             role="application"
             aria-label={`${gameMode === 'letters' ? 'Letter' : 'Number'} counting game. Show your fingers to match the target.`}

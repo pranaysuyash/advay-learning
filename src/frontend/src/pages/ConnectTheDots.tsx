@@ -13,7 +13,7 @@ import { GameCursor } from '../components/game/GameCursor';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -73,7 +73,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   const gameCompletedRef = useRef<boolean>(false);
 
   // Sound effects
-  const { playCelebration, playPop } = useSoundEffects();
+  const { playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('connect-the-dots');
 
@@ -439,7 +439,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   };
 
   const goToHome = () => {
-    assetLoader.playSound('pop', 0.3); // Audio feedback on navigation
+    playPop(); // Audio feedback on navigation
     navigate('/dashboard');
   };
 
@@ -500,9 +500,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
   const normalizedCursor = handCursor
     ? {
-        x: handCursor.x / 800,
-        y: handCursor.y / 600,
-      }
+      x: handCursor.x / 800,
+      y: handCursor.y / 600,
+    }
     : null;
 
   return (
@@ -795,7 +795,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-12'>
                   <div className='w-32 h-32 mx-auto mb-8 text-7xl'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] mb-2'>

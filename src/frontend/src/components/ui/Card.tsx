@@ -1,5 +1,6 @@
 import { ReactNode, forwardRef } from 'react';
 import { motion } from 'framer-motion';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 interface CardProps {
   children: ReactNode;
@@ -18,10 +19,20 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       lg: 'p-8',
     };
 
+    const { playHover, playClick } = useAudio();
+
+    const handleClick = () => {
+      if (onClick) {
+        playClick();
+        onClick();
+      }
+    };
+
     return (
       <motion.div
         ref={ref}
-        onClick={onClick}
+        onClick={onClick ? handleClick : undefined}
+        onMouseEnter={hover ? playHover : undefined}
         whileHover={hover ? { y: -4, boxShadow: '0 12px 0 0 rgba(0, 0, 0, 0.05)' } : undefined}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className={`

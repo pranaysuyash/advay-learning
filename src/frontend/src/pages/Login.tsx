@@ -6,8 +6,10 @@ import { useAuthStore } from '../store';
 import { authApi } from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export function Login() {
+  const { playSuccess, playError } = useAudio();
   const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,6 +51,7 @@ export function Login() {
 
     // Basic client-side validation only on explicit submit
     if (!email.trim() || !password.trim()) {
+      playError();
       setInlineError(t('login.errors.emptyFields'));
       if (!email.trim()) {
         emailInputRef.current?.focus();
@@ -60,9 +63,11 @@ export function Login() {
 
     try {
       await login(email, password);
+      playSuccess();
       // Wait for state to settle, then navigate
       setTimeout(() => navigate('/dashboard'), 50);
     } catch (error: unknown) {
+      playError();
       // Check if error is due to unverified email
       const errorMsg =
         (error as { response?: { data?: { detail?: string } } })?.response?.data

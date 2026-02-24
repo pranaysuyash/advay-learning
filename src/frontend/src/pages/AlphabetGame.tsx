@@ -39,7 +39,6 @@ import useInactivityDetector from '../hooks/useInactivityDetector';
 import { usePostureDetection } from '../hooks/usePostureDetection';
 import { useAttentionDetection } from '../hooks/useAttentionDetection';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { usePhonics } from '../hooks/usePhonics';
 import { useCameraPermission } from '../hooks/useCameraPermission';
@@ -124,8 +123,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const latestTrackingFrameRef = useRef<TrackedHandFrame | null>(null);
 
   // Sound effects and phonics hooks
-  const { playCelebration, playPop, playError } = useSoundEffects();
-  const { playClick } = useAudio();
+  const { playFanfare: playCelebration, playPop, playError, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('alphabet-tracing');
   const { speakWordExample } = usePhonics();

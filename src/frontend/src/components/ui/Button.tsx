@@ -1,6 +1,7 @@
 import { ReactNode, ButtonHTMLAttributes, forwardRef } from 'react';
 import { UIIcon, IconName } from './Icon';
 import { Link, type LinkProps } from 'react-router-dom';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success';
@@ -69,6 +70,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       className = '',
       disabled,
+      onClick,
       ...props
     },
     ref,
@@ -77,6 +79,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sm: 18,
       md: 22,
       lg: 26,
+    };
+
+    const { playClick } = useAudio();
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!disabled && !isLoading) {
+        playClick();
+      }
+      onClick?.(e);
     };
 
     // Exclude custom props that shouldn't hit DOM
@@ -89,6 +100,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={getButtonClassName({ variant, size, fullWidth, className })}
         disabled={disabled || isLoading}
+        onClick={handleClick}
         {...domProps}
       >
         {isLoading ? (
@@ -154,10 +166,20 @@ export function ButtonLink({
     lg: 26,
   };
 
+  const { playClick } = useAudio();
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    playClick();
+    if (props.onClick) {
+      props.onClick(e);
+    }
+  };
+
   return (
     <Link
       to={to}
       className={getButtonClassName({ variant, size, fullWidth, className })}
+      onClick={handleClick}
       {...props}
     >
       {icon && iconPosition === 'left' && <UIIcon name={icon} size={iconSizes[size]} />}

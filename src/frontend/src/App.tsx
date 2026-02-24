@@ -1,12 +1,13 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/ui/Layout';
 import { ProtectedRoute } from './components/ui/ProtectedRoute';
 import { ToastProvider } from './components/ui/Toast';
 import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { ItemDropToast } from './components/inventory/ItemDropToast';
 import { BackpackButton } from './components/inventory/BackpackButton';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect, useRef } from 'react';
 import { CameraSafeRoute } from './components/routing/CameraSafeRoute';
+import { useAudio } from './utils/hooks/useAudio';
 import { GlobalErrorBoundary } from './components/errors/GlobalErrorBoundary';
 import { useProgressSync } from './hooks/useProgressSync';
 import { CalmModeProvider } from './components/CalmModeProvider';
@@ -201,6 +202,11 @@ const DiscoveryLab = lazy(() =>
     default: module.DiscoveryLab,
   })),
 );
+const PlatformerRunner = lazy(() =>
+  import('./pages/PlatformerRunner').then((module) => ({
+    default: module.PlatformerRunner,
+  })),
+);
 
 // Loading component for suspense boundaries
 const PageLoader = () => (
@@ -211,6 +217,17 @@ const PageLoader = () => (
 
 function App() {
   useProgressSync();
+  const location = useLocation();
+  const { playFlip } = useAudio();
+  const prevPathName = useRef(location.pathname);
+
+  useEffect(() => {
+    if (location.pathname !== prevPathName.current) {
+      // Don't play flip sound on initial render
+      playFlip();
+      prevPathName.current = location.pathname;
+    }
+  }, [location.pathname, playFlip]);
 
   return (
     <ToastProvider>
@@ -501,6 +518,16 @@ function App() {
                     <ProtectedRoute>
                       <CameraSafeRoute gameName='Math Monsters'>
                         <MathMonsters />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/platformer-runner'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Platform Runner'>
+                        <PlatformerRunner />
                       </CameraSafeRoute>
                     </ProtectedRoute>
                   }

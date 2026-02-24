@@ -11,7 +11,7 @@ import { GameCursor } from '../components/game/GameCursor';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
@@ -84,7 +84,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   const [showCelebration, setShowCelebration] = useState(false);
 
   // Sound effects
-  const { playCelebration, playSuccess, playError } = useSoundEffects();
+  const { playFanfare: playCelebration, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('letter-hunt');
 
@@ -348,9 +348,9 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   const cursorViewport =
     cursor && cameraAreaRef.current
       ? {
-          x: cameraAreaRef.current.getBoundingClientRect().left + cursor.x,
-          y: cameraAreaRef.current.getBoundingClientRect().top + cursor.y,
-        }
+        x: cameraAreaRef.current.getBoundingClientRect().left + cursor.x,
+        y: cameraAreaRef.current.getBoundingClientRect().top + cursor.y,
+      }
       : null;
 
   // Menu controls
@@ -646,7 +646,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-8'>
                   <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-3 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform text-amber-500'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-3'>

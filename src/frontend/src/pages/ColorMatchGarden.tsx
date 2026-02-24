@@ -10,7 +10,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
@@ -84,7 +84,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const targetsRef = useRef(targets);
   const promptRef = useRef(promptId);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('color-match-garden');
 
@@ -248,7 +248,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
       void speak(`Find the ${targetName} flower!`);
     }
     assetLoader.playSound('pop', 0.5);
-    await playStart();
+    playPop();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();
@@ -384,7 +384,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-white/60 backdrop-blur-sm z-20'>
             <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
               <div className='w-32 h-32 mb-6 bg-emerald-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center drop-shadow-md hover:scale-110 transition-transform cursor-pointer text-emerald-500'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9"/><path d="M12 16.5a4.5 4.5 0 1 0 4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 1-4.5-4.5M16.5 12H15"/><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9" /><path d="M12 16.5a4.5 4.5 0 1 0 4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 1-4.5-4.5M16.5 12H15" /><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /></svg>
               </div>
 
               <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>

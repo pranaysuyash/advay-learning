@@ -285,3 +285,68 @@ Execution log (continued):
 Status updates:
 - [2026-02-24 20:20 IST] **IN_PROGRESS** — Ticket created, beginning implementation
 - [2026-02-24 20:23 IST] **DONE** — WordBuilder toddler enhancements complete
+
+---
+
+### TCK-20260224-006 :: Sound Everything — Phase 1 Core UI Audio
+
+Type: ENHANCEMENT  
+Owner: Pranay  
+Created: 2026-02-24 20:30 IST  
+Status: **IN_PROGRESS**  
+Priority: P0
+
+Description:
+Implement Phase 1 of Sound Everything ticket (TCK-20260224-001) - adding audio feedback to Core UI components. Button.tsx and Card.tsx already have audio implemented. This work adds audio to GameControls and ConfirmDialog components.
+
+Source:
+- Parent ticket: `docs/WORKLOG_ADDENDUM_v3.md` TCK-20260224-001
+
+Scope contract:
+- In-scope:
+  - Add click sounds to GameControls component buttons
+  - Add click sounds to ConfirmDialog buttons (confirm/cancel)
+  - Add pop sound to ConfirmDialog open
+- Out-of-scope:
+  - Toast sounds (optional, can be Phase 2)
+  - ParentGate sounds (optional)
+  - Game audio (Phase 2)
+- Behavior change allowed: NO (audio feedback only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/GameControls.tsx`
+  - `src/frontend/src/components/ui/ConfirmDialog.tsx`
+- Branch/PR: main
+
+Acceptance Criteria:
+- [ ] GameControls buttons play click sound on interaction
+- [ ] ConfirmDialog buttons play click sound on interaction
+- [ ] ConfirmDialog plays pop sound when opening
+- [ ] Type-check and lint pass
+- [ ] No regressions in existing functionality
+
+Plan:
+1. Add useAudio hook to GameControls.tsx
+2. Add playClick to GameControls button onClick handler
+3. Add useAudio hook to ConfirmDialog.tsx
+4. Add playPop when dialog opens
+5. Add playClick to confirm/cancel buttons
+6. Run type-check and lint
+7. Verify no regressions
+
+Execution log:
+- [2026-02-24 20:32 IST] Added useAudio hook import to GameControls.tsx
+- [2026-02-24 20:33 IST] Added handleControlClick function with playClick to GameControls.tsx
+- [2026-02-24 20:34 IST] Updated button onClick to use handleControlClick wrapper
+- [2026-02-24 20:35 IST] Added useAudio hook import to ConfirmDialog.tsx
+- [2026-02-24 20:36 IST] Added useEffect to playPop sound when dialog opens
+- [2026-02-24 20:37 IST] Added handleConfirm and handleCancel functions with playClick
+- [2026-02-24 20:38 IST] Updated all onClick handlers to use wrapped functions
+- [2026-02-24 20:39 IST] Type-check passed | Evidence: No new errors (pre-existing errors in other files)
+- [2026-02-24 20:39 IST] Lint passed for modified files | Evidence: No errors in GameControls.tsx or ConfirmDialog.tsx
+
+Status updates:
+- [2026-02-24 20:30 IST] **IN_PROGRESS** — Phase 1 implementation starting
+- [2026-02-24 20:39 IST] **DONE** — Phase 1 Core UI Audio complete

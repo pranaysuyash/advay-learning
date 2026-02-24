@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { LANGUAGES } from '../../data/languages';
+import { useAudio } from '../../utils/hooks/useAudio';
+import { useEffect, useRef } from 'react';
 
 interface AddChildModalProps {
   isOpen: boolean;
@@ -30,6 +32,16 @@ export function AddChildModal({
   onSubmit,
   isSubmitting,
 }: AddChildModalProps) {
+  const { playPop } = useAudio();
+  const wasOpen = useRef(isOpen);
+
+  useEffect(() => {
+    if (isOpen !== wasOpen.current) {
+      playPop();
+      wasOpen.current = isOpen;
+    }
+  }, [isOpen, playPop]);
+
   if (!isOpen) return null;
 
   return (

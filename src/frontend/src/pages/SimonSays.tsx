@@ -8,6 +8,7 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
 // Icon components for body actions
@@ -457,8 +458,23 @@ export const SimonSays = memo(function SimonSays() {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className='text-center mb-10'>
-                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 w-28 h-28 mb-6 drop-shadow-[0_4px_0_#E5B86E] text-advay-slate'>
+                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 w-28 h-28 mb-4 drop-shadow-[0_4px_0_#E5B86E] text-advay-slate'>
                   {currentAction.icon}
+                </div>
+                {/* Kenney Character Demonstration */}
+                <div className='flex justify-center mb-4'>
+                  <KenneyCharacter
+                    type="beige"
+                    animation={
+                      currentAction.name === 'Arms Up' ? 'climb' :
+                      currentAction.name === 'Touch Head' ? 'duck' :
+                      currentAction.name === 'Wave' ? 'walk' :
+                      currentAction.name === 'Hands On Hips' ? 'idle' :
+                      currentAction.name === 'T-Rex Arms' ? 'hit' :
+                      currentAction.name === 'Touch Shoulders' ? 'jump' : 'idle'
+                    }
+                    size="lg"
+                  />
                 </div>
                 <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
                   {currentAction.name}

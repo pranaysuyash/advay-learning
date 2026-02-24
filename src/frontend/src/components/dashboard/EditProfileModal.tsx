@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { LANGUAGES } from '../../data/languages';
 import type { Profile } from '../../store';
+import { useAudio } from '../../utils/hooks/useAudio';
+import { useEffect, useRef } from 'react';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -29,6 +31,16 @@ export function EditProfileModal({
   onSubmit,
   isSubmitting,
 }: EditProfileModalProps) {
+  const { playPop } = useAudio();
+  const wasOpen = useRef(isOpen);
+
+  useEffect(() => {
+    if (isOpen !== wasOpen.current) {
+      playPop();
+      wasOpen.current = isOpen;
+    }
+  }, [isOpen, playPop]);
+
   if (!isOpen || !profile) return null;
 
   return (

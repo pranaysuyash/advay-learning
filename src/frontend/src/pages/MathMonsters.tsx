@@ -23,8 +23,10 @@ import { CSSMonster } from '../components/characters/CSSMonster';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 
 import { useAudio } from '../utils/hooks/useAudio';
+import { useKenneyAudio } from '../utils/hooks/useKenneyAudio';
 import '../styles/animations.css';
 
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -50,6 +52,8 @@ const MIN_FINGER_HOLD_TIME = 1500;
 export default function MathMonsters() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
+  const { playCoin, playHurt, playSelect } = useKenneyAudio();
+  const { onGameComplete } = useGameDrops('math-monsters');
   const { speak, isEnabled: ttsEnabled } = useTTS();
   
   // ===== GAME STATE =====
@@ -144,6 +148,7 @@ export default function MathMonsters() {
   // ===== GAME FLOW =====
   const startGame = () => {
     playClick();
+    playSelect(); // Kenney UI sound
     const newGameState = initializeGame();
     setGameState(newGameState);
     setShowMenu(false);
@@ -174,6 +179,7 @@ export default function MathMonsters() {
     
     if (isCorrect) {
       playSuccess();
+      playCoin(); // Kenney coin sound
       setMonsterExpression('eating');
       if (ttsEnabled) {
         void speak('Yum! Correct answer!');
@@ -181,6 +187,7 @@ export default function MathMonsters() {
       setTimeout(() => playMunch(), 200);
     } else {
       playError();
+      playHurt(); // Kenney hurt sound
       setMonsterExpression('sad');
       if (ttsEnabled) {
         void speak(`That's ${fingerCount}. Try ${gameState.currentProblem?.answer} fingers!`);

@@ -10,7 +10,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
@@ -44,7 +44,7 @@ export const ShapePop = memo(function ShapePopComponent() {
 
   const scoreRef = useRef(score);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('shape-pop');
 
@@ -132,7 +132,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     if (ttsEnabled) {
       void speak("Let's pop some shapes! Show me your hand!");
     }
-    await playStart();
+    playPop();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();
@@ -230,7 +230,7 @@ export const ShapePop = memo(function ShapePopComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform text-[#3B82F6]'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
               </div>
               <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Shape Pop</h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>

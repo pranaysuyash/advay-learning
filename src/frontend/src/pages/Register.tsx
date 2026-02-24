@@ -6,8 +6,10 @@ import { profileApi } from '../services/api';
 import { Mascot } from '../components/Mascot';
 import { LANGUAGES } from '../data/languages';
 import { UIIcon } from '../components/ui/Icon';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export function Register() {
+  const { playSuccess, playError } = useAudio();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,16 +33,19 @@ export function Register() {
     setLocalError('');
 
     if (password !== confirmPassword) {
+      playError();
       setLocalError('Passwords do not match');
       return;
     }
 
     if (password.length < 8) {
+      playError();
       setLocalError('Password must be at least 8 characters');
       return;
     }
 
     if (showChildFields && !childName.trim()) {
+      playError();
       setLocalError('Please enter your child\'s name');
       return;
     }
@@ -62,8 +67,10 @@ export function Register() {
         setIsCreatingProfile(false);
       }
 
+      playSuccess();
       setTimeout(() => navigate('/login?registered=true'), 50);
     } catch (error) {
+      playError();
       // Error is handled in store
     }
   };

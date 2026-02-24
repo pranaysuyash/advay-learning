@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { UIIcon, IconName } from './ui/Icon';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export interface GameControl {
   id: string;
@@ -35,6 +36,13 @@ export const GameControls: React.FC<GameControlsProps> = ({
   position = 'bottom-right',
   className = '',
 }) => {
+  const { playClick } = useAudio();
+
+  const handleControlClick = (control: GameControl) => {
+    playClick();
+    control.onClick();
+  };
+
   const positionClasses = {
     'bottom-left': 'bottom-4 left-4',
     'bottom-right': 'bottom-4 right-4',
@@ -76,7 +84,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
         {controls.map((control) => (
           <motion.button
             key={control.id}
-            onClick={control.onClick}
+            onClick={() => handleControlClick(control)}
             disabled={control.disabled}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

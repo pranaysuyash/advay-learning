@@ -10,7 +10,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
@@ -48,8 +48,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const holdProgressRef = useRef(holdProgress);
   const celebrationTimeoutRef = useRef<number | undefined>(undefined);
 
-  const { playSuccess, playError, playCelebration, playStart } =
-    useSoundEffects();
+  const { playSuccess, playError, playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('steady-hand-lab');
 
@@ -209,7 +208,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     if (ttsEnabled) {
       void speak("Let's test your steady hand! Show me your finger!");
     }
-    await playStart();
+    playPop();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();
@@ -226,7 +225,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   };
 
   const goHome = () => {
-    assetLoader.playSound('pop', 0.3); // Audio feedback on navigation
+    playPop(); // Audio feedback on navigation
     resetGame();
     navigate('/dashboard');
   };
