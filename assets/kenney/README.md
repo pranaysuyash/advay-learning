@@ -3,7 +3,7 @@
 **Status:** Placeholder folders created - assets need manual download  
 **Source:** https://kenney.nl/assets  
 **License:** CC0 (Public Domain)  
-**Total Available:** 40,000+ assets
+**Total Available:** 60,000+ assets (All-in-1) / Individual packs FREE
 
 ---
 
@@ -18,11 +18,14 @@ Since Kenney's assets require manual download from the website (CDN links are se
 3. Click the **"Download"** button
 4. Extract the ZIP to the corresponding folder below
 
-### Method 2: All-in-1 Bundle (if available)
+### Method 2: All-in-1 Bundle (Paid - $19.95)
 
-1. Visit https://kenney.nl/assets
-2. Look for "All-in-1" or "Complete Collection" bundle
-3. Download and extract to `assets/kenney/`
+1. Visit https://kenney.itch.io/kenney-game-assets
+2. Purchase supports Kenney's work (includes free updates)
+3. **60,000+ assets** (~2-3 GB) - everything in one download
+4. Extract to `assets/kenney/`
+
+**Alternative:** Download individual packs for free from https://kenney.nl/assets
 
 ---
 
@@ -96,6 +99,26 @@ assets/kenney/
 
 ---
 
+## 📊 Asset Pack Sizes
+
+| Pack | Size (Approx) | Contents |
+|------|---------------|----------|
+| **UI Pack** | ~1.1 MB | 430+ UI elements ⭐ |
+| **Platformer Kit** | ~5-10 MB | Characters, tiles, items |
+| **Nature Kit** | ~15-20 MB | Trees, rocks, grass |
+| **Space Kit** | ~10-15 MB | Rockets, planets, sci-fi |
+| **Dungeon Kit** | ~10-15 MB | Walls, floors, doors |
+| **Monster Kit** | ~5-10 MB | Enemy characters |
+| **Food Kit** | ~2-5 MB | Food items |
+| **Animal Kit** | ~5-10 MB | Animals, pets |
+| **RPG Kit** | ~10-15 MB | Characters, weapons |
+
+**Total (Essential Packs):** ~50-75 MB
+
+**All-in-1 Bundle:** ~2-3 GB (60,000+ assets)
+
+---
+
 ## ⚙️ Setup Script
 
 After downloading, run this to organize assets:
@@ -145,15 +168,19 @@ git commit -m "Add Kenney UI button asset"
 
 ---
 
-## 📊 Asset Stats
+## 📊 Asset Stats (All-in-1 Bundle)
 
 | Category | Count | Formats |
 |----------|-------|---------|
 | 3D Models | 3,000+ | OBJ, FBX, glTF |
 | 2D Sprites | 20,000+ | PNG, SVG |
 | UI Elements | 430+ | PNG |
-| Audio | 100+ | WAV, OGG |
+| Audio | 1,200+ | WAV, OGG |
 | Fonts | 20+ | TTF |
+| **Total** | **60,000+** | ~2-3 GB |
+
+### Individual Packs (Free)
+All packs listed above are also available **individually for free** at https://kenney.nl/assets
 
 ---
 
