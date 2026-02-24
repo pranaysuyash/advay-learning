@@ -9,7 +9,7 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -46,7 +46,7 @@ export function FreezeDance() {
   const stabilityRef = useRef(0);
   const handCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { playSuccess, playCelebration } = useSoundEffects();
+  const { playPop: playSuccess, playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('freeze-dance');
 
@@ -367,6 +367,7 @@ export function FreezeDance() {
   ]);
 
   const startGame = () => {
+    playPop();
     setIsPlaying(true);
     setScore(0);
     setRound(1);
@@ -376,6 +377,7 @@ export function FreezeDance() {
   };
 
   const stopGame = () => {
+    playPop();
     onGameComplete();
     setIsPlaying(false);
     setGamePhase('dancing');
@@ -496,10 +498,10 @@ export function FreezeDance() {
               <h3 className='font-black text-advay-slate text-xl mb-4 text-center tracking-tight'>Choose Your Mode:</h3>
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                 <button
-                  onClick={() => setGameMode('classic')}
+                  onClick={() => { playPop(); setGameMode('classic'); }}
                   className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'classic'
-                      ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+                    ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
                     }`}
                 >
                   <span className='block mb-2 flex justify-center'><Trophy className='w-10 h-10 text-blue-600' /></span>
@@ -507,10 +509,10 @@ export function FreezeDance() {
                   <span className='block text-sm font-normal mt-1 opacity-80'>Just Dance & Freeze</span>
                 </button>
                 <button
-                  onClick={() => setGameMode('combo')}
+                  onClick={() => { playPop(); setGameMode('combo'); }}
                   className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'combo'
-                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+                    ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
                     }`}
                 >
                   <span className='block mb-2 flex justify-center'><Hand className='w-10 h-10 text-purple-600' /></span>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Mascot } from '../Mascot';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 interface ParentGateProps {
   isOpen: boolean;
@@ -28,6 +29,15 @@ export function ParentGate({
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdingRef = useRef(false);
   
+  const { playPop, playClick, playSuccess } = useAudio();
+  
+  // Play pop sound when gate opens
+  useEffect(() => {
+    if (isOpen) {
+      playPop();
+    }
+  }, [isOpen, playPop]);
+  
   // Update holdingRef whenever holding state changes
   useEffect(() => {
     holdingRef.current = holding;
@@ -43,13 +53,15 @@ export function ParentGate({
       setUnlocked(true);
       setHolding(false);
       holdingRef.current = false;
+      // Play success sound when unlocked
+      playSuccess();
       setTimeout(() => {
         onUnlock();
       }, 500);
     } else if (holdingRef.current) {
       animationRef.current = requestAnimationFrame(animateProgress);
     }
-  }, [holdDuration, onUnlock]);
+  }, [holdDuration, onUnlock, playSuccess]);
 
   const startHolding = useCallback(() => {
     console.log('🔴 PARENT GATE: startHolding called');
@@ -65,6 +77,8 @@ export function ParentGate({
       '🔴 PARENT GATE: Starting animation, time:',
       startTimeRef.current,
     );
+    // Play click sound when holding starts
+    playClick();
     
     // Start the animation loop
     animationRef.current = requestAnimationFrame(animateProgress);
@@ -81,7 +95,7 @@ export function ParentGate({
       // small delay to mimic UI transition before calling onUnlock
       setTimeout(() => onUnlock(), 500);
     }, holdDuration);
-  }, [unlocked, holdDuration, onUnlock, animateProgress]);
+  }, [unlocked, holdDuration, onUnlock, animateProgress, playClick]);
 
   const stopHolding = useCallback(() => {
     if (unlocked) return;
@@ -168,7 +182,10 @@ export function ParentGate({
             {onCancel && (
               <button
                 type='button'
-                onClick={onCancel}
+                onClick={() => {
+                  playClick();
+                  onCancel();
+                }}
                 className='w-full py-3 text-text-muted hover:text-text-primary transition'
               >
                 Cancel

@@ -62,7 +62,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
 
-  const { playPop, playError, playFanfare: playCelebration } = useAudio();
+  const { playPop, playError, playFanfare } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('number-tap-trail');
 

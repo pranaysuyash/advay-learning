@@ -10,6 +10,7 @@ import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useAudio } from '../utils/hooks/useAudio';
 
 // Icon components for body actions
 const HeadIcon = () => (
@@ -122,6 +123,8 @@ export const SimonSays = memo(function SimonSays() {
   const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
   const [targetFingers, setTargetFingers] = useState<number | null>(null);
   const [detectedFingers, setDetectedFingers] = useState(0);
+
+  const { playPop, playFanfare } = useAudio();
 
   const currentAction = BODY_ACTIONS[currentActionIndex];
   const HOLD_DURATION = 2000;
@@ -270,12 +273,13 @@ export const SimonSays = memo(function SimonSays() {
 
       setMatchProgress(matchScore);
 
-      let poseMatches = matchScore > 70;
-      let fingerMatches = gameMode !== 'combo' || (targetFingers !== null && detectedFingers === targetFingers);
+      const poseMatches = matchScore > 70;
+      const fingerMatches = gameMode !== 'combo' || (targetFingers !== null && detectedFingers === targetFingers);
 
       if (poseMatches && fingerMatches) {
         holdTimeRef.current += 50;
         if (holdTimeRef.current >= HOLD_DURATION) {
+          playFanfare();
           setScore((s: number) => s + 100);
           setShowResult(true);
           setShowCelebration(true);
@@ -307,6 +311,7 @@ export const SimonSays = memo(function SimonSays() {
   }, [isPlaying, cameraReady, detectPose]);
 
   const startGame = () => {
+    playPop();
     setIsPlaying(true);
     setScore(0);
     setCurrentActionIndex(0);
@@ -320,6 +325,7 @@ export const SimonSays = memo(function SimonSays() {
   };
 
   const stopGame = () => {
+    playPop();
     onGameComplete();
     setIsPlaying(false);
     if (animationRef.current) {
@@ -420,7 +426,7 @@ export const SimonSays = memo(function SimonSays() {
 
             <div className='flex gap-4 w-full max-w-md mb-6'>
               <button
-                onClick={() => setGameMode('classic')}
+                onClick={() => { playPop(); setGameMode('classic'); }}
                 className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'classic'
                   ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
                   : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
@@ -430,7 +436,7 @@ export const SimonSays = memo(function SimonSays() {
                 Classic
               </button>
               <button
-                onClick={() => setGameMode('combo')}
+                onClick={() => { playPop(); setGameMode('combo'); }}
                 className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'combo'
                   ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
                   : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
@@ -467,11 +473,11 @@ export const SimonSays = memo(function SimonSays() {
                     type="beige"
                     animation={
                       currentAction.name === 'Arms Up' ? 'climb' :
-                      currentAction.name === 'Touch Head' ? 'duck' :
-                      currentAction.name === 'Wave' ? 'walk' :
-                      currentAction.name === 'Hands On Hips' ? 'idle' :
-                      currentAction.name === 'T-Rex Arms' ? 'hit' :
-                      currentAction.name === 'Touch Shoulders' ? 'jump' : 'idle'
+                        currentAction.name === 'Touch Head' ? 'duck' :
+                          currentAction.name === 'Wave' ? 'walk' :
+                            currentAction.name === 'Hands On Hips' ? 'idle' :
+                              currentAction.name === 'T-Rex Arms' ? 'hit' :
+                                currentAction.name === 'Touch Shoulders' ? 'jump' : 'idle'
                     }
                     size="lg"
                   />
@@ -575,6 +581,7 @@ export const SimonSays = memo(function SimonSays() {
                 </button>
                 <button
                   onClick={() => {
+                    playPop();
                     setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
                     if (gameMode === 'combo') {
                       setTargetFingers(Math.floor(Math.random() * 5) + 1);

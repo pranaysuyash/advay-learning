@@ -65,6 +65,21 @@ SKIP_SECRET_SCAN=1 git commit ...
 SKIP_SECRET_SCAN=1 git push ...
 ```
 
+### No-Bypass Push Checks (Required)
+
+`pre-push` now enforces frontend validation for pushed frontend source changes:
+
+- `npm run -s type-check`
+- `npx vitest run --related ...` for changed frontend files in the pushed commit range
+
+This prevents `git commit --no-verify` from silently bypassing quality gates.
+
+Emergency-only explicit override (must include reason):
+
+```bash
+ALLOW_BYPASS_CHECKS=1 BYPASS_REASON="hotfix rollback window" git push
+```
+
 ## Install uv
 
 ```bash

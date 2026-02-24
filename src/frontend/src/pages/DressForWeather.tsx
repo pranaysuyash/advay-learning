@@ -458,6 +458,7 @@ export default function DressForWeather() {
               speak("Amazing! Let's try the next weather!");
             } else {
               assetLoader.playSound('level-complete', 0.9);
+              onGameComplete();
               speak("You finished all the weather! You're a weather expert!");
             }
           }, 2000);
@@ -470,7 +471,7 @@ export default function DressForWeather() {
         );
       }
     },
-    [currentLevel, correctlyPlaced, speak],
+    [currentLevel, correctlyPlaced, onGameComplete, speak],
   );
 
   // Handle item dropped outside

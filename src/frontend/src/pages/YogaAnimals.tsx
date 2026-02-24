@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { Dog, Cat, TreeDeciduous, Bird, Sparkles, Camera, Eye, Activity, Lightbulb, CheckCircle2, Loader2, Target, SkipForward } from 'lucide-react';
+import { Dog, Cat, TreeDeciduous, Bird, Bug, Sparkles, Camera, Eye, Activity, Lightbulb, CheckCircle2, Loader2, Target, SkipForward } from 'lucide-react';
 import { KenneyEnemy } from '../components/characters/KenneyCharacter';
+import { useAudio } from '../utils/hooks/useAudio';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
@@ -57,7 +58,7 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
   {
     name: 'Frog',
-    icon: <KenneyEnemy type="frog" animation="jump" size="lg" />,
+    icon: <KenneyEnemy type="frog" animation="walk" size="lg" />,
     description: 'Jump like a frog!',
     instruction: 'Squat down with hands on the ground, then jump up!',
     targets: { leftLegAngle: 20, rightLegAngle: 20, torsoAngle: -45 },
@@ -101,6 +102,8 @@ export function YogaAnimals() {
   const [holdTime, setHoldTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
+
+  const { playPop, playFanfare } = useAudio();
 
   const currentPose = ANIMAL_POSES[currentPoseIndex];
   const HOLD_DURATION = 2000; // 2 seconds to hold pose
@@ -263,6 +266,7 @@ export function YogaAnimals() {
           const newTime = prev + 50;
           if (newTime >= HOLD_DURATION && !showCelebration) {
             // Pose held long enough - success!
+            playFanfare();
             setScore((s) => s + 100);
             setShowCelebration(true);
             setTimeout(() => {
@@ -340,6 +344,7 @@ export function YogaAnimals() {
 
   // Start/stop game
   const startGame = () => {
+    playPop();
     setIsPlaying(true);
     setScore(0);
     setCurrentPoseIndex(0);
@@ -348,6 +353,7 @@ export function YogaAnimals() {
   };
 
   const stopGame = () => {
+    playPop();
     onGameComplete();
     setIsPlaying(false);
     if (animationRef.current) {
@@ -395,10 +401,10 @@ export function YogaAnimals() {
         <div className='bg-red-50 rounded-[2.5rem] border-3 border-red-100 p-12 text-center max-w-md w-full shadow-[0_4px_0_#E5B86E]'>
           <div className='text-6xl mb-6 flex justify-center'>
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
-              <line x1="9" x2="9.01" y1="9" y2="9"/>
-              <line x1="15" x2="15.01" y1="9" y2="9"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+              <line x1="9" x2="9.01" y1="9" y2="9" />
+              <line x1="15" x2="15.01" y1="9" y2="9" />
             </svg>
           </div>
           <h2 className='text-2xl font-black text-red-600 tracking-tight mb-4'>Oops!</h2>
@@ -580,9 +586,10 @@ export function YogaAnimals() {
                   Stop Playing
                 </button>
                 <button
-                  onClick={() =>
-                    setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length)
-                  }
+                  onClick={() => {
+                    playPop();
+                    setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length);
+                  }}
                   className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
                 >
                   Skip Pose <SkipForward className="w-5 h-5 inline-block ml-1" />
@@ -609,12 +616,12 @@ export function YogaAnimals() {
               >
                 <div className='flex justify-center mb-6'>
                   <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500 drop-shadow-[0_4px_0_#E5B86E]">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
                   </svg>
                 </div>
                 <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>

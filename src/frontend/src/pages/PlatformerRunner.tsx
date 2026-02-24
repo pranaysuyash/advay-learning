@@ -1,12 +1,11 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { GameContainer } from '../components/game/GameContainer';
-import { GameHeader } from '../components/game/GameHeader';
+import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { LoadingOverlay } from '../components/ui/LoadingOverlay';
+import { LoadingState } from '../components/LoadingState';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import type { TrackedHandFrame } from '../types/tracking';
 
 // --- Assets ---
 const ASSET_BASE = '/assets/kenney-platformer';
@@ -100,7 +99,8 @@ function checkCollision(r1: Rect, r2: Rect, margin = 0.8): boolean {
 }
 
 // Custom hook to preload images
-function useImageCache(urls: Record<string, string | Record<string, string>>) {
+function useImageCache() {
+    const urls = ASSETS;
     const [loaded, setLoaded] = useState(false);
     const cacheRef = useRef<Record<string, HTMLImageElement>>({});
 
@@ -116,7 +116,7 @@ function useImageCache(urls: Record<string, string | Record<string, string>>) {
                 }
             });
         };
-        _extractUrls(ASSETS);
+        _extractUrls(urls);
 
         let loadedCount = 0;
         const cache = cacheRef.current;
@@ -147,7 +147,7 @@ function useImageCache(urls: Record<string, string | Record<string, string>>) {
                 if (loadedCount === imagesToLoad.length) setLoaded(true);
             };
         });
-    }, []);
+    }, [urls]);
 
     return { loaded, cache: cacheRef.current };
 }
@@ -175,7 +175,6 @@ function useAudioCache(sounds: Record<string, string>) {
 }
 
 export function PlatformerRunner() {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -185,31 +184,37 @@ export function PlatformerRunner() {
     const [lives, setLives] = useState(3);
     const [isPaused, setIsPaused] = useState(false);
 
-    const { loaded: imagesLoaded, cache: images } = useImageCache(ASSETS);
+    const { loaded: imagesLoaded, cache: images } = useImageCache();
     const playSound = useAudioCache(ASSETS.sounds);
 
     // Hand tracking
     const [handY, setHandY] = useState(0.5); // 0 (top) to 1 (bottom)
-    const { isCameraReady, handLandmarks } = useGameHandTracking('platformer', {
-        onHandStateChange: (state, hand) => {
-            if (state === 'active' && hand && hand.length > 0) {
+    const { isReady: isCameraReady } = useGameHandTracking({
+        gameName: 'platformer-runner',
+        targetFps: 30,
+        onFrame: (frame: TrackedHandFrame) => {
+            const hand = frame.primaryHand;
+            if (hand && hand.length > 0) {
                 // use wrist (0) or middle finger mcp (9) for vertical proxy
                 // simple average of a few points
-                const y = (hand[0].y + hand[9].y) / 2;
-                // clamp and maybe smooth
-                setHandY(Math.max(0, Math.min(1, y)));
+                const y = (hand[0]?.y + (hand[9]?.y || hand[0]?.y)) / 2;
+                if (!isNaN(y)) {
+                    // clamp and maybe smooth
+                    setHandY(Math.max(0, Math.min(1, y)));
+                }
             }
         },
     });
 
     // Analytics/Progress
-    const sessionTracker = useGameSessionProgress({
-        gameId: 'platformer-runner',
-        activityType: 'game',
+    useGameSessionProgress({
+        gameName: 'platformer-runner',
+        score: score,
+        isPlaying: gameState === 'PLAYING' && !isPaused,
     });
 
     // Refs for requestAnimationFrame logic
-    const requestRef = useRef<number>();
+    const requestRef = useRef<number | null>(null);
     const lastTimeRef = useRef<number>(0);
 
     // Mutable Game State (avoids React render cycle for physics)
@@ -269,15 +274,9 @@ export function PlatformerRunner() {
             },
         };
         playSound('jump'); // test
-        sessionTracker.startSession();
     };
 
     const handlePause = () => setIsPaused(true);
-    const handleResume = () => {
-        setIsPaused(false);
-        lastTimeRef.current = performance.now();
-    };
-
     const handleExit = () => {
         navigate('/games');
     };
@@ -385,7 +384,7 @@ export function PlatformerRunner() {
                 }
 
                 // 4. Update Objects & Collisions
-                for (let obj of state.objects) {
+                for (const obj of state.objects) {
                     if (!obj.active) continue;
 
                     obj.x += obj.vx * dt;
@@ -471,7 +470,7 @@ export function PlatformerRunner() {
                 }
 
                 // Draw Objects
-                for (let obj of state.objects) {
+                for (const obj of state.objects) {
                     if (!obj.active) continue;
                     let imgUrl = '';
                     if (obj.type === 'slime') imgUrl = obj.frameIndex === 0 ? ASSETS.enemies.slimeA : ASSETS.enemies.slimeB;
@@ -516,35 +515,22 @@ export function PlatformerRunner() {
 
     // Handle game over logic bridging
     useEffect(() => {
-        if (gameState === 'GAMEOVER') {
-            sessionTracker.recordScore(score, 100); // 100 as an arbitrary max
-            sessionTracker.endSession();
-        }
-    }, [gameState]); // eslint-disable-line
+        // Automatically handled by sessionTracker when isPlaying changes
+    }, [gameState]);
 
     return (
         <GameContainer
-            id='platformer-runner'
             title='Platform Runner'
-            category='Platform World'
+            score={score}
             onPause={handlePause}
-            onResume={handleResume}
-            onExit={handleExit}
-            isPaused={isPaused}
-            requireHandTracking
-            hideHeader={false}
+            onHome={handleExit}
+            isHandDetected={isCameraReady}
+            isPlaying={gameState === 'PLAYING'}
         >
-            <GameHeader
-                title={'Platform Runner'}
-                score={score}
-                onPause={handlePause}
-                onExit={handleExit}
-            />
-
             <div className="relative w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-3xl overflow-hidden shrink-0 mt-4 max-h-[70vh]">
 
                 {!imagesLoaded || !isCameraReady ? (
-                    <LoadingOverlay message={!imagesLoaded ? 'Loading Assets...' : 'Starting Camera...'} />
+                    <LoadingState message={!imagesLoaded ? 'Loading Assets...' : 'Starting Camera...'} />
                 ) : null}
 
                 {gameState === 'READY' && (

@@ -32,7 +32,7 @@ export function AddChildModal({
   onSubmit,
   isSubmitting,
 }: AddChildModalProps) {
-  const { playPop } = useAudio();
+  const { playPop, playClick } = useAudio();
   const wasOpen = useRef(isOpen);
 
   useEffect(() => {
@@ -112,14 +112,20 @@ export function AddChildModal({
         <div className='flex gap-3 mt-6'>
           <button
             type='button'
-            onClick={onClose}
+            onClick={() => {
+              playClick();
+              onClose();
+            }}
             className='flex-1 px-4 py-3 bg-white/10 border border-border rounded-lg hover:bg-white/20 transition'
           >
             Cancel
           </button>
           <button
             type='button'
-            onClick={onSubmit}
+            onClick={() => {
+              playClick();
+              onSubmit();
+            }}
             disabled={!childName.trim() || isSubmitting}
             className='flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-red-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed'
           >

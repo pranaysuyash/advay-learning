@@ -1,6 +1,7 @@
-import { useState, useCallback, createContext, ReactNode } from 'react';
+import { useState, useCallback, createContext, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './Icon';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -22,19 +23,41 @@ export { ToastContext };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const { playSuccess, playError, playPop } = useAudio();
+  // Track which toast IDs have played sounds to avoid duplicates
+  const playedSoundIds = useRef<Set<string>>(new Set());
 
   const showToast = useCallback(
     (message: string, type: ToastType = 'info', duration = 4000) => {
       const id = Math.random().toString(36).substring(2, 9);
       setToasts((prev) => [...prev, { id, message, type, duration }]);
 
+      // Play sound based on toast type (only once per toast)
+      if (!playedSoundIds.current.has(id)) {
+        playedSoundIds.current.add(id);
+        switch (type) {
+          case 'success':
+            playSuccess();
+            break;
+          case 'error':
+            playError();
+            break;
+          case 'warning':
+            playPop();
+            break;
+          default:
+            playPop();
+        }
+      }
+
       if (duration > 0) {
         setTimeout(() => {
           setToasts((prev) => prev.filter((t) => t.id !== id));
+          playedSoundIds.current.delete(id);
         }, duration);
       }
     },
-    [],
+    [playSuccess, playError, playPop],
   );
 
   const hideToast = useCallback((id: string) => {
@@ -57,6 +80,12 @@ function ToastContainer({
   onHide: (id: string) => void;
 }) {
   const reducedMotion = useReducedMotion();
+  const { playClick } = useAudio();
+
+  const handleDismiss = (id: string) => {
+    playClick();
+    onHide(id);
+  };
 
   const getToastStyles = (type: ToastType) => {
     switch (type) {
@@ -120,7 +149,7 @@ function ToastContainer({
             <span className='flex-1 text-sm font-medium'>{toast.message}</span>
             <button
               type='button'
-              onClick={() => onHide(toast.id)}
+              onClick={() => handleDismiss(toast.id)}
               className='opacity-60 hover:opacity-100 transition p-1'
               aria-label='Dismiss notification'
             >

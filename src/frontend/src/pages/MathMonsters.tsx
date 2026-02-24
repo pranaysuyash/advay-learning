@@ -55,7 +55,7 @@ export default function MathMonsters() {
   const { playCoin, playHurt, playSelect } = useKenneyAudio();
   const { onGameComplete } = useGameDrops('math-monsters');
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  
+
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
@@ -63,13 +63,13 @@ export default function MathMonsters() {
   const [monsterMessage, setMonsterMessage] = useState<string>('');
   const [showHint, setShowHint] = useState(false);
   const [monsterExpression, setMonsterExpression] = useState<'idle' | 'happy' | 'sad' | 'eating' | 'hungry'>('idle');
-  
+
   // Finger counting state
   const [detectedFingers, setDetectedFingers] = useState<number>(0);
   const [fingerHoldStart, setFingerHoldStart] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  
+
   // Initialize audio on first interaction
   useEffect(() => {
     const handleInteraction = () => {
@@ -78,35 +78,35 @@ export default function MathMonsters() {
     document.addEventListener('click', handleInteraction, { once: true });
     return () => document.removeEventListener('click', handleInteraction);
   }, []);
-  
+
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const lastFingerCountRef = useRef<number>(0);
   const fingerCountHistoryRef = useRef<number[]>([]);
   const lastSubmitTimeRef = useRef<number>(0);
-  
+
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
     if (!frame.primaryHand || isSubmitting || showMenu) return;
-    
+
     // Count fingers
     const fingerCount = countExtendedFingersFromLandmarks(frame.primaryHand);
-    
+
     // Add to history for smoothing
     fingerCountHistoryRef.current.push(fingerCount);
     if (fingerCountHistoryRef.current.length > 10) {
       fingerCountHistoryRef.current.shift();
     }
-    
+
     // Get most common count in recent history
     const smoothedCount = getMostCommonCount(fingerCountHistoryRef.current);
-    
+
     if (smoothedCount !== lastFingerCountRef.current) {
       lastFingerCountRef.current = smoothedCount;
       setDetectedFingers(smoothedCount);
       setFingerHoldStart(Date.now());
     }
-    
+
     // Check if held long enough to submit
     if (fingerHoldStart && smoothedCount > 0) {
       const holdTime = Date.now() - fingerHoldStart;
@@ -118,21 +118,21 @@ export default function MathMonsters() {
       }
     }
   }, [fingerHoldStart, isSubmitting, showMenu]);
-  
+
   useGameHandTracking({
     gameName: 'MathMonsters',
     isRunning: !showMenu && !showCelebration,
     webcamRef,
     onFrame: handleHandFrame,
   });
-  
+
   // Helper to get most common count
   const getMostCommonCount = (counts: number[]): number => {
     const frequency: Record<number, number> = {};
     counts.forEach(c => {
       frequency[c] = (frequency[c] || 0) + 1;
     });
-    
+
     let maxCount = 0;
     let mostCommon = 0;
     Object.entries(frequency).forEach(([count, freq]) => {
@@ -141,10 +141,10 @@ export default function MathMonsters() {
         mostCommon = parseInt(count);
       }
     });
-    
+
     return mostCommon;
   };
-  
+
   // ===== GAME FLOW =====
   const startGame = () => {
     playClick();
@@ -161,22 +161,22 @@ export default function MathMonsters() {
     setFingerHoldStart(null);
     fingerCountHistoryRef.current = [];
   };
-  
+
   const handleSubmitAnswer = async (fingerCount: number) => {
     if (!gameState.currentProblem || isSubmitting) return;
-    
+
     setIsSubmitting(true);
     lastSubmitTimeRef.current = Date.now();
-    
+
     const isCorrect = checkAnswer(fingerCount, gameState.currentProblem.answer);
-    
+
     // Update game state
     const newGameState = processAnswer(gameState, fingerCount, isCorrect);
     setGameState(newGameState);
-    
+
     // Show feedback and play sound
     setShowFeedback(isCorrect ? 'correct' : 'incorrect');
-    
+
     if (isCorrect) {
       playSuccess();
       playCoin(); // Kenney coin sound
@@ -193,17 +193,18 @@ export default function MathMonsters() {
         void speak(`That's ${fingerCount}. Try ${gameState.currentProblem?.answer} fingers!`);
       }
     }
-    
+
     // Update monster message
     const currentLevel = LEVELS[newGameState.currentLevel - 1];
     const monster = getMonsterForLevel(currentLevel);
     setMonsterMessage(getRandomPhrase(monster, isCorrect ? 'correct' : 'incorrect'));
-    
+
     // Wait before next problem
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     if (newGameState.completed) {
       playFanfare();
+      onGameComplete();
       setShowCelebration(true);
     } else {
       setShowFeedback(null);
@@ -211,33 +212,33 @@ export default function MathMonsters() {
       setFingerHoldStart(null);
       fingerCountHistoryRef.current = [];
       setMonsterExpression('hungry');
-      
+
       // Update monster message for new problem
       if (newGameState.currentProblem) {
         setMonsterMessage(getRandomPhrase(monster, 'request'));
       }
     }
-    
+
     setIsSubmitting(false);
   };
-  
+
   const handlePlayAgain = () => {
     playClick();
     startGame();
     setShowCelebration(false);
   };
-  
+
   const handleShowMenu = () => {
     playClick();
     setShowMenu(true);
     setShowCelebration(false);
   };
-  
+
   // ===== RENDER HELPERS =====
   const currentLevel = LEVELS[gameState.currentLevel - 1];
   const monster = getMonsterForLevel(currentLevel);
   const levelProgress = getLevelProgress(gameState);
-  
+
   // ===== RENDER =====
   return (
     <GameContainer title="Math Monsters" onHome={handleShowMenu}>
@@ -250,7 +251,7 @@ export default function MathMonsters() {
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {showMenu ? (
         // ===== START MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
@@ -266,7 +267,7 @@ export default function MathMonsters() {
             ))}
           </div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">Math Monsters!</h2>
-          
+
           {/* Voice Instructions */}
           {ttsEnabled && (
             <div className="mb-4">
@@ -282,9 +283,9 @@ export default function MathMonsters() {
               />
             </div>
           )}
-          
+
           {/* Goal Statement with Semantic Attributes */}
-          <div 
+          <div
             data-ux-goal="Show the correct number of fingers to solve math problems and feed hungry monsters!"
             data-ux-instruction="Hold up your fingers to show the answer - the game counts them automatically!"
             className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-4 mb-4 max-w-md border-2 border-orange-300"
@@ -298,7 +299,7 @@ export default function MathMonsters() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
             <ol className="text-blue-700 text-sm space-y-2">
@@ -308,14 +309,14 @@ export default function MathMonsters() {
               <li>4. Feed the monster!</li>
             </ol>
           </div>
-          
+
           <div className="flex gap-4 mb-6">
             {MONSTERS.map(m => (
               <div key={m.id} className="text-center">
                 <KenneyCharacter
-                  type={(m.id === 'munchy' ? 'beige' : 
-                        m.id === 'crunchy' ? 'green' :
-                        m.id === 'nibbles' ? 'pink' :
+                  type={(m.id === 'munchy' ? 'beige' :
+                    m.id === 'crunchy' ? 'green' :
+                      m.id === 'nibbles' ? 'pink' :
                         m.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
                   animation="idle"
                   size="md"
@@ -324,7 +325,7 @@ export default function MathMonsters() {
               </div>
             ))}
           </div>
-          
+
           <button
             onClick={startGame}
             className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold text-xl transition-colors shadow-lg hover-lift"
@@ -337,7 +338,7 @@ export default function MathMonsters() {
         <div className="flex flex-col items-center justify-center h-full p-6">
           <div className="text-5xl mb-4 text-amber-500 font-bold">★</div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">You Fed All The Monsters!</h2>
-          
+
           <div className="flex gap-1 mb-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <span
@@ -348,7 +349,7 @@ export default function MathMonsters() {
               </span>
             ))}
           </div>
-          
+
           <div className="bg-white rounded-xl p-6 shadow-[0_4px_0_#E5B86E] mb-6 text-center w-full max-w-md">
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -369,7 +370,7 @@ export default function MathMonsters() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex gap-3">
             <button
               onClick={handleShowMenu}
@@ -389,7 +390,7 @@ export default function MathMonsters() {
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full">
           {/* Goal Banner with Semantic Attributes */}
-          <div 
+          <div
             data-ux-goal={`Show ${gameState.currentProblem?.answer} fingers to solve the math problem and feed the monster!`}
             data-ux-instruction="Hold up your hand and count with your fingers"
             data-ux-action="finger-counting"
@@ -404,7 +405,7 @@ export default function MathMonsters() {
               </div>
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="px-4 py-2 bg-white border-b border-[#F2CC8F]">
             <div className="flex justify-between text-sm text-text-secondary mb-1">
@@ -425,7 +426,7 @@ export default function MathMonsters() {
               </div>
             )}
           </div>
-          
+
           {/* Helper indicator */}
           <div className="absolute top-20 right-4 z-10">
             {showFeedback === 'correct' && (
@@ -435,43 +436,43 @@ export default function MathMonsters() {
               <div className="text-4xl animate-shake">❓</div>
             )}
           </div>
-          
+
           {/* Monster & Problem Area */}
           <div className="flex-1 flex flex-col items-center justify-center p-4">
             {/* Monster - Kenney Character */}
             <div className="mb-4">
               <KenneyCharacter
-                type={(monster.id === 'munchy' ? 'beige' : 
-                      monster.id === 'crunchy' ? 'green' :
-                      monster.id === 'nibbles' ? 'pink' :
+                type={(monster.id === 'munchy' ? 'beige' :
+                  monster.id === 'crunchy' ? 'green' :
+                    monster.id === 'nibbles' ? 'pink' :
                       monster.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
                 animation={monsterExpression === 'eating' ? 'jump' :
-                          monsterExpression === 'happy' ? 'walk' :
-                          monsterExpression === 'sad' ? 'hit' :
-                          monsterExpression === 'hungry' ? 'climb' : 'idle'}
+                  monsterExpression === 'happy' ? 'walk' :
+                    monsterExpression === 'sad' ? 'hit' :
+                      monsterExpression === 'hungry' ? 'climb' : 'idle'}
                 size="lg"
               />
             </div>
-            
+
             {/* Monster Message Bubble */}
             <div className="bg-white border-2 border-[#F2CC8F] rounded-2xl px-6 py-3 mb-6 shadow-[0_4px_0_#E5B86E] max-w-sm text-center">
               <p className="text-advay-slate font-medium">{monsterMessage}</p>
             </div>
-            
+
             {/* Math Problem */}
             {gameState.currentProblem && (
               <div className="bg-slate-100 rounded-2xl p-6 mb-6 text-center">
                 <div className="text-5xl font-black text-advay-slate mb-2">
                   {gameState.currentProblem.visual.equation}
                 </div>
-                
+
                 {/* Visual representation - CSS shapes instead of emojis */}
                 <div className="flex items-center justify-center gap-2 mt-3">
                   {gameState.currentProblem!.operation !== 'recognition' && (
                     <>
                       <div className="flex gap-1">
                         {Array.from({ length: gameState.currentProblem!.num1 }).map((_, i) => (
-                          <div 
+                          <div
                             key={i}
                             className="w-6 h-6 rounded-full bg-orange-400 animate-pop-in"
                             style={{ animationDelay: `${i * 50}ms` }}
@@ -483,7 +484,7 @@ export default function MathMonsters() {
                       </span>
                       <div className="flex gap-1">
                         {Array.from({ length: gameState.currentProblem!.num2 }).map((_, i) => (
-                          <div 
+                          <div
                             key={i}
                             className="w-6 h-6 rounded-full bg-blue-400 animate-pop-in"
                             style={{ animationDelay: `${(gameState.currentProblem!.num1 + i) * 50}ms` }}
@@ -495,16 +496,16 @@ export default function MathMonsters() {
                 </div>
               </div>
             )}
-            
+
             {/* Finger Detection Display - Prominent */}
             <div className="bg-gradient-to-b from-blue-100 to-blue-50 border-3 border-blue-400 rounded-3xl p-8 text-center min-w-[280px] shadow-lg">
               <p className="text-blue-800 font-bold text-lg mb-4">🖐️ Your Answer:</p>
-              
+
               {/* Big number display */}
               <div className="text-8xl font-black text-blue-600 mb-4">
                 {detectedFingers}
               </div>
-              
+
               {/* Visual finger representation */}
               <div className="flex justify-center gap-2 text-4xl mb-4 min-h-[60px]">
                 {detectedFingers === 0 ? (
@@ -515,7 +516,7 @@ export default function MathMonsters() {
                   ))
                 )}
               </div>
-              
+
               {/* Hold progress bar */}
               {detectedFingers > 0 && (
                 <div className="mt-4">
@@ -535,7 +536,7 @@ export default function MathMonsters() {
                 </div>
               )}
             </div>
-            
+
             {/* Hint Button */}
             <button
               onClick={() => {
@@ -546,14 +547,14 @@ export default function MathMonsters() {
             >
               {showHint ? 'Hide Hint' : 'Need a Hint?'}
             </button>
-            
+
             {showHint && gameState.currentProblem && (
               <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 text-sm max-w-sm text-center">
                 💡 {gameState.currentProblem.hint}
               </div>
             )}
           </div>
-          
+
           {/* Feedback Overlay */}
           {showFeedback && (
             <div className={`
@@ -570,7 +571,7 @@ export default function MathMonsters() {
           )}
         </div>
       )}
-      
+
       {/* Celebration Overlay */}
       <CelebrationOverlay
         show={showCelebration}

@@ -770,6 +770,12 @@ git commit --no-verify
 SKIP_FEATURE_CHECK=1 git commit
 ```
 
+**Repo policy override (new):**
+- `--no-verify` is prohibited unless the user explicitly requests bypass in the current conversation.
+- Even if commit hooks are skipped, `pre-push` runs mandatory checks (typecheck + related tests for changed frontend files) unless explicit override is provided.
+- Emergency override for pre-push only:
+  - `ALLOW_BYPASS_CHECKS=1 BYPASS_REASON="<reason>" git push`
+
 #### 4. Regression Tests (`scripts/regression_check.sh`)
 - Runs all frontend tests (or related tests for changed files).
 - Checks for removed exports (breaking changes).
@@ -913,6 +919,8 @@ Pass if:
 9. **Never** run ad-hoc “process” work without curating it into repo prompts/docs (if it will be reused)
 10. **Never** delete other agents' work/artifacts (docs, audits, tickets, assets) unless the user explicitly asks or explicitly approves it in the active ticket (recorded with evidence)
 11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
+12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
+13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
 
 ---
 

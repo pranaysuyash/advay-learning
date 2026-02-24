@@ -10,6 +10,7 @@ import { useConfirm } from '../components/ui/useConfirm';
 import { useToast } from '../components/ui/useToast';
 import { ParentGate } from '../components/ui/ParentGate';
 import { getLanguageOptions } from '../i18n';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export function Settings() {
   const { t } = useTranslation(['settings', 'common']);
@@ -22,6 +23,7 @@ export function Settings() {
   } = useProgressStore();
   const confirm = useConfirm();
   const { showToast } = useToast();
+  const { playClick } = useAudio();
   const cameraPermission = settings.cameraPermissionState;
   const [parentGatePassed, setParentGatePassed] = useState(false);
 
@@ -145,10 +147,13 @@ export function Settings() {
                     <div className='flex items-center justify-between pt-6 border-t-4 border-[#F2CC8F]'>
                       <div>
                         <div className='font-black text-advay-slate text-lg'>Sound Effects</div>
-                        <div className='text-base font-bold text-text-secondary mt-1'>Bouncy app feedback sounds</div>
+                        <div className='text-base font-bold text-text-secondary mt-1'>Fun feedback sounds for all interactions</div>
+                        <div className='text-sm text-blue-600 mt-2 font-medium bg-blue-50 px-3 py-2 rounded-xl border border-blue-100'>
+                          Includes: button clicks, success chimes, error buzzes, celebration fanfares, and more!
+                        </div>
                       </div>
                       <button
-                        onClick={() => settings.updateSettings({ soundEnabled: !settings.soundEnabled })}
+                        onClick={() => { playClick(); settings.updateSettings({ soundEnabled: !settings.soundEnabled }); }}
                         className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.soundEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
                         <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.soundEnabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
@@ -169,7 +174,7 @@ export function Settings() {
                         </div>
                       </div>
                       <button
-                        onClick={() => settings.updateSettings({ calmMode: !settings.calmMode })}
+                        onClick={() => { playClick(); settings.updateSettings({ calmMode: !settings.calmMode }); }}
                         aria-label={settings.calmMode ? 'Turn Calm Mode off' : 'Turn Calm Mode on'}
                         className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.calmMode ? 'bg-[#7C9CB5] border-[#6B8BA4]' : 'bg-slate-200 border-slate-300'}`}
                       >

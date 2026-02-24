@@ -257,6 +257,26 @@ class AudioManager {
     const now = ctx.currentTime;
     const vol = this.config.sfxVolume * this.config.masterVolume;
 
+    // Some test/mocked audio contexts do not implement buffer APIs.
+    // Fall back to a short oscillator chirp instead of throwing.
+    if (
+      typeof (ctx as AudioContext).createBuffer !== 'function' ||
+      typeof (ctx as AudioContext).createBufferSource !== 'function' ||
+      typeof (ctx as AudioContext).createBiquadFilter !== 'function'
+    ) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.15 * vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+      return;
+    }
+
     // Create noise buffer
     const bufferSize = ctx.sampleRate * 0.08;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);

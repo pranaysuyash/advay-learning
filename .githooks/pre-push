@@ -7,6 +7,46 @@ cd "$repo_root"
 zero_sha='0000000000000000000000000000000000000000'
 scanned_any=false
 
+run_frontend_push_checks() {
+  local range="$1"
+
+  local changed_frontend
+  changed_frontend="$(git diff --name-only --diff-filter=ACMR "$range" | rg '^src/frontend/src/.*\.(ts|tsx|js|jsx)$' || true)"
+  if [[ -z "${changed_frontend//$'\n'/}" ]]; then
+    return 0
+  fi
+
+  if [[ "${ALLOW_BYPASS_CHECKS:-}" == "1" ]]; then
+    if [[ -z "${BYPASS_REASON:-}" ]]; then
+      echo "[pre-push] ALLOW_BYPASS_CHECKS=1 requires BYPASS_REASON to be set." >&2
+      return 1
+    fi
+    echo "[pre-push] Bypassing frontend push checks due to explicit override: ${BYPASS_REASON}"
+    return 0
+  fi
+
+  echo "[pre-push] Running mandatory frontend typecheck for pushed changes..."
+  (
+    cd src/frontend
+    npm run -s type-check
+  )
+
+  local related_args=""
+  while IFS= read -r file; do
+    [[ -z "$file" ]] && continue
+    related_args+=" ${file#src/frontend/}"
+  done <<< "$changed_frontend"
+
+  if [[ -n "${related_args// }" ]]; then
+    echo "[pre-push] Running related frontend tests for pushed files..."
+    (
+      cd src/frontend
+      # shellcheck disable=SC2086
+      npx vitest run --reporter=dot --related $related_args
+    )
+  fi
+}
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   [[ -z "${local_ref:-}" ]] && continue
 
@@ -36,6 +76,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     range="${remote_sha}..${local_sha}"
   fi
 
+  run_frontend_push_checks "$range"
   ./scripts/secret_scan.sh --range "$range"
   scanned_any=true
 done
@@ -44,5 +85,6 @@ done
 if [[ "$scanned_any" != true && "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
   head_sha="$(git rev-parse HEAD)"
   ./scripts/agent_gate.sh --commit "$head_sha"
+  run_frontend_push_checks "${head_sha}~1..${head_sha}"
   ./scripts/secret_scan.sh --range "${head_sha}~1..${head_sha}"
 fi

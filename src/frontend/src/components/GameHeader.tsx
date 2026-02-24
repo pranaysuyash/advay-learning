@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UIIcon } from './ui/Icon';
 import { Button } from './ui/Button';
+import { useAudio } from '../utils/hooks/useAudio';
 
 interface GameHeaderProps {
     /** Game title displayed in header */
@@ -58,8 +59,10 @@ export const GameHeader = memo(function GameHeader({
     secondaryAction,
 }: GameHeaderProps) {
     const navigate = useNavigate();
+    const { playClick } = useAudio();
 
     const handleBack = () => {
+        playClick();
         if (onBack) {
             onBack();
         } else {
