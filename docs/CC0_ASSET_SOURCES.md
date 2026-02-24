@@ -32,7 +32,8 @@
 ### 2. Kenney (https://kenney.nl/assets)
 **Best For:** 2D sprites, UI elements, 3D models, game kits  
 **License:** CC0 (Public Domain)  
-**Formats:** PNG, OBJ, FBX, JSON (spritesheets)  
+**Total Assets:** 40,000+ (and growing)  
+**Formats:** PNG, OBJ, FBX, JSON (spritesheets), AI, PSD  
 
 | Asset Pack | Contents | Use Case |
 |------------|----------|----------|
@@ -47,6 +48,15 @@
 
 **Special:** Everything is modular and consistent art style  
 **Download:** https://kenney.nl/assets
+
+**🎁 Special:** Kenney offers an "All-in-1" bundle containing **40,000+ assets** including:
+- 3,000+ low-poly 3D models across 40+ packs
+- 20,000+ 2D sprites and textures
+- 430+ UI elements (buttons, panels, sliders, icons)
+- 100+ audio files (SFX and music)
+- Fonts, particle effects, and more
+
+All completely free, CC0 licensed, consistent art style.
 
 ---
 
@@ -226,9 +236,15 @@ Quaternius Animated Animals - Educational games
 Sketchfab Low Poly Fox/Deer - Forest animals
 ```
 
-### Bundle 3: Complete Game Kit (Free)
+### Bundle 3: Kenney Complete Collection (Free)
 ```
-Kenney Complete Collection (all kits)
+Kenney All-in-1 Bundle: 40,000+ assets
+├── 3,000+ low-poly 3D models
+├── 20,000+ 2D sprites
+├── 430+ UI elements
+├── 100+ audio files
+└── 40+ game asset packs
+
 Quaternius Ultimate Animated Pack
 OpenGameArt music & SFX
 ```
