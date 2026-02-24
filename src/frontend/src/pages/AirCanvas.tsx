@@ -59,7 +59,7 @@ const COLORS = [
 
 export function AirCanvas() {
   const navigate = useNavigate();
-  const { onGameComplete } = useGameDrops('air-canvas');
+  const { onGameComplete: _onGameComplete } = useGameDrops('air-canvas');
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setIsDrawing] = useState(false);

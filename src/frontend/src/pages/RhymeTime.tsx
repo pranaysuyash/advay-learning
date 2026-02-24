@@ -131,6 +131,13 @@ export default function RhymeTime() {
     
     // Speak target word
     setTimeout(() => speakWord(round.targetWord.word), 500);
+    
+    // Voice instructions for the game
+    if (ttsEnabled) {
+      setTimeout(() => {
+        void speak(`Find the word that rhymes with ${round.targetWord.word}!`);
+      }, 1500);
+    }
   };
   
   const handleSelectOption = async (optionWord: string) => {
@@ -141,6 +148,15 @@ export default function RhymeTime() {
     
     const isCorrect = checkAnswer(optionWord, currentRound.correctAnswer);
     setShowFeedback(isCorrect ? 'correct' : 'incorrect');
+    
+    // TTS feedback
+    if (ttsEnabled) {
+      if (isCorrect) {
+        void speak('Great job! That rhymes!');
+      } else {
+        void speak('Try again! Listen for the rhyme!');
+      }
+    }
     
     // Audio and bird expression feedback
     if (isCorrect) {
@@ -245,6 +261,22 @@ export default function RhymeTime() {
               </div>
             </div>
           </div>
+          
+          {/* Voice Instructions */}
+          {ttsEnabled && (
+            <div className="mb-4">
+              <VoiceInstructions
+                instructions={[
+                  'Listen to the target word.',
+                  'Find the word that rhymes!',
+                  'Pinch to select!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            </div>
+          )}
           
           <p className="text-text-secondary mb-6 text-sm text-center max-w-md">
             Rhyming helps you learn to read! 🔤

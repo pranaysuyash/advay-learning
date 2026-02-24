@@ -20,7 +20,7 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CSSMonster } from '../components/characters/CSSMonster';
-import { useGameDrops } from '../hooks/useGameDrops';
+
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 

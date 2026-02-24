@@ -53,7 +53,7 @@ import {
 export default function FreeDraw() {
   // ===== AUDIO =====
   const { playClick, playSuccess } = useAudio();
-  const { onGameComplete } = useGameDrops('free-draw');
+  const { onGameComplete: _onGameComplete } = useGameDrops('free-draw');
   
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());

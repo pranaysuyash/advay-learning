@@ -51,7 +51,7 @@ const MUSICAL_NOTES = [
 
 export default function BubblePopSymphony() {
   // Hand tracking with modern hooks
-  const { onGameComplete } = useGameDrops('bubble-pop-symphony');
+  const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop-symphony');
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,

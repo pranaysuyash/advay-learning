@@ -30,7 +30,7 @@ import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const MAX_LEVEL = 4;
-const CURSOR_SIZE = 84; // Increased for toddler visibility
+const _CURSOR_SIZE = 84; // Increased for toddler visibility - used in canvas rendering
 const TEMPLATES_TO_PASS = 3; // pass 3/5 to unlock next level
 
 export const MirrorDraw = memo(function MirrorDrawComponent() {

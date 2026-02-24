@@ -654,7 +654,7 @@ This section tracks which personas have been interviewed, key findings, and impl
 | Dr. Meera Sharma | Expert/Advisor | ✅ 2026-02-23 | 8 findings, Calm Mode | NEW — P0 |
 | Ms. Deepa (Teacher) | Institutional | ✅ 2026-02-24 | 7 findings, B2B blocker | **P0** (was P2) |
 | Kabir (Competitive Learner) | End User | ✅ 2026-02-24 | 7 findings, churn risk | **P0** |
-| Riya (Influencer) | Growth | ⏳ Not started | — | — |
+| Riya (Influencer) | Growth | ✅ 2026-02-24 | 7 findings, growth channel | P1 |
 
 ### Interview Documentation
 
@@ -667,6 +667,7 @@ This section tracks which personas have been interviewed, key findings, and impl
 | Dr. Meera Sharma | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | TCK-20260223-013 to 016 |
 | Ms. Deepa | personas/TEACHER_Ms_Deepa.md | TCK-20260224-017 to 020 |
 | Kabir | personas/CHILD_Kabir_Competitive_Learner.md | TCK-20260224-021 to 024 |
+| Riya | personas/INFLUENCER_Riya.md | TCK-20260224-025 to 028 |
 
 ### Key Findings Summary by Persona
 

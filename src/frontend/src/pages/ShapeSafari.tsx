@@ -437,6 +437,22 @@ export const ShapeSafari = memo(function ShapeSafari() {
             Find hidden shapes by tracing around them with your finger.
             Discover animals and objects hiding in each scene!
           </p>
+          
+          {/* Voice Instructions */}
+          {ttsEnabled && (
+            <div className="mb-4">
+              <VoiceInstructions
+                instructions={[
+                  'Look for hidden shapes.',
+                  'Trace around them with your finger.',
+                  'Discover what is hiding!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl w-full">
             {SAFARI_SCENES.map(scene => (
