@@ -20,6 +20,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 
@@ -52,6 +53,7 @@ import {
 export default function FreeDraw() {
   // ===== AUDIO =====
   const { playClick, playSuccess } = useAudio();
+  const { onGameComplete } = useGameDrops('free-draw');
   
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());

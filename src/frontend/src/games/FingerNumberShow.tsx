@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useTTS } from '../hooks/useTTS';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { GameContainer } from '../components/GameContainer';
@@ -75,6 +76,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
   const { playCelebration, playSuccess } = useSoundEffects();
+  const { onGameComplete } = useGameDrops('finger-number-show');
 
   // Language and mode selection
   type GameMode = 'numbers' | 'letters';
@@ -484,6 +486,7 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
   };
 
   const stopGame = () => {
+    onGameComplete();
     setIsPlaying(false);
     setFeedback('');
     if (promptTimeoutRef.current) {

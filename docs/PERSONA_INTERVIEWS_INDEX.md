@@ -15,12 +15,13 @@ This index consolidates all persona interview findings. For complete transcripts
 | Ananya (Working Mom) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-008) | ✅ DONE | 8 findings, 7 recommendations |
 | Dadi (Non-Tech Guardian) | WORKLOG_ADDENDUM_v3.md (TCK-20260223-009) | ✅ DONE | 9 findings, Hindi UI critical |
 | Dr. Meera Sharma (Child Psychologist) | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | ✅ DONE | 8 findings, cognitive load focus |
+| Ms. Deepa (School Teacher) | personas/TEACHER_Ms_Deepa.md | ✅ DONE | 7 findings, curriculum & B2B focus |
 
-**Total Interviews Completed**: 5  
-**Total Findings Documented**: 38  
-**Total Recommendations**: 34 (19 P0, 15 P1)  
+**Total Interviews Completed**: 6  
+**Total Findings Documented**: 45  
+**Total Recommendations**: 41 (22 P0, 19 P1)  
 **Technical Audits**: 1 (Language Infrastructure Gap — TCK-20260223-010)  
-**Implementations Completed**: 2 (Global i18n Infrastructure — TCK-20260223-011, Extended UI Translations — TCK-20260223-012)
+**Implementations Completed**: 3 (Global i18n Infrastructure — TCK-20260223-011, Extended UI Translations — TCK-20260223-012, Calm Mode — TCK-20260223-013)
 
 ## Critical Technical Discovery → RESOLVED
 
@@ -103,7 +104,8 @@ Dadi's finding "Hindi. Poora app Hindi mein hona chahiye" is now **addressed**:
 | 3   | Ananya — Overwhelmed Working Mom   | Onboarding & Engagement  | ✅ DONE | 2026-02-23 |
 | 4   | Dadi — Non-Tech Guardian           | Accessibility & Language | ✅ DONE | 2026-02-23 |
 | 5   | Dr. Meera Sharma — Child Psychologist | Development & Cognition | ✅ DONE | 2026-02-23 |
-| 6   | TBD                                | TBD                      | 🔜 NEXT | —          |
+| 6   | Ms. Deepa — School Teacher         | Curriculum & Classroom   | ✅ DONE | 2026-02-24 |
+| 7   | TBD                                | TBD                      | 🔜 NEXT | —          |
 
 ---
 
@@ -565,3 +567,134 @@ Together, Neha, Vikram, Ananya, and Dadi represent **four critical ecosystem rol
 ---
 
 *Last Updated: 2026-02-23*
+
+---
+
+### 6. Ms. Deepa — School Teacher (Grade 1-2, CBSE)
+
+**Date**: 2026-02-24  
+**Status**: ✅ COMPLETED  
+**Full Transcript**: `docs/personas/TEACHER_Ms_Deepa.md`
+
+#### Profile
+
+- **Age**: 38
+- **Location**: Bangalore, Karnataka
+- **Occupation**: Primary School Teacher (Grade 1-2), Early Primary Coordinator
+- **School**: CBSE-affiliated school
+- **Experience**: 12 years teaching
+- **Class Size**: 35 students, 8 shared tablets
+- **Primary Concern**: Curriculum alignment (NCERT/NEP), classroom logistics
+- **Key Trait**: Gateway to B2B adoption — parents trust her recommendations
+
+#### Interview Focus Area
+
+- Curriculum standard mapping (NCERT/NEP)
+- Classroom constraints (offline, shared devices, noise)
+- Teacher-usable progress tracking
+- Inclusive education for learning differences
+
+#### Key Findings
+
+| Severity   | Finding                              | Impact                                                   |
+| ---------- | ------------------------------------ | -------------------------------------------------------- |
+| 🔴 CRITICAL| No curriculum standard mapping       | Teachers cannot recommend; no B2B credibility            |
+| 🔴 HIGH    | Not designed for classroom use       | Needs offline mode, group mode, session timers           |
+| 🔴 HIGH    | Progress data not teacher-usable     | Stars ≠ rubric assessment; no class analytics            |
+| 🔴 HIGH    | Not inclusive for learning differences| 10-15% of children excluded (motor, language, attention) |
+| 🟡 MEDIUM  | No teacher-parent communication      | Missed advocacy opportunity                              |
+| 🟡 MEDIUM  | No teacher onboarding/support        | Low adoption when issues arise                           |
+| 🟡 MEDIUM  | Positioned as "entertainment"        | Teachers view as "supplementary" not "serious learning"  |
+
+#### Top Recommendations
+
+**P0 (Critical - B2B Blockers)**:
+1. **NCERT/NEP curriculum mapping** — Learning outcome tags on each activity
+2. **Offline mode** — Cache lessons, sync when connected (school WiFi is unreliable)
+3. **Classroom Mode** — Group/shared device support, quick profile switching
+
+**P1 (High Priority)**:
+4. **Teacher dashboard** — Class-level analytics, rubric-based assessment
+5. **Inclusive Mode** — Larger touch targets, regional language UI, micro-lessons
+6. **Printable reports** — One-page summaries for parent-teacher meetings
+
+**Positioning**:
+7. **"Teacher Approved" certification** — CBSE/NCERT partnership badge
+
+#### Critical Insight
+
+> *"If I can't tell parents 'this app teaches FLN Foundational Literacy standard 2.3(a),' then I can't recommend it. Parents trust me because I speak curriculum language."*
+
+> *"I'd tell parents it's 'a fun supplementary activity' — not a serious learning tool. That's not what you want, right?"*
+
+#### Documentation
+
+- Persona file: `docs/personas/TEACHER_Ms_Deepa.md`
+- Worklog tickets: TCK-20260224-017 through TCK-20260224-020
+
+---
+
+## Updated Priority Matrix (All Personas)
+
+### P0 Critical (Implement Next)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Calm Mode for sensory sensitivity | Dr. Sharma | ✅ TCK-20260223-013 DONE |
+| NCERT/NEP curriculum mapping | Ms. Deepa | TCK-20260224-017 |
+| Offline mode for classroom/Tier 2-3 | Ananya + Ms. Deepa | TCK-20260223-008 |
+| Guest mode for instant play | Ananya | TCK-20260223-008 |
+| Hindi UI full translation | Dadi | TCK-20260223-012 (partial) |
+| UPI payment option | Ananya | TCK-20260223-008 |
+| Classroom mode (shared devices) | Ms. Deepa | TCK-20260224-018 |
+| Reduce celebration overload | Dr. Sharma | TCK-20260223-014 |
+
+### P1 Important (Schedule Soon)
+
+| Finding | Source | Ticket |
+|---------|--------|--------|
+| Teacher dashboard | Ms. Deepa | TCK-20260224-019 |
+| Inclusive mode (accessibility) | Ms. Deepa | TCK-20260224-020 |
+| Adaptive difficulty | Dr. Sharma | TCK-20260223-015 |
+| Split age categories (2-3, 4-5, 6-8) | Dr. Sharma | TCK-20260223-016 |
+| Skill breakdown with trends | Vikram | TCK-20260223-007 |
+| Weekly automated reports | Vikram | TCK-20260223-007 |
+
+---
+
+## Summary Statistics (Updated)
+
+| Metric | Count |
+|--------|-------|
+| **Interviews Completed** | 6 |
+| **Total Findings** | 45 |
+| **Total Recommendations** | 41 |
+| **P0 Critical** | 22 |
+| **P1 Important** | 19 |
+| **Tickets Created** | 20 |
+| **Features Implemented** | 7 |
+
+### Persona Coverage
+
+| Stakeholder | Persona | Status | Key Contribution |
+|-------------|---------|--------|------------------|
+| Parent (Safety) | Neha | ✅ Done | Privacy, time limits, progress visibility |
+| Parent (Data) | Vikram | ✅ Done | Metrics, curriculum alignment, reports |
+| Parent (Working) | Ananya | ✅ Done | Guest mode, offline, UPI, viral features |
+| Guardian (Non-tech) | Dadi | ✅ Done | Hindi UI, accessibility, simplicity |
+| Expert (Psychology) | Dr. Sharma | ✅ Done | Calm Mode, cognitive load, development |
+| Educator (Teacher) | Ms. Deepa | ✅ Done | Curriculum mapping, B2B, classroom use |
+
+### Remaining Personas
+
+1. **Kabir — The Competitive Learner (Child, 7y)**
+   - Upper age boundary, biggest churn risk
+   - Needs: Challenge, mastery validation, "not babyish" UI
+
+2. **Riya — The Parenting Micro-Influencer**
+   - Growth channel validation
+   - Needs: Shareable content, referral programs, authenticity
+
+---
+
+*Last Updated: 2026-02-24*

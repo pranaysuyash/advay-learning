@@ -21,7 +21,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
@@ -43,6 +46,8 @@ import {
 export default function StorySequence() {
   // ===== AUDIO =====
   const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('story-sequence');
   
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -336,6 +341,7 @@ export default function StorySequence() {
   };
   
   const handleGameComplete = () => {
+    onGameComplete();
     playCelebration();
     setShowCelebration(true);
     if (gameState) {

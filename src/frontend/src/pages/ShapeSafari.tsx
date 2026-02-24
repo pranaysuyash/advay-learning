@@ -20,7 +20,10 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame, Point } from '../types/tracking';
@@ -42,8 +45,10 @@ import {
 export const ShapeSafari = memo(function ShapeSafari() {
   // ===== AUDIO =====
   const { playSuccess, playClick, playCelebration, playHover } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
   // ===== GAME STATE =====
+  const { onGameComplete } = useGameDrops('shape-safari');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentScene, setCurrentScene] = useState<SafariScene | null>(null);
   const [showMenu, setShowMenu] = useState(true);
@@ -383,6 +388,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
 
   const handleShowMenu = () => {
     playClick();
+    onGameComplete();
     setShowMenu(true);
     setGameState(null);
     setCurrentScene(null);

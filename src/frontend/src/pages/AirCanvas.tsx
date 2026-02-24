@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -58,6 +59,7 @@ const COLORS = [
 
 export function AirCanvas() {
   const navigate = useNavigate();
+  const { onGameComplete } = useGameDrops('air-canvas');
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setIsDrawing] = useState(false);

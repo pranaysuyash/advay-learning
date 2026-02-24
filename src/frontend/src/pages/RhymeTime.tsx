@@ -19,7 +19,10 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { SVGBird } from '../components/characters/SVGBird';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
@@ -42,6 +45,8 @@ import {
 export default function RhymeTime() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playChirp, playCelebration } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete } = useGameDrops('rhyme-time');
   
   // ===== GAME STATE =====
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -184,6 +189,7 @@ export default function RhymeTime() {
   
   const handleShowMenu = () => {
     playClick();
+    onGameComplete();
     setShowMenu(true);
     setGameState(null);
     setCurrentRound(null);

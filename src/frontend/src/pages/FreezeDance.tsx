@@ -32,6 +32,9 @@ export function FreezeDance() {
   const [round, setRound] = useState(1);
   const [stabilityScore, setStabilityScore] = useState(0);
 
+  // Game Mode: 'classic' = pose only, 'combo' = pose + fingers
+  const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
+
   // Combined CV: Hand tracking state
   const [targetFingers, setTargetFingers] = useState(0);
   const [detectedFingers, setDetectedFingers] = useState(0);
@@ -204,7 +207,7 @@ export function FreezeDance() {
     setIsFrozen(false);
     setShowHandOverlay(false);
     setFingerChallengeComplete(false);
-    
+
     // Voice cue for dancing phase
     if (ttsEnabled) {
       void speak("Dance dance dance!");
@@ -220,8 +223,8 @@ export function FreezeDance() {
       const freezeTimer = setTimeout(() => {
         const roundScore = Math.round(stabilityRef.current);
 
-        // If stability is good (>60%), add finger challenge
-        if (roundScore > 60 && round > 2) {
+        // If stability is good (>60%), add finger challenge (only in combo mode)
+        if (roundScore > 60 && round > 2 && gameMode === 'combo') {
           // FINGER CHALLENGE phase - combined CV!
           const target = Math.floor(Math.random() * 6); // 0-5 fingers
           setTargetFingers(target);
@@ -428,7 +431,7 @@ export function FreezeDance() {
     <div className='min-h-screen bg-discovery-cream p-4 md:p-8 font-sans relative'>
       {/* Background blur overlay for clean look */}
       <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
-      
+
       <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
       <header className='flex justify-between items-center mb-8 max-w-5xl mx-auto'>
         <button
@@ -485,13 +488,35 @@ export function FreezeDance() {
                   <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>4</span>
                   <span>Hold still to earn points!</span>
                 </li>
-                <li className='flex items-center gap-4 bg-purple-50 border-2 border-purple-100 rounded-2xl p-4 mt-6'>
-                  <span className='text-purple-500 text-2xl drop-shadow-[0_4px_0_#E5B86E]'>🌟</span>
-                  <span className='font-bold text-purple-700'>
-                    BONUS: After round 3, show the correct number of fingers while frozen!
-                  </span>
-                </li>
               </ul>
+            </div>
+
+            <div className='bg-white border-3 border-blue-200 rounded-[2rem] p-6 mb-10 shadow-sm'>
+              <h3 className='font-black text-advay-slate text-xl mb-4 text-center tracking-tight'>Choose Your Mode:</h3>
+              <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+                <button
+                  onClick={() => setGameMode('classic')}
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'classic'
+                      ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+                    }`}
+                >
+                  <span className='text-3xl block mb-2'>🏃‍♂️</span>
+                  Classic Mode
+                  <span className='block text-sm font-normal mt-1 opacity-80'>Just Dance & Freeze</span>
+                </button>
+                <button
+                  onClick={() => setGameMode('combo')}
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'combo'
+                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+                    }`}
+                >
+                  <span className='text-3xl block mb-2'>✋</span>
+                  Combo Mode
+                  <span className='block text-sm font-normal mt-1 opacity-80'>Freeze + Finger Challenges!</span>
+                </button>
+              </div>
             </div>
 
             <button

@@ -44,6 +44,8 @@ import { useTTS } from '../hooks/useTTS';
 import { usePhonics } from '../hooks/usePhonics';
 import { useCameraPermission } from '../hooks/useCameraPermission';
 import { useInitialCameraPermission } from '../hooks/useInitialCameraPermission';
+import { useAudio } from '../utils/hooks/useAudio';
+import { LanguageFlag } from '../components/ui/LanguageFlag';
 // Centralized hand tracking hooks
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -94,11 +96,11 @@ import { getAlphabetGameOverlayVisibility } from './alphabet-game/overlayState';
 
 // Available languages for the game
 const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-  { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
-  { code: 'te', name: 'Telugu', flag: '🇮🇳' },
-  { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+  { code: 'en', name: 'English' },
+  { code: 'hi', name: 'Hindi' },
+  { code: 'kn', name: 'Kannada' },
+  { code: 'te', name: 'Telugu' },
+  { code: 'ta', name: 'Tamil' },
 ] as const;
 
 export const AlphabetGame = React.memo(function AlphabetGameComponent() {
@@ -123,6 +125,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
   // Sound effects and phonics hooks
   const { playCelebration, playPop, playError } = useSoundEffects();
+  const { playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('alphabet-tracing');
   const { speakWordExample } = usePhonics();
@@ -1631,6 +1634,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                             type='button'
                             key={lang.code}
                             onClick={() => {
+                              playClick();
                               setSelectedLanguage(lang.code);
                               setCurrentLetterIndex(0);
                             }}
@@ -1639,7 +1643,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                               : 'bg-discovery-cream text-advay-slate border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-4px] hover:bg-white'
                               }`}
                           >
-                            <span className='mr-3 text-xl'>{lang.flag}</span>
+                            <span className='mr-3 text-xl'><LanguageFlag code={lang.code} /></span>
                             {lang.name}
                           </button>
                         ))}

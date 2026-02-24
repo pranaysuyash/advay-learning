@@ -428,3 +428,63 @@ Evidence delta:
 
 - Observed: `src/frontend/src/services/api.test.ts` now includes `issueReportsApi` coverage (+2 tests)
 - Observed: Command `npx vitest run src/services/api.test.ts` passed with `1` file and `10` tests
+
+---
+
+## TCK-20260224-005 :: Playwright Happy-Path — In-Game Issue Report Submission
+
+Type: FEATURE_IMPLEMENTATION
+Owner: Pranay
+Created: 2026-02-24
+Status: **DONE**
+Priority: P0
+
+Description:
+Add focused Playwright E2E coverage for the in-game issue reporting happy path to verify record → preview → parent confirmation → submit success behavior.
+
+Scope contract:
+
+- In-scope:
+  - Add one deterministic Playwright test for AirCanvas issue reporting flow
+  - Mock auth/session, recording primitives (`MediaRecorder`, `captureStream`) and issue-report API endpoints for stable E2E execution
+  - Assert submission success UX and key request payload invariants
+- Out-of-scope:
+  - Multi-browser matrix expansion
+  - Full redaction pixel-level video verification in E2E
+  - Backend persistence migration
+- Behavior change allowed: NO (test-only + documentation)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/e2e/IssueReportFlow.e2e.test.ts` (new)
+  - `docs/WORKLOG_ADDENDUM_VIDEO_ISSUE_REPORTING_2026-02-23.md` (update)
+- Branch/PR: main
+
+Execution log:
+
+- [2026-02-24] Added `IssueReportFlow.e2e.test.ts` covering AirCanvas issue-report flow
+- [2026-02-24] Added deterministic browser init mocks for persisted guest auth and recording primitives
+- [2026-02-24] Added route handlers for create/upload/finalize issue-report endpoints and payload capture assertions
+- [2026-02-24] Ran focused Playwright test, fixed parent-gate selector from failure snapshot, and re-ran successfully
+
+Evidence:
+
+- Observed: New test file `src/frontend/e2e/IssueReportFlow.e2e.test.ts` executes full modal flow including parent hold-to-unlock
+- Observed: First run failed on selector mismatch (`Hold to Unlock` vs aria-label based accessible name)
+- Observed: Selector updated to accessible name pattern `Hold for 3 seconds to access settings`
+- Observed: Command `npx playwright test e2e/IssueReportFlow.e2e.test.ts --project=chromium` passed with `1` test
+- Observed: Test asserts payload invariants for `createSession` (`game_id`, `activity_id`, `issue_tags`) and `finalizeReport` (`redaction_applied`, `mime_type`)
+- Inferred: Happy-path UX + API orchestration is now guarded by deterministic E2E coverage for one integrated game
+- Unknown: Flake profile across slower CI runners and additional browsers until broader matrix execution
+
+Status updates:
+
+- [2026-02-24] **DONE** — Playwright happy-path issue reporting test added and passing
+
+Next actions:
+
+1. Extend E2E coverage to `VirtualChemistryLab` report flow (same parent-gated path)
+2. Add negative-path Playwright tests (session create failure, upload failure, finalize failure)
+3. Move backend issue reports from temporary in-memory store to DB-backed persistence + retention jobs

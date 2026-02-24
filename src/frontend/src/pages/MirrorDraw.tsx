@@ -11,6 +11,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
   assetLoader,
   SOUND_ASSETS,
@@ -28,6 +30,7 @@ import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const MAX_LEVEL = 4;
+const CURSOR_SIZE = 84; // Increased for toddler visibility
 const TEMPLATES_TO_PASS = 3; // pass 3/5 to unlock next level
 
 export const MirrorDraw = memo(function MirrorDrawComponent() {
@@ -58,6 +61,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   const templateRef = useRef<MirrorTemplate | null>(null);
 
   const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('mirror-draw');
 
   useEffect(() => {
@@ -182,15 +186,20 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
       ctx.shadowBlur = 0;
     }
 
-    // V1 Bubbly Cursor
+    // V1 Bubbly Cursor - Increased size for toddlers
     if (cursor) {
       ctx.beginPath();
-      ctx.arc(cursor.x * w, cursor.y * h, isDrawing ? 16 : 12, 0, Math.PI * 2);
+      ctx.arc(cursor.x * w, cursor.y * h, isDrawing ? 24 : 18, 0, Math.PI * 2);
       ctx.fillStyle = isDrawing ? '#10B981' : '#E85D04';
       ctx.fill();
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 4;
       ctx.stroke();
+      // Add emoji indicator
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(isDrawing ? '✏️' : '👆', cursor.x * w, cursor.y * h);
     }
   }, [template, userPoints, cursor, isDrawing]);
 
@@ -212,11 +221,19 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
       const pts = 10 + result.stars * 5;
       setScore((prev) => prev + pts);
       setPassedCount((prev) => prev + 1);
-      setFeedback(`${result.stars === 3 ? 'Perfect!' : result.stars === 2 ? 'Great!' : 'Nice!'} ${tmpl.emoji} ${Math.round(result.accuracy * 100)}%`);
+      const feedbackMsg = `${result.stars === 3 ? 'Perfect!' : result.stars === 2 ? 'Great!' : 'Nice!'} ${tmpl.emoji} ${Math.round(result.accuracy * 100)}%`;
+      setFeedback(feedbackMsg);
+      if (ttsEnabled) {
+        void speak(`${result.stars === 3 ? 'Perfect tracing' : result.stars === 2 ? 'Great job' : 'Nice work'}! You matched the ${tmpl.name}!`);
+      }
       assetLoader.playSound('success', 0.45);
       void playPop();
     } else {
-      setFeedback(`Try again! ${Math.round(result.accuracy * 100)}% — you need ${Math.round(LEVELS[level - 1].passThreshold * 100)}%`);
+      const tryAgainMsg = `Try again! ${Math.round(result.accuracy * 100)}% — you need ${Math.round(LEVELS[level - 1].passThreshold * 100)}%`;
+      setFeedback(tryAgainMsg);
+      if (ttsEnabled) {
+        void speak('Keep trying! Trace the shape more carefully!');
+      }
       assetLoader.playSound('wrong', 0.42);
       void playError();
     }
@@ -233,6 +250,13 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
           assetLoader.playSound('level-complete', 0.55);
           void playCelebration();
           setShowCelebration(true);
+          if (ttsEnabled) {
+            if (level >= MAX_LEVEL) {
+              void speak('Amazing! You completed all the mirror drawings!');
+            } else {
+              void speak('Level complete! Great mirror drawing!');
+            }
+          }
           levelTimeoutRef.current = setTimeout(() => {
             setShowCelebration(false);
             if (level >= MAX_LEVEL) {
@@ -471,11 +495,23 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
             className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-20'
           >
             <div className='text-8xl drop-shadow-xl'>🎨</div>
-            <div className='bg-white p-8 rounded-[2.5rem] border-3 border-[#F2CC8F] shadow-xl max-w-lg text-center flex flex-col items-center'>
+            <div className='bg-white p-8 rounded-[2.5rem] border-3 border-[#F2CC8F] shadow-xl max-w-lg text-center flex flex-col items-center relative'>
               <h2 className='text-4xl font-black text-advay-slate mb-4 tracking-tight'>Mirror Draw</h2>
               <p className='text-text-secondary font-bold text-lg mb-8 leading-relaxed'>
                 See the shape on the left? Trace its mirror on the right side!
               </p>
+              {ttsEnabled && (
+                <VoiceInstructions
+                  instructions={[
+                    'Look at the shape on the left.',
+                    'Trace its mirror on the right.',
+                    'Pinch and draw with your finger!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
+              )}
               <button
                 type='button'
                 onClick={startGame}

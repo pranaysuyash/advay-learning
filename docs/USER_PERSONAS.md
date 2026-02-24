@@ -635,3 +635,144 @@ Personas were selected to cover every **stakeholder role** that influences adopt
 |---|---|---|---|
 | 1.0 | 2026-02-22 | Antigravity | Initial comprehensive persona document |
 | 1.1 | 2026-02-22 | Antigravity | Removed India-first framing (product is global); added Methodology & Prompts appendix |
+
+
+---
+
+## Appendix: Persona Interview Tracking
+
+This section tracks which personas have been interviewed, key findings, and implementation status.
+
+### Interview Status Matrix
+
+| Persona | Category | Interview Status | Key Output | Priority Update |
+|---------|----------|------------------|------------|-----------------|
+| Neha (Safety-First Parent) | Decision Maker | ✅ 2026-02-23 | 6 features implemented | P0 confirmed |
+| Vikram (Data-Driven Father) | Decision Maker | ✅ 2026-02-23 | 7 findings documented | P1 confirmed |
+| Ananya (Working Mom) | Decision Maker | ✅ 2026-02-23 | 8 findings, Guest/Offline/UPI | P0 confirmed |
+| Dadi (Grandmother) | Decision Maker | ✅ 2026-02-23 | 9 findings, Hindi UI critical | P0 confirmed |
+| Dr. Meera Sharma | Expert/Advisor | ✅ 2026-02-23 | 8 findings, Calm Mode | NEW — P0 |
+| Ms. Deepa (Teacher) | Institutional | ✅ 2026-02-24 | 7 findings, B2B blocker | **P0** (was P2) |
+| Kabir (Competitive Learner) | End User | ⏳ Not started | — | — |
+| Riya (Influencer) | Growth | ⏳ Not started | — | — |
+
+### Interview Documentation
+
+| Persona | Document Location | Worklog Tickets |
+|---------|-------------------|-----------------|
+| Neha | WORKLOG_TICKETS.md (TCK-20260223-001) | TCK-20260223-001 to 006 |
+| Vikram | WORKLOG_ADDENDUM_v3.md (TCK-20260223-007) | TCK-20260223-007 |
+| Ananya | WORKLOG_ADDENDUM_v3.md (TCK-20260223-008) | TCK-20260223-008 |
+| Dadi | WORKLOG_ADDENDUM_v3.md (TCK-20260223-009) | TCK-20260223-009 to 011 |
+| Dr. Meera Sharma | personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md | TCK-20260223-013 to 016 |
+| Ms. Deepa | personas/TEACHER_Ms_Deepa.md | TCK-20260224-017 to 020 |
+
+### Key Findings Summary by Persona
+
+#### Dr. Meera Sharma — Child Psychologist
+
+**Persona Type:** Expert/Advisor (NEW)  
+**Interview Date:** 2026-02-23  
+**Document:** `docs/personas/CHILD_PSYCHOLOGIST_Dr_Meera_Sharma.md`
+
+**Critical Finding:** Celebration cognitive overload — 4+ simultaneous sensory inputs (animation + sparkles + mascot + voice) overwhelm children and reduce learning.
+
+**Top Recommendations:**
+1. ✅ **Calm Mode** — Implemented (TCK-20260223-013)
+2. Sequence celebrations instead of simultaneous (TCK-20260223-014)
+3. Adaptive difficulty system (TCK-20260223-015)
+4. Split age categories 2-3/4-5/6-8 (TCK-20260223-016)
+
+**Key Quote:**
+> "Stars and rewards create dopamine loops. Children play for the reward, not the learning. That's addiction, not education."
+
+---
+
+#### Ms. Deepa — School Teacher (UPDATED)
+
+**Persona Type:** Institutional (B2B Gateway)  
+**Interview Date:** 2026-02-24  
+**Document:** `docs/personas/TEACHER_Ms_Deepa.md`  
+**Priority Update:** P2 → **P0** (Critical for B2B)
+
+**Critical Finding:** No curriculum standard mapping. Teachers cannot recommend app without NCERT/NEP learning outcome tags.
+
+**Top Recommendations:**
+1. NCERT/NEP curriculum mapping (TCK-20260224-017) — B2B Blocker
+2. Classroom Mode — offline, group/shared devices (TCK-20260224-018)
+3. Teacher dashboard with class analytics (TCK-20260224-019)
+4. Inclusive Mode for learning differences (TCK-20260224-020)
+
+**Key Quote:**
+> "If I can't tell parents 'this app teaches FLN 2.3(a),' then I can't recommend it. Parents trust me because I speak curriculum language."
+
+> "I'd tell parents it's 'a fun supplementary activity' — not a serious learning tool. That's not what you want, right?"
+
+---
+
+### Implementation Progress
+
+| Ticket | Description | Status | Persona |
+|--------|-------------|--------|---------|
+| TCK-20260223-001 | Daily Time Breakdown Chart | ✅ DONE | Neha |
+| TCK-20260223-002 | Struggle Visibility | ✅ DONE | Neha |
+| TCK-20260223-003 | PDF Export | ✅ DONE | Neha |
+| TCK-20260223-004 | Time Limit Enforcement | ✅ DONE | Neha |
+| TCK-20260223-005 | Camera Settings Clarity | ✅ DONE | Neha |
+| TCK-20260223-011 | Global i18n Infrastructure | ✅ DONE | Dadi |
+| TCK-20260223-012 | Extended UI Translations | ✅ DONE | Dadi |
+| TCK-20260223-013 | Calm Mode | ✅ DONE | Dr. Sharma |
+| TCK-20260223-014 | Reduce Celebration Overload | 📝 OPEN | Dr. Sharma |
+| TCK-20260223-015 | Adaptive Difficulty | 📝 OPEN | Dr. Sharma |
+| TCK-20260223-016 | Split Age Categories | 📝 OPEN | Dr. Sharma |
+| TCK-20260224-017 | NCERT/NEP Curriculum Mapping | 📝 OPEN | Ms. Deepa |
+| TCK-20260224-018 | Classroom Mode | 📝 OPEN | Ms. Deepa |
+| TCK-20260224-019 | Teacher Dashboard | 📝 OPEN | Ms. Deepa |
+| TCK-20260224-020 | Inclusive Mode | 📝 OPEN | Ms. Deepa |
+
+---
+
+### Persona Gaps Identified Through Interviews
+
+**NEW Persona Category: Expert/Advisor**
+
+Dr. Meera Sharma revealed a gap in our persona coverage: **child development experts** who evaluate apps through a developmental psychology lens. This persona type:
+- Validates product credibility with safety-conscious parents
+- Identifies cognitive load and accessibility issues
+- Provides research-backed recommendations
+
+**Recommendation:** Add more expert personas:
+- Occupational Therapist (motor development)
+- Speech-Language Pathologist (phonics, articulation)
+- Special Education Expert (inclusive design)
+
+---
+
+### Updated Priority Framework
+
+Based on interview findings, the priority framework has been updated:
+
+**P0 (Critical - Implement Next):**
+1. Calm Mode (sensory sensitivity) — Dr. Sharma ✅ DONE
+2. NCERT/NEP curriculum mapping — Ms. Deepa (B2B blocker)
+3. Guest mode + Offline mode — Ananya (Tier 2/3 India)
+4. Hindi UI full translation — Dadi (accessibility)
+5. UPI payment — Ananya (India market)
+6. Classroom Mode — Ms. Deepa (B2B enablement)
+
+**P1 (Important - Schedule Soon):**
+1. Teacher dashboard — Ms. Deepa
+2. Inclusive Mode — Ms. Deepa
+3. Adaptive difficulty — Dr. Sharma
+4. Split age categories — Dr. Sharma
+5. Celebration overload fix — Dr. Sharma
+
+---
+
+## Version History
+
+| Version | Date | Author | Changes |
+|---|---|---|---|
+| 1.0 | 2026-02-22 | Antigravity | Initial comprehensive persona document |
+| 1.1 | 2026-02-22 | Antigravity | Removed India-first framing (product is global); added Methodology & Prompts appendix |
+| 1.2 | 2026-02-24 | Kimi Code CLI | Added Persona Interview Tracking appendix; updated Ms. Deepa priority P2→P0; added Dr. Meera Sharma as new Expert persona |

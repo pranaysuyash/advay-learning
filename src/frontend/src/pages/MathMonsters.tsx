@@ -20,10 +20,13 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CSSMonster } from '../components/characters/CSSMonster';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -46,6 +49,7 @@ const MIN_FINGER_HOLD_TIME = 1500;
 export default function MathMonsters() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
   
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -144,6 +148,9 @@ export default function MathMonsters() {
     setShowMenu(false);
     setMonsterExpression('hungry');
     setMonsterMessage(getRandomPhrase(getMonsterForLevel(LEVELS[0]), 'request'));
+    if (ttsEnabled && newGameState.currentProblem) {
+      void speak(`Feed the monster! Show ${newGameState.currentProblem.answer} fingers!`);
+    }
     setDetectedFingers(0);
     setFingerHoldStart(null);
     fingerCountHistoryRef.current = [];
@@ -167,10 +174,16 @@ export default function MathMonsters() {
     if (isCorrect) {
       playSuccess();
       setMonsterExpression('eating');
+      if (ttsEnabled) {
+        void speak('Yum! Correct answer!');
+      }
       setTimeout(() => playMunch(), 200);
     } else {
       playError();
       setMonsterExpression('sad');
+      if (ttsEnabled) {
+        void speak(`That's ${fingerCount}. Try ${gameState.currentProblem?.answer} fingers!`);
+      }
     }
     
     // Update monster message
@@ -245,6 +258,22 @@ export default function MathMonsters() {
             ))}
           </div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">Math Monsters!</h2>
+          
+          {/* Voice Instructions */}
+          {ttsEnabled && (
+            <div className="mb-4">
+              <VoiceInstructions
+                instructions={[
+                  'Look at the math problem.',
+                  'Show the answer with your fingers.',
+                  'Hold for 2 seconds to feed!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            </div>
+          )}
           
           {/* Goal Statement with Semantic Attributes */}
           <div 

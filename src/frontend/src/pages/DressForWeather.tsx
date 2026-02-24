@@ -22,6 +22,7 @@ import {
   SOUND_ASSETS,
   createSVGIcon,
 } from '../utils/assets';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';

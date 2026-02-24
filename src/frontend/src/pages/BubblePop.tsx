@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 import { useMicrophoneInput } from '../hooks/useMicrophoneInput';
@@ -29,6 +30,7 @@ const FRAME_TIME = 1000 / TARGET_FPS;
 export default function BubblePop() {
   // Audio
   const { playClick, playLevelUp } = useAudio();
+  const { onGameComplete } = useGameDrops('bubble-pop');
 
   // Game state
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -127,6 +129,7 @@ export default function BubblePop() {
 
   const handleStop = () => {
     playClick();
+    onGameComplete();
     stop();
     setGameState(endGame(gameState));
     setShowMenu(true);

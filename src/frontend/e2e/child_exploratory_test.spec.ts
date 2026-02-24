@@ -402,13 +402,19 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
 
     await takeScreenshot(page, 'rhyme-time', '02_audio_test', result);
 
-    // Check word cards
-    const wordCards = await page.locator('[class*="word"], [class*="card"], button').all();
+    // Check word cards - use data-testid if available, fallback to more specific selector
+    const wordCards = await page.locator('[data-testid*="card"], [data-testid*="word"], .game-card, button[class*="word"]').all();
     recordInteraction(result, 'discover', 'word_cards', wordCards.length > 0, `${wordCards.length} word options`);
 
     if (wordCards.length > 0) {
-      // Child randomly clicks a word
-      const randomCard = wordCards[Math.floor(Math.random() * wordCards.length)];
+      // Child randomly clicks a word (avoid dev tools buttons)
+      const validCards = wordCards.filter(card => {
+        const title = card.getAttribute('title');
+        return !title || (!title.includes('Clear') && !title.includes('events'));
+      });
+      const randomCard = validCards.length > 0 
+        ? validCards[Math.floor(Math.random() * validCards.length)]
+        : wordCards[Math.floor(Math.random() * wordCards.length)];
       await childDelay(page, 800, 1500);
       await randomCard.click();
       recordInteraction(result, 'click', 'word_card', true);
