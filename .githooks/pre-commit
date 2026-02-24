@@ -15,7 +15,16 @@ else
   echo "[pre-commit] Skipping secret scan (SKIP_SECRET_SCAN=1)"
 fi
 
-# 3. Regression check: tests + export comparison + TypeScript
+# 3. Feature regression check: detect removed functionality in large refactors
+# Triggered when >10% LOC changed in existing files
+# Skip with SKIP_FEATURE_CHECK=1 or --no-verify
+if [[ "${SKIP_FEATURE_CHECK:-}" != "1" ]]; then
+  ./scripts/feature_regression_check.sh --staged
+else
+  echo "[pre-commit] Skipping feature regression check (SKIP_FEATURE_CHECK=1)"
+fi
+
+# 4. Regression check: tests + export comparison + TypeScript
 # Skip with SKIP_REGRESSION_CHECK=1 or --no-verify
 if [[ "${SKIP_REGRESSION_CHECK:-}" != "1" ]]; then
   ./scripts/regression_check.sh --staged

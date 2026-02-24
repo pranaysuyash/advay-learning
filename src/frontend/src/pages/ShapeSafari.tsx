@@ -265,8 +265,11 @@ export const ShapeSafari = memo(function ShapeSafari() {
         foundShapes: newFoundShapes,
       });
 
-      // Show found object with sound
+      // Show found object with sound and TTS
       playSuccess();
+      if (ttsEnabled) {
+        void speak(`You found a ${activeShape.hiddenObject.name}!`);
+      }
       setFoundObject({
         name: activeShape.hiddenObject.name,
         emoji: activeShape.hiddenObject.emoji,

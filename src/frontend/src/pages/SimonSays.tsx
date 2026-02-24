@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 
@@ -70,6 +73,9 @@ export const SimonSays = memo(function SimonSays() {
   const [matchProgress, setMatchProgress] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [round, setRound] = useState(1);
+  const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
+  const [targetFingers, setTargetFingers] = useState<number | null>(null);
+  const [detectedFingers, setDetectedFingers] = useState(0);
 
   const currentAction = BODY_ACTIONS[currentActionIndex];
   const HOLD_DURATION = 2000;
@@ -83,6 +89,23 @@ export const SimonSays = memo(function SimonSays() {
 
   const holdTimeRef = useRef(0);
   const lastPoseRef = useRef<any[] | null>(null);
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
+    if (!frame.primaryHand || gameMode !== 'combo' || !isPlaying) {
+      setDetectedFingers(0);
+      return;
+    }
+    const count = countExtendedFingersFromLandmarks(frame.primaryHand);
+    setDetectedFingers(count);
+  }, [gameMode, isPlaying]);
+
+  useGameHandTracking({
+    gameName: 'SimonSays',
+    isRunning: isPlaying && gameMode === 'combo',
+    webcamRef,
+    targetFps: 15,
+    onFrame: handleHandFrame,
+  });
 
   useEffect(() => {
     async function initPose() {
@@ -201,18 +224,24 @@ export const SimonSays = memo(function SimonSays() {
 
       setMatchProgress(matchScore);
 
-      if (matchScore > 70) {
+      let poseMatches = matchScore > 70;
+      let fingerMatches = gameMode !== 'combo' || (targetFingers !== null && detectedFingers === targetFingers);
+
+      if (poseMatches && fingerMatches) {
         holdTimeRef.current += 50;
         if (holdTimeRef.current >= HOLD_DURATION) {
-          setScore((s) => s + 100);
+          setScore((s: number) => s + 100);
           setShowResult(true);
           setShowCelebration(true);
           setTimeout(() => {
             setShowCelebration(false);
-            setCurrentActionIndex((i) => (i + 1) % BODY_ACTIONS.length);
+            setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
             setShowResult(false);
             holdTimeRef.current = 0;
-            setRound((r) => r + 1);
+            setRound((r: number) => r + 1);
+            if (gameMode === 'combo') {
+              setTargetFingers(Math.floor(Math.random() * 5) + 1);
+            }
           }, 2000);
         }
       } else {
@@ -223,7 +252,7 @@ export const SimonSays = memo(function SimonSays() {
     }
 
     animationRef.current = requestAnimationFrame(detectPose);
-  }, [cameraReady, isPlaying, showResult, currentAction]);
+  }, [cameraReady, isPlaying, showResult, currentAction, gameMode, targetFingers, detectedFingers]);
 
   useEffect(() => {
     if (isPlaying && cameraReady) {
@@ -237,6 +266,11 @@ export const SimonSays = memo(function SimonSays() {
     setCurrentActionIndex(0);
     setRound(1);
     holdTimeRef.current = 0;
+    if (gameMode === 'combo') {
+      setTargetFingers(Math.floor(Math.random() * 5) + 1);
+    } else {
+      setTargetFingers(null);
+    }
   };
 
   const stopGame = () => {
@@ -332,7 +366,31 @@ export const SimonSays = memo(function SimonSays() {
                 <li className='flex items-center gap-3'><span className='text-3xl'>👂</span> Listen carefully to what Simon says</li>
                 <li className='flex items-center gap-3'><span className='text-3xl'>🏃</span> Do the action with your whole body!</li>
                 <li className='flex items-center gap-3'><span className='text-3xl'>⏸️</span> Hold the pose steady to complete it</li>
+                {gameMode === 'combo' && <li className='flex items-center gap-3'><span className='text-3xl'>✋</span> Also show the correct number of fingers!</li>}
               </ul>
+            </div>
+
+            <div className='flex gap-4 w-full max-w-md mb-6'>
+              <button
+                onClick={() => setGameMode('classic')}
+                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'classic'
+                  ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+                  }`}
+              >
+                <span className='text-3xl block mb-2'>🏃‍♂️</span>
+                Classic
+              </button>
+              <button
+                onClick={() => setGameMode('combo')}
+                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'combo'
+                  ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+                  }`}
+              >
+                <span className='text-3xl block mb-2'>✋</span>
+                Combo
+              </button>
             </div>
 
             <button
@@ -360,6 +418,11 @@ export const SimonSays = memo(function SimonSays() {
                 </h3>
                 <p className='text-xl font-bold text-text-secondary mb-4'>
                   {currentAction.instruction}
+                  {gameMode === 'combo' && targetFingers !== null && (
+                    <span className="block mt-2 text-purple-600 text-2xl">
+                      ...AND show me {targetFingers} fingers!
+                    </span>
+                  )}
                 </p>
                 <div className='inline-block bg-slate-100 text-advay-slate font-bold px-4 py-2 rounded-full text-sm uppercase tracking-wider'>
                   Round {round}
@@ -399,6 +462,22 @@ export const SimonSays = memo(function SimonSays() {
                     />
                   </div>
                 </div>
+
+                {gameMode === 'combo' && targetFingers !== null && (
+                  <div>
+                    <div className='flex justify-between font-bold text-purple-600 mb-2 uppercase tracking-wide text-sm'>
+                      <span>Fingers Required</span>
+                      <span>{detectedFingers} / {targetFingers}</span>
+                    </div>
+                    <div className='h-6 bg-purple-100 rounded-full overflow-hidden border-2 border-purple-300/50 p-1'>
+                      <motion.div
+                        className='h-full bg-purple-500 rounded-full'
+                        animate={{ width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%` }}
+                        transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -433,7 +512,10 @@ export const SimonSays = memo(function SimonSays() {
                 </button>
                 <button
                   onClick={() => {
-                    setCurrentActionIndex((i) => (i + 1) % BODY_ACTIONS.length);
+                    setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
+                    if (gameMode === 'combo') {
+                      setTargetFingers(Math.floor(Math.random() * 5) + 1);
+                    }
                     holdTimeRef.current = 0;
                   }}
                   className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'

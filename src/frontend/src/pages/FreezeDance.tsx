@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { Music, Sparkles, Frown, Video, Hand, Snowflake, Trophy, PartyPopper, Star, PersonStanding } from 'lucide-react';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -396,14 +397,14 @@ export function FreezeDance() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className='text-6xl mb-4'>💃</div>
+          <div className='text-6xl mb-4 flex justify-center'><Music className='w-16 h-16 text-purple-500' /></div>
           <h2 className='text-2xl font-bold text-blue-700 mb-2'>
             Loading Freeze Dance...
           </h2>
           <p className='text-blue-500'>
             {isLoading ? 'Loading pose tracking...' : 'Loading hand tracking...'}
           </p>
-          <p className='text-purple-500 text-sm mt-2'>✨ Now with finger challenges!</p>
+          <p className='text-purple-500 text-sm mt-2 flex items-center justify-center gap-1'><Sparkles className='w-4 h-4' /> Now with finger challenges!</p>
         </motion.div>
       </div>
     );
@@ -413,7 +414,7 @@ export function FreezeDance() {
     return (
       <div className='min-h-screen bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center'>
         <div className='text-center p-8'>
-          <div className='text-6xl mb-4'>😢</div>
+          <div className='text-6xl mb-4 flex justify-center'><Frown className='w-16 h-16 text-red-500' /></div>
           <h2 className='text-2xl font-bold text-red-700 mb-2'>Oops!</h2>
           <p className='text-red-500 mb-4'>{error}</p>
           <button
@@ -447,7 +448,7 @@ export function FreezeDance() {
             <span className='font-black text-amber-500 text-xl'>{score}</span>
           </div>
           <div className='px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-            <span className='text-text-secondary font-bold text-sm'>Take your time! 🌈</span>
+            <span className='text-text-secondary font-bold text-sm flex items-center gap-1'>Take your time!</span>
           </div>
         </div>
       </header>
@@ -460,7 +461,7 @@ export function FreezeDance() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className='text-center mb-10'>
-              <div className='text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>💃🕺</div>
+              <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center gap-2'><Music className='w-20 h-20 text-purple-500' /><PersonStanding className='w-20 h-20 text-blue-500' /></div>
               <h2 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4'>
                 Freeze Dance!
               </h2>
@@ -478,11 +479,11 @@ export function FreezeDance() {
                 </li>
                 <li className='flex items-center gap-4'>
                   <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>2</span>
-                  <span>Dance and move when you see "DANCE!" 💃</span>
+                  <span>Dance and move when you see "DANCE!"</span>
                 </li>
                 <li className='flex items-center gap-4'>
                   <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>3</span>
-                  <span>FREEZE when you see "FREEZE!" ❄️</span>
+                  <span>FREEZE when you see "FREEZE!"</span>
                 </li>
                 <li className='flex items-center gap-4'>
                   <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>4</span>
@@ -501,7 +502,7 @@ export function FreezeDance() {
                       : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
                     }`}
                 >
-                  <span className='text-3xl block mb-2'>🏃‍♂️</span>
+                  <span className='block mb-2 flex justify-center'><Trophy className='w-10 h-10 text-blue-600' /></span>
                   Classic Mode
                   <span className='block text-sm font-normal mt-1 opacity-80'>Just Dance & Freeze</span>
                 </button>
@@ -512,7 +513,7 @@ export function FreezeDance() {
                       : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
                     }`}
                 >
-                  <span className='text-3xl block mb-2'>✋</span>
+                  <span className='block mb-2 flex justify-center'><Hand className='w-10 h-10 text-purple-600' /></span>
                   Combo Mode
                   <span className='block text-sm font-normal mt-1 opacity-80'>Freeze + Finger Challenges!</span>
                 </button>
@@ -523,7 +524,7 @@ export function FreezeDance() {
               onClick={startGame}
               className='w-full py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95'
             >
-              Start Dancing! 🎵
+              Start Dancing!
             </button>
 
             {ttsEnabled && (
@@ -548,8 +549,8 @@ export function FreezeDance() {
               animate={{ opacity: 1, scale: 1 }}
             >
               <div className='text-center'>
-                <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E]'>
-                  {gamePhase === 'dancing' ? '💃' : gamePhase === 'freezing' ? '❄️' : '✋'}
+                <div className='mb-4 drop-shadow-[0_4px_0_#E5B86E] flex justify-center'>
+                  {gamePhase === 'dancing' ? <Music className='w-20 h-20 text-blue-500' /> : gamePhase === 'freezing' ? <Snowflake className='w-20 h-20 text-red-500' /> : <Hand className='w-20 h-20 text-purple-500' />}
                 </div>
                 <h3
                   className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing' ? 'text-[#3B82F6]' :
@@ -629,8 +630,8 @@ export function FreezeDance() {
 
               <div className='absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <span className='text-advay-slate font-bold whitespace-nowrap'>
-                  {cameraReady ? '📹 Camera Ready' : '⏳ Loading...'}
-                  {isHandReady && ' ✋'}
+                  {cameraReady ? <span className='flex items-center gap-1'><Video className='w-4 h-4' /> Camera Ready</span> : 'Loading...'}
+                  {isHandReady && <Hand className='w-4 h-4 inline' />}
                 </span>
               </div>
 
@@ -640,8 +641,8 @@ export function FreezeDance() {
                     gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
                     }`}
                 >
-                  {gamePhase === 'dancing' ? '💃 DANCE' :
-                    gamePhase === 'freezing' ? '❄️ FROZEN' : '✋ FINGERS'}
+                  {gamePhase === 'dancing' ? <span className='flex items-center gap-1'><Music className='w-4 h-4' /> DANCE</span> :
+                    gamePhase === 'freezing' ? <span className='flex items-center gap-1'><Snowflake className='w-4 h-4' /> FROZEN</span> : <span className='flex items-center gap-1'><Hand className='w-4 h-4' /> FINGERS</span>}
                 </span>
               </div>
             </div>
@@ -671,13 +672,13 @@ export function FreezeDance() {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
               >
-                <div className='text-[6rem] mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🎉</div>
+                <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center'><PartyPopper className='w-24 h-24 text-yellow-500' /></div>
                 <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>
                   {fingerChallengeComplete ? 'Perfect Freeze + Fingers!' : 'Amazing Freeze!'}
                 </h2>
                 <p className='text-text-secondary font-bold text-xl'>
                   {fingerChallengeComplete
-                    ? 'You froze AND showed the right fingers! 🌟'
+                    ? <span className='flex items-center justify-center gap-1'>You froze AND showed the right fingers! <Star className='w-5 h-5 text-yellow-500 inline' /></span>
                     : 'Perfect stillness!'}
                 </p>
               </motion.div>

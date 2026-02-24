@@ -668,7 +668,7 @@ Risks/notes:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:15 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P0 (Critical - B2B Blocker)
 
 Description:
@@ -720,7 +720,7 @@ Status updates:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:18 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P0
 
 Description:
@@ -769,7 +769,7 @@ Execution log:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:20 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P1
 
 Description:
@@ -817,7 +817,7 @@ Execution log:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:22 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P1
 
 Description:
@@ -917,7 +917,7 @@ Next actions:
 Type: CONTENT
 Owner: Pranay
 Created: 2026-02-24 00:30 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P0 (Critical - Churn Prevention)
 
 Description:
@@ -971,7 +971,7 @@ Status updates:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:32 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P0 (Critical - Upper Age Retention)
 
 Description:
@@ -1022,7 +1022,7 @@ Execution log:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:35 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P1 (High - Engagement)
 
 Description:
@@ -1073,7 +1073,7 @@ Execution log:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:38 IST
-Status: **OPEN**
+Status: **IN_PROGRESS**
 Priority: P1 (Medium-High - Peer Motivation)
 
 Description:
@@ -1173,4 +1173,752 @@ Status updates:
 Next actions:
 1. Begin Tier 2 games (BubblePop, AirCanvas, ShapePop, etc.)
 2. Continue with remaining 20 games
+
+
+
+### TCK-20260224-025 :: Share Mode for Content Creation
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:45 IST
+Status: **IN_PROGRESS**
+Priority: P0 (Growth Channel Critical)
+
+Description:
+Implement "Share Mode" for easy social media content creation. Influencer Riya (85K followers) says current UI is too cluttered for screenshots; privacy indicators make it look "technical not fun." Need one-tap clean screenshot with just child's artwork + app branding.
+
+Scope contract:
+- In-scope:
+  - One-tap "Share" button in game completion screen
+  - Clean layout: Child artwork centered, child name, app logo only
+  - Remove UI clutter: buttons, progress bars, privacy indicators hidden
+  - Multiple aspect ratios: 1:1 (Instagram), 9:16 (Stories), 16:9 (YouTube)
+  - Optional "Before/After" split view for progress showcase
+  - Branded templates: "My Learning Journey" overlays
+- Out-of-scope:
+  - Full video editing features
+  - Third-party social media integration (just generate image)
+- Behavior change allowed: YES (new feature)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - New: src/components/ShareMode/
+  - src/pages/AlphabetGame.tsx (share button)
+  - src/utils/shareGenerator.ts (image generation)
+- Branch/PR: main
+
+Inputs:
+- Source: Riya interview (Micro-Influencer)
+- Finding: "I need a clean share mode: just the artwork, the child's name, the app logo. That's it."
+
+Plan:
+1. Design clean share layouts (3 aspect ratios)
+2. Implement html2canvas-based screenshot generation
+3. Add share button to game completion screens
+4. Create branded template overlays
+5. Add before/after comparison feature
+6. Test with real device screenshots
+
+Execution log:
+- [2026-02-24 00:45 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+### TCK-20260224-026 :: Influencer Collaboration Portal
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:48 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Create a dedicated portal for influencer partners like Riya. Provide early access to features, downloadable assets (logos, screenshots), usage stats for their referrals, and direct communication channel. Currently partnerships are ad-hoc and fail due to lack of structure.
+
+Scope contract:
+- In-scope:
+  - Creator login portal (separate from parent accounts)
+  - Early access to new features (beta flags)
+  - Asset library: Logos, screenshots, brand guidelines
+  - Referral stats: Signups, engagement, conversion rates
+  - Direct messaging with product team
+  - Collaboration idea submission
+- Out-of-scope:
+  - Payment processing (handle separately)
+  - Contract management (legal)
+- Behavior change allowed: YES (new portal)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - New: src/pages/CreatorPortal/
+  - Backend: creator accounts, analytics APIs
+- Branch/PR: main
+
+Inputs:
+- Source: Riya interview
+- Finding: "I need early access to new features, direct line to product team, creative freedom."
+
+Plan:
+1. Design creator portal UI
+2. Implement creator account type
+3. Create asset library system
+4. Build referral tracking dashboard
+5. Add direct messaging feature
+6. Onboard first 3 influencers
+
+Execution log:
+- [2026-02-24 00:48 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+### TCK-20260224-027 :: In-App Viral Loop (Referral System)
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:50 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Implement proper viral loop for influencer-driven growth. Currently referrals feel transactional. Need in-app recognition: "Riya sent you 50 bonus stars!" Follower groups, co-play with influencer's child, exclusive content. Makes referrals feel community-based not ad-based.
+
+Scope contract:
+- In-scope:
+  - Influencer-branded welcome: "Welcome! Riya invited you. Here's 50 stars!"
+  - Follower groups: "Riya's Learning Squad" track progress together
+  - Async challenges: "Beat Anika's score!" (influencer's child)
+  - Exclusive content: "Riya's phonics tips" for her referrals
+  - Group discounts: "40% off if 10 people join"
+  - Referral stats for influencers
+- Out-of-scope:
+  - Open chat between children (safety)
+  - Real-money rewards
+- Behavior change allowed: YES (growth feature)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/store/referralStore.ts
+  - src/components/social/ReferralSystem/
+  - Backend: referral tracking, group management
+- Branch/PR: main
+
+Inputs:
+- Source: Riya interview
+- Finding: "In-app sharing: 'Riya sent you 50 bonus stars!' — My followers feel special."
+
+Plan:
+1. Design referral code system
+2. Implement in-app welcome experience
+3. Create follower group functionality
+4. Build async challenge system
+5. Add exclusive content delivery
+6. Create group discount mechanism
+
+Execution log:
+- [2026-02-24 00:50 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+### TCK-20260224-028 :: Privacy & Ethics Transparency Package
+
+Type: DOCUMENTATION
+Owner: Pranay
+Created: 2026-02-24 00:52 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Create influencer-ready privacy and ethics transparency package. Riya (and other credible influencers) won't promote without clear privacy documentation. Need simple-language one-pager, COPPA/GDPR badges, ethics statement on non-addictive design, parent control showcase. Risk: one privacy scandal destroys influencer credibility forever.
+
+Scope contract:
+- In-scope:
+  - Privacy one-pager: Simple language summary for sharing
+  - COPPA/GDPR compliance badges: Visible certification
+  - Ethics statement: "No addictive design patterns" commitment
+  - Parent control showcase: Time limits, usage reports
+  - Data handling flowchart: Visual "how we protect data"
+  - Influencer FAQ: Pre-answered privacy questions
+- Out-of-scope:
+  - Legal policy changes (just packaging existing policies)
+  - New compliance certifications (use existing)
+- Behavior change allowed: NO (documentation only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - New: docs/marketing/PRIVACY_TRANSPARENCY.md
+  - New: docs/marketing/INFLUENCER_FAQ.md
+  - public/influencer-assets/ (privacy badges)
+- Branch/PR: main
+
+Inputs:
+- Source: Riya interview
+- Finding: "Privacy. If I recommend an app and it turns out they're selling children's data? I'm done."
+
+Plan:
+1. Write simple-language privacy summary
+2. Design compliance badge graphics
+3. Create ethics statement document
+4. Document parent controls with screenshots
+5. Build data handling visual flowchart
+6. Compile influencer FAQ
+
+Execution log:
+- [2026-02-24 00:52 IST] Created ticket | Evidence: WORKLOG_ADDENDUM_v3.md
+
+---
+
+## P0 Secondary Findings (Non-Initiative)
+
+### TCK-20260224-008 :: Privacy Guardrails — No Video Storage + Camera Redaction
+
+Type: PRIVACY  
+Owner: Pranay  
+Created: 2026-02-24 14:45 IST  
+Status: **OPEN**  
+Priority: P1 (Safety & trust)
+
+Description:
+Solo developer scope: we are **not** pursuing formal compliance workstreams (COPPA, etc.). Instead, we enforce strict privacy guardrails: **no camera recordings are stored**. For issue reporting, we only allow redacted captures where the camera area is blocked/blurred, per the existing ticket plan.
+
+Scope contract:
+- In-scope:
+  - Enforce **no raw camera video storage** anywhere in frontend/backend
+  - Ensure issue-reporting captures **always mask the camera region**
+  - Add explicit UI copy: "Camera never recorded" in relevant flows
+  - Add automated check: verify redaction applied before upload
+  - Document policy in developer notes
+- Out-of-scope:
+  - Legal compliance work (COPPA/GDPR reviews)
+  - Parental consent flows or email verification
+  - Data retention automation jobs
+- Behavior change allowed: YES (privacy safeguards only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/game/CameraThumbnail.tsx` — ensure masking toggle supported
+  - `src/frontend/src/components/TimeLimitGate.tsx` / issue report flow components
+  - `src/frontend/src/services/api.ts` — verify upload path never includes raw camera
+  - `docs/WORKLOG_ADDENDUM_VIDEO_ISSUE_REPORTING_2026-02-23.md` — align plan wording
+  - Any capture utilities used in issue reporting
+- Branch/PR: main
+
+Plan:
+
+**Phase 1 (Day 1): Audit & Guarantees**
+1. Search for any video capture/storage (MediaRecorder, captureStream, getDisplayMedia)
+2. Confirm all issue reporting uses masked capture
+3. Add guard: if camera region not masked, block upload with user-friendly error
+
+**Phase 2 (Day 2): UX Messaging**
+1. Add copy: "Camera never recorded" near issue report flow
+2. Add tooltip in camera permission screen about no storage
+
+**Phase 3 (Day 3): Tests & Documentation**
+1. Add unit test for redaction check
+2. Add docs note in issue reporting ticket
+3. Manual test: confirm no camera data is saved or uploaded
+
+Acceptance Criteria:
+- [ ] No raw camera recordings stored on device or server
+- [ ] Issue reports always mask/blur camera area
+- [ ] Upload blocked if redaction not applied
+- [ ] UI copy clearly states camera is not recorded
+- [ ] Tests confirm redaction enforcement
+
+Execution log:
+- [2026-02-24 14:45 IST] Created ticket | Evidence: SECONDARY_FINDINGS_BACKLOG.md section SEC-001 (updated)
+
+Status updates:
+- [2026-02-24] **OPEN** — Ticket created, aligned to solo-dev scope
+
+---
+
+### TCK-20260224-009 :: Performance Optimization — Bundle Size & 60fps Rendering
+
+Type: ENHANCEMENT  
+Owner: Pranay  
+Created: 2026-02-24 14:45 IST  
+Status: **IN_PROGRESS**  
+Priority: P0 (User experience critical)
+
+Description:
+Frontend bundle ~2.5MB uncompressed (target: <2MB). Animations stutter on older devices (target: 60fps minimum on modern, 30fps on low-end devices). Performance degrades user experience for ~30% of users (older devices).
+
+Scope contract:
+- In-scope:
+  - Code splitting (lazy load games, animations, 3D models)
+  - Image optimization (WebP, srcset, compression)
+  - CSS animation performance (will-change, GPU acceleration)
+  - Render profiling (identify janky animations)
+  - Testing on: Galaxy S9 (2018), iPad Air 2 (2014)
+  - Lighthouse audit (goal: 90+ score)
+  - Network optimization (parallel API calls, prefetching)
+- Out-of-scope:
+  - Rewriting games in different framework
+  - Removing features to reduce size
+  - Database query optimization (backend domain)
+- Behavior change allowed: NO (performance only, no functionality changes)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+    - `vite.config.ts` — Code splitting configuration
+  - `tailwind.config.ts` — CSS optimization
+  - `src/frontend/src/main.tsx` — Lazy loading setup
+  - Image files in `src/frontend/public/assets/` — Compression
+  - All game pages — Lazy load with React.lazy()
+  - `src/frontend/src/App.tsx` — Suspense boundaries
+
+Plan:
+
+**Phase 1 (Days 1-2): Analysis & Profiling**
+1. Measure current state:
+   - Bundle size: `npm run build && ls -lah dist/`
+   - Lighthouse: `npm run build && npx lighthouse http://localhost:6173`
+   - Profile animations: Chrome DevTools Performance tab
+2. Identify bottlenecks:
+   - What's in bundle? (Bundle Analyzer)
+   - Which animations stutter? (60fps test on Galaxy S9)
+3. Document baseline metrics
+
+**Phase 2 (Days 3-4): Code Splitting**
+1. Lazy load all game pages:
+   ```tsx
+   const AlphabetGame = React.lazy(() => import('./pages/AlphabetGame'));
+   ```
+2. Add Suspense boundaries (show loader while game loads)
+3. Lazy load animation libraries (only when needed)
+4. Result: Bundle drops from 2.5MB → ~1.8MB
+
+**Phase 3 (Days 5-6): Image Optimization**
+1. Convert PNG → WebP (smaller filesize)
+2. Add responsive images:
+   ```html
+   <img srcset="small.webp 360w, large.webp 768w" />
+   ```
+3. Compress remaining images (ImageOptim, TinyPNG)
+4. Result: Images drop from 500KB → 250KB
+
+**Phase 4 (Days 7-8): CSS & Rendering**
+1. Profile animations with Chrome DevTools
+2. Add `will-change` to animated elements
+3. Use `transform` + `opacity` (GPU-accelerated, not layout-thrashing)
+4. Avoid `left`, `top`, `width` changes in animations
+5. Test 60fps on modern device: Chrome DevTools FPS meter
+6. Test 30fps target on Galaxy S9 (acceptable minimum)
+
+**Phase 5 (Days 9-10): Network Optimization**
+1. Parallel API calls where safe:
+   ```js
+   Promise.all([getGamesList(), getUserProgress()])
+   ```
+2. Prefetch next game while current plays
+3. Service Worker for offline (optional, V2)
+4. Measure metrics:
+   - LCP (Largest Contentful Paint): <2.5s
+   - FID (First Input Delay): <100ms
+   - CLS (Cumulative Layout Shift): <0.1
+
+Acceptance Criteria:
+- [ ] Bundle size <2MB gzip (down from 2.5MB)
+- [ ] Lighthouse score 90+ (mobile)
+- [ ] 60fps on modern devices (iPhone 12+, Galaxy S20+)
+- [ ] 30fps minimum on low-end (Galaxy S9, iPad Air 2)
+- [ ] No janky scrolling
+- [ ] Images optimized (WebP with fallback)
+- [ ] No performance regression on any key metric
+
+Tools:
+- Webpack Bundle Analyzer
+- Lighthouse CLI
+- Chrome DevTools Performance tab
+- ImageOptim, TinyPNG
+
+Execution log:
+- [2026-02-24 14:45 IST] Created ticket | Evidence: SECONDARY_FINDINGS_BACKLOG.md sections PERF-001, PERF-002
+
+Status updates:
+- [2026-02-24] **OPEN** — Ticket created, ready to start profiling
+
+---
+
+### TCK-20260224-010 :: Accessibility Audit — WCAG AA Compliance + Color Contrast
+
+Type: ENHANCEMENT  
+Owner: Pranay  
+Created: 2026-02-24 14:45 IST  
+Status: **IN_PROGRESS**  
+Priority: P0 (Inclusivity requirement)
+
+Description:
+Current color palette may fail WCAG AA contrast tests (4.5:1 ratio). Some buttons hard to read. Accessibility must be built-in, not bolted-on. Initiative 6 (Personas) identified accessibility as critical; this ticket ensures compliance.
+
+Scope contract:
+- In-scope:
+  - Audit all UI colors (text, buttons, backgrounds) against WCAG AA
+  - Fix contrast failures
+  - Never use color alone to convey information (add text/icon)
+  - Test with color blindness simulator (Chromatic, Color Brewer)
+  - Add keyboard navigation support (Tab key works everywhere)
+  - Add screen reader support (ARIA labels, alt text)
+- Out-of-scope:
+  - Full WCAG AAA (higher standard, can be future)
+  - Motion sickness prevention (vestibular issues)
+  - Custom screen reader training
+- Behavior change allowed: YES (UI improvements for accessibility)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/theme/colors.ts` — Update color palette (from Initiative 1)
+  - `tailwind.config.ts` — Add contrast utilities
+  - All UI components — Update color usage
+  - All game pages — Test keyboard navigation
+  - `src/frontend/src/index.html` — Add ARIA attributes
+
+Plan:
+
+**Phase 1 (Days 1-2): Contrast Audit**
+1. Test current colors with WebAIM Contrast Checker
+2. Document violations:
+   - Which text/background combos fail?
+   - How many elements affected?
+3. Create fix list (darken text or lighten background)
+4. Color blindness test (Deuteranopia, Protanopia, Tritanopia)
+
+**Phase 2 (Days 3-4): Color Fix**
+1. Update main colors (if from Initiative 1, use their palette)
+2. Verify: All text 4.5:1+ contrast ratio
+3. Update Tailwind config with accessible colors
+4. Test across all screens (home, dashes, games)
+
+**Phase 3 (Days 5): Keyboard Navigation**
+1. Test: Tab key navigates to all interactive elements
+2. Add visible focus indicator (border/outline)
+3. Allow Enter/Space to activate buttons
+4. Game controls: Can user navigate via keyboard? (if applicable)
+
+**Phase 4 (Days 6-7): Screen Reader Support**
+1. Add alt text to all images:
+   ```html
+   <img alt="Orange Pip character waving hello" />
+   ```
+2. Add ARIA labels to buttons:
+   ```html
+   <button aria-label="Start game">Play</button>
+   ```
+3. Announce state changes:
+   ```js
+   const announcement = "Game complete! You earned 3 stars!";
+   // Read aloud via screen reader
+   ```
+4. Test with NVDA (Windows) + VoiceOver (Mac)
+
+Acceptance Criteria:
+- [ ] All text 4.5:1+ contrast ratio (WCAG AA)
+- [ ] Color blindness test passed (all deuteranopia, protanopia can read)
+- [ ] Keyboard navigation works (Tab, Enter, Arrow keys)
+- [ ] Focus indicator visible
+- [ ] Alt text on all images
+- [ ] ARIA labels on all buttons
+- [ ] Screen reader test passed (can understand game)
+
+Tools:
+- WebAIM Contrast Checker
+- Colorblind simulator (Chromatic, Color Brewer)
+- Chrome DevTools Accessibility panel
+- NVDA (Windows), VoiceOver (Mac)
+
+Execution log:
+- [2026-02-24 14:45 IST] Created ticket | Evidence: SECONDARY_FINDINGS_BACKLOG.md sections A11Y-001, A11Y-002
+
+Status updates:
+- [2026-02-24] **OPEN** — Ticket created, ready to start audit
+
+---
+
+
+### TCK-20260224-017 :: NCERT/NEP Curriculum Mapping — **CLOSED (Out of Scope)**
+
+Type: CONTENT — **WON'T FIX**
+Owner: Pranay
+Created: 2026-02-24 00:15 IST  
+**Closed: 2026-02-24 01:00 IST**
+Reason: Out of scope per North Star Vision
+
+**Original Description:**
+Add curriculum standard mapping to games and activities, enabling teachers to see exactly which NCERT/NEP learning outcomes are being taught.
+
+**Follow-Up Interview Finding (Ms. Deepa):**
+> "Frame it as 'recess enrichment' not 'curriculum supplement' — curriculum coordinators don't care about recess."
+
+**Decision:**
+- Vision alignment: The North Star Vision is "playground, not curriculum"
+- Market positioning: "Smart recess" bypasses curriculum scrutiny; "curriculum app" invites unwanted standards alignment expectations
+- Teacher validation: Ms. Deepa prefers "activity logs" over "learning outcomes"
+
+**Replacement Approach:**
+- Instead of: "FLN 2.3(a) — Letter-sound correspondence"
+- Use: "Explored letter tracing for 15 minutes"
+- Position: "Recess documentation" not "curriculum alignment"
+
+**Related Tickets Still Valid:**
+- TCK-20260224-018 (Classroom Mode) — Keep as "Recess Mode"
+- TCK-20260224-019 (Teacher Dashboard) — Reposition as "Activity Journal"
+
+**Evidence:**
+- Follow-up interview: `docs/personas/TEACHER_Ms_Deepa_FollowUp.md`
+- Vision doc: `docs/NORTH_STAR_VISION.md` — "Open Playground, not linear tracks"
+
+---
+
+### TCK-20260224-019-MODIFIED :: Teacher Activity Journal (Repositioned from "Teacher Dashboard")
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 00:20 IST  
+**Modified: 2026-02-24 01:00 IST**
+
+**Original Description (Pre-Modification):**
+Create a teacher-facing dashboard showing class-level analytics and rubric-based assessment.
+
+**Modified Description (Post-Follow-Up):**
+Create a "Teacher Activity Journal" showing simple engagement logs, NOT rubric-based assessment. Teachers need "Kabir traced letters for 15 minutes" not "Kabir is Proficient in letter formation."
+
+**Key Changes:**
+| Original | Modified |
+|----------|----------|
+| "Rubric-based assessment" | "Activity categories + time logs" |
+| "Emerging/Developing/Proficient" | "Explored/Engaged/Active" (neutral language) |
+| "Learning outcomes" | "Activity summaries" |
+| "Progress tracking" | "Engagement documentation" |
+
+**Features:**
+- Simple format: "Kabir explored: Tracing (8 min), Free Draw (7 min)"
+- Weekly "Recess Report": Total active time, activity breakdown
+- No percentages, no "mastery" labels
+- Export: "Activity Log" not "Progress Report"
+- Disclaimer: "Child-directed exploration, not formal instruction"
+
+**Validation:**
+- Follow-up interview finding: "I don't need it to teach my curriculum. I need it to keep kids active while I get paperwork done."
+
+**Scope:**
+- In-scope: Time tracking, activity categories, simple exports
+- Out-of-scope: Rubrics, standards alignment, proficiency levels
+
+**Status:** Modified and validated — proceed with implementation
+
+---
+
+### TCK-20260224-029 :: "Recess Report" Weekly Summary for Parents
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-24 01:05 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Description:
+Create weekly "Recess Report" template for teachers to send to parents. Based on Ms. Deepa's design in follow-up interview. Simple, neutral, parent-defensible documentation of active play time.
+
+Report Format:
+```
+Kabir's Active Play This Week
+- Tracing in the air: 3 sessions, 35 minutes total
+- Free drawing: 2 sessions, 20 minutes total  
+- Movement games: 1 session, 15 minutes total
+- Total active time: 70 minutes
+
+No formal lessons — just child-directed exploration and movement.
+```
+
+Features:
+- Auto-generated weekly
+- Teacher can add personal note
+- PDF export for WhatsApp/email
+- Neutral language: "explored" not "learned"
+
+Parent Communication Strategy:
+- For parents who want "learning": "Practiced fine motor skills and creativity"
+- For parents who want "play": "70 minutes of active, screen-safe play"
+- Avoid: "Educational outcomes," "curriculum," "assessment"
+
+Inputs:
+- Source: Ms. Deepa follow-up interview
+- Design: Ms. Deepa's own words: "That's it. No grades, no levels, no behind/ahead."
+
+Related Tickets:
+- TCK-20260224-019-MODIFIED (Teacher Activity Journal)
+- TCK-20260224-018 (Classroom Mode / Recess Mode)
+
+---
+
+### TCK-20260224-030 :: "Smart Recess" Marketing Positioning Document
+
+Type: DOCUMENTATION
+Owner: Pranay
+Created: 2026-02-24 01:10 IST
+Status: **IN_PROGRESS**
+Priority: P2
+
+Description:
+Create internal positioning document for "Smart Recess" go-to-market strategy. Based on Ms. Deepa follow-up interview validation. Defines messaging for teachers vs. parents, competitive differentiation from GoNoodle/YouTube Kids.
+
+Key Sections:
+1. **Category Definition:** "Recess Technology" not "Educational Software"
+2. **Target Buyers:** PE teachers, classroom teachers (not curriculum directors)
+3. **Budget:** Recess/PE budget, not instructional materials
+4. **Value Prop:** "Zero-prep active breaks with parent visibility"
+5. **What NOT to Say:** "Educational curriculum," "learning outcomes," "standards-aligned"
+
+Competitive Positioning:
+| Competitor | Their Position | Our Differentiation |
+|------------|---------------|---------------------|
+| GoNoodle | Passive video watching | Active creation with hands |
+| YouTube Kids | Entertainment | Safe, structured play with logs |
+| ABCmouse | Curriculum/lessons | Free exploration, no levels |
+| Traditional apps | Standards-aligned | Recess enrichment, zero prep |
+
+Dual Messaging Strategy:
+| Audience | Message |
+|----------|---------|
+| Teachers | "Active breaks with zero prep and parent documentation" |
+| Parents | "Playful practice of creativity and motor skills" |
+| Avoid | "Educational curriculum" — sets wrong expectations |
+
+Risk Mitigation:
+- Concern: Parents who want worksheets may reject
+- Response: Emphasize "motor skills and creativity" not "just play"
+- Alternative: Offer both "play mode" and (later) optional "skill practice mode"
+
+Inputs:
+- Ms. Deepa follow-up interview findings
+- North Star Vision alignment check
+
+---
+
+### TCK-20260224-006 :: Research Browser-Based AI Models for Kids
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-24 11:10 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Research browser-based AI models suitable for kids' educational apps:
+1. Question answering models (Q&A for kids ages 2-8)
+2. Transformer v4 models for browser deployment
+3. SOTA small local translation models
+4. Hugging Face integration for model access
+
+Scope contract:
+- In-scope:
+  - Identify browser-compatible AI models for Q&A
+  - Research Transformer v4 models with WebGPU support
+  - Find small/efficient local translation models (<=100MB)
+  - Document Hugging Face integration options
+  - Provide performance benchmarks (CPU vs GPU)
+  - Create summary of model options with trade-offs
+- Out-of-scope:
+  - Implementing models in codebase
+  - Training/fine-tuning models
+  - Cloud-based APIs (OpenAI, Anthropic, etc.)
+- Behavior change allowed: NO (research only)
+
+Targets:
+- Repo: learning_for_kids
+- Branch/PR: main
+
+Inputs:
+- Source: User research request
+- Hugging Face Pro access: Available (to be verified)
+
+Acceptance Criteria:
+- [ ] Question answering models identified (3-5 options)
+- [ ] Transformer v4 models researched (2-3 options)
+- [ ] Small local translation models found (2-3 options)
+- [ ] Hugging Face integration documented
+- [ ] Performance benchmarks compiled
+- [ ] Trade-offs documented (accuracy, speed, size)
+- [ ] Research document created and saved
+
+Execution log:
+- [2026-02-24 11:10 IST] **OPEN** — Ticket created, starting research
+
+Next actions:
+1. Search for browser-based Q&A models for kids
+2. Research Transformer v4 models
+3. Find small translation models
+4. Check Hugging Face model hub
+5. Compile research document
+
+Risks/notes:
+- Models must be browser-compatible (WebGPU/WebGL/WASM)
+- Target age group: 2-8 years old
+- Must support offline operation (for parent dashboard/educational context)
+
+
+---
+
+### TCK-20260224-023 :: Tier 2 Asset Migration - Complete
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-24 12:30 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Complete Tier 2 asset migration for all 7 creative/skill games. Replaced UI chrome emojis with SVG icons, Lucide icons, and text.
+
+Scope contract:
+- In-scope:
+  - BubblePop: Bubble/target/mic emojis → SVG icons (11 emojis)
+  - AirCanvas: Brush/loading/emojis → Text symbols + SVG icons (24 emojis)
+  - ShapePop: Trophy/bubble → SVG icons (2 emojis)
+  - FreezeDance: Dance/music emojis → Lucide icons (6 emojis)
+  - MirrorDraw: Art/trophy emojis → SVG icons (2 emojis)
+  - SteadyHandLab: No emojis found (0 emojis)
+  - DressForWeather: Weather/clothing emojis → SVG icons (12 emojis)
+- Out-of-scope:
+  - Game content emojis (intrinsic to gameplay)
+- Behavior change allowed: NO (visual parity required)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/pages/BubblePop.tsx
+  - src/frontend/src/pages/AirCanvas.tsx
+  - src/frontend/src/pages/ShapePop.tsx
+  - src/frontend/src/pages/FreezeDance.tsx
+  - src/frontend/src/pages/MirrorDraw.tsx
+  - src/frontend/src/pages/DressForWeather.tsx
+  - src/frontend/src/components/ClothingSVGs.tsx (new)
+- Branch/PR: main
+
+Inputs:
+- Source: BULK_ASSET_MIGRATION_PLAN_27_GAMES.md Tier 2
+
+Execution log:
+- [2026-02-24 12:15 IST] BubblePop emojis migrated | Evidence: 11 emojis replaced
+- [2026-02-24 12:18 IST] AirCanvas emojis migrated | Evidence: 24 emojis replaced
+- [2026-02-24 12:20 IST] ShapePop emojis migrated | Evidence: 2 emojis replaced
+- [2026-02-24 12:22 IST] FreezeDance emojis migrated | Evidence: 6 emojis replaced
+- [2026-02-24 12:25 IST] MirrorDraw emojis migrated | Evidence: 2 emojis replaced
+- [2026-02-24 12:28 IST] DressForWeather emojis migrated | Evidence: 12 emojis replaced
+- [2026-02-24 12:30 IST] SteadyHandLab verified | Evidence: 0 emojis found
+
+Status updates:
+- [2026-02-24 12:30 IST] **DONE** — All Tier 2 games migrated (57 total emojis)
+
+Next actions:
+1. Begin Tier 3 games (remaining games)
+2. Complete full migration audit
 

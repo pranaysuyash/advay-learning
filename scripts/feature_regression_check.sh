@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 # feature_regression_check.sh - Detect feature regressions in large refactors
-# 
+#
 # Policy: If >10% LOC changed in existing file, compare to previous commits
 # to ensure new version is comprehensive/better, not removing functionality
 #
 # Triggered by: pre-commit for modified files with significant changes
+#
+# AGENT INSTRUCTIONS:
+# When this check triggers (shows warnings about removed functions/state):
+# 1. DO NOT just bypass with --no-verify
+# 2. Compare old vs new version MANUALLY to understand what was lost
+# 3. Ask: "Does the new version preserve ALL user-facing functionality?"
+# 4. If functionality was removed unintentionally - RESTORE IT before committing
+# 5. If removal was intentional - document WHY in the commit message
+# 6. When in doubt, ask the user before committing
+#
+# Remember: This automated check is a SAFETY NET, not a replacement for
+# thoughtful code review by the agent. Always verify your changes.
 
 set -euo pipefail
 
@@ -266,10 +278,33 @@ check_feature_regression() {
       log_error "  $issue"
     done
     log_error ""
-    log_error "If this is intentional refactoring:"
-    log_error "  1. Ensure functionality is preserved elsewhere"
-    log_error "  2. Document the change in your commit message"
-    log_error "  3. Or skip with: git commit --no-verify"
+    log_error "═══════════════════════════════════════════════════════════════"
+    log_error "AGENT ACTION REQUIRED - DO NOT JUST BYPASS"
+    log_error "═══════════════════════════════════════════════════════════════"
+    log_error ""
+    log_error "You MUST verify this manually before committing:"
+    log_error ""
+    log_error "1. COMPARE versions side-by-side:"
+    log_error "   git diff HEAD -- $file"
+    log_error ""
+    log_error "2. ASK: Does the new version preserve ALL user-facing functionality?"
+    log_error "   - Can users still do what they could do before?"
+    log_error "   - Are all buttons/features still accessible?"
+    log_error "   - Check for removed state variables (may break UI)"
+    log_error ""
+    log_error "3. IF functionality was removed UNINTENTIONALLY:"
+    log_error "   → RESTORE IT before committing"
+    log_error ""
+    log_error "4. IF removal was INTENTIONAL:"
+    log_error "   → Document WHY in your commit message"
+    log_error "   → Example: 'Removes X because Y is now handled by Z'"
+    log_error ""
+    log_error "5. WHEN IN DOUBT: Ask the user before committing"
+    log_error ""
+    log_error "═══════════════════════════════════════════════════════════════"
+    log_error ""
+    log_error "To bypass ONLY if you've verified thoroughly:"
+    log_error "   git commit --no-verify"
     log_error ""
     return 1
   else

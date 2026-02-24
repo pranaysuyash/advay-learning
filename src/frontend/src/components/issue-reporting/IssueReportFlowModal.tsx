@@ -97,7 +97,7 @@ export function IssueReportFlowModal({
       setCaptureStream(null);
       setShowParentGate(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isOpen]);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export function IssueReportFlowModal({
     if (elapsedMs < MAX_DURATION_MS) return;
 
     void handleStopRecording();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [elapsedMs, step]);
 
   const handleClose = () => {

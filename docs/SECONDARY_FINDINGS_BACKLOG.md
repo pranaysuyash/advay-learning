@@ -323,33 +323,30 @@ Multiple API calls block each other. Load time slow on 4G/LTE.
 
 ## Category 4: Security & Privacy Improvements
 
-### SEC-001: COPPA Compliance Audit
-**Priority**: P0  
-**Effort**: 2-3 days  
-**Source**: Initiative 6 (Personas) privacy expert notes + docs/SECURITY.md
+### SEC-001: No Video Storage + Camera Redaction Enforcement
+**Priority**: P1  
+**Effort**: 1-2 days  
+**Source**: Issue reporting plan + privacy expectations
 
 **Issue**:
-App collects data from children <13. COPPA requires verifiable parental consent. Currently incomplete.
+We must ensure **no camera recordings are stored**. For issue reporting, only redacted captures are allowed (camera area blocked/blurred). This matches the solo-dev scope and avoids compliance-heavy flows.
 
 **Solutions**:
-1. Update Privacy Policy (specific to COPPA)
-2. Consent flow:
-   - Parent (18+) must verify age via email confirmation
-   - Parent reads privacy policy (not just checkbox)
-   - Parent confirms specific permissions (camera, microphone, progress tracking)
-3. Data retention: Delete child data after 30 days inactivity (or sooner on request)
-4. No behavioral targeting (no ads, no third-party tracking)
+1. Enforce redaction before any capture upload
+2. Block upload if camera region not masked
+3. UI copy: "Camera never recorded"
+4. Document policy in issue reporting plan
 
 **Acceptance**:
-- [ ] Privacy Policy COPPA-compliant
-- [ ] Parental consent flow working
-- [ ] Data retention policy enforced
-- [ ] Legal review (lawyer, not just self-review)
+- [ ] No raw camera recordings stored on device or server
+- [ ] Issue reports always mask/blur camera area
+- [ ] Upload blocked if redaction not applied
+- [ ] UI copy confirms camera is not recorded
 
 **Related files**:
-- `src/frontend/src/pages/Login.tsx` (add parent verification)
-- `src/frontend/public/PRIVACY_POLICY.md` (new, COPPA-specific)
-- Backend: Add parent verification + data retention job
+- `src/frontend/src/components/game/CameraThumbnail.tsx`
+- Issue reporting components + capture utilities
+- `docs/WORKLOG_ADDENDUM_VIDEO_ISSUE_REPORTING_2026-02-23.md`
 
 ---
 
@@ -638,12 +635,12 @@ Backend monitoring planned, but frontend errors not tracked. App crashes silentl
 | UX/Accessibility | - | 4 | 1 | - |
 | Accessibility | 1 | 2 | 1 | - |
 | Performance | 1 | 1 | 1 | - |
-| Security/Privacy | 1 | 2 | - | - |
+| Security/Privacy | - | 3 | - | - |
 | Content | - | 1 | 2 | 1 |
 | Mobile | - | 1 | 1 | - |
 | Analytics | - | - | 2 | - |
 | DevOps | - | 1 | 1 | - |
-| **TOTAL** | **3** | **12** | **9** | **1** |
+| **TOTAL** | **2** | **13** | **9** | **1** |
 
 ---
 
@@ -669,7 +666,7 @@ Backend monitoring planned, but frontend errors not tracked. App crashes silentl
 
 ### Ship in v2.1 (Next 2 weeks) — High Value, Quick Win
 - UX-001, UX-004, UX-005 (hand tracking indicator)
-- SEC-001 (COPPA) — Legal requirement
+- SEC-001 (No video storage + camera redaction)
 - DEVOPS-001 (CI/CD)
 - **Total**: 1-2 weeks
 

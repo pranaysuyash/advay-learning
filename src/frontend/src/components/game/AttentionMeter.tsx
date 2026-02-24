@@ -4,7 +4,7 @@ import Webcam from 'react-webcam';
 import useAttentionDetection from '../../hooks/useAttentionDetection';
 
 interface AttentionMeterProps {
-    webcamRef: React.RefObject<Webcam>;
+    webcamRef: React.RefObject<Webcam | null>;
     className?: string; // Allow custom positioning, e.g., 'bottom-4 right-4'
 }
 
@@ -13,7 +13,7 @@ export function AttentionMeter({ webcamRef, className = 'bottom-6 right-6' }: At
     const [showTooltip, setShowTooltip] = useState(false);
 
     useEffect(() => {
-        let videoCheckTimer: NodeJS.Timeout;
+        let videoCheckTimer: ReturnType<typeof setTimeout>;
 
         const checkVideo = () => {
             if (webcamRef.current?.video?.readyState === 4) {

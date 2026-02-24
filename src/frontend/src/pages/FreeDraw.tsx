@@ -25,6 +25,9 @@ import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useHandClick } from '../hooks/useHandClick';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { AttentionMeter } from '../components/game/AttentionMeter';
 import type { TrackedHandFrame, Point } from '../types/tracking';
 import {
   type GameState,
@@ -54,7 +57,7 @@ export default function FreeDraw() {
   // ===== AUDIO =====
   const { playClick, playSuccess } = useAudio();
   const { onGameComplete: _onGameComplete } = useGameDrops('free-draw');
-  
+
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
@@ -62,50 +65,50 @@ export default function FreeDraw() {
   const [mixColor1, setMixColor1] = useState<string | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [, setVelocityHistory] = useState<{ x: number; y: number }[]>([]);
-  
+
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const lastPointRef = useRef<Point | null>(null);
   const lastTimeRef = useRef<number>(0);
-  
+
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip) return;
-    
+
     const { x, y } = frame.indexTip;
     const now = Date.now();
-    
+
     // Calculate velocity for shake detection
     if (lastPointRef.current) {
       const dt = (now - lastTimeRef.current) / 1000;
       if (dt > 0) {
         const vx = (x - lastPointRef.current.x) / dt;
         const vy = (y - lastPointRef.current.y) / dt;
-        
+
         setVelocityHistory(prev => {
           const newHistory = [...prev, { x: vx, y: vy }].slice(-10);
-          
+
           // Check for shake
           if (detectShake(newHistory)) {
             handleClear();
             return [];
           }
-          
+
           return newHistory;
         });
       }
     }
-    
+
     lastPointRef.current = { x, y };
     lastTimeRef.current = now;
-    
+
     // Handle drawing
     const isPinching = frame.pinch?.state.isPinching || false;
-    
+
     if (isPinching && !gameState.isDrawing) {
       // Start drawing
       setGameState(prev => startStroke(prev, { x, y }));
@@ -118,39 +121,41 @@ export default function FreeDraw() {
       setGameState(prev => continueStroke(prev, { x, y }));
     }
   }, [gameState.isDrawing]);
-  
-  useGameHandTracking({
+
+  const { cursor, pinch, isReady } = useGameHandTracking({
     gameName: 'FreeDraw',
     isRunning: true,
     webcamRef,
     onFrame: handleHandFrame,
   });
-  
+
+  useHandClick(pinch.isPinching, cursor, true);
+
   // ===== CANVAS RENDERING =====
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     const { width, height } = canvas;
-    
+
     // Clear canvas with background color
     ctx.fillStyle = gameState.canvas.backgroundColor;
     ctx.fillRect(0, 0, width, height);
-    
+
     // Draw all completed strokes
     gameState.canvas.strokes.forEach(stroke => {
       drawStroke(ctx, stroke, width, height);
     });
-    
+
     // Draw current stroke
     if (gameState.canvas.currentStroke) {
       drawStroke(ctx, gameState.canvas.currentStroke, width, height);
     }
   }, [gameState.canvas]);
-  
+
   // Helper to draw a stroke
   const drawStroke = (
     ctx: CanvasRenderingContext2D,
@@ -159,12 +164,12 @@ export default function FreeDraw() {
     height: number
   ) => {
     if (stroke.points.length < 2) return;
-    
+
     const { brush, points } = stroke;
-    
+
     ctx.save();
     ctx.globalAlpha = brush.opacity;
-    
+
     switch (brush.type) {
       case 'eraser':
         ctx.globalCompositeOperation = 'destination-out';
@@ -173,21 +178,21 @@ export default function FreeDraw() {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         break;
-        
+
       case 'spray':
         // Spray paint effect
         points.forEach((point, i) => {
           if (i % 3 !== 0) return; // Sample every 3rd point
           const x = point.x * width;
           const y = point.y * height;
-          
+
           for (let j = 0; j < 10; j++) {
             const angle = Math.random() * Math.PI * 2;
             const dist = Math.random() * brush.size;
             const px = x + Math.cos(angle) * dist;
             const py = y + Math.sin(angle) * dist;
-            
-            ctx.fillStyle = brush.isRainbow 
+
+            ctx.fillStyle = brush.isRainbow
               ? `hsl(${(gameState.brushColorHue + i * 2) % 360}, 100%, 50%)`
               : brush.color;
             ctx.fillRect(px, py, 2, 2);
@@ -195,14 +200,14 @@ export default function FreeDraw() {
         });
         ctx.restore();
         return;
-        
+
       case 'glitter':
         // Glitter effect
         points.forEach((point, i) => {
           if (i % 2 !== 0) return;
           const x = point.x * width;
           const y = point.y * height;
-          
+
           ctx.fillStyle = brush.isRainbow
             ? `hsl(${(gameState.brushColorHue + i * 3) % 360}, 100%, 70%)`
             : '#FFD700';
@@ -212,7 +217,7 @@ export default function FreeDraw() {
         });
         ctx.restore();
         return;
-        
+
       case 'neon':
         // Glow effect
         ctx.shadowBlur = 20;
@@ -226,21 +231,21 @@ export default function FreeDraw() {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         break;
-        
+
       case 'rainbow':
         ctx.strokeStyle = `hsl(${gameState.brushColorHue}, 100%, 50%)`;
         ctx.lineWidth = brush.size;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         break;
-        
+
       case 'flat':
         ctx.strokeStyle = brush.color;
         ctx.lineWidth = brush.size * 0.6;
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'miter';
         break;
-        
+
       case 'marker':
         ctx.strokeStyle = brush.color;
         ctx.lineWidth = brush.size * 0.8;
@@ -248,60 +253,60 @@ export default function FreeDraw() {
         ctx.lineJoin = 'round';
         ctx.globalAlpha = brush.opacity * 0.8;
         break;
-        
+
       default: // round
         ctx.strokeStyle = brush.color;
         ctx.lineWidth = brush.size;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
     }
-    
+
     // Draw the stroke path
     ctx.beginPath();
     ctx.moveTo(points[0].x * width, points[0].y * height);
-    
+
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(points[i].x * width, points[i].y * height);
     }
-    
+
     ctx.stroke();
     ctx.restore();
   };
-  
+
   // Re-render when state changes
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
-  
+
   // ===== MOUSE HANDLERS =====
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    
+
     setGameState(prev => startStroke(prev, { x, y }));
   };
-  
+
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!gameState.isDrawing) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    
+
     setGameState(prev => continueStroke(prev, { x, y }));
   };
-  
+
   const handleMouseUp = () => {
     setGameState(prev => endStroke(prev));
   };
-  
+
   // ===== ACTION HANDLERS =====
   const handleUndo = () => {
     playClick();
@@ -315,29 +320,29 @@ export default function FreeDraw() {
     playClick();
     setGameState(prev => clearCanvas(prev));
   };
-  
+
   const handleSave = () => {
     const canvas = canvasRef.current;
     if (!canvas || isCanvasEmpty(gameState)) return;
-    
+
     playSuccess();
     const dataUrl = exportCanvas(canvas);
-    
+
     // Create download link
     const link = document.createElement('a');
     link.download = `artwork-${Date.now()}.png`;
     link.href = dataUrl;
     link.click();
-    
+
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 2000);
   };
-  
+
   const handleBrushTypeChange = (type: BrushType) => {
     playClick();
     setGameState(prev => setBrushType(prev, type));
   };
-  
+
   const handleColorSelect = (color: string) => {
     playClick();
     if (showColorMixer) {
@@ -355,20 +360,34 @@ export default function FreeDraw() {
       setGameState(prev => setBrushColor(prev, color));
     }
   };
-  
+
   const handleSizeChange = (delta: number) => {
     playClick();
     setGameState(prev => setBrushSize(prev, prev.currentBrush.size + delta));
   };
-  
+
   const handleBackgroundChange = (color: string) => {
     playClick();
     setGameState(prev => setBackgroundColor(prev, color));
   };
-  
+
   // ===== RENDER =====
   return (
     <GameContainer title="Free Draw" onHome={() => setShowMenu(true)} showScore={false}>
+      {isReady && cursor && (
+        <CursorEmbodiment
+          position={cursor}
+          coordinateSpace="normalized"
+          isPinching={pinch.isPinching}
+          isHandDetected={true}
+          size={70}
+          showTrail={true}
+        />
+      )}
+
+      {/* Focus Power Meter */}
+      {!showMenu && <AttentionMeter webcamRef={webcamRef} className="bottom-6 right-6" />}
+
       {/* Hidden webcam */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
         <Webcam
@@ -378,7 +397,7 @@ export default function FreeDraw() {
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {showMenu ? (
         // ===== START MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
@@ -396,9 +415,9 @@ export default function FreeDraw() {
             <div className="absolute -bottom-2 -right-2 text-3xl animate-bounce">✨</div>
           </div>
           <h2 className="text-3xl font-bold text-advay-slate mb-2">Free Draw Studio!</h2>
-          
+
           {/* Goal Statement with Semantic Attributes */}
-          <div 
+          <div
             data-ux-goal="Draw and create beautiful art using different brushes and colors!"
             data-ux-instruction="Pinch your fingers and move your hand to draw on the canvas"
             data-ux-action="pinch-and-draw"
@@ -413,7 +432,7 @@ export default function FreeDraw() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-purple-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-purple-800 mb-3">How to Play:</h3>
             <ol className="text-purple-700 text-sm space-y-2">
@@ -431,7 +450,7 @@ export default function FreeDraw() {
               </li>
             </ol>
           </div>
-          
+
           <button
             onClick={() => {
               playClick();
@@ -447,106 +466,106 @@ export default function FreeDraw() {
       ) : (
         // ===== GAME SCREEN =====
         <div className="flex flex-col h-full">
-        {/* Goal Banner with Semantic Attributes */}
-        <div 
-          data-ux-goal="Draw and create beautiful art using different brushes and colors!"
-          data-ux-instruction="Pinch your fingers and move your hand to draw"
-          data-ux-action="pinch-and-draw"
-          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
-        >
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-xl">🎯</span>
-            <p className="font-bold">GOAL: Create beautiful art! Pick a brush and start drawing!</p>
-          </div>
-        </div>
-        
-        {/* Toolbar - Child Friendly */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-[0_4px_0_#E5B86E]">
-          {/* Brush Type Selector - Larger for kids */}
-          <div className="mb-3">
-            <p className="text-sm font-bold text-advay-slate mb-2">🖌️ Pick a Brush:</p>
-            <div className="flex gap-2 flex-wrap">
-              {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
-                <button
-                  key={type}
-                  onClick={() => handleBrushTypeChange(type)}
-                  className={`
-                    p-3 rounded-xl text-2xl transition-all transform hover:scale-110
-                    ${gameState.currentBrush.type === type
-                      ? 'bg-blue-200 border-3 border-blue-500 shadow-md scale-105'
-                      : 'bg-white border-2 border-[#F2CC8F] hover:border-blue-300 shadow-[0_4px_0_#E5B86E]'
-                    }
-                  `}
-                  title={BRUSH_PRESETS[type].name}
-                >
-                  {BRUSH_PRESETS[type].emoji}
-                </button>
-              ))}
+          {/* Goal Banner with Semantic Attributes */}
+          <div
+            data-ux-goal="Draw and create beautiful art using different brushes and colors!"
+            data-ux-instruction="Pinch your fingers and move your hand to draw"
+            data-ux-action="pinch-and-draw"
+            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xl">🎯</span>
+              <p className="font-bold">GOAL: Create beautiful art! Pick a brush and start drawing!</p>
             </div>
           </div>
+
+          {/* Toolbar - Child Friendly */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-[0_4px_0_#E5B86E]">
+            {/* Brush Type Selector - Larger for kids */}
+            <div className="mb-3">
+              <p className="text-sm font-bold text-advay-slate mb-2">🖌️ Pick a Brush:</p>
+              <div className="flex gap-2 flex-wrap">
+                {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => handleBrushTypeChange(type)}
+                    className={`
+                    p-3 rounded-xl text-2xl transition-all transform hover:scale-110
+                    ${gameState.currentBrush.type === type
+                        ? 'bg-blue-200 border-3 border-blue-500 shadow-md scale-105'
+                        : 'bg-white border-2 border-[#F2CC8F] hover:border-blue-300 shadow-[0_4px_0_#E5B86E]'
+                      }
+                  `}
+                    title={BRUSH_PRESETS[type].name}
+                  >
+                    {BRUSH_PRESETS[type].emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* Size Control */}
               <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1">
-              <button
-                onClick={() => handleSizeChange(-5)}
-                className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
-              >
-                −
-              </button>
-              <div className="flex items-center gap-2">
-                <div
-                  className="rounded-full bg-slate-800"
-                  style={{
-                    width: Math.max(4, gameState.currentBrush.size / 3),
-                    height: Math.max(4, gameState.currentBrush.size / 3),
-                  }}
-                />
-                <span className="text-xs text-advay-slate w-8 text-center">
-                  {gameState.currentBrush.size}px
-                </span>
+                <button
+                  onClick={() => handleSizeChange(-5)}
+                  className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
+                >
+                  −
+                </button>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="rounded-full bg-slate-800"
+                    style={{
+                      width: Math.max(4, gameState.currentBrush.size / 3),
+                      height: Math.max(4, gameState.currentBrush.size / 3),
+                    }}
+                  />
+                  <span className="text-xs text-advay-slate w-8 text-center">
+                    {gameState.currentBrush.size}px
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleSizeChange(5)}
+                  className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
+                >
+                  +
+                </button>
               </div>
-              <button
-                onClick={() => handleSizeChange(5)}
-                className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
-              >
-                +
-              </button>
-            </div>
-            
+
               {/* Actions */}
               <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={handleUndo}
-                disabled={gameState.undoStack.length === 0}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-              >
-                ↶ Undo
-              </button>
-              <button
-                onClick={handleRedo}
-                disabled={gameState.redoStack.length === 0}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-              >
-                ↷ Redo
-              </button>
-              <button
-                onClick={handleClear}
-                disabled={isCanvasEmpty(gameState)}
-                className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-              >
-                🗑️ Clear
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isCanvasEmpty(gameState)}
-                className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-              >
-                💾 Save
-              </button>
+                <button
+                  onClick={handleUndo}
+                  disabled={gameState.undoStack.length === 0}
+                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
+                >
+                  ↶ Undo
+                </button>
+                <button
+                  onClick={handleRedo}
+                  disabled={gameState.redoStack.length === 0}
+                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
+                >
+                  ↷ Redo
+                </button>
+                <button
+                  onClick={handleClear}
+                  disabled={isCanvasEmpty(gameState)}
+                  className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
+                >
+                  🗑️ Clear
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isCanvasEmpty(gameState)}
+                  className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
+                >
+                  💾 Save
+                </button>
               </div>
             </div>
           </div>
-          
+
           {/* Color Palette - Larger for kids */}
           <div className="mt-3">
             <p className="text-sm font-bold text-advay-slate mb-2">🎨 Pick a Color:</p>
@@ -560,119 +579,119 @@ export default function FreeDraw() {
                     ${gameState.currentBrush.color === color && !gameState.currentBrush.isRainbow
                       ? 'border-slate-800 scale-125 shadow-lg ring-2 ring-blue-300'
                       : mixColor1 === color
-                      ? 'border-yellow-400 scale-125 shadow-lg'
-                      : 'border-white shadow-md hover:shadow-lg'
+                        ? 'border-yellow-400 scale-125 shadow-lg'
+                        : 'border-white shadow-md hover:shadow-lg'
                     }
                   `}
                   style={{ backgroundColor: color }}
                   title={getColorName(color)}
                 />
               ))}
-            
-            {/* Rainbow brush button */}
-            <button
-              onClick={() => handleBrushTypeChange('rainbow')}
-              className={`
+
+              {/* Rainbow brush button */}
+              <button
+                onClick={() => handleBrushTypeChange('rainbow')}
+                className={`
                 w-8 h-8 rounded-full border-2 flex items-center justify-center text-lg
                 ${gameState.currentBrush.isRainbow
-                  ? 'border-slate-800'
-                  : 'border-transparent hover:scale-110'
-                }
+                    ? 'border-slate-800'
+                    : 'border-transparent hover:scale-110'
+                  }
               `}
-              style={{
-                background: 'linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff)',
-              }}
-              title="Rainbow"
-            >
-              🌈
-            </button>
-            
-            {/* Color Mixer Toggle */}
-            <button
-              onClick={() => {
-                setShowColorMixer(!showColorMixer);
-                setMixColor1(null);
-              }}
-              className={`
+                style={{
+                  background: 'linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff)',
+                }}
+                title="Rainbow"
+              >
+                🌈
+              </button>
+
+              {/* Color Mixer Toggle */}
+              <button
+                onClick={() => {
+                  setShowColorMixer(!showColorMixer);
+                  setMixColor1(null);
+                }}
+                className={`
                 ml-2 px-3 py-1 rounded-lg text-sm font-bold transition-colors
                 ${showColorMixer
-                  ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
-                  : 'bg-slate-100 hover:bg-slate-200'
-                }
+                    ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
+                    : 'bg-slate-100 hover:bg-slate-200'
+                  }
               `}
-            >
-              🎨 Mix Colors
-            </button>
-            
-            {showColorMixer && (
-              <span className="text-xs text-purple-600">
-                {mixColor1 ? 'Pick second color to mix' : 'Pick first color'}
-              </span>
-            )}
-          </div>
-          
-          {/* Background Color */}
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-text-secondary font-bold">Background:</span>
-            {BACKGROUND_COLORS.map(color => (
-              <button
-                key={color}
-                onClick={() => handleBackgroundChange(color)}
-                className={`
+              >
+                🎨 Mix Colors
+              </button>
+
+              {showColorMixer && (
+                <span className="text-xs text-purple-600">
+                  {mixColor1 ? 'Pick second color to mix' : 'Pick first color'}
+                </span>
+              )}
+            </div>
+
+            {/* Background Color */}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-text-secondary font-bold">Background:</span>
+              {BACKGROUND_COLORS.map(color => (
+                <button
+                  key={color}
+                  onClick={() => handleBackgroundChange(color)}
+                  className={`
                   w-6 h-6 rounded border-2 transition-all
                   ${gameState.canvas.backgroundColor === color
-                    ? 'border-slate-800'
-                    : 'border-slate-300 hover:scale-110'
-                  }
+                      ? 'border-slate-800'
+                      : 'border-slate-300 hover:scale-110'
+                    }
                 `}
-                style={{ backgroundColor: color }}
-              />
-            ))}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-        
-        {/* Canvas Area */}
-        <div ref={canvasContainerRef} className="flex-1 relative bg-slate-100">
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          />
-          
-          {/* Hint overlay */}
-          {isCanvasEmpty(gameState) && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center text-slate-400">
-                <div className="text-6xl mb-4">✋</div>
-                <p className="text-lg font-bold">Pinch and move to draw!</p>
-                <p className="text-sm">Shake hand to clear</p>
+
+          {/* Canvas Area */}
+          <div ref={canvasContainerRef} className="flex-1 relative bg-slate-100">
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            />
+
+            {/* Hint overlay */}
+            {isCanvasEmpty(gameState) && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center text-slate-400">
+                  <div className="text-6xl mb-4">✋</div>
+                  <p className="text-lg font-bold">Pinch and move to draw!</p>
+                  <p className="text-sm">Shake hand to clear</p>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {/* Save success notification */}
-          {showSaveSuccess && (
-            <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
-              ✅ Saved to downloads!
-            </div>
-          )}
-        </div>
-        
-        {/* Footer */}
-        <div className="bg-white border-t border-[#F2CC8F] px-4 py-2 flex justify-between items-center text-xs text-text-secondary">
-          <div>
-            Brush: {BRUSH_PRESETS[gameState.currentBrush.type].name} | 
-            Color: {getColorName(gameState.currentBrush.color)} |
-            Size: {gameState.currentBrush.size}px
+            )}
+
+            {/* Save success notification */}
+            {showSaveSuccess && (
+              <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
+                ✅ Saved to downloads!
+              </div>
+            )}
           </div>
-          <div>
-            Strokes: {gameState.canvas.strokes.length}
+
+          {/* Footer */}
+          <div className="bg-white border-t border-[#F2CC8F] px-4 py-2 flex justify-between items-center text-xs text-text-secondary">
+            <div>
+              Brush: {BRUSH_PRESETS[gameState.currentBrush.type].name} |
+              Color: {getColorName(gameState.currentBrush.color)} |
+              Size: {gameState.currentBrush.size}px
+            </div>
+            <div>
+              Strokes: {gameState.canvas.strokes.length}
+            </div>
           </div>
         </div>
-      </div>
       )}
     </GameContainer>
   );

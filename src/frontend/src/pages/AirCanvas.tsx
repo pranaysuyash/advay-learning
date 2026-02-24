@@ -42,14 +42,14 @@ interface Particle {
 }
 
 const BRUSHES: Brush[] = [
-  { id: 'sparkle', name: 'Sparkle', icon: '✨', particleSize: 4, fadeSpeed: 0.02, colorShift: false, trail: false },
-  { id: 'neon', name: 'Neon', icon: '💡', particleSize: 6, fadeSpeed: 0.01, colorShift: false, trail: true },
-  { id: 'rainbow', name: 'Rainbow', icon: '🌈', particleSize: 8, fadeSpeed: 0.015, colorShift: true, trail: true },
-  { id: 'fire', name: 'Fire', icon: '🔥', particleSize: 10, fadeSpeed: 0.03, colorShift: false, trail: false },
-  { id: 'smoke', name: 'Smoke', icon: '💨', particleSize: 15, fadeSpeed: 0.008, colorShift: false, trail: true },
-  { id: 'glitter', name: 'Glitter', icon: '✨', particleSize: 3, fadeSpeed: 0.025, colorShift: true, trail: false },
-  { id: 'laser', name: 'Laser', icon: '⚡', particleSize: 4, fadeSpeed: 0.005, colorShift: false, trail: true },
-  { id: 'bubble', name: 'Bubble', icon: '🫧', particleSize: 12, fadeSpeed: 0.01, colorShift: false, trail: false },
+  { id: 'sparkle', name: 'Sparkle', icon: '•', particleSize: 4, fadeSpeed: 0.02, colorShift: false, trail: false },
+  { id: 'neon', name: 'Neon', icon: '○', particleSize: 6, fadeSpeed: 0.01, colorShift: false, trail: true },
+  { id: 'rainbow', name: 'Rainbow', icon: '◎', particleSize: 8, fadeSpeed: 0.015, colorShift: true, trail: true },
+  { id: 'fire', name: 'Fire', icon: '▲', particleSize: 10, fadeSpeed: 0.03, colorShift: false, trail: false },
+  { id: 'smoke', name: 'Smoke', icon: '☁', particleSize: 15, fadeSpeed: 0.008, colorShift: false, trail: true },
+  { id: 'glitter', name: 'Glitter', icon: '◆', particleSize: 3, fadeSpeed: 0.025, colorShift: true, trail: false },
+  { id: 'laser', name: 'Laser', icon: '|', particleSize: 4, fadeSpeed: 0.005, colorShift: false, trail: true },
+  { id: 'bubble', name: 'Bubble', icon: '○', particleSize: 12, fadeSpeed: 0.01, colorShift: false, trail: false },
 ];
 
 const COLORS = [
@@ -366,7 +366,7 @@ export function AirCanvas() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E]">✨</div>
+          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E]"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m12 3 9 9-9 9-9-9 9-9Z"/></svg></div>
           <h2 className="text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4">Loading Air Canvas...</h2>
           <div className="w-16 h-16 border-8 border-[#F2CC8F] border-t-[#3B82F6] rounded-full animate-spin mx-auto mb-6"></div>
           <p className="text-xl font-bold text-text-secondary">Preparing magic brushes...</p>
@@ -383,23 +383,23 @@ export function AirCanvas() {
           onClick={() => navigate('/games')}
           className="pointer-events-auto px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F]/50 rounded-[1.5rem] font-bold text-advay-slate shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
         >
-          <span className="text-xl">←</span> Back
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> Back
         </button>
         <div className="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-3 rounded-[2rem]">
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas ✨</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas</h1>
         </div>
         <div className="pointer-events-auto flex items-center gap-3">
           <button
             onClick={() => setShowIssueReport(true)}
             className="px-5 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-base md:text-lg"
           >
-            Report Issue 🎥
+            Report Issue
           </button>
           <button
             onClick={() => setShowUI(!showUI)}
             className="px-6 py-3 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-lg"
           >
-            {showUI ? 'Hide Tools 👁️' : 'Show Tools 🎨'}
+            {showUI ? 'Hide Tools' : 'Show Tools'}
           </button>
         </div>
       </header>
@@ -479,10 +479,10 @@ export function AirCanvas() {
                   ))}
                   <button
                     onClick={randomColor}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-3 border-white shadow-[0_4px_0_#E5B86E] hover:scale-105 transition-transform flex items-center justify-center text-xl"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-3 border-white shadow-[0_4px_0_#E5B86E] hover:scale-105 transition-transform flex items-center justify-center text-xl font-black text-white"
                     title="Random Color"
                   >
-                    🎲
+                    ?
                   </button>
                 </div>
               </div>
@@ -499,13 +499,13 @@ export function AirCanvas() {
                   onClick={clearCanvas}
                   className="px-6 py-3 bg-red-100 hover:bg-red-200 border-3 border-red-200 rounded-[1.5rem] font-black text-red-600 shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                  <span>🗑️</span> Clear
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Clear
                 </button>
                 <button
                   onClick={takeSnapshot}
                   className="px-6 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-400 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                  <span>📸</span> Snap
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Snap
                 </button>
               </div>
             </div>
@@ -523,7 +523,7 @@ export function AirCanvas() {
             exit={{ opacity: 0, scale: 0.8 }}
           >
             <div className="bg-white/95 backdrop-blur-md border-3 border-amber-200 rounded-[2.5rem] p-10 text-center shadow-lg">
-              <div className="text-[6rem] mb-4 drop-shadow-md">🖐️</div>
+              <div className="text-[6rem] mb-4 drop-shadow-md"><svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
               <h2 className="text-3xl font-black text-advay-slate tracking-tight mb-2">Open Hand to Draw!</h2>
               <div className="inline-block bg-slate-100 rounded-full px-6 py-2 mt-2">
                 <p className="text-lg font-bold text-text-secondary">Close fingers to pause</p>
@@ -551,15 +551,15 @@ export function AirCanvas() {
       <div className="absolute top-24 left-6 z-10 pointer-events-none">
         <div className="bg-black/40 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 flex gap-4 items-center shadow-[0_4px_0_#E5B86E]">
           <span className="text-white font-bold tracking-wide">
-            {isHandReady ? '🟢 Hand Ready' : '⏳ Loading...'}
+            {isHandReady ? 'Hand Ready' : 'Loading...'}
           </span>
           <div className="w-px h-4 bg-white/30" />
           <span className="text-white font-bold tracking-wide">
-            {isHandOpen ? '🎨 Drawing' : '✋ Paused'}
+            {isHandOpen ? 'Drawing' : 'Paused'}
           </span>
           <div className="w-px h-4 bg-white/30" />
           <span className="text-white/80 text-sm font-medium">
-            ✨ {particleCount}
+            {particleCount} particles
           </span>
         </div>
       </div>
@@ -575,7 +575,7 @@ export function AirCanvas() {
           >
             <div className="bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-10 max-w-2xl w-full shadow-2xl">
               <div className="text-center mb-6">
-                <span className="text-[4rem] inline-block mb-2">🎨</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E85D04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"/></svg>
                 <h2 className="text-4xl font-black text-advay-slate tracking-tight">Your Masterpiece!</h2>
               </div>
               <div className="border-3 border-[#F2CC8F] rounded-[2rem] overflow-hidden mb-8 shadow-inner">
@@ -590,7 +590,7 @@ export function AirCanvas() {
                   onClick={downloadSnapshot}
                   className="flex-1 py-4 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-400 rounded-[1.5rem] font-black text-white text-xl shadow-[0_6px_0_0_rgba(59,130,246,0.6)] hover:shadow-none hover:translate-y-[6px] transition-all flex items-center justify-center gap-2"
                 >
-                  <span>💾</span> Download
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Download
                 </button>
                 <button
                   onClick={() => setSnapshot(null)}

@@ -22,6 +22,14 @@ import {
   SOUND_ASSETS,
   createSVGIcon,
 } from '../utils/assets';
+import {
+  SunIcon,
+  CloudRainIcon,
+  SnowflakeIcon,
+  WindIcon,
+  CloudSunIcon,
+  RainbowIcon,
+} from '../components/ClothingSVGs';
 
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -56,7 +64,7 @@ type WeatherType = 'sunny' | 'rainy' | 'snowy' | 'windy';
 
 interface ClothingItem {
   id: string;
-  emoji: string;
+  iconId: string;
   name: string;
   weathers: WeatherType[]; // Which weather types this clothing is appropriate for
   color: string;
@@ -64,7 +72,7 @@ interface ClothingItem {
 
 interface Level {
   weather: WeatherType;
-  weatherEmoji: string;
+  weatherIcon: 'sun' | 'rain' | 'snow' | 'wind';
   weatherName: string;
   backgroundColor: string;
   correctItems: string[]; // IDs of correct clothing items
@@ -73,84 +81,84 @@ interface Level {
 const CLOTHING_ITEMS: ClothingItem[] = [
   {
     id: 'sunglasses',
-    emoji: '🕶️',
+    iconId: 'sunglasses',
     name: 'Sunglasses',
     weathers: ['sunny'],
     color: '#FFE082',
   },
   {
     id: 't-shirt',
-    emoji: '👕',
+    iconId: 't-shirt',
     name: 'T-Shirt',
     weathers: ['sunny', 'windy'],
     color: '#81D4FA',
   },
   {
     id: 'shorts',
-    emoji: '🩳',
+    iconId: 'shorts',
     name: 'Shorts',
     weathers: ['sunny'],
     color: '#FFB74D',
   },
   {
     id: 'raincoat',
-    emoji: '🧥',
+    iconId: 'raincoat',
     name: 'Raincoat',
     weathers: ['rainy'],
     color: '#FFF59D',
   },
   {
     id: 'umbrella',
-    emoji: '☂️',
+    iconId: 'umbrella',
     name: 'Umbrella',
     weathers: ['rainy'],
     color: '#FF6B6B',
   },
   {
     id: 'boots',
-    emoji: '🥾',
+    iconId: 'boots',
     name: 'Rain Boots',
     weathers: ['rainy', 'snowy'],
     color: '#A1887F',
   },
   {
     id: 'coat',
-    emoji: '🧥',
+    iconId: 'coat',
     name: 'Winter Coat',
     weathers: ['snowy', 'windy'],
     color: '#E3F2FD',
   },
   {
     id: 'scarf',
-    emoji: '🧣',
+    iconId: 'scarf',
     name: 'Scarf',
     weathers: ['snowy', 'windy'],
     color: '#FFCCBC',
   },
   {
     id: 'mittens',
-    emoji: '🧤',
+    iconId: 'mittens',
     name: 'Mittens',
     weathers: ['snowy'],
     color: '#F8BBD0',
   },
   {
     id: 'hat',
-    emoji: '🧢',
+    iconId: 'hat',
     name: 'Cap',
     weathers: ['sunny', 'windy'],
     color: '#C5E1A5',
   },
   {
     id: 'winter-hat',
-    emoji: '🎩',
+    iconId: 'winter-hat',
     name: 'Winter Hat',
     weathers: ['snowy', 'windy'],
     color: '#B39DDB',
   },
   {
     id: 'sandals',
-    emoji: '👡',
+    iconId: 'sandals',
     name: 'Sandals',
     weathers: ['sunny'],
     color: '#FFAB91',
@@ -160,28 +168,28 @@ const CLOTHING_ITEMS: ClothingItem[] = [
 const LEVELS: Level[] = [
   {
     weather: 'sunny',
-    weatherEmoji: '☀️',
+    weatherIcon: 'sun',
     weatherName: 'Sunny Day',
     backgroundColor: 'linear-gradient(135deg, #FFF9C4 0%, #FFE082 100%)',
     correctItems: ['sunglasses', 't-shirt', 'shorts', 'hat', 'sandals'],
   },
   {
     weather: 'rainy',
-    weatherEmoji: '🌧️',
+    weatherIcon: 'rain',
     weatherName: 'Rainy Day',
     backgroundColor: 'linear-gradient(135deg, #B3E5FC 0%, #81D4FA 100%)',
     correctItems: ['raincoat', 'umbrella', 'boots'],
   },
   {
     weather: 'snowy',
-    weatherEmoji: '❄️',
+    weatherIcon: 'snow',
     weatherName: 'Snowy Day',
     backgroundColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
     correctItems: ['coat', 'scarf', 'mittens', 'winter-hat', 'boots'],
   },
   {
     weather: 'windy',
-    weatherEmoji: '💨',
+    weatherIcon: 'wind',
     weatherName: 'Windy Day',
     backgroundColor: 'linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%)',
     correctItems: ['coat', 't-shirt', 'scarf', 'winter-hat', 'hat'],
@@ -302,7 +310,31 @@ export default function DressForWeather() {
       );
     }
 
-    return <span style={{ lineHeight: 1 }}>{item.emoji}</span>;
+    return (
+      <span
+        style={{
+          lineHeight: 1,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: size,
+          height: size,
+        }}
+      >
+        <svg
+          width={size * 0.8}
+          height={size * 0.8}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={item.color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+        </svg>
+      </span>
+    );
   }, []);
 
   // Hand tracking runtime - replaces manual detection loop
@@ -386,7 +418,7 @@ export default function DressForWeather() {
         x: screenDims.width / 2,
         y: screenDims.height / 2 + 50,
         size: dropZoneSize,
-        label: '👤 Dress Me!',
+        label: 'Dress Me!',
         accepts: level.correctItems,
         color: '#E8F5E9',
       },
@@ -499,7 +531,12 @@ export default function DressForWeather() {
       {/* Weather indicator */}
       {gameStarted && (
         <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] px-8 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] flex items-center gap-6'>
-          <span className='text-5xl drop-shadow-[0_4px_0_#E5B86E]'>{level.weatherEmoji}</span>
+          <span className='text-5xl drop-shadow-[0_4px_0_#E5B86E] text-[#F59E0B]'>
+            {level.weatherIcon === 'sun' && <SunIcon size={48} />}
+            {level.weatherIcon === 'rain' && <CloudRainIcon size={48} />}
+            {level.weatherIcon === 'snow' && <SnowflakeIcon size={48} />}
+            {level.weatherIcon === 'wind' && <WindIcon size={48} />}
+          </span>
           <div>
             <h2 className='text-2xl font-black text-advay-slate tracking-tight m-0'>
               {level.weatherName}
@@ -507,8 +544,8 @@ export default function DressForWeather() {
             <p className='text-lg font-bold text-text-secondary m-0'>
               Score: <span className='text-[#10B981]'>{score}</span>
             </p>
-            <p className='text-sm font-bold text-slate-400 m-0 mt-1'>
-              Take your time! 🌈
+            <p className='text-sm font-bold text-slate-400 m-0 mt-1 flex items-center justify-center gap-1'>
+              Take your time! <RainbowIcon size={14} className="text-slate-400" />
             </p>
           </div>
         </div>
@@ -518,12 +555,12 @@ export default function DressForWeather() {
       {!gameStarted && (
         <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-slate-50/40 backdrop-blur-sm z-20'>
           <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
-            <div className='w-32 h-32 mb-6 bg-slate-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center text-[5rem] drop-shadow-md hover:scale-110 transition-transform cursor-pointer'>
-              🌦️
+            <div className='w-32 h-32 mb-6 bg-slate-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center text-[5rem] drop-shadow-md hover:scale-110 transition-transform cursor-pointer text-[#60A5FA]'>
+              <CloudSunIcon size={72} />
             </div>
 
             <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>
-              Dress for Weather 👕
+              Dress for Weather
             </h1>
 
             <p className='text-text-secondary font-bold mb-8 max-w-sm mx-auto text-lg md:text-xl leading-relaxed'>
@@ -534,7 +571,7 @@ export default function DressForWeather() {
               onClick={startGame}
               className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
-              Start Game! 🚀
+              Start Game!
             </button>
           </div>
 
@@ -572,7 +609,6 @@ export default function DressForWeather() {
           showTrail={true}
           pulseAnimation={true}
           highContrast={true}
-          icon='👆'
         />
       )}
 
@@ -580,7 +616,7 @@ export default function DressForWeather() {
       <SuccessAnimation
         show={showSuccess}
         type='hearts'
-        message='Perfect! 👍'
+        message='Perfect!'
         duration={1500}
         onComplete={() => setShowSuccess(false)}
       />

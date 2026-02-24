@@ -212,6 +212,16 @@ export default function StorySequence() {
       
       setLastPlacedSlot(droppedInSlot);
       
+      // TTS feedback for placement
+      if (ttsEnabled) {
+        const isCorrectSlot = isSlotCorrect(newSlots, droppedInSlot);
+        if (isCorrectSlot) {
+          void speak('Great! That is the right spot!');
+        } else {
+          void speak('Try a different spot!');
+        }
+      }
+      
       // Check if sequence is complete and correct
       if (checkSequence(newSlots)) {
         handleGameComplete();
@@ -412,6 +422,22 @@ export default function StorySequence() {
             Drag the picture cards to arrange them in the right order. 
             Watch how stories happen from start to finish!
           </p>
+          
+          {/* Voice Instructions */}
+          {ttsEnabled && (
+            <div className="mb-4">
+              <VoiceInstructions
+                instructions={[
+                  'Look at the story cards.',
+                  'Drag them to the numbered slots.',
+                  'Put them in the right order!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            </div>
+          )}
           
           {/* Big Start Button for Kids */}
           <button

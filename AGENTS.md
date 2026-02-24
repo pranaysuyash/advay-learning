@@ -72,8 +72,8 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.5  
-**Last Updated**: 2026-02-20  
+**Version**: 1.6  
+**Last Updated**: 2026-02-23  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -409,6 +409,21 @@ The audit-to-ticket gap exists because:
 - [ ] Stage changes using `git add -A` (unless user explicitly requests partial staging)
 ```
 
+### Before Committing (Agent Self-Check)
+
+```markdown
+- [ ] Review your diff: `git diff --staged` or `git diff HEAD`
+- [ ] **FEATURE REGRESSION CHECK** (critical for >10% LOC changes):
+  - [ ] For modified files with significant changes, compare to previous version
+  - [ ] Ask: "Does the new version preserve ALL user-facing functionality?"
+  - [ ] Check for accidentally removed functions, state variables, exports
+  - [ ] Check for orphaned components (built but not used)
+  - [ ] If functionality removed: document WHY or RESTORE it
+- [ ] Run pre-commit checks locally: `./scripts/agent_gate.sh --staged`
+- [ ] Ensure worklog addendum is updated for code changes
+- [ ] Write meaningful commit message explaining WHAT and WHY
+```
+
 ### Before Creating PR
 
 ```markdown
@@ -639,25 +654,124 @@ M src/backend/app/main.py
 
 ## Local Enforcement (No PR Required)
 
-This repo enforces workflow discipline locally via git hooks (so agents cannot “forget” tickets/evidence).
+This repo enforces workflow discipline locally via git hooks (so agents cannot "forget" tickets/evidence).
 
 Required one-time setup per clone:
 
 ```bash
 git config core.hooksPath .githooks
-chmod +x .githooks/* scripts/agent_gate.sh
+chmod +x .githooks/* scripts/*.sh
 ```
 
-What is enforced at commit time:
+### What is Enforced at Commit Time
 
-1. If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_TICKETS.md`.
-2. Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
-3. Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
+The pre-commit hook runs these checks in order:
 
-Manual check (recommended before committing):
+| Check | Script | Purpose | Skip Flag |
+|-------|--------|---------|-----------|
+| **1. Agent Gate** | `scripts/agent_gate.sh` | Worklog updates, audit artifacts, ticket evidence | - |
+| **2. Secret Scan** | `scripts/secret_scan.sh` | Block leaked credentials/API keys | `SKIP_SECRET_SCAN=1` |
+| **3. Feature Regression** | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors | `SKIP_FEATURE_CHECK=1` |
+| **4. Regression Tests** | `scripts/regression_check.sh` | Tests, export changes, TypeScript validation | `SKIP_REGRESSION_CHECK=1` |
+
+#### 1. Agent Gate (`scripts/agent_gate.sh`)
+- If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_*.md`.
+- Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
+- Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
+
+#### 2. Secret Scan (`scripts/secret_scan.sh`)
+- Detects common secret patterns (API keys, passwords, tokens).
+- Fails if any potential secrets are found in staged files.
+
+#### 3. Feature Regression Check (`scripts/feature_regression_check.sh`) ⭐ NEW
+**Critical:** Detects when large refactors remove functionality.
+
+**Triggers when:**
+- Existing file has >10% LOC changed (threshold configurable via `LOC_THRESHOLD`)
+
+**Detects:**
+- Removed functions/methods
+- Removed exports
+- Removed component props
+- Removed hooks
+- Removed state variables
+
+**When This Check Triggers - AGENT MUST:**
+
+1. **DO NOT just bypass with `--no-verify`**
+   - This check exists because agents (including you) have accidentally removed features
+
+2. **Manually compare old vs new versions:**
+   ```bash
+   git diff HEAD -- <file>
+   ```
+
+3. **Verify functionality preservation:**
+   - Ask: "Can users still do everything they could before?"
+   - Check: Are all buttons/actions still present?
+   - Check: Are state variables properly migrated (not just deleted)?
+   - Check: Are child components still receiving necessary props?
+
+4. **If functionality was removed UNINTENTIONALLY:**
+   - STOP and restore it
+   - Reference the old version: `git show HEAD:<file>`
+   - Preserve user-facing behavior even if implementation changes
+
+5. **If removal was INTENTIONAL:**
+   - Document WHY in your commit message
+   - Example: "Removes handleCreateProfile from Dashboard - now handled by AddChildModal directly"
+   - Ensure no orphaned components exist
+
+6. **When in doubt:**
+   - Ask the user before committing
+   - Better to verify than to regress
+
+**Example of what it catches:**
+The Dashboard.tsx refactor (commit 29900a6) removed `handleCreateProfile`, `showAddModal`, and 5 state variables - breaking the "Add Child" feature. This check would have flagged:
+```
+⚠️  POTENTIAL REGRESSION DETECTED in src/frontend/src/pages/Dashboard.tsx
+  Functions removed: 4
+    - handleCreateProfile
+    - handleOpenEditModal
+    - handleUpdateProfile
+    - formatTimeKidFriendly
+  State variables removed: 5
+    - showAddModal
+    - newChildName
+    ...
+```
+
+An agent seeing this should have:
+1. Compared versions and noticed `handleCreateProfile` was gone
+2. Checked if AddChildModal was still integrated (it wasn't)
+3. Realized users couldn't add children anymore
+4. Restored the functionality before committing
+
+**To bypass ONLY after verification:**
+```bash
+git commit --no-verify
+# OR
+SKIP_FEATURE_CHECK=1 git commit
+```
+
+#### 4. Regression Tests (`scripts/regression_check.sh`)
+- Runs all frontend tests (or related tests for changed files).
+- Checks for removed exports (breaking changes).
+- Validates TypeScript compilation.
+
+### Manual Checks
+
+Run individual checks before committing:
 
 ```bash
+# Full pre-commit simulation
 ./scripts/agent_gate.sh --staged
+
+# Feature regression only
+./scripts/feature_regression_check.sh --staged
+
+# All regression checks
+./scripts/regression_check.sh --staged
 ```
 
 ---

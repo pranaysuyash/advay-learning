@@ -710,6 +710,29 @@ This section tracks which personas have been interviewed, key findings, and impl
 
 > "I'd tell parents it's 'a fun supplementary activity' — not a serious learning tool. That's not what you want, right?"
 
+**Follow-Up Interview: "Smart Recess" Positioning (NEW)**
+
+**Date:** 2026-02-24  
+**Document:** `docs/personas/TEACHER_Ms_Deepa_FollowUp.md`
+
+**Purpose:** Test whether "smart recess" (activity tracking without curriculum alignment) is viable for school market.
+
+**Key Findings:**
+- ✅ **"Smart recess" validated** — Ms. Deepa prefers it over curriculum apps
+- Zero lesson planning required; solves classroom management
+- Bypasses curriculum coordinator scrutiny
+- Parents get documentation: "70 minutes active play this week"
+
+**Strategic Decisions:**
+| Original Approach | Follow-Up Decision |
+|-------------------|-------------------|
+| NCERT/NEP curriculum mapping | **CLOSED** — Out of scope per vision |
+| Rubric-based assessment | **MODIFIED** — "Activity Journal" with neutral logs |
+| "Learning outcomes" | **CHANGED** — "Activity summaries" (what they did, not learned) |
+
+**Ms. Deepa's Final Verdict:**
+> "I don't need it to teach my curriculum. I need it to keep kids active while I get paperwork done. Frame it as 'recess enrichment' not 'curriculum supplement.'"
+
 ---
 
 #### Kabir — The Competitive Learner (Age 7, NEW)
@@ -744,6 +767,38 @@ Kabir is **Vikram's son**. His feedback validates Vikram's data-driven concerns:
 
 ---
 
+#### Riya — The Parenting Micro-Influencer (NEW)
+
+**Persona Type:** Growth Channel (Lowest-CAC Acquisition)  
+**Interview Date:** 2026-02-24  
+**Document:** `docs/personas/INFLUENCER_Riya.md`  
+**Priority:** P1 (Growth enablement)
+
+**Critical Finding:** Not designed for content creation — UI too cluttered for screenshots; camera preview looks "technical" not "fun." Rejects 90% of sponsorship requests due to lack of authenticity markers.
+
+**Top Recommendations:**
+1. **"Share Mode"** — One-tap clean screenshot for social media (TCK-20260224-025)
+2. **Influencer collaboration portal** — Early access, assets, stats tracking (TCK-20260224-026)
+3. **In-app viral loop** — "Riya sent you 50 stars!" recognition (TCK-20260224-027)
+4. **Privacy/ethics transparency** — One-pager for influencers to share (TCK-20260224-028)
+
+**Key Quote:**
+> "Authenticity is everything. If I promote something and my followers have a bad experience, my credibility is gone. Forever."
+
+> "The camera-based hand tracking is visual — that's better than tap apps. But the privacy indicators make it look like a science experiment, not fun."
+
+> "I promote 'balanced screen time.' If this app is designed to be addictive, I can't promote it. Even if it teaches ABCs."
+
+**Connection to Other Personas:**
+Riya amplifies other personas' concerns to her 85K followers:
+- Neha's privacy concerns → Won't promote without transparency
+- Ananya's offline need → Followers constantly ask about offline mode
+- Dadi's language need → Audience asks about Hindi/regional support
+- Vikram's value question → Needs "worth ₹2,999" justification
+- Kabir's UI feedback → Needs visually appealing content for older kids
+
+---
+
 ### Implementation Progress
 
 | Ticket | Description | Status | Persona |
@@ -767,6 +822,10 @@ Kabir is **Vikram's son**. His feedback validates Vikram's data-driven concerns:
 | TCK-20260224-022 | "Big Kid Mode" UI | 📝 OPEN | Kabir |
 | TCK-20260224-023 | Competitive Progression System | 📝 OPEN | Kabir |
 | TCK-20260224-024 | Social Features | 📝 OPEN | Kabir |
+| TCK-20260224-025 | Share Mode for Content Creation | 📝 OPEN | Riya |
+| TCK-20260224-026 | Influencer Collaboration Portal | 📝 OPEN | Riya |
+| TCK-20260224-027 | In-App Viral Loop | 📝 OPEN | Riya |
+| TCK-20260224-028 | Privacy/Ethics Transparency | 📝 OPEN | Riya |
 
 ---
 
@@ -795,19 +854,22 @@ Based on interview findings, the priority framework has been updated:
 2. **Grade 2-3 Content Expansion** — Kabir (churn risk)
 3. **"Big Kid Mode" UI** — Kabir (upper age retention)
 4. NCERT/NEP curriculum mapping — Ms. Deepa (B2B blocker)
-5. Guest mode + Offline mode — Ananya (Tier 2/3 India)
-6. Hindi UI full translation — Dadi (accessibility)
-7. UPI payment — Ananya (India market)
-8. Classroom Mode — Ms. Deepa (B2B enablement)
+5. **Share Mode for content creation** — Riya (growth channel)
+6. Guest mode + Offline mode — Ananya (Tier 2/3 India)
+7. Hindi UI full translation — Dadi (accessibility)
+8. UPI payment — Ananya (India market)
+9. Classroom Mode — Ms. Deepa (B2B enablement)
 
 **P1 (Important - Schedule Soon):**
-1. Teacher dashboard — Ms. Deepa
-2. Inclusive Mode — Ms. Deepa
-3. **Competitive Progression System** — Kabir (engagement)
-4. **Social Features** — Kabir (peer motivation)
-5. Adaptive difficulty — Dr. Sharma
-6. Split age categories — Dr. Sharma
-7. Celebration overload fix — Dr. Sharma
+1. **Influencer collaboration portal** — Riya (lowest-CAC growth)
+2. **In-app viral loop** — Riya (referral system)
+3. Teacher dashboard — Ms. Deepa
+4. Inclusive Mode — Ms. Deepa
+5. **Competitive Progression System** — Kabir (engagement)
+6. **Social Features** — Kabir (peer motivation)
+7. Adaptive difficulty — Dr. Sharma
+8. Split age categories — Dr. Sharma
+9. Celebration overload fix — Dr. Sharma
 
 ---
 
@@ -818,4 +880,5 @@ Based on interview findings, the priority framework has been updated:
 | 1.0 | 2026-02-22 | Antigravity | Initial comprehensive persona document |
 | 1.1 | 2026-02-22 | Antigravity | Removed India-first framing (product is global); added Methodology & Prompts appendix |
 | 1.2 | 2026-02-24 | Kimi Code CLI | Added Persona Interview Tracking appendix; updated Ms. Deepa priority P2→P0; added Dr. Meera Sharma as new Expert persona |
-| 1.3 | 2026-02-24 | Kimi Code CLI | Added Kabir (Competitive Learner) interview; updated stats: 7 interviews, 52 findings, 48 recommendations; added Grade 2-3 content and Big Kid Mode to P0 priorities
+| 1.3 | 2026-02-24 | Kimi Code CLI | Added Kabir (Competitive Learner) interview; updated stats: 7 interviews, 52 findings, 48 recommendations; added Grade 2-3 content and Big Kid Mode to P0 priorities |
+| 1.4 | 2026-02-24 | Kimi Code CLI | **PERSONA RESEARCH COMPLETE**: Added Riya (Micro-Influencer) — 8th and final persona; final stats: 8 interviews, 59 findings, 55 recommendations; all persona stakeholder categories covered (Parents, Children, Educators, Experts, Growth, Internal)

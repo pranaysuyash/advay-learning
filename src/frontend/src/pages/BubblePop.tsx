@@ -12,6 +12,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import '../styles/animations.css';
 import { useMicrophoneInput } from '../hooks/useMicrophoneInput';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
   initializeGame,
   startGame,
@@ -30,7 +32,8 @@ const FRAME_TIME = 1000 / TARGET_FPS;
 export default function BubblePop() {
   // Audio
   const { playClick, playLevelUp } = useAudio();
-  const { onGameComplete } = useGameDrops('bubble-pop');
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop');
 
   // Game state
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -56,6 +59,17 @@ export default function BubblePop() {
       // Blow detected - check hits
       setGameState(prev => {
         const newState = checkBlowHits(prev, 0.5);  // High volume for strong blow
+        
+        // TTS feedback for milestone pops
+        if (ttsEnabled && newState.poppedCount > prev.poppedCount) {
+          const newlyPopped = newState.poppedCount - prev.poppedCount;
+          if (newState.poppedCount % 5 === 0) {
+            void speak(`${newState.poppedCount} bubbles popped! Great job!`);
+          } else if (newlyPopped >= 3) {
+            void speak('Wow! You popped a lot!');
+          }
+        }
+        
         return newState;
       });
     },
@@ -129,7 +143,7 @@ export default function BubblePop() {
 
   const handleStop = () => {
     playClick();
-    onGameComplete();
+    _onGameComplete();
     stop();
     setGameState(endGame(gameState));
     setShowMenu(true);
@@ -149,7 +163,7 @@ export default function BubblePop() {
       {showMenu ? (
         // Menu Screen
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <div className="text-8xl mb-4 animate-bounce">🫧</div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" className="text-blue-400 mb-4 animate-bounce"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" opacity="0.5"/></svg>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bubble Pop!</h2>
 
           {/* Goal Statement with Semantic Attributes */}
@@ -160,18 +174,18 @@ export default function BubblePop() {
             className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               <div>
                 <p className="font-bold text-blue-800">GOAL:</p>
                 <p className="text-blue-700">Blow bubbles to pop them and score!</p>
-                <p className="text-blue-600 text-sm">🎤 Blow hard → 💨 Pop! → ⭐ Score!</p>
+                <p className="text-blue-600 text-sm">Blow hard → Pop! → Score!</p>
               </div>
             </div>
           </div>
 
           {/* Microphone Warning */}
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3">
-            <span className="text-3xl">🎤</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-yellow-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
             <div>
               <h3 className="font-bold text-yellow-800 mb-1">You need a microphone!</h3>
               <p className="text-yellow-700 text-sm">
@@ -180,6 +194,22 @@ export default function BubblePop() {
               </p>
             </div>
           </div>
+
+          {/* Voice Instructions */}
+          {ttsEnabled && (
+            <div className="mb-4 w-full max-w-md">
+              <VoiceInstructions
+                instructions={[
+                  'Blow into the microphone to pop bubbles!',
+                  'The harder you blow, the more bubbles pop!',
+                  'Do not let bubbles float away!',
+                ]}
+                autoSpeak={true}
+                showReplayButton={true}
+                replayButtonPosition='bottom-right'
+              />
+            </div>
+          )}
 
           <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
             <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
@@ -194,7 +224,7 @@ export default function BubblePop() {
               </li>
               <li className="flex items-center gap-2">
                 <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">3</span>
-                <span><strong>Blow into your microphone</strong> to pop them! 💨</span>
+                <span><strong>Blow into your microphone</strong> to pop them!</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">4</span>
@@ -207,13 +237,11 @@ export default function BubblePop() {
             onClick={handleStart}
             className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
           >
-            <span>🎤</span>
             Start Blowing!
-            <span>💨</span>
           </button>
 
           <p className="text-xs text-slate-400 mt-4">
-            First game with microphone input! 🔬
+            First game with microphone input!
           </p>
         </div>
       ) : (
@@ -247,7 +275,7 @@ export default function BubblePop() {
                 />
               </div>
               {isBlowing && (
-                <span className="text-red-500 animate-pulse">💨</span>
+                <span className="text-red-500 animate-pulse font-bold text-xs">BLOW!</span>
               )}
             </div>
           </div>
@@ -276,19 +304,39 @@ export default function BubblePop() {
             className="absolute top-16 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center z-10 shadow-lg"
           >
             <div className="flex items-center justify-center gap-2">
-              <span className="text-2xl">🎯</span>
-              <p className="font-black">GOAL: Blow into your microphone to pop bubbles! 💨</p>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-white"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <p className="font-black">GOAL: Blow into your microphone to pop bubbles!</p>
             </div>
           </div>
 
           {/* Instructions overlay at bottom */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-xl border-4 border-blue-400 flex items-center gap-4">
-              <div className="text-4xl animate-bounce">🎤</div>
+            {/* Microphone Active Indicator */}
+            {!isActive && (
+              <div className="bg-red-100 border-2 border-red-400 rounded-xl px-4 py-2 flex items-center gap-2 animate-pulse">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-red-600"><path d="m18 9-5 5"/><path d="m13 9 5 5"/><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+                <span className="font-bold text-red-700">Click Start to enable microphone!</span>
+              </div>
+            )}
+            
+            <div className={`rounded-2xl px-6 py-4 shadow-xl border-4 flex items-center gap-4 transition-all ${isBlowing ? 'bg-green-100 border-green-400 scale-105' : 'bg-white/95 border-blue-400'}`}>
+              <div className={`text-4xl ${isBlowing ? 'animate-pulse' : 'animate-bounce'}`}>
+                {isBlowing ? (
+                  <span className="text-4xl font-bold text-green-600">POOF!</span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+                )}
+              </div>
               <div className="text-left">
-                <p className="font-bold text-blue-800 text-lg">Blow into your microphone!</p>
-                <p className="text-blue-600">The harder you blow, the more bubbles pop! 💨</p>
-                <p className="text-slate-500 text-sm mt-1">{isBlowing ? '💨 Great! Keep blowing!' : '👄 Get close to the mic and blow!'}</p>
+                <p className={`font-bold text-lg ${isBlowing ? 'text-green-800' : 'text-blue-800'}`}>
+                  {isBlowing ? 'Great blowing! Keep going!' : 'Get close to the mic!'}
+                </p>
+                <p className={`${isBlowing ? 'text-green-600' : 'text-blue-600'}`}>
+                  {isBlowing ? 'You are popping bubbles!' : 'Take a deep breath and BLOW hard!'}
+                </p>
+                <p className="text-slate-500 text-sm mt-1">
+                  {isBlowing ? 'Keep blowing!' : 'Mic → Mouth → Blow!'}
+                </p>
               </div>
             </div>
 
@@ -302,7 +350,7 @@ export default function BubblePop() {
                   style={{ width: `${Math.min(100, volume * 100)}%` }}
                 />
               </div>
-              <span className="text-lg">{isBlowing ? '💨💨💨' : '💤'}</span>
+              <span className="text-lg font-bold">{isBlowing ? 'WOW!' : 'Ready'}</span>
             </div>
           </div>
         </div>
@@ -311,7 +359,7 @@ export default function BubblePop() {
       {/* Celebration */}
       <CelebrationOverlay
         show={showCelebration}
-        letter="🫧"
+        letter="O"
         accuracy={stats.accuracy}
         onComplete={() => setShowCelebration(false)}
         message={`Level ${gameState.level} Complete!`}

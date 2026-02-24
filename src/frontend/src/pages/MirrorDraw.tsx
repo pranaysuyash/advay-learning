@@ -9,6 +9,8 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useHandClick } from '../hooks/useHandClick';
+import { AttentionMeter } from '../components/game/AttentionMeter';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
@@ -30,7 +32,6 @@ import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const MAX_LEVEL = 4;
-const _CURSOR_SIZE = 84; // Increased for toddler visibility - used in canvas rendering
 const TEMPLATES_TO_PASS = 3; // pass 3/5 to unlock next level
 
 export const MirrorDraw = memo(function MirrorDrawComponent() {
@@ -331,7 +332,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
     [submitDrawing],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, pinch } =
     useGameHandTracking({
       gameName: 'MirrorDraw',
       isRunning: isPlaying && !gameCompleted,
@@ -343,6 +344,8 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
         if (isDrawingRef.current) setIsDrawing(false);
       },
     });
+
+  useHandClick(pinch?.isPinching ?? false, cursor, true);
 
   useEffect(() => {
     if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
@@ -449,6 +452,8 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
           videoConstraints={{ facingMode: 'user' }}
         />
 
+        <AttentionMeter webcamRef={webcamRef} className="bottom-6 left-6" />
+
         <canvas
           ref={canvasRef}
           className='absolute inset-0 w-full h-full'
@@ -494,7 +499,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
             animate={{ opacity: 1, scale: 1 }}
             className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-20'
           >
-            <div className='text-8xl drop-shadow-xl'>🎨</div>
+            <div className='w-24 h-24 drop-shadow-xl'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="w-full h-full text-advay-slate"><path d="M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"/><path d="M12 19a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/><path d="M15 12h.01"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></div>
             <div className='bg-white p-8 rounded-[2.5rem] border-3 border-[#F2CC8F] shadow-xl max-w-lg text-center flex flex-col items-center relative'>
               <h2 className='text-4xl font-black text-advay-slate mb-4 tracking-tight'>Mirror Draw</h2>
               <p className='text-text-secondary font-bold text-lg mb-8 leading-relaxed'>
@@ -530,7 +535,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
             className='absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-20'
           >
             <div className='bg-white p-10 rounded-[2.5rem] border-3 border-[#F59E0B] shadow-xl max-w-lg text-center flex flex-col items-center'>
-              <div className='text-6xl mb-4'>🏆</div>
+              <div className='w-16 h-16 mb-4'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="w-full h-full text-[#F59E0B]"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
               <h2 className='text-4xl font-black text-advay-slate mb-2'>Symmetry Master!</h2>
               <p className='text-[#F59E0B] font-black text-2xl mb-8'>Final Score: {score}</p>
               <button

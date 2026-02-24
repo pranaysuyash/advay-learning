@@ -11,35 +11,11 @@ interface LanguageFlagProps {
   className?: string;
 }
 
-const flagStyles: Record<string, { colors: string[]; pattern?: 'horizontal' | 'vertical' | 'circle' }> = {
-  en: {
-    colors: ['#012169', '#FFFFFF', '#C8102E'], // UK: Blue, White, Red
-    pattern: 'horizontal',
-  },
-  hi: {
-    colors: ['#FF9932', '#FFFFFF', '#138808'], // India: Saffron, White, Green
-    pattern: 'horizontal',
-  },
-  kn: {
-    colors: ['#FF9932', '#FFFFFF', '#138808'], // India: Saffron, White, Green
-    pattern: 'horizontal',
-  },
-  te: {
-    colors: ['#FF9932', '#FFFFFF', '#138808'], // India: Saffron, White, Green
-    pattern: 'horizontal',
-  },
-  ta: {
-    colors: ['#FF9932', '#FFFFFF', '#138808'], // India: Saffron, White, Green
-    pattern: 'horizontal',
-  },
-};
-
 export const LanguageFlag: React.FC<LanguageFlagProps> = ({
   code,
   size = 'md',
   className = '',
-}) => {
-  const style = flagStyles[code] || flagStyles.en;
+}: LanguageFlagProps) => {
   const sizeClasses = {
     sm: 'w-5 h-4 text-xs',
     md: 'w-6 h-5 text-base',
