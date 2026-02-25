@@ -2,6 +2,8 @@
 
 **Version**: 1.0
 **Date**: 2026-02-02
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Auditor**: GitHub Copilot (agent)
 
 ## Summary

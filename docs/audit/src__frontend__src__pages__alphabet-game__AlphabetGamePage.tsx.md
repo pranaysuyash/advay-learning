@@ -4,6 +4,8 @@
 **Audit Version**: v1.5.1
 **Audited By**: Multi-Persona Review (Technical, Child-Centered UX, MediaPipe, UI/UX Design, Code Review)
 **Date**: 2026-02-03
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket:** TCK-20260203-001
 **Target**: src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
 **Scope**: Single-file technical and UX audit

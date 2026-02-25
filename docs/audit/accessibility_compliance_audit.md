@@ -3,6 +3,8 @@
 **Audit Version**: v1.5.1
 **Audited By**: Accessibility Specialist
 **Date**: 2026-02-03
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket:** TCK-20260202-046
 **Target**: Accessibility compliance and inclusive design across the application
 **Scope**: WCAG 2.1 AA compliance, screen reader compatibility, keyboard navigation, inclusive design

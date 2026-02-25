@@ -241,7 +241,8 @@ export function PlatformerRunner() {
 
     // Init
     useEffect(() => {
-        if (imagesLoaded && isCameraReady && gameState === 'LOADING') {
+        const skipCamera = (window as any).__DEV_DISABLE_CAMERA;
+        if (imagesLoaded && (isCameraReady || skipCamera) && gameState === 'LOADING') {
             setGameState('READY');
         }
     }, [imagesLoaded, isCameraReady, gameState]);
@@ -300,10 +301,6 @@ export function PlatformerRunner() {
 
                 // increase speed very slowly
                 state.speed += 2 * dt;
-
-                // Reset offsets to loop
-                if (state.bgOffsetX > 1024) state.bgOffsetX -= 1024;
-                if (state.terrainOffsetX > 128) state.terrainOffsetX -= 128; // grass tile roughly 128px wide
 
                 // 2. Map Player Y based on hand tracking.
                 // We map handY (0 to 1) to (0 to GROUND_Y - p.h)
@@ -443,11 +440,14 @@ export function PlatformerRunner() {
                 // Draw Background Layer
                 const bgImg = images[ASSETS.bg];
                 if (bgImg) {
-                    // slice 0-1024 width off the spritesheet (approx bounds of the blue sky + hills)
-                    // Simple tiling
-                    const sx = 0, sy = 0, sw = 1024, sh = 512;
-                    for (let i = 0; i < 3; i++) {
-                        ctx.drawImage(bgImg, sx, sy, sw, sh, (i * sw) - state.bgOffsetX, 0, sw, sh);
+                    // Kenney backgrounds are 1024x1024 tiles. We'll take the top-left one (sky + clouds).
+                    const sx = 0, sy = 0, sw = 1024, sh = 1024;
+                    // Draw it scaled to fit canvas height, and tile it horizontally
+                    const drawH = CANVAS_HEIGHT;
+                    const drawW = (sw / sh) * drawH; // maintain aspect ratio
+
+                    for (let i = 0; i < Math.ceil(CANVAS_WIDTH / drawW) + 1; i++) {
+                        ctx.drawImage(bgImg, sx, sy, sw, sh, (i * drawW) - (state.bgOffsetX % drawW), 0, drawW, drawH);
                     }
                 } else {
                     // Fallback sky
@@ -491,7 +491,7 @@ export function PlatformerRunner() {
                     const tileH = 128;
                     // draw enough tiles to cover width + 2
                     for (let i = -1; i < Math.ceil(CANVAS_WIDTH / tileW) + 1; i++) {
-                        ctx.drawImage(tImg, (i * tileW) - state.terrainOffsetX, GROUND_Y, tileW, tileH);
+                        ctx.drawImage(tImg, (i * tileW) - (state.terrainOffsetX % tileW), GROUND_Y, tileW, tileH);
                     }
                 } else {
                     // Fallback terrain
@@ -529,7 +529,7 @@ export function PlatformerRunner() {
         >
             <div className="relative w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-3xl overflow-hidden shrink-0 mt-4 max-h-[70vh]">
 
-                {!imagesLoaded || !isCameraReady ? (
+                {(!imagesLoaded || (!isCameraReady && !(window as any).__DEV_DISABLE_CAMERA)) ? (
                     <LoadingState message={!imagesLoaded ? 'Loading Assets...' : 'Starting Camera...'} />
                 ) : null}
 

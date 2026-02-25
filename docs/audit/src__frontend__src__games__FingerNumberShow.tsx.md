@@ -4,6 +4,8 @@
 **Target file**: `src/frontend/src/games/FingerNumberShow.tsx`  
 **Audit artifact**: `docs/audit/src__frontend__src__games__FingerNumberShow.tsx.md`  
 **Date**: 2026-02-03  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Prompt(s) used**: `prompts/audit/camera-game-multipersona-audit-v1.0.md` (+ repo rules in `AGENTS.md`)  
 
 ## Scope Contract

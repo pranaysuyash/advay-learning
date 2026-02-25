@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/data/languages.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 3, Risk 1, Complexity 1, Changeability 3, Learning 1 = **9/25**
 

@@ -221,7 +221,7 @@ export const Dashboard = memo(function Dashboard() {
         </div>
       </header>
 
-      {/* MULTI-PROFILE SELECTOR with Add Child */}
+      {/* MULTI-PROFILE SELECTOR with Add Child - Only for logged-in users */}
       {!isGuest && (
         <div className='px-6 lg:px-12 mb-8'>
           <div className='inline-flex items-center gap-2 bg-white p-1 rounded-full border-2 border-slate-100 shadow-sm'>
@@ -234,7 +234,7 @@ export const Dashboard = memo(function Dashboard() {
                 {p.name}
               </button>
             ))}
-            {/* ADD CHILD BUTTON */}
+            {/* ADD CHILD BUTTON - Only for logged-in users */}
             <button
               onClick={() => setShowAddModal(true)}
               className='px-3 py-1.5 rounded-full text-sm font-bold text-slate-400 hover:bg-slate-50 hover:text-[#3B82F6] transition border-2 border-dashed border-slate-200 hover:border-[#3B82F6] flex items-center gap-1'

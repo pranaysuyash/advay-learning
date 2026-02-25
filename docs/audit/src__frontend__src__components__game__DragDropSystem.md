@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/components/game/DragDropSystem.tsx`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 5, Risk 3, Complexity 3, Changeability 3, Learning 2 = **16/25**
 

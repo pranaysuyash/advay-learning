@@ -3,6 +3,8 @@
 **Audit Version**: v1.5.1  
 **Audited By**: GitHub Copilot  
 **Date**: 2024-01-28  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket:** TCK-20260203-031
 **Target**: src/backend/app/services/profile_service.py  
 **Scope**: Single-file technical audit  

@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/services/api.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket**: `TCK-20260224-031`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 5, Risk 4, Complexity 3, Changeability 3, Learning 2 = **17/25**

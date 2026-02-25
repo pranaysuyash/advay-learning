@@ -42,7 +42,7 @@ run_frontend_push_checks() {
     (
       cd src/frontend
       # shellcheck disable=SC2086
-      npx vitest run --reporter=dot --related $related_args
+      npx vitest related --run --reporter=dot $related_args
     )
   fi
 }

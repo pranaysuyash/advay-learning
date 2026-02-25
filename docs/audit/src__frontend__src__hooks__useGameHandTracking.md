@@ -3,6 +3,8 @@
 
 **Target**: `src/frontend/src/hooks/useGameHandTracking.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 5, Risk 4, Complexity 5, Changeability 3, Learning 5 = **22/25**
 

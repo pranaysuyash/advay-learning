@@ -6,6 +6,8 @@
 **Audit Version**: functional-audit-v1.0  
 **Audited By**: GitHub Copilot  
 **Date**: 2024-01-28  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Target**: src/backend/app/api/v1/endpoints/auth.py  
 **Scope**: Single-file functional audit  
 **Base Branch**: main

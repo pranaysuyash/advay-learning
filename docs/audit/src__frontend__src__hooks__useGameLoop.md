@@ -3,6 +3,8 @@
 
 **Target**: `src/frontend/src/hooks/useGameLoop.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 5, Risk 3, Complexity 4, Changeability 4, Learning 4 = **20/25**
 

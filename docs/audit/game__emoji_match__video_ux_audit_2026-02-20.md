@@ -4,6 +4,8 @@
 
 - **Game**: Emoji Match
 - **Date**: February 20, 2026
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 - **Auditor**: AI Agent (Video UX Analysis)
 - **Scope**: Gameplay UX, hand-tracking performance, child-friendliness, timer/pacing
 - **Ticket**: TCK-20260220-002

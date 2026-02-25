@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/hooks/useTTS.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 3, Complexity 3, Changeability 2, Learning 2 = **14/25**
 

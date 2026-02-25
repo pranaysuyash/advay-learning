@@ -5,6 +5,8 @@
 **Audit prompt**: prompts/audit/audit-v1.5.1.md
 **Audit version**: 1.5.1
 **Date**: 2026-01-29 16:03 IST
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Audited file**: `src/frontend/src/pages/Game.tsx` (REMOVED 2026-01-30)
 **Base commit SHA**: d7d0670e0c7977093b7606b9415405669f4258a3
 **Auditor**: GitHub Copilot

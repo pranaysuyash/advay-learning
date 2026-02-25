@@ -35,6 +35,7 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
+import { useAudio } from '../utils/hooks/useAudio';
 
 /**
  * Dress for Weather - Weather awareness and clothing matching game
@@ -200,6 +201,7 @@ const LEVELS: Level[] = [
 export default function DressForWeather() {
   // Hand tracking with modern hooks
   const { onGameComplete } = useGameDrops('dress-for-weather');
+  const { playClick } = useAudio();
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,
@@ -493,7 +495,7 @@ export default function DressForWeather() {
     setScore(0);
     assetLoader.playSound('pop', 0.55);
     speak('Dress the character for different weather! Drag the right clothes!');
-  }, [speak]);
+  }, [speak, playClick]);
 
   const level = LEVELS[currentLevel];
 
@@ -571,7 +573,7 @@ export default function DressForWeather() {
             </p>
 
             <button
-              onClick={startGame}
+              onClick={() => { playClick(); startGame(); }}
               className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
               Start Game!
@@ -621,7 +623,7 @@ export default function DressForWeather() {
         type='hearts'
         message='Perfect!'
         duration={1500}
-        onComplete={() => setShowSuccess(false)}
+        onComplete={() => { playClick(); setShowSuccess(false); }}
       />
     </div>
   );

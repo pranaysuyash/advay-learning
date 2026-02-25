@@ -3,6 +3,8 @@
 **Audit Version**: v1.5.1
 **Audited By**: Security Specialist
 **Date**: 2026-02-03
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket:** TCK-20260203-026
 **Target**: Authentication and authorization implementation across the application
 **Scope**: Backend auth endpoints, token management, session handling, permission checks

@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/store/settingsStore.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 5, Risk 4, Complexity 2, Changeability 2, Learning 2 = **15/25**
 

@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/pages/DressForWeather.tsx`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 3, Complexity 4, Changeability 3, Learning 2 = **16/25**
 

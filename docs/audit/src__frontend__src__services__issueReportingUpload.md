@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/services/issueReportingUpload.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Ticket**: `TCK-20260224-031`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 3, Risk 2, Complexity 1, Changeability 3, Learning 1 = **10/25**

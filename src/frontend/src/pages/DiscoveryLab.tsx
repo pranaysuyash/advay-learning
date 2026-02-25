@@ -5,10 +5,12 @@ import { useInventoryStore, useProfileStore } from '../store';
 import { getItem, RARITY_CONFIG, type CollectibleItem } from '../data/collectibles';
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
 import { recordProgressActivity } from '../services/progressTracking';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export function DiscoveryLab() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const currentProfileId = useProfileStore((state) => state.currentProfile?.id);
   const {
     ownedItems,
@@ -41,6 +43,7 @@ export function DiscoveryLab() {
   );
 
   const handleCraft = (recipe: Recipe) => {
+    playClick();
     const wasNewDiscovery = !discoveredRecipes.includes(recipe.id);
     const result = craft(recipe.id);
     void recordProgressActivity({
@@ -59,6 +62,8 @@ export function DiscoveryLab() {
     });
 
     if (result.success) {
+      playSuccess();
+      playCelebration();
       setCraftResult({
         success: true,
         item: result.outputItem,
@@ -66,6 +71,7 @@ export function DiscoveryLab() {
         scienceFact: recipe.scienceFact,
       });
     } else {
+      playError();
       setCraftResult({ success: false });
     }
     setSelectedRecipe(null);
@@ -82,7 +88,7 @@ export function DiscoveryLab() {
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => navigate('/inventory')}
+              onClick={() => { playClick(); navigate('/inventory'); }}
               className="flex items-center gap-2 px-4 py-2 bg-white border-3 border-[#F2CC8F] rounded-2xl font-bold text-text-secondary hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
             >
               Back to Backpack
@@ -197,7 +203,7 @@ export function DiscoveryLab() {
               Play some games to collect items, then come back to combine them!
             </p>
             <button
-              onClick={() => navigate('/games')}
+              onClick={() => { playClick(); navigate('/games'); }}
               className="px-6 py-3 bg-[#3B82F6] text-white rounded-2xl font-black hover:bg-blue-600 transition-colors"
             >
               Play Games
@@ -213,7 +219,7 @@ export function DiscoveryLab() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
-              onClick={() => setCraftResult(null)}
+              onClick={() => { playClick(); setCraftResult(null); }}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.5, y: 40 }}
@@ -255,7 +261,7 @@ export function DiscoveryLab() {
                   </p>
                 )}
                 <button
-                  onClick={() => setCraftResult(null)}
+                  onClick={() => { playClick(); setCraftResult(null); }}
                   className="px-6 py-3 bg-[#E85D04] text-white rounded-2xl font-black hover:bg-[#d45304] transition-colors"
                 >
                   {craftResult.success ? 'Awesome!' : 'Try Again'}

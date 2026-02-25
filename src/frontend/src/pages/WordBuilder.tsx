@@ -10,8 +10,8 @@ import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { useAudio } from '../utils/hooks/useAudio';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
 import { findHitTarget } from '../games/hitTarget';
@@ -60,7 +60,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('word-builder');
 
@@ -158,7 +158,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       }
       levelTimeoutRef.current = null;
     }, 3000);
-  }, [playCelebration]);
+  }, [playCelebration, onGameComplete]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -184,12 +184,12 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
       if (!hit) {
         setFeedback('Move closer to a letter and pinch.');
-        void playError();
+        playError();
         return;
       }
 
       if (hit.letter === expectedLetter) {
-        void playPop();
+        playPop();
         triggerHaptic('success');
         setCompletedLetters((prev) => [...prev, hit.letter]);
         setScore((prev) => prev + 15);
@@ -215,11 +215,11 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         if (ttsEnabled) {
           void speak(`That's ${hit.letter}. Find ${expectedLetter}!`);
         }
-        void playError();
+        playError();
         triggerHaptic('error');
       }
     },
-    [completeWord, cursor, playError, playPop, speak, ttsEnabled],
+    [completeWord, cursor, playError, playPop, speak, ttsEnabled, word],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
@@ -252,7 +252,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     if (ttsEnabled) {
       void speak("Let's build words together! Show me your hand!");
     }
-    await playStart();
+    playClick();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();

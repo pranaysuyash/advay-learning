@@ -3,6 +3,8 @@
 
 **Target**: `src/frontend/src/utils/coordinateTransform.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 4, Complexity 3, Changeability 3, Learning 3 = **17/25**
 

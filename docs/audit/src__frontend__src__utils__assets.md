@@ -2,6 +2,8 @@
 
 **Target**: `src/frontend/src/utils/assets.ts`  
 **Date**: 2026-02-24  
+**Ticket**: TCK-20260224-001
+**Ticket**: TCK-20260224-001
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 2, Complexity 2, Changeability 2, Learning 2 = **12/25**
 
