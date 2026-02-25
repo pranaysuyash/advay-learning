@@ -75,7 +75,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
   // Sound effects
   const { playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('connect-the-dots');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('connect-the-dots');
 
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
   const [isPinching, setIsPinching] = useState(false);
@@ -359,6 +359,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
         setShowCelebration(false);
         if (level >= 5) {
           onGameComplete();
+          triggerEasterEgg('egg-star-connector');
           setGameCompleted(true);
         } else {
           setLevel((prev) => prev + 1);

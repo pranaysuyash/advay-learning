@@ -7,10 +7,10 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { useAudio } from '../utils/hooks/useAudio';
 
 
 interface Chemical {
@@ -119,8 +119,8 @@ export function VirtualChemistryLab() {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { playSuccess, playPop } = useSoundEffects();
-  const { onGameComplete } = useGameDrops('chemistry-lab');
+  const { playSuccess, playPop } = useAudio();
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('chemistry-lab');
 
   useGameSessionProgress({
     gameName: 'Virtual Chemistry Lab',
@@ -146,7 +146,11 @@ export function VirtualChemistryLab() {
           setLastReaction(reaction);
           setShowReactionEffect(true);
           setScore((s) => s + 50);
-          void playSuccess();
+          playSuccess();
+
+          const newSize = discoveredReactions.size + 1;
+          if (newSize >= 3) triggerEasterEgg('egg-gold-reaction');
+          if (newSize >= 5) triggerEasterEgg('egg-periodic-key');
 
           if (ttsEnabled) {
             void speak(`${reaction.name}! ${reaction.description}`);
@@ -334,7 +338,7 @@ export function VirtualChemistryLab() {
     if (!selectedChemical || isPouring) return;
 
     setIsPouring(true);
-    void playPop();
+    playPop();
 
     setTimeout(() => {
       setBeakerContents((prev) => {

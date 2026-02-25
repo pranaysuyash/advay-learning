@@ -87,11 +87,12 @@ function calculateAngle(
 
 export function YogaAnimals() {
   const navigate = useNavigate();
-  const { onGameComplete } = useGameDrops('yoga-animals');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('yoga-animals');
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const animationRef = useRef<number>(0);
+  const continuousHoldRef = useRef(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -262,6 +263,11 @@ export function YogaAnimals() {
 
       // Check if pose is matched (above 70% threshold)
       if (matchScore > 70) {
+        continuousHoldRef.current += 50;
+        if (continuousHoldRef.current >= 10000) {
+          triggerEasterEgg('egg-spirit-animal');
+          continuousHoldRef.current = 0; // reset so it only fires once per 10s hold
+        }
         setHoldTime((prev) => {
           const newTime = prev + 50;
           if (newTime >= HOLD_DURATION && !showCelebration) {
@@ -279,6 +285,7 @@ export function YogaAnimals() {
           return newTime;
         });
       } else {
+        continuousHoldRef.current = 0;
         setHoldTime(0);
       }
 

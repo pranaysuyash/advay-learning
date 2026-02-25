@@ -46,7 +46,8 @@ export const ShapePop = memo(function ShapePopComponent() {
 
   const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('shape-pop');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('shape-pop');
+  const popWindowRef = useRef<number[]>([]);
 
   useEffect(() => {
     scoreRef.current = score;
@@ -82,6 +83,13 @@ export const ShapePop = memo(function ShapePopComponent() {
         }
         void playPop();
         triggerHaptic('success');
+
+        const now = Date.now();
+        popWindowRef.current.push(now);
+        popWindowRef.current = popWindowRef.current.filter((t) => now - t < 30000);
+        if (popWindowRef.current.length >= 20) {
+          triggerEasterEgg('egg-diamond-pop');
+        }
 
         if (nextScore > 0 && nextScore % 120 === 0) {
           setShowCelebration(true);

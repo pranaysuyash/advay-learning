@@ -4,6 +4,42 @@ This directory contains reusable tools for analyzing and improving kids learning
 
 ---
 
+## 🧰 Kenney Asset Sync Tool
+
+**Purpose:** Synchronize Kenney `new-platformer-pack` assets from local downloaded packs into the frontend canonical asset path.
+
+**File:** `tools/sync_kenney_platformer_assets.sh`
+
+### Why this exists
+
+- Avoid manual copy mistakes and partial imports.
+- Keep one canonical runtime path: `src/frontend/public/assets/kenney/platformer`.
+- Make future pack refreshes repeatable when new Kenney downloads are added.
+
+### Usage
+
+```bash
+# From repo root (uses default source + destination)
+tools/sync_kenney_platformer_assets.sh
+
+# Or pass explicit source and destination
+tools/sync_kenney_platformer_assets.sh \
+  /Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1 \
+  src/frontend/public/assets/kenney/platformer
+```
+
+### What it syncs
+
+- `characters/*.png`
+- `enemies/*.png`
+- `tiles/*.png`
+- `backgrounds/*.png`
+- `sounds/*.ogg`
+- `spritesheet-backgrounds-default.png`
+- curated `collectibles` + `hud` files needed by runtime code
+
+---
+
 ## 🎯 Hand Tracking Latency Analyzer ⭐ PRIMARY TOOL
 
 **Purpose:** Measure MediaPipe hand-tracking accuracy by comparing actual hand position to on-screen pointer/cursor position to detect coordinate system bugs.

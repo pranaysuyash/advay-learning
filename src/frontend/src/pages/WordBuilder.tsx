@@ -62,7 +62,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('word-builder');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('word-builder');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -145,6 +145,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     playCelebration();
     setShowCelebration(true);
     setScore((prev) => prev + 30 + timeLeftRef.current);
+    triggerEasterEgg('egg-first-word');
 
     // Slower pacing for kids - 3 seconds instead of 1.8s
     levelTimeoutRef.current = setTimeout(() => {

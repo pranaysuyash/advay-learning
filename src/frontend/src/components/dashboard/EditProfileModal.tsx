@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { LANGUAGES } from '../../data/languages';
 import type { Profile } from '../../store';
+import type { AvatarConfig } from '../avatar';
+import { KenneyAvatar } from '../avatar';
 import { useAudio } from '../../utils/hooks/useAudio';
 import { useEffect, useRef } from 'react';
 
@@ -12,13 +14,15 @@ interface EditProfileModalProps {
   onEditNameChange: (name: string) => void;
   editLanguage: string;
   onEditLanguageChange: (language: string) => void;
+  editAvatarConfig?: AvatarConfig | null;
+  onChangeAvatar?: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
 }
 
 /**
  * Modal for editing an existing child profile.
- * Allows updating name and preferred language.
+ * Allows updating name, preferred language, and avatar.
  */
 export function EditProfileModal({
   isOpen,
@@ -28,6 +32,8 @@ export function EditProfileModal({
   onEditNameChange,
   editLanguage,
   onEditLanguageChange,
+  editAvatarConfig,
+  onChangeAvatar,
   onSubmit,
   isSubmitting,
 }: EditProfileModalProps) {
@@ -43,6 +49,9 @@ export function EditProfileModal({
 
   if (!isOpen || !profile) return null;
 
+  // Use editing avatar config if available, otherwise fall back to profile's current avatar
+  const avatarConfig = editAvatarConfig || (profile.settings?.avatar_config as AvatarConfig) || null;
+
   return (
     <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
       <motion.div
@@ -54,6 +63,40 @@ export function EditProfileModal({
         <p className='text-advay-slate text-sm mb-6'>
           Update {profile.name}'s information
         </p>
+
+        {/* Avatar Section */}
+        <div className='flex flex-col items-center mb-6'>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              playClick();
+              onChangeAvatar?.();
+            }}
+            className='relative cursor-pointer group'
+          >
+            <KenneyAvatar
+              config={avatarConfig}
+              fallbackName={editName || profile.name}
+              size='xl'
+              showAnimation={true}
+            />
+            {/* Change overlay */}
+            <div className='absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+              <span className='text-white text-sm font-medium'>Change</span>
+            </div>
+          </motion.div>
+          <button
+            type='button'
+            onClick={() => {
+              playClick();
+              onChangeAvatar?.();
+            }}
+            className='mt-2 text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium transition'
+          >
+            Change Avatar
+          </button>
+        </div>
 
         <div className='space-y-4'>
           <div>

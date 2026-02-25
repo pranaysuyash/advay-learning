@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getItem, rollDropsFromTable, type CollectibleItem } from '../data/collectibles';
 import { RECIPES_BY_ID, findCraftableRecipes, type Recipe } from '../data/recipes';
-import { getEasterEggById } from '../data/easterEggs';
-import { getDropTable } from '../data/gameRegistry';
+import { getDropTable, getRegistryEasterEggById } from '../data/gameRegistry';
 
 
 export interface OwnedItem {
@@ -212,7 +211,7 @@ export const useInventoryStore = create<InventoryState>()(
         const state = get();
         if (state.foundEasterEggs.includes(eggId)) return null;
 
-        const egg = getEasterEggById(eggId);
+        const egg = getRegistryEasterEggById(eggId);
         if (!egg) return null;
 
         const item = getItem(egg.reward.itemId);

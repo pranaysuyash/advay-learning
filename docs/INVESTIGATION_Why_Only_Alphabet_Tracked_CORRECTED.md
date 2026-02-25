@@ -14,12 +14,14 @@
 From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-smart-recess-strategy):
 
 > **What We're NOT Building:**
+>
 > - ❌ Standards-aligned curriculum app
 > - ❌ Lesson plans or scope-and-sequence
 > - ❌ Rubric-based assessment
 > - ❌ "Grade level" content gating
-> 
+>
 > **What We Closed:**
+>
 > - TCK-20260224-017 (NCERT/NEP Curriculum Mapping) — **Out of scope per vision**
 
 ---
@@ -28,38 +30,39 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 
 ### Complete Game Inventory (from gameRegistry.ts)
 
-| # | Game | World | Vibe | Age | CV Mode |
-|---|------|-------|------|-----|---------|
-| 1 | Draw Letters (Alphabet Tracing) | Letter Land | Chill | 2-8 | Hand |
-| 2 | Find the Letter (Letter Hunt) | Letter Land | Active | 2-6 | Hand |
-| 3 | Finger Counting (Numbers) | Number Jungle | Chill | 3-7 | Hand |
-| 4 | Number Tap Trail | Number Jungle | Active | 4-8 | Hand |
-| 5 | Word Builder | Word Workshop | Brainy | 3-7 | Hand |
-| 6 | Phonics Sounds | Word Workshop | Brainy | 3-7 | Hand |
-| 7 | Shape Pop | Shape Garden | Active | 3-7 | Hand |
-| 8 | Shape Sequence | Mind Maze | Brainy | 4-8 | Hand |
-| 9 | Color Match Garden | Color Splash | Active | 3-7 | Hand |
-| 10 | Connect Dots | Doodle Dock | Chill | 3-6 | Hand |
-| 11 | Steady Hand Lab | Steady Labs | Chill | 4-7 | Hand |
-| 12 | Music Pinch Beat | Sound Studio | Creative | 3-7 | Hand |
-| 13 | Bubble Pop Symphony | Sound Studio | Chill | 3-7 | Hand |
-| 14 | Yoga Animals | Body Zone | Chill | 3-8 | Pose |
-| 15 | Freeze Dance | Body Zone | Active | 3-8 | Pose |
-| 16 | Simon Says | Body Zone | Active | 3-8 | Pose |
-| 17 | Chemistry Lab | Lab of Wonders | Brainy | 4-8 | Hand |
-| 18 | Emoji Match | Feeling Forest | Chill | 3-7 | Hand |
-| 19 | Air Canvas | Art Atelier | Creative | 3-8 | Hand |
-| 20 | Mirror Draw | Art Atelier | Chill | 4-7 | Hand |
-| 21 | Dress For Weather | Real World | Chill | 3-7 | Hand |
-| 22 | Story Sequence | Story Corner | Brainy | 4-8 | Hand |
-| 23 | Shape Safari | Shape Garden | Creative | 3-5 | Hand |
-| 24 | Rhyme Time | Word Workshop | Brainy | 4-6 | Hand |
-| 25 | Free Draw | Creative Corner | Creative | 2-6 | Hand |
-| 26 | Math Monsters | Number Jungle | Brainy | 5-8 | Hand |
-| 27 | Platform Runner | Platform World | Active | 3-8 | Hand |
-| 28 | Bubble Pop (Voice) | Creative Corner | Active | 3-8 | Voice |
+| #   | Game                            | World           | Vibe     | Age | CV Mode |
+| --- | ------------------------------- | --------------- | -------- | --- | ------- |
+| 1   | Draw Letters (Alphabet Tracing) | Letter Land     | Chill    | 2-8 | Hand    |
+| 2   | Find the Letter (Letter Hunt)   | Letter Land     | Active   | 2-6 | Hand    |
+| 3   | Finger Counting (Numbers)       | Number Jungle   | Chill    | 3-7 | Hand    |
+| 4   | Number Tap Trail                | Number Jungle   | Active   | 4-8 | Hand    |
+| 5   | Word Builder                    | Word Workshop   | Brainy   | 3-7 | Hand    |
+| 6   | Phonics Sounds                  | Word Workshop   | Brainy   | 3-7 | Hand    |
+| 7   | Shape Pop                       | Shape Garden    | Active   | 3-7 | Hand    |
+| 8   | Shape Sequence                  | Mind Maze       | Brainy   | 4-8 | Hand    |
+| 9   | Color Match Garden              | Color Splash    | Active   | 3-7 | Hand    |
+| 10  | Connect Dots                    | Doodle Dock     | Chill    | 3-6 | Hand    |
+| 11  | Steady Hand Lab                 | Steady Labs     | Chill    | 4-7 | Hand    |
+| 12  | Music Pinch Beat                | Sound Studio    | Creative | 3-7 | Hand    |
+| 13  | Bubble Pop Symphony             | Sound Studio    | Chill    | 3-7 | Hand    |
+| 14  | Yoga Animals                    | Body Zone       | Chill    | 3-8 | Pose    |
+| 15  | Freeze Dance                    | Body Zone       | Active   | 3-8 | Pose    |
+| 16  | Simon Says                      | Body Zone       | Active   | 3-8 | Pose    |
+| 17  | Chemistry Lab                   | Lab of Wonders  | Brainy   | 4-8 | Hand    |
+| 18  | Emoji Match                     | Feeling Forest  | Chill    | 3-7 | Hand    |
+| 19  | Air Canvas                      | Art Atelier     | Creative | 3-8 | Hand    |
+| 20  | Mirror Draw                     | Art Atelier     | Chill    | 4-7 | Hand    |
+| 21  | Dress For Weather               | Real World      | Chill    | 3-7 | Hand    |
+| 22  | Story Sequence                  | Story Corner    | Brainy   | 4-8 | Hand    |
+| 23  | Shape Safari                    | Shape Garden    | Creative | 3-5 | Hand    |
+| 24  | Rhyme Time                      | Word Workshop   | Brainy   | 4-6 | Hand    |
+| 25  | Free Draw                       | Creative Corner | Creative | 2-6 | Hand    |
+| 26  | Math Monsters                   | Number Jungle   | Brainy   | 5-8 | Hand    |
+| 27  | Platform Runner                 | Platform World  | Active   | 3-8 | Hand    |
+| 28  | Bubble Pop (Voice)              | Creative Corner | Active   | 3-8 | Voice   |
 
 **Vibe Distribution**:
+
 - Chill (relaxing): 11 games
 - Active (energetic): 9 games
 - Brainy (cognitive): 7 games
@@ -76,10 +79,11 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 From [NORTH_STAR_VISION.md](docs/NORTH_STAR_VISION.md):
 
 > **"Anything physical, made virtual, safe, and wildly fun."**
-> 
+>
 > The platform is an **AI-native, camera-first digital sandbox** designed for Generation Alpha.
-> 
+>
 > Learning happens best when it is:
+>
 > 1. **Child-Directed**: Kids choose what to explore
 > 2. **Failure-Positive**: Mistakes are hilarious, never punishing
 > 3. **Physically Interactive**: Whole body, not just fingertips
@@ -88,13 +92,14 @@ From [NORTH_STAR_VISION.md](docs/NORTH_STAR_VISION.md):
 From [FUN_FIRST_GAMES_CATALOG.md](docs/FUN_FIRST_GAMES_CATALOG.md):
 
 > **Philosophy: Play > Pedagogy**
-> 
+>
 > These games prioritize:
+>
 > - 😄 **Joy** over educational outcomes
 > - 🎨 **Expression** over correctness
 > - 🏆 **Mastery** over curriculum
 > - 🤩 **Wonder** over lessons
-> 
+>
 > **Kids learn best when they don't know they're learning.**
 
 ### From Customer Research (Ms. Deepa Interview)
@@ -102,18 +107,22 @@ From [FUN_FIRST_GAMES_CATALOG.md](docs/FUN_FIRST_GAMES_CATALOG.md):
 From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-smart-recess-strategy):
 
 **Teachers DON'T want**:
+
 - ❌ Curriculum alignment requirements
 - ❌ Lesson plans
 - ❌ Standards compliance
 
 **Teachers DO want**:
+
 - ✅ **Activity log** to justify "non-academic" time to parents
 - ✅ Simple visibility (not grades, just "what did kids do?")
 - ✅ Zero prep required
 - ✅ Recess/PE time slot filling
 
 **Ms. Deepa Quote**: (from TEACHER_Ms_Deepa_FollowUp.md)
+
 > Parent communication should be reframed:
+>
 > - Export: **"Activity Log"** not "Progress Report"
 > - Neutral language: **"Explored"** not "Learned"
 > - Parent-friendly: **"Kabir moved his body for 20 minutes today"** not graded outcomes
@@ -130,8 +139,8 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 interface LetterProgress {
   letter: string;
   attempts: number;
-  bestAccuracy: number;  // ← Assumes mastery = accuracy
-  mastered: boolean;     // ← Binary: 70%+ = mastered
+  bestAccuracy: number; // ← Assumes mastery = accuracy
+  mastered: boolean; // ← Binary: 70%+ = mastered
   lastAttemptDate: string;
 }
 
@@ -140,11 +149,13 @@ const MASTERY_THRESHOLD = 70;
 ```
 
 **UI**: `LetterJourney` component
+
 - Shows: "0/26 Mastered"
 - Batch progression: Master 3/5 letters → unlock next batch
 - Visual: Green star on letter
 
 **Philosophy Conflict**:
+
 - This is **curriculum-like** (mastery → unlock)
 - But vision says **"child-directed, no gating"**
 - Result: Alphabet feels like "school" while other 27 games feel like "play"
@@ -154,6 +165,7 @@ const MASTERY_THRESHOLD = 70;
 ### What Doesn't Exist: Activity Logging for Other Games
 
 **Games 2-28**: No persistent tracking at all
+
 - BubblePopSymphony: Plays, pops bubbles → No activity log
 - YogaAnimals: Does poses → No pose tracking
 - AirCanvas: Draws → No drawing history
@@ -168,14 +180,17 @@ const MASTERY_THRESHOLD = 70;
 ### What Does Tracking Mean in a Playground?
 
 **In Curriculum Model** (what I assumed):
+
 > "Teacher wants to know if child mastered Alphabet → can do Numbers → ready for Shapes"
 
 **In Playground Model** (what vision actually says):
+
 > "Parent wants to know: What did my child do today? For how long? Did they enjoy it? Are they developing physically?"
 
 ### What Parents Actually Want (From Research)
 
 **Ms. Deepa** (teacher proxy for parent):
+
 ```
 "Activity Log" not "Grade Sheet"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -194,12 +209,13 @@ Creative Expression: ✅ Yes
 Social/Emotional: Chill vibe
 
 Parent-Friendly Summary:
-"Kabir had a creative, physically active day. 
-He explored drawing, yoga, and music. 
+"Kabir had a creative, physically active day.
+He explored drawing, yoga, and music.
 No signs of screen fatigue."
 ```
 
 **NOT:**
+
 ```
 Progress Report
 ━━━━━━━━━━━━━━━━━━━━
@@ -224,6 +240,7 @@ Status: NO PROGRESS YET
 ### The Accidental Curriculum App Problem
 
 The longer Alphabet tracking exists without a playground framework, the more it pushes toward:
+
 - Forced progression (batches locked)
 - Mastery criteria (arbitrary 70% threshold)
 - Parent pressure ("Why hasn't Kabir unlocked Batch 2?")
@@ -314,20 +331,23 @@ Proposed Mindset:
 
 ## Part 7: What Customer Research Says About Tracking
 
-### From Vikram (Data-Driven Father) 
+### From Vikram (Data-Driven Father)
 
 From [USER_PERSONAS.md](docs/USER_PERSONAS.md):
 
 > **Vikram's Expectation:**
+>
 > - "Can you show me quantitative data?"
 > - "I want CSV, trend lines"
 > - "Can I compare Kabir to peers?"
 
 **But context matters**: Vikram's son Kabir says:
+
 > **"My dad asks 'Did you learn something new?' And I have to say... 'I practiced letters.'**
 > **But I already KNOW letters! He looks disappointed."**
 
 **What Vikram REALLY needs**:
+
 - Proof Kabir is **developing physically**: Fine motor? Gross motor? Hand-eye coordination?
 - Proof he's **engaged**: Does he enjoy it? Is he trying new things?
 - Proof it's **not screen addiction**: Active interaction? Varied games? Good pacing?
@@ -343,10 +363,10 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 > Teachers need **activity logs, not grades**.
 > Reframe: "Activity Log" not "Progress Report"
 > Language: "Explored" not "Learned"
-> 
+>
 > Example parent communication:
 > "Kabir moved his body for 20 minutes today,
->  explored letter shapes, and enjoyed creating music."
+> explored letter shapes, and enjoyed creating music."
 
 ---
 
@@ -355,11 +375,13 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 ### Problem 1: Philosophy Contradiction
 
 **What We Say**:
+
 - "Play-first, child-directed, open playground"
 - "No curriculum"
 - "Kids choose what to explore"
 
 **What We Show**:
+
 - Alphabet: "0/26 Mastered" (looks like a curriculum)
 - Other 27 games: Just play, no tracking (looks like entertainment)
 
@@ -370,9 +392,11 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 ### Problem 2: Inconsistent Tracking Across Games
 
 **If** Alphabet tracking is good (progression, visual feedback, mastery):
+
 > Why don't Word Builder, Math Monsters, Chemistry Lab have it too?
 
 **If** Alphabet tracking is NOT good (contradicts vision):
+
 > Why is it there at all?
 
 **Current state**: Indefensible. Either it's a curriculum app (then all games need tracking) OR it's a playground app (then no games need mastery gates).
@@ -382,6 +406,7 @@ From [PERSONA_INTERVIEWS_INDEX.md](docs/PERSONA_INTERVIEWS_INDEX.md#summary-the-
 ### Problem 3: Parent Confusion
 
 **Vikram sees**:
+
 ```
 Alphabet: 0/26 Mastered
 Dashboard Plant: 40% height
@@ -391,6 +416,7 @@ Daily Time: 25 min
 **Vikram's Thought**: "Is Kabir actually progressing? The plant is pretty but what does it mean?"
 
 **What he should see** (aligned to vision):
+
 ```
 This Week's Activity
 ━━━━━━━━━━━━━━━━━━━━
@@ -410,11 +436,13 @@ Observations:
 ### Decision 1: Clarify the Model
 
 **We are NOT building a curriculum app.**
+
 - No gating by skill level
 - No forced progression
 - No mastery requirements
 
 **We ARE building an open playground.**
+
 - All games equally accessible
 - Child-directed choices
 - Parents see activity, not grades
@@ -424,11 +452,13 @@ Observations:
 ### Decision 2: Remove Alphabet Gating (Recommended)
 
 **Current (Contradicts Vision)**:
+
 ```
 Batch 1 → [Locked] → Batch 2 → [Locked] → Batch 3
 ```
 
 **Proposed (Aligns with Vision)**:
+
 ```
 [All Letters Accessible]
 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
@@ -436,6 +466,7 @@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 ```
 
 **LetterJourney becomes**:
+
 - Exploration tracker, not progression gate
 - "You've drawn with: A, C, E, G, M, P (6 unique letters)"
 - "Best drawing: G (92% accuracy)"
@@ -446,6 +477,7 @@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 ### Decision 3: Add Activity Logging for All Games
 
 **New Parent Dashboard**:
+
 ```
 This Week's Playtime
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -556,9 +588,10 @@ Mood & Energy:
 
 **Root Cause**: Alphabet was first game, got progression UI, and now feels like a curriculum app while others feel like entertainment
 
-**Recommended Fix**: 
+**Recommended Fix**:
+
 - Remove alphabet gating to align with vision
-- Add activity logging (not progress tracking) for all games  
+- Add activity logging (not progress tracking) for all games
 - Reframe parent communication from "grades" to "engagement"
 - Confirm this is a playground, not a curriculum
 

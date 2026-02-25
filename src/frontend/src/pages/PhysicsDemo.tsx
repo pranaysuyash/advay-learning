@@ -19,12 +19,14 @@ import {
   type GameState,
   type PhysicsBodies,
 } from '../games/colorSortLogic';
+import { useAudio } from '../utils/hooks/useAudio';
 
 export default function PhysicsDemo() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const physicsRef = useRef<PhysicsBodies | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const { playClick, playSuccess, playError, playLevelUp } = useAudio();
   
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [nextColor, setNextColor] = useState<string>(getRandomColor());
@@ -57,14 +59,17 @@ export default function PhysicsDemo() {
           events.forEach(event => {
             switch (event.type) {
               case 'correct':
+                playSuccess();
                 setFeedback('✓ Correct!');
                 setTimeout(() => setFeedback(null), 1000);
                 break;
               case 'wrong':
+                playError();
                 setFeedback('✗ Wrong bucket!');
                 setTimeout(() => setFeedback(null), 1000);
                 break;
               case 'levelup':
+                playLevelUp();
                 setFeedback(`Level ${event.level}!`);
                 setTimeout(() => setFeedback(null), 2000);
                 break;
@@ -160,6 +165,7 @@ export default function PhysicsDemo() {
   
   // Handle canvas click to drop ball
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    playClick();
     if (!canvasRef.current || !physicsRef.current) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
@@ -179,10 +185,11 @@ export default function PhysicsDemo() {
       ...prev,
       ballsDropped: prev.ballsDropped + 1,
     }));
-  }, [nextColor]);
+  }, [nextColor, playClick]);
   
   // Reset game
   const handleReset = () => {
+    playClick();
     if (physicsRef.current) {
       // Remove all balls
       physicsRef.current.balls.forEach(ball => {

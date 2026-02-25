@@ -242,10 +242,29 @@ The `tools/` directory contains reusable utilities for development and QA:
 
 - **Video Frame Analyzer** (`tools/video_frame_analyzer.html`) - Frame-by-frame video analysis for UX/QA testing
 - **Contrast Calculator** (`tools/contrast_calculator.py`) - WCAG contrast ratio validation
+- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync downloaded Kenney platformer packs into canonical frontend runtime path
 
 See [tools/README.md](../tools/README.md) for full documentation and usage examples.
 
 **When to add tools**: If you create a helpful utility (analyzer, converter, validator, test harness), save it to `tools/` with documentation instead of creating one-off scripts.
+
+## Kenney Asset Workflow
+
+When new Kenney packs are downloaded under `/Users/pranay/Projects/adhoc_resources`, sync them into the app runtime folder:
+
+```bash
+# From repo root
+tools/sync_kenney_platformer_assets.sh
+```
+
+Canonical platformer asset runtime path:
+
+- `src/frontend/public/assets/kenney/platformer`
+
+Note:
+
+- Keep this path as the source of truth for frontend game asset URLs.
+- Avoid creating new ad-hoc runtime paths when importing new packs.
 
 ---
 

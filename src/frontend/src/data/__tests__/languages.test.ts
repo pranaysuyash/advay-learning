@@ -6,7 +6,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { LANGUAGES, getLanguageByCode, getLanguageName, getAllLanguages } from '../languages';
+import {
+  LANGUAGES,
+  getLanguageByCode,
+  getLanguageName,
+  getAllLanguages,
+} from '../languages';
 import { SUPPORTED_LANGUAGES } from '../../i18n/config';
 
 describe('languages', () => {
@@ -122,7 +127,8 @@ describe('languages', () => {
     it('should maintain single source of truth: i18n/config.SUPPORTED_LANGUAGES', () => {
       // Verify that LANGUAGES is generated from SUPPORTED_LANGUAGES, not hardcoded
       const codesMismatch = LANGUAGES.some(
-        (lang) => !SUPPORTED_LANGUAGES.find((isoLang) => isoLang.code === lang.code)
+        (lang) =>
+          !SUPPORTED_LANGUAGES.find((isoLang) => isoLang.code === lang.code),
       );
       expect(codesMismatch).toBe(false);
     });

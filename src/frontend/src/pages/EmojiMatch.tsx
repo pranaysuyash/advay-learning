@@ -14,8 +14,8 @@ import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { useAudio } from '../utils/hooks/useAudio';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
 import { UIIcon } from '../components/ui/Icon';
 import { distanceBetweenPoints, isPointInCircle } from '../games/targetPracticeLogic';
@@ -89,8 +89,8 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const showDebug = Boolean((import.meta as any)?.env?.DEV);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
-  const { onGameComplete } = useGameDrops('emoji-match');
+  const { playPop, playError, playCelebration, playClick } = useAudio();
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('emoji-match');
 
   useEffect(() => { targetsRef.current = targets; }, [targets]);
   useEffect(() => { correctIdRef.current = correctId; }, [correctId]);
@@ -161,6 +161,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         setCelebrationMessage(null);
         if (levelRef.current >= MAX_LEVEL) {
           onGameComplete();
+          if (missCountRef.current === 0) {
+            triggerEasterEgg('egg-emotion-master');
+          }
           setGameCompleted(true);
           setIsPlaying(false);
         } else {
@@ -235,9 +238,9 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
     if (ttsEnabled) {
       void speak("Let's play Emoji Match! Show me your hand!");
     }
-    await playStart();
+    playClick();
 
-  }, [playStart, speak, ttsEnabled]);
+  }, [playClick, speak, ttsEnabled]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {

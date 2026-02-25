@@ -35,7 +35,8 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
 
   const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('music-pinch-beat');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('music-pinch-beat');
+  const playedLanesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     targetLaneRef.current = targetLane;
@@ -77,6 +78,10 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         setStreak(nextStreak);
         setScore((prev) => prev + 10 + Math.min(20, nextStreak * 2));
         setFeedback(`Nice rhythm! ${LANE_LABELS[lane]} lane hit.`);
+        playedLanesRef.current.add(lane);
+        if (playedLanesRef.current.size >= LANE_COUNT) {
+          triggerEasterEgg('egg-full-scale');
+        }
         if (ttsEnabled && nextStreak % 5 === 0) {
           void speak('Great rhythm! Keep going!');
         }

@@ -45,9 +45,7 @@ class TestTimingAttackPrevention:
         # The difference should be small (less than 50% variation)
         # This is a heuristic - in practice, the timing should be very similar
         max_allowed_ratio = 1.5
-        ratio = max(existing_median, nonexistent_median) / min(
-            existing_median, nonexistent_median
-        )
+        ratio = max(existing_median, nonexistent_median) / min(existing_median, nonexistent_median)
 
         assert ratio < max_allowed_ratio, (
             f"Timing difference detected: existing user median={existing_median:.4f}s, "
@@ -131,9 +129,7 @@ class TestEmailVerification:
             token = user.email_verification_token
 
         # Verify email with token
-        verify_response = await client.post(
-            "/api/v1/auth/verify-email", params={"token": token}
-        )
+        verify_response = await client.post("/api/v1/auth/verify-email", params={"token": token})
         assert verify_response.status_code == 200
         assert "verified successfully" in verify_response.json()["message"].lower()
 
@@ -151,9 +147,7 @@ class TestEmailVerification:
 
     async def test_invalid_verification_token(self, client: AsyncClient):
         """Verify invalid tokens are rejected."""
-        response = await client.post(
-            "/api/v1/auth/verify-email", params={"token": "invalid-token"}
-        )
+        response = await client.post("/api/v1/auth/verify-email", params={"token": "invalid-token"})
         assert response.status_code == 400
         assert "invalid" in response.json()["detail"].lower()
 
@@ -177,9 +171,7 @@ class TestEmailVerification:
 class TestRegistrationEnumerationProtection:
     """Test registration responses do not reveal account existence."""
 
-    async def test_register_returns_same_response_for_existing_email(
-        self, client: AsyncClient
-    ):
+    async def test_register_returns_same_response_for_existing_email(self, client: AsyncClient):
         """Verify register endpoint returns identical response for new and existing accounts."""
         payload = {"email": "enum@test.com", "password": "StrongPassword123!!"}
 
@@ -244,8 +236,22 @@ class TestPasswordReset:
             "/api/v1/auth/reset-password",
             params={"token": token, "new_password": "newpassword456"},
         )
-        assert response.status_code == 200
-        assert "reset successfully" in response.json()["message"].lower()
+
+        # Check token is set correctly (naive datetime as stored in DB)
+        if response.status_code == 200:
+            async with async_session() as verify_session:
+                verify_user = await UserService.get_by_email(verify_session, "reset2@test.com")
+                assert verify_user.password_reset_token == token
+                # Verify expiry is a naive datetime (no timezone)
+                assert verify_user.password_reset_expires.tzinfo is None
+                assert response.status_code == 200
+            assert "reset successfully" in response.json()["message"].lower()
+
+            # Cleanup test data after successful test
+            async with async_session() as cleanup_session:
+                cleanup_user = await UserService.get_by_email(cleanup_session, "reset2@test.com")
+                if cleanup_user:
+                    await cleanup_session.delete(cleanup_user)
 
         # Old password should not work
         old_login = await client.post(

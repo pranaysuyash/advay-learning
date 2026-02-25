@@ -7,6 +7,16 @@ export interface Profile {
   age?: number;
   preferred_language: string;
   created_at: string;
+  updated_at: string;
+  parent_id: string;
+  settings?: {
+    avatar_config?: {
+      type: 'platformer' | 'animal' | 'creature' | 'photo';
+      character: string;
+      animation?: string;
+    };
+    [key: string]: unknown;
+  };
 }
 
 interface ProfileState {
@@ -18,7 +28,7 @@ interface ProfileState {
   // Actions
   fetchProfiles: () => Promise<void>;
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) => Promise<void>;
-  updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string }>) => Promise<void>;
+  updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string; settings?: Record<string, unknown> }>) => Promise<void>;
   setCurrentProfile: (profile: Profile | null) => void;
   clearError: () => void;
 }

@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
@@ -38,6 +38,9 @@ class Progress(Base):
     idempotency_key: Mapped[str | None] = mapped_column(
         String, nullable=True, index=True
     )
+
+    # Game completion tracking (for recommendation algorithm)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     completed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

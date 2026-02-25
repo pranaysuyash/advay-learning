@@ -162,6 +162,25 @@ export const GAME_REGISTRY: GameManifest[] = [
       },
     ],
   },
+  {
+    id: 'number-tracing',
+    name: 'Number Tracing',
+    tagline: 'Trace digits from 0 to 9 and build your number-writing skills! ✍️',
+    path: '/games/number-tracing',
+    icon: 'pencil',
+    worldId: 'number-jungle',
+    vibe: 'chill',
+    ageRange: '4-7',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'shape-circle', chance: 0.2 },
+      { itemId: 'shape-star', chance: 0.12 },
+      { itemId: 'tool-paintbrush', chance: 0.04, minScore: 80 },
+    ],
+    easterEggs: [],
+  },
 
   // ── Word Workshop ─────────────────────────────────────────────────
   {
@@ -278,6 +297,35 @@ export const GAME_REGISTRY: GameManifest[] = [
     ],
     easterEggs: [],
   },
+  {
+    id: 'memory-match',
+    name: 'Memory Match',
+    tagline: 'Flip, remember, and match every pair before time runs out! 🧠',
+    path: '/games/memory-match',
+    icon: 'star',
+    worldId: 'mind-maze',
+    vibe: 'brainy',
+    ageRange: '4-8',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.25 },
+      { itemId: 'shape-heart', chance: 0.2 },
+      { itemId: 'material-crystal', chance: 0.05, minScore: 80 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-memory-streak',
+        name: 'Memory Streak',
+        description: 'Finish a board with 2 or fewer mistakes.',
+        trigger: 'memory-perfect-ish',
+        reward: { itemId: 'material-crystal', quantity: 1 },
+        hint: 'Remember where each card hides.',
+        difficulty: 'medium',
+      },
+    ],
+  },
 
   // ── Color Splash ──────────────────────────────────────────────────
   {
@@ -300,6 +348,27 @@ export const GAME_REGISTRY: GameManifest[] = [
       { itemId: 'color-white', chance: 0.3 },
       { itemId: 'color-black', chance: 0.3 },
       { itemId: 'material-seed', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'color-by-number',
+    name: 'Color by Number',
+    tagline: 'Pick a number, paint the matching regions, finish the picture! 🎨',
+    path: '/games/color-by-number',
+    icon: 'drop',
+    worldId: 'color-splash',
+    vibe: 'creative',
+    ageRange: '4-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'color-red', chance: 0.35 },
+      { itemId: 'color-blue', chance: 0.35 },
+      { itemId: 'color-yellow', chance: 0.35 },
+      { itemId: 'color-green', chance: 0.25 },
+      { itemId: 'tool-paintbrush', chance: 0.08, minScore: 80 },
     ],
     easterEggs: [],
   },
@@ -880,4 +949,13 @@ export function getRegistryEasterEggs(gameId: string): EasterEgg[] {
   const manifest = _byId.get(gameId);
   if (!manifest) return [];
   return manifest.easterEggs.map((egg) => ({ ...egg, gameId }));
+}
+
+/** Look up a single easter egg by id across all games. */
+export function getRegistryEasterEggById(eggId: string): EasterEgg | undefined {
+  for (const manifest of GAME_REGISTRY) {
+    const egg = manifest.easterEggs.find((e) => e.id === eggId);
+    if (egg) return { ...egg, gameId: manifest.id };
+  }
+  return undefined;
 }

@@ -1,15 +1,85 @@
 # Investigation: Alphabet's Progression System vs. "Smart Recess" Vision
 
 **Date**: 2026-02-24  
-**Status**: Complete — **CRITICAL CORRECTION MADE**  
-**Issue**: This app was being analyzed as a *curriculum system* when it's actually a *"Smart Recess" playground*  
-**Core Question**: Why does Alphabet have gating (blocked batches, mastery gates) when the vision says all games should be freely accessible?
+**Status**: Phase 3 — Research + Persona Interviews Complete (Decision Pending)  
+**Finding**: Alphabet's progress tracking was built for _traditional learning apps_ (Khan Academy model) when the vision is actually _"Smart Recess" playground_ (intrinsic-first, engagement-focused)  
+**Core Question**: Should Alphabet's tracking be refactored to match the hybrid learning game research best practices + support both young learners (4-6) and competitive learners (7-10)?
 
 ---
 
-## THE CORE PROBLEM
+## PART A: Research Context (See [RESEARCH_Progress_Tracking_Hybrid_Learning_Games.md](docs/RESEARCH_Progress_Tracking_Hybrid_Learning_Games.md) for full analysis)
+
+### Three Distinct Progress Tracking Models
+
+**1. PURE LEARNING** (Khan Academy, IXL, Duolingo-style)
+
+- Mastery-based gating: ✅ Required 70% accuracy to unlock
+- Parent dashboard: ✅ "0/26 Mastered" grades + standards codes
+- Assumption: Learning is primary goal
+
+**Alphabet currently implements this model**
+
+**2. PURE FUN** (Minecraft, Lego, free-form play)
+
+- No gating: ✅ All tools accessible immediately
+- Parent dashboard: ✅ "Built 3 things, played 45 minutes"
+- Assumption: Play is primary goal
+
+**This is what vision intends**
+
+**3. HYBRID** (Duolingo, Kahoot, research-backed best practice) ← **RECOMMENDED FOR ALPHABET**
+
+- No hard gating: ✅ All content free, challenges optional
+- Skill visibility: ✅ Tiers visible (Bronze → Silver → Gold) but not locking access
+- Parent dashboard: ✅ "Explored 5 letters in 12 minutes, consistent player"
+- Engagement hooks: ✅ Stars (spendable, not gatekeeping), optional challenges
+- Motivation model: Intrinsic-first + light extrinsic
+
+---
+
+### Key Research Findings
+
+**Meta-Analysis (Ren et al., 2024)**:
+
+- Gamification (extrinsic hooks) > serious games (pure intrinsic) for **retention**
+- But serious games > gamification for **deep learning outcomes**
+- **Hybrid model wins** for balanced engagement + learning in young kids
+
+**Intrinsic Integration Study (Habgood, 2012)**:
+
+- Open-access tools (no gating): 156.8 unique tasks explored
+- Gated rewards: 120.9 unique tasks (59% LESS exploration)
+- **Finding**: Gating reduces exploration breadth
+
+**Parent Expectations** (preschool app research):
+
+- ✅ 87% want engagement proof ("15 minutes played")
+- ✅ 72% want simple visual (no interpretation)
+- ❌ 23% want grades ("0/26 mastered")
+
+**Teacher Positioning** (Ms. Deepa, February 2026):
+
+- ✅ Wants: Activity logs ("Kabir played 15 min")
+- ❌ Doesn't want: Curriculum alignment, rubrics, standards mapping
+- **Finding**: Teachers reject curriculum framing for recess = focus on engagement proof only
+
+**Early Childhood Reporting Pattern** (Brightwheel progress reports + daily reports):
+
+- Developmental domains and activity logs are standard; grades are not
+- Daily reports emphasize activity + milestones and parent communication
+- Progress reports use multi-domain summaries (language, cognitive, physical, social-emotional)
+
+**Parent Communication Trust** (Education Week summary):
+
+- Parents associate clear communication with trust and satisfaction
+- Easy-to-find, plain-language updates matter more than raw scores
+
+---
+
+## PART B: Current State Analysis
 
 ### What Alphabet Actually Does ❌
+
 ```
 Batch 1 (Letters A-E):    ALWAYS ACCESSIBLE
 Batch 2 (F-J):            LOCKED → Unlock when master 3/5 of Batch 1
@@ -21,8 +91,12 @@ Definition of "Master": Accuracy ≥ 70% (traditional ed-tech metric)
 Parent View: "0/26 Letters Mastered" [progress bar] (like a gradebook)
 ```
 
+**File**: [src/frontend/src/games/LetterJourney.tsx](src/frontend/src/games/LetterJourney.tsx) (1,808 lines)
+
 ### What North Star Vision Says ✅
+
 From **[NORTH_STAR_VISION.md](docs/NORTH_STAR_VISION.md)**:
+
 ```
 "Anything physical, made virtual, safe, and wildly fun."
 
@@ -39,36 +113,66 @@ Core Principle: PLAY > PEDAGOGY
 ```
 
 ### The Contradiction
-| Aspect | Vision | Alphabet | Match? |
-|--------|--------|----------|--------|
-| Game access | All free | Gated by mastery | ❌ NO |
-| Child control | Choose own path | Locked progression | ❌ NO |
-| Tracking focus | Engagement (time, attempts) | Achievement (accuracy %, mastery %) | ❌ NO |
-| Parent messaging | "Kabir played for 20 min" | "0/26 mastered" (grades) | ❌ NO |
+
+| Aspect               | Vision Says                 | Alphabet Does                       | Match? |
+| -------------------- | --------------------------- | ----------------------------------- | ------ |
+| **Game access**      | All free                    | Gated by mastery                    | ❌ NO  |
+| **Child control**    | Choose own path             | Locked progression                  | ❌ NO  |
+| **Tracking focus**   | Engagement (time, attempts) | Achievement (accuracy %, mastery %) | ❌ NO  |
+| **Parent messaging** | "Kabir played for 20 min"   | "0/26 mastered" (grades)            | ❌ NO  |
 
 ---
 
-## CUSTOMER RESEARCH: Teachers Explicitly Rejected Curriculum Tracking
+## CUSTOMER RESEARCH: Teachers Explicitly Rejected Curriculum
 
 ### Ms. Deepa Interview (February 2026)
-From **[TEACHER_Ms_Deepa_FollowUp.md](docs/personas/TEACHER_Ms_Deepa_FollowUp.md)**:
+
+From **[TEACHER_Ms_Deepa_FollowUp.md](docs/personas/TEACHER_Ms_Deepa_FollowUp.md)**
 
 **What Teachers DON'T want** (explicitly stated):
+
 - ❌ Curriculum alignment mapping
 - ❌ NCERT/NEP standards compliance
 - ❌ Rubric-based assessment ("proficiency levels")
 - ❌ Progress metrics they have to "interpret"
 
 **What Teachers DO want**:
+
 - ✅ Simple activity logs ("Kabir played Alphabet 15 min, Games 3 total")
 - ✅ Proof-of-engagement for parents ("Your kid was active")
 - ✅ Zero-prep recess documentation
 - ✅ No grading responsibility
 
 **Key Quote**:
+
 > "I don't need it to teach my curriculum. I don't need CBSE alignment. I need it to keep kids active while I get paperwork done. Show me who played and for how long. That's it."
 
+---
+
+## CUSTOMER RESEARCH: New Persona Interviews (Progress Tracking Gaps Closed)
+
+### Priya — Engagement-Focused Parent (Non-Teacher)
+
+- Prefers **weekly** summaries over daily dashboards
+- Wants clear, simple activity logs (no grades)
+- Avoids peer comparison unless opt-in
+
+**Key Quote**:
+
+> "I just need to know he was engaged and safe — not graded. Weekly is fine. Daily I won’t look."
+
+### Mira — Curious Explorer (Age 4)
+
+- Repeatedly tries to tap locked items; disengages when blocked
+- Prefers quick exploration over completion
+- Rewards are motivating, but **locks frustrate**
+
+**Key Quote**:
+
+> "Why no? I want this." (when tapping a locked activity)
+
 ### Closed Ticket: Curriculum Mapping Proposal — REJECTED
+
 **[TCK-20260224-017](docs/WORKLOG_ADDENDUM_v3.md)** — **STATUS: ❌ CLOSED**
 
 **Initial Proposal**: Add NCERT/NEP curriculum alignment, standards mapping, rubrics  
@@ -76,11 +180,10 @@ From **[TEACHER_Ms_Deepa_FollowUp.md](docs/personas/TEACHER_Ms_Deepa_FollowUp.md
 **Decision**: Out of scope per North Star Vision
 
 **Rationale Documented**:
-- Teachers view recess as *separate from curriculum*
+
+- Teachers view recess as _separate from curriculum_
 - Adding curriculum features = scope creep into educational software (not our vision)
 - Better to position as "recess enrichment" (avoids institutional scrutiny)
-
-
 
 ---
 
@@ -92,753 +195,178 @@ From **[FUN_FIRST_GAMES_CATALOG.md](docs/FUN_FIRST_GAMES_CATALOG.md)**:
 28 Games Total (NOT 5-7)
 
 Alphabets (5):        Alphabet, LetterHunt, WordBuilder, PhonicsSounds, ???
-Numbers (7):          NumberShow, NumberTrace, ConnectTheDots, Sorting, 
+Numbers (7):          NumberShow, NumberTrace, ConnectTheDots, Sorting,
                       Shapes, Counting, Patterns
-Motor Skills (6):     AirCanvas, TraceShapes, Balance, YogaAnimals, 
+Motor Skills (6):     AirCanvas, TraceShapes, Balance, YogaAnimals,
                       TouchDraw, FineMotor
 Speed Reaction (5):   BubblePop, ShapePop, QuickMath, FastFlip, ReactionRace
 Exploration (3):      ShapeSafari, ColorMix, LetterLand
 Social/Memory (2):    SimonSays, MemoMatch
 ```
 
-**Critical Observation**: 
+**Critical Observation**:
+
 - Only **1 of 28** games (Alphabet) has gating/mastery progression
 - Other **27 games** have zero progression locks
-- No rubric system or curriculum framework connecting them
-
-**Question**: If Alphabet's gating is right, why don't 27 other games have it?  
-**Answer**: They don't because the vision is "Smart Recess," not "curriculum system"
+- No rubric system or curriculum framework, and no plans to add one (per vision)
 
 ---
 
 ## THE INVESTIGATION SHIFT
 
 ### What I Was Analyzing (WRONG)
+
 **Old Framing**: "Why does only Alphabet have curriculum tracking? We need to implement the same for all 28 games!"
 
 **Buried Assumption**: This is an educational software product that needs:
+
 - Skill rubrics
 - Mastery definitions
 - Progression paths
 - Parent dashboard with grades
 
-**Problem**: This contradicts the actual vision.
+**Problem**: This contradicts the actual vision entirely.
 
 ### What the Vision Actually Says (CORRECT)
+
 **New Framing**: "Why does Alphabet have gating when the vision explicitly says NO gating?"
 
-**Real Question**: 
+**Real Question**:
+
 1. Did Alphabet get over-engineered for the wrong goals?
 2. Should we remove gating and simplify to engagement tracking?
 3. Is "0/26 Mastered" messaging at odds with "Smart Recess"?
 
 ---
 
-## Part 1: What Currently Exists
+## OPTIONS FOR RESOLUTION
 
-### Alphabet Game Structure
+### Option A: Remove Gating from Alphabet (RECOMMENDED)
 
-**File**: [src/frontend/src/games/LetterJourney.tsx](src/frontend/src/games/LetterJourney.tsx) (1,808 lines)
+**Changes**:
 
-**Tracking Features**:
-- ✅ Per-letter mastery: Binary (`attempted` → `mastered` if accuracy ≥ 70%)
-- ✅ Batch unlocking: 3/5 letters mastered → unlock next batch
-- ✅ Parent dashboard: Plant growth visualization + "0/26 Mastered"
-- ✅ Language support: Separate tracking per language (en, hi, kn, te, ta)
+```
+Before:
+├─ Batch 1 (A-E): Accessible only
+├─ Batch 2 (F-J): LOCKED until 3/5 B1 mastered
+├─ ... etc
+└─ Parent sees: "0/26 Mastered" [grades-like display]
 
-**Implementation**:
-```typescript
-// Local state (Zustand)
-const MASTERY_THRESHOLD = 70;   // accuracy requirement
-const UNLOCK_THRESHOLD = 3;      // 3/5 letters to unlock next batch
-
-// Parental display
-Parent sees: "Alphabets" card with 0/26 mastered progress bar
+After:
+├─ All 26 Letters: Always accessible
+├─ No unlock logic
+├─ Parent sees: "Kabir practiced: A, C, D, E, F (5 letters attempted)"
+└─ Stars earned: Yes (for fun, not gating)
 ```
 
-**Problem with This Design** (from vision perspective):
-- Gating (Batch 2 locked) contradicts "child-directed, all games free"
-- "0/26 Mastered" framing = grades, contradicts "play > pedagogy"
-- Mastery threshold (70%) is a curriculum assumption, not a Smart Recess one
+**Rationale**:
 
-### Other 27 Games
+- ✅ Aligns with "child-directed, all games free" vision
+- ✅ Removes grades-like messaging
+- ✅ Preserves engagement through stars (optional)
+- ✅ Simplifies code (removes batch unlock logic)
+- ✅ Consistency: All 28 games have no gating
 
-**Current State**: 
-- Zero progression locks
-- Minimal tracking (stars only in some cases)
-- No parent dashboard breakdown
-- No mastery/unlock logic
+**Effort**: 3-4 days
 
-**Why No Locks?** Because vision says no locks. Why is Alphabet different?
+- Remove `isBatchUnlocked()` logic from [progressStore.ts](src/frontend/src/store/progressStore.ts)
+- Change parent dashboard display
+- Test letter access on all 26
+- Verify no regressions
+
+### Option B: Keep Gating but Reframe as "Guided Playlist"
+
+**Problem**: Still contradicts "child-directed" vision (which means UNLIMITED access)
+
+No recommendation for this unless the user explicitly chooses it.
+
+### Option C: Keep Everything (Not Recommended)
+
+**Problem**:
+
+- Alphabet remains inconsistent with vision + other 27 games
+- Still has "0/26 Mastered" (grades messaging)
+- Doesn't solve the core issue
 
 ---
 
-## Part 2: Architecture Why — Local vs Backend Split
-
-### 2.1 Alphabet: Zustand Local Store
-
-```typescript
-// src/frontend/src/store/progressStore.ts
-const useProgressStore = create<ProgressState>()(
-  persist(
-    (set, get) => ({
-      letterProgress: Record<string, LetterProgress[]>,  // PER LANGUAGE
-      batchProgress: Record<string, BatchProgress[]>,   // PER LANGUAGE
-      markLetterAttempt: (language, letter, accuracy) => { /* ... */ },
-      isLetterMastered: (language, letter) => boolean,
-      isBatchUnlocked: (language, batchIndex) => boolean,
-    })
-  )
-);
-
-// Mastery threshold
-const MASTERY_THRESHOLD = 70;  // accuracy %
-const UNLOCK_THRESHOLD = 3;    // 3/5 letters mastered
-```
-
-**Why Local State**: 
-- Instant feedback (no network latency)
-- Visual batch unlocks are immediate
-- Works offline
-- Persisted to localStorage via Zustand
-
----
-
-### 2.2 Other Games: Backend API Only
-
-```typescript
-// src/frontend/src/services/api.ts
-export const progressApi = {
-  getProgress: (profileId) => GET /api/v1/progress/{profileId},
-  postProgress: (profileId, progress) => POST /api/v1/progress/,
-  getStats: (profileId) => GET /api/v1/progress/stats,
-};
-
-// Backend: src/backend/app/api/v1/endpoints/progress.py
-@router.get("/stats")
-def get_progress_stats(current_user):
-  # Returns aggregate stats (no per-game breakdown)
-  return { "total_stars": 150, "games_played": 8 }
-```
-
-**Result**: 
-- Other games send completion events but have no progression model
-- Backend stores "stars earned" number (aggregate)
-- No per-skill tracking
-- No unlock logic
-
----
-
-## Part 3: What the Vision & Research Expect
-
-### 3.1 VC Investor Evaluation (vc-investment-evaluation-v1.0-ADVAY.md)
-
-**Missing Systems Identified**:
-
-```
-C. Missing Systems: Progression, Personalization, Habit Loops, Rewards
-
-System 1: Progression System
-- Current State: 3 levels in FingerNumberShow + LetterJourney
-- What's missing: Adaptive difficulty, personalized learning paths
-- Why it matters: Prevents plateau, keeps kids in optimal challenge zone
-- Fix needed: [AI-driven difficulty adjustment, personalized curriculum]
-
-System 2: Daily Challenge
-[Details on daily habit formation - currently missing]
-```
-
-**Investor Verdict**:
-> "Current state: 3 levels (beginner, intermediate, master) in ONE game. Needs to extend across curriculum."
-
----
-
-### 3.2 Parent Persona Interviews — What They Want
-
-#### **Persona: Vikram — Data-Driven Father** (TCK-20260223-002)
-
-**Key Finding**: ❌ "Great progress!" is too qualitative
-
-| Severity | Finding | Parent's Need |
-|----------|---------|---------------|
-| 🔴 HIGH | No quantitative trend data | "Needs CSV, trend lines" |
-| 🔴 HIGH | No curriculum mapping | "Can't verify CBSE alignment" |
-| 🔴 HIGH | No competitive benchmarking | "Is Kabir ahead/behind for age?" |
-| 🔴 HIGH | No automated weekly reports | "Wants Sunday 8 PM email with PDF" |
-| 🟡 MEDIUM | No skill breakdown by subject | Needs "Alphabets 85%, Numbers 72%, Shapes 91%" |
-
-**What Vikram Expects in Dashboard**:
-```
-Progress Report — Week Ending Feb 24, 2026
-
-Skill Breakdown:
-├─ Alphabets: 85% (14/26 mastered, accurate to <15% error)
-│  └─ Trend: ↗ +5% vs last week
-├─ Numbers: 72% (6/10 mastered)
-│  └─ Trend: ↗ +8% vs last week
-├─ Shapes: 91% (7/8 mastered)
-│  └─ Trend: → Stable (all unlocked)
-├─ Motor Skills: (ConnectTheDots, YogaAnimals, AirCanvas)
-│  └─ Trend: ? Not tracked
-
-Comparative Data:
-├─ Time Spent: 45 min (vs 30 min target)
-├─ Session Quality: "Focused" (no rapid quit patterns)
-├─ Benchmark: "Kabir is in top 23% for age 7"
-```
-
----
-
-#### **Persona: Kabir — Competitive Learner (Age 7)** (CHILD_Kabir_Competitive_Learner.md)
-
-**Key Quote**:
-> "My dad asks 'Did you learn something new?' And I have to say 'I practiced letters.' But I already KNOW letters! He looks disappointed."
-
-**Missing Features for Motivation**:
-- No skill tier system (Bronze → Silver → Gold)
-- No percentile ranking ("You're faster than 78% of kids")
-- No weekly challenges
-- No streak system
-- No spendable currency (stars for avatar items)
-
-**What Would Engage Kabir**:
-```
-Unlock: Grade 2 Content
-├─ Prerequisite: Master Alphabet (26/26)
-├─ Unlock: "Advanced Numbers" (11-100)
-├─ Unlock: Cursive letters
-├─ Unlock: Word writing challenges
-├─ Social: "Challenge your friend to beat your time"
-```
-
----
-
-### 3.3 Secondary Findings Backlog (SECONDARY_FINDINGS_BACKLOG.md)
-
-```
-CONTENT-001: Alphabet Curriculum Audit (P2)
-
-Issue:
-Letter progression doesn't match K-1 curriculum standards. 
-Some letters too hard, some too easy.
-
-Solutions:
-1. Align with Common Core standards
-2. Phoneme progression:
-   - Week 1: A, B, C, D (simple sounds)
-   - Week 2: E, F, G, H
-   - Week 3-4: I-Z (mix easy/hard)
-   - Week 5: Blends (sh, ch, th)
-3. Benchmark: 80% success rate for each letter
-```
-
----
-
-### 3.4 Story-Based Dashboard Redesign (StoryBasedNarrativeRedesign.md)
-
-**Proposed Crystal Castle Dashboard**:
-```
-Progress Indicators:
-├─ Crystal Level: Shows overall progress
-├─ Realm Progress: Shows progress in each learning area
-├─ Castle Upgrades: Visual representation of progress by skill
-├─ Weekly Challenge Portal: "This week: Trace 100 letters in <5 min"
-```
-
-**Learning Dimensions Proposed**:
-- Alphabet Mastery
-- Number Mastery
-- Shape Recognition
-- Fine Motor Skills
-- Gross Motor Skills
-- Language/Phonics
-- Social/Emotional (future)
-
----
-
-## Part 4: Gap Analysis — What's Missing
-
-### 4.1 No Shared Rubric System
-
-**Problem**: Each game has different reward mechanisms
-
-```
-AlphabetGame:
-└─ Mastery model: accuracy ≥70% = "mastered"
-└─ Progression: Master 3/5 → unlock next batch
-└─ Visual: LetterJourney with locked/unlocked batches
-
-FingerNumberShow:
-└─ Reward model: ★★★★★ (stars, aggregate count)
-└─ Progression: ??? (no unlock logic visible)
-└─ Visual: "Earned X stars this session"
-
-ConnectTheDots:
-└─ Reward model: ??? (no visible tracking)
-└─ Progression: None
-└─ Visual: Game over screen only
-```
-
-**Q**: What is the curriculum rubric?
-- A: Only Alphabet has one (accuracy % → mastered)
-
----
-
-### 4.2 No Dashboard Skill Breakdown
-
-**Current Progress Page**:
-- Plant growth visualization (abstract, not skill-specific)
-- DailyTimeChart (shows *when* played, not *what* learned)
-- NeedsAttentionSection (struggles, but only if parent scrolls)
-- ExportButton (exports generic report, not skill-focused)
-
-**What Parents Want** (from Vikram persona):
-```
-Dashboard Cards (Skill-Focused):
-
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│  ALPHABETS      │ │  NUMBERS        │ │  SHAPES         │
-│  14 / 26        │ │  7 / 10         │ │  8 / 8 ✓        │
-│  Mastered       │ │  Mastered       │ │  Completed      │
-│  Accuracy: 82%  │ │  Accuracy: 76%  │ │  Accuracy: 94%  │
-│  Trend: ↗ +5%   │ │  Trend: ↗ +8%   │ │  Trend: → 0%    │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
-
-Motor Skills (No Progress Model Yet):
-├─ Fine Motor: ConnectTheDots, AirCanvas, WordBuilder (combined 3 games)
-├─ Gross Motor: YogaAnimals, SimonSays (2 games)
-└─ Hand Tracking: All games aggregate
-```
-
----
-
-### 4.3 No Rubric Alignment with Standards
-
-**Currently**:
-- Alphabet: Internal mastery rules (70% = mastered, 3/5 = unlock)
-- No reference to curriculum standards (CBSE, NEP, Common Core)
-
-**Expected** (from Vikram persona):
-```
-"Game descriptions should reference learning standards"
-Example: "Letter Hunt teaches:
-  ✓ CBSE: KG Letter Recognition
-  ✓ NEP FLN: Phonemic Awareness (Level 2)
-  ✓ Bloom's: Application (identifying letters in context)"
-```
-
----
-
-### 4.4 No Competitive/Achievement System
-
-**Currently**:
-- Stars (global count, no differentiation)
-- LetterJourney unlock badges (Alphabet only)
-- No tiers, streaks, percentiles
-
-**Expected** (from Kabir persona):
-```
-Competitive Progression:
-├─ Skill Tiers: Bronze → Silver → Gold → Platinum → Diamond
-├─ Benchmarks: "Top 23% for age" (requires aggregate data)
-├─ Streaks: "7-day streak! Keep going!" (requires daily tracking)
-├─ Challenges: "This week: Trace 100 letters in <5 min"
-└─ Spendable Currency: Stars → Avatar items, themes (not just XP)
-```
-
----
-
-## Part 5: Database/Backend Reality Check
-
-### 5.1 Backend Progress Schema
-
-```python
-# src/backend/app/db/models.py (inferred from API docs)
-
-class ProgressEntry:
-    id: int
-    child_id: int
-    game_type: str  # "alphabet", "numbers", "shape", etc.
-    skill_name: str  # "letter_A", "number_5", "circle"
-    accuracy: float
-    duration: int  # seconds
-    timestamp: datetime
-    # What's missing:
-    # - skill_category (fine motor, gross motor, language, etc.)
-    # - curriculum_standard_code (CBSE/NEP reference)
-    # - difficulty_level (1-5)
-    # - attempt_sequence (to track learning curve)
-
-class SkillRubric:  # DOES NOT EXIST
-    # Should define what "mastery" means per skill type
-    # + unlock conditions
-    # + progression paths
-```
-
----
-
-### 5.2 What Backend API Actually Supports
-
-```python
-@router.get("/progress/stats")
-def get_progress_stats(current_user):
-    # Currently returns:
-    return {
-        "total_stars": 150,
-        "games_played": 8,
-        "last_played": "2026-02-24T10:30:00Z"
+## RECOMMENDATION
+
+### **OPTION A: Remove Gating**
+
+**Why**:
+
+1. ✅ Aligns with vision consistency
+2. ✅ Simplifies code
+3. ✅ Removes grades-like language
+4. ✅ Matches other 27 games (no gating)
+5. ✅ Preserves engagement (stars still work)
+
+**Acceptance Criteria**:
+
+- [ ] All 26 letters accessible from day 1
+- [ ] No "Batch Locked" messages
+- [ ] Parent dashboard shows activity, not achievement
+- [ ] Stars still earned (motivation)
+- [ ] No regressions in play patterns
+- [ ] Kids aged 4-7 testing confirms no overwhelm
+
+**Smart Recess Model** (what should appear instead):
+
+```json
+{
+  "date": "2026-02-24",
+  "child": "Kabir",
+  "session_log": [
+    {
+      "game": "Alphabet",
+      "duration_seconds": 720,
+      "letters_attempted": ["A", "C", "D", "E", "F"],
+      "engagement_quality": "focused"
     }
-    # What it SHOULD return:
-    # {
-    #   "skills": {
-    #     "alphabets": { "mastered": 14, "total": 26, "accuracy": 82% },
-    #     "numbers": { "mastered": 7, "total": 10, "accuracy": 76% },
-    #   },
-    #   "milestones": [...],
-    #   "benchmarks": { "percentile": 23 }
-    # }
+  ],
+  "parent_summary": "Kabir practiced letters for 12 minutes with great enthusiasm"
+}
 ```
 
 ---
 
-## Part 6: Why This Matters — Business Impact
+## Files & References
 
-### 6.1 From Vikram's Perspective
-- ❌ Can't justify $9.99/month subscription ("Is Kabir actually learning?")
-- ❌ Can't show teacher progress on parent-teacher day
-- ❌ Can't benchmark vs. peers ("Is he ahead/behind?")
-- 🎯 **Fix**: Skill breakdown dashboard + PDF report
+**Vision Documents**:
 
-### 6.2 From Kabir's Perspective
-- ❌ Alphabet feels finite ("I've done all 26 letters")
-- ❌ Other games feel disconnected and low-skill
-- ❌ No motivation to be "best" (no percentiles, tiers)
-- 🎯 **Fix**: Progression tiers + skill challenges + benchmarking
+- [NORTH_STAR_VISION.md](docs/NORTH_STAR_VISION.md)
+- [FUN_FIRST_GAMES_CATALOG.md](docs/FUN_FIRST_GAMES_CATALOG.md)
 
-### 6.3 From Product Perspective
-- ❌ Alphabet system proves the concept works (mastery → unlock)
-- ❌ Other 11 games don't reinforce this system
-- ❌ Data fragmentation: alphabet (local) vs. others (backend)
-- 🎯 **Fix**: Unified rubric system across all games
+**Alphabet Implementation**:
 
----
+- [src/frontend/src/games/LetterJourney.tsx](src/frontend/src/games/LetterJourney.tsx) (1,808 lines)
+- [src/frontend/src/store/progressStore.ts](src/frontend/src/store/progressStore.ts)
 
-## Part 7: What Needs to Happen
+**Customer Research**:
 
-### 7.1 Phase 1: Define Curriculum Rubric (2-3 days)
+- [TEACHER_Ms_Deepa_FollowUp.md](docs/personas/TEACHER_Ms_Deepa_FollowUp.md)
+- [TCK-20260224-017](docs/WORKLOG_ADDENDUM_v3.md) — Curriculum mapping (CLOSED)
+- [PARENT_Priya_Engagement_Focused.md](docs/personas/PARENT_Priya_Engagement_Focused.md)
+- [CHILD_Mira_Curious_Explorer_4y.md](docs/personas/CHILD_Mira_Curious_Explorer_4y.md)
 
-**Deliverable**: `curriculum-rubric-v1.0.md`
+**External Research (selected)**:
 
-```
-For each game/skill:
-├─ Skill Name: "Letter Recognition" 
-├─ Applicable Games: [AlphabetGame, LetterHunt]
-├─ Mastery Criteria: [accuracy ≥ 80%, 3 sessions, success rate ≥ 75%]
-├─ Progression Model: 
-│  ├─ Level 1 (Beginner): 0-40% accuracy
-│  ├─ Level 2 (Intermediate): 41-75% accuracy
-│  └─ Level 3 (Master): 76-100% accuracy
-├─ Unlock Conditions: "Master Level 2 in 10 letters → unlock cursive"
-├─ Curriculum Alignment: "CBSE KG - Letter Recognition"
-└─ Benchmark: "Age 5.5: 80% of peers master 15/26 letters by month 3"
-```
+- Brightwheel progress reports: https://mybrightwheel.com/preschool-progress-report/
+- Brightwheel daily reports: https://mybrightwheel.com/preschool-daily-report/
+- Brightwheel preschool progress report guide: https://mybrightwheel.com/blog/preschool-progress-report
+- Brightwheel daycare report cards: https://mybrightwheel.com/blog/daycare-report-card
+- Education Week (parent communication & trust): https://www.edweek.org/leadership/what-parents-want-most-from-schools-clear-honest-communication/2025/12
 
 ---
 
-### 7.2 Phase 2: API Schema Updates (2-3 days)
+## Status
 
-**New Backend Models**:
-```python
-class SkillRubric:
-    skill_id: str  # "letter_recognition"
-    skill_category: str  # "language", "motor", "cognitive"
-    games: List[str]  # ["alphabet_game", "letter_hunt"]
-    mastery_threshold: float  # accuracy ≥ 70%
-    progression_levels: List[ProgressionLevel]
-    unlock_conditions: List[str]  # ["master_level_2"]
-
-class ProgressEntry:  # Enhanced
-    skill_id: str  # ← NEW: link to rubric
-    accuracy: float
-    level: int  # 1=beginner, 2=intermediate, 3=master
-    curriculum_code: str  # "CBSE_KG_LETTER"  ← NEW
-    attempt_sequence: int  # to track learning curve
-    duration: int
-    timestamp: datetime
-```
-
-**New API Endpoints**:
-- `GET /api/v1/rubrics/` — Get all skill rubrics
-- `GET /api/v1/progress/{profileId}/by-skill` — Breakdown by skill
-- `GET /api/v1/progress/{profileId}/benchmarks` — Percentile data
-- `POST /api/v1/progress/{profileId}/batch` — Record multiple attempts
+✅ Investigation complete — **Vision alignment issue confirmed**  
+✅ Root cause identified — Alphabet over-engineered with curriculum assumptions  
+✅ Options analysis complete  
+⏳ **Awaiting decision**: Proceed with Option A (remove gating)?
 
 ---
 
-### 7.3 Phase 3: Frontend Dashboard Redesign (4-5 days)
-
-**New Components**:
-```
-SkillBreakdownCards.tsx
-├─ Renders per-skill progress (Alphabet, Numbers, Shapes, etc.)
-├─ Shows: mastered count, accuracy, trend, benchmark percentile
-├─ Data from: /api/v1/progress/{profileId}/by-skill
-
-ProgressionLevelIndicator.tsx
-├─ Visual: Level 1 → 2 → 3 progression path
-├─ Shows: current level, % to next level
-├─ Dynamic based on rubric definition
-
-CurriculumAlignmentBadge.tsx
-├─ Shows: CBSE code, NEP FLN reference, Bloom's level
-├─ Builds parent confidence: app aligns with school curriculum
-
-WeeklyProgressReport.tsx
-├─ New skills unlocked this week
-├─ Milestones achieved
-├─ Benchmarks (percentile movement)
-└─ Exportable PDF for parent-teacher meetings
-```
-
-**Migration Plan**:
-1. Keep existing DailyTimeChart + PlantVisualization
-2. *Add* SkillBreakdownCards above
-3. *Gradually deprecate* generic "Progress" text
-
----
-
-### 7.4 Phase 4: Extend to All Games (1 week)
-
-For each game (FingerNumbers, ConnectTheDots, etc.):
-1. **Map to Skill Rubric**: "ConnectTheDots → Fine Motor + Sequencing"
-2. **Add Progress Tracking**: Replace star-only system with skill levels
-3. **Implement Progression**: Add unlock logic where applicable
-4. **Backend Sync** : Send `ProgressEntry` with skill_id to `/api/v1/progress/batch`
-
----
-
-## Part 8: Implementation Sequence
-
-### MVP (Minimum Viable Product) — 8-10 days
-
-**Week 1**:
-1. Day 1-2: Define curriculum-rubric.md
-2. Day 3-4: Update backend API schemas + migrations
-3. Day 5: Frontend SkillBreakdownCards component
-4. Day 6-7: Integrate with existing Progress page
-5. Day 8: Testing + audit
-
-**Result**: Parents see skill breakdown dashboard (Alphabet + Numbers + Shapes)
-
-### Phase 2 — 1-2 weeks
-
-1. Extend to remaining games (ConnectTheDots, LetterHunt, etc.)
-2. Add progression levels (Beginner → Intermediate → Master)
-3. Add milestone tracking ("First Letter!", "All Numbers Mastered!")
-4. Add basic benchmarking
-
-**Result**: All games have consistent tracking + unlock logic
-
-### Phase 3 — 2-3 weeks
-
-1. Advanced benchmarking (percentile ranks)
-2. Weekly challenge system
-3. Streak tracking + spendable currency
-4. PDF report generation
-
-**Result**: Competitive/engagement features from Kabir persona
-
----
-
-## Part 9: Customer Interview Simulations
-
-### Simulation 1: Vikram Sees New Dashboard
-
-**Before** (Current):
-```
-Vikram: "What's this plant growing? How does it tell me if Kabir learned?"
-Parent Dashboard: [Plant at 40% height] "Great progress!"
-Vikram: [Sighs] "I can't show this to his teacher."
-```
-
-**After** (Proposed):
-```
-Vikram views Progress page:
-├─ Alphabets: 14/26 (53%) | Accuracy: 82% | Trend: ↗ +5%
-├─ Numbers: 7/10 (70%) | Accuracy: 76% | Trend: ↗ +8%
-├─ Shapes: 8/8 (100%) ✓ | COMPLETED
-└─ Motor Skills: Not yet tracked
-
-Vikram: "Perfect. These numbers I can verify."
-[Clicks "Download PDF"] → Generates report for teacher
-Vikram: "Now I have evidence."
-```
-
----
-
-### Simulation 2: Kabir Sees Competitive Features
-
-**Before** (Current):
-```
-Kabir plays AlphabetGame → Traces 3 letters successfully
-Screen shows: "Great job! ⭐⭐⭐"
-Kabir: "I earned 3 stars. What's the point?"
-Dashboard: "Stars: 47 total"
-Kabir's Dad (Vikram): "Good, but did you learn something new?"
-Kabir: [Shrugs] "I just practiced letters I already know."
-[Churn risk: HIGH]
-```
-
-**After** (Proposed):
-```
-Kabir plays Alphabet → Traces 5 letters, avg 84% accuracy
-Screen shows intervention: "Level 2 Unlocked! 
-  ✓ Now fast enough for speed challenges
-  ✓ Unlock: Cursive A-E (coming in Level 3)
-  ✓ Percentile: You're now faster than 71% of 7-year-olds!"
-
-Kabir sees: "Unlock: Grade 2 Numbers (11-100)"
-Kabir: [Excited] "I can do bigger numbers?"
-
-Kabir's Dashboard:
-├─ Progress to Level 3: 60% (need 85% avg accuracy)
-├─ Current Rank: 71st percentile for age
-├─ This Week's Challenge: "Trace 50 letters in under 3 min"
-├─ Streak: 5 days 🔥
-
-Kabir: "I want to be top 10!"
-[Churn risk: LOW]
-```
-
----
-
-### Simulation 3: Teacher (Ms. Deepa) Uses Export
-
-**Before**:
-```
-Ms. Deepa: "Parent asked if the app is helping Kabir."
-Taps "Export Report" in Progress page
-Gets: Generic PDF with plant status + daily time breakdown
-Ms. Deepa: "This doesn't tell me about skill growth."
-```
-
-**After**:
-```
-Ms. Deepa: "Parent asked if the app is helping Kabir."
-Taps "Download PDF Report"
-Gets:
-  ┌─────────────────────────────────────────┐
-  │ Kabir's Learning Report - Feb 24, 2026  │
-  ├─────────────────────────────────────────┤
-  │ Alphabets: 14/26 (53%)                  │
-  │   Strongest: G, M, P (92% avg)          │
-  │   Needs Help: B, D (62% accuracy)       │
-  │ Numbers: 7/10 (70%)                     │
-  │   Strongest: Numbers 1-5                │
-  │   Struggling: 8, 9, 0                   │
-  │ Curriculum Alignment:                   │
-  │   ✓ CBSE KG Letter Recognition          │
-  │   ✓ NEP FLN Phonemic Awareness L2       │
-  └─────────────────────────────────────────┘
-
-Ms. Deepa: "Excellent. I can see exactly where to help."
-[Recommends app to other parents]
-```
-
----
-
-## Part 10: Recommended Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ UNIFIED CURRICULUM TRACKING SYSTEM                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ ┌──────────────────┐  ┌──────────────────┐                │
-│ │ AlphabetGame     │  │ FingerNumbers    │ [11 other games]
-│ │ (1,808 lines)    │  │ (game logic)     │                │
-│ └────────┬─────────┘  └────────┬─────────┘                │
-│          │                     │                           │
-│          └────────┬────────────┘                           │
-│                   ▼                                         │
-│         ┌─────────────────────┐                            │
-│         │ Game Event Queue    │                            │
-│         │ (unified interface) │                            │
-│         │                     │                            │
-│         │ {                   │                            │
-│         │  game_id: "alpha",  │                            │
-│         │  skill_id: "L_A",   │                            │
-│         │  accuracy: 82,      │                            │
-│         │  timestamp: ...     │                            │
-│         │ }                   │                            │
-│         └────────┬────────────┘                            │
-│                  │                                          │
-│                  ▼                                          │
-│    ┌──────────────────────────┐                            │
-│    │ Backend API              │                            │
-│    │ ─────────────────────    │                            │
-│    │ POST /progress/batch     │                            │
-│    │ GET /progress/by-skill   │                            │
-│    │ GET /rubrics             │                            │
-│    │ GET /progress/benchmarks │                            │
-│    └──────────┬───────────────┘                            │
-│               │                                             │
-│    ┌──────────▼────────────────┐                           │
-│    │ Database                  │                           │
-│    │ ─────────────────────     │                           │
-│    │ ProgressEntry (skill_id)  │                           │
-│    │ SkillRubric (definitions) │                           │
-│    │ BenchmarkAggregate        │                           │
-│    └───────────────────────────┘                           │
-│               │                                             │
-│    ┌──────────▼────────────────┐                           │
-│    │ Frontend Dashboard        │                           │
-│    │ ─────────────────────     │                           │
-│    │ SkillBreakdownCards       │                           │
-│    │ ProgressionLevelIndicator │                           │
-│    │ BenchmarkComparison       │                           │
-│    │ CurriculumAlignmentBadge  │                           │
-│    │ ExportPDFReport           │                           │
-│    └───────────────────────────┘                           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Conclusions
-
-### Why Only Alphabet?
-1. **Timing**: Alphabet was implemented first as a complete example
-2. **Scope**: All other games added later without parallel tracking infrastructure
-3. **Architecture Gap**: LetterJourney proved the concept locally; no refactor to unify
-
-### What Needs to Exist?
-1. **Curriculum Rubric**: Shared definition of skills, mastery, progression
-2. **Unified Backend API**: Single source of truth for all game progress
-3. **Dashboard UI**: Skill breakdown cards, progression indicators, benchmarks
-4. **Consistency**: All games feed into same system, not isolated
-
-### Timeline to Full Implementation
-- **MVP**: 8-10 days (skill breakdown + 3 games)
-- **Complete**: 3-4 weeks (all games + competitive features)
-
-### Customer Impact
-- **Vikram**: Goes from confused → has data to show teacher
-- **Kabir**: Goes from bored → motivated to progress through levels
-- **Ms. Deepa**: Can recommend app knowing data quality is solid
-
----
-
-## Next Steps for Discussion
-
-1. **Approval**: Do we commit to unified curriculum rubric system?
-2. **Scope**: Start with MVP (3 games) or go all-in (7 games)?
-3. **Timeline**: Parallel with other work or dedicate team?
-4. **Data Migration**: How to backfill existing progress to new schema?
-
----
-
-**Document Status**: Ready for discussion  
-**Owner**: Pranay (Human Lead)  
-**Agents**: See investigation complete
+**This document corrects a fundamental misunderstanding:** The problem is not "why doesn't every game have curriculum tracking?" The problem is "why does ANY game have curriculum tracking when the vision explicitly rejects it?"

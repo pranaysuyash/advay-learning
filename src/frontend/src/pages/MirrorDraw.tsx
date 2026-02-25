@@ -12,7 +12,7 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useHandClick } from '../hooks/useHandClick';
 import { AttentionMeter } from '../components/game/AttentionMeter';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import {
@@ -61,7 +61,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   const isDrawingRef = useRef(false);
   const templateRef = useRef<MirrorTemplate | null>(null);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('mirror-draw');
 
@@ -366,7 +366,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
     setIsPlaying(true);
     isSubmittingRef.current = false;
     assetLoader.playSound('pop', 0.35);
-    await playStart();
+    playClick();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();

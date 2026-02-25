@@ -825,6 +825,27 @@ TCK-20240128-001
 TCK-20240128-002
 ```
 
+### Ticket Naming & Stamp Rules
+
+- `TCK-YYYYMMDD-###` remains the human-facing ticket id format.
+- Every new/changed ticket entry must include a unique stamp line:
+  - `Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent[-abcd]`
+- Generate stamp via:
+  - `./scripts/new_ticket_stamp.sh <agent-name>`
+- Uniqueness policy:
+  - `TCK-...` may collide historically across parallel agents/files.
+  - `Ticket Stamp` is the canonical uniqueness key and must be globally unique across `docs/WORKLOG_*.md`.
+- Commit-time enforcement:
+  - `scripts/agent_gate.sh` rejects changed tickets without valid stamp format.
+  - `scripts/agent_gate.sh` rejects duplicate `Ticket Stamp` values.
+
+Example:
+
+```markdown
+## TCK-20260224-033 :: Enforce No-Bypass Validation
+Ticket Stamp: STAMP-20260224T180958Z-codex-2jxp
+```
+
 ---
 
 ## Communication Protocol

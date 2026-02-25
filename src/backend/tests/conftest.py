@@ -83,6 +83,10 @@ async def test_user(db_session: AsyncSession) -> dict:
 
     user_data = {"email": "test@example.com", "password": "TestPassword123"}
 
+    # Skip creating user for pranay.suyash@gmail.com to avoid conflicts
+    if user_data["email"] == "pranay.suyash@gmail.com":
+        return user_data
+
     # Check if user already exists
     existing = await UserService.get_by_email(db_session, user_data["email"])
     if existing:
@@ -135,14 +139,31 @@ async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     from app.core.security import get_password_hash
     from app.db.models.user import User
 
-    # Create admin user directly in database
-    user = User(
-        id=str(uuid4()),
-        email="admin@test.com",
-        hashed_password=get_password_hash("Admin123!"),
-        is_active=True,
-        is_superuser=True,
-        email_verified=True,
+    # Check if admin user already exists
+    existing_admin = await db_session.execute(
+        db_session.query(User).filter(User.email == "admin@test.com")
+    )
+    if existing_admin.scalar_one_or_none():
+        # User exists, just use it
+        pass
+    else:
+        # Create admin user directly in database
+        user = User(
+            id=str(uuid4()),
+            email="admin@test.com",
+            hashed_password=get_password_hash("Admin123!"),
+            is_active=True,
+            is_superuser=True,
+            email_verified=True,
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+    # Login to get token
+    response = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin@test.com", "password": "Admin123!"},
     )
     db_session.add(user)
     await db_session.commit()

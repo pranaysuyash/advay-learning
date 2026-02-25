@@ -64,7 +64,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
 
   const { playPop, playError, playFanfare } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('number-tap-trail');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('number-tap-trail');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -128,6 +128,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
         onGameComplete();
+        triggerEasterEgg('egg-golden-number');
         setGameCompleted(true);
         setIsPlaying(false);
       } else {

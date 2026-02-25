@@ -7,6 +7,7 @@ import {
   useProfileStore,
   useProgressStore,
   useSettingsStore,
+  type Profile,
 } from '../store';
 import { Mascot } from '../components/Mascot';
 import { UIIcon } from '../components/ui/Icon';
@@ -17,6 +18,8 @@ import { useToast } from '../components/ui/useToast';
 import { AdventureMap } from '../components/Map';
 import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
+import { EditProfileModal } from '../components/dashboard/EditProfileModal';
+import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -80,6 +83,14 @@ export const Dashboard = memo(function Dashboard() {
   const [childAge, setChildAge] = useState(5);
   const [childLanguage, setChildLanguage] = useState('en');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Edit Profile Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<typeof currentProfile>(null);
+  const [editName, setEditName] = useState('');
+  const [editLanguage, setEditLanguage] = useState('en');
+  const [editAvatarConfig, setEditAvatarConfig] = useState<AvatarConfig | null>(null);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   useEffect(() => {
     if (!isGuest) {
@@ -88,7 +99,7 @@ export const Dashboard = memo(function Dashboard() {
   }, [fetchProfiles, isGuest]);
 
   // Handle guest data vs real profile data
-  const defaultProfile = useMemo(() => {
+  const defaultProfile = useMemo<Profile | null>(() => {
     if (isGuest && guestSession) {
       return {
         id: guestSession.childProfile.id,
@@ -96,9 +107,12 @@ export const Dashboard = memo(function Dashboard() {
         age: guestSession.childProfile.age,
         preferred_language: guestSession.childProfile.preferredLanguage,
         created_at: new Date(guestSession.createdAt).toISOString(),
+        updated_at: new Date(guestSession.createdAt).toISOString(),
+        parent_id: 'guest',
+        settings: {},
       };
     }
-    return currentProfile || profiles[0];
+    return currentProfile || profiles[0] || null;
   }, [isGuest, guestSession, currentProfile, profiles]);
 
   // Set initial profile
@@ -107,6 +121,8 @@ export const Dashboard = memo(function Dashboard() {
       setCurrentProfile(defaultProfile);
     }
   }, [defaultProfile, currentProfile, setCurrentProfile, isGuest]);
+  
+  const { updateProfile } = useProfileStore();
 
   // Calculate total XP/Stars
   const totalStars = useMemo(() => {
@@ -166,6 +182,46 @@ export const Dashboard = memo(function Dashboard() {
       setIsSubmitting(false);
     }
   };
+  
+  const handleEditProfile = (profile: typeof currentProfile) => {
+    if (!profile) return;
+    setEditingProfile(profile);
+    setEditName(profile.name);
+    setEditLanguage(profile.preferred_language);
+    setEditAvatarConfig((profile.settings?.avatar_config as AvatarConfig) || null);
+    setShowEditModal(true);
+  };
+  
+  const handleSaveProfile = async () => {
+    if (!editingProfile || !editName.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      const updateData: Parameters<typeof updateProfile>[1] = {
+        name: editName.trim(),
+        preferred_language: editLanguage,
+      };
+      
+      // Include avatar config if it was changed
+      if (editAvatarConfig) {
+        updateData.settings = {
+          ...editingProfile.settings,
+          avatar_config: editAvatarConfig,
+        };
+      }
+      
+      await updateProfile(editingProfile.id, updateData);
+      await fetchProfiles();
+      setShowEditModal(false);
+      setEditingProfile(null);
+      setEditAvatarConfig(null);
+      showToast(t('dashboard:profile.saved'), 'success');
+    } catch (error) {
+      showToast(t('dashboard:profile.saveError'), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-[#FFF8F0] font-nunito pb-24'>
@@ -221,20 +277,36 @@ export const Dashboard = memo(function Dashboard() {
         </div>
       </header>
 
-      {/* MULTI-PROFILE SELECTOR with Add Child - Only for logged-in users */}
+      {/* MULTI-PROFILE SELECTOR with Avatars - Only for logged-in users */}
       {!isGuest && (
         <div className='px-6 lg:px-12 mb-8'>
-          <div className='inline-flex items-center gap-2 bg-white p-1 rounded-full border-2 border-slate-100 shadow-sm'>
+          <div className='inline-flex items-center gap-3 bg-white p-2 rounded-full border-2 border-slate-100 shadow-sm'>
             {profiles.map(p => (
               <button
                 key={p.id}
                 onClick={() => setCurrentProfile(p)}
-                className={`px-4 py-1.5 rounded-full text-sm font-bold transition ${p.id === currentProfile?.id ? 'bg-[#3B82F6] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  handleEditProfile(p);
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition ${
+                  p.id === currentProfile?.id 
+                    ? 'bg-[#3B82F6] text-white shadow-sm' 
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+                title={`${p.name}${p.age ? ` (${p.age} years)` : ''} - Right-click to edit`}
               >
-                {p.name}
+                <AvatarWithBadge
+                  config={p.settings?.avatar_config as AvatarConfig | null | undefined}
+                  fallbackName={p.name}
+                  age={p.age}
+                  size="sm"
+                  showAnimation={p.id === currentProfile?.id}
+                />
+                <span className="text-sm font-bold">{p.name}</span>
               </button>
             ))}
-            {/* ADD CHILD BUTTON - Only for logged-in users */}
+            {/* ADD CHILD BUTTON */}
             <button
               onClick={() => setShowAddModal(true)}
               className='px-3 py-1.5 rounded-full text-sm font-bold text-slate-400 hover:bg-slate-50 hover:text-[#3B82F6] transition border-2 border-dashed border-slate-200 hover:border-[#3B82F6] flex items-center gap-1'
@@ -244,6 +316,9 @@ export const Dashboard = memo(function Dashboard() {
               <span className='hidden sm:inline'>{t('dashboard:profile.addChild', 'Add')}</span>
             </button>
           </div>
+          <p className="text-xs text-slate-400 mt-2 ml-2">
+            Tip: Right-click a profile to edit
+          </p>
         </div>
       )}
 
@@ -309,6 +384,41 @@ export const Dashboard = memo(function Dashboard() {
         onChildLanguageChange={setChildLanguage}
         onSubmit={handleAddChild}
         isSubmitting={isSubmitting}
+      />
+      
+      {/* EDIT PROFILE MODAL */}
+      <EditProfileModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingProfile(null);
+          setEditAvatarConfig(null);
+        }}
+        profile={editingProfile}
+        editName={editName}
+        onEditNameChange={setEditName}
+        editLanguage={editLanguage}
+        onEditLanguageChange={setEditLanguage}
+        editAvatarConfig={editAvatarConfig}
+        onChangeAvatar={() => setShowAvatarPicker(true)}
+        onSubmit={handleSaveProfile}
+        isSubmitting={isSubmitting}
+      />
+      
+      {/* AVATAR PICKER MODAL */}
+      <AvatarPickerModal
+        isOpen={showAvatarPicker}
+        onClose={() => setShowAvatarPicker(false)}
+        currentConfig={editAvatarConfig || (editingProfile?.settings?.avatar_config as AvatarConfig | null | undefined)}
+        onSelect={(config) => {
+          setEditAvatarConfig(config);
+          setShowAvatarPicker(false);
+          showToast('Avatar selected! Click Save to apply changes.', 'success');
+        }}
+        onSelectPhoto={() => {
+          // Would open AvatarCapture component
+          console.log('Photo avatar selected');
+        }}
       />
     </div>
   );

@@ -14,6 +14,7 @@ class ProgressBase(BaseModel):
     score: int = 0
     duration_seconds: int = 0
     meta_data: Dict[str, Any] = {}
+    completed: bool = False
 
 
 class ProgressCreate(ProgressBase):
@@ -39,4 +40,5 @@ class Progress(ProgressBase):
     id: str
     profile_id: str
     completed_at: datetime
+    completed: bool
     idempotency_key: str | None = None

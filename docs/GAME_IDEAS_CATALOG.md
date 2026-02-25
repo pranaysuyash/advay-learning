@@ -390,3 +390,32 @@ Dolch List Level 1: a, and, away, big, blue, can, come...
 ---
 
 *Last Updated: 2026-02-01*
+
+## 🧱 KENNEY ASSET REUSE GAMES (Platformer Pack)
+
+These game concepts heavily utilize the 2D characters, tiles, enemies, and collectibles from the Kenney Platformer Pack, maximizing asset reuse and providing a cohesive feel.
+
+#### 1. Math Jumpers (Number Line Platformer)
+**Age:** 4-7 | **Effort:** 1 week
+**Concept:** A side-scrolling or static platformer where tiles are labeled with numbers. The game asks "What is 2 + 3?", and the player must move their character (e.g., the alien) to jump onto the tile labeled "5".
+**Assets Used:** `characters`, `tiles` (for platforms), `sounds` (jump/land).
+
+#### 2. Spelling Run (Word Collector)
+**Age:** 5-8 | **Effort:** 1.5 weeks
+**Concept:** A runner or maze game where letters are scattered across platforms. The child is prompted to spell a word (e.g., "CAT") and must collect the letters in the correct order while dodging passive enemies like slimes.
+**Assets Used:** `characters`, `tiles`, `enemies` (as obstacles), `sounds`.
+
+#### 3. Counting Collect-a-thon (Scavenger Hunt)
+**Age:** 3-5 | **Effort:** 1 week
+**Concept:** A relaxed, non-scrolling environment built using the platform tiles. The prompt asks to "Collect exactly 4 blue gems!". The child guides the character to grab the correct items and avoid the wrong ones.
+**Assets Used:** `characters`, `tiles` (level building), `collectibles` (gems, coins, keys, stars), `hud`.
+
+#### 4. Catch & Sort (Falling Objects)
+**Age:** 3-5 | **Effort:** 1 week
+**Concept:** The player moves the character left/right along the bottom of the screen. Items fall from the sky. The game instructs: "Catch only the stars, avoid the enemies!" or "Catch all the red items!".
+**Assets Used:** `characters`, `collectibles` (falling good items), `enemies` (falling bad items), `backgrounds`.
+
+#### 5. Logic Box Push (Sokoban Style)
+**Age:** 5-8 | **Effort:** 2 weeks
+**Concept:** A puzzle game where the player must push crates onto specific switches to open a door or bridge a gap. Teaches spatial reasoning and logic planning.
+**Assets Used:** `characters`, `tiles` (crates, bridges, solid ground, switches), `sounds`.

@@ -26,6 +26,7 @@ import {
 } from '../utils/assets';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
+import { useAudio } from '../utils/hooks/useAudio';
 
 interface Bubble {
   id: string;
@@ -60,6 +61,7 @@ const MUSICAL_NOTES = [
 export default function BubblePopSymphony() {
   // Hand tracking with modern hooks
   const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop-symphony');
+  const { playClick } = useAudio();
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,
@@ -405,7 +407,7 @@ export default function BubblePopSymphony() {
             </p>
 
             <button
-              onClick={startGame}
+              onClick={() => { playClick(); startGame(); }}
               className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 mx-auto'
             >
               <Play className="w-7 h-7" /> Start Game!
@@ -455,7 +457,7 @@ export default function BubblePopSymphony() {
         type='confetti'
         message='Pop!'
         duration={1500}
-        onComplete={() => setShowSuccess(false)}
+        onComplete={() => { playClick(); setShowSuccess(false); }}
       />
     </div>
   );

@@ -48,7 +48,8 @@ export function FreezeDance() {
 
   const { playPop: playSuccess, playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('freeze-dance');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('freeze-dance');
+  const perfectFreezeStreakRef = useRef(0);
 
   useGameSessionProgress({
     gameName: 'Freeze Dance',
@@ -258,6 +259,15 @@ export function FreezeDance() {
 
   const completeRound = (roundScore: number, success: boolean) => {
     setIsFrozen(false);
+
+    if (success && roundScore > 80) {
+      perfectFreezeStreakRef.current += 1;
+      if (perfectFreezeStreakRef.current >= 5) {
+        triggerEasterEgg('egg-ice-sculpture');
+      }
+    } else {
+      perfectFreezeStreakRef.current = 0;
+    }
 
     if (success) {
       setScore((s) => s + roundScore);

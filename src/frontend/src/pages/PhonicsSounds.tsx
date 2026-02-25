@@ -12,14 +12,14 @@ import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useSoundEffects } from '../hooks/useSoundEffects';
-import { assetLoader, SOUND_ASSETS } from '../utils/assets';
+import { useAudio } from '../utils/hooks/useAudio';
 import {
   LEVELS,
   buildPhonicsRound,
   type PhonicsTarget,
   type Phoneme,
 } from '../games/phonicsSoundsLogic';
+import { assetLoader, SOUND_ASSETS } from '../utils/assets';
 import { isPointInCircle } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -67,9 +67,10 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const correctCountRef = useRef(correctCount);
   const usedLettersRef = useRef<string[]>(usedLetters);
 
-  const { playPop, playError, playCelebration, playStart } = useSoundEffects();
+  const { playPop, playError, playSuccess, playCelebration, playClick, playLevelUp } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('phonics-sounds');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('phonics-sounds');
+  const correctVowelsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     async function preloadAssets() {
@@ -157,7 +158,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
       // Check if passed level
       if (correctCountRef.current >= lvlCfg.passThreshold) {
-        assetLoader.playSound('level-complete', 0.55);
+        playLevelUp();
         void playCelebration();
         setShowCelebration(true);
         if (ttsEnabled) {
@@ -220,7 +221,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
       if (!hit) {
         setFeedback('Pinch directly on a letter.');
-        assetLoader.playSound('wrong', 0.35);
+        playError();
         void playError();
         return;
       }
@@ -235,8 +236,16 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         if (ttsEnabled) {
           void speak(`Yes! ${hit.phoneme.letter} as in ${hit.phoneme.exampleWord}!`);
         }
-        assetLoader.playSound('success', 0.45);
+        playSuccess();
         void playPop();
+
+        const vowels = ['A', 'E', 'I', 'O', 'U'];
+        if (vowels.includes(hit.phoneme.letter.toUpperCase())) {
+          correctVowelsRef.current.add(hit.phoneme.letter.toUpperCase());
+          if (correctVowelsRef.current.size >= 5) {
+            triggerEasterEgg('egg-vowel-master');
+          }
+        }
 
         if (nextStreak > 0 && nextStreak % 5 === 0) {
           setShowCelebration(true);
@@ -262,7 +271,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         if (ttsEnabled) {
           void speak(`That's ${hit.phoneme.sound}. Try again!`);
         }
-        assetLoader.playSound('wrong', 0.35);
+        playError();
         void playError();
         // Re-speak the target phoneme
         if (targetPhoneme) {
@@ -334,8 +343,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
     setShowExample(false);
     setIsPlaying(true);
     isAdvancingRef.current = false;
-    assetLoader.playSound('pop', 0.25);
-    await playStart();
+    playPop();
+    playClick();
 
     if (!isHandTrackingReady && !isModelLoading) {
       void startTracking();
@@ -380,7 +389,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
   const repeatSound = () => {
     if (targetPhoneme) {
-      assetLoader.playSound('pop', 0.2);
+      playPop();
       speakPhoneme(targetPhoneme);
     }
   };

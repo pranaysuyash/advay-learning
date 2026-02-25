@@ -1161,6 +1161,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       name: 'Guest',
                       preferred_language: 'en',
                       created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                      parent_id: 'guest',
+                      settings: {},
                     },
                   });
                 }}
@@ -1216,6 +1219,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                       name: 'Guest',
                       preferred_language: 'en',
                       created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                      parent_id: 'guest',
+                      settings: {},
                     },
                   });
                 }}

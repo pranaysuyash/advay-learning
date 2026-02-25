@@ -71,6 +71,21 @@ const ColorMatchGarden = lazy(() =>
     default: module.ColorMatchGarden,
   })),
 );
+const ColorByNumber = lazy(() =>
+  import('./pages/ColorByNumber').then((module) => ({
+    default: module.ColorByNumber,
+  })),
+);
+const MemoryMatch = lazy(() =>
+  import('./pages/MemoryMatch').then((module) => ({
+    default: module.MemoryMatch,
+  })),
+);
+const NumberTracing = lazy(() =>
+  import('./pages/NumberTracing').then((module) => ({
+    default: module.NumberTracing,
+  })),
+);
 const NumberTapTrail = lazy(() =>
   import('./pages/NumberTapTrail').then((module) => ({
     default: module.NumberTapTrail,
@@ -353,6 +368,30 @@ function App() {
                       <CameraSafeRoute gameName='Color Match Garden'>
                         <ColorMatchGarden />
                       </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/color-by-number'
+                  element={
+                    <ProtectedRoute>
+                      <ColorByNumber />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/memory-match'
+                  element={
+                    <ProtectedRoute>
+                      <MemoryMatch />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/number-tracing'
+                  element={
+                    <ProtectedRoute>
+                      <NumberTracing />
                     </ProtectedRoute>
                   }
                 />

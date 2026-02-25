@@ -74,15 +74,15 @@ class UserService:
         return user
 
     @staticmethod
-    async def get_by_password_reset_token(
-        db: AsyncSession, token: str
-    ) -> Optional[User]:
+    async def get_by_password_reset_token(db: AsyncSession, token: str) -> Optional[User]:
         """Get user by password reset token."""
         result = await db.execute(
-            select(User).where(
+            select(User)
+            .where(
                 User.password_reset_token == token,
-                User.password_reset_expires > datetime.now(timezone.utc),
+                User.password_reset_expires > EmailService.get_verification_expiry(),
             )
+            .order_by(User.id),
         )
         return result.scalar_one_or_none()
 
@@ -113,9 +113,7 @@ class UserService:
         update_data = user_in.model_dump(exclude_unset=True)
 
         if "password" in update_data:
-            update_data["hashed_password"] = get_password_hash(
-                update_data.pop("password")
-            )
+            update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
 
         for field, value in update_data.items():
             setattr(user, field, value)
@@ -131,9 +129,7 @@ class UserService:
         await db.commit()
 
     @staticmethod
-    async def authenticate(
-        db: AsyncSession, email: str, password: str
-    ) -> Optional[User]:
+    async def authenticate(db: AsyncSession, email: str, password: str) -> Optional[User]:
         """Authenticate user with constant-time comparison to prevent timing attacks."""
         user = await UserService.get_by_email(db, email)
 

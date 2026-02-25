@@ -63,7 +63,8 @@ export const LANGUAGES: Language[] = SUPPORTED_LANGUAGES.map((lang) => ({
   code: lang.code as LanguageCode,
   name: lang.name,
   nativeName: lang.nameLocal,
-  flagIcon: FLAG_ICON_MAP[lang.code as LanguageCode] || '/assets/icons/ui/flag-en.svg',
+  flagIcon:
+    FLAG_ICON_MAP[lang.code as LanguageCode] || '/assets/icons/ui/flag-en.svg',
 }));
 
 /**

@@ -144,6 +144,9 @@ describe('ProfileStore', () => {
         age: 5,
         preferred_language: 'en',
         created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        parent_id: 'parent1',
+        settings: {},
       };
       useProfileStore.setState({ profiles: [existingProfile] });
 
@@ -153,6 +156,9 @@ describe('ProfileStore', () => {
         age: 7,
         preferred_language: 'hi',
         created_at: '2024-01-02',
+        updated_at: '2024-01-02',
+        parent_id: 'parent1',
+        settings: {},
       };
       vi.mocked(profileApi.createProfile).mockResolvedValueOnce({ data: newProfile } as any);
 
@@ -196,6 +202,9 @@ describe('ProfileStore', () => {
         age: 5,
         preferred_language: 'en',
         created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        parent_id: 'parent1',
+        settings: {},
       };
 
       const store = useProfileStore.getState();
@@ -212,6 +221,9 @@ describe('ProfileStore', () => {
           name: 'Test',
           preferred_language: 'en',
           created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          parent_id: 'parent1',
+          settings: {},
         },
       });
 

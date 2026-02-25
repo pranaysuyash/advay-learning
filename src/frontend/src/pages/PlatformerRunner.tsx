@@ -5,10 +5,11 @@ import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { LoadingState } from '../components/LoadingState';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameDrops } from '../hooks/useGameDrops';
 import type { TrackedHandFrame } from '../types/tracking';
 
 // --- Assets ---
-const ASSET_BASE = '/assets/kenney-platformer';
+const ASSET_BASE = '/assets/kenney/platformer';
 const ASSETS = {
     player: {
         idle: `${ASSET_BASE}/characters/character_green_idle.png`,
@@ -205,6 +206,8 @@ export function PlatformerRunner() {
             }
         },
     });
+
+    const { onGameComplete, triggerEasterEgg } = useGameDrops('platformer-runner');
 
     // Analytics/Progress
     useGameSessionProgress({
@@ -513,10 +516,15 @@ export function PlatformerRunner() {
         };
     }, [update]);
 
-    // Handle game over logic bridging
+    // Handle game over — trigger drops
     useEffect(() => {
-        // Automatically handled by sessionTracker when isPlaying changes
-    }, [gameState]);
+        if (gameState === 'GAMEOVER') {
+            onGameComplete(score);
+            if (score >= 20) {
+                triggerEasterEgg('egg-coin-king');
+            }
+        }
+    }, [gameState, onGameComplete, score, triggerEasterEgg]);
 
     return (
         <GameContainer
