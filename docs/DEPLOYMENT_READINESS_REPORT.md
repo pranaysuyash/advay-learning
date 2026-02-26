@@ -32,7 +32,7 @@
 | Python | 3.13+ | Required |
 | FastAPI | 0.109.0+ | `src/backend/pyproject.toml:7` |
 | SQLAlchemy | 2.0+ | `src/backend/pyproject.toml:8` |
-| PostgreSQL | 14+ | Required |
+| PostgreSQL | 17+ | Required |
 | Alembic | 1.13+ | `src/backend/pyproject.toml:10` |
 
 ### 1.2 Configuration Status
@@ -42,7 +42,7 @@
 ```
 APP_ENV=development
 DEBUG=True
-SECRET_KEY=51888dc7e60ce8647d6af52e3cad4a9b231f6060c6ca83a48448afb8739c7993
+SECRET_KEY=<redacted-generated-key>
 ALLOWED_ORIGINS=["http://localhost:6173","http://localhost:5173","http://localhost:3000"]
 ```
 
@@ -169,7 +169,7 @@ pool_config = {
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| PostgreSQL 14+ | REQUIRED | Not installed/configured in project |
+| PostgreSQL 17+ | REQUIRED | Not installed/configured in project |
 | Connection pooling | ✅ CONFIGURED | session.py:10-18 |
 | Async driver | ✅ asyncpg | pyproject.toml:19 |
 

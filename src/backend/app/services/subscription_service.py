@@ -273,3 +273,38 @@ class SubscriptionService:
             "swap_available": swap_remaining,
             "plan_type": subscription.plan_type.value,
         }
+
+    @staticmethod
+    async def can_access_game(
+        db: AsyncSession, parent_id: str, game_id: str
+    ) -> tuple[bool, str]:
+        """Check if user can access a specific game.
+        
+        Returns:
+            tuple of (can_access: bool, reason: str)
+        """
+        subscription = await SubscriptionService.get_active_subscription(
+            db=db, parent_id=parent_id
+        )
+        
+        if not subscription:
+            return False, "No active subscription"
+        
+        # Full annual = access to all games
+        if subscription.plan_type == SubscriptionPlanType.FULL_ANNUAL:
+            return True, "Full annual subscription"
+        
+        # For packs, check game selection
+        selected_game_ids = {s.game_id for s in subscription.game_selections}
+        
+        if game_id in selected_game_ids:
+            return True, "Game selected in pack"
+        
+        return False, f"Game not in your {subscription.plan_type.value} selection"
+
+    @staticmethod
+    async def get_subscription_for_parent(
+        db: AsyncSession, parent_id: str
+    ) -> Optional[Subscription]:
+        """Get active subscription for a parent."""
+        return await SubscriptionService.get_active_subscription(db, parent_id)

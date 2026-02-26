@@ -42,7 +42,7 @@ services:
 
   # PostgreSQL Database
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     env_file:
       - .env.production
     volumes:

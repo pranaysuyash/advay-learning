@@ -153,4 +153,50 @@ export const issueReportsApi = {
     apiClient.post<IssueReportResponse>(`/issue-reports/${reportId}/finalize`, payload),
 };
 
+// Subscription API
+export type SubscriptionPlanType = 'game_pack_5' | 'game_pack_10' | 'full_annual';
+
+export interface SubscriptionStatus {
+  has_active: boolean;
+  subscription: {
+    id: string;
+    plan_type: string;
+    status: string;
+    start_date: string;
+    end_date: string;
+    game_selections: { game_id: string }[];
+  } | null;
+  days_remaining: number | null;
+  available_games: {
+    game_limit: number;
+    selected_count: number;
+    remaining_slots: number;
+    swap_available: boolean;
+  } | null;
+}
+
+export interface CheckoutResponse {
+  checkout_url: string;
+  session_id: string;
+  plan_type: string;
+}
+
+export const subscriptionApi = {
+  getCurrent: () => apiClient.get<SubscriptionStatus>('/subscriptions/current'),
+  purchase: (planType: SubscriptionPlanType) =>
+    apiClient.post<CheckoutResponse>('/subscriptions/purchase', null, {
+      params: { plan_type: planType },
+    }),
+  getGamesCatalog: () =>
+    apiClient.get<{ games: any[]; total: number }>('/subscriptions/games/catalog'),
+  getAvailableGames: (subscriptionId: string) =>
+    apiClient.get('/subscriptions/games/available', { params: { subscription_id: subscriptionId } }),
+  updateGameSelection: (subscriptionId: string, gameIds: string[]) =>
+    apiClient.put(`/subscriptions/games`, { game_ids: gameIds }, { params: { subscription_id: subscriptionId } }),
+  swapGame: (subscriptionId: string, newGameId: string) =>
+    apiClient.put('/subscriptions/games/swap', { new_game_id: newGameId }, { params: { subscription_id: subscriptionId } }),
+  upgrade: (subscriptionId: string, newPlan: SubscriptionPlanType) =>
+    apiClient.post('/subscriptions/upgrade', { new_plan: newPlan }, { params: { subscription_id: subscriptionId } }),
+};
+
 export default apiClient;

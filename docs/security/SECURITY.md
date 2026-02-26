@@ -76,7 +76,7 @@ Landmarks Used for Interaction
 
 ### Backend Database (PostgreSQL)
 
-- **Type**: PostgreSQL 14+
+- **Type**: PostgreSQL 17+
 - **Location**: Cloud-hosted or self-managed PostgreSQL instance
 - **Encryption**: 
   - Transport: TLS 1.2+ for all connections

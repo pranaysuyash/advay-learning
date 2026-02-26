@@ -8,7 +8,7 @@ from dodopayments import DodoPayments
 from app.db.models.subscription import SubscriptionPlanType
 from app.services.subscription_service import PLAN_PRICES
 
-DODO_API_KEY = os.getenv("DODO_API_KEY", "46HOzaj-IRJyuoIc.I5_KlMUBgs-isqG5-zJuCHh9bDMLbv6Vxf-rJAB-4hq4UmtC")
+DODO_API_KEY = os.getenv("DODO_API_KEY", "")
 
 # Product IDs from Dodo dashboard - need to be created in INR
 # These should be created in Dodo dashboard
@@ -29,6 +29,8 @@ class DodoPaymentService:
     """Service for handling Dodo Payments integration."""
 
     def __init__(self):
+        if not DODO_API_KEY:
+            raise ValueError("DODO_API_KEY is required to initialize DodoPayments")
         self.client = DodoPayments(
             bearer_token=DODO_API_KEY,
             base_url="https://test.dodopayments.com",

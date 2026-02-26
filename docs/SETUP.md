@@ -3,11 +3,11 @@
 ## Prerequisites
 
 - **Python**: 3.13 or higher
-- **Node.js**: 24 or higher (use `nvm` or `volta` to manage local Node versions)
+- **Node.js**: 22+ (LTS, use `nvm` or `volta` to manage local Node versions)
 
-> Tip: To switch to the recommended Node version (nvm): `nvm use 24`
+> Tip: To switch to the recommended Node version (nvm): `nvm use 22`
 
-- **PostgreSQL**: 14 or higher
+- **PostgreSQL**: 17+
 - **uv**: Python package manager
 - **Git**: Version control
 

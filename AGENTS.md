@@ -586,6 +586,13 @@ git reset src/components/NewFeature.tsx  # ❌ Deletes other agent's work
 - [ ] Proper auth/authorization checks
 - [ ] Rate limiting considered
 - [ ] Error messages don't leak sensitive info
+
+### Secret Remediation Scope (Required)
+
+- If a secret scan fails, remediate by fixing tracked code/config files that contain hardcoded secrets (for example `src/**`, `scripts/**`, committed docs).
+- **Do not edit `.env`, `.env.*`, or other local environment files unless the user explicitly asks in the current conversation.**
+- Do not "fix" secret-scan failures by mutating local env files by default; prefer replacing hardcoded literals with `os.getenv(...)`/settings-based loading in actual code.
+- If a committed sample/env file must be adjusted (e.g., `.env.example`), do so only with explicit user approval.
 ```
 
 ### For Authentication-Related Changes
@@ -942,6 +949,7 @@ Pass if:
 11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
 12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
+14. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
 
 ---
 
@@ -1084,6 +1092,7 @@ Risks/notes:
 
 | Version | Date       | Changes                                                                                                            |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1.7     | 2026-02-26 | Added strict secret-remediation scope: do not touch `.env*` by default; remove hardcoded secrets in code/config |
 | 1.6     | 2026-02-20 | Strengthened reusable-tool policy: mandatory `/tmp` migration to `tools/` and long-term maintenance requirement  |
 | 1.5     | 2026-02-20 | Added Core Principle #7: Create Reusable Tools; documented `tools/` directory; added prohibition #11              |
 | 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes |

@@ -18,7 +18,7 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 ### Prerequisites
 
 - Python 3.13+
-- Node.js 18+
+- Node.js 22+
 - PostgreSQL 14+
 - uv (Python package manager)
 

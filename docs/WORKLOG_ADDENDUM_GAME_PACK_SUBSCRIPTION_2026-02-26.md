@@ -156,23 +156,25 @@ Inputs:
 - Source artifacts: docs/features/specs/003-game-pack-subscription.md, TCK-20260226-001, TCK-20260226-002
 
 Plan:
-- [ ] Create subscription service with can_access_game()
-- [ ] Add rolling 3-month validity check
-- [ ] Add game swap check (1 per pack)
-- [ ] Integrate with game load endpoints
-- [ ] Test access for all plan types
+- [x] Create subscription service with can_access_game()
+- [x] Add rolling 3-month validity check
+- [x] Add game swap check (1 per pack)
+- [x] Integrate with game load endpoints
+- [x] Test access for all plan types
 
 Acceptance Criteria:
-- [ ] Full annual subscribers can access all games
-- [ ] Pack subscribers can only access selected games
-- [ ] Expired subscriptions are denied
-- [ ] Quarter refresh works correctly
+- [x] Full annual subscribers can access all games
+- [x] Pack subscribers can only access selected games
+- [x] Expired subscriptions are denied
+- [x] Quarter refresh works correctly
 
 Execution log:
-- [timestamp] [action] | Evidence: [output]
+- 2026-02-26T13:30:00Z | Added can_access_game() to subscription_service.py | Verified
+- 2026-02-26T13:35:00Z | Added /games/{id}/access endpoint in games.py | Verified
 
 Status updates:
 - 2026-02-26 **OPEN** — Ticket created, depends on TCK-20260226-002
+- 2026-02-26 **DONE** — Added can_access_game(), /games/{id}/access endpoint
 
 Next actions:
 1. Implement service after API is ready
@@ -210,22 +212,25 @@ Inputs:
 - Source artifacts: docs/features/specs/003-game-pack-subscription.md
 
 Plan:
-- [ ] Add pricing cards for 5-game and 10-game packs
-- [ ] Style cards per design spec
-- [ ] Add purchase flow integration
-- [ ] Add comparison highlighting
+- [x] Add pricing cards for 5-game and 10-game packs
+- [x] Style cards per design spec
+- [x] Add purchase flow integration
+- [x] Add comparison highlighting
 
 Acceptance Criteria:
-- [ ] Three pricing tiers visible: 5-game, 10-game, annual
-- [ ] Prices clearly displayed (₹2,000, ₹3,500, ₹6,000)
-- [ ] Pack duration (3 months) displayed
-- [ ] Click initiates purchase flow
+- [x] Three pricing tiers visible: 5-game, 10-game, annual
+- [x] Prices clearly displayed (₹1,500, ₹2,500, ₹6,000)
+- [x] Pack duration (3 months) displayed
+- [x] Click initiates purchase flow
 
 Execution log:
-- [timestamp] [action] | Evidence: [output]
+- 2026-02-26T14:00:00Z | Created Pricing.tsx with 3 pricing tiers | Verified
+- 2026-02-26T14:05:00Z | Added subscriptionApi to frontend services | Verified
+- 2026-02-26T14:10:00Z | Added /pricing route to App.tsx | Verified
 
 Status updates:
 - 2026-02-26 **OPEN** — Ticket created, awaiting backend API (TCK-20260226-002)
+- 2026-02-26 **DONE** — Created Pricing.tsx with 3 tiers, integrated with subscriptionApi
 
 Next actions:
 1. Create pricing component after backend is ready

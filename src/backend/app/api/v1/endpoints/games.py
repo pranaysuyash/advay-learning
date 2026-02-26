@@ -3,6 +3,7 @@
 import logging
 import re
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
@@ -15,6 +16,7 @@ from app.db.models.progress import Progress
 from app.schemas.game import Game, GameCreate, GameList, GameUpdate, GlobalGameStat, GlobalGameStatsResponse
 from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
+from app.services.subscription_service import SubscriptionService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -223,6 +225,52 @@ async def get_games_stats(
 async def get_game(identifier: str = Path(..., description="Game slug or ID"), db: AsyncSession = Depends(get_db)) -> Game:
     """Get game details by slug or ID."""
     return await resolve_game_identifier(identifier, db)
+
+
+@router.get("/{identifier}/access")
+async def check_game_access(
+    identifier: str = Path(..., description="Game slug or ID"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Check if the current user can access a game.
+    
+    Returns:
+        {
+            "can_access": bool,
+            "reason": str,
+            "game_id": str,
+            "subscription_status": "active" | "expired" | "none"
+        }
+    """
+    # Get game
+    game = await resolve_game_identifier(identifier, db)
+    
+    # Check subscription
+    subscription = await SubscriptionService.get_active_subscription(
+        db=db, parent_id=current_user.id
+    )
+    
+    if not subscription:
+        return {
+            "can_access": False,
+            "reason": "No active subscription",
+            "game_id": game.id,
+            "subscription_status": "none",
+        }
+    
+    # Check game access
+    can_access, reason = await SubscriptionService.can_access_game(
+        db=db, parent_id=current_user.id, game_id=game.id
+    )
+    
+    return {
+        "can_access": can_access,
+        "reason": reason,
+        "game_id": game.id,
+        "subscription_status": "active",
+        "plan_type": subscription.plan_type.value,
+    }
 
 
 @router.post("/", response_model=Game, status_code=status.HTTP_201_CREATED)

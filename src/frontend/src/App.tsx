@@ -32,6 +32,9 @@ const ResetPassword = lazy(() =>
     default: module.ResetPassword,
   })),
 );
+const Pricing = lazy(() =>
+  import('./pages/Pricing').then((module) => ({ default: module.Pricing })),
+);
 const Dashboard = lazy(() =>
   import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })),
 );
@@ -258,6 +261,14 @@ function App() {
                 <Route path='/reset-password' element={<ResetPassword />} />
 
                 {/* All other pages use Layout */}
+                <Route
+                  path='/pricing'
+                  element={
+                    <Layout>
+                      <Pricing />
+                    </Layout>
+                  }
+                />
                 <Route
                   path='/'
                   element={
