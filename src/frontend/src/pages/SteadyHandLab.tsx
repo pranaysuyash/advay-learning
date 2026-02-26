@@ -50,7 +50,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
 
   const { playSuccess, playError, playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('steady-hand-lab');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('steady-hand-lab');
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;
@@ -136,6 +136,10 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         }
         void playSuccess();
         triggerHaptic('success');
+
+        if (round + 1 >= 3) {
+          triggerEasterEgg('egg-surgeon-hands');
+        }
 
         if ((round + 1) % 5 === 0) {
           setShowCelebration(true);

@@ -2,6 +2,7 @@
 
 **Target**: `src/frontend/src/components/ui/ConfirmDialog.tsx`  
 **Date**: 2026-02-25  
+**Source Ticket**: `TCK-20260225-004`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 3, Risk 2, Complexity 2, Changeability 2, Learning 1 = **10/25**
 

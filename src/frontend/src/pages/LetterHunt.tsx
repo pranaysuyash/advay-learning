@@ -86,7 +86,8 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   // Sound effects
   const { playFanfare: playCelebration, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('letter-hunt');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('letter-hunt');
+  const foundCountRef = useRef(0);
 
   // Get alphabet based on settings
   const alphabet = getAlphabet(settings.gameLanguage || 'en');
@@ -164,6 +165,10 @@ export const LetterHunt = memo(function LetterHuntComponent() {
       if (option.isTarget) {
         playSuccess();
         setScore((prev) => prev + timeLeft * 5);
+        foundCountRef.current += 1;
+        if (foundCountRef.current >= 8) {
+          triggerEasterEgg('egg-treasure-hunter');
+        }
         setFeedback({ message: 'Correct! Great job!', type: 'success' });
         if (ttsEnabled) {
           void speak('Correct! Great job!');

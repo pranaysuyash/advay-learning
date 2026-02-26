@@ -2,6 +2,7 @@
 
 **Target**: `src/frontend/src/components/ui/VoiceButton.tsx`  
 **Date**: 2026-02-25  
+**Source Ticket**: `TCK-20260225-004`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 3, Risk 1, Complexity 2, Changeability 3, Learning 1 = **10/25**
 

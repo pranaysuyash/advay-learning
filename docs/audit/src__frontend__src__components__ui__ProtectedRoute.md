@@ -2,6 +2,7 @@
 
 **Target**: `src/frontend/src/components/ui/ProtectedRoute.tsx`  
 **Date**: 2026-02-25  
+**Source Ticket**: `TCK-20260225-004`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 2, Complexity 1, Changeability 2, Learning 1 = **10/25**
 

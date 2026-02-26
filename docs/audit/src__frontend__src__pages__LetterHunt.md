@@ -2,6 +2,7 @@
 
 **Target**: `src/frontend/src/pages/LetterHunt.tsx`  
 **Date**: 2026-02-25  
+**Source Ticket**: `TCK-20260225-004`  
 **Type**: Multi-Viewpoint Analysis  
 **Scoring**: Impact 4, Risk 4, Complexity 3, Changeability 2, Learning 1 = **14/25**
 

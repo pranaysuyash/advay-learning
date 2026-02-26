@@ -22,8 +22,27 @@ router = APIRouter()
 # Constants
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
 ALLOWED_EXTENSIONS = ["image/jpeg", "image/png"]
+ALLOWED_MIME_TYPES = {"jpeg": "image/jpeg", "png": "image/png"}
 TARGET_RESOLUTION = (640, 480)
 LOCAL_STORAGE_DIR = Path("public/profile_photos")
+
+# Magic bytes for image validation (file signatures)
+IMAGE_SIGNATURES = {
+    b'\xff\xd8\xff': 'jpeg',  # JPEG
+    b'\x89PNG\r\n\x1a\n': 'png',  # PNG
+}
+
+
+def validate_image_magic_bytes(content: bytes) -> str | None:
+    """Validate image by checking magic bytes (file signatures).
+
+    Returns the detected image type or None if invalid.
+    """
+    # Check first few bytes against known signatures
+    for signature, image_type in IMAGE_SIGNATURES.items():
+        if content.startswith(signature):
+            return image_type
+    return None
 
 
 @router.post("/api/v1/users/me/profiles/{profile_id}/photo", response_model=ProfilePhotoResponse)
@@ -52,12 +71,32 @@ async def upload_profile_photo(
             detail=f"Photo file too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)} bytes",
         )
 
-    # Validate file type
+    # Validate file type (header can be spoofed, so we check magic bytes below)
     content_type = photo.content_type if hasattr(photo, "content_type") else "image/jpeg"
     if content_type not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=415,
             detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
+        )
+
+    # Validate magic bytes (actual file content) to prevent spoofing
+    detected_type = validate_image_magic_bytes(contents)
+    if detected_type is None:
+        raise HTTPException(
+            status_code=415,
+            detail="Invalid image file. Only JPEG and PNG are allowed.",
+        )
+
+    # Verify detected type matches declared type
+    if detected_type == 'jpeg' and content_type != 'image/jpeg':
+        raise HTTPException(
+            status_code=415,
+            detail="File content does not match declared type.",
+        )
+    if detected_type == 'png' and content_type != 'image/png':
+        raise HTTPException(
+            status_code=415,
+            detail="File content does not match declared type.",
         )
 
     # Generate filename

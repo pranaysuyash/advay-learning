@@ -108,7 +108,7 @@ export const SimonSays = memo(function SimonSays() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const animationRef = useRef<number>(0);
-  const { onGameComplete } = useGameDrops('simon-says');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('simon-says');
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -288,7 +288,10 @@ export const SimonSays = memo(function SimonSays() {
             setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
             setShowResult(false);
             holdTimeRef.current = 0;
-            setRound((r: number) => r + 1);
+            setRound((r: number) => {
+              if (r + 1 >= 10) triggerEasterEgg('egg-simon-master');
+              return r + 1;
+            });
             if (gameMode === 'combo') {
               setTargetFingers(Math.floor(Math.random() * 5) + 1);
             }

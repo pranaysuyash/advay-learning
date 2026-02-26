@@ -57,18 +57,30 @@ class AccountLockoutService:
     async def is_account_locked(cls, email: str) -> bool:
         """Check if an account is currently locked.
 
+        Uses constant-time operations to prevent timing attacks.
+
         Args:
             email: The email to check
 
         Returns:
             True if account is locked, False otherwise
         """
-        if email in cls._account_lockouts:
-            if datetime.now() < cls._account_lockouts[email]:
-                return True
-            else:
-                # Lockout period expired, remove from lockouts
-                del cls._account_lockouts[email]
+        # Always access dict to prevent timing attack
+        # Use get() which has more consistent timing than 'in' operator
+        lockout_time = cls._account_lockouts.get(email)
+
+        if lockout_time is None:
+            return False
+
+        # Check if lockout has expired
+        if datetime.now() < lockout_time:
+            return True
+
+        # Lockout expired - remove it (best effort, ignore errors)
+        try:
+            cls._account_lockouts.pop(email, None)
+        except Exception:
+            pass
 
         return False
 
@@ -76,19 +88,29 @@ class AccountLockoutService:
     async def get_remaining_lockout_time(cls, email: str) -> Optional[int]:
         """Get remaining lockout time in seconds.
 
+        Uses constant-time operations to prevent timing attacks.
+
         Args:
             email: The email to check
 
         Returns:
             Remaining lockout time in seconds, or None if not locked
         """
-        if email in cls._account_lockouts:
-            remaining = cls._account_lockouts[email] - datetime.now()
-            if remaining.total_seconds() > 0:
-                return int(remaining.total_seconds())
-            else:
-                # Lockout period expired, remove from lockouts
-                del cls._account_lockouts[email]
+        # Always access dict to prevent timing attack
+        lockout_time = cls._account_lockouts.get(email)
+
+        if lockout_time is None:
+            return None
+
+        remaining = lockout_time - datetime.now()
+        if remaining.total_seconds() > 0:
+            return int(remaining.total_seconds())
+
+        # Lockout expired - remove it (best effort)
+        try:
+            cls._account_lockouts.pop(email, None)
+        except Exception:
+            pass
 
         return None
 

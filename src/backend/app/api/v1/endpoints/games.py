@@ -1,6 +1,8 @@
 """Games management endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
@@ -9,6 +11,31 @@ from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
 
 router = APIRouter()
+
+UUID_PATTERN = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+
+
+def is_uuid(value: str) -> bool:
+    """Check if value is a UUID."""
+    return bool(UUID_PATTERN.match(value))
+
+
+async def resolve_game_identifier(
+    identifier: str = Path(..., description="Game slug or ID"),
+    db: AsyncSession = Depends(get_db),
+) -> Game:
+    """Resolve game by slug or ID. UUIDs are treated as IDs, others as slugs."""
+    if is_uuid(identifier):
+        game = await GameService.get_by_id(db, identifier)
+    else:
+        game = await GameService.get_by_slug(db, identifier)
+
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found",
+        )
+    return game
 
 
 @router.get("/", response_model=GameList)
@@ -44,32 +71,10 @@ async def list_games(
     )
 
 
-@router.get("/{slug}", response_model=Game)
-async def get_game(slug: str, db: AsyncSession = Depends(get_db)) -> Game:
-    """Get game details by slug."""
-
-    game = await GameService.get_by_slug(db, slug)
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Game not found",
-        )
-
-    return game  # type: ignore[return-value]
-
-
-@router.get("/{game_id}", response_model=Game, include_in_schema=False)
-async def get_game_by_id(game_id: str, db: AsyncSession = Depends(get_db)) -> Game:
-    """Get game details by ID."""
-
-    game = await GameService.get_by_id(db, game_id)
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Game not found",
-        )
-
-    return game  # type: ignore[return-value]
+@router.get("/{identifier}", response_model=Game)
+async def get_game(identifier: str = Path(..., description="Game slug or ID"), db: AsyncSession = Depends(get_db)) -> Game:
+    """Get game details by slug or ID."""
+    return await resolve_game_identifier(identifier, db)
 
 
 @router.post("/", response_model=Game, status_code=status.HTTP_201_CREATED)

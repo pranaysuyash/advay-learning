@@ -25,7 +25,7 @@ class RefreshTokenService:
             {
                 "sub": user_id,
                 "jti": token_uuid,
-                "exp": datetime.utcnow()
+                "exp": datetime.now(timezone.utc)
                 + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
             },
             settings.SECRET_KEY,
@@ -36,7 +36,7 @@ class RefreshTokenService:
         refresh_token = RefreshToken(
             token=token,
             user_id=user_id,
-            expires_at=datetime.utcnow()
+            expires_at=datetime.now(timezone.utc)
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
 
