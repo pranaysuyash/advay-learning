@@ -1,0 +1,2 @@
+# Ignore known false-positive placeholder detected by generic-api-key rule in historical commit range
+b3ad0562f9c7f348ee95a82a753027951f733966:src/backend/app/services/dodo_payment_service.py:generic-api-key:11
