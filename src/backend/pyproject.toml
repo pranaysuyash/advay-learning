@@ -22,6 +22,7 @@ dependencies = [
     "bcrypt<4.1",
     "slowapi>=0.1.9",
     "cachetools>=5.3.3",
+    "dodopayments>=0.1.0",
 ]
 
 [project.optional-dependencies]

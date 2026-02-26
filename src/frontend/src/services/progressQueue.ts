@@ -8,6 +8,7 @@ export interface ProgressItem {
   content_id: string;
   score: number;
   duration_seconds?: number;
+  completed?: boolean;
   meta_data?: Record<string, any>;
   timestamp: string; // ISO
   status?: 'pending' | 'synced' | 'error';

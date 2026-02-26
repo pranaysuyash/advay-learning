@@ -36,7 +36,7 @@ class RefreshTokenService:
         refresh_token = RefreshToken(
             token=token,
             user_id=user_id,
-            expires_at=datetime.now(timezone.utc)
+            expires_at=datetime.utcnow()
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
 
@@ -54,7 +54,7 @@ class RefreshTokenService:
             .where(RefreshToken.token == token)
             .where(RefreshToken.is_active)
             .where(~RefreshToken.is_revoked)
-            .where(RefreshToken.expires_at > datetime.now(timezone.utc))
+            .where(RefreshToken.expires_at > datetime.utcnow())
         )
         return result.scalar_one_or_none()
 
@@ -67,7 +67,7 @@ class RefreshTokenService:
 
         refresh_token.is_revoked = True
         refresh_token.is_active = False
-        refresh_token.revoked_at = datetime.now(timezone.utc)
+        refresh_token.revoked_at = datetime.utcnow()
 
         await db.commit()
         return True
@@ -87,7 +87,7 @@ class RefreshTokenService:
         for token in tokens:
             token.is_revoked = True
             token.is_active = False
-            token.revoked_at = datetime.now(timezone.utc)
+            token.revoked_at = datetime.utcnow()
             count += 1
 
         await db.commit()

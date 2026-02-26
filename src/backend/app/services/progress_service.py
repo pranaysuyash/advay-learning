@@ -84,6 +84,7 @@ class ProgressService:
             duration_seconds=data.duration_seconds,
             meta_data=data.meta_data or {},
             idempotency_key=data.idempotency_key,
+            completed=data.completed,
         )
         db.add(progress)
 

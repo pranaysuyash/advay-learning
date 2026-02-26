@@ -126,6 +126,7 @@ export const progressApi = {
       content_id: string;
       score: number;
       duration_seconds?: number;
+      completed?: boolean;
       meta_data?: Record<string, any>;
       idempotency_key?: string;
       timestamp?: string;

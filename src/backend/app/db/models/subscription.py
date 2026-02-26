@@ -70,12 +70,9 @@ class Subscription(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc)
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
     # Relationships
@@ -109,9 +106,7 @@ class SubscriptionGameSelection(Base):
     game_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
 
     # When this game was selected
-    selected_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
-    )
+    selected_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # When swapped (if applicable)
     swapped_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -120,9 +115,7 @@ class SubscriptionGameSelection(Base):
     original_game_id: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
     subscription: Mapped["Subscription"] = relationship(

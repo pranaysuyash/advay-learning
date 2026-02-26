@@ -23,6 +23,7 @@ class TestProgress:
                 "content_id": "A",
                 "score": 85,
                 "duration_seconds": 30,
+                "completed": True,
                 "meta_data": {"accuracy": 90},
             },
         )
@@ -30,6 +31,7 @@ class TestProgress:
         data = response.json()
         assert data["score"] == 85
         assert data["activity_type"] == "letter_tracing"
+        assert data["completed"] is True
 
     async def test_get_progress(self, client: AsyncClient, auth_headers: dict):
         """Test getting progress data."""

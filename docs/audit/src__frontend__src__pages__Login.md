@@ -16,10 +16,10 @@ This is the **Login** page - authentication page with email/password login and g
 
 ## Scoring Rationale
 
-| Criterion     | Score | Justification    |
-| ------------- | ----- | ------------- |
-| Impact        | 5     | Auth page       |
-| Risk          | 1     | Simple form     |
+| Criterion     | Score | Justification  |
+| ------------- | ----- | -------------- |
+| Impact        | 5     | Auth page      |
+| Risk          | 1     | Simple form    |
 | Complexity    | 1     | Basic UI       |
 | Changeability | 1     | Standard auth  |
 | Learning      | 1     | Common pattern |
@@ -38,9 +38,9 @@ This is the **Login** page - authentication page with email/password login and g
 
 ## Prioritized Backlog
 
-| ID     | Category   | Severity | Effort | Fix                |
-| ------ | ---------- | -------- | ------ | ------------------ |
-| L-01   | Correctness | P0       | 0.1h   | Fix JSX syntax      |
+| ID   | Category    | Severity | Effort | Fix            |
+| ---- | ----------- | -------- | ------ | -------------- |
+| L-01 | Correctness | P0       | 0.1h   | Fix JSX syntax |
 
 ---
 

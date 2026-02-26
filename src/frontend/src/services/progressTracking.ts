@@ -14,6 +14,7 @@ export interface GameProgressPayload {
   routePath?: string;
   sessionId?: string;
   metaData?: Record<string, unknown>;
+  completed?: boolean;
 }
 
 export interface ProgressActivityPayload {
@@ -26,6 +27,7 @@ export interface ProgressActivityPayload {
   sessionId?: string;
   idempotencyKey?: string;
   metaData?: Record<string, unknown>;
+  completed?: boolean;
 }
 
 function normalizeScore(score: number): number {
@@ -68,6 +70,7 @@ export async function recordProgressActivity(payload: ProgressActivityPayload): 
     sessionId,
     idempotencyKey,
     metaData,
+    completed,
   } = payload;
 
   if (!isValidProfileId(profileId)) {
@@ -93,6 +96,7 @@ export async function recordProgressActivity(payload: ProgressActivityPayload): 
     content_id: safeContentId,
     score: safeScore,
     duration_seconds: safeDurationSeconds,
+    completed: Boolean(completed),
     meta_data: {
       route_path: routePath,
       ...metaData,
@@ -109,6 +113,7 @@ export async function recordProgressActivity(payload: ProgressActivityPayload): 
       content_id: queueItem.content_id,
       score: queueItem.score,
       duration_seconds: queueItem.duration_seconds,
+      completed: queueItem.completed,
       meta_data: queueItem.meta_data,
       idempotency_key: queueItem.idempotency_key,
       timestamp: queueItem.timestamp,
@@ -134,6 +139,7 @@ export async function recordGameSessionProgress(payload: GameProgressPayload): P
     routePath,
     sessionId,
     metaData,
+    completed,
   } = payload;
 
   const contentId = toContentId(gameName || 'unknown-game');
@@ -141,15 +147,20 @@ export async function recordGameSessionProgress(payload: GameProgressPayload): P
     ? buildSessionIdempotencyKey(profileId, contentId, sessionId || `${Date.now()}`)
     : undefined;
 
+  const durationOk = Number.isFinite(durationSeconds) && durationSeconds > 60;
+  const scoreOk = Number.isFinite(score) && score > 0;
+  const inferredCompleted = completed ?? (durationOk && scoreOk);
+
   return recordProgressActivity({
     profileId,
-    activityType: 'game_session',
+    activityType: 'game',
     contentId,
     score,
     durationSeconds,
     routePath,
     sessionId,
     idempotencyKey,
+    completed: inferredCompleted,
     metaData: {
       game_name: gameName,
       level,

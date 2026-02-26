@@ -299,7 +299,7 @@
 
 **Ticket:** TCK-20260223-001  
 **Verifier:** GitHub Copilot  
-**Verification target in current codebase:** `src/frontend/src/pages/AlphabetGame.tsx` (file appears renamed from historical `AlphabetGamePage.tsx`)  
+**Verification target in current codebase:** `src/frontend/src/pages/AlphabetGame.tsx` (file appears renamed from historical `AlphabetGamePage.tsx`)
 
 ### Evidence anchors (Observed)
 
@@ -311,30 +311,30 @@
 
 ### Finding status matrix
 
-| Original finding | 2026-02-23 status | Notes |
-|---|---|---|
-| Component size violation (P0) | **NOT FIXED** | Still a very large page component handling many domains. |
-| Single responsibility violation (P0) | **NOT FIXED** | Game logic + camera + wellness + UI + session persistence still coupled. |
-| Memory management issues (P1) | **PARTIAL** | Bounded point buffer (6000 cap) added; broader long-session memory profiling still not evidenced in this file. |
-| Performance issues in RAF loop (P1) | **PARTIAL** | Some helper extraction and hand-tracking hook centralization present; heavy RAF/canvas loop still core path. |
-| State management complexity (P2) | **NOT FIXED** | High number of `useState`/`useRef` and intertwined effects remain. |
-| Dependency management complexity (P2) | **NOT FIXED** | Several broad effects with multiple dependencies still present. |
-| Cognitive overload (P0) | **PARTIAL** | Some modal gating and clearer sections; pre-game still shows many simultaneous elements. |
-| Accessibility concerns (P0) | **PARTIAL** | Bigger controls/responsive classes observed; full WCAG validation evidence not present here. |
-| Feedback delay (P1) | **PARTIAL** | Immediate feedback exists in key paths; no latency measurement evidence. |
-| Complex instructions (P1) | **PARTIAL** | Tone improved in places; still text-heavy in pre-game sections. |
-| Hand tracking performance (P0) | **PARTIAL** | Centralized tracking hook used; no hard perf proof in this file, RAF remains heavy. |
-| Fallback mechanism intuitiveness (P0) | **FIXED (functional)** | Mouse/touch fallback and recovery modal are explicit and user-facing. |
-| Calibration issues (P1) | **NOT FIXED** | No explicit calibration step found. |
-| Lighting sensitivity guidance (P1) | **NOT FIXED** | No dedicated lighting guidance flow observed in this file. |
-| Visual hierarchy issues (P0) | **PARTIAL** | Improved cards/layout; hierarchy still dense in pre-game. |
-| Responsive design issues (P0) | **PARTIAL** | Responsive classes and layout present; cross-device validation still pending. |
-| Color usage inconsistency (P1) | **UNKNOWN** | Requires design token audit across app, not this file alone. |
-| Animation performance (P1) | **PARTIAL** | Motion usage remains; no profiling evidence attached. |
-| localStorage security concern (P0) | **PARTIAL** | Defensive `try/catch` exists; schema validation/sanitization not formalized. |
-| Error handling (P0) | **NOT FIXED** | Multiple catches still ignore/log minimally; observability not standardized. |
-| Code duplication (P1) | **PARTIAL** | Some utility extraction exists; duplication still likely in UI state flows. |
-| Magic numbers (P1) | **NOT FIXED** | Multiple hardcoded thresholds/constants remain inline. |
+| Original finding                      | 2026-02-23 status      | Notes                                                                                                          |
+| ------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Component size violation (P0)         | **NOT FIXED**          | Still a very large page component handling many domains.                                                       |
+| Single responsibility violation (P0)  | **NOT FIXED**          | Game logic + camera + wellness + UI + session persistence still coupled.                                       |
+| Memory management issues (P1)         | **PARTIAL**            | Bounded point buffer (6000 cap) added; broader long-session memory profiling still not evidenced in this file. |
+| Performance issues in RAF loop (P1)   | **PARTIAL**            | Some helper extraction and hand-tracking hook centralization present; heavy RAF/canvas loop still core path.   |
+| State management complexity (P2)      | **NOT FIXED**          | High number of `useState`/`useRef` and intertwined effects remain.                                             |
+| Dependency management complexity (P2) | **NOT FIXED**          | Several broad effects with multiple dependencies still present.                                                |
+| Cognitive overload (P0)               | **PARTIAL**            | Some modal gating and clearer sections; pre-game still shows many simultaneous elements.                       |
+| Accessibility concerns (P0)           | **PARTIAL**            | Bigger controls/responsive classes observed; full WCAG validation evidence not present here.                   |
+| Feedback delay (P1)                   | **PARTIAL**            | Immediate feedback exists in key paths; no latency measurement evidence.                                       |
+| Complex instructions (P1)             | **PARTIAL**            | Tone improved in places; still text-heavy in pre-game sections.                                                |
+| Hand tracking performance (P0)        | **PARTIAL**            | Centralized tracking hook used; no hard perf proof in this file, RAF remains heavy.                            |
+| Fallback mechanism intuitiveness (P0) | **FIXED (functional)** | Mouse/touch fallback and recovery modal are explicit and user-facing.                                          |
+| Calibration issues (P1)               | **NOT FIXED**          | No explicit calibration step found.                                                                            |
+| Lighting sensitivity guidance (P1)    | **NOT FIXED**          | No dedicated lighting guidance flow observed in this file.                                                     |
+| Visual hierarchy issues (P0)          | **PARTIAL**            | Improved cards/layout; hierarchy still dense in pre-game.                                                      |
+| Responsive design issues (P0)         | **PARTIAL**            | Responsive classes and layout present; cross-device validation still pending.                                  |
+| Color usage inconsistency (P1)        | **UNKNOWN**            | Requires design token audit across app, not this file alone.                                                   |
+| Animation performance (P1)            | **PARTIAL**            | Motion usage remains; no profiling evidence attached.                                                          |
+| localStorage security concern (P0)    | **PARTIAL**            | Defensive `try/catch` exists; schema validation/sanitization not formalized.                                   |
+| Error handling (P0)                   | **NOT FIXED**          | Multiple catches still ignore/log minimally; observability not standardized.                                   |
+| Code duplication (P1)                 | **PARTIAL**            | Some utility extraction exists; duplication still likely in UI state flows.                                    |
+| Magic numbers (P1)                    | **NOT FIXED**          | Multiple hardcoded thresholds/constants remain inline.                                                         |
 
 ### Verification verdict
 
@@ -344,11 +344,10 @@ Critical architectural issues (size/SRP/state complexity) remain open. Several U
 ### Action taken from this verification
 
 - Created remediation ticket in `docs/WORKLOG_ADDENDUM_v3.md`:
-   - **TCK-20260223-002 :: AlphabetGame hardening from verified open findings**
+  - **TCK-20260223-002 :: AlphabetGame hardening from verified open findings**
 
 ### 2026-02-23 remediation checkpoint
 
 - **Observed:** TCK-20260223-002 remediation slices completed (constants extraction, session persistence extraction, overlay gating extraction, catch-path warning normalization).
 - **Observed evidence:** focused tests passing for extracted modules (`sessionPersistence` and `overlayState`, 9 tests total).
 - **Implication:** Several findings moved from NOT FIXED → PARTIAL/FIXED at implementation level, but full architectural decomposition remains out-of-scope for this slice.
-

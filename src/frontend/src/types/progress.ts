@@ -7,6 +7,7 @@ export interface ProgressItem {
   activity_type: string;
   content_id: string;
   score: number;
+  completed?: boolean;
   completed_at: string;
   attempt_count?: number; // Number of attempts to complete (undefined = not tracked, assume 1)
 }

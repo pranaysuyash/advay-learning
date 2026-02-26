@@ -120,7 +120,7 @@ Execution log:
 
 Status updates:
 - 2026-02-26 **OPEN** — Ticket created, depends on TCK-20260226-001
-- 2026-02-26 **DONE** — Created endpoints/subscriptions.py with 8 endpoints, registered in api.py, verified
+- 2026-02-26 **DONE** — Created endpoints/subscriptions.py with 8 endpoints, Dodo payment service integrated
 
 Next actions:
 1. Implement endpoints after models are ready
@@ -389,20 +389,45 @@ Next actions:
 
 ---
 
-## Summary
+## Pending Items & Next Steps
 
-**PRICING DECIDED:**
-- 5-Game Pack: ₹1,500 / 3 months rolling
-- 10-Game Pack: ₹2,500 / 3 months rolling  
-- Full Annual: ₹6,000 / 12 months
-- Payment: Dodo Payments
+### Completed
+- ✅ TCK-20260226-001: Database Models (migration 008 created)
+- ✅ TCK-20260226-002: API Endpoints (8 endpoints created, Dodo integrated)
 
-| Ticket | Description | Priority | Dependencies |
-|--------|-------------|----------|--------------|
-| TCK-20260226-001 | Database Models | P1 | None |
-| TCK-20260226-002 | API Endpoints (7 endpoints) | P1 | TCK-20260226-001 |
-| TCK-20260226-003 | Game Access Control | P0 | TCK-20260226-002 |
-| TCK-20260226-004 | Pricing Page UI | P1 | TCK-20260226-002 |
-| TCK-20260226-005 | Game Selection UI | P1 | TCK-20260226-002 |
-| TCK-20260226-006 | Dashboard Pack Status | P1 | TCK-20260226-002 |
-| TCK-20260226-007 | Upgrade to Full | P2 | TCK-20260226-002 |
+### Pending (In Priority Order)
+
+1. **TCK-20260226-003: Game Access Control** (P0)
+   - `can_access_game()` function
+   - Integrate with game loading endpoints
+   - Block access for non-selected games in packs
+   - Dependencies: API ready
+
+2. **TCK-20260226-004: Pricing Page UI** (P1)
+   - Display 3 pricing tiers
+   - Purchase button flow
+   - Dependencies: API ready
+
+3. **TCK-20260226-005: Game Selection UI** (P1)
+   - Grid of available games
+   - Checkbox selection with limit enforcement
+   - Dependencies: API ready
+
+4. **TCK-20260226-006: Dashboard Pack Status** (P1)
+   - Show pack type, days remaining
+   - Expiration warning
+   - Selected games list
+   - Dependencies: API ready
+
+5. **TCK-20260226-007: Upgrade to Full** (P2)
+   - Prorated credit calculation UI
+   - Upgrade flow
+   - Dependencies: API ready
+
+### Dodo Products Setup (BLOCKING)
+Create products in Dodo dashboard:
+- 5-Game Pack (₹1,500) - INR
+- 10-Game Pack (₹2,500) - INR
+- Full Annual (₹6,000) - INR
+
+Then add product IDs to `PLAN_PRODUCT_IDS` in `app/services/dodo_payment_service.py`

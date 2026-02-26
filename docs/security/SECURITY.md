@@ -6,7 +6,7 @@ This application is designed for a child (Advay) and prioritizes **safety, priva
 
 ## Core Principles
 
-1. **Local-First**: All data stays on the device by default
+1. **Privacy-First**: Minimal data collection, parental control over all stored data
 2. **Minimal Data**: Collect only what's necessary for functionality
 3. **Parental Control**: Parents have full visibility and control
 4. **Transparent**: Clear about what data is used and why
@@ -16,12 +16,21 @@ This application is designed for a child (Advay) and prioritizes **safety, priva
 
 ### What We Collect
 
-| Data | Purpose | Storage |
-|------|---------|---------|
-| Learning progress | Track advancement | PostgreSQL (backend) |
-| Game scores | Gamification | PostgreSQL (backend) |
-| Settings/preferences | User experience | PostgreSQL (backend) |
-| Error logs | Debugging | Local file (rotated) |
+| Data | Purpose | Storage | Retention |
+|------|---------|---------|-----------|
+| Learning progress | Track advancement | PostgreSQL (backend) | Until account deletion |
+| Game scores | Gamification | PostgreSQL (backend) | 90 days |
+| Settings/preferences | User experience | PostgreSQL (backend) | Until account deletion |
+| User account (email, hashed password) | Authentication | PostgreSQL (backend) | Until account deletion |
+| Child profiles (name, age, avatar) | Personalization | PostgreSQL (backend) | Until profile deletion |
+| Error logs | Debugging | Local file (rotated) | 7 days |
+
+### Authentication Data
+
+- **Parent accounts**: Email and bcrypt-hashed passwords stored in PostgreSQL
+- **JWT tokens**: Short-lived access tokens (15 min) and refresh tokens (7 days) stored in HTTP-only cookies
+- **Session management**: Refresh tokens tracked in database for revocation
+- **No PIN-based local auth**: Previous local-first PIN authentication has been replaced with secure web authentication
 
 ### What We DON'T Collect
 
@@ -65,36 +74,70 @@ Landmarks Used for Interaction
 
 ## Storage Security
 
-### Backend Database
+### Backend Database (PostgreSQL)
 
-- **Type**: PostgreSQL
-- **Location**: Backend server (managed database)
-- **Encryption**: Transport encryption (TLS); at-rest encryption per database provider
-- **Backup**: Database-managed backups; custom backup strategy in ADR 003
-- **Access**: Authenticated via API with JWT tokens
+- **Type**: PostgreSQL 14+
+- **Location**: Cloud-hosted or self-managed PostgreSQL instance
+- **Encryption**: 
+  - Transport: TLS 1.2+ for all connections
+  - At-rest: Per database provider (AWS RDS, Google Cloud SQL, etc.)
+- **Backup**: Automated daily backups with 30-day retention
+- **Access**: 
+  - API access via JWT token authentication
+  - Database credentials stored in environment variables
+  - No direct database access from frontend
+
+### Data Access Controls
+
+- **Row-level security**: Users can only access their own data and their children's profiles
+- **API authorization**: All endpoints require valid JWT tokens
+- **Rate limiting**: API requests are rate-limited to prevent abuse
+- **Audit logging**: Security events (login, password changes) are logged
 
 ### Data Retention
 
-| Data Type | Retention |
-|-----------|-----------|
-| Learning progress | Until explicitly deleted |
-| Game history | Last 90 days |
-| Error logs | 7 days |
-| Temporary files | Session only |
+| Data Type | Retention | Deletion Method |
+|-----------|-----------|-----------------|
+| User account + profiles | Until account deletion | Parent-initiated account deletion |
+| Learning progress | Until account deletion | Cascading delete with account |
+| Game history | 90 days | Automatic purge after 90 days |
+| Refresh tokens | 7 days or on logout | Automatic expiry or revocation |
+| Error logs | 7 days | Automatic rotation |
+| Temporary files | Session only | Automatic cleanup |
+
+### Right to Deletion
+
+Parents can request complete account deletion which removes:
+- User account and authentication credentials
+- All child profiles
+- All learning progress and game history
+- All settings and preferences
+
+Deletion is permanent and cannot be undone.
 
 ## Authentication
 
-### Parent Mode
+### Web-Based Authentication
 
-- **Purpose**: Access settings, progress reports, data export
-- **Method**: PIN or password (configurable)
-- **Timeout**: Auto-lock after 5 minutes of inactivity
+- **Registration**: Email verification required before first login
+- **Login**: Email + password with account lockout protection (5 failed attempts)
+- **Session Management**: JWT access tokens (15-minute expiry) + refresh tokens (7-day expiry)
+- **Token Storage**: HTTP-only, Secure, SameSite=Lax cookies
+- **Password Security**: bcrypt hashing with 12 rounds
+- **Auto-logout**: Token expiry enforces re-authentication
 
-### Child Mode
+### Parent Features (Post-Login)
 
-- No authentication required
-- Limited to learning activities only
-- Cannot access settings or data export
+- **Settings access**: Full control over account and child profiles
+- **Progress reports**: View all stored learning data
+- **Data export**: JSON/CSV export of all account data
+- **Account deletion**: Complete data removal on request
+
+### Child Access
+
+- Child profiles are managed under parent accounts
+- No separate authentication required for children
+- Child mode is a UI state, not an authentication tier
 
 ## Optional Cloud Sync
 
