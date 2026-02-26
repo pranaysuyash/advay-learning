@@ -2,7 +2,15 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, games, issue_reports, profile_photos, progress, users
+from app.api.v1.endpoints import (
+    auth,
+    games,
+    issue_reports,
+    profile_photos,
+    progress,
+    subscriptions,
+    users,
+)
 
 api_router = APIRouter()
 
@@ -12,7 +20,12 @@ api_router.include_router(progress.router, prefix="/progress", tags=["progress"]
 api_router.include_router(profile_photos.router, tags=["profile-photos"])
 api_router.include_router(games.router, prefix="/games", tags=["games"])
 api_router.include_router(
-	issue_reports.router,
-	prefix="/issue-reports",
-	tags=["issue-reports"],
+    issue_reports.router,
+    prefix="/issue-reports",
+    tags=["issue-reports"],
+)
+api_router.include_router(
+    subscriptions.router,
+    prefix="/subscriptions",
+    tags=["subscriptions"],
 )

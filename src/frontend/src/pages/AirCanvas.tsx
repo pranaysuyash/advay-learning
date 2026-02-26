@@ -59,7 +59,8 @@ const COLORS = [
 
 export function AirCanvas() {
   const navigate = useNavigate();
-  const { onGameComplete: _onGameComplete } = useGameDrops('air-canvas');
+  const { triggerEasterEgg } = useGameDrops('air-canvas');
+  const usedColorsRef = useRef<Set<string>>(new Set());
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setIsDrawing] = useState(false);
@@ -467,6 +468,10 @@ export function AirCanvas() {
                       key={color}
                       onClick={() => {
                         setSelectedColor(color);
+                        usedColorsRef.current.add(color);
+                        if (usedColorsRef.current.size >= COLORS.length) {
+                          triggerEasterEgg('egg-rainbow-canvas');
+                        }
                         assetLoader.playSound('pop', 0.2);
                         void playPop();
                       }}

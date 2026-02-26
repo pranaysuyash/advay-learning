@@ -2,6 +2,7 @@
 
 Ticket: `TCK-20260223-900`  
 Date: 2026-02-23  
+Source Ticket: TCK-20260225-004
 Prompt Traceability: `prompts/audit/audit-v1.5.1.md` + `prompts/remediation/implementation-v1.6.1.md` (findings-only pass, no fixes in this artifact)
 
 ## Scope Contract

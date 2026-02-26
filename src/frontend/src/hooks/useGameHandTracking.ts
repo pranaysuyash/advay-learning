@@ -335,7 +335,7 @@ export function useGameHandTracking(
         pinchStateRef.current = currentPinch;
         onFrame?.(frame, meta);
       },
-      [activeRuntimeMode, onFrame, pinch, resetPinchOnNoHand, smoothing],
+      [onFrame],
     ),
     onNoVideoFrame: useCallback(() => {
       setCursor(null);
@@ -352,7 +352,7 @@ export function useGameHandTracking(
         console.error(`[${gameName}] Hand tracking error:`, error);
         onError?.(error as Error);
       },
-      [activeRuntimeMode, gameName, onError],
+      [gameName, onError],
     ),
   });
 

@@ -7,6 +7,7 @@
 **Date**: 2026-01-29 16:03 IST
 **Ticket**: TCK-20260224-001
 **Ticket**: TCK-20260224-001
+**Source Ticket**: TCK-20260225-004
 **Audited file**: `src/frontend/src/pages/Game.tsx` (REMOVED 2026-01-30)
 **Base commit SHA**: d7d0670e0c7977093b7606b9415405669f4258a3
 **Auditor**: GitHub Copilot

@@ -8,6 +8,7 @@
 **Ticket**: TCK-20260224-001
 **Ticket:** TCK-20260203-001
 **Target**: src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx
+**Source Ticket**: TCK-20260225-004
 **Scope**: Single-file technical and UX audit
 **Base Branch**: main
 

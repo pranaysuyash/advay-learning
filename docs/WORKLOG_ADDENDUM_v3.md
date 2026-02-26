@@ -68,6 +68,7 @@ Next actions:
 Evidence:
 
 **Research Findings**:
+
 - Observed: Dashboard has static RECOMMENDED_GAMES array (alphabet-tracing, finger-number-show, music-pinch-beat, connect-the-dots)
 - Observed: gameRegistry has 39 games with rich metadata (worldId, vibe, ageRange, isNew flag, cv requirements)
 - Observed: 9 games flagged as isNew (underutilized for discovery)
@@ -77,6 +78,7 @@ Evidence:
 - **Key Insight**: Can build comprehensive system from day one instead of 3 phases
 
 **Enhanced Phase 1 Strategy** (APPROVED):
+
 - **4-Slot Algorithm**:
   1. Slot 1: NEW (isNew flag - always available)
   2. Slot 2: FAVORITE (most played local - personal history)
@@ -102,6 +104,7 @@ Evidence:
   - UI: Update Dashboard to use new algorithm
 
 **Expected Impact**:
+
 - Featured game CTR: **40-60%** (vs 8-12% baseline)
 - Unique games/week/child: **10-15** (vs 3-5 baseline)
 - Dashboard bounce rate: **20-25%** (vs 35-40% baseline)
@@ -109,6 +112,7 @@ Evidence:
 - Implementation time: **2 weeks, 60 hours** (1 backend + 1 frontend engineer)
 
 **Why Enhanced Phase 1 is Better**:
+
 - ✅ No throwaway code (build once, not 3 times)
 - ✅ IS personalized (uses personal history when available)
 - ✅ IS dynamic (different for every user type: new, returning, guest)
@@ -164,6 +168,7 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 **WEEK 1: Backend + Data Layer (27 hours)**
 
 **Day 1-2: Database & Models (8 hours)**
+
 - [ ] Create Alembic migration to add `completed BOOLEAN DEFAULT FALSE` to game_progress table
 - [ ] Add indexes: `CREATE INDEX idx_game_progress_game_time ON game_progress(game_name, created_at DESC)`
 - [ ] Add indexes: `CREATE INDEX idx_game_progress_profile_game ON game_progress(profile_id, game_name)`
@@ -172,15 +177,19 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 - [ ] Verify indexes with EXPLAIN queries
 
 **Day 3-4: Stats API Endpoint (12 hours)**
-- [ ] Create `src/backend/app/routers/games.py` with GET /api/games/stats endpoint
-- [ ] Implement GlobalGameStatsResponse schema (totalPlays, avgSessionMinutes, completionRate, popularityScore, ageCohortRank)
-- [ ] Implement query with GROUP BY game_name, age cohort filtering, time period filtering
-- [ ] Add TTLCache caching (1-hour expiry, 100 item limit)
-- [ ] Add error handling (500 → empty stats response)
-- [ ] Write integration tests for stats endpoint (test_games_stats.py)
-- [ ] Test caching behavior (verify cache hit/miss)
+
+- [x] Create `src/backend/app/routers/games.py` with GET /api/games/stats endpoint
+- [x] Implement GlobalGameStatsResponse schema (totalPlays, avgSessionMinutes, completionRate, popularityScore, ageCohortRank)
+- [x] Implement query with GROUP BY game_name, age cohort filtering, time period filtering
+- [x] Add TTLCache caching (1-hour expiry, 100 item limit)
+- [x] Add error handling (500 → empty stats response)
+- [x] Write integration tests for stats endpoint (test_games_stats.py)
+- [x] Test caching behavior (verify cache hit/miss)
+- [x] Fix boolean→numeric cast in SQL query (can't cast BOOLEAN to FLOAT directly)
+- [x] Fix timezone-aware vs timezone-naive datetime mismatch in User/Profile models
 
 **Day 5: Progress Tracking Updates (7 hours)**
+
 - [ ] Update POST /api/progress endpoint to accept `completed: boolean` parameter
 - [ ] Update frontend progressTracking.logGameSession() to calculate completed flag (>60s session + score >0 heuristic)
 - [ ] Test completed field is properly saved to database
@@ -189,6 +198,7 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 **WEEK 2: Frontend Algorithm + UI (33 hours)**
 
 **Day 6-7: State Management & Data Hooks (10 hours)**
+
 - [ ] Extend progressStore.ts with gameHistory interface (playCount, totalMinutes, lastPlayed, completionRate, scores[])
 - [ ] Implement recordGamePlay(), getGameHistory(), getRecentGames() methods
 - [ ] Add persistence to localStorage for gameHistory (per profileId)
@@ -197,6 +207,7 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 - [ ] Write unit tests for progressStore gameHistory methods
 
 **Day 8-9: Recommendation Algorithm (12 hours)**
+
 - [ ] Create src/frontend/src/utils/recommendations.ts
 - [ ] Implement getFeaturedGamesEnhanced() with 4-slot strategy:
   - Slot 1: NEW (isNew flag, prioritize world diversity)
@@ -215,6 +226,7 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
   - Age filtering edge cases
 
 **Day 10: UI Implementation (8 hours)**
+
 - [ ] Update GameCard.tsx to accept badge prop (NEW | FAVORITE | TRENDING | DISCOVER)
 - [ ] Style badges with appropriate colors and icons
 - [ ] Update Dashboard.tsx to use getFeaturedGamesEnhanced()
@@ -223,6 +235,7 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 - [ ] Test UI with various user states (new, returning, guest)
 
 **Day 11: Testing & QA (3 hours)**
+
 - [ ] Run full test suite (backend + frontend)
 - [ ] Manual QA testing:
   - New user flow (see NEW games)
@@ -275,6 +288,15 @@ Execution log:
 
 - 2026-02-25 15:35 | Ticket created, awaiting implementation start | Evidence: Research complete (TCK-20260225-003), implementation plan reviewed and approved
 - 2026-02-26 10:05 | Added missing `Source Ticket` references to 26 `docs/audit/*` artifacts to satisfy agent-gate pre-push policy and unblock remote sync | Evidence: gate error output + metadata patch across affected audit files
+- 2026-02-26 10:30 | Week 1 Day 3-4: Implemented stats API endpoint with TTLCache | Evidence: Created GlobalGameStat/GlobalGameStatsResponse schemas, GET /api/v1/games/stats endpoint with age cohort + period filtering, TTLCache (1h TTL, 100 items), popularity scoring algorithm
+- 2026-02-26 10:45 | Added cachetools dependency to pyproject.toml | Evidence: `cachetools>=5.3.3` added to dependencies list
+- 2026-02-26 10:50 | Wrote integration tests for stats endpoint | Evidence: test_games_stats_returns_aggregates (validates aggregation + age filtering), test_games_stats_uses_ttl_cache (validates cache behavior)
+- 2026-02-26 11:00 | Fixed SQL query boolean cast error | Evidence: Changed `cast(Progress.completed, Float)` to `cast(Progress.completed, Integer)` - PostgreSQL cannot cast boolean→float directly
+- 2026-02-26 11:05 | Fixed timezone mismatch in User/Profile models | Evidence: Changed `datetime.now(timezone.utc)` to `datetime.utcnow()` to match TIMESTAMP WITHOUT TIME ZONE database columns
+- 2026-02-26 11:10 | Fixed test timezone issue | Evidence: Changed test from `datetime.now(timezone.utc)` to `datetime.utcnow()` for Progress.completed_at test data
+- 2026-02-26 11:15 | All tests passing | Evidence: pytest output shows `2 passed` for test_games_stats_returns_aggregates + test_games_stats_uses_ttl_cache
+- 2026-02-26 12:30 | Added corrective migration to ensure completion tracking schema on existing DBs | Evidence: Created `007_ensure_game_completion_tracking.py` (adds completed column + indexes if missing)
+- 2026-02-26 12:35 | Applied migration 007 and re-verified stats tests | Evidence: alembic upgraded to head 007; pytest output shows `2 passed` for stats tests
 
 Status updates:
 

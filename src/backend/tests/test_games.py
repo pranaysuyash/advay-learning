@@ -1,8 +1,16 @@
 """Tests for games API."""
 
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+
 import pytest
 from httpx import AsyncClient
 
+from app.api.v1.endpoints import games as games_endpoint
+from app.core.security import get_password_hash
+from app.db.models.profile import Profile
+from app.db.models.progress import Progress
+from app.db.models.user import User
 from app.db.models.user import User as UserModel
 from app.schemas.user import UserRole
 
@@ -35,6 +43,91 @@ async def test_list_games_pagination(client: AsyncClient):
     data = response.json()
     assert data["page"] == 1
     assert data["page_size"] == 10
+
+
+@pytest.mark.asyncio
+async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
+    """Stats endpoint should aggregate per game with age-cohort filtering."""
+    parent = User(
+        id=str(uuid4()),
+        email=f"stats-parent-{uuid4()}@test.com",
+        hashed_password=get_password_hash("Test123!@#"),
+        is_active=True,
+        email_verified=True,
+    )
+    db_session.add(parent)
+    await db_session.flush()
+
+    in_range = Profile(id=str(uuid4()), parent_id=parent.id, name="Kid A", age=5)
+    out_range = Profile(id=str(uuid4()), parent_id=parent.id, name="Kid B", age=9)
+    db_session.add_all([in_range, out_range])
+    await db_session.flush()
+
+    now = datetime.utcnow()
+    db_session.add_all(
+        [
+            Progress(
+                id=str(uuid4()),
+                profile_id=in_range.id,
+                activity_type="game",
+                content_id="color-by-number",
+                score=90,
+                duration_seconds=120,
+                completed=True,
+                completed_at=now - timedelta(days=1),
+            ),
+            Progress(
+                id=str(uuid4()),
+                profile_id=in_range.id,
+                activity_type="game",
+                content_id="color-by-number",
+                score=70,
+                duration_seconds=180,
+                completed=False,
+                completed_at=now - timedelta(days=1),
+            ),
+            Progress(
+                id=str(uuid4()),
+                profile_id=out_range.id,
+                activity_type="game",
+                content_id="color-by-number",
+                score=80,
+                duration_seconds=240,
+                completed=True,
+                completed_at=now - timedelta(days=1),
+            ),
+        ]
+    )
+    await db_session.commit()
+
+    response = await client.get("/api/v1/games/stats?period=all&ageGroup=4-6")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["period"] == "all"
+    assert data["ageGroup"] == "4-6"
+    assert len(data["games"]) >= 1
+
+    target = next((g for g in data["games"] if g["gameName"] == "color-by-number"), None)
+    assert target is not None
+    assert target["totalPlays"] == 2
+    assert target["avgSessionMinutes"] == 2.5
+    assert target["completionRate"] == 0.5
+    assert target["ageCohortRank"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_games_stats_uses_ttl_cache(client: AsyncClient):
+    """Stats endpoint should return cached response for identical requests."""
+    games_endpoint._GAME_STATS_CACHE.clear()
+
+    first = await client.get("/api/v1/games/stats?period=all")
+    second = await client.get("/api/v1/games/stats?period=all")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["generatedAt"] == second.json()["generatedAt"]
+    assert games_endpoint._GAME_STATS_CACHE.currsize == 1
 
 
 @pytest.mark.asyncio

@@ -19,6 +19,48 @@ from app.services.user_service import UserService
 router = APIRouter()
 
 
+async def get_and_validate_profile(
+    profile_id: str,
+    current_user: UserModel,
+    db: AsyncSession,
+) -> "Profile":
+    """Validate profile_id format and ownership.
+
+    Args:
+        profile_id: The profile ID to validate
+        current_user: The current authenticated user
+        db: Database session
+
+    Returns:
+        The profile if valid and owned by current user
+
+    Raises:
+        HTTPException: If validation fails or ownership check fails
+    """
+    try:
+        validate_uuid(profile_id, "profile_id")
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        )
+
+    profile = await ProfileService.get_by_id(db, profile_id)
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
+
+    if profile.parent_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+        )
+
+    return profile
+
+
 @router.get("/me", response_model=User)
 async def get_me(current_user: User = Depends(get_current_user)) -> User:
     """Get current user info."""
@@ -153,22 +195,8 @@ async def get_profile(
     db: AsyncSession = Depends(get_db),
 ) -> Profile:
     """Get a specific profile by ID."""
-    # Validate profile_id format
-    try:
-        validate_uuid(profile_id, "profile_id")
-    except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
-        )
-
-    # Get profile
-    profile = await ProfileService.get_by_id(db, profile_id)
-    if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found",
-        )
+    profile = await get_and_validate_profile(profile_id, current_user, db)
+    return profile  # type: ignore[return-value]
 
     # Verify profile belongs to current user
     if profile.parent_id != current_user.id:
@@ -191,29 +219,7 @@ async def update_profile(
 
     Allows parents to edit profile details without deleting and recreating.
     """
-    # Validate profile_id format
-    try:
-        validate_uuid(profile_id, "profile_id")
-    except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
-        )
-
-    # Get profile
-    profile = await ProfileService.get_by_id(db, profile_id)
-    if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found",
-        )
-
-    # Verify profile belongs to current user
-    if profile.parent_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions",
-        )
+    profile = await get_and_validate_profile(profile_id, current_user, db)
 
     # Update profile
     updated = await ProfileService.update(db, profile, profile_in)
@@ -247,29 +253,7 @@ async def delete_profile(
     Requires password re-authentication for security.
     This will also delete all progress data associated with the profile.
     """
-    # Validate profile_id format
-    try:
-        validate_uuid(profile_id, "profile_id")
-    except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
-        )
-
-    # Get profile
-    profile = await ProfileService.get_by_id(db, profile_id)
-    if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found",
-        )
-
-    # Verify profile belongs to current user
-    if profile.parent_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions",
-        )
+    profile = await get_and_validate_profile(profile_id, current_user, db)
 
     # Verify password (parent verification)
     if not verify_password(delete_req.password, current_user.hashed_password):

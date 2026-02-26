@@ -12,6 +12,7 @@ from app.schemas.user import UserRole
 
 if TYPE_CHECKING:
     from app.db.models.profile import Profile
+    from app.db.models.subscription import Subscription
 
 
 class User(Base):
@@ -35,14 +36,22 @@ class User(Base):
     password_reset_token: Mapped[str | None] = mapped_column(String, nullable=True)
     password_reset_expires: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
     # Relationships - cascade deletes to profiles (and their progress/achievements)
     profiles: Mapped[list["Profile"]] = relationship(
         "Profile",
+        back_populates="parent",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
+
+    # Subscriptions
+    subscriptions: Mapped[list["Subscription"]] = relationship(
+        "Subscription",
         back_populates="parent",
         lazy="selectin",
         cascade="all, delete-orphan",

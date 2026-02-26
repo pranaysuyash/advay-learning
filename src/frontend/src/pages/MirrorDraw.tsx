@@ -63,7 +63,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
 
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('mirror-draw');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('mirror-draw');
 
   useEffect(() => {
     let mounted = true;
@@ -229,6 +229,9 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
       }
       assetLoader.playSound('success', 0.45);
       void playPop();
+      if (result.accuracy >= 0.95) {
+        triggerEasterEgg('egg-perfect-symmetry');
+      }
     } else {
       const tryAgainMsg = `Try again! ${Math.round(result.accuracy * 100)}% — you need ${Math.round(LEVELS[level - 1].passThreshold * 100)}%`;
       setFeedback(tryAgainMsg);

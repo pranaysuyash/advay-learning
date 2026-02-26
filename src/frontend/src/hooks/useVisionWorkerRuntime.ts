@@ -67,6 +67,7 @@ export function useVisionWorkerRuntime(
   const transferMode = workerConfig?.transferMode ?? 'bitmap';
 
   const workerRef = useRef<Worker | null>(null);
+  const initializingRef = useRef(false);  // Guard to prevent race condition
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pendingMetaRef = useRef(
     new Map<number, Omit<HandTrackingRuntimeMeta, 'video'>>(),
@@ -79,10 +80,12 @@ export function useVisionWorkerRuntime(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!workerConfig?.enabled || !isWorkerSupported || workerRef.current) {
+    // Guard against race condition - prevent multiple simultaneous initializations
+    if (!workerConfig?.enabled || !isWorkerSupported || workerRef.current || initializingRef.current) {
       return;
     }
 
+    initializingRef.current = true;
     setIsLoading(true);
 
     const worker = new Worker(new URL('../workers/vision.worker.ts', import.meta.url), {
@@ -92,6 +95,7 @@ export function useVisionWorkerRuntime(
 
     const handleMessage = (event: MessageEvent<unknown>) => {
       if (isWorkerInitResponse(event.data)) {
+        initializingRef.current = false;  // Reset guard after init completes
         setIsLoading(false);
         setIsReady(event.data.ok);
         if (!event.data.ok) {
@@ -163,6 +167,7 @@ export function useVisionWorkerRuntime(
     });
 
     return () => {
+      initializingRef.current = false;  // Allow re-initialization
       worker.removeEventListener('message', handleMessage);
       worker.removeEventListener('error', handleError);
       worker.postMessage({ type: 'dispose' });

@@ -1,23 +1,80 @@
 """Games management endpoints."""
 
+import logging
 import re
+from datetime import datetime, timedelta, timezone
 
+from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from sqlalchemy import Float, Integer, and_, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.schemas.game import Game, GameCreate, GameList, GameUpdate
+from app.db.models.profile import Profile
+from app.db.models.progress import Progress
+from app.schemas.game import Game, GameCreate, GameList, GameUpdate, GlobalGameStat, GlobalGameStatsResponse
 from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 UUID_PATTERN = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+
+CACHE_TTL_SECONDS = 3600
+_GAME_STATS_CACHE: TTLCache[str, GlobalGameStatsResponse] = TTLCache(maxsize=100, ttl=CACHE_TTL_SECONDS)
 
 
 def is_uuid(value: str) -> bool:
     """Check if value is a UUID."""
     return bool(UUID_PATTERN.match(value))
+
+
+def _parse_age_group(age_group: str | None) -> tuple[float | None, float | None]:
+    """Parse age group query param (e.g. 4-6) into min/max age."""
+    if not age_group:
+        return None, None
+
+    match = re.match(r"^\s*(\d+(?:\.\d+)?)\s*[-:]\s*(\d+(?:\.\d+)?)\s*$", age_group)
+    if not match:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="ageGroup must be in format min-max (e.g. 4-6)",
+        )
+
+    age_min = float(match.group(1))
+    age_max = float(match.group(2))
+    if age_min > age_max:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="ageGroup minimum age cannot be greater than maximum age",
+        )
+    return age_min, age_max
+
+
+def _period_cutoff(period: str) -> datetime | None:
+    """Resolve period filter cutoff timestamp."""
+    now = datetime.now(timezone.utc)
+    if period == "week":
+        return now - timedelta(days=7)
+    if period == "month":
+        return now - timedelta(days=30)
+    if period == "all":
+        return None
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail="period must be one of: week, month, all",
+    )
+
+
+def _popularity_score(total_plays: int, completion_rate: float) -> float:
+    """Calculate weighted popularity score for sorting/trending."""
+    return round((total_plays * 0.6) + ((completion_rate * 100.0) * 0.4), 2)
+
+
+def _stats_cache_key(period: str, age_group: str | None) -> str:
+    """Build cache key for stats request."""
+    return f"period:{period}|age_group:{age_group or 'all'}"
 
 
 async def resolve_game_identifier(
@@ -69,6 +126,97 @@ async def list_games(
         page=page,
         page_size=page_size,
     )
+
+
+@router.get("/stats", response_model=GlobalGameStatsResponse)
+async def get_games_stats(
+    period: str = Query("week", description="Time window: week, month, or all"),
+    age_group: str | None = Query(None, alias="ageGroup", description="Age cohort filter (e.g. 4-6)"),
+    db: AsyncSession = Depends(get_db),
+) -> GlobalGameStatsResponse:
+    """Get global game statistics with optional time and age-cohort filtering."""
+    cache_key = _stats_cache_key(period, age_group)
+    cached = _GAME_STATS_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        cutoff = _period_cutoff(period)
+        age_min, age_max = _parse_age_group(age_group)
+
+        filters = [Progress.activity_type == "game"]
+        if cutoff is not None:
+            filters.append(Progress.completed_at >= cutoff)
+        if age_min is not None:
+            filters.append(Profile.age >= age_min)
+        if age_max is not None:
+            filters.append(Profile.age <= age_max)
+
+        stmt = (
+            select(
+                Progress.content_id.label("game_name"),
+                func.count(Progress.id).label("total_plays"),
+                func.coalesce(func.avg(cast(Progress.duration_seconds, Float)) / 60.0, 0.0).label("avg_session_minutes"),
+                func.coalesce(func.avg(cast(Progress.completed, Integer)), 0.0).label("completion_rate"),
+            )
+            .join(Profile, Profile.id == Progress.profile_id)
+            .where(and_(*filters))
+            .group_by(Progress.content_id)
+        )
+
+        result = await db.execute(stmt)
+        rows = result.all()
+
+        stats: list[dict] = []
+        for row in rows:
+            total_plays = int(row.total_plays or 0)
+            completion_rate = float(row.completion_rate or 0.0)
+            avg_session_minutes = round(float(row.avg_session_minutes or 0.0), 2)
+
+            stats.append(
+                {
+                    "game_name": str(row.game_name),
+                    "total_plays": total_plays,
+                    "avg_session_minutes": avg_session_minutes,
+                    "completion_rate": round(completion_rate, 4),
+                    "popularity_score": _popularity_score(total_plays, completion_rate),
+                }
+            )
+
+        stats.sort(key=lambda item: (item["popularity_score"], item["total_plays"]), reverse=True)
+
+        games: list[GlobalGameStat] = []
+        for idx, item in enumerate(stats, start=1):
+            games.append(
+                GlobalGameStat(
+                    game_name=item["game_name"],
+                    total_plays=item["total_plays"],
+                    avg_session_minutes=item["avg_session_minutes"],
+                    completion_rate=item["completion_rate"],
+                    popularity_score=item["popularity_score"],
+                    age_cohort_rank=idx,
+                )
+            )
+
+        response = GlobalGameStatsResponse(
+            period=period,
+            age_group=age_group,
+            generated_at=datetime.now(timezone.utc),
+            games=games,
+        )
+        _GAME_STATS_CACHE[cache_key] = response
+        return response
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to compute games stats; returning empty response")
+        return GlobalGameStatsResponse(
+            period=period,
+            age_group=age_group,
+            generated_at=datetime.now(timezone.utc),
+            games=[],
+        )
 
 
 @router.get("/{identifier}", response_model=Game)

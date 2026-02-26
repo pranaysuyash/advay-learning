@@ -93,3 +93,27 @@ class GameFilter(BaseModel):
     is_featured: Optional[bool] = None
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100)
+
+
+class GlobalGameStat(BaseModel):
+    """Aggregated global game statistics for one game."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    game_name: str = Field(serialization_alias="gameName")
+    total_plays: int = Field(serialization_alias="totalPlays")
+    avg_session_minutes: float = Field(serialization_alias="avgSessionMinutes")
+    completion_rate: float = Field(serialization_alias="completionRate")
+    popularity_score: float = Field(serialization_alias="popularityScore")
+    age_cohort_rank: int = Field(serialization_alias="ageCohortRank")
+
+
+class GlobalGameStatsResponse(BaseModel):
+    """Response schema for global game statistics endpoint."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    period: str
+    age_group: Optional[str] = Field(default=None, serialization_alias="ageGroup")
+    generated_at: datetime = Field(serialization_alias="generatedAt")
+    games: List[GlobalGameStat]
