@@ -190,8 +190,8 @@ Plan (Reference: docs/research/GAME_ROTATION_ENHANCED_PHASE1_PLAN_2026-02-25.md)
 
 **Day 5: Progress Tracking Updates (7 hours)**
 
-- [ ] Update POST /api/progress endpoint to accept `completed: boolean` parameter
-- [ ] Update frontend progressTracking.logGameSession() to calculate completed flag (>60s session + score >0 heuristic)
+- [x] Update POST /api/progress endpoint to accept `completed: boolean` parameter
+- [x] Update frontend progressTracking.logGameSession() to calculate completed flag (>60s session + score >0 heuristic)
 - [ ] Test completed field is properly saved to database
 - [ ] Verify historical data migration (set completed=true for sessions >60s with score>0)
 
@@ -297,6 +297,9 @@ Execution log:
 - 2026-02-26 11:15 | All tests passing | Evidence: pytest output shows `2 passed` for test_games_stats_returns_aggregates + test_games_stats_uses_ttl_cache
 - 2026-02-26 12:30 | Added corrective migration to ensure completion tracking schema on existing DBs | Evidence: Created `007_ensure_game_completion_tracking.py` (adds completed column + indexes if missing)
 - 2026-02-26 12:35 | Applied migration 007 and re-verified stats tests | Evidence: alembic upgraded to head 007; pytest output shows `2 passed` for stats tests
+- 2026-02-26 16:30 | Updated progress service to persist `completed` flag | Evidence: ProgressService.create now sets completed on Progress model
+- 2026-02-26 16:35 | Updated frontend progress tracking to compute completion | Evidence: recordGameSessionProgress now infers completion (>60s + score>0) and sends `completed` + activity_type `game`
+- 2026-02-26 16:40 | Added completed flag support to progress API payloads and queue | Evidence: progressQueue + progressApi types updated to include `completed`
 
 Status updates:
 
@@ -3510,3 +3513,62 @@ Next actions:
 Risks/notes:
 
 - Worklog policy conflict: AGENTS.md prefers `WORKLOG_ADDENDUM_*` over `WORKLOG_TICKETS.md` unless explicitly requested.
+
+---
+
+### TCK-20260226-005 :: Fix ESLint react-refresh warnings
+
+Ticket Stamp: STAMP-20260226T110634Z-opencode-mpl1
+
+Type: HARDENING
+Owner: opencode
+Created: 2026-02-26
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Fix ESLint react-refresh warnings about mixing components and hooks in same file
+- Out-of-scope: Other ESLint issues
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/i18n/useI18n.ts (NEW)
+  - src/frontend/src/hooks/useCalmMode.ts (NEW)
+  - src/frontend/src/i18n/I18nProvider.tsx
+  - src/frontend/src/i18n/index.ts
+  - src/frontend/src/components/CalmModeProvider.tsx
+  - src/frontend/src/components/ui/Layout.tsx
+- Branch: main
+
+Plan:
+
+- [x] Create src/frontend/src/i18n/useI18n.ts with useTranslation re-export
+- [x] Update I18nProvider.tsx to remove hook re-export
+- [x] Create src/frontend/src/hooks/useCalmMode.ts with useCalmModeContext
+- [x] Update CalmModeProvider.tsx to remove inline hook definition
+- [x] Update Layout.tsx import path
+- [x] Update i18n/index.ts re-export
+
+Acceptance Criteria:
+
+- [x] ESLint passes with 0 errors/warnings
+- [x] TypeScript passes
+- [x] Tests pass
+
+Execution log:
+
+- 2026-02-26 11:06 | Generated ticket stamp | Evidence: STAMP-20260226T110634Z-opencode-mpl1
+- 2026-02-26 11:15 | Created useI18n.ts | Evidence: New file src/frontend/src/i18n/useI18n.ts
+- 2026-02-26 11:18 | Created useCalmMode.ts | Evidence: New file src/frontend/src/hooks/useCalmMode.ts
+- 2026-02-26 11:25 | Updated I18nProvider.tsx | Evidence: Removed useTranslation re-export
+- 2026-02-26 11:27 | Updated CalmModeProvider.tsx | Evidence: Removed useCalmModeContext function
+- 2026-02-26 11:30 | Updated Layout.tsx import | Evidence: Changed import path to hooks/useCalmMode
+- 2026-02-26 11:32 | Updated i18n/index.ts | Evidence: Changed re-export to use useI18n.ts
+
+Status updates:
+
+- 2026-02-26 11:35 **DONE** — ESLint warnings fixed, tests pass

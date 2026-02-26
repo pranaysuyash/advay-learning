@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSettingsStore } from '../../store';
 import { Button } from './Button';
-import { useCalmModeContext } from '../CalmModeProvider';
+import { useCalmModeContext } from '../../hooks/useCalmMode';
 
 interface LayoutProps {
   children: ReactNode;

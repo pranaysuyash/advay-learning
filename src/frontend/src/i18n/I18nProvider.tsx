@@ -31,6 +31,3 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
   return <>{children}</>;
 }
-
-// Hook for easy translation access
-export { useTranslation };
