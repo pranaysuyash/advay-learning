@@ -36,8 +36,13 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 # Configuration
-LOC_CHANGE_THRESHOLD=10  # Percentage
-MIN_LOC_ABSOLUTE=20      # Minimum lines to trigger check
+LOC_CHANGE_THRESHOLD=10       # Percentage (net LOC delta vs old LOC)
+TOUCHED_CHANGE_THRESHOLD=10   # Percentage (added+deleted vs old LOC)
+MIN_LOC_ABSOLUTE=20           # Minimum touched lines to trigger review signals
+LARGE_FILE_LOC_THRESHOLD=500  # Large file review guard
+COMPLEXITY_SIGNAL_THRESHOLD=25
+CCN_MAX_THRESHOLD="${CCN_MAX_THRESHOLD:-20}"          # Trigger when max cyclomatic complexity is high
+CCN_DELTA_THRESHOLD="${CCN_DELTA_THRESHOLD:-5}"       # Trigger when max complexity increases significantly
 
 # Colors for output
 RED='\033[0;31m'
@@ -59,8 +64,9 @@ Usage:
 
 Purpose:
   Detect potential feature regressions when large portions of files change.
-  For existing files with >10% LOC changes, compares functionality between
-  old and new versions to ensure features aren't silently removed.
+  For existing files with high net LOC delta OR high touched-line churn,
+  compares functionality between old and new versions to ensure features
+  aren't silently removed.
 
 Checks performed:
   - Function/method count comparison
@@ -70,8 +76,11 @@ Checks performed:
   - State management comparison
 
 Environment variables:
-  SKIP_FEATURE_CHECK=1      # Skip this check entirely
-  LOC_THRESHOLD=N           # Override 10% threshold (e.g., 15 for 15%)
+  SKIP_FEATURE_CHECK=1         # Skip this check entirely
+  LOC_THRESHOLD=N              # Override net LOC threshold (default: 10)
+  TOUCHED_LOC_THRESHOLD=N      # Override touched LOC threshold (default: 10)
+  CCN_MAX_THRESHOLD=N          # Override max CCN threshold (default: 20)
+  CCN_DELTA_THRESHOLD=N        # Override max CCN delta threshold (default: 5)
 USAGE
 }
 
@@ -108,7 +117,9 @@ fi
 if [[ -n "${LOC_THRESHOLD:-}" ]]; then
   LOC_CHANGE_THRESHOLD="$LOC_THRESHOLD"
 fi
-
+if [[ -n "${TOUCHED_LOC_THRESHOLD:-}" ]]; then
+  TOUCHED_CHANGE_THRESHOLD="$TOUCHED_LOC_THRESHOLD"
+fi
 # Get changed files with modification type
 get_modified_files() {
   if [[ "$MODE" == "staged" ]]; then
@@ -119,10 +130,10 @@ get_modified_files() {
   fi
 }
 
-# Calculate LOC change percentage for a file
-calculate_loc_change() {
+# Calculate net LOC change percentage for a file.
+calculate_net_loc_change() {
   local file="$1"
-  local old_loc new_loc
+  local old_loc new_loc change_percent abs_percent
   
   # Get old version LOC (from HEAD)
   old_loc=$(git show "HEAD:$file" 2>/dev/null | wc -l || echo "0")
@@ -132,20 +143,101 @@ calculate_loc_change() {
   
   # If old file doesn't exist, treat as 0 (shouldn't happen with --diff-filter=M)
   if [[ "$old_loc" == "0" ]]; then
-    echo "0"
+    echo "0|0|0"
     return
   fi
   
   # Calculate percentage change
-  local change_percent
   change_percent=$(echo "scale=2; ($new_loc - $old_loc) / $old_loc * 100" | bc 2>/dev/null || echo "0")
-  
-  # Use absolute value for threshold comparison
-  if (( $(echo "${change_percent#-} >= $LOC_CHANGE_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
-    echo "${change_percent#-}"  # Return positive percentage
-  else
-    echo "0"
+  abs_percent="${change_percent#-}"
+  echo "${abs_percent}|${old_loc}|${new_loc}"
+}
+
+# Calculate touched LOC percentage for a file using staged diff.
+calculate_touched_change() {
+  local file="$1"
+  local old_loc add del touched touched_percent
+
+  old_loc=$(git show "HEAD:$file" 2>/dev/null | wc -l || echo "0")
+  if [[ "$old_loc" == "0" ]]; then
+    echo "0|0|0|0"
+    return
   fi
+
+  # numstat prints: added<TAB>deleted<TAB>path
+  local numstat
+  numstat="$(git diff --cached --numstat -- "$file" | awk '{print $1"|"$2}' | head -n1)"
+  add="${numstat%%|*}"
+  del="${numstat##*|}"
+  add="${add:-0}"
+  del="${del:-0}"
+  [[ "$add" == "-" ]] && add=0
+  [[ "$del" == "-" ]] && del=0
+  touched=$((add + del))
+  touched_percent=$(echo "scale=2; ($touched / $old_loc) * 100" | bc 2>/dev/null || echo "0")
+  echo "${touched_percent}|${touched}|${add}|${del}"
+}
+
+# Tool detection (prefer lizard; fallback to heuristic).
+HAS_LIZARD=0
+if python3 - <<'PY' >/dev/null 2>&1
+import lizard  # noqa: F401
+PY
+then
+  HAS_LIZARD=1
+fi
+
+heuristic_complexity_signal_count() {
+  local content="$1"
+  local file="$2"
+  if [[ "$file" =~ \.(tsx?|jsx?)$ ]]; then
+    echo "$content" | rg -n "useState\\(|useReducer\\(|useEffect\\(|useMemo\\(|useCallback\\(|useRef\\(" | wc -l | tr -d ' '
+  elif [[ "$file" =~ \.py$ ]]; then
+    echo "$content" | rg -n "^\\s*(def|class|if|for|while|try|except|with)\\b" | wc -l | tr -d ' '
+  else
+    echo 0
+  fi
+}
+
+# Returns: engine|function_count|max_ccn|avg_ccn
+complexity_metrics_for_blob() {
+  local blob_ref="$1"
+  local file="$2"
+  local content
+  content="$(git show "$blob_ref" 2>/dev/null || echo "")"
+
+  if [[ -z "$content" ]]; then
+    echo "none|0|0|0"
+    return
+  fi
+
+  if [[ "$HAS_LIZARD" == "1" ]]; then
+    local ext tmp
+    ext="${file##*.}"
+    tmp="$(mktemp "/tmp/feature-check-ccn.XXXXXX.${ext}")"
+    printf "%s" "$content" > "$tmp"
+    python3 - "$tmp" <<'PY'
+import sys
+import lizard
+
+path = sys.argv[1]
+analysis = lizard.analyze_file(path)
+funcs = analysis.function_list
+count = len(funcs)
+if count == 0:
+    print("lizard|0|0|0.00")
+else:
+    max_ccn = max(f.cyclomatic_complexity for f in funcs)
+    avg_ccn = sum(f.cyclomatic_complexity for f in funcs) / count
+    print(f"lizard|{count}|{max_ccn}|{avg_ccn:.2f}")
+PY
+    rm -f "$tmp"
+    return
+  fi
+
+  local heuristic
+  heuristic="$(heuristic_complexity_signal_count "$content" "$file")"
+  echo "heuristic|${heuristic}|${heuristic}|${heuristic}"
 }
 
 # Extract functions/methods from TypeScript/JavaScript file
@@ -161,7 +253,8 @@ extract_functions() {
 extract_exports() {
   local content="$1"
   echo "$content" | grep -E '^export (const|function|class|type|interface|enum)' | \
-    sed 's/export //' | sort -u
+    sed -E 's/^export[[:space:]]+(const|function|class|type|interface|enum)[[:space:]]+([A-Za-z0-9_]+).*/\1 \2/' | \
+    sort -u
 }
 
 # Extract component props interfaces
@@ -191,9 +284,12 @@ extract_state_vars() {
 # Compare features between old and new version
 check_feature_regression() {
   local file="$1"
-  local change_percent="$2"
+  local reason="$2"
+  local metrics="$3"
   
-  log_warn "Significant change detected in: $file (${change_percent}% LOC changed)"
+  log_warn "Significant refactor-risk change detected in: $file"
+  log_warn "  reason: $reason"
+  log_warn "  metrics: $metrics"
   
   # Get file content
   local old_content new_content
@@ -201,6 +297,7 @@ check_feature_regression() {
   new_content=$(git show ":$file" 2>/dev/null || echo "")
   
   local issues=()
+  local advisories=()
   
   # Check 1: Function count
   local old_funcs new_funcs
@@ -215,9 +312,9 @@ check_feature_regression() {
     local lost_funcs
     lost_funcs=$(comm -23 <(echo "$old_funcs") <(echo "$new_funcs") || true)
     if [[ -n "$lost_funcs" ]]; then
-      issues+=("Functions removed: $(echo "$lost_funcs" | wc -l | tr -d ' ')")
+      advisories+=("Functions changed/removed: $(echo "$lost_funcs" | wc -l | tr -d ' ')")
       while IFS= read -r func; do
-        [[ -n "$func" ]] && issues+=("  - $func")
+        [[ -n "$func" ]] && advisories+=("  - $func")
       done <<< "$lost_funcs"
     fi
   fi
@@ -260,9 +357,9 @@ check_feature_regression() {
   local removed_hooks
   removed_hooks=$(comm -23 <(echo "$old_hooks") <(echo "$new_hooks") || true)
   if [[ -n "$removed_hooks" ]]; then
-    issues+=("Hooks removed: $(echo "$removed_hooks" | wc -l | tr -d ' ')")
+    advisories+=("Hooks changed/removed: $(echo "$removed_hooks" | wc -l | tr -d ' ')")
     while IFS= read -r hook; do
-      [[ -n "$hook" ]] && issues+=("  - $hook")
+      [[ -n "$hook" ]] && advisories+=("  - $hook")
     done <<< "$removed_hooks"
   fi
   
@@ -274,10 +371,17 @@ check_feature_regression() {
   local removed_state
   removed_state=$(comm -23 <(echo "$old_state") <(echo "$new_state") || true)
   if [[ -n "$removed_state" ]]; then
-    issues+=("State variables removed: $(echo "$removed_state" | wc -l | tr -d ' ')")
+    advisories+=("State variables changed/removed: $(echo "$removed_state" | wc -l | tr -d ' ')")
     while IFS= read -r state; do
-      [[ -n "$state" ]] && issues+=("  - $state")
+      [[ -n "$state" ]] && advisories+=("  - $state")
     done <<< "$removed_state"
+  fi
+
+  if [[ ${#advisories[@]} -gt 0 ]]; then
+    log_warn "Implementation changes detected in $file (manual review recommended):"
+    for advisory in "${advisories[@]}"; do
+      log_warn "  $advisory"
+    done
   fi
   
   # Report findings
@@ -331,7 +435,7 @@ check_feature_regression() {
 
 # Main execution
 main() {
-  log_info "Starting feature regression check (threshold: ${LOC_CHANGE_THRESHOLD}%)..."
+  log_info "Starting feature regression check (net threshold: ${LOC_CHANGE_THRESHOLD}%, touched threshold: ${TOUCHED_CHANGE_THRESHOLD}%)..."
   
   # Get modified files only
   local modified_files
@@ -354,25 +458,76 @@ main() {
   log_info "Checking $(echo "$source_files" | wc -l | tr -d ' ') modified source files..."
   
   local files_to_check=()
-  local file_changes=()
+  local file_reasons=()
+  local file_metrics=()
   
   # Check each file for LOC threshold
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
     
-    local change_percent
-    change_percent=$(calculate_loc_change "$file")
-    
-    if [[ "$change_percent" != "0" ]]; then
+    local net_info net_pct old_loc new_loc
+    local touched_info touched_pct touched_lines add_lines del_lines
+    local old_complexity new_complexity
+    local complexity_engine new_fn_count old_ccn_max new_ccn_max new_ccn_avg ccn_delta
+    local trigger=false
+    local reasons=()
+
+    net_info=$(calculate_net_loc_change "$file")
+    net_pct="${net_info%%|*}"
+    old_loc="$(echo "$net_info" | cut -d'|' -f2)"
+    new_loc="$(echo "$net_info" | cut -d'|' -f3)"
+
+    touched_info=$(calculate_touched_change "$file")
+    touched_pct="${touched_info%%|*}"
+    touched_lines="$(echo "$touched_info" | cut -d'|' -f2)"
+    add_lines="$(echo "$touched_info" | cut -d'|' -f3)"
+    del_lines="$(echo "$touched_info" | cut -d'|' -f4)"
+
+    old_complexity="$(complexity_metrics_for_blob "HEAD:$file" "$file")"
+    new_complexity="$(complexity_metrics_for_blob ":$file" "$file")"
+    complexity_engine="$(echo "$new_complexity" | cut -d'|' -f1)"
+    new_fn_count="$(echo "$new_complexity" | cut -d'|' -f2)"
+    old_ccn_max="$(echo "$old_complexity" | cut -d'|' -f3)"
+    new_ccn_max="$(echo "$new_complexity" | cut -d'|' -f3)"
+    new_ccn_avg="$(echo "$new_complexity" | cut -d'|' -f4)"
+    ccn_delta="$(echo "$new_ccn_max - $old_ccn_max" | bc 2>/dev/null || echo "0")"
+
+    if (( $(echo "$net_pct >= $LOC_CHANGE_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+      trigger=true
+      reasons+=("net_loc%:${net_pct}")
+    fi
+    if (( $(echo "$touched_pct >= $TOUCHED_CHANGE_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+      trigger=true
+      reasons+=("touched_loc%:${touched_pct}")
+    fi
+    if (( touched_lines >= MIN_LOC_ABSOLUTE && old_loc >= LARGE_FILE_LOC_THRESHOLD )); then
+      trigger=true
+      reasons+=("large_file+touch:${touched_lines}")
+    fi
+    if (( touched_lines >= MIN_LOC_ABSOLUTE && $(echo "$new_ccn_max >= $CCN_MAX_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+      trigger=true
+      reasons+=("max_ccn:${new_ccn_max}")
+    fi
+    if (( touched_lines >= MIN_LOC_ABSOLUTE && $(echo "$ccn_delta >= $CCN_DELTA_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+      trigger=true
+      reasons+=("ccn_delta:+${ccn_delta}")
+    fi
+    if [[ "$complexity_engine" == "heuristic" && touched_lines -ge MIN_LOC_ABSOLUTE && new_ccn_max -ge COMPLEXITY_SIGNAL_THRESHOLD ]]; then
+      trigger=true
+      reasons+=("heuristic_complexity:${new_ccn_max}")
+    fi
+
+    if [[ "$trigger" == true ]]; then
       files_to_check+=("$file")
-      file_changes+=("$change_percent")
-      log_info "$file: ${change_percent}% changed (exceeds ${LOC_CHANGE_THRESHOLD}% threshold)"
+      file_reasons+=("$(IFS=,; echo "${reasons[*]}")")
+      file_metrics+=("old=${old_loc},new=${new_loc},added=${add_lines},deleted=${del_lines},touched=${touched_lines},net%=${net_pct},touched%=${touched_pct},engine=${complexity_engine},fn=${new_fn_count},max_ccn_old=${old_ccn_max},max_ccn_new=${new_ccn_max},avg_ccn_new=${new_ccn_avg}")
+      log_info "$file: review required (${reasons[*]})"
     fi
     
   done <<< "$source_files"
   
   if [[ ${#files_to_check[@]} -eq 0 ]]; then
-    log_success "No files exceed ${LOC_CHANGE_THRESHOLD}% change threshold."
+    log_success "No files exceeded refactor-risk thresholds."
     exit 0
   fi
   
@@ -389,7 +544,7 @@ main() {
     # For each significantly modified file, check if new files are in same directory
     for i in "${!files_to_check[@]}"; do
       local modified_file="${files_to_check[$i]}"
-      local change="${file_changes[$i]}"
+      local metrics="${file_metrics[$i]}"
       local dir
       dir=$(dirname "$modified_file")
       
@@ -397,10 +552,12 @@ main() {
       local related_new_files
       related_new_files=$(echo "$new_files" | grep "^$dir/" || true)
       
-      if [[ -n "$related_new_files" && "$change" -gt 30 ]]; then
+      local touched_pct
+      touched_pct="$(echo "$metrics" | sed -E 's/.*touched%=([^,]+).*/\1/')"
+      if [[ -n "$related_new_files" && $(echo "$touched_pct > 30" | bc -l 2>/dev/null || echo "0") -eq 1 ]]; then
         log_warn ""
         log_warn "⚠️  POTENTIAL FILE SPLIT DETECTED:"
-        log_warn "   Modified: $modified_file (${change}% changed)"
+        log_warn "   Modified: $modified_file (touched ${touched_pct}%)"
         log_warn "   New files in same directory:"
         echo "$related_new_files" | while read -r new_file; do
           [[ -n "$new_file" ]] && log_warn "     + $new_file"
@@ -419,9 +576,10 @@ main() {
   # Check each file for feature regression
   for i in "${!files_to_check[@]}"; do
     local file="${files_to_check[$i]}"
-    local change="${file_changes[$i]}"
+    local reason="${file_reasons[$i]}"
+    local metrics="${file_metrics[$i]}"
     
-    if ! check_feature_regression "$file" "$change"; then
+    if ! check_feature_regression "$file" "$reason" "$metrics"; then
       exit_code=1
     fi
     echo ""

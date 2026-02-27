@@ -233,7 +233,7 @@ npm run type-check
 
 ### Step 6: Update Worklog
 
-Edit `docs/WORKLOG_TICKETS.md`:
+Edit the active `docs/WORKLOG_ADDENDUM_*.md` file:
 
 ```markdown
 ### TCK-20260130-009 :: Implement Parent Gate for Settings (P0)

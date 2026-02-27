@@ -1,6 +1,6 @@
 # Issue Sync Prompt v1.0 (Worklog ↔ GitHub Issues)
 
-**Purpose**: Create/update/close GitHub Issues that mirror `docs/WORKLOG_TICKETS.md` tickets, while keeping the worklog as the single source of truth.
+**Purpose**: Create/update/close GitHub Issues that mirror `docs/WORKLOG_ADDENDUM_*.md` tickets, while keeping the worklog as the single source of truth.
 
 **Use When**:
 
@@ -24,7 +24,7 @@ If either is NO/UNKNOWN, do not attempt to create Issues; update the worklog wit
 1) Worklog is canonical.
 2) One ticket maps to at most one Issue.
 3) Issue title must start with `TCK-YYYYMMDD-###`.
-4) Append-only updates to `docs/WORKLOG_TICKETS.md`.
+4) Append-only updates to `docs/WORKLOG_ADDENDUM_*.md`.
 
 ---
 
@@ -68,7 +68,7 @@ If you find:
 
 Include:
 
-- Ticket link (path to `docs/WORKLOG_TICKETS.md` + ticket ID)
+- Ticket link (path to `docs/WORKLOG_ADDENDUM_*.md` + ticket ID)
 - Status + priority
 - Scope contract (in/out)
 - Acceptance criteria

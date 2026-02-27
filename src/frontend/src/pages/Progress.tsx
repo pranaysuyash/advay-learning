@@ -6,6 +6,7 @@ import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
 import apiClient from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
+import { DeadLetterDialog } from '../components/ui/DeadLetterDialog';
 import { PlantVisualization } from '../components/progress/PlantVisualization';
 import { MetricCard } from '../components/progress/MetricsCard';
 import { RecommendationCard } from '../components/progress/RecommendationCard';
@@ -30,6 +31,8 @@ export const Progress = memo(function Progress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [deadLetterCount, setDeadLetterCount] = useState<number>(0);
+  const [showDeadLetterDialog, setShowDeadLetterDialog] = useState(false);
   const [syncing, setSyncing] = useState<boolean>(false);
   const [timeBreakdown, setTimeBreakdown] = useState<TimeBreakdownSummary | null>(null);
   const [struggleSummary, setStruggleSummary] = useState<StruggleSummary | null>(null);
@@ -63,8 +66,10 @@ export const Progress = memo(function Progress() {
   }, [fetchProfiles]);
 
   useEffect(() => {
-    const update = () =>
+    const update = () => {
       setPendingCount(progressQueue.getPending(selectedProfileId || '').length);
+      setDeadLetterCount(progressQueue.getDeadLetterCount(selectedProfileId || ''));
+    };
     update();
     const unsubscribe = progressQueue.subscribe(update);
     return unsubscribe;
@@ -130,6 +135,18 @@ export const Progress = memo(function Progress() {
                 <UIIcon name='warning' size={16} />
                 Pending ({pendingCount})
               </div>
+            )}
+
+            {/* Dead letter indicator */}
+            {deadLetterCount > 0 && (
+              <button
+                type='button'
+                onClick={() => setShowDeadLetterDialog(true)}
+                className='inline-flex items-center gap-2 bg-red-100 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-200 transition-colors'
+              >
+                <UIIcon name='alert-triangle' size={16} />
+                Failed ({deadLetterCount})
+              </button>
             )}
 
             <button
@@ -309,7 +326,7 @@ export const Progress = memo(function Progress() {
                   <div className='text-center bg-white border-3 border-[#F2CC8F] rounded-[2rem] p-6 shadow-[0_4px_0_#E5B86E] flex items-center justify-between'>
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-[#3B82F6]/10 rounded-2xl flex items-center justify-center">
-                        <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg>
+                        <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg>
                       </div>
                       <div className='text-left'>
                         <div className='text-text-secondary font-bold uppercase tracking-wider text-sm'>Overall Score</div>
@@ -334,7 +351,7 @@ export const Progress = memo(function Progress() {
             {/* Unified Metrics Section */}
             <div className='mb-12'>
               <h2 className='text-3xl font-black text-advay-slate mb-8 flex items-center gap-3'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#10B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' x2='18' y1='20' y2='10'/><line x1='12' x2='12' y1='20' y2='4'/><line x1='6' x2='6' y1='20' y2='14'/></svg> Learning Dimensions
+                <svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><line x1='18' x2='18' y1='20' y2='10'/><line x1='12' x2='12' y1='20' y2='4'/><line x1='6' x2='6' y1='20' y2='14'/></svg> Learning Dimensions
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
                 <MetricCard
@@ -431,7 +448,7 @@ export const Progress = memo(function Progress() {
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-12'>
               <div className='bg-white border-3 border-[#F2CC8F] rounded-[2rem] p-8 text-center flex flex-col items-center shadow-[0_4px_0_#E5B86E] relative overflow-hidden group hover:border-[#F59E0B] transition-colors'>
                 <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#F59E0B]/10 rounded-full blur-xl group-hover:bg-[#F59E0B]/20 transition-colors'></div>
-                <div className='w-16 h-16 bg-[#F59E0B]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='4 7 4 4 20 4 20 7'/><line x1='9' x2='15' y1='20' y2='20'/><line x1='12' x2='12' y1='4' y2='20'/></svg></div>
+                <div className='w-16 h-16 bg-[#F59E0B]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='4 7 4 4 20 4 20 7'/><line x1='9' x2='15' y1='20' y2='20'/><line x1='12' x2='12' y1='4' y2='20'/></svg></div>
                 <div className='text-5xl font-black text-advay-slate mb-2'>
                   {honestStats.uniqueLettersPracticed}
                 </div>
@@ -441,7 +458,7 @@ export const Progress = memo(function Progress() {
               </div>
               <div className='bg-white border-3 border-[#F2CC8F] rounded-[2rem] p-8 text-center flex flex-col items-center shadow-[0_4px_0_#E5B86E] relative overflow-hidden group hover:border-[#10B981] transition-colors'>
                 <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#10B981]/10 rounded-full blur-xl group-hover:bg-[#10B981]/20 transition-colors'></div>
-                <div className='w-16 h-16 bg-[#10B981]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#10B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg></div>
+                <div className='w-16 h-16 bg-[#10B981]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg></div>
                 <div className='text-5xl font-black text-advay-slate mb-2'>
                   {honestStats.avgTracingAccuracy}%
                 </div>
@@ -451,7 +468,7 @@ export const Progress = memo(function Progress() {
               </div>
               <div className='bg-white border-3 border-[#F2CC8F] rounded-[2rem] p-8 text-center flex flex-col items-center shadow-[0_4px_0_#E5B86E] relative overflow-hidden group hover:border-[#3B82F6] transition-colors'>
                 <div className='absolute -right-6 -top-6 w-24 h-24 bg-[#3B82F6]/10 rounded-full blur-xl group-hover:bg-[#3B82F6]/20 transition-colors'></div>
-                <div className='w-16 h-16 bg-[#3B82F6]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z'/><path d='m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z'/><path d='M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0'/><path d='M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5'/></svg></div>
+                <div className='w-16 h-16 bg-[#3B82F6]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z'/><path d='m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z'/><path d='M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0'/><path d='M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5'/></svg></div>
                 <div className='text-5xl font-black text-advay-slate mb-2'>
                   {honestStats.totalActivities}
                 </div>
@@ -462,11 +479,11 @@ export const Progress = memo(function Progress() {
             {/* Recent Activity */}
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 lg:p-12 shadow-[0_4px_0_#E5B86E]'>
               <h2 className='text-3xl font-black text-advay-slate mb-8 flex items-center gap-3'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#E85D04' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg> Recent Activity
+                <svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg> Recent Activity
               </h2>
               {honestStats.recentActivity.length === 0 ? (
                 <div className='text-center py-12 bg-slate-50 rounded-[2rem] border-3 border-dashed border-[#F2CC8F]'>
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg></div>
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg></div>
                   <p className='text-text-secondary font-bold text-lg'>
                     No activity yet. Start learning to see your progress here!
                   </p>
@@ -484,9 +501,9 @@ export const Progress = memo(function Progress() {
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white rounded-xl shadow-[0_4px_0_#E5B86E] border border-[#F2CC8F] flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                           {activity.action.includes('Traced') ? (
-                          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m12 19 7-7 3 3-7 7-3-3z'/><path d='m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/><path d='m2 2 7.5 8.6'/><path d='M22 22l-5.5-5.5'/></svg>
+                          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 19 7-7 3 3-7 7-3-3z'/><path d='m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/><path d='m2 2 7.5 8.6'/><path d='M22 22l-5.5-5.5'/></svg>
                         ) : (
-                          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='6' x2='10' y1='12' y2='12'/><line x1='8' x2='8' y1='10' y2='14'/><line x1='15' x2='15.01' y1='13' y2='13'/><line x1='18' x2='18.01' y1='11' y2='11'/><rect width='20' height='12' x='2' y='6' rx='2'/></svg>
+                          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><line x1='6' x2='10' y1='12' y2='12'/><line x1='8' x2='8' y1='10' y2='14'/><line x1='15' x2='15.01' y1='13' y2='13'/><line x1='18' x2='18.01' y1='11' y2='11'/><rect width='20' height='12' x='2' y='6' rx='2'/></svg>
                         )}
                         </div>
                         <div>
@@ -509,6 +526,17 @@ export const Progress = memo(function Progress() {
           </>
         )}
       </motion.div>
+
+      {/* Dead Letter Dialog */}
+      <DeadLetterDialog
+        isOpen={showDeadLetterDialog}
+        onClose={() => setShowDeadLetterDialog(false)}
+        profileId={selectedProfileId || undefined}
+        onRetry={() => {
+          setPendingCount(progressQueue.getPending(selectedProfileId || '').length);
+          setDeadLetterCount(progressQueue.getDeadLetterCount(selectedProfileId || ''));
+        }}
+      />
     </div>
   );
 });

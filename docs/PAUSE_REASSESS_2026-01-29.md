@@ -225,7 +225,7 @@ cd src/backend && uv run pytest -W error 2>&1 | grep -i "deprecation\|warning"
 
 ## Step 6 — Worklog Update
 
-See appended entry in `docs/WORKLOG_TICKETS.md` below.
+See appended entry in `docs/WORKLOG_ADDENDUM_*.md` below.
 
 ---
 

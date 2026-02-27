@@ -1,6 +1,6 @@
 # Ticket Hygiene Prompt v1.0
 
-**Purpose**: Prevent ticket ID collisions, stale dashboards, and confusing “duplicate scope” tickets in `docs/WORKLOG_TICKETS.md`.
+**Purpose**: Prevent ticket ID collisions, stale dashboards, and confusing “duplicate scope” tickets in `docs/WORKLOG_ADDENDUM_*.md`.
 
 **Use When**:
 
@@ -23,7 +23,7 @@
 Run:
 
 ```bash
-rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_TICKETS.md | tail -n 30
+rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_*.md | tail -n 30
 ```
 
 Then:

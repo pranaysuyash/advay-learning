@@ -1,12 +1,16 @@
 """Progress service for business logic."""
 
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.db.models.progress import Progress
 from app.schemas.progress import ProgressCreate, ProgressUpdate
+
+settings = get_settings()
 
 
 class DuplicateProgressError(Exception):
@@ -19,6 +23,21 @@ class DuplicateProgressError(Exception):
 
 class ProgressService:
     """Progress service."""
+
+    @staticmethod
+    def _parse_client_timestamp(timestamp: str | None) -> datetime | None:
+        """Parse client-provided timestamp into UTC-naive datetime for DB storage."""
+        if not timestamp:
+            return None
+        try:
+            parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+
+        if parsed.tzinfo is None:
+            return parsed
+
+        return parsed.astimezone(timezone.utc).replace(tzinfo=None)
 
     @staticmethod
     async def get_by_id(db: AsyncSession, progress_id: str) -> Optional[Progress]:
@@ -76,15 +95,24 @@ class ProgressService:
             else ProgressCreate(**progress_in)
         )
 
+        progress_kwargs = {
+            "profile_id": profile_id,
+            "activity_type": data.activity_type,
+            "content_id": data.content_id,
+            "score": data.score,
+            "duration_seconds": data.duration_seconds,
+            "meta_data": data.meta_data or {},
+            "idempotency_key": data.idempotency_key,
+            "completed": data.completed,
+        }
+
+        if settings.USE_CLIENT_EVENT_TIME:
+            parsed_completed_at = ProgressService._parse_client_timestamp(data.timestamp)
+            if parsed_completed_at is not None:
+                progress_kwargs["completed_at"] = parsed_completed_at
+
         progress = Progress(
-            profile_id=profile_id,
-            activity_type=data.activity_type,
-            content_id=data.content_id,
-            score=data.score,
-            duration_seconds=data.duration_seconds,
-            meta_data=data.meta_data or {},
-            idempotency_key=data.idempotency_key,
-            completed=data.completed,
+            **progress_kwargs,
         )
         db.add(progress)
 

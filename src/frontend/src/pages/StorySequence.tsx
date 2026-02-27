@@ -415,7 +415,7 @@ export default function StorySequence() {
                 <line x1="50" y1="25" x2="50" y2="75" stroke="white" strokeWidth="2" />
               </svg>
             </div>
-            <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg></div>
+            <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg></div>
           </div>
           <h2 className="text-2xl font-bold text-advay-slate mb-2">Put the Story in Order!</h2>
           <p className="text-advay-slate mb-6 text-center max-w-md">
@@ -460,7 +460,7 @@ export default function StorySequence() {
                   onClick={() => startGame(story.id)}
                   className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-[0_4px_0_#E5B86E]"
                 >
-                  <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='9' x2='15' y1='3' y2='21'/></svg></div>
+                  <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='9' x2='15' y1='3' y2='21'/></svg></div>
                   <h3 className="font-bold text-advay-slate text-sm mb-1 group-hover:text-blue-500">
                     {story.title}
                   </h3>
@@ -472,7 +472,7 @@ export default function StorySequence() {
           </div>
           
           <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm bg-blue-50 px-4 py-2 rounded-xl">
-            <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>
+            <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>
             <span>Pinch and drag with your hand, or use your mouse!</span>
           </div>
         </div>
@@ -494,7 +494,7 @@ export default function StorySequence() {
             className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl mb-4 shadow-lg border-2 border-indigo-300"
           >
             <div className="flex items-center justify-center gap-2">
-              <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg>
+              <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg>
               <p className="font-black text-lg">GOAL: Drag cards to numbered slots in the RIGHT ORDER!</p>
               <span className="text-lg font-black text-white/80">1 → 2 → 3</span>
             </div>
@@ -611,7 +611,7 @@ export default function StorySequence() {
           {gameState?.completed && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-                <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg></div>
+                <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg></div>
                 <h3 className="text-2xl font-bold text-advay-slate mb-2">Story Complete!</h3>
                 <p className="text-advay-slate mb-4">
                   Great job arranging the {currentStory?.title.toLowerCase()} story!

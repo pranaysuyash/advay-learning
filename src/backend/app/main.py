@@ -7,40 +7,19 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
 from app.api.v1.api import api_router
 from app.core.config import Settings, get_settings
 from app.core.health import get_health_status
+from app.core.logging_config import setup_logging
 from app.core.rate_limit import setup_rate_limiting
 from app.db.session import get_db
+from app.middleware.security_headers import SecurityHeadersMiddleware
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to all responses."""
-
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-
-        # Prevent MIME type sniffing
-        response.headers["X-Content-Type-Options"] = "nosniff"
-
-        # Prevent clickjacking
-        response.headers["X-Frame-Options"] = "DENY"
-
-        # XSS protection
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-
-        # Referrer policy
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-        # Permissions policy (disable unused features)
-        response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), geolocation=()"
-        )
-
-        return response
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 def validate_cors_configuration(settings_instance: Settings) -> None:
@@ -65,8 +44,37 @@ def validate_cors_configuration(settings_instance: Settings) -> None:
             )
 
 
-# Setup logging
-logger = logging.getLogger(__name__)
+async def validate_database_schema() -> None:
+    """Validate that all SQLAlchemy models have corresponding database tables.
+    
+    This runs at startup to catch missing migrations early.
+    """
+    from sqlalchemy import inspect
+    from app.db.session import engine
+    from app.db.base_class import Base
+    
+    # Import all models to ensure they're registered with Base
+    from app.db.models import (
+        user, profile, progress, achievement,
+        subscription, game, audit_log, revoked_token
+    )
+    
+    async with engine.connect() as conn:
+        def check_tables(sync_conn):
+            inspector = inspect(sync_conn)
+            existing_tables = set(inspector.get_table_names())
+            existing_tables.discard('alembic_version')  # Managed by alembic
+            model_tables = set(Base.metadata.tables.keys())
+            
+            missing_tables = model_tables - existing_tables
+            if missing_tables:
+                raise RuntimeError(
+                    f"Database schema mismatch: Missing tables {missing_tables}. "
+                    f"Run: alembic revision --autogenerate -m 'add missing tables' && alembic upgrade head"
+                )
+        
+        await conn.run_sync(check_tables)
+
 
 # Validate settings before creating app to catch issues early
 try:
@@ -117,6 +125,18 @@ app.add_middleware(
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Run startup validations."""
+    logger.info("Running startup validations...")
+    try:
+        await validate_database_schema()
+        logger.info("✅ Database schema validation passed")
+    except Exception as e:
+        logger.error(f"❌ Startup validation failed: {e}")
+        raise
 
 
 @app.get("/")

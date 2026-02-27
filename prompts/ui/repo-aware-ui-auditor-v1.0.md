@@ -41,7 +41,7 @@ No extra text before the sentinel line.
 
 1) Ticketing evidence
 Create or update exactly ONE append-only log file:
-docs/WORKLOG_TICKETS.md
+docs/WORKLOG_ADDENDUM_*.md
 
 **PHASE A: WHOLE-REPO UI AUDIT**
 

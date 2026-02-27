@@ -1,6 +1,6 @@
 # QA FINDINGS → TICKETS PROMPT v1.0
 
-**Goal**: Convert a QA/tester findings report into scoped work tickets in `docs/WORKLOG_TICKETS.md` (append-only), without implementing fixes.
+**Goal**: Convert a QA/tester findings report into scoped work tickets in `docs/WORKLOG_ADDENDUM_*.md` (append-only), without implementing fixes.
 
 ---
 
@@ -49,7 +49,7 @@ For each finding:
 
 ### B) Ticket set (append-ready)
 
-Produce a markdown block with 1–N new tickets to append to `docs/WORKLOG_TICKETS.md`.
+Produce a markdown block with 1–N new tickets to append to `docs/WORKLOG_ADDENDUM_*.md`.
 
 Each ticket MUST include:
 

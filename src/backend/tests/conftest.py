@@ -50,9 +50,20 @@ def event_loop() -> Generator:
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database():
-    """Create database tables once for the test session."""
+    """Create database tables once for the test session and seed initial data."""
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Populate initial games so that endpoints return data during tests
+    from app.data.games_data import INITIAL_GAMES
+    from app.db.models.game import Game
+
+    async with test_async_session() as session:
+        for game in INITIAL_GAMES:
+            # use **game since the dict already contains all required fields
+            session.add(Game(**game))
+        await session.commit()
+
     yield
     # Cleanup
     async with test_engine.begin() as conn:
@@ -136,19 +147,16 @@ async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     """Create an admin user and return authentication token."""
     from uuid import uuid4
 
+    from sqlalchemy import select
     from app.core.security import get_password_hash
     from app.db.models.user import User
 
-    # Check if admin user already exists
-    existing_admin = await db_session.execute(
-        db_session.query(User).filter(User.email == "admin@test.com")
-    )
-    if existing_admin.scalar_one_or_none():
-        # User exists, just use it
-        pass
-    else:
+    # Check if admin user already exists using a select statement; AsyncSession doesn't support `.query`
+    result = await db_session.execute(select(User).where(User.email == "admin@test.com"))
+    admin_obj = result.scalar_one_or_none()
+    if not admin_obj:
         # Create admin user directly in database
-        user = User(
+        admin_obj = User(
             id=str(uuid4()),
             email="admin@test.com",
             hashed_password=get_password_hash("Admin123!"),
@@ -156,20 +164,11 @@ async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
             is_superuser=True,
             email_verified=True,
         )
-        db_session.add(user)
+        db_session.add(admin_obj)
         await db_session.commit()
-        await db_session.refresh(user)
+        await db_session.refresh(admin_obj)
 
-    # Login to get token
-    response = await client.post(
-        "/api/v1/auth/login",
-        data={"username": "admin@test.com", "password": "Admin123!"},
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-
-    # Login to get token
+    # Perform login once to obtain token
     response = await client.post(
         "/api/v1/auth/login",
         data={"username": "admin@test.com", "password": "Admin123!"},

@@ -11,10 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 class CacheService:
-    """Redis-based caching service."""
+    """Redis-based caching service with optional in-memory fallback.
+
+    In development and CI we often don't have a Redis instance running, so
+    the service automatically falls back to a simple dictionary.  Any errors
+    communicating with Redis (connection issues, closed event loops, etc.)
+    will be logged and handled gracefully.
+    """
 
     def __init__(self):
         self._client: Optional[redis.Redis] = None
+        # simple in-memory cache for fallback when Redis is unavailable
+        self._fallback: dict[str, str] = {}
 
     async def get_client(self) -> redis.Redis:
         """Get or create Redis client."""
@@ -36,7 +44,15 @@ class CacheService:
             return None
         except redis.RedisError as e:
             logger.warning("Redis error getting key %s: %s", key, e)
-            return None
+        except Exception as e:  # catch any unexpected errors (e.g. event loop issues)
+            logger.warning("Unexpected cache error getting key %s: %s", key, e)
+        # fall back to in-memory store if available
+        if key in self._fallback:
+            try:
+                return json.loads(self._fallback[key])
+            except json.JSONDecodeError:
+                return None
+        return None
 
     async def set(self, key: str, value: Any, ttl: int = 300) -> bool:
         """Set value in cache with TTL (default 5 minutes)."""
@@ -49,7 +65,14 @@ class CacheService:
             return False
         except redis.RedisError as e:
             logger.warning("Redis error setting key %s: %s", key, e)
-            return False
+        except Exception as e:
+            logger.warning("Unexpected cache error setting key %s: %s", key, e)
+        # if we reached here it means redis failed; store in fallback
+        try:
+            self._fallback[key] = json.dumps(value)
+        except Exception:
+            pass
+        return True
 
     async def delete(self, key: str) -> bool:
         """Delete key from cache."""

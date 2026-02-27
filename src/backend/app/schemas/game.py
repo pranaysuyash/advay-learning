@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
 
 class GameBase(BaseModel):
@@ -23,6 +23,23 @@ class GameBase(BaseModel):
     is_published: bool = True
     is_featured: bool = False
     config_json: Optional[dict] = None
+
+    @field_validator("config_json", mode="before")
+    def _parse_config_json(cls, v):
+        """Parse config_json when it's provided as a JSON string.
+
+        Pydantic can receive values from raw dicts or ORM objects; the
+        validator may receive the field value directly rather than a mapping.
+        """
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except Exception:
+                return {}
+        # leave as-is (None or already dict)
+        return v
 
     @model_validator(mode="after")
     def validate_age_range(self):

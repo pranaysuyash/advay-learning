@@ -27,7 +27,7 @@ PASS only if all are true:
 - **R3 Deterministic output**: Required sections and “must include” fields.
 - **R4 Non-duplication**: Prevents parallel versions (`*_v2`) and references preservation-first.
 - **R5 Verification**: Includes verification commands or explicitly states why not.
-- **R6 Repo integration**: References `docs/WORKLOG_TICKETS.md` and `prompts/README.md` indexing rules.
+- **R6 Repo integration**: References `docs/WORKLOG_ADDENDUM_*.md` and `prompts/README.md` indexing rules.
 
 If any rubric item fails, revise the prompt and re-check.
 

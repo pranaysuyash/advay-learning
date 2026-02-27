@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.endpoints import games as games_endpoint
 from app.core.security import get_password_hash
@@ -143,13 +144,25 @@ async def test_get_game_by_slug(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_create_game_requires_admin(client: AsyncClient, db_session):
     """Test that creating games requires admin access."""
-    # Create regular user
+    # Create regular user (unique check inside helper prevents duplicates)
     user = await create_test_user(db_session, role=UserRole.PARENT)
-    token = await login_user(client, user)
+    token = await login_user(client, user, db_session)
 
+    game_payload = {
+        "title": "Test Game",
+        "slug": "test-game",
+        "description": "A game used in unit tests",
+        "icon": "test-icon",
+        "category": "Test",
+        "age_range_min": 2,
+        "age_range_max": 3,
+        "difficulty": "Easy",
+        "game_path": "/games/test-game",
+        "config_json": "{}",
+    }
     response = await client.post(
-        "/api/v1/games",
-        json={"title": "Test Game", "slug": "test-game"},
+        "/api/v1/games/",  # ensure trailing slash so permission check runs before redirect
+        json=game_payload,
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 403
@@ -158,9 +171,21 @@ async def test_create_game_requires_admin(client: AsyncClient, db_session):
 @pytest.mark.asyncio
 async def test_create_game_admin(client: AsyncClient, admin_token: str, db_session):
     """Test that admins can create games."""
+    game_payload = {
+        "title": "Test Game",
+        "slug": "admin-game",
+        "description": "A game used in unit tests",
+        "icon": "test-icon",
+        "category": "Test",
+        "age_range_min": 2,
+        "age_range_max": 3,
+        "difficulty": "Easy",
+        "game_path": "/games/test-game",
+        "config_json": "{}",
+    }
     response = await client.post(
-        "/api/v1/games",
-        json={"title": "Test Game", "slug": "admin-game"},
+        "/api/v1/games/",  # include trailing slash to avoid redirect
+        json=game_payload,
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert response.status_code == 201
@@ -179,7 +204,7 @@ async def test_get_game_by_id(client: AsyncClient):
 async def test_update_game_requires_admin(client: AsyncClient, admin_token: str, db_session):
     """Test that updating games requires admin access."""
     user = await create_test_user(db_session, role=UserRole.PARENT)
-    token = await login_user(client, user)
+    token = await login_user(client, user, db_session)
 
     response = await client.put(
         "/api/v1/games/alphabet-tracing",
@@ -204,7 +229,7 @@ async def test_update_game_admin(client: AsyncClient, admin_token: str, db_sessi
 async def test_delete_game_requires_admin(client: AsyncClient, admin_token: str, db_session):
     """Test that deleting games requires admin access."""
     user = await create_test_user(db_session, role=UserRole.PARENT)
-    token = await login_user(client, user)
+    token = await login_user(client, user, db_session)
 
     response = await client.delete(
         "/api/v1/games/alphabet-tracing",
@@ -224,17 +249,30 @@ async def test_delete_game_admin(client: AsyncClient, admin_token: str, db_sessi
 
 
 async def create_test_user(db_session, role: UserRole = UserRole.ADMIN) -> UserModel:
-    """Helper to create admin user for tests."""
+    """Helper to create admin/user for tests.
+
+    If a user with the same role/email already exists in the database, return
+    the existing object instead of attempting to insert a duplicate.  This
+    prevents unique constraint violations across multiple test functions.
+    """
     from uuid import uuid4
 
     from app.core.security import get_password_hash
+    from sqlalchemy import select
+
+    email = f"{role.value}@test.com"
+    # look for existing user first
+    existing = await db_session.execute(select(UserModel).where(UserModel.email == email))
+    existing_user = existing.scalar_one_or_none()
+    if existing_user:
+        return existing_user
 
     user = UserModel(
         id=str(uuid4()),
-        email=f"{role.value}@test.com",
+        email=email,
         hashed_password=get_password_hash("Test123!@#"),
         is_active=True,
-        is_superuser=True,
+        is_superuser=(role == UserRole.ADMIN),
         role=role,
     )
     db_session.add(user)
@@ -244,35 +282,38 @@ async def create_test_user(db_session, role: UserRole = UserRole.ADMIN) -> UserM
     return user
 
 
-async def login_user(client: AsyncClient, user: UserModel) -> str:
-    """Login user and return access token."""
+async def login_user(client: AsyncClient, user: UserModel, db_session: AsyncSession) -> str:
+    """Login user and return access token.
+
+    Ensures the user's email is marked verified in the provided session so that
+    the authentication flow succeeds.  Uses the same session to avoid cross-
+    session attachment errors.
+    """
     from app.services.audit_service import AuditService
 
-    # Manually verify email for admin user
+    # Manually verify email if needed
     if not user.email_verified:
-        from app.db.session import async_session
+        await AuditService.log_action(
+            db_session,
+            user_id=user.id,
+            user_email=user.email,
+            action="email_verified",
+            resource_type="user",
+            resource_id=user.id,
+            details="Verified email for testing",
+            ip_address=None,
+            user_agent=None,
+        )
+        user.email_verified = True
+        db_session.add(user)
+        await db_session.commit()
 
-        async with async_session() as session:
-            await AuditService.log_action(
-                session,
-                user_id=user.id,
-                user_email=user.email,
-                action="email_verified",
-                resource_type="user",
-                resource_id=user.id,
-                details="Verified email for testing",
-                ip_address=None,
-                user_agent=None,
-            )
-
-            user.email_verified = True
-            session.add(user)
-            await session.commit()
-
+    # OAuth2PasswordRequestForm expects form data with 'username' and
+    # 'password' fields (it maps 'username' to email internally).
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": user.email,
+        data={
+            "username": user.email,
             "password": "Test123!@#",
         },
     )
@@ -280,7 +321,13 @@ async def login_user(client: AsyncClient, user: UserModel) -> str:
     if response.status_code != 200:
         raise ValueError(f"Login failed: {response.text}")
 
-    token = response.json().get("access_token")
+    # Access token is stored in a cookie by the server.  `httpx.AsyncClient`
+    # keeps a cookie jar which we can inspect after the request; relying on
+    # `response.cookies` alone has been flaky in our tests.  We'll check both.
+    token = client.cookies.get("access_token") or response.cookies.get("access_token")
+    if not token:
+        # fallback: maybe the endpoint started returning it in the body again
+        token = response.json().get("access_token")
     if not token:
         raise ValueError("No access token in response")
 

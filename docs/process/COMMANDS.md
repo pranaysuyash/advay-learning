@@ -6,7 +6,7 @@ This repo prefers fast, reproducible discovery commands. Default to `rg` over `g
 
 ```bash
 # Ticket scan (helps avoid collisions and see current work)
-rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_TICKETS.md | tail -n 30
+rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_*.md | tail -n 30
 
 # Find TODOs / fixmes
 rg -n "TODO|FIXME|HACK" -S src docs prompts || true
@@ -25,6 +25,19 @@ git config --get core.hooksPath
 
 # Run the workflow gate against staged changes
 ./scripts/agent_gate.sh --staged
+```
+
+## Start WIP PR Branch
+
+```bash
+# From main, create/switch to short-lived branch for PR review workflow
+./scripts/start_wip_branch.sh <ticket-or-scope>
+# e.g.
+./scripts/start_wip_branch.sh TCK-20260227-013
+
+# After commit, push and open PR so review checks trigger
+git push -u origin codex/wip-<ticket-or-scope>
+gh pr create --base main --head codex/wip-<ticket-or-scope> --fill
 ```
 
 ## Canonical File Finding
@@ -60,10 +73,25 @@ rg -n "<symbol>" <file>
 cd src/backend && uv run pytest -q
 ```
 
+## DB Migration Guard
+
+```bash
+# Fail if DB model-layer changes do not include alembic migration updates
+./scripts/db_migration_guard.sh --staged
+./scripts/db_migration_guard.sh --range origin/main..HEAD
+```
+
 ## Frontend Verification (preferred)
 
 ```bash
 npm -C src/frontend run type-check
+```
+
+## Mandatory Check Bundle
+
+```bash
+# Runs DB migration guard + frontend type/test + backend pytest
+npm run check:mandatory
 ```
 
 ## Notes

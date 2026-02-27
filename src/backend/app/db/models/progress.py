@@ -50,4 +50,8 @@ class Progress(Base):
         ),
     )
     # Relationships
-    profile: Mapped["Profile"] = relationship("Profile", back_populates="progress")
+    profile: Mapped["Profile"] = relationship(
+        "Profile", 
+        back_populates="progress",
+        lazy="joined",
+    )

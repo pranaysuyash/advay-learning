@@ -57,7 +57,7 @@ import {
 export default function FreeDraw() {
   // ===== AUDIO =====
   const { playClick, playSuccess } = useAudio();
-  const { onGameComplete: _onGameComplete } = useGameDrops('free-draw');
+  const { onGameComplete } = useGameDrops('free-draw');
 
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -326,6 +326,7 @@ export default function FreeDraw() {
     const canvas = canvasRef.current;
     if (!canvas || isCanvasEmpty(gameState)) return;
 
+    onGameComplete();
     playSuccess();
     const dataUrl = exportCanvas(canvas);
 

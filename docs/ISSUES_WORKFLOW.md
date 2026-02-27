@@ -2,7 +2,7 @@
 
 This repo uses **two layers** of tracking:
 
-1) **Canonical**: `docs/WORKLOG_TICKETS.md` (append-only; evidence-first; scope contract required)
+1) **Canonical**: `docs/WORKLOG_ADDENDUM_*.md` (append-only; evidence-first; scope contract required)
 2) **Collaboration mirror**: **GitHub Issues** (labels, assignees, discussion, PR linking)
 
 ## Rules

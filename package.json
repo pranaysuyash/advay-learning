@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "check:db-migration": "bash ./scripts/ci_db_migration_check.sh",
+    "check:mandatory": "npm run -s check:db-migration && npm -C src/frontend run -s type-check && npm -C src/frontend run -s test -- --run && (cd src/backend && uv run pytest -q)"
+  },
   "dependencies": {
     "puppeteer": "^24.37.5"
   }

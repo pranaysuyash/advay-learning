@@ -58,6 +58,21 @@ Access:
 - Backend API: <http://localhost:8001>
 - API Docs: <http://localhost:8001/docs>
 
+## 🧪 Test Accounts
+
+For development and testing, the following accounts are pre-configured:
+
+| Email | Plan | Status | Purpose |
+|-------|------|--------|---------|
+| `pranay.suyash@gmail.com` | Yearly | Active | Full feature testing |
+| `testquarterly@example.com` | Quarterly | Active | Subscription swap testing |
+
+**Login Credentials:**
+- Email: `testquarterly@example.com`
+- Password: `TestPass123!`
+
+The quarterly account can be used to test upgrading to yearly subscription. The yearly account has full access to all premium features.
+
 ## 🏗️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Vite

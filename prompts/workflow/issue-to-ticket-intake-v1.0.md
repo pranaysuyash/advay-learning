@@ -1,6 +1,6 @@
 # GitHub Issue → Worklog Ticket Intake Prompt v1.0
 
-**Purpose**: Convert a GitHub Issue into a properly-scoped, evidence-first worklog ticket in `docs/WORKLOG_TICKETS.md` (append-only).
+**Purpose**: Convert a GitHub Issue into a properly-scoped, evidence-first worklog ticket in `docs/WORKLOG_ADDENDUM_*.md` (append-only).
 
 **Use When**:
 

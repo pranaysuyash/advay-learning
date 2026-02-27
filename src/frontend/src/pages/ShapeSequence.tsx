@@ -356,7 +356,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-blue-100 rounded-3xl border-4 border-blue-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 20-1.25-2.5L6 18" /><path d="M10 4 8.5 6.5 6 6" /><path d="m14 20 1.25-2.5L18 18" /><path d="m14 4 1.25 2.5L18 6" /><path d="M17 10h-6" /><path d="M17 14h-6" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 20-1.25-2.5L6 18" /><path d="M10 4 8.5 6.5 6 6" /><path d="m14 20 1.25-2.5L18 18" /><path d="m14 4 1.25 2.5L18 6" /><path d="M17 10h-6" /><path d="M17 14h-6" /></svg>
               </div>
               <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Shape Sequence</h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>
@@ -390,7 +390,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-amber-100 rounded-3xl border-4 border-amber-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
               </div>
               <h2 className='text-4xl font-black text-[#D946EF] tracking-tight mb-2'>Sequence Master!</h2>
               <p className='text-xl font-bold text-text-secondary mb-8'>Incredible job memorizing the order!</p>

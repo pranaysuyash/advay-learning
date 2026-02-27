@@ -230,7 +230,7 @@ class TestPasswordValidation:
         """Test registration with valid password succeeds."""
         response = await client.post(
             "/api/v1/auth/register",
-            json={"email": "strongpass@test.com", "password": "StrongPass123!"},
+            json={"email": "parent.valid@test.com", "password": "StrongPass123!"},
         )
         assert response.status_code == 200
 

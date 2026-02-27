@@ -13,7 +13,7 @@
 
 ---
 
-## OUTPUT (paste into the existing ticket in `docs/WORKLOG_TICKETS.md`)
+## OUTPUT (paste into the existing ticket in `docs/WORKLOG_ADDENDUM_*.md`)
 
 ```markdown
 Completion report:

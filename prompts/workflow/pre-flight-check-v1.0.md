@@ -8,7 +8,7 @@
 
 1) Read `AGENTS.md` (scope, evidence-first, preservation).
 2) Run `prompts/workflow/agent-entrypoint-v1.0.md` to pick work type + scope.
-3) Append/confirm ticket in `docs/WORKLOG_TICKETS.md` (append-only, unique ID).
+3) Append/confirm ticket in `docs/WORKLOG_ADDENDUM_*.md` (append-only, unique ID).
 4) If implementation/remediation/hardening: run `prompts/planning/implementation-planning-v1.0.md` (or the role-appropriate planner) before coding.
 5) After changes: run `prompts/workflow/pre-merge-clean-room-check-v1.0.md`.
 
@@ -31,7 +31,7 @@ If git or repo access is missing, record `Unknown` and continue with what’s po
 Run:
 
 ```bash
-rg -n "TCK-" docs/WORKLOG_TICKETS.md | tail -n 30
+rg -n "TCK-" docs/WORKLOG_*.md | tail -n 30
 ```
 
 If you see:

@@ -7,7 +7,7 @@ This guide helps keep prompts consistent, testable, and aligned with AGENTS.md.
 - **Evidence-first**: require Observed/Inferred/Unknown labels for non-trivial claims.
 - **Scope discipline**: one work unit per run; new findings → new ticket.
 - **Preservation-first**: refactor in place; avoid `*_v2` parallel implementations.
-- **Append-only tracking**: `docs/WORKLOG_TICKETS.md` is canonical.
+- **Append-only tracking**: `docs/WORKLOG_ADDENDUM_*.md` is canonical.
 
 ## Recommended Prompt Skeleton
 

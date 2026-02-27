@@ -206,4 +206,4 @@ ollama pull llama3.2:3b
 
 - If all PASS: Document in worklog, proceed with development
 - If any FAIL: Create issue ticket, investigate root cause
-- Update `docs/WORKLOG_TICKETS.md` with check results
+- Update `docs/WORKLOG_ADDENDUM_*.md` with check results

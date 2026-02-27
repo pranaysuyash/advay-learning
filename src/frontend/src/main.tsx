@@ -6,14 +6,15 @@ import App from './App';
 import './index.css';
 import { scan } from 'react-scan';
 import { initializeI18n, I18nProvider } from './i18n';
+import { preloadItemsManifest } from './utils/itemsManifest';
 
 // Initialize i18n before app render
 initializeI18n();
+void preloadItemsManifest();
 
 // Initialize React Scan for performance monitoring (development only)
 scan({
   enabled: (import.meta as any).env?.DEV ?? true,
-  trackUnnecessaryRenders: true,
   animationSpeed: 'fast',
   showToolbar: true,
   log: false,

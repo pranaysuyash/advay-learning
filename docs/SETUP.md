@@ -20,7 +20,7 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh
 ```
 
 To manually run the gate on your staged changes:
@@ -34,6 +34,24 @@ To generate a unique ticket stamp for worklog entries:
 ```bash
 ./scripts/new_ticket_stamp.sh codex
 # -> STAMP-20260224T220000Z-codex-ab12
+```
+
+### Main Branch Commit Guard (Required)
+
+`pre-commit` blocks direct commits on `main` to enforce PR-based review:
+
+- Keep iterating locally as needed.
+- Before commit, switch/create a short-lived branch:
+  - `./scripts/start_wip_branch.sh <ticket-or-scope>`
+  - or `git switch -c codex/wip-<ticket-or-scope>`
+- Commit on that branch, push it, and create a PR to `main` so remote review checks trigger.
+  - Example push: `git push -u origin codex/wip-<ticket-or-scope>`
+  - Example PR: `gh pr create --base main --head codex/wip-<ticket-or-scope> --fill`
+
+Emergency-only bypass (must be explicitly approved for the current task):
+
+```bash
+ALLOW_MAIN_COMMIT=1 git commit ...
 ```
 
 ### Secret Scanning Gate (Required)
@@ -63,6 +81,31 @@ Temporary bypass (emergency only):
 ```bash
 SKIP_SECRET_SCAN=1 git commit ...
 SKIP_SECRET_SCAN=1 git push ...
+```
+
+### DB Migration Guard (Required)
+
+Commits and pushes run `scripts/db_migration_guard.sh` to catch model-layer DB
+changes without matching Alembic migrations:
+
+- Triggers when files under `src/backend/app/db/models/` (or `base_class.py`) change.
+- Requires a migration change under `src/backend/alembic/versions/` in the same staged/pushed set.
+
+Manual checks:
+
+```bash
+# Check staged files
+./scripts/db_migration_guard.sh --staged
+
+# Check commit range
+./scripts/db_migration_guard.sh --range origin/main..HEAD
+```
+
+Temporary bypass (emergency only):
+
+```bash
+SKIP_DB_MIGRATION_CHECK=1 git commit ...
+SKIP_DB_MIGRATION_CHECK=1 git push ...
 ```
 
 ### No-Bypass Push Checks (Required)

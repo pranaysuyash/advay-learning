@@ -65,7 +65,7 @@ If the doc introduces new decisions or requirements:
 
 ## Step 4 — Worklog Update
 
-Append to `docs/WORKLOG_TICKETS.md`:
+Append to `docs/WORKLOG_ADDENDUM_*.md`:
 
 - what docs were added/updated
 - where they were linked

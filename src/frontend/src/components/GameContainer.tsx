@@ -1,9 +1,7 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { ReactNode } from 'react';
 import { UIIcon } from './ui/Icon';
 import { CameraThumbnail } from './game/CameraThumbnail';
-import { useProfileStore } from '../store/profileStore';
-import { recordGameSessionProgress } from '../services/progressTracking';
+import { useSessionProgressReporter } from '../hooks/useSessionProgressReporter';
 
 interface GameContainerProps {
   children: ReactNode;
@@ -19,6 +17,8 @@ interface GameContainerProps {
   isHandDetected?: boolean;
   /** Whether the game is actively playing (shows thumbnail only during play) */
   isPlaying?: boolean;
+  /** Whether to report session progress (default: true). Set to false if using useGameSessionProgress hook */
+  reportSession?: boolean;
 }
 
 /**
@@ -42,92 +42,20 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   className = '',
   isHandDetected,
   isPlaying,
+  reportSession: shouldReportSession = true,
 }) => {
-  const location = useLocation();
-  const currentProfileId = useProfileStore((state) => state.currentProfile?.id);
-  const resolvedProfileId = useMemo(() => {
-    const stateProfileId = (location.state as { profileId?: string } | null)
-      ?.profileId;
-    return stateProfileId || currentProfileId || null;
-  }, [currentProfileId, location.state]);
-
-  const mountedAtRef = useRef<number>(Date.now());
-  const sessionStartRef = useRef<number | null>(isPlaying === true ? Date.now() : null);
-  const prevIsPlayingRef = useRef<boolean | undefined>(isPlaying);
-  const latestScoreRef = useRef<number | undefined>(score);
-  const latestLevelRef = useRef<number | undefined>(level);
-  const latestTitleRef = useRef<string>(title || 'game');
-  const lastReportedSessionRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    latestScoreRef.current = score;
-  }, [score]);
-
-  useEffect(() => {
-    latestLevelRef.current = level;
-  }, [level]);
-
-  useEffect(() => {
-    latestTitleRef.current = title || 'game';
-  }, [title]);
-
-  const reportSession = useCallback(
-    (reason: 'pause-stop' | 'unmount') => {
-      const startMs =
-        sessionStartRef.current ??
-        (isPlaying === undefined ? mountedAtRef.current : null);
-      if (!startMs) return;
-
-      const durationSeconds = Math.max(0, Math.round((Date.now() - startMs) / 1000));
-      const finalScore = Number(latestScoreRef.current ?? 0);
-      const sessionId = `${startMs}`;
-      if (lastReportedSessionRef.current === sessionId) return;
-
-      // Ignore extremely short, zero-score "open and close" sessions.
-      if (durationSeconds < 5 && finalScore <= 0) return;
-
-      lastReportedSessionRef.current = sessionId;
-
-      void recordGameSessionProgress({
-        profileId: resolvedProfileId,
-        gameName: latestTitleRef.current,
-        score: finalScore,
-        durationSeconds,
-        level: latestLevelRef.current,
-        routePath: location.pathname,
-        sessionId,
-        metaData: { end_reason: reason },
-      });
-    },
-    [isPlaying, location.pathname, resolvedProfileId],
-  );
-
-  useEffect(() => {
-    const wasPlaying = prevIsPlayingRef.current;
-    const nowPlaying = isPlaying;
-
-    if (nowPlaying === true && wasPlaying !== true) {
-      sessionStartRef.current = Date.now();
-      lastReportedSessionRef.current = null;
-    }
-
-    if (wasPlaying === true && nowPlaying === false) {
-      reportSession('pause-stop');
-      sessionStartRef.current = null;
-    }
-
-    prevIsPlayingRef.current = nowPlaying;
-  }, [isPlaying, reportSession]);
-
-  useEffect(
-    () => () => {
-      reportSession('unmount');
-    },
-    [reportSession],
-  );
+  useSessionProgressReporter({
+    gameName: title || 'game',
+    score,
+    level,
+    isPlaying,
+    enabled: shouldReportSession,
+  });
 
   return (
-    <div className={`fixed inset-0 bg-[#FFF8F0] font-nunito flex flex-col overflow-hidden ${className}`}>
+    <div
+      className={`fixed inset-0 bg-[#FFF8F0] font-nunito flex flex-col overflow-hidden ${className}`}
+    >
       {/* V1 Playful Header - 72px height */}
       <header className='h-[72px] bg-white border-b-4 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] flex items-center justify-between px-4 sm:px-6 shrink-0 z-50'>
         {/* Left: Home Button */}
@@ -136,8 +64,10 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           className='flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] focus:outline-none focus:border-[#3B82F6]'
           type='button'
         >
-          <UIIcon name='home' size={22} className="text-text-secondary" />
-          <span className='hidden sm:inline text-sm font-bold uppercase tracking-wider'>Exit</span>
+          <UIIcon name='home' size={22} className='text-text-secondary' />
+          <span className='hidden sm:inline text-sm font-bold uppercase tracking-wider'>
+            Exit
+          </span>
         </button>
 
         {/* Center: Title */}
@@ -151,7 +81,9 @@ export const GameContainer: React.FC<GameContainerProps> = ({
         <div className='flex items-center gap-3'>
           {level !== undefined && (
             <div className='hidden sm:flex items-center gap-1 px-3 py-2 bg-[#3B82F6]/10 border-2 border-[#3B82F6]/20 rounded-xl shadow-[0_4px_0_#E5B86E]'>
-              <span className='text-sm font-bold text-[#3B82F6] uppercase tracking-wider'>Level</span>
+              <span className='text-sm font-bold text-[#3B82F6] uppercase tracking-wider'>
+                Level
+              </span>
               <span className='text-lg font-black text-[#3B82F6]'>{level}</span>
             </div>
           )}
@@ -168,9 +100,9 @@ export const GameContainer: React.FC<GameContainerProps> = ({
               onClick={onPause}
               className='p-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
               type='button'
-              aria-label="Pause Game"
+              aria-label='Pause Game'
             >
-              <UIIcon name='timer' size={22} className="text-text-secondary" />
+              <UIIcon name='timer' size={22} className='text-text-secondary' />
             </button>
           )}
 
@@ -179,9 +111,9 @@ export const GameContainer: React.FC<GameContainerProps> = ({
               onClick={onSettings}
               className='p-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
               type='button'
-              aria-label="Game Settings"
+              aria-label='Game Settings'
             >
-              <UIIcon name='lock' size={22} className="text-text-secondary" />
+              <UIIcon name='lock' size={22} className='text-text-secondary' />
             </button>
           )}
         </div>

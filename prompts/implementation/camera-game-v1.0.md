@@ -41,7 +41,7 @@ This prompt provides step-by-step guidance for implementing camera-based educati
 
 ```bash
 # Find your ticket (e.g., TCK-20260129-200)
-grep -A 5 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
+grep -A 5 "TCK-20260129-200" docs/WORKLOG_*.md
 ```
 
 **What to Look For:**
@@ -951,7 +951,7 @@ Test with screen reader and keyboard.
 ```bash
 # Update your worklog ticket
 # Find your ticket (e.g., TCK-20260129-200)
-rg -A 20 "TCK-20260129-200" docs/WORKLOG_TICKETS.md
+rg -A 20 "TCK-20260129-200" docs/WORKLOG_*.md
 
 # Mark as DONE
 # Update status from OPEN to DONE

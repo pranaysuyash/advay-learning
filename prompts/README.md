@@ -5,12 +5,12 @@ This folder contains the reusable prompts that govern how agents work on this re
 ## Start Here (Any Agent)
 
 1. Use: `prompts/workflow/agent-entrypoint-v1.0.md`
-2. Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
+2. Update tracking: `docs/WORKLOG_ADDENDUM_*.md` (append-only)
 3. Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
 ## 🚫 Critical Rules
 
-**NEVER create new git branches unless explicitly asked by the user.** Work on `main` (or existing feature branch if user created it).
+**Use short-lived PR branches for commits.** Iteration can happen locally on `main`, but commit on `codex/wip-<ticket-or-scope>` and merge back to `main` only after review.
 
 **NEVER delete or revert files with unrecognized changes.** Unrecognized changes may be from parallel agents - always preserve them.
 

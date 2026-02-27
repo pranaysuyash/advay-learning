@@ -1,5 +1,6 @@
 // Master catalog of all collectible items in the platform
 // Items are dropped by games, found as easter eggs, or crafted via recipes
+import { getItemIconPath, getVisualTierFromRarity, type VisualTier } from '../utils/itemsManifest';
 
 export type ItemCategory =
   | 'element'
@@ -21,8 +22,10 @@ export interface CollectibleItem {
   id: string;
   name: string;
   emoji: string;
+  icon?: string;
   category: ItemCategory;
   rarity: Rarity;
+  visualTier?: VisualTier;
   description: string;
   funFact?: string;
 }
@@ -161,6 +164,23 @@ const FOOD: CollectibleItem[] = [
   { id: 'food-cake',      name: 'Magic Cake',   emoji: '🎂', category: 'food', rarity: 'rare',     description: 'A celebration cake!',            funFact: 'The tradition of birthday cakes started in ancient Greece.' },
 ];
 
+// Legacy IDs still referenced in game drop tables.
+const LEGACY_COMPAT_ITEMS: CollectibleItem[] = [
+  { id: 'music-note',        name: 'Music Note',         emoji: '🎵', category: 'note',     rarity: 'common',   description: 'A classic melody note.' },
+  { id: 'star-gold',         name: 'Gold Star',          emoji: '⭐', category: 'shape',    rarity: 'rare',     description: 'A shiny gold achievement star.' },
+  { id: 'star-silver',       name: 'Silver Star',        emoji: '⭐', category: 'shape',    rarity: 'uncommon', description: 'A bright silver achievement star.' },
+  { id: 'star-bronze',       name: 'Bronze Star',        emoji: '⭐', category: 'shape',    rarity: 'common',   description: 'A bronze achievement star.' },
+  { id: 'fruit-apple',       name: 'Apple',              emoji: '🍎', category: 'food',     rarity: 'common',   description: 'A crunchy apple snack.' },
+  { id: 'tool-knife',        name: 'Safe Prep Knife',    emoji: '🔪', category: 'tool',     rarity: 'uncommon', description: 'A pretend kitchen tool for learning games.' },
+  { id: 'number-one',        name: 'Number One',         emoji: '1️⃣', category: 'number',   rarity: 'common',   description: 'The number one token.' },
+  { id: 'math-plus',         name: 'Plus Sign',          emoji: '➕', category: 'number',   rarity: 'common',   description: 'A math plus operator token.' },
+  { id: 'trophy-bronze',     name: 'Bronze Trophy',      emoji: '🏆', category: 'artifact', rarity: 'uncommon', description: 'A trophy for steady progress.' },
+  { id: 'letter-a',          name: 'Letter A',           emoji: '🅰️', category: 'letter',   rarity: 'common',   description: 'The letter A collectible.' },
+  { id: 'book-blue',         name: 'Blue Book',          emoji: '📘', category: 'artifact', rarity: 'common',   description: 'A blue learning book collectible.' },
+  { id: 'material-balloon',  name: 'Balloon',            emoji: '🎈', category: 'material', rarity: 'common',   description: 'A colorful balloon material.' },
+  { id: 'material-confetti', name: 'Confetti',           emoji: '🎊', category: 'material', rarity: 'uncommon', description: 'A burst of celebration confetti.' },
+];
+
 // ─── MASTER CATALOG ─────────────────────────────────────────────────────
 
 export const ALL_ITEMS: CollectibleItem[] = [
@@ -174,7 +194,12 @@ export const ALL_ITEMS: CollectibleItem[] = [
   ...TOOLS,
   ...ARTIFACTS,
   ...FOOD,
-];
+  ...LEGACY_COMPAT_ITEMS,
+].map((item) => ({
+  ...item,
+  icon: getItemIconPath(item.id, item.icon),
+  visualTier: item.visualTier ?? getVisualTierFromRarity(item.rarity),
+}));
 
 export const ITEMS_BY_ID: Record<string, CollectibleItem> = Object.fromEntries(
   ALL_ITEMS.map((item) => [item.id, item])
@@ -200,6 +225,64 @@ export interface DropEntry {
   minScore?: number; // minimum score/accuracy needed
 }
 
+export interface DeterministicDropInput {
+  gameId: string;
+  completionCount: number;
+  score?: number;
+}
+
+export interface RewardModelConfig {
+  deterministicCore: boolean;
+  enableOlderBonus: boolean;
+  olderBonusMinAge: number;
+  olderBonusChance: number;
+}
+
+export const REWARD_MODEL_CONFIG: RewardModelConfig = {
+  deterministicCore: true,
+  enableOlderBonus: false, // default OFF until explicitly enabled
+  olderBonusMinAge: 6,
+  olderBonusChance: 0.1,
+};
+
+function hashSeed(value: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function deterministicIndex(seed: string, modulo: number): number {
+  if (modulo <= 0) return 0;
+  return hashSeed(seed) % modulo;
+}
+
+function normalizeWeight(chance: number): number {
+  if (!Number.isFinite(chance)) return 1;
+  return Math.max(chance, 0.0001);
+}
+
+function weightedDeterministicPick(table: DropEntry[], seed: string): string | null {
+  if (table.length === 0) return null;
+  const totalWeight = table.reduce((sum, entry) => sum + normalizeWeight(entry.chance), 0);
+  if (totalWeight <= 0) return table[deterministicIndex(seed, table.length)]?.itemId ?? null;
+
+  const target = (hashSeed(seed) / 0xffffffff) * totalWeight;
+  let cursor = 0;
+  for (const entry of table) {
+    cursor += normalizeWeight(entry.chance);
+    if (target <= cursor) return entry.itemId;
+  }
+  return table[table.length - 1]?.itemId ?? null;
+}
+
+function withOptionalScoreGate(table: DropEntry[], score?: number): DropEntry[] {
+  if (score === undefined) return table;
+  return table.filter((entry) => entry.minScore === undefined || score >= entry.minScore);
+}
+
 /**
  * Roll drops from a drop table.
  * Pass the table directly (from gameRegistry.getDropTable).
@@ -215,4 +298,41 @@ export function rollDropsFromTable(table: DropEntry[], score?: number): string[]
     }
   }
   return drops;
+}
+
+/**
+ * Deterministic core reward selector.
+ * Guarantees one item when the table has entries by using a stable seeded pick.
+ * Core reward intentionally ignores minScore to avoid silent no-reward outcomes.
+ */
+export function getDeterministicCoreDrop(table: DropEntry[], input: DeterministicDropInput): string | null {
+  if (!table || table.length === 0) return null;
+  const seed = `core:${input.gameId}:${input.completionCount}`;
+  return weightedDeterministicPick(table, seed);
+}
+
+/**
+ * Optional additive bonus reward for older kids.
+ * This never replaces the core reward.
+ */
+export function maybeGetDeterministicBonusDrop(
+  table: DropEntry[],
+  input: DeterministicDropInput,
+  profileAge?: number,
+  enableOlderBonus?: boolean
+): string | null {
+  const bonusEnabled = enableOlderBonus ?? REWARD_MODEL_CONFIG.enableOlderBonus;
+  if (!bonusEnabled) return null;
+  if (profileAge === undefined || profileAge < REWARD_MODEL_CONFIG.olderBonusMinAge) return null;
+  if (!table || table.length === 0) return null;
+
+  const eligible = withOptionalScoreGate(table, input.score);
+  if (eligible.length === 0) return null;
+
+  const triggerSeed = `bonus-trigger:${input.gameId}:${input.completionCount}`;
+  const trigger = hashSeed(triggerSeed) / 0xffffffff;
+  if (trigger >= REWARD_MODEL_CONFIG.olderBonusChance) return null;
+
+  const pickSeed = `bonus-pick:${input.gameId}:${input.completionCount}`;
+  return weightedDeterministicPick(eligible, pickSeed);
 }

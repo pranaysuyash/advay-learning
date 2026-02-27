@@ -24,7 +24,13 @@ import type { EasterEgg } from './easterEggs';
 
 // ─── TYPES ──────────────────────────────────────────────────────────────
 
-export type GameVibe = 'chill' | 'active' | 'creative' | 'brainy';
+export type GameVibe =
+  | 'chill'
+  | 'active'
+  | 'creative'
+  | 'brainy'
+  | 'educational'
+  | 'musical';
 
 export interface GameManifest {
   // Identity
@@ -32,7 +38,7 @@ export interface GameManifest {
   name: string;
   tagline: string; // fun one-liner — NOT "learn X", but "do Y!"
   path: string;
-  icon: IconName;
+  icon: IconName | string;
 
   // World & feel
   worldId: string;
@@ -64,6 +70,8 @@ export const VIBE_CONFIG: Record<GameVibe, { label: string; emoji: string; color
   active: { label: 'Active', emoji: '⚡', color: '#F59E0B' },
   creative: { label: 'Creative', emoji: '🎨', color: '#A855F7' },
   brainy: { label: 'Brainy', emoji: '🧠', color: '#3B82F6' },
+  educational: { label: 'Educational', emoji: '📚', color: '#6366F1' },
+  musical: { label: 'Musical', emoji: '🎵', color: '#EC4899' },
 };
 
 // ─── THE REGISTRY ───────────────────────────────────────────────────────
@@ -243,6 +251,253 @@ export const GAME_REGISTRY: GameManifest[] = [
         difficulty: 'medium',
       },
     ],
+  },
+  {
+    id: 'phonics-tracing',
+    name: 'Phonics Tracing',
+    tagline: 'Trace letters and hear them sound out in real-time! 🔤🎵',
+    path: '/games/phonics-tracing',
+    icon: 'letters',
+    worldId: 'word-workshop',
+    vibe: 'chill',
+    ageRange: '4-6',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'food-apple', chance: 0.2 },
+      { itemId: 'creature-cat', chance: 0.15 },
+      { itemId: 'creature-dog', chance: 0.15 },
+      { itemId: 'creature-owl', chance: 0.05, minScore: 85 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-phonics-master',
+        name: 'Phonics Master',
+        description: 'Complete all 3 levels!',
+        trigger: 'all-levels-complete',
+        reward: { itemId: 'creature-owl', quantity: 1 },
+        hint: 'Master all the letter sounds...',
+        difficulty: 'hard',
+      },
+    ],
+  },
+  {
+    id: 'beginning-sounds',
+    name: 'Beginning Sounds',
+    tagline: 'What sound does the word start with? Listen and choose! 🔊',
+    path: '/games/beginning-sounds',
+    icon: 'letters',
+    worldId: 'word-workshop',
+    vibe: 'brainy',
+    ageRange: '3-6',
+    isNew: true,
+    cv: ['hand', 'voice'],
+    listed: true,
+    drops: [
+      { itemId: 'creature-owl', chance: 0.15 },
+      { itemId: 'food-apple', chance: 0.2 },
+      { itemId: 'creature-cat', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'odd-one-out',
+    name: 'Odd One Out',
+    tagline: 'Find the one that does NOT belong! 🤔',
+    path: '/games/odd-one-out',
+    icon: 'sparkles',
+    worldId: 'mind-maze',
+    vibe: 'brainy',
+    ageRange: '3-7',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.2 },
+      { itemId: 'material-crystal', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'shadow-puppet-theater',
+    name: 'Shadow Puppet Theater',
+    tagline: 'Make shadow animals with your hands! 🦋',
+    path: '/games/shadow-puppet-theater',
+    icon: 'sparkles',
+    worldId: 'creative-corner',
+    vibe: 'creative',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'tool-paintbrush', chance: 0.15 },
+      { itemId: 'color-rainbow', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'virtual-bubbles',
+    name: 'Virtual Bubbles',
+    tagline: 'Blow to make bubbles, pop them with your hands! 🫧',
+    path: '/games/virtual-bubbles',
+    icon: 'drop',
+    worldId: 'creative-corner',
+    vibe: 'chill',
+    ageRange: '2-6',
+    isNew: true,
+    cv: ['hand', 'voice'],
+    listed: true,
+    drops: [
+      { itemId: 'material-crystal', chance: 0.1 },
+      { itemId: 'shape-circle', chance: 0.2 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'kaleidoscope-hands',
+    name: 'Kaleidoscope Hands',
+    tagline: 'Move your hands to create beautiful symmetrical art! 🎨',
+    path: '/games/kaleidoscope-hands',
+    icon: 'sparkles',
+    worldId: 'creative-corner',
+    vibe: 'creative',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'color-rainbow', chance: 0.2 },
+      { itemId: 'tool-paintbrush', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'air-guitar-hero',
+    name: 'Air Guitar Hero',
+    tagline: 'Strum and rock like a superstar! 🎸',
+    path: '/games/air-guitar-hero',
+    icon: 'guitar',
+    worldId: 'sound-studio',
+    vibe: 'musical',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'music-note', chance: 0.2 },
+      { itemId: 'star-gold', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'fruit-ninja-air',
+    name: 'Fruit Ninja Air',
+    tagline: 'Slice fruits in the air with hand gestures! 🍎',
+    path: '/games/fruit-ninja-air',
+    icon: 'fruit',
+    worldId: 'motor-zone',
+    vibe: 'active',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'fruit-apple', chance: 0.2 },
+      { itemId: 'tool-knife', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'counting-objects',
+    name: 'Counting Objects',
+    tagline: 'Count the fun objects you see! 🔢',
+    path: '/games/counting-objects',
+    icon: 'numbers',
+    worldId: 'number-jungle',
+    vibe: 'educational',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'number-one', chance: 0.2 },
+      { itemId: 'shape-star', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'more-or-less',
+    name: 'More or Less',
+    tagline: 'Find which group has more or less! 📊',
+    path: '/games/more-or-less',
+    icon: 'scale',
+    worldId: 'number-jungle',
+    vibe: 'educational',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'math-plus', chance: 0.2 },
+      { itemId: 'trophy-bronze', chance: 0.1 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'blend-builder',
+    name: 'Blend Builder',
+    tagline: 'Blend sounds to make words! 🧩',
+    path: '/games/blend-builder',
+    icon: 'puzzle',
+    worldId: 'word-workshop',
+    vibe: 'educational',
+    ageRange: '4-7',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'letter-a', chance: 0.2 },
+      { itemId: 'star-silver', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'syllable-clap',
+    name: 'Syllable Clap',
+    tagline: 'Clap the syllables in words! 👏',
+    path: '/games/syllable-clap',
+    icon: 'clap',
+    worldId: 'word-workshop',
+    vibe: 'educational',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'music-note', chance: 0.2 },
+      { itemId: 'star-bronze', chance: 0.15 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'sight-word-flash',
+    name: 'Sight Word Flash',
+    tagline: 'How many words do you know? 👀',
+    path: '/games/sight-word-flash',
+    icon: 'eye',
+    worldId: 'word-workshop',
+    vibe: 'educational',
+    ageRange: '4-7',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'book-blue', chance: 0.2 },
+      { itemId: 'star-gold', chance: 0.15 },
+    ],
+    easterEggs: [],
   },
 
   // ── Shape Garden ──────────────────────────────────────────────────
@@ -518,6 +773,34 @@ export const GAME_REGISTRY: GameManifest[] = [
         trigger: 'perfect-hold-10s',
         reward: { itemId: 'creature-owl', quantity: 1 },
         hint: 'Be still and patient like an owl...',
+        difficulty: 'medium',
+      },
+    ],
+  },
+  {
+    id: 'balloon-pop-fitness',
+    name: 'Balloon Pop Fitness',
+    tagline: 'Pop balloons by jumping, waving, and clapping! 🎈💪',
+    path: '/games/balloon-pop-fitness',
+    icon: 'sparkles',
+    worldId: 'body-zone',
+    vibe: 'active',
+    ageRange: '3-8',
+    isNew: true,
+    cv: ['pose'],
+    listed: true,
+    drops: [
+      { itemId: 'material-balloon', chance: 0.3 },
+      { itemId: 'material-confetti', chance: 0.2 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-balloon-combo',
+        name: 'Combo Master',
+        description: 'Get a 10x combo!',
+        trigger: 'combo-10x',
+        reward: { itemId: 'material-confetti', quantity: 5 },
+        hint: 'Pop balloons quickly without missing!',
         difficulty: 'medium',
       },
     ],

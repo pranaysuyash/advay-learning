@@ -89,7 +89,7 @@ Record outputs in the worklog.
 
 ## Step 5 — Worklog Requirements
 
-Append to `docs/WORKLOG_TICKETS.md`:
+Append to `docs/WORKLOG_ADDENDUM_*.md`:
 
 - what was deprecated and why
 - what became canonical and why (Observed)

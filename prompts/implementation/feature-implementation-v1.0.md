@@ -81,7 +81,7 @@ If commands fail, capture raw output and mark related claims Unknown.
 1) Make minimal code changes for the slice.
 2) Add/update tests (unit/integration/e2e as appropriate).
 3) Run the smallest relevant verification set.
-4) Update work tracking in `docs/WORKLOG_TICKETS.md` with:
+4) Update work tracking in `docs/WORKLOG_ADDENDUM_*.md` with:
    - commands + raw outputs
    - what changed and why
 
