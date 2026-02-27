@@ -217,7 +217,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
             style={{ left: `${cursorX * 100}%` }}
             aria-hidden='true'
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l3 3-3 3 3 3" /><path d="M18 15V9a2 2 0 0 0-2-2h-2" /><path d="M10 15V9a2 2 0 0 1 2-2h2" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l3 3-3 3 3 3" /><path d="M18 15V9a2 2 0 0 0-2-2h-2" /><path d="M10 15V9a2 2 0 0 1 2-2h2" /></svg>
           </div>
         )}
 
@@ -229,7 +229,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-purple-100 rounded-3xl border-4 border-purple-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9333EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9333EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
               </div>
               <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Music Pinch Beat</h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>

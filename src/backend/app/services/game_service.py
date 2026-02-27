@@ -74,7 +74,18 @@ class GameService:
     async def create(db: AsyncSession, game_in: GameCreate, created_by: str) -> Game:
         """Create a new game (admin only)."""
 
-        game = Game(**game_in.model_dump(), created_by=created_by)
+        # The Pydantic schema represents config_json as a dict, but the
+        # database column is a plain string.  Ensure we serialize it back to
+        # JSON before constructing the ORM object so asyncpg doesn't choke on
+        # receiving a dict value.
+        game_data = game_in.model_dump()
+        cfg = game_data.get("config_json")
+        if isinstance(cfg, dict):
+            import json
+
+            game_data["config_json"] = json.dumps(cfg)
+
+        game = Game(**game_data, created_by=created_by)
         db.add(game)
         await db.commit()
         await db.refresh(game)
@@ -90,6 +101,13 @@ class GameService:
             return None
 
         update_data = game_in.model_dump(exclude_unset=True)
+        # same serialization logic for updates
+        cfg = update_data.get("config_json")
+        if isinstance(cfg, dict):
+            import json
+
+            update_data["config_json"] = json.dumps(cfg)
+
         for field, value in update_data.items():
             setattr(game, field, value)
 

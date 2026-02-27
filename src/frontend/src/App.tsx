@@ -521,7 +521,9 @@ function App() {
                   path='/games/balloon-pop-fitness'
                   element={
                     <ProtectedRoute>
-                      <BalloonPopFitness />
+                      <CameraSafeRoute gameName='Balloon Pop Fitness'>
+                        <BalloonPopFitness />
+                      </CameraSafeRoute>
                     </ProtectedRoute>
                   }
                 />

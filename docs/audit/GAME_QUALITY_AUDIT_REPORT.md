@@ -236,7 +236,7 @@ const reducedMotion = useReducedMotion();
 
 ### 🥈 Second Place: SimonSays.tsx
 
-**Score**: 38/100
+**Score**: 43/100
 
 **Strengths**:
 - ✅ Error handling
@@ -245,7 +245,7 @@ const reducedMotion = useReducedMotion();
 
 ---
 
-### 🥉 Third Place (Tie): 16 Games
+### 🥉 Third Place (Tie): 10 Games
 
 **Score**: 43/100
 

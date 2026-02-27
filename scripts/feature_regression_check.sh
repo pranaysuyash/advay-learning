@@ -41,8 +41,8 @@ TOUCHED_CHANGE_THRESHOLD=10   # Percentage (added+deleted vs old LOC)
 MIN_LOC_ABSOLUTE=20           # Minimum touched lines to trigger review signals
 LARGE_FILE_LOC_THRESHOLD=500  # Large file review guard
 COMPLEXITY_SIGNAL_THRESHOLD=25
-CCN_MAX_THRESHOLD=20          # Trigger when max cyclomatic complexity is high
-CCN_DELTA_THRESHOLD=5         # Trigger when max complexity increases significantly
+CCN_MAX_THRESHOLD="${CCN_MAX_THRESHOLD:-20}"          # Trigger when max cyclomatic complexity is high
+CCN_DELTA_THRESHOLD="${CCN_DELTA_THRESHOLD:-5}"       # Trigger when max complexity increases significantly
 
 # Colors for output
 RED='\033[0;31m'
@@ -120,13 +120,6 @@ fi
 if [[ -n "${TOUCHED_LOC_THRESHOLD:-}" ]]; then
   TOUCHED_CHANGE_THRESHOLD="$TOUCHED_LOC_THRESHOLD"
 fi
-if [[ -n "${CCN_MAX_THRESHOLD:-}" ]]; then
-  CCN_MAX_THRESHOLD="$CCN_MAX_THRESHOLD"
-fi
-if [[ -n "${CCN_DELTA_THRESHOLD:-}" ]]; then
-  CCN_DELTA_THRESHOLD="$CCN_DELTA_THRESHOLD"
-fi
-
 # Get changed files with modification type
 get_modified_files() {
   if [[ "$MODE" == "staged" ]]; then

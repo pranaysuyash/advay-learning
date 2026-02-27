@@ -67,7 +67,7 @@
 - Local CC0 asset reality:
   - Observed directories:
     - Existing in repo: `src/frontend/public/assets/kenney/platformer/...`
-    - Downloaded pack: `/Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1`
+    - Downloaded pack (local, outside repo): `<workspace>/adhoc_resources/kenney_new-platformer-pack-1.1`
   - Observed content in downloaded pack: platformer tiles/characters/enemies/sounds; no dedicated food/item icon set.
 
 ### Inferred
@@ -232,7 +232,7 @@ Decision status: **Selected for implementation on 2026-02-27** (core determinist
   - `no_call_games 3` (`free-draw`, `bubble-pop-symphony`, `air-canvas`)
   - `with_arg_calls 3`
   - `no_arg_calls 24`
-- `find /Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1 -maxdepth 3 -type d`
+- `find <kenney_download_dir>/kenney_new-platformer-pack-1.1 -maxdepth 3 -type d`
   - Confirms downloaded pack scope (platformer assets, no food icon pack).
 
 ## Open Decisions for Product Owner

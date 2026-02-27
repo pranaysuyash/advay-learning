@@ -17,6 +17,24 @@ export interface SubscriptionGameAccess {
   reason: string;
 }
 
+function describeApiError(error: unknown): string {
+  if (typeof error !== 'object' || error === null) {
+    return 'Unknown error';
+  }
+
+  const maybeAxios = error as {
+    message?: string;
+    response?: { status?: number; data?: { detail?: string; message?: string } };
+  };
+
+  const status = maybeAxios.response?.status;
+  const detail = maybeAxios.response?.data?.detail || maybeAxios.response?.data?.message;
+  if (status && detail) return `HTTP ${status}: ${detail}`;
+  if (status) return `HTTP ${status}`;
+  if (maybeAxios.message) return maybeAxios.message;
+  return 'Unknown error';
+}
+
 export const subscriptionApi = {
   /**
    * Get subscription status for a user
@@ -51,7 +69,7 @@ export const subscriptionApi = {
         daysRemaining: data.subscription.days_remaining,
       };
     } catch (error) {
-      // No subscription or error
+      console.error('Failed to fetch subscription status:', describeApiError(error));
       return {
         hasActiveSubscription: false,
         accessibleGames: null,
@@ -70,9 +88,11 @@ export const subscriptionApi = {
         reason: response.data.reason,
       };
     } catch (error) {
+      const errorReason = describeApiError(error);
+      console.error('Failed to check game access:', errorReason);
       return {
         hasAccess: false,
-        reason: 'Access check failed',
+        reason: `Access check failed: ${errorReason}`,
       };
     }
   },

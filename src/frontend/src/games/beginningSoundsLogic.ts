@@ -112,13 +112,17 @@ export function buildBeginningSoundsRound(
   random: () => number = Math.random,
 ): BeginningSoundsRound {
   const levelCfg = getLevelConfig(level);
-  const availableWords = getWordsForLevel(level).filter((w) => !usedWords.includes(w.word));
+  const levelWords = getWordsForLevel(levelCfg.level);
 
-  if (availableWords.length === 0) {
-    return buildBeginningSoundsRound(level, [], random);
+  if (levelWords.length === 0) {
+    throw new Error(`No words configured for level ${levelCfg.level}`);
   }
 
-  const shuffled = [...availableWords].sort(() => random() - 0.5);
+  const availableWords = levelWords.filter((w) => !usedWords.includes(w.word));
+  // When all words have been used, restart from the full pool (no infinite recursion)
+  const candidateWords = availableWords.length > 0 ? availableWords : levelWords;
+
+  const shuffled = [...candidateWords].sort(() => random() - 0.5);
   const targetWord = shuffled[0];
 
   // Get incorrect options (different first letters)

@@ -164,6 +164,23 @@ const FOOD: CollectibleItem[] = [
   { id: 'food-cake',      name: 'Magic Cake',   emoji: '🎂', category: 'food', rarity: 'rare',     description: 'A celebration cake!',            funFact: 'The tradition of birthday cakes started in ancient Greece.' },
 ];
 
+// Legacy IDs still referenced in game drop tables.
+const LEGACY_COMPAT_ITEMS: CollectibleItem[] = [
+  { id: 'music-note',        name: 'Music Note',         emoji: '🎵', category: 'note',     rarity: 'common',   description: 'A classic melody note.' },
+  { id: 'star-gold',         name: 'Gold Star',          emoji: '⭐', category: 'shape',    rarity: 'rare',     description: 'A shiny gold achievement star.' },
+  { id: 'star-silver',       name: 'Silver Star',        emoji: '⭐', category: 'shape',    rarity: 'uncommon', description: 'A bright silver achievement star.' },
+  { id: 'star-bronze',       name: 'Bronze Star',        emoji: '⭐', category: 'shape',    rarity: 'common',   description: 'A bronze achievement star.' },
+  { id: 'fruit-apple',       name: 'Apple',              emoji: '🍎', category: 'food',     rarity: 'common',   description: 'A crunchy apple snack.' },
+  { id: 'tool-knife',        name: 'Safe Prep Knife',    emoji: '🔪', category: 'tool',     rarity: 'uncommon', description: 'A pretend kitchen tool for learning games.' },
+  { id: 'number-one',        name: 'Number One',         emoji: '1️⃣', category: 'number',   rarity: 'common',   description: 'The number one token.' },
+  { id: 'math-plus',         name: 'Plus Sign',          emoji: '➕', category: 'number',   rarity: 'common',   description: 'A math plus operator token.' },
+  { id: 'trophy-bronze',     name: 'Bronze Trophy',      emoji: '🏆', category: 'artifact', rarity: 'uncommon', description: 'A trophy for steady progress.' },
+  { id: 'letter-a',          name: 'Letter A',           emoji: '🅰️', category: 'letter',   rarity: 'common',   description: 'The letter A collectible.' },
+  { id: 'book-blue',         name: 'Blue Book',          emoji: '📘', category: 'artifact', rarity: 'common',   description: 'A blue learning book collectible.' },
+  { id: 'material-balloon',  name: 'Balloon',            emoji: '🎈', category: 'material', rarity: 'common',   description: 'A colorful balloon material.' },
+  { id: 'material-confetti', name: 'Confetti',           emoji: '🎊', category: 'material', rarity: 'uncommon', description: 'A burst of celebration confetti.' },
+];
+
 // ─── MASTER CATALOG ─────────────────────────────────────────────────────
 
 export const ALL_ITEMS: CollectibleItem[] = [
@@ -177,6 +194,7 @@ export const ALL_ITEMS: CollectibleItem[] = [
   ...TOOLS,
   ...ARTIFACTS,
   ...FOOD,
+  ...LEGACY_COMPAT_ITEMS,
 ].map((item) => ({
   ...item,
   icon: getItemIconPath(item.id, item.icon),

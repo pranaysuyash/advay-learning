@@ -396,7 +396,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
   // ===== RENDER =====
   return (
-    <GameContainer title="Balloon Pop Fitness" onHome={handleShowMenu}>
+    <GameContainer title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
         <Webcam

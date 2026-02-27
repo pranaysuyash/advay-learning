@@ -197,7 +197,7 @@ npm run type-check
 **Files**:
 1. `src/frontend/src/services/progressQueue.ts` - Retry logic
 2. `src/frontend/src/services/progressTracking.ts` - Integration
-3. `src/frontend/src/components/DeadLetterDialog.tsx` - New component
+3. `src/frontend/src/components/ui/DeadLetterDialog.tsx` - New component
 4. `src/frontend/src/pages/Progress.tsx` - Add dialog
 
 **Tests**:
@@ -376,4 +376,3 @@ npm test src/services/__tests__/progressQueue.test.ts
 
 **Issues Resolved**:
 - ISSUE-005: DEAD LETTER QUEUE - ✅ RESOLVED
-

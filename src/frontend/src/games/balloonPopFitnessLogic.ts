@@ -353,10 +353,9 @@ export function updateGameTimer(
  * Check if level should be advanced
  */
 export function shouldAdvanceLevel(gameState: GameState): boolean {
-  const levelTimeElapsed = GAME_CONFIG.LEVEL_DURATION -
-    (GAME_CONFIG.GAME_DURATION - gameState.timeRemaining) % GAME_CONFIG.LEVEL_DURATION;
-
-  return levelTimeElapsed >= GAME_CONFIG.LEVEL_DURATION && gameState.timeRemaining > 0;
+  const elapsed = GAME_CONFIG.GAME_DURATION - gameState.timeRemaining;
+  const nextLevelThreshold = gameState.level * GAME_CONFIG.LEVEL_DURATION;
+  return gameState.timeRemaining > 0 && elapsed >= nextLevelThreshold;
 }
 
 /**

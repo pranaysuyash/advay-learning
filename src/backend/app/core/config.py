@@ -77,6 +77,10 @@ class Settings(BaseSettings):
     # Progress event-time handling
     USE_CLIENT_EVENT_TIME: bool = False
 
+    # AI/LLM API Keys
+    GEMINI_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
+
 
 @lru_cache()
 def get_settings() -> Settings:

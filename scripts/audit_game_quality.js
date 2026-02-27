@@ -181,7 +181,8 @@ function runAudit() {
   
   const allResults = [];
   let totalScore = 0;
-  let maxPossibleScore = 0;
+  // Per-game max score (fixed constant, not accumulating across games)
+  const perGameMax = Object.values(WEIGHTS).filter(w => w > 0).reduce((a, b) => a + b, 0);
   
   GAME_FILES.forEach(gameFile => {
     // Check in pages directory
@@ -199,8 +200,8 @@ function runAudit() {
     const result = auditFile(filePath);
     allResults.push(result);
     totalScore += result.score;
-    maxPossibleScore += Object.values(WEIGHTS).filter(w => w > 0).reduce((a, b) => a + b, 0);
   });
+  const maxPossibleScore = perGameMax * allResults.length;
   
   // Sort by score (worst first)
   allResults.sort((a, b) => a.score - b.score);
@@ -210,7 +211,7 @@ function runAudit() {
   console.log('📊 AUDIT SUMMARY');
   console.log('='.repeat(80));
   console.log(`\nTotal Games Audited: ${allResults.length}`);
-  console.log(`Average Score: ${(totalScore / allResults.length).toFixed(1)}/${(maxPossibleScore / allResults.length).toFixed(1)}`);
+  console.log(`Average Score: ${(totalScore / allResults.length).toFixed(1)}/${perGameMax.toFixed(1)}`);
   console.log(`Total Score: ${totalScore}/${maxPossibleScore}\n`);
   
   console.log('='.repeat(80));
@@ -223,7 +224,7 @@ function runAudit() {
     console.log('✅ No critical issues found!\n');
   } else {
     criticalGames.forEach(game => {
-      console.log(`\n❌ ${game.file} (Score: ${game.score}/${maxPossibleScore})`);
+      console.log(`\n❌ ${game.file} (Score: ${game.score}/${perGameMax})`);
       console.log(`   Path: ${game.path}`);
       console.log(`   Issues: ${game.issues.length}`);
       if (game.issues.length > 0) {
@@ -243,8 +244,9 @@ function runAudit() {
     console.log('✅ All games meet quality standards!\n');
   } else {
     needsImprovement.forEach(game => {
-      console.log(`\n⚠️  ${game.file} (Score: ${game.score}/${maxPossibleScore})`);
-      console.log(`   Missing: ${game.strengths.length}/10 quality features`);
+      console.log(`\n⚠️  ${game.file} (Score: ${game.score}/${perGameMax})`);
+      const missingCount = Object.entries(game.patterns).filter(([key, value]) => !value && WEIGHTS[key] > 0).length;
+      console.log(`   Missing: ${missingCount} quality features`);
       const missing = Object.entries(game.patterns)
         .filter(([key, value]) => !value && WEIGHTS[key] > 0)
         .map(([key]) => key);

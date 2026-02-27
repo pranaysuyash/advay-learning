@@ -52,7 +52,7 @@ Each game needs:
 - [ ] BeginningSounds.tsx (25/100)
 - [ ] BubblePop.tsx (25/100)
 
-#### P1 - High Priority (Score 30-35)
+#### P1 - High Priority (Score 28-35)
 - [ ] YogaAnimals.tsx (28/100)
 - [ ] PlatformerRunner.tsx (28/100)
 - [ ] VirtualBubbles.tsx (28/100)
@@ -152,14 +152,14 @@ export const MyGame = memo(function MyGameComponent() {
 ### Batch 2: P1 High (4 games)
 **Goal**: Fix accessibility & errors  
 **Timeline**: 1 day  
-**Games**: Score 30-35
+**Games**: Score 28-35
 
 ### Batch 3: P2 Medium (24 games)
 **Goal**: Standardize all games  
 **Timeline**: 3-4 days  
 **Games**: Score 35-43
 
-### Batch 4: P3 Polish (2 games)
+### Batch 4: P3 Polish (1 game)
 **Goal**: Minor improvements  
 **Timeline**: 2 hours  
 **Games**: Score > 50

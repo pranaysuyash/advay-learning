@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -22,8 +22,25 @@ export function SightWordFlash() {
 
   useGameSessionProgress({ gameName: 'Sight Word Flash', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
+  // Track pending show so we don't double-trigger
+  const showPending = useRef(false);
+
+  // When words are loaded and gameState is 'showing', display the current word
+  useEffect(() => {
+    if (gameState === 'showing' && words.length > 0 && !showWord && !showPending.current) {
+      showPending.current = true;
+      setShowWord(true);
+      setTimeout(() => {
+        setShowWord(false);
+        setGameState('answering');
+        showPending.current = false;
+      }, 2000);
+    }
+  }, [gameState, words, showWord]);
+
   const startGame = () => {
     const newWords = getWordsForLevel(currentLevel);
+    showPending.current = false;
     setWords(newWords);
     setCurrentIndex(0);
     setRound(0);
@@ -31,16 +48,7 @@ export function SightWordFlash() {
     setCorrect(0);
     setShowWord(false);
     setGameState('showing');
-    showCurrentWord();
-  };
-
-  const showCurrentWord = () => {
-    if (!words[currentIndex]) return;
-    setShowWord(true);
-    setTimeout(() => {
-      setShowWord(false);
-      setGameState('answering');
-    }, 2000);
+    // showCurrentWord is now driven by useEffect above once words & state are ready
   };
 
   const handleKnow = () => {
@@ -59,8 +67,9 @@ export function SightWordFlash() {
     if (currentIndex < words.length - 1) {
       setCurrentIndex((i) => i + 1);
       setRound((r) => r + 1);
+      showPending.current = false;
+      setShowWord(false);
       setGameState('showing');
-      setTimeout(showCurrentWord, 500);
     } else {
       setGameState('complete');
     }

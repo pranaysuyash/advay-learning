@@ -14,7 +14,7 @@
 |----|-------|----------|----------|--------|
 | PERF-001 | Hand Tracking FPS Bottleneck | performance | **P0** | OPEN |
 | PERF-002 | Memory Leaks from Unsubscribed Listeners | reliability | **P0** | OPEN |
-| PERF-003 | Large Component Rendering (AlphabetGamePage) | performance | P1 | OPEN |
+| PERF-003 | Large Component Rendering (AlphabetGamePage) | performance | P1 | CLOSED (2026-02-27) |
 | PERF-004 | Bundle Size Optimization | performance | P1 | OPEN |
 | PERF-005 | Database Query Optimization | performance | P1 | OPEN |
 | PERF-006 | No Performance Tests in CI | tooling | P2 | OPEN |
@@ -259,7 +259,7 @@
 
 ### Unit-3: Component Optimization (PERF-003)
 - **Goal**: Split large components
-- **Files**: AlphabetGamePage.tsx
+- **Files**: src/frontend/src/pages/AlphabetGame.tsx
 - **Tests**: React DevTools
 
 ### Unit-4: Bundle Optimization (PERF-004)

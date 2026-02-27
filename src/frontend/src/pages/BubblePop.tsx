@@ -163,7 +163,7 @@ export default function BubblePop() {
       {showMenu ? (
         // Menu Screen
         <div className="flex flex-col items-center justify-center h-full p-6">
-          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" className="text-blue-400 mb-4 animate-bounce"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" opacity="0.5"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mb-4 animate-bounce"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" opacity="0.5"/></svg>
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bubble Pop!</h2>
 
           {/* Goal Statement with Semantic Attributes */}
@@ -174,7 +174,7 @@ export default function BubblePop() {
             className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
           >
             <div className="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               <div>
                 <p className="font-bold text-blue-800">GOAL:</p>
                 <p className="text-blue-700">Blow bubbles to pop them and score!</p>
@@ -185,7 +185,7 @@ export default function BubblePop() {
 
           {/* Microphone Warning */}
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-yellow-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
             <div>
               <h3 className="font-bold text-yellow-800 mb-1">You need a microphone!</h3>
               <p className="text-yellow-700 text-sm">
@@ -304,7 +304,7 @@ export default function BubblePop() {
             className="absolute top-16 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center z-10 shadow-lg"
           >
             <div className="flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-white"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               <p className="font-black">GOAL: Blow into your microphone to pop bubbles!</p>
             </div>
           </div>
@@ -314,7 +314,7 @@ export default function BubblePop() {
             {/* Microphone Active Indicator */}
             {!isActive && (
               <div className="bg-red-100 border-2 border-red-400 rounded-xl px-4 py-2 flex items-center gap-2 animate-pulse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-red-600"><path d="m18 9-5 5"/><path d="m13 9 5 5"/><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600"><path d="m18 9-5 5"/><path d="m13 9 5 5"/><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
                 <span className="font-bold text-red-700">Click Start to enable microphone!</span>
               </div>
             )}
@@ -324,7 +324,7 @@ export default function BubblePop() {
                 {isBlowing ? (
                   <span className="text-4xl font-bold text-green-600">POOF!</span>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-blue-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
                 )}
               </div>
               <div className="text-left">

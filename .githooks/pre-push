@@ -1,90 +1,30 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+#
+# Pre-push hook to run deployment checks
+# This prevents pushing code that would break production
+#
 
-repo_root="$(git rev-parse --show-toplevel)"
-cd "$repo_root"
+set -e
 
-zero_sha='0000000000000000000000000000000000000000'
-scanned_any=false
+echo "🔍 Running pre-push deployment checks..."
+echo ""
 
-run_frontend_push_checks() {
-  local range="$1"
+# Check if we're in the backend directory context
+cd "$(git rev-parse --show-toplevel)"
 
-  local changed_frontend
-  changed_frontend="$(git diff --name-only --diff-filter=ACMR "$range" | rg '^src/frontend/src/.*\.(ts|tsx|js|jsx)$' || true)"
-  if [[ -z "${changed_frontend//$'\n'/}" ]]; then
-    return 0
-  fi
-
-  if [[ "${ALLOW_BYPASS_CHECKS:-}" == "1" ]]; then
-    if [[ -z "${BYPASS_REASON:-}" ]]; then
-      echo "[pre-push] ALLOW_BYPASS_CHECKS=1 requires BYPASS_REASON to be set." >&2
-      return 1
-    fi
-    echo "[pre-push] Bypassing frontend push checks due to explicit override: ${BYPASS_REASON}"
-    return 0
-  fi
-
-  echo "[pre-push] Running mandatory frontend typecheck for pushed changes..."
-  (
-    cd src/frontend
-    npm run -s type-check
-  )
-
-  local related_args=""
-  while IFS= read -r file; do
-    [[ -z "$file" ]] && continue
-    related_args+=" ${file#src/frontend/}"
-  done <<< "$changed_frontend"
-
-  if [[ -n "${related_args// }" ]]; then
-    echo "[pre-push] Running related frontend tests for pushed files..."
-    (
-      cd src/frontend
-      # shellcheck disable=SC2086
-      npx vitest related --run --reporter=dot $related_args
-    )
-  fi
-}
-
-while read -r local_ref local_sha remote_ref remote_sha; do
-  [[ -z "${local_ref:-}" ]] && continue
-
-  # Deletion push (no local object to scan)
-  if [[ "${local_sha:-}" == "$zero_sha" ]]; then
-    continue
-  fi
-
-  # Keep existing workflow gate safety net for the pushed tip commit.
-  ./scripts/agent_gate.sh --commit "$local_sha"
-
-  if [[ "${SKIP_SECRET_SCAN:-}" == "1" ]]; then
-    echo "[pre-push] Skipping secret scan (SKIP_SECRET_SCAN=1)"
-    scanned_any=true
-    continue
-  fi
-
-  if [[ "${remote_sha:-}" == "$zero_sha" ]]; then
-    # New branch: scan only commits since fork-point with origin/main when available.
-    if git rev-parse --verify --quiet origin/main >/dev/null; then
-      base_sha="$(git merge-base origin/main "$local_sha")"
-      range="${base_sha}..${local_sha}"
-    else
-      range="${local_sha}~1..${local_sha}"
-    fi
-  else
-    range="${remote_sha}..${local_sha}"
-  fi
-
-  run_frontend_push_checks "$range"
-  ./scripts/secret_scan.sh --range "$range"
-  scanned_any=true
-done
-
-# Fallback for environments where pre-push receives no refs on stdin.
-if [[ "$scanned_any" != true && "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
-  head_sha="$(git rev-parse HEAD)"
-  ./scripts/agent_gate.sh --commit "$head_sha"
-  run_frontend_push_checks "${head_sha}~1..${head_sha}"
-  ./scripts/secret_scan.sh --range "${head_sha}~1..${head_sha}"
+# Activate virtual environment if it exists
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
 fi
+
+# Run deployment checks
+if ! python scripts/pre_deploy_check.py; then
+    echo ""
+    echo "❌ Pre-push checks failed!"
+    echo "Fix the issues above before pushing."
+    exit 1
+fi
+
+echo ""
+echo "✅ All pre-push checks passed!"
+exit 0

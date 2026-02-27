@@ -98,6 +98,9 @@ storage/temp/*
 storage/drawings/*
 !storage/drawings/.gitkeep
 
+# Backend runtime uploads (generated during issue-report flows/tests)
+src/backend/storage/issue_reports/**
+
 # Runtime temp files
 .tmp/
 *.pid
@@ -173,3 +176,15 @@ assets/kenney/*/
 # Asset archives
 assets/*.zip
 assets/**/*.zip
+
+# Binary office documents (use markdown for documentation)
+*.docx
+*.doc
+*.xlsx
+*.pptx
+
+# Backup files
+*.bak
+*.bak[0-9]
+*.backup
+archive/backups/

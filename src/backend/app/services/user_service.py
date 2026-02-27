@@ -77,12 +77,23 @@ class UserService:
 
     @staticmethod
     async def get_by_password_reset_token(db: AsyncSession, token: str) -> Optional[User]:
-        """Get user by password reset token."""
+        """Get user by password reset token.
+
+        The previous implementation compared the expiry column to
+        ``EmailService.get_verification_expiry()``, which returns the
+        current time plus 24 hours.  Since we also set
+        ``password_reset_expires`` to that same value when creating the
+        token, the comparison was always false and every lookup returned
+        ``None``.  That caused ``reset-password`` to behave as though the
+        token was invalid every time.
+        """
+        from datetime import datetime
+
         result = await db.execute(
             select(User)
             .where(
                 User.password_reset_token == token,
-                User.password_reset_expires > EmailService.get_verification_expiry(),
+                User.password_reset_expires > datetime.utcnow(),
             )
             .order_by(User.id),
         )

@@ -36,7 +36,7 @@ From `docs/WORKLOG_ADDENDUM_*.md`, list tickets matching the filter:
 Evidence:
 
 ```bash
-rg -n "### TCK-" docs/WORKLOG_*.md
+rg -n "### TCK-" docs/WORKLOG_ADDENDUM_*.md
 ```
 
 ---

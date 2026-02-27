@@ -11,7 +11,7 @@
   "games": [
     {
       "file": "PhysicsDemo.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhysicsDemo.tsx",
+      "path": "src/frontend/src/pages/PhysicsDemo.tsx",
       "lineCount": 289,
       "patterns": {
         "hasErrorHandling": false,
@@ -36,7 +36,7 @@
     },
     {
       "file": "NumberTracing.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/NumberTracing.tsx",
+      "path": "src/frontend/src/pages/NumberTracing.tsx",
       "lineCount": 234,
       "patterns": {
         "hasErrorHandling": false,
@@ -61,7 +61,7 @@
     },
     {
       "file": "ColorByNumber.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ColorByNumber.tsx",
+      "path": "src/frontend/src/pages/ColorByNumber.tsx",
       "lineCount": 374,
       "patterns": {
         "hasErrorHandling": false,
@@ -86,7 +86,7 @@
     },
     {
       "file": "OddOneOut.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/OddOneOut.tsx",
+      "path": "src/frontend/src/pages/OddOneOut.tsx",
       "lineCount": 229,
       "patterns": {
         "hasErrorHandling": false,
@@ -111,7 +111,7 @@
     },
     {
       "file": "ShadowPuppetTheater.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShadowPuppetTheater.tsx",
+      "path": "src/frontend/src/pages/ShadowPuppetTheater.tsx",
       "lineCount": 222,
       "patterns": {
         "hasErrorHandling": false,
@@ -136,7 +136,7 @@
     },
     {
       "file": "KaleidoscopeHands.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/KaleidoscopeHands.tsx",
+      "path": "src/frontend/src/pages/KaleidoscopeHands.tsx",
       "lineCount": 214,
       "patterns": {
         "hasErrorHandling": false,
@@ -161,7 +161,7 @@
     },
     {
       "file": "DiscoveryLab.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/DiscoveryLab.tsx",
+      "path": "src/frontend/src/pages/DiscoveryLab.tsx",
       "lineCount": 366,
       "patterns": {
         "hasErrorHandling": false,
@@ -187,7 +187,7 @@
     },
     {
       "file": "PhonicsTracing.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhonicsTracing.tsx",
+      "path": "src/frontend/src/pages/PhonicsTracing.tsx",
       "lineCount": 349,
       "patterns": {
         "hasErrorHandling": false,
@@ -212,7 +212,7 @@
     },
     {
       "file": "BeginningSounds.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BeginningSounds.tsx",
+      "path": "src/frontend/src/pages/BeginningSounds.tsx",
       "lineCount": 297,
       "patterns": {
         "hasErrorHandling": false,
@@ -237,7 +237,7 @@
     },
     {
       "file": "BubblePop.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BubblePop.tsx",
+      "path": "src/frontend/src/pages/BubblePop.tsx",
       "lineCount": 404,
       "patterns": {
         "hasErrorHandling": false,
@@ -262,7 +262,7 @@
     },
     {
       "file": "YogaAnimals.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/YogaAnimals.tsx",
+      "path": "src/frontend/src/pages/YogaAnimals.tsx",
       "lineCount": 651,
       "patterns": {
         "hasErrorHandling": true,
@@ -299,7 +299,7 @@
     },
     {
       "file": "PlatformerRunner.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PlatformerRunner.tsx",
+      "path": "src/frontend/src/pages/PlatformerRunner.tsx",
       "lineCount": 601,
       "patterns": {
         "hasErrorHandling": false,
@@ -336,7 +336,7 @@
     },
     {
       "file": "VirtualBubbles.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/VirtualBubbles.tsx",
+      "path": "src/frontend/src/pages/VirtualBubbles.tsx",
       "lineCount": 309,
       "patterns": {
         "hasErrorHandling": true,
@@ -368,7 +368,7 @@
     },
     {
       "file": "FreeDraw.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/FreeDraw.tsx",
+      "path": "src/frontend/src/pages/FreeDraw.tsx",
       "lineCount": 711,
       "patterns": {
         "hasErrorHandling": false,
@@ -394,7 +394,7 @@
     },
     {
       "file": "LetterHunt.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/LetterHunt.tsx",
+      "path": "src/frontend/src/pages/LetterHunt.tsx",
       "lineCount": 708,
       "patterns": {
         "hasErrorHandling": false,
@@ -420,7 +420,7 @@
     },
     {
       "file": "RhymeTime.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/RhymeTime.tsx",
+      "path": "src/frontend/src/pages/RhymeTime.tsx",
       "lineCount": 606,
       "patterns": {
         "hasErrorHandling": false,
@@ -446,7 +446,7 @@
     },
     {
       "file": "FingerNumberShow.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/games/FingerNumberShow.tsx",
+      "path": "src/frontend/src/games/FingerNumberShow.tsx",
       "lineCount": 690,
       "patterns": {
         "hasErrorHandling": false,
@@ -472,7 +472,7 @@
     },
     {
       "file": "NumberTapTrail.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/NumberTapTrail.tsx",
+      "path": "src/frontend/src/pages/NumberTapTrail.tsx",
       "lineCount": 402,
       "patterns": {
         "hasErrorHandling": false,
@@ -498,7 +498,7 @@
     },
     {
       "file": "MathMonsters.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MathMonsters.tsx",
+      "path": "src/frontend/src/pages/MathMonsters.tsx",
       "lineCount": 586,
       "patterns": {
         "hasErrorHandling": false,
@@ -524,7 +524,7 @@
     },
     {
       "file": "ShapePop.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapePop.tsx",
+      "path": "src/frontend/src/pages/ShapePop.tsx",
       "lineCount": 287,
       "patterns": {
         "hasErrorHandling": false,
@@ -550,7 +550,7 @@
     },
     {
       "file": "ShapeSequence.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapeSequence.tsx",
+      "path": "src/frontend/src/pages/ShapeSequence.tsx",
       "lineCount": 421,
       "patterns": {
         "hasErrorHandling": false,
@@ -576,7 +576,7 @@
     },
     {
       "file": "ShapeSafari.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapeSafari.tsx",
+      "path": "src/frontend/src/pages/ShapeSafari.tsx",
       "lineCount": 609,
       "patterns": {
         "hasErrorHandling": false,
@@ -602,7 +602,7 @@
     },
     {
       "file": "MemoryMatch.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MemoryMatch.tsx",
+      "path": "src/frontend/src/pages/MemoryMatch.tsx",
       "lineCount": 507,
       "patterns": {
         "hasErrorHandling": false,
@@ -628,7 +628,7 @@
     },
     {
       "file": "MusicPinchBeat.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MusicPinchBeat.tsx",
+      "path": "src/frontend/src/pages/MusicPinchBeat.tsx",
       "lineCount": 282,
       "patterns": {
         "hasErrorHandling": false,
@@ -654,7 +654,7 @@
     },
     {
       "file": "VirtualChemistryLab.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/VirtualChemistryLab.tsx",
+      "path": "src/frontend/src/pages/VirtualChemistryLab.tsx",
       "lineCount": 666,
       "patterns": {
         "hasErrorHandling": false,
@@ -680,7 +680,7 @@
     },
     {
       "file": "EmojiMatch.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/EmojiMatch.tsx",
+      "path": "src/frontend/src/pages/EmojiMatch.tsx",
       "lineCount": 760,
       "patterns": {
         "hasErrorHandling": false,
@@ -706,7 +706,7 @@
     },
     {
       "file": "StorySequence.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/StorySequence.tsx",
+      "path": "src/frontend/src/pages/StorySequence.tsx",
       "lineCount": 665,
       "patterns": {
         "hasErrorHandling": false,
@@ -732,7 +732,7 @@
     },
     {
       "file": "SimonSays.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/SimonSays.tsx",
+      "path": "src/frontend/src/pages/SimonSays.tsx",
       "lineCount": 637,
       "patterns": {
         "hasErrorHandling": true,
@@ -770,7 +770,7 @@
     },
     {
       "file": "PhonicsSounds.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhonicsSounds.tsx",
+      "path": "src/frontend/src/pages/PhonicsSounds.tsx",
       "lineCount": 587,
       "patterns": {
         "hasErrorHandling": true,
@@ -803,7 +803,7 @@
     },
     {
       "file": "WordBuilder.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/WordBuilder.tsx",
+      "path": "src/frontend/src/pages/WordBuilder.tsx",
       "lineCount": 472,
       "patterns": {
         "hasErrorHandling": true,
@@ -836,7 +836,7 @@
     },
     {
       "file": "ColorMatchGarden.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ColorMatchGarden.tsx",
+      "path": "src/frontend/src/pages/ColorMatchGarden.tsx",
       "lineCount": 438,
       "patterns": {
         "hasErrorHandling": true,
@@ -869,7 +869,7 @@
     },
     {
       "file": "ConnectTheDots.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ConnectTheDots.tsx",
+      "path": "src/frontend/src/pages/ConnectTheDots.tsx",
       "lineCount": 865,
       "patterns": {
         "hasErrorHandling": true,
@@ -917,7 +917,7 @@
     },
     {
       "file": "MirrorDraw.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MirrorDraw.tsx",
+      "path": "src/frontend/src/pages/MirrorDraw.tsx",
       "lineCount": 572,
       "patterns": {
         "hasErrorHandling": true,
@@ -950,7 +950,7 @@
     },
     {
       "file": "BubblePopSymphony.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BubblePopSymphony.tsx",
+      "path": "src/frontend/src/pages/BubblePopSymphony.tsx",
       "lineCount": 466,
       "patterns": {
         "hasErrorHandling": true,
@@ -983,7 +983,7 @@
     },
     {
       "file": "FreezeDance.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/FreezeDance.tsx",
+      "path": "src/frontend/src/pages/FreezeDance.tsx",
       "lineCount": 706,
       "patterns": {
         "hasErrorHandling": true,
@@ -1021,7 +1021,7 @@
     },
     {
       "file": "SteadyHandLab.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/SteadyHandLab.tsx",
+      "path": "src/frontend/src/pages/SteadyHandLab.tsx",
       "lineCount": 386,
       "patterns": {
         "hasErrorHandling": true,
@@ -1054,7 +1054,7 @@
     },
     {
       "file": "AirCanvas.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/AirCanvas.tsx",
+      "path": "src/frontend/src/pages/AirCanvas.tsx",
       "lineCount": 631,
       "patterns": {
         "hasErrorHandling": true,
@@ -1087,7 +1087,7 @@
     },
     {
       "file": "DressForWeather.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/DressForWeather.tsx",
+      "path": "src/frontend/src/pages/DressForWeather.tsx",
       "lineCount": 663,
       "patterns": {
         "hasErrorHandling": true,
@@ -1120,7 +1120,7 @@
     },
     {
       "file": "AlphabetGame.tsx",
-      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/AlphabetGame.tsx",
+      "path": "src/frontend/src/pages/AlphabetGame.tsx",
       "lineCount": 1884,
       "patterns": {
         "hasErrorHandling": true,

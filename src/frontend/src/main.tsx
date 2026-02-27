@@ -15,7 +15,6 @@ void preloadItemsManifest();
 // Initialize React Scan for performance monitoring (development only)
 scan({
   enabled: (import.meta as any).env?.DEV ?? true,
-  trackUnnecessaryRenders: true,
   animationSpeed: 'fast',
   showToolbar: true,
   log: false,

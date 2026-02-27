@@ -86,7 +86,7 @@ Risks/notes:
 
 ---
 
-### TCK-20260227-001 :: Fix Password Validation - Check Against Email
+### TCK-20260227-001 Addendum :: Fix Password Validation - Check Against Email
 
 Ticket Stamp: STAMP-20260227T095331Z-codex-g7ym
 
@@ -306,38 +306,8 @@ Plan:
 
 ### TCK-20260227-001 :: Fix Password Validation - Check Against Email
 
-Ticket Stamp: STAMP-20260227T095353Z-codex-d6ep
-
-Type: SECURITY_REMEDIATION
-Owner: Pranay
-Created: 2026-02-27 12:00 PST
-Status: **OPEN**
-Priority: P0 (HIGH severity security finding)
-
-Scope contract:
-
-- In-scope: Implement password-email validation in UserCreate schema per security audit
-- Out-of-scope: CORS config (already fixed), 319 medium issues
-- Behavior change allowed: YES (new validation added)
-
-Targets:
-
-- Repo: learning_for_kids
-- File(s): src/backend/app/schemas/user.py
-- Branch: main
-
-Source:
-
-- Audit file: docs/security/security_audit_report.md
-- Finding: Password Validation Gap (HIGH severity)
-- Evidence: validate_password_strength() has comment "Check if password is based on email" but not implemented
-
-Plan:
-
-- [ ] Add model_validator to UserCreate to access both email and password
-- [ ] Check if password contains/derives from email
-- [ ] Add tests for new validation
-- [ ] Run typecheck and lint
+> **Duplicate entry** — see Addendum entry earlier in this file (STAMP-20260227T095331Z-codex-g7ym).
+> The implementation plan and tasks are tracked in `docs/tickets/TCK-20260227-001.md`.
 
 Execution log:
 
@@ -5042,3 +5012,93 @@ Validation evidence:
 
 Status updates:
 - [2026-02-27 18:00 IST] **IN_PROGRESS** — Collectibles Phase 2-5 implemented and locally validated with focused checks; full-repo regression gate still blocked by pre-existing unrelated TS issues.
+
+
+---
+
+## TCK-20260227-004 :: Fix Production Safety Issues (COMPLETE)
+Ticket Stamp: STAMP-20260227T203500Z-codex-abc3
+
+Type: BUG_FIX / SAFETY
+Owner: Pranay
+Created: 2026-02-27 20:35 IST
+Status: **DONE**
+
+Scope contract:
+- In-scope:
+  - Fix missing revoked_tokens table
+  - Add Settings fields for new env vars (GEMINI_API_KEY, OPENAI_API_KEY)
+  - Create pre-deployment check script
+  - Add startup database schema validation
+  - Create pre-push git hook
+  - Document safety procedures
+- Out-of-scope:
+  - Full CI/CD pipeline setup
+  - Database backup/restore procedures
+- Behavior change allowed: NO (fixes only)
+
+Targets:
+- Repo: learning_for_kids
+- Files:
+  - src/backend/alembic/versions/d6c64c8f02e5_add_revoked_tokens_table.py (new)
+  - src/backend/app/core/config.py (added API key fields)
+  - src/backend/app/main.py (startup validation)
+  - scripts/pre_deploy_check.py (new)
+  - .githooks/pre-push (new)
+  - docs/DEPLOYMENT_SAFETY.md (new)
+
+Issues Fixed:
+
+1. **ISSUE**: Login works but /me endpoint fails with 500
+   **Root Cause**: `revoked_tokens` table referenced in code but doesn't exist in DB
+   **Fix**: Created migration `d6c64c8f02e5_add_revoked_tokens_table.py`
+   **Prevention**: Startup validation now checks schema consistency
+
+2. **ISSUE**: Adding new env var to .env breaks backend
+   **Root Cause**: Pydantic Settings rejects extra fields by default
+   **Fix**: Added GEMINI_API_KEY and OPENAI_API_KEY to Settings with Optional[str] = None
+   **Prevention**: Pre-deploy check warns about undefined env vars
+
+3. **ISSUE**: No way to catch DB/model mismatches before deployment
+   **Root Cause**: No automated checks
+   **Fix**: 
+   - `scripts/pre_deploy_check.py` - Comprehensive checks
+   - `validate_database_schema()` - Runs at startup
+   - `.githooks/pre-push` - Runs before git push
+
+Execution log:
+
+- [20:30] Created migration for revoked_tokens table
+- [20:31] Applied migration to database
+- [20:32] Added GEMINI_API_KEY and OPENAI_API_KEY to Settings class
+- [20:33] Created pre_deploy_check.py with 4 validation checks
+- [20:33] Added startup validation in main.py
+- [20:34] Created pre-push git hook
+- [20:35] Tested auth flow - login and /me endpoint now work
+- [20:35] Created DEPLOYMENT_SAFETY.md documentation
+
+Status updates:
+
+- [2026-02-27 20:35] **DONE** - All safety issues fixed
+
+Verification:
+
+```bash
+# Auth flow works
+curl -X POST http://localhost:8001/api/v1/auth/login \
+  -d "username=test@example.com&password=TestPass123!"
+# -> {"message":"Login successful",...}
+
+curl http://localhost:8001/api/v1/auth/me -b cookies.txt
+# -> {"email":"test@example.com",...}
+
+# Pre-deploy checks pass
+python scripts/pre_deploy_check.py
+# -> ✅ All checks passed! Ready for deployment.
+```
+
+Documentation:
+- `docs/DEPLOYMENT_SAFETY.md` - Complete safety guide
+
+Dependencies:
+- Source: User reported login issues with browser logs

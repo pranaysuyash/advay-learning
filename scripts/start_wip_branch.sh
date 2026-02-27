@@ -14,6 +14,7 @@ Behavior:
   - Must be run from branch: main
   - Creates/switches to: codex/wip-<sanitized-scope>
   - Preserves local uncommitted changes when switching
+  - After commit: push branch and create PR to main
 USAGE
 }
 
@@ -65,4 +66,7 @@ else
   echo "Created and switched to: $target_branch"
 fi
 
-echo "Next: commit on this branch, push, then open PR -> main."
+echo "Next:"
+echo "  1) Commit on this branch"
+echo "  2) Push: git push -u origin $target_branch"
+echo "  3) Create PR: gh pr create --base main --head $target_branch --fill"

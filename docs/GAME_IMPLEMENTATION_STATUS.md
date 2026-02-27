@@ -136,13 +136,15 @@ Based on `GAME_IDEAS_CATALOG.md`, these are the next games to implement:
 
 ### P1 - Near-Term (1-2 months)
 
-From the catalog, these P1 games are NOT yet implemented:
+From the catalog, these P1 games are candidates for prioritization:
 
-1. **Phonics Tracing** (Sound It Out!) - Real-time phonics
-2. **Rhyme Time** ✅ - Already implemented
-3. **Story Sequence** ✅ - Already implemented
-4. **Number Tracing** ✅ - Already implemented
-5. **Connect the Dots** ✅ - Already implemented
+1. **Phonics Tracing** ✅ - Implemented
+2. **Rhyme Time** ✅ - Implemented
+3. **Story Sequence** ✅ - Implemented
+4. **Number Tracing** ✅ - Implemented
+5. **Connect the Dots** ✅ - Implemented
+
+All listed P1 items above already exist in the current registry/pages set.
 
 ### P2 - Future (3-6 months)
 

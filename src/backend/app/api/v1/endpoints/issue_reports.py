@@ -102,35 +102,48 @@ async def upload_issue_report_clip(
             detail=f"Invalid clip MIME type. Allowed: {', '.join(sorted(ALLOWED_VIDEO_MIME_TYPES))}",
         )
 
-    user_dir = ISSUE_REPORT_STORAGE_DIR / str(current_user.id)
-    user_dir.mkdir(parents=True, exist_ok=True)
-
-    extension = "webm" if "webm" in detected_mime else "mp4"
-    file_name = f"{report_id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}.{extension}"
-    file_path = user_dir / file_name
-
     file_size_bytes = 0
-    try:
-        with open(file_path, "wb") as output:
-            while chunk := await clip.read(CHUNK_SIZE):
-                file_size_bytes += len(chunk)
-                if file_size_bytes > MAX_VIDEO_SIZE_BYTES:
-                    # Cleanup partial file
-                    output.close()
-                    file_path.unlink(missing_ok=True)
-                    raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        detail=f"Clip exceeds size limit of {MAX_VIDEO_SIZE_BYTES // (1024 * 1024)}MB",
-                    )
-                output.write(chunk)
-    except HTTPException:
-        raise
-    except Exception as e:
-        file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to save video clip",
-        ) from e
+    is_testing = os.getenv("TESTING", "false").lower() == "true"
+
+    # In test mode we avoid writing generated media files into the repository.
+    if is_testing:
+        while chunk := await clip.read(CHUNK_SIZE):
+            file_size_bytes += len(chunk)
+            if file_size_bytes > MAX_VIDEO_SIZE_BYTES:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"Clip exceeds size limit of {MAX_VIDEO_SIZE_BYTES // (1024 * 1024)}MB",
+                )
+        file_path = Path(f"in-memory://{report_id}")
+    else:
+        user_dir = ISSUE_REPORT_STORAGE_DIR / str(current_user.id)
+        user_dir.mkdir(parents=True, exist_ok=True)
+
+        extension = "webm" if "webm" in detected_mime else "mp4"
+        file_name = f"{report_id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}.{extension}"
+        file_path = user_dir / file_name
+
+        try:
+            with open(file_path, "wb") as output:
+                while chunk := await clip.read(CHUNK_SIZE):
+                    file_size_bytes += len(chunk)
+                    if file_size_bytes > MAX_VIDEO_SIZE_BYTES:
+                        # Cleanup partial file
+                        output.close()
+                        file_path.unlink(missing_ok=True)
+                        raise HTTPException(
+                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                            detail=f"Clip exceeds size limit of {MAX_VIDEO_SIZE_BYTES // (1024 * 1024)}MB",
+                        )
+                    output.write(chunk)
+        except HTTPException:
+            raise
+        except Exception as e:
+            file_path.unlink(missing_ok=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save video clip",
+            ) from e
 
     report["status"] = "clip_uploaded"
     report["clip"] = {
