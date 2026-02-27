@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Dict
 from uuid import uuid4
+import os
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
@@ -16,15 +17,15 @@ from app.schemas.issue_report import (
     IssueReportSessionCreate,
     IssueReportUploadResponse,
 )
+from app.services.cache_service import cache_service
 
 router = APIRouter()
 
 MAX_VIDEO_SIZE_BYTES = 40 * 1024 * 1024  # 40MB
+CHUNK_SIZE = 1024 * 1024  # 1MB
 ALLOWED_VIDEO_MIME_TYPES = {"video/webm", "video/mp4"}
 ISSUE_REPORT_STORAGE_DIR = Path("storage/issue_reports")
-
-# Contract-first in-memory store for foundation slice (will move to DB model later)
-ISSUE_REPORTS: Dict[str, Dict[str, Any]] = {}
+SESSION_TTL_SECONDS = 86400  # 24 hours
 
 
 def normalize_video_mime_type(value: str | None) -> str:
@@ -32,6 +33,10 @@ def normalize_video_mime_type(value: str | None) -> str:
     if not value:
         return "application/octet-stream"
     return value.split(";", 1)[0].strip().lower()
+
+
+def get_session_cache_key(report_id: str) -> str:
+    return f"issue_report_session:{report_id}"
 
 
 @router.post("/sessions", response_model=IssueReportSession)
@@ -43,13 +48,22 @@ async def create_issue_report_session(
     report_id = str(uuid4())
     created_at = datetime.now(UTC)
 
-    ISSUE_REPORTS[report_id] = {
+    session_data = {
         "report_id": report_id,
         "owner_id": current_user.id,
         "status": "created",
-        "created_at": created_at,
+        "created_at": created_at.isoformat(),
         "payload": payload.model_dump(),
     }
+
+    success = await cache_service.set(
+        get_session_cache_key(report_id), session_data, ttl=SESSION_TTL_SECONDS
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create issue report session. Cache unavailable.",
+        )
 
     return IssueReportSession(
         report_id=report_id,
@@ -66,11 +80,13 @@ async def upload_issue_report_clip(
     current_user: User = Depends(get_current_user),
 ) -> IssueReportUploadResponse:
     """Upload a recorded issue clip for an existing report session."""
-    report = ISSUE_REPORTS.get(report_id)
+    cache_key = get_session_cache_key(report_id)
+    report = await cache_service.get(cache_key)
+    
     if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Issue report session not found",
+            detail="Issue report session not found or expired",
         )
 
     if report["owner_id"] != current_user.id:
@@ -86,14 +102,6 @@ async def upload_issue_report_clip(
             detail=f"Invalid clip MIME type. Allowed: {', '.join(sorted(ALLOWED_VIDEO_MIME_TYPES))}",
         )
 
-    contents = await clip.read()
-    file_size_bytes = len(contents)
-    if file_size_bytes > MAX_VIDEO_SIZE_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Clip exceeds size limit of {MAX_VIDEO_SIZE_BYTES // (1024 * 1024)}MB",
-        )
-
     user_dir = ISSUE_REPORT_STORAGE_DIR / str(current_user.id)
     user_dir.mkdir(parents=True, exist_ok=True)
 
@@ -101,16 +109,38 @@ async def upload_issue_report_clip(
     file_name = f"{report_id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}.{extension}"
     file_path = user_dir / file_name
 
-    with open(file_path, "wb") as output:
-        output.write(contents)
+    file_size_bytes = 0
+    try:
+        with open(file_path, "wb") as output:
+            while chunk := await clip.read(CHUNK_SIZE):
+                file_size_bytes += len(chunk)
+                if file_size_bytes > MAX_VIDEO_SIZE_BYTES:
+                    # Cleanup partial file
+                    output.close()
+                    file_path.unlink(missing_ok=True)
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"Clip exceeds size limit of {MAX_VIDEO_SIZE_BYTES // (1024 * 1024)}MB",
+                    )
+                output.write(chunk)
+    except HTTPException:
+        raise
+    except Exception as e:
+        file_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to save video clip",
+        ) from e
 
     report["status"] = "clip_uploaded"
     report["clip"] = {
         "path": str(file_path),
         "mime_type": detected_mime,
         "file_size_bytes": file_size_bytes,
-        "uploaded_at": datetime.now(UTC),
+        "uploaded_at": datetime.now(UTC).isoformat(),
     }
+
+    await cache_service.set(cache_key, report, ttl=SESSION_TTL_SECONDS)
 
     return IssueReportUploadResponse(
         report_id=report_id,
@@ -127,11 +157,13 @@ async def finalize_issue_report(
     current_user: User = Depends(get_current_user),
 ) -> IssueReportResponse:
     """Finalize issue report metadata after clip upload."""
-    report = ISSUE_REPORTS.get(report_id)
+    cache_key = get_session_cache_key(report_id)
+    report = await cache_service.get(cache_key)
+    
     if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Issue report session not found",
+            detail="Issue report session not found or expired",
         )
 
     if report["owner_id"] != current_user.id:
@@ -146,13 +178,16 @@ async def finalize_issue_report(
             detail="Clip must be uploaded before finalization",
         )
 
+    submitted_at = datetime.now(UTC)
     report["status"] = "submitted"
-    report["submitted_at"] = datetime.now(UTC)
+    report["submitted_at"] = submitted_at.isoformat()
     report["finalize_payload"] = payload.model_dump()
 
+    await cache_service.set(cache_key, report, ttl=SESSION_TTL_SECONDS)
+    
     return IssueReportResponse(
         report_id=report_id,
         status="submitted",
-        created_at=report["created_at"],
-        submitted_at=report["submitted_at"],
+        created_at=datetime.fromisoformat(report["created_at"]),
+        submitted_at=submitted_at,
     )

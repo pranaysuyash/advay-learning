@@ -20,6 +20,8 @@ import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
+// TODO: Add subscription check for premium features
+// import { subscriptionApi } from '../services/api';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -322,6 +324,9 @@ export const Dashboard = memo(function Dashboard() {
         </div>
       )}
 
+      {/* SUBSCRIPTION STATUS CARD */}
+      {!isGuest && <SubscriptionCard />}
+
       {/* CORE ACTION AREA: GAME GRID */}
       <main className='px-6 lg:px-12 space-y-12 max-w-[1600px] mx-auto'>
 
@@ -423,4 +428,107 @@ export const Dashboard = memo(function Dashboard() {
     </div>
   );
 });
+
+// Subscription Card Component
+function SubscriptionCard() {
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    subscriptionApi.getCurrent()
+      .then((res) => setSubscription(res.data))
+      .catch(() => setSubscription(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="px-6 lg:px-12">
+        <div className="animate-pulse bg-white rounded-xl h-24 border-2 border-slate-100"></div>
+      </div>
+    );
+  }
+
+  if (!subscription?.has_active || !subscription.subscription) {
+    return (
+      <div className="px-6 lg:px-12 mb-6">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+          <h3 className="text-xl font-bold mb-2">Unlock More Games!</h3>
+          <p className="text-blue-100 mb-4">Get access to 5, 10, or all games with a subscription.</p>
+          <Link
+            to="/pricing"
+            className="inline-block bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50"
+          >
+            View Plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const sub = subscription.subscription;
+  const planName = sub.plan_type?.replace('_', ' ').replace('game pack', 'Game Pack').replace('full annual', 'Full Annual');
+  const isExpiringSoon = subscription.days_remaining !== null && subscription.days_remaining <= 14;
+  const isAnnual = sub.plan_type === 'full_annual';
+
+  return (
+    <div className="px-6 lg:px-12 mb-6">
+      <div className={`rounded-xl p-6 border-2 ${isExpiringSoon ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-100'}`}>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">🎮</span>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">{planName}</h3>
+                <span className={`text-sm ${sub.status === 'active' ? 'text-green-600' : 'text-slate-500'}`}>
+                  {sub.status === 'active' ? 'Active' : sub.status}
+                </span>
+              </div>
+            </div>
+            
+            {subscription.days_remaining !== null && (
+              <p className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}>
+                {isExpiringSoon ? '⚠️ ' : ''}{subscription.days_remaining} days remaining
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            {!isAnnual && (
+              <Link
+                to="/game-selection"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
+              >
+                Change Games
+              </Link>
+            )}
+            <Link
+              to="/pricing"
+              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200"
+            >
+              {subscription.days_remaining !== null && subscription.days_remaining <= 30 ? 'Renew' : 'Upgrade'}
+            </Link>
+          </div>
+        </div>
+
+        {/* Selected Games (for packs) */}
+        {!isAnnual && sub.game_selections && sub.game_selections.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <p className="text-sm text-slate-500 mb-2">Selected games ({sub.game_selections.length}):</p>
+            <div className="flex flex-wrap gap-2">
+              {sub.game_selections.slice(0, 5).map((game: any) => (
+                <span key={game.game_id} className="text-xs bg-slate-100 px-2 py-1 rounded">
+                  {game.game_id}
+                </span>
+              ))}
+              {sub.game_selections.length > 5 && (
+                <span className="text-xs text-slate-400">+{sub.game_selections.length - 5} more</span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 

@@ -27,8 +27,19 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
-    """Create a JWT access token."""
+    """Create a JWT access token with a jti claim for revocation.
+
+    The caller may pass a pre‑generated "jti" value in `data`; if absent,
+    we generate a UUID.  A blacklist will rely on this value if
+    ``settings.ENABLE_ACCESS_TOKEN_BLACKLIST`` is true.
+    """
+    from uuid import uuid4
+
     to_encode = data.copy()
+    # ensure jti for blacklist/rotation
+    if "jti" not in to_encode:
+        to_encode["jti"] = str(uuid4())
+
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:

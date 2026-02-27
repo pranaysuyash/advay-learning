@@ -138,6 +138,45 @@ class TestUserIdValidation:
 class TestPasswordValidation:
     """Test password strength validation."""
 
+    def test_password_email_exact_match_fails(self):
+        """Test password containing exact email fails validation."""
+        from app.schemas.user import UserCreate
+
+        with pytest.raises(ValueError) as exc_info:
+            UserCreate(
+                email="pranay@example.com", password="pranay12345678A!"
+            )
+        assert "email" in str(exc_info.value).lower()
+
+    def test_password_email_local_part_fails(self):
+        """Test password containing email local part fails."""
+        from app.schemas.user import UserCreate
+
+        with pytest.raises(ValueError) as exc_info:
+            UserCreate(
+                email="john.doe@company.com", password="JohnDoe123456A!"
+            )
+        assert "email" in str(exc_info.value).lower()
+
+    def test_password_email_with_underscore_fails(self):
+        """Test password containing email with underscore fails."""
+        from app.schemas.user import UserCreate
+
+        with pytest.raises(ValueError) as exc_info:
+            UserCreate(
+                email="test_user@domain.com", password="test_user_passA1!"
+            )
+        assert "email" in str(exc_info.value).lower()
+
+    def test_password_email_unrelated_passes(self):
+        """Test password not related to email passes."""
+        from app.schemas.user import UserCreate
+
+        user = UserCreate(
+            email="pranay@example.com", password="UnrelatedPass123!"
+        )
+        assert user.email == "pranay@example.com"
+
     def test_validate_password_valid(self):
         """Test valid passwords pass validation."""
         valid_passwords = [

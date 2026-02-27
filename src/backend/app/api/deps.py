@@ -13,6 +13,8 @@ from app.db.models.user import User
 from app.db.session import async_session
 from app.schemas.token import TokenPayload
 
+from app.services.token_service import TokenService
+
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
     auto_error=False,  # Don't auto-error, we'll check cookies too
@@ -63,6 +65,14 @@ async def get_current_user(
             raise credentials_exception
     except (JWTError, ValidationError):
         raise credentials_exception
+
+    # check revocation if enabled
+    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+        jti = payload.get("jti")
+        if jti:
+            revoked = await TokenService.is_token_revoked(db, jti)
+            if revoked:
+                raise credentials_exception
 
     # Import here to avoid circular dependency
     from app.services.user_service import UserService

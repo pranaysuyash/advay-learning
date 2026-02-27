@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     # JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    # security features
+    ENABLE_ACCESS_TOKEN_BLACKLIST: bool = True
 
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:6173", "http://localhost:3000"]

@@ -91,6 +91,12 @@ Limited error-specific tests found.
 - **Minimal fix direction:** Create a global ErrorBoundary component and wrap the root application
 - **Invariant:** All React errors should be caught and gracefully handled without crashing the app
 
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- File: `src/frontend/src/components/errors/GlobalErrorBoundary.tsx` (76 lines)
+- Used in: `src/frontend/src/App.tsx:257` - Wraps entire app
+- Also: `CameraErrorBoundary` exists for camera-specific errors
+- Tests: `src/frontend/src/components/errors/__tests__/CameraErrorBoundary.test.tsx`
+
 ### 2. Inconsistent Error Handling in Frontend (MEDIUM)
 
 - **ID:** ERR-2
@@ -144,7 +150,7 @@ Limited error-specific tests found.
 
 **Recommended for next remediation PR:**
 
-- ERR-1: Create global ErrorBoundary component
+- ~~ERR-1: Create global ErrorBoundary component~~ - ALREADY IMPLEMENTED
 - ERR-2: Standardize frontend error handling patterns
 - ERR-4: Implement standardized backend error responses
 
@@ -154,6 +160,20 @@ Limited error-specific tests found.
 - For ERR-2: Add tests for error handling in async operations
 - For ERR-3: Test error recovery flows end-to-end
 - For ERR-4: Verify consistent error response format across all endpoints
+
+---
+
+## F) Status Tracker (2026-02-27)
+
+| Finding ID | Status | Resolution Date | Notes |
+|------------|--------|-----------------|-------|
+| ERR-1 (ErrorBoundary) | **CLOSED** | 2026-02-27 | Already implemented - GlobalErrorBoundary exists |
+| ERR-2 (Inconsistent Error Handling) | OPEN | - | - |
+| ERR-3 (Poor Error Recovery UX) | OPEN | - | - |
+| ERR-4 (Backend Error Standards) | OPEN | - | - |
+| ERR-5 (Error Logging) | OPEN | - | - |
+
+**Updated**: 2026-02-27 - Verified ERR-1 is already implemented
 
 ---
 

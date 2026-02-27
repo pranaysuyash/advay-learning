@@ -19,8 +19,13 @@ class EmailService:
 
     @staticmethod
     def get_verification_expiry() -> datetime:
-        """Get expiration time for verification tokens (24 hours)."""
-        return datetime.now(timezone.utc) + timedelta(hours=24)
+        """Get expiration time for verification tokens (24 hours).
+
+        SQLAlchemy/PostgreSQL stores these values as naive timestamps;
+        return a UTC-naive datetime to avoid offset-aware/naive mixups
+        (see ISSUE-001 tests).
+        """
+        return (datetime.now(timezone.utc) + timedelta(hours=24)).replace(tzinfo=None)
 
     @staticmethod
     async def send_verification_email(email: str, token: str) -> None:

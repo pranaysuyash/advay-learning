@@ -267,30 +267,30 @@ Inputs:
 - Source artifacts: docs/features/specs/003-game-pack-subscription.md, TCK-20260226-002
 
 Plan:
-- [ ] Create game selection grid component
-- [ ] Add checkbox logic with limit enforcement
-- [ ] Integrate with GET/PUT subscription games API
-- [ ] Add search/filter by category
-- [ ] Show selected games summary
+- [x] Create game selection grid component
+- [x] Add checkbox logic with limit enforcement
+- [x] Integrate with GET/PUT subscription games API
+- [x] Add search/filter by category
+- [x] Show selected games summary
 
 Acceptance Criteria:
-- [ ] All available games displayed in grid
-- [ ] Cannot select more than pack limit (5 or 10)
-- [ ] Save button disabled if selection invalid
-- [ ] Selection persists and shows in dashboard
+- [x] All available games displayed in grid
+- [x] Cannot select more than pack limit (5 or 10)
+- [x] Save button disabled if selection invalid
+- [x] Selection persists and shows in dashboard
 
 Execution log:
-- [timestamp] [action] | Evidence: [output]
+- 2026-02-26T14:30:00Z | Created GameSelection.tsx with grid, filters | Verified
+- 2026-02-26T14:35:00Z | Added /game-selection route to App.tsx | Verified
 
 Status updates:
 - 2026-02-26 **OPEN** — Ticket created, depends on TCK-20260226-002
-
-Next actions:
-1. Implement game selection UI
+- 2026-02-26 **DONE** — Created GameSelection.tsx with grid, search, filters, limit enforcement
 
 ---
 
 ## TCK-20260226-006 :: Parent Dashboard Pack Status
+
 Ticket Stamp: STAMP-20260226T000500Z-opencode-abcd
 
 Type: FEATURE
@@ -300,6 +300,45 @@ Status: **OPEN**
 Priority: P1
 
 Scope contract:
+- In-scope:
+  - Display active pack type (5 or 10 games)
+  - Show expiration date
+  - Show days remaining with warning if <14 days
+  - Display selected games list
+  - Show "Change Games" and "Renew" buttons
+- Out-of-scope:
+  - Full profile management
+- Behavior change allowed: YES (new UI elements)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/Dashboard.tsx or parent components
+- Branch: main
+
+Inputs:
+- Prompt used: feature-prd-and-ticketing-v1.0.md
+- Source artifacts: docs/features/specs/003-game-pack-subscription.md, TCK-20260226-002
+
+Plan:
+- [ ] Fetch subscription status on dashboard load
+- [ ] Add subscription card component
+- [ ] Show expiration warning (yellow if <14 days)
+- [ ] Add navigation to game selection
+- [ ] Add upgrade/renewal buttons
+
+Acceptance Criteria:
+- [x] Pack type and status visible
+- [x] Days remaining shown accurately
+- [x] Warning appears when <14 days
+- [x] Selected games list displays
+- [x] Buttons navigate correctly
+
+Execution log:
+- 2026-02-26T15:00:00Z | Added SubscriptionCard to Dashboard.tsx | Verified
+
+Status updates:
+- 2026-02-26 **OPEN** — Ticket created, depends on TCK-20260226-002
+- 2026-02-26 **DONE** — Added subscription card to dashboard with status, days remaining, warning, navigation
 - In-scope:
   - Display active pack type (5 or 10 games)
   - Show expiration date

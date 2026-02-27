@@ -35,6 +35,9 @@ const ResetPassword = lazy(() =>
 const Pricing = lazy(() =>
   import('./pages/Pricing').then((module) => ({ default: module.Pricing })),
 );
+const GameSelection = lazy(() =>
+  import('./pages/GameSelection').then((module) => ({ default: module.GameSelection })),
+);
 const Dashboard = lazy(() =>
   import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })),
 );
@@ -267,6 +270,16 @@ function App() {
                     <Layout>
                       <Pricing />
                     </Layout>
+                  }
+                />
+                <Route
+                  path='/game-selection'
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <GameSelection />
+                      </Layout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route

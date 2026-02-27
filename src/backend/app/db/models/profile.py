@@ -24,7 +24,7 @@ class Profile(Base):
         String, primary_key=True, default=lambda: str(uuid4())
     )
     parent_id: Mapped[str] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[float] = mapped_column(Float, nullable=True)

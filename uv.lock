@@ -16,6 +16,7 @@ name = "advay-learning"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "bandit" },
     { name = "mediapipe" },
     { name = "numpy" },
     { name = "opencv-python" },
@@ -62,6 +63,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", marker = "extra == 'dev'", specifier = ">=1.11.1" },
+    { name = "bandit", specifier = ">=1.9.3" },
     { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7.0" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "factory-boy", marker = "extra == 'dev'", specifier = ">=3.3.0" },

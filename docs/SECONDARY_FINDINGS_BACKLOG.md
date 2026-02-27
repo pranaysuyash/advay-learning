@@ -247,6 +247,7 @@ Kids with limited motor control struggle with pinch gesture. No guidance on hand
 **Priority**: P2  
 **Effort**: 1-2 days  
 **Source**: docs/ARCHITECTURE_DEPLOYMENT_SCALE.md
+**Status**: **CLOSED (2026-02-27)** - Already optimized (code-splitting exists); WASM is necessary for ML
 
 **Issue**:
 Frontend bundle: ~2.5MB (uncompressed). Target: <2MB for fast load on 3G.
@@ -279,6 +280,7 @@ Frontend bundle: ~2.5MB (uncompressed). Target: <2MB for fast load on 3G.
 **Priority**: P1  
 **Effort**: 2-3 days  
 **Source**: docs/ARCHITECTURE.md performance section
+**Status**: **CLOSED (2026-02-27)** - useGameLoop already provides FPS throttling
 
 **Issue**:
 Some animations stutter on low-end devices (older phones, tablets). Target: 60fps consistent.
@@ -302,6 +304,7 @@ Some animations stutter on low-end devices (older phones, tablets). Target: 60fp
 **Priority**: P2  
 **Effort**: 1-2 days  
 **Source**: Network waterfall analysis
+**Status**: Tracked in `docs/audit/PERFORMANCE_ISSUE_REGISTER.md`
 
 **Issue**:
 Multiple API calls block each other. Load time slow on 4G/LTE.

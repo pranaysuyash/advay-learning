@@ -1,6 +1,7 @@
 """Authentication endpoints."""
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from datetime import datetime, timezone
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.exc import IntegrityError
@@ -14,6 +15,7 @@ from app.core.security import create_access_token
 from app.schemas.user import User, UserCreate
 from app.services.account_lockout_service import AccountLockoutService
 from app.services.refresh_token_service import RefreshTokenService
+from app.services.token_service import TokenService
 from app.services.user_service import UserService
 
 router = APIRouter()
@@ -22,7 +24,8 @@ router = APIRouter()
 COOKIE_DOMAIN = None  # Use default (current domain)
 COOKIE_PATH = "/"
 COOKIE_SECURE = settings.APP_ENV == "production"  # Secure in production
-COOKIE_SAMESITE = "lax"  # CSRF protection
+# same‑site setting: `strict` provides stronger CSRF protection
+COOKIE_SAMESITE = "strict"
 ACCESS_TOKEN_COOKIE = "access_token"
 REFRESH_TOKEN_COOKIE = "refresh_token"
 REGISTRATION_SUCCESS_MESSAGE = "If an account is eligible, a verification email has been sent."
@@ -170,12 +173,26 @@ async def login(
 
 @router.post("/logout")
 async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)) -> dict:
-    """Logout and clear authentication cookies, revoke refresh token."""
-    # Get refresh token from cookie to revoke it
+    """Logout and clear authentication cookies, revoke refresh + access token."""
+    # Revoke refresh token if present
     refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
     if refresh_token:
-        # Revoke the refresh token in the database
         await RefreshTokenService.revoke_refresh_token(db, refresh_token)
+
+    # Also revoke current access token if blacklist enabled
+    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+        access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
+        if access_token:
+            try:
+                payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+                jti = payload.get("jti")
+                exp = payload.get("exp")
+                if jti and exp:
+                    # exp is a timestamp
+                    expires = datetime.fromtimestamp(exp, timezone.utc)
+                    await TokenService.revoke_access_token(db, jti, expires)
+            except JWTError:
+                pass  # token invalid; nothing to revoke
 
     clear_auth_cookies(response)
     return {"message": "Logout successful"}
@@ -314,6 +331,20 @@ async def refresh_token(
 
     # Revoke the old refresh token (rotation)
     await RefreshTokenService.revoke_refresh_token(db, refresh_token)
+
+    # Also revoke the current access token if blacklisting enabled
+    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+        access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
+        if access_token:
+            try:
+                payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+                jti = payload.get("jti")
+                exp = payload.get("exp")
+                if jti and exp:
+                    expires = datetime.fromtimestamp(exp, timezone.utc)
+                    await TokenService.revoke_access_token(db, jti, expires)
+            except JWTError:
+                pass
 
     # Create new tokens
     new_access_token = create_access_token(data={"sub": user.id})

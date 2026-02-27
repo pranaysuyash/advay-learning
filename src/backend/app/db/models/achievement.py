@@ -22,7 +22,7 @@ class Achievement(Base):
         String, primary_key=True, default=lambda: str(uuid4())
     )
     profile_id: Mapped[str] = mapped_column(
-        ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
     )
     achievement_type: Mapped[str] = mapped_column(String, nullable=False)
 

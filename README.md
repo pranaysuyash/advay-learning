@@ -39,7 +39,7 @@ alembic upgrade head  # Run migrations
 
 # 2. Frontend setup
 cd ../frontend
-npm install
+pnpm install
 cp .env.example .env.local
 
 # 3. Run development servers
@@ -49,7 +49,7 @@ python -m uvicorn app.main:app --reload --port 8001
 
 # Terminal 2 - Frontend
 cd src/frontend
-npm run dev
+pnpm dev
 ```
 
 Access:
@@ -72,8 +72,7 @@ Access:
 - [AGENTS.md](AGENTS.md) - AI agent coordination guide
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design
 - [docs/SETUP.md](docs/SETUP.md) - Detailed setup
-- [docs/SECURITY.md](docs/SECURITY.md) - Security guidelines
-- [docs/GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md) - Git process
+- [docs/SECURITY.md](docs/security/SECURITY.md) - Security guidelines
 - [docs/LINTING_GUIDELINES.md](docs/LINTING_GUIDELINES.md) - Linting guidelines
 - [docs/POST_ERROR_RESOLUTION_PLAN.md](docs/POST_ERROR_RESOLUTION_PLAN.md) - Post-resolution work plan
 
@@ -102,7 +101,7 @@ Access:
 ### Common Development Issues
 
 **Problem**: Frontend tests failing due to vite/dependency issues
-**Solution**: Always run `npm install` after package.json changes, clear `node_modules/.vite` cache if needed
+**Solution**: Always run `pnpm install` after package.json changes, clear `node_modules/.vite` cache if needed
 
 **Problem**: TypeScript errors after refactoring
 **Solution**: Run `npm run type-check` to verify compilation before committing changes

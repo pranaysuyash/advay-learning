@@ -451,6 +451,13 @@
    
    **Impact**: Stale progress shown to user; sync issues with server; incorrect calculations
    
+   > **RESOLVED 2026-02-27** ✅ - Added Set-based duplicate detection in `progressQueue.ts`.
+   > - `_knownIds` Set tracks session items for O(1) lookup
+   > - Storage scan checks persisted items
+   > - Duplicate items rejected with warning: "[ProgressQueue] Duplicate item ignored"
+   > - Implementation: `src/frontend/src/services/progressQueue.ts` lines 48-72
+   > - Tests: `src/frontend/src/services/__tests__/progressQueue.test.ts` lines 69-79
+   
    **Fix Idea**: Add ID uniqueness invariant with Set-based tracking:
    ```typescript
    // Track all known IDs in O(1) Set
@@ -746,6 +753,13 @@
    **Root Cause**: Trusts caller to provide valid data; no schema validation
    
    **Impact**: Store corruption; crashes in downstream code; potential for data injection (if metadata ever rendered)
+   
+   > **RESOLVED 2026-02-27** ✅ - Added manual schema validation (no new deps).
+   > - `progressValidation.ts`: UUID v4 validation, score bounds (0-1M), required fields
+   > - `enqueue()` rejects invalid items with detailed error messages
+   > - Constants extracted to `progressConstants.ts` (MAX_QUEUE_SIZE, SCORE_BOUNDS, etc.)
+   > - Implementation: `src/frontend/src/services/progressValidation.ts` (123 lines)
+   > - Tests: All 16 tests pass including validation edge cases
    
    **Fix Idea**: Add Zod schema validation:
    ```typescript

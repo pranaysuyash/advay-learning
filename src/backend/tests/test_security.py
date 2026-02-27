@@ -5,6 +5,7 @@ import time
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TestTimingAttackPrevention:
@@ -166,6 +167,71 @@ class TestEmailVerification:
         assert resend_response.status_code == 200
         # Should return generic message (prevents user enumeration)
         assert "if an account exists" in resend_response.json()["message"].lower()
+
+
+class TestAccessTokenRevocation:
+    """Verify that access tokens are revoked on logout and refresh."""
+
+    async def test_token_revoked_on_logout(self, client: AsyncClient, db_session: AsyncSession):
+        # create and verify a user directly
+        from app.services.user_service import UserService
+        from app.schemas.user import UserCreate
+
+        user = await UserService.create(
+            db_session,
+            UserCreate(email="revoke@test.com", password="StrongPass!7890"),
+        )
+        await UserService.verify_email(db_session, user)
+
+        # ensure no lockout remains
+        from app.services.account_lockout_service import AccountLockoutService
+        await AccountLockoutService.clear_failed_attempts("revoke@test.com")
+
+        # perform login through API to exercise cookie logic
+        login_resp = await client.post(
+            "/api/v1/auth/login",
+            data={"username": "revoke@test.com", "password": "StrongPass!7890"},
+        )
+        assert login_resp.status_code == 200
+        access = login_resp.cookies.get("access_token")
+        assert access
+
+        # logout to trigger revocation
+        await client.post("/api/v1/auth/logout")
+
+        # attempt to use old token via cookie
+        resp = await client.get("/api/v1/auth/me", cookies={"access_token": access})
+        assert resp.status_code == 401
+
+    async def test_cookie_samesite_strict(self, client: AsyncClient, db_session: AsyncSession):
+        # create and verify user directly
+        from app.services.user_service import UserService
+        from app.schemas.user import UserCreate
+
+        user = await UserService.create(
+            db_session,
+            UserCreate(email="cookie@test.com", password="AnotherStrong!456"),
+        )
+
+        # clear any lockout state
+        from app.services.account_lockout_service import AccountLockoutService
+        await AccountLockoutService.clear_failed_attempts("cookie@test.com")
+        await UserService.verify_email(db_session, user)
+
+        login_resp = await client.post(
+            "/api/v1/auth/login",
+            data={"username": "cookie@test.com", "password": "CookiePass123!"},
+        )
+        assert login_resp.status_code == 200
+
+        # instead of relying on httpx header handling, directly test helper
+        from starlette.responses import Response
+        from app.api.v1.endpoints.auth import set_auth_cookies
+
+        r = Response()
+        set_auth_cookies(r, "tok", "ref")
+        sadd = r.headers.get_list("set-cookie")
+        assert any("samesite=strict" in h.lower() for h in sadd), f"headers: {sadd}"
 
 
 class TestRegistrationEnumerationProtection:

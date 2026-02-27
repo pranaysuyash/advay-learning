@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, model_validator
 
 
 class UserRole(str, Enum):
@@ -116,6 +116,22 @@ class UserCreate(UserBase):
     def validate_password(cls, v: str) -> str:
         """Validate password strength."""
         return validate_password_strength(v)
+
+    @model_validator(mode="after")
+    def validate_password_not_based_on_email(self) -> "UserCreate":
+        """Validate password is not derived from email address."""
+        email_local = self.email.split("@")[0].lower()
+        password_lower = self.password.lower()
+
+        if email_local in password_lower:
+            raise ValueError("Password cannot be based on your email address")
+
+        email_parts = re.split(r"[._-]", email_local)
+        for part in email_parts:
+            if len(part) >= 3 and part in password_lower:
+                raise ValueError("Password cannot be based on your email address")
+
+        return self
 
 
 class UserUpdate(BaseModel):
