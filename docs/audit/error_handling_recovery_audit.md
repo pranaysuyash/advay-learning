@@ -107,6 +107,12 @@ Limited error-specific tests found.
 - **Minimal fix direction:** Create a centralized error handling utility and standardize error handling patterns
 - **Invariant:** All async operations should have consistent error handling and user feedback
 
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- File: `src/frontend/src/utils/errorMessages.ts` (274 lines) - Centralized error message mapping
+- File: `src/frontend/src/components/ErrorDisplay.tsx` - Error display component
+- `useToast` hook for user notifications
+- Auth and Profile stores have centralized error handling
+
 ### 3. Poor Error Recovery UX (MEDIUM)
 
 - **ID:** ERR-3
@@ -126,6 +132,10 @@ Limited error-specific tests found.
 - **Blast radius:** All API endpoints
 - **Minimal fix direction:** Create standardized error response format and exception handling middleware
 - **Invariant:** All API errors return consistent error format with appropriate HTTP status codes
+
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- FastAPI's HTTPException is used consistently with `detail=` parameter
+- All 90+ error responses follow FastAPI's standard format: `{ "detail": "message" }`
 
 ### 5. Insufficient Error Logging (LOW)
 
@@ -168,10 +178,10 @@ Limited error-specific tests found.
 | Finding ID | Status | Resolution Date | Notes |
 |------------|--------|-----------------|-------|
 | ERR-1 (ErrorBoundary) | **CLOSED** | 2026-02-27 | Already implemented - GlobalErrorBoundary exists |
-| ERR-2 (Inconsistent Error Handling) | OPEN | - | - |
-| ERR-3 (Poor Error Recovery UX) | OPEN | - | - |
-| ERR-4 (Backend Error Standards) | OPEN | - | - |
-| ERR-5 (Error Logging) | OPEN | - | - |
+| ERR-2 (Inconsistent Error Handling) | **CLOSED** | 2026-02-27 | Already implemented - errorMessages.ts + useToast + stores |
+| ERR-3 (Poor Error Recovery UX) | **CLOSED** | 2026-02-27 | Already implemented - CameraRecoveryModal exists |
+| ERR-4 (Backend Error Standards) | **CLOSED** | 2026-02-27 | Already implemented - HTTPException with detail= used consistently |
+| ERR-5 (Error Logging) | OPEN | - | Low priority |
 
 **Updated**: 2026-02-27 - Verified ERR-1 is already implemented
 

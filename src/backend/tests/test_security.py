@@ -196,8 +196,20 @@ class TestAccessTokenRevocation:
         access = login_resp.cookies.get("access_token")
         assert access
 
-        # logout to trigger revocation
-        await client.post("/api/v1/auth/logout")
+        # logout to trigger revocation; include cookies explicitly
+        await client.post("/api/v1/auth/logout", cookies={"access_token": access})
+
+        # after logout the token should be persisted in blacklist
+        from app.services.token_service import TokenService
+        # extract jti from token using same secret as app
+        from jose import jwt
+        from app.core.config import settings
+
+        payload = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
+        jti = payload.get("jti")
+        assert jti is not None
+        revoked_record = await TokenService.is_token_revoked(db_session, jti)
+        assert revoked_record, "access token not added to blacklist"
 
         # attempt to use old token via cookie
         resp = await client.get("/api/v1/auth/me", cookies={"access_token": access})
@@ -220,7 +232,7 @@ class TestAccessTokenRevocation:
 
         login_resp = await client.post(
             "/api/v1/auth/login",
-            data={"username": "cookie@test.com", "password": "CookiePass123!"},
+            data={"username": "cookie@test.com", "password": "AnotherStrong!456"},
         )
         assert login_resp.status_code == 200
 
@@ -230,7 +242,7 @@ class TestAccessTokenRevocation:
 
         r = Response()
         set_auth_cookies(r, "tok", "ref")
-        sadd = r.headers.get_list("set-cookie")
+        sadd = r.headers.getlist("set-cookie")
         assert any("samesite=strict" in h.lower() for h in sadd), f"headers: {sadd}"
 
 
@@ -374,6 +386,90 @@ class TestPasswordReset:
         assert response.status_code == 200
         # Should return same message to prevent user enumeration
         assert "if an account exists" in response.json()["message"].lower()
+
+
+class TestCookieAuthentication:
+    """Test httpOnly cookie-based authentication."""
+
+
+class TestAuthorization:
+    """Authorization enforcement tests for admin-only routes."""
+
+    async def test_parent_cannot_create_game(self, client: AsyncClient, db_session: AsyncSession):
+        from app.services.user_service import UserService
+        from app.schemas.user import UserCreate
+
+        # create ordinary parent user
+        user = await UserService.create(
+            db_session,
+            UserCreate(email="parent@test.com", password="SafePass!7890"),
+        )
+        await UserService.verify_email(db_session, user)
+
+        # ensure lockout state reset
+        from app.services.account_lockout_service import AccountLockoutService
+        await AccountLockoutService.reset_account_lockout(db_session, "parent@test.com")
+        # login as parent
+        resp = await client.post(
+            "/api/v1/auth/login",
+            data={"username": "parent@test.com", "password": "ParentPass!123"},
+        )
+        if resp.status_code != 200:
+            print("parent login failed", resp.status_code, resp.text)
+        assert resp.status_code == 200
+
+        # attempt to create game
+        game_payload = {
+            "title": "Test Game",
+            "slug": "test-game",
+            "description": "desc",
+            "icon": "icon.png",
+            "category": "math",
+            "age_range_min": 2,
+            "age_range_max": 4,
+            "difficulty": "easy",
+            "game_path": "/games/test",
+        }
+        create_resp = await client.post("/api/v1/games", json=game_payload)
+        assert create_resp.status_code == 403
+
+    async def test_admin_can_create_game(self, client: AsyncClient, db_session: AsyncSession):
+        from app.services.user_service import UserService
+        from app.schemas.user import UserCreate, UserRole
+
+        # create admin user
+        admin = await UserService.create(
+            db_session,
+            UserCreate(email="admin@test.com", password="Secure!Pass456", role=UserRole.ADMIN),
+        )
+        await UserService.verify_email(db_session, admin)
+
+        # ensure lockout state reset
+        from app.services.account_lockout_service import AccountLockoutService
+        await AccountLockoutService.reset_account_lockout(db_session, "admin@test.com")
+        # login as admin
+        resp = await client.post(
+            "/api/v1/auth/login",
+            data={"username": "admin@test.com", "password": "AdminPass!123"},
+        )
+        if resp.status_code != 200:
+            print("admin login failed", resp.status_code, resp.text)
+        assert resp.status_code == 200
+
+        # create game
+        game_payload = {
+            "title": "Admin Game",
+            "slug": "admin-game",
+            "description": "desc",
+            "icon": "icon.png",
+            "category": "math",
+            "age_range_min": 2,
+            "age_range_max": 4,
+            "difficulty": "easy",
+            "game_path": "/games/admin",
+        }
+        create_resp = await client.post("/api/v1/games", json=game_payload)
+        assert create_resp.status_code == 201
 
 
 class TestCookieAuthentication:

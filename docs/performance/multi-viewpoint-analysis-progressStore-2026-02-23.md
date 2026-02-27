@@ -905,6 +905,16 @@
    
    **Impact**: Lost progress on flaky network; poor user experience; data inconsistency
    
+   > **RESOLVED 2026-02-27** ✅ - Added retry logic with exponential backoff in `progressQueue.ts`.
+   > - `processItemWithRetry()`: Handles up to 5 retry attempts with exponential backoff
+   > - Delays: 1000ms → 2000ms → 4000ms → 8000ms → 16000ms + random jitter (0-500ms)
+   > - Distinguishes retryable (5xx) vs non-retryable (4xx) errors
+   > - Updates `retryCount`, `lastError`, `lastRetryAt` metadata on each attempt
+   > - Integration: `syncAll()` processes items in retry-count order (lowest first)
+   > - Constants: `RETRY_BASE_DELAY_MS`, `MAX_RETRY_DELAY_MS`, `RETRY_JITTER_MS`
+   > - Implementation: `src/frontend/src/services/progressQueue.ts` lines 320-400
+   > - Tests: `src/frontend/src/services/__tests__/progressQueue.retry.test.ts` lines 50-103
+   
    **Fix Idea**: Implement exponential backoff with jitter:
    ```typescript
    const RETRY_DELAYS = [1000, 2000, 4000, 8000, 16000]; // ms
@@ -979,6 +989,15 @@
    **Root Cause**: No dead letter mechanism; no observability
    
    **Impact**: Silent data loss; no way to diagnose; no user notification
+   
+   > **RESOLVED 2026-02-27** ✅ - Added Dead Letter Queue in `progressQueue.ts`.
+   > - `_deadLetters` array stores permanently failed items
+   > - `moveToDeadLetter()` moves item from main queue to DLQ
+   > - `retryDeadLetter()` allows manual retry of failed items
+   > - `deleteDeadLetter()` permanently removes failed items
+   > - `getDeadLetters(profileId?)` filters dead letters by profile
+   > - Implementation: `src/frontend/src/services/progressQueue.ts` lines 245-275
+   > - Tests: `src/frontend/src/services/__tests__/progressQueue.retry.test.ts` lines 199-288
    
    **Fix Idea**: Add dead letter queue with alerting:
    ```typescript

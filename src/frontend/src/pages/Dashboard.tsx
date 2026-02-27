@@ -20,8 +20,7 @@ import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
-// TODO: Add subscription check for premium features
-// import { subscriptionApi } from '../services/api';
+import { subscriptionApi, type SubscriptionStatus } from '../services/api';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -531,4 +530,3 @@ function SubscriptionCard() {
     </div>
   );
 }
-

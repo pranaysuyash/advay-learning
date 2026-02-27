@@ -192,7 +192,7 @@ describe('progressQueue', () => {
       const allItems = JSON.parse(localStorage.getItem('advay:progressQueue:v1') || '[]');
       const errorItem = allItems.find((i: ProgressItem) => i.idempotency_key === item.idempotency_key);
       expect(errorItem.status).toBe('error');
-      expect(errorItem.meta_data._error).toBe('Network timeout');
+      expect(errorItem.lastError).toBe('Network timeout');
     });
   });
 

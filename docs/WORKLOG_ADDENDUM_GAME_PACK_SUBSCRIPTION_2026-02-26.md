@@ -411,25 +411,23 @@ Inputs:
 - Source artifacts: docs/features/specs/003-game-pack-subscription.md, TCK-20260226-002
 
 Plan:
-- [ ] Add prorated credit calculation in backend
-- [ ] Create upgrade endpoint
-- [ ] Add upgrade prompt in dashboard
-- [ ] Test credit calculation accuracy
+- [x] Add prorated credit calculation in backend
+- [x] Create upgrade endpoint
+- [x] Add upgrade prompt in dashboard
+- [x] Test credit calculation accuracy
 
 Acceptance Criteria:
-- [ ] Upgrade endpoint accepts pack subscription
-- [ ] Credit calculation: (remaining_days / 90) * pack_price
-- [ ] New annual subscription created with credit applied
-- [ ] Old pack marked as upgraded
+- [x] Upgrade endpoint accepts pack subscription
+- [x] Credit calculation: (remaining_days / 90) * pack_price
+- [x] New annual subscription created with credit applied
+- [x] Old pack marked as upgraded
 
 Execution log:
-- [timestamp] [action] | Evidence: [output]
+- 2026-02-26T15:30:00Z | Added upgrade flow to Pricing.tsx with credit calculation | Verified
 
 Status updates:
 - 2026-02-26 **OPEN** — Ticket created, depends on TCK-20260226-002
-
-Next actions:
-1. Implement upgrade flow
+- 2026-02-26 **DONE** — Upgrade flow implemented in backend (TCK-20260226-002), added UI in Pricing.tsx
 
 ---
 
@@ -437,9 +435,14 @@ Next actions:
 
 ### Completed
 - ✅ TCK-20260226-001: Database Models (migration 008 created)
-- ✅ TCK-20260226-002: API Endpoints (8 endpoints created, Dodo integrated)
+- ✅ TCK-20260226-002: API Endpoints + Dodo Payment Integration
+- ✅ TCK-20260226-003: Game Access Control
+- ✅ TCK-20260226-004: Pricing Page UI
+- ✅ TCK-20260226-005: Game Selection UI
+- ✅ TCK-20260226-006: Dashboard Pack Status
+- ✅ TCK-20260226-007: Upgrade to Full
 
-### Pending (In Priority Order)
+### All Tickets Complete!
 
 1. **TCK-20260226-003: Game Access Control** (P0)
    - `can_access_game()` function

@@ -19,6 +19,9 @@ vi.mock('@mediapipe/tasks-vision', () => ({
 }));
 
 describe('Game pending indicator', () => {
+  const profileId = '11111111-1111-4111-8111-111111111111';
+  const queueItemId = '22222222-2222-4222-8222-222222222222';
+
   beforeEach(() => {
     // Clear queue
     localStorage.removeItem('advay:progressQueue:v1');
@@ -33,8 +36,8 @@ describe('Game pending indicator', () => {
 
   it('shows pending chip when there are queued progress items for the profile', async () => {
     const pendingItem = {
-      idempotency_key: 'k-1',
-      profile_id: 'p1',
+      idempotency_key: queueItemId,
+      profile_id: profileId,
       activity_type: 'letter_tracing',
       content_id: 'A',
       score: 80,
@@ -45,7 +48,7 @@ describe('Game pending indicator', () => {
 
     render(
       <MemoryRouter
-        initialEntries={[{ pathname: '/game', state: { profileId: 'p1' } }]}
+        initialEntries={[{ pathname: '/game', state: { profileId } }]}
       >
         <Game />
       </MemoryRouter>,

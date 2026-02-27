@@ -15,12 +15,15 @@ vi.mock('@mediapipe/tasks-vision', () => ({
 }));
 
 describe('Progress sync', () => {
+  const profileId = '33333333-3333-4333-8333-333333333333';
+  const queueItemId = '44444444-4444-4444-8444-444444444444';
+
   beforeEach(() => {
     localStorage.removeItem('advay:progressQueue:v1');
     useProfileStore.setState({
       profiles: [
         {
-          id: 'p1',
+          id: profileId,
           name: 'Kid',
           preferred_language: 'english',
           created_at: new Date().toISOString(),
@@ -31,8 +34,8 @@ describe('Progress sync', () => {
 
   it('sync now button triggers queue sync and clears pending', async () => {
     const pendingItem = {
-      idempotency_key: 'k-sync-1',
-      profile_id: 'p1',
+      idempotency_key: queueItemId,
+      profile_id: profileId,
       activity_type: 'letter_tracing',
       content_id: 'B',
       score: 75,
@@ -41,8 +44,9 @@ describe('Progress sync', () => {
     progressQueue.enqueue(pendingItem);
 
     // Mock apiClient.post to respond with success
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValue({ data: [] } as any);
     const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
-      data: { results: [{ idempotency_key: 'k-sync-1', status: 'ok' }] },
+      data: { results: [{ idempotency_key: queueItemId, status: 'ok' }] },
     });
 
     render(
@@ -65,5 +69,8 @@ describe('Progress sync', () => {
     await waitFor(() => {
       expect(screen.queryByText(/Pending \(1\)/i)).toBeNull();
     });
+
+    getSpy.mockRestore();
+    postSpy.mockRestore();
   });
 });

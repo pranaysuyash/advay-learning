@@ -422,6 +422,7 @@ The audit-to-ticket gap exists because:
   - [ ] Check for orphaned components (built but not used)
   - [ ] If functionality removed: document WHY and what replaces it, or RESTORE it
 - [ ] Run pre-commit checks locally: `./scripts/agent_gate.sh --staged`
+- [ ] If any gate/test/typecheck fails, fix failures completely, rerun checks, then retry commit (do not bypass unless user explicitly authorizes)
 - [ ] Ensure worklog addendum is updated for code changes
 - [ ] Write meaningful commit message explaining WHAT and WHY
 ```
@@ -950,6 +951,7 @@ Pass if:
 12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
 14. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
+15. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
 
 ---
 

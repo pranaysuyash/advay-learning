@@ -65,21 +65,40 @@ export function Pricing() {
       .catch(() => setCurrentSubscription(null));
   }, []);
 
+  const hasActiveSubscription = currentSubscription?.has_active;
+  const currentPlan = currentSubscription?.subscription?.plan_type;
+  const currentSubscriptionId = currentSubscription?.subscription?.id;
+  const daysRemaining = currentSubscription?.days_remaining;
+
+  const getUpgradeCredit = () => {
+    if (!currentSubscription?.subscription || currentPlan === 'full_annual') return 0;
+    const priceMap: Record<string, number> = { game_pack_5: 1500, game_pack_10: 2500 };
+    const basePrice = priceMap[currentPlan || ''] || 0;
+    return Math.round(((daysRemaining || 0) / 90) * basePrice);
+  };
+
+  const upgradeCredit = getUpgradeCredit();
+
   const handlePurchase = async (planId: SubscriptionPlanType) => {
     setLoading(planId);
     setError(null);
 
     try {
+      // Upgrade flow
+      if (currentSubscriptionId && hasActiveSubscription && planId === 'full_annual' && currentPlan !== 'full_annual') {
+        await subscriptionApi.upgrade(currentSubscriptionId, planId);
+        alert(`Upgrade successful! Credit of ₹${upgradeCredit} applied.`);
+        const sub = await subscriptionApi.getCurrent();
+        setCurrentSubscription(sub.data);
+        return;
+      }
+
       const response = await subscriptionApi.purchase(planId);
       const { checkout_url } = response.data;
-
-      // Redirect to Dodo checkout
       if (checkout_url && !checkout_url.includes('placeholder')) {
         window.location.href = checkout_url;
       } else {
-        // For demo/placeholder - just show success
         alert('Demo mode: Checkout would redirect to ' + checkout_url);
-        // Refresh subscription status
         const sub = await subscriptionApi.getCurrent();
         setCurrentSubscription(sub.data);
       }
@@ -89,9 +108,6 @@ export function Pricing() {
       setLoading(null);
     }
   };
-
-  const hasActiveSubscription = currentSubscription?.has_active;
-  const currentPlan = currentSubscription?.subscription?.plan_type;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">

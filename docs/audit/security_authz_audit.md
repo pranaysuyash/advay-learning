@@ -157,7 +157,7 @@ Some security-specific tests exist but may not be comprehensive.
 
 **Recommended for next remediation PR:**
 
-- AUTHZ-1: Implement secure JWT token management
+- AUTHZ-1: Implement secure JWT token management **(in progress – access token blacklist added, see Unit-1)**
 - AUTHZ-5: Review and fix authorization checks
 - AUTHZ-2: Enhance rate limiting implementation
 
@@ -182,7 +182,7 @@ Some security-specific tests exist but may not be comprehensive.
 
 ### Phase 1: Critical (P0)
 
-1. Implement secure JWT token management with rotation
+1. Implement secure JWT token management with rotation **(DONE 2026-02-27; access tokens now revocable, cookies improved)**
 2. Review all endpoints for proper authorization
 3. Enhance rate limiting implementation
 

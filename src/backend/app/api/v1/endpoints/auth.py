@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db
+from app.api.deps import get_db, get_current_user
 from app.core.config import settings
 from app.core.email import EmailService
 from app.core.rate_limit import RateLimits, limiter
@@ -32,7 +32,13 @@ REGISTRATION_SUCCESS_MESSAGE = "If an account is eligible, a verification email 
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
-    """Set authentication cookies with proper security settings."""
+    """Set authentication cookies with proper security settings.
+
+    Cookies configured by Unit-1:
+    * HttpOnly
+    * Secure when production
+    * SameSite=strict for CSRF mitigation
+    """
     # Access token - short lived
     response.set_cookie(
         key=ACCESS_TOKEN_COOKIE,
@@ -360,36 +366,12 @@ async def refresh_token(
 
 
 @router.get("/me", response_model=User)
-async def get_current_user_info(request: Request, db: AsyncSession = Depends(get_db)) -> User:
-    """Get current user info from access token cookie."""
-    # Get access token from cookie
-    access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
-    if not access_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-        )
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Get current user info from access token cookie.
 
-    try:
-        payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id: str | None = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
-            )
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-        )
-
-    # Get user
-    user = await UserService.get_by_id(db, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    return user  # type: ignore[return-value]
+    Delegates to `get_current_user` so that revocation and authorization
+    checks are applied consistently.
+    """
+    return current_user

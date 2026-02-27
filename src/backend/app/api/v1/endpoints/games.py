@@ -11,6 +11,7 @@ from sqlalchemy import Float, Integer, and_, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
+from app.api.permissions import require_roles
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
 from app.schemas.game import Game, GameCreate, GameList, GameUpdate, GlobalGameStat, GlobalGameStatsResponse
@@ -276,17 +277,10 @@ async def check_game_access(
 @router.post("/", response_model=Game, status_code=status.HTTP_201_CREATED)
 async def create_game(
     game_in: GameCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles([UserRole.ADMIN])),
     db: AsyncSession = Depends(get_db),
 ) -> Game:
     """Create a new game (admin only)."""
-
-    # Verify admin access
-    if not (getattr(current_user, "is_superuser", False) or current_user.role == UserRole.ADMIN):  # type: ignore[attr-defined, misc]
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can create games",
-        )
 
     existing = await GameService.get_by_slug(db, game_in.slug)
     if existing:
@@ -302,17 +296,10 @@ async def create_game(
 async def update_game(
     game_id: str,
     game_in: GameUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles([UserRole.ADMIN])),
     db: AsyncSession = Depends(get_db),
 ) -> Game:
     """Update an existing game (admin only)."""
-
-    # Verify admin access
-    if not (getattr(current_user, "is_superuser", False) or current_user.role == UserRole.ADMIN):  # type: ignore[attr-defined, misc]
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can update games",
-        )
 
     game = await GameService.update(db, game_id, game_in)
     if not game:
@@ -327,17 +314,10 @@ async def update_game(
 @router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_game(
     game_id: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles([UserRole.ADMIN])),
     db: AsyncSession = Depends(get_db),
 ) -> None:
     """Delete a game (admin only)."""
-
-    # Verify admin access
-    if not (getattr(current_user, "is_superuser", False) or current_user.role == UserRole.ADMIN):  # type: ignore[attr-defined, misc]
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can delete games",
-        )
 
     game = await GameService.get_by_id(db, game_id)
     if not game:
