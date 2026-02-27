@@ -388,9 +388,6 @@ class TestPasswordReset:
         assert "if an account exists" in response.json()["message"].lower()
 
 
-class TestCookieAuthentication:
-    """Test httpOnly cookie-based authentication."""
-
 
 class TestAuthorization:
     """Authorization enforcement tests for admin-only routes."""
@@ -472,6 +469,16 @@ class TestAuthorization:
         assert create_resp.status_code == 201
 
 
+class TestRateLimiting:
+    """Smoke tests for rate-limited auth endpoints."""
+
+    async def test_verify_and_resend_exist(self, client: AsyncClient):
+        r1 = await client.post("/api/v1/auth/verify-email", params={"token": "none"})
+        assert r1.status_code in (400, 401, 404, 200)
+        r2 = await client.post("/api/v1/auth/resend-verification", params={"email": "noone@xyz"})
+        assert r2.status_code == 200
+
+
 class TestCookieAuthentication:
     """Test httpOnly cookie-based authentication."""
 
@@ -506,6 +513,16 @@ class TestCookieAuthentication:
         # but we can verify the backend sets them correctly in the response headers
         set_cookie_headers = response.headers.get_list("set-cookie")
         assert any("httponly" in h.lower() for h in set_cookie_headers)
+
+    async def test_security_headers_present(self, client: AsyncClient):
+        """Ensure the security headers middleware remains active after file removal."""
+        resp = await client.get("/api/v1/auth/me")
+        # endpoint will 401 unauthenticated but headers should still be added
+        hdrs = resp.headers
+        assert hdrs.get("x-content-type-options") == "nosniff"
+        assert hdrs.get("x-frame-options") == "DENY"
+        assert "strict-transport-security" in hdrs
+        assert "permissions-policy" in hdrs
 
     async def test_logout_clears_cookies(self, client: AsyncClient):
         """Verify logout clears authentication cookies."""

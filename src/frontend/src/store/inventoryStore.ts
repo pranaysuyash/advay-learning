@@ -1,8 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getItem, rollDropsFromTable, type CollectibleItem } from '../data/collectibles';
+import {
+  getItem,
+  getDeterministicCoreDrop,
+  maybeGetDeterministicBonusDrop,
+  rollDropsFromTable,
+  REWARD_MODEL_CONFIG,
+  type CollectibleItem,
+} from '../data/collectibles';
 import { RECIPES_BY_ID, findCraftableRecipes, type Recipe } from '../data/recipes';
-import { getDropTable, getRegistryEasterEggById } from '../data/gameRegistry';
+import { getDropTable, getRegistryEasterEggById, getRegistryEasterEggs } from '../data/gameRegistry';
 
 
 export interface OwnedItem {
@@ -25,11 +32,29 @@ export interface ItemDrop {
   isNew: boolean; // first time finding this item
 }
 
+export type AgeBand = '2-5' | '6-9';
+
+export interface EggHintState {
+  stage: 0 | 1 | 2 | 3;
+  sessionsSinceSeen: number;
+}
+
+export interface EggHintView {
+  eggId: string;
+  rewardItemId: string;
+  discovered: boolean;
+  stage: 0 | 1 | 2 | 3;
+  title: string;
+  hintText: string;
+}
+
 interface InventoryState {
   ownedItems: Record<string, OwnedItem>;
   discoveredRecipes: string[];
   foundEasterEggs: string[];
+  eggHintState: Record<string, EggHintState>;
   totalDiscoveries: number;
+  gameCompletions: Record<string, number>;
   lastDrops: ItemDrop[]; // most recent drops for toast display
   showDropToast: boolean;
 
@@ -41,7 +66,10 @@ interface InventoryState {
   getOwnedItem: (itemId: string) => OwnedItem | undefined;
 
   // Game completion: roll drops + add items
-  processGameCompletion: (gameId: string, score?: number) => ItemDrop[];
+  processGameCompletion: (
+    gameId: string,
+    params?: { score?: number; profileAge?: number; enableOlderBonus?: boolean }
+  ) => ItemDrop[];
 
   // Crafting
   craft: (recipeId: string) => CraftResult;
@@ -50,6 +78,9 @@ interface InventoryState {
   // Easter eggs
   findEasterEgg: (eggId: string) => ItemDrop | null;
   hasFoundEasterEgg: (eggId: string) => boolean;
+  recordEggSession: (gameId: string) => void;
+  getEggHints: (gameId: string, ageBand: AgeBand) => EggHintView[];
+  advanceEggHint: (eggId: string) => void;
 
   // UI state
   clearDropToast: () => void;
@@ -69,7 +100,9 @@ export const useInventoryStore = create<InventoryState>()(
       ownedItems: {},
       discoveredRecipes: [],
       foundEasterEggs: [],
+      eggHintState: {},
       totalDiscoveries: 0,
+      gameCompletions: {},
       lastDrops: [],
       showDropToast: false,
 
@@ -131,13 +164,33 @@ export const useInventoryStore = create<InventoryState>()(
         return get().ownedItems[itemId];
       },
 
-      processGameCompletion: (gameId, score) => {
+      processGameCompletion: (gameId, params) => {
+        const { score, profileAge, enableOlderBonus } = params ?? {};
         const dropTable = getDropTable(gameId);
-        const droppedIds = rollDropsFromTable(dropTable, score);
-        if (droppedIds.length === 0) return [];
+        const state = get();
+        const completionCount = (state.gameCompletions[gameId] ?? 0) + 1;
+        const droppedIds: string[] = [];
+
+        if (REWARD_MODEL_CONFIG.deterministicCore) {
+          const coreId = getDeterministicCoreDrop(dropTable, {
+            gameId,
+            completionCount,
+            score,
+          });
+          if (coreId) droppedIds.push(coreId);
+
+          const bonusId = maybeGetDeterministicBonusDrop(
+            dropTable,
+            { gameId, completionCount, score },
+            profileAge,
+            enableOlderBonus
+          );
+          if (bonusId) droppedIds.push(bonusId);
+        } else {
+          droppedIds.push(...rollDropsFromTable(dropTable, score));
+        }
 
         const drops: ItemDrop[] = [];
-        const state = get();
 
         for (const itemId of droppedIds) {
           const item = getItem(itemId);
@@ -149,11 +202,22 @@ export const useInventoryStore = create<InventoryState>()(
         }
 
         if (drops.length > 0) {
-          set({
+          set((s) => ({
             lastDrops: drops,
             showDropToast: true,
-            totalDiscoveries: get().totalDiscoveries + drops.filter((d) => d.isNew).length,
-          });
+            totalDiscoveries: s.totalDiscoveries + drops.filter((d) => d.isNew).length,
+            gameCompletions: {
+              ...s.gameCompletions,
+              [gameId]: completionCount,
+            },
+          }));
+        } else {
+          set((s) => ({
+            gameCompletions: {
+              ...s.gameCompletions,
+              [gameId]: completionCount,
+            },
+          }));
         }
 
         return drops;
@@ -223,6 +287,10 @@ export const useInventoryStore = create<InventoryState>()(
 
         set((s) => ({
           foundEasterEggs: [...s.foundEasterEggs, eggId],
+          eggHintState: {
+            ...s.eggHintState,
+            [eggId]: { stage: 3, sessionsSinceSeen: 0 },
+          },
           totalDiscoveries: s.totalDiscoveries + 1,
           lastDrops: [{ item, isNew }],
           showDropToast: true,
@@ -233,6 +301,76 @@ export const useInventoryStore = create<InventoryState>()(
 
       hasFoundEasterEgg: (eggId) => {
         return get().foundEasterEggs.includes(eggId);
+      },
+
+      recordEggSession: (gameId) => {
+        const eggs = getRegistryEasterEggs(gameId);
+        if (eggs.length === 0) return;
+
+        set((state) => {
+          const next = { ...state.eggHintState };
+
+          for (const egg of eggs) {
+            if (state.foundEasterEggs.includes(egg.id)) continue;
+
+            const prev = next[egg.id] ?? { stage: 0 as const, sessionsSinceSeen: 0 };
+            const sessionsSinceSeen = prev.sessionsSinceSeen + 1;
+            let stage: 0 | 1 | 2 | 3 = prev.stage;
+            if (sessionsSinceSeen >= 9) stage = 3;
+            else if (sessionsSinceSeen >= 6) stage = 2;
+            else if (sessionsSinceSeen >= 3) stage = 1;
+
+            next[egg.id] = { stage, sessionsSinceSeen };
+          }
+
+          return { eggHintState: next };
+        });
+      },
+
+      getEggHints: (gameId, ageBand) => {
+        const state = get();
+        const eggs = getRegistryEasterEggs(gameId);
+
+        return eggs.map((egg) => {
+          const discovered = state.foundEasterEggs.includes(egg.id);
+          const eggState = state.eggHintState[egg.id] ?? { stage: 0 as const, sessionsSinceSeen: 0 };
+          const stage: 0 | 1 | 2 | 3 = discovered ? 3 : eggState.stage;
+
+          let hintText = 'Keep exploring this game.';
+          if (stage === 1) hintText = 'A subtle sparkle appears somewhere in this game.';
+          if (stage === 2) hintText = 'Pip notices a hidden secret nearby.';
+          if (stage === 3) {
+            hintText = ageBand === '6-9'
+              ? egg.hint
+              : 'A big secret is nearby. Keep tapping and exploring!';
+          }
+          if (discovered) hintText = 'Found! Great discovery.';
+
+          return {
+            eggId: egg.id,
+            rewardItemId: egg.reward.itemId,
+            discovered,
+            stage,
+            title: discovered || ageBand === '6-9' ? egg.name : 'Hidden Surprise',
+            hintText,
+          };
+        });
+      },
+
+      advanceEggHint: (eggId) => {
+        set((state) => {
+          const current = state.eggHintState[eggId] ?? { stage: 0 as const, sessionsSinceSeen: 0 };
+          const stage = Math.min(3, current.stage + 1) as 0 | 1 | 2 | 3;
+          return {
+            eggHintState: {
+              ...state.eggHintState,
+              [eggId]: {
+                stage,
+                sessionsSinceSeen: current.sessionsSinceSeen,
+              },
+            },
+          };
+        });
       },
 
       clearDropToast: () => {
@@ -266,7 +404,9 @@ export const useInventoryStore = create<InventoryState>()(
           ownedItems: {},
           discoveredRecipes: [],
           foundEasterEggs: [],
+          eggHintState: {},
           totalDiscoveries: 0,
+          gameCompletions: {},
           lastDrops: [],
           showDropToast: false,
         });
@@ -278,7 +418,9 @@ export const useInventoryStore = create<InventoryState>()(
         ownedItems: state.ownedItems,
         discoveredRecipes: state.discoveredRecipes,
         foundEasterEggs: state.foundEasterEggs,
+        eggHintState: state.eggHintState,
         totalDiscoveries: state.totalDiscoveries,
+        gameCompletions: state.gameCompletions,
       }),
     }
   )

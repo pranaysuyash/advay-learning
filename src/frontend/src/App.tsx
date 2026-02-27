@@ -107,6 +107,11 @@ const YogaAnimals = lazy(() =>
     default: module.YogaAnimals,
   })),
 );
+const BalloonPopFitness = lazy(() =>
+  import('./pages/BalloonPopFitness').then((module) => ({
+    default: module.BalloonPopFitness,
+  })),
+);
 const FreezeDance = lazy(() =>
   import('./pages/FreezeDance').then((module) => ({
     default: module.FreezeDance,
@@ -166,6 +171,71 @@ const MirrorDraw = lazy(() =>
 const PhonicsSounds = lazy(() =>
   import('./pages/PhonicsSounds').then((module) => ({
     default: module.PhonicsSounds,
+  })),
+);
+const PhonicsTracing = lazy(() =>
+  import('./pages/PhonicsTracing').then((module) => ({
+    default: module.PhonicsTracing,
+  })),
+);
+const BeginningSounds = lazy(() =>
+  import('./pages/BeginningSounds').then((module) => ({
+    default: module.BeginningSounds,
+  })),
+);
+const OddOneOut = lazy(() =>
+  import('./pages/OddOneOut').then((module) => ({
+    default: module.OddOneOut,
+  })),
+);
+const ShadowPuppetTheater = lazy(() =>
+  import('./pages/ShadowPuppetTheater').then((module) => ({
+    default: module.ShadowPuppetTheater,
+  })),
+);
+const VirtualBubbles = lazy(() =>
+  import('./pages/VirtualBubbles').then((module) => ({
+    default: module.VirtualBubbles,
+  })),
+);
+const KaleidoscopeHands = lazy(() =>
+  import('./pages/KaleidoscopeHands').then((module) => ({
+    default: module.KaleidoscopeHands,
+  })),
+);
+const AirGuitarHero = lazy(() =>
+  import('./pages/AirGuitarHero').then((module) => ({
+    default: module.AirGuitarHero,
+  })),
+);
+const FruitNinjaAir = lazy(() =>
+  import('./pages/FruitNinjaAir').then((module) => ({
+    default: module.FruitNinjaAir,
+  })),
+);
+const CountingObjects = lazy(() =>
+  import('./pages/CountingObjects').then((module) => ({
+    default: module.CountingObjects,
+  })),
+);
+const MoreOrLess = lazy(() =>
+  import('./pages/MoreOrLess').then((module) => ({
+    default: module.MoreOrLess,
+  })),
+);
+const BlendBuilder = lazy(() =>
+  import('./pages/BlendBuilder').then((module) => ({
+    default: module.BlendBuilder,
+  })),
+);
+const SyllableClap = lazy(() =>
+  import('./pages/SyllableClap').then((module) => ({
+    default: module.SyllableClap,
+  })),
+);
+const SightWordFlash = lazy(() =>
+  import('./pages/SightWordFlash').then((module) => ({
+    default: module.SightWordFlash,
   })),
 );
 const BubblePopSymphony = lazy(() =>
@@ -448,6 +518,14 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/balloon-pop-fitness'
+                  element={
+                    <ProtectedRoute>
+                      <BalloonPopFitness />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/freeze-dance'
                   element={
                     <ProtectedRoute>
@@ -522,6 +600,122 @@ function App() {
                       <CameraSafeRoute gameName='Phonics Sounds'>
                         <PhonicsSounds />
                       </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/phonics-tracing'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Phonics Tracing'>
+                        <PhonicsTracing />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/beginning-sounds'
+                  element={
+                    <ProtectedRoute>
+                      <BeginningSounds />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/odd-one-out'
+                  element={
+                    <ProtectedRoute>
+                      <OddOneOut />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/shadow-puppet-theater'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Shadow Puppet Theater'>
+                        <ShadowPuppetTheater />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/virtual-bubbles'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Virtual Bubbles'>
+                        <VirtualBubbles />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/kaleidoscope-hands'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Kaleidoscope Hands'>
+                        <KaleidoscopeHands />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/air-guitar-hero'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Air Guitar Hero'>
+                        <AirGuitarHero />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/fruit-ninja-air'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Fruit Ninja Air'>
+                        <FruitNinjaAir />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/counting-objects'
+                  element={
+                    <ProtectedRoute>
+                      <CountingObjects />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/more-or-less'
+                  element={
+                    <ProtectedRoute>
+                      <MoreOrLess />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/blend-builder'
+                  element={
+                    <ProtectedRoute>
+                      <BlendBuilder />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/syllable-clap'
+                  element={
+                    <ProtectedRoute>
+                      <SyllableClap />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/sight-word-flash'
+                  element={
+                    <ProtectedRoute>
+                      <SightWordFlash />
                     </ProtectedRoute>
                   }
                 />
@@ -607,7 +801,9 @@ function App() {
                   path='/games/rhyme-time'
                   element={
                     <ProtectedRoute>
-                      <RhymeTime />
+                      <CameraSafeRoute gameName='Rhyme Time'>
+                        <RhymeTime />
+                      </CameraSafeRoute>
                     </ProtectedRoute>
                   }
                 />

@@ -17,7 +17,7 @@ NON-NEGOTIABLES
 
 PROMPT MAINTENANCE (NON-NEGOTIABLE)
 
-- If you change this prompt's scope or output expectations, update BOTH `prompts/audit/master-audit-agent-v1.0.md` and its entry in `prompts/README.md` together, and record the revision in `docs/WORKLOG_TICKETS.md` with a new ticket.
+- If you change this prompt's scope or output expectations, update BOTH `prompts/audit/master-audit-agent-v1.0.md` and its entry in `prompts/README.md` together, and record the revision in `docs/WORKLOG_ADDENDUM_*.md` with a new ticket.
 
 INPUTS YOU WILL RECEIVE
 

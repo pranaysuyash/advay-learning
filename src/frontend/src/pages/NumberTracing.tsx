@@ -145,6 +145,7 @@ export function NumberTracing() {
       level={currentDigit + 1}
       onHome={() => navigate('/games')}
       showScore
+      reportSession={false}
     >
       <div className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-5xl mx-auto space-y-4'>

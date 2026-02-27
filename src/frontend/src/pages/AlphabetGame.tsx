@@ -22,6 +22,7 @@ import {
 import type { Profile } from '../store';
 import { Mascot } from '../components/Mascot';
 import { progressQueue } from '../services/progressQueue';
+import { recordProgressActivity } from '../services/progressTracking';
 import { getAllIcons } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
@@ -34,6 +35,7 @@ import CameraRecoveryModal from '../components/CameraRecoveryModal';
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { HandTutorialOverlay } from '../components/game/AnimatedHand';
+import { GamePauseModal } from '../components/game/GamePauseModal';
 import { LoadingState } from '../components/LoadingState';
 import useInactivityDetector from '../hooks/useInactivityDetector';
 import { usePostureDetection } from '../hooks/usePostureDetection';
@@ -56,10 +58,7 @@ import {
   addBreakPoint,
   shouldAddPoint,
 } from '../utils/drawing';
-import {
-  detectPinch,
-  createDefaultPinchState,
-} from '../utils/pinchDetection';
+import { detectPinch, createDefaultPinchState } from '../utils/pinchDetection';
 import type { PinchState, Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
@@ -105,15 +104,20 @@ const LANGUAGES = [
 export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const settings = useSettingsStore();
+  const showHints = useSettingsStore((state) => state.showHints);
+  const difficulty = useSettingsStore((state) => state.difficulty);
+  const gameLanguageSetting = useSettingsStore((state) => state.gameLanguage);
   useAuthStore();
-  const markLetterAttempt = useProgressStore((state) => state.markLetterAttempt);
+  const markLetterAttempt = useProgressStore(
+    (state) => state.markLetterAttempt,
+  );
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafIdRef = useRef<number | null>(null);
   const lastDrawPointRef = useRef<{ x: number; y: number } | null>(null);
   const drawnPointsRef = useRef<Array<{ x: number; y: number }>>([]);
+  const letterAttemptCountsRef = useRef<Record<string, number>>({});
   const pointerDownRef = useRef(false);
   const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const smoothedTipRef = useRef<Point | null>(null);
@@ -123,7 +127,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const latestTrackingFrameRef = useRef<TrackedHandFrame | null>(null);
 
   // Sound effects and phonics hooks
-  const { playFanfare: playCelebration, playPop, playError, playClick } = useAudio();
+  const {
+    playFanfare: playCelebration,
+    playPop,
+    playError,
+    playClick,
+  } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('alphabet-tracing');
   const { speakWordExample } = usePhonics();
@@ -193,7 +202,10 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         setUseMouseMode(true);
         setIsPlaying(true);
         if (cameraPermissionError) {
-          warnAlphabetGame('Camera permission denied in start flow', cameraPermissionError);
+          warnAlphabetGame(
+            'Camera permission denied in start flow',
+            cameraPermissionError,
+          );
         }
         setFeedback("Let's use your finger to draw! 👆");
         return;
@@ -317,27 +329,36 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     [],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
-    useGameHandTracking({
-      gameName: 'AlphabetGame',
-      webcamRef,
-      handTracking: {
-        numHands: 2,
-        minDetectionConfidence: HAND_TRACKING_CONFIDENCE,
-        minHandPresenceConfidence: HAND_TRACKING_CONFIDENCE,
-        minTrackingConfidence: HAND_TRACKING_CONFIDENCE,
-        delegate: 'GPU',
-        enableFallback: true,
-      },
-      isRunning: isPlaying && !isPaused && !useMouseMode,
-      onFrame: handleTrackingFrame,
-      onNoVideoFrame: () => {
-        latestTrackingFrameRef.current = null;
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'AlphabetGame',
+    webcamRef,
+    handTracking: {
+      numHands: 2,
+      minDetectionConfidence: HAND_TRACKING_CONFIDENCE,
+      minHandPresenceConfidence: HAND_TRACKING_CONFIDENCE,
+      minTrackingConfidence: HAND_TRACKING_CONFIDENCE,
+      delegate: 'GPU',
+      enableFallback: true,
+    },
+    isRunning: isPlaying && !isPaused && !useMouseMode,
+    onFrame: handleTrackingFrame,
+    onNoVideoFrame: () => {
+      latestTrackingFrameRef.current = null;
+    },
+  });
 
   useEffect(() => {
-    if (isPlaying && !isPaused && !useMouseMode && !isHandTrackingReady && !isModelLoading) {
+    if (
+      isPlaying &&
+      !isPaused &&
+      !useMouseMode &&
+      !isHandTrackingReady &&
+      !isModelLoading
+    ) {
       void startTracking();
     }
   }, [
@@ -350,11 +371,54 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   ]);
 
   const checkProgress = async () => {
+    const buildLetterTracingContentId = (
+      languageCode: string,
+      letterChar: string,
+    ) => {
+      const codepoints = Array.from(letterChar)
+        .map((char) => char.codePointAt(0)?.toString(16))
+        .filter(Boolean)
+        .join('-');
+      return `letter-${languageCode}-${codepoints || 'unknown'}`;
+    };
+
+    const featureFlag = import.meta.env.VITE_FEATURE_LETTER_TRACING_EVENTS;
+    const isLetterTracingSyncEnabled =
+      featureFlag === undefined || featureFlag !== 'false';
+    const attemptKey = `${selectedLanguage}:${currentLetter.char}`;
+    const attemptCount = (letterAttemptCountsRef.current[attemptKey] ?? 0) + 1;
+    letterAttemptCountsRef.current[attemptKey] = attemptCount;
+    const eventContentId = buildLetterTracingContentId(
+      selectedLanguage,
+      currentLetter.char,
+    );
+
     // Minimal, deterministic scoring: ensures the core tracking UX is testable.
     const points = drawnPointsRef.current.length;
     if (points < MIN_DRAW_POINTS_FOR_CHECK) {
       setAccuracy(MIN_FEEDBACK_ACCURACY);
-      markLetterAttempt(selectedLanguage, currentLetter.char, MIN_FEEDBACK_ACCURACY);
+      markLetterAttempt(
+        selectedLanguage,
+        currentLetter.char,
+        MIN_FEEDBACK_ACCURACY,
+      );
+      if (isLetterTracingSyncEnabled && resolvedProfileId) {
+        void recordProgressActivity({
+          profileId: resolvedProfileId,
+          activityType: 'letter_tracing',
+          contentId: eventContentId,
+          score: MIN_FEEDBACK_ACCURACY,
+          metaData: {
+            language: selectedLanguage,
+            letter: currentLetter.char,
+            letter_name: currentLetter.name,
+            attempt_count: attemptCount,
+            points_drawn: points,
+            check_outcome: 'too_few_points',
+          },
+          completed: false,
+        });
+      }
       setFeedback('Draw more of the letter first! ✏️');
       setStreak(0);
       try {
@@ -372,6 +436,24 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     );
     setAccuracy(nextAccuracy);
     markLetterAttempt(selectedLanguage, currentLetter.char, nextAccuracy);
+
+    // Sync to server for parent dashboard visibility (behind feature flag)
+    if (isLetterTracingSyncEnabled && resolvedProfileId) {
+      void recordProgressActivity({
+        profileId: resolvedProfileId,
+        activityType: 'letter_tracing',
+        contentId: eventContentId,
+        score: nextAccuracy,
+        metaData: {
+          language: selectedLanguage,
+          letter: currentLetter.char,
+          letter_name: currentLetter.name,
+          attempt_count: attemptCount,
+          points_drawn: points,
+        },
+        completed: nextAccuracy >= ACCURACY_SUCCESS_THRESHOLD,
+      });
+    }
 
     if (nextAccuracy >= ACCURACY_SUCCESS_THRESHOLD) {
       // Ensure only one overlay is visible at a time (simplified overlay stack)
@@ -500,13 +582,11 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const profileId = (location.state as any)?.profileId as string | undefined;
 
   // Get profile for display (name, etc.) - NOT for language
-  const {
-    profiles,
-    currentProfile,
-    isLoading: isProfilesLoading,
-    fetchProfiles,
-    error: profilesError,
-  } = useProfileStore();
+  const profiles = useProfileStore((state) => state.profiles);
+  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const isProfilesLoading = useProfileStore((state) => state.isLoading);
+  const fetchProfiles = useProfileStore((state) => state.fetchProfiles);
+  const profilesError = useProfileStore((state) => state.error);
 
   // Single, stable initialization effect for profiles
   const hasFetchedRef = useRef(false);
@@ -528,7 +608,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   // Game language is determined by profile's preferred_language
   // This ensures consistency across the app
   const defaultLanguage =
-    profile?.preferred_language || settings.gameLanguage || 'en';
+    profile?.preferred_language || gameLanguageSetting || 'en';
 
   // Language selection - user can switch anytime
   const [selectedLanguage, setSelectedLanguage] =
@@ -585,11 +665,20 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     handleWellnessReminderPostpone();
   };
 
-  const LETTERS = useMemo(() => getLettersForGame(selectedLanguage), [selectedLanguage]);
+  const LETTERS = useMemo(
+    () => getLettersForGame(selectedLanguage),
+    [selectedLanguage],
+  );
   const [currentLetterIndex, setCurrentLetterIndex] = useState<number>(0);
   const currentLetter = useMemo(
     () => LETTERS[currentLetterIndex] ?? LETTERS[0],
     [LETTERS, currentLetterIndex],
+  );
+  const selectedLanguageName = useMemo(
+    () =>
+      LANGUAGES.find((language) => language.code === selectedLanguage)?.name ??
+      'English',
+    [selectedLanguage],
   );
   const [pendingCount, setPendingCount] = useState<number>(0);
   const accuracyColorClass = useMemo(
@@ -814,7 +903,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw hint with better visibility
-      if (settings.showHints) {
+      if (showHints) {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         ctx.shadowBlur = 4;
         drawLetterHint(ctx, currentLetter.char, canvas.width, canvas.height);
@@ -964,7 +1053,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     isPaused,
     currentLetter.char,
     currentLetter.color,
-    settings.showHints,
+    showHints,
     useMouseMode,
   ]);
 
@@ -1024,9 +1113,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-            Math.pow(point.y / canvas.height - lastPoint.y, 2),
-          )
+              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+                Math.pow(point.y / canvas.height - lastPoint.y, 2),
+            )
           : Infinity;
 
       if (dist > POINT_MIN_DISTANCE) {
@@ -1137,9 +1226,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
           <div className='text-center max-w-md'>
             <div className='text-6xl mb-4'>⚠️</div>
             <h2 className='text-2xl font-bold mb-2'>Unable to Load Profile</h2>
-            <p className='text-text-secondary mb-6'>
-              {profilesError}
-            </p>
+            <p className='text-text-secondary mb-6'>{profilesError}</p>
             <div className='space-y-3'>
               <button
                 type='button'
@@ -1192,7 +1279,8 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
             <div className='text-5xl mb-4 font-bold text-blue-500'>Aa</div>
             <h2 className='text-2xl font-bold mb-2'>Ready to Learn!</h2>
             <p className='text-text-secondary mb-6'>
-              Create a profile to save your progress, or start playing right away!
+              Create a profile to save your progress, or start playing right
+              away!
             </p>
             <div className='space-y-3'>
               <button
@@ -1263,6 +1351,55 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     showCameraErrorModal,
     isPaused,
   });
+  const handleCameraPermissionChange = useCallback(
+    (state: 'granted' | 'denied' | 'prompt') => {
+      setCameraPermission(state);
+      if (state === 'denied') {
+        setShowPermissionWarning(true);
+        setUseMouseMode(true);
+        setFeedback("Let's use your finger to draw! 👆");
+      } else {
+        setShowPermissionWarning(false);
+      }
+    },
+    [],
+  );
+  const mascotState = useMemo(() => {
+    if (feedback?.includes('Great') || feedback?.includes('Amazing')) {
+      return 'happy' as const;
+    }
+    if (isDrawing) {
+      return 'waiting' as const;
+    }
+    return 'idle' as const;
+  }, [feedback, isDrawing]);
+  const mascotMessage = useMemo(
+    () => feedback || (isDrawing ? 'Keep going!' : 'Trace the letter!'),
+    [feedback, isDrawing],
+  );
+  const wellnessAlerts = useMemo(() => {
+    if (!wellnessReminderType) {
+      return [];
+    }
+    return [
+      {
+        id: '1',
+        type: wellnessReminderType as any,
+        message:
+          wellnessReminderType === 'break'
+            ? 'Time for a break! Rest your eyes and stretch.'
+            : wellnessReminderType === 'water'
+              ? hydrationReminderCount > 1
+                ? `Time for a drink of water! (You've had ${hydrationReminderCount} water reminders.)`
+                : 'Time for a drink of water!'
+              : wellnessReminderType === 'stretch'
+                ? 'Time to stretch your body!'
+                : 'Are you still there?',
+        timestamp: Date.now(),
+        acknowledged: false,
+      },
+    ];
+  }, [hydrationReminderCount, wellnessReminderType]);
 
   return (
     <>
@@ -1281,7 +1418,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       {/* Game Area - Full Screen Mode */}
       {isPlaying ? (
         <GameContainer
-          title={`${LANGUAGES.find((l) => l.code === selectedLanguage)?.name} Alphabet`}
+          title={`${selectedLanguageName} Alphabet`}
           score={score}
           level={currentLetterIndex + 1}
           onHome={() => setShowExitModal(true)}
@@ -1320,16 +1457,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
               highContrast={highContrast}
               variant='hero'
               className='w-full h-full'
-              onCameraPermission={(state: 'granted' | 'denied' | 'prompt') => {
-                setCameraPermission(state);
-                if (state === 'denied') {
-                  setShowPermissionWarning(true);
-                  setUseMouseMode(true);
-                  setFeedback("Let's use your finger to draw! 👆");
-                } else {
-                  setShowPermissionWarning(false);
-                }
-              }}
+              onCameraPermission={handleCameraPermissionChange}
               onCameraError={handleCameraError}
               canvasEvents={{
                 onPointerDown: handleCanvasPointerDown,
@@ -1396,12 +1524,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                         {currentLetter.icon && (
                           <span className='inline-block w-12 h-12 mt-1'>
                             <img
-                              src={Array.isArray(currentLetter.icon) ? currentLetter.icon[0] : currentLetter.icon}
+                              src={
+                                Array.isArray(currentLetter.icon)
+                                  ? currentLetter.icon[0]
+                                  : currentLetter.icon
+                              }
                               alt={currentLetter.name}
                               className='w-full h-full object-contain drop-shadow-[0_4px_0_#E5B86E]'
                               onError={(e) => {
                                 // Hide broken images gracefully
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).style.display =
+                                  'none';
                               }}
                             />
                           </span>
@@ -1414,23 +1547,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
               {/* In-Game Mascot */}
               <div className='absolute bottom-4 left-4 z-20'>
-                {(() => {
-                  const mascotState =
-                    feedback?.includes('Great') || feedback?.includes('Amazing')
-                      ? 'happy'
-                      : isDrawing
-                        ? 'waiting'
-                        : 'idle';
-                  return (
-                    <Mascot
-                      state={mascotState}
-                      message={
-                        feedback ||
-                        (isDrawing ? 'Keep going!' : 'Trace the letter!')
-                      }
-                    />
-                  );
-                })()}
+                <Mascot state={mascotState} message={mascotMessage} />
               </div>
 
               {/* Standardized Game Controls - Bottom Right */}
@@ -1469,11 +1586,12 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     Streak {streak}
                   </span>
                   <span className='min-w-fit text-slate-400'>
-                    Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1}/{Math.ceil(LETTERS.length / BATCH_SIZE)}
+                    Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1}/
+                    {Math.ceil(LETTERS.length / BATCH_SIZE)}
                   </span>
                   {pendingCount > 0 && (
                     <div className='inline-flex items-center gap-1 bg-amber-50 border-2 border-amber-200 text-amber-600 px-3 py-1 rounded-full text-xs font-black'>
-                      <UIIcon name='warning' size={14} className="pb-0.5" />
+                      <UIIcon name='warning' size={14} className='pb-0.5' />
                       Pending ({pendingCount})
                     </div>
                   )}
@@ -1534,7 +1652,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                     >
                       Tracing Accuracy
                     </label>
-                    <span className={`font-black text-lg ${accuracyColorClass}`}>
+                    <span
+                      className={`font-black text-lg ${accuracyColorClass}`}
+                    >
                       {accuracy}%
                     </span>
                   </div>
@@ -1558,12 +1678,13 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className={`rounded-xl p-4 text-center font-semibold ${feedback?.includes('Great')
-                      ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                      : feedback?.includes('Good')
-                        ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-                        : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                      }`}
+                    className={`rounded-xl p-4 text-center font-semibold ${
+                      feedback?.includes('Great')
+                        ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                        : feedback?.includes('Good')
+                          ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                          : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                    }`}
                   >
                     {feedback}
                   </motion.div>
@@ -1642,12 +1763,15 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                               setSelectedLanguage(lang.code);
                               setCurrentLetterIndex(0);
                             }}
-                            className={`px-6 py-3 rounded-2xl font-extrabold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
-                              ? 'bg-pip-orange text-white shadow-[0_6px_0_#D4561C] relative top-[-6px]'
-                              : 'bg-discovery-cream text-advay-slate border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-4px] hover:bg-white'
-                              }`}
+                            className={`px-6 py-3 rounded-2xl font-extrabold text-lg transition-all transform hover:scale-105 ${
+                              selectedLanguage === lang.code
+                                ? 'bg-pip-orange text-white shadow-[0_6px_0_#D4561C] relative top-[-6px]'
+                                : 'bg-discovery-cream text-advay-slate border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-4px] hover:bg-white'
+                            }`}
                           >
-                            <span className='mr-3 text-xl'><LanguageFlag code={lang.code} /></span>
+                            <span className='mr-3 text-xl'>
+                              <LanguageFlag code={lang.code} />
+                            </span>
                             {lang.name}
                           </button>
                         ))}
@@ -1661,7 +1785,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
                   <div className='text-lg text-text-secondary mb-8'>
                     Difficulty:{' '}
                     <span className='text-text-primary font-bold capitalize'>
-                      {settings.difficulty}
+                      {difficulty}
                     </span>
                   </div>
 
@@ -1703,24 +1827,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       {/* Wellness Reminder */}
       {overlayVisibility.wellnessReminder && wellnessReminderType && (
         <WellnessReminder
-          alerts={[
-            {
-              id: '1',
-              type: wellnessReminderType as any,
-              message:
-                wellnessReminderType === 'break'
-                  ? 'Time for a break! Rest your eyes and stretch.'
-                  : wellnessReminderType === 'water'
-                    ? hydrationReminderCount > 1
-                      ? `Time for a drink of water! (You've had ${hydrationReminderCount} water reminders.)`
-                      : 'Time for a drink of water!'
-                    : wellnessReminderType === 'stretch'
-                      ? 'Time to stretch your body!'
-                      : 'Are you still there?',
-              timestamp: Date.now(),
-              acknowledged: false,
-            },
-          ]}
+          alerts={wellnessAlerts}
           onAcknowledge={() => handleWellnessReminderDismiss()}
           onDismiss={() => handleWellnessReminderDismiss()}
         />
@@ -1728,57 +1835,17 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
 
       {/* Pause Modal */}
       <AnimatePresence>
-        {overlayVisibility.pauseModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4'
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className='bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-3 border-[#F2CC8F]'
-            >
-              <div className='flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-3 border-blue-100'>
-                <Mascot state='waiting' message='Paused! Take a breather.' />
-              </div>
-              <div className='text-center mb-8'>
-                <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-2'>
-                  Game Paused
-                </h2>
-                <p className='text-text-secondary font-bold text-lg'>
-                  Your progress is saved. Ready to continue?
-                </p>
-              </div>
-              <div className='space-y-4'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setIsPaused(false);
-                    setFeedback("Welcome back! Let's draw more letters!");
-                  }}
-                  className='w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 flex items-center justify-center gap-3'
-                >
-                  <UIIcon name='check' size={28} />
-                  Resume Game
-                </button>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setIsPaused(false);
-                    setShowExitModal(true);
-                  }}
-                  className='w-full px-6 py-4 min-h-[64px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3'
-                >
-                  <UIIcon name='home' size={24} />
-                  Exit to Home
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        <GamePauseModal
+          isVisible={overlayVisibility.pauseModal}
+          onResume={() => {
+            setIsPaused(false);
+            setFeedback("Welcome back! Let's draw more letters!");
+          }}
+          onExit={() => {
+            setIsPaused(false);
+            setShowExitModal(true);
+          }}
+        />
       </AnimatePresence>
 
       {/* Camera Error Modal */}

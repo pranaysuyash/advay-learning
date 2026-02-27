@@ -3,12 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FlaskConical, Backpack, Sparkles, BadgeHelp, Lightbulb } from 'lucide-react';
 import { useInventoryStore } from '../store';
+import { useProfileStore } from '../store/profileStore';
 import {
   ALL_ITEMS,
   RARITY_CONFIG,
+  getItem,
   type ItemCategory,
   type CollectibleItem,
 } from '../data/collectibles';
+import { getListedGames } from '../data/gameRegistry';
+import { ItemIcon } from '../components/ui/ItemIcon';
 
 
 const CATEGORY_CONFIG: Record<
@@ -37,15 +41,25 @@ export const Inventory = memo(function Inventory() {
     ownedItems,
     discoveredRecipes,
     foundEasterEggs,
+    getEggHints,
     getUniqueItemCount,
     getTotalItemCount,
   } = useInventoryStore();
+  const profileAge = useProfileStore((s) => s.currentProfile?.age);
 
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory | 'all'>('all');
   const [selectedItem, setSelectedItem] = useState<CollectibleItem | null>(null);
 
   const uniqueCount = getUniqueItemCount();
   const totalCount = getTotalItemCount();
+  const ageBand = profileAge !== undefined && profileAge < 6 ? '2-5' : '6-9';
+  const gamesWithEggs = useMemo(
+    () => getListedGames().filter((game) => game.easterEggs.length > 0),
+    []
+  );
+  const [selectedEggGame, setSelectedEggGame] = useState<string | null>(
+    gamesWithEggs[0]?.id ?? null
+  );
 
   const filteredItems = useMemo(() => {
     const items = selectedCategory === 'all'
@@ -60,6 +74,27 @@ export const Inventory = memo(function Inventory() {
   }, [selectedCategory, ownedItems]);
 
   const discoveredCount = filteredItems.filter((i) => i.discovered).length;
+  const eggProgressByGame = useMemo(
+    () =>
+      gamesWithEggs.map((game) => {
+        const hints = getEggHints(game.id, ageBand);
+        const discovered = hints.filter((hint) => hint.discovered).length;
+        return {
+          gameId: game.id,
+          name: game.name,
+          discovered,
+          total: hints.length,
+          hints,
+        };
+      }),
+    [gamesWithEggs, getEggHints, ageBand]
+  );
+  const activeEggGame = useMemo(
+    () =>
+      eggProgressByGame.find((game) => game.gameId === selectedEggGame) ??
+      eggProgressByGame[0],
+    [eggProgressByGame, selectedEggGame]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 sm:p-8">
@@ -175,6 +210,71 @@ export const Inventory = memo(function Inventory() {
           </div>
         </div>
 
+        {eggProgressByGame.length > 0 && (
+          <div className="bg-white border-3 border-[#F2CC8F] rounded-2xl p-4 mb-6">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h2 className="font-black text-advay-slate text-lg">Easter Egg Discovery</h2>
+              <span className="text-xs font-bold text-text-secondary">
+                Age layer: {ageBand}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+              {eggProgressByGame.map((game) => (
+                <button
+                  key={game.gameId}
+                  onClick={() => setSelectedEggGame(game.gameId)}
+                  className={`px-3 py-2 rounded-xl text-xs font-black border-2 transition ${selectedEggGame === game.gameId ? 'bg-[#3B82F6] text-white border-[#3B82F6]' : 'bg-white text-advay-slate border-[#F2CC8F]'}`}
+                >
+                  {game.name} ({game.discovered}/{game.total})
+                </button>
+              ))}
+            </div>
+
+            {activeEggGame && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {activeEggGame.hints.map((hint) => {
+                  const eggReward = hint.discovered ? getItem(hint.rewardItemId) : null;
+                  const stageDots = [0, 1, 2, 3];
+                  return (
+                    <div
+                      key={hint.eggId}
+                      className={`rounded-2xl border-2 p-3 ${hint.discovered ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-[#F2CC8F]'}`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${hint.discovered ? 'bg-white border-emerald-300' : 'bg-slate-100 border-slate-200'}`}>
+                          {hint.discovered && eggReward ? (
+                            <ItemIcon item={eggReward} size={28} />
+                          ) : (
+                            <span className={`${hint.discovered ? '' : 'opacity-60 blur-[1px]'}`}>🥚</span>
+                          )}
+                        </div>
+                        <span className="text-xs font-black text-text-secondary">
+                          S{hint.stage}
+                        </span>
+                      </div>
+                      <p className="text-xs font-black text-advay-slate truncate mb-1">
+                        {hint.title}
+                      </p>
+                      <p className="text-[11px] font-bold text-text-secondary min-h-[2rem]">
+                        {hint.hintText}
+                      </p>
+                      <div className="flex gap-1 mt-2">
+                        {stageDots.map((dot) => (
+                          <span
+                            key={`${hint.eggId}-${dot}`}
+                            className={`w-2 h-2 rounded-full ${dot <= hint.stage ? 'bg-[#3B82F6]' : 'bg-slate-300'}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Item Grid */}
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
           {filteredItems.map((item) => {
@@ -198,7 +298,7 @@ export const Inventory = memo(function Inventory() {
                 }
               >
                 <span className={`text-2xl sm:text-3xl ${!item.discovered ? 'blur-sm' : ''}`}>
-                  {item.discovered ? item.emoji : '❓'}
+                  {item.discovered ? <ItemIcon item={item} size={34} /> : '❓'}
                 </span>
                 <span className="text-[10px] font-bold text-text-secondary truncate w-full text-center px-1">
                   {item.discovered ? item.name : '???'}
@@ -290,7 +390,7 @@ function ItemDetail({
           boxShadow: rarity.glow,
         }}
       >
-        {item.emoji}
+        <ItemIcon item={item} size={72} />
       </motion.div>
 
       <h3 className="text-2xl font-black text-advay-slate mb-1">{item.name}</h3>

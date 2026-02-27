@@ -1,5 +1,6 @@
 // Master catalog of all collectible items in the platform
 // Items are dropped by games, found as easter eggs, or crafted via recipes
+import { getItemIconPath, getVisualTierFromRarity, type VisualTier } from '../utils/itemsManifest';
 
 export type ItemCategory =
   | 'element'
@@ -21,8 +22,10 @@ export interface CollectibleItem {
   id: string;
   name: string;
   emoji: string;
+  icon?: string;
   category: ItemCategory;
   rarity: Rarity;
+  visualTier?: VisualTier;
   description: string;
   funFact?: string;
 }
@@ -174,7 +177,11 @@ export const ALL_ITEMS: CollectibleItem[] = [
   ...TOOLS,
   ...ARTIFACTS,
   ...FOOD,
-];
+].map((item) => ({
+  ...item,
+  icon: getItemIconPath(item.id, item.icon),
+  visualTier: item.visualTier ?? getVisualTierFromRarity(item.rarity),
+}));
 
 export const ITEMS_BY_ID: Record<string, CollectibleItem> = Object.fromEntries(
   ALL_ITEMS.map((item) => [item.id, item])
@@ -200,6 +207,64 @@ export interface DropEntry {
   minScore?: number; // minimum score/accuracy needed
 }
 
+export interface DeterministicDropInput {
+  gameId: string;
+  completionCount: number;
+  score?: number;
+}
+
+export interface RewardModelConfig {
+  deterministicCore: boolean;
+  enableOlderBonus: boolean;
+  olderBonusMinAge: number;
+  olderBonusChance: number;
+}
+
+export const REWARD_MODEL_CONFIG: RewardModelConfig = {
+  deterministicCore: true,
+  enableOlderBonus: false, // default OFF until explicitly enabled
+  olderBonusMinAge: 6,
+  olderBonusChance: 0.1,
+};
+
+function hashSeed(value: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function deterministicIndex(seed: string, modulo: number): number {
+  if (modulo <= 0) return 0;
+  return hashSeed(seed) % modulo;
+}
+
+function normalizeWeight(chance: number): number {
+  if (!Number.isFinite(chance)) return 1;
+  return Math.max(chance, 0.0001);
+}
+
+function weightedDeterministicPick(table: DropEntry[], seed: string): string | null {
+  if (table.length === 0) return null;
+  const totalWeight = table.reduce((sum, entry) => sum + normalizeWeight(entry.chance), 0);
+  if (totalWeight <= 0) return table[deterministicIndex(seed, table.length)]?.itemId ?? null;
+
+  const target = (hashSeed(seed) / 0xffffffff) * totalWeight;
+  let cursor = 0;
+  for (const entry of table) {
+    cursor += normalizeWeight(entry.chance);
+    if (target <= cursor) return entry.itemId;
+  }
+  return table[table.length - 1]?.itemId ?? null;
+}
+
+function withOptionalScoreGate(table: DropEntry[], score?: number): DropEntry[] {
+  if (score === undefined) return table;
+  return table.filter((entry) => entry.minScore === undefined || score >= entry.minScore);
+}
+
 /**
  * Roll drops from a drop table.
  * Pass the table directly (from gameRegistry.getDropTable).
@@ -215,4 +280,41 @@ export function rollDropsFromTable(table: DropEntry[], score?: number): string[]
     }
   }
   return drops;
+}
+
+/**
+ * Deterministic core reward selector.
+ * Guarantees one item when the table has entries by using a stable seeded pick.
+ * Core reward intentionally ignores minScore to avoid silent no-reward outcomes.
+ */
+export function getDeterministicCoreDrop(table: DropEntry[], input: DeterministicDropInput): string | null {
+  if (!table || table.length === 0) return null;
+  const seed = `core:${input.gameId}:${input.completionCount}`;
+  return weightedDeterministicPick(table, seed);
+}
+
+/**
+ * Optional additive bonus reward for older kids.
+ * This never replaces the core reward.
+ */
+export function maybeGetDeterministicBonusDrop(
+  table: DropEntry[],
+  input: DeterministicDropInput,
+  profileAge?: number,
+  enableOlderBonus?: boolean
+): string | null {
+  const bonusEnabled = enableOlderBonus ?? REWARD_MODEL_CONFIG.enableOlderBonus;
+  if (!bonusEnabled) return null;
+  if (profileAge === undefined || profileAge < REWARD_MODEL_CONFIG.olderBonusMinAge) return null;
+  if (!table || table.length === 0) return null;
+
+  const eligible = withOptionalScoreGate(table, input.score);
+  if (eligible.length === 0) return null;
+
+  const triggerSeed = `bonus-trigger:${input.gameId}:${input.completionCount}`;
+  const trigger = hashSeed(triggerSeed) / 0xffffffff;
+  if (trigger >= REWARD_MODEL_CONFIG.olderBonusChance) return null;
+
+  const pickSeed = `bonus-pick:${input.gameId}:${input.completionCount}`;
+  return weightedDeterministicPick(eligible, pickSeed);
 }

@@ -1,17 +1,33 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInventoryStore } from '../../store';
+import { useProfileStore } from '../../store/profileStore';
 import { RARITY_CONFIG } from '../../data/collectibles';
+import { ItemIcon } from '../ui/ItemIcon';
 
 export function ItemDropToast() {
   const { lastDrops, showDropToast, clearDropToast } = useInventoryStore();
+  const profileAge = useProfileStore((s) => s.currentProfile?.age);
+  const showRarityTextForOlder = useProfileStore(
+    (s) =>
+      (s.currentProfile?.settings?.collectibles as { showRarityTextForOlder?: boolean } | undefined)
+        ?.showRarityTextForOlder ?? true
+  );
+  const showTextLayers = profileAge === undefined || profileAge >= 6;
 
   useEffect(() => {
     if (showDropToast && lastDrops.length > 0) {
-      const timer = setTimeout(clearDropToast, 4000);
+      const timer = setTimeout(clearDropToast, 6000);
       return () => clearTimeout(timer);
     }
   }, [showDropToast, lastDrops, clearDropToast]);
+
+  useEffect(() => {
+    if (!showDropToast || lastDrops.length === 0) return;
+    const chime = new Audio('/assets/kenney/platformer/sounds/sfx_gem.ogg');
+    chime.volume = 0.35;
+    void chime.play().catch(() => undefined);
+  }, [showDropToast, lastDrops]);
 
   return (
     <AnimatePresence>
@@ -41,7 +57,7 @@ export function ItemDropToast() {
                       boxShadow: rarity.glow,
                     }}
                   >
-                    {drop.item.emoji}
+                    <ItemIcon item={drop.item} size={36} />
                   </motion.div>
                 );
               })}
@@ -52,24 +68,29 @@ export function ItemDropToast() {
               {lastDrops.length === 1 ? (
                 <>
                   <p className="font-black text-advay-slate text-sm truncate">
-                    {lastDrops[0].isNew ? '🆕 New Discovery!' : 'Found!'}{' '}
-                    {lastDrops[0].item.name}
+                    {showTextLayers
+                      ? `${lastDrops[0].isNew ? '🆕 New Discovery!' : 'Found!'} ${lastDrops[0].item.name}`
+                      : '🎉 You got an item!'}
                   </p>
-                  <p
-                    className="text-xs font-bold uppercase tracking-widest"
-                    style={{ color: RARITY_CONFIG[lastDrops[0].item.rarity].color }}
-                  >
-                    {RARITY_CONFIG[lastDrops[0].item.rarity].label}
-                  </p>
+                  {showTextLayers && showRarityTextForOlder && (
+                    <p
+                      className="text-xs font-bold uppercase tracking-widest"
+                      style={{ color: RARITY_CONFIG[lastDrops[0].item.rarity].color }}
+                    >
+                      {RARITY_CONFIG[lastDrops[0].item.rarity].label}
+                    </p>
+                  )}
                 </>
               ) : (
                 <>
                   <p className="font-black text-advay-slate text-sm">
-                    Found {lastDrops.length} items!
+                    {showTextLayers ? `Found ${lastDrops.length} items!` : '🎉 More goodies!'}
                   </p>
-                  <p className="text-xs font-bold text-text-secondary truncate">
-                    {lastDrops.map((d) => d.item.name).join(', ')}
-                  </p>
+                  {showTextLayers && (
+                    <p className="text-xs font-bold text-text-secondary truncate">
+                      {lastDrops.map((d) => d.item.name).join(', ')}
+                    </p>
+                  )}
                 </>
               )}
             </div>

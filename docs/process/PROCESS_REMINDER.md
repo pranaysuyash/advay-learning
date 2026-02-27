@@ -1,13 +1,13 @@
 # Process Reminder (Run Before Work)
 
-**Single source of truth**: `docs/WORKLOG_TICKETS.md`  
+**Single source of truth**: `docs/WORKLOG_ADDENDUM_*.md`  
 **Do first**: `prompts/workflow/pre-flight-check-v1.0.md`
 
 ## Must Do (in order)
 
 1. Read `AGENTS.md`.
 2. Run `prompts/workflow/agent-entrypoint-v1.0.md`.
-3. Create/confirm ticket in `docs/WORKLOG_TICKETS.md` (append-only, unique ID).
+3. Create/confirm ticket in `docs/WORKLOG_ADDENDUM_*.md` (append-only, unique ID).
 4. Plan with the right prompt (e.g., `prompts/planning/implementation-planning-v1.0.md`) before coding.
 5. Code within the scope contract (one scope only).
 6. Verify and clean: `prompts/workflow/pre-merge-clean-room-check-v1.0.md`.

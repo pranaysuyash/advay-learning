@@ -111,6 +111,7 @@ export function ColorByNumber() {
         level={unlockedLevel + 1}
         showScore
         onHome={() => navigate('/games')}
+        reportSession={false}
       >
         <div className='h-full overflow-auto p-4 md:p-6'>
           <div className='max-w-5xl mx-auto space-y-5'>
@@ -174,6 +175,7 @@ export function ColorByNumber() {
       level={templateIndex + 1}
       showScore
       onHome={() => navigate('/games')}
+      reportSession={false}
     >
       <div className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-6xl mx-auto space-y-4 md:space-y-6'>

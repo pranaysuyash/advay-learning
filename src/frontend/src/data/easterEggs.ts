@@ -1,5 +1,9 @@
 // Easter egg definitions — hidden discoverable items within games.
 // Each egg has a trigger condition and a reward.
+//
+// DEPRECATED RUNTIME SOURCE:
+// Keep this file for historical/reference compatibility only.
+// Runtime lookups should use registry-based helpers in `data/gameRegistry.ts`.
 
 export interface EasterEgg {
   id: string;

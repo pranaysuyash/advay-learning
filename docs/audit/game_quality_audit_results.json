@@ -1,0 +1,1156 @@
+{
+  "timestamp": "2026-02-27T11:52:24.892Z",
+  "summary": {
+    "totalGames": 39,
+    "averageScore": 33.333333333333336,
+    "maxPossibleScore": 100,
+    "criticalGames": 1,
+    "needsImprovement": 9,
+    "topPerformers": 25
+  },
+  "games": [
+    {
+      "file": "PhysicsDemo.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhysicsDemo.tsx",
+      "lineCount": 289,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": false,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 10,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "NumberTracing.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/NumberTracing.tsx",
+      "lineCount": 234,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ColorByNumber.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ColorByNumber.tsx",
+      "lineCount": 374,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "OddOneOut.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/OddOneOut.tsx",
+      "lineCount": 229,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ShadowPuppetTheater.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShadowPuppetTheater.tsx",
+      "lineCount": 222,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "KaleidoscopeHands.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/KaleidoscopeHands.tsx",
+      "lineCount": 214,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "DiscoveryLab.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/DiscoveryLab.tsx",
+      "lineCount": 366,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": true,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": false,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 20,
+      "issues": [],
+      "strengths": [
+        "Tracks progress",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "PhonicsTracing.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhonicsTracing.tsx",
+      "lineCount": 349,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 25,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "BeginningSounds.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BeginningSounds.tsx",
+      "lineCount": 297,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 25,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "BubblePop.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BubblePop.tsx",
+      "lineCount": 404,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 25,
+      "issues": [],
+      "strengths": [
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "YogaAnimals.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/YogaAnimals.tsx",
+      "lineCount": 651,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 28,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 138,
+          "content": "console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);"
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 152,
+          "content": "console.error('Failed to initialize pose landmarker:', err);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "PlatformerRunner.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PlatformerRunner.tsx",
+      "lineCount": 601,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 28,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 146,
+          "content": "console.error(`Failed to load image: ${url}`);"
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 171,
+          "content": "audio.play().catch((e) => console.log('Audio play prevented:', e));"
+        }
+      ],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "VirtualBubbles.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/VirtualBubbles.tsx",
+      "lineCount": 309,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": false,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 28,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 59,
+          "content": "console.log('Mic not available for blow detection');"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "FreeDraw.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/FreeDraw.tsx",
+      "lineCount": 711,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 30,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "LetterHunt.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/LetterHunt.tsx",
+      "lineCount": 708,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "RhymeTime.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/RhymeTime.tsx",
+      "lineCount": 606,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "FingerNumberShow.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/games/FingerNumberShow.tsx",
+      "lineCount": 690,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "NumberTapTrail.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/NumberTapTrail.tsx",
+      "lineCount": 402,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "MathMonsters.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MathMonsters.tsx",
+      "lineCount": 586,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ShapePop.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapePop.tsx",
+      "lineCount": 287,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ShapeSequence.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapeSequence.tsx",
+      "lineCount": 421,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ShapeSafari.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShapeSafari.tsx",
+      "lineCount": 609,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "MemoryMatch.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MemoryMatch.tsx",
+      "lineCount": 507,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "MusicPinchBeat.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MusicPinchBeat.tsx",
+      "lineCount": 282,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "VirtualChemistryLab.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/VirtualChemistryLab.tsx",
+      "lineCount": 666,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "EmojiMatch.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/EmojiMatch.tsx",
+      "lineCount": 760,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "StorySequence.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/StorySequence.tsx",
+      "lineCount": 665,
+      "patterns": {
+        "hasErrorHandling": false,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": false,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 35,
+      "issues": [],
+      "strengths": [
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "SimonSays.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/SimonSays.tsx",
+      "lineCount": 637,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": false,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 38,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 177,
+          "content": "console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);"
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 191,
+          "content": "console.error('Failed to initialize pose landmarker:', err);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "PhonicsSounds.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhonicsSounds.tsx",
+      "lineCount": 587,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 80,
+          "content": "console.error('Failed to preload phonics sounds assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "WordBuilder.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/WordBuilder.tsx",
+      "lineCount": 472,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 92,
+          "content": "console.error('Asset preload failed (non-blocking):', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ColorMatchGarden.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ColorMatchGarden.tsx",
+      "lineCount": 438,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 102,
+          "content": "console.error('Failed to preload color-match assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "ConnectTheDots.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ConnectTheDots.tsx",
+      "lineCount": 865,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 100,
+          "content": "console.warn("
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 127,
+          "content": "console.warn("
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 164,
+          "content": "console.error('Asset preload failed (non-blocking):', error);"
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 228,
+          "content": "console.error('[ConnectTheDots] Hand tracking error:', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "MirrorDraw.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MirrorDraw.tsx",
+      "lineCount": 572,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 81,
+          "content": "console.error('Failed to preload MirrorDraw assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "BubblePopSymphony.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/BubblePopSymphony.tsx",
+      "lineCount": 466,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 158,
+          "content": "console.error('Failed to preload bubble assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "FreezeDance.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/FreezeDance.tsx",
+      "lineCount": 706,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 80,
+          "content": "console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);"
+        },
+        {
+          "type": "CONSOLE_LOG",
+          "line": 94,
+          "content": "console.error('Failed to initialize pose landmarker:', err);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "SteadyHandLab.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/SteadyHandLab.tsx",
+      "lineCount": 386,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 68,
+          "content": "console.error('Asset preload failed (non-blocking):', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "AirCanvas.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/AirCanvas.tsx",
+      "lineCount": 631,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 105,
+          "content": "console.error('Failed to preload Air Canvas assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "DressForWeather.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/DressForWeather.tsx",
+      "lineCount": 663,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": false,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": false,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 43,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 264,
+          "content": "console.error('Failed to preload dress-for-weather assets', error);"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    },
+    {
+      "file": "AlphabetGame.tsx",
+      "path": "/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/AlphabetGame.tsx",
+      "lineCount": 1884,
+      "patterns": {
+        "hasErrorHandling": true,
+        "hasProgressIntegration": true,
+        "hasSubscriptionCheck": false,
+        "hasWellnessFeatures": true,
+        "hasReduceMotion": false,
+        "hasCVHooks": true,
+        "hasAudioFeedback": true,
+        "hasTTS": true,
+        "hasGameDrops": true,
+        "hasErrorBoundary": false,
+        "hasConsoleLog": true,
+        "hasTODO": false,
+        "hasAnyPattern": false
+      },
+      "score": 58,
+      "issues": [
+        {
+          "type": "CONSOLE_LOG",
+          "line": 560,
+          "content": "console.log('[AlphabetGame] Hand tracking became ready during gameplay');"
+        }
+      ],
+      "strengths": [
+        "Has error handling",
+        "Tracks progress",
+        "Computer vision integrated",
+        "Audio feedback"
+      ]
+    }
+  ]
+}

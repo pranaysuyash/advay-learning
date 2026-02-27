@@ -534,6 +534,7 @@ export function PlatformerRunner() {
             onHome={handleExit}
             isHandDetected={isCameraReady}
             isPlaying={gameState === 'PLAYING'}
+            reportSession={false}
         >
             <div className="relative w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-3xl overflow-hidden shrink-0 mt-4 max-h-[70vh]">
 

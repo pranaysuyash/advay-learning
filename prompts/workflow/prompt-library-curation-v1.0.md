@@ -14,7 +14,7 @@
 
 1) **No verbatim imports** from external prompt libraries. Use them only as inspiration for structure and techniques.
 2) **Repo-native conventions**:
-   - Worklog is canonical: `docs/WORKLOG_TICKETS.md` (append-only).
+   - Worklog is canonical: `docs/WORKLOG_ADDENDUM_*.md` (append-only).
    - Evidence-first labels: Observed / Inferred / Unknown.
    - Scope discipline: one work unit per prompt or per change.
 3) **Preservation-first**: improve existing prompts instead of creating parallel versions.

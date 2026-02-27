@@ -19,7 +19,7 @@
 ## Non-Negotiable Rules
 
 1) Worklog is canonical; Issues are mirrors.
-2) Append-only edits to `docs/WORKLOG_TICKETS.md`.
+2) Append-only edits to `docs/WORKLOG_ADDENDUM_*.md`.
 3) Do not create duplicate Issues for the same ticket ID.
 4) If GH auth/repo is unavailable, stop after generating a “ready-to-create” list.
 
@@ -27,7 +27,7 @@
 
 ## Step 1 — Collect Candidate Tickets
 
-From `docs/WORKLOG_TICKETS.md`, list tickets matching the filter:
+From `docs/WORKLOG_ADDENDUM_*.md`, list tickets matching the filter:
 
 - Ticket ID, title
 - Type, priority, status
@@ -36,7 +36,7 @@ From `docs/WORKLOG_TICKETS.md`, list tickets matching the filter:
 Evidence:
 
 ```bash
-rg -n "### TCK-" docs/WORKLOG_TICKETS.md
+rg -n "### TCK-" docs/WORKLOG_*.md
 ```
 
 ---

@@ -119,7 +119,7 @@ git log --all --oneline -- src/frontend/src/components/ParentDashboard.tsx
 git show <commit-hash> --stat
 
 # 2. Search for references (even in comments)
-rg -i "parent.*dashboard" docs/WORKLOG_TICKETS.md
+rg -i "parent.*dashboard" docs/WORKLOG_ADDENDUM_*.md
 grep -r "ParentDashboard" docs/
 
 # 3. Check for feature flags
@@ -402,4 +402,4 @@ Track these to validate the approach:
 
 - `AGENTS.md` - Core agent principles (Preservation First)
 - `docs/process/PROMPT_STYLE_GUIDE.md` - Prompt conventions
-- `docs/WORKLOG_TICKETS.md` - Work tracking
+- `docs/WORKLOG_ADDENDUM_*.md` - Work tracking

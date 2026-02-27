@@ -64,7 +64,7 @@ For each role, list 3–8 tasks:
 
 ### C) Ticket plan (MANDATORY)
 
-Create 3–7 **scoped** tickets to append to `docs/WORKLOG_TICKETS.md`.
+Create 3–7 **scoped** tickets to append to `docs/WORKLOG_ADDENDUM_*.md`.
 Each ticket must:
 
 - name explicit target files

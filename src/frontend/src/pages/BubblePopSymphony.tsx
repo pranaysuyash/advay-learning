@@ -60,7 +60,7 @@ const MUSICAL_NOTES = [
 
 export default function BubblePopSymphony() {
   // Hand tracking with modern hooks
-  const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop-symphony');
+  const { onGameComplete } = useGameDrops('bubble-pop-symphony');
   const { playClick } = useAudio();
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
@@ -338,6 +338,7 @@ export default function BubblePopSymphony() {
         const remaining = prev.filter((bubble) => bubble.id !== target.id);
 
         if (remaining.length === 0) {
+          onGameComplete();
           window.setTimeout(() => {
             setBubbles(createBubbleSet());
             assetLoader.playSound('success', 0.55);
@@ -348,7 +349,7 @@ export default function BubblePopSymphony() {
         return remaining;
       });
     },
-    [playNote, createBubbleSet, speak],
+    [playNote, createBubbleSet, speak, onGameComplete],
   );
 
   const startGame = useCallback(() => {

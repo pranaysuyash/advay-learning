@@ -9,6 +9,25 @@ import {
   StruggleSummary,
 } from '../types/progress';
 
+function getMetaNumber(item: ProgressItem, key: string): number | undefined {
+  const value = item.meta_data?.[key];
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+}
+
+function getMetaString(item: ProgressItem, key: string): string | undefined {
+  const value = item.meta_data?.[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
 /**
  * Calculate unified metrics across all activities
  */
@@ -239,16 +258,24 @@ export function calculateHonestStats(progress: ProgressItem[]) {
       : 0;
 
   // Recent activity sorted by date (not arbitrary slice)
-  const recentActivity = progress
+  const recentActivity = [...progress]
     .sort(
       (a, b) =>
         new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(),
     )
     .slice(0, 10)
     .map((item) => ({
+      letterLabel:
+        getMetaString(item, 'letter') ||
+        getMetaString(item, 'letter_name') ||
+        item.content_id,
       action:
         item.activity_type === 'letter_tracing'
-          ? `Practiced letter ${item.content_id}`
+          ? `Practiced letter ${
+              getMetaString(item, 'letter') ||
+              getMetaString(item, 'letter_name') ||
+              item.content_id
+            }`
           : `Completed ${item.activity_type}`,
       time: new Date(item.completed_at).toLocaleDateString(),
       score: `${Math.round(item.score)}%`,
@@ -434,11 +461,10 @@ export function calculateDailyTimeBreakdown(
  * Medium attention: 3-5 attempts OR 50-70% accuracy
  * Low attention: 2 attempts with good accuracy
  */
-export function analyzeStruggles(
-  progress: ProgressItem[],
-): StruggleSummary {
+export function analyzeStruggles(progress: ProgressItem[]): StruggleSummary {
   const analyzed: StruggleAnalysis[] = progress.map((item) => {
-    const attempts = item.attempt_count ?? 1;
+    const attempts =
+      item.attempt_count ?? getMetaNumber(item, 'attempt_count') ?? 1;
     let attentionLevel: StruggleAnalysis['attentionLevel'] = 'none';
     let reason = '';
 
@@ -477,7 +503,9 @@ export function analyzeStruggles(
 
   const recommendations: string[] = [];
   const highCount = analyzed.filter((a) => a.attentionLevel === 'high').length;
-  const mediumCount = analyzed.filter((a) => a.attentionLevel === 'medium').length;
+  const mediumCount = analyzed.filter(
+    (a) => a.attentionLevel === 'medium',
+  ).length;
 
   if (highCount > 0) {
     recommendations.push(
@@ -490,7 +518,9 @@ export function analyzeStruggles(
     );
   }
   if (highCount === 0 && mediumCount === 0) {
-    recommendations.push('Great progress! No items need special attention right now.');
+    recommendations.push(
+      'Great progress! No items need special attention right now.',
+    );
   }
 
   return {

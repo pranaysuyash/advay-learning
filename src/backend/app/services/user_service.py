@@ -55,10 +55,12 @@ class UserService:
     @staticmethod
     async def get_by_verification_token(db: AsyncSession, token: str) -> Optional[User]:
         """Get user by email verification token."""
+        # DB stores naive timestamps; compare against naive UTC
+        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
         result = await db.execute(
             select(User).where(
                 User.email_verification_token == token,
-                User.email_verification_expires > datetime.now(timezone.utc),
+                User.email_verification_expires > now_naive,
             )
         )
         return result.scalar_one_or_none()

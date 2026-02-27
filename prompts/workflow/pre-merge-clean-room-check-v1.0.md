@@ -16,7 +16,7 @@
 1) **No surprises**: every modified file must be explained by the ticket scope.
 2) **No stray artifacts**: caches/logs/db/temp files must not be committed.
 3) **Evidence-first**: provide command outputs; label Observed / Inferred / Unknown.
-4) **Append-only worklog**: update `docs/WORKLOG_TICKETS.md` with verification evidence.
+4) **Append-only worklog**: update `docs/WORKLOG_ADDENDUM_*.md` with verification evidence.
 
 ---
 
@@ -109,7 +109,7 @@ For each modified file:
 
 ## Step 5 — Completion Report + Worklog Update (Required)
 
-Append to the ticket in `docs/WORKLOG_TICKETS.md`:
+Append to the ticket in `docs/WORKLOG_ADDENDUM_*.md`:
 
 - commands run and raw outputs
 - summary of what changed

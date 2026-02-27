@@ -30,12 +30,13 @@ You are NOT:
 
 1) **Evidence-first**: label non-trivial claims as Observed / Inferred / Unknown.
 2) **Scope discipline**: pick exactly one work type and one scope area.
-3) **Single source of truth**: all work tracking goes in `docs/WORKLOG_TICKETS.md` (append-only).
+3) **Single source of truth**: all work tracking goes in `docs/WORKLOG_ADDENDUM_*.md` (append-only).
 4) **Preservation-first**: do not delete other agents’ work/artifacts unless the user explicitly asks or explicitly approves it (recorded in the active ticket). Prefer archiving + pointer notes.
 5) **Staging policy**: default to `git add -A` (unless the user explicitly requests partial staging).
 
-6) **NEVER create new git branches** unless explicitly asked by the user. Work on `main` (or existing user-created feature branch).
-7) **NEVER delete/revert files with unrecognized changes** - these may be from parallel agents. Preserve all changes you did not create.
+6) **Commit via short-lived PR branch**: local edits can be prepared on `main`, but before commit create/switch to `codex/wip-<ticket-or-scope>`, commit there, open PR to `main`, and merge only after review.
+7) **Direct commits to `main` are blocked by hook policy** unless user explicitly authorizes `ALLOW_MAIN_COMMIT=1` for the current task.
+8) **NEVER delete/revert files with unrecognized changes** - these may be from parallel agents. Preserve all changes you did not create.
 
 ---
 
@@ -100,7 +101,7 @@ If any command fails, record it and downgrade related claims to Unknown.
 
 ### C) Ticket update (MANDATORY)
 
-Append a new ticket to `docs/WORKLOG_TICKETS.md` using the template in:
+Append a new ticket to `docs/WORKLOG_ADDENDUM_*.md` using the template in:
 `prompts/workflow/worklog-v1.0.md`
 
 ### D) Next prompt to run
@@ -113,5 +114,5 @@ State exactly which prompt file should be run next, and with what inputs.
 
 Stop after:
 
-1) Updating `docs/WORKLOG_TICKETS.md`, and
+1) Updating `docs/WORKLOG_ADDENDUM_*.md`, and
 2) Selecting the next prompt + inputs.

@@ -9,6 +9,8 @@ export interface ProgressItem {
   score: number;
   completed?: boolean;
   completed_at: string;
+  duration_seconds?: number;
+  meta_data?: Record<string, unknown>;
   attempt_count?: number; // Number of attempts to complete (undefined = not tracked, assume 1)
 }
 

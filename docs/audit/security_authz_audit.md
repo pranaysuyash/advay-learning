@@ -191,7 +191,7 @@ Some security-specific tests exist but may not be comprehensive.
 
 - For AUTHZ-1: Test token rotation and secure cookie implementation (see `tests/test_security.py::TestAccessTokenRevocation`)
 - For AUTHZ-5: Verify all endpoints have proper authorization (Unit‑2 added `tests/test_security.py::TestAuthorization` for games/admin)
-- For AUTHZ-2: Test rate limiting effectiveness
+- For AUTHZ-2: Test rate limiting effectiveness (endpoints now decorated; smoke test added)
 
 ---
 
@@ -213,7 +213,7 @@ Some security-specific tests exist but may not be comprehensive.
 | AUTHZ-3 (Password Policy) | **CLOSED** | 2026-02-27 | Already implemented - enhanced validation + email check |
 | AUTHZ-4 (Session Management) | **CLOSED** | 2026-02-27 | Already implemented - token revocation on logout |
 | AUTHZ-5 (Authorization Bypass) | **CLOSED** | 2026-02-27 | Already implemented - get_current_user + permissions |
-| AUTHZ-6 (Security Headers) | **CLOSED** | 2026-02-27 | Already implemented - SecurityHeadersMiddleware |
+| AUTHZ-6 (Security Headers) | **CLOSED** | 2026-02-27 | Already implemented - Security headers in main.py (removed redundant middleware file) |
 
 ---
 

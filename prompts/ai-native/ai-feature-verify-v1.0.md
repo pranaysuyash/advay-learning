@@ -283,7 +283,7 @@ cd src/frontend && npm test
 | Architecture changes in `docs/ai-native/ARCHITECTURE.md` | | PASS/FAIL |
 | Safety considerations in `docs/ai-native/SAFETY_GUIDELINES.md` | | PASS/FAIL |
 | Parent controls in `docs/ai-native/PARENT_CONTROLS.md` | | PASS/FAIL |
-| Worklog entry in `docs/WORKLOG_TICKETS.md` | | PASS/FAIL |
+| Worklog entry in `docs/WORKLOG_ADDENDUM_*.md` | | PASS/FAIL |
 
 ---
 

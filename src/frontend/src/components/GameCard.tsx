@@ -9,7 +9,7 @@ interface GameCardProps {
     title: string;
     description: string;
     path: string;
-    icon: IconName;
+    icon: IconName | string;
     ageRange: string;
     category: string;
     difficulty: string;

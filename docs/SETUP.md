@@ -36,6 +36,22 @@ To generate a unique ticket stamp for worklog entries:
 # -> STAMP-20260224T220000Z-codex-ab12
 ```
 
+### Main Branch Commit Guard (Required)
+
+`pre-commit` blocks direct commits on `main` to enforce PR-based review:
+
+- Keep iterating locally as needed.
+- Before commit, switch/create a short-lived branch:
+  - `./scripts/start_wip_branch.sh <ticket-or-scope>`
+  - or `git switch -c codex/wip-<ticket-or-scope>`
+- Commit on that branch, push, and open PR to `main`.
+
+Emergency-only bypass (must be explicitly approved for the current task):
+
+```bash
+ALLOW_MAIN_COMMIT=1 git commit ...
+```
+
 ### Secret Scanning Gate (Required)
 
 Commits and pushes now run `scripts/secret_scan.sh`:

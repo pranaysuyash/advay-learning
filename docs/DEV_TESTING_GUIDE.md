@@ -32,7 +32,7 @@ This short guide explains the recommended local test and visual verification wor
 ## Notes on current repo state
 
 - Root `vitest.config.ts` added to exclude `**/e2e/**` so running `npx vitest --run` at the repo root does not import Playwright tests.
-- Follow-up cleanup ticket created in `docs/WORKLOG_TICKETS.md` to sweep remaining faint border usages and improve visual test coverage.
+- Follow-up cleanup ticket created in `docs/WORKLOG_ADDENDUM_*.md` to sweep remaining faint border usages and improve visual test coverage.
 
 ---
 

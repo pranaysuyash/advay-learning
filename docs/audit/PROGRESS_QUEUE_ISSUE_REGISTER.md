@@ -114,7 +114,7 @@
 | ISSUE-001 | 5 | 4 | 5 | 1 | 5 | 100 | **P0** |
 | ISSUE-002 | 4 | 4 | 5 | 1 | 5 | 80 | **P0** |
 | ISSUE-003 | 5 | 3 | 5 | 3 | 4 | 60 | **P1** |
-| ISSUE-005 | 4 | 3 | 4 | 3 | 4 | 48 | **P1** |
+| ISSUE-005 | 4 | 3 | 4 | 3 | 4 | 48 | **P1** ✅ RESOLVED |
 | ISSUE-007 | 3 | 3 | 4 | 1 | 4 | 48 | **P1** |
 | ISSUE-004 | 3 | 2 | 3 | 3 | 5 | 24 | **P2** |
 | ISSUE-006 | 2 | 4 | 5 | 3 | 4 | 32 | **P2** |
@@ -129,8 +129,8 @@
 - ISSUE-002: Input validation (security/correctness)
 
 **P1 - High (Do Next)**:
-- ISSUE-003: Retry logic (reliability)
-- ISSUE-005: Dead letter queue (visibility)
+- ISSUE-003: Retry logic (reliability) - IN PROGRESS
+- ISSUE-005: Dead letter queue (visibility) - ✅ RESOLVED
 - ISSUE-007: Circuit breaker (protection)
 
 **P2 - Medium (Do Later)**:
@@ -356,4 +356,24 @@ npm test src/services/__tests__/progressQueue.test.ts
 **Goal**: Implement exponential backoff retry and dead letter queue
 **Issues**: ISSUE-003 (retry logic), ISSUE-005 (dead letter queue)
 **Approach**: Add retryCount field, exponential delays, deadLetters array, UI dialog
+
+### 2026-02-27 12:10 IST - ISSUE-005 COMPLETE ✅
+**Files Created/Modified**:
+1. `src/frontend/src/components/ui/DeadLetterDialog.tsx` - New component (148 lines)
+2. `src/frontend/src/pages/Progress.tsx` - Added dead letter indicator and dialog integration
+
+**Changes Made**:
+- ✅ DeadLetterDialog component with retry/delete functionality
+- ✅ Dead letter count indicator in Progress page header
+- ✅ Dialog opens when user clicks "Failed" button
+- ✅ Retry all button to retry all dead letter items
+- ✅ Individual retry and delete buttons per item
+
+**Test Results**:
+- TypeScript type-check: ✅ PASS
+- ESLint: ✅ PASS
+- Progress queue tests: 31 passed
+
+**Issues Resolved**:
+- ISSUE-005: DEAD LETTER QUEUE - ✅ RESOLVED
 

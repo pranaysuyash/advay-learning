@@ -59,7 +59,7 @@ const COLORS = [
 
 export function AirCanvas() {
   const navigate = useNavigate();
-  const { triggerEasterEgg } = useGameDrops('air-canvas');
+  const { onGameComplete, triggerEasterEgg } = useGameDrops('air-canvas');
   const usedColorsRef = useRef<Set<string>>(new Set());
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -330,6 +330,7 @@ export function AirCanvas() {
     if (canvas) {
       const dataUrl = canvas.toDataURL('image/png');
       setSnapshot(dataUrl);
+      onGameComplete(particleCount);
       void playSuccess();
     }
   };

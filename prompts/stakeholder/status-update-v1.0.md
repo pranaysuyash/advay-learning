@@ -7,7 +7,7 @@
 ## INPUTS
 
 - Time window: `<e.g., this week>`
-- Worklog excerpts: `<paste relevant ticket updates from docs/WORKLOG_TICKETS.md>`
+- Worklog excerpts: `<paste relevant ticket updates from docs/WORKLOG_ADDENDUM_*.md>`
 - Demo link/build info (optional): `<how to run / where to see>`
 - Key decisions needed (optional): `<list>`
 

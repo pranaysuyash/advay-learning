@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import select
 
 from app.db.models.progress import Progress
+from app.services.progress_service import settings as progress_service_settings
 
 
 @pytest.mark.asyncio
@@ -79,3 +80,40 @@ async def test_progress_batch_integration(client, auth_headers, db_session):
     result2 = await db_session.execute(q)
     rows2 = result2.scalars().all()
     assert len(rows2) == 3
+
+
+@pytest.mark.asyncio
+async def test_progress_uses_client_timestamp_when_enabled(
+    client, auth_headers, db_session, monkeypatch
+):
+    monkeypatch.setattr(progress_service_settings, 'USE_CLIENT_EVENT_TIME', True)
+
+    profile_response = await client.post(
+        "/api/v1/users/me/profiles",
+        headers=auth_headers,
+        json={"name": "Timestamp Child", "age": 8},
+    )
+    profile_id = profile_response.json()["id"]
+
+    event_timestamp = "2026-01-29T00:00:05Z"
+    response = await client.post(
+        "/api/v1/progress/",
+        params={"profile_id": profile_id},
+        headers=auth_headers,
+        json={
+            "idempotency_key": "ts-enabled-1",
+            "activity_type": "letter_tracing",
+            "content_id": "A",
+            "score": 90,
+            "timestamp": event_timestamp,
+        },
+    )
+
+    assert response.status_code == 200
+    saved_id = response.json()["id"]
+
+    query = select(Progress).where(Progress.id == saved_id)
+    result = await db_session.execute(query)
+    row = result.scalar_one()
+
+    assert row.completed_at.isoformat() == "2026-01-29T00:00:05"

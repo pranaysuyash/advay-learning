@@ -49,7 +49,7 @@ This prompt provides comprehensive guidance for implementing educational feature
 
 ```bash
 # Find your ticket (e.g., TCK-20260129-201)
-grep -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
+grep -A 5 "TCK-20260129-201" docs/WORKLOG_*.md
 ```
 
 **What to Look For:**
@@ -750,11 +750,12 @@ describe('HindiGreetings', () => {
 
 ```bash
 # Update your ticket
-rg -A 5 "TCK-20260129-201" docs/WORKLOG_TICKETS.md
+rg -A 5 "TCK-20260129-201" docs/WORKLOG_*.md
 
 # Mark as DONE
 # Add completion evidence
-echo "Marked as DONE at $(date -u +%Y-%m-%d)" >> docs/WORKLOG_TICKETS.md
+WORKLOG_FILE="$(ls docs/WORKLOG_ADDENDUM_*.md | sort | tail -n 1)"
+echo "Marked as DONE at $(date -u +%Y-%m-%d)" >> "$WORKLOG_FILE"
 ```
 
 **What to Update:**

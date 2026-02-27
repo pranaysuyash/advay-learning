@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useInventoryStore } from '../store';
+import { useProfileStore } from '../store/profileStore';
 import { getRegistryEasterEggs } from '../data/gameRegistry';
 import type { ItemDrop } from '../store';
 
@@ -22,8 +23,15 @@ import type { ItemDrop } from '../store';
  */
 export function useGameDrops(gameId: string) {
   const processGameCompletion = useInventoryStore((s) => s.processGameCompletion);
+  const recordEggSession = useInventoryStore((s) => s.recordEggSession);
   const findEasterEgg = useInventoryStore((s) => s.findEasterEgg);
   const hasFoundEasterEgg = useInventoryStore((s) => s.hasFoundEasterEgg);
+  const profileAge = useProfileStore((s) => s.currentProfile?.age);
+  const enableOlderBonus = useProfileStore(
+    (s) =>
+      (s.currentProfile?.settings?.collectibles as { enableOlderBonus?: boolean } | undefined)
+        ?.enableOlderBonus ?? false
+  );
 
   // Prevent double-processing in React StrictMode
   const lastProcessedRef = useRef<number>(0);
@@ -34,9 +42,10 @@ export function useGameDrops(gameId: string) {
       if (now - lastProcessedRef.current < 1000) return [];
       lastProcessedRef.current = now;
 
-      return processGameCompletion(gameId, score);
+      recordEggSession(gameId);
+      return processGameCompletion(gameId, { score, profileAge, enableOlderBonus });
     },
-    [gameId, processGameCompletion]
+    [gameId, processGameCompletion, profileAge, enableOlderBonus, recordEggSession]
   );
 
   const triggerEasterEgg = useCallback(

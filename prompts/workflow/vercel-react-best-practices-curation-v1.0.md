@@ -20,7 +20,7 @@ Create or update:
 1) A prompt that agents can run directly against this repo:
    - `prompts/hardening/react-best-practices-v1.0.md`
 2) `prompts/README.md` index entry so it’s discoverable
-3) Worklog ticket appended to `docs/WORKLOG_TICKETS.md`
+3) Worklog ticket appended to `docs/WORKLOG_ADDENDUM_*.md`
 
 ## Curation Rules
 

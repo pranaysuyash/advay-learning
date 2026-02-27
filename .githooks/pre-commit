@@ -4,6 +4,29 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
+# Block direct commits on main to enforce PR-based review flow.
+# Emergency override only with explicit user approval per task.
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+if [[ "$current_branch" == "main" && "${ALLOW_MAIN_COMMIT:-}" != "1" ]]; then
+  echo "[pre-commit] Direct commits on 'main' are blocked." >&2
+  echo "[pre-commit] Create a short-lived branch and commit there for PR review:" >&2
+  echo "[pre-commit]   ./scripts/start_wip_branch.sh <ticket-or-scope>" >&2
+  echo "[pre-commit]   # or: git switch -c codex/wip-<ticket-or-scope>" >&2
+  echo "[pre-commit] Emergency override (user-approved only): ALLOW_MAIN_COMMIT=1 git commit ..." >&2
+  exit 1
+fi
+
+# Fail fast on unintended WORKLOG_TICKETS edits (even if unstaged).
+# Explicit curation can override with ALLOW_WORKLOG_TICKETS_EDIT=1.
+if [[ "${ALLOW_WORKLOG_TICKETS_EDIT:-}" != "1" ]]; then
+  if git diff --name-only | grep -q '^docs/WORKLOG_TICKETS.md$'; then
+    echo "[pre-commit] docs/WORKLOG_TICKETS.md has unstaged local edits." >&2
+    echo "[pre-commit] Use docs/WORKLOG_ADDENDUM_*.md for active updates." >&2
+    echo "[pre-commit] If this is intentional curation, rerun with ALLOW_WORKLOG_TICKETS_EDIT=1." >&2
+    exit 1
+  fi
+fi
+
 # 1. Agent gate: worklog enforcement
 ./scripts/agent_gate.sh --staged
 

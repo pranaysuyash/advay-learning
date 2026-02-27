@@ -13,7 +13,7 @@
 ## Non-Negotiable Rules
 
 1) **Preservation first**: Do not delete contributor work unless clearly inferior and you record why.
-2) **Append-only tracking**: Update `docs/WORKLOG_TICKETS.md` without rewriting history.
+2) **Append-only tracking**: Update `docs/WORKLOG_ADDENDUM_*.md` without rewriting history.
 3) **No loose artifacts**: No random files in project root, `src/`, or `docs/` outside intended folders.
 4) **Evidence-first**: Every non-trivial claim must be labeled Observed / Inferred / Unknown.
 

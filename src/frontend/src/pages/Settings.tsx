@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore, useProgressStore, useAuthStore } from '../store';
+import { useProfileStore } from '../store/profileStore';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
 import { Button } from '../components/ui';
@@ -17,6 +18,7 @@ export function Settings() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const { logout, user } = useAuthStore();
+  const { currentProfile, updateCollectiblesSettings } = useProfileStore();
   const {
     resetProgress,
     getMasteredLettersCount,
@@ -26,6 +28,12 @@ export function Settings() {
   const { playClick } = useAudio();
   const cameraPermission = settings.cameraPermissionState;
   const [parentGatePassed, setParentGatePassed] = useState(false);
+  const collectiblesSettings =
+    (currentProfile?.settings?.collectibles as
+      | { enableOlderBonus?: boolean; showRarityTextForOlder?: boolean }
+      | undefined) ?? {};
+  const enableOlderBonus = collectiblesSettings.enableOlderBonus ?? false;
+  const showRarityTextForOlder = collectiblesSettings.showRarityTextForOlder ?? true;
 
   const handleCancelGate = useCallback(() => {
     window.history.back();
@@ -316,6 +324,84 @@ export function Settings() {
                       >
                         <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.showHints ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
                       </button>
+                    </div>
+
+                    <div className='pt-6 border-t-4 border-[#F2CC8F] space-y-6'>
+                      <div>
+                        <div className='font-black text-advay-slate text-lg mb-2'>
+                          Collectibles Reward Controls
+                        </div>
+                        <div className='text-sm font-bold text-text-secondary'>
+                          Configure optional mystery bonus rewards for older children (ages 6-9).
+                        </div>
+                      </div>
+
+                      {!currentProfile && (
+                        <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-3 border-blue-200'>
+                          <div className='font-black'>No child profile selected.</div>
+                          <div className='text-sm font-bold mt-1'>
+                            Select a profile to customize collectibles behavior.
+                          </div>
+                        </div>
+                      )}
+
+                      <div className='flex items-center justify-between'>
+                        <div className='pr-4'>
+                          <div className='font-black text-advay-slate text-base'>
+                            Enable mystery bonus rewards (6-9)
+                          </div>
+                          <div className='text-sm font-bold text-text-secondary mt-1'>
+                            Default is OFF. Core deterministic rewards always stay enabled.
+                          </div>
+                        </div>
+                        <button
+                          disabled={!currentProfile}
+                          onClick={async () => {
+                            if (!currentProfile) return;
+                            await updateCollectiblesSettings({
+                              enableOlderBonus: !enableOlderBonus,
+                            });
+                            showToast('Collectibles bonus preference updated', 'success');
+                          }}
+                          className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${enableOlderBonus ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          aria-label={
+                            enableOlderBonus
+                              ? 'Disable mystery bonus rewards'
+                              : 'Enable mystery bonus rewards'
+                          }
+                        >
+                          <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enableOlderBonus ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
+
+                      <div className='flex items-center justify-between'>
+                        <div className='pr-4'>
+                          <div className='font-black text-advay-slate text-base'>
+                            Show rarity text for older kids
+                          </div>
+                          <div className='text-sm font-bold text-text-secondary mt-1'>
+                            Keeps textual rarity labels visible for age 6-9 profiles.
+                          </div>
+                        </div>
+                        <button
+                          disabled={!currentProfile}
+                          onClick={async () => {
+                            if (!currentProfile) return;
+                            await updateCollectiblesSettings({
+                              showRarityTextForOlder: !showRarityTextForOlder,
+                            });
+                            showToast('Rarity text preference updated', 'success');
+                          }}
+                          className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${showRarityTextForOlder ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          aria-label={
+                            showRarityTextForOlder
+                              ? 'Hide rarity text for older kids'
+                              : 'Show rarity text for older kids'
+                          }
+                        >
+                          <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${showRarityTextForOlder ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="pt-6 border-t-4 border-[#F2CC8F] space-y-4">

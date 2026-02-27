@@ -88,7 +88,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 
 ### 2. Single Source of Truth
 
-- **Worklog**: `docs/WORKLOG_TICKETS.md` - All work tracking
+- **Worklog**: `docs/WORKLOG_ADDENDUM_*.md` - All work tracking
 - **Audits**: `docs/audit/<sanitized-file>.md` - Audit artifacts
 - **Claims**: `docs/CLAIMS.md` - Append-only claim registry (prevents cross-agent contradictions)
 - **Prompts**: `prompts/` - All AI prompts
@@ -134,11 +134,24 @@ This document governs how AI agents (including myself and others) work on the Ad
 
 ### 6. Branch and Parallel Work Preservation (CRITICAL)
 
-**🚫 NEVER create new git branches unless explicitly asked by the user.**
+**Default branch workflow (required):**
 
-- Always work on the current branch (main)
-- If a feature branch already exists, the user created it - work there
-- Do not create `feature/`, `fix/`, `hotfix/`, or any other branches
+- Local edits may happen on `main` while iterating.
+- Before any commit, create/switch to a short-lived WIP branch:
+  - Naming: `codex/wip-<ticket-or-scope>`
+  - Base: current `main` HEAD
+  - Keep uncommitted changes; then commit on the WIP branch
+- Open a PR from `codex/wip-*` -> `main` for AI/human review.
+- Merge to `main` only after review findings are resolved.
+- Direct commits on `main` are blocked by default via `pre-commit`.
+  - Emergency override only with explicit user approval in current chat:
+    - `ALLOW_MAIN_COMMIT=1 git commit ...`
+
+**Branch discipline:**
+
+- Do not create long-lived branch trees (`feature/*`, `fix/*`, `hotfix/*`) unless user explicitly asks.
+- Keep one active WIP branch per scoped task where possible.
+- If a user-created feature branch already exists, continue there and still use PR review before merge.
 
 **🚫 NEVER delete or revert files with unrecognized changes.**
 
@@ -235,7 +248,7 @@ Before starting ANY work, determine:
    - If the user provides an external prompt, curate it into `prompts/` (repo-native) and add it to `prompts/README.md` so future agents use the same source of truth.
 
 3. Ticket Action (MANDATORY):
-   - Create or update docs/WORKLOG_TICKETS.md
+   - Create or update docs/WORKLOG_ADDENDUM_*.md
    - Append-only discipline
 ```
 
@@ -258,7 +271,7 @@ Based on work type, follow the appropriate prompt:
 
 Every work unit MUST produce:
 
-1. **Worklog Entry** in `docs/WORKLOG_TICKETS.md`
+1. **Worklog Entry** in `docs/WORKLOG_ADDENDUM_*.md`
 2. **Audit Artifact** (for audits) in `docs/audit/<file>.md`
 3. **Verifier Pack** (for PRs) in PR description
 4. **Evidence Log** with raw command outputs
@@ -283,7 +296,7 @@ When reading audit documents and finding actionable issues:
 
    ```bash
    # Check if worklog ticket exists for the issue
-   rg "TCK-YYYYMMDD-NNN" docs/WORKLOG_TICKETS.md
+   rg "TCK-YYYYMMDD-NNN" docs/WORKLOG_*.md
 
    # If NOT found, CREATE IT IMMEDIATELY
    # Even if status is OPEN - getting it tracked is priority over perfecting
@@ -312,7 +325,7 @@ When reading audit documents and finding actionable issues:
 
    - Repo: learning_for_kids
    - File(s): [files to modify]
-   - Branch/PR: main
+   - Branch/PR: `codex/wip-<scope>` -> `main`
 
    Acceptance Criteria:
 
@@ -387,7 +400,7 @@ The audit-to-ticket gap exists because:
 
 ```markdown
 - [ ] Read AGENTS.md (this file)
-- [ ] Check docs/WORKLOG_TICKETS.md for existing work
+- [ ] Check `docs/WORKLOG_*.md` for existing work
 - [ ] Ensure local workflow gate is enabled (`git config core.hooksPath .githooks`)
 - [ ] Find the correct prompt in prompts/README.md and follow it
 - [ ] Determine work type and select correct prompt
@@ -561,7 +574,7 @@ cd src/frontend && npm install
 
 ```bash
 # You see git status shows:
-M  docs/WORKLOG_TICKETS.md       # Your work
+M  docs/WORKLOG_ADDENDUM_v3.md       # Your work
 A  src/components/NewFeature.tsx # Parallel agent's work
 
 # CORRECT: Commit both together
@@ -685,7 +698,7 @@ The pre-commit hook runs these checks in order:
 | **4. Regression Tests** | `scripts/regression_check.sh` | Tests, export changes, TypeScript validation | `SKIP_REGRESSION_CHECK=1` |
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
-- If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_*.md`.
+- If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_ADDENDUM_*.md`.
 - Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
 - Any changed ticket entry must include a unique `Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent[-abcd]`.
 - Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
@@ -698,7 +711,10 @@ The pre-commit hook runs these checks in order:
 **Critical:** Detects when large refactors remove functionality.
 
 **Triggers when:**
-- Existing file has >10% LOC changed (threshold configurable via `LOC_THRESHOLD`)
+- Existing file has >10% **net LOC delta** (threshold configurable via `LOC_THRESHOLD`)
+- Existing file has >10% **touched-line churn** (`added + deleted` vs old LOC; configurable via `TOUCHED_LOC_THRESHOLD`)
+- Large file + meaningful edits: old LOC >= 500 and touched lines >= 20
+- Complexity-risk edits: touched lines >= 20 and high complexity per analyzer (`lizard` max CCN / CCN delta; fallback heuristics only if analyzer unavailable)
 
 **Detects:**
 - Removed functions/methods
@@ -747,6 +763,13 @@ The pre-commit hook runs these checks in order:
 7. **When in doubt:**
    - Ask the user before committing
    - Better to verify than to regress
+
+**Manual refactor review basis (required):**
+- Surface/API: exports, route contracts, prop interfaces, side-effect entry points
+- State & lifecycle: removed/renamed state vars, reducer transitions, effect dependencies/cleanup
+- Behavior paths: happy path + error path + pause/recovery/edge-state path
+- Complexity concentration: high-hook/high-branch sections touched by refactor
+- Cross-file completeness: if split/extract happened, sum of new files must preserve prior behavior
 
 **Core Principle:** New code should be **ADDITIVE** or **IMPROVEMENT**, never reductive unless explicitly discussed and justified.
 
@@ -952,6 +975,7 @@ Pass if:
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
 14. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
 15. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
+16. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
 
 ---
 
@@ -983,7 +1007,7 @@ prompts/
 
 ### Documentation
 
-- `docs/WORKLOG_TICKETS.md` - Work tracking
+- `docs/WORKLOG_ADDENDUM_*.md` - Work tracking
 - `docs/audit/*.md` - Audit artifacts
 - `docs/process/CODE_PRESERVATION_GUIDELINES.md` - When to delete vs. implement unused code
 - `docs/ARCHITECTURE.md` - System design

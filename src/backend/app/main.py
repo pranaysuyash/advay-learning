@@ -40,6 +40,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "camera=(), microphone=(), geolocation=()"
         )
 
+        # HTTP Strict Transport Security
+        response.headers[
+            "Strict-Transport-Security"
+        ] = "max-age=63072000; includeSubDomains; preload"
+
         return response
 
 
@@ -66,6 +71,8 @@ def validate_cors_configuration(settings_instance: Settings) -> None:
 
 
 # Setup logging
+from app.core.logging_config import setup_logging
+setup_logging()
 logger = logging.getLogger(__name__)
 
 # Validate settings before creating app to catch issues early

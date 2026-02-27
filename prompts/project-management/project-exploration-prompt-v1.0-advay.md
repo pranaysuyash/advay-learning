@@ -30,7 +30,7 @@ Codebase-specific implementation of the generic exploration prompt for Advay Vis
 ### Project-Specific Files to Reference
 
 - `docs/clarity/questions.md` - Open questions and decisions
-- `docs/WORKLOG_TICKETS.md` - All work tracking
+- `docs/WORKLOG_ADDENDUM_*.md` - All work tracking
 - `docs/PROJECT_EXPLORATION_BACKLOG.md` - Exploration opportunities
 - `docs/ROADMAP.md` - Current strategic direction
 - `docs/AGE_BANDS.md` - Target user demographics

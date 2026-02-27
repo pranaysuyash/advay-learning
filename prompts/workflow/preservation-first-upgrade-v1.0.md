@@ -114,7 +114,7 @@ Update docs only if behavior changed or a new configuration path exists.
 
 ## Worklog Requirements
 
-Update `docs/WORKLOG_TICKETS.md` (append-only) with:
+Update `docs/WORKLOG_ADDENDUM_*.md` (append-only) with:
 
 - Which file(s) were canonical and why (Observed evidence)
 - What changed (diff summary)

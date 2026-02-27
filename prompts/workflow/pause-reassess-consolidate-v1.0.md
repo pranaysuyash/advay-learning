@@ -15,7 +15,7 @@
 
 1) No new code changes while running this prompt.
 2) Evidence-first: Observed / Inferred / Unknown labels.
-3) Append-only worklog updates: `docs/WORKLOG_TICKETS.md`.
+3) Append-only worklog updates: `docs/WORKLOG_ADDENDUM_*.md`.
 4) One clear next work unit (or a small prioritized list) at the end.
 
 ---
@@ -25,8 +25,8 @@
 If possible:
 
 ```bash
-rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_TICKETS.md | tail -n 30
-rg -n "OPEN|IN_PROGRESS|BLOCKED" docs/WORKLOG_TICKETS.md | tail -n 40
+rg -n "TCK-\\d{8}-\\d{3}" docs/WORKLOG_*.md | tail -n 30
+rg -n "OPEN|IN_PROGRESS|BLOCKED" docs/WORKLOG_*.md | tail -n 40
 ```
 
 If git is available:
@@ -94,7 +94,7 @@ If more than 3 items, you are not being minimal—reduce.
 
 ## Step 6 — Worklog Update (Required)
 
-Append to `docs/WORKLOG_TICKETS.md`:
+Append to `docs/WORKLOG_ADDENDUM_*.md`:
 
 - A short “pause/reassess” note under the relevant ticket(s), or
 - A new TRIAGE ticket if the situation is ambiguous

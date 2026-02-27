@@ -1,6 +1,6 @@
 # WORKLOG UPDATE PROMPT v1.0
 
-**Goal**: Ensure every agent run leaves a durable trail in `docs/WORKLOG_TICKETS.md` so another agent can resume work later.
+**Goal**: Ensure every agent run leaves a durable trail in `docs/WORKLOG_ADDENDUM_*.md` so another agent can resume work later.
 
 ---
 

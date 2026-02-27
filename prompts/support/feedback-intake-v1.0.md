@@ -51,7 +51,7 @@ You are NOT:
 
 ### E) Ticket(s) (append-ready)
 
-Produce 1–3 tickets to append to `docs/WORKLOG_TICKETS.md` (append-only), using the repo’s ticket template.
+Produce 1–3 tickets to append to `docs/WORKLOG_ADDENDUM_*.md` (append-only), using the repo’s ticket template.
 
 ---
 

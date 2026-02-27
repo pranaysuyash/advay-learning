@@ -431,7 +431,7 @@ function getChildFriendlyError(error: Error): string {
 ## Next Steps After Build
 
 1. Run health check: `prompts/ai-native/ai-feature-check-v1.0.md`
-2. Update worklog: `docs/WORKLOG_TICKETS.md`
+2. Update worklog: `docs/WORKLOG_ADDENDUM_*.md`
 3. Create PR with feature flag disabled
 4. Enable feature flag after review
 5. Monitor metrics post-deployment

@@ -95,6 +95,26 @@ describe('analyzeStruggles', () => {
     expect(result.strugglingItems).toHaveLength(0);
   });
 
+  it('falls back to meta_data.attempt_count when top-level attempt_count is missing', () => {
+    const progress: ProgressItem[] = [
+      {
+        id: 'meta-attempt-1',
+        activity_type: 'letter_tracing',
+        content_id: 'letter-en-61',
+        score: 65,
+        completed_at: new Date().toISOString(),
+        meta_data: {
+          attempt_count: 4,
+        },
+      },
+    ];
+
+    const result = analyzeStruggles(progress);
+    expect(result.strugglingItems).toHaveLength(1);
+    expect(result.strugglingItems[0].attentionLevel).toBe('medium');
+    expect(result.strugglingItems[0].effectiveAttempts).toBe(4);
+  });
+
   it('sorts struggling items by attempts (most first)', () => {
     const progress = [
       createMockItem('1', 80, 3),
@@ -113,18 +133,18 @@ describe('analyzeStruggles', () => {
     const progress = [createMockItem('1', 40, 7)];
     const result = analyzeStruggles(progress);
 
-    expect(result.recommendations.some((r) => r.includes('focused practice'))).toBe(
-      true,
-    );
+    expect(
+      result.recommendations.some((r) => r.includes('focused practice')),
+    ).toBe(true);
   });
 
   it('generates recommendations for medium attention items', () => {
     const progress = [createMockItem('1', 60, 4)];
     const result = analyzeStruggles(progress);
 
-    expect(result.recommendations.some((r) => r.includes('additional practice'))).toBe(
-      true,
-    );
+    expect(
+      result.recommendations.some((r) => r.includes('additional practice')),
+    ).toBe(true);
   });
 
   it('correctly counts high and medium items', () => {
@@ -138,8 +158,12 @@ describe('analyzeStruggles', () => {
     const result = analyzeStruggles(progress);
 
     expect(result.needsAttentionCount).toBe(4);
-    expect(result.strugglingItems.filter((i) => i.attentionLevel === 'high')).toHaveLength(2);
-    expect(result.strugglingItems.filter((i) => i.attentionLevel === 'medium')).toHaveLength(2);
+    expect(
+      result.strugglingItems.filter((i) => i.attentionLevel === 'high'),
+    ).toHaveLength(2);
+    expect(
+      result.strugglingItems.filter((i) => i.attentionLevel === 'medium'),
+    ).toHaveLength(2);
   });
 });
 

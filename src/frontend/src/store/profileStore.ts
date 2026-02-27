@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { profileApi } from '../services/api';
 
+export interface CollectiblesProfileSettings {
+  enableOlderBonus?: boolean;
+  showRarityTextForOlder?: boolean;
+}
+
 export interface Profile {
   id: string;
   name: string;
@@ -10,6 +15,7 @@ export interface Profile {
   updated_at: string;
   parent_id: string;
   settings?: {
+    collectibles?: CollectiblesProfileSettings;
     avatar_config?: {
       type: 'platformer' | 'animal' | 'creature' | 'photo';
       character: string;
@@ -29,6 +35,7 @@ interface ProfileState {
   fetchProfiles: () => Promise<void>;
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) => Promise<void>;
   updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string; settings?: Record<string, unknown> }>) => Promise<void>;
+  updateCollectiblesSettings: (settings: CollectiblesProfileSettings) => Promise<void>;
   setCurrentProfile: (profile: Profile | null) => void;
   clearError: () => void;
 }
@@ -92,6 +99,22 @@ export const useProfileStore = create<ProfileState>()((set) => ({
         isLoading: false,
       });
     }
+  },
+
+  updateCollectiblesSettings: async (collectibles) => {
+    const state = useProfileStore.getState();
+    const currentProfile = state.currentProfile;
+    if (!currentProfile) return;
+
+    const mergedSettings = {
+      ...(currentProfile.settings ?? {}),
+      collectibles: {
+        ...((currentProfile.settings?.collectibles as CollectiblesProfileSettings | undefined) ?? {}),
+        ...collectibles,
+      },
+    };
+
+    await state.updateProfile(currentProfile.id, { settings: mergedSettings });
   },
 
   deleteProfile: async (profileId: string) => {

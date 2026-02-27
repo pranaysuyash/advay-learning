@@ -6,6 +6,7 @@ import { progressApi } from '../services/api';
 import { progressQueue } from '../services/progressQueue';
 import apiClient from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
+import { DeadLetterDialog } from '../components/ui/DeadLetterDialog';
 import { PlantVisualization } from '../components/progress/PlantVisualization';
 import { MetricCard } from '../components/progress/MetricsCard';
 import { RecommendationCard } from '../components/progress/RecommendationCard';
@@ -30,6 +31,8 @@ export const Progress = memo(function Progress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [deadLetterCount, setDeadLetterCount] = useState<number>(0);
+  const [showDeadLetterDialog, setShowDeadLetterDialog] = useState(false);
   const [syncing, setSyncing] = useState<boolean>(false);
   const [timeBreakdown, setTimeBreakdown] = useState<TimeBreakdownSummary | null>(null);
   const [struggleSummary, setStruggleSummary] = useState<StruggleSummary | null>(null);
@@ -63,8 +66,10 @@ export const Progress = memo(function Progress() {
   }, [fetchProfiles]);
 
   useEffect(() => {
-    const update = () =>
+    const update = () => {
       setPendingCount(progressQueue.getPending(selectedProfileId || '').length);
+      setDeadLetterCount(progressQueue.getDeadLetterCount(selectedProfileId || ''));
+    };
     update();
     const unsubscribe = progressQueue.subscribe(update);
     return unsubscribe;
@@ -130,6 +135,18 @@ export const Progress = memo(function Progress() {
                 <UIIcon name='warning' size={16} />
                 Pending ({pendingCount})
               </div>
+            )}
+
+            {/* Dead letter indicator */}
+            {deadLetterCount > 0 && (
+              <button
+                type='button'
+                onClick={() => setShowDeadLetterDialog(true)}
+                className='inline-flex items-center gap-2 bg-red-100 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-200 transition-colors'
+              >
+                <UIIcon name='alert-triangle' size={16} />
+                Failed ({deadLetterCount})
+              </button>
             )}
 
             <button
@@ -509,6 +526,17 @@ export const Progress = memo(function Progress() {
           </>
         )}
       </motion.div>
+
+      {/* Dead Letter Dialog */}
+      <DeadLetterDialog
+        isOpen={showDeadLetterDialog}
+        onClose={() => setShowDeadLetterDialog(false)}
+        profileId={selectedProfileId || undefined}
+        onRetry={() => {
+          setPendingCount(progressQueue.getPending(selectedProfileId || '').length);
+          setDeadLetterCount(progressQueue.getDeadLetterCount(selectedProfileId || ''));
+        }}
+      />
     </div>
   );
 });

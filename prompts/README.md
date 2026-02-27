@@ -5,7 +5,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 ## Start Here (Any Agent)
 
 1. Use: `prompts/workflow/agent-entrypoint-v1.0.md`
-2. Update tracking: `docs/WORKLOG_TICKETS.md` (append-only)
+2. Update tracking: `docs/WORKLOG_ADDENDUM_*.md` (append-only)
 3. Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
 ## 🚫 Critical Rules

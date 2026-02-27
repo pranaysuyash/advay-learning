@@ -1,12 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { calculateDailyTimeBreakdown } from '../progressCalculations';
+import {
+  calculateDailyTimeBreakdown,
+  calculateHonestStats,
+} from '../progressCalculations';
 import { ProgressItem } from '../../types/progress';
 
 describe('calculateDailyTimeBreakdown', () => {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
 
-  const createMockProgress = (daysAgo: number, count: number): ProgressItem[] => {
+  const createMockProgress = (
+    daysAgo: number,
+    count: number,
+  ): ProgressItem[] => {
     const date = new Date(today);
     date.setDate(date.getDate() - daysAgo);
     const dateStr = date.toISOString();
@@ -110,5 +116,65 @@ describe('calculateDailyTimeBreakdown', () => {
 
     expect(result.totalMinutesWeek).toBe(36); // 12 + 6 + 18
     expect(result.dailyBreakdown[6].minutes).toBe(12); // Today (index 6) is last
+  });
+});
+
+describe('calculateHonestStats', () => {
+  it('counts unique letter_tracing activities using encoded content ids', () => {
+    const now = new Date().toISOString();
+    const progress: ProgressItem[] = [
+      {
+        id: '1',
+        activity_type: 'letter_tracing',
+        content_id: 'letter-en-61',
+        score: 80,
+        completed_at: now,
+        meta_data: { letter: 'A' },
+      },
+      {
+        id: '2',
+        activity_type: 'letter_tracing',
+        content_id: 'letter-hi-905',
+        score: 90,
+        completed_at: now,
+        meta_data: { letter: 'अ' },
+      },
+      {
+        id: '3',
+        activity_type: 'letter_tracing',
+        content_id: 'letter-en-61',
+        score: 70,
+        completed_at: now,
+        meta_data: { letter: 'A' },
+      },
+      {
+        id: '4',
+        activity_type: 'game',
+        content_id: 'alphabet-game',
+        score: 85,
+        completed_at: now,
+      },
+    ];
+
+    const result = calculateHonestStats(progress);
+    expect(result.uniqueLettersPracticed).toBe(2);
+    expect(result.avgTracingAccuracy).toBe(80);
+  });
+
+  it('prefers metadata letter label in recent activity text', () => {
+    const progress: ProgressItem[] = [
+      {
+        id: '1',
+        activity_type: 'letter_tracing',
+        content_id: 'letter-en-61',
+        score: 88,
+        completed_at: new Date().toISOString(),
+        meta_data: { letter: 'A' },
+      },
+    ];
+
+    const result = calculateHonestStats(progress);
+    expect(result.recentActivity[0].action).toContain('A');
+    expect(result.recentActivity[0].action).not.toContain('letter-en-61');
   });
 });

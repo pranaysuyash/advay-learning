@@ -133,7 +133,7 @@ Create:
   - acceptance criteria
   - verification steps
 
-Append to `docs/WORKLOG_TICKETS.md` using `prompts/workflow/worklog-v1.0.md`.
+Append to `docs/WORKLOG_ADDENDUM_*.md` using `prompts/workflow/worklog-v1.0.md`.
 
 ---
 
