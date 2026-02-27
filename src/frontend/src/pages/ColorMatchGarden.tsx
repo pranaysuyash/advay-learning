@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -217,7 +216,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
     [cursor, playCelebration, playError, playPop, speak, startRound, ttsEnabled],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } =
     useGameHandTracking({
       gameName: 'ColorMatchGarden',
       targetFps: 30,
@@ -306,13 +305,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           backgroundPosition: 'center',
         }}
       >
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
+        
 
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 

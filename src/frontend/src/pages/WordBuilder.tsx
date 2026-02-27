@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -223,7 +222,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     [completeWord, cursor, playError, playPop, speak, ttsEnabled, word],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } =
     useGameHandTracking({
       gameName: 'WordBuilder',
       targetFps: 30,
@@ -325,13 +324,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         />
 
         <div className='absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-[3rem] border-[8px] border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
-          <Webcam
-            ref={webcamRef}
-            audio={false}
-            mirrored
-            className='absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply'
-            videoConstraints={{ facingMode: 'user' }}
-          />
+          
 
           <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 

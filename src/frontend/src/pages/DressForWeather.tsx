@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Webcam from 'react-webcam';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
@@ -515,13 +514,7 @@ export default function DressForWeather() {
       }}
     >
       {/* Hidden webcam */}
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        mirrored={true}
-        videoConstraints={{ width: 1280, height: 720, facingMode: 'user' }}
-        style={{ display: 'none' }}
-      />
+      
 
       <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
 

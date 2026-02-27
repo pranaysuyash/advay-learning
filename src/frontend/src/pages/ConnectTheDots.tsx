@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
@@ -590,17 +589,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             {/* Webcam for hand tracking (hidden) */}
             {isHandTrackingEnabled && (
               <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
-                <Webcam
-                  ref={webcamRef}
-                  audio={false}
-                  mirrored={true}
-                  videoConstraints={{
-                    facingMode: 'user',
-                    width: 640,
-                    height: 480,
-                  }}
-                  className='w-full h-full object-cover'
-                />
+                
               </div>
             )}
 

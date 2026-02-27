@@ -57,7 +57,7 @@ export function KaleidoscopeHands() {
       ctx.translate(centerX, centerY);
       ctx.rotate(i * segmentAngle);
       ctx.scale(1, 1); // Mirror effect
-      
+
       if (points.length > 1) {
         ctx.beginPath();
         ctx.lineWidth = 8;
@@ -67,20 +67,20 @@ export function KaleidoscopeHands() {
         for (let j = 0; j < points.length - 1; j++) {
           const p1 = points[j];
           const p2 = points[j + 1];
-          
+
           ctx.strokeStyle = getColorForPoint(levelConfig.colorMode, (j / points.length + colorProgressRef.current) % 1);
           ctx.beginPath();
           ctx.moveTo(p1.x * CANVAS_SIZE - centerX, p1.y * CANVAS_SIZE - centerY);
           ctx.lineTo(p2.x * CANVAS_SIZE - centerX, p2.y * CANVAS_SIZE - centerY);
           ctx.stroke();
         }
-        
+
         // Mirror
         ctx.scale(-1, 1);
         for (let j = 0; j < points.length - 1; j++) {
           const p1 = points[j];
           const p2 = points[j + 1];
-          
+
           ctx.strokeStyle = getColorForPoint(levelConfig.colorMode, (j / points.length + colorProgressRef.current) % 1);
           ctx.beginPath();
           ctx.moveTo(p1.x * CANVAS_SIZE - centerX, p1.y * CANVAS_SIZE - centerY);
@@ -88,7 +88,7 @@ export function KaleidoscopeHands() {
           ctx.stroke();
         }
       }
-      
+
       ctx.restore();
     }
 
@@ -156,11 +156,10 @@ export function KaleidoscopeHands() {
               type="button"
               key={level.level}
               onClick={() => handleLevelChange(level.level)}
-              className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentLevel === level.level
+              className={`px-4 py-2 rounded-full font-bold transition-all ${currentLevel === level.level
                   ? 'bg-pink-500 text-white shadow-lg'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                  : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
+                }`}
             >
               Level {level.level}
             </button>
@@ -193,7 +192,7 @@ export function KaleidoscopeHands() {
           <button
             type="button"
             onClick={handleClear}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold transition-all"
+            className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all"
           >
             Clear
           </button>

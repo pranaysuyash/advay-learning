@@ -74,7 +74,7 @@ export function VirtualBubbles() {
       if (!analyserRef.current) return;
       const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
       analyserRef.current.getByteFrequencyData(dataArray);
-      
+
       const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
       if (average > 50) {
         setBlowDetected(true);
@@ -111,7 +111,7 @@ export function VirtualBubbles() {
     if (!ctx) return;
 
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
+
     // Draw gradient background
     const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
     gradient.addColorStop(0, '#87CEEB');
@@ -128,7 +128,7 @@ export function VirtualBubbles() {
       ctx.strokeStyle = bubble.color;
       ctx.lineWidth = 2;
       ctx.stroke();
-      
+
       // Shine effect
       ctx.beginPath();
       ctx.arc(bubble.x - bubble.size * 0.3, bubble.y - bubble.size * 0.3, bubble.size * 0.2, 0, Math.PI * 2);
@@ -159,7 +159,7 @@ export function VirtualBubbles() {
     if (gameState !== 'playing') return;
 
     const { popped, remaining } = checkBubblePop(bubbles, handPosition.x, handPosition.y, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
+
     if (popped) {
       playPop();
       setBubbles(remaining);
@@ -207,11 +207,10 @@ export function VirtualBubbles() {
               type="button"
               key={level.level}
               onClick={() => handleLevelChange(level.level)}
-              className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentLevel === level.level
+              className={`px-4 py-2 rounded-full font-bold transition-all ${currentLevel === level.level
                   ? 'bg-cyan-500 text-white shadow-lg'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                  : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
+                }`}
             >
               Level {level.level}
             </button>
@@ -288,7 +287,7 @@ export function VirtualBubbles() {
               <button
                 type="button"
                 onClick={handleStart}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold transition-all"
+                className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all"
               >
                 Play Again
               </button>

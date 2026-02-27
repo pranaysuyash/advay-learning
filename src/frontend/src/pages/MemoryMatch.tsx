@@ -15,7 +15,6 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -155,7 +154,7 @@ export function MemoryMatch() {
       setShowCelebration(true);
       onGameComplete(score);
     }
-  }, [completed]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [completed]);  
 
   // ── Flip a card ────────────────────────────────────────────────────────────
   const flipCard = useCallback((cardId: string) => {
@@ -277,13 +276,7 @@ export function MemoryMatch() {
       isPlaying={gameStarted && !showMenu}
     >
       {/* Hidden webcam */}
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        mirrored
-        videoConstraints={{ width: 640, height: 480, facingMode: 'user' }}
-        style={{ display: 'none' }}
-      />
+      
 
       <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted && !showMenu} />
       <HandTrackingStatus

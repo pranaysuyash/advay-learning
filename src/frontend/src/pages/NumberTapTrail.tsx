@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
@@ -201,7 +200,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     [completeLevel, cursor, playError, playPop, speak, ttsEnabled],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } =
     useGameHandTracking({
       gameName: 'NumberTapTrail',
       targetFps: 24,
@@ -278,13 +277,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   return (
     <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
+        
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-200/40 pointer-events-none' />
 

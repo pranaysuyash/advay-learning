@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import confetti from 'canvas-confetti';
 import { GameLayout } from '../components/layout/GameLayout';
 import { getLettersForGame } from '../data/alphabets';

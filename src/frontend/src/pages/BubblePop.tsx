@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -32,8 +33,9 @@ const FRAME_TIME = 1000 / TARGET_FPS;
 export default function BubblePop() {
   // Audio
   const { playClick, playLevelUp } = useAudio();
-  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { speak, stop: stopTTS, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop');
+  const navigate = useNavigate();
 
   // Game state
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -52,7 +54,8 @@ export default function BubblePop() {
 
   // Microphone input for blow detection
   const { isActive, volume, isBlowing, error, start, stop } = useMicrophoneInput({
-    blowThreshold: 0.25,
+    // lower threshold to make blowing easier for little lungs
+    blowThreshold: 0.12,
     minBlowDuration: 100,
     cooldown: 200,
     onBlow: () => {
@@ -87,8 +90,8 @@ export default function BubblePop() {
       setGameState(prev => {
         let newState = updateBubbles(prev, deltaTime);
 
-        // Check for blow hits based on volume
-        if (isActive && volume > 0.2) {
+        // Check for blow hits based on volume (looser now)
+        if (isActive && volume > 0.12) {
           newState = checkBlowHits(newState, volume);
         }
 
@@ -121,6 +124,13 @@ export default function BubblePop() {
     };
   }, [gameState.isPlaying, showMenu, gameLoop]);
 
+  // cleanup on unmount already handled for mic and TTS; ensure any lingering timers removed
+  useEffect(() => {
+    return () => {
+      stopTTS();
+    };
+  }, [stopTTS]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -143,10 +153,17 @@ export default function BubblePop() {
 
   const handleStop = () => {
     playClick();
-    _onGameComplete();
+    // only award drops if player actually played / popped bubbles
+    if (gameState.poppedCount > 0 || gameState.isPlaying) {
+      _onGameComplete();
+    }
+    // ensure any pending speech is canceled immediately
+    stopTTS();
     stop();
     setGameState(endGame(gameState));
     setShowMenu(true);
+    // navigate back to dashboard for a full exit experience
+    navigate('/dashboard');
   };
 
   const stats = getStats(gameState);

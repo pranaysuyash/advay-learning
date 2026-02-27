@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -431,13 +430,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
               ref={cameraAreaRef}
               className='relative w-full h-full overflow-hidden m-0 border-3 border-[#F2CC8F] rounded-[2.5rem]'
             >
-              <Webcam
-                ref={webcamRef}
-                audio={false}
-                mirrored
-                className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-                videoConstraints={{ facingMode: 'user' }}
-              />
+              
 
               <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 

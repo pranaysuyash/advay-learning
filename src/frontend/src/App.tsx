@@ -112,6 +112,16 @@ const BalloonPopFitness = lazy(() =>
     default: module.BalloonPopFitness,
   })),
 );
+const FollowTheLeader = lazy(() =>
+  import('./pages/FollowTheLeader').then((module) => ({
+    default: module.FollowTheLeader,
+  })),
+);
+const MusicalStatues = lazy(() =>
+  import('./pages/MusicalStatues').then((module) => ({
+    default: module.MusicalStatues,
+  })),
+);
 const FreezeDance = lazy(() =>
   import('./pages/FreezeDance').then((module) => ({
     default: module.FreezeDance,
@@ -236,6 +246,21 @@ const SyllableClap = lazy(() =>
 const SightWordFlash = lazy(() =>
   import('./pages/SightWordFlash').then((module) => ({
     default: module.SightWordFlash,
+  })),
+);
+const MazeRunner = lazy(() =>
+  import('./pages/MazeRunner').then((module) => ({
+    default: module.MazeRunner,
+  })),
+);
+const PathFollowing = lazy(() =>
+  import('./pages/PathFollowing').then((module) => ({
+    default: module.PathFollowing,
+  })),
+);
+const RhythmTap = lazy(() =>
+  import('./pages/RhythmTap').then((module) => ({
+    default: module.RhythmTap,
   })),
 );
 const BubblePopSymphony = lazy(() =>
@@ -528,6 +553,36 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/balloon-pop-fitness'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Balloon Pop Fitness'>
+                        <BalloonPopFitness />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/follow-the-leader'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Follow the Leader'>
+                        <FollowTheLeader />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/musical-statues'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Musical Statues'>
+                        <MusicalStatues />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/freeze-dance'
                   element={
                     <ProtectedRoute>
@@ -718,6 +773,30 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SightWordFlash />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/maze-runner'
+                  element={
+                    <ProtectedRoute>
+                      <MazeRunner />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/path-following'
+                  element={
+                    <ProtectedRoute>
+                      <PathFollowing />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/rhythm-tap'
+                  element={
+                    <ProtectedRoute>
+                      <RhythmTap />
                     </ProtectedRoute>
                   }
                 />

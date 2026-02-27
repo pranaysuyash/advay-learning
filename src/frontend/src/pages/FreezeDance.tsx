@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { Music, Sparkles, Frown, Video, Hand, Snowflake, Trophy, PartyPopper, Star, PersonStanding } from 'lucide-react';
@@ -397,7 +396,7 @@ export function FreezeDance() {
     }
   };
 
-  const handleVideoLoad = () => {
+  const _handleVideoLoad = () => {
     setCameraReady(true);
   };
 
@@ -620,12 +619,7 @@ export function FreezeDance() {
             </motion.div>
 
             <div className='relative rounded-[2.5rem] overflow-hidden bg-slate-100 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-              <Webcam
-                ref={webcamRef}
-                onLoadedData={handleVideoLoad}
-                className='w-full h-[400px] object-cover'
-                mirrored
-              />
+              
               <canvas
                 ref={canvasRef}
                 className='absolute top-0 left-0 w-full h-[400px] pointer-events-none'

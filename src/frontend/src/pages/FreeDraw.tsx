@@ -19,7 +19,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Palette, Paintbrush, Trash2, Save, Hand, Sparkles, Target } from 'lucide-react';
-import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -392,12 +391,7 @@ export default function FreeDraw() {
 
       {/* Hidden webcam */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
-        />
+        
       </div>
 
       {showMenu ? (

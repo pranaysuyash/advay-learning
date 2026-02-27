@@ -17,7 +17,6 @@
  */
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -414,12 +413,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
     <GameContainer title="Shape Safari" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
-        />
+        
       </div>
 
       {showMenu ? (

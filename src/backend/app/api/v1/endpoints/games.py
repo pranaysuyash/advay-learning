@@ -57,7 +57,7 @@ def _parse_age_group(age_group: str | None) -> tuple[float | None, float | None]
 
 def _period_cutoff(period: str) -> datetime | None:
     """Resolve period filter cutoff timestamp."""
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     if period == "week":
         return now - timedelta(days=7)
     if period == "month":
@@ -204,7 +204,7 @@ async def get_games_stats(
         response = GlobalGameStatsResponse(
             period=period,
             age_group=age_group,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.utcnow(),
             games=games,
         )
         _GAME_STATS_CACHE[cache_key] = response
@@ -217,7 +217,7 @@ async def get_games_stats(
         return GlobalGameStatsResponse(
             period=period,
             age_group=age_group,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.utcnow(),
             games=[],
         )
 

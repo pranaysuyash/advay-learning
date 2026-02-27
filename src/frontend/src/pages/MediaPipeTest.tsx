@@ -1,6 +1,5 @@
 import { memo, useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
 import { FilesetResolver, FaceLandmarker, PoseLandmarker, HandLandmarker } from '@mediapipe/tasks-vision';
 import { UIIcon } from '../components/ui/Icon';
@@ -672,13 +671,7 @@ export const MediaPipeTest = memo(function MediaPipeTest() {
                 {/* Camera View */}
                 <div className="bg-white/10 border border-border rounded-xl p-4 mb-6">
                     <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100">
-                        <Webcam
-                            ref={webcamRef}
-                            audio={false}
-                            mirrored
-                            className="absolute inset-0 w-full h-full object-cover"
-                            videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                        />
+                        
                         <canvas
                             ref={canvasRef}
                             width={640}

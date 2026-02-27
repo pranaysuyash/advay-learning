@@ -18,7 +18,6 @@
  */
 
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import Webcam from 'react-webcam';
 import { motion } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameContainer } from '../components/GameContainer';
@@ -190,25 +189,28 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
           let popped = false;
           switch (balloon.action) {
-            case 'jump':
+            case 'jump': {
               // Check ankles/feet for jump
               const leftAnkle = landmarks[27];
               const rightAnkle = landmarks[28];
               popped = checkBodyCollisions(balloon, [leftAnkle, rightAnkle]);
               break;
+            }
 
-            case 'wave':
+            case 'wave': {
               // Check wrists for wave
               const leftWrist = landmarks[15];
               const rightWrist = landmarks[16];
               popped = checkBodyCollisions(balloon, [leftWrist, rightWrist]);
               break;
+            }
 
-            case 'clap':
+            case 'clap': {
               // Check either wrist for clap
               const wrists = [landmarks[15], landmarks[16]];
               popped = checkBodyCollisions(balloon, wrists);
               break;
+            }
           }
 
           return { ...balloon, popped: popped || balloon.popped };
@@ -390,7 +392,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
   };
 
   // ===== CAMERA READY HANDLER =====
-  const handleCameraReady = () => {
+  const _handleCameraReady = () => {
     setCameraReady(true);
   };
 
@@ -399,13 +401,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
     <GameContainer title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          onUserMedia={handleCameraReady}
-          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
-        />
+        
       </div>
 
       {showMenu ? (

@@ -1,7 +1,6 @@
 import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { Hand, Star, Camera, Ear, Gamepad2, Check, Hourglass, SkipForward, PartyPopper, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -336,7 +335,7 @@ export const SimonSays = memo(function SimonSays() {
     }
   };
 
-  const handleVideoLoad = () => {
+  const _handleVideoLoad = () => {
     setCameraReady(true);
   };
 
@@ -556,12 +555,7 @@ export const SimonSays = memo(function SimonSays() {
             {/* Right Column: Camera & Controls */}
             <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
               <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
-                <Webcam
-                  ref={webcamRef}
-                  onLoadedData={handleVideoLoad}
-                  className='absolute inset-0 w-full h-full object-cover'
-                  mirrored
-                />
+                
                 <canvas
                   ref={canvasRef}
                   className='absolute inset-0 w-full h-full'

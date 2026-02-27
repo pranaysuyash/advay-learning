@@ -18,6 +18,8 @@ interface CameraThumbnailProps {
     mirrored?: boolean;
     /** Whether to show the thumbnail (default: true) */
     visible?: boolean;
+    /** Webcam ref mandatory for hand tracking to access video feed */
+    webcamRef?: any;
 }
 
 const POSITION_CLASSES: Record<string, string> = {
@@ -32,12 +34,25 @@ export function CameraThumbnail({
     position = 'bottom-left',
     mirrored = true,
     visible = true,
+    webcamRef
 }: CameraThumbnailProps) {
-    if (!visible) return null;
+    if (!visible) {
+        // Must still render the webcam invisibly so MediaPipe can access the video feed
+        return (
+            <div className="absolute opacity-0 pointer-events-none w-[1px] h-[1px] overflow-hidden">
+                <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    mirrored={mirrored}
+                    videoConstraints={{ facingMode: 'user', width: 320, height: 240 }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div
-            className={`absolute ${POSITION_CLASSES[position]} z-30 rounded-xl overflow-hidden border-3 shadow-lg`}
+            className={`absolute ${POSITION_CLASSES[position]} z-[60] rounded-xl overflow-hidden border-3 shadow-lg`}
             style={{
                 width: '160px',
                 height: '120px',
@@ -46,6 +61,7 @@ export function CameraThumbnail({
             }}
         >
             <Webcam
+                ref={webcamRef}
                 audio={false}
                 mirrored={mirrored}
                 className='w-full h-full object-cover'

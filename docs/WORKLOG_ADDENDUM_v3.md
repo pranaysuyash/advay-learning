@@ -1,3 +1,82 @@
+### TCK-20260227-009 :: Implement Follow the Leader Game
+
+Ticket Stamp: STAMP-20260227T165432Z-claude-qp0x
+
+Type: FEATURE_IMPLEMENTATION
+Owner: Pranay
+Created: 2026-02-27 16:54 PST
+Status: **OPEN**
+Priority: P0 (Next Sprint from COMPLETE_GAME_ACTIVITIES_CATALOG.md)
+
+Scope contract:
+
+- In-scope: Implement Follow the Leader game - children mirror movement patterns demonstrated by guide character
+- Out-of-scope: Multiplayer modes, advanced choreography, AR integration
+- Behavior change allowed: YES (new game functionality)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/pages/FollowTheLeader.tsx, src/frontend/src/games/followTheLeaderLogic.ts, src/frontend/src/App.tsx, src/frontend/src/data/gameRegistry.ts
+- Branch: main
+
+Acceptance Criteria:
+
+- [ ] Create FollowTheLeader.tsx game page with pose detection
+- [ ] Implement movement pattern system (walk like penguin, hop like frog, etc.)
+- [ ] Add Pose Landmarker integration for movement mirroring
+- [ ] Implement movement validation and similarity scoring
+- [ ] Add animated guide character demonstrating movements
+- [ ] Implement progression system with increasing complexity
+- [ ] Add sound effects and celebration feedback
+- [ ] Integrate with GameContainer and progress tracking
+- [ ] Register route in App.tsx and add to gameRegistry.ts
+- [ ] Test smoke tests pass (including new game)
+
+Source:
+
+- Research: docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md - Section A6: Follow the Leader
+- Technical patterns: YogaAnimals.tsx (pose detection), BalloonPopFitness.tsx (pose landmarker)
+- Priority: P0 from catalog - Physical Movement Games section
+
+Plan:
+
+- [ ] Create followTheLeaderLogic.ts with movement patterns and validation
+- [ ] Implement pose detection using Pose Landmarker (reused from YogaAnimals)
+- [ ] Create movement library (penguin walk, frog hop, tiptoe, etc.)
+- [ ] Build main game page with animated guide character
+- [ ] Add movement similarity scoring system
+- [ ] Implement sound effects and celebration
+- [ ] Test pose detection accuracy for movement mirroring
+- [ ] Register routes and update game gallery
+- [ ] Run smoke tests and validate
+
+Execution log:
+
+- 2026-02-27 16:54 PST | Ticket created | Evidence: Added to WORKLOG_ADDENDUM_v3.md with STAMP-20260227T165432Z-claude-qp0x
+- 2026-02-27 16:54 PST | Analysis complete | Evidence: Confirmed 46 frontend games + BalloonPopFitness = 47 total
+- 2026-02-27 16:54 PST | Game selection | Evidence: Selected Follow the Leader as next P0 priority physical movement game
+
+Status updates:
+
+- 2026-02-27 16:54 PST | **OPEN** | Ticket created, ready for implementation
+
+Next actions:
+
+1. Create followTheLeaderLogic.ts with movement patterns
+2. Implement FollowTheLeader.tsx page
+3. Add pose detection and movement validation
+4. Test and validate integration
+
+Risks/notes:
+
+- Reuses existing Pose Landmarker infrastructure from YogaAnimals/BalloonPopFitness
+- Movement pattern validation requires accurate pose similarity detection
+- High engagement potential with animal-themed movements
+- Estimated effort: 1.5 weeks (medium complexity)
+
+---
+
 ### TCK-20260227-008 :: Implement Balloon Pop Fitness Game
 
 Ticket Stamp: STAMP-20260227T115018Z-claude-mh4j

@@ -62,6 +62,8 @@ import { NumberTapTrail } from '../NumberTapTrail';
 import { ShapeSequence } from '../ShapeSequence';
 import { YogaAnimals } from '../YogaAnimals';
 import { FreezeDance } from '../FreezeDance';
+import { FollowTheLeader } from '../FollowTheLeader';
+import { MusicalStatues } from '../MusicalStatues';
 import { SimonSays } from '../SimonSays';
 import { FingerNumberShow } from '../../games/FingerNumberShow';
 import { WordBuilder } from '../WordBuilder';
@@ -156,6 +158,28 @@ describe('Game pages smoke tests', () => {
       expect(
         screen.queryByText('Simon Says') ||
           screen.queryByText(/Loading Simon Says/),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('FollowTheLeader', () => {
+    it('renders without throwing and shows key UI', () => {
+      expect(() => renderInRouter(<FollowTheLeader />)).not.toThrow();
+      // Initial render shows menu with title
+      expect(
+        screen.queryByText('Follow the Leader') ||
+        screen.queryByText(/Loading/),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('MusicalStatues', () => {
+    it('renders without throwing and shows key UI', () => {
+      expect(() => renderInRouter(<MusicalStatues />)).not.toThrow();
+      // Initial render shows menu with title
+      expect(
+        screen.queryByText('Musical Statues') ||
+        screen.queryByText(/Loading/),
       ).toBeTruthy();
     });
   });

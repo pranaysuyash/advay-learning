@@ -15,7 +15,6 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
-import Webcam from 'react-webcam';
 import {
   Target,
   Music,
@@ -248,12 +247,7 @@ export default function RhymeTime() {
     <GameContainer title="Rhyme Time" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
-        />
+        
       </div>
       
       {showMenu ? (

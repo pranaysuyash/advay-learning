@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -415,12 +414,7 @@ export function AirCanvas() {
       />
 
       {/* Webcam (hidden but functional) */}
-      <Webcam
-        ref={webcamRef}
-        style={{ display: 'none' }}
-        mirrored
-        videoConstraints={{ width: 640, height: 480 }}
-      />
+      
 
       <CameraThumbnail isHandDetected={isHandReady} position="bottom-right" />
 

@@ -93,7 +93,7 @@ export function FruitNinjaAir() {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
     const y = (event.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
-    
+
     slicePathRef.current.push({ x, y });
     if (slicePathRef.current.length > 10) slicePathRef.current.shift();
 
@@ -121,7 +121,7 @@ export function FruitNinjaAir() {
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => handleLevelChange(l.level)}
-              className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
+              className={`px-4 py-2 rounded-full font-black text-sm transition-all ${currentLevel === l.level ? 'bg-green-500 text-white shadow-[0_2px_0_#15803D]' : 'bg-white border-2 border-green-200 hover:border-green-400 text-slate-700'}`}>
               Level {l.level}
             </button>
           ))}
@@ -168,7 +168,7 @@ export function FruitNinjaAir() {
 
         {gameState !== 'start' && (
           <div className="flex gap-3">
-            <button type="button" onClick={handleStart} className="px-6 py-3 bg-gray-200 rounded-xl font-bold">Play Again</button>
+            <button type="button" onClick={handleStart} className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all">Play Again</button>
             <button type="button" onClick={handleFinish} className="px-6 py-3 bg-green-500 text-white rounded-xl font-bold">Finish</button>
           </div>
         )}

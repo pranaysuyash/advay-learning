@@ -16,12 +16,19 @@ export function SyllableClap() {
   const [correct, setCorrect] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [lastAnswer, setLastAnswer] = useState<number | null>(null);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
 
-  const { playClick, playSuccess, playError } = useAudio();
+  const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('syllable-clap');
 
-  useGameSessionProgress({ gameName: 'Syllable Clap', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
+  useGameSessionProgress({
+    gameName: 'Syllable Clap',
+    score,
+    level: currentLevel,
+    isPlaying: gameState === 'playing',
+    metaData: { correct, round },
+  });
 
   const startGame = () => {
     const newWords = getWordsForLevel(currentLevel);
@@ -32,6 +39,7 @@ export function SyllableClap() {
     setCorrect(0);
     setShowResult(false);
     setFeedback('');
+    setLastAnswer(null);
     setGameState('playing');
   };
 
@@ -41,14 +49,16 @@ export function SyllableClap() {
     const currentWord = words[currentIndex];
     const isCorrect = checkAnswer(currentWord.syllableCount, answer);
     setShowResult(true);
+    setLastAnswer(answer);
     if (isCorrect) {
       playSuccess();
       setCorrect((c) => c + 1);
       setScore((s) => s + 25);
-      setFeedback(`Correct! "${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
+      setFeedback(`✅ Yes! "${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
+      if (correct > 0 && (correct + 1) % 5 === 0) playCelebration();
     } else {
       playError();
-      setFeedback(`"${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
+      setFeedback(`❌ "${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
     }
     setTimeout(() => {
       if (currentIndex < words.length - 1) {
@@ -56,72 +66,185 @@ export function SyllableClap() {
         setRound((r) => r + 1);
         setShowResult(false);
         setFeedback('');
+        setLastAnswer(null);
       } else {
         setGameState('complete');
+        if (correct >= words.length * 0.8) playCelebration();
       }
     }, 2500);
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => {
+    playClick();
+    await onGameComplete(correct);
+    navigate('/games');
+  }, [correct, onGameComplete, navigate, playClick]);
 
   const currentWord = words[currentIndex];
   const maxSyllables = LEVELS[currentLevel - 1]?.maxSyllables ?? 3;
 
   return (
-    <GameContainer title="Syllable Clap" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
-        <div className="flex gap-2">
-          {LEVELS.map((l) => (
-            <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}
-              className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
-              Level {l.level}
-            </button>
-          ))}
-        </div>
+    <GameContainer
+      title='Syllable Clap'
+      score={score}
+      level={currentLevel}
+      showScore
+      onHome={() => navigate('/games')}
+      reportSession={false}
+    >
+      <div className='h-full overflow-auto p-4 md:p-6'>
+        <div className='max-w-2xl mx-auto space-y-4'>
 
-        {gameState === 'start' && (
-          <div className="text-center">
-            <p className="text-6xl mb-4">👏</p>
-            <h2 className="text-2xl font-bold mb-2">Syllable Clap!</h2>
-            <p className="mb-4">Clap or tap the number of syllables!</p>
-            <button type="button" onClick={handleStart} className="px-8 py-4 bg-blue-500 text-white rounded-2xl font-bold text-xl">Start Clapping! 👏</button>
+          {/* Level selector */}
+          <div className='flex gap-2 justify-center'>
+            {LEVELS.map((l) => (
+              <button
+                key={l.level}
+                type='button'
+                onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); }}
+                className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#1D4ED8] ${currentLevel === l.level
+                    ? 'bg-[#3B82F6] text-white border-2 border-blue-600'
+                    : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-blue-300'
+                  }`}
+              >
+                Level {l.level}
+              </button>
+            ))}
           </div>
-        )}
 
-        {gameState === 'playing' && currentWord && (
-          <>
-            <p className="text-6xl mb-2">{currentWord.emoji}</p>
-            <p className="text-2xl font-bold text-purple-600">"{currentWord.word}"</p>
-            <p className="text-sm text-gray-500 mb-4">Hint: {currentWord.hint}</p>
-            <p className="text-lg font-bold">How many syllables?</p>
-            <div className="flex gap-3">
-              {Array.from({ length: maxSyllables }, (_, i) => i + 1).map((num) => (
-                <button key={num} type="button" onClick={() => handleAnswer(num)} disabled={showResult}
-                  className={`w-16 h-16 rounded-full font-bold text-2xl transition-all ${showResult ? (num === currentWord.syllableCount ? 'bg-green-400' : 'bg-gray-200') : 'bg-blue-200 hover:bg-blue-300'}`}>
-                  {num}
+          {/* Menu */}
+          {gameState === 'start' && (
+            <div className='flex flex-col items-center gap-6 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
+              <div className='text-7xl'>👏</div>
+              <div>
+                <h2 className='text-4xl font-black text-slate-900 tracking-tight'>Syllable Clap!</h2>
+                <p className='text-lg font-bold text-slate-600 mt-2'>
+                  Listen to a word and clap out its syllables — then tap the right number!
+                </p>
+              </div>
+              <div className='flex items-center gap-3 text-sm font-bold text-slate-600'>
+                <span className='px-3 py-1 bg-blue-50 rounded-full border border-blue-200'>Score +25 per correct</span>
+                <span className='px-3 py-1 bg-purple-50 rounded-full border border-purple-200'>10 words per round</span>
+              </div>
+              <button
+                type='button'
+                onClick={handleStart}
+                className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-2xl font-black text-2xl shadow-[0_4px_0_#1D4ED8] hover:scale-105 active:scale-95 transition-all'
+              >
+                Start Clapping! 👏
+              </button>
+            </div>
+          )}
+
+          {/* Playing */}
+          {gameState === 'playing' && currentWord && (
+            <>
+              {/* Progress bar */}
+              <div className='bg-white rounded-2xl border-2 border-[#F2CC8F] px-5 py-3 shadow-[0_3px_0_#E5B86E]'>
+                <div className='flex items-center justify-between mb-2'>
+                  <span className='text-sm font-black uppercase tracking-widest text-blue-400'>Word {currentIndex + 1} of {words.length}</span>
+                  <span className='text-sm font-black text-slate-500'>Correct: {correct}</span>
+                </div>
+                <div className='w-full h-2 bg-slate-100 rounded-full overflow-hidden'>
+                  <div
+                    className='h-full bg-[#3B82F6] rounded-full transition-all'
+                    style={{ width: `${((currentIndex) / words.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Word card */}
+              <div className='bg-gradient-to-br from-blue-50 via-purple-50 to-white rounded-3xl border-3 border-[#F2CC8F] p-8 shadow-[0_6px_0_#E5B86E] text-center'>
+                <div className='text-7xl mb-4'>{currentWord.emoji}</div>
+                <p className='text-5xl font-black text-purple-600 mb-3'>"{currentWord.word}"</p>
+                <p className='text-sm font-bold text-slate-400'>💡 {currentWord.hint}</p>
+                <p className='text-lg font-black text-slate-700 mt-4'>How many syllables?</p>
+              </div>
+
+              {/* Syllable number buttons */}
+              <div className='flex gap-4 justify-center'>
+                {Array.from({ length: maxSyllables }, (_, i) => i + 1).map((num) => {
+                  const isCorrectNum = num === currentWord.syllableCount;
+                  const isSelected = num === lastAnswer;
+                  return (
+                    <button
+                      key={num}
+                      type='button'
+                      onClick={() => handleAnswer(num)}
+                      disabled={showResult}
+                      className={[
+                        'w-20 h-20 rounded-2xl font-black text-3xl transition-all border-3',
+                        showResult
+                          ? isCorrectNum
+                            ? 'bg-emerald-100 border-emerald-400 text-emerald-700 scale-110 shadow-[0_4px_0_#6EE7B7]'
+                            : isSelected
+                              ? 'bg-red-100 border-red-400 text-red-700'
+                              : 'bg-slate-50 border-slate-200 text-slate-300'
+                          : 'bg-white border-[#F2CC8F] text-slate-900 hover:border-blue-400 hover:scale-110 hover:bg-blue-50 active:scale-95 cursor-pointer shadow-[0_4px_0_#E5B86E]',
+                      ].join(' ')}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Clap hint */}
+              <div className='text-center text-sm font-bold text-slate-400'>
+                Tap the number! 👆 Or clap along and count.
+              </div>
+
+              {/* Feedback */}
+              {feedback && (
+                <div className={`rounded-2xl px-5 py-4 border-2 font-bold text-lg text-center ${feedback.startsWith('✅')
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                    : 'bg-red-50 border-red-300 text-red-700'
+                  }`}>
+                  {feedback}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Complete */}
+          {gameState === 'complete' && (
+            <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
+              <div className='text-7xl'>🎉</div>
+              <h2 className='text-4xl font-black text-slate-900'>Great Job!</h2>
+              <div className='grid grid-cols-3 gap-4 w-full max-w-sm'>
+                <div className='bg-emerald-50 border-2 border-emerald-200 px-4 py-3 rounded-xl'>
+                  <p className='text-xs font-black uppercase text-emerald-600'>Correct</p>
+                  <p className='text-3xl font-black text-emerald-700'>{correct}/{words.length}</p>
+                </div>
+                <div className='bg-blue-50 border-2 border-blue-200 px-4 py-3 rounded-xl'>
+                  <p className='text-xs font-black uppercase text-blue-600'>Accuracy</p>
+                  <p className='text-3xl font-black text-blue-700'>{Math.round((correct / words.length) * 100)}%</p>
+                </div>
+                <div className='bg-purple-50 border-2 border-purple-200 px-4 py-3 rounded-xl'>
+                  <p className='text-xs font-black uppercase text-purple-600'>Score</p>
+                  <p className='text-3xl font-black text-purple-700'>{score}</p>
+                </div>
+              </div>
+              <div className='flex gap-3'>
+                <button
+                  type='button'
+                  onClick={handleStart}
+                  className='px-8 py-4 bg-[#3B82F6] text-white rounded-xl font-black shadow-[0_4px_0_#1D4ED8] hover:scale-105 active:scale-95 transition-all'
+                >
+                  Play Again
                 </button>
-              ))}
+                <button
+                  type='button'
+                  onClick={handleFinish}
+                  className='px-8 py-4 bg-slate-100 text-slate-700 rounded-xl font-black border-2 border-slate-200 hover:bg-slate-200 transition-all'
+                >
+                  Finish
+                </button>
+              </div>
             </div>
-            <p className="text-lg font-medium text-purple-600">{feedback}</p>
-            <div className="flex gap-4">
-              <div className="bg-green-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Correct</p><p className="text-2xl font-bold">{correct}</p></div>
-              <div className="bg-blue-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Word</p><p className="text-2xl font-bold">{currentIndex + 1}/{words.length}</p></div>
-              <div className="bg-green-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Score</p><p className="text-2xl font-bold">{score}</p></div>
-            </div>
-          </>
-        )}
-
-        {gameState === 'complete' && (
-          <div className="text-center">
-            <p className="text-6xl mb-4">🎉</p>
-            <h2 className="text-2xl font-bold mb-2">Great Job!</h2>
-            <p className="text-xl mb-4">You got {correct} out of {words.length} correct!</p>
-            <p className="text-2xl font-bold text-green-600 mb-4">Score: {score}</p>
-            <button type="button" onClick={handleStart} className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold mr-4">Play Again</button>
-            <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold">Finish</button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </GameContainer>
   );

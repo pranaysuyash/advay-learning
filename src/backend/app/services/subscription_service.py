@@ -44,7 +44,7 @@ class SubscriptionService:
         payment_reference: Optional[str] = None,
     ) -> Subscription:
         """Create a new subscription."""
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         duration = PLAN_DURATIONS[plan_type]
 
         subscription = Subscription(
@@ -73,7 +73,7 @@ class SubscriptionService:
             select(Subscription)
             .where(Subscription.parent_id == parent_id)
             .where(Subscription.status == SubscriptionStatus.ACTIVE)
-            .where(Subscription.end_date > datetime.now(timezone.utc))
+            .where(Subscription.end_date > datetime.utcnow())
             .order_by(Subscription.created_at.desc())
         )
         return result.scalar_one_or_none()
@@ -152,7 +152,7 @@ class SubscriptionService:
             id=str(uuid4()),
             subscription_id=subscription_id,
             game_id=new_game_id,
-            swapped_at=datetime.now(timezone.utc),
+            swapped_at=datetime.utcnow(),
         )
 
         db.add(selection)
@@ -171,7 +171,7 @@ class SubscriptionService:
         if not subscription:
             raise ValueError("Subscription not found")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         if subscription.end_date <= now:
             return 0
 
@@ -211,7 +211,7 @@ class SubscriptionService:
         old_subscription.upgraded_to_id = None  # Will be set after new is created
 
         # Create new subscription
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         new_duration = PLAN_DURATIONS[new_plan]
 
         new_subscription = Subscription(

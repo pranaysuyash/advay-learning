@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -369,7 +368,7 @@ export function YogaAnimals() {
   };
 
   // Handle video loaded
-  const handleVideoLoad = () => {
+  const _handleVideoLoad = () => {
     setCameraReady(true);
   };
 
@@ -552,12 +551,7 @@ export function YogaAnimals() {
             <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
               {/* Camera feed */}
               <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
-                <Webcam
-                  ref={webcamRef}
-                  onLoadedData={handleVideoLoad}
-                  className='w-full h-64 object-cover'
-                  mirrored
-                />
+                
                 <canvas
                   ref={canvasRef}
                   className='absolute top-0 left-0 w-full h-64 pointer-events-none'
