@@ -51,7 +51,20 @@ export const subscriptionApi = {
         daysRemaining: data.subscription.days_remaining,
       };
     } catch (error) {
-      // No subscription or error
+      // Distinguish between expected (no subscription) and unexpected errors
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          // Expected: No subscription found
+          return {
+            hasActiveSubscription: false,
+            accessibleGames: null,
+          };
+        }
+      }
+
+      // Unexpected error - log for debugging
+      console.error('Subscription status check failed:', error);
       return {
         hasActiveSubscription: false,
         accessibleGames: null,
@@ -70,9 +83,32 @@ export const subscriptionApi = {
         reason: response.data.reason,
       };
     } catch (error) {
+      // Distinguish between different error types for better debugging
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number; data?: { reason?: string } } };
+
+        if (axiosError.response?.status === 403) {
+          // Expected: Access denied
+          return {
+            hasAccess: false,
+            reason: axiosError.response.data?.reason || 'Access denied',
+          };
+        }
+
+        if (axiosError.response?.status === 404) {
+          // Expected: Game or subscription not found
+          return {
+            hasAccess: false,
+            reason: 'Game or subscription not found',
+          };
+        }
+      }
+
+      // Unexpected error - log for debugging
+      console.error('Game access check failed:', error);
       return {
         hasAccess: false,
-        reason: 'Access check failed',
+        reason: 'Access check failed - see console for details',
       };
     }
   },
