@@ -164,7 +164,7 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Get all pending items, optionally filtered by profile
      */
     getPending(profileId?: string): ProgressItem[] {
-      const pending = repo.getPending();
+      const pending = repo.getByStatus('pending');
       if (!profileId) return pending;
       return pending.filter(i => i.profile_id === profileId);
     },
@@ -325,11 +325,11 @@ export function createProgressQueue(repo: ProgressRepository) {
     },
 
     /**
-     * Sync all pending items with retry logic
+     * Sync all pending and error items with retry logic
      */
     async syncAll(apiClient: any): Promise<SyncResult> {
       const result: SyncResult = { synced: 0, failed: 0, deadLettered: 0, errors: [] };
-      const items = repo.getPending();
+      const items = [...repo.getByStatus('pending'), ...repo.getByStatus('error')];
 
       if (items.length === 0) return result;
 

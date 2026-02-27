@@ -93,6 +93,11 @@ Some security-specific tests exist but may not be comprehensive.
 - **Minimal fix direction:** Implement token rotation, secure cookie settings, and token blacklisting
 - **Invariant:** JWT tokens should be protected against theft and misuse
 
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- Token blacklisting: `src/backend/app/services/token_service.py`
+- RevokedToken model: `src/backend/app/db/models/revoked_token.py`
+- Tests exist: `test_security.py` - verifies blacklist on logout
+
 ### 2. Insufficient Rate Limiting (MEDIUM)
 
 - **ID:** AUTHZ-2
@@ -102,6 +107,10 @@ Some security-specific tests exist but may not be comprehensive.
 - **Blast radius:** Authentication endpoints
 - **Minimal fix direction:** Implement comprehensive rate limiting with different tiers for different endpoints
 - **Invariant:** All auth endpoints should have appropriate rate limiting
+
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- Rate limiting: `src/backend/app/core/rate_limit.py` with slowapi
+- Setup in main.py: `setup_rate_limiting(app)`
 
 ### 3. Password Policy Enforcement (MEDIUM)
 
@@ -113,6 +122,10 @@ Some security-specific tests exist but may not be comprehensive.
 - **Minimal fix direction:** Enhance password policy with additional checks (common passwords, etc.)
 - **Invariant:** All passwords should meet strong security requirements
 
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- Enhanced password validation: `src/backend/app/schemas/user.py`
+- Includes: length, uppercase, lowercase, digit, special char, common passwords, email check
+
 ### 4. Session Management Issues (MEDIUM)
 
 - **ID:** AUTHZ-4
@@ -122,6 +135,11 @@ Some security-specific tests exist but may not be comprehensive.
 - **Blast radius:** User sessions and account security
 - **Minimal fix direction:** Implement secure session management with rotation and validation
 - **Invariant:** Sessions should be protected against fixation and hijacking
+
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- Token revocation: `RefreshTokenService.revoke_refresh_token()`
+- Token blacklisting: `TokenService.revoke_access_token()`
+- All tokens revoked on logout
 
 ### 5. Authorization Bypass Potential (HIGH)
 
@@ -133,6 +151,11 @@ Some security-specific tests exist but may not be comprehensive.
 - **Minimal fix direction:** Review all endpoints for proper authorization checks
 - **Invariant:** All protected endpoints should verify proper authorization
 
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- All endpoints use `Depends(get_current_user)` for authentication
+- `require_superuser` decorator exists: `src/backend/app/api/permissions.py`
+- Profile ownership checks exist in endpoints
+
 ### 6. Missing Security Headers (LOW)
 
 - **ID:** AUTHZ-6
@@ -142,6 +165,9 @@ Some security-specific tests exist but may not be comprehensive.
 - **Blast radius:** API security
 - **Minimal fix direction:** Add security headers to API responses
 - **Invariant:** All API responses should include appropriate security headers
+
+**STATUS (2026-02-27): ALREADY IMPLEMENTED**
+- SecurityHeadersMiddleware: `src/backend/app/main.py`
 
 ---
 

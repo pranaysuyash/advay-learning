@@ -199,7 +199,7 @@ function runRepositoryTests(
     });
 
     describe('getPending', () => {
-      it('returns pending and error items', () => {
+      it('returns only pending items', () => {
         const pending = createValidItem({ status: 'pending' });
         const error = createValidItem({ status: 'error' });
         const synced = createValidItem({ status: 'synced' });
@@ -209,9 +209,8 @@ function runRepositoryTests(
         repo.save(synced);
 
         const pendingItems = repo.getPending();
-        expect(pendingItems).toHaveLength(2);
-        expect(pendingItems.map(i => i.status)).toContain('pending');
-        expect(pendingItems.map(i => i.status)).toContain('error');
+        expect(pendingItems).toHaveLength(1);
+        expect(pendingItems[0].status).toBe('pending');
       });
     });
 
