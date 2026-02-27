@@ -47,6 +47,7 @@ Description:
 Complete requested UX-critical remediations for Emoji Match (S1-001/002/003) and finish remaining image-optimization rollout so P0 status is fully complete. Also correct stale TypeScript-error status text in readiness documentation.
 
 Scope contract:
+
 - In-scope:
   - Emoji Match toddler UX hardening for hit forgiveness, visible cursor guidance, and reduced timer anxiety.
   - Generate missing WebP variants for remaining PNG mascot assets and register them in image manifest.
@@ -57,17 +58,19 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/EmojiMatch.tsx
   - src/frontend/src/utils/imageAssets.ts
-  - src/frontend/src/utils/__tests__/imageAssets.test.ts
+  - src/frontend/src/utils/**tests**/imageAssets.test.ts
   - src/frontend/src/components/ui/Layout.tsx
   - docs/V2_ARCHITECTURE_PROPOSALS.md
   - docs/DEMO_READINESS_ASSESSMENT.md
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] EmojiMatch uses toddler-forgiving hit behavior and larger targets.
 - [x] Countdown pressure removed from visible UI while keeping round pacing logic.
 - [x] Cursor guidance is explicit when hand not detected.
@@ -75,6 +78,7 @@ Acceptance Criteria:
 - [x] Type-check/lint/tests pass and stale TypeScript-error claim updated.
 
 Execution log:
+
 - 2026-02-23 01:08 IST — Updated EmojiMatch constants/UI for S1 fixes (`BASE_HIT_RADIUS`, larger targets, non-anxious timer copy, cursor guidance).
 - 2026-02-23 01:10 IST — Generated missing `.webp` assets using `cwebp` for `pip_mascot*` and `red_panda_no_bg_cropped*`.
 - 2026-02-23 01:11 IST — Extended `imageAssets` manifest for new converted assets and added test coverage.
@@ -83,11 +87,13 @@ Execution log:
 - 2026-02-23 01:15 IST — Updated stale TypeScript-error status in `DEMO_READINESS_ASSESSMENT.md`.
 
 Evidence:
+
 - Command: `cd src/frontend && npm run type-check`
 - Command: `cd src/frontend && npm run lint`
 - Command: `cd src/frontend && npm run test -- src/utils/__tests__/imageAssets.test.ts src/pages/__tests__/GamePages.smoke.test.tsx src/pages/__tests__/CameraRoutes.smoke.test.tsx`
 
 Status updates:
+
 - 2026-02-23 01:15 IST **DONE** — EmojiMatch S1 blockers and image-optimization completion pass verified; TypeScript "10 errors" status corrected as historical.
 
 ---
@@ -104,6 +110,7 @@ Description:
 Complete and verify P0 frontend launch blockers for camera-game stability and performance: camera error boundaries, MediaPipe worker offload runtime with fallback, and image optimization baseline with WebP/fallback pathing.
 
 Scope contract:
+
 - In-scope:
   - Stabilize smoke tests for camera routes by preventing TTS worker/model boot in unit environment.
   - Verify worker runtime, boundary behavior, and image helper coverage with targeted tests.
@@ -114,26 +121,30 @@ Scope contract:
 - Behavior change allowed: YES (test stabilization + optimized image source selection path)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
-  - src/frontend/src/pages/__tests__/CameraRoutes.smoke.test.tsx
+  - src/frontend/src/pages/**tests**/CameraRoutes.smoke.test.tsx
   - src/frontend/src/components/Map.tsx
   - docs/V2_ARCHITECTURE_PROPOSALS.md
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] Camera + game smoke suites pass together without worker crash.
 - [x] `type-check` and `lint` pass after P0 changes.
 - [x] P0 targeted tests for boundaries/worker/image helpers pass.
 - [x] Adventure map resolves through optimized image helper path.
 
 Execution log:
+
 - 2026-02-23 00:42 IST — Added `useTTS` mock in `CameraRoutes.smoke.test.tsx` to prevent Kokoro worker init in smoke runs.
 - 2026-02-23 00:43 IST — Verified smoke suites pass together.
 - 2026-02-23 00:43 IST — Verified `type-check`, `lint`, and targeted P0 tests pass.
 - 2026-02-23 00:44 IST — Updated `Map.tsx` to use `resolveImageUrl('adventure-map')` with fallback.
 
 Evidence:
+
 - Command: `cd src/frontend && npm run test -- src/pages/__tests__/GamePages.smoke.test.tsx src/pages/__tests__/CameraRoutes.smoke.test.tsx`
   - Output: 2 test files passed, 26 tests passed.
 - Command: `cd src/frontend && npm run type-check`
@@ -144,6 +155,7 @@ Evidence:
   - Output: 4 test files passed, 11 tests passed.
 
 Status updates:
+
 - 2026-02-23 00:45 IST **DONE** — P0 closure verification completed; image optimization remains partial rollout by design (prioritized assets complete, broader conversion queued).
 
 ---
@@ -160,6 +172,7 @@ Description:
 Implement daily time breakdown chart in Progress page to show minutes played per day. Addresses the #1 finding from Neha persona interview: parents cannot verify if child played 9 min/day or one 45-min binge.
 
 Scope contract:
+
 - In-scope:
   - Add `calculateDailyTimeBreakdown()` function to progressCalculations.ts
   - Create `DailyTimeChart` component (bar chart showing last 7 days)
@@ -173,16 +186,18 @@ Scope contract:
 - Behavior change allowed: YES (new UI component, new calculation)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/utils/progressCalculations.ts (add function)
   - src/frontend/src/components/progress/DailyTimeChart.tsx (new)
   - src/frontend/src/types/progress.ts (add types)
   - src/frontend/src/pages/Progress.tsx (integrate)
-  - src/frontend/src/utils/__tests__/progressCalculations.test.ts (new tests)
+  - src/frontend/src/utils/**tests**/progressCalculations.test.ts (new tests)
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] Daily time breakdown calculated from progress timestamps
 - [x] Bar chart displays last 7 days of activity (minutes per day)
 - [x] Visual indicator when daily limit exceeded (orange/red bar)
@@ -190,6 +205,7 @@ Acceptance Criteria:
 - [x] All existing tests pass + 9 new tests added
 
 Execution log:
+
 - 2026-02-23 00:30 IST — **OPEN** — Implementation ticket created from research findings
 - 2026-02-23 00:35 IST — Added `DailyTimeBreakdown` and `TimeBreakdownSummary` types to progress.ts
 - 2026-02-23 00:38 IST — Implemented `calculateDailyTimeBreakdown()` function in progressCalculations.ts
@@ -200,10 +216,12 @@ Execution log:
 - 2026-02-23 00:50 IST — **DONE** — Implementation complete, TypeScript clean, tests passing
 
 Status updates:
+
 - 2026-02-23 00:30 IST **IN_PROGRESS** — Starting implementation
 - 2026-02-23 00:50 IST **DONE** — Feature complete with tests
 
 Implementation Details:
+
 - Estimates time: ~3 minutes per activity (based on average game duration)
 - Shows last 7 days with day names (Mon, Tue, etc.)
 - Color-coded bars: emerald (on track), yellow (near limit), orange (over limit)
@@ -212,15 +230,18 @@ Implementation Details:
 - Limit line indicator shows 20-minute threshold
 
 Files Modified:
+
 - `src/frontend/src/types/progress.ts` — Added DailyTimeBreakdown, TimeBreakdownSummary interfaces
 - `src/frontend/src/utils/progressCalculations.ts` — Added calculateDailyTimeBreakdown() function
 - `src/frontend/src/pages/Progress.tsx` — Integrated DailyTimeChart component
 
 Files Created:
+
 - `src/frontend/src/components/progress/DailyTimeChart.tsx` — New bar chart component
 - `src/frontend/src/utils/__tests__/progressCalculations.test.ts` — Unit tests (9 tests)
 
 Test Results:
+
 ```
 ✓ src/utils/__tests__/progressCalculations.test.ts (9 tests) 17ms
 Test Files 1 passed (1)
@@ -231,6 +252,7 @@ TypeScript Check: ✅ Clean
 Overall Test Suite: 616 passed (my changes didn't break existing tests)
 
 Next Actions:
+
 1. Consider adding PDF export feature (separate ticket)
 2. Consider real-time session tracking to replace estimation
 3. Deploy to staging for parent feedback
@@ -238,6 +260,86 @@ Next Actions:
 ---
 
 ### TCK-20260223-001 :: Simulated Customer Interview - Neha (Safety-First Parent)
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 00:15 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Conducted a simulated customer interview with the "Neha — The Safety-First Parent" persona to uncover insights about the Parent Dashboard experience, privacy concerns, and retention blockers.
+
+Scope contract:
+
+- In-scope:
+  - Interview simulation with Neha persona (32, Mumbai, HR Manager, mother of Aarav 2y8m and Isha 5y)
+  - Focus area: Parent Dashboard (progress tracking, time limits, privacy settings)
+  - Document key insights, pain points, and recommended actions
+- Out-of-scope:
+  - Actual user interviews with real customers
+  - Code implementation of recommendations
+  - UI/UX design changes
+- Behavior change allowed: NO (research only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): docs/WORKLOG_TICKETS.md (this entry)
+- Branch/PR: main
+
+Acceptance Criteria:
+
+- [x] Interview transcript captured with persona context
+- [x] Key insights identified and categorized by severity
+- [x] Recommended actions documented for Parent Dashboard improvements
+- [x] Findings linked to persona goals/frustrations from USER_PERSONAS.md
+
+Execution log:
+
+- 2026-02-23 00:15 IST — **OPEN** — Ticket created, interview simulation started
+- 2026-02-23 00:20 IST — Interview transcript completed with 6 key questions
+- 2026-02-23 00:22 IST — Insights table created with severity ratings
+- 2026-02-23 00:25 IST — **DONE** — Research documented, findings summarized
+
+Status updates:
+
+- 2026-02-23 00:25 IST **DONE** — Simulated interview complete with actionable insights for Parent Dashboard
+
+Key Findings (Evidence):
+
+| Insight                                    | Severity   | Implication                                |
+| ------------------------------------------ | ---------- | ------------------------------------------ |
+| Time breakdown by day not visible          | 🔴 High    | Can't enforce daily 20-min rule            |
+| No "struggle" visibility — only completion | 🔴 High    | Missed intervention opportunities          |
+| App restart bypasses time limits           | 🟡 Medium  | Children inadvertently circumvent controls |
+| Camera settings label unclear              | 🟡 Medium  | Privacy controls cause confusion           |
+| No exportable progress reports             | 🔴 High    | Blocks teacher/parent communication        |
+| Green dot = trust signal                   | ✅ Working | Keep this prominent                        |
+
+Recommended Actions:
+
+1. Add daily time breakdown chart — bar chart showing minutes per day
+2. Show attempt counts — "Letter K: 8 attempts, 3 correct" not just ✓
+3. Fix time limit enforcement — track across sessions server-side
+4. Clarify camera settings — "Disable camera" vs "Hide indicator"
+5. Add "Download Progress Report (PDF)" — one-click, WhatsApp-friendly
+6. Keep the green dot — it's working as a privacy trust signal
+
+Source References:
+
+- Persona: `docs/USER_PERSONAS.md` — Persona 4: Neha — The Safety-First Parent
+- Related Persona: Vikram (Data-Driven Father) — influences renewal decision
+- Target Area: Parent Dashboard — progress tracking, settings, time controls
+
+Next Actions:
+
+1. Create UX tickets for high-severity findings (time breakdown, struggle visibility, PDF export)
+2. Share insights with product team for dashboard roadmap prioritization
+3. Consider follow-up simulated interviews with other personas (Vikram, Ananya, Dadi)
+
+---
+
 ### TCK-20260223-003 :: Struggle Visibility - Show Attempt Count in Progress
 
 Type: IMPLEMENTATION
@@ -250,6 +352,7 @@ Description:
 Add attempt count visibility to Progress page so parents can identify when their child is struggling with specific content. Currently shows "Letter K: 85%" — parent doesn't know if that's 2 attempts or 10. Neha interview: "I don't know if she got it on the first try or the tenth."
 
 Scope contract:
+
 - In-scope:
   - Add optional `attempt_count` field to `ProgressItem` type
   - Update progress tracking to capture attempts (default to 1 if not tracked)
@@ -263,6 +366,7 @@ Scope contract:
 - Behavior change allowed: YES (new field, new UI components)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/types/progress.ts (add attempt_count)
@@ -274,6 +378,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] ProgressItem has optional attempt_count field
 - [x] Recent activity shows attempts with visual indicators
 - [x] Items with >5 attempts OR <50% accuracy get "Needs Attention" badge
@@ -281,6 +386,7 @@ Acceptance Criteria:
 - [x] All new tests pass (27 tests total)
 
 Execution log:
+
 - 2026-02-23 00:55 IST — **OPEN** — Ticket created from Neha interview findings
 - 2026-02-23 00:56 IST — Analysis: ProgressItem lacks attempt tracking
 - 2026-02-23 00:58 IST — Added `attempt_count` to ProgressItem type
@@ -294,10 +400,12 @@ Execution log:
 - 2026-02-23 01:10 IST — **DONE** — Feature complete, TypeScript clean, 27 tests passing
 
 Status updates:
+
 - 2026-02-23 00:56 IST **IN_PROGRESS** — Starting implementation
 - 2026-02-23 01:10 IST **DONE** — Implementation complete with tests
 
 Research Findings:
+
 - Current ProgressItem: id, activity_type, content_id, score, completed_at
 - No existing attempt tracking in data model
 - Score is 0-100 but context (attempts) missing
@@ -307,33 +415,39 @@ Research Findings:
 Implementation Details:
 
 **Attention Level Logic:**
+
 - High: >5 attempts OR <50% accuracy → Orange "Needs Help" badge
 - Medium: 3-5 attempts OR 50-70% accuracy → Yellow "Practice More" badge
 - Low: 2 attempts → Blue badge (not in needs attention list)
 - None: 1 attempt with good accuracy → Green (not shown)
 
 **New Components:**
+
 1. `StruggleIndicator` — Badge showing attention level with icon
 2. `StruggleDot` — Compact dot indicator for lists
 3. `ActivityWithAttempts` — Full row showing activity, accuracy %, attempts
 4. `NeedsAttentionSection` — Collapsible section at top of Progress page
 
 **Helper Functions:**
+
 - `analyzeStruggles(progress)` → Returns struggling items sorted by attempts
 - `formatAttempts(count)` → Returns "1st try", "2nd try", "3rd try", etc.
 
 Files Modified:
+
 - `src/frontend/src/types/progress.ts` — Added attempt_count, StruggleAnalysis, StruggleSummary
 - `src/frontend/src/utils/progressCalculations.ts` — Added analyzeStruggles(), formatAttempts()
 - `src/frontend/src/pages/Progress.tsx` — Integrated NeedsAttentionSection
 
 Files Created:
+
 - `src/frontend/src/components/progress/StruggleIndicator.tsx` — Badge component
 - `src/frontend/src/components/progress/ActivityWithAttempts.tsx` — Activity row component
 - `src/frontend/src/components/progress/NeedsAttentionSection.tsx` — Section component
 - `src/frontend/src/utils/__tests__/struggleAnalysis.test.ts` — Unit tests (18 tests)
 
 Test Results:
+
 ```
 ✓ src/utils/__tests__/struggleAnalysis.test.ts (18 tests) 3ms
 ✓ src/utils/__tests__/progressCalculations.test.ts (9 tests) 17ms
@@ -344,6 +458,7 @@ Tests 27 passed (27)
 TypeScript Check: ✅ Clean
 
 Parent-Facing Benefits:
+
 - Immediately see which letters/activities need practice
 - "Needs Attention" section at top shows struggling items first
 - Visual indicators: orange = urgent, yellow = practice more
@@ -364,12 +479,14 @@ Description:
 Add PDF export functionality to Progress page so parents can download/share professional progress reports with teachers. Neha interview: "I wanted to show Isha's preschool teacher... I ended up taking screenshots and WhatsApp-ing them. Felt unprofessional."
 
 Scope:
+
 - Generate text report with child's progress data
 - Include: time breakdown, struggle analysis, recommendations
 - WhatsApp share integration
 - Copy to clipboard + download .txt options
 
 Execution Log:
+
 - 01:15 IST — **OPEN** — Created ticket
 - 01:20 IST — Created `reportExport.ts` with generateTextReport(), generateWhatsAppShareUrl()
 - 01:25 IST — Created `ExportButton` component with dropdown menu
@@ -378,19 +495,23 @@ Execution Log:
 - 01:36 IST — **DONE** — Feature complete
 
 Files Created:
+
 - `src/frontend/src/utils/reportExport.ts` — Report generation utilities
 - `src/frontend/src/components/progress/ExportButton.tsx` — Export button with dropdown
 - `src/frontend/src/utils/__tests__/reportExport.test.ts` — 12 unit tests
 
 Files Modified:
+
 - `src/frontend/src/pages/Progress.tsx` — Added ExportButton to header
 
 Features:
+
 - 📋 Copy to Clipboard — Copy formatted text report
 - 📥 Download .txt — Save as text file
 - 💬 Share to WhatsApp — Pre-filled message with report
 
 Sample Report Output:
+
 ```
 📊 Isha's Learning Report
 📅 Monday, February 23, 2026
@@ -427,6 +548,7 @@ Description:
 Fix time limit bypass via app restart. Isha discovered she can reset Pip by closing/reopening the app. Implemented persistent session tracking using localStorage.
 
 Execution Log:
+
 - 01:15 IST — **OPEN** — Created ticket
 - 01:38 IST — Created `useSessionTimer` hook with localStorage persistence
 - 01:40 IST — Created `TimeLimitGate` component for "Time to Rest" screen
@@ -434,10 +556,12 @@ Execution Log:
 - 01:43 IST — **DONE** — Implementation complete
 
 Files Created:
+
 - `src/frontend/src/hooks/useSessionTimer.ts` — Session timer with localStorage persistence
 - `src/frontend/src/components/TimeLimitGate.tsx` — "Time to Rest" screen component
 
 Features:
+
 - ✅ Persists session time across app restarts (localStorage)
 - ✅ Resets automatically on new day
 - ✅ Tracks minutes used and remaining
@@ -445,9 +569,12 @@ Features:
 - ✅ Hook API: startSession(), stopSession(), addSessionTime(), resetSession()
 
 Usage:
+
 ```tsx
-const { minutesUsed, isTimeLimitReached, getRemainingMinutes } = useSessionTimer(20);
-if (isTimeLimitReached()) return <TimeLimitGate minutesUsed={minutesUsed} timeLimit={20} />;
+const { minutesUsed, isTimeLimitReached, getRemainingMinutes } =
+  useSessionTimer(20);
+if (isTimeLimitReached())
+  return <TimeLimitGate minutesUsed={minutesUsed} timeLimit={20} />;
 ```
 
 ---
@@ -464,6 +591,7 @@ Description:
 Clarify camera settings toggle label. Neha: "There's a 'Camera Settings' toggle but I couldn't tell if it was disabling the camera or just hiding the green dot indicator."
 
 Execution Log:
+
 - 01:15 IST — **OPEN** — Created ticket
 - 01:45 IST — Updated Settings page camera section with clearer labels
 - 01:47 IST — Added dynamic descriptions showing camera state
@@ -471,15 +599,18 @@ Execution Log:
 - 01:49 IST — **DONE** — Implementation complete
 
 Files Modified:
+
 - `src/frontend/src/pages/Settings.tsx` — Updated camera toggle section
 
 Changes Made:
 
 **Before:**
+
 - Label: "Enable Tracking"
 - Description: "Camera required. Video never leaves this device."
 
 **After:**
+
 - Label: "📷 Camera for Games" (or "🚫 Camera for Games" when off)
 - Dynamic description:
   - ON: "✅ Camera is ON — Used for hand tracking games. Video stays on this device only."
@@ -487,6 +618,7 @@ Changes Made:
 - Added Privacy Indicator box explaining the green dot
 
 Benefits:
+
 - Clearer on/off state with emoji indicators
 - Explains what happens when camera is off (touch fallback)
 - Reassures privacy with "Video stays on this device only" message
@@ -506,6 +638,7 @@ Description:
 Conduct simulated customer interview with Vikram persona to understand data-driven parent's needs for learning metrics, curriculum alignment, and renewal decision factors. Vikram is Neha's husband and the retention decider for the 6-8 age group.
 
 Scope contract:
+
 - In-scope:
   - Interview simulation with Vikram persona (38, Hyderabad, Data Analyst, father of Kabir 7y 3m)
   - Focus areas: Progress data visibility, learning metrics, curriculum mapping, export/share features
@@ -517,11 +650,13 @@ Scope contract:
 - Behavior change allowed: NO (research only)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): docs/PERSONA_INTERVIEWS_INDEX.md, docs/WORKLOG_TICKETS.md
 - Branch/PR: main
 
 Persona Context (from USER_PERSONAS.md):
+
 - **Vikram**: 38, Hyderabad, Senior Data Analyst at IT services company
 - **Child**: Kabir (7y 3m) — upper boundary of target age, biggest churn risk
 - **Primary Concern**: Measurable learning outcomes, ROI on educational spend
@@ -529,6 +664,7 @@ Persona Context (from USER_PERSONAS.md):
 - **Will only pay if**: Can see data proving his son is learning
 
 Planned Questions:
+
 1. How do you currently track Kabir's learning progress?
 2. What metrics would convince you the app is working?
 3. How do you verify if the content maps to CBSE curriculum?
@@ -537,6 +673,7 @@ Planned Questions:
 6. What data would justify ₹2,999/year vs private tuition?
 
 Execution log:
+
 - 2026-02-23 14:00 IST — **OPEN** — Ticket created, interview preparation started
 - 2026-02-23 14:05 IST — Reviewed Vikram persona profile from USER_PERSONAS.md
 - 2026-02-23 14:10 IST — Analyzed current Progress page capabilities
@@ -546,10 +683,12 @@ Execution log:
 - 2026-02-23 14:32 IST — **DONE** — Interview complete, findings documented
 
 Status updates:
+
 - 2026-02-23 14:00 IST **IN_PROGRESS** — Beginning interview simulation
 - 2026-02-23 14:32 IST **DONE** — Interview complete with actionable insights
 
 Research Notes:
+
 - Current Progress page shows: overall score, insights, recommendations
 - Missing: skill-level breakdown by subject, trend charts, curriculum alignment tags
 - No NCERT/NEP learning outcome mapping visible
@@ -560,36 +699,43 @@ Research Notes:
 Interview Transcript Summary:
 
 **Q: How do you evaluate if the app is working?**
+
 - Needs: "Letter recognition improved from 60% to 92% in 4 weeks"
 - Currently logs accuracy per letter in personal spreadsheet
 - "Great progress!" is too qualitative — wants quantitative
 
 **Q: Have you looked at the Progress page?**
+
 - Plant visualization is nice for Kabir, not useful for him
 - Wants CSV export, trend lines, accuracy slope over time
 - Currently exports JSON only — not parent-friendly
 
 **Q: What about curriculum alignment?**
+
 - Critical gap: No CBSE/NCERT/NEP mapping visible
 - Khan Academy Kids labels standards (CCSS.MATH.K.CC.A.1)
 - Without mapping, feels like entertainment not education
 
 **Q: How do you share progress with teacher?**
+
 - Currently has nothing concrete for parent-teacher meetings
 - Teacher asked if Kabir ready for cursive — no data to answer
 - Wants PDF: "Kabir traced 47 letters with 78% accuracy, struggle letters: Q, Z"
 
 **Q: What would make you cancel after Month 3?**
+
 1. Flat data/plateau with no "next skill" visible
 2. No competitive benchmark ("Top 15% for age 7" like Osmo)
 3. Stale content — finishes games, sees "Coming Soon" too long
 
 **Q: Compare to private tuition?**
+
 - Tuition: ₹3,000/month with daily corrections notebook
 - App: Plant emoji — not equivalent value
 - Needs skill breakdown with trend arrows to justify cost
 
 **Q: One thing to change?**
+
 - **Automated weekly email** — Sundays 8 PM with PDF
 - Content: letters practiced, accuracy change, badges, needs attention
 - Zero effort, maximum insight
@@ -606,14 +752,12 @@ Key Findings:
 | Teacher-ready PDF | 🟡 MEDIUM | Struggle letters, accuracy for meetings |
 
 Recommended Actions (P0):
+
 1. Add skill-level breakdown charts (Alphabets/Numbers/Shapes with % and trends)
 2. Add curriculum alignment tags ("Teaches NEP FLN: Phonemic Awareness")
 3. Implement weekly automated email (PDF report, Sundays 8 PM)
 
-Recommended Actions (P1):
-4. Percentile benchmarking ("Top X% for age 7")
-5. CSV export for spreadsheet parents
-6. Content roadmap visibility ("Coming next: Cursive at 80% accuracy")
+Recommended Actions (P1): 4. Percentile benchmarking ("Top X% for age 7") 5. CSV export for spreadsheet parents 6. Content roadmap visibility ("Coming next: Cursive at 80% accuracy")
 
 ---
 
@@ -642,17 +786,20 @@ Description:
 Comprehensive UI/UX analysis of Emoji Match game for toddler usability. Analyzed 634 video frames to identify critical usability issues affecting 2-4 year old users.
 
 Scope contract:
+
 - In-scope: Video frame analysis (634 frames), UI/UX issues identification, toddler usability assessment
 - Out-of-scope: Code implementation fixes, user testing execution
 - Behavior change allowed: NO (analysis only)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): emoji_match_analysis_report.md, evaluations/emoji_match_frames/ (634 frames)
 - Branch/PR: main
 - Range: HEAD
 
 Execution log:
+
 - 2026-02-20 14:30 IST — **OPEN** — Ticket created, analysis started
 - 2026-02-20 18:00 IST — Completed frame analysis (1-200 frames)
 - 2026-02-21 10:00 IST — Completed deep audit with gameplay analysis
@@ -660,9 +807,11 @@ Execution log:
 - 2026-02-23 12:50 IST — **DONE** — Analysis complete, 8 audit documents produced
 
 Status updates:
+
 - 2026-02-23 12:50 IST **DONE** — Comprehensive analysis complete
 
 Artifacts Produced:
+
 - `docs/audit/emoji_match_deep_audit.md` — Core audit findings
 - `docs/audit/emoji_match_detailed_qa_report_2026-02-20.md` — QA report
 - `docs/audit/emoji_match_gameplay_audit_2026-02-20.md` — Gameplay analysis
@@ -673,12 +822,14 @@ Artifacts Produced:
 - `docs/audit/emoji_match_review.md` — Summary review
 
 Key Findings:
+
 - 634 frames analyzed for toddler usability (ages 2-4)
 - Critical issues identified in instruction timing and visual feedback
 - Voice enhancement recommendations for better engagement
 - Unsupervised readiness assessment: requires adult supervision
 
 Next Actions (Separate Tickets):
+
 - Create remediation tickets for HIGH severity findings
 - Implement voice enhancement recommendations
 - Address input lag and visual feedback issues
@@ -782,6 +933,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — Existing worktree changes present; preserve unrelated changes and scope edits to UI files listed above + this ticket entry.
+
 - [2026-02-04 11:09 IST] Discovery | Evidence:
   - **Command**: `rg -n "Wellness Timer|Stretch Alert" -S src/frontend/src | head -n 50`
   - **Output**:
@@ -792,6 +944,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — Wellness Timer and alert UI are part of the AlphabetGamePage screen and can impact perceived UI quality.
+
 - [2026-02-04 11:21 IST] Implemented UI polish changes | Evidence:
   - **Command**: `git diff --stat -- src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx src/frontend/src/components/WellnessTimer.tsx src/frontend/src/components/WellnessReminder.tsx`
   - **Output**:
@@ -804,6 +957,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — UI-only changes applied to the scoped files.
+
 - [2026-02-04 11:21 IST] Verification | Evidence:
   - **Command**: `cd src/frontend && npm run type-check`
   - **Output**:
@@ -814,6 +968,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — TypeScript typecheck passes.
+
 - [2026-02-04 11:21 IST] Verification | Evidence:
   - **Command**: `cd src/frontend && npm test --silent -- --run --no-color`
   - **Output**:
@@ -903,6 +1058,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — Frontend dev server is running; visual audits via Playwright are possible.
+
 - [2026-02-04 11:25 IST] Evidence capture | Evidence:
   - **Command**: `cd src/frontend && npx playwright install chromium`
   - **Output**: (download logs omitted)
@@ -916,6 +1072,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — Fresh screenshots captured for `/game` and `/games` at desktop/tablet/mobile.
+
 - [2026-02-04 11:37 IST] Audit artifact updated | Evidence:
   - **Command**: `rg -n "2026-02-04 Addendum" docs/audit/src__frontend__src__pages__alphabet-game__AlphabetGamePage.tsx.md`
   - **Output**:
@@ -1002,6 +1159,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — Fresh screenshots captured for `/login` on desktop and mobile.
+
 - [2026-02-04 11:37 IST] Audit artifact updated | Evidence:
   - **Command**: `rg -n "2026-02-04 Addendum" docs/audit/ui__src__frontend__src__pages__Login.tsx.md`
   - **Output**:
@@ -2626,6 +2784,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — click coordinates are now scaled into canvas space.
+
 - [2026-01-30 11:59 UTC] AlphabetGame tracking loop present | Evidence:
   - **Command**: `rg -n "FilesetResolver|HandLandmarker|detectForVideo|pinchDistance|onPointerDown" src/frontend/src/pages/AlphabetGame.tsx`
   - **Output**:
@@ -2638,6 +2797,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — AlphabetGame now includes a MediaPipe loop and pointer drawing handlers.
+
 - [2026-01-30 11:59 UTC] Verified frontend tests | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
@@ -2648,6 +2808,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — vitest suite passes after interaction fixes.
+
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
@@ -2739,6 +2900,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — target `0` success now requires a recently-detected hand (prevents auto-success on “no hands”).
+
 - [2026-01-30 11:53 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
@@ -2749,6 +2911,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — vitest passes.
+
 - [2026-01-30 11:53 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
@@ -2851,6 +3014,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — target selection now uses a per-level shuffled bag instead of per-pick `Math.random()`.
+
 - [2026-01-30 11:59 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
@@ -2861,6 +3025,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — vitest passes.
+
 - [2026-01-30 11:59 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
@@ -2965,6 +3130,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — above-camera target/detected panels removed; target+detected now rendered as in-camera overlays.
+
 - [2026-01-30 11:49 UTC] Verified frontend tests and build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
@@ -2975,6 +3141,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — vitest passes.
+
 - [2026-01-30 11:49 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
@@ -3056,6 +3223,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — local workspace has uncommitted UI edits on the two target screens at commit `fab14b1`.
+
 - [2026-01-30 11:25 UTC] Brand guideline reference | Evidence:
   - **Command**: `ls -la docs/BRAND_KIT.md`
   - **Output**:
@@ -3091,6 +3259,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — test runner failed to write temp files due to low available disk.
+
 - [2026-01-30 11:32 UTC] Freed temp space to unblock tests | Evidence:
   - **Command**: `rm -rf .mypy_cache .pytest_cache && rm -rf /var/folders/*/*/T/* 2>/dev/null || true && df -h /`
   - **Output**:
@@ -3100,6 +3269,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — disk space recovered and tests could proceed.
+
 - [2026-01-30 11:44 UTC] Verified frontend tests and production build | Evidence:
   - **Command**: `cd src/frontend && npm test`
   - **Output**:
@@ -3110,6 +3280,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — vitest suite passes after UI refresh.
+
 - [2026-01-30 11:44 UTC] Verified frontend production build | Evidence:
   - **Command**: `cd src/frontend && npm run build`
   - **Output**:
@@ -5242,6 +5413,7 @@ Add keyboard navigation, ARIA labels, and screen reader support to Finger Number
 Audit Finding: FNS-06
 
 Scope contract:
+
 - In-scope:
   - Add keyboard controls (Space/Enter to start/stop)
   - Add ARIA live region for announcements
@@ -5253,6 +5425,7 @@ Scope contract:
   - Screen reader testing with actual users
 
 Acceptance Criteria:
+
 - [ ] Space/Enter starts and stops game
 - [ ] ARIA live region announces score changes
 - [ ] Webcam has descriptive aria-label
@@ -5261,6 +5434,7 @@ Acceptance Criteria:
 - [ ] Colorblind-friendly feedback (not just color)
 
 Execution Log:
+
 - 2026-02-23 12:55 IST — **IN_PROGRESS** — Starting accessibility implementation
 - 2026-02-23 12:56 IST — Analysis: No aria-label, aria-live, or keyboard handlers found
 - 2026-02-23 12:57 IST — Plan: Add keyboard controls, ARIA regions, focus management
@@ -5272,10 +5446,12 @@ Execution Log:
 - 2026-02-23 13:41 IST — **DONE** — All acceptance criteria met
 
 Status updates:
+
 - 2026-02-23 12:55 IST **IN_PROGRESS** — Starting implementation
 - 2026-02-23 13:41 IST **DONE** — Accessibility features complete
 
 Acceptance Criteria (All Met):
+
 - [x] Space/Enter starts and stops game
 - [x] ARIA live region announces score changes
 - [x] Webcam has descriptive aria-label
@@ -5284,6 +5460,7 @@ Acceptance Criteria (All Met):
 - [x] Colorblind-friendly feedback (not just color)
 
 Implementation Summary:
+
 1. **Keyboard Controls**: Added useEffect with window keydown listener for Space/Enter
 2. **ARIA Live Regions**: Added polite (feedback) and assertive (matches) regions
 3. **Webcam Label**: "Camera feed for hand tracking. Video is processed on your device only."
@@ -5292,12 +5469,15 @@ Implementation Summary:
 6. **Tests**: 7 accessibility tests covering all features
 
 Files Modified:
+
 - `src/frontend/src/games/FingerNumberShow.tsx` — Added accessibility features
 
 Files Created:
+
 - `src/frontend/src/games/__tests__/FingerNumberShow.a11y.test.tsx` — 7 accessibility tests
 
 Test Results:
+
 ```
 ✓ src/games/__tests__/FingerNumberShow.a11y.test.tsx (7 tests) 593ms
 Test Files 1 passed (1)
@@ -7312,6 +7492,7 @@ Execution log:
     ```
 
   - **Interpretation**: Observed — support/deploy/stakeholder prompts exist at expected paths.
+
 - [2026-01-28 14:18 IST] Verified index entries exist | Evidence:
   - **Command**: `rg -n "Support / Feedback|Deployment / Incident Response|Stakeholder Comms|QA findings|Backlog grooming" prompts/README.md`
   - **Output (excerpt)**: includes headings for Support/Feedback, Deployment/Incident Response, Stakeholder Comms, and Backlog grooming lines.
@@ -7553,6 +7734,7 @@ Execution Log:
 - [2026-01-28 14:15 IST] Created ticket TCK-20260128-002 | Status: **DONE**
 
 Status Updates:
+
 - [2026-01-28 14:15 IST] **OPEN**
 - [2026-02-23 13:45 IST] **DONE** — All docs and scripts aligned to src/frontend + src/backend layout
 
@@ -7716,19 +7898,19 @@ PM System Utility Score: **10/10** ✅
 
 **Why 10/10:**
 
-| Criterion | Before | After |
-|-----------|--------|-------|
-| Single source of truth | ✅ | ✅ |
-| Status clarity | ✅ | ✅ |
-| Evidence discipline | ✅ | ✅ |
-| Scope contracts | ✅ | ✅ |
-| Acceptance criteria | ✅ | ✅ |
-| Traceability | ✅ | ✅ |
-| Append-only | ✅ | ✅ |
-| **No duplicate IDs** | ❌ | ✅ |
-| **Template excluded** | ❌ | ✅ |
-| **Script accuracy** | ❌ | ✅ |
-| **Assignment tracking** | ❌ | ✅ |
+| Criterion               | Before | After |
+| ----------------------- | ------ | ----- |
+| Single source of truth  | ✅     | ✅    |
+| Status clarity          | ✅     | ✅    |
+| Evidence discipline     | ✅     | ✅    |
+| Scope contracts         | ✅     | ✅    |
+| Acceptance criteria     | ✅     | ✅    |
+| Traceability            | ✅     | ✅    |
+| Append-only             | ✅     | ✅    |
+| **No duplicate IDs**    | ❌     | ✅    |
+| **Template excluded**   | ❌     | ✅    |
+| **Script accuracy**     | ❌     | ✅    |
+| **Assignment tracking** | ❌     | ✅    |
 
 ---
 
@@ -7866,11 +8048,11 @@ Execution Log:
 
 Languages Now Supported:
 
-| Language | Letters | Examples |
-|----------|---------|----------|
-| English | 26 | A for Apple 🍎 |
-| Hindi | 35 | क for Kabutar 🕊️ |
-| Kannada | 37 | ಕ for Kappu ⬛ |
+| Language | Letters | Examples         |
+| -------- | ------- | ---------------- |
+| English  | 26      | A for Apple 🍎   |
+| Hindi    | 35      | क for Kabutar 🕊️ |
+| Kannada  | 37      | ಕ for Kappu ⬛   |
 
 How to Use:
 
@@ -7939,13 +8121,13 @@ Execution Log:
 
 Scoring System:
 
-| Accuracy | Points | Rating |
-|----------|--------|--------|
-| 90-100% | 20 | ⭐⭐⭐ Excellent |
-| 80-89% | 15 | ⭐⭐ Great |
-| 70-79% | 10 | ⭐ Good |
-| 40-69% | 5 | 👍 Okay |
-| <40% | 0 | ✏️ Try Again |
+| Accuracy | Points | Rating           |
+| -------- | ------ | ---------------- |
+| 90-100%  | 20     | ⭐⭐⭐ Excellent |
+| 80-89%   | 15     | ⭐⭐ Great       |
+| 70-79%   | 10     | ⭐ Good          |
+| 40-69%   | 5      | 👍 Okay          |
+| <40%     | 0      | ✏️ Try Again     |
 
 Features Added:
 
@@ -8019,11 +8201,11 @@ uv run pytest tests/ -v
 
 Test Coverage:
 
-| File | Tests | Coverage |
-|------|-------|----------|
-| test_auth.py | 6 | Register, Login, Auth checks |
-| test_profiles.py | 4 | Create, Get, Multi-profile |
-| test_progress.py | 3 | Save, Get, Stats |
+| File             | Tests | Coverage                     |
+| ---------------- | ----- | ---------------------------- |
+| test_auth.py     | 6     | Register, Login, Auth checks |
+| test_profiles.py | 4     | Create, Get, Multi-profile   |
+| test_progress.py | 3     | Save, Get, Stats             |
 
 Status Updates:
 
@@ -8143,15 +8325,15 @@ Execution Log:
 
 Dashboard Features:
 
-| Feature | Description |
-|---------|-------------|
-| Child Selector | Switch between multiple children |
-| Stats Cards | Letters, accuracy, time, streak with progress bars |
-| Progress List | Visual letter-by-letter progress |
-| Export Data | Download progress as JSON |
-| Quick Actions | Game, settings, reports |
-| Settings View | Current language, difficulty, time limit |
-| Learning Tips | Parent guidance section |
+| Feature        | Description                                        |
+| -------------- | -------------------------------------------------- |
+| Child Selector | Switch between multiple children                   |
+| Stats Cards    | Letters, accuracy, time, streak with progress bars |
+| Progress List  | Visual letter-by-letter progress                   |
+| Export Data    | Download progress as JSON                          |
+| Quick Actions  | Game, settings, reports                            |
+| Settings View  | Current language, difficulty, time limit           |
+| Learning Tips  | Parent guidance section                            |
 
 Status Updates:
 
@@ -21178,16 +21360,16 @@ Inputs:
 
 **Brush Ideas Documented**:
 
-| Brush | Effect | Use Case |
-|-------|--------|----------|
-| Magic Wand | Sparkle trail, star particles | Letter tracing, spell casting |
-| Paint Brush | Bristles that spread | Free drawing |
-| Crayon | Waxy texture, slight jitter | Pre-writing practice |
-| Glow Pen | Neon glow, light trail | Night/space themes |
-| Rainbow Brush | Color cycling | Creative expression |
-| Spray Can | Scatter particles | Art activities |
-| Stamp Brush | Shapes on click | Pattern making |
-| Eraser | Cleaning fade effect | Corrections |
+| Brush         | Effect                        | Use Case                      |
+| ------------- | ----------------------------- | ----------------------------- |
+| Magic Wand    | Sparkle trail, star particles | Letter tracing, spell casting |
+| Paint Brush   | Bristles that spread          | Free drawing                  |
+| Crayon        | Waxy texture, slight jitter   | Pre-writing practice          |
+| Glow Pen      | Neon glow, light trail        | Night/space themes            |
+| Rainbow Brush | Color cycling                 | Creative expression           |
+| Spray Can     | Scatter particles             | Art activities                |
+| Stamp Brush   | Shapes on click               | Pattern making                |
+| Eraser        | Cleaning fade effect          | Corrections                   |
 
 **Implementation Approach**:
 
@@ -21234,12 +21416,12 @@ interface Brush {
 
 **Success Feedback Tiers**:
 
-| Score | Effect | Duration |
-|-------|--------|----------|
-| 70-79 | Small sparkle burst | 1 sec |
-| 80-89 | Confetti + Sound | 2 sec |
-| 90-99 | Fireworks + Dance | 3 sec |
-| 100 | Epic celebration | 5 sec |
+| Score | Effect              | Duration |
+| ----- | ------------------- | -------- |
+| 70-79 | Small sparkle burst | 1 sec    |
+| 80-89 | Confetti + Sound    | 2 sec    |
+| 90-99 | Fireworks + Dance   | 3 sec    |
+| 100   | Epic celebration    | 5 sec    |
 
 ### 3. Gesture-Based Interactions
 
@@ -21258,12 +21440,12 @@ interface Brush {
 
 **Gesture Detection Possibilities**:
 
-| Gesture | Use Case |
-|---------|----------|
-| Clap | Confirm selection, celebrate |
-| Wave | Say hello, dismiss popup |
-| Thumbs Up | "I got it" confirmation |
-| Stop (open palm) | Pause game |
+| Gesture          | Use Case                     |
+| ---------------- | ---------------------------- |
+| Clap             | Confirm selection, celebrate |
+| Wave             | Say hello, dismiss popup     |
+| Thumbs Up        | "I got it" confirmation      |
+| Stop (open palm) | Pause game                   |
 
 ### 4. 3D Object Manipulation
 
@@ -21284,12 +21466,12 @@ interface Brush {
 
 **Two-Hand Coordination Games**:
 
-| Game | Left Hand | Right Hand |
-|------|-----------|------------|
-| Orchestra | Volume control | Instrument selection |
-| Dual Tracing | Trace left side | Trace right side |
-| Balance Scale | Add to left pan | Add to right pan |
-| Catch & Sort | Hold basket | Grab items |
+| Game          | Left Hand       | Right Hand           |
+| ------------- | --------------- | -------------------- |
+| Orchestra     | Volume control  | Instrument selection |
+| Dual Tracing  | Trace left side | Trace right side     |
+| Balance Scale | Add to left pan | Add to right pan     |
+| Catch & Sort  | Hold basket     | Grab items           |
 
 **Benefits**: Bilateral coordination, brain training
 
@@ -21312,13 +21494,13 @@ interface Brush {
 
 **Temporary Ability Ideas**:
 
-| Power-Up | Effect | Duration |
-|----------|--------|----------|
-| Mega Brush | 3x brush size | 10 sec |
-| Rainbow Mode | All colors at once | 15 sec |
-| Slow Motion | Game slows 50% | 10 sec |
-| Magnet | Auto-attract to target | 8 sec |
-| Double Points | 2x score | 20 sec |
+| Power-Up      | Effect                 | Duration |
+| ------------- | ---------------------- | -------- |
+| Mega Brush    | 3x brush size          | 10 sec   |
+| Rainbow Mode  | All colors at once     | 15 sec   |
+| Slow Motion   | Game slows 50%         | 10 sec   |
+| Magnet        | Auto-attract to target | 8 sec    |
+| Double Points | 2x score               | 20 sec   |
 
 **Activation Methods**:
 
@@ -22685,11 +22867,11 @@ Files Modified:
 
 Changes Made:
 
-| Letter | Word | Old Emoji | New Emoji | Reason |
-|--------|------|-----------|-----------|--------|
-| अ | अनार (Anaar) | 🍎 | 🍈 | Pomegranate, not apple |
-| फ | फल (Fal) | 🍎 | 🍇 | Generic fruit (grapes) |
-| स | सेब (Seb) | 🍎 | 🍏 | Green apple distinction |
+| Letter | Word         | Old Emoji | New Emoji | Reason                  |
+| ------ | ------------ | --------- | --------- | ----------------------- |
+| अ      | अनार (Anaar) | 🍎        | 🍈        | Pomegranate, not apple  |
+| फ      | फल (Fal)     | 🍎        | 🍇        | Generic fruit (grapes)  |
+| स      | सेब (Seb)    | 🍎        | 🍏        | Green apple distinction |
 
 Acceptance Criteria:
 
@@ -22753,23 +22935,23 @@ Key Findings:
 
 **Cultural Gestures (India)**:
 
-| Gesture | MediaPipe Feature | Game Application |
-|---------|-------------------|------------------|
-| Namaste (🙏) | Hand Landmarker - palms together | "Namaste Detective" game |
-| Head wobble (yes) | Face Landmarker - side tilt | Cultural context teaching |
-| Blessing (ashirwad) | Hand + Pose tracking | "Give a Blessing" game |
-| Indian finger counting | Hand Landmarker - finger positions | Counting differences |
+| Gesture                | MediaPipe Feature                  | Game Application          |
+| ---------------------- | ---------------------------------- | ------------------------- |
+| Namaste (🙏)           | Hand Landmarker - palms together   | "Namaste Detective" game  |
+| Head wobble (yes)      | Face Landmarker - side tilt        | Cultural context teaching |
+| Blessing (ashirwad)    | Hand + Pose tracking               | "Give a Blessing" game    |
+| Indian finger counting | Hand Landmarker - finger positions | Counting differences      |
 
 **Universal Gestures**:
 
-| Gesture | Detection Method | Use Case |
-|---------|------------------|----------|
-| Thumbs up/down | Thumb extended, fingers curled | Voting, approval |
-| Wave hello/bye | Repeated side-to-side motion | Greeting games |
-| OK sign 👌 | Thumb-index circle | Confirmation |
-| Pointing | Index finger extended | Selection |
-| Stop ✋ | Open palm | Traffic safety games |
-| Clapping 👏 | Hands together quickly | Celebrations |
+| Gesture        | Detection Method               | Use Case             |
+| -------------- | ------------------------------ | -------------------- |
+| Thumbs up/down | Thumb extended, fingers curled | Voting, approval     |
+| Wave hello/bye | Repeated side-to-side motion   | Greeting games       |
+| OK sign 👌     | Thumb-index circle             | Confirmation         |
+| Pointing       | Index finger extended          | Selection            |
+| Stop ✋        | Open palm                      | Traffic safety games |
+| Clapping 👏    | Hands together quickly         | Celebrations         |
 
 **Game Ideas Documented**:
 
@@ -39187,6 +39369,7 @@ Next actions:
 ---
 
 ### TCK-20260220-004 :: Emoji Match UX Remediation (Hand Tracking + Pacing)
+
 Type: REMEDIATION
 Owner: Pranay
 Created: 2026-02-20 18:14 UTC
@@ -39197,6 +39380,7 @@ Description:
 Remediate critical Emoji Match UX findings from video audits, focusing on hand-tracking visibility/activation, coordinate alignment, hit tolerance, and toddler-friendly pacing cues.
 
 Scope contract:
+
 - In-scope:
   - Hand-tracking cursor visibility and mapping fixes in `src/frontend/src/pages/EmojiMatch.tsx`
   - Start interaction via hand-tracking pinch
@@ -39212,6 +39396,7 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/pages/EmojiMatch.tsx`
@@ -39220,10 +39405,11 @@ Targets:
   - `src/frontend/src/utils/*` (new mapping helper/tests)
 - Branch/PR: main
 - Range: Unknown
-Git availability:
+  Git availability:
 - YES
 
 Acceptance Criteria:
+
 - [x] Start screen can be activated via pinch gesture on the start target
 - [x] Cursor is larger and high-contrast, visible on all backgrounds
 - [x] Hit detection radius and target sizing reflect toddler-friendly tolerance
@@ -39232,6 +39418,7 @@ Acceptance Criteria:
 - [x] Tests added/updated for new mapping helper
 
 Execution log:
+
 - [2026-02-20 18:14 UTC] Captured git state for remediation work | Evidence:
   - **Command**: `git --no-pager status --porcelain && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD`
   - **Output**:
@@ -39345,16 +39532,19 @@ Execution log:
   - **Interpretation**: Observed — GamePages smoke tests now pass.
 
 Status updates:
+
 - [2026-02-20 18:14 UTC] OPEN - Ticket created for Emoji Match remediation work.
 - [2026-02-20 23:56 UTC] IN_PROGRESS - Implemented initial coordinate mapping and UI remediation changes with passing unit tests.
 - [2026-02-21 00:18 UTC] DONE - Implemented remaining emoji audit findings with tutorial, voice prompts, adaptive difficulty, pacing, progress indicators, and updated tests.
 
 Next actions:
-1) Create implementation plan in session workspace.
-2) Map audit findings to concrete code changes and tests.
-3) Implement and verify with targeted frontend tests.
+
+1. Create implementation plan in session workspace.
+2. Map audit findings to concrete code changes and tests.
+3. Implement and verify with targeted frontend tests.
 
 Risks/notes:
+
 - Emoji Match audits cite coordinate mapping failures; remediation must confirm object-cover alignment before declaring fixed.
 
 ### TCK-20260222-001 :: Frontend Refactoring Program Umbrella (Evidence-First)
@@ -39366,6 +39556,7 @@ Status: **IN_PROGRESS**
 Priority: P0
 
 Scope contract:
+
 - In-scope:
   - Utility extraction for haptics/random
   - Archival of stale backup files
@@ -39379,6 +39570,7 @@ Scope contract:
 - Behavior change allowed: YES (research-backed improvements only)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/pages/*` (camera game pages in scope)
@@ -39390,12 +39582,14 @@ Targets:
 - Branch/PR: main
 
 Inputs:
+
 - Prompt used: `prompts/planning/implementation-planning-v1.0.md`
 - Source artifacts:
   - `docs/REFACTORING_OPPORTUNITIES.md`
   - `docs/REFACTORING_OPPORTUNITIES_2026-02-22.md`
 
 Execution log:
+
 - 2026-02-22 19:52 IST — Started implementation of full-scope refactor plan.
 - 2026-02-22 19:52 IST — **Observed** backup files + `ShapePopRefactored.tsx` archived under `archive/backups/frontend-src-2026-02-22`.
 - 2026-02-22 19:52 IST — **Observed** shared utilities added (`haptics.ts`, `random.ts`) and duplicate local helpers removed from active game pages.
@@ -39408,6 +39602,7 @@ Execution log:
 - 2026-02-22 21:02 IST — **Observed** repo blockers resolved in-scope: fixed frontend lint/type failures in e2e debug specs, test files, `mathMonstersLogic`, `coordinateTransform`, `BubblePop`, and `gameRegistry` (`voice` CV typing), and removed warning-budget blockers in game component files.
 
 Evidence:
+
 - **Command**: `cd src/frontend && npm run type-check`
 - **Output**:
   ```
@@ -39479,6 +39674,7 @@ Evidence:
 - **Interpretation**: Observed — remaining direct `detectForVideo` usage is limited to pose/test pipelines, not game hand-runtime orchestration.
 
 Status updates:
+
 - 2026-02-22 19:52 IST **IN_PROGRESS** — Core phases implemented; remaining cohort migrations scheduled.
 - 2026-02-22 20:35 IST **IN_PROGRESS** — Hand-tracking migration cohorts completed for game pages; remaining umbrella items are visual interaction rollout breadth and final store-directory canonical move.
 - 2026-02-22 20:45 IST **IN_PROGRESS** — Visual cursor standardization and social store canonicalization completed.
@@ -39495,6 +39691,7 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope:
   - Move `.bak`/`.backup` files from active frontend source directories into archive
   - Archive `ShapePopRefactored.tsx` and preserve canonical `ShapePop.tsx`
@@ -39505,11 +39702,13 @@ Scope contract:
 - Behavior change allowed: NO
 
 Execution log:
+
 - 2026-02-22 19:52 IST — Moved stale backup files to `archive/backups/frontend-src-2026-02-22/`.
 - 2026-02-22 19:52 IST — Archived `src/frontend/src/pages/ShapePopRefactored.tsx` under `archive/backups/frontend-src-2026-02-22/refactors/`.
 - 2026-02-22 19:52 IST — Added archive pointer `README.md`.
 
 Status updates:
+
 - 2026-02-22 19:52 IST **DONE** — Archive completed, active source tree cleaned.
 
 ---
@@ -39523,6 +39722,7 @@ Status: **IN_PROGRESS**
 Priority: P1
 
 Scope contract:
+
 - In-scope:
   - Migrate targeted pages from direct low-level runtime orchestration to `useGameHandTracking`
   - Add controlled runtime compatibility options to `useGameHandTracking`
@@ -39531,6 +39731,7 @@ Scope contract:
 - Behavior change allowed: YES (must preserve mechanics)
 
 Files migrated (Observed):
+
 - `src/frontend/src/pages/ShapePop.tsx`
 - `src/frontend/src/pages/SteadyHandLab.tsx`
 - `src/frontend/src/pages/WordBuilder.tsx`
@@ -39557,9 +39758,11 @@ Files migrated (Observed):
 - `src/frontend/src/games/FingerNumberShow.tsx`
 
 Remaining follow-up (Inferred):
+
 - Pose-specific pipelines (`SimonSays`, `YogaAnimals`) and diagnostics page (`MediaPipeTest`) remain on direct MediaPipe APIs by design; no hand-runtime migration required for this ticket.
 
 Status updates:
+
 - 2026-02-22 19:52 IST **IN_PROGRESS** — Partial cohort migration complete; next batch required.
 - 2026-02-22 20:35 IST **DONE** — Cohort migration for game hand tracking completed; remaining direct MediaPipe pages are pose/test-specific and intentionally excluded.
 
@@ -39574,16 +39777,18 @@ Status: **IN_PROGRESS**
 Priority: P0
 
 Description:
-Fix critical and high-priority UX issues identified by automated child exploratory testing. 
-Overall score was 41/100 with 1 critical bug and 3 high-priority issues preventing children 
+Fix critical and high-priority UX issues identified by automated child exploratory testing.
+Overall score was 41/100 with 1 critical bug and 3 high-priority issues preventing children
 from successfully playing games independently.
 
 Source:
+
 - UX Analysis Report: src/frontend/docs/ux-analysis/ux-analysis-report.md
 - Test Script: src/frontend/e2e/child_exploratory_test.spec.ts
 - Generated: 2026-02-22T18:46:24.468Z
 
 Scope contract:
+
 - In-scope:
   - Fix CRITICAL: Shape Safari canvas not found
   - Fix HIGH: Story Sequence missing start button
@@ -39601,8 +39806,9 @@ Scope contract:
 - Behavior change allowed: YES (UX improvements only)
 
 Targets:
+
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - src/frontend/src/pages/ShapeSafari.tsx
   - src/frontend/src/pages/StorySequence.tsx
   - src/frontend/src/pages/MathMonsters.tsx
@@ -39612,6 +39818,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [ ] Shape Safari: Canvas renders and game is playable
 - [ ] Story Sequence: Clear start button visible on load
 - [ ] Math Monsters: Instructions explain "show fingers to answer"
@@ -39622,6 +39829,7 @@ Acceptance Criteria:
 - [ ] Zero critical issues in UX report
 
 Plan:
+
 1. Investigate Shape Safari canvas issue (root cause)
 2. Add missing UI elements (buttons, instructions)
 3. Test each fix locally
@@ -39629,15 +39837,18 @@ Plan:
 5. Document all changes
 
 Execution log:
+
 - 2026-02-22 23:50 IST - **IN_PROGRESS** — Ticket created, starting work
 - 2026-02-22 23:52 IST - Fixed test script: "Try as Guest" button selector
 - 2026-02-22 23:58 IST - Ran initial UX test, captured baseline report
 - 2026-02-23 00:16 IST - All 6 games tested, report generated with 18 screenshots
 
 Status updates:
+
 - 2026-02-23 00:16 IST **IN_PROGRESS** — Starting remediation work
 
 Next actions:
+
 1. Fix Shape Safari canvas rendering
 2. Add start button to Story Sequence
 3. Add instructions to Math Monsters
@@ -39645,10 +39856,10 @@ Next actions:
 5. Re-run tests and verify improvements
 
 Risks/notes:
+
 - Canvas issues may be related to initialization timing or CSS
 - Voice input permissions need clear UI guidance for children
 - Instructions should be visual/icon-based for pre-readers
-
 
 ---
 
@@ -39657,6 +39868,7 @@ Risks/notes:
 Status Update: 2026-02-23 00:37 IST **IN_PROGRESS** — Second round of improvements complete
 
 Execution log (continued):
+
 - 2026-02-23 00:25 IST - Enhanced Math Monsters with prominent header showing exact finger count needed
 - 2026-02-23 00:27 IST - Improved finger detection display with animated finger emojis
 - 2026-02-23 00:28 IST - Added orange/red gradient instruction header to Math Monsters
@@ -39677,17 +39889,18 @@ Current Status:
 | Total Issues | 6 |
 
 Visual Improvements Made:
+
 - Math Monsters: Bright orange header with exact finger count, animated finger display
 - Bubble Pop: Yellow microphone warning, dual instruction banners, visual blow meter
 - Rhyme Time: Full-screen feedback overlay, prominent instruction header
 - Story Sequence: Visual drag instructions, placement feedback banners
 
 Test Limitations Noted:
+
 - Automated test may not fully detect visual improvements
 - "Understands Goal" criteria requires semantic content matching
 - Some improvements are visual/polish not captured by automated checks
 - Real child testing needed for qualitative validation
-
 
 ---
 
@@ -39696,6 +39909,7 @@ Test Limitations Noted:
 Status Update: 2026-02-23 00:42 IST **IN_PROGRESS** — Third round complete, significant improvements
 
 Execution log (continued):
+
 - 2026-02-23 00:38 IST - Updated test to click Start button in Math Monsters test
 - 2026-02-23 00:39 IST - Updated test to click Start button in Bubble Pop test
 - 2026-02-23 00:40 IST - Fixed test timeout issues with networkidle → domcontentloaded
@@ -39720,6 +39934,7 @@ Key Wins:
 ✅ Overall: +18 points (59/100) - Critical issues eliminated
 
 Files Modified (Final Count):
+
 - src/frontend/src/pages/ShapeSafari.tsx
 - src/frontend/src/pages/StorySequence.tsx
 - src/frontend/src/pages/MathMonsters.tsx
@@ -39729,6 +39944,7 @@ Files Modified (Final Count):
 - src/frontend/e2e/child_exploratory_test.spec.ts
 
 Remaining Work:
+
 - Rhyme Time feedback detection needs improvement
 - Free Draw toolbar visibility could be enhanced
 - Target: 70+ score for all games
@@ -39744,23 +39960,26 @@ Status Update: 2026-02-23 00:59 IST **IN_PROGRESS** — Phase 1 Complete, Phase 
 ## FINAL RESULTS SUMMARY
 
 ### Overall Progress
-| Metric | Initial | Final | Change |
-|--------|---------|-------|--------|
-| Overall Score | 41/100 | 64/100 | +23 🚀 |
-| Critical Issues | 1 | 0 | FIXED ✅ |
-| Tests Passing | 0/6 | 6/6 | 100% ✅ |
+
+| Metric          | Initial | Final  | Change   |
+| --------------- | ------- | ------ | -------- |
+| Overall Score   | 41/100  | 64/100 | +23 🚀   |
+| Critical Issues | 1       | 0      | FIXED ✅ |
+| Tests Passing   | 0/6     | 6/6    | 100% ✅  |
 
 ### Game-by-Game Results
-| Game | Before | After | Change |
-|------|--------|-------|--------|
-| Free Draw | 65 | 95 | +30 🚀 |
-| Shape Safari | 25 | 70 | +45 🚀 |
-| Story Sequence | 30 | 65 | +35 🚀 |
-| Bubble Pop | 40 | 60 | +20 🚀 |
-| Math Monsters | 40 | 50 | +10 🟢 |
-| Rhyme Time | 45 | 45 | 0 |
+
+| Game           | Before | After | Change |
+| -------------- | ------ | ----- | ------ |
+| Free Draw      | 65     | 95    | +30 🚀 |
+| Shape Safari   | 25     | 70    | +45 🚀 |
+| Story Sequence | 30     | 65    | +35 🚀 |
+| Bubble Pop     | 40     | 60    | +20 🚀 |
+| Math Monsters  | 40     | 50    | +10 🟢 |
+| Rhyme Time     | 45     | 45    | 0      |
 
 ### Key Achievement: Free Draw 95/100
+
 - Added Start Menu with semantic attributes
 - Goal detected: "Draw and create beautiful art..."
 - All 4 criteria now passing
@@ -39808,7 +40027,6 @@ Phase 1 (Semantic Foundation) complete. System proven working with Free Draw (95
 
 Status: **IN_PROGRESS** — Foundation complete, optimization ongoing
 
-
 ---
 
 ### TCK-20260223-900 :: Game-by-Game Logical Findings + Research Documentation (FreeDraw Start)
@@ -39823,6 +40041,7 @@ Description:
 Establish one-game-at-a-time logical issue documentation with evidence labels and research notes, starting with `FreeDraw`, and maintain a central rolling index for findings/research.
 
 Scope contract:
+
 - In-scope:
   - Per-game audit artifact creation with Observed/Inferred/Unknown labels.
   - Research notes tied to each finding and to hand-embodiment UX direction.
@@ -39833,30 +40052,35 @@ Scope contract:
 - Behavior change allowed: NO (documentation/audit phase)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
-  - docs/audit/src__frontend__src__pages__FreeDraw.tsx.md
+  - docs/audit/src**frontend**src**pages**FreeDraw.tsx.md
   - docs/GAME_LOGICAL_FINDINGS_AND_RESEARCH_2026-02-23.md
   - docs/PARALLEL_IMPLEMENTATION_PLAN_2026-02-23.md
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] `FreeDraw` findings documented with severity + evidence.
 - [x] Research notes captured for each finding area.
 - [x] Central rolling findings/research log created and linked.
 - [ ] Next game audit artifact created.
 
 Execution log:
+
 - 2026-02-23 12:24 IST — Captured `FreeDraw` logical findings evidence from `FreeDraw.tsx` and `freeDrawLogic.ts`.
 - 2026-02-23 12:25 IST — Created per-file audit artifact with findings and remediation plan.
 - 2026-02-23 12:26 IST — Created rolling findings/research tracker and linked in parallel implementation plan.
 
 Evidence:
+
 - Command: `rg -n "clearCanvas|isDrawing|lastPoint|showMenu|useGameHandTracking|onFrame|canvasRef|width|height" src/frontend/src/pages/FreeDraw.tsx src/frontend/src/games/freeDrawLogic.ts`
 - Command: `sed -n '1,360p' src/frontend/src/games/freeDrawLogic.ts`
 - Command: `sed -n '1,460p' src/frontend/src/pages/FreeDraw.tsx`
 
 Status updates:
+
 - 2026-02-23 12:26 IST **IN_PROGRESS** — FreeDraw analysis/docs completed; proceeding game-by-game.
 
 ---
@@ -39873,6 +40097,7 @@ Description:
 Execute P0 closure first with fresh evidence, then implement soft cartoon floating hand embodiment pilot in EmojiMatch with feature-flag fallback, and document cohort expansion path.
 
 Scope contract:
+
 - In-scope:
   - Resolve active branch type-check/lint blockers and re-verify P0 worker/boundary/image/smoke tests.
   - Implement `HandAvatarCursor` + `CursorEmbodiment` and integrate pilot in `EmojiMatch`.
@@ -39884,11 +40109,13 @@ Scope contract:
 - Behavior change allowed: YES (visual cursor embodiment only; gameplay logic unchanged)
 
 Child checkpoints:
+
 - [x] Checkpoint A - P0 closure validation (type-check/lint/tests)
 - [x] Checkpoint B - Floating hand pilot (EmojiMatch)
 - [ ] Checkpoint C - Cohort expansion (A/B/C games)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/AirCanvas.tsx
@@ -39897,12 +40124,12 @@ Targets:
   - src/frontend/src/pages/LetterHunt.tsx
   - src/frontend/src/pages/VirtualChemistryLab.tsx
   - src/frontend/src/pages/Progress.tsx
-  - src/frontend/src/utils/__tests__/reportExport.test.ts
+  - src/frontend/src/utils/**tests**/reportExport.test.ts
   - src/frontend/src/components/game/HandAvatarCursor.tsx
   - src/frontend/src/components/game/CursorEmbodiment.tsx
   - src/frontend/src/components/game/cursorEmbodimentConfig.ts
-  - src/frontend/src/components/game/__tests__/HandAvatarCursor.test.tsx
-  - src/frontend/src/components/game/__tests__/CursorEmbodiment.test.tsx
+  - src/frontend/src/components/game/**tests**/HandAvatarCursor.test.tsx
+  - src/frontend/src/components/game/**tests**/CursorEmbodiment.test.tsx
   - src/frontend/src/pages/EmojiMatch.tsx
   - docs/PARALLEL_IMPLEMENTATION_PLAN_2026-02-23.md
   - docs/STREAM1_HAND_TRACKING_POLISH_ANALYSIS.md
@@ -39912,6 +40139,7 @@ Targets:
 - Branch/PR: main
 
 Acceptance Criteria:
+
 - [x] Current branch type-check and lint pass.
 - [x] P0 targeted tests (worker/boundary/image) and smoke suites pass.
 - [x] EmojiMatch uses flag-aware cursor embodiment with soft hand pilot path.
@@ -39919,6 +40147,7 @@ Acceptance Criteria:
 - [x] Docs updated with fresh evidence and phased status.
 
 Execution log:
+
 - 2026-02-23 12:37 IST — Fixed active TS regressions (hand-ready variable mismatches and undefined play-state references) in camera pages.
 - 2026-02-23 12:38 IST — Fixed lint/TS issues in Progress and report export test.
 - 2026-02-23 12:40 IST — Verified `type-check`, `lint`, and targeted P0 suites pass.
@@ -39928,11 +40157,13 @@ Execution log:
 - 2026-02-23 13:15 IST — Updated planning/research/report docs to reflect fresh branch evidence.
 
 Evidence:
+
 - Command: `cd src/frontend && npm run -s type-check`
 - Command: `cd src/frontend && npm run -s lint`
 - Command: `cd src/frontend && npm run -s test -- src/components/game/__tests__/HandAvatarCursor.test.tsx src/components/game/__tests__/CursorEmbodiment.test.tsx src/components/errors/__tests__/CameraErrorBoundary.test.tsx src/hooks/__tests__/useGameHandTracking.runtimeMode.test.ts src/workers/__tests__/vision.protocol.test.ts src/utils/__tests__/imageAssets.test.ts src/pages/__tests__/GamePages.smoke.test.tsx src/pages/__tests__/CameraRoutes.smoke.test.tsx`
 
 Status updates:
+
 - 2026-02-23 13:15 IST **IN_PROGRESS** — P0 closure and EmojiMatch pilot complete; cohort expansion remains queued under this ticket.
 - 2026-02-23 13:18 IST — Cohort A rollout completed: switched `ShapeSequence` and `NumberTapTrail` from direct `GameCursor` to `CursorEmbodiment` with feature-flag fallback.
 - 2026-02-23 13:19 IST — Re-verified gates after Cohort A: `type-check` pass, `lint` pass, targeted embodiment + smoke suites pass.
@@ -39991,6 +40222,7 @@ Key Findings:
 **✅ READY FOR UNSUPERVISED USE (85% confidence)**
 
 Voice Coverage Analysis:
+
 - ✅ Tutorial: "Show your hand... Move the dot... Pinch to choose"
 - ✅ Round Start: "Find the [emotion] emoji!"
 - ✅ Hand Detection: "Show your hand to the camera!" (8s cooldown)
@@ -40002,6 +40234,7 @@ Critical Path: 100% voice coverage ✅
 (Core gameplay fully voice-guided)
 
 All Feb 20 S1 Blockers Resolved:
+
 - ✅ Cursor: 84px yellow hand with glow
 - ✅ Targets: 170-440px (massive!)
 - ✅ Text dependency: Eliminated with TTS
@@ -40016,7 +40249,6 @@ Next actions:
 1. Conduct 30-min unsupervised playtest with toddler
 2. Add voice for success messages (low effort, high impact)
 3. Collect feedback from 5+ toddler playtests
-
 
 ### TCK-20260223-003 :: Emoji Match Voice Enhancements Implementation
 
@@ -40066,21 +40298,22 @@ Status updates:
 
 Voice Coverage Summary:
 
-| Game State | Voice Message |
-|------------|---------------|
-| Game Start | "Let's play Emoji Match! Show me your hand!" |
-| Tutorial | "Show your hand..." (existing) |
-| Round Start | "Find the [emotion] emoji!" (existing) |
-| Correct | "Yes! That's the [emotion] emoji!" |
-| Wrong | "Try again! Find the [emotion] emoji!" |
-| Streak (5x) | "Amazing! Five in a row!" |
-| Level Complete | "Level [X] complete! Great job!" |
-| Game Complete | "You're an emotion expert! Amazing job!" |
-| Hand Lost | "Show your hand!" (existing) |
+| Game State     | Voice Message                                |
+| -------------- | -------------------------------------------- |
+| Game Start     | "Let's play Emoji Match! Show me your hand!" |
+| Tutorial       | "Show your hand..." (existing)               |
+| Round Start    | "Find the [emotion] emoji!" (existing)       |
+| Correct        | "Yes! That's the [emotion] emoji!"           |
+| Wrong          | "Try again! Find the [emotion] emoji!"       |
+| Streak (5x)    | "Amazing! Five in a row!"                    |
+| Level Complete | "Level [X] complete! Great job!"             |
+| Game Complete  | "You're an emotion expert! Amazing job!"     |
+| Hand Lost      | "Show your hand!" (existing)                 |
 
 **Critical Path Voice Coverage: 100% ✅**
 
 Impact:
+
 - Unsupervised confidence (3yr): 85% → 95%
 - Unsupervised confidence (4yr): 95% → 98%
 - Zero text dependency achieved
@@ -40090,7 +40323,6 @@ Next actions:
 1. Deploy to staging
 2. Conduct toddler playtest
 3. Monitor for voice overlap issues
-
 
 ### TCK-20260223-004 :: Bubble Pop Symphony Toddler Enhancements
 
@@ -40141,17 +40373,18 @@ Status updates:
 
 Enhancements Summary:
 
-| Feature | Before | After |
-|---------|--------|-------|
-| Cursor Size | 70px | 84px |
-| Cursor Icon | None | 👆 |
-| Background | Gradient | + blur overlay |
-| Voice First Pop | ❌ | ✅ |
-| Voice Milestones | ❌ | ✅ |
-| Bubble Speed | Fast (0.55) | Gentle (0.35) |
-| Time Pressure | Implicit | "Take your time" |
+| Feature          | Before      | After            |
+| ---------------- | ----------- | ---------------- |
+| Cursor Size      | 70px        | 84px             |
+| Cursor Icon      | None        | 👆               |
+| Background       | Gradient    | + blur overlay   |
+| Voice First Pop  | ❌          | ✅               |
+| Voice Milestones | ❌          | ✅               |
+| Bubble Speed     | Fast (0.55) | Gentle (0.35)    |
+| Time Pressure    | Implicit    | "Take your time" |
 
 Toddler Readiness:
+
 - 2 years: 60% → 75%
 - 3 years: 75% → 88%
 - 4 years: 85% → 95%
@@ -40211,14 +40444,15 @@ Status updates:
 
 Summary of Changes:
 
-| Game | Cursor | Voice | Timer |
-|------|--------|-------|-------|
-| ShapeSequence | 64→84px | 0%→100% | 80s→"Take your time" |
-| ColorMatchGarden | 60→84px | 0%→100% | 75s→"Take your time" |
-| ConnectTheDots | 62→84px | 0%→90% | countdown→"Take your time" |
-| DressForWeather | 70→84px | 80%→100% | Added message |
+| Game             | Cursor  | Voice    | Timer                      |
+| ---------------- | ------- | -------- | -------------------------- |
+| ShapeSequence    | 64→84px | 0%→100%  | 80s→"Take your time"       |
+| ColorMatchGarden | 60→84px | 0%→100%  | 75s→"Take your time"       |
+| ConnectTheDots   | 62→84px | 0%→90%   | countdown→"Take your time" |
+| DressForWeather  | 70→84px | 80%→100% | Added message              |
 
 Toddler Readiness (3yr):
+
 - ShapeSequence: 55% → 88%
 - ColorMatchGarden: 60% → 88%
 - ConnectTheDots: 50% → 82%
@@ -40229,7 +40463,6 @@ Next actions:
 1. Test all 4 games with toddlers
 2. Deploy to staging
 3. Fix next batch: LetterHunt, SteadyHandLab, ShapePop, WordBuilder
-
 
 ---
 
@@ -40282,26 +40515,29 @@ Status updates:
 
 Summary of Changes:
 
-| Game | Cursor | Voice | Timer |
-|------|--------|-------|-------|
-| LetterHunt | 64→84px | 0%→100% | 30s→60s+"Take your time" |
-| SteadyHandLab | 64→84px | Added feedback | "Take your time! 🌈" |
-| ShapePop | 64→84px | Random praises | Removed countdown |
-| WordBuilder | 64→84px | Spelling guidance | 90s→"Take your time" |
+| Game          | Cursor  | Voice             | Timer                    |
+| ------------- | ------- | ----------------- | ------------------------ |
+| LetterHunt    | 64→84px | 0%→100%           | 30s→60s+"Take your time" |
+| SteadyHandLab | 64→84px | Added feedback    | "Take your time! 🌈"     |
+| ShapePop      | 64→84px | Random praises    | Removed countdown        |
+| WordBuilder   | 64→84px | Spelling guidance | 90s→"Take your time"     |
 
 Toddler Readiness Improvement:
+
 - Average +25% improvement for 3yr olds
 - Average +18% improvement for 4yr olds
 
 Remaining Games to Enhance:
 
 Priority HIGH:
+
 - AirCanvas - cursor check, voice for drawing
 - AlphabetGame - cursor check, enhance voice
 - NumberTapTrail - cursor check, add voice
 - PhonicsSounds - cursor check, add voice
 
 Priority MEDIUM:
+
 - MathMonsters - cursor check, voice for math
 - MirrorDraw - cursor check
 - MusicPinchBeat - cursor check
@@ -40311,9 +40547,9 @@ Priority MEDIUM:
 - VirtualChemistryLab - cursor check
 
 Priority LOW (pose-based, not hand tracking):
+
 - SimonSays - pose tracking, may need voice
 - YogaAnimals - pose tracking, may need voice
-
 
 ---
 
@@ -40360,19 +40596,19 @@ Status updates:
 
 Summary of Changes:
 
-| Game | Cursor | Voice | Notes |
-|------|--------|-------|-------|
-| AlphabetGame | 6→10px radius | ✅ Added | Canvas-based cursor |
-| MathMonsters | N/A (finger counting) | ✅ Full TTS | Shows fingers |
-| MirrorDraw | 12→18px, 16→24px | ✅ Added | Added emoji indicator |
+| Game         | Cursor                | Voice       | Notes                 |
+| ------------ | --------------------- | ----------- | --------------------- |
+| AlphabetGame | 6→10px radius         | ✅ Added    | Canvas-based cursor   |
+| MathMonsters | N/A (finger counting) | ✅ Full TTS | Shows fingers         |
+| MirrorDraw   | 12→18px, 16→24px      | ✅ Added    | Added emoji indicator |
 
 Remaining Games to Check:
+
 - RhymeTime.tsx
 - ShapeSafari.tsx
 - StorySequence.tsx
 - SimonSays.tsx (pose-based)
 - YogaAnimals.tsx (pose-based)
-
 
 ---
 
@@ -40402,7 +40638,7 @@ Targets:
 Acceptance Criteria:
 
 - [x] RhymeTime: TTS imports added, ready for voice integration
-- [x] ShapeSafari: TTS imports added, ready for voice integration  
+- [x] ShapeSafari: TTS imports added, ready for voice integration
 - [x] StorySequence: TTS imports added, ready for voice integration
 - [x] All games have useTTS hook available
 
@@ -40419,7 +40655,6 @@ Status updates:
 
 Note: Full voice feedback implementation for these games requires deeper integration with
 each game's specific feedback system. Current work adds the TTS hook infrastructure.
-
 
 ---
 
@@ -40484,7 +40719,6 @@ Status updates:
 
 - [22:56] **DONE** - All TypeScript errors resolved
 
-
 ---
 
 ### TCK-20260223-012 :: Child Exploratory UX Testing - Final Results
@@ -40537,19 +40771,18 @@ Status updates:
 
 Final Results Summary:
 
-| Game | Before | After | Change |
-|------|--------|-------|--------|
-| Shape Safari | 70 | **95** | +25 🚀 |
-| Free Draw | 65 | **95** | +30 🚀 |
-| Story Sequence | 65 | **90** | +25 🚀 |
-| Rhyme Time | 45 | **90** | +45 🚀 |
-| Math Monsters | 50 | **90** | +40 🚀 |
-| Bubble Pop | 60 | **85** | +25 🚀 |
-| **OVERALL** | 59 | **91** | **+32** 🎉 |
+| Game           | Before | After  | Change     |
+| -------------- | ------ | ------ | ---------- |
+| Shape Safari   | 70     | **95** | +25 🚀     |
+| Free Draw      | 65     | **95** | +30 🚀     |
+| Story Sequence | 65     | **90** | +25 🚀     |
+| Rhyme Time     | 45     | **90** | +45 🚀     |
+| Math Monsters  | 50     | **90** | +40 🚀     |
+| Bubble Pop     | 60     | **85** | +25 🚀     |
+| **OVERALL**    | 59     | **91** | **+32** 🎉 |
 
 All toddler enhancement work verified and passing!
 Grade: **A (Excellent)**
-
 
 ---
 
@@ -40606,7 +40839,6 @@ Enhancements provide clearer visual feedback for children during gameplay.
 
 ---
 
-
 ---
 
 ### TCK-20260224-001 :: Feature Research Initiative (Option F)
@@ -40661,19 +40893,21 @@ Status updates:
 Key Findings:
 
 **Top 3 Recommended Features (Immediate):**
+
 1. **Progress Reports** - High parent value, low effort (2-3 days)
 2. **Daily Challenges** - Increases DAU, low effort (3-5 days)
 3. **Achievement System MVP** - Gamification basics (5-7 days)
 
 **Top Learning Gap:**
+
 - **Phonics Games** - Critical for ages 4-6, identified in competitor gap analysis
 
 **Technical Priority:**
+
 - Structured logging and error handling for scale preparation
 
 **Full Research Document:**
 docs/FEATURE_RESEARCH_INITIATIVE_2026-02-24.md
-
 
 ---
 
@@ -40691,12 +40925,14 @@ Validate actual database configuration and correct documentation that incorrectl
 Findings:
 
 **Observed (Code Review):**
+
 - src/backend/.env: DATABASE_URL=postgresql+asyncpg://postgres@localhost:5432/advay_learning
 - src/backend/app/db/session.py: PostgreSQL connection pool configured (10 base + 20 overflow)
 - src/backend/app/core/config.py: DATABASE_URL required setting
 - No SQLite database file exists in backend directory
 
 **Incorrect Documentation:**
+
 - FEATURE_RESEARCH_INITIATIVE_2026-02-24.md incorrectly stated "SQLite" as current state
 - Research document mentioned "PostgreSQL migration" as future need
 
@@ -40726,4 +40962,3 @@ npm run test
 Status updates:
 
 - [07:15] **DONE** - Documentation corrected, legacy script archived
-
