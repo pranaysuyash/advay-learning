@@ -5102,3 +5102,38 @@ Documentation:
 
 Dependencies:
 - Source: User reported login issues with browser logs
+
+---
+
+## TCK-20260227-011 Addendum :: Resolve remaining PR review comments
+
+Ticket Stamp: STAMP-20260227T213200Z-codex-rv11
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-27 21:32 IST
+Status: **IN_PROGRESS**
+
+Scope contract:
+- In-scope:
+  - Resolve remaining active PR comment concerns for subscription status debugging and Balloon Pop Fitness logic/thread validation
+  - Add targeted regression coverage for Balloon Pop Fitness level-advance boundary behavior
+  - Re-verify collectible ID validity against registry references
+- Out-of-scope:
+  - Broad refactors unrelated to unresolved review threads
+  - Product-level behavior changes outside reviewed paths
+- Behavior change allowed: YES (debug metadata additions only)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/services/subscriptionApi.ts`
+  - `src/frontend/src/games/__tests__/balloonPopFitnessLogic.test.ts`
+
+Execution log:
+- [2026-02-27 21:20 IST] Added explicit subscription status source metadata (`active_subscription` / `no_subscription` / `api_error`) and `errorReason` propagation in API failure paths | Evidence: `src/frontend/src/services/subscriptionApi.ts`
+- [2026-02-27 21:23 IST] Added targeted tests for `shouldAdvanceLevel` to lock boundary behavior and avoid frame-boundary regressions | Evidence: `src/frontend/src/games/__tests__/balloonPopFitnessLogic.test.ts`
+- [2026-02-27 21:26 IST] Validated all registry drop/reward `itemId` references map to collectible IDs (no missing IDs) | Evidence: script output `missing: []`
+
+Status updates:
+- [2026-02-27 21:32 IST] **IN_PROGRESS** — Code/test fixes applied; running final validation and PR thread resolution.

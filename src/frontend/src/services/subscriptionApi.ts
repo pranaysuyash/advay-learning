@@ -10,6 +10,8 @@ export interface SubscriptionStatus {
   accessibleGames: string[] | null;
   planType?: string;
   daysRemaining?: number;
+  source?: 'active_subscription' | 'no_subscription' | 'api_error';
+  errorReason?: string;
 }
 
 export interface SubscriptionGameAccess {
@@ -48,6 +50,7 @@ export const subscriptionApi = {
         return {
           hasActiveSubscription: false,
           accessibleGames: null,
+          source: 'no_subscription',
         };
       }
 
@@ -58,6 +61,7 @@ export const subscriptionApi = {
           accessibleGames: ['*'],
           planType: data.subscription.plan_type,
           daysRemaining: data.subscription.days_remaining,
+          source: 'active_subscription',
         };
       }
 
@@ -67,12 +71,16 @@ export const subscriptionApi = {
         accessibleGames: data.subscription.selected_games || [],
         planType: data.subscription.plan_type,
         daysRemaining: data.subscription.days_remaining,
+        source: 'active_subscription',
       };
     } catch (error) {
-      console.error('Failed to fetch subscription status:', describeApiError(error));
+      const errorReason = describeApiError(error);
+      console.error('Failed to fetch subscription status:', errorReason);
       return {
         hasActiveSubscription: false,
         accessibleGames: null,
+        source: 'api_error',
+        errorReason,
       };
     }
   },
