@@ -1,10 +1,13 @@
 """Redis cache service for API response caching."""
 
 import json
+import logging
 import os
 from typing import Any, Optional
 
 import redis.asyncio as redis
+
+logger = logging.getLogger(__name__)
 
 
 class CacheService:
@@ -28,7 +31,11 @@ class CacheService:
             if value:
                 return json.loads(value)
             return None
-        except Exception:
+        except json.JSONDecodeError as e:
+            logger.warning("Cache decoding error for key %s: %s", key, e)
+            return None
+        except redis.RedisError as e:
+            logger.warning("Redis error getting key %s: %s", key, e)
             return None
 
     async def set(self, key: str, value: Any, ttl: int = 300) -> bool:
@@ -37,7 +44,11 @@ class CacheService:
             client = await self.get_client()
             await client.setex(key, ttl, json.dumps(value))
             return True
-        except Exception:
+        except TypeError as e:
+            logger.warning("Cache serialization error for key %s: %s", key, e)
+            return False
+        except redis.RedisError as e:
+            logger.warning("Redis error setting key %s: %s", key, e)
             return False
 
     async def delete(self, key: str) -> bool:
@@ -46,7 +57,8 @@ class CacheService:
             client = await self.get_client()
             await client.delete(key)
             return True
-        except Exception:
+        except redis.RedisError as e:
+            logger.warning("Redis error deleting key %s: %s", key, e)
             return False
 
     async def invalidate_pattern(self, pattern: str) -> bool:
@@ -59,7 +71,8 @@ class CacheService:
             if keys:
                 await client.delete(*keys)
             return True
-        except Exception:
+        except redis.RedisError as e:
+            logger.warning("Redis error invalidating pattern %s: %s", pattern, e)
             return False
 
     async def close(self):

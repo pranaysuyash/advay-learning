@@ -163,8 +163,8 @@ Some security-specific tests exist but may not be comprehensive.
 
 **Verification notes:**
 
-- For AUTHZ-1: Test token rotation and secure cookie implementation
-- For AUTHZ-5: Verify all endpoints have proper authorization
+- For AUTHZ-1: Test token rotation and secure cookie implementation (see `tests/test_security.py::TestAccessTokenRevocation`)
+- For AUTHZ-5: Verify all endpoints have proper authorization (Unit‑2 added `tests/test_security.py::TestAuthorization` for games/admin)
 - For AUTHZ-2: Test rate limiting effectiveness
 
 ---

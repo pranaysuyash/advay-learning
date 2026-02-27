@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.api.permissions import require_roles
+from app.api.permissions import require_roles  # for future use; get_user keeps custom logic
 from app.core.security import verify_password
 from app.core.validation import ValidationError, validate_uuid
 from app.db.models.user import User as UserModel

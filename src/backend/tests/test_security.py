@@ -412,7 +412,7 @@ class TestAuthorization:
         # login as parent
         resp = await client.post(
             "/api/v1/auth/login",
-            data={"username": "parent@test.com", "password": "ParentPass!123"},
+            data={"username": "parent@test.com", "password": "SafePass!7890"},
         )
         if resp.status_code != 200:
             print("parent login failed", resp.status_code, resp.text)
@@ -430,7 +430,7 @@ class TestAuthorization:
             "difficulty": "easy",
             "game_path": "/games/test",
         }
-        create_resp = await client.post("/api/v1/games", json=game_payload)
+        create_resp = await client.post("/api/v1/games/", json=game_payload)
         assert create_resp.status_code == 403
 
     async def test_admin_can_create_game(self, client: AsyncClient, db_session: AsyncSession):
@@ -450,7 +450,7 @@ class TestAuthorization:
         # login as admin
         resp = await client.post(
             "/api/v1/auth/login",
-            data={"username": "admin@test.com", "password": "AdminPass!123"},
+            data={"username": "admin@test.com", "password": "Secure!Pass456"},
         )
         if resp.status_code != 200:
             print("admin login failed", resp.status_code, resp.text)
@@ -468,7 +468,7 @@ class TestAuthorization:
             "difficulty": "easy",
             "game_path": "/games/admin",
         }
-        create_resp = await client.post("/api/v1/games", json=game_payload)
+        create_resp = await client.post("/api/v1/games/", json=game_payload)
         assert create_resp.status_code == 201
 
 

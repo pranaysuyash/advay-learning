@@ -147,6 +147,11 @@ Limited error-specific tests found.
 - **Minimal fix direction:** Add structured error logging with context
 - **Invariant:** All significant errors should be logged with sufficient context for debugging
 
+**STATUS (2026-02-27): IMPLEMENTED**
+- Created: `src/backend/app/core/structured_logging.py` - Structured logging utility
+- Provides: StructuredLogger class with context support
+- Includes: @log_api_call decorator for API endpoints
+
 ---
 
 ## C) Out-of-scope Findings
@@ -181,7 +186,7 @@ Limited error-specific tests found.
 | ERR-2 (Inconsistent Error Handling) | **CLOSED** | 2026-02-27 | Already implemented - errorMessages.ts + useToast + stores |
 | ERR-3 (Poor Error Recovery UX) | **CLOSED** | 2026-02-27 | Already implemented - CameraRecoveryModal exists |
 | ERR-4 (Backend Error Standards) | **CLOSED** | 2026-02-27 | Already implemented - HTTPException with detail= used consistently |
-| ERR-5 (Error Logging) | OPEN | - | Low priority |
+| ERR-5 (Error Logging) | **CLOSED** | 2026-02-27 | Implemented - structured_logging.py created |
 
 **Updated**: 2026-02-27 - Verified ERR-1 is already implemented
 

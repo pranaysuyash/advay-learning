@@ -19,3 +19,10 @@ This document collects design decisions and invariants for access/refresh tokens
 
 See `src/backend/app/api/v1/endpoints/auth.py` and
 `src/backend/app/services/token_service.py` for implementation details.
+
+## Authorization helpers
+
+Unit‑2 added `app/api/permissions.py` which exports `require_roles` and
+`require_superuser` dependencies. Games endpoints now use
+`Depends(require_roles([UserRole.ADMIN]))` rather than manual checks, and same
+pattern will be applied across the codebase.

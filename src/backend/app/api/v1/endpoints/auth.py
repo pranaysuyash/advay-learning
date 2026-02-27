@@ -205,7 +205,8 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
 
 
 @router.post("/verify-email")
-async def verify_email(token: str, db: AsyncSession = Depends(get_db)) -> dict:
+@limiter.limit(RateLimits.AUTH_MEDIUM)
+async def verify_email(request: Request, token: str, db: AsyncSession = Depends(get_db)) -> dict:
     """Verify email address using verification token."""
     user = await UserService.get_by_verification_token(db, token)
     if not user:
@@ -219,7 +220,8 @@ async def verify_email(token: str, db: AsyncSession = Depends(get_db)) -> dict:
 
 
 @router.post("/resend-verification")
-async def resend_verification(email: str, db: AsyncSession = Depends(get_db)) -> dict:
+@limiter.limit(RateLimits.AUTH_MEDIUM)
+async def resend_verification(request: Request, email: str, db: AsyncSession = Depends(get_db)) -> dict:
     """Resend email verification link."""
     user = await UserService.get_by_email(db, email)
     if not user:

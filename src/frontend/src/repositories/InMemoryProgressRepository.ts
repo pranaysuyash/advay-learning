@@ -25,7 +25,7 @@ export class InMemoryProgressRepository implements ProgressRepository {
 
   getPending(): ProgressItem[] {
     return this.getAll().filter(
-      item => item.status === 'pending' || item.status === 'error'
+      item => item.status === 'pending'
     );
   }
 
