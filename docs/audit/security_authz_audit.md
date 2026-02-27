@@ -204,6 +204,19 @@ Some security-specific tests exist but may not be comprehensive.
 
 ---
 
+## G) Status Tracker (2026-02-27)
+
+| Finding ID | Status | Resolution Date | Notes |
+|------------|--------|-----------------|-------|
+| AUTHZ-1 (JWT Token Security) | **CLOSED** | 2026-02-27 | Already implemented - token blacklisting exists |
+| AUTHZ-2 (Rate Limiting) | **CLOSED** | 2026-02-27 | Already implemented - slowapi rate limiting |
+| AUTHZ-3 (Password Policy) | **CLOSED** | 2026-02-27 | Already implemented - enhanced validation + email check |
+| AUTHZ-4 (Session Management) | **CLOSED** | 2026-02-27 | Already implemented - token revocation on logout |
+| AUTHZ-5 (Authorization Bypass) | **CLOSED** | 2026-02-27 | Already implemented - get_current_user + permissions |
+| AUTHZ-6 (Security Headers) | **CLOSED** | 2026-02-27 | Already implemented - SecurityHeadersMiddleware |
+
+---
+
 ## F) Implementation Plan
 
 ### Phase 1: Critical (P0)

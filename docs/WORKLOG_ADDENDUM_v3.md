@@ -4090,3 +4090,130 @@ Dependencies:
 **Resolution Notes in Audit Doc**:
 - Retry logic: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 906-914
 - Dead letter queue: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 983-991
+
+
+---
+
+## TCK-20260227-003 :: Unit-3: Repository Pattern for Testability (COMPLETE)
+Ticket Stamp: STAMP-20260227T122000Z-codex-abc2
+
+Type: ARCHITECTURE
+Owner: Pranay
+Created: 2026-02-27 12:20 IST
+Status: **DONE**
+
+Scope contract:
+- In-scope:
+  - ProgressRepository interface for storage abstraction
+  - LocalStorageProgressRepository (production)
+  - InMemoryProgressRepository (testing)
+  - Refactor progressQueue to use DI
+  - Comprehensive test coverage for both implementations
+- Out-of-scope:
+  - Full migration of all existing tests to use InMemory repository
+  - Zustand store refactoring (separate scope)
+  - Repository for progressStore.ts (different module)
+- Behavior change allowed: NO (backward compatible - default export unchanged)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/frontend/src/repositories/ProgressRepository.ts (new)
+  - src/frontend/src/repositories/LocalStorageProgressRepository.ts (new)
+  - src/frontend/src/repositories/InMemoryProgressRepository.ts (new)
+  - src/frontend/src/repositories/index.ts (new)
+  - src/frontend/src/services/progressQueue.ts (refactored)
+  - src/repositories/__tests__/ProgressRepository.test.ts (new)
+- Branch/PR: main
+
+Plan:
+
+1. Define ProgressRepository interface with all storage operations
+2. Implement LocalStorageProgressRepository for production
+3. Implement InMemoryProgressRepository for fast tests
+4. Create factory function createProgressQueue(repo) for DI
+5. Maintain backward compatibility with default progressQueue export
+6. Write comprehensive tests for both implementations
+
+Execution log:
+
+- [11:10] Created ProgressRepository interface with 20+ methods
+- [11:12] Implemented LocalStorageProgressRepository with full localStorage integration
+- [11:14] Implemented InMemoryProgressRepository using Maps (no localStorage dependency)
+- [11:16] Refactored progressQueue.ts to use factory function with DI
+- [11:17] Created shared test suite covering both implementations (64 tests)
+- [11:18] Fixed getPending() behavior to match original (only pending, not error items)
+- [11:19] All 898 tests passing (31 progressQueue + 64 repository + existing tests)
+
+Status updates:
+
+- [2026-02-27 12:20] **DONE** — Repository pattern implemented with 64 new tests
+
+Next actions:
+
+1. Migrate existing progressQueue tests to use InMemoryProgressRepository (optional optimization)
+2. Consider applying repository pattern to progressStore.ts (separate ticket)
+
+Risks/notes:
+
+- Full backward compatibility maintained - default export unchanged
+- Tests can now use InMemoryProgressRepository for fast, isolated unit tests
+- No localStorage dependency in tests = no cleanup required between tests
+- Repository pattern enables future storage backends (IndexedDB, API-only, etc.)
+
+Dependencies:
+
+- Source audit: docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md
+- Issue register: docs/audit/PROGRESS_QUEUE_ISSUE_REGISTER.md (ISSUE-008)
+
+**Test Summary**:
+- 64 repository tests (32 per implementation)
+- 31 progressQueue tests (unchanged, using default localStorage)
+- 898 total tests passing
+- 4 tests skipped (slow exponential backoff integration tests)
+
+**Resolution Notes in Audit Doc**:
+- Repository pattern: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 1141-1151
+
+---
+
+## TCK-20260227-009 :: Audit Documentation Sync for Security + ProgressStore
+Ticket Stamp: STAMP-20260227T054829Z-codex-2ox9
+
+Type: DOCUMENTATION
+Owner: Pranay
+Created: 2026-02-27
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+- In-scope:
+  - Update security authorization audit with current remediation status
+  - Update progressStore multi-viewpoint audit with repository-pattern resolution notes
+- Out-of-scope:
+  - Additional code behavior changes
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - docs/audit/security_authz_audit.md
+  - docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md
+- Branch/PR: main
+
+Prompt & persona traceability:
+- Prompt used: AGENTS.md remediation workflow + evidence-first discipline
+- Lenses: security hardening, reliability/testability
+
+Execution log:
+- 2026-02-27 | Updated security authz audit status and findings alignment
+- 2026-02-27 | Added repository-pattern resolution note in progressStore audit
+
+Evidence:
+- Command: `git diff --cached --name-only`
+- Output:
+  - docs/audit/security_authz_audit.md
+  - docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md
+
+Status updates:
+- 2026-02-27 **DONE** — Audit documentation synchronized to current implementation state
