@@ -6766,3 +6766,222 @@ Status updates:
 
 - [2026-03-03 00:28 IST] **IN_PROGRESS** — Reorganizing root-level stray files and patching references
 - [2026-03-03 00:47 IST] **DONE** — Root layout cleaned by functional moves; references and future Playwright output paths updated
+
+---
+
+### TCK-20260303-011 :: Restore Worklog Entries Truncated by 91a598e
+Ticket Stamp: STAMP-20260302T184018Z-codex-vo1o
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-03-03 00:10 IST
+Status: **DONE**
+Priority: P0
+
+Prompts used:
+- `prompts/workflow/agent-entrypoint-v1.0.md`
+- `prompts/hardening/generalized-implementer-v1.0.md`
+
+Scope contract:
+
+- In-scope:
+  - Audit commit `91a598eb64fa5fda88d3dc8522e9323cc5925180` for historical worklog truncation
+  - Restore ticket visibility for entries removed from `docs/WORKLOG_ADDENDUM_v3.md`
+  - Preserve the removed ticket metadata in the current addendum without deleting current entries
+- Out-of-scope:
+  - Rewriting unrelated ticket content
+  - Reconstructing every removed execution-log line verbatim if not required for ticket traceability
+  - Changing any product code
+- Behavior change allowed: YES (documentation preservation only)
+
+Acceptance Criteria:
+
+- [x] Identify whether the large deletion in `91a598e` was intentional migration or destructive truncation
+- [x] Confirm which removed tickets were not preserved elsewhere
+- [x] Restore the removed ticket records into the current addendum in preserved form
+
+Execution log:
+
+- [2026-03-03 00:52 IST] Command: `git log --numstat --format='%H %ad %s' --date=short -- docs/WORKLOG_ADDENDUM_v3.md` | Evidence: commit `91a598e` changed `docs/WORKLOG_ADDENDUM_v3.md` by `+236/-1907`
+- [2026-03-03 00:53 IST] Command: `git show 91a598e^:docs/WORKLOG_ADDENDUM_v3.md | rg '^### TCK-' | wc -l` and `git show 91a598e:docs/WORKLOG_ADDENDUM_v3.md | rg '^### TCK-' | wc -l` | Evidence: ticket headings dropped from 24 to 7
+- [2026-03-03 00:54 IST] Command: compared ticket headings before vs after `91a598e` | Evidence: 24 ticket sections removed from the file
+- [2026-03-03 00:55 IST] Command: `rg -n --fixed-strings "<removed ticket title>" docs` across removed headings | Evidence: almost all removed tickets were absent from current docs, confirming no proper migration
+- [2026-03-03 00:56 IST] Restored removed ticket records below as historical stubs sourced from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`
+
+Status updates:
+
+- [2026-03-03 00:56 IST] **DONE** — Historical ticket visibility restored after confirming `91a598e` performed an in-place truncation rather than a documented migration
+
+---
+
+### Recovered Historical Entries Removed By `91a598e`
+
+These ticket records were removed from `docs/WORKLOG_ADDENDUM_v3.md` by commit `91a598eb64fa5fda88d3dc8522e9323cc5925180` without a documented migration. They are restored here as historical stubs using the original metadata from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`. The original detailed bodies remain recoverable from git history if needed.
+
+### TCK-20260223-008 :: Pre-Commit Noise Reduction (jsdom media stubs)
+Type: HARDENING
+Owner: Pranay
+Created: 2026-02-23 17:40 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+### TCK-20260223-001 :: Verify AlphabetGamePage audit vs codebase
+Type: VERIFICATION
+Owner: Pranay
+Created: 2026-02-23 14:25 IST
+Status: **OPEN**
+Priority: P1
+
+### TCK-20260223-002 :: AlphabetGame hardening from verified open findings
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-23 14:48 IST
+Status: **DONE**
+Priority: P1
+
+### TCK-20260223-003 :: AlphabetGame decomposition slice: camera permission flow reuse
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-23 15:40 IST
+Status: **DONE**
+Priority: P2
+
+### TCK-20260204-008 :: Phase 1 Visual Asset Generation
+Type: ASSET_GENERATION
+Owner: Pranay
+Created: 2026-02-04 17:45 IST
+Status: **OPEN**
+Priority: P1
+
+### TCK-20260204-009 :: Persona-Based Design Audit (Complete)
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-04 18:15 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260204-010 :: Fix Child-Friendly Language (P0)
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-04 18:52 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260204-011 :: Add Parent Trust Indicators (P0)
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-04 18:55 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260204-012 :: Fix Two-Stage Prompt Confusion (P0)
+Type: BUG_FIX
+Owner: Pranay
+Created: 2026-02-04 19:20 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260204-013 :: Multi-Persona Visual Audit with Playwright
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-05 11:00 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260215-001 :: PR-2 Camera UX Fixes (M3 + M4)
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-15 00:10 PST
+Status: **DONE**
+Priority: P1
+
+### TCK-20260215-002 :: PR-1 Temporal Smoothing (M1 — One-Euro Filter)
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-15 14:50 PST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260217-001 :: Combined CV Experience - Freeze Dance + Fingers
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260217-002 :: Visible Attention/Wellness Meter
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P0
+
+### TCK-20260217-003 :: Audio Improvements - Short TTS + Success Sounds
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260217-004 :: Auto-Start Game Flow
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P1
+
+### TCK-20260217-005 :: New Game - Phonics Sounds
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:40 IST
+Status: **OPEN**
+Priority: P1
+
+### TCK-20260217-006 :: Virtual Chemistry Lab Game
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 23:52 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260217-007 :: Fun First Games Catalog + Air Canvas Studio
+Type: FEATURE
+Owner: Pranay
+Created: 2026-02-17 13:45 IST
+Status: **DONE**
+Priority: P0
+
+### TCK-20260223-002 :: AlphabetGame Audit Remediation - Slice 1-3 (Constants + Persistence + Overlay)
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-23 15:10 IST
+Status: **DONE**
+Priority: P1
+
+### TCK-20260223-003 :: AlphabetGame Audit Remediation - Slice 4 (Permission Hook Integration)
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-02-23 15:18 IST
+Status: **DONE**
+Priority: P1
+
+### TCK-20260223-007 :: Simulated Customer Interview - Vikram (Data-Driven Father)
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 14:00 IST
+Status: **DONE**
+Priority: P1
+
+### TCK-20260223-008 :: Simulated Customer Interview - Ananya (Overwhelmed Working Mom)
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 16:30 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+### TCK-20260223-009 :: Simulated Customer Interview - Dadi (Non-Tech Guardian)
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-23 16:50 IST
+Status: **IN_PROGRESS**
+Priority: P1
