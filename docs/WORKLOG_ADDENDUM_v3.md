@@ -6069,3 +6069,73 @@ Risks/notes:
 - Feature flag `controls.fallbackV1` defaults to false (safe rollout)
 - Integration into game pages requires explicit adoption
 - Snap targets must be configured per-game based on interactive elements
+
+---
+
+### TCK-20260302-004 :: Settings & Parental Controls Audit
+Ticket Stamp: STAMP-20260302T124000Z-codex-set04
+
+Type: AUDIT  
+Owner: Pranay  
+Created: 2026-03-02 12:40 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Comprehensive audit of Settings page, Parent Gate, Data Privacy, and COPPA compliance. Identified critical gaps in data export, privacy policy, and time limit enforcement.
+
+Source:
+- Audit files: `docs/audit/ui__src__frontend__src__pages__Settings.tsx.md` (existing)
+- New audit: `docs/audit/SETTINGS_PARENTAL_CONTROLS_AUDIT_2026-03-02.md`
+
+Scope contract:
+- In-scope:
+  - Settings.tsx component audit
+  - ParentGate.tsx component audit
+  - Data privacy compliance review
+  - COPPA compliance gap analysis
+  - Prioritized backlog (7 items)
+- Out-of-scope:
+  - Implementation (separate tickets)
+  - Backend API changes (referenced only)
+- Behavior change allowed: N/A (audit only)
+
+Targets:
+- Repo: learning_for_kids
+- Files: 
+  - `src/frontend/src/pages/Settings.tsx`
+  - `src/frontend/src/components/ui/ParentGate.tsx`
+  - `docs/audit/SETTINGS_PARENTAL_CONTROLS_AUDIT_2026-03-02.md` (new)
+- Branch: main
+
+Key Findings:
+1. Data export is placeholder (COPPA/GDPR risk)
+2. Parent gate single-factor (accessibility/security gap)
+3. Time limit setting not enforced (UI-only)
+4. Browser alerts used for errors (UX issue)
+5. No privacy policy link (compliance gap)
+
+Backlog Items:
+- SET-001: Implement data export (P0)
+- SET-002: Add privacy policy link (P0)
+- SET-003: Enforce time limits (P1)
+- SET-004: Replace browser alerts (P1)
+- SET-005: Cognitive parent gate (P2)
+- SET-006: Audit logging (P2)
+- SET-007: Persist gate session (P2)
+
+Execution log:
+- [2026-03-02 12:00 IST] Analyzed Settings.tsx component | Evidence: 527 lines, 4 sections
+- [2026-03-02 12:15 IST] Analyzed ParentGate.tsx component | Evidence: 203 lines, hold-to-unlock
+- [2026-03-02 12:25 IST] Reviewed settingsStore.ts | Evidence: Feature flags integrated
+- [2026-03-02 12:35 IST] Created audit document | Evidence: 8 sections, 7 backlog items
+- [2026-03-02 12:40 IST] Committed audit | Evidence: git commit [TCK-20260302-004]
+
+Status updates:
+- [2026-03-02 12:00 IST] **OPEN** — Audit started
+- [2026-03-02 12:40 IST] **DONE** — Audit complete
+
+Next actions:
+1. Create tickets for SET-001 through SET-007
+2. Prioritize P0 items (data export, privacy policy)
+3. Schedule compliance review with legal
