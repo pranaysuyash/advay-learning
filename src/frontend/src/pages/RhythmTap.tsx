@@ -14,7 +14,9 @@ export function RhythmTap() {
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
   const [correct, setCorrect] = useState(0);
-  const [gameState, setGameState] = useState<'start' | 'showing' | 'listening' | 'result' | 'complete'>('start');
+  const [gameState, setGameState] = useState<
+    'start' | 'showing' | 'listening' | 'result' | 'complete'
+  >('start');
   const [feedback, setFeedback] = useState('');
   const [tapping, setTapping] = useState(false);
 
@@ -106,18 +108,22 @@ export function RhythmTap() {
     >
       <div className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-2xl mx-auto space-y-4'>
-
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>
             {LEVELS.map((l: { level: number }) => (
               <button
                 key={l.level}
                 type='button'
-                onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); }}
-                className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#9D174D] ${currentLevel === l.level
+                onClick={() => {
+                  playClick();
+                  setCurrentLevel(l.level);
+                  setGameState('start');
+                }}
+                className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#9D174D] ${
+                  currentLevel === l.level
                     ? 'bg-[#EC4899] text-white border-2 border-pink-600'
                     : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-pink-300'
-                  }`}
+                }`}
               >
                 Level {l.level}
               </button>
@@ -129,14 +135,20 @@ export function RhythmTap() {
             <div className='flex flex-col items-center gap-6 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
               <div className='text-7xl'>🥁</div>
               <div>
-                <h2 className='text-4xl font-black text-slate-900 tracking-tight'>Rhythm Tap!</h2>
+                <h2 className='text-4xl font-black text-slate-900 tracking-tight'>
+                  Rhythm Tap!
+                </h2>
                 <p className='text-lg font-bold text-slate-600 mt-2'>
                   Listen to the rhythm pattern — then tap it back perfectly!
                 </p>
               </div>
               <div className='flex items-center gap-3 text-sm font-bold text-slate-600'>
-                <span className='px-3 py-1 bg-pink-50 rounded-full border border-pink-200'>Score +30 per round</span>
-                <span className='px-3 py-1 bg-purple-50 rounded-full border border-purple-200'>5 rounds</span>
+                <span className='px-3 py-1 bg-pink-50 rounded-full border border-pink-200'>
+                  Score +30 per round
+                </span>
+                <span className='px-3 py-1 bg-purple-50 rounded-full border border-purple-200'>
+                  5 rounds
+                </span>
               </div>
               <button
                 type='button'
@@ -151,11 +163,15 @@ export function RhythmTap() {
           {/* Showing pattern */}
           {gameState === 'showing' && (
             <div className='flex flex-col items-center gap-6 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <p className='text-sm font-black uppercase tracking-widest text-pink-400'>Round {round + 1} of 5</p>
+              <p className='text-sm font-black uppercase tracking-widest text-pink-400'>
+                Round {round + 1} of 5
+              </p>
               <div className='text-5xl'>👂</div>
-              <p className='text-2xl font-black text-slate-700'>Listen to the pattern...</p>
+              <p className='text-2xl font-black text-slate-700'>
+                Listen to the pattern...
+              </p>
               <div className='flex gap-2 flex-wrap justify-center'>
-                {pattern.map((val, i) => (
+                {pattern.map((_, i) => (
                   <div
                     key={`p-${i}`}
                     className='w-5 h-5 rounded-full bg-pink-200 border-2 border-pink-400 animate-pulse'
@@ -170,27 +186,33 @@ export function RhythmTap() {
             <div className='flex flex-col items-center gap-6'>
               {/* Status */}
               {feedback && (
-                <div className={`w-full rounded-2xl px-5 py-4 border-2 font-bold text-lg text-center ${feedback.startsWith('🎵')
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                    : feedback.startsWith('❌')
-                      ? 'bg-red-50 border-red-300 text-red-700'
-                      : 'bg-pink-50 border-pink-300 text-pink-700'
-                  }`}>
+                <div
+                  className={`w-full rounded-2xl px-5 py-4 border-2 font-bold text-lg text-center ${
+                    feedback.startsWith('🎵')
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                      : feedback.startsWith('❌')
+                        ? 'bg-red-50 border-red-300 text-red-700'
+                        : 'bg-pink-50 border-pink-300 text-pink-700'
+                  }`}
+                >
                   {feedback}
                 </div>
               )}
 
               {/* Pattern dots */}
               <div className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_3px_0_#E5B86E] w-full'>
-                <p className='text-xs font-black uppercase text-slate-400 mb-3 text-center'>Pattern to match</p>
+                <p className='text-xs font-black uppercase text-slate-400 mb-3 text-center'>
+                  Pattern to match
+                </p>
                 <div className='flex gap-2 flex-wrap justify-center'>
-                {pattern.map((_val, i) => (
+                  {pattern.map((_val, i) => (
                     <div
                       key={`p-${i}`}
-                      className={`w-6 h-6 rounded-full border-2 transition-all ${i < userInput.length
+                      className={`w-6 h-6 rounded-full border-2 transition-all ${
+                        i < userInput.length
                           ? 'bg-pink-400 border-pink-500 scale-110'
                           : 'bg-pink-100 border-pink-300'
-                        }`}
+                      }`}
                     />
                   ))}
                 </div>
@@ -214,7 +236,8 @@ export function RhythmTap() {
               </button>
 
               <p className='text-sm font-bold text-slate-400'>
-                Tap {pattern.length - userInput.length} more time{pattern.length - userInput.length !== 1 ? 's' : ''}
+                Tap {pattern.length - userInput.length} more time
+                {pattern.length - userInput.length !== 1 ? 's' : ''}
               </p>
             </div>
           )}
@@ -223,15 +246,25 @@ export function RhythmTap() {
           {gameState === 'complete' && (
             <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
               <div className='text-7xl'>🎉</div>
-              <h2 className='text-4xl font-black text-slate-900'>Rhythm Master!</h2>
+              <h2 className='text-4xl font-black text-slate-900'>
+                Rhythm Master!
+              </h2>
               <div className='grid grid-cols-2 gap-4 w-full max-w-sm'>
                 <div className='bg-pink-50 border-2 border-pink-200 px-4 py-3 rounded-xl'>
-                  <p className='text-xs font-black uppercase text-pink-600'>Correct</p>
-                  <p className='text-3xl font-black text-pink-700'>{correct}/5</p>
+                  <p className='text-xs font-black uppercase text-pink-600'>
+                    Correct
+                  </p>
+                  <p className='text-3xl font-black text-pink-700'>
+                    {correct}/5
+                  </p>
                 </div>
                 <div className='bg-emerald-50 border-2 border-emerald-200 px-4 py-3 rounded-xl'>
-                  <p className='text-xs font-black uppercase text-emerald-600'>Score</p>
-                  <p className='text-3xl font-black text-emerald-700'>{score}</p>
+                  <p className='text-xs font-black uppercase text-emerald-600'>
+                    Score
+                  </p>
+                  <p className='text-3xl font-black text-emerald-700'>
+                    {score}
+                  </p>
                 </div>
               </div>
               <div className='flex gap-3'>

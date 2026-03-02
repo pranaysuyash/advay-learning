@@ -6,27 +6,27 @@
 
 ## Summary Table
 
-| # | Game | Route | Category | Input | Levels | Timer | Status |
-|---|------|-------|----------|-------|--------|-------|--------|
-| 1 | [Alphabet Tracing](#1-alphabet-tracing) | `/games/alphabet-tracing` | Literacy | Hand tracking | Multi-language | — | ✅ Complete |
-| 2 | [Finger Number Show](#2-finger-number-show) | `/games/finger-number-show` | Numeracy | Hand tracking | 4 difficulties | — | ✅ Complete |
-| 3 | [Connect The Dots](#3-connect-the-dots) | `/games/connect-the-dots` | Motor Skills | Hand tracking + Mouse | 5 levels × 3 difficulties | 60s | ✅ Complete |
-| 4 | [Letter Hunt](#4-letter-hunt) | `/games/letter-hunt` | Literacy | Hand tracking | 3 levels | 30s/round | ✅ Complete |
-| 5 | [Music Pinch Beat](#5-music-pinch-beat) | `/games/music-pinch-beat` | Rhythm | Hand tracking (pinch) | — | — | ✅ Complete |
-| 6 | [Steady Hand Lab](#6-steady-hand-lab) | `/games/steady-hand-lab` | Motor Skills | Hand tracking | — | — | ✅ Complete |
-| 7 | [Shape Pop](#7-shape-pop) | `/games/shape-pop` | Shapes | Hand tracking (pinch) | — | 60s | ✅ Complete |
-| 8 | [Color Match Garden](#8-color-match-garden) | `/games/color-match-garden` | Colors | Hand tracking (pinch) | — | 75s | ✅ Complete |
-| 9 | [Number Tap Trail](#9-number-tap-trail) | `/games/number-tap-trail` | Numeracy | Hand tracking (pinch) | 6 levels | 90s | ✅ Complete |
-| 10 | [Shape Sequence](#10-shape-sequence) | `/games/shape-sequence` | Memory | Hand tracking (pinch) | 6 levels | 80s | ✅ Complete |
-| 11 | [Yoga Animals](#11-yoga-animals) | `/games/yoga-animals` | Movement | Pose tracking | 6 animals | — | ✅ Complete |
-| 12 | [Freeze Dance](#12-freeze-dance) | `/games/freeze-dance` | Movement | Pose + Hand tracking | 3 phases | — | ✅ Complete |
-| 13 | [Simon Says](#13-simon-says) | `/games/simon-says` | Movement | Pose tracking | — | — | ✅ Complete |
-| 14 | [Virtual Chemistry Lab](#14-virtual-chemistry-lab) | `/games/chemistry-lab` | Science | Hand tracking (pinch) | 5 reactions | — | ✅ Complete |
-| 15 | [Word Builder](#15-word-builder) | `/games/word-builder` | Literacy / Phonics | Hand tracking (pinch) | 3 levels | 90s | ✅ Complete |
-| 16 | [Emoji Emotion Match](#16-emoji-emotion-match) | `/games/emoji-match` | Social-Emotional | Hand tracking (pinch) | 3 levels | 20s/round | ✅ Complete |
-| 17 | [Air Canvas](#17-air-canvas) | `/games/air-canvas` | Creativity | Hand tracking | — | — | ✅ Complete |
-| 18 | [Mirror Draw](#18-mirror-draw) | `/games/mirror-draw` | Creativity + Motor | Hand tracking (pinch) | 4 levels | — | ✅ Complete |
-| 19 | [Phonics Sounds](#19-phonics-sounds) | `/games/phonics-sounds` | Literacy / Phonics | Hand tracking (pinch) | 3 levels | 15-20s/round | ✅ Complete |
+| #   | Game                                               | Route                       | Category           | Input                 | Levels                    | Timer        | Status      |
+| --- | -------------------------------------------------- | --------------------------- | ------------------ | --------------------- | ------------------------- | ------------ | ----------- |
+| 1   | [Alphabet Tracing](#1-alphabet-tracing)            | `/games/alphabet-tracing`   | Literacy           | Hand tracking         | Multi-language            | —            | ✅ Complete |
+| 2   | [Finger Number Show](#2-finger-number-show)        | `/games/finger-number-show` | Numeracy           | Hand tracking         | 4 difficulties            | —            | ✅ Complete |
+| 3   | [Connect The Dots](#3-connect-the-dots)            | `/games/connect-the-dots`   | Motor Skills       | Hand tracking + Mouse | 5 levels × 3 difficulties | 60s          | ✅ Complete |
+| 4   | [Letter Hunt](#4-letter-hunt)                      | `/games/letter-hunt`        | Literacy           | Hand tracking         | 3 levels                  | 30s/round    | ✅ Complete |
+| 5   | [Music Pinch Beat](#5-music-pinch-beat)            | `/games/music-pinch-beat`   | Rhythm             | Hand tracking (pinch) | —                         | —            | ✅ Complete |
+| 6   | [Steady Hand Lab](#6-steady-hand-lab)              | `/games/steady-hand-lab`    | Motor Skills       | Hand tracking         | —                         | —            | ✅ Complete |
+| 7   | [Shape Pop](#7-shape-pop)                          | `/games/shape-pop`          | Shapes             | Hand tracking (pinch) | —                         | 60s          | ✅ Complete |
+| 8   | [Color Match Garden](#8-color-match-garden)        | `/games/color-match-garden` | Colors             | Hand tracking (pinch) | —                         | 75s          | ✅ Complete |
+| 9   | [Number Tap Trail](#9-number-tap-trail)            | `/games/number-tap-trail`   | Numeracy           | Hand tracking (pinch) | 6 levels                  | 90s          | ✅ Complete |
+| 10  | [Shape Sequence](#10-shape-sequence)               | `/games/shape-sequence`     | Memory             | Hand tracking (pinch) | 6 levels                  | 80s          | ✅ Complete |
+| 11  | [Yoga Animals](#11-yoga-animals)                   | `/games/yoga-animals`       | Movement           | Pose tracking         | 6 animals                 | —            | ✅ Complete |
+| 12  | [Freeze Dance](#12-freeze-dance)                   | `/games/freeze-dance`       | Movement           | Pose + Hand tracking  | 3 phases                  | —            | ✅ Complete |
+| 13  | [Simon Says](#13-simon-says)                       | `/games/simon-says`         | Movement           | Pose tracking         | —                         | —            | ✅ Complete |
+| 14  | [Virtual Chemistry Lab](#14-virtual-chemistry-lab) | `/games/chemistry-lab`      | Science            | Hand tracking (pinch) | 5 reactions               | —            | ✅ Complete |
+| 15  | [Word Builder](#15-word-builder)                   | `/games/word-builder`       | Literacy / Phonics | Hand tracking (pinch) | 3 levels                  | 90s          | ✅ Complete |
+| 16  | [Emoji Emotion Match](#16-emoji-emotion-match)     | `/games/emoji-match`        | Social-Emotional   | Hand tracking (pinch) | 3 levels                  | 20s/round    | ✅ Complete |
+| 17  | [Air Canvas](#17-air-canvas)                       | `/games/air-canvas`         | Creativity         | Hand tracking         | —                         | —            | ✅ Complete |
+| 18  | [Mirror Draw](#18-mirror-draw)                     | `/games/mirror-draw`        | Creativity + Motor | Hand tracking (pinch) | 4 levels                  | —            | ✅ Complete |
+| 19  | [Phonics Sounds](#19-phonics-sounds)               | `/games/phonics-sounds`     | Literacy / Phonics | Hand tracking (pinch) | 3 levels                  | 15-20s/round | ✅ Complete |
 
 ---
 
@@ -36,55 +36,55 @@
 
 All camera-based games share a common set of hooks that abstract MediaPipe setup, the detection loop, and audio feedback.
 
-| Hook | File | Purpose |
-|------|------|---------|
-| `useHandTracking` | `src/frontend/src/hooks/useHandTracking.ts` | Initializes MediaPipe `HandLandmarker` with GPU→CPU fallback. Returns `landmarker`, `isLoading`, `isReady`, `initialize`, `reset`. |
-| `useHandTrackingRuntime` | `src/frontend/src/hooks/useHandTrackingRuntime.ts` | Shared game loop: processes webcam frames, runs detection, calculates hand/pinch states. Accepts `onFrame` callback, smoothing & pinch config. |
-| `useSoundEffects` | `src/frontend/src/hooks/useSoundEffects.ts` | Programmatic Web Audio API sound effects (no external assets). Methods: `playSuccess`, `playPop`, `playError`, `playClick`, `playCelebration`, `playStart`. |
+| Hook                     | File                                               | Purpose                                                                                                                                                     |
+| ------------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useHandTracking`        | `src/frontend/src/hooks/useHandTracking.ts`        | Initializes MediaPipe `HandLandmarker` with GPU→CPU fallback. Returns `landmarker`, `isLoading`, `isReady`, `initialize`, `reset`.                          |
+| `useHandTrackingRuntime` | `src/frontend/src/hooks/useHandTrackingRuntime.ts` | Shared game loop: processes webcam frames, runs detection, calculates hand/pinch states. Accepts `onFrame` callback, smoothing & pinch config.              |
+| `useSoundEffects`        | `src/frontend/src/hooks/useSoundEffects.ts`        | Programmatic Web Audio API sound effects (no external assets). Methods: `playSuccess`, `playPop`, `playError`, `playClick`, `playCelebration`, `playStart`. |
 
 ### Shared Components
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| `GameContainer` | `src/frontend/src/components/GameContainer.tsx` | Standardized game layout with header (score, level, navigation) and game area. |
-| `GameControls` | `src/frontend/src/components/GameControls.tsx` | Reusable control buttons with consistent touch targets and positioning. |
-| `CelebrationOverlay` | `src/frontend/src/components/CelebrationOverlay.tsx` | Full-screen confetti and star burst animation for success states. |
-| `Mascot` | `src/frontend/src/components/Mascot.tsx` | "Pip" the mascot — TTS support, animations, and interactive states. |
+| Component            | File                                                 | Purpose                                                                        |
+| -------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `GameContainer`      | `src/frontend/src/components/GameContainer.tsx`      | Standardized game layout with header (score, level, navigation) and game area. |
+| `GameControls`       | `src/frontend/src/components/GameControls.tsx`       | Reusable control buttons with consistent touch targets and positioning.        |
+| `CelebrationOverlay` | `src/frontend/src/components/CelebrationOverlay.tsx` | Full-screen confetti and star burst animation for success states.              |
+| `Mascot`             | `src/frontend/src/components/Mascot.tsx`             | "Pip" the mascot — TTS support, animations, and interactive states.            |
 
 ### Game Logic Modules
 
 Reusable pure-function modules extracted from game pages:
 
-| Module | File | Exports | Used By |
-|--------|------|---------|---------|
-| `fingerCounting` | `src/frontend/src/games/fingerCounting.ts` | `countExtendedFingersFromLandmarks` — heuristic finger counting for kids | Finger Number Show |
-| `musicPinchLogic` | `src/frontend/src/games/musicPinchLogic.ts` | `getLaneFromNormalizedX`, `pickNextLane` | Music Pinch Beat |
-| `steadyHandLogic` | `src/frontend/src/games/steadyHandLogic.ts` | `updateHoldProgress` (linear progress + decay), `pickTargetPoint` | Steady Hand Lab |
-| `targetPracticeLogic` | `src/frontend/src/games/targetPracticeLogic.ts` | `isPointInCircle`, `pickRandomPoint`, `pickSpacedPoints` (collision-aware) | Shape Pop, Color Match Garden, Number Tap Trail |
-| `hitTarget` | `src/frontend/src/games/hitTarget.ts` | `findHitTarget` — generic circular hit detection | Number Tap Trail, Shape Sequence, Word Builder |
-| `wordBuilderLogic` | `src/frontend/src/games/wordBuilderLogic.ts` | `pickWordForLevel`, `createLetterTargets`, `WORD_LISTS` | Word Builder |
-| `emojiMatchLogic` | `src/frontend/src/games/emojiMatchLogic.ts` | `buildRound`, `EMOTIONS` | Emoji Emotion Match |
-| `airCanvasLogic` | `src/frontend/src/games/airCanvasLogic.ts` | `createStroke`, `addPointToStroke`, `detectShake`, `getBrushConfig`, `nextColor`, `nextBrush`, `getRainbowHue` | Air Canvas |
-| `mirrorDrawLogic` | `src/frontend/src/games/mirrorDrawLogic.ts` | `calculateMatchScore`, `mirrorPoint`, `samplePoints`, `getStars`, `TEMPLATES`, `LEVELS` | Mirror Draw |
-| `phonicsSoundsLogic` | `src/frontend/src/games/phonicsSoundsLogic.ts` | `buildPhonicsRound`, `getPhonemesForLevel`, `PHONEMES`, `LEVELS` | Phonics Sounds |
+| Module                | File                                            | Exports                                                                                                        | Used By                                         |
+| --------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `fingerCounting`      | `src/frontend/src/games/fingerCounting.ts`      | `countExtendedFingersFromLandmarks` — heuristic finger counting for kids                                       | Finger Number Show                              |
+| `musicPinchLogic`     | `src/frontend/src/games/musicPinchLogic.ts`     | `getLaneFromNormalizedX`, `pickNextLane`                                                                       | Music Pinch Beat                                |
+| `steadyHandLogic`     | `src/frontend/src/games/steadyHandLogic.ts`     | `updateHoldProgress` (linear progress + decay), `pickTargetPoint`                                              | Steady Hand Lab                                 |
+| `targetPracticeLogic` | `src/frontend/src/games/targetPracticeLogic.ts` | `isPointInCircle`, `pickRandomPoint`, `pickSpacedPoints` (collision-aware)                                     | Shape Pop, Color Match Garden, Number Tap Trail |
+| `hitTarget`           | `src/frontend/src/games/hitTarget.ts`           | `findHitTarget` — generic circular hit detection                                                               | Number Tap Trail, Shape Sequence, Word Builder  |
+| `wordBuilderLogic`    | `src/frontend/src/games/wordBuilderLogic.ts`    | `pickWordForLevel`, `createLetterTargets`, `WORD_LISTS`                                                        | Word Builder                                    |
+| `emojiMatchLogic`     | `src/frontend/src/games/emojiMatchLogic.ts`     | `buildRound`, `EMOTIONS`                                                                                       | Emoji Emotion Match                             |
+| `airCanvasLogic`      | `src/frontend/src/games/airCanvasLogic.ts`      | `createStroke`, `addPointToStroke`, `detectShake`, `getBrushConfig`, `nextColor`, `nextBrush`, `getRainbowHue` | Air Canvas                                      |
+| `mirrorDrawLogic`     | `src/frontend/src/games/mirrorDrawLogic.ts`     | `calculateMatchScore`, `mirrorPoint`, `samplePoints`, `getStars`, `TEMPLATES`, `LEVELS`                        | Mirror Draw                                     |
+| `phonicsSoundsLogic`  | `src/frontend/src/games/phonicsSoundsLogic.ts`  | `buildPhonicsRound`, `getPhonemesForLevel`, `PHONEMES`, `LEVELS`                                               | Phonics Sounds                                  |
 
 ### Test Coverage
 
-| Test File | Scope |
-|-----------|-------|
-| `src/frontend/src/games/__tests__/fingerCounting.test.ts` | Finger counting logic |
-| `src/frontend/src/games/__tests__/musicPinchLogic.test.ts` | Music lane logic |
-| `src/frontend/src/games/__tests__/steadyHandLogic.test.ts` | Hold progress/decay |
-| `src/frontend/src/games/__tests__/targetPracticeLogic.test.ts` | Hit detection, point placement |
-| `src/frontend/src/games/__tests__/hitTarget.test.ts` | Generic hit target detection |
-| `src/frontend/src/games/__tests__/wordBuilderLogic.test.ts` | Word selection and letter target generation |
-| `src/frontend/src/games/__tests__/emojiMatchLogic.test.ts` | Emotion round building logic |
-| `src/frontend/src/games/__tests__/airCanvasLogic.test.ts` | Stroke management, brush configs, shake detection |
-| `src/frontend/src/games/__tests__/mirrorDrawLogic.test.ts` | Templates, path matching, scoring, symmetry |
-| `src/frontend/src/games/__tests__/phonicsSoundsLogic.test.ts` | Phoneme data, round building, positioning |
-| `src/frontend/src/pages/__tests__/ConnectTheDots.test.tsx` | Connect The Dots page |
-| `src/frontend/src/pages/__tests__/Game.smoke.test.tsx` | General game smoke tests |
-| `src/frontend/src/pages/__tests__/Game.pending.test.tsx` | Pending test cases |
+| Test File                                                      | Scope                                             |
+| -------------------------------------------------------------- | ------------------------------------------------- |
+| `src/frontend/src/games/__tests__/fingerCounting.test.ts`      | Finger counting logic                             |
+| `src/frontend/src/games/__tests__/musicPinchLogic.test.ts`     | Music lane logic                                  |
+| `src/frontend/src/games/__tests__/steadyHandLogic.test.ts`     | Hold progress/decay                               |
+| `src/frontend/src/games/__tests__/targetPracticeLogic.test.ts` | Hit detection, point placement                    |
+| `src/frontend/src/games/__tests__/hitTarget.test.ts`           | Generic hit target detection                      |
+| `src/frontend/src/games/__tests__/wordBuilderLogic.test.ts`    | Word selection and letter target generation       |
+| `src/frontend/src/games/__tests__/emojiMatchLogic.test.ts`     | Emotion round building logic                      |
+| `src/frontend/src/games/__tests__/airCanvasLogic.test.ts`      | Stroke management, brush configs, shake detection |
+| `src/frontend/src/games/__tests__/mirrorDrawLogic.test.ts`     | Templates, path matching, scoring, symmetry       |
+| `src/frontend/src/games/__tests__/phonicsSoundsLogic.test.ts`  | Phoneme data, round building, positioning         |
+| `src/frontend/src/pages/__tests__/ConnectTheDots.test.tsx`     | Connect The Dots page                             |
+| `src/frontend/src/pages/__tests__/Game.smoke.test.tsx`         | General game smoke tests                          |
+| `src/frontend/src/pages/__tests__/Game.pending.test.tsx`       | Pending test cases                                |
 
 ---
 
@@ -94,15 +94,15 @@ Reusable pure-function modules extracted from game pages:
 
 ### 1. Alphabet Tracing
 
-| | |
-|---|---|
-| **Route** | `/games/alphabet-tracing` |
-| **Age Range** | 3–6 |
-| **Category** | Literacy / Handwriting |
-| **Difficulty** | Adaptive per language |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` |
-| **Re-export** | `src/frontend/src/pages/AlphabetGame.tsx` |
+|                |                                                             |
+| -------------- | ----------------------------------------------------------- |
+| **Route**      | `/games/alphabet-tracing`                                   |
+| **Age Range**  | 3–6                                                         |
+| **Category**   | Literacy / Handwriting                                      |
+| **Difficulty** | Adaptive per language                                       |
+| **Status**     | ✅ Complete (routed)                                        |
+| **Source**     | `src/frontend/src/pages/alphabet-game/AlphabetGamePage.tsx` |
+| **Re-export**  | `src/frontend/src/pages/AlphabetGame.tsx`                   |
 
 **Learning Objectives:**
 
@@ -132,14 +132,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 2. Finger Number Show
 
-| | |
-|---|---|
-| **Route** | `/games/finger-number-show` |
-| **Age Range** | 3–6 |
-| **Category** | Numeracy |
-| **Difficulty** | 4 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/games/FingerNumberShow.tsx` |
+|                |                                               |
+| -------------- | --------------------------------------------- |
+| **Route**      | `/games/finger-number-show`                   |
+| **Age Range**  | 3–6                                           |
+| **Category**   | Numeracy                                      |
+| **Difficulty** | 4 levels                                      |
+| **Status**     | ✅ Complete (routed)                          |
+| **Source**     | `src/frontend/src/games/FingerNumberShow.tsx` |
 
 **Learning Objectives:**
 
@@ -173,14 +173,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 3. Connect The Dots
 
-| | |
-|---|---|
-| **Route** | `/games/connect-the-dots` |
-| **Age Range** | 3–7 |
-| **Category** | Motor Skills / Numeracy |
-| **Difficulty** | 3 levels (Easy / Medium / Hard) |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/ConnectTheDots.tsx` |
+|                |                                             |
+| -------------- | ------------------------------------------- |
+| **Route**      | `/games/connect-the-dots`                   |
+| **Age Range**  | 3–7                                         |
+| **Category**   | Motor Skills / Numeracy                     |
+| **Difficulty** | 3 levels (Easy / Medium / Hard)             |
+| **Status**     | ✅ Complete (routed)                        |
+| **Source**     | `src/frontend/src/pages/ConnectTheDots.tsx` |
 
 **Learning Objectives:**
 
@@ -211,14 +211,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 4. Letter Hunt
 
-| | |
-|---|---|
-| **Route** | `/games/letter-hunt` |
-| **Age Range** | 4–7 |
-| **Category** | Literacy |
-| **Difficulty** | 3 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/LetterHunt.tsx` |
+|                |                                         |
+| -------------- | --------------------------------------- |
+| **Route**      | `/games/letter-hunt`                    |
+| **Age Range**  | 4–7                                     |
+| **Category**   | Literacy                                |
+| **Difficulty** | 3 levels                                |
+| **Status**     | ✅ Complete (routed)                    |
+| **Source**     | `src/frontend/src/pages/LetterHunt.tsx` |
 
 **Learning Objectives:**
 
@@ -250,14 +250,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 5. Music Pinch Beat
 
-| | |
-|---|---|
-| **Route** | `/games/music-pinch-beat` |
-| **Age Range** | 4–8 |
-| **Category** | Rhythm / Music |
-| **Difficulty** | Progressive (streak-based) |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/MusicPinchBeat.tsx` |
+|                |                                             |
+| -------------- | ------------------------------------------- |
+| **Route**      | `/games/music-pinch-beat`                   |
+| **Age Range**  | 4–8                                         |
+| **Category**   | Rhythm / Music                              |
+| **Difficulty** | Progressive (streak-based)                  |
+| **Status**     | ✅ Complete (routed)                        |
+| **Source**     | `src/frontend/src/pages/MusicPinchBeat.tsx` |
 
 **Learning Objectives:**
 
@@ -289,14 +289,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 6. Steady Hand Lab
 
-| | |
-|---|---|
-| **Route** | `/games/steady-hand-lab` |
-| **Age Range** | 4–8 |
-| **Category** | Motor Skills / Focus |
-| **Difficulty** | Progressive (round-based) |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/SteadyHandLab.tsx` |
+|                |                                            |
+| -------------- | ------------------------------------------ |
+| **Route**      | `/games/steady-hand-lab`                   |
+| **Age Range**  | 4–8                                        |
+| **Category**   | Motor Skills / Focus                       |
+| **Difficulty** | Progressive (round-based)                  |
+| **Status**     | ✅ Complete (routed)                       |
+| **Source**     | `src/frontend/src/pages/SteadyHandLab.tsx` |
 
 **Learning Objectives:**
 
@@ -328,14 +328,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 7. Shape Pop
 
-| | |
-|---|---|
-| **Route** | `/games/shape-pop` |
-| **Age Range** | 3–6 |
-| **Category** | Shapes / Motor Skills |
-| **Difficulty** | Single mode |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/ShapePop.tsx` |
+|                |                                       |
+| -------------- | ------------------------------------- |
+| **Route**      | `/games/shape-pop`                    |
+| **Age Range**  | 3–6                                   |
+| **Category**   | Shapes / Motor Skills                 |
+| **Difficulty** | Single mode                           |
+| **Status**     | ✅ Complete (routed)                  |
+| **Source**     | `src/frontend/src/pages/ShapePop.tsx` |
 
 **Learning Objectives:**
 
@@ -367,14 +367,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 8. Color Match Garden
 
-| | |
-|---|---|
-| **Route** | `/games/color-match-garden` |
-| **Age Range** | 3–6 |
-| **Category** | Colors |
-| **Difficulty** | Single mode |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/ColorMatchGarden.tsx` |
+|                |                                               |
+| -------------- | --------------------------------------------- |
+| **Route**      | `/games/color-match-garden`                   |
+| **Age Range**  | 3–6                                           |
+| **Category**   | Colors                                        |
+| **Difficulty** | Single mode                                   |
+| **Status**     | ✅ Complete (routed)                          |
+| **Source**     | `src/frontend/src/pages/ColorMatchGarden.tsx` |
 
 **Learning Objectives:**
 
@@ -408,14 +408,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 9. Number Tap Trail
 
-| | |
-|---|---|
-| **Route** | `/games/number-tap-trail` |
-| **Age Range** | 4–7 |
-| **Category** | Numeracy / Sequencing |
-| **Difficulty** | 6 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/NumberTapTrail.tsx` |
+|                |                                             |
+| -------------- | ------------------------------------------- |
+| **Route**      | `/games/number-tap-trail`                   |
+| **Age Range**  | 4–7                                         |
+| **Category**   | Numeracy / Sequencing                       |
+| **Difficulty** | 6 levels                                    |
+| **Status**     | ✅ Complete (routed)                        |
+| **Source**     | `src/frontend/src/pages/NumberTapTrail.tsx` |
 
 **Learning Objectives:**
 
@@ -448,14 +448,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 10. Shape Sequence
 
-| | |
-|---|---|
-| **Route** | `/games/shape-sequence` |
-| **Age Range** | 4–8 |
-| **Category** | Memory / Shapes |
-| **Difficulty** | 6 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/ShapeSequence.tsx` |
+|                |                                            |
+| -------------- | ------------------------------------------ |
+| **Route**      | `/games/shape-sequence`                    |
+| **Age Range**  | 4–8                                        |
+| **Category**   | Memory / Shapes                            |
+| **Difficulty** | 6 levels                                   |
+| **Status**     | ✅ Complete (routed)                       |
+| **Source**     | `src/frontend/src/pages/ShapeSequence.tsx` |
 
 **Learning Objectives:**
 
@@ -488,14 +488,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 11. Yoga Animals
 
-| | |
-|---|---|
-| **Route** | `/games/yoga-animals` |
-| **Age Range** | 4–8 |
-| **Category** | Movement / Body Awareness |
-| **Difficulty** | Single mode |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/YogaAnimals.tsx` |
+|                |                                          |
+| -------------- | ---------------------------------------- |
+| **Route**      | `/games/yoga-animals`                    |
+| **Age Range**  | 4–8                                      |
+| **Category**   | Movement / Body Awareness                |
+| **Difficulty** | Single mode                              |
+| **Status**     | ✅ Complete (routed)                     |
+| **Source**     | `src/frontend/src/pages/YogaAnimals.tsx` |
 
 **Learning Objectives:**
 
@@ -528,14 +528,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 12. Freeze Dance
 
-| | |
-|---|---|
-| **Route** | `/games/freeze-dance` |
-| **Age Range** | 3–7 |
-| **Category** | Movement / Listening |
-| **Difficulty** | Progressive (3 phases) |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/FreezeDance.tsx` |
+|                |                                          |
+| -------------- | ---------------------------------------- |
+| **Route**      | `/games/freeze-dance`                    |
+| **Age Range**  | 3–7                                      |
+| **Category**   | Movement / Listening                     |
+| **Difficulty** | Progressive (3 phases)                   |
+| **Status**     | ✅ Complete (routed)                     |
+| **Source**     | `src/frontend/src/pages/FreezeDance.tsx` |
 
 **Learning Objectives:**
 
@@ -572,14 +572,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 13. Simon Says
 
-| | |
-|---|---|
-| **Route** | `/games/simon-says` |
-| **Age Range** | 4–8 |
-| **Category** | Movement / Listening |
-| **Difficulty** | Single mode |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/SimonSays.tsx` |
+|                |                                           |
+| -------------- | ----------------------------------------- |
+| **Route**      | `/games/simon-says`                       |
+| **Age Range**  | 4–8                                       |
+| **Category**   | Movement / Listening                      |
+| **Difficulty** | Classic + Combo modes                     |
+| **Status**     | ⚠️ Routed; reliability remediation queued |
+| **Source**     | `src/frontend/src/pages/SimonSays.tsx`    |
 
 **Learning Objectives:**
 
@@ -591,14 +591,22 @@ Reusable pure-function modules extracted from game pages:
 **Input Method:**
 
 - 🧍 Pose tracking via MediaPipe `PoseLandmarker`
+- ✋ Optional hand counting in Combo mode via `useGameHandTracking`
+- ⚠️ No documented touch/mouse fallback in current implementation
 
 **Game Mechanics:**
 
 - Actions: Touch Head, Wave, Arms Up, Hands On Hips, T-Rex Arms, Touch Shoulders
-- App announces an action; child performs it with their body
+- App shows an action; child performs it with their body
 - 100 points per correctly detected pose
 - Must hold the pose for 2 seconds for it to count
 - Pose detection via landmark position analysis
+
+**Audit Note (2026-02-28):**
+
+- `Wave` and `T-Rex Arms` are currently configured but not scored by the pose matcher.
+- “Only if Simon says” copy is present, but inverse-command rule logic is not yet implemented.
+- See: `docs/audit/src__frontend__src__pages__SimonSays.md` (Addendum 2026-02-28, Unit-1..Unit-3).
 
 **Key Dependencies:**
 
@@ -612,14 +620,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 14. Virtual Chemistry Lab
 
-| | |
-|---|---|
-| **Route** | `/games/chemistry-lab` |
-| **Age Range** | 5–8 |
-| **Category** | Science / Exploration |
-| **Difficulty** | Open-ended |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/VirtualChemistryLab.tsx` |
+|                |                                                  |
+| -------------- | ------------------------------------------------ |
+| **Route**      | `/games/chemistry-lab`                           |
+| **Age Range**  | 5–8                                              |
+| **Category**   | Science / Exploration                            |
+| **Difficulty** | Open-ended                                       |
+| **Status**     | ✅ Complete (routed)                             |
+| **Source**     | `src/frontend/src/pages/VirtualChemistryLab.tsx` |
 
 **Learning Objectives:**
 
@@ -652,14 +660,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 15. Word Builder
 
-| | |
-|---|---|
-| **Route** | `/games/word-builder` |
-| **Age Range** | 3–7 |
-| **Category** | Literacy / Phonics |
-| **Difficulty** | 3 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/WordBuilder.tsx` |
+|                |                                          |
+| -------------- | ---------------------------------------- |
+| **Route**      | `/games/word-builder`                    |
+| **Age Range**  | 3–7                                      |
+| **Category**   | Literacy / Phonics                       |
+| **Difficulty** | 3 levels                                 |
+| **Status**     | ✅ Complete (routed)                     |
+| **Source**     | `src/frontend/src/pages/WordBuilder.tsx` |
 
 **Learning Objectives:**
 
@@ -698,14 +706,14 @@ Reusable pure-function modules extracted from game pages:
 
 ### 16. Emoji Emotion Match
 
-| | |
-|---|---|
-| **Route** | `/games/emoji-match` |
-| **Age Range** | 3–7 |
-| **Category** | Social-Emotional Learning |
-| **Difficulty** | 3 levels |
-| **Status** | ✅ Complete (routed) |
-| **Source** | `src/frontend/src/pages/EmojiMatch.tsx` |
+|                |                                         |
+| -------------- | --------------------------------------- |
+| **Route**      | `/games/emoji-match`                    |
+| **Age Range**  | 3–7                                     |
+| **Category**   | Social-Emotional Learning               |
+| **Difficulty** | 3 levels                                |
+| **Status**     | ✅ Complete (routed)                    |
+| **Source**     | `src/frontend/src/pages/EmojiMatch.tsx` |
 
 **Learning Objectives:**
 
@@ -742,30 +750,30 @@ Reusable pure-function modules extracted from game pages:
 
 ## Game Categories
 
-| Category | Games |
-|----------|-------|
-| **Literacy** | Alphabet Tracing, Letter Hunt, Word Builder |
-| **Numeracy** | Finger Number Show, Connect The Dots, Number Tap Trail |
-| **Shapes** | Shape Pop, Shape Sequence |
-| **Colors** | Color Match Garden |
-| **Motor Skills** | Connect The Dots, Steady Hand Lab, Shape Pop |
-| **Memory** | Shape Sequence |
-| **Rhythm / Music** | Music Pinch Beat |
-| **Movement / Body** | Yoga Animals, Freeze Dance, Simon Says |
-| **Social-Emotional** | Emoji Emotion Match |
-| **Science** | Virtual Chemistry Lab |
-| **Creativity** | Air Canvas, Mirror Draw |
+| Category             | Games                                                  |
+| -------------------- | ------------------------------------------------------ |
+| **Literacy**         | Alphabet Tracing, Letter Hunt, Word Builder            |
+| **Numeracy**         | Finger Number Show, Connect The Dots, Number Tap Trail |
+| **Shapes**           | Shape Pop, Shape Sequence                              |
+| **Colors**           | Color Match Garden                                     |
+| **Motor Skills**     | Connect The Dots, Steady Hand Lab, Shape Pop           |
+| **Memory**           | Shape Sequence                                         |
+| **Rhythm / Music**   | Music Pinch Beat                                       |
+| **Movement / Body**  | Yoga Animals, Freeze Dance, Simon Says                 |
+| **Social-Emotional** | Emoji Emotion Match                                    |
+| **Science**          | Virtual Chemistry Lab                                  |
+| **Creativity**       | Air Canvas, Mirror Draw                                |
 
 ## Input Method Summary
 
-| Method | Technology | Games Using It |
-|--------|-----------|----------------|
-| **Hand Tracking** | MediaPipe `HandLandmarker` | All except Yoga Animals, Simon Says |
-| **Pose Tracking** | MediaPipe `PoseLandmarker` | Yoga Animals, Freeze Dance, Simon Says |
-| **Finger Counting** | Custom heuristic on landmarks | Finger Number Show, Freeze Dance |
-| **Pinch Detection** | Thumb-index distance threshold | Most hand-tracking games |
-| **Mouse Fallback** | Standard DOM events | Alphabet Tracing, Connect The Dots, Letter Hunt |
+| Method              | Technology                     | Games Using It                                  |
+| ------------------- | ------------------------------ | ----------------------------------------------- |
+| **Hand Tracking**   | MediaPipe `HandLandmarker`     | All except Yoga Animals, Simon Says             |
+| **Pose Tracking**   | MediaPipe `PoseLandmarker`     | Yoga Animals, Freeze Dance, Simon Says          |
+| **Finger Counting** | Custom heuristic on landmarks  | Finger Number Show, Freeze Dance                |
+| **Pinch Detection** | Thumb-index distance threshold | Most hand-tracking games                        |
+| **Mouse Fallback**  | Standard DOM events            | Alphabet Tracing, Connect The Dots, Letter Hunt |
 
 ---
 
-*Last updated: 2026-02-22*
+_Last updated: 2026-02-22_

@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useHandDetection } from '../components/game/useHandDetection';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useTTS } from '../hooks/useTTS';
@@ -96,7 +97,11 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
   );
 
   // derived from hand detection context
-  const { cursor: _detectorCursor, pinch: _pinch, meta: _meta } = useHandDetection();
+  const {
+    cursor: _detectorCursor,
+    pinch: _pinch,
+    meta: _meta,
+  } = useHandDetection();
   const [isHandDetected, setIsHandDetected] = useState(false);
   const [cursor, setCursor] = useState<Point | null>(null);
   const [cursorPx, setCursorPx] = useState<Point | null>(null);
@@ -590,6 +595,7 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
 
   return (
     <GameContainer
+      webcamRef={_webcamRef}
       title='Emoji Match'
       score={score}
       level={level}
@@ -606,8 +612,6 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         ref={containerRef}
         className='absolute inset-0 bg-discovery-cream overflow-hidden'
       >
-        
-
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate font-bold text-base md:text-lg text-center shadow-[0_4px_0_#E5B86E] min-w-max'>

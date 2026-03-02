@@ -8264,8 +8264,9 @@ To run tests:
 
 ```bash
 cd src/frontend
-npm run test        # Run tests
-npm run test -- --run  # Run once (CI mode)
+npm run test            # Run tests (single pass by default)
+npm run test:watch      # Start Vitest in watch/development mode
+npm run test:ci         # Run a one‑off pass with coverage (CI friendly)
 ```
 
 Status Updates:
@@ -40997,7 +40998,7 @@ Targets:
   - src/frontend/src/pages/MusicalStatues.tsx (NEW)
   - src/frontend/src/App.tsx (MODIFY)
   - src/frontend/src/data/gameRegistry.ts (MODIFY)
-  - src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx (MODIFY)
+  - src/frontend/src/pages/**tests**/GamePages.smoke.test.tsx (MODIFY)
 - Branch/PR: main
 
 Acceptance Criteria:
@@ -41020,6 +41021,7 @@ Execution log:
 - 2026-02-27 18:30 UTC **DONE** - Musical Statues game fully implemented and tested
 
 Evidence:
+
 - Command: `cd src/frontend && npm run type-check` (MusicalStatues compilation clean)
 - Command: `npm test -- src/pages/__tests__/GamePages.smoke.test.tsx -t "MusicalStatues"` (✓ 1 passed)
 - Files created:
@@ -41028,7 +41030,7 @@ Evidence:
 - Files modified:
   - src/frontend/src/App.tsx (added MusicalStatues lazy import and route)
   - src/frontend/src/data/gameRegistry.ts (added MusicalStatues metadata)
-  - src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx (added MusicalStatues smoke test)
+  - src/frontend/src/pages/**tests**/GamePages.smoke.test.tsx (added MusicalStatues smoke test)
 
 Status updates:
 

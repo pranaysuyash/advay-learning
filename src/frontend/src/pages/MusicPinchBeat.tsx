@@ -26,7 +26,9 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   const [targetLane, setTargetLane] = useState(1);
   const [cursorX, setCursorX] = useState<number | null>(null);
   const [selectedLane, setSelectedLane] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState('Pinch on the glowing lane to play the beat!');
+  const [feedback, setFeedback] = useState(
+    'Pinch on the glowing lane to play the beat!',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
 
   const targetLaneRef = useRef(targetLane);
@@ -101,20 +103,32 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         }
       }
     },
-    [cursorX, playCelebration, playError, playPop, selectedLane, speak, ttsEnabled],
+    [
+      cursorX,
+      playCelebration,
+      playError,
+      playPop,
+      selectedLane,
+      speak,
+      ttsEnabled,
+    ],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } =
-    useGameHandTracking({
-      gameName: 'MusicPinchBeat',
-      targetFps: 30,
-      isRunning: isPlaying,
-      onFrame: handleFrame,
-      onNoVideoFrame: () => {
-        if (cursorX !== null) setCursorX(null);
-        if (selectedLane !== null) setSelectedLane(null);
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'MusicPinchBeat',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => {
+      if (cursorX !== null) setCursorX(null);
+      if (selectedLane !== null) setSelectedLane(null);
+    },
+  });
 
   useEffect(() => {
     if (isPlaying && !isHandTrackingReady && !isModelLoading) {
@@ -125,13 +139,17 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   const startGame = async () => {
     setScore(0);
     setStreak(0);
-    setFeedback('Follow the beat: pinch when your finger is on the glowing lane.');
+    setFeedback(
+      'Follow the beat: pinch when your finger is on the glowing lane.',
+    );
     setTargetLane(1);
     setCursorX(null);
     setSelectedLane(null);
     setIsPlaying(true);
     if (ttsEnabled) {
-      void speak('Move your finger to the glowing lane and pinch to play the beat!');
+      void speak(
+        'Move your finger to the glowing lane and pinch to play the beat!',
+      );
     }
     playPop();
 
@@ -171,10 +189,16 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
   ];
 
   return (
-    <GameContainer title='Music Pinch Beat' score={score} level={Math.max(1, Math.floor(score / 80) + 1)} onHome={goHome} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+    <GameContainer
+      webcamRef={_webcamRef}
+      title='Music Pinch Beat'
+      score={score}
+      level={Math.max(1, Math.floor(score / 80) + 1)}
+      onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
+    >
       <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        
-
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-blue-100/40 pointer-events-none' />
 
         <div className='absolute inset-x-4 top-24 bottom-24 grid grid-cols-3 gap-4 md:gap-8'>
@@ -188,14 +212,16 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
                 className='relative flex items-center justify-center'
               >
                 <div
-                  className={`absolute inset-0 rounded-[2.5rem] border-3 transition-all duration-300 ${isTarget
-                    ? 'bg-amber-100/50 border-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.5)]'
-                    : 'bg-white/40 border-[#F2CC8F]'
-                    }`}
+                  className={`absolute inset-0 rounded-[2.5rem] border-3 transition-all duration-300 ${
+                    isTarget
+                      ? 'bg-amber-100/50 border-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.5)]'
+                      : 'bg-white/40 border-[#F2CC8F]'
+                  }`}
                 />
                 <div
-                  className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
-                    } transition-transform drop-shadow-[0_4px_0_#E5B86E]`}
+                  className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${
+                    isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
+                  } transition-transform drop-shadow-[0_4px_0_#E5B86E]`}
                 >
                   {LANE_LABELS[laneIndex]}
                 </div>
@@ -210,7 +236,21 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
             style={{ left: `${cursorX * 100}%` }}
             aria-hidden='true'
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l3 3-3 3 3 3" /><path d="M18 15V9a2 2 0 0 0-2-2h-2" /><path d="M10 15V9a2 2 0 0 1 2-2h2" /></svg>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='36'
+              height='36'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='#3B82F6'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+            >
+              <path d='M14 9a2 2 0 0 1-2 2H6l3 3-3 3 3 3' />
+              <path d='M18 15V9a2 2 0 0 0-2-2h-2' />
+              <path d='M10 15V9a2 2 0 0 1 2-2h2' />
+            </svg>
           </div>
         )}
 
@@ -222,9 +262,25 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-purple-100 rounded-3xl border-4 border-purple-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9333EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='48'
+                  height='48'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#9333EA'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <path d='M9 18V5l12-2v13' />
+                  <circle cx='6' cy='18' r='3' />
+                  <circle cx='18' cy='16' r='3' />
+                </svg>
               </div>
-              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Music Pinch Beat</h2>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>
+                Music Pinch Beat
+              </h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>
                 Move your finger to the glowing lane and pinch to play the beat!
               </p>
@@ -252,7 +308,10 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         )}
 
         <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg'>
-          Streak: <span className='font-black text-amber-500 text-2xl ml-2'>{streak}</span>
+          Streak:{' '}
+          <span className='font-black text-amber-500 text-2xl ml-2'>
+            {streak}
+          </span>
         </div>
 
         <GameControls controls={controls} position='bottom-right' />

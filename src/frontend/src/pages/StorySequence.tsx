@@ -391,7 +391,7 @@ export default function StorySequence() {
   
   // ===== RENDER =====
   return (
-    <GameContainer title="Story Sequence" onHome={handleShowMenu}>
+    <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
         

@@ -42,7 +42,7 @@ export function KaleidoscopeHands() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx || typeof ctx.translate !== 'function') return; // guard for jsdom stub
 
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -68,10 +68,19 @@ export function KaleidoscopeHands() {
           const p1 = points[j];
           const p2 = points[j + 1];
 
-          ctx.strokeStyle = getColorForPoint(levelConfig.colorMode, (j / points.length + colorProgressRef.current) % 1);
+          ctx.strokeStyle = getColorForPoint(
+            levelConfig.colorMode,
+            (j / points.length + colorProgressRef.current) % 1,
+          );
           ctx.beginPath();
-          ctx.moveTo(p1.x * CANVAS_SIZE - centerX, p1.y * CANVAS_SIZE - centerY);
-          ctx.lineTo(p2.x * CANVAS_SIZE - centerX, p2.y * CANVAS_SIZE - centerY);
+          ctx.moveTo(
+            p1.x * CANVAS_SIZE - centerX,
+            p1.y * CANVAS_SIZE - centerY,
+          );
+          ctx.lineTo(
+            p2.x * CANVAS_SIZE - centerX,
+            p2.y * CANVAS_SIZE - centerY,
+          );
           ctx.stroke();
         }
 
@@ -81,10 +90,19 @@ export function KaleidoscopeHands() {
           const p1 = points[j];
           const p2 = points[j + 1];
 
-          ctx.strokeStyle = getColorForPoint(levelConfig.colorMode, (j / points.length + colorProgressRef.current) % 1);
+          ctx.strokeStyle = getColorForPoint(
+            levelConfig.colorMode,
+            (j / points.length + colorProgressRef.current) % 1,
+          );
           ctx.beginPath();
-          ctx.moveTo(p1.x * CANVAS_SIZE - centerX, p1.y * CANVAS_SIZE - centerY);
-          ctx.lineTo(p2.x * CANVAS_SIZE - centerX, p2.y * CANVAS_SIZE - centerY);
+          ctx.moveTo(
+            p1.x * CANVAS_SIZE - centerX,
+            p1.y * CANVAS_SIZE - centerY,
+          );
+          ctx.lineTo(
+            p2.x * CANVAS_SIZE - centerX,
+            p2.y * CANVAS_SIZE - centerY,
+          );
           ctx.stroke();
         }
       }
@@ -94,13 +112,18 @@ export function KaleidoscopeHands() {
 
     // Draw hand cursor
     ctx.beginPath();
-    ctx.arc(handPosition.x * CANVAS_SIZE, handPosition.y * CANVAS_SIZE, 12, 0, Math.PI * 2);
+    ctx.arc(
+      handPosition.x * CANVAS_SIZE,
+      handPosition.y * CANVAS_SIZE,
+      12,
+      0,
+      Math.PI * 2,
+    );
     ctx.fillStyle = 'white';
     ctx.fill();
     ctx.strokeStyle = '#FF6B6B';
     ctx.lineWidth = 3;
     ctx.stroke();
-
   }, [points, handPosition, levelConfig]);
 
   // Animate colors
@@ -145,61 +168,66 @@ export function KaleidoscopeHands() {
 
   return (
     <GameContainer
-      title="Kaleidoscope Hands"
+      title='Kaleidoscope Hands'
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
-        <div className="flex gap-2">
+      <div className='flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
+        <div className='flex gap-2'>
           {LEVELS.map((level) => (
             <button
-              type="button"
+              type='button'
               key={level.level}
               onClick={() => handleLevelChange(level.level)}
-              className={`px-4 py-2 rounded-full font-bold transition-all ${currentLevel === level.level
+              className={`px-4 py-2 rounded-full font-bold transition-all ${
+                currentLevel === level.level
                   ? 'bg-pink-500 text-white shadow-lg'
                   : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
-                }`}
+              }`}
             >
               Level {level.level}
             </button>
           ))}
         </div>
 
-        <p className="text-gray-600">Move your finger to draw beautiful patterns!</p>
+        <p className='text-gray-600'>
+          Move your finger to draw beautiful patterns!
+        </p>
 
         <canvas
           ref={canvasRef}
           width={CANVAS_SIZE}
           height={CANVAS_SIZE}
           onPointerMove={handlePointerMove}
-          className="touch-none cursor-crosshair rounded-2xl shadow-xl border-4 border-pink-200"
+          className='touch-none cursor-crosshair rounded-2xl shadow-xl border-4 border-pink-200'
           style={{ maxWidth: '100%', height: 'auto' }}
         />
 
-        <div className="flex gap-4 text-center">
-          <div className="bg-purple-100 px-4 py-2 rounded-xl">
-            <p className="text-sm text-purple-600 font-medium">Points</p>
-            <p className="text-2xl font-bold text-purple-700">{points.length}</p>
+        <div className='flex gap-4 text-center'>
+          <div className='bg-purple-100 px-4 py-2 rounded-xl'>
+            <p className='text-sm text-purple-600 font-medium'>Points</p>
+            <p className='text-2xl font-bold text-purple-700'>
+              {points.length}
+            </p>
           </div>
-          <div className="bg-pink-100 px-4 py-2 rounded-xl">
-            <p className="text-sm text-pink-600 font-medium">Score</p>
-            <p className="text-2xl font-bold text-pink-700">{score}</p>
+          <div className='bg-pink-100 px-4 py-2 rounded-xl'>
+            <p className='text-sm text-pink-600 font-medium'>Score</p>
+            <p className='text-2xl font-bold text-pink-700'>{score}</p>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className='flex gap-3'>
           <button
-            type="button"
+            type='button'
             onClick={handleClear}
-            className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all"
+            className='px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all'
           >
             Clear
           </button>
           <button
-            type="button"
+            type='button'
             onClick={handleFinish}
-            className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl font-bold shadow-lg transition-all"
+            className='px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl font-bold shadow-lg transition-all'
           >
             Finish
           </button>

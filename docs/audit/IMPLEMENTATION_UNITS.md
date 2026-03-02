@@ -123,6 +123,7 @@ This document organises the work into discrete units so that progress can be tra
 **Acceptance criteria:**
 
 - Remove unnecessary warnings/returns; add simple tests.
+  **Status:** Done. Added richer metadata for FreeDraw progress, rendered disabled category tabs instead of omitting them, and purged the `'HACK'` placeholder from the word list with a corresponding regression test. All related tests pass and UI behaviour is consistent.
 
 ## Unit 6 – Attention Detection Head Pose
 

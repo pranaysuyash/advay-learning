@@ -16,13 +16,19 @@ export interface BatchProgress {
 }
 
 interface ProgressState {
+  // Backward-compat profile pointer used by some legacy game pages
+  currentProfile: { id: string } | null;
   // Per-language progress
   letterProgress: Record<string, LetterProgress[]>; // language -> progress array
   batchProgress: Record<string, BatchProgress[]>; // language -> batch array
   earnedBadges: string[];
-  
+
   // Actions
-  markLetterAttempt: (language: string, letter: string, accuracy: number) => void;
+  markLetterAttempt: (
+    language: string,
+    letter: string,
+    accuracy: number,
+  ) => void;
   isLetterMastered: (language: string, letter: string) => boolean;
   isBatchUnlocked: (language: string, batchIndex: number) => boolean;
   getUnlockedBatches: (language: string) => number;
@@ -41,6 +47,7 @@ const UNLOCK_THRESHOLD = 3; // Need 3/5 letters mastered to unlock next batch
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
+      currentProfile: null,
       letterProgress: {},
       batchProgress: {},
       earnedBadges: [],
@@ -48,10 +55,12 @@ export const useProgressStore = create<ProgressState>()(
       markLetterAttempt: (language, letter, accuracy) => {
         set((state) => {
           const langProgress = state.letterProgress[language] || [];
-          const existingIndex = langProgress.findIndex(p => p.letter === letter);
-          
+          const existingIndex = langProgress.findIndex(
+            (p) => p.letter === letter,
+          );
+
           let updatedProgress: LetterProgress[];
-          
+
           if (existingIndex >= 0) {
             // Update existing
             updatedProgress = [...langProgress];
@@ -76,24 +85,28 @@ export const useProgressStore = create<ProgressState>()(
               },
             ];
           }
-          
+
           // Check if we should unlock next batch
-          const batchIndex = Math.floor((updatedProgress.length - 1) / BATCH_SIZE);
+          const batchIndex = Math.floor(
+            (updatedProgress.length - 1) / BATCH_SIZE,
+          );
           const langBatches = state.batchProgress[language] || [];
-          
+
           // Count mastered letters in current batch
           const batchStart = batchIndex * BATCH_SIZE;
           const batchEnd = batchStart + BATCH_SIZE;
           const masteredInBatch = updatedProgress
             .slice(batchStart, batchEnd)
-            .filter(p => p.mastered).length;
-          
+            .filter((p) => p.mastered).length;
+
           // Unlock next batch if threshold met
           const updatedBatches = [...langBatches];
           if (masteredInBatch >= UNLOCK_THRESHOLD) {
             const nextBatchIndex = batchIndex + 1;
-            const nextBatchExists = updatedBatches.some(b => b.batchIndex === nextBatchIndex);
-            
+            const nextBatchExists = updatedBatches.some(
+              (b) => b.batchIndex === nextBatchIndex,
+            );
+
             if (!nextBatchExists) {
               updatedBatches.push({
                 batchIndex: nextBatchIndex,
@@ -102,7 +115,7 @@ export const useProgressStore = create<ProgressState>()(
               });
             }
           }
-          
+
           return {
             letterProgress: {
               ...state.letterProgress,
@@ -118,37 +131,39 @@ export const useProgressStore = create<ProgressState>()(
 
       isLetterMastered: (language, letter) => {
         const langProgress = get().letterProgress[language] || [];
-        const letterProg = langProgress.find(p => p.letter === letter);
+        const letterProg = langProgress.find((p) => p.letter === letter);
         return letterProg?.mastered || false;
       },
 
       isBatchUnlocked: (language, batchIndex) => {
         // Batch 0 is always unlocked
         if (batchIndex === 0) return true;
-        
+
         const langBatches = get().batchProgress[language] || [];
-        return langBatches.some(b => b.batchIndex === batchIndex && b.unlocked);
+        return langBatches.some(
+          (b) => b.batchIndex === batchIndex && b.unlocked,
+        );
       },
 
       getUnlockedBatches: (language) => {
         const langBatches = get().batchProgress[language] || [];
         // Count batch 0 (always unlocked) + unlocked batches
-        return 1 + langBatches.filter(b => b.unlocked).length;
+        return 1 + langBatches.filter((b) => b.unlocked).length;
       },
 
       getMasteredLettersCount: (language) => {
         const langProgress = get().letterProgress[language] || [];
-        return langProgress.filter(p => p.mastered).length;
+        return langProgress.filter((p) => p.mastered).length;
       },
 
       getBatchMasteryCount: (language, batchIndex) => {
         const langProgress = get().letterProgress[language] || [];
         const batchStart = batchIndex * BATCH_SIZE;
         const batchEnd = batchStart + BATCH_SIZE;
-        
+
         return langProgress
           .slice(batchStart, batchEnd)
-          .filter(p => p.mastered).length;
+          .filter((p) => p.mastered).length;
       },
 
       unlockAllBatches: (language, totalBatches) => {
@@ -161,7 +176,7 @@ export const useProgressStore = create<ProgressState>()(
               unlockedDate: new Date().toISOString(),
             });
           }
-          
+
           return {
             batchProgress: {
               ...state.batchProgress,
@@ -201,30 +216,33 @@ export const useProgressStore = create<ProgressState>()(
     }),
     {
       name: 'progress-storage',
-    }
-  )
+    },
+  ),
 );
 
 // Helper function to get available letters based on unlocked batches
-export function getAvailableLetterIndices(language: string, totalLetters: number): number[] {
+export function getAvailableLetterIndices(
+  language: string,
+  totalLetters: number,
+): number[] {
   const { batchProgress } = useProgressStore.getState();
   const langBatches = batchProgress[language] || [];
-  
+
   // Batch 0 is always unlocked
   const unlockedBatches = new Set([0]);
-  langBatches.forEach(b => {
+  langBatches.forEach((b) => {
     if (b.unlocked) unlockedBatches.add(b.batchIndex);
   });
-  
+
   const indices: number[] = [];
-  unlockedBatches.forEach(batchIndex => {
+  unlockedBatches.forEach((batchIndex) => {
     const start = batchIndex * BATCH_SIZE;
     const end = Math.min(start + BATCH_SIZE, totalLetters);
     for (let i = start; i < end; i++) {
       indices.push(i);
     }
   });
-  
+
   return indices;
 }
 

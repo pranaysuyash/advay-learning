@@ -73,6 +73,10 @@ export default function BubblePopSymphony() {
   });
   const [isPinching, setIsPinching] = useState(false);
   const [isHandDetected, setIsHandDetected] = useState(false);
+  const [screenDims, setScreenDims] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
   // when cursor changes we derive hand detection and pixel position
   const { cursor, pinch, webcamRef: _webcamRef } = useHandDetection();
@@ -98,11 +102,6 @@ export default function BubblePopSymphony() {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const { speak } = useVoiceInstructions();
-
-  const [screenDims, setScreenDims] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
 
   useGameSessionProgress({
     gameName: 'Bubble Pop Symphony',
@@ -350,8 +349,6 @@ export default function BubblePopSymphony() {
   return (
     <HandDetectionProvider gameName='BubblePopSymphony' isPlaying={gameStarted}>
       <div className='w-screen h-screen overflow-hidden bg-discovery-cream relative'>
-        
-
         <CameraThumbnail
           isHandDetected={isHandDetected}
           visible={gameStarted}

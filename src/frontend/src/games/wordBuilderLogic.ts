@@ -591,7 +591,6 @@ export const WORD_LISTS: string[][] = [
     'GUTS',
     'GUYS',
     'GYMS',
-    'HACK',
     'HAIL',
     'HAIR',
     'HALE',

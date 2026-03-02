@@ -1,3 +1,5 @@
+type Webcam = import('react-webcam').default;
+
 declare module 'react-scan' {
   export interface ScanOptions {
     enabled?: boolean;

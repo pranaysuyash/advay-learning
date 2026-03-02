@@ -148,13 +148,16 @@ describe('languages', () => {
     });
   });
 
-  describe('Incomplete flag mapping (LANG-01 follow-up)', () => {
-    it('should document missing per-language flags for Indian languages', () => {
+  describe('Indian language flags (LANG-01 follow-up)', () => {
+    it('should provide a flag icon for each Indian language', () => {
       const indianLanguages = ['kn', 'te', 'ta'];
       indianLanguages.forEach((code) => {
         const lang = getLanguageByCode(code);
-        // Currently all Indian languages use flag-in.svg (LANG-01 follow-up to add specific flags)
-        expect(lang?.flagIcon).toContain('flag-in.svg');
+        expect(lang).toBeDefined();
+        expect(lang?.flagIcon).toBeTruthy();
+        // previously these defaulted to flag-in.svg; new icons are now included
+        // so the only requirement is that the path exists and ends in .svg
+        expect(lang?.flagIcon.endsWith('.svg')).toBe(true);
       });
     });
   });

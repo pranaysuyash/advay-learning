@@ -36,9 +36,9 @@ export interface Language {
 const FLAG_ICON_MAP: Record<LanguageCode, string> = {
   en: '/assets/icons/ui/flag-en.svg',
   hi: '/assets/icons/ui/flag-in.svg',
-  kn: '/assets/icons/ui/flag-in.svg', // TODO: Create kn-specific flag (LANG-01)
-  te: '/assets/icons/ui/flag-in.svg', // TODO: Create te-specific flag (LANG-01)
-  ta: '/assets/icons/ui/flag-in.svg', // TODO: Create ta-specific flag (LANG-01)
+  kn: '/assets/icons/ui/flag-kn.svg',
+  te: '/assets/icons/ui/flag-te.svg',
+  ta: '/assets/icons/ui/flag-ta.svg',
   zh: '/assets/icons/ui/flag-in.svg', // Placeholder (not Indian language)
   es: '/assets/icons/ui/flag-in.svg', // Placeholder (not Indian language)
   ar: '/assets/icons/ui/flag-in.svg', // Placeholder (not Indian language)

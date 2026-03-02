@@ -1,20 +1,23 @@
 /**
  * Progress Queue Service
- * 
+ *
  * Offline progress queue with validation, duplicate detection, retry logic,
  * and dead letter queue. Uses repository pattern for testability.
- * 
+ *
  * Usage:
  *   // Production (default localStorage)
  *   import { progressQueue } from './progressQueue';
- *   
+ *
  *   // Testing (with DI)
  *   import { createProgressQueue } from './progressQueue';
  *   import { InMemoryProgressRepository } from '../repositories';
  *   const testQueue = createProgressQueue(new InMemoryProgressRepository());
  */
 
-import { validateProgressItem, type ValidationResult } from './progressValidation';
+import {
+  validateProgressItem,
+  type ValidationResult,
+} from './progressValidation';
 import {
   MAX_QUEUE_SIZE,
   MAX_RETRIES,
@@ -62,6 +65,16 @@ export interface EnqueueResult {
   validation?: ValidationResult;
 }
 
+export interface LegacyProgressItem {
+  profileId?: string;
+  gameId?: string;
+  metadata?: Record<string, any>;
+  score?: number;
+  completed?: boolean;
+  duration_seconds?: number;
+  timestamp?: string;
+}
+
 type Subscriber = () => void;
 
 /**
@@ -71,7 +84,7 @@ type Subscriber = () => void;
 function calculateRetryDelay(attemptNumber: number): number {
   const exponentialDelay = Math.min(
     RETRY_BASE_DELAY_MS * Math.pow(2, attemptNumber),
-    MAX_RETRY_DELAY_MS
+    MAX_RETRY_DELAY_MS,
   );
   const jitter = Math.random() * RETRY_JITTER_MS;
   return exponentialDelay + jitter;
@@ -79,7 +92,7 @@ function calculateRetryDelay(attemptNumber: number): number {
 
 /**
  * Factory function to create a progress queue with dependency injection
- * 
+ *
  * @param repo - The repository to use for storage (localStorage, memory, etc.)
  * @returns Progress queue instance
  */
@@ -111,6 +124,41 @@ export function createProgressQueue(repo: ProgressRepository) {
 
   return {
     /**
+     * Backward-compatible API used by several game pages.
+     * Converts legacy payloads to canonical ProgressItem shape.
+     */
+    add(item: ProgressItem | LegacyProgressItem): EnqueueResult {
+      const candidate = item as ProgressItem;
+      if (
+        candidate.idempotency_key &&
+        candidate.profile_id &&
+        candidate.content_id
+      ) {
+        return this.enqueue(candidate);
+      }
+
+      const legacy = item as LegacyProgressItem;
+      const idempotencyKey =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      const normalized: ProgressItem = {
+        idempotency_key: idempotencyKey,
+        profile_id: legacy.profileId || '',
+        activity_type: 'game_completion',
+        content_id: legacy.gameId || 'unknown-game',
+        score: legacy.score ?? 0,
+        duration_seconds: legacy.duration_seconds,
+        completed: legacy.completed ?? true,
+        meta_data: legacy.metadata ?? {},
+        timestamp: legacy.timestamp || new Date().toISOString(),
+      };
+
+      return this.enqueue(normalized);
+    },
+
+    /**
      * Add a progress item to the queue
      */
     enqueue(item: ProgressItem): EnqueueResult {
@@ -121,14 +169,17 @@ export function createProgressQueue(repo: ProgressRepository) {
         return {
           success: false,
           item,
-          error: `Validation failed: ${validation.errors.map(e => `${e.field}: ${e.message}`).join(', ')}`,
+          error: `Validation failed: ${validation.errors.map((e) => `${e.field}: ${e.message}`).join(', ')}`,
           validation,
         };
       }
 
       // Duplicate detection
       if (isDuplicate(item.idempotency_key)) {
-        console.warn('[ProgressQueue] Duplicate item ignored:', item.idempotency_key);
+        console.warn(
+          '[ProgressQueue] Duplicate item ignored:',
+          item.idempotency_key,
+        );
         return {
           success: false,
           item,
@@ -166,7 +217,7 @@ export function createProgressQueue(repo: ProgressRepository) {
     getPending(profileId?: string): ProgressItem[] {
       const pending = repo.getByStatus('pending');
       if (!profileId) return pending;
-      return pending.filter(i => i.profile_id === profileId);
+      return pending.filter((i) => i.profile_id === profileId);
     },
 
     /**
@@ -182,7 +233,7 @@ export function createProgressQueue(repo: ProgressRepository) {
     getErrors(profileId?: string): ProgressItem[] {
       const errors = repo.getByStatus('error');
       if (!profileId) return errors;
-      return errors.filter(i => i.profile_id === profileId);
+      return errors.filter((i) => i.profile_id === profileId);
     },
 
     /**
@@ -198,7 +249,10 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Mark an item as error
      */
     markError(idempotency_key: string, errorMessage?: string): boolean {
-      const result = repo.markError(idempotency_key, errorMessage || 'Unknown error');
+      const result = repo.markError(
+        idempotency_key,
+        errorMessage || 'Unknown error',
+      );
       if (result) _notify();
       return result;
     },
@@ -218,7 +272,11 @@ export function createProgressQueue(repo: ProgressRepository) {
       });
 
       _notify();
-      console.warn('[ProgressQueue] Moved to dead letter:', idempotency_key, finalError);
+      console.warn(
+        '[ProgressQueue] Moved to dead letter:',
+        idempotency_key,
+        finalError,
+      );
       return true;
     },
 
@@ -291,7 +349,7 @@ export function createProgressQueue(repo: ProgressRepository) {
      */
     async processItemWithRetry(
       item: ProgressItem,
-      apiClient: any
+      apiClient: any,
     ): Promise<{ success: boolean; shouldRetry: boolean; error?: string }> {
       const retryCount = item.retryCount || 0;
 
@@ -299,26 +357,40 @@ export function createProgressQueue(repo: ProgressRepository) {
         await apiClient.post('/api/v1/progress/', item);
         return { success: true, shouldRetry: false };
       } catch (error: any) {
-        const errorMessage = error?.response?.data?.detail || error?.message || 'Unknown error';
+        const errorMessage =
+          error?.response?.data?.detail || error?.message || 'Unknown error';
         const statusCode = error?.response?.status;
 
         // Don't retry 4xx errors
         if (statusCode >= 400 && statusCode < 500) {
-          console.error('[ProgressQueue] Client error, not retrying:', item.idempotency_key, statusCode);
+          console.error(
+            '[ProgressQueue] Client error, not retrying:',
+            item.idempotency_key,
+            statusCode,
+          );
           return { success: false, shouldRetry: false, error: errorMessage };
         }
 
         // Check if max retries reached
         if (retryCount >= MAX_RETRIES) {
-          console.error('[ProgressQueue] Max retries reached:', item.idempotency_key);
-          return { success: false, shouldRetry: false, error: `Max retries reached: ${errorMessage}` };
+          console.error(
+            '[ProgressQueue] Max retries reached:',
+            item.idempotency_key,
+          );
+          return {
+            success: false,
+            shouldRetry: false,
+            error: `Max retries reached: ${errorMessage}`,
+          };
         }
 
         // Calculate and apply backoff
         const delay = calculateRetryDelay(retryCount);
-        console.log(`[ProgressQueue] Retry ${retryCount + 1}/${MAX_RETRIES} for ${item.idempotency_key} after ${Math.round(delay)}ms`);
+        console.log(
+          `[ProgressQueue] Retry ${retryCount + 1}/${MAX_RETRIES} for ${item.idempotency_key} after ${Math.round(delay)}ms`,
+        );
 
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
 
         return { success: false, shouldRetry: true, error: errorMessage };
       }
@@ -328,8 +400,16 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Sync all pending and error items with retry logic
      */
     async syncAll(apiClient: any): Promise<SyncResult> {
-      const result: SyncResult = { synced: 0, failed: 0, deadLettered: 0, errors: [] };
-      const items = [...repo.getByStatus('pending'), ...repo.getByStatus('error')];
+      const result: SyncResult = {
+        synced: 0,
+        failed: 0,
+        deadLettered: 0,
+        errors: [],
+      };
+      const items = [
+        ...repo.getByStatus('pending'),
+        ...repo.getByStatus('error'),
+      ];
 
       if (items.length === 0) return result;
 
@@ -344,18 +424,27 @@ export function createProgressQueue(repo: ProgressRepository) {
           result.synced++;
         } else if (processResult.shouldRetry) {
           this.markError(item.idempotency_key, processResult.error);
-          result.errors.push({ idempotency_key: item.idempotency_key, error: processResult.error || 'Unknown' });
+          result.errors.push({
+            idempotency_key: item.idempotency_key,
+            error: processResult.error || 'Unknown',
+          });
         } else {
           // Permanent failure
           const currentRetries = item.retryCount || 0;
           if (currentRetries >= MAX_RETRIES) {
-            this.moveToDeadLetter(item.idempotency_key, processResult.error || 'Max retries exceeded');
+            this.moveToDeadLetter(
+              item.idempotency_key,
+              processResult.error || 'Max retries exceeded',
+            );
             result.deadLettered++;
           } else {
             this.markError(item.idempotency_key, processResult.error);
             result.failed++;
           }
-          result.errors.push({ idempotency_key: item.idempotency_key, error: processResult.error || 'Permanent failure' });
+          result.errors.push({
+            idempotency_key: item.idempotency_key,
+            error: processResult.error || 'Permanent failure',
+          });
         }
       }
 
@@ -373,7 +462,7 @@ export function createProgressQueue(repo: ProgressRepository) {
 
 /**
  * Default progress queue instance using localStorage
- * 
+ *
  * Use this for production code. For testing, use createProgressQueue()
  * with InMemoryProgressRepository.
  */

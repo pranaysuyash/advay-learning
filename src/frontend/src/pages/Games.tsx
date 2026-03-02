@@ -24,6 +24,11 @@ export const Games = memo(function Games() {
   const [showProfilePicker, setShowProfilePicker] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<string | 'all'>('all');
 
+  const normalizeTranslationList = (value: unknown): string[] => {
+    if (!Array.isArray(value)) return [];
+    return value.filter((item): item is string => typeof item === 'string');
+  };
+
   // Games come from the registry — single source of truth
   const allGames = useMemo(() => getListedGames(), []);
   const worlds = useMemo(() => getAllWorlds(), []);
@@ -32,6 +37,13 @@ export const Games = memo(function Games() {
     if (selectedWorld === 'all') return allGames;
     return allGames.filter((g) => g.worldId === selectedWorld);
   }, [allGames, selectedWorld]);
+
+  const specialFeatures = normalizeTranslationList(
+    t('info.special.features', { returnObjects: true }),
+  );
+  const howItWorksSteps = normalizeTranslationList(
+    t('info.howItWorks.steps', { returnObjects: true }),
+  );
 
   const getLanguageLabel = (code: string) => {
     return t(`languages.${code}`) || t('languages.en');
@@ -235,9 +247,7 @@ export const Games = memo(function Games() {
               What Makes This Special
             </h2>
             <ul className='space-y-4 text-advay-slate font-bold text-lg flex-1'>
-              {(
-                t('info.special.features', { returnObjects: true }) as string[]
-              ).map((feature: string, idx: number) => (
+              {specialFeatures.map((feature: string, idx: number) => (
                 <li key={idx} className='flex items-start gap-3'>
                   <div className='w-8 h-8 rounded-full bg-[#10B981]/20 flex items-center justify-center text-[#10B981] shrink-0 mt-0.5'>
                     ✓
@@ -277,9 +287,7 @@ export const Games = memo(function Games() {
               {t('info.howItWorks.title')}
             </h2>
             <ul className='space-y-4 text-slate-300 font-bold text-lg flex-1 relative z-10'>
-              {(
-                t('info.howItWorks.steps', { returnObjects: true }) as string[]
-              ).map((step: string, idx: number) => (
+              {howItWorksSteps.map((step: string, idx: number) => (
                 <li key={idx} className='flex items-start gap-3'>
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${idx === 3 ? 'bg-[#E85D04] border-2 border-[#000000] shadow-[0_2px_0_0_#000000] text-white' : 'bg-slate-700 text-white'}`}

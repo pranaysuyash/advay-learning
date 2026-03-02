@@ -116,17 +116,18 @@ Camera Frames → Preprocessing → Model Inference → Smoothing → Post-Proce
 ```typescript
 const handLandmarker = await HandLandmarker.createFromOptions(vision, {
   baseOptions: {
-    modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
-    delegate: 'GPU',  // Use GPU for performance
+    modelAssetPath:
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+    delegate: 'GPU', // Use GPU for performance
   },
-  numHands: 2,  // Track up to 2 hands
-  minHandDetectionConfidence: 0.5,  // Ignore weak detections
+  numHands: 2, // Track up to 2 hands
+  minHandDetectionConfidence: 0.5, // Ignore weak detections
 });
 
 // In loop
 const results = handLandmarker.detectForVideo(video, timestamp);
 if (results.landmarks && results.landmarks.length > 0) {
-  const indexTip = results.landmarks[0][8];  // Pointer finger
+  const indexTip = results.landmarks[0][8]; // Pointer finger
   // Use indexTip for cursor, drawing, etc.
 }
 ```
@@ -169,18 +170,19 @@ if (results.landmarks && results.landmarks.length > 0) {
 ```typescript
 const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
   baseOptions: {
-    modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+    modelAssetPath:
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     delegate: 'GPU',
   },
-  outputFaceBlendshapes: true,  // Enable expression tracking
-  outputFacialTransformationMatrixes: true,  // Enable rotation
+  outputFaceBlendshapes: true, // Enable expression tracking
+  outputFacialTransformationMatrixes: true, // Enable rotation
 });
 
 // Get blendshapes
 const results = faceLandmarker.detectForVideo(video, timestamp);
 if (results.faceBlendshapes) {
-  const smileScore = results.faceBlendshapes[0].categories[0];  // MouthSmile
-  const lookDownScore = results.faceBlendshapes[0].categories[8];  // LookDown
+  const smileScore = results.faceBlendshapes[0].categories[0]; // MouthSmile
+  const lookDownScore = results.faceBlendshapes[0].categories[8]; // LookDown
   // Use scores for expression matching games
 }
 ```
@@ -228,10 +230,11 @@ Feet: 23-26 (foot keypoints)
 ```typescript
 const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
   baseOptions: {
-    modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+    modelAssetPath:
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     delegate: 'GPU',
   },
-  outputSegmentationMasks: true,  // Enable body mask
+  outputSegmentationMasks: true, // Enable body mask
 });
 
 // Check pose
@@ -241,7 +244,7 @@ if (results.poseLandmarks && results.poseLandmarks.length > 0) {
   const rightWrist = results.poseLandmarks[0][16];
   const leftShoulder = results.poseLandmarks[0][11];
   const rightShoulder = results.poseLandmarks[0][12];
-  
+
   // Check if hands raised (y < shoulder.y)
   const leftHandRaised = leftWrist.y < leftShoulder.y;
   const rightHandRaised = rightWrist.y < rightShoulder.y;
@@ -277,11 +280,12 @@ if (results.poseLandmarks && results.poseLandmarks.length > 0) {
 ```typescript
 const imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
   baseOptions: {
-    modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+    modelAssetPath:
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     delegate: 'GPU',
   },
-  outputCategoryMask: true,  // Get per-pixel masks
-  runningMode: 'VIDEO',  // For real-time segmentation
+  outputCategoryMask: true, // Get per-pixel masks
+  runningMode: 'VIDEO', // For real-time segmentation
 });
 
 // Get segmentation
@@ -323,19 +327,20 @@ if (results.categoryMask) {
 ```typescript
 const objectDetector = await ObjectDetector.createFromOptions(vision, {
   baseOptions: {
-    modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+    modelAssetPath:
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     delegate: 'GPU',
   },
-  maxResults: 5,  // Limit detections
-  scoreThreshold: 0.5,  // Filter weak detections
+  maxResults: 5, // Limit detections
+  scoreThreshold: 0.5, // Filter weak detections
 });
 
 // Detect objects
 const results = objectDetector.detectForVideo(video, timestamp);
 if (results.detections && results.detections.length > 0) {
-  results.detections.forEach(detection => {
-    const objectName = detection.categories[0].categoryName;  // "apple", "cup", etc.
-    const boundingBox = detection.boundingBox;  // x, y, width, height
+  results.detections.forEach((detection) => {
+    const objectName = detection.categories[0].categoryName; // "apple", "cup", etc.
+    const boundingBox = detection.boundingBox; // x, y, width, height
     // Use for scavenger hunt, show-and-tell, etc.
   });
 }
@@ -380,11 +385,11 @@ image.onload = async () => {
 // In animation loop
 function renderLoop(timestamp: number) {
   const results = task.detectForVideo(video, timestamp);
-  
+
   // Use timestamp for tracking consistency
   // Smooth landmarks across frames
   // Update UI
-  
+
   requestAnimationFrame(renderLoop);
 }
 ```
@@ -406,11 +411,11 @@ const lastTimestamp = -1;
 
 function processFrame(video: HTMLVideoElement) {
   if (video.currentTime === lastTimestamp) {
-    return;  // Skip duplicate frames
+    return; // Skip duplicate frames
   }
   lastTimestamp = video.currentTime;
-  
-  const results = task.detect(video);  // IMAGE mode API
+
+  const results = task.detect(video); // IMAGE mode API
   // Process results
 }
 ```
@@ -447,21 +452,21 @@ interface SmoothedLandmark {
 function smoothLandmarks(
   rawLandmarks: NormalizedLandmark[],
   smoothed: Map<number, SmoothedLandmark>,
-  alpha: number = 0.7  // Smoothing factor (0.5-0.9)
+  alpha: number = 0.7, // Smoothing factor (0.5-0.9)
 ): NormalizedLandmark[] {
   const smoothed: NormalizedLandmark[] = [];
-  
+
   rawLandmarks.forEach((landmark, index) => {
     const raw = { x: landmark.x, y: landmark.y };
     const prev = smoothed.get(index) || raw;
-    
+
     // EMA formula: smoothed[i] = alpha * current + (1 - alpha) * previous
     const smoothedX = alpha * raw.x + (1 - alpha) * prev.x;
     const smoothedY = alpha * raw.y + (1 - alpha) * prev.y;
-    
+
     smoothed[index] = { x: smoothedX, y: smoothedY };
   });
-  
+
   return smoothed;
 }
 ```
@@ -472,11 +477,11 @@ function smoothLandmarks(
 // More complex but smoother
 // Good for precise tracking but higher computational cost
 function kalmanFilter(predicted: Point, measured: Point): Point {
-  const kalmanGain = 0.5;  // Tuning parameter
-  
+  const kalmanGain = 0.5; // Tuning parameter
+
   return {
     x: predicted.x + kalmanGain * (measured.x - predicted.x),
-    y: predicted.y + kalmanGain * (measured.y - predicted.y)
+    y: predicted.y + kalmanGain * (measured.y - predicted.y),
   };
 }
 ```
@@ -516,15 +521,15 @@ let lastFpsUpdate = performance.now();
 function measureFps() {
   frameCount++;
   const now = performance.now();
-  
+
   if (now - lastFpsUpdate > 1000) {
-    const fps = frameCount * 1000 / (now - lastFpsUpdate);
+    const fps = (frameCount * 1000) / (now - lastFpsUpdate);
     console.log(`FPS: ${fps.toFixed(1)}`);
-    
+
     if (fps < 15) {
       // Performance warning
     }
-    
+
     frameCount = 0;
     lastFpsUpdate = now;
   }
@@ -546,11 +551,12 @@ if (!handPresent && isPlaying) {
 1. **Low Light Detection**
 
 ```typescript
-const avgConfidence = results.landmarks.reduce((sum, lm) => sum + lm.visibility, 0) / 21;
+const avgConfidence =
+  results.landmarks.reduce((sum, lm) => sum + lm.visibility, 0) / 21;
 
 if (avgConfidence < 0.3) {
   // Low confidence - likely poor lighting
-  showMessage("Too dark! Move closer to a light.");
+  showMessage('Too dark! Move closer to a light.');
 }
 ```
 
@@ -582,7 +588,7 @@ const faceYaw = results.facialTransformationMatrixes[0].yaw;
 
 if (Math.abs(faceYaw) > Math.PI / 4) {
   // Looking too far to the side - prompt user
-  showMessage("Turn your head more towards the camera.");
+  showMessage('Turn your head more towards the camera.');
 }
 ```
 
@@ -595,16 +601,16 @@ let frameCount = 0;
 
 function processVideoFrame() {
   frameCount++;
-  
+
   // Skip every other frame (30 FPS instead of 60 FPS)
   if (frameCount % 2 !== 0) {
     requestAnimationFrame(processVideoFrame);
     return;
   }
-  
+
   // Process frame
   detectAndDraw();
-  
+
   requestAnimationFrame(processVideoFrame);
 }
 ```
@@ -613,7 +619,7 @@ function processVideoFrame() {
 
 ```typescript
 // Reduce resolution for better performance
-const targetWidth = 640;  // Downsample from 1080p
+const targetWidth = 640; // Downsample from 1080p
 const targetHeight = 480;
 
 const canvas = document.createElement('canvas');
@@ -626,7 +632,7 @@ canvas.height = targetHeight;
 ```typescript
 const task = await Task.createFromOptions(vision, {
   baseOptions: {
-    delegate: 'GPU',  // Use GPU instead of CPU
+    delegate: 'GPU', // Use GPU instead of CPU
   },
 });
 ```
@@ -657,24 +663,27 @@ const task = await Task.createFromOptions(vision, {
 // Ghost stroke
 function drawGhostStroke(ctx: CanvasRenderingContext2D, letter: string) {
   const idealPath = getLetterPath(letter);
-  
+
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
   ctx.lineWidth = 20;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.setLineDash([10, 10]);  // Dashed line for ghost effect
+  ctx.setLineDash([10, 10]); // Dashed line for ghost effect
   ctx.stroke(idealPath);
 }
 
 // Score: closeness to ideal path
-function calculateTracingAccuracy(userPath: Point[], idealPath: Point[]): number {
+function calculateTracingAccuracy(
+  userPath: Point[],
+  idealPath: Point[],
+): number {
   // Calculate average distance from ideal path
   let totalDistance = 0;
-  userPath.forEach(point => {
+  userPath.forEach((point) => {
     const closest = findClosestPointOnPath(idealPath, point);
     totalDistance += distance(point, closest);
   });
-  
+
   return Math.max(0, 100 - (totalDistance / userPath.length) * 100);
 }
 ```
@@ -688,21 +697,21 @@ function calculateTracingAccuracy(userPath: Point[], idealPath: Point[]): number
 **Implementation:**
 
 ```typescript
-const dots = generateDotPattern(letter);  // Array of {x, y, order}
+const dots = generateDotPattern(letter); // Array of {x, y, order}
 
 function checkDotTouch(fingerPosition: Point): boolean {
   // Find nearest dot
-  const nearestDot = dots.find(dot => 
-    distance(fingerPosition, dot) < 30  // 30px threshold
+  const nearestDot = dots.find(
+    (dot) => distance(fingerPosition, dot) < 30, // 30px threshold
   );
-  
+
   if (nearestDot && nearestDot.order === currentExpectedOrder) {
     // Touched correct dot in order
     dots.push(nearestDot);
     playSuccessSound();
     return true;
   }
-  
+
   return false;
 }
 ```
@@ -773,13 +782,13 @@ function traceShape(shape: Shape) {
 ```typescript
 function detectFingerLift(landmarks: Landmark[]): number | null {
   // Check if finger tip is significantly higher than knuckle
-  const fingerTipY = landmarks[8].y;  // Index tip
-  const fingerPipY = landmarks[6].y;  // Index PIP
-  
+  const fingerTipY = landmarks[8].y; // Index tip
+  const fingerPipY = landmarks[6].y; // Index PIP
+
   if (fingerTipY < fingerPipY - 0.1) {
-    return 8;  // Index finger raised
+    return 8; // Index finger raised
   }
-  
+
   return null;
 }
 ```
@@ -789,6 +798,8 @@ function detectFingerLift(landmarks: Landmark[]): number | null {
 ### Domain 2: Gross Motor Skills (Pose & Balance)
 
 #### Feature 2.1: Simon Says (Body)
+
+> **Implementation status note (2026-02-28):** This section describes the target design. Current in-repo implementation (`src/frontend/src/pages/SimonSays.tsx`) ships a narrower action set and has known reliability gaps under audit.
 
 **Description:** Follow instructions like "Touch your head", "Touch your knees"
 
@@ -811,17 +822,18 @@ function detectFingerLift(landmarks: Landmark[]): number | null {
 function checkPoseInstruction(instruction: string, pose: Pose): boolean {
   switch (instruction) {
     case 'touchHead':
-      return pose.leftShoulder.y > pose.head.y && 
-             pose.rightShoulder.y > pose.head.y;
-      
+      return (
+        pose.leftShoulder.y > pose.head.y && pose.rightShoulder.y > pose.head.y
+      );
+
     case 'touchLeftKnee':
       const leftHand = pose.leftWrist;
       const leftKnee = pose.leftKnee;
       return distance(leftHand, leftKnee) < 0.1;
-      
+
     case 'touchBothElbows':
       return distance(pose.leftElbow, pose.rightElbow) < 0.15;
-      
+
     // ... more instructions
   }
 }
@@ -833,6 +845,13 @@ function checkPoseInstruction(instruction: string, pose: Pose): boolean {
 - Gentle "try again" if pose not detected
 - Progressive difficulty (faster sequences, more poses)
 - Sound effects on successful pose matching
+
+**Current implementation caveat (Observed in code):**
+
+- Implemented action matcher branches currently cover head/arms-up/hands-on-hips/shoulders only.
+- `Wave` and `T-Rex Arms` are present in action config but not scored in matcher switch.
+- “Simon says / do not act” inhibition rule copy exists, but inverse-command game logic is not yet implemented.
+- See audit addendum: `docs/audit/src__frontend__src__pages__SimonSays.md`.
 
 #### Feature 2.2: Freeze Dance
 
@@ -848,16 +867,16 @@ let freezeStartTime = 0;
 
 function freezeDanceLoop() {
   const pose = detectPose();
-  
+
   if (isFreezing) {
     // Check if pose is stable
     const stability = calculatePoseStability(pose);
     if (stability > 0.85) {
       awardPoints(stability);
     } else {
-      showMessage("Keep still!");
+      showMessage('Keep still!');
     }
-    
+
     // End freeze after 2-3 seconds
     if (performance.now() - freezeStartTime > 2500) {
       isFreezing = false;
@@ -911,9 +930,11 @@ const animalPoses = {
       rightElbow: { x: 0.4, y: 0.5 },
       // ... full body pose definition
     },
-    facts: "Trees grow tall and strong!",
+    facts: 'Trees grow tall and strong!',
   },
-  warrior: { /* similar structure */ },
+  warrior: {
+    /* similar structure */
+  },
   // ... more animals
 };
 
@@ -921,7 +942,7 @@ function checkAnimalPose(currentPose: Pose): string | null {
   for (const [animal, expectedPose] of Object.entries(animalPoses)) {
     const matchScore = comparePoses(currentPose, expectedPose);
     if (matchScore > 0.85) {
-      return animal;  // Matched animal!
+      return animal; // Matched animal!
     }
   }
   return null;
@@ -949,17 +970,17 @@ function checkBalance(pose: Pose): number {
   const rightKnee = pose.rightKnee;
   const leftAnkle = pose.leftAnkle;
   const rightAnkle = pose.rightAnkle;
-  
+
   // Check if left leg is planted (knee and ankle stable)
   const leftLegPlanted = Math.abs(leftKnee.y - leftAnkle.y) < 0.05;
-  
+
   // Check if right leg is raised
   const rightLegRaised = rightKnee.y > leftKnee.y + 0.1;
-  
+
   if (leftLegPlanted && rightLegRaised) {
-    return calculateStability(pose.rightAnkle);  // 0.0 to 1.0
+    return calculateStability(pose.rightAnkle); // 0.0 to 1.0
   }
-  
+
   return 0;
 }
 ```
@@ -1004,11 +1025,21 @@ const hindiGestures = {
     pronunciation: 'Haa',
     meaning: 'Hello',
   },
-  ji: { /* similar structure */ },
-  namaste: { /* similar structure */ },
-  pranam: { /* similar structure */ },
-  danyavad: { /* similar structure */ },
-  yes: { /* similar structure */ },
+  ji: {
+    /* similar structure */
+  },
+  namaste: {
+    /* similar structure */
+  },
+  pranam: {
+    /* similar structure */
+  },
+  danyavad: {
+    /* similar structure */
+  },
+  yes: {
+    /* similar structure */
+  },
 };
 
 function recognizeHindiGesture(landmarks: Landmark[]): string | null {
@@ -1039,21 +1070,21 @@ function recognizeHindiGesture(landmarks: Landmark[]): string | null {
 ```typescript
 function vocabularyGame() {
   // Show random object card
-  const targetObject = getRandomObject();  // "apple", "car", "sun"
-  
+  const targetObject = getRandomObject(); // "apple", "car", "sun"
+
   // Child draws the object with brush
   childDrawsObject();
-  
+
   // AI analyzes drawing and shows recognition
   const recognized = recognizeDrawing(canvas);
-  
+
   if (recognized === targetObject) {
     showSuccess();
     teachWord(targetObject);
     showPronunciation(targetObject);
     showDefinition(targetObject);
   } else {
-    showEncouragement("Great drawing! Try again.");
+    showEncouragement('Great drawing! Try again.');
   }
 }
 
@@ -1086,14 +1117,14 @@ function teachWord(object: string) {
 
 ```typescript
 function pointAndSayGame() {
-  const targetObjects = getRandomObjects(3);  // "apple", "ball", "cup"
-  
+  const targetObjects = getRandomObjects(3); // "apple", "ball", "cup"
+
   // Display objects on screen
   displayObjects(targetObjects);
-  
+
   while (gameActive) {
     const fingerPosition = getFingerPosition();
-    
+
     // Check which object is pointed at
     for (const obj of targetObjects) {
       if (isPointingAt(fingerPosition, obj.position)) {
@@ -1101,7 +1132,7 @@ function pointAndSayGame() {
           obj.touched = true;
           playSound('success');
           teachWord(obj.name);
-          
+
           // Check if all objects touched
           if (allObjectsTouched()) {
             celebrate();
@@ -1138,42 +1169,43 @@ function pointAndSayGame() {
 **Implementation:**
 
 ```typescript
-function detectAction(landmarks: Landmark[], previousLandmarks: Landmark[]): Action {
+function detectAction(
+  landmarks: Landmark[],
+  previousLandmarks: Landmark[],
+): Action {
   const handVelocity = calculateHandVelocity(landmarks, previousLandmarks);
-  const handPosition = landmarks[8];  // Index finger
-  
+  const handPosition = landmarks[8]; // Index finger
+
   // Wave detection
   if (Math.abs(handVelocity.x) > 0.15 && Math.abs(handVelocity.y) < 0.05) {
     return 'wave';
   }
-  
+
   // Jump detection (both hands)
   if (landmarks.length === 2) {
     const avgHeight = (landmarks[0][8].y + landmarks[1][8].y) / 2;
-    const prevAvgHeight = (previousLandmarks[0][8].y + previousLandmarks[1][8].y) / 2;
-    
+    const prevAvgHeight =
+      (previousLandmarks[0][8].y + previousLandmarks[1][8].y) / 2;
+
     if (avgHeight < prevAvgHeight - 0.2) {
       return 'jump';
     }
   }
-  
+
   // Clap detection
   if (landmarks.length === 2) {
-    const handDistance = distance(
-      landmarks[0][8],
-      landmarks[1][8]
-    );
+    const handDistance = distance(landmarks[0][8], landmarks[1][8]);
     const prevDistance = distance(
       previousLandmarks[0][8],
-      previousLandmarks[1][8]
+      previousLandmarks[1][8],
     );
-    
+
     // Clap = hands come together rapidly
     if (handDistance < 0.1 && prevDistance > 0.2) {
       return 'clap';
     }
   }
-  
+
   // ... more actions
 }
 ```
@@ -1200,32 +1232,32 @@ function detectAction(landmarks: Landmark[], previousLandmarks: Landmark[]): Act
 ```typescript
 function countFingers(landmarks: Landmark[]): number {
   let count = 0;
-  
+
   // Check each finger tip vs knuckle
   const fingerPairs = [
-    { tip: 8, pip: 6 },  // Index
-    { tip: 12, pip: 10 },  // Middle
-    { tip: 16, pip: 14 },  // Ring
-    { tip: 20, pip: 18 },  // Little
+    { tip: 8, pip: 6 }, // Index
+    { tip: 12, pip: 10 }, // Middle
+    { tip: 16, pip: 14 }, // Ring
+    { tip: 20, pip: 18 }, // Little
   ];
-  
-  fingerPairs.forEach(pair => {
+
+  fingerPairs.forEach((pair) => {
     // Finger is extended if tip is higher than PIP
     if (landmarks[pair.tip].y < landmarks[pair.pip].y) {
       count++;
     }
   });
-  
+
   return count;
 }
 
 function fingerNumberGame() {
-  const targetNumber = Math.floor(Math.random() * 10);  // 0-10
+  const targetNumber = Math.floor(Math.random() * 10); // 0-10
   showNumberPrompt(targetNumber);
-  
+
   while (gameActive) {
     const currentCount = countFingers(detectHands());
-    
+
     if (currentCount === targetNumber) {
       celebrate();
       speakNumber(targetNumber);
@@ -1264,17 +1296,17 @@ function spawnObject() {
     color: getRandomColor(),
     touched: false,
   };
-  
+
   fallenObjects.push(object);
 }
 
 function updateObjects() {
   const fingerPosition = getFingerPosition();
-  
-  fallenObjects.forEach(obj => {
+
+  fallenObjects.forEach((obj) => {
     // Update position
     obj.position.y += obj.velocity.y;
-    
+
     // Check if tapped (finger tip inside object)
     if (isPointInCircle(fingerPosition, obj.position, obj.size)) {
       if (!obj.touched) {
@@ -1282,15 +1314,15 @@ function updateObjects() {
         touchedObjects.add(obj.id);
         playTapSound();
         showNumber(touchedObjects.size);
-        
+
         // Remove tapped object
-        fallenObjects = fallenObjects.filter(o => o.id !== obj.id);
+        fallenObjects = fallenObjects.filter((o) => o.id !== obj.id);
       }
     }
-    
+
     // Remove objects that fell off screen
     if (obj.position.y > 1.0) {
-      fallenObjects = fallenObjects.filter(o => o.id !== obj.id);
+      fallenObjects = fallenObjects.filter((o) => o.id !== obj.id);
     }
   });
 }
@@ -1317,28 +1349,29 @@ let characterPosition = 0;
 
 function detectSwipe(handVelocity: Point): number {
   const swipeThreshold = 0.2;
-  
+
   if (Math.abs(handVelocity.x) > swipeThreshold) {
-    return Math.sign(handVelocity.x);  // 1 = right, -1 = left
+    return Math.sign(handVelocity.x); // 1 = right, -1 = left
   }
-  
+
   return 0;
 }
 
 function numberLineGame() {
-  const targetNumber = numberLine[Math.floor(Math.random() * numberLine.length)];
+  const targetNumber =
+    numberLine[Math.floor(Math.random() * numberLine.length)];
   showTargetNumber(targetNumber);
-  
+
   while (gameActive) {
     const handVelocity = calculateHandVelocity();
     const direction = detectSwipe(handVelocity);
-    
+
     if (direction !== 0) {
-      characterPosition += direction * 0.1;  // Move character
-      
+      characterPosition += direction * 0.1; // Move character
+
       // Clamp to 0-10 range
       characterPosition = Math.max(0, Math.min(10, characterPosition));
-      
+
       // Check if reached target
       if (Math.round(characterPosition) === targetNumber) {
         celebrate();
@@ -1366,8 +1399,8 @@ function numberLineGame() {
 **Implementation:**
 
 ```typescript
-const leftPile = createPile(5);  // 5 apples
-const rightPile = createPile(3);  // 3 apples
+const leftPile = createPile(5); // 5 apples
+const rightPile = createPile(3); // 3 apples
 
 let leftPileCount = 0;
 let rightPileCount = 0;
@@ -1375,21 +1408,24 @@ let rightPileCount = 0;
 function quickCompareGame() {
   while (gameActive) {
     const fingerPosition = getFingerPosition();
-    
+
     // Check left pile tap
     if (isPointingAt(fingerPosition, leftPile)) {
       moveOneApple(leftPile, rightPile);
       leftPileCount++;
       rightPileCount++;
     }
-    
+
     // Check right pile tap (child points left or right)
-    if (leftPileCount > 0 && isPointingAt(fingerPosition, { x: -0.3, y: 0.5 })) {
+    if (
+      leftPileCount > 0 &&
+      isPointingAt(fingerPosition, { x: -0.3, y: 0.5 })
+    ) {
       // Child points left
       if (leftPileCount > rightPileCount) {
-        showMessage("Left has more!");
+        showMessage('Left has more!');
       } else {
-        showMessage("Right has more!");
+        showMessage('Right has more!');
       }
       updateCounts();
       leftPileCount = 0;
@@ -1426,15 +1462,15 @@ const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 function makeTenGame() {
   // Show numbers to drag
   displayDraggableNumbers(numbers);
-  
+
   while (gameActive) {
     const [grabbedNumber, grabbedSlot] = detectDragDrop();
-    
+
     if (grabbedNumber && grabbedSlot && !grabbedSlot.value) {
       // Drop number in slot
       grabbedSlot.value = grabbedNumber;
       playDropSound();
-      
+
       // Check if sum is 10
       const currentSum = calculateSum();
       if (currentSum === 10) {
@@ -1442,7 +1478,7 @@ function makeTenGame() {
         showTenWord();
       } else if (currentSum > 10) {
         // Wrong sum - reset
-        showMessage("Too much! Try again.");
+        showMessage('Too much! Try again.');
         resetSlots();
       }
     }
@@ -1469,26 +1505,30 @@ function makeTenGame() {
 const targetNumber = Math.floor(Math.random() * 10) + 1;
 
 function biggerSmallerGame() {
-  const biggerNumbers = numbers.filter(n => n > targetNumber);
-  const smallerNumbers = numbers.filter(n => n < targetNumber);
-  
+  const biggerNumbers = numbers.filter((n) => n > targetNumber);
+  const smallerNumbers = numbers.filter((n) => n < targetNumber);
+
   displayNumbers(biggerNumbers, smallerNumbers);
-  
+
   while (gameActive) {
-    const [selectedNumber, isBigger] = detectSelection(biggerNumbers, smallerNumbers);
-    
+    const [selectedNumber, isBigger] = detectSelection(
+      biggerNumbers,
+      smallerNumbers,
+    );
+
     if (selectedNumber) {
-      const correct = (isBigger && selectedNumber > targetNumber) ||
-                    (!isBigger && selectedNumber < targetNumber);
-      
+      const correct =
+        (isBigger && selectedNumber > targetNumber) ||
+        (!isBigger && selectedNumber < targetNumber);
+
       if (correct) {
         celebrate();
         showExplanation(
-          `${targetNumber} is bigger than ${selectedNumber ? smallerNumbers[0] : biggerNumbers[0]}`
+          `${targetNumber} is bigger than ${selectedNumber ? smallerNumbers[0] : biggerNumbers[0]}`,
         );
         nextNumber();
       } else {
-        showEncouragement("Try again!");
+        showEncouragement('Try again!');
       }
     }
   }
@@ -1521,26 +1561,28 @@ const buckets = [
   { color: '#FFE66D', name: 'yellow', count: 0 },
 ];
 
-const apples = Array(10).fill().map(() => ({
-  position: { x: Math.random() * 0.6 - 0.3, y: Math.random() * 0.4 },
-  grabbed: false,
-  color: '#FF6B6B',
-}));
+const apples = Array(10)
+  .fill()
+  .map(() => ({
+    position: { x: Math.random() * 0.6 - 0.3, y: Math.random() * 0.4 },
+    grabbed: false,
+    color: '#FF6B6B',
+  }));
 
 function bucketSortGame() {
   while (gameActive) {
     const [grabbedApple, targetBucket] = detectPinchDrop();
-    
+
     if (grabbedApple && targetBucket && !grabbedApple.dropped) {
       grabbedApple.dropped = true;
       playDropSound();
-      
+
       // Check if color matches
       if (grabbedApple.color === targetBucket.color) {
         targetBucket.count++;
         showCheckmark();
         playSuccessSound();
-        
+
         if (allApplesSorted()) {
           celebrate();
         }
@@ -1575,28 +1617,28 @@ const colorBlobs = [
   { color: '#0000FF', position: { x: 0.4, y: 0.3 }, collected: 0 },
 ];
 
-const mixedColorDisplay = '#808080';  // Gray until mixed
+const mixedColorDisplay = '#808080'; // Gray until mixed
 
 function paintMixerGame() {
   while (gameActive) {
     const fingerPosition = getFingerPosition();
-    
+
     // Check which blob is touched
     for (const blob of colorBlobs) {
       if (isPointingAt(fingerPosition, blob.position)) {
         blob.collected++;
         playPopSound();
-        
+
         // Check if have 2 colors to mix
-        const collectedColors = colorBlobs.filter(b => b.collected > 0);
+        const collectedColors = colorBlobs.filter((b) => b.collected > 0);
         if (collectedColors.length >= 2) {
           const mixedColor = mixColors(collectedColors);
           mixedColorDisplay = mixedColor;
           showColorName(mixedColor);
-          
+
           setTimeout(() => {
             // Reset blobs after 2 seconds
-            colorBlobs.forEach(b => b.collected = 0);
+            colorBlobs.forEach((b) => (b.collected = 0));
             mixedColorDisplay = '#808080';
           }, 2000);
         }
@@ -1610,7 +1652,7 @@ function mixColors(colors: Color[]): string {
   const r = Math.floor(colors.reduce((sum, c) => sum + c.r, 0) / colors.length);
   const g = Math.floor(colors.reduce((sum, c) => sum + c.g, 0) / colors.length);
   const b = Math.floor(colors.reduce((sum, c) => sum + c.b, 0) / colors.length);
-  
+
   return `rgb(${r}, ${g}, ${b})`;
 }
 ```
@@ -1640,22 +1682,23 @@ function mixColors(colors: Color[]): string {
 ```typescript
 function colorScavengerGame() {
   const targetColors = ['red', 'blue', 'yellow'];
-  const targetColor = targetColors[Math.floor(Math.random() * targetColors.length)];
-  
+  const targetColor =
+    targetColors[Math.floor(Math.random() * targetColors.length)];
+
   showInstruction(`Find something ${targetColor}!`);
-  
+
   while (gameActive) {
     const objects = detectObjects();
     const [targetObject] = findClosestMatchingColor(objects, targetColor);
-    
+
     if (targetObject) {
       // Child should point to object
       const fingerPosition = getFingerPosition();
-      
+
       if (isPointingAt(fingerPosition, targetObject.boundingBox)) {
         celebrate();
         showColorName(targetColor);
-        showObjects(targetColor);  // List other red objects
+        showObjects(targetColor); // List other red objects
         nextColor();
       }
     }
@@ -1686,22 +1729,24 @@ const shapeHoles = [
   { type: 'triangle', position: { x: 0.3, y: 0 }, filled: null },
 ];
 
-const draggableShapes = Array(5).fill().map(() => ({
-  type: shapes[Math.floor(Math.random() * shapes.length)],
-  position: { x: Math.random() * 0.6 - 0.3, y: Math.random() * 0.4 },
-}));
+const draggableShapes = Array(5)
+  .fill()
+  .map(() => ({
+    type: shapes[Math.floor(Math.random() * shapes.length)],
+    position: { x: Math.random() * 0.6 - 0.3, y: Math.random() * 0.4 },
+  }));
 
 function shapeSortGame() {
   while (gameActive) {
     const [grabbedShape, targetHole] = detectPinchDrop();
-    
+
     if (grabbedShape && targetHole && !targetHole.filled) {
       targetHole.filled = grabbedShape;
-      
+
       if (grabbedShape.type === targetHole.type) {
         celebrate();
         showShapeName(grabbedShape.type);
-        
+
         if (allShapesSorted()) {
           celebrate();
         }
@@ -1737,22 +1782,22 @@ const categories = {
 };
 
 function attributeSortGame() {
-  const category = getRandomCategory();  // "big vs small"
+  const category = getRandomCategory(); // "big vs small"
   const objects = displayObjects(categories[category]);
-  
+
   while (gameActive) {
     const targetObject = getTargetObject();
     const fingerPosition = getFingerPosition();
-    
+
     if (isPointingAt(fingerPosition, targetObject)) {
       // Ask child to categorize
       const childChoice = waitForChildChoice(category);
-      
+
       if (childChoice === targetObject.category) {
         celebrate();
         showExplanation(`${targetObject.name} is ${category}`);
       } else {
-        showEncouragement("Try again!");
+        showEncouragement('Try again!');
       }
     }
   }
@@ -1782,27 +1827,31 @@ const pattern = [
   { type: 'color', value: 'yellow', next: 'orange' },
 ];
 
-const options = Array(3).fill().map((_, i) => ({
-  type: 'color',
-  value: pattern[(i + patternIndex) % pattern.length].value,
-}));
+const options = Array(3)
+  .fill()
+  .map((_, i) => ({
+    type: 'color',
+    value: pattern[(i + patternIndex) % pattern.length].value,
+  }));
 
 function patternGame() {
   let currentIndex = 0;
-  
+
   while (gameActive) {
     displayOptions(options);
-    
+
     const [selectedOption] = detectTap();
-    
+
     if (selectedOption) {
       const expectedValue = pattern[currentIndex].next;
-      
+
       if (selectedOption.value === expectedValue) {
         celebrate();
-        showExplanation(`Red, ${selectedOption.value}, ${pattern[currentIndex + 1].next}`);
+        showExplanation(
+          `Red, ${selectedOption.value}, ${pattern[currentIndex + 1].next}`,
+        );
         currentIndex++;
-        
+
         // Shift pattern (circular buffer)
         const newOptions = pattern.map((p, i) => ({
           type: 'color',
@@ -1810,7 +1859,7 @@ function patternGame() {
         }));
         options = newOptions;
       } else {
-        showEncouragement("Try again!");
+        showEncouragement('Try again!');
       }
     }
   }
@@ -1847,20 +1896,20 @@ const gestureLibrary = {
 function gestureSequenceGame() {
   const sequence = generateRandomSequence(3, gestureLibrary);
   showSequencePreview(sequence);
-  
+
   let currentStep = 0;
-  
+
   while (gameActive) {
     const currentGesture = detectGesture();
-    
+
     if (currentGesture === sequence[currentStep]) {
       showCheckmark(currentStep);
       playSuccessSound();
       currentStep++;
-      
+
       if (currentStep >= sequence.length) {
         celebrate();
-        showSequencePreview();  // Show full sequence again
+        showSequencePreview(); // Show full sequence again
       }
     }
   }
@@ -1891,27 +1940,27 @@ function gestureSequenceGame() {
 
 ```typescript
 const basePattern = ['red', 'blue'];
-const length = 4;  // Can increase difficulty
+const length = 4; // Can increase difficulty
 
 function patternBuilderGame() {
   // Show base pattern
   displayPattern(basePattern);
-  
+
   let userPattern = [];
-  
+
   while (gameActive) {
     const [selectedColor] = detectTap();
-    
+
     if (selectedColor) {
       userPattern.push(selectedColor);
-      
+
       // Check if complete
       if (userPattern.length === length) {
         if (arraysEqual(userPattern, basePattern)) {
           celebrate();
-          showExplanation("Red, Blue, Red, Blue!");
+          showExplanation('Red, Blue, Red, Blue!');
         } else {
-          showEncouragement("Try again!");
+          showEncouragement('Try again!');
           userPattern = [];
         }
       }
@@ -1947,27 +1996,27 @@ function oddOneOutGame() {
   // Generate 3 objects
   const objects = generateObjects(3);
   const [oddObject, ...evenObjects] = makeOneOdd(objects);
-  
+
   displayObjects(objects);
-  showInstruction("Which one is different?");
-  
+  showInstruction('Which one is different?');
+
   while (gameActive) {
     const [selectedObject] = detectTap();
-    
+
     if (selectedObject === oddObject) {
       celebrate();
       showExplanation(`${selectedObject.name} is different!`);
       showReason(`It's ${oddObject.differenceReason}`);
       setTimeout(nextObjects, 2000);
     } else {
-      showEncouragement("Try again!");
+      showEncouragement('Try again!');
     }
   }
 }
 
 function makeOneOdd(objects: Object[]): [Object, Object[], string] {
   const difference = Math.random() > 0.5 ? 'color' : 'shape';
-  
+
   if (difference === 'color') {
     // Make 2 same color, 1 different
     const baseColor = objects[0].color;
@@ -2019,13 +2068,13 @@ function makeOneOdd(objects: Object[]): [Object, Object[], string] {
 const expressions = {
   happy: {
     blendshapes: { MouthSmile: 0.8, EyesWide: 0.5 },
-    description: "Happy! Smile big!",
-    icon: "😊",
+    description: 'Happy! Smile big!',
+    icon: '😊',
   },
   sad: {
     blendshapes: { MouthFrown: 0.8, EyesSquint: 0.3 },
-    description: "Sad time.",
-    icon: "😢",
+    description: 'Sad time.',
+    icon: '😢',
   },
   // ... more expressions
 };
@@ -2033,13 +2082,16 @@ const expressions = {
 function expressionMirrorGame() {
   const targetExpression = getRandomExpression();
   showCharacterWithExpression(targetExpression);
-  
+
   while (gameActive) {
     const faceResults = detectFace();
     const currentBlendshapes = faceResults.faceBlendshapes[0].categories;
-    
-    const matchScore = compareBlendshapes(currentBlendshapes, targetExpression.blendshapes);
-    
+
+    const matchScore = compareBlendshapes(
+      currentBlendshapes,
+      targetExpression.blendshapes,
+    );
+
     if (matchScore > 0.7) {
       celebrate();
       showDescription(targetExpression.description);
@@ -2048,20 +2100,23 @@ function expressionMirrorGame() {
   }
 }
 
-function compareBlendshapes(detected: Blendshapes, target: Blendshapes): number {
+function compareBlendshapes(
+  detected: Blendshapes,
+  target: Blendshapes,
+): number {
   let score = 0;
   let totalWeights = 0;
-  
+
   for (const [key, targetValue] of Object.entries(target)) {
     const detectedValue = detected[key];
     const diff = Math.abs(detectedValue - targetValue);
     const weight = getBlendshapeWeight(key);
-    
-    score += weight * (1 - diff);  // Higher score for closer match
+
+    score += weight * (1 - diff); // Higher score for closer match
     totalWeights += weight;
   }
-  
-  return score / totalWeights;  // 0.0 to 1.0
+
+  return score / totalWeights; // 0.0 to 1.0
 }
 ```
 
@@ -2130,19 +2185,19 @@ const mouthShapes = {
 function mouthShapeGame() {
   const letters = ['A', 'E', 'I', 'O', 'U'];
   let currentIndex = 0;
-  
+
   while (gameActive) {
     const targetLetter = letters[currentIndex];
     const targetShape = mouthShapes[targetLetter];
-    
+
     showInstruction(targetShape.description);
     showMouthShapeOutline(targetShape);
-    
+
     const faceResults = detectFace();
     const currentMouthShape = extractMouthShape(faceResults);
-    
+
     const matchScore = compareMouthShapes(currentMouthShape, targetShape);
-    
+
     if (matchScore > 0.75) {
       celebrate();
       playPronunciation(targetLetter);
@@ -2156,7 +2211,7 @@ function extractMouthShape(faceResults: FaceResults): MouthShape {
   const lowerLip = faceResults.landmarks[14];
   const leftCorner = faceResults.landmarks[61];
   const rightCorner = faceResults.landmarks[294];
-  
+
   return {
     width: distance(leftCorner, rightCorner),
     openness: distance(upperLip, lowerLip),
@@ -2189,21 +2244,21 @@ function headOrientationGame() {
     { direction: 'left', message: 'Look left!', emoji: '⬅️' },
     { direction: 'right', message: 'Look right!', emoji: '➡️' },
   ];
-  
+
   let currentIndex = 0;
-  
+
   while (gameActive) {
     const instruction = instructions[currentIndex];
     showInstruction(instruction.message);
-    
+
     const faceResults = detectFace();
     const orientation = extractHeadOrientation(faceResults);
-    
+
     if (orientation === instruction.direction) {
       showCheckmark();
       playSuccessSound();
       currentIndex++;
-      
+
       if (currentIndex >= instructions.length) {
         celebrate();
       }
@@ -2215,11 +2270,11 @@ function extractHeadOrientation(faceResults: FaceResults): string {
   const roll = faceResults.facialTransformationMatrixes[0].roll;
   const pitch = faceResults.facialTransformationMatrixes[0].pitch;
   const yaw = faceResults.facialTransformationMatrixes[0].yaw;
-  
+
   // Simple threshold-based direction
   if (Math.abs(yaw) > 0.2) return yaw > 0 ? 'left' : 'right';
   if (Math.abs(pitch) > 0.2) return pitch < 0 ? 'up' : 'down';
-  return 'center';  // No clear direction
+  return 'center'; // No clear direction
 }
 ```
 
@@ -2264,12 +2319,12 @@ function toggleGameMode() {
     showToolSelector(true);
     showColorPalette(true);
     showBrushPreview(true);
-    showMessage("Free draw mode! Draw anything you want!");
+    showMessage('Free draw mode! Draw anything you want!');
   } else {
     setGameMode('trace');
-    showToolSelector(false);  // Simplify for tracing
+    showToolSelector(false); // Simplify for tracing
     showColorPalette(false);
-    showMessage("Back to letter tracing!");
+    showMessage('Back to letter tracing!');
   }
 }
 
@@ -2283,12 +2338,16 @@ function renderCanvas(ctx: CanvasRenderingContext2D) {
   }
 }
 
-function drawFreePaint(ctx: CanvasRenderingContext2D, brush: BrushSettings, position: Point) {
+function drawFreePaint(
+  ctx: CanvasRenderingContext2D,
+  brush: BrushSettings,
+  position: Point,
+) {
   ctx.strokeStyle = brush.color;
   ctx.lineWidth = brush.size;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  
+
   // Apply brush-specific effects
   if (brush.type === 'calligraphy') {
     drawCalligraphyStroke(ctx, position);
@@ -2324,35 +2383,35 @@ function drawFreePaint(ctx: CanvasRenderingContext2D, brush: BrushSettings, posi
 const worlds = {
   space: {
     name: 'Space Explorer',
-    background: '#0B0E3E',  // Dark blue
+    background: '#0B0E3E', // Dark blue
     stars: generateStars(50),
     message: "You're an astronaut exploring space!",
   },
   underwater: {
     name: 'Underwater Diver',
-    background: '#006994',  // Deep blue
+    background: '#006994', // Deep blue
     bubbles: generateBubbles(20),
     message: "You're diving deep underwater!",
   },
   jungle: {
     name: 'Jungle Explorer',
-    background: '#228B22',  // Green
+    background: '#228B22', // Green
     animals: generateAnimals(10),
-    message: "Exploring the jungle!",
+    message: 'Exploring the jungle!',
   },
 };
 
 function magicBackgroundGame() {
-  const world = worlds.space;  // Start with space
-  
+  const world = worlds.space; // Start with space
+
   while (gameActive) {
     const segmentationResults = detectSegmentation();
     const personMask = segmentationResults.categoryMask;
-    
+
     // Remove background, replace with world
     renderWorld(world);
     renderPersonMask(personMask, world);
-    
+
     // Interactive elements in world
     if (world === worlds.underwater) {
       // Child pops bubbles
@@ -2371,9 +2430,9 @@ function renderWorld(world: World) {
   // Draw world background
   ctx.fillStyle = world.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
+
   // Draw world elements (stars, bubbles, animals)
-  world.elements.forEach(element => {
+  world.elements.forEach((element) => {
     drawElement(ctx, element);
   });
 }
@@ -2383,7 +2442,7 @@ function renderPersonMask(mask: ImageData, world: World) {
   const maskCanvas = document.createElement('canvas');
   const maskCtx = maskCanvas.getContext('2d');
   maskCtx.putImageData(mask, 0, 0);
-  
+
   // Use mask to "cut out" child and place in world
   // Child appears "inside" world
   composeWithWorld(maskCanvas, world);
@@ -2408,16 +2467,40 @@ function renderPersonMask(mask: ImageData, world: World) {
 
 ```typescript
 const stickers = [
-  { id: 'star', name: 'Golden Star', icon: '⭐', unlocked: false, unlockCondition: 'Complete 10 letters' },
-  { id: 'rainbow', name: 'Rainbow', icon: '🌈', unlocked: false, unlockCondition: 'Achieve 5-day streak' },
-  { id: 'unicorn', name: 'Unicorn', icon: '🦄', unlocked: false, unlockCondition: 'Master all letters in Hindi' },
-  { id: 'rocket', name: 'Rocket Ship', icon: '🚀', unlocked: false, unlockCondition: 'Complete 50 activities' },
+  {
+    id: 'star',
+    name: 'Golden Star',
+    icon: '⭐',
+    unlocked: false,
+    unlockCondition: 'Complete 10 letters',
+  },
+  {
+    id: 'rainbow',
+    name: 'Rainbow',
+    icon: '🌈',
+    unlocked: false,
+    unlockCondition: 'Achieve 5-day streak',
+  },
+  {
+    id: 'unicorn',
+    name: 'Unicorn',
+    icon: '🦄',
+    unlocked: false,
+    unlockCondition: 'Master all letters in Hindi',
+  },
+  {
+    id: 'rocket',
+    name: 'Rocket Ship',
+    icon: '🚀',
+    unlocked: false,
+    unlockCondition: 'Complete 50 activities',
+  },
 ];
 
 function checkStickerUnlock(achievements: Achievement[]): string[] {
   const unlocked = [];
-  
-  stickers.forEach(sticker => {
+
+  stickers.forEach((sticker) => {
     if (sticker.unlocked) {
       unlocked.push(sticker);
     } else if (meetsUnlockCondition(sticker, achievements)) {
@@ -2427,17 +2510,17 @@ function checkStickerUnlock(achievements: Achievement[]): string[] {
       showMessage(`You unlocked ${sticker.name}! 🎉`);
     }
   });
-  
+
   return unlocked;
 }
 
 function stickerBook(stickers: Sticker[]) {
   // Display sticker collection grid
-  stickers.forEach(sticker => {
+  stickers.forEach((sticker) => {
     if (sticker.unlocked) {
       displaySticker(sticker);
     } else {
-      displayLockedSticker(sticker);  // Grayed out with lock icon
+      displayLockedSticker(sticker); // Grayed out with lock icon
       showUnlockCondition(sticker.unlockCondition);
     }
   });
@@ -2472,34 +2555,34 @@ function showAndTellGame() {
     { name: 'cat', emoji: '🐱', color: '#808080' },
     { name: 'house', emoji: '🏠', color: '#F59E0B' },
   ];
-  
+
   const targetObject = objects[Math.floor(Math.random() * objects.length)];
   showObjectOnScreen(targetObject);
-  
+
   showInstruction(`Show me: ${targetObject.emoji} ${targetObject.name}`);
-  
+
   let attempts = 0;
   const maxAttempts = 3;
-  
+
   while (gameActive && attempts < maxAttempts) {
     const fingerPosition = getFingerPosition();
-    
+
     if (isPointingAt(fingerPosition, targetObject.position)) {
       attempts++;
-      
+
       if (attempts === 1) {
         // Teach word
         teachWord(targetObject);
-        
+
         // Add follow-up questions
         askQuestion(`What color is ${targetObject.name}?`);
-        
+
         setTimeout(() => {
           askQuestion(`Is ${targetObject.name} soft or hard?`);
         }, 2000);
       } else if (attempts === 2) {
         // Show object in different size
-        showObjectOnScreen(targetObject, 0.5);  // Half size
+        showObjectOnScreen(targetObject, 0.5); // Half size
         showInstruction(`Find the small ${targetObject.name}!`);
       } else if (attempts === 3) {
         celebrate();
@@ -2540,26 +2623,26 @@ function scavengerHuntGame() {
     toys: ['ball', 'car', 'doll', 'train'],
     clothes: ['shirt', 'hat', 'shoes', 'pants'],
   };
-  
+
   const targetCategory = getRandomCategory();
   const targetItems = categories[targetCategory];
-  
+
   showInstruction(`Find something from the ${targetCategory} group!`);
   showCategoryIcons(targetItems);
-  
+
   let found = new Set();
-  
+
   while (gameActive && found.size < targetItems.length) {
     const detectedObjects = detectObjects();
-    
-    detectedObjects.forEach(obj => {
+
+    detectedObjects.forEach((obj) => {
       const category = categorizeObject(obj);
-      
+
       if (category === targetCategory && !found.has(obj.id)) {
         found.add(obj.id);
         showCheckmark(obj);
         playSuccessSound();
-        
+
         if (found.size === targetItems.length) {
           celebrate();
           showCategorySummary(targetCategory);
@@ -2610,22 +2693,22 @@ function scavengerHuntGame() {
 ```typescript
 function storyQuest(story: Story) {
   let currentTask = 0;
-  
+
   // Load story assets
   loadCharacter(story.character);
   loadBackground(story.background);
-  
+
   while (gameActive && currentTask < story.tasks.length) {
     const task = story.tasks[currentTask];
     showTaskDescription(task);
-    
+
     // Child completes task
     const completed = completeTask(task);
-    
+
     if (completed) {
       currentTask++;
       showStoryProgress(currentTask, story.tasks.length);
-      
+
       // Unlock next chapter/area
       if (currentTask === story.tasks.length) {
         celebrate();
@@ -2639,17 +2722,17 @@ function storyQuest(story: Story) {
 function completeTask(task: Task): boolean {
   const segmentation = detectSegmentation();
   const handPosition = getFingerPosition();
-  
+
   switch (task.type) {
     case 'catch':
       return catchObject(handPosition, task.target);
-    
+
     case 'avoid':
       return !isNear(handPosition, task.target);
-    
+
     case 'collect':
       return isNear(handPosition, task.target) && isPinching();
-    
+
     case 'deliver':
       return isPinching() && isInZone(handPosition, task.targetZone);
   }
@@ -2732,22 +2815,25 @@ interface GamePrimitives {
   detectPinch(): boolean;
   detectGesture(): Gesture;
   countFingers(): number;
-  
+
   // Pose primitives
   getPoseLandmarks(): Pose;
   detectBodyPartPosition(part: BodyPart): Point;
   checkPoseInstruction(instruction: string): boolean;
   calculatePoseStability(pose: Pose): number;
-  
+
   // Face primitives
   getFaceLandmarks(): FaceResults;
   detectHeadOrientation(): Direction;
-  compareBlendshapes(detected: FaceBlendshapes, target: FaceBlendshapes): number;
-  
+  compareBlendshapes(
+    detected: FaceBlendshapes,
+    target: FaceBlendshapes,
+  ): number;
+
   // Object primitives
   detectObjects(): DetectedObject[];
   categorizeObject(object: DetectedObject): Category;
-  
+
   // Segmentation primitives
   getPersonMask(): ImageData;
   detectBodySegment(): BodyPart[];
@@ -2762,23 +2848,23 @@ class CameraManager {
   private stream: MediaStream;
   private active: boolean = false;
   private permissions: boolean = false;
-  
+
   async start(deviceId?: string): Promise<boolean> {
     try {
       // Request camera with constraints
       this.stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user',  // Front camera
+          facingMode: 'user', // Front camera
           deviceId: deviceId,
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
         audio: false,
       });
-      
+
       this.videoElement.srcObject = this.stream;
       this.videoElement.play();
-      
+
       this.active = true;
       this.permissions = true;
       return true;
@@ -2788,26 +2874,26 @@ class CameraManager {
       return false;
     }
   }
-  
+
   stop(): void {
     if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
+      this.stream.getTracks().forEach((track) => track.stop());
     }
     this.active = false;
   }
-  
+
   getStream(): MediaStream {
     return this.stream;
   }
-  
+
   getVideoElement(): HTMLVideoElement {
     return this.videoElement;
   }
-  
+
   hasPermission(): boolean {
     return this.permissions;
   }
-  
+
   isActive(): boolean {
     return this.active;
   }
@@ -2821,50 +2907,51 @@ class HandsRunner {
   private landmarker: HandLandmarker;
   private lastResults: HandResult | null = null;
   private smoothing: SmoothingFilter;
-  
+
   constructor() {
-    this.smoothing = new EMAFilter(0.7);  // Alpha 0.7
+    this.smoothing = new EMAFilter(0.7); // Alpha 0.7
   }
-  
+
   async initialize(): Promise<void> {
     const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     );
-    
+
     this.landmarker = await HandLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+        modelAssetPath:
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
         delegate: 'GPU',
       },
       numHands: 2,
       minHandDetectionConfidence: 0.5,
     });
   }
-  
+
   detect(frame: HTMLVideoElement, timestamp: number): SmoothedHandLandmarks {
     const results = this.landmarker.detectForVideo(frame, timestamp);
-    
+
     // Apply smoothing
     const smoothed = this.smoothing.smooth(results.landmarks || []);
-    
+
     this.lastResults = { ...results, landmarks: smoothed };
     return this.lastResults;
   }
-  
+
   getLastResults(): HandResult | null {
     return this.lastResults;
   }
-  
+
   getFingerPosition(handIndex: number = 0): Point | null {
     if (!this.lastResults || !this.lastResults.landmarks) {
       return null;
     }
-    
+
     const landmarks = this.lastResults.landmarks[handIndex];
     if (!landmarks) return null;
-    
+
     return {
-      x: landmarks[8].x,  // Index finger tip
+      x: landmarks[8].x, // Index finger tip
       y: landmarks[8].y,
       z: landmarks[8].z || 0,
     };
@@ -2874,19 +2961,20 @@ class HandsRunner {
 class FaceRunner {
   private landmarker: FaceLandmarker;
   private smoothing: SmoothingFilter;
-  
+
   constructor() {
-    this.smoothing = new EMAFilter(0.5);  // Less smoothing for face
+    this.smoothing = new EMAFilter(0.5); // Less smoothing for face
   }
-  
+
   async initialize(): Promise<void> {
     const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     );
-    
+
     this.landmarker = await FaceLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+        modelAssetPath:
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
         delegate: 'GPU',
       },
       outputFaceBlendshapes: true,
@@ -2894,19 +2982,19 @@ class FaceRunner {
       minFaceDetectionConfidence: 0.5,
     });
   }
-  
+
   detect(frame: HTMLVideoElement, timestamp: number): SmoothedFaceLandmarks {
     const results = this.landmarker.detectForVideo(frame, timestamp);
-    
+
     // Apply smoothing
     const smoothed = this.smoothing.smooth(results.faceLandmarks || []);
-    
+
     return {
       ...results,
       faceLandmarks: smoothed,
     };
   }
-  
+
   getBlendshapes(): FaceBlendshapes | null {
     if (!this.lastResults || !this.lastResults.faceBlendshapes) {
       return null;
@@ -2918,32 +3006,33 @@ class FaceRunner {
 class PoseRunner {
   private landmarker: PoseLandmarker;
   private smoothing: SmoothingFilter;
-  
+
   constructor() {
-    this.smoothing = new EMAFilter(0.6);  // Moderate smoothing
+    this.smoothing = new EMAFilter(0.6); // Moderate smoothing
   }
-  
+
   async initialize(): Promise<void> {
     const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     );
-    
+
     this.landmarker = await PoseLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+        modelAssetPath:
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
         delegate: 'GPU',
       },
       outputSegmentationMasks: true,
       minPoseDetectionConfidence: 0.5,
     });
   }
-  
+
   detect(frame: HTMLVideoElement, timestamp: number): SmoothedPoseLandmarks {
     const results = this.landmarker.detectForVideo(frame, timestamp);
-    
+
     // Apply smoothing
     const smoothed = this.smoothing.smooth(results.poseLandmarks || []);
-    
+
     return {
       ...results,
       poseLandmarks: smoothed,
@@ -2953,28 +3042,32 @@ class PoseRunner {
 
 class SegmenterRunner {
   private segmenter: ImageSegmenter;
-  
+
   async initialize(): Promise<void> {
     const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
     );
-    
+
     this.segmenter = await ImageSegmenter.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+        modelAssetPath:
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
         delegate: 'GPU',
       },
       outputCategoryMask: true,
       runningMode: 'VIDEO',
     });
   }
-  
+
   segment(frame: HTMLVideoElement, timestamp: number): SegmentationResult {
     return this.segmenter.segmentForVideo(frame, timestamp);
   }
-  
+
   getPersonMask(): ImageData | null {
-    const results = this.segmenter.segmentForVideo(this.video, performance.now());
+    const results = this.segmenter.segmentForVideo(
+      this.video,
+      performance.now(),
+    );
     if (results.categoryMask) {
       return results.categoryMask.getAsUint8Array();
     }
@@ -3140,30 +3233,35 @@ async function requestCameraPermission(): Promise<boolean> {
   // Check if already have permission
   if (navigator.mediaDevices) {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(d => d.kind === 'videoinput');
-    
+    const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+
     if (videoDevices.length > 0) {
       console.log('Already have camera permission');
       return true;
     }
   }
-  
+
   // Request permission
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: 'user',  // Front camera only
-        width: { ideal: 640 },  // Reasonable resolution
+        facingMode: 'user', // Front camera only
+        width: { ideal: 640 }, // Reasonable resolution
         height: { ideal: 480 },
       },
-      audio: false,  // No audio
+      audio: false, // No audio
     });
-    
-    stream.getTracks().forEach(track => track.stop());
+
+    stream.getTracks().forEach((track) => track.stop());
     return true;
   } catch (error) {
-    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-      showMessage('Camera permission denied. Please allow camera access to play games.');
+    if (
+      error.name === 'NotAllowedError' ||
+      error.name === 'PermissionDeniedError'
+    ) {
+      showMessage(
+        'Camera permission denied. Please allow camera access to play games.',
+      );
       return false;
     } else if (error.name === 'NotFoundError') {
       showMessage('No camera found. Please check your device.');
@@ -3181,20 +3279,20 @@ async function requestCameraPermission(): Promise<boolean> {
 ```typescript
 // No cloud uploads by default
 const PRIVACY_SETTINGS = {
-  uploadVideo: false,  // Disabled by default
-  uploadImages: false,  // Disabled by default
-  shareProgress: false,  // Disabled by default
-  analyticsEnabled: false,  // Only basic metrics
+  uploadVideo: false, // Disabled by default
+  uploadImages: false, // Disabled by default
+  shareProgress: false, // Disabled by default
+  analyticsEnabled: false, // Only basic metrics
 };
 
 function processFrameLocally(frame: HTMLVideoElement): void {
   // Process frame entirely in browser
   const landmarks = detectHandLandmarks(frame);
   const smoothed = smoothLandmarks(landmarks);
-  
+
   // Render locally
   renderLocally(smoothed);
-  
+
   // NO uploading to server
 }
 
@@ -3211,17 +3309,17 @@ function enableCloudUploads(parentConsent: boolean): void {
 
 ```typescript
 interface PerformanceBudget {
-  maxFrameTime: number;  // ms per frame
+  maxFrameTime: number; // ms per frame
   targetFPS: number;
-  maxMemory: number;  // MB
-  maxCPU: number;  // percentage
+  maxMemory: number; // MB
+  maxCPU: number; // percentage
 }
 
 const BUDGET: PerformanceBudget = {
-  maxFrameTime: 33,  // ~30 FPS
+  maxFrameTime: 33, // ~30 FPS
   targetFPS: 30,
-  maxMemory: 200,  // 200 MB limit
-  maxCPU: 80,  // Leave 20% headroom
+  maxMemory: 200, // 200 MB limit
+  maxCPU: 80, // Leave 20% headroom
 };
 
 function checkPerformanceBudget(currentMetrics: PerformanceMetrics): boolean {
@@ -3229,12 +3327,12 @@ function checkPerformanceBudget(currentMetrics: PerformanceMetrics): boolean {
     console.warn('Frame time exceeded budget:', currentMetrics.frameTime);
     reduceComplexity();
   }
-  
+
   if (currentMetrics.memory > BUDGET.maxMemory) {
     console.warn('Memory exceeded budget:', currentMetrics.memory);
     triggerGarbageCollection();
   }
-  
+
   return currentMetrics.frameTime <= BUDGET.maxFrameTime;
 }
 
@@ -3260,7 +3358,9 @@ const CAMERA_ALTERNATIVES = {
 
 function detectCameraCapability(): boolean {
   // Try to access camera
-  return navigator.mediaDevices && navigator.mediaDevices.getUserMedia !== undefined;
+  return (
+    navigator.mediaDevices && navigator.mediaDevices.getUserMedia !== undefined
+  );
 }
 
 if (!detectCameraCapability()) {
@@ -3277,14 +3377,14 @@ function setupKeyboardNavigation() {
         focusNextElement();
         e.preventDefault();
         break;
-        
+
       case 'Enter':
       case ' ':
         // Select/confirm
         triggerSelection();
         e.preventDefault();
         break;
-        
+
       case 'Escape':
         // Cancel/go back
         goBack();
@@ -3297,13 +3397,13 @@ function setupKeyboardNavigation() {
 // Screen reader support
 function setupScreenReaderSupport() {
   // Ensure all interactive elements have ARIA labels
-  buttons.forEach(button => {
+  buttons.forEach((button) => {
     if (!button.getAttribute('aria-label')) {
       const text = button.textContent || button.getAttribute('alt') || 'Button';
       button.setAttribute('aria-label', text);
     }
   });
-  
+
   // Announce state changes
   announceStateChanges('Game started', 'Game paused', 'Score updated');
 }
@@ -3315,14 +3415,14 @@ function setupScreenReaderSupport() {
 class ErrorHandler {
   private errorCounts: Map<string, number> = new Map();
   private lastErrorTime: number = 0;
-  
+
   handleError(error: Error, context: string): void {
     const now = Date.now();
     const errorKey = `${context}:${error.name}`;
-    
+
     // Count errors
     this.errorCounts.set(errorKey, (this.errorCounts.get(errorKey) || 0) + 1);
-    
+
     // Check for repeated errors (spam prevention)
     if (this.errorCounts.get(errorKey) > 3 && now - this.lastErrorTime < 5000) {
       this.lastErrorTime = now;
@@ -3330,19 +3430,19 @@ class ErrorHandler {
       showMessage('Something went wrong. Please try again.');
       return;
     }
-    
+
     this.lastErrorTime = now;
-    
+
     // Show user-friendly message
     showUserFriendlyError(error);
-    
+
     // Log for debugging
     logError(error, context);
   }
-  
+
   showUserFriendlyError(error: Error): void {
     let message = 'Oops! Something went wrong.';
-    
+
     if (error.name === 'NotAllowedError') {
       message = 'Camera permission was denied. Please check your settings.';
     } else if (error.name === 'NotFoundError') {
@@ -3352,7 +3452,7 @@ class ErrorHandler {
     } else {
       message = 'Something unexpected happened. Please try again.';
     }
-    
+
     showMessage(message);
   }
 }

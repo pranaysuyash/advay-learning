@@ -266,8 +266,7 @@ export function MemoryMatch() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <GameContainer
-      title='Memory Match'
+    <GameContainer webcamRef={webcamRef}       title='Memory Match'
       score={score}
       level={difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3}
       showScore

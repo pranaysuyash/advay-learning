@@ -70,7 +70,8 @@ const LANGUAGE_VOICE_MAP: Record<string, string> = {
  * ```
  */
 export class TTSService {
-  private readonly isTestEnv: boolean = (import.meta as any).env?.MODE === 'test';
+  private readonly isTestEnv: boolean =
+    (import.meta as any).env?.MODE === 'test';
 
   // Tier 3: Web Speech API (always available)
   private synth: SpeechSynthesis | null = null;
@@ -116,7 +117,9 @@ export class TTSService {
     this.voices = this.synth.getVoices();
     this.voicesLoaded = this.voices.length > 0;
     if (this.voicesLoaded) {
-      console.log(`[TTSService] Loaded ${this.voices.length} Web Speech voices`);
+      console.log(
+        `[TTSService] Loaded ${this.voices.length} Web Speech voices`,
+      );
     }
   }
 
@@ -267,13 +270,21 @@ export class TTSService {
       return this.kokoroEngine
         .speak(text, effectiveVolume, options.kokoroVoice)
         .catch((err) => {
-          console.warn('[TTSService] Kokoro failed, falling back to Web Speech:', err);
+          console.warn(
+            '[TTSService] Kokoro failed, falling back to Web Speech:',
+            err,
+          );
           this._lastActiveEngine = 'web-speech';
           return this.webSpeechSpeak(text, options);
         });
-    } else if (this.enginePreference !== 'web-speech' && this.kokoroEngine.getStatus() === 'loading') {
+    } else if (
+      this.enginePreference !== 'web-speech' &&
+      this.kokoroEngine.getStatus() === 'loading'
+    ) {
       // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
-      console.log('[TTSService] Kokoro is still loading, falling back to Web Speech temporarily');
+      console.log(
+        '[TTSService] Kokoro is still loading, falling back to Web Speech temporarily',
+      );
     }
 
     // Tier 3: Web Speech API
@@ -289,17 +300,34 @@ export class TTSService {
 
   stop(): void {
     // Stop all engines
-    if (this.synth) this.synth.cancel();
+    if (this.synth) {
+      // Browser bug fix: cancel() occasionally fails to clear the queue if speech is paused
+      // or if it was interrupted mid-word. Pausing, resuming, then waiting a tick before cancel
+      // is the most reliable way to clear sticky queues in Chrome/Safari.
+      if (typeof this.synth.pause === 'function') {
+        this.synth.pause();
+      }
+      if (typeof this.synth.resume === 'function') {
+        this.synth.resume();
+      }
+      if (typeof this.synth.cancel === 'function') {
+        this.synth.cancel();
+      }
+    }
     PregenAudioCache.stop();
     this.kokoroEngine.stop();
   }
 
   pause(): void {
-    if (this.synth) this.synth.pause();
+    if (this.synth && typeof this.synth.pause === 'function') {
+      this.synth.pause();
+    }
   }
 
   resume(): void {
-    if (this.synth) this.synth.resume();
+    if (this.synth && typeof this.synth.resume === 'function') {
+      this.synth.resume();
+    }
   }
 
   isSpeaking(): boolean {

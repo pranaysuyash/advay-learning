@@ -9,8 +9,10 @@ vi.mock('react-i18next', () => ({
 }));
 
 // we will mock the data registry to supply a bad vibe
-vi.mock('../data/gameRegistry', () => {
-  const original = vi.importActual('../data/gameRegistry');
+vi.mock('../../data/gameRegistry', async () => {
+  const original = await vi.importActual<
+    typeof import('../../data/gameRegistry')
+  >('../../data/gameRegistry');
   return {
     ...original,
     getListedGames: () => [

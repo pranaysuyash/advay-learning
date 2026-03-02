@@ -437,8 +437,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   ];
 
   return (
-    <GameContainer
-      title='Mirror Draw'
+    <GameContainer webcamRef={webcamRef}       title='Mirror Draw'
       score={score}
       level={level}
       onHome={goHome}

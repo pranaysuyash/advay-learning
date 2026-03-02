@@ -421,8 +421,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const lvlCfg = LEVELS.find((l) => l.level === level) ?? LEVELS[0];
 
   return (
-    <GameContainer
-      title='Phonics Sounds'
+    <GameContainer webcamRef={webcamRef}       title='Phonics Sounds'
       score={score}
       level={level}
       onHome={goHome}

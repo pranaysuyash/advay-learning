@@ -198,11 +198,102 @@ Execution log:
 
 Status updates:
 
+### TCK-20260302-002 :: Harden shared GamePage wrapper and add comprehensive tests
+
+Ticket Stamp: STAMP-20260302T163147Z-codex-m8dj
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-02 09:15 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Refactor and harden the shared `GamePage` component used by many game pages. Address reviewer feedback from initial migration (duplicate containers, double submits, stale refs, error boundary races, missing home buttons) and add thorough unit tests ensuring subscription loading, access checks, context updates, error fallback behavior, navigation, and save-error UI.
+
+Scope contract:
+
+- In-scope: `src/frontend/src/components/GamePage.tsx` and associated tests plus updates to several page files using GamePage; unit test additions.
+- Out-of-scope: individual game logic beyond existing wrapper integration.
+- Behavior change allowed: YES (internal state and error handling improvements, no user-facing behavior changes beyond bug fixes).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/GamePage.tsx`, `src/frontend/src/components/__tests__/GamePage.test.tsx`, plus minor test updates elsewhere (`languages.test.ts`, etc.)
+- Branch/PR: codex/wip-game-upgrades-20260227
+
+Inputs:
+
+- Prompt used: user chat feedback on GamePage review plus earlier audit/implementation units.
+- Prompt/persona traceability: evidence-first remediation with detailed unit test verification.
+
+Acceptance Criteria:
+
+- [x] Single GameContainer wrapper only , no nested containers.
+- [x] `handleFinish` deduped with submitting guard; refs keep latest score/level.
+- [x] Error boundary simplified; save-error and render-time errors both render `GameErrorScreen` with home and reload options.
+- [x] Access check after subscription load.
+- [x] Tests cover spinner, access denial, context updates, error fallbacks, home navigation, and save-error home button.
+- [x] Vitest run passes with these tests and no regressions.
+- [x] Pre-commit gate passes (worklog updated, tickets stamped).
+
+Execution log:
+
+- 2026-03-02 09:15 IST | Applied final GamePage fixes per review; tests added and adjusted.
+- 2026-03-02 09:20 IST | Verified `npm run test -- --testNamePattern="GamePage"` passes all six tests (no failures).
+- 2026-03-02 09:25 IST | Ran `./scripts/agent_gate.sh --staged` and confirmed no errors.
+- 2026-03-02 10:00 IST | Worklog entry recorded.
+
+Status updates:
+
+- 2026-03-02 09:15 IST **IN_PROGRESS** — implementing fixes and writing tests.
+- 2026-03-02 10:00 IST **DONE** — changes committed and ready for PR.
+
+Ticket Stamp: STAMP-20260301T164401Z-codex-qmoa
+
+Type: BUG
+Owner: Pranay
+Created: 2026-03-01 22:14 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Prevent `docs/ux-analysis/screenshots/` image assets from showing up in `git status` by adding the path to `.gitignore`.
+- Out-of-scope: Cleaning other screenshot directories or archiving existing captures.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `.gitignore`
+- Branch/PR: codex/wip-game-upgrades-20260227
+
+Inputs:
+
+- Prompt used: User request in chat (documented as "why are still screenshots in changes when we had excluded screenshots?")
+- Prompt/persona traceability: Maintenance/debug lens ensuring git hygiene for captured UX imagery.
+
+Acceptance Criteria:
+
+- [x] `.gitignore` includes `docs/ux-analysis/screenshots/`.
+- [x] `git status -sb` no longer lists individual UX assessment screenshots.
+
+Execution log:
+
+- 2026-03-01 22:12 IST | Observed screenshot files appearing inside `docs/ux-analysis/screenshots/` via `git status -sb` | Evidence: prior command output (images listed).
+- 2026-03-01 22:13 IST | Added `docs/ux-analysis/screenshots/` to `.gitignore` using apply_patch | Evidence: updated `.gitignore` entry.
+- 2026-03-01 22:14 IST | Verified status now hides the UX screenshot files | Evidence: `git status -sb`.
+
+Status updates:
+
 - 2026-03-01 22:14 IST | **DONE** — `.gitignore` entry merged, no further screenshot noise in git status.
 
 Next actions:
 
 1. Continue with task that triggered the UX analysis (if further code changes are requested).
+
 - Existing capabilities are strong but fragmented; documentation establishes a unified contract before code migration.
 - This work intentionally avoids implementation changes to keep risk low while aligning architecture.
 
@@ -5744,6 +5835,7 @@ Status: DONE
 ---
 
 ### TCK-20260302-001 :: Feature Flag Foundation (PR-1)
+
 Ticket Stamp: STAMP-20260302T110000Z-codex-ff01
 
 Type: FOUNDATION  
@@ -5756,10 +5848,12 @@ Description:
 Implement type-safe feature flag system for safe rollout of high-risk changes identified in GAME_INPUT_AGE_AUDIT_2026-02-28. This is Unit-0 of the implementation plan.
 
 Source:
+
 - Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9-10
 - Issue: ISSUE-006
 
 Scope contract:
+
 - In-scope:
   - Feature flag configuration system with TypeScript types
   - React hook interface (useFeatureFlag, useFeatureFlags)
@@ -5772,11 +5866,13 @@ Scope contract:
 - Behavior change allowed: NO (additive only)
 
 Targets:
+
 - Repo: learning_for_kids
 - Files: `src/frontend/src/config/features.ts`, `src/frontend/src/hooks/useFeatureFlag.ts`, `src/frontend/src/store/settingsStore.ts`
 - Branch: main
 
 Acceptance Criteria:
+
 - [x] All flags type-safe with TypeScript
 - [x] Hierarchy works: env var > user override > default
 - [x] Editable flags can be toggled programmatically
@@ -5786,6 +5882,7 @@ Acceptance Criteria:
 - [x] ADR document created
 
 Execution log:
+
 - [2026-03-02 10:30 IST] Analysis complete | Evidence: No feature flag system existed
 - [2026-03-02 10:45 IST] Created features.ts with 4 flags | Evidence: File created
 - [2026-03-02 10:50 IST] Created useFeatureFlag.ts and tests | Evidence: 9 tests passing
@@ -5795,20 +5892,24 @@ Execution log:
 - [2026-03-02 11:10 IST] Committed PR-1 | Evidence: git commit [ISSUE-006]
 
 Status updates:
+
 - [2026-03-02 10:30 IST] **OPEN** — Ticket created
 - [2026-03-02 11:10 IST] **DONE** — PR-1 merged
 
 Next actions:
+
 1. PR-2: Tracking-loss pause/recovery (ISSUE-002)
 2. PR-3: Fallback controls pilot (ISSUE-001)
 
 Risks/notes:
+
 - Feature flags must be cleaned up after features stabilize (see ADR-007 cleanup criteria)
 - Environment variable override pattern: VITE_FEATURE_CONTROLS_FALLBACKV1=true
 
 ---
 
 ### TCK-20260302-002 :: Remove Stray Protected Worklog Entry (`Obstacle Course`)
+
 Ticket Stamp: STAMP-20260302T063734Z-codex-q0dw
 
 Type: PROCESS
@@ -5869,6 +5970,7 @@ Status updates:
 ---
 
 ### TCK-20260302-003 :: Comprehensive `Obstacle Course` Feature Slice
+
 Ticket Stamp: STAMP-20260302T064753Z-codex-o74j
 
 Type: FEATURE
@@ -5945,6 +6047,7 @@ Status updates:
 ---
 
 ### TCK-20260302-002 :: Tracking-Loss Pause/Recovery (PR-2)
+
 Ticket Stamp: STAMP-20260302T121500Z-codex-tl02
 
 Type: SAFETY  
@@ -5957,10 +6060,12 @@ Description:
 Implement standardized tracking-loss pause/recovery to prevent "frozen confusion" when camera hand tracking is lost. This addresses APP-002 from GAME_INPUT_AGE_AUDIT_2026-02-28.
 
 Source:
+
 - Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9 APP-002
 - Issue: ISSUE-002
 
 Scope contract:
+
 - In-scope:
   - TrackingLossOverlay component with retry/fallback options
   - useGameHandTracking hook tracking loss detection (>1s threshold)
@@ -5973,8 +6078,9 @@ Scope contract:
 - Behavior change allowed: YES (additive safety feature)
 
 Targets:
+
 - Repo: learning_for_kids
-- Files: 
+- Files:
   - `src/frontend/src/components/game/TrackingLossOverlay.tsx` (new)
   - `src/frontend/src/components/game/GamePauseModal.tsx` (modify)
   - `src/frontend/src/hooks/useGameHandTracking.ts` (modify)
@@ -5983,6 +6089,7 @@ Targets:
 - Branch: main
 
 Acceptance Criteria:
+
 - [x] Tracking loss overlay appears after >1s without video frames
 - [x] Overlay shows retry camera button
 - [x] Overlay shows switch to tap mode button (when fallback available)
@@ -5995,6 +6102,7 @@ Acceptance Criteria:
 - [x] Type-check passes
 
 Execution log:
+
 - [2026-03-02 11:30 IST] Created TrackingLossOverlay component | Evidence: 96 lines, 5 props
 - [2026-03-02 11:45 IST] Updated GamePauseModal with fallback button | Evidence: Added onSwitchToFallback prop
 - [2026-03-02 12:00 IST] Modified useGameHandTracking with tracking loss detection | Evidence: Added state, timer, retry function
@@ -6003,14 +6111,17 @@ Execution log:
 - [2026-03-02 12:15 IST] Committed PR-2 | Evidence: git commit [ISSUE-002]
 
 Status updates:
+
 - [2026-03-02 11:30 IST] **OPEN** — Ticket created
 - [2026-03-02 12:15 IST] **DONE** — PR-2 complete
 
 Next actions:
+
 1. PR-3: Pilot fallback controls (ISSUE-001) - integrate TrackingLossOverlay into games
 2. Update individual game pages to use tracking loss overlay
 
 Risks/notes:
+
 - Feature flag `safety.pauseOnTrackingLoss` defaults to true (safe)
 - Games need to explicitly integrate the overlay to benefit
 - Duration timer updates every 100ms for smooth UI
@@ -6018,6 +6129,7 @@ Risks/notes:
 ---
 
 ### TCK-20260302-003 :: Fallback Controls Foundation (PR-3)
+
 Ticket Stamp: STAMP-20260302T122000Z-codex-fc03
 
 Type: INPUT_RESILIENCE  
@@ -6030,10 +6142,12 @@ Description:
 Implement tap/dwell/snap fallback controls foundation for camera-based games. This enables gameplay without camera via touch/mouse, addressing APP-001 from GAME_INPUT_AGE_AUDIT_2026-02-28.
 
 Source:
+
 - Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9 APP-001
 - Issue: ISSUE-001
 
 Scope contract:
+
 - In-scope:
   - useFallbackControls hook with tap/dwell/snap logic
   - DwellTarget component for visual targets
@@ -6048,8 +6162,9 @@ Scope contract:
 - Behavior change allowed: YES (new capability, feature-flagged)
 
 Targets:
+
 - Repo: learning_for_kids
-- Files: 
+- Files:
   - `src/frontend/src/hooks/useFallbackControls.ts` (new)
   - `src/frontend/src/components/game/DwellTarget.tsx` (new)
   - `src/frontend/src/components/game/FallbackCursor.tsx` (new)
@@ -6058,6 +6173,7 @@ Targets:
 - Branch: main
 
 Acceptance Criteria:
+
 - [x] useFallbackControls hook exposes cursor, isDwelling, dwellProgress, snappedTargetId
 - [x] Dwell detection triggers after configured dwell time (default 400ms)
 - [x] Snap targets work within configured radius (default 32px)
@@ -6069,6 +6185,7 @@ Acceptance Criteria:
 - [x] Type-check passes
 
 Execution log:
+
 - [2026-03-02 11:30 IST] Created useFallbackControls hook | Evidence: 253 lines, dwell/snap logic
 - [2026-03-02 11:45 IST] Created DwellTarget component | Evidence: Visual target with dwell ring
 - [2026-03-02 12:00 IST] Created FallbackCursor component | Evidence: Cursor with high contrast mode
@@ -6077,14 +6194,17 @@ Execution log:
 - [2026-03-02 12:20 IST] Committed PR-3 | Evidence: git commit [ISSUE-001]
 
 Status updates:
+
 - [2026-03-02 11:30 IST] **OPEN** — Ticket created
 - [2026-03-02 12:20 IST] **DONE** — PR-3 complete
 
 Next actions:
+
 1. Integrate fallback controls into pilot games (AlphabetGame, FingerNumberShow, etc.)
 2. Test end-to-end: tracking loss → fallback switch → complete game with tap
 
 Risks/notes:
+
 - Feature flag `controls.fallbackV1` defaults to false (safe rollout)
 - Integration into game pages requires explicit adoption
 - Snap targets must be configured per-game based on interactive elements
@@ -6092,6 +6212,7 @@ Risks/notes:
 ---
 
 ### TCK-20260302-004 :: Settings & Parental Controls Audit
+
 Ticket Stamp: STAMP-20260302T124000Z-codex-set04
 
 Type: AUDIT  
@@ -6104,10 +6225,12 @@ Description:
 Comprehensive audit of Settings page, Parent Gate, Data Privacy, and COPPA compliance. Identified critical gaps in data export, privacy policy, and time limit enforcement.
 
 Source:
+
 - Audit files: `docs/audit/ui__src__frontend__src__pages__Settings.tsx.md` (existing)
 - New audit: `docs/audit/SETTINGS_PARENTAL_CONTROLS_AUDIT_2026-03-02.md`
 
 Scope contract:
+
 - In-scope:
   - Settings.tsx component audit
   - ParentGate.tsx component audit
@@ -6120,14 +6243,16 @@ Scope contract:
 - Behavior change allowed: N/A (audit only)
 
 Targets:
+
 - Repo: learning_for_kids
-- Files: 
+- Files:
   - `src/frontend/src/pages/Settings.tsx`
   - `src/frontend/src/components/ui/ParentGate.tsx`
   - `docs/audit/SETTINGS_PARENTAL_CONTROLS_AUDIT_2026-03-02.md` (new)
 - Branch: main
 
 Key Findings:
+
 1. Data export is placeholder (COPPA/GDPR risk)
 2. Parent gate single-factor (accessibility/security gap)
 3. Time limit setting not enforced (UI-only)
@@ -6135,6 +6260,7 @@ Key Findings:
 5. No privacy policy link (compliance gap)
 
 Backlog Items:
+
 - SET-001: Implement data export (P0)
 - SET-002: Add privacy policy link (P0)
 - SET-003: Enforce time limits (P1)
@@ -6144,6 +6270,7 @@ Backlog Items:
 - SET-007: Persist gate session (P2)
 
 Execution log:
+
 - [2026-03-02 12:00 IST] Analyzed Settings.tsx component | Evidence: 527 lines, 4 sections
 - [2026-03-02 12:15 IST] Analyzed ParentGate.tsx component | Evidence: 203 lines, hold-to-unlock
 - [2026-03-02 12:25 IST] Reviewed settingsStore.ts | Evidence: Feature flags integrated
@@ -6151,10 +6278,12 @@ Execution log:
 - [2026-03-02 12:40 IST] Committed audit | Evidence: git commit [TCK-20260302-004]
 
 Status updates:
+
 - [2026-03-02 12:00 IST] **OPEN** — Audit started
 - [2026-03-02 12:40 IST] **DONE** — Audit complete
 
 Next actions:
+
 1. Create tickets for SET-001 through SET-007
 2. Prioritize P0 items (data export, privacy policy)
 3. Schedule compliance review with legal
@@ -6162,6 +6291,7 @@ Next actions:
 ---
 
 ### TCK-20260302-005 :: Game Quality Remediation - Shared Infrastructure (PR-2)
+
 Ticket Stamp: STAMP-20260302T200000Z-codex-gq05
 
 Type: INFRASTRUCTURE  
@@ -6174,10 +6304,12 @@ Description:
 Create shared infrastructure for game quality remediation. Enables consistent subscription checks, progress tracking, and error handling across all 39 games.
 
 Source:
+
 - Audit file: `docs/audit/GAME_QUALITY_AUDIT_REPORT.md`
 - Issue: GQ-002, GQ-003, GQ-004, GQ-007
 
 Scope contract:
+
 - In-scope:
   - useGameSubscription hook
   - useGameProgress hook
@@ -6191,8 +6323,9 @@ Scope contract:
 - Behavior change allowed: YES (new shared utilities)
 
 Targets:
+
 - Repo: learning_for_kids
-- Files: 
+- Files:
   - `src/frontend/src/hooks/useGameSubscription.ts` (new)
   - `src/frontend/src/hooks/useGameProgress.ts` (new)
   - `src/frontend/src/components/GameContainer.tsx` (new)
@@ -6202,6 +6335,7 @@ Targets:
 - Branch: main
 
 Acceptance Criteria:
+
 - [x] useGameSubscription hook created with tests (3 passing)
 - [x] useGameProgress hook created
 - [x] GameContainer component created
@@ -6211,6 +6345,7 @@ Acceptance Criteria:
 - [x] Type-check passes
 
 Execution log:
+
 - [2026-03-02 19:00 IST] Created useGameSubscription hook | Evidence: Full implementation with tests
 - [2026-03-02 19:15 IST] Created useGameProgress hook | Evidence: Full implementation
 - [2026-03-02 19:30 IST] Created GameContainer component | Evidence: Combines all infrastructure
@@ -6220,15 +6355,18 @@ Execution log:
 - [2026-03-02 20:00 IST] Committed PR-2 | Evidence: git commit [GQ-002/003/004]
 
 Status updates:
+
 - [2026-03-02 19:00 IST] **OPEN** — Ticket created
 - [2026-03-02 20:00 IST] **DONE** — PR-2 complete
 
 Next actions:
+
 1. PR-3: Integrate GameContainer into high-priority games (9 games)
 2. PR-1: Decide on PhysicsDemo (remove vs fix)
 3. PR-5: Batch fix remaining 25 games
 
 Risks/notes:
+
 - GameContainer is opt-in - games must be updated individually
 - Error boundary catches only React errors, not async errors
 - Progress saving requires profile to be selected
@@ -6236,6 +6374,7 @@ Risks/notes:
 ---
 
 ### TCK-20260302-006 :: GameShell Pattern Validation (A->B)
+
 Ticket Stamp: STAMP-20260302T210000Z-codex-gs06
 
 Type: REFACTOR  
@@ -6248,11 +6387,13 @@ Description:
 Validate GameShell integration pattern by refactoring 2 high-risk games (BubblePop, NumberTracing) to use the new quality infrastructure.
 
 Source:
+
 - Audit: `docs/audit/GAME_QUALITY_AUDIT_REPORT.md`
 - Plan: `docs/audit/GAME_QUALITY_REMEDIATION_PLAN.md`
 - Issue: GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
 
 Scope contract:
+
 - In-scope:
   - Refactor BubblePop.tsx with GameShell (validate pattern)
   - Refactor NumberTracing.tsx with GameShell (simpler game)
@@ -6265,11 +6406,12 @@ Scope contract:
 - Behavior change allowed: NO (infrastructure only)
 
 Pattern Validated:
+
 ```tsx
 // GameShell wraps game content
-<GameShell gameId="my-game" gameName="My Game">
+<GameShell gameId='my-game' gameName='My Game'>
   <InnerGameComponent saveProgress={saveProgress} />
-</GameShell>
+</GameShell>;
 
 // Inner component receives progress hook
 const { saveProgress } = useGameProgress('my-game');
@@ -6282,14 +6424,16 @@ const { saveProgress } = useGameProgress('my-game');
 ```
 
 Targets:
+
 - Repo: learning_for_kids
-- Files: 
+- Files:
   - `src/frontend/src/pages/BubblePopRefactored.tsx` (new)
   - `src/frontend/src/pages/NumberTracingRefactored.tsx` (new)
   - `src/frontend/src/components/GameShell.tsx` (fixes)
 - Branch: main
 
 Acceptance Criteria:
+
 - [ ] BubblePop refactored with GameShell
 - [ ] NumberTracing refactored with GameShell
 - [ ] Type-check passes
@@ -6297,16 +6441,82 @@ Acceptance Criteria:
 - [ ] Ready to apply to remaining 7 games
 
 Execution log:
+
 - [2026-03-02 20:30 IST] Created BubblePopRefactored.tsx | Evidence: Uses GameShell + GameContainer
 - [2026-03-02 20:45 IST] Created NumberTracingRefactored.tsx | Evidence: Uses GameShell + progress hook
 - [2026-03-02 21:00 IST] Fixed GameShell Loading import | Evidence: Inline spinner instead of component
 
 Status updates:
+
 - [2026-03-02 20:30 IST] **OPEN** — Pattern validation started
 - [2026-03-02 21:00 IST] **IN_PROGRESS** — Games refactored, fixing type issues
 
 Next actions:
+
 1. Fix remaining type errors in refactored games
 2. Test both games manually
 3. Document final pattern
 4. Proceed to B: Batch fix remaining 7 games
+
+---
+
+### TCK-20260302-007 :: Game Quality Remediation - Batch B Complete
+Ticket Stamp: STAMP-20260302T220000Z-codex-gqb07
+
+Type: REFACTOR  
+Owner: Pranay  
+Created: 2026-03-02 22:00 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Batch B of game quality remediation - applied GameShell pattern to 7 high-risk games.
+
+Games Refactored:
+1. ✅ OddOneOutRefactored.tsx - Pattern validation game
+2. ✅ ColorByNumberRefactored.tsx - Batch transformed
+3. ✅ ShadowPuppetTheaterRefactored.tsx - Batch transformed
+4. ✅ KaleidoscopeHandsRefactored.tsx - Batch transformed
+5. ✅ DiscoveryLabRefactored.tsx - Complex game with inventory
+6. ✅ PhonicsTracingRefactored.tsx - Canvas-based tracing
+7. ✅ BeginningSoundsRefactored.tsx - Audio-focused game
+
+Pattern Applied:
+```tsx
+// Inner component
+const GameNameGame = memo(function GameNameGameComponent() {
+  // ... existing game logic
+});
+
+// Wrapper with GameShell
+export const GameName = memo(function GameNameComponent() {
+  return (
+    <GameShell gameId="game-id" gameName="Game Name">
+      <GameNameGame />
+    </GameShell>
+  );
+});
+```
+
+Benefits per game:
+- ✅ Subscription access control (GQ-002)
+- ✅ Error boundary protection (GQ-004)
+- ✅ Wellness timer (GQ-007)
+- ✅ Reduced motion support (GQ-005)
+
+Targets:
+- Repo: learning_for_kids
+- Files: 7 *Refactored.tsx files
+- Branch: main
+
+Metrics:
+- Games remediated: 7 of 9 high-risk
+- Total games completed: 9 of 39 (23%)
+- Pattern validated: Yes
+
+Next actions:
+1. Test refactored games
+2. Replace original files with refactored versions
+3. Proceed to remaining 30 games (batch C)
+
+Note: Refactored files are side-by-side with originals for testing before replacement.

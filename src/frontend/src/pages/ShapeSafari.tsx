@@ -410,7 +410,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
 
   // ===== RENDER =====
   return (
-    <GameContainer title="Shape Safari" onHome={handleShowMenu}>
+    <GameContainer webcamRef={webcamRef} title="Shape Safari" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
         

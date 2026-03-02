@@ -40,6 +40,12 @@ describe('pickWordForLevel', () => {
     const b = pickWordForLevel(1, seededRandom());
     expect(a).toBe(b);
   });
+
+  it('word lists never include the placeholder word HACK', () => {
+    for (const list of WORD_LISTS) {
+      expect(list).not.toContain('HACK');
+    }
+  });
 });
 
 describe('createLetterTargets', () => {

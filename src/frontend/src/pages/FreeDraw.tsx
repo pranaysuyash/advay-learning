@@ -1,704 +1,399 @@
 /**
  * Free Draw / Finger Painting Game
- * 
+ *
  * Open-ended creative canvas for pure artistic expression.
- * No objectives, no scores - just joyful creation!
- * 
- * Educational Focus:
- * - Creative expression and confidence
- * - Color theory (mixing)
- * - Cause-and-effect learning
- * - Fine motor control
- * 
- * Controls:
- * - Move finger to paint
- * - Pinch to change color/brush
- * - Shake to clear
- * - Two hands = two brushes
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Palette, Paintbrush, Trash2, Save, Hand, Sparkles, Target } from 'lucide-react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { Palette, Paintbrush, Trash2, Save } from 'lucide-react';
 import { GameContainer } from '../components/GameContainer';
+import { AccessDenied } from '../components/ui/AccessDenied';
+import { useSubscription } from '../hooks/useSubscription';
+import { progressQueue } from '../services/progressQueue';
+import { useProgressStore } from '../store';
+import WellnessTimer from '../components/WellnessTimer';
+import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
-import '../styles/animations.css';
-
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useHandClick } from '../hooks/useHandClick';
-import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
-import { AttentionMeter } from '../components/game/AttentionMeter';
-import type { TrackedHandFrame, Point } from '../types/tracking';
+import type { Point } from '../types/tracking';
 import {
   type GameState,
-  type BrushType,
   initializeGame,
   startStroke,
   continueStroke,
   endStroke,
-  undo,
-  redo,
   clearCanvas,
-  setBrushType,
   setBrushColor,
-  setBrushSize,
-  setBackgroundColor,
-  mixColors,
-  getColorName,
-  detectShake,
   exportCanvas,
   isCanvasEmpty,
   COLOR_PALETTE,
-  BACKGROUND_COLORS,
-  BRUSH_PRESETS,
 } from '../games/freeDrawLogic';
 
-export default function FreeDraw() {
-  // ===== AUDIO =====
-  const { playClick, playSuccess } = useAudio();
+export const FreeDraw = memo(function FreeDrawComponent() {
+  const navigate = useNavigate();
+  const reducedMotion = useReducedMotion();
+  const { canAccessGame, isLoading: subLoading } = useSubscription();
+  const hasAccess = canAccessGame('free-draw');
+  const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('free-draw');
 
-  // ===== GAME STATE =====
+  const { playClick } = useAudio();
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
-  const [showColorMixer, setShowColorMixer] = useState(false);
-  const [mixColor1, setMixColor1] = useState<string | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [, setVelocityHistory] = useState<{ x: number; y: number }[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-
-  // ===== REFS =====
-  const webcamRef = useRef<Webcam>(null);
   const lastPointRef = useRef<Point | null>(null);
-  const lastTimeRef = useRef<number>(0);
+  const wasPinchingRef = useRef(false);
 
-  // ===== HAND TRACKING =====
-  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip) return;
-
-    const { x, y } = frame.indexTip;
-    const now = Date.now();
-
-    // Calculate velocity for shake detection
-    if (lastPointRef.current) {
-      const dt = (now - lastTimeRef.current) / 1000;
-      if (dt > 0) {
-        const vx = (x - lastPointRef.current.x) / dt;
-        const vy = (y - lastPointRef.current.y) / dt;
-
-        setVelocityHistory(prev => {
-          const newHistory = [...prev, { x: vx, y: vy }].slice(-10);
-
-          // Check for shake
-          if (detectShake(newHistory)) {
-            handleClear();
-            return [];
-          }
-
-          return newHistory;
-        });
-      }
-    }
-
-    lastPointRef.current = { x, y };
-    lastTimeRef.current = now;
-
-    // Handle drawing
-    const isPinching = frame.pinch?.state.isPinching || false;
-
-    if (isPinching && !gameState.isDrawing) {
-      // Start drawing
-      setGameState(prev => startStroke(prev, { x, y }));
-    } else if (!isPinching && gameState.isDrawing) {
-      // Stop drawing
-      setGameState(prev => endStroke(prev));
-      setVelocityHistory([]);
-    } else if (isPinching && gameState.isDrawing) {
-      // Continue drawing
-      setGameState(prev => continueStroke(prev, { x, y }));
-    }
-  }, [gameState.isDrawing]);
-
-  const { cursor, pinch, isReady } = useGameHandTracking({
-    gameName: 'FreeDraw',
-    isRunning: true,
-    webcamRef,
-    onFrame: handleHandFrame,
-  });
-
-  useHandClick(pinch.isPinching, cursor, true);
-
-  // ===== CANVAS RENDERING =====
-  const renderCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const { width, height } = canvas;
-
-    // Clear canvas with background color
-    ctx.fillStyle = gameState.canvas.backgroundColor;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw all completed strokes
-    gameState.canvas.strokes.forEach(stroke => {
-      drawStroke(ctx, stroke, width, height);
-    });
-
-    // Draw current stroke
-    if (gameState.canvas.currentStroke) {
-      drawStroke(ctx, gameState.canvas.currentStroke, width, height);
-    }
-  }, [gameState.canvas]);
-
-  // Helper to draw a stroke
-  const drawStroke = (
-    ctx: CanvasRenderingContext2D,
-    stroke: { points: Point[]; brush: { type: BrushType; size: number; color: string; opacity: number; isRainbow: boolean } },
-    width: number,
-    height: number
-  ) => {
-    if (stroke.points.length < 2) return;
-
-    const { brush, points } = stroke;
-
-    ctx.save();
-    ctx.globalAlpha = brush.opacity;
-
-    switch (brush.type) {
-      case 'eraser':
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.strokeStyle = 'rgba(0,0,0,1)';
-        ctx.lineWidth = brush.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        break;
-
-      case 'spray':
-        // Spray paint effect
-        points.forEach((point, i) => {
-          if (i % 3 !== 0) return; // Sample every 3rd point
-          const x = point.x * width;
-          const y = point.y * height;
-
-          for (let j = 0; j < 10; j++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * brush.size;
-            const px = x + Math.cos(angle) * dist;
-            const py = y + Math.sin(angle) * dist;
-
-            ctx.fillStyle = brush.isRainbow
-              ? `hsl(${(gameState.brushColorHue + i * 2) % 360}, 100%, 50%)`
-              : brush.color;
-            ctx.fillRect(px, py, 2, 2);
-          }
-        });
-        ctx.restore();
-        return;
-
-      case 'glitter':
-        // Glitter effect
-        points.forEach((point, i) => {
-          if (i % 2 !== 0) return;
-          const x = point.x * width;
-          const y = point.y * height;
-
-          ctx.fillStyle = brush.isRainbow
-            ? `hsl(${(gameState.brushColorHue + i * 3) % 360}, 100%, 70%)`
-            : '#FFD700';
-          ctx.beginPath();
-          ctx.arc(x, y, Math.random() * 3 + 1, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.restore();
-        return;
-
-      case 'neon':
-        // Glow effect
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = brush.isRainbow
-          ? `hsl(${gameState.brushColorHue}, 100%, 50%)`
-          : brush.color;
-        ctx.strokeStyle = brush.isRainbow
-          ? `hsl(${gameState.brushColorHue}, 100%, 70%)`
-          : brush.color;
-        ctx.lineWidth = brush.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        break;
-
-      case 'rainbow':
-        ctx.strokeStyle = `hsl(${gameState.brushColorHue}, 100%, 50%)`;
-        ctx.lineWidth = brush.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        break;
-
-      case 'flat':
-        ctx.strokeStyle = brush.color;
-        ctx.lineWidth = brush.size * 0.6;
-        ctx.lineCap = 'butt';
-        ctx.lineJoin = 'miter';
-        break;
-
-      case 'marker':
-        ctx.strokeStyle = brush.color;
-        ctx.lineWidth = brush.size * 0.8;
-        ctx.lineCap = 'square';
-        ctx.lineJoin = 'round';
-        ctx.globalAlpha = brush.opacity * 0.8;
-        break;
-
-      default: // round
-        ctx.strokeStyle = brush.color;
-        ctx.lineWidth = brush.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-    }
-
-    // Draw the stroke path
-    ctx.beginPath();
-    ctx.moveTo(points[0].x * width, points[0].y * height);
-
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x * width, points[i].y * height);
-    }
-
-    ctx.stroke();
-    ctx.restore();
-  };
-
-  // Re-render when state changes
-  useEffect(() => {
-    renderCanvas();
-  }, [renderCanvas]);
-
-  // ===== MOUSE HANDLERS =====
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
-    setGameState(prev => startStroke(prev, { x, y }));
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!gameState.isDrawing) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
-    setGameState(prev => continueStroke(prev, { x, y }));
-  };
-
-  const handleMouseUp = () => {
-    setGameState(prev => endStroke(prev));
-  };
-
-  // ===== ACTION HANDLERS =====
-  const handleUndo = () => {
-    playClick();
-    setGameState(prev => undo(prev));
-  };
-  const handleRedo = () => {
-    playClick();
-    setGameState(prev => redo(prev));
-  };
-  const handleClear = () => {
-    playClick();
-    setGameState(prev => clearCanvas(prev));
-  };
-
-  const handleSave = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || isCanvasEmpty(gameState)) return;
-
-    onGameComplete();
-    playSuccess();
-    const dataUrl = exportCanvas(canvas);
-
-    // Create download link
-    const link = document.createElement('a');
-    link.download = `artwork-${Date.now()}.png`;
-    link.href = dataUrl;
-    link.click();
-
-    setShowSaveSuccess(true);
-    setTimeout(() => setShowSaveSuccess(false), 2000);
-  };
-
-  const handleBrushTypeChange = (type: BrushType) => {
-    playClick();
-    setGameState(prev => setBrushType(prev, type));
-  };
-
-  const handleColorSelect = (color: string) => {
-    playClick();
-    if (showColorMixer) {
-      if (!mixColor1) {
-        setMixColor1(color);
-      } else {
-        // Mix colors
-        const mixedColor = mixColors(mixColor1, color);
-        setGameState(prev => setBrushColor(prev, mixedColor));
-        setMixColor1(null);
-        setShowColorMixer(false);
-        playSuccess();
-      }
-    } else {
-      setGameState(prev => setBrushColor(prev, color));
-    }
-  };
-
-  const handleSizeChange = (delta: number) => {
-    playClick();
-    setGameState(prev => setBrushSize(prev, prev.currentBrush.size + delta));
-  };
-
-  const handleBackgroundChange = (color: string) => {
-    playClick();
-    setGameState(prev => setBackgroundColor(prev, color));
-  };
-
-  // ===== RENDER =====
-  return (
-    <GameContainer title="Free Draw" onHome={() => setShowMenu(true)} showScore={false}>
-      {isReady && cursor && (
-        <CursorEmbodiment
-          position={cursor}
-          coordinateSpace="normalized"
-          isPinching={pinch.isPinching}
-          isHandDetected={true}
-          size={70}
-          showTrail={true}
-        />
-      )}
-
-      {/* Focus Power Meter */}
-      {!showMenu && <AttentionMeter webcamRef={webcamRef} className="bottom-6 right-6" />}
-
-      {/* Hidden webcam */}
-      <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        
+  // Show loading while checking subscription
+  if (subLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
       </div>
+    );
+  }
 
-      {showMenu ? (
-        // ===== START MENU =====
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          {/* CSS Art Palette Icon */}
-          <div className="relative mb-4">
-            <div className="w-28 h-20 rounded-full bg-gradient-to-br from-amber-700 to-amber-900 shadow-lg animate-float rotate-12">
-              {/* Paint blobs */}
-              <div className="absolute top-3 left-4 w-6 h-6 rounded-full bg-red-500 animate-pulse" />
-              <div className="absolute top-2 left-10 w-5 h-5 rounded-full bg-blue-500 animate-pulse delay-100" />
-              <div className="absolute top-6 left-14 w-6 h-6 rounded-full bg-green-500 animate-pulse delay-200" />
-              <div className="absolute top-8 left-6 w-5 h-5 rounded-full bg-yellow-400 animate-pulse delay-300" />
-              {/* Thumb hole */}
-              <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-6 bg-white/20 rounded-full" />
-            </div>
-            <div className="absolute -bottom-2 -right-2 animate-bounce">
-              <Sparkles className="w-8 h-8 text-yellow-400" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold text-advay-slate mb-2">Free Draw Studio!</h2>
+  // Check subscription access
+  if (!hasAccess) {
+    return <AccessDenied gameName='Free Draw' gameId='free-draw' />;
+  }
 
-          {/* Goal Statement with Semantic Attributes */}
-          <div
-            data-ux-goal="Draw and create beautiful art using different brushes and colors!"
-            data-ux-instruction="Pinch your fingers and move your hand to draw on the canvas"
-            data-ux-action="pinch-and-draw"
-            className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
-          >
-            <div className="flex items-center gap-3">
-              <Target className="w-8 h-8 text-blue-600" />
-              <div>
-                <p className="font-bold text-blue-800">GOAL:</p>
-                <p className="text-blue-700">Create beautiful art with brushes!</p>
-                <p className="text-blue-600 text-sm flex items-center gap-1">
-                  <Hand className="w-4 h-4 inline" /> Pinch → <Paintbrush className="w-4 h-4 inline" /> Draw → <Palette className="w-4 h-4 inline" /> Create!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-purple-50 rounded-xl p-6 max-w-md mb-6">
-            <h3 className="font-bold text-purple-800 mb-3">How to Play:</h3>
-            <ol className="text-purple-700 text-sm space-y-2">
-              <li className="flex items-center gap-2">
-                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">1</span>
-                <span>Pick a brush and color</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">2</span>
-                <span>Pinch your fingers to draw</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="bg-purple-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">3</span>
-                <span>Create your masterpiece!</span>
-              </li>
-            </ol>
-          </div>
-
-          <button
-            onClick={() => {
-              playClick();
-              setShowMenu(false);
-            }}
-            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
-          >
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-pink-500" />
-            Start Drawing!
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500" />
-          </button>
-        </div>
-      ) : (
-        // ===== GAME SCREEN =====
-        <div className="flex flex-col h-full">
-          {/* Goal Banner with Semantic Attributes */}
-          <div
-            data-ux-goal="Draw and create beautiful art using different brushes and colors!"
-            data-ux-instruction="Pinch your fingers and move your hand to draw"
-            data-ux-action="pinch-and-draw"
-            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center shadow-[0_4px_0_#E5B86E]"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Target className="w-6 h-6" />
-              <p className="font-bold">GOAL: Create beautiful art! Pick a brush and start drawing!</p>
-            </div>
-          </div>
-
-          {/* Toolbar - Child Friendly */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200 px-4 py-3 shadow-[0_4px_0_#E5B86E]">
-            {/* Brush Type Selector - Larger for kids */}
-            <div className="mb-3">
-              <p className="text-sm font-bold text-advay-slate mb-2 flex items-center gap-2">
-                <Paintbrush className="w-5 h-5" /> Pick a Brush:
-              </p>
-              <div className="flex gap-2 flex-wrap">
-                {(Object.keys(BRUSH_PRESETS) as BrushType[]).map(type => (
-                  <button
-                    key={type}
-                    onClick={() => handleBrushTypeChange(type)}
-                    className={`
-                    p-3 rounded-xl text-2xl transition-all transform hover:scale-110
-                    ${gameState.currentBrush.type === type
-                        ? 'bg-blue-200 border-3 border-blue-500 shadow-md scale-105'
-                        : 'bg-white border-2 border-[#F2CC8F] hover:border-blue-300 shadow-[0_4px_0_#E5B86E]'
-                      }
-                  `}
-                    title={BRUSH_PRESETS[type].name}
-                  >
-                    {BRUSH_PRESETS[type].emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              {/* Size Control */}
-              <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1">
-                <button
-                  onClick={() => handleSizeChange(-5)}
-                  className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
-                >
-                  −
-                </button>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="rounded-full bg-slate-800"
-                    style={{
-                      width: Math.max(4, gameState.currentBrush.size / 3),
-                      height: Math.max(4, gameState.currentBrush.size / 3),
-                    }}
-                  />
-                  <span className="text-xs text-advay-slate w-8 text-center">
-                    {gameState.currentBrush.size}px
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleSizeChange(5)}
-                  className="w-6 h-6 flex items-center justify-center bg-white rounded hover:bg-slate-200"
-                >
-                  +
-                </button>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={handleUndo}
-                  disabled={gameState.undoStack.length === 0}
-                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-                >
-                  ↶ Undo
-                </button>
-                <button
-                  onClick={handleRedo}
-                  disabled={gameState.redoStack.length === 0}
-                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-                >
-                  ↷ Redo
-                </button>
-                <button
-                  onClick={handleClear}
-                  disabled={isCanvasEmpty(gameState)}
-                  className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 inline mr-1" /> Clear
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isCanvasEmpty(gameState)}
-                  className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 disabled:opacity-30 rounded-lg text-sm font-bold transition-colors"
-                >
-                  <Save className="w-4 h-4 inline mr-1" /> Save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Color Palette - Larger for kids */}
-          <div className="mt-3">
-            <p className="text-sm font-bold text-advay-slate mb-2 flex items-center gap-2">
-              <Palette className="w-5 h-5" /> Pick a Color:
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              {COLOR_PALETTE.map(color => (
-                <button
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  className={`
-                    w-10 h-10 rounded-full border-3 transition-all transform hover:scale-125
-                    ${gameState.currentBrush.color === color && !gameState.currentBrush.isRainbow
-                      ? 'border-slate-800 scale-125 shadow-lg ring-2 ring-blue-300'
-                      : mixColor1 === color
-                        ? 'border-yellow-400 scale-125 shadow-lg'
-                        : 'border-white shadow-md hover:shadow-lg'
-                    }
-                  `}
-                  style={{ backgroundColor: color }}
-                  title={getColorName(color)}
-                />
-              ))}
-
-              {/* Rainbow brush button */}
-              <button
-                onClick={() => handleBrushTypeChange('rainbow')}
-                className={`
-                w-8 h-8 rounded-full border-2 flex items-center justify-center text-lg
-                ${gameState.currentBrush.isRainbow
-                    ? 'border-slate-800'
-                    : 'border-transparent hover:scale-110'
-                  }
-              `}
-                style={{
-                  background: 'linear-gradient(45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff)',
-                }}
-                title="Rainbow"
-              >
-                <span className="text-xs font-bold">Rainbow</span>
-              </button>
-
-              {/* Color Mixer Toggle */}
-              <button
-                onClick={() => {
-                  setShowColorMixer(!showColorMixer);
-                  setMixColor1(null);
-                }}
-                className={`
-                ml-2 px-3 py-1 rounded-lg text-sm font-bold transition-colors
-                ${showColorMixer
-                    ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
-                    : 'bg-slate-100 hover:bg-slate-200'
-                  }
-              `}
-              >
-                <Palette className="w-4 h-4 inline mr-1" /> Mix Colors
-              </button>
-
-              {showColorMixer && (
-                <span className="text-xs text-purple-600">
-                  {mixColor1 ? 'Pick second color to mix' : 'Pick first color'}
-                </span>
-              )}
-            </div>
-
-            {/* Background Color */}
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-text-secondary font-bold">Background:</span>
-              {BACKGROUND_COLORS.map(color => (
-                <button
-                  key={color}
-                  onClick={() => handleBackgroundChange(color)}
-                  className={`
-                  w-6 h-6 rounded border-2 transition-all
-                  ${gameState.canvas.backgroundColor === color
-                      ? 'border-slate-800'
-                      : 'border-slate-300 hover:scale-110'
-                    }
-                `}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Canvas Area */}
-          <div ref={canvasContainerRef} className="flex-1 relative bg-slate-100">
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            />
-
-            {/* Hint overlay */}
-            {isCanvasEmpty(gameState) && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center text-slate-400">
-                  <div className="mb-4">
-                    <Hand className="w-16 h-16 text-slate-400 mx-auto" />
-                  </div>
-                  <p className="text-lg font-bold">Pinch and move to draw!</p>
-                  <p className="text-sm">Shake hand to clear</p>
-                </div>
-              </div>
-            )}
-
-            {/* Save success notification */}
-            {showSaveSuccess && (
-              <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
-                ✅ Saved to downloads!
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="bg-white border-t border-[#F2CC8F] px-4 py-2 flex justify-between items-center text-xs text-text-secondary">
-            <div>
-              Brush: {BRUSH_PRESETS[gameState.currentBrush.type].name} |
-              Color: {getColorName(gameState.currentBrush.color)} |
-              Size: {gameState.currentBrush.size}px
-            </div>
-            <div>
-              Strokes: {gameState.canvas.strokes.length}
-            </div>
+  // Error state
+  if (error) {
+    return (
+      <GameContainer title='Free Draw' onHome={() => navigate('/games')}>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h2 className='text-2xl font-bold text-red-600 mb-4'>
+              Oops! Something went wrong
+            </h2>
+            <p className='text-slate-600 mb-4'>{error.message}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
+            >
+              Try Again
+            </button>
           </div>
         </div>
-      )}
-    </GameContainer>
+      </GameContainer>
+    );
+  }
+
+  // Save progress on game complete
+  const handleGameComplete = useCallback(
+    async (finalScore: number) => {
+      if (!currentProfile) return;
+
+      try {
+        await progressQueue.add({
+          profileId: currentProfile.id,
+          gameId: 'free-draw',
+          score: finalScore,
+          completed: true,
+          metadata: {
+            strokesCreated: gameState.canvas.strokes.length,
+            brushType: gameState.currentBrush.type,
+          },
+        });
+        onGameComplete(finalScore);
+      } catch (err) {
+        console.error('Failed to save progress:', err);
+        setError(err as Error);
+      }
+    },
+    [
+      currentProfile,
+      gameState.canvas.strokes.length,
+      gameState.currentBrush.type,
+      onGameComplete,
+    ],
   );
-}
+
+  const { cursor, pinch } = useGameHandTracking({
+    gameName: 'FreeDraw',
+    targetFps: 30,
+  });
+  useHandClick(pinch.isPinching, cursor, !showMenu);
+
+  useEffect(() => {
+    if (showMenu || !cursor || !canvasRef.current) {
+      if (wasPinchingRef.current) {
+        setGameState((prev) => endStroke(prev));
+      }
+      wasPinchingRef.current = false;
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    const point: Point = {
+      x: cursor.x * canvas.width,
+      y: cursor.y * canvas.height,
+    };
+
+    if (pinch.isPinching && !wasPinchingRef.current) {
+      setGameState((prev) => startStroke(prev, point));
+    } else if (pinch.isPinching) {
+      setGameState((prev) => continueStroke(prev, point));
+    } else if (!pinch.isPinching && wasPinchingRef.current) {
+      setGameState((prev) => endStroke(prev));
+    }
+
+    lastPointRef.current = point;
+    wasPinchingRef.current = pinch.isPinching;
+  }, [cursor, pinch.isPinching, showMenu]);
+
+  // Canvas rendering
+  useEffect(() => {
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Clear and redraw
+      ctx.fillStyle = gameState.canvas.backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw strokes
+      const strokesToDraw = gameState.canvas.currentStroke
+        ? [...gameState.canvas.strokes, gameState.canvas.currentStroke]
+        : gameState.canvas.strokes;
+
+      strokesToDraw.forEach((stroke) => {
+        if (!stroke.points.length) return;
+        ctx.beginPath();
+        ctx.strokeStyle = stroke.brush.color;
+        ctx.lineWidth = stroke.brush.size;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        stroke.points.forEach((point) => ctx.lineTo(point.x, point.y));
+        ctx.stroke();
+      });
+    } catch (err) {
+      console.error('Canvas rendering failed:', err);
+      setError(err as Error);
+    }
+  }, [
+    gameState.canvas.backgroundColor,
+    gameState.canvas.currentStroke,
+    gameState.canvas.strokes,
+  ]);
+
+  const handleStart = useCallback(() => {
+    playClick();
+    setShowMenu(false);
+    setGameState(initializeGame());
+  }, [playClick]);
+
+  const handleStop = useCallback(async () => {
+    try {
+      playClick();
+      if (!isCanvasEmpty(gameState)) {
+        await handleGameComplete(100);
+      }
+      setShowMenu(true);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Stop failed:', err);
+      setError(err as Error);
+    }
+  }, [gameState, handleGameComplete, navigate, playClick]);
+
+  const handleClear = useCallback(() => {
+    try {
+      playClick();
+      setGameState((prev) => clearCanvas(prev));
+    } catch (err) {
+      console.error('Clear failed:', err);
+      setError(err as Error);
+    }
+  }, [playClick]);
+
+  const handleSave = useCallback(async () => {
+    try {
+      playClick();
+      if (!canvasRef.current) return;
+      const dataUrl = exportCanvas(canvasRef.current);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `free-draw-${Date.now()}.png`;
+      link.click();
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 2000);
+    } catch (err) {
+      console.error('Save failed:', err);
+      setError(err as Error);
+    }
+  }, [playClick]);
+
+  return (
+    <GlobalErrorBoundary>
+      <div className='min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4'>
+        {showMenu ? (
+          <motion.div
+            className='max-w-2xl mx-auto mt-20 bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-12 shadow-[0_4px_0_#E5B86E] text-center'
+            initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
+            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0.01 } : { duration: 0.3 }}
+          >
+            <div className='flex justify-center gap-4 mb-6'>
+              <Palette className='w-20 h-20 text-purple-500' />
+              <Paintbrush className='w-20 h-20 text-pink-500' />
+            </div>
+            <h1 className='text-4xl font-black text-advay-slate mb-4'>
+              Free Draw!
+            </h1>
+            <p className='text-xl text-text-secondary mb-8'>
+              Create beautiful art with your finger!
+            </p>
+
+            <motion.button
+              onClick={handleStart}
+              whileHover={reducedMotion ? {} : { scale: 1.05 }}
+              whileTap={reducedMotion ? {} : { scale: 0.95 }}
+              className='px-10 py-5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg transition-all'
+            >
+              Start Drawing!
+            </motion.button>
+          </motion.div>
+        ) : (
+          <div className='max-w-6xl mx-auto'>
+            <div className='flex justify-between items-center mb-4'>
+              <motion.button
+                onClick={handleStop}
+                whileHover={reducedMotion ? {} : { scale: 1.05 }}
+                whileTap={reducedMotion ? {} : { scale: 0.95 }}
+                className='px-6 py-3 bg-white border-2 border-[#F2CC8F] rounded-xl font-bold hover:bg-slate-50'
+              >
+                Back
+              </motion.button>
+
+              <div className='flex gap-2'>
+                <motion.button
+                  onClick={handleClear}
+                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
+                  className='px-4 py-2 bg-red-100 text-red-600 rounded-xl font-bold'
+                >
+                  <Trash2 className='w-5 h-5 inline' /> Clear
+                </motion.button>
+                <motion.button
+                  onClick={handleSave}
+                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
+                  className='px-4 py-2 bg-green-100 text-green-600 rounded-xl font-bold'
+                >
+                  <Save className='w-5 h-5 inline' /> Save
+                </motion.button>
+              </div>
+            </div>
+
+            <div className='bg-white rounded-2xl border-3 border-[#F2CC8F] p-4 shadow-lg'>
+              <canvas
+                ref={canvasRef}
+                width={800}
+                height={600}
+                className='w-full cursor-crosshair touch-none rounded-xl'
+                onMouseDown={(e) => {
+                  try {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    setGameState((prev) => startStroke(prev, { x, y }));
+                    lastPointRef.current = { x, y };
+                  } catch (err) {
+                    console.error('Mouse down failed:', err);
+                    setError(err as Error);
+                  }
+                }}
+                onMouseMove={(e) => {
+                  try {
+                    if (!lastPointRef.current) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    setGameState((prev) => continueStroke(prev, { x, y }));
+                    lastPointRef.current = { x, y };
+                  } catch (err) {
+                    console.error('Mouse move failed:', err);
+                    setError(err as Error);
+                  }
+                }}
+                onMouseUp={() => {
+                  try {
+                    setGameState((prev) => endStroke(prev));
+                    lastPointRef.current = null;
+                  } catch (err) {
+                    console.error('Mouse up failed:', err);
+                    setError(err as Error);
+                  }
+                }}
+                onMouseLeave={() => {
+                  try {
+                    setGameState((prev) => endStroke(prev));
+                    lastPointRef.current = null;
+                  } catch (err) {
+                    console.error('Mouse leave failed:', err);
+                    setError(err as Error);
+                  }
+                }}
+              />
+            </div>
+
+            {/* Color palette */}
+            <div className='mt-4 flex flex-wrap gap-2 justify-center'>
+              {COLOR_PALETTE.map((color) => (
+                <motion.button
+                  key={color}
+                  onClick={() => {
+                    try {
+                      playClick();
+                      setGameState((prev) => setBrushColor(prev, color));
+                    } catch (err) {
+                      console.error('Color change failed:', err);
+                    }
+                  }}
+                  whileHover={reducedMotion ? {} : { scale: 1.1 }}
+                  whileTap={reducedMotion ? {} : { scale: 0.9 }}
+                  className={`w-12 h-12 rounded-full border-4 ${
+                    gameState.currentBrush.color === color
+                      ? 'border-slate-800 scale-110'
+                      : 'border-white'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showSaveSuccess && (
+          <motion.div
+            initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
+            animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            className='fixed top-4 right-4 bg-green-100 text-green-700 px-6 py-3 rounded-xl font-bold shadow-lg'
+          >
+            Art saved! 🎨
+          </motion.div>
+        )}
+
+        {/* Wellness timer */}
+        <WellnessTimer />
+      </div>
+    </GlobalErrorBoundary>
+  );
+});
+
+export default FreeDraw;

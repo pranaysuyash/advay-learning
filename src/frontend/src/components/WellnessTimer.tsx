@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { UIIcon } from '../components/ui/Icon';
 
 interface WellnessTimerProps {
-  onBreakReminder: () => void;
-  onHydrationReminder: () => void;
-  onStretchReminder: () => void;
+  onBreakReminder?: () => void;
+  onHydrationReminder?: () => void;
+  onStretchReminder?: () => void;
   activeThreshold?: number; // Time in minutes before break reminder (default 15)
   hydrationThreshold?: number; // Time in minutes before hydration reminder (default 10)
   stretchThreshold?: number; // Time in minutes before stretch reminder (default 20)
@@ -13,9 +13,9 @@ interface WellnessTimerProps {
 }
 
 const WellnessTimer: React.FC<WellnessTimerProps> = ({
-  onBreakReminder,
-  onHydrationReminder,
-  onStretchReminder,
+  onBreakReminder = () => {},
+  onHydrationReminder = () => {},
+  onStretchReminder = () => {},
   activeThreshold = 15,
   hydrationThreshold = 10,
   stretchThreshold = 20,
@@ -24,11 +24,14 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
 }) => {
   const [activeTime, setActiveTime] = useState<number>(0); // in minutes
   const [showBreakReminder, setShowBreakReminder] = useState<boolean>(false);
-  const [showHydrationReminder, setShowHydrationReminder] = useState<boolean>(false);
-  const [showStretchReminder, setShowStretchReminder] = useState<boolean>(false);
-  const [showScreenTimeReminder, setShowScreenTimeReminder] = useState<boolean>(false);
+  const [showHydrationReminder, setShowHydrationReminder] =
+    useState<boolean>(false);
+  const [showStretchReminder, setShowStretchReminder] =
+    useState<boolean>(false);
+  const [showScreenTimeReminder, setShowScreenTimeReminder] =
+    useState<boolean>(false);
   const [isHidden, setIsHidden] = useState<boolean>(defaultHidden);
-  
+
   const activeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Format time for display
@@ -42,7 +45,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   useEffect(() => {
     // Start timer when component mounts
     activeTimerRef.current = setInterval(() => {
-      setActiveTime(prev => prev + 1);
+      setActiveTime((prev) => prev + 1);
     }, 60000); // Increment every minute
 
     return () => {
@@ -59,24 +62,36 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
       setShowBreakReminder(true);
       onBreakReminder();
     }
-    
+
     // Check for hydration reminder
-    if (activeTime >= hydrationThreshold && activeTime < hydrationThreshold + 1) {
+    if (
+      activeTime >= hydrationThreshold &&
+      activeTime < hydrationThreshold + 1
+    ) {
       setShowHydrationReminder(true);
       onHydrationReminder();
     }
-    
+
     // Check for stretch reminder
     if (activeTime >= stretchThreshold && activeTime < stretchThreshold + 1) {
       setShowStretchReminder(true);
       onStretchReminder();
     }
-    
+
     // Check for screen time reminder
-    if (activeTime >= screenTimeThreshold && activeTime < screenTimeThreshold + 1) {
+    if (
+      activeTime >= screenTimeThreshold &&
+      activeTime < screenTimeThreshold + 1
+    ) {
       setShowScreenTimeReminder(true);
     }
-  }, [activeTime, activeThreshold, hydrationThreshold, stretchThreshold, screenTimeThreshold]);
+  }, [
+    activeTime,
+    activeThreshold,
+    hydrationThreshold,
+    stretchThreshold,
+    screenTimeThreshold,
+  ]);
 
   // Toggle visibility
   const toggleVisibility = () => {
@@ -84,7 +99,7 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className='fixed bottom-4 right-4 z-50'>
       <div
         className={`transition-all duration-300 ease-in-out ${
           isHidden
@@ -93,91 +108,97 @@ const WellnessTimer: React.FC<WellnessTimerProps> = ({
         }`}
         aria-hidden={isHidden}
       >
-        <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 shadow-xl border-2 border-white/20 min-w-[220px]">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-bold text-white text-sm">Wellness Timer</h3>
+        <div className='bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 shadow-xl border-2 border-white/20 min-w-[220px]'>
+          <div className='flex justify-between items-center mb-3'>
+            <h3 className='font-bold text-white text-sm'>Wellness Timer</h3>
             <button
               onClick={toggleVisibility}
-              className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition"
-              aria-label="Hide wellness timer"
-              title="Hide"
-              type="button"
+              className='inline-flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition'
+              aria-label='Hide wellness timer'
+              title='Hide'
+              type='button'
             >
-              <UIIcon name="eye-off" size={18} className="text-white/90" />
+              <UIIcon name='eye-off' size={18} className='text-white/90' />
             </button>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-white/90 text-xs">
+
+          <div className='space-y-2'>
+            <div className='flex justify-between text-white/90 text-xs'>
               <span>Active Time:</span>
-              <span className="font-mono">{formatTime(activeTime)}</span>
+              <span className='font-mono'>{formatTime(activeTime)}</span>
             </div>
-            
-            <div className="flex justify-between text-white/90 text-xs">
+
+            <div className='flex justify-between text-white/90 text-xs'>
               <span>Break in:</span>
-              <span className="font-mono">{formatTime(Math.max(0, activeThreshold - activeTime))}</span>
+              <span className='font-mono'>
+                {formatTime(Math.max(0, activeThreshold - activeTime))}
+              </span>
             </div>
-            
-            <div className="flex justify-between text-white/90 text-xs">
+
+            <div className='flex justify-between text-white/90 text-xs'>
               <span>Hydration in:</span>
-              <span className="font-mono">{formatTime(Math.max(0, hydrationThreshold - activeTime))}</span>
+              <span className='font-mono'>
+                {formatTime(Math.max(0, hydrationThreshold - activeTime))}
+              </span>
             </div>
-            
-            <div className="flex justify-between text-white/90 text-xs">
+
+            <div className='flex justify-between text-white/90 text-xs'>
               <span>Stretch in:</span>
-              <span className="font-mono">{formatTime(Math.max(0, stretchThreshold - activeTime))}</span>
+              <span className='font-mono'>
+                {formatTime(Math.max(0, stretchThreshold - activeTime))}
+              </span>
             </div>
           </div>
-          
+
           {/* Wellness Reminders */}
           {showBreakReminder && (
-            <div className="mt-3 p-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-              <div className="flex items-center gap-1 text-yellow-300 text-xs">
-                <UIIcon name="coffee" size={12} />
+            <div className='mt-3 p-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg'>
+              <div className='flex items-center gap-1 text-yellow-300 text-xs'>
+                <UIIcon name='coffee' size={12} />
                 <span>Take a break!</span>
               </div>
             </div>
           )}
-          
+
           {showHydrationReminder && (
-            <div className="mt-3 p-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-              <div className="flex items-center gap-1 text-blue-300 text-xs">
-                <UIIcon name="drop" size={12} />
+            <div className='mt-3 p-2 bg-blue-500/20 border border-blue-500/30 rounded-lg'>
+              <div className='flex items-center gap-1 text-blue-300 text-xs'>
+                <UIIcon name='drop' size={12} />
                 <span>Drink water!</span>
               </div>
             </div>
           )}
-          
+
           {showStretchReminder && (
-            <div className="mt-3 p-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-              <div className="flex items-center gap-1 text-green-300 text-xs">
-                <UIIcon name="body" size={12} />
+            <div className='mt-3 p-2 bg-green-500/20 border border-green-500/30 rounded-lg'>
+              <div className='flex items-center gap-1 text-green-300 text-xs'>
+                <UIIcon name='body' size={12} />
                 <span>Stretch your body!</span>
               </div>
             </div>
           )}
-          
+
           {showScreenTimeReminder && (
-            <div className="mt-3 p-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-              <div className="flex items-center gap-1 text-red-300 text-xs">
-                <UIIcon name="eye" size={12} />
+            <div className='mt-3 p-2 bg-red-500/20 border border-red-500/30 rounded-lg'>
+              <div className='flex items-center gap-1 text-red-300 text-xs'>
+                <UIIcon name='eye' size={12} />
                 <span>Time for a longer break!</span>
               </div>
             </div>
           )}
         </div>
       </div>
-      
+
       {/* Floating reminder when hidden */}
       {isHidden && (
         <button
           onClick={toggleVisibility}
-          className="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-orange-600 transition border-2 border-white/20"
-          aria-label="Show wellness timer"
-          title="Show wellness timer"
-          type="button"
+          className='bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-orange-600 transition border-2 border-white/20'
+          aria-label='Show wellness timer'
+          title='Show wellness timer'
+          type='button'
         >
-          <UIIcon name="timer" size={20} className="text-white" />
+          <UIIcon name='timer' size={20} className='text-white' />
         </button>
       )}
     </div>
