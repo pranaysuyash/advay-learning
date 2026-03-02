@@ -857,9 +857,15 @@ Quick wins: APP-003, APP-008, APP-010. Risky changes (feature-flag): APP-001, AP
 
 > **Status Update (2026-03-02)**: Unit-0 implemented — Feature flag foundation now exists. See `src/frontend/src/config/features.ts` and `docs/adr/ADR-007-FEATURE_FLAGS.md`.
 
+> **Status Update (2026-03-02)**: Unit-2 partially implemented — Tracking-loss pause/recovery now exists. See `src/frontend/src/components/game/TrackingLossOverlay.tsx` and `src/frontend/src/hooks/useGameHandTracking.ts`.
+
 1. **Unit-0 (Feature Flag Foundation)**: ✅ **DONE** — Implemented type-safe feature flag system with env > user > default hierarchy. Enables safe rollout of APP-001, APP-002, APP-004. Files: `features.ts`, `useFeatureFlag.ts`, ADR-007.
 2. Unit-1 (Inventory Foundation): APP-010 + APP-007; establish reliable inventory and artifact pipeline before gameplay changes.
-3. Unit-2 (Safety Baseline): APP-002 + APP-009; unify pause/recovery and accidental-exit protection. **Uses flag: `safety.pauseOnTrackingLoss`**.
+3. **Unit-2 (Safety Baseline)**: 🔄 **IN PROGRESS** — APP-002 tracking-loss pause/recovery implemented. APP-009 exit/confirmation pending.
+   - `TrackingLossOverlay` component: Shows pause overlay when tracking lost >1s
+   - `useGameHandTracking` hook: Detects tracking loss, exposes `trackingLoss` state
+   - Feature flag: `safety.pauseOnTrackingLoss` (default: true)
+   - Files: `TrackingLossOverlay.tsx`, `GamePauseModal.tsx` (updated), `useGameHandTracking.ts`
 4. Unit-3 (Core Input Resilience): APP-001 + APP-003 with feature flag `features.controls.fallbackV1`.
 5. Unit-4 (Clarity And Accessibility): APP-005 + APP-006; improve onboarding and global control profiles.
 6. Unit-5 (Economy/Safety Hardening): APP-004 deterministic rewards refactor with migration plan and child-safe copy checks. **Uses flag: `rewards.deterministicV1`**.

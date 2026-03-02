@@ -5805,3 +5805,136 @@ Next actions:
 Risks/notes:
 - Feature flags must be cleaned up after features stabilize (see ADR-007 cleanup criteria)
 - Environment variable override pattern: VITE_FEATURE_CONTROLS_FALLBACKV1=true
+
+---
+
+### TCK-20260302-002 :: Remove Stray Protected Worklog Entry (`Obstacle Course`)
+Ticket Stamp: STAMP-20260302T063734Z-codex-q0dw
+
+Type: PROCESS
+Owner: Pranay
+Created: 2026-03-02 12:07 IST
+Status: **DONE**
+Priority: P1
+
+Description:
+Remove the stray `TCK-20260228-011 :: Obstacle Course Game Implementation` block from `docs/WORKLOG_TICKETS.md` and preserve the correction in an addendum, per repo policy that active updates belong in addendum files.
+
+Scope contract:
+
+- In-scope:
+  - Remove the misplaced Obstacle Course ticket block from `docs/WORKLOG_TICKETS.md`
+  - Record the corrective action and evidence in `docs/WORKLOG_ADDENDUM_v3.md`
+- Out-of-scope:
+  - Implementing `ObstacleCourse`
+  - Validating or modifying unrelated worklog entries
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/WORKLOG_TICKETS.md`, `docs/WORKLOG_ADDENDUM_v3.md`
+- Branch/PR: local working branch
+
+Inputs:
+
+- Prompt used: User request in current chat
+- Prompt/persona traceability: `AGENTS.md` worklog write policy and preservation-first correction of misplaced documentation
+
+Acceptance Criteria:
+
+- [x] Stray `Obstacle Course` block removed from `docs/WORKLOG_TICKETS.md`
+- [x] Addendum updated with a corrective record
+- [x] Correction notes whether any implementation exists
+
+Execution log:
+
+- 2026-03-02 12:05 IST | Located stray entry in protected worklog | Evidence: `rg -n "TCK-20260228-011|Obstacle Course Game Implementation" docs/WORKLOG_TICKETS.md docs/WORKLOG_ADDENDUM_*.md`
+- 2026-03-02 12:06 IST | Verified no matching implementation exists in source tree | Evidence: `rg -n "ObstacleCourse|obstacleCourseLogic|Obstacle Course" src/frontend/src` returned no matches
+- 2026-03-02 12:07 IST | Removed stray protected-file entry and recorded correction here | Evidence: diff in `docs/WORKLOG_TICKETS.md` and `docs/WORKLOG_ADDENDUM_v3.md`
+
+Evidence:
+
+- Command: `rg -n "TCK-20260228-011|Obstacle Course Game Implementation|Obstacle Course" docs/WORKLOG_TICKETS.md docs/WORKLOG_ADDENDUM_*.md`
+- Output: `docs/WORKLOG_TICKETS.md` contained the stray implementation block; no matching Obstacle Course implementation ticket existed in addendum files
+- Command: `rg -n "ObstacleCourse|obstacleCourseLogic|Obstacle Course" src/frontend/src`
+- Output: no matches
+- Observed: the removed entry claimed completed acceptance criteria despite no `ObstacleCourse` page or logic files existing under `src/frontend/src`
+
+Status updates:
+
+- 2026-03-02 12:05 IST | **IN_PROGRESS** — Validating whether the protected worklog entry had corresponding code
+- 2026-03-02 12:07 IST | **DONE** — Stray protected worklog entry removed; correction preserved in addendum
+
+---
+
+### TCK-20260302-002 :: Tracking-Loss Pause/Recovery (PR-2)
+Ticket Stamp: STAMP-20260302T121500Z-codex-tl02
+
+Type: SAFETY  
+Owner: Pranay  
+Created: 2026-03-02 12:15 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Implement standardized tracking-loss pause/recovery to prevent "frozen confusion" when camera hand tracking is lost. This addresses APP-002 from GAME_INPUT_AGE_AUDIT_2026-02-28.
+
+Source:
+- Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9 APP-002
+- Issue: ISSUE-002
+
+Scope contract:
+- In-scope:
+  - TrackingLossOverlay component with retry/fallback options
+  - useGameHandTracking hook tracking loss detection (>1s threshold)
+  - GamePauseModal fallback button integration
+  - Feature flag integration (`safety.pauseOnTrackingLoss`)
+  - Unit tests for tracking loss functionality
+- Out-of-scope:
+  - Integration into individual game pages (future PRs)
+  - Fallback control implementation (ISSUE-001)
+- Behavior change allowed: YES (additive safety feature)
+
+Targets:
+- Repo: learning_for_kids
+- Files: 
+  - `src/frontend/src/components/game/TrackingLossOverlay.tsx` (new)
+  - `src/frontend/src/components/game/GamePauseModal.tsx` (modify)
+  - `src/frontend/src/hooks/useGameHandTracking.ts` (modify)
+  - `src/frontend/src/hooks/__tests__/useGameHandTracking.trackingLoss.test.ts` (new)
+  - `docs/components/TRACKING_LOSS_OVERLAY.md` (new)
+- Branch: main
+
+Acceptance Criteria:
+- [x] Tracking loss overlay appears after >1s without video frames
+- [x] Overlay shows retry camera button
+- [x] Overlay shows switch to tap mode button (when fallback available)
+- [x] Mascot shows appropriate message based on loss duration
+- [x] Help tips auto-appear after 3 seconds
+- [x] Progress saved reassurance text displayed
+- [x] useGameHandTracking exposes trackingLoss state with isLost, durationMs, retry
+- [x] Feature flag `safety.pauseOnTrackingLoss` controls behavior
+- [x] Unit tests pass (4 tests)
+- [x] Type-check passes
+
+Execution log:
+- [2026-03-02 11:30 IST] Created TrackingLossOverlay component | Evidence: 96 lines, 5 props
+- [2026-03-02 11:45 IST] Updated GamePauseModal with fallback button | Evidence: Added onSwitchToFallback prop
+- [2026-03-02 12:00 IST] Modified useGameHandTracking with tracking loss detection | Evidence: Added state, timer, retry function
+- [2026-03-02 12:05 IST] Created unit tests | Evidence: 4 tests passing
+- [2026-03-02 12:10 IST] Created documentation | Evidence: TRACKING_LOSS_OVERLAY.md
+- [2026-03-02 12:15 IST] Committed PR-2 | Evidence: git commit [ISSUE-002]
+
+Status updates:
+- [2026-03-02 11:30 IST] **OPEN** — Ticket created
+- [2026-03-02 12:15 IST] **DONE** — PR-2 complete
+
+Next actions:
+1. PR-3: Pilot fallback controls (ISSUE-001) - integrate TrackingLossOverlay into games
+2. Update individual game pages to use tracking loss overlay
+
+Risks/notes:
+- Feature flag `safety.pauseOnTrackingLoss` defaults to true (safe)
+- Games need to explicitly integrate the overlay to benefit
+- Duration timer updates every 100ms for smooth UI
