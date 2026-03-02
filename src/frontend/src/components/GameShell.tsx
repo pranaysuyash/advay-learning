@@ -19,8 +19,6 @@ import { useReducedMotion } from 'framer-motion';
 import { useGameSubscription } from '../hooks/useGameSubscription';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { GameErrorBoundary } from './errors/GameErrorBoundary';
-import { Loading } from './ui/Loading';
-import { Button } from './ui';
 import WellnessTimer from './WellnessTimer';
 
 interface GameShellProps {
@@ -78,7 +76,10 @@ export const GameShell: React.FC<GameShellProps> = ({
   if (isLoading) {
     return loadingComponent ?? (
       <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0]">
-        <Loading message={`Loading ${gameName}...`} />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-xl font-black text-advay-slate">Loading {gameName}...</p>
+        </div>
       </div>
     );
   }
@@ -95,13 +96,12 @@ export const GameShell: React.FC<GameShellProps> = ({
           <p className="text-lg text-text-secondary mb-6">
             {gameName} is available with a subscription. Ask a parent to unlock all games!
           </p>
-          <Button
-            variant="primary"
+          <button
             onClick={() => window.location.href = '/subscribe'}
-            className="w-full"
+            className="w-full px-6 py-4 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#1D4ED8] transition-all"
           >
             View Plans
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -119,13 +119,12 @@ export const GameShell: React.FC<GameShellProps> = ({
           <p className="text-lg text-text-secondary mb-6">
             Don't worry, your progress is saved. Let's try again!
           </p>
-          <Button
-            variant="primary"
+          <button
             onClick={handleRetry}
-            className="w-full"
+            className="w-full px-6 py-4 bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#059669] transition-all"
           >
             Try Again
-          </Button>
+          </button>
         </div>
       </div>
     );

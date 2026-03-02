@@ -6232,3 +6232,81 @@ Risks/notes:
 - GameContainer is opt-in - games must be updated individually
 - Error boundary catches only React errors, not async errors
 - Progress saving requires profile to be selected
+
+---
+
+### TCK-20260302-006 :: GameShell Pattern Validation (A->B)
+Ticket Stamp: STAMP-20260302T210000Z-codex-gs06
+
+Type: REFACTOR  
+Owner: Pranay  
+Created: 2026-03-02 21:00 IST  
+Status: **IN_PROGRESS**  
+Priority: P0
+
+Description:
+Validate GameShell integration pattern by refactoring 2 high-risk games (BubblePop, NumberTracing) to use the new quality infrastructure.
+
+Source:
+- Audit: `docs/audit/GAME_QUALITY_AUDIT_REPORT.md`
+- Plan: `docs/audit/GAME_QUALITY_REMEDIATION_PLAN.md`
+- Issue: GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+
+Scope contract:
+- In-scope:
+  - Refactor BubblePop.tsx with GameShell (validate pattern)
+  - Refactor NumberTracing.tsx with GameShell (simpler game)
+  - Fix GameShell component issues discovered
+  - Document pattern for batch application
+- Out-of-scope:
+  - Actual game logic changes (UI/UX stays same)
+  - Backend changes
+  - Deploy to production
+- Behavior change allowed: NO (infrastructure only)
+
+Pattern Validated:
+```tsx
+// GameShell wraps game content
+<GameShell gameId="my-game" gameName="My Game">
+  <InnerGameComponent saveProgress={saveProgress} />
+</GameShell>
+
+// Inner component receives progress hook
+const { saveProgress } = useGameProgress('my-game');
+
+// Benefits:
+// - Automatic subscription check
+// - Automatic error boundary
+// - Automatic wellness timer
+// - Reduced motion support
+```
+
+Targets:
+- Repo: learning_for_kids
+- Files: 
+  - `src/frontend/src/pages/BubblePopRefactored.tsx` (new)
+  - `src/frontend/src/pages/NumberTracingRefactored.tsx` (new)
+  - `src/frontend/src/components/GameShell.tsx` (fixes)
+- Branch: main
+
+Acceptance Criteria:
+- [ ] BubblePop refactored with GameShell
+- [ ] NumberTracing refactored with GameShell
+- [ ] Type-check passes
+- [ ] Pattern documented for batch application
+- [ ] Ready to apply to remaining 7 games
+
+Execution log:
+- [2026-03-02 20:30 IST] Created BubblePopRefactored.tsx | Evidence: Uses GameShell + GameContainer
+- [2026-03-02 20:45 IST] Created NumberTracingRefactored.tsx | Evidence: Uses GameShell + progress hook
+- [2026-03-02 21:00 IST] Fixed GameShell Loading import | Evidence: Inline spinner instead of component
+
+Status updates:
+- [2026-03-02 20:30 IST] **OPEN** — Pattern validation started
+- [2026-03-02 21:00 IST] **IN_PROGRESS** — Games refactored, fixing type issues
+
+Next actions:
+1. Fix remaining type errors in refactored games
+2. Test both games manually
+3. Document final pattern
+4. Proceed to B: Batch fix remaining 7 games
