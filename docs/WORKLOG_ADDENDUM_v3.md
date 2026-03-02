@@ -5868,6 +5868,63 @@ Status updates:
 
 ---
 
+### TCK-20260302-003 :: Comprehensive `Obstacle Course` Feature Slice
+Ticket Stamp: STAMP-20260302T064753Z-codex-o74j
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-03-02 12:17 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Description:
+Implement `Obstacle Course` as a full pose-driven game and add reusable movement-analysis primitives so future movement games can use calibrated duck/jump/sidestep detection with approximate depth cues.
+
+Scope contract:
+
+- In-scope:
+  - Shared movement-analysis utilities for pose landmarks
+  - `Obstacle Course` game logic and page
+  - Route and registry integration
+  - Targeted unit and smoke tests
+  - Planning/research documentation for the chosen implementation path
+- Out-of-scope:
+  - Refactoring existing pose games onto the new utility in this same slice
+  - Backend changes
+  - New generalized camera provider architecture
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/research/OBSTACLE_COURSE_IMPLEMENTATION_PLAN_2026-03-02.md`, `src/frontend/src/games/*`, `src/frontend/src/pages/ObstacleCourse.tsx`, `src/frontend/src/App.tsx`, `src/frontend/src/data/gameRegistry.ts`, `src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx`, `docs/WORKLOG_ADDENDUM_v3.md`
+- Branch/PR: local working branch
+
+Inputs:
+
+- Prompt used: `prompts/planning/implementation-planning-v1.0.md`, `prompts/implementation/feature-implementation-v1.0.md`
+- Prompt/persona traceability: planning-first feature slice with shared-infrastructure bias from `docs/architecture/GAME_ARCHITECTURE_PRINCIPLES.md`
+
+Acceptance Criteria:
+
+- [ ] Reusable movement-analysis primitives exist with tests
+- [ ] `ObstacleCourse` page implements calibration + duck/jump/sidestep gameplay
+- [ ] Route and registry integration are complete
+- [ ] Smoke test covers the new page
+- [ ] Verification commands captured in this addendum
+
+Execution log:
+
+- 2026-03-02 12:14 IST | Reviewed prompt index and selected planning-first feature workflow | Evidence: `prompts/README.md`
+- 2026-03-02 12:16 IST | Completed implementation plan document before coding | Evidence: `docs/research/OBSTACLE_COURSE_IMPLEMENTATION_PLAN_2026-03-02.md`
+- 2026-03-02 12:17 IST | Created scoped feature ticket in addendum | Evidence: this entry
+
+Status updates:
+
+- 2026-03-02 12:17 IST | **IN_PROGRESS** — Planning complete; implementation starting
+
+---
+
 ### TCK-20260302-002 :: Tracking-Loss Pause/Recovery (PR-2)
 Ticket Stamp: STAMP-20260302T121500Z-codex-tl02
 
@@ -5938,3 +5995,77 @@ Risks/notes:
 - Feature flag `safety.pauseOnTrackingLoss` defaults to true (safe)
 - Games need to explicitly integrate the overlay to benefit
 - Duration timer updates every 100ms for smooth UI
+
+---
+
+### TCK-20260302-003 :: Fallback Controls Foundation (PR-3)
+Ticket Stamp: STAMP-20260302T122000Z-codex-fc03
+
+Type: INPUT_RESILIENCE  
+Owner: Pranay  
+Created: 2026-03-02 12:20 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Implement tap/dwell/snap fallback controls foundation for camera-based games. This enables gameplay without camera via touch/mouse, addressing APP-001 from GAME_INPUT_AGE_AUDIT_2026-02-28.
+
+Source:
+- Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9 APP-001
+- Issue: ISSUE-001
+
+Scope contract:
+- In-scope:
+  - useFallbackControls hook with tap/dwell/snap logic
+  - DwellTarget component for visual targets
+  - FallbackCursor component for visual cursor
+  - Age-adapted defaults (350-500ms dwell, 24-48px snap)
+  - Feature flag integration (`controls.fallbackV1`)
+  - Unit tests (9 tests)
+  - Documentation
+- Out-of-scope:
+  - Integration into specific game pages (future PRs)
+  - Voice fallback (ISSUE-008)
+- Behavior change allowed: YES (new capability, feature-flagged)
+
+Targets:
+- Repo: learning_for_kids
+- Files: 
+  - `src/frontend/src/hooks/useFallbackControls.ts` (new)
+  - `src/frontend/src/components/game/DwellTarget.tsx` (new)
+  - `src/frontend/src/components/game/FallbackCursor.tsx` (new)
+  - `src/frontend/src/hooks/__tests__/useFallbackControls.test.ts` (new)
+  - `docs/components/FALLBACK_CONTROLS.md` (new)
+- Branch: main
+
+Acceptance Criteria:
+- [x] useFallbackControls hook exposes cursor, isDwelling, dwellProgress, snappedTargetId
+- [x] Dwell detection triggers after configured dwell time (default 400ms)
+- [x] Snap targets work within configured radius (default 32px)
+- [x] Click/tap selects target immediately
+- [x] Visual feedback during dwell (progress ring)
+- [x] Age-adapted defaults documented (350-500ms range)
+- [x] Feature flag `controls.fallbackV1` controls availability
+- [x] Unit tests pass (9 tests)
+- [x] Type-check passes
+
+Execution log:
+- [2026-03-02 11:30 IST] Created useFallbackControls hook | Evidence: 253 lines, dwell/snap logic
+- [2026-03-02 11:45 IST] Created DwellTarget component | Evidence: Visual target with dwell ring
+- [2026-03-02 12:00 IST] Created FallbackCursor component | Evidence: Cursor with high contrast mode
+- [2026-03-02 12:10 IST] Created unit tests | Evidence: 9 tests passing
+- [2026-03-02 12:15 IST] Created documentation | Evidence: FALLBACK_CONTROLS.md with integration guide
+- [2026-03-02 12:20 IST] Committed PR-3 | Evidence: git commit [ISSUE-001]
+
+Status updates:
+- [2026-03-02 11:30 IST] **OPEN** — Ticket created
+- [2026-03-02 12:20 IST] **DONE** — PR-3 complete
+
+Next actions:
+1. Integrate fallback controls into pilot games (AlphabetGame, FingerNumberShow, etc.)
+2. Test end-to-end: tracking loss → fallback switch → complete game with tap
+
+Risks/notes:
+- Feature flag `controls.fallbackV1` defaults to false (safe rollout)
+- Integration into game pages requires explicit adoption
+- Snap targets must be configured per-game based on interactive elements

@@ -859,6 +859,8 @@ Quick wins: APP-003, APP-008, APP-010. Risky changes (feature-flag): APP-001, AP
 
 > **Status Update (2026-03-02)**: Unit-2 partially implemented — Tracking-loss pause/recovery now exists. See `src/frontend/src/components/game/TrackingLossOverlay.tsx` and `src/frontend/src/hooks/useGameHandTracking.ts`.
 
+> **Status Update (2026-03-02)**: Unit-3 foundation implemented — Fallback controls primitives now exist. See `src/frontend/src/hooks/useFallbackControls.ts` and related components.
+
 1. **Unit-0 (Feature Flag Foundation)**: ✅ **DONE** — Implemented type-safe feature flag system with env > user > default hierarchy. Enables safe rollout of APP-001, APP-002, APP-004. Files: `features.ts`, `useFeatureFlag.ts`, ADR-007.
 2. Unit-1 (Inventory Foundation): APP-010 + APP-007; establish reliable inventory and artifact pipeline before gameplay changes.
 3. **Unit-2 (Safety Baseline)**: 🔄 **IN PROGRESS** — APP-002 tracking-loss pause/recovery implemented. APP-009 exit/confirmation pending.
@@ -866,7 +868,13 @@ Quick wins: APP-003, APP-008, APP-010. Risky changes (feature-flag): APP-001, AP
    - `useGameHandTracking` hook: Detects tracking loss, exposes `trackingLoss` state
    - Feature flag: `safety.pauseOnTrackingLoss` (default: true)
    - Files: `TrackingLossOverlay.tsx`, `GamePauseModal.tsx` (updated), `useGameHandTracking.ts`
-4. Unit-3 (Core Input Resilience): APP-001 + APP-003 with feature flag `features.controls.fallbackV1`.
+4. **Unit-3 (Core Input Resilience)**: 🔄 **IN PROGRESS** — APP-001 foundation implemented. Pilot game integration pending.
+   - `useFallbackControls` hook: Tap/dwell/snap control system
+   - `DwellTarget` component: Visual targets with dwell feedback
+   - `FallbackCursor` component: Visual cursor for tap mode
+   - Feature flag: `controls.fallbackV1` (default: false)
+   - Age-adapted defaults: Dwell 350-500ms, snap 24-48px
+   - Files: `useFallbackControls.ts`, `DwellTarget.tsx`, `FallbackCursor.tsx`
 5. Unit-4 (Clarity And Accessibility): APP-005 + APP-006; improve onboarding and global control profiles.
 6. Unit-5 (Economy/Safety Hardening): APP-004 deterministic rewards refactor with migration plan and child-safe copy checks. **Uses flag: `rewards.deterministicV1`**.
 7. Unit-6 (Specialized Voice Flows): APP-008 after Unit-3 shared fallback primitives are available. **Uses flag: `controls.voiceFallbackV1`**.
