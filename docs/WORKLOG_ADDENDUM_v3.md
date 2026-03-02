@@ -6645,3 +6645,59 @@ Targets:
 - `src/frontend/src/App.tsx`
 - `src/frontend/src/data/gameRegistry.ts`
 - `src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx`
+
+---
+
+### TCK-20260302-009 :: Fold Useful Claude Branch Error Handling Into Main
+Ticket Stamp: STAMP-20260302T182504Z-codex-a8sc
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-02 23:56 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Prompts used:
+- `prompts/workflow/agent-entrypoint-v1.0.md`
+- `prompts/remediation/implementation-v1.6.1.md`
+
+Scope contract:
+
+- In-scope:
+  - Inspect remaining unmerged remote Claude branches for useful code
+  - Preserve any beneficial `subscriptionApi` error-handling semantics from `origin/claude/sub-pr-1`
+  - Add focused tests covering the preserved behavior before branch cleanup
+- Out-of-scope:
+  - Merging stale branches unchanged
+  - Broader subscription flow refactors outside `src/frontend/src/services/subscriptionApi.ts`
+  - CI cleanup beyond the user-approved current deferment
+- Behavior change allowed: YES (treat expected HTTP 403/404 cases as non-fatal outcomes)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/services/subscriptionApi.ts`
+  - `src/frontend/src/services/subscriptionApi.test.ts`
+- Branch/PR: `codex/wip-subscription-branch-cleanup` -> `main`
+
+Acceptance Criteria:
+
+- [ ] Current `main` keeps its richer `source` / `errorReason` contract
+- [ ] `getSubscriptionStatus()` treats expected 404 responses as `no_subscription`
+- [ ] `checkGameAccess()` treats expected 403/404 responses as denied access with useful reasons
+- [ ] Focused frontend tests cover the preserved semantics
+
+Execution log:
+
+- [2026-03-02 23:52 IST] Audited local/remote branches and worktrees after PR #4 merge; removed fully merged local branch, remote branch, and detached worktrees
+- [2026-03-02 23:54 IST] Compared `origin/claude/review-pull-request` and `origin/claude/sub-pr-1` against `origin/main`
+- [2026-03-02 23:55 IST] Confirmed `origin/claude/review-pull-request` is empty and `origin/claude/sub-pr-1` only changes `src/frontend/src/services/subscriptionApi.ts`
+- [2026-03-02 23:56 IST] Created remediation branch to port only the useful expected-error handling from the stale Claude branch
+- [2026-03-02 23:56 IST] Preserved expected 404/403 handling in `src/frontend/src/services/subscriptionApi.ts` without dropping current `main`'s richer `source` / `errorReason` contract
+- [2026-03-02 23:56 IST] Command: `cd src/frontend && npm test -- src/services/subscriptionApi.test.ts` | Evidence: 3 tests passed
+
+Status updates:
+
+- [2026-03-02 23:56 IST] **IN_PROGRESS** — Porting useful stale-branch semantics into current `main` before deleting Claude branches
+- [2026-03-02 23:56 IST] **DONE** — Useful `sub-pr-1` semantics folded into current `main`; stale Claude branches can now be deleted after merge

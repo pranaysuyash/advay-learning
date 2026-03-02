@@ -19,18 +19,33 @@ export interface SubscriptionGameAccess {
   reason: string;
 }
 
-function describeApiError(error: unknown): string {
+type ApiErrorLike = {
+  message?: string;
+  response?: {
+    status?: number;
+    data?: { detail?: string; message?: string; reason?: string };
+  };
+};
+
+function getApiErrorLike(error: unknown): ApiErrorLike | null {
   if (typeof error !== 'object' || error === null) {
+    return null;
+  }
+
+  return error as ApiErrorLike;
+}
+
+function describeApiError(error: unknown): string {
+  const maybeAxios = getApiErrorLike(error);
+  if (!maybeAxios) {
     return 'Unknown error';
   }
 
-  const maybeAxios = error as {
-    message?: string;
-    response?: { status?: number; data?: { detail?: string; message?: string } };
-  };
-
   const status = maybeAxios.response?.status;
-  const detail = maybeAxios.response?.data?.detail || maybeAxios.response?.data?.message;
+  const detail =
+    maybeAxios.response?.data?.detail ||
+    maybeAxios.response?.data?.message ||
+    maybeAxios.response?.data?.reason;
   if (status && detail) return `HTTP ${status}: ${detail}`;
   if (status) return `HTTP ${status}`;
   if (maybeAxios.message) return maybeAxios.message;
@@ -74,6 +89,15 @@ export const subscriptionApi = {
         source: 'active_subscription',
       };
     } catch (error) {
+      const status = getApiErrorLike(error)?.response?.status;
+      if (status === 404) {
+        return {
+          hasActiveSubscription: false,
+          accessibleGames: null,
+          source: 'no_subscription',
+        };
+      }
+
       const errorReason = describeApiError(error);
       console.error('Failed to fetch subscription status:', errorReason);
       return {
@@ -96,6 +120,22 @@ export const subscriptionApi = {
         reason: response.data.reason,
       };
     } catch (error) {
+      const apiError = getApiErrorLike(error);
+      const status = apiError?.response?.status;
+      if (status === 403) {
+        return {
+          hasAccess: false,
+          reason: apiError?.response?.data?.reason || 'Access denied',
+        };
+      }
+
+      if (status === 404) {
+        return {
+          hasAccess: false,
+          reason: apiError?.response?.data?.reason || 'Game or subscription not found',
+        };
+      }
+
       const errorReason = describeApiError(error);
       console.error('Failed to check game access:', errorReason);
       return {
