@@ -484,6 +484,28 @@ export function Settings() {
                       </div>
                     )}
 
+                    {/* Privacy Policy Link - COPPA Compliance */}
+                    <div className="px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-3 border-blue-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-black text-lg">Your Privacy Matters</div>
+                          <div className="text-sm font-bold text-blue-600 mt-1">
+                            We never see or store camera video. All processing happens on your device.
+                          </div>
+                          <a 
+                            href="/privacy" 
+                            className="inline-flex items-center gap-2 mt-3 text-sm font-black text-blue-700 hover:text-blue-800 hover:underline"
+                          >
+                            Read our Privacy Policy
+                            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14'/><path d='m12 5 7 7-7 7'/></svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="pt-6 border-t-4 border-[#F2CC8F] flex flex-col sm:flex-row gap-4">
                       <Button
                         variant='secondary'

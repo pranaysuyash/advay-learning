@@ -49,7 +49,7 @@
 **Files to Create**:
 - `src/frontend/src/hooks/useGameSubscription.ts`
 - `src/frontend/src/hooks/useGameProgress.ts`
-- `src/frontend/src/components/GameContainer.tsx` (wrapper)
+- `src/frontend/src/components/GameShell.tsx` (infrastructure wrapper)
 
 **Pattern**:
 ```typescript
