@@ -95,6 +95,24 @@ if echo "$changed_paths" | rg -q '^docs/audit/.*\.md$'; then
 fi
 
 if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true ]]; then
+  if [[ "${ALLOW_WORKLOG_REWRITE:-}" != "1" ]]; then
+    deleted_worklog_lines="$(
+      if [[ "$mode" == "--staged" ]]; then
+        git diff --cached --unified=0 -- docs/WORKLOG_ADDENDUM*.md docs/WORKLOG_TICKETS.md 2>/dev/null || true
+      else
+        git show --unified=0 "$arg" -- docs/WORKLOG_ADDENDUM*.md docs/WORKLOG_TICKETS.md 2>/dev/null || true
+      fi
+    )"
+
+    if echo "$deleted_worklog_lines" | rg -q '^-### TCK-[0-9]{8}-[0-9]{3}'; then
+      die "worklog ticket headings cannot be removed. Worklogs are append-only. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
+    fi
+
+    if echo "$deleted_worklog_lines" | rg -q '^-[^-@]'; then
+      die "worklog deletions detected. Worklogs are append-only by default. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
+    fi
+  fi
+
   # Enforce globally unique ticket stamps across worklog files.
   duplicate_stamp_lines="$(
     rg -n '^Ticket Stamp:[[:space:]]+STAMP-[0-9]{8}T[0-9]{6}Z-[A-Za-z0-9_.-]+(-[A-Za-z0-9]{4})?$' docs/WORKLOG_*.md \
