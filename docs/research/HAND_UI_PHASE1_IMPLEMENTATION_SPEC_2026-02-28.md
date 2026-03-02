@@ -80,7 +80,7 @@ Behavior:
 ### 5.1 Core types (`types.ts`)
 
 ```ts
-export type HandUIMode = 'pinch' | 'dwell' | 'touch-only';
+export type HandUIMode = 'pinch' | 'dwell' | 'touch-only' | 'auto';
 
 export type HandInteractionQuality = {
   handPresent: boolean;

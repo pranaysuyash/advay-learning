@@ -1,5 +1,7 @@
 """Subscription management endpoints."""
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -213,9 +215,7 @@ async def get_current_subscription(
             available_games=None,
         )
 
-    from datetime import datetime
-
-    days_remaining = (subscription.end_date - datetime.utcnow()).days
+    days_remaining = (subscription.end_date - datetime.now(timezone.utc)).days
 
     available_games = None
     if subscription.plan_type in [
@@ -425,11 +425,12 @@ async def get_subscription_status(
             detail="Not authorized to access this subscription",
         )
 
-    from datetime import datetime
-
     days_remaining = None
     if subscription.status == "active":
-        days_remaining = max(0, (subscription.end_date - datetime.utcnow()).days)
+        days_remaining = max(
+            0,
+            (subscription.end_date - datetime.now(timezone.utc)).days,
+        )
 
     available_games = None
     if subscription.plan_type in [

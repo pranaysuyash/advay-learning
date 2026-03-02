@@ -24,6 +24,8 @@ export interface TrackingLossOverlayProps {
   lossDurationMs?: number;
   /** Whether fallback controls are available */
   fallbackAvailable?: boolean;
+  /** Optional callback for exiting to games route (SPA-safe) */
+  onExitToGames?: () => void;
 }
 
 export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.memo(
@@ -32,7 +34,8 @@ export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.mem
     onRetryCamera, 
     onSwitchToTapMode,
     lossDurationMs = 0,
-    fallbackAvailable = false 
+    fallbackAvailable = false,
+    onExitToGames,
   }) => {
     const [showHelp, setShowHelp] = useState(false);
 
@@ -138,7 +141,13 @@ export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.mem
                 {/* Tertiary: Exit */}
                 <button
                   type="button"
-                  onClick={() => window.location.href = '/games'}
+                  onClick={() => {
+                    if (onExitToGames) {
+                      onExitToGames();
+                      return;
+                    }
+                    window.location.assign('/games');
+                  }}
                   className="w-full px-6 py-4 min-h-[64px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3"
                 >
                   <UIIcon name="home" size={24} />

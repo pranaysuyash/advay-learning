@@ -17,7 +17,6 @@
 import React, { useState, useCallback } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { useGameSubscription } from '../hooks/useGameSubscription';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { GameErrorBoundary } from './errors/GameErrorBoundary';
 import WellnessTimer from './WellnessTimer';
 

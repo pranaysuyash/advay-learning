@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 
+const E2E_EMAIL = process.env.E2E_EMAIL;
+const E2E_PASSWORD = process.env.E2E_PASSWORD;
+
 test.describe('Offline Progress Sync', () => {
   test('syncs progress correctly after coming back online', async ({ page }) => {
+    test.skip(!E2E_EMAIL || !E2E_PASSWORD, 'Set E2E_EMAIL and E2E_PASSWORD to run authenticated offline sync test.');
+
     // 1. Setup and Login
     await page.goto('/login');
-    await page.fill("#login-email-input", 'pranay.suyash@gmail.com');
-    await page.fill("#login-password-input", 'pranaysuyash');
+    await page.fill("#login-email-input", E2E_EMAIL!);
+    await page.fill("#login-password-input", E2E_PASSWORD!);
     await page.click('button[type=submit]');
     await page.waitForURL('**/dashboard', { timeout: 10000 });
 

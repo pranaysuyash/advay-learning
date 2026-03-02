@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+const E2E_EMAIL = process.env.E2E_EMAIL;
+const E2E_PASSWORD = process.env.E2E_PASSWORD;
+
 const GAMES_TO_TEST = [
     '/games/shape-pop',
     '/games/alphabet-game',
@@ -12,14 +15,16 @@ test.describe('Games Camera & Visual Verification', () => {
     test.setTimeout(60000);
 
     test.beforeEach(async ({ page }) => {
+        test.skip(!E2E_EMAIL || !E2E_PASSWORD, 'Set E2E_EMAIL and E2E_PASSWORD to run authenticated visual tests.');
+
         // 1. Authenticate with the test user
         await page.goto('http://localhost:6173/login');
 
         // Fill credentials if the form exists (it might be auto-login in dev)
         const emailInput = page.locator('input[type="email"]');
         if (await emailInput.isVisible()) {
-            await emailInput.fill('pranay.suyash@gmail.com');
-            await page.locator('input[type="password"]').fill('pranaysuyash');
+            await emailInput.fill(E2E_EMAIL!);
+            await page.locator('input[type="password"]').fill(E2E_PASSWORD!);
             await page.locator('button[type="submit"]').click();
             await page.waitForURL('**/dashboard*');
         }

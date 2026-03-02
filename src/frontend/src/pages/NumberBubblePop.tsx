@@ -25,7 +25,7 @@ export function NumberBubblePop() {
     const config = LEVELS[currentLevel - 1];
     const target = Math.floor(Math.random() * config.numberRange) + 1;
     setTargetNumber(target);
-    setBubbles(generateBubbles(5, target));
+    setBubbles(generateBubbles(5, target, config.numberRange));
     setScore(0);
     setCorrect(0);
     setRound(0);

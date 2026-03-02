@@ -11,10 +11,10 @@ Prompts used:
 ## Discovery Summary
 
 **Observed**
-- [docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md](/Users/pranay/Projects/learning_for_kids/docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md) defines `Obstacle Course` as a sequence-memory + movement game: duck, jump, sidestep in order, with "Pose Landmarker depth estimation".
-- [src/frontend/src/pages/FollowTheLeader.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/FollowTheLeader.tsx), [src/frontend/src/pages/MusicalStatues.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/MusicalStatues.tsx), [src/frontend/src/pages/YogaAnimals.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/YogaAnimals.tsx), and [src/frontend/src/pages/SimonSays.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/SimonSays.tsx) each initialize `PoseLandmarker` locally and run bespoke pose loops.
-- [src/frontend/src/App.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/App.tsx) and [src/frontend/src/data/gameRegistry.ts](/Users/pranay/Projects/learning_for_kids/src/frontend/src/data/gameRegistry.ts) are the required route/registry integration points.
-- [src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx](/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx) is the existing smoke test location for new pages.
+- [docs/COMPLETE_GAME_ACTIVITIES_CATALOG.md](../COMPLETE_GAME_ACTIVITIES_CATALOG.md) defines `Obstacle Course` as a sequence-memory + movement game: duck, jump, sidestep in order, with "Pose Landmarker depth estimation".
+- [src/frontend/src/pages/FollowTheLeader.tsx](../../src/frontend/src/pages/FollowTheLeader.tsx), [src/frontend/src/pages/MusicalStatues.tsx](../../src/frontend/src/pages/MusicalStatues.tsx), [src/frontend/src/pages/YogaAnimals.tsx](../../src/frontend/src/pages/YogaAnimals.tsx), and [src/frontend/src/pages/SimonSays.tsx](../../src/frontend/src/pages/SimonSays.tsx) each initialize `PoseLandmarker` locally and run bespoke pose loops.
+- [src/frontend/src/App.tsx](../../src/frontend/src/App.tsx) and [src/frontend/src/data/gameRegistry.ts](../../src/frontend/src/data/gameRegistry.ts) are the required route/registry integration points.
+- [src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx](../../src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx) is the existing smoke test location for new pages.
 
 **Inferred**
 - A reusable foundation should separate movement classification from page rendering so other pose games can reuse calibration, baseline tracking, and motion heuristics.

@@ -39,7 +39,7 @@ export function generateObjects(level: Level): { objects: ColorObject[]; targetC
   const targetColor = selectedColors[0];
   
   const objects: ColorObject[] = [];
-  const positions = generatePositions(level.objectCount, 80, 70);
+  const positions = generatePositions(level.objectCount, 10, 14);
   
   for (let i = 0; i < level.objectCount; i++) {
     const color = selectedColors[i % selectedColors.length];
@@ -59,6 +59,9 @@ export function generateObjects(level: Level): { objects: ColorObject[]; targetC
 
 function generatePositions(count: number, margin: number, minDistance: number): { x: number; y: number }[] {
   const positions: { x: number; y: number }[] = [];
+  const safeMargin = Math.min(Math.max(margin, 0), 49);
+  const span = 100 - safeMargin * 2;
+  const safeMinDistance = Math.min(Math.max(minDistance, 0), Math.max(span * 0.5, 0));
   
   for (let i = 0; i < count; i++) {
     let attempts = 0;
@@ -67,13 +70,13 @@ function generatePositions(count: number, margin: number, minDistance: number): 
     let y = 0;
     
     while (!validPosition && attempts < 100) {
-      x = margin + Math.random() * (100 - margin * 2);
-      y = margin + Math.random() * (100 - margin * 2);
+      x = safeMargin + Math.random() * span;
+      y = safeMargin + Math.random() * span;
       
       validPosition = true;
       for (const pos of positions) {
         const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-        if (dist < minDistance) {
+        if (dist < safeMinDistance) {
           validPosition = false;
           break;
         }

@@ -120,7 +120,30 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (poseLandmarkerRef.current) {
+        poseLandmarkerRef.current.close();
+        poseLandmarkerRef.current = null;
+      }
     };
+  }, []);
+
+  // Keep canvas backing resolution in sync with displayed size.
+  useEffect(() => {
+    const syncCanvasSize = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.floor(rect.width));
+      const nextHeight = Math.max(1, Math.floor(rect.height));
+      if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+        canvas.width = nextWidth;
+        canvas.height = nextHeight;
+      }
+    };
+
+    syncCanvasSize();
+    window.addEventListener('resize', syncCanvasSize);
+    return () => window.removeEventListener('resize', syncCanvasSize);
   }, []);
 
   // ===== GAME LOOP =====
@@ -385,7 +408,8 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
   const handleShowMenu = () => {
     playClick();
-    if (gameState) {
+    // Reward completion only when the game actually finished.
+    if (gameState && !gameState.gameActive) {
       onGameComplete();
     }
     setShowMenu(true);

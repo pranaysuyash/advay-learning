@@ -1,3 +1,50 @@
+### TCK-20260302-062 :: Fix GamePage React Rules of Hooks Violation
+
+Ticket Stamp: STAMP-20260302T233843Z-copilot-9m2k
+
+Type: BUG_FIX
+Owner: Pranay
+Created: 2026-03-02 23:38 IST
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Fix React Rules of Hooks violation in `src/frontend/src/components/GamePage.tsx` causing test failure
+- Out-of-scope: Other GamePage refactoring
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/GamePage.tsx`
+- Branch/PR: `codex/wip-game-upgrades-20260227` -> `main`
+
+Inputs:
+
+- Test failure: "GamePage > save-error UI also includes a Home button" — Error: Rendered fewer hooks than expected
+- Root cause: `useMemo` for context value was called AFTER conditional early returns (loading, access check, error state)
+- Fix: Move all React hooks to top of component before any conditional returns per Rules of Hooks
+
+Acceptance Criteria:
+
+- [x] Test "save-error UI also includes a Home button" passes
+- [x] All 7 GamePage tests pass (no regressions)
+- [x] No TypeScript compilation errors introduced
+
+Execution log:
+
+- 2026-03-02 23:38 IST | Identified test failure | Evidence: test output "Rendered fewer hooks than expected"
+- 2026-03-02 23:38 IST | Diagnosed root cause | Evidence: useMemo at line ~228 after early returns at lines ~195, ~209
+- 2026-03-02 23:38 IST | Applied fix | Evidence: Moved useMemo call to after handleFinish callback, before conditional returns
+- 2026-03-02 23:38 IST | Verified fix | Evidence: All 7 GamePage tests passing, no compilation errors
+
+Status updates:
+
+- 2026-03-02 23:38 IST **DONE** — React Rules of Hooks violation fixed, all tests passing
+
+---
+
 ### TCK-20260228-012 :: Audit HandDetectionProvider Shared Runtime Bridge
 
 Ticket Stamp: STAMP-20260228T130224Z-copilot-w06i
@@ -160,7 +207,7 @@ Risks/notes:
 
 ### TCK-20260301-001 :: Ignore UX analysis screenshots by default
 
-Ticket Stamp: STAMP-20260301T164401Z-codex-qmoa
+Ticket Stamp: STAMP-20260302T180746Z-codex-lcjw
 
 Type: BUG
 Owner: Pranay
@@ -1850,7 +1897,7 @@ Risks/notes:
 Type: FEATURE
 Owner: Pranay
 Created: 2026-02-24 00:15 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P0 (Critical - B2B Blocker)
 
 Description:
@@ -6520,3 +6567,81 @@ Next actions:
 3. Proceed to remaining 30 games (batch C)
 
 Note: Refactored files are side-by-side with originals for testing before replacement.
+
+---
+
+### TCK-20260302-008 :: PR #4 Review Remediation Sweep
+Ticket Stamp: STAMP-20260302T170915Z-codex-wl1a
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-02 22:40 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Prompts used:
+- `prompts/workflow/agent-entrypoint-v1.0.md`
+- `prompts/remediation/implementation-v1.6.1.md`
+
+Scope contract:
+
+- In-scope:
+  - Address non-nit PR #4 review comments that still reproduce on the current branch
+  - Fix runtime issues, unsafe helper scripts, duplicate routes, credential leaks, and doc inconsistencies
+  - Update worklog/addendum evidence for this remediation pass
+- Out-of-scope:
+  - Re-opening stale bot comments already fixed in branch
+  - Broad refactors unrelated to the cited review findings
+  - PR comment replies / GitHub thread resolution state changes
+- Behavior change allowed: YES (test helpers/scripts and route table cleanup)
+
+Targets:
+
+- Repo: learning_for_kids
+- Branch/PR: `codex/wip-game-upgrades-20260227` / PR #4
+
+Acceptance Criteria:
+
+- [ ] All still-valid non-nit PR review comments are either fixed or explicitly documented as stale/invalid
+- [ ] No hardcoded test credentials remain in reviewed E2E files
+- [ ] Duplicate route registrations are removed
+- [ ] Unsafe helper scripts are corrected to avoid the cited failures
+- [ ] Worklog reflects the remediation sweep and verification evidence
+
+Execution log:
+
+- [2026-03-02 22:40 IST] Gathered PR #4 issue comments, reviews, and inline review comments via `gh pr view` and `gh api`
+- [2026-03-02 22:44 IST] Validated current branch state against reported findings; marked some backend/registry comments as already fixed
+- [2026-03-02 22:46 IST] Began in-repo remediation patch set for still-valid findings
+- [2026-03-02 22:49 IST] Completed route, registry, script, and docs fixes; added focused regression tests
+- [2026-03-02 22:50 IST] Archived duplicate stray `patternPlayLogic` file from `src/frontend/src/games.ts/` into `archive/stray-files/`
+- [2026-03-02 22:50 IST] Verified `python3 -m py_compile scripts/convert_games_to_gamepage.py`
+- [2026-03-02 22:50 IST] Verified `node --check scripts/batch_upgrade_games.js`
+- [2026-03-02 22:50 IST] Verified `npm test -- src/games/__tests__/numberBubblePopLogic.test.ts src/store/progressStore.test.ts` (4 tests passed)
+- [2026-03-02 22:51 IST] Verified duplicate route counts reduced to one each for `/games/balloon-pop-fitness`, `/games/air-guitar-hero`, and `/games/maze-runner`
+
+Status updates:
+
+- [2026-03-02 22:40 IST] **IN_PROGRESS** — Review sweep started from live PR feedback
+- [2026-03-02 22:51 IST] **DONE** — Still-valid non-nit review findings addressed; stale findings documented during validation
+
+---
+
+### TCK-20260227-010 :: Musical Statues Game Implementation
+Ticket Stamp: STAMP-20260302T171931Z-codex-f4cg
+
+Type: FEATURE
+Owner: Claude Code
+Created: 2026-02-27 18:18 UTC
+Status: **DONE**
+Priority: P0
+
+Migration note:
+- Moved from `docs/WORKLOG_TICKETS.md` during PR #4 cleanup to comply with the addendum-only active worklog policy in `AGENTS.md`.
+
+Targets:
+- `src/frontend/src/games/musicalStatuesLogic.ts`
+- `src/frontend/src/pages/MusicalStatues.tsx`
+- `src/frontend/src/App.tsx`
+- `src/frontend/src/data/gameRegistry.ts`
+- `src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx`

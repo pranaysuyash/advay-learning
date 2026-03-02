@@ -26,7 +26,7 @@ export function generateBubbles(level: Level): NumberBubble[] {
   const shuffled = shuffleArray(numbers);
   
   const bubbles: NumberBubble[] = [];
-  const positions = generatePositions(level.numberRange, 120, 80);
+  const positions = generatePositions(level.numberRange, 12, 18);
   
   for (let i = 0; i < shuffled.length; i++) {
     bubbles.push({
@@ -45,6 +45,9 @@ export function generateBubbles(level: Level): NumberBubble[] {
 function generatePositions(count: number, margin: number, minDistance: number): { x: number; y: number }[] {
   const positions: { x: number; y: number }[] = [];
   const maxAttempts = 100;
+  const safeMargin = Math.min(Math.max(margin, 0), 49);
+  const span = 100 - safeMargin * 2;
+  const safeMinDistance = Math.min(Math.max(minDistance, 0), Math.max(span * 0.75, 0));
   
   for (let i = 0; i < count; i++) {
     let attempts = 0;
@@ -53,13 +56,13 @@ function generatePositions(count: number, margin: number, minDistance: number): 
     let y = 0;
     
     while (!validPosition && attempts < maxAttempts) {
-      x = margin + Math.random() * (100 - margin * 2);
-      y = margin + Math.random() * (100 - margin * 2);
+      x = safeMargin + Math.random() * span;
+      y = safeMargin + Math.random() * span;
       
       validPosition = true;
       for (const pos of positions) {
         const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-        if (dist < minDistance) {
+        if (dist < safeMinDistance) {
           validPosition = false;
           break;
         }

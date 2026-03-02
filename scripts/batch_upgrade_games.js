@@ -2,13 +2,8 @@
 /**
  * Batch Game Upgrade Script
  * 
- * Adds production-ready features to all game files:
- * - Subscription check
- * - Progress tracking
- * - Error handling
- * - Reduce motion
- * - Wellness timer
- * - Error boundary
+ * Prepares game files for manual quality upgrades by adding safe shared imports
+ * and simple boilerplate where it can do so without rewriting component logic.
  */
 
 const fs = require('fs');
@@ -70,6 +65,17 @@ import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 `;
 
+function insertAfterLastImport(content, block) {
+  const importMatches = [...content.matchAll(/^import .*;$/gm)];
+  if (importMatches.length === 0) {
+    return `${block.trim()}\n\n${content}`;
+  }
+
+  const lastImport = importMatches[importMatches.length - 1];
+  const insertAt = lastImport.index + lastImport[0].length;
+  return `${content.slice(0, insertAt)}\n${block.trim()}${content.slice(insertAt)}`;
+}
+
 // Pattern to detect if file already has subscription check
 function hasSubscriptionCheck(content) {
   return content.includes('useSubscription') && content.includes('canAccessGame');
@@ -115,31 +121,15 @@ function upgradeGame(filePath) {
   if (!content.includes('useSubscription')) {
     const reactImportMatch = content.match(/import\s+{[^}]*}\s+from\s+['"]react['"];?/);
     if (reactImportMatch) {
-      const importLine = reactImportMatch[0];
-      const newImports = `
-import { memo, useCallback } from 'react';
-import { useReducedMotion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { useSubscription } from '../hooks/useSubscription';
-import { AccessDenied } from '../components/ui/AccessDenied';
-import { progressQueue } from '../services/progressQueue';
-import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
-import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';`;
-      
-      content = content.replace(importLine, newImports);
+      content = insertAfterLastImport(content, IMPORTS_TO_ADD);
       changes.imports = true;
       console.log('  ✅ Added imports');
     }
   }
   
-  // 2. Wrap export in memo if not already
+  // 2. Memo wrapping requires AST-safe edits; leave this for manual review.
   if (!content.includes('memo(function') && !content.includes('memo(')) {
-    content = content.replace(
-      /export (function|const) (\w+)/,
-      'export const $2 = memo(function $2Component()'
-    );
-    console.log('  ✅ Added memo wrapper');
+    console.log('  ℹ️ Skipped automatic memo wrapper (manual review required)');
   }
   
   // 3. Add error state if not present
@@ -153,30 +143,9 @@ import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';`
     }
   }
   
-  // 4. Add subscription check pattern (before first return)
+  // 4. Subscription guard insertion is left for manual review to avoid hook-order regressions.
   if (!content.includes('canAccessGame')) {
-    const firstReturnMatch = content.match(/return \(/);
-    if (firstReturnMatch) {
-      const subscriptionCheck = `
-  // Check subscription access
-  const { canAccessGame, isLoading } = useSubscription();
-  const hasAccess = canAccessGame('${fileName.replace('.tsx', '').toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2')}');
-  
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  
-  if (!hasAccess) {
-    return <AccessDenied gameName="${fileName.replace('.tsx', '')}" gameId="${fileName.replace('.tsx', '').toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2')}" />;
-  }
-
-`;
-      // Insert before first return
-      const index = firstReturnMatch.index;
-      content = content.slice(0, index) + subscriptionCheck + content.slice(index);
-      changes.subscription = true;
-      console.log('  ✅ Added subscription check');
-    }
+    console.log('  ℹ️ Skipped automatic subscription guard insertion (manual review required)');
   }
   
   // 5. Add WellnessTimer before closing GameContainer

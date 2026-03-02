@@ -52,8 +52,6 @@ export const FallbackCursor: React.FC<FallbackCursorProps> = React.memo(({
       animate={{ 
         scale: isDwelling ? 1.2 : 1, 
         opacity: 1,
-        x: position.x - radius,
-        y: position.y - radius,
       }}
       transition={{
         type: 'spring',

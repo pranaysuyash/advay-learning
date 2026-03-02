@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useProfileStore } from './profileStore';
 
 export interface LetterProgress {
   letter: string;
@@ -219,6 +220,20 @@ export const useProgressStore = create<ProgressState>()(
     },
   ),
 );
+
+// Keep legacy `currentProfile` in sync with canonical profile selection store.
+const syncCurrentProfileFromProfileStore = () => {
+  const selected = useProfileStore.getState().currentProfile;
+  const next = selected ? { id: selected.id } : null;
+  const current = useProgressStore.getState().currentProfile;
+
+  if (current?.id !== next?.id) {
+    useProgressStore.setState({ currentProfile: next });
+  }
+};
+
+syncCurrentProfileFromProfileStore();
+useProfileStore.subscribe(syncCurrentProfileFromProfileStore);
 
 // Helper function to get available letters based on unlocked batches
 export function getAvailableLetterIndices(

@@ -1,5 +1,7 @@
 # Game Quality Upgrade - Status Report #2
 
+Ticket: TCK-20260302-008
+
 **Date**: 2026-02-27  
 **Session**: Afternoon Upgrade Sprint  
 **Progress**: 3/39 games upgraded (8%)
@@ -57,7 +59,7 @@ All foundational components are now in place:
 
 ## 🎯 REMAINING: 36 GAMES
 
-### P0 Critical (6 games) - Next Priority
+### P0 Critical (7 games) - Next Priority
 - OddOneOut.tsx
 - ShadowPuppetTheater.tsx
 - KaleidoscopeHands.tsx
@@ -75,7 +77,7 @@ All foundational components are now in place:
 ### P2 Medium (24 games)
 All games scoring 35-43/100
 
-### P3 Low (2 games)
+### P3 Low (1 game)
 - AlphabetGame.tsx (58/100 - already good)
 
 ---

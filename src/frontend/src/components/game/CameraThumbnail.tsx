@@ -8,6 +8,7 @@
  */
 
 import Webcam from 'react-webcam';
+import type React from 'react';
 
 interface CameraThumbnailProps {
     /** Whether the player's hand is currently detected */
@@ -19,7 +20,7 @@ interface CameraThumbnailProps {
     /** Whether to show the thumbnail (default: true) */
     visible?: boolean;
     /** Webcam ref mandatory for hand tracking to access video feed */
-    webcamRef?: any;
+    webcamRef?: React.RefObject<Webcam | null>;
 }
 
 const POSITION_CLASSES: Record<string, string> = {

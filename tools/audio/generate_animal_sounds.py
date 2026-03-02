@@ -20,7 +20,7 @@ def get_hf_token():
 
 HF_TOKEN = get_hf_token()
 
-API_URL = "https://api-inference.huggingface.co/models/cvssp/audioldm2"
+API_URL = "https://router.huggingface.co/hf-inference/models/cvssp/audioldm2"
 headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
 
 ANIMALS = {

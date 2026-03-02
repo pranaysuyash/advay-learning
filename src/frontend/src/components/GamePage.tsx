@@ -109,12 +109,11 @@ export function GamePage({
   reportSession = true,
   children,
 }: GamePageProps) {
+  // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL RETURNS
   const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops(gameId);
-
-  // access check will be computed after loading block; see render section
 
   // internal refs keep the latest values synchronously so callers can
   // update and immediately finish without having to pass explicit opts.
@@ -192,6 +191,13 @@ export function GamePage({
     [handleGameComplete],
   );
 
+  const ctxValue = useMemo(
+    () => ({ score, setScore, currentLevel, setCurrentLevel, handleFinish }),
+    [score, currentLevel, handleFinish],
+  );
+
+  // NOW we can do conditional early returns after all hooks are called
+
   // rendering
   if (subLoading) {
     return (
@@ -222,11 +228,6 @@ export function GamePage({
       </GameContainer>
     );
   }
-
-  const ctxValue = useMemo(
-    () => ({ score, setScore, currentLevel, setCurrentLevel, handleFinish }),
-    [score, currentLevel, handleFinish],
-  );
 
   return (
     <GameContainer

@@ -48,15 +48,37 @@ export function WellnessMonitor({
     } = usePostureDetection(onPostureAlert);
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (isActive && video) {
-            startAttentionMonitoring(video);
-            startPostureMonitoring(video);
-        } else {
+        if (!isActive) {
             stopAttentionMonitoring();
             stopPostureMonitoring();
+            return () => {
+                stopAttentionMonitoring();
+                stopPostureMonitoring();
+            };
         }
+
+        let rafId = 0;
+        let monitoringStarted = false;
+
+        const tryStartMonitoring = () => {
+            const video = videoRef.current;
+            if (video && !monitoringStarted) {
+                startAttentionMonitoring(video);
+                startPostureMonitoring(video);
+                monitoringStarted = true;
+                return;
+            }
+            if (!monitoringStarted) {
+                rafId = requestAnimationFrame(tryStartMonitoring);
+            }
+        };
+
+        tryStartMonitoring();
+
         return () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
             stopAttentionMonitoring();
             stopPostureMonitoring();
         };

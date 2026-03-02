@@ -675,16 +675,6 @@ function App() {
                   }
                 />
                 <Route
-                  path='/games/balloon-pop-fitness'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Balloon Pop Fitness'>
-                        <BalloonPopFitness />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path='/games/obstacle-course'
                   element={
                     <ProtectedRoute>
@@ -1103,14 +1093,6 @@ function App() {
                   }
                 />
                 <Route
-                  path='/games/air-guitar-hero'
-                  element={
-                    <ProtectedRoute>
-                      <AirGuitarHero />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path='/games/fruit-ninja-air'
                   element={
                     <ProtectedRoute>
@@ -1191,14 +1173,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SightWordFlash />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/maze-runner'
-                  element={
-                    <ProtectedRoute>
-                      <MazeRunner />
                     </ProtectedRoute>
                   }
                 />

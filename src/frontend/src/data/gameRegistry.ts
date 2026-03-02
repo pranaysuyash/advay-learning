@@ -995,6 +995,27 @@ export const GAME_REGISTRY: GameManifest[] = [
     easterEggs: [],
   },
   {
+    id: 'color-splash',
+    name: 'Color Splash',
+    tagline: 'Splash every item in the target color! 🎨',
+    path: '/games/color-splash',
+    icon: 'drop',
+    worldId: 'color-splash',
+    vibe: 'active',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'color-red', chance: 0.35 },
+      { itemId: 'color-blue', chance: 0.35 },
+      { itemId: 'color-yellow', chance: 0.35 },
+      { itemId: 'color-green', chance: 0.25 },
+      { itemId: 'material-seed', chance: 0.08, minScore: 70 },
+    ],
+    easterEggs: [],
+  },
+  {
     id: 'color-by-number',
     name: 'Color by Number',
     tagline:

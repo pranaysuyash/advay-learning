@@ -19,7 +19,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
-import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameContainer } from '../components/GameContainer';
@@ -270,14 +269,13 @@ export function MemoryMatch() {
       score={score}
       level={difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3}
       showScore
+      reportSession={false}
       onHome={() => { setShowMenu(true); setGameStarted(false); }}
       isHandDetected={isHandDetected}
       isPlaying={gameStarted && !showMenu}
     >
       {/* Hidden webcam */}
-      
 
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted && !showMenu} />
       <HandTrackingStatus
         isHandDetected={gameStarted ? isHandDetected : true}
         pauseOnHandLost={false}
