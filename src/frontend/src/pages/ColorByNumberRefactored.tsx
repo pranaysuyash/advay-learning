@@ -29,9 +29,9 @@ interface ColorByNumberGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress }: ColorByNumberGameProps) {
+const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress: _saveProgress }: ColorByNumberGameProps) {
   const navigate = useNavigate();
-  const reducedMotion = useReducedMotion();
+  const _reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('color-by-number');

@@ -35,7 +35,7 @@ function BodyPartsGame({
     'start',
   );
   const [feedback, setFeedback] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [_error, setError] = useState<Error | null>(null);
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('body-parts');

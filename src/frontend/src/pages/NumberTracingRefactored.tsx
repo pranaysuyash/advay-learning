@@ -21,7 +21,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import {
-  NUMBER_TEMPLATES,
+  NUMBER_TEMPLATES as _NUMBER_TEMPLATES,
   buildScore,
   calculateTraceCoverage,
   getTemplateForDigit,
@@ -52,7 +52,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedDigits, setCompletedDigits] = useState<number[]>([]);
 
-  const { playClick, playSuccess, playError, playCelebration } = useAudio();
+  const { playClick, playSuccess, playError, playCelebration: _playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('number-tracing');
   const currentTemplate = useMemo(() => getTemplateForDigit(currentDigit), [currentDigit]);
 

@@ -107,7 +107,7 @@ function AirGuitarHeroInner({
   );
 
   // wrapper method used by GamePage
-  const onFinish = useCallback(async () => {
+  const _onFinish = useCallback(async () => {
     await handleFinishLocal(score);
   }, [handleFinishLocal, score]);
 

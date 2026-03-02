@@ -2,17 +2,13 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 
-import { useSubscription } from '../hooks/useSubscription';
-import { useProgressStore } from '../store';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   LEVELS,
   getAnimalsForLevel,
   type Animal,
 } from '../games/animalSoundsLogic';
-import { progressQueue } from '../services/progressQueue';
 import { GamePage } from '../components/GamePage';
 
 interface InnerProps {

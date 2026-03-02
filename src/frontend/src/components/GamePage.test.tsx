@@ -7,7 +7,7 @@ import { progressQueue } from '../services/progressQueue';
 
 // most hooks are mocked in test/setup.ts; we only need to override
 vi.mock('../hooks/useGameDrops', () => ({
-  useGameDrops: (gameId: string) => ({
+  useGameDrops: (_gameId: string) => ({
     onGameComplete: vi.fn(),
   }),
 }));

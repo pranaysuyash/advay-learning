@@ -6,7 +6,6 @@ import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';

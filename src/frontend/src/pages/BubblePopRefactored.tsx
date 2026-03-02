@@ -45,7 +45,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
   const { onGameComplete } = useGameDrops('bubble-pop');
 
   // Audio
-  const { playClick, playLevelUp } = useAudio();
+  const { playClick, playLevelUp: _playLevelUp } = useAudio();
   const { speak, stop: stopTTS, isEnabled: ttsEnabled } = useTTS();
 
   // Game state
@@ -328,7 +328,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
 // Main export wrapped with GameShell
 export const BubblePop = memo(function BubblePopComponent() {
   const { saveProgress } = useGameProgress('bubble-pop');
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   return (
     <GameShell

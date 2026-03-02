@@ -260,8 +260,8 @@ export const FollowTheLeader = memo(function FollowTheLeader() {
 
   const handleGameComplete = () => {
     if (gameState) {
-      const stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', stats);
+      const _stats = calculateFinalStats(gameState);
+      // DEBUG: console.log('Game complete:', _stats);
     }
     setShowMenu(true);
     setGameState(null);

@@ -22,9 +22,9 @@ interface KaleidoscopeHandsGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress }: KaleidoscopeHandsGameProps) {
+const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress: _saveProgress }: KaleidoscopeHandsGameProps) {
   const navigate = useNavigate();
-  const reducedMotion = useReducedMotion();
+  const _reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);

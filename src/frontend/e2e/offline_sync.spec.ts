@@ -56,7 +56,7 @@ test.describe('Offline Progress Sync', () => {
 
     // 8. Verify the local queue was cleared (i.e. sync was successful)
     const queueSize = await page.evaluate(() => {
-      // @ts-expect-error
+      // @ts-expect-error accessing internal progressQueue for test verification
       return ((window as any).progressQueue?.getQueue() || []).length;
     });
 

@@ -9,7 +9,6 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useProgressStore } from '../store';

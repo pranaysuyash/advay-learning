@@ -2,10 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DiscoveryLab } from '../DiscoveryLab';
 import { MemoryRouter } from 'react-router-dom';
-import { useSubscription } from '../../hooks/useSubscription';
 import { useInventoryStore } from '../../store';
-import { RECIPES, findPartialRecipes, Recipe } from '../../data/recipes';
-import { vi } from 'vitest';
+import { findPartialRecipes } from '../../data/recipes';
 
 // mock subscription to always allow access
 vi.mock('../../hooks/useSubscription', () => ({
@@ -32,7 +30,7 @@ function resetInventory() {
   useInventoryStore.setState({
     ownedItems: {},
     discoveredRecipes: [],
-    craft: (id: string) => ({ success: false }),
+    craft: (_id: string) => ({ success: false }),
     getCraftableRecipes: () => [],
     getItemCount: (_: string) => 0,
   });
@@ -59,7 +57,7 @@ describe('DiscoveryLab', () => {
         'element-o': { quantity: 1 },
       },
       discoveredRecipes: [],
-      craft: (id: string) => ({ success: false }),
+      craft: (_id: string) => ({ success: false }),
       getCraftableRecipes: () => [],
       getItemCount: (id: string) => {
         const qty = { 'element-h': 1, 'element-o': 1 }[id];

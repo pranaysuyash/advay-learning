@@ -5,7 +5,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
-  LEVELS,
+  LEVELS as _LEVELS,
   createGame,
   checkAnswer,
   generateQuestion,

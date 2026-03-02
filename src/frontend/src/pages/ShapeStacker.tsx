@@ -5,7 +5,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
-  LEVELS,
+  LEVELS as _LEVELS,
   createShapes,
   createTargets,
   checkMatch,
@@ -44,9 +44,9 @@ export function ShapeStacker() {
   const { onGameComplete } = useGameDrops('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
-  const TOTAL_ROUNDS = 3;
+  const _TOTAL_ROUNDS = 3;
   const FALL_SPEED = 0.15;
-  const TARGET_Y = 70;
+  const _TARGET_Y = 70;
 
   const startGame = useCallback(() => {
     const newShapes = createShapes(currentLevel);
