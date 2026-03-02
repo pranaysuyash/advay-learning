@@ -6807,6 +6807,7 @@ Execution log:
 - [2026-03-03 00:54 IST] Command: compared ticket headings before vs after `91a598e` | Evidence: 24 ticket sections removed from the file
 - [2026-03-03 00:55 IST] Command: `rg -n --fixed-strings "<removed ticket title>" docs` across removed headings | Evidence: almost all removed tickets were absent from current docs, confirming no proper migration
 - [2026-03-03 00:56 IST] Restored removed ticket records below as historical stubs sourced from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`
+- [2026-03-03 00:58 IST] Restored the full verbatim deleted blocks into `docs/recovery/WORKLOG_ADDENDUM_v3_removed_by_91a598e_FULL.md` directly from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`
 
 Status updates:
 
@@ -6816,7 +6817,7 @@ Status updates:
 
 ### Recovered Historical Entries Removed By `91a598e`
 
-These ticket records were removed from `docs/WORKLOG_ADDENDUM_v3.md` by commit `91a598eb64fa5fda88d3dc8522e9323cc5925180` without a documented migration. They are restored here as historical stubs using the original metadata from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`. The original detailed bodies remain recoverable from git history if needed.
+These ticket records were removed from `docs/WORKLOG_ADDENDUM_v3.md` by commit `91a598eb64fa5fda88d3dc8522e9323cc5925180` without a documented migration. They are listed here as historical stubs for continuity, and their full original bodies have now been restored verbatim in `docs/recovery/WORKLOG_ADDENDUM_v3_removed_by_91a598e_FULL.md` from `0f81c8571ec3581e383777ab99cf90d410312df3:docs/WORKLOG_ADDENDUM_v3.md`.
 
 ### TCK-20260223-008 :: Pre-Commit Noise Reduction (jsdom media stubs)
 Type: HARDENING
