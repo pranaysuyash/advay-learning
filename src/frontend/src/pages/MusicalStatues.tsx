@@ -31,7 +31,6 @@ import {
   initializeGame,
   updateGameState,
   getFeedbackMessage,
-  calculateFinalStats,
   getLevelDisplayName,
 } from '../games/musicalStatuesLogic';
 
@@ -272,8 +271,7 @@ export const MusicalStatues = memo(function MusicalStatues() {
 
   const handleGameComplete = () => {
     if (gameState) {
-      const _stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', _stats);
+      // DEBUG: console.log('Game complete');
     }
     setShowMenu(true);
     setGameState(null);

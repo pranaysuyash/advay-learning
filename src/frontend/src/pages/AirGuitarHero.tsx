@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
@@ -50,7 +50,7 @@ function AirGuitarHeroInner({
   const [correctCount, setCorrectCount] = useState(0);
 
   const { playClick, playPop, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('air-guitar-hero');
+  useGameDrops('air-guitar-hero');
   const levelConfig = useMemo(() => LEVELS[currentLevel - 1], [currentLevel]);
 
   // progress handled by GamePage itself
@@ -94,23 +94,7 @@ function AirGuitarHeroInner({
     }
   };
 
-  const handleFinishLocal = useCallback(
-    async (ctxScore: number) => {
-      playClick();
-      const finalScore = Math.round(
-        ctxScore / Math.max(levelConfig.notesToPlay, 1),
-      );
-      await onGameComplete(finalScore);
-      navigate('/games');
-    },
-    [levelConfig, onGameComplete, navigate, playClick],
-  );
-
-  // wrapper method used by GamePage
-  const _onFinish = useCallback(async () => {
-    await handleFinishLocal(score);
-  }, [handleFinishLocal, score]);
-
+  
   const currentNote = noteSequence[currentIndex];
   const noteColors = currentNote
     ? (NOTE_COLORS[currentNote.name] ?? NOTE_COLORS.G)

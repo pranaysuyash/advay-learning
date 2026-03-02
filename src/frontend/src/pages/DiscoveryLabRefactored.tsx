@@ -22,6 +22,8 @@ import {
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { progressQueue } from '../services/progressQueue';
+import WellnessTimer from '../components/WellnessTimer';
 
 // Inner game component
 const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {

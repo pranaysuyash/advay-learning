@@ -220,7 +220,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
           'Blow into the microphone to pop bubbles!',
           'The louder you blow, the more bubbles pop!',
         ]}
-        playOnMount={showMenu}
+        autoSpeak={showMenu}
       />
 
       {/* Game Content */}
@@ -314,10 +314,10 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         {/* Celebration */}
         {showCelebration && (
           <CelebrationOverlay
-            score={gameState.score}
-            stats={stats}
-            onPlayAgain={handleResetGame}
-            onExit={() => navigate('/games')}
+            show={showCelebration}
+            letter={String(gameState.score)}
+            accuracy={stats.accuracy}
+            onComplete={handleResetGame}
           />
         )}
       </div>
@@ -328,7 +328,6 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
 // Main export wrapped with GameShell
 export const BubblePop = memo(function BubblePopComponent() {
   const { saveProgress } = useGameProgress('bubble-pop');
-  const _navigate = useNavigate();
 
   return (
     <GameShell

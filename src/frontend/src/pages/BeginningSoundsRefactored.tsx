@@ -7,6 +7,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import {

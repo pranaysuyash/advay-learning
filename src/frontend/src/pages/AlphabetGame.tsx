@@ -1421,7 +1421,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   return (
     <GlobalErrorBoundary>
       <WellnessMonitor
-        videoRef={webcamRef}
+        videoRef={webcamRef as unknown as React.RefObject<HTMLVideoElement>}
         isActive={isPlaying && !isPaused && !useMouseMode}
         onAttentionAlert={handleAttentionAlert}
         onPostureAlert={handlePostureAlert}

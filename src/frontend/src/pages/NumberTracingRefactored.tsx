@@ -121,7 +121,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
 
     try {
       // Calculate accuracy
-      const accuracy = calculateTraceCoverage(strokePoints, currentTemplate);
+      const accuracy = calculateTraceCoverage(strokePoints, currentTemplate?.guidePoints ?? []);
       setLastAccuracy(accuracy);
 
       if (accuracy >= 0.6) {
@@ -148,7 +148,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
         } else {
           // Next digit after delay
           setTimeout(() => {
-            setCurrentDigit(nextDigit(currentDigit, completedDigits));
+            setCurrentDigit(nextDigit(currentDigit));
             setStrokePoints([]);
             setFeedback('Trace the next number!');
           }, reducedMotion ? 500 : 1500);
@@ -267,10 +267,10 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
         {/* Celebration */}
         {showCelebration && (
           <CelebrationOverlay
-            score={score}
-            stats={{ accuracy: lastAccuracy, hints: hintsUsed }}
-            onPlayAgain={handleReset}
-            onExit={() => navigate('/games')}
+            show={showCelebration}
+            letter={String(score)}
+            accuracy={lastAccuracy * 100}
+            onComplete={handleReset}
           />
         )}
       </div>

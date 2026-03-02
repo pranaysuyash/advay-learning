@@ -8,7 +8,6 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useReducedMotion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
@@ -40,8 +39,6 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
   const [usedCategories, setUsedCategories] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Tap the one that does NOT belong!');
 
-  const navigate = useNavigate();
-  const _reducedMotion = useReducedMotion();
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('odd-one-out');
 

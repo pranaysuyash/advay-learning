@@ -6,7 +6,6 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useReducedMotion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
@@ -27,8 +26,6 @@ interface ShadowPuppetTheaterGameProps {
 }
 
 const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({ saveProgress: _saveProgress }: ShadowPuppetTheaterGameProps) {
-  const navigate = useNavigate();
-  const _reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentShape, setCurrentShape] = useState<PuppetShape | null>(null);

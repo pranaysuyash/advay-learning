@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -23,8 +25,6 @@ interface KaleidoscopeHandsGameProps {
 }
 
 const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress: _saveProgress }: KaleidoscopeHandsGameProps) {
-  const navigate = useNavigate();
-  const _reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);

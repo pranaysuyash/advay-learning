@@ -31,6 +31,8 @@ export interface GameState {
   isPlaying: boolean;
   lastBlowTime: number;
   blowStrength: number;  // 0-1 from microphone
+  timeLeft: number;      // seconds remaining
+  gameOver: boolean;
 }
 
 // Bubble colors
@@ -74,6 +76,8 @@ export function initializeGame(): GameState {
     isPlaying: false,
     lastBlowTime: 0,
     blowStrength: 0,
+    timeLeft: 60,
+    gameOver: false,
   };
 }
 
@@ -184,5 +188,6 @@ export function endGame(state: GameState): GameState {
   return {
     ...state,
     isPlaying: false,
+    gameOver: true,
   };
 }

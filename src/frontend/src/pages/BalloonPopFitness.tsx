@@ -41,7 +41,6 @@ import {
   initializeGame,
   getActionText,
   getBalloonEmoji,
-  calculateFinalStats,
   BALLOON_COLORS,
 } from '../games/balloonPopFitnessLogic';
 
@@ -376,8 +375,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
   const handleGameComplete = () => {
     if (gameState) {
-      const _stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', _stats);
+      // DEBUG: console.log('Game complete');
     }
     setShowMenu(true);
     setGameState(null);

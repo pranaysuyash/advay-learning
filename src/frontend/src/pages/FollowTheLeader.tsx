@@ -33,7 +33,6 @@ import {
   updateGameState,
   isLevelComplete,
   advanceLevel,
-  calculateFinalStats,
 } from '../games/followTheLeaderLogic';
 
 export const FollowTheLeader = memo(function FollowTheLeader() {
@@ -260,8 +259,7 @@ export const FollowTheLeader = memo(function FollowTheLeader() {
 
   const handleGameComplete = () => {
     if (gameState) {
-      const _stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', _stats);
+      // DEBUG: console.log('Game complete');
     }
     setShowMenu(true);
     setGameState(null);

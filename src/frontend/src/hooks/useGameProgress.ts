@@ -77,9 +77,8 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
         gameId,
         score: data.score,
         completed: data.completed,
-        level: data.level,
-        metadata: data.metadata,
-        timestamp: Date.now(),
+        metadata: { ...(data.level !== undefined ? { level: data.level } : {}), ...data.metadata },
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error(`[useGameProgress] Failed to save progress:`, error);

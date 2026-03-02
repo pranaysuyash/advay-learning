@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -30,8 +32,6 @@ interface ColorByNumberGameProps {
 }
 
 const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress: _saveProgress }: ColorByNumberGameProps) {
-  const navigate = useNavigate();
-  const _reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('color-by-number');

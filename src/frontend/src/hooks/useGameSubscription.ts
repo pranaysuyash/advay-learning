@@ -16,8 +16,6 @@ export interface UseGameSubscriptionReturn {
   hasAccess: boolean;
   /** Whether subscription status is loading */
   isLoading: boolean;
-  /** Error if subscription check failed */
-  error: Error | null;
   /** Game ID being checked */
   gameId: string;
 }
@@ -38,17 +36,16 @@ export interface UseGameSubscriptionReturn {
  * ```
  */
 export function useGameSubscription(gameId: string): UseGameSubscriptionReturn {
-  const { canAccessGame, isLoading, error } = useSubscription();
+  const { canAccessGame, isLoading } = useSubscription();
   
   const hasAccess = useMemo(() => {
-    if (isLoading || error) return false;
+    if (isLoading) return false;
     return canAccessGame(gameId);
-  }, [canAccessGame, gameId, isLoading, error]);
+  }, [canAccessGame, gameId, isLoading]);
   
   return {
     hasAccess,
     isLoading,
-    error,
     gameId,
   };
 }
