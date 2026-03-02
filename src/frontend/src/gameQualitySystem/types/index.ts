@@ -12,7 +12,7 @@ export interface Game {
     category: string;
     ageRange: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
-    estimatedTime: number; // in hours
+    estimatedTime: number;
     requiredTechnologies: string[];
     successCriteria: string[];
     isImplemented: boolean;
@@ -23,7 +23,7 @@ export interface Game {
 
 export interface AuditScore {
     dimension: AuditDimension;
-    score: number; // 1-5
+    score: number;
     comments: string;
     issues: string[];
 }

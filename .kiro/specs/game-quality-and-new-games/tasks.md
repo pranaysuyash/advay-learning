@@ -14,7 +14,7 @@ All code will be implemented in TypeScript with comprehensive unit tests and pro
 
 ## Tasks
 
-- [-] 1. Set up project structure and core interfaces
+- [ ] 1. Set up project structure and core interfaces
   - Create directory structure for game quality system
   - Define core TypeScript interfaces for Game, AuditReport, PriorityScore, etc.
   - Set up testing framework with fast-check for property-based tests

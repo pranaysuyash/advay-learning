@@ -8913,3 +8913,48 @@ Next Actions:
 1. Test refactored games
 2. Replace original files with refactored versions
 3. Proceed to C: Data export backend
+
+---
+
+### TCK-20260303-001 :: Data Export Backend (GDPR/COPPA)
+
+Ticket Stamp: STAMP-20260303T120000Z-codex-8xyz
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-03-03 12:00 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Backend API endpoints for exporting user data (JSON/CSV), SET-001 compliance
+- Out-of-scope: Frontend download UI, PDF generation
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/backend/app/api/v1/endpoints/data_export.py`, `src/backend/app/services/data_export_service.py`, `src/backend/app/schemas/data_export.py`
+- Branch/PR: `codex/wip-data-export` -> `main`
+
+Acceptance Criteria:
+
+- [ ] GET /api/v1/export/export returns complete user data export
+- [ ] GET /api/v1/export/download downloads JSON or CSV file
+- [ ] GET /api/v1/export/summary returns data counts
+- [ ] POST /api/v1/export supports filtered export options
+- [ ] Includes user info, profiles, progress, subscriptions
+- [ ] Authenticated endpoints only
+
+Execution log:
+
+- 2026-03-03 12:00 IST | Created schemas for data export | Evidence: DataExportResponse, UserExportData, etc.
+- 2026-03-03 12:00 IST | Created DataExportService | Evidence: export_user_data(), get_data_summary()
+- 2026-03-03 12:00 IST | Created data_export endpoints | Evidence: /export, /download, /summary, POST /export
+- 2026-03-03 12:00 IST | Registered router in api.py | Evidence: /api/v1/export prefix
+
+Status updates:
+
+- 2026-03-03 12:00 IST **IN_PROGRESS** — Backend endpoints created, need verification
+

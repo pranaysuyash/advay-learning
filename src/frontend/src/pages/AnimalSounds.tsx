@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 
 import { useSubscription } from '../hooks/useSubscription';
@@ -14,6 +15,7 @@ import {
 } from '../games/animalSoundsLogic';
 import { progressQueue } from '../services/progressQueue';
 import { GamePage } from '../components/GamePage';
+import { useTTS } from '../hooks/useTTS';
 
 interface InnerProps {
   score: number;
@@ -42,6 +44,8 @@ function AnimalSoundsGame({
   const [error, setError] = useState<Error | null>(null);
 
   const { playClick, playSuccess, playError } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const allowInteractionRef = useRef(true);
 
   useGameSessionProgress({
     gameName: 'Animal Sounds',
@@ -53,39 +57,61 @@ function AnimalSoundsGame({
 
   const startGame = () => {
     const newAnimals = getAnimalsForLevel(currentLevel);
+    const target = newAnimals[Math.floor(Math.random() * newAnimals.length)];
     setAnimals(newAnimals);
-    setTargetAnimal(newAnimals[Math.floor(Math.random() * newAnimals.length)]);
+    setTargetAnimal(target);
     setScore(0);
     setCorrect(0);
     setRound(0);
     setGameState('playing');
     setFeedback('');
+    allowInteractionRef.current = true;
+    if (ttsEnabled) {
+      void speak(`Which animal says ${target.sound}?`);
+    }
   };
 
   const handleAnswer = (animal: Animal) => {
-    if (!targetAnimal || gameState !== 'playing') return;
+    if (!targetAnimal || gameState !== 'playing' || !allowInteractionRef.current) return;
     playClick();
+    allowInteractionRef.current = false;
+
     if (animal.name === targetAnimal.name) {
       playSuccess();
       setCorrect((c) => c + 1);
       setScore((s) => s + 30);
-      setFeedback(`Correct! ${animal.emoji} says "${animal.sound}"`);
+      setFeedback(`Correct! The ${animal.name} says "${animal.sound}"`);
+      if (ttsEnabled) {
+        void speak(`Correct! The ${animal.name} says ${animal.sound}`);
+      }
     } else {
       playError();
-      setFeedback(`Oops! ${targetAnimal.emoji} says "${targetAnimal.sound}"`);
-    }
-    setTimeout(() => {
-      const newAnimals = getAnimalsForLevel(currentLevel);
-      setAnimals(newAnimals);
-      setTargetAnimal(
-        newAnimals[Math.floor(Math.random() * newAnimals.length)],
-      );
-      setRound((r) => r + 1);
-      setFeedback('');
-      if (round >= 4) {
-        setGameState('complete');
+      setFeedback(`Oops! The ${targetAnimal.name} says "${targetAnimal.sound}"`);
+      if (ttsEnabled) {
+        void speak(`Oops! Look for the ${targetAnimal.name}. It says ${targetAnimal.sound}`);
       }
-    }, 2000);
+    }
+
+    setTimeout(() => {
+      const nextRound = round + 1;
+      if (nextRound >= 5) {
+        setGameState('complete');
+        if (ttsEnabled) {
+          void speak(`Great job! You got ${correct + (animal.name === targetAnimal.name ? 1 : 0)} out of 5 animals right!`);
+        }
+      } else {
+        const newAnimals = getAnimalsForLevel(currentLevel);
+        const nextTarget = newAnimals[Math.floor(Math.random() * newAnimals.length)];
+        setAnimals(newAnimals);
+        setTargetAnimal(nextTarget);
+        setRound(nextRound);
+        setFeedback('');
+        allowInteractionRef.current = true;
+        if (ttsEnabled) {
+          void speak(`Which animal says ${nextTarget.sound}?`);
+        }
+      }
+    }, 2800);
   };
 
   const handleStart = () => {
@@ -142,11 +168,10 @@ function AnimalSoundsGame({
                 playClick();
                 setCurrentLevel(l.level);
               }}
-              className={`px-4 py-2 rounded-full font-bold ${
-                currentLevel === l.level
+              className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level
                   ? 'bg-amber-500 text-white'
                   : 'bg-gray-200'
-              }`}
+                }`}
             >
               Level {l.level}
             </button>
@@ -169,24 +194,65 @@ function AnimalSoundsGame({
         )}
 
         {gameState === 'playing' && targetAnimal && (
-          <div className='text-center'>
-            <p className='text-2xl font-bold mb-4'>Which animal says:</p>
-            <p className='text-4xl font-bold text-amber-600 mb-4'>
-              "{targetAnimal.sound}"
-            </p>
-            <div className='grid grid-cols-3 gap-4 mb-4'>
-              {animals.map((animal) => (
-                <button
-                  type='button'
-                  key={animal.name}
-                  onClick={() => handleAnswer(animal)}
-                  className='p-4 bg-white rounded-xl shadow-md hover:bg-amber-50 transition-all text-5xl'
+          <div className='text-center w-full max-w-2xl'>
+            <div className='bg-white shadow-xl rounded-2xl p-6 mb-8 border-4 border-amber-100 relative overflow-hidden'>
+              <div className='absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent pointer-events-none' />
+              <p className='text-xl font-bold mb-2 text-slate-500'>Which animal says:</p>
+              <div className='flex items-center justify-center gap-4'>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className='text-2xl p-3 bg-amber-100 rounded-full hover:bg-amber-200 text-amber-600'
+                  onClick={() => {
+                    if (ttsEnabled) void speak(targetAnimal.sound);
+                    playClick();
+                  }}
                 >
-                  {animal.emoji}
-                </button>
-              ))}
+                  🔊
+                </motion.button>
+                <p className='text-4xl md:text-5xl font-black text-amber-500 drop-shadow-sm'>
+                  "{targetAnimal.sound}"
+                </p>
+              </div>
             </div>
-            <p className='text-lg font-medium text-purple-600'>{feedback}</p>
+
+            <div className='grid grid-cols-2 md:grid-cols-3 gap-6 mb-8'>
+              <AnimatePresence mode="popLayout">
+                {animals.map((animal, i) => (
+                  <motion.button
+                    type='button'
+                    key={`${animal.name}-${round}`}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
+                    whileHover={{ scale: 1.05, translateY: -4 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleAnswer(animal)}
+                    className='aspect-square flex flex-col items-center justify-center p-4 bg-white rounded-3xl shadow-lg border-b-4 border-slate-200 hover:border-amber-300 hover:shadow-xl transition-all group'
+                  >
+                    <span className='text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm'>{animal.emoji}</span>
+                    <span className='mt-3 font-bold text-slate-500 opacity-60 group-hover:opacity-100'>{animal.name}</span>
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            <div className='h-12'>
+              <AnimatePresence mode="wait">
+                {feedback && (
+                  <motion.p
+                    key={feedback}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`text-xl font-bold bg-white px-6 py-2 rounded-full shadow-sm inline-block ${feedback.includes('Correct') ? 'text-green-500 border-2 border-green-200' : 'text-red-500 border-2 border-red-200'}`}
+                  >
+                    {feedback}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
             <div className='flex gap-4 mt-4'>
               <div className='bg-green-100 px-4 py-2 rounded-xl text-center'>
                 <p className='text-sm'>Correct</p>
