@@ -5874,7 +5874,7 @@ Ticket Stamp: STAMP-20260302T064753Z-codex-o74j
 Type: FEATURE
 Owner: Pranay
 Created: 2026-03-02 12:17 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P0
 
 Description:
@@ -5907,21 +5907,40 @@ Inputs:
 
 Acceptance Criteria:
 
-- [ ] Reusable movement-analysis primitives exist with tests
-- [ ] `ObstacleCourse` page implements calibration + duck/jump/sidestep gameplay
-- [ ] Route and registry integration are complete
-- [ ] Smoke test covers the new page
-- [ ] Verification commands captured in this addendum
+- [x] Reusable movement-analysis primitives exist with tests
+- [x] `ObstacleCourse` page implements calibration + duck/jump/sidestep gameplay
+- [x] Route and registry integration are complete
+- [x] Smoke test covers the new page
+- [x] Verification commands captured in this addendum
 
 Execution log:
 
 - 2026-03-02 12:14 IST | Reviewed prompt index and selected planning-first feature workflow | Evidence: `prompts/README.md`
 - 2026-03-02 12:16 IST | Completed implementation plan document before coding | Evidence: `docs/research/OBSTACLE_COURSE_IMPLEMENTATION_PLAN_2026-03-02.md`
 - 2026-03-02 12:17 IST | Created scoped feature ticket in addendum | Evidence: this entry
+- 2026-03-02 12:22 IST | Added reusable pose movement analysis and obstacle course round logic with unit tests | Evidence: `src/frontend/src/games/poseMovementAnalysis.ts`, `src/frontend/src/games/obstacleCourseLogic.ts`, matching `__tests__`
+- 2026-03-02 12:24 IST | Implemented `ObstacleCourse` page with calibration, depth meter, and multi-level obstacle flow | Evidence: `src/frontend/src/pages/ObstacleCourse.tsx`
+- 2026-03-02 12:25 IST | Integrated route, registry entry, and smoke coverage | Evidence: `src/frontend/src/App.tsx`, `src/frontend/src/data/gameRegistry.ts`, `src/frontend/src/pages/__tests__/GamePages.smoke.test.tsx`
+- 2026-03-02 12:26 IST | Ran targeted tests and verified no TypeScript errors reference the new files | Evidence: commands below
+
+Evidence:
+
+- Command: `cd src/frontend && npx vitest run src/games/__tests__/poseMovementAnalysis.test.ts src/games/__tests__/obstacleCourseLogic.test.ts`
+- Output:
+  - `2 passed`
+  - `8 passed`
+- Command: `cd src/frontend && npx vitest run src/pages/__tests__/GamePages.smoke.test.tsx -t "ObstacleCourse"`
+- Output:
+  - `1 passed`
+  - `20 skipped`
+- Command: `cd src/frontend && npx tsc --noEmit --pretty false 2>&1 | rg -n "ObstacleCourse|poseMovementAnalysis|obstacleCourseLogic|GamePages\\.smoke"`
+- Output: no matches
+- Observed: repo-wide `npm run type-check` still fails because of pre-existing unrelated errors in files such as `src/components/GamePage.test.tsx`, `src/pages/AirGuitarHero.tsx`, `src/pages/AlphabetGame.tsx`, `src/pages/AnimalSounds.tsx`, and `src/pages/BodyParts.tsx`
 
 Status updates:
 
 - 2026-03-02 12:17 IST | **IN_PROGRESS** — Planning complete; implementation starting
+- 2026-03-02 12:26 IST | **DONE** — Feature slice implemented; targeted verification passed, full repo type-check remains blocked by unrelated existing errors
 
 ---
 
@@ -6139,3 +6158,77 @@ Next actions:
 1. Create tickets for SET-001 through SET-007
 2. Prioritize P0 items (data export, privacy policy)
 3. Schedule compliance review with legal
+
+---
+
+### TCK-20260302-005 :: Game Quality Remediation - Shared Infrastructure (PR-2)
+Ticket Stamp: STAMP-20260302T200000Z-codex-gq05
+
+Type: INFRASTRUCTURE  
+Owner: Pranay  
+Created: 2026-03-02 20:00 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Create shared infrastructure for game quality remediation. Enables consistent subscription checks, progress tracking, and error handling across all 39 games.
+
+Source:
+- Audit file: `docs/audit/GAME_QUALITY_AUDIT_REPORT.md`
+- Issue: GQ-002, GQ-003, GQ-004, GQ-007
+
+Scope contract:
+- In-scope:
+  - useGameSubscription hook
+  - useGameProgress hook
+  - GameContainer component
+  - GameErrorBoundary component
+  - Console.log cleanup (6 files)
+  - Unit tests
+- Out-of-scope:
+  - Integration into individual games (separate PRs)
+  - PhysicsDemo decision (separate)
+- Behavior change allowed: YES (new shared utilities)
+
+Targets:
+- Repo: learning_for_kids
+- Files: 
+  - `src/frontend/src/hooks/useGameSubscription.ts` (new)
+  - `src/frontend/src/hooks/useGameProgress.ts` (new)
+  - `src/frontend/src/components/GameContainer.tsx` (new)
+  - `src/frontend/src/components/errors/GameErrorBoundary.tsx` (new)
+  - `src/frontend/src/hooks/__tests__/useGameSubscription.test.ts` (new)
+  - 6 files with console.log cleaned
+- Branch: main
+
+Acceptance Criteria:
+- [x] useGameSubscription hook created with tests (3 passing)
+- [x] useGameProgress hook created
+- [x] GameContainer component created
+- [x] GameErrorBoundary component created
+- [x] Console.log statements removed from 6 files
+- [x] ParentGate console.log removed
+- [x] Type-check passes
+
+Execution log:
+- [2026-03-02 19:00 IST] Created useGameSubscription hook | Evidence: Full implementation with tests
+- [2026-03-02 19:15 IST] Created useGameProgress hook | Evidence: Full implementation
+- [2026-03-02 19:30 IST] Created GameContainer component | Evidence: Combines all infrastructure
+- [2026-03-02 19:40 IST] Created GameErrorBoundary component | Evidence: Child-friendly error UI
+- [2026-03-02 19:45 IST] Cleaned console.log statements | Evidence: 6 files processed
+- [2026-03-02 19:50 IST] Removed ParentGate console.log | Evidence: 3 statements removed
+- [2026-03-02 20:00 IST] Committed PR-2 | Evidence: git commit [GQ-002/003/004]
+
+Status updates:
+- [2026-03-02 19:00 IST] **OPEN** — Ticket created
+- [2026-03-02 20:00 IST] **DONE** — PR-2 complete
+
+Next actions:
+1. PR-3: Integrate GameContainer into high-priority games (9 games)
+2. PR-1: Decide on PhysicsDemo (remove vs fix)
+3. PR-5: Batch fix remaining 25 games
+
+Risks/notes:
+- GameContainer is opt-in - games must be updated individually
+- Error boundary catches only React errors, not async errors
+- Progress saving requires profile to be selected

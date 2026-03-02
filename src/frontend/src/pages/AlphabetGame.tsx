@@ -6,7 +6,7 @@ import React, {
   useMemo,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { GameLayout } from '../components/layout/GameLayout';
@@ -25,6 +25,9 @@ import { recordProgressActivity } from '../services/progressTracking';
 import { getAllIcons } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
+import { AccessDenied } from '../components/ui/AccessDenied';
+import { useSubscription } from '../hooks/useSubscription';
+import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { GameTutorial } from '../components/GameTutorial';
@@ -37,8 +40,6 @@ import { HandTutorialOverlay } from '../components/game/AnimatedHand';
 import { GamePauseModal } from '../components/game/GamePauseModal';
 import { LoadingState } from '../components/LoadingState';
 import useInactivityDetector from '../hooks/useInactivityDetector';
-import { usePostureDetection } from '../hooks/usePostureDetection';
-import { useAttentionDetection } from '../hooks/useAttentionDetection';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useTTS } from '../hooks/useTTS';
 import { usePhonics } from '../hooks/usePhonics';
@@ -46,6 +47,7 @@ import { useCameraPermission } from '../hooks/useCameraPermission';
 import { useInitialCameraPermission } from '../hooks/useInitialCameraPermission';
 import { useAudio } from '../utils/hooks/useAudio';
 import { LanguageFlag } from '../components/ui/LanguageFlag';
+import { WellnessMonitor } from '../components/game/WellnessMonitor';
 // Centralized hand tracking hooks
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -103,6 +105,10 @@ const LANGUAGES = [
 export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const location = useLocation();
   const navigate = useNavigate();
+  const reducedMotion = useReducedMotion();
+  void reducedMotion;
+  const { canAccessGame, isLoading: subLoading } = useSubscription();
+  const hasAccess = canAccessGame('alphabet-tracing');
   const showHints = useSettingsStore((state) => state.showHints);
   const difficulty = useSettingsStore((state) => state.difficulty);
   const gameLanguageSetting = useSettingsStore((state) => state.gameLanguage);
@@ -110,6 +116,49 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const markLetterAttempt = useProgressStore(
     (state) => state.markLetterAttempt,
   );
+
+  const [error, setError] = useState<Error | null>(null);
+
+  // Show loading while checking subscription
+  if (subLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
+      </div>
+    );
+  }
+
+  // Check subscription access
+  if (!hasAccess) {
+    return (
+      <AccessDenied gameName='Alphabet Tracing' gameId='alphabet-tracing' />
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <GameContainer title='Alphabet Tracing' onHome={() => navigate('/games')}>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h2 className='text-2xl font-bold text-red-600 mb-4'>
+              Oops! Something went wrong
+            </h2>
+            <p className='text-slate-600 mb-4'>{error.message}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </GameContainer>
+    );
+  }
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -224,12 +273,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       } else {
         setFeedback('Pip can see you! 📷');
       }
-
-      // Start wellness monitoring after game starts
-      if (webcamRef.current?.video) {
-        startPostureMonitoring(webcamRef.current.video);
-        startAttentionMonitoring(webcamRef.current.video);
-      }
     } catch (error) {
       warnAlphabetGame('Camera permission check failed at game start', error);
       setCameraPermission('denied');
@@ -255,11 +298,6 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       clearTimeout(promptTimeoutRef.current);
       promptTimeoutRef.current = null;
     }
-    // Don't reset hand tracking here - let it persist for quick restarts
-
-    // Stop wellness monitoring when game stops
-    stopPostureMonitoring();
-    stopAttentionMonitoring();
   };
 
   const clearDrawing = () => {
@@ -286,40 +324,20 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   const [hydrationReminderCount, setHydrationReminderCount] =
     useState<number>(0); // Track hydration reminders
 
-  // Wellness tracking hooks
-  const {
-    startMonitoring: startPostureMonitoring,
-    stopMonitoring: stopPostureMonitoring,
-  } = usePostureDetection(
-    (alert: {
-      level: 'info' | 'warning' | 'critical';
-      message: string;
-      timestamp: number;
-    }) => {
-      // Handle posture alerts
-      setWellnessReminderType('break'); // Use break type for posture alerts
+  // Wellness tracking hooks handled by <WellnessMonitor />
+  const handleAttentionAlert = useCallback((alert: { level: string; message: string; timestamp: number }) => {
+    if (alert.level === 'critical') {
+      setWellnessReminderType('inactive');
       setShowWellnessReminder(true);
       setFeedback(alert.message);
-    },
-  );
+    }
+  }, []);
 
-  const {
-    startMonitoring: startAttentionMonitoring,
-    stopMonitoring: stopAttentionMonitoring,
-  } = useAttentionDetection(
-    (alert: {
-      level: 'info' | 'warning' | 'critical';
-      message: string;
-      timestamp: number;
-    }) => {
-      // Handle attention alerts
-      if (alert.level === 'critical') {
-        setWellnessReminderType('inactive'); // Use inactive type for attention alerts
-        setShowWellnessReminder(true);
-        setFeedback(alert.message);
-      }
-    },
-  );
+  const handlePostureAlert = useCallback((alert: { level: string; message: string; timestamp: number }) => {
+    setWellnessReminderType('break');
+    setShowWellnessReminder(true);
+    setFeedback(alert.message);
+  }, []);
 
   const handleTrackingFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -556,7 +574,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
     if (isPlaying && isHandTrackingReady) {
       setIsHandTrackingLoading(false);
       setFeedback('Pip can see you! 📷');
-      console.log('[AlphabetGame] Hand tracking became ready during gameplay');
+      // DEBUG: console.log('[AlphabetGame] Hand tracking became ready during gameplay');
     }
   }, [isPlaying, isHandTrackingReady]);
 
@@ -1112,9 +1130,9 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
       const dist =
         lastPoint && !isNaN(lastPoint.x)
           ? Math.sqrt(
-              Math.pow(point.x / canvas.width - lastPoint.x, 2) +
-                Math.pow(point.y / canvas.height - lastPoint.y, 2),
-            )
+            Math.pow(point.x / canvas.width - lastPoint.x, 2) +
+            Math.pow(point.y / canvas.height - lastPoint.y, 2),
+          )
           : Infinity;
 
       if (dist > POINT_MIN_DISTANCE) {
@@ -1401,481 +1419,488 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   }, [hydrationReminderCount, wellnessReminderType]);
 
   return (
-    <>
-      {!tutorialCompleted && (
-        <GameTutorial
-          onComplete={handleTutorialComplete}
-          onSkip={handleSkipTutorial}
-        />
-      )}
-
-      <HandTutorialOverlay
-        isOpen={showHandTutorial}
-        onComplete={handleHandTutorialComplete}
+    <GlobalErrorBoundary>
+      <WellnessMonitor
+        videoRef={webcamRef}
+        isActive={isPlaying && !isPaused && !useMouseMode}
+        onAttentionAlert={handleAttentionAlert}
+        onPostureAlert={handlePostureAlert}
       />
+      <>
+        {!tutorialCompleted && (
+          <GameTutorial
+            onComplete={handleTutorialComplete}
+            onSkip={handleSkipTutorial}
+          />
+        )}
 
-      {/* Game Area - Full Screen Mode */}
-      {isPlaying ? (
-        <GameContainer
-          title={`${selectedLanguageName} Alphabet`}
-          score={score}
-          level={currentLetterIndex + 1}
-          onHome={() => setShowExitModal(true)}
-          onPause={() => setIsPaused(!isPaused)}
-          isHandDetected={isHandTrackingReady}
-          isPlaying={isPlaying}
-        >
-          <div className='relative w-full h-full'>
-            {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
+        <HandTutorialOverlay
+          isOpen={showHandTutorial}
+          onComplete={handleHandTutorialComplete}
+        />
+
+        {/* Game Area - Full Screen Mode */}
+        {isPlaying ? (
+          <GameContainer
+            webcamRef={webcamRef}
+            title={`${selectedLanguageName} Alphabet`}
+            score={score}
+            level={currentLetterIndex + 1}
+            onHome={() => setShowExitModal(true)}
+            onPause={() => setIsPaused(!isPaused)}
+            isHandDetected={isHandTrackingReady}
+            isPlaying={isPlaying}
+          >
+            <div className='relative w-full h-full'>
+              {/* Accuracy Bar - always render for semantic accessibility; value can be 0 */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-5 mb-6 shadow-[0_4px_0_#E5B86E] absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
+              >
+                <div className='flex justify-between items-center mb-3'>
+                  <label
+                    htmlFor='accuracy-progress'
+                    className='text-text-secondary font-bold uppercase tracking-widest text-sm'
+                  >
+                    Tracing Accuracy
+                  </label>
+                  <span className={`font-black text-lg ${accuracyColorClass}`}>
+                    {accuracy}%
+                  </span>
+                </div>
+                <progress
+                  id='accuracy-progress'
+                  value={accuracy}
+                  max={100}
+                  className='w-full h-4 rounded-full'
+                />
+              </motion.div>
+              <GameLayout
+                webcamRef={webcamRef}
+                canvasRef={canvasRef}
+                highContrast={highContrast}
+                variant='hero'
+                className='w-full h-full'
+                onCameraPermission={handleCameraPermissionChange}
+                onCameraError={handleCameraError}
+                canvasEvents={{
+                  onPointerDown: handleCanvasPointerDown,
+                  onPointerMove: handleCanvasPointerMove,
+                  onPointerUp: handleCanvasPointerUpOrCancel,
+                  onPointerCancel: handleCanvasPointerUpOrCancel,
+                  onPointerLeave: handleCanvasPointerUpOrCancel,
+                }}
+              >
+                {/* Instruction Overlay with High Contrast */}
+                <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
+                  <div className='inline-block px-8 py-4 rounded-[2rem] bg-[#F2CC8F] text-advay-slate shadow-[0_6px_0_#E5B86E] transition-all duration-300 transform hover:scale-105'>
+                    <p className='text-xl md:text-2xl font-extrabold tracking-wide'>
+                      {isDrawing ? 'Trace the letter!' : 'Pinch to draw'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pinch Status (hidden in mouse mode) */}
+                {!useMouseMode && (
+                  <div className='absolute top-28 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
+                    <div className='px-5 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-sm md:text-base font-bold'>
+                      {isHandPresent ? (
+                        isPinching ? (
+                          <span className='flex items-center gap-2'>
+                            <span className='inline-block w-3 h-3 rounded-full bg-pip-orange shadow-[0_4px_0_#E5B86E]' />
+                            Pinching… Draw!
+                          </span>
+                        ) : (
+                          <span className='flex items-center gap-2'>
+                            <span className='inline-block w-3 h-3 rounded-full bg-slate-200 shadow-inner' />
+                            Hand seen — pinch to draw
+                          </span>
+                        )
+                      ) : (
+                        <span className='flex items-center gap-2 text-slate-400'>
+                          <span className='inline-block w-3 h-3 rounded-full bg-slate-100' />
+                          Show your hand to start
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Consistent letter prompt - stays in one place */}
+                {isPlaying && showLetterPrompt && (
+                  <div className='absolute top-4 left-4 z-10'>
+                    <div className='bg-white px-6 py-5 rounded-[2rem] border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
+                      <div className='flex items-center gap-4'>
+                        {/* Big letter */}
+                        <div
+                          className={`text-5xl md:text-6xl font-black leading-none text-advay-slate`}
+                        >
+                          {currentLetter.char}
+                        </div>
+                        {/* Letter name and instruction */}
+                        <div className='flex flex-col'>
+                          <span className='text-xs md:text-sm font-bold uppercase tracking-widest text-text-secondary'>
+                            Draw this letter
+                          </span>
+                          <span className='text-base md:text-xl font-extrabold text-advay-slate tracking-tight mt-1'>
+                            {currentLetter.name}
+                          </span>
+                          {currentLetter.icon && (
+                            <span className='inline-block w-12 h-12 mt-1'>
+                              <img
+                                src={
+                                  Array.isArray(currentLetter.icon)
+                                    ? currentLetter.icon[0]
+                                    : currentLetter.icon
+                                }
+                                alt={currentLetter.name}
+                                className='w-full h-full object-contain drop-shadow-[0_4px_0_#E5B86E]'
+                                onError={(e) => {
+                                  // Hide broken images gracefully
+                                  (e.target as HTMLImageElement).style.display =
+                                    'none';
+                                }}
+                              />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* In-Game Mascot */}
+                <div className='absolute bottom-4 left-4 z-20'>
+                  <Mascot state={mascotState} message={mascotMessage} />
+                </div>
+
+                {/* Standardized Game Controls - Bottom Right */}
+                <GameControls controls={gameControls} position='bottom-right' />
+              </GameLayout>
+            </div>
+          </GameContainer>
+        ) : (
+          /* Pre-Game UI - Menu Screen */
+          <section className='bg-discovery-cream min-h-screen max-w-7xl mx-auto px-4 py-8 md:py-12'>
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-5 mb-6 shadow-[0_4px_0_#E5B86E] absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
             >
-              <div className='flex justify-between items-center mb-3'>
-                <label
-                  htmlFor='accuracy-progress'
-                  className='text-text-secondary font-bold uppercase tracking-widest text-sm'
-                >
-                  Tracing Accuracy
-                </label>
-                <span className={`font-black text-lg ${accuracyColorClass}`}>
-                  {accuracy}%
-                </span>
-              </div>
-              <progress
-                id='accuracy-progress'
-                value={accuracy}
-                max={100}
-                className='w-full h-4 rounded-full'
-              />
-            </motion.div>
-            <GameLayout
-              webcamRef={webcamRef}
-              canvasRef={canvasRef}
-              highContrast={highContrast}
-              variant='hero'
-              className='w-full h-full'
-              onCameraPermission={handleCameraPermissionChange}
-              onCameraError={handleCameraError}
-              canvasEvents={{
-                onPointerDown: handleCanvasPointerDown,
-                onPointerMove: handleCanvasPointerMove,
-                onPointerUp: handleCanvasPointerUpOrCancel,
-                onPointerCancel: handleCanvasPointerUpOrCancel,
-                onPointerLeave: handleCanvasPointerUpOrCancel,
-              }}
-            >
-              {/* Instruction Overlay with High Contrast */}
-              <div className='absolute bottom-8 left-0 right-0 text-center pointer-events-none'>
-                <div className='inline-block px-8 py-4 rounded-[2rem] bg-[#F2CC8F] text-advay-slate shadow-[0_6px_0_#E5B86E] transition-all duration-300 transform hover:scale-105'>
-                  <p className='text-xl md:text-2xl font-extrabold tracking-wide'>
-                    {isDrawing ? 'Trace the letter!' : 'Pinch to draw'}
+              {/* Header */}
+              <header className='flex flex-col sm:flex-row justify-between items-start gap-4 mb-8'>
+                <div>
+                  <h1 className='text-h1 md:text-[2.5rem] font-extrabold text-advay-slate tracking-tight'>
+                    Learning Game
+                  </h1>
+                  <p className='text-text-secondary text-base md:text-lg font-bold mt-2'>
+                    Trace letters with your finger!
                   </p>
                 </div>
-              </div>
-
-              {/* Pinch Status (hidden in mouse mode) */}
-              {!useMouseMode && (
-                <div className='absolute top-28 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
-                  <div className='px-5 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-sm md:text-base font-bold'>
-                    {isHandPresent ? (
-                      isPinching ? (
-                        <span className='flex items-center gap-2'>
-                          <span className='inline-block w-3 h-3 rounded-full bg-pip-orange shadow-[0_4px_0_#E5B86E]' />
-                          Pinching… Draw!
-                        </span>
-                      ) : (
-                        <span className='flex items-center gap-2'>
-                          <span className='inline-block w-3 h-3 rounded-full bg-slate-200 shadow-inner' />
-                          Hand seen — pinch to draw
-                        </span>
-                      )
-                    ) : (
-                      <span className='flex items-center gap-2 text-slate-400'>
-                        <span className='inline-block w-3 h-3 rounded-full bg-slate-100' />
-                        Show your hand to start
-                      </span>
+                <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl px-6 py-5 shadow-[0_8px_0_#E5B86E] w-full sm:w-auto relative top-[-4px]'>
+                  <output className='text-3xl md:text-4xl font-black text-pip-orange block text-left sm:text-right mb-1'>
+                    Score: {score}
+                  </output>
+                  <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mt-1'>
+                    <span className='flex items-center gap-1 min-w-fit'>
+                      <UIIcon
+                        name='flame'
+                        size={16}
+                        className='text-pip-orange pb-0.5'
+                      />
+                      Streak {streak}
+                    </span>
+                    <span className='min-w-fit text-slate-400'>
+                      Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1}/
+                      {Math.ceil(LETTERS.length / BATCH_SIZE)}
+                    </span>
+                    {pendingCount > 0 && (
+                      <div className='inline-flex items-center gap-1 bg-amber-50 border-2 border-amber-200 text-amber-600 px-3 py-1 rounded-full text-xs font-black'>
+                        <UIIcon name='warning' size={14} className='pb-0.5' />
+                        Pending ({pendingCount})
+                      </div>
                     )}
                   </div>
                 </div>
-              )}
+              </header>
 
-              {/* Consistent letter prompt - stays in one place */}
-              {isPlaying && showLetterPrompt && (
-                <div className='absolute top-4 left-4 z-10'>
-                  <div className='bg-white px-6 py-5 rounded-[2rem] border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
-                    <div className='flex items-center gap-4'>
-                      {/* Big letter */}
-                      <div
-                        className={`text-5xl md:text-6xl font-black leading-none text-advay-slate`}
-                      >
-                        {currentLetter.char}
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 items-start'>
+                {/* Left column: current letter + status */}
+                <div className='space-y-6'>
+                  {/* Animated Letter Display */}
+                  <div className='bg-discovery-cream border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 shadow-[0_8px_0_#E5B86E] relative top-[-4px]'>
+                    <div className='flex flex-col items-center justify-center gap-6'>
+                      <div className='text-center'>
+                        <div
+                          className={`text-9xl md:text-[12rem] font-black mb-4 text-advay-slate drop-shadow-[0_4px_0_#E5B86E]`}
+                        >
+                          {currentLetter.char}
+                        </div>
+                        {currentLetter.transliteration && (
+                          <div className='text-base md:text-lg text-text-secondary mt-2 font-black uppercase tracking-widest'>
+                            {currentLetter.transliteration}
+                          </div>
+                        )}
                       </div>
-                      {/* Letter name and instruction */}
-                      <div className='flex flex-col'>
-                        <span className='text-xs md:text-sm font-bold uppercase tracking-widest text-text-secondary'>
-                          Draw this letter
-                        </span>
-                        <span className='text-base md:text-xl font-extrabold text-advay-slate tracking-tight mt-1'>
+                      <div className='w-32 h-32 mb-4 bg-pip-cream rounded-3xl p-6 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
+                        <UIIcon
+                          src={getAllIcons(currentLetter)}
+                          alt={currentLetter.name}
+                          size={128}
+                          className='w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform cursor-pointer'
+                          fallback={currentLetter.emoji || ''}
+                        />
+                      </div>
+                      <div className='text-center'>
+                        <div className='text-4xl font-black text-advay-slate tracking-tight'>
                           {currentLetter.name}
-                        </span>
-                        {currentLetter.icon && (
-                          <span className='inline-block w-12 h-12 mt-1'>
-                            <img
-                              src={
-                                Array.isArray(currentLetter.icon)
-                                  ? currentLetter.icon[0]
-                                  : currentLetter.icon
-                              }
-                              alt={currentLetter.name}
-                              className='w-full h-full object-contain drop-shadow-[0_4px_0_#E5B86E]'
-                              onError={(e) => {
-                                // Hide broken images gracefully
-                                (e.target as HTMLImageElement).style.display =
-                                  'none';
-                              }}
-                            />
-                          </span>
+                        </div>
+                        {currentLetter.pronunciation && (
+                          <div className='text-xl text-text-secondary mt-3 font-bold'>
+                            "{currentLetter.pronunciation}"
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* In-Game Mascot */}
-              <div className='absolute bottom-4 left-4 z-20'>
-                <Mascot state={mascotState} message={mascotMessage} />
-              </div>
-
-              {/* Standardized Game Controls - Bottom Right */}
-              <GameControls controls={gameControls} position='bottom-right' />
-            </GameLayout>
-          </div>
-        </GameContainer>
-      ) : (
-        /* Pre-Game UI - Menu Screen */
-        <section className='bg-discovery-cream min-h-screen max-w-7xl mx-auto px-4 py-8 md:py-12'>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {/* Header */}
-            <header className='flex flex-col sm:flex-row justify-between items-start gap-4 mb-8'>
-              <div>
-                <h1 className='text-h1 md:text-[2.5rem] font-extrabold text-advay-slate tracking-tight'>
-                  Learning Game
-                </h1>
-                <p className='text-text-secondary text-base md:text-lg font-bold mt-2'>
-                  Trace letters with your finger!
-                </p>
-              </div>
-              <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl px-6 py-5 shadow-[0_8px_0_#E5B86E] w-full sm:w-auto relative top-[-4px]'>
-                <output className='text-3xl md:text-4xl font-black text-pip-orange block text-left sm:text-right mb-1'>
-                  Score: {score}
-                </output>
-                <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mt-1'>
-                  <span className='flex items-center gap-1 min-w-fit'>
-                    <UIIcon
-                      name='flame'
-                      size={16}
-                      className='text-pip-orange pb-0.5'
+                  {/* Accuracy Bar */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className='bg-white border-3 border-[#F2CC8F] rounded-2xl p-5 shadow-[0_4px_0_#E5B86E] relative top-[-2px]'
+                  >
+                    <div className='flex justify-between items-center mb-3'>
+                      <label
+                        htmlFor='accuracy-progress'
+                        className='text-text-secondary font-bold uppercase tracking-widest text-sm'
+                      >
+                        Tracing Accuracy
+                      </label>
+                      <span
+                        className={`font-black text-lg ${accuracyColorClass}`}
+                      >
+                        {accuracy}%
+                      </span>
+                    </div>
+                    <progress
+                      id='accuracy-progress'
+                      value={accuracy}
+                      max={100}
+                      className='w-full h-4 rounded-full'
                     />
-                    Streak {streak}
-                  </span>
-                  <span className='min-w-fit text-slate-400'>
-                    Batch {Math.floor(currentLetterIndex / BATCH_SIZE) + 1}/
-                    {Math.ceil(LETTERS.length / BATCH_SIZE)}
-                  </span>
-                  {pendingCount > 0 && (
-                    <div className='inline-flex items-center gap-1 bg-amber-50 border-2 border-amber-200 text-amber-600 px-3 py-1 rounded-full text-xs font-black'>
-                      <UIIcon name='warning' size={14} className='pb-0.5' />
-                      Pending ({pendingCount})
+                  </motion.div>
+
+                  {/* Loading State with Pip */}
+                  {isHandTrackingLoading && (
+                    <div className='bg-white border border-border rounded-xl p-4 shadow-soft'>
+                      <LoadingState message='Getting hand tracking ready...' />
                     </div>
                   )}
-                </div>
-              </div>
-            </header>
 
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 items-start'>
-              {/* Left column: current letter + status */}
-              <div className='space-y-6'>
-                {/* Animated Letter Display */}
-                <div className='bg-discovery-cream border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 shadow-[0_8px_0_#E5B86E] relative top-[-4px]'>
-                  <div className='flex flex-col items-center justify-center gap-6'>
-                    <div className='text-center'>
-                      <div
-                        className={`text-9xl md:text-[12rem] font-black mb-4 text-advay-slate drop-shadow-[0_4px_0_#E5B86E]`}
-                      >
-                        {currentLetter.char}
-                      </div>
-                      {currentLetter.transliteration && (
-                        <div className='text-base md:text-lg text-text-secondary mt-2 font-black uppercase tracking-widest'>
-                          {currentLetter.transliteration}
-                        </div>
-                      )}
-                    </div>
-                    <div className='w-32 h-32 mb-4 bg-pip-cream rounded-3xl p-6 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
-                      <UIIcon
-                        src={getAllIcons(currentLetter)}
-                        alt={currentLetter.name}
-                        size={128}
-                        className='w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform cursor-pointer'
-                        fallback={currentLetter.emoji || ''}
-                      />
-                    </div>
-                    <div className='text-center'>
-                      <div className='text-4xl font-black text-advay-slate tracking-tight'>
-                        {currentLetter.name}
-                      </div>
-                      {currentLetter.pronunciation && (
-                        <div className='text-xl text-text-secondary mt-3 font-bold'>
-                          "{currentLetter.pronunciation}"
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Accuracy Bar */}
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className='bg-white border-3 border-[#F2CC8F] rounded-2xl p-5 shadow-[0_4px_0_#E5B86E] relative top-[-2px]'
-                >
-                  <div className='flex justify-between items-center mb-3'>
-                    <label
-                      htmlFor='accuracy-progress'
-                      className='text-text-secondary font-bold uppercase tracking-widest text-sm'
-                    >
-                      Tracing Accuracy
-                    </label>
-                    <span
-                      className={`font-black text-lg ${accuracyColorClass}`}
-                    >
-                      {accuracy}%
-                    </span>
-                  </div>
-                  <progress
-                    id='accuracy-progress'
-                    value={accuracy}
-                    max={100}
-                    className='w-full h-4 rounded-full'
-                  />
-                </motion.div>
-
-                {/* Loading State with Pip */}
-                {isHandTrackingLoading && (
-                  <div className='bg-white border border-border rounded-xl p-4 shadow-soft'>
-                    <LoadingState message='Getting hand tracking ready...' />
-                  </div>
-                )}
-
-                {/* Feedback */}
-                {feedback && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`rounded-xl p-4 text-center font-semibold ${
-                      feedback?.includes('Great')
+                  {/* Feedback */}
+                  {feedback && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`rounded-xl p-4 text-center font-semibold ${feedback?.includes('Great')
                         ? 'bg-green-500/20 border border-green-500/30 text-green-400'
                         : feedback?.includes('Good')
                           ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
                           : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                    }`}
-                  >
-                    {feedback}
-                  </motion.div>
-                )}
+                        }`}
+                    >
+                      {feedback}
+                    </motion.div>
+                  )}
 
-                {/* Permission Warning - Kid-Friendly Fallback */}
-                {showPermissionWarning && (
-                  <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 text-center shadow-lg'>
-                    <div className='flex items-center justify-center gap-3 text-blue-300 font-bold text-lg'>
-                      <span className='text-2xl'>✋</span>
-                      <span>Using Finger Magic Mode!</span>
+                  {/* Permission Warning - Kid-Friendly Fallback */}
+                  {showPermissionWarning && (
+                    <div className='bg-blue-500/15 border-2 border-blue-400/40 rounded-2xl p-5 text-center shadow-lg'>
+                      <div className='flex items-center justify-center gap-3 text-blue-300 font-bold text-lg'>
+                        <span className='text-2xl'>✋</span>
+                        <span>Using Finger Magic Mode!</span>
+                      </div>
+                      <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
+                        Pip can't see your hand right now (the Forgetfulness Fog
+                        is blocking the camera), but that's okay! You can use
+                        your finger on the screen to draw and rescue letters!
+                      </p>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className='mt-3 px-4 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 rounded-lg text-sm font-semibold transition'
+                        type='button'
+                      >
+                        Try Hand Magic Again 🔄
+                      </button>
                     </div>
-                    <p className='text-blue-200/90 text-base mt-2 leading-relaxed'>
-                      Pip can't see your hand right now (the Forgetfulness Fog
-                      is blocking the camera), but that's okay! You can use your
-                      finger on the screen to draw and rescue letters!
+                  )}
+                </div>
+
+                {/* Right column: setup + start */}
+                <div className='space-y-6'>
+                  {/* Menu Screen */}
+                  <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 text-center relative overflow-hidden shadow-[0_8px_0_#E5B86E] top-[-4px]'>
+                    {/* Decorative elements */}
+                    <div className='absolute inset-0 opacity-10 pointer-events-none'>
+                      <div className='absolute top-10 left-10 w-32 h-32 rounded-full bg-vision-blue blur-3xl'></div>
+                      <div className='absolute bottom-20 right-16 w-40 h-40 rounded-full bg-pip-orange blur-3xl'></div>
+                      <div className='absolute top-1/2 right-1/4 w-24 h-24 rounded-full bg-success blur-3xl'></div>
+                    </div>
+
+                    {/* Mascot Preview */}
+                    <div className='absolute -bottom-4 -left-4 opacity-90 pointer-events-none drop-shadow-xl'>
+                      <Mascot state='happy' />
+                    </div>
+
+                    <div className='w-32 h-32 mx-auto mb-8 bg-pip-cream rounded-full flex items-center justify-center border-3 border-pip-orange/20 relative z-10'>
+                      <img
+                        src='/assets/images/onboarding-hand.svg'
+                        alt='Hand tracking'
+                        className='w-20 h-20 object-contain drop-shadow-[0_4px_0_#E5B86E]'
+                      />
+                    </div>
+                    <h2 className='text-h2 md:text-4xl font-black mb-4 text-advay-slate tracking-tight relative z-10'>
+                      Ready to Learn?
+                    </h2>
+                    <p className='text-text-secondary font-bold mb-10 max-w-sm mx-auto text-lg leading-relaxed relative z-10'>
+                      Use your hand to trace letters! The camera will track your
+                      finger movements.
                     </p>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className='mt-3 px-4 py-2 bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 rounded-lg text-sm font-semibold transition'
-                      type='button'
-                    >
-                      Try Hand Magic Again 🔄
-                    </button>
-                  </div>
-                )}
-              </div>
 
-              {/* Right column: setup + start */}
-              <div className='space-y-6'>
-                {/* Menu Screen */}
-                <div className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-8 md:p-12 text-center relative overflow-hidden shadow-[0_8px_0_#E5B86E] top-[-4px]'>
-                  {/* Decorative elements */}
-                  <div className='absolute inset-0 opacity-10 pointer-events-none'>
-                    <div className='absolute top-10 left-10 w-32 h-32 rounded-full bg-vision-blue blur-3xl'></div>
-                    <div className='absolute bottom-20 right-16 w-40 h-40 rounded-full bg-pip-orange blur-3xl'></div>
-                    <div className='absolute top-1/2 right-1/4 w-24 h-24 rounded-full bg-success blur-3xl'></div>
-                  </div>
-
-                  {/* Mascot Preview */}
-                  <div className='absolute -bottom-4 -left-4 opacity-90 pointer-events-none drop-shadow-xl'>
-                    <Mascot state='happy' />
-                  </div>
-
-                  <div className='w-32 h-32 mx-auto mb-8 bg-pip-cream rounded-full flex items-center justify-center border-3 border-pip-orange/20 relative z-10'>
-                    <img
-                      src='/assets/images/onboarding-hand.svg'
-                      alt='Hand tracking'
-                      className='w-20 h-20 object-contain drop-shadow-[0_4px_0_#E5B86E]'
-                    />
-                  </div>
-                  <h2 className='text-h2 md:text-4xl font-black mb-4 text-advay-slate tracking-tight relative z-10'>
-                    Ready to Learn?
-                  </h2>
-                  <p className='text-text-secondary font-bold mb-10 max-w-sm mx-auto text-lg leading-relaxed relative z-10'>
-                    Use your hand to trace letters! The camera will track your
-                    finger movements.
-                  </p>
-
-                  {/* Language Selector */}
-                  <div className='mb-8'>
-                    <label
-                      className='block text-lg font-bold text-text-primary mb-4'
-                      htmlFor='alphabet-select'
-                    >
-                      Choose Your Alphabet
-                    </label>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                      <div className='flex flex-wrap gap-3 justify-center'>
-                        {LANGUAGES.map((lang) => (
-                          <button
-                            type='button'
-                            key={lang.code}
-                            onClick={() => {
-                              playClick();
-                              setSelectedLanguage(lang.code);
-                              setCurrentLetterIndex(0);
-                            }}
-                            className={`px-6 py-3 rounded-2xl font-extrabold text-lg transition-all transform hover:scale-105 ${
-                              selectedLanguage === lang.code
+                    {/* Language Selector */}
+                    <div className='mb-8'>
+                      <label
+                        className='block text-lg font-bold text-text-primary mb-4'
+                        htmlFor='alphabet-select'
+                      >
+                        Choose Your Alphabet
+                      </label>
+                      <form onSubmit={(e) => e.preventDefault()}>
+                        <div className='flex flex-wrap gap-3 justify-center'>
+                          {LANGUAGES.map((lang) => (
+                            <button
+                              type='button'
+                              key={lang.code}
+                              onClick={() => {
+                                playClick();
+                                setSelectedLanguage(lang.code);
+                                setCurrentLetterIndex(0);
+                              }}
+                              className={`px-6 py-3 rounded-2xl font-extrabold text-lg transition-all transform hover:scale-105 ${selectedLanguage === lang.code
                                 ? 'bg-pip-orange text-white shadow-[0_6px_0_#D4561C] relative top-[-6px]'
                                 : 'bg-discovery-cream text-advay-slate border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] relative top-[-4px] hover:bg-white'
-                            }`}
-                          >
-                            <span className='mr-3 text-xl'>
-                              <LanguageFlag code={lang.code} />
-                            </span>
-                            {lang.name}
-                          </button>
-                        ))}
-                      </div>
-                    </form>
-                  </div>
-                  <p className='text-center text-text-secondary mt-4 text-base'>
-                    Progress is tracked separately for each language
-                  </p>
+                                }`}
+                            >
+                              <span className='mr-3 text-xl'>
+                                <LanguageFlag code={lang.code} />
+                              </span>
+                              {lang.name}
+                            </button>
+                          ))}
+                        </div>
+                      </form>
+                    </div>
+                    <p className='text-center text-text-secondary mt-4 text-base'>
+                      Progress is tracked separately for each language
+                    </p>
 
-                  <div className='text-lg text-text-secondary mb-8'>
-                    Difficulty:{' '}
-                    <span className='text-text-primary font-bold capitalize'>
-                      {difficulty}
-                    </span>
-                  </div>
+                    <div className='text-lg text-text-secondary mb-8'>
+                      Difficulty:{' '}
+                      <span className='text-text-primary font-bold capitalize'>
+                        {difficulty}
+                      </span>
+                    </div>
 
-                  {/* Standardized Menu Controls */}
-                  <div className='pb-10'>
-                    {/* Spacer to ensure content doesn't overlap absolute controls */}
-                    <GameControls
-                      controls={menuControls}
-                      position='bottom-center'
-                    />
+                    {/* Standardized Menu Controls */}
+                    <div className='pb-10'>
+                      {/* Spacer to ensure content doesn't overlap absolute controls */}
+                      <GameControls
+                        controls={menuControls}
+                        position='bottom-center'
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </section>
-      )}
+            </motion.div>
+          </section>
+        )}
 
-      {/* Wellness Timer */}
-      <WellnessTimer
-        onBreakReminder={() => {
-          setWellnessReminderType('break');
-          setShowWellnessReminder(true);
-        }}
-        onHydrationReminder={() => {
-          setWellnessReminderType('water');
-          setShowWellnessReminder(true);
-        }}
-        onStretchReminder={() => {
-          setWellnessReminderType('stretch');
-          setShowWellnessReminder(true);
-        }}
-        activeThreshold={WELLNESS_ACTIVE_THRESHOLD_MINUTES}
-        hydrationThreshold={WELLNESS_HYDRATION_THRESHOLD_MINUTES}
-        stretchThreshold={WELLNESS_STRETCH_THRESHOLD_MINUTES}
-        screenTimeThreshold={WELLNESS_SCREEN_TIME_THRESHOLD_MINUTES}
-      />
-
-      {/* Wellness Reminder */}
-      {overlayVisibility.wellnessReminder && wellnessReminderType && (
-        <WellnessReminder
-          alerts={wellnessAlerts}
-          onAcknowledge={() => handleWellnessReminderDismiss()}
-          onDismiss={() => handleWellnessReminderDismiss()}
-        />
-      )}
-
-      {/* Pause Modal */}
-      <AnimatePresence>
-        <GamePauseModal
-          isVisible={overlayVisibility.pauseModal}
-          onResume={() => {
-            setIsPaused(false);
-            setFeedback("Welcome back! Let's draw more letters!");
+        {/* Wellness Timer */}
+        <WellnessTimer
+          onBreakReminder={() => {
+            setWellnessReminderType('break');
+            setShowWellnessReminder(true);
           }}
-          onExit={() => {
-            setIsPaused(false);
-            setShowExitModal(true);
+          onHydrationReminder={() => {
+            setWellnessReminderType('water');
+            setShowWellnessReminder(true);
+          }}
+          onStretchReminder={() => {
+            setWellnessReminderType('stretch');
+            setShowWellnessReminder(true);
+          }}
+          activeThreshold={WELLNESS_ACTIVE_THRESHOLD_MINUTES}
+          hydrationThreshold={WELLNESS_HYDRATION_THRESHOLD_MINUTES}
+          stretchThreshold={WELLNESS_STRETCH_THRESHOLD_MINUTES}
+          screenTimeThreshold={WELLNESS_SCREEN_TIME_THRESHOLD_MINUTES}
+        />
+
+        {/* Wellness Reminder */}
+        {overlayVisibility.wellnessReminder && wellnessReminderType && (
+          <WellnessReminder
+            alerts={wellnessAlerts}
+            onAcknowledge={() => handleWellnessReminderDismiss()}
+            onDismiss={() => handleWellnessReminderDismiss()}
+          />
+        )}
+
+        {/* Pause Modal */}
+        <AnimatePresence>
+          <GamePauseModal
+            isVisible={overlayVisibility.pauseModal}
+            onResume={() => {
+              setIsPaused(false);
+              setFeedback("Welcome back! Let's draw more letters!");
+            }}
+            onExit={() => {
+              setIsPaused(false);
+              setShowExitModal(true);
+            }}
+          />
+        </AnimatePresence>
+
+        {/* Camera Error Modal */}
+        <CameraRecoveryModal
+          isOpen={showCameraErrorModal}
+          errorMessage={cameraErrorMessage}
+          onRetryCamera={handleRetryCamera}
+          onContinueWithMouse={handleContinueWithMouse}
+          onSaveAndExit={handleSaveAndExit}
+        />
+
+        {/* Exit Confirmation Modal */}
+        <ExitConfirmationModal
+          isOpen={showExitModal}
+          onConfirmExit={handleConfirmExit}
+          onCancelExit={handleCancelExit}
+          progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
+        />
+
+        {/* Celebration Overlay */}
+        <CelebrationOverlay
+          show={overlayVisibility.celebrationOverlay}
+          letter={currentLetter.char}
+          accuracy={accuracy}
+          message={celebrationTitle}
+          onComplete={() => {
+            setShowCelebration(false);
+            nextLetter();
           }}
         />
-      </AnimatePresence>
-
-      {/* Camera Error Modal */}
-      <CameraRecoveryModal
-        isOpen={showCameraErrorModal}
-        errorMessage={cameraErrorMessage}
-        onRetryCamera={handleRetryCamera}
-        onContinueWithMouse={handleContinueWithMouse}
-        onSaveAndExit={handleSaveAndExit}
-      />
-
-      {/* Exit Confirmation Modal */}
-      <ExitConfirmationModal
-        isOpen={showExitModal}
-        onConfirmExit={handleConfirmExit}
-        onCancelExit={handleCancelExit}
-        progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
-      />
-
-      {/* Celebration Overlay */}
-      <CelebrationOverlay
-        show={overlayVisibility.celebrationOverlay}
-        letter={currentLetter.char}
-        accuracy={accuracy}
-        message={celebrationTitle}
-        onComplete={() => {
-          setShowCelebration(false);
-          nextLetter();
-        }}
-      />
-    </>
+      </>
+    </GlobalErrorBoundary>
   );
 });
 

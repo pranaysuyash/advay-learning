@@ -421,7 +421,7 @@ export const Dashboard = memo(function Dashboard() {
         }}
         onSelectPhoto={() => {
           // Would open AvatarCapture component
-          console.log('Photo avatar selected');
+          // DEBUG: console.log('Photo avatar selected');
         }}
       />
     </div>

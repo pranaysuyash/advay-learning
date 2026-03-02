@@ -273,7 +273,7 @@ export const MusicalStatues = memo(function MusicalStatues() {
   const handleGameComplete = () => {
     if (gameState) {
       const stats = calculateFinalStats(gameState);
-      console.log('Game complete:', stats);
+      // DEBUG: console.log('Game complete:', stats);
     }
     setShowMenu(true);
     setGameState(null);
@@ -289,16 +289,22 @@ export const MusicalStatues = memo(function MusicalStatues() {
   };
 
   // ===== CAMERA READY HANDLER =====
-  const _handleCameraReady = () => {
+  const handleCameraReady = () => {
     setCameraReady(true);
   };
 
   // ===== RENDER =====
   return (
-    <GameContainer title="Musical Statues" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer webcamRef={webcamRef} title="Musical Statues" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
-
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          onUserMedia={handleCameraReady}
+          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {showMenu ? (

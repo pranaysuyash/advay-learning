@@ -1,139 +1,143 @@
-import React, { ReactNode } from 'react';
-import { UIIcon } from './ui/Icon';
-import { CameraThumbnail } from './game/CameraThumbnail';
-import { useSessionProgressReporter } from '../hooks/useSessionProgressReporter';
+/**
+ * GameContainer Component
+ * 
+ * Wrapper component that provides standard game infrastructure:
+ * - Subscription access control
+ * - Error boundary
+ * - Wellness timer
+ * - Reduced motion support
+ * 
+ * @see docs/audit/GAME_QUALITY_REMEDIATION_PLAN.md
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-007
+ */
+
+import React, { useState, useCallback } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { useGameSubscription } from '../hooks/useGameSubscription';
+import { useGameProgress } from '../hooks/useGameProgress';
+import { GameErrorBoundary } from './errors/GameErrorBoundary';
+import { Loading } from './ui/Loading';
+import { Button } from './ui';
+import WellnessTimer from './WellnessTimer';
 
 interface GameContainerProps {
-  children: ReactNode;
-  title?: string;
-  score?: number;
-  level?: number;
-  onHome?: () => void;
-  onPause?: () => void;
-  onSettings?: () => void;
-  showScore?: boolean;
-  className?: string;
-  /** Pass hand detection state to show camera thumbnail (optional) */
-  isHandDetected?: boolean;
-  /** Whether the game is actively playing (shows thumbnail only during play) */
-  isPlaying?: boolean;
-  /** Whether to report session progress (default: true). Set to false if using useGameSessionProgress hook */
-  reportSession?: boolean;
-  /** Webcam ref mandatory for hand tracking to access video feed */
-  webcamRef?: any;
+  /** Unique game ID */
+  gameId: string;
+  /** Game display name */
+  gameName: string;
+  /** Game content */
+  children: React.ReactNode;
+  /** Optional: Custom access denied component */
+  accessDeniedComponent?: React.ReactNode;
+  /** Optional: Custom loading component */
+  loadingComponent?: React.ReactNode;
+  /** Whether to show wellness timer (default: true) */
+  showWellnessTimer?: boolean;
+  /** Whether to enable error boundary (default: true) */
+  enableErrorBoundary?: boolean;
 }
 
 /**
- * Standardized game container with V1 Header and game area.
- * All games should use this for consistent layout.
- *
- * Layout:
- * - Playful V1 header (72px) with Home, Score, Settings
- * - Full-screen game area (calc(100vh - 72px))
- * - Consistent styling across all games
+ * Standard game container with infrastructure
+ * 
+ * @example
+ * ```tsx
+ * <GameContainer gameId="alphabet-tracing" gameName="Draw Letters">
+ *   <AlphabetGameContent />
+ * </GameContainer>
+ * ```
  */
 export const GameContainer: React.FC<GameContainerProps> = ({
+  gameId,
+  gameName,
   children,
-  title,
-  score,
-  level,
-  onHome,
-  onPause,
-  onSettings,
-  showScore = true,
-  className = '',
-  isHandDetected,
-  isPlaying,
-  reportSession: shouldReportSession = true,
-  webcamRef,
+  accessDeniedComponent,
+  loadingComponent,
+  showWellnessTimer = true,
+  enableErrorBoundary = true,
 }) => {
-  useSessionProgressReporter({
-    gameName: title || 'game',
-    score,
-    level,
-    isPlaying,
-    enabled: shouldReportSession,
-  });
+  const { hasAccess, isLoading } = useGameSubscription(gameId);
+  const reducedMotion = useReducedMotion();
+  const [error, setError] = useState<Error | null>(null);
+
+  const handleError = useCallback((err: Error) => {
+    setError(err);
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // Loading state
+  if (isLoading) {
+    return loadingComponent ?? (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0]">
+        <Loading message={`Loading ${gameName}...`} />
+      </div>
+    );
+  }
+
+  // Access denied state
+  if (!hasAccess) {
+    return accessDeniedComponent ?? (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4">
+        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h1 className="text-3xl font-black text-advay-slate mb-4">
+            Premium Game
+          </h1>
+          <p className="text-lg text-text-secondary mb-6">
+            {gameName} is available with a subscription. Ask a parent to unlock all games!
+          </p>
+          <Button
+            variant="primary"
+            onClick={() => window.location.href = '/subscribe'}
+            className="w-full"
+          >
+            View Plans
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4">
+        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-red-200 shadow-[0_4px_0_#FECACA] text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h1 className="text-3xl font-black text-advay-slate mb-4">
+            Oops! Something went wrong
+          </h1>
+          <p className="text-lg text-text-secondary mb-6">
+            Don't worry, your progress is saved. Let's try again!
+          </p>
+          <Button
+            variant="primary"
+            onClick={handleRetry}
+            className="w-full"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Wrap content with error boundary if enabled
+  const content = enableErrorBoundary ? (
+    <GameErrorBoundary gameName={gameName} onError={handleError}>
+      {children}
+    </GameErrorBoundary>
+  ) : (
+    children
+  );
 
   return (
-    <div
-      className={`fixed inset-0 bg-[#FFF8F0] font-nunito flex flex-col overflow-hidden ${className}`}
-    >
-      {/* V1 Playful Header - 72px height */}
-      <header className='h-[72px] bg-white border-b-4 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] flex items-center justify-between px-4 sm:px-6 shrink-0 z-50'>
-        {/* Left: Home Button */}
-        <button
-          onClick={onHome}
-          className='flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] focus:outline-none focus:border-[#3B82F6]'
-          type='button'
-        >
-          <UIIcon name='home' size={22} className='text-text-secondary' />
-          <span className='hidden sm:inline text-sm font-bold uppercase tracking-wider'>
-            Exit
-          </span>
-        </button>
-
-        {/* Center: Title */}
-        {title && (
-          <h1 className='text-advay-slate font-black text-xl sm:text-2xl absolute left-1/2 -translate-x-1/2 tracking-tight'>
-            {title}
-          </h1>
-        )}
-
-        {/* Right: Score + Controls */}
-        <div className='flex items-center gap-3'>
-          {level !== undefined && (
-            <div className='hidden sm:flex items-center gap-1 px-3 py-2 bg-[#3B82F6]/10 border-2 border-[#3B82F6]/20 rounded-xl shadow-[0_4px_0_#E5B86E]'>
-              <span className='text-sm font-bold text-[#3B82F6] uppercase tracking-wider'>
-                Level
-              </span>
-              <span className='text-lg font-black text-[#3B82F6]'>{level}</span>
-            </div>
-          )}
-
-          {showScore && score !== undefined && (
-            <div className='flex items-center gap-2 px-4 py-2 bg-[#F59E0B]/10 border-2 border-[#F59E0B]/20 rounded-xl shadow-[0_4px_0_#E5B86E]'>
-              <UIIcon name='star' size={20} className='text-[#F59E0B]' />
-              <span className='text-[#F59E0B] font-black text-lg'>{score}</span>
-            </div>
-          )}
-
-          {onPause && (
-            <button
-              onClick={onPause}
-              className='p-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
-              type='button'
-              aria-label='Pause Game'
-            >
-              <UIIcon name='timer' size={22} className='text-text-secondary' />
-            </button>
-          )}
-
-          {onSettings && (
-            <button
-              onClick={onSettings}
-              className='p-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
-              type='button'
-              aria-label='Game Settings'
-            >
-              <UIIcon name='lock' size={22} className='text-text-secondary' />
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* Full-Screen Game Area */}
-      <main className='flex-1 relative overflow-hidden bg-white/50'>
-        {children}
-        {/* Camera thumbnail for hand-tracking games */}
-        {isHandDetected !== undefined && (
-          <CameraThumbnail
-            isHandDetected={!!isHandDetected}
-            visible={isPlaying !== false}
-            webcamRef={webcamRef}
-          />
-        )}
-      </main>
+    <div className={`min-h-screen bg-[#FFF8F0] ${reducedMotion ? 'reduce-motion' : ''}`}>
+      {showWellnessTimer && <WellnessTimer />}
+      {content}
     </div>
   );
 };

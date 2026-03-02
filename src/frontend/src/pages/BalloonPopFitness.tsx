@@ -19,6 +19,7 @@
 
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -376,7 +377,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
   const handleGameComplete = () => {
     if (gameState) {
       const stats = calculateFinalStats(gameState);
-      console.log('Game complete:', stats);
+      // DEBUG: console.log('Game complete:', stats);
     }
     setShowMenu(true);
     setGameState(null);
@@ -392,16 +393,22 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
   };
 
   // ===== CAMERA READY HANDLER =====
-  const _handleCameraReady = () => {
+  const handleCameraReady = () => {
     setCameraReady(true);
   };
 
   // ===== RENDER =====
   return (
-    <GameContainer title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer webcamRef={webcamRef} title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
-        
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          onUserMedia={handleCameraReady}
+          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {showMenu ? (
