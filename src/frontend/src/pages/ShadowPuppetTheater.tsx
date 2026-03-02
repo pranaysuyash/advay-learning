@@ -44,7 +44,7 @@ export function ShadowPuppetTheater() {
       const shape = getRandomShape(currentLevel, usedShapes);
       setCurrentShape(shape);
       setUsedShapes((prev) => [...prev, shape.id]);
-      
+
       // Auto-play voice hint
       setTimeout(() => {
         speakShape(shape);
@@ -124,11 +124,10 @@ export function ShadowPuppetTheater() {
               type="button"
               key={level.level}
               onClick={() => handleLevelChange(level.level)}
-              className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentLevel === level.level
+              className={`px-4 py-2 rounded-full font-bold transition-all ${currentLevel === level.level
                   ? 'bg-indigo-500 text-white shadow-lg'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+                  : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
+                }`}
             >
               Level {level.level}
             </button>
@@ -203,7 +202,7 @@ export function ShadowPuppetTheater() {
           <button
             type="button"
             onClick={handleRestart}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold transition-all"
+            className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all"
           >
             Play Again
           </button>

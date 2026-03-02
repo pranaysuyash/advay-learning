@@ -1,16 +1,23 @@
 /**
  * Bubble Pop Game
- * 
+ *
  * Blow into the microphone to pop bubbles!
  * First game to use voice/blow input.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { AccessDenied } from '../components/ui/AccessDenied';
+import { useSubscription } from '../hooks/useSubscription';
+import { progressQueue } from '../services/progressQueue';
+import { useProgressStore } from '../store';
+import WellnessTimer from '../components/WellnessTimer';
+import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
-import '../styles/animations.css';
 import { useMicrophoneInput } from '../hooks/useMicrophoneInput';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -29,16 +36,23 @@ import {
 const TARGET_FPS = 60;
 const FRAME_TIME = 1000 / TARGET_FPS;
 
-export default function BubblePop() {
+export const BubblePop = memo(function BubblePopComponent() {
+  const navigate = useNavigate();
+  const reducedMotion = useReducedMotion();
+  const { canAccessGame, isLoading: subLoading } = useSubscription();
+  const hasAccess = canAccessGame('bubble-pop');
+  const { currentProfile } = useProgressStore();
+  const { onGameComplete } = useGameDrops('bubble-pop');
+
   // Audio
   const { playClick, playLevelUp } = useAudio();
-  const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete: _onGameComplete } = useGameDrops('bubble-pop');
+  const { speak, stop: stopTTS, isEnabled: ttsEnabled } = useTTS();
 
   // Game state
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [showMenu, setShowMenu] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // Animation refs
   const lastFrameTimeRef = useRef<number>(0);
@@ -50,63 +64,167 @@ export default function BubblePop() {
     gameStateRef.current = gameState;
   }, [gameState]);
 
+  // Show loading while checking subscription
+  if (subLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
+      </div>
+    );
+  }
+
+  // Check subscription access
+  if (!hasAccess) {
+    return <AccessDenied gameName='Bubble Pop' gameId='bubble-pop' />;
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <GameContainer title='Bubble Pop' onHome={() => navigate('/dashboard')}>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h2 className='text-2xl font-bold text-red-600 mb-4'>
+              Oops! Something went wrong
+            </h2>
+            <p className='text-slate-600 mb-4'>{error.message}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </GameContainer>
+    );
+  }
+
+  // Save progress on game complete
+  const handleGameComplete = useCallback(
+    async (finalScore: number) => {
+      if (!currentProfile) return;
+
+      try {
+        await progressQueue.add({
+          profileId: currentProfile.id,
+          gameId: 'bubble-pop',
+          score: finalScore,
+          completed: true,
+          metadata: {
+            level: gameState.level,
+            poppedCount: gameState.poppedCount,
+            missedCount: gameState.missedCount,
+          },
+        });
+        onGameComplete(finalScore);
+      } catch (err) {
+        console.error('Failed to save progress:', err);
+        setError(err as Error);
+      }
+    },
+    [
+      currentProfile,
+      gameState.level,
+      gameState.poppedCount,
+      gameState.missedCount,
+      onGameComplete,
+    ],
+  );
+
   // Microphone input for blow detection
-  const { isActive, volume, isBlowing, error, start, stop } = useMicrophoneInput({
-    blowThreshold: 0.25,
+  const {
+    isActive,
+    volume,
+    isBlowing,
+    error: micError,
+    start,
+    stop,
+  } = useMicrophoneInput({
+    blowThreshold: 0.12,
     minBlowDuration: 100,
     cooldown: 200,
     onBlow: () => {
-      // Blow detected - check hits
-      setGameState(prev => {
-        const newState = checkBlowHits(prev, 0.5);  // High volume for strong blow
-        
-        // TTS feedback for milestone pops
-        if (ttsEnabled && newState.poppedCount > prev.poppedCount) {
-          const newlyPopped = newState.poppedCount - prev.poppedCount;
-          if (newState.poppedCount % 5 === 0) {
-            void speak(`${newState.poppedCount} bubbles popped! Great job!`);
-          } else if (newlyPopped >= 3) {
-            void speak('Wow! You popped a lot!');
+      try {
+        // Blow detected - check hits
+        setGameState((prev) => {
+          const newState = checkBlowHits(prev, 0.5);
+
+          // TTS feedback for milestone pops
+          if (ttsEnabled && newState.poppedCount > prev.poppedCount) {
+            const newlyPopped = newState.poppedCount - prev.poppedCount;
+            if (newState.poppedCount % 5 === 0) {
+              void speak(`${newState.poppedCount} bubbles popped! Great job!`);
+            } else if (newlyPopped >= 3) {
+              void speak('Wow! You popped a lot!');
+            }
           }
-        }
-        
-        return newState;
-      });
+
+          return newState;
+        });
+      } catch (err) {
+        console.error('Blow handling failed:', err);
+        setError(err as Error);
+      }
     },
   });
 
+  // Handle mic error
+  useEffect(() => {
+    if (micError) {
+      setError(new Error(`Microphone error: ${micError}`));
+    }
+  }, [micError]);
+
   // Game loop
-  const gameLoop = useCallback((timestamp: number) => {
-    if (!lastFrameTimeRef.current) {
-      lastFrameTimeRef.current = timestamp;
-    }
-
-    const deltaTime = timestamp - lastFrameTimeRef.current;
-
-    if (deltaTime >= FRAME_TIME) {
-      setGameState(prev => {
-        let newState = updateBubbles(prev, deltaTime);
-
-        // Check for blow hits based on volume
-        if (isActive && volume > 0.2) {
-          newState = checkBlowHits(newState, volume);
+  const gameLoop = useCallback(
+    (timestamp: number) => {
+      try {
+        if (!lastFrameTimeRef.current) {
+          lastFrameTimeRef.current = timestamp;
         }
 
-        // Level up every 10 pops
-        if (newState.poppedCount > 0 && newState.poppedCount % 10 === 0 &&
-          newState.poppedCount !== prev.poppedCount) {
-          newState = { ...newState, level: Math.min(10, newState.level + 1) };
-          playLevelUp();
+        const deltaTime = timestamp - lastFrameTimeRef.current;
+
+        if (deltaTime >= FRAME_TIME) {
+          setGameState((prev) => {
+            let newState = updateBubbles(prev, deltaTime);
+
+            // Check for blow hits based on volume
+            if (isActive && volume > 0.12) {
+              newState = checkBlowHits(newState, volume);
+            }
+
+            // Level up every 10 pops
+            if (
+              newState.poppedCount > 0 &&
+              newState.poppedCount % 10 === 0 &&
+              newState.poppedCount !== prev.poppedCount
+            ) {
+              newState = {
+                ...newState,
+                level: Math.min(10, newState.level + 1),
+              };
+              playLevelUp();
+            }
+
+            return newState;
+          });
+
+          lastFrameTimeRef.current = timestamp;
         }
 
-        return newState;
-      });
-
-      lastFrameTimeRef.current = timestamp;
-    }
-
-    animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [isActive, volume, playLevelUp]);
+        animationFrameRef.current = requestAnimationFrame(gameLoop);
+      } catch (err) {
+        console.error('Game loop failed:', err);
+        setError(err as Error);
+      }
+    },
+    [isActive, volume, playLevelUp],
+  );
 
   // Start/stop game loop
   useEffect(() => {
@@ -121,275 +239,455 @@ export default function BubblePop() {
     };
   }, [gameState.isPlaying, showMenu, gameLoop]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stop();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [stop]);
-
   const handleStart = async () => {
-    playClick();
-    // Start microphone
-    await start();
+    try {
+      playClick();
+      // Start microphone
+      await start();
 
-    setGameState(startGame(initializeGame()));
-    setShowMenu(false);
-    setShowCelebration(false);
+      setGameState(startGame(initializeGame()));
+      setShowMenu(false);
+      setShowCelebration(false);
+    } catch (err) {
+      console.error('Game start failed:', err);
+      setError(err as Error);
+    }
   };
 
-  const handleStop = () => {
-    playClick();
-    _onGameComplete();
-    stop();
-    setGameState(endGame(gameState));
-    setShowMenu(true);
-  };
+  const handleStop = useCallback(async () => {
+    try {
+      playClick();
+      // only award drops if player actually played / popped bubbles
+      if (gameState.poppedCount > 0 || gameState.isPlaying) {
+        await handleGameComplete(gameState.score);
+      }
+      // ensure any pending speech is canceled immediately
+      stopTTS();
+      stop();
+      setGameState(endGame(gameState));
+      setShowMenu(true);
+      // navigate back to dashboard for a full exit experience
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Game stop failed:', err);
+      setError(err as Error);
+    }
+  }, [gameState, handleGameComplete, stopTTS, stop, navigate, playClick]);
 
   const stats = getStats(gameState);
 
   return (
-    <GameContainer title="Bubble Pop" onHome={handleStop}>
-      {/* Microphone permission/error display */}
-      {error && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm z-50">
-          {error}
-        </div>
-      )}
+    <GlobalErrorBoundary>
+      <GameContainer
+        title='Bubble Pop'
+        onHome={handleStop}
+        reportSession={false}
+      >
+        {showMenu ? (
+          // Menu Screen
+          <div className='flex flex-col items-center justify-center h-full p-6'>
+            <motion.svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='96'
+              height='96'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='1.5'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='text-blue-400 mb-4'
+              animate={reducedMotion ? {} : { y: [0, -10, 0] }}
+              transition={
+                reducedMotion
+                  ? { duration: 0.01 }
+                  : { duration: 1, repeat: Infinity }
+              }
+            >
+              <circle cx='12' cy='12' r='10' />
+              <circle cx='12' cy='12' r='4' opacity='0.5' />
+            </motion.svg>
+            <h2 className='text-3xl font-bold text-slate-800 mb-4'>
+              Bubble Pop!
+            </h2>
 
-      {showMenu ? (
-        // Menu Screen
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mb-4 animate-bounce"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" opacity="0.5"/></svg>
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">Bubble Pop!</h2>
-
-          {/* Goal Statement with Semantic Attributes */}
-          <div
-            data-ux-goal="Blow into the microphone to pop bubbles and score points!"
-            data-ux-instruction="Get close to the microphone and blow as hard as you can"
-            data-ux-action="blow"
-            className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300"
-          >
-            <div className="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              <div>
-                <p className="font-bold text-blue-800">GOAL:</p>
-                <p className="text-blue-700">Blow bubbles to pop them and score!</p>
-                <p className="text-blue-600 text-sm">Blow hard → Pop! → Score!</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Microphone Warning */}
-          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
-            <div>
-              <h3 className="font-bold text-yellow-800 mb-1">You need a microphone!</h3>
-              <p className="text-yellow-700 text-sm">
-                This game uses your microphone to detect when you blow.
-                Make sure to <strong>allow microphone access</strong> when prompted.
-              </p>
-            </div>
-          </div>
-
-          {/* Voice Instructions */}
-          {ttsEnabled && (
-            <div className="mb-4 w-full max-w-md">
-              <VoiceInstructions
-                instructions={[
-                  'Blow into the microphone to pop bubbles!',
-                  'The harder you blow, the more bubbles pop!',
-                  'Do not let bubbles float away!',
-                ]}
-                autoSpeak={true}
-                showReplayButton={true}
-                replayButtonPosition='bottom-right'
-              />
-            </div>
-          )}
-
-          <div className="bg-blue-50 rounded-xl p-6 max-w-md mb-6">
-            <h3 className="font-bold text-blue-800 mb-3">How to Play:</h3>
-            <ol className="text-blue-700 text-sm space-y-3">
-              <li className="flex items-center gap-2">
-                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">1</span>
-                <span>Click "Start" and allow microphone access</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">2</span>
-                <span>Bubbles float up from the bottom</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">3</span>
-                <span><strong>Blow into your microphone</strong> to pop them!</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">4</span>
-                <span>Don&apos;t let them float away!</span>
-              </li>
-            </ol>
-          </div>
-
-          <button
-            onClick={handleStart}
-            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg transform hover:scale-105 flex items-center gap-3"
-          >
-            Start Blowing!
-          </button>
-
-          <p className="text-xs text-slate-400 mt-4">
-            First game with microphone input!
-          </p>
-        </div>
-      ) : (
-        // Game Screen
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-sky-200 to-sky-400">
-          {/* Stats Bar */}
-          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-sm z-10">
-            <div className="flex gap-4">
-              <div className="text-sm">
-                <span className="text-slate-500">Score:</span>
-                <span className="font-bold text-blue-600 ml-1">{gameState.score}</span>
-              </div>
-              <div className="text-sm">
-                <span className="text-slate-500">Level:</span>
-                <span className="font-bold text-purple-600 ml-1">{gameState.level}</span>
-              </div>
-              <div className="text-sm">
-                <span className="text-slate-500">Popped:</span>
-                <span className="font-bold text-green-600 ml-1">{gameState.poppedCount}</span>
-              </div>
-            </div>
-
-            {/* Volume indicator */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Blow:</span>
-              <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-75 ${isBlowing ? 'bg-red-500' : 'bg-blue-500'
-                    }`}
-                  style={{ width: `${volume * 100}%` }}
-                />
-              </div>
-              {isBlowing && (
-                <span className="text-red-500 animate-pulse font-bold text-xs">BLOW!</span>
-              )}
-            </div>
-          </div>
-
-          {/* Bubbles */}
-          {gameState.bubbles.map((bubble) => (
-            <BubbleView key={bubble.id} bubble={bubble} />
-          ))}
-
-          {/* Blow effect overlay */}
-          {isBlowing && (
+            {/* Goal Statement with Semantic Attributes */}
             <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,${volume * 0.5}) 0%, transparent 50%)`,
-              }}
-            />
-          )}
-
-          {/* Instructions Header with Semantic Attributes */}
-          <div
-            data-ux-goal="Blow into the microphone to pop bubbles and score points!"
-            data-ux-instruction="Get close to the microphone and blow as hard as you can"
-            data-ux-action="blow"
-            data-ux-progress={`${gameState.poppedCount} bubbles popped`}
-            className="absolute top-16 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center z-10 shadow-lg"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              <p className="font-black">GOAL: Blow into your microphone to pop bubbles!</p>
+              data-ux-goal='Blow into the microphone to pop bubbles and score points!'
+              data-ux-instruction='Get close to the microphone and blow as hard as you can'
+              data-ux-action='blow'
+              className='bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-4 mb-4 max-w-md border-2 border-blue-300'
+            >
+              <div className='flex items-center gap-3'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='32'
+                  height='32'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='text-blue-600'
+                >
+                  <circle cx='12' cy='12' r='10' />
+                  <circle cx='12' cy='12' r='6' />
+                  <circle cx='12' cy='12' r='2' />
+                </svg>
+                <div>
+                  <p className='font-bold text-blue-800'>GOAL:</p>
+                  <p className='text-blue-700'>
+                    Blow bubbles to pop them and score!
+                  </p>
+                  <p className='text-blue-600 text-sm'>
+                    Blow hard → Pop! → Score!
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Instructions overlay at bottom */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
-            {/* Microphone Active Indicator */}
-            {!isActive && (
-              <div className="bg-red-100 border-2 border-red-400 rounded-xl px-4 py-2 flex items-center gap-2 animate-pulse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600"><path d="m18 9-5 5"/><path d="m13 9 5 5"/><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
-                <span className="font-bold text-red-700">Click Start to enable microphone!</span>
+            {/* Microphone Warning */}
+            <div className='bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 max-w-md mb-6 flex items-start gap-3'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='32'
+                height='32'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                className='text-yellow-600'
+              >
+                <circle cx='12' cy='12' r='10' />
+                <path d='M12 2v12' />
+                <path d='M17 10a5 5 0 0 0-10 0' />
+                <path d='M19 10a7 7 0 0 0-14 0' />
+                <path d='M8 21h8' />
+              </svg>
+              <div>
+                <h3 className='font-bold text-yellow-800 mb-1'>
+                  You need a microphone!
+                </h3>
+                <p className='text-yellow-700 text-sm'>
+                  This game uses your microphone to detect when you blow. Make
+                  sure to <strong>allow microphone access</strong> when
+                  prompted.
+                </p>
+              </div>
+            </div>
+
+            {/* Voice Instructions */}
+            {ttsEnabled && (
+              <div className='mb-4 w-full max-w-md'>
+                <VoiceInstructions
+                  instructions={[
+                    'Blow into the microphone to pop bubbles!',
+                    'The harder you blow, the more bubbles pop!',
+                    'Do not let bubbles float away!',
+                  ]}
+                  autoSpeak={true}
+                  showReplayButton={true}
+                  replayButtonPosition='bottom-right'
+                />
               </div>
             )}
-            
-            <div className={`rounded-2xl px-6 py-4 shadow-xl border-4 flex items-center gap-4 transition-all ${isBlowing ? 'bg-green-100 border-green-400 scale-105' : 'bg-white/95 border-blue-400'}`}>
-              <div className={`text-4xl ${isBlowing ? 'animate-pulse' : 'animate-bounce'}`}>
-                {isBlowing ? (
-                  <span className="text-4xl font-bold text-green-600">POOF!</span>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M12 19v3"/><path d="M12 2v12"/><path d="M17 10a5 5 0 0 0-10 0"/><path d="M19 10a7 7 0 0 0-14 0"/><path d="M8 21h8"/></svg>
+
+            <div className='bg-blue-50 rounded-xl p-6 max-w-md mb-6'>
+              <h3 className='font-bold text-blue-800 mb-3'>How to Play:</h3>
+              <ol className='text-blue-700 text-sm space-y-3'>
+                <li className='flex items-center gap-2'>
+                  <span className='bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs'>
+                    1
+                  </span>
+                  <span>Click "Start" and allow microphone access</span>
+                </li>
+                <li className='flex items-center gap-2'>
+                  <span className='bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs'>
+                    2
+                  </span>
+                  <span>Bubbles float up from the bottom</span>
+                </li>
+                <li className='flex items-center gap-2'>
+                  <span className='bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs'>
+                    3
+                  </span>
+                  <span>
+                    <strong>Blow into your microphone</strong> to pop them!
+                  </span>
+                </li>
+                <li className='flex items-center gap-2'>
+                  <span className='bg-blue-200 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs'>
+                    4
+                  </span>
+                  <span>Don&apos;t let them float away!</span>
+                </li>
+              </ol>
+            </div>
+
+            <motion.button
+              onClick={handleStart}
+              whileHover={reducedMotion ? {} : { scale: 1.05 }}
+              whileTap={reducedMotion ? {} : { scale: 0.95 }}
+              className='px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg flex items-center gap-3'
+            >
+              Start Blowing!
+            </motion.button>
+
+            <p className='text-xs text-slate-400 mt-4'>
+              First game with microphone input!
+            </p>
+          </div>
+        ) : (
+          // Game Screen
+          <div className='relative w-full h-full overflow-hidden bg-gradient-to-b from-sky-200 to-sky-400'>
+            {/* Stats Bar */}
+            <div className='absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-sm z-10'>
+              <div className='flex gap-4'>
+                <div className='text-sm'>
+                  <span className='text-slate-500'>Score:</span>
+                  <span className='font-bold text-blue-600 ml-1'>
+                    {gameState.score}
+                  </span>
+                </div>
+                <div className='text-sm'>
+                  <span className='text-slate-500'>Level:</span>
+                  <span className='font-bold text-purple-600 ml-1'>
+                    {gameState.level}
+                  </span>
+                </div>
+                <div className='text-sm'>
+                  <span className='text-slate-500'>Popped:</span>
+                  <span className='font-bold text-green-600 ml-1'>
+                    {gameState.poppedCount}
+                  </span>
+                </div>
+              </div>
+
+              {/* Volume indicator */}
+              <div className='flex items-center gap-2'>
+                <span className='text-xs text-slate-500'>Blow:</span>
+                <div className='w-24 h-2 bg-slate-200 rounded-full overflow-hidden'>
+                  <div
+                    className={`h-full transition-all duration-75 ${
+                      isBlowing ? 'bg-red-500' : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${volume * 100}%` }}
+                  />
+                </div>
+                {isBlowing && (
+                  <span className='text-red-500 animate-pulse font-bold text-xs'>
+                    BLOW!
+                  </span>
                 )}
               </div>
-              <div className="text-left">
-                <p className={`font-bold text-lg ${isBlowing ? 'text-green-800' : 'text-blue-800'}`}>
-                  {isBlowing ? 'Great blowing! Keep going!' : 'Get close to the mic!'}
-                </p>
-                <p className={`${isBlowing ? 'text-green-600' : 'text-blue-600'}`}>
-                  {isBlowing ? 'You are popping bubbles!' : 'Take a deep breath and BLOW hard!'}
-                </p>
-                <p className="text-slate-500 text-sm mt-1">
-                  {isBlowing ? 'Keep blowing!' : 'Mic → Mouth → Blow!'}
+            </div>
+
+            {/* Bubbles */}
+            {gameState.bubbles.map((bubble) => (
+              <BubbleView
+                key={bubble.id}
+                bubble={bubble}
+                reducedMotion={Boolean(reducedMotion)}
+              />
+            ))}
+
+            {/* Blow effect overlay */}
+            {isBlowing && (
+              <div
+                className='absolute inset-0 pointer-events-none'
+                style={{
+                  background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,${volume * 0.5}) 0%, transparent 50%)`,
+                }}
+              />
+            )}
+
+            {/* Instructions Header with Semantic Attributes */}
+            <div
+              data-ux-goal='Blow into the microphone to pop bubbles and score points!'
+              data-ux-instruction='Get close to the microphone and blow as hard as you can'
+              data-ux-action='blow'
+              data-ux-progress={`${gameState.poppedCount} bubbles popped`}
+              className='absolute top-16 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center z-10 shadow-lg'
+            >
+              <div className='flex items-center justify-center gap-2'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='text-white'
+                >
+                  <circle cx='12' cy='12' r='10' />
+                  <circle cx='12' cy='12' r='6' />
+                  <circle cx='12' cy='12' r='2' />
+                </svg>
+                <p className='font-black'>
+                  GOAL: Blow into your microphone to pop bubbles!
                 </p>
               </div>
             </div>
 
-            {/* Visual blow meter */}
-            <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-600">Blow Power:</span>
-              <div className="w-32 h-4 bg-slate-200 rounded-full overflow-hidden border-2 border-slate-300">
+            {/* Instructions overlay at bottom */}
+            <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10'>
+              {/* Microphone Active Indicator */}
+              {!isActive && (
+                <div className='bg-red-100 border-2 border-red-400 rounded-xl px-4 py-2 flex items-center gap-2 animate-pulse'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    className='text-red-600'
+                  >
+                    <circle cx='12' cy='12' r='10' />
+                    <path d='M12 2v12' />
+                    <path d='M17 10a5 5 0 0 0-10 0' />
+                    <path d='M19 10a7 7 0 0 0-14 0' />
+                    <path d='M8 21h8' />
+                  </svg>
+                  <span className='font-bold text-red-700'>
+                    Click Start to enable microphone!
+                  </span>
+                </div>
+              )}
+
+              <div
+                className={`rounded-2xl px-6 py-4 shadow-xl border-4 flex items-center gap-4 transition-all ${isBlowing ? 'bg-green-100 border-green-400 scale-105' : 'bg-white/95 border-blue-400'}`}
+              >
                 <div
-                  className={`h-full transition-all duration-100 ${volume > 0.5 ? 'bg-red-500' : volume > 0.25 ? 'bg-yellow-500' : 'bg-blue-500'
-                    }`}
-                  style={{ width: `${Math.min(100, volume * 100)}%` }}
-                />
+                  className={`text-4xl ${isBlowing ? 'animate-pulse' : 'animate-bounce'}`}
+                >
+                  {isBlowing ? (
+                    <span className='text-4xl font-bold text-green-600'>
+                      POOF!
+                    </span>
+                  ) : (
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width='40'
+                      height='40'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      className='text-blue-600'
+                    >
+                      <circle cx='12' cy='12' r='10' />
+                      <path d='M12 2v12' />
+                      <path d='M17 10a5 5 0 0 0-10 0' />
+                      <path d='M19 10a7 7 0 0 0-14 0' />
+                      <path d='M8 21h8' />
+                    </svg>
+                  )}
+                </div>
+                <div className='text-left'>
+                  <p
+                    className={`font-bold text-lg ${isBlowing ? 'text-green-800' : 'text-blue-800'}`}
+                  >
+                    {isBlowing
+                      ? 'Great blowing! Keep going!'
+                      : 'Get close to the mic!'}
+                  </p>
+                  <p
+                    className={`${isBlowing ? 'text-green-600' : 'text-blue-600'}`}
+                  >
+                    {isBlowing
+                      ? 'You are popping bubbles!'
+                      : 'Take a deep breath and BLOW hard!'}
+                  </p>
+                  <p className='text-slate-500 text-sm mt-1'>
+                    {isBlowing ? 'Keep blowing!' : 'Mic → Mouth → Blow!'}
+                  </p>
+                </div>
               </div>
-              <span className="text-lg font-bold">{isBlowing ? 'WOW!' : 'Ready'}</span>
+
+              {/* Visual blow meter */}
+              <div className='bg-white/90 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2'>
+                <span className='text-sm font-bold text-slate-600'>
+                  Blow Power:
+                </span>
+                <div className='w-32 h-4 bg-slate-200 rounded-full overflow-hidden border-2 border-slate-300'>
+                  <div
+                    className={`h-full transition-all duration-100 ${
+                      volume > 0.5
+                        ? 'bg-red-500'
+                        : volume > 0.25
+                          ? 'bg-yellow-500'
+                          : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${Math.min(100, volume * 100)}%` }}
+                  />
+                </div>
+                <span className='text-lg font-bold'>
+                  {isBlowing ? 'WOW!' : 'Ready'}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Celebration */}
-      <CelebrationOverlay
-        show={showCelebration}
-        letter="O"
-        accuracy={stats.accuracy}
-        onComplete={() => setShowCelebration(false)}
-        message={`Level ${gameState.level} Complete!`}
-      />
-    </GameContainer>
+        {/* Celebration */}
+        <CelebrationOverlay
+          show={showCelebration}
+          letter='O'
+          accuracy={stats.accuracy}
+          onComplete={() => setShowCelebration(false)}
+          message={`Level ${gameState.level} Complete!`}
+        />
+
+        {/* Wellness timer */}
+        <WellnessTimer />
+      </GameContainer>
+    </GlobalErrorBoundary>
   );
-}
+});
 
 // Bubble component
-function BubbleView({ bubble }: { bubble: Bubble }) {
+function BubbleView({
+  bubble,
+  reducedMotion,
+}: {
+  bubble: Bubble;
+  reducedMotion: boolean;
+}) {
   if (bubble.isPopped) return null;
 
   const wobbleX = Math.sin(bubble.wobble) * 20;
 
   return (
-    <div
-      className="absolute rounded-full transition-transform"
+    <motion.div
+      className='absolute rounded-full transition-transform'
       style={{
-        left: `${(bubble.x * 100)}%`,
-        top: `${(bubble.y * 100)}%`,
+        left: `${bubble.x * 100}%`,
+        top: `${bubble.y * 100}%`,
         width: bubble.size,
         height: bubble.size,
         background: `radial-gradient(circle at 30% 30%, ${bubble.color}, ${bubble.color}dd)`,
         boxShadow: `inset -5px -5px 10px rgba(0,0,0,0.1), inset 5px 5px 10px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.2)`,
-        transform: `translate(-50%, -50%) translateX(${wobbleX}px)`,
       }}
+      animate={reducedMotion ? {} : { x: wobbleX }}
+      transition={
+        reducedMotion ? { duration: 0.01 } : { duration: 0.5, repeat: Infinity }
+      }
     >
       {/* Highlight */}
       <div
-        className="absolute rounded-full"
+        className='absolute rounded-full'
         style={{
           width: '30%',
           height: '30%',
@@ -398,6 +696,6 @@ function BubbleView({ bubble }: { bubble: Bubble }) {
           background: 'rgba(255,255,255,0.6)',
         }}
       />
-    </div>
+    </motion.div>
   );
 }

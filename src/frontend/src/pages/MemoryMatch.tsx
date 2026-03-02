@@ -15,12 +15,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
-import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameContainer } from '../components/GameContainer';
@@ -155,7 +153,7 @@ export function MemoryMatch() {
       setShowCelebration(true);
       onGameComplete(score);
     }
-  }, [completed]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [completed]);  
 
   // ── Flip a card ────────────────────────────────────────────────────────────
   const flipCard = useCallback((cardId: string) => {
@@ -267,25 +265,17 @@ export function MemoryMatch() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <GameContainer
-      title='Memory Match'
+    <GameContainer webcamRef={webcamRef}       title='Memory Match'
       score={score}
       level={difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3}
       showScore
+      reportSession={false}
       onHome={() => { setShowMenu(true); setGameStarted(false); }}
       isHandDetected={isHandDetected}
       isPlaying={gameStarted && !showMenu}
     >
       {/* Hidden webcam */}
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        mirrored
-        videoConstraints={{ width: 640, height: 480, facingMode: 'user' }}
-        style={{ display: 'none' }}
-      />
 
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted && !showMenu} />
       <HandTrackingStatus
         isHandDetected={gameStarted ? isHandDetected : true}
         pauseOnHandLost={false}

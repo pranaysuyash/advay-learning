@@ -97,8 +97,9 @@ if (typeof globalThis.SpeechSynthesisUtterance === 'undefined') {
     pitch = 1;
     volume = 1;
     voice: SpeechSynthesisVoice | null = null;
-    onend: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null =
-      null;
+    onend:
+      | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+      | null = null;
     onerror:
       | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisErrorEvent) => any)
       | null = null;
@@ -136,7 +137,10 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 }
 
 // Mock Web Audio API for hooks/services that create AudioContext in unit tests.
-if (typeof window !== 'undefined' && typeof (window as any).AudioContext === 'undefined') {
+if (
+  typeof window !== 'undefined' &&
+  typeof (window as any).AudioContext === 'undefined'
+) {
   class MockAudioContext {
     state: AudioContextState = 'running';
     currentTime = 0;
@@ -200,3 +204,14 @@ if (typeof globalThis.Audio === 'undefined') {
     }),
   });
 }
+
+// Most component tests are not subscription-gating tests; keep them focused on
+// render/interaction behavior by default.
+vi.mock('../hooks/useSubscription', () => ({
+  useSubscription: () => ({
+    canAccessGame: () => true,
+    hasActiveSubscription: true,
+    isLoading: false,
+    isFullyAccessible: true,
+  }),
+}));

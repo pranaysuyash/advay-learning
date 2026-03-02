@@ -11,6 +11,23 @@
 **Games with Pages**: ~33 pages exist
 **Games Needing Implementation**: 2-3 games
 
+### 2026-02-28 Audit Linkage Update
+
+This file is now linked to `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` for runtime evidence and age/input-resilience tracking. The exploratory coverage source is `src/frontend/docs/ux-analysis/ux-analysis-report.md`.
+
+| Game ID | Runtime evidence method | Last artifact date | Age/input note |
+|---|---|---|---|
+| `story-sequence` | Option A (Playwright exploratory) | 2026-02-28 | Observed; start discoverability issue flagged in UX run |
+| `shape-safari` | Option A (Playwright exploratory) | 2026-02-28 | Observed; fallback parity still pending |
+| `free-draw` | Option A (Playwright exploratory) | 2026-02-28 | Observed; tool visibility issue flagged |
+| `math-monsters` | Option A (Playwright exploratory) | 2026-02-28 | Observed; instruction clarity issue flagged |
+| `bubble-pop` | Option A (Playwright exploratory) | 2026-02-28 | Observed; voice guidance sensitivity tracked |
+| `rhyme-time` | Option A (Playwright exploratory) | 2026-02-28 | Observed; load-time variance to monitor |
+| `number-tracing` | Option A (Playwright lightweight probe) | 2026-02-28 | Observed; onboarding cue recommended |
+| `path-following` | Option A (Playwright lightweight probe) | 2026-02-28 | Observed; first-action guidance recommended |
+| `maze-runner` | Option A (Playwright lightweight probe) | 2026-02-28 | Observed; objective cue recommended |
+| `color-by-number` | Option A (Playwright lightweight probe) | 2026-02-28 | Observed; first-action CTA recommended |
+
 ---
 
 ## Complete Game Inventory

@@ -64,19 +64,12 @@ export function ParentGate({
   }, [holdDuration, onUnlock, playSuccess]);
 
   const startHolding = useCallback(() => {
-    console.log('🔴 PARENT GATE: startHolding called');
     if (unlocked) {
-      console.log('🔴 PARENT GATE: Already unlocked, ignoring');
       return;
     }
-    console.log('🔴 PARENT GATE: Setting holding to TRUE');
     setHolding(true);
     holdingRef.current = true;
     startTimeRef.current = Date.now();
-    console.log(
-      '🔴 PARENT GATE: Starting animation, time:',
-      startTimeRef.current,
-    );
     // Play click sound when holding starts
     playClick();
     

@@ -2,6 +2,43 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ConnectTheDots } from '../ConnectTheDots';
+import { vi } from 'vitest';
+
+// mocks for hooks used by the component (hand tracking, audio, tts, game drops)
+vi.mock('../../hooks/useSubscription', () => ({
+  useSubscription: () => ({ canAccessGame: () => true, isLoading: false }),
+}));
+vi.mock('../../hooks/useAudio', () => ({
+  useAudio: () => ({ playFanfare: () => {}, playPop: () => {} }),
+}));
+vi.mock('../../hooks/useTTS', () => ({
+  useTTS: () => ({ speak: () => {}, isEnabled: false }),
+}));
+vi.mock('../../hooks/useGameDrops', () => ({
+  useGameDrops: () => ({
+    onGameComplete: () => {},
+    triggerEasterEgg: () => {},
+  }),
+}));
+vi.mock('../../hooks/useGameHandTracking', () => ({
+  useGameHandTracking: () => ({
+    isReady: false,
+    cursor: null,
+    pinch: { isPinching: false, distance: 0, transition: 'none' },
+    startTracking: () => Promise.resolve(),
+    stopTracking: () => {},
+    resetTracking: () => {},
+    reinitialize: () => Promise.resolve(),
+    fps: 0,
+    averageFps: 0,
+    error: null,
+    isLoading: false,
+    webcamRef: { current: null },
+    isPinching: false,
+    handVisible: false,
+    attentionLevel: 0,
+  }),
+}));
 
 // Basic smoke/regression tests for dot click behavior
 describe('ConnectTheDots component - regression', () => {
@@ -18,7 +55,9 @@ describe('ConnectTheDots component - regression', () => {
 
     // Wait for dots to render and pick the first circle from the overlay SVG.
     await waitFor(() => {
-      expect(document.querySelector('svg[viewBox="0 0 800 600"] circle')).toBeTruthy();
+      expect(
+        document.querySelector('svg[viewBox="0 0 800 600"] circle'),
+      ).toBeTruthy();
     });
 
     // Find the canvas and stub its getBoundingClientRect so clicks map cleanly
@@ -56,7 +95,9 @@ describe('ConnectTheDots component - regression', () => {
     });
 
     // Re-query to ensure a dot circle still exists after state update.
-    const updatedCircle = document.querySelector('svg[viewBox="0 0 800 600"] circle');
+    const updatedCircle = document.querySelector(
+      'svg[viewBox="0 0 800 600"] circle',
+    );
     expect(updatedCircle).toBeTruthy();
     // Visual fill style may depend on CSS variables in the test environment;
     // the key regression is the index advancement which we already assert above.
@@ -72,7 +113,9 @@ describe('ConnectTheDots component - regression', () => {
     fireEvent.click(startButton);
 
     await waitFor(() => {
-      expect(document.querySelector('svg[viewBox="0 0 800 600"] circle')).toBeTruthy();
+      expect(
+        document.querySelector('svg[viewBox="0 0 800 600"] circle'),
+      ).toBeTruthy();
     });
     const circle = document.querySelector('svg[viewBox="0 0 800 600"] circle')!;
     const cx = Number(circle.getAttribute('cx'));
@@ -106,4 +149,53 @@ describe('ConnectTheDots component - regression', () => {
       expect(indicator.textContent).not.toMatch(/#3/);
     });
   });
+
+  // Permission handling tests
+
+  describe('ConnectTheDots camera permissions', () => {
+    let warnSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      warnSpy.mockRestore();
+      delete (navigator as any).permissions;
+    });
+
+    it('does not warn when permissions API is absent', () => {
+      delete (navigator as any).permissions;
+      render(
+        <MemoryRouter>
+          <ConnectTheDots />
+        </MemoryRouter>,
+      );
+      expect(console.warn).not.toHaveBeenCalled();
+      // component rendered; check for the Start Game button rather than ambiguous title
+      expect(
+        screen.getByRole('button', { name: /start game/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('displays warning banner when permission state is denied', async () => {
+      const fakeStatus = {
+        state: 'denied',
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+      (navigator as any).permissions = {
+        query: vi.fn().mockResolvedValue(fakeStatus),
+      };
+      render(
+        <MemoryRouter>
+          <ConnectTheDots />
+        </MemoryRouter>,
+      );
+      expect(
+        await screen.findByText(/Camera permission denied/i),
+      ).toBeInTheDocument();
+    });
+  });
+
+  // close top-level regression suite
 });

@@ -58,16 +58,23 @@ Access:
 - Backend API: <http://localhost:8001>
 - API Docs: <http://localhost:8001/docs>
 
+> **Note:** the frontend `npm run test` script now runs a single pass
+> (equivalent to `vitest --run`). Use `npm run test:watch` for a
+> continuous watcher, or `npm run test:ci` when running in CI environments.
+> The old behavior of staying in watch mode and waiting for `q` has been
+> replaced.
+
 ## 🧪 Test Accounts
 
 For development and testing, the following accounts are pre-configured:
 
-| Email | Plan | Status | Purpose |
-|-------|------|--------|---------|
-| `pranay.suyash@gmail.com` | Yearly | Active | Full feature testing |
+| Email                       | Plan      | Status | Purpose                   |
+| --------------------------- | --------- | ------ | ------------------------- |
+| `pranay.suyash@gmail.com`   | Yearly    | Active | Full feature testing      |
 | `testquarterly@example.com` | Quarterly | Active | Subscription swap testing |
 
 **Login Credentials:**
+
 - Email: `testquarterly@example.com`
 - Password: `TestPass123!`
 

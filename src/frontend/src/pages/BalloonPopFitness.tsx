@@ -18,8 +18,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import Webcam from 'react-webcam';
 import { motion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -120,7 +120,30 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (poseLandmarkerRef.current) {
+        poseLandmarkerRef.current.close();
+        poseLandmarkerRef.current = null;
+      }
     };
+  }, []);
+
+  // Keep canvas backing resolution in sync with displayed size.
+  useEffect(() => {
+    const syncCanvasSize = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.floor(rect.width));
+      const nextHeight = Math.max(1, Math.floor(rect.height));
+      if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+        canvas.width = nextWidth;
+        canvas.height = nextHeight;
+      }
+    };
+
+    syncCanvasSize();
+    window.addEventListener('resize', syncCanvasSize);
+    return () => window.removeEventListener('resize', syncCanvasSize);
   }, []);
 
   // ===== GAME LOOP =====
@@ -190,25 +213,28 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
           let popped = false;
           switch (balloon.action) {
-            case 'jump':
+            case 'jump': {
               // Check ankles/feet for jump
               const leftAnkle = landmarks[27];
               const rightAnkle = landmarks[28];
               popped = checkBodyCollisions(balloon, [leftAnkle, rightAnkle]);
               break;
+            }
 
-            case 'wave':
+            case 'wave': {
               // Check wrists for wave
               const leftWrist = landmarks[15];
               const rightWrist = landmarks[16];
               popped = checkBodyCollisions(balloon, [leftWrist, rightWrist]);
               break;
+            }
 
-            case 'clap':
+            case 'clap': {
               // Check either wrist for clap
               const wrists = [landmarks[15], landmarks[16]];
               popped = checkBodyCollisions(balloon, wrists);
               break;
+            }
           }
 
           return { ...balloon, popped: popped || balloon.popped };
@@ -374,7 +400,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
   const handleGameComplete = () => {
     if (gameState) {
       const stats = calculateFinalStats(gameState);
-      console.log('Game complete:', stats);
+      // DEBUG: console.log('Game complete:', stats);
     }
     setShowMenu(true);
     setGameState(null);
@@ -382,7 +408,8 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
   const handleShowMenu = () => {
     playClick();
-    if (gameState) {
+    // Reward completion only when the game actually finished.
+    if (gameState && !gameState.gameActive) {
       onGameComplete();
     }
     setShowMenu(true);
@@ -396,7 +423,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
 
   // ===== RENDER =====
   return (
-    <GameContainer title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer webcamRef={webcamRef} title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
         <Webcam

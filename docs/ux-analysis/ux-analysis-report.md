@@ -1,6 +1,6 @@
 # 🧒 Child Exploratory UX Analysis Report
 
-**Generated:** 2026-02-27T05:23:04.866Z  
+**Generated:** 2026-03-01T18:39:19.064Z  
 **Test Environment:** Playwright Automated Browser Testing  
 **User Persona:** Child (ages 4-8), first-time player  
 
@@ -10,14 +10,14 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Games Tested | 6 |
-| Avg Load Time | 2387ms |
+| Total Games Tested | 10 |
+| Avg Load Time | 749ms |
 | Total Issues Found | 6 |
 | Critical Issues | 0 |
 | High Priority | 1 |
 
 ### Overall Child-Friendliness Score
-**88/100** - Grade: B (Good)
+**74/100** - Grade: C (Acceptable)
 
 ---
 
@@ -30,7 +30,7 @@
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 1597ms | ✅ |
+| Load Time | 2155ms | ✅ |
 | Interactions | 4 | - |
 | Issues Found | 2 | ⚠️ |
 
@@ -53,17 +53,17 @@
 - **[MEDIUM]** ux: No immediate feedback on interactions - child might be confused
 
 #### ⏱️ Performance Timings
-- Navigation: 1597ms ✅
+- Navigation: 2155ms ✅
 
 ---
 
 ### 2. Shape Safari
-**ID:** shape-safari | **Score:** 75/100
+**ID:** shape-safari | **Score:** 95/100
 
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 5813ms | ⚠️ |
+| Load Time | 232ms | ✅ |
 | Interactions | 6 | - |
 | Issues Found | 0 | ✅ |
 
@@ -77,7 +77,7 @@
 
 #### 📝 Key Interactions
 - click: scene_card (✅) - Selected a scene to play
-- trace: canvas (✅) - Trace took 156ms
+- trace: canvas (✅) - Trace took 358ms
 - discover: shapes (✅) - 4 interactive elements
 - discover: goal (✅) - Find 5 hidden shapes to discover animals and objects!
 - discover: instruction (✅) - Move your finger near shapes to see them glow, then trace around them
@@ -86,7 +86,7 @@
 ✅ No issues found
 
 #### ⏱️ Performance Timings
-- Navigation: 5813ms ⚠️ Too slow
+- Navigation: 232ms ✅
 
 ---
 
@@ -96,7 +96,7 @@
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 2594ms | ✅ |
+| Load Time | 2502ms | ✅ |
 | Interactions | 7 | - |
 | Issues Found | 0 | ✅ |
 
@@ -119,41 +119,38 @@
 ✅ No issues found
 
 #### ⏱️ Performance Timings
-- Navigation: 2594ms ✅
+- Navigation: 2502ms ✅
 
 ---
 
 ### 4. Free Draw
-**ID:** free-draw | **Score:** 90/100
+**ID:** free-draw | **Score:** 55/100
 
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 965ms | ✅ |
-| Interactions | 5 | - |
+| Load Time | 177ms | ✅ |
+| Interactions | 2 | - |
 | Issues Found | 2 | ⚠️ |
 
 #### 🎯 Child-Friendliness
 | Criterion | Result |
 |-----------|--------|
 | Understands Goal | ✅ Yes |
-| Can Start Game | ✅ Yes |
-| Instructions Clear | ✅ Yes |
-| Visually Engaging | ✅ Yes |
+| Can Start Game | ❌ No |
+| Instructions Clear | ❌ No |
+| Visually Engaging | ❌ No |
 
 #### 📝 Key Interactions
-- click: start_button (✅)
-- draw: canvas (✅) - Stroke in 717ms
-- discover: color_buttons (✅) - 7 color options
-- discover: goal (✅) - Draw and create beautiful art using different brushes and colors!
-- discover: instruction (✅) - Pinch your fingers and move your hand to draw
+- draw: canvas (✅) - Stroke in 439ms
+- discover: color_buttons (✅) - 1 color options
 
 #### ⚠️ Issues Found
-- **[MEDIUM]** performance: Drawing lag detected: 717ms for simple stroke
+- **[MEDIUM]** performance: Drawing lag detected: 439ms for simple stroke
 - **[MEDIUM]** confusion: Brush/tool options not clearly visible
 
 #### ⏱️ Performance Timings
-- Navigation: 965ms ✅
+- Navigation: 177ms ✅
 
 ---
 
@@ -163,8 +160,8 @@
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 2651ms | ✅ |
-| Interactions | 6 | - |
+| Load Time | 1157ms | ✅ |
+| Interactions | 5 | - |
 | Issues Found | 1 | ⚠️ |
 
 #### 🎯 Child-Friendliness
@@ -178,7 +175,7 @@
 #### 📝 Key Interactions
 - click: start_button (✅)
 - discover: math_problem (✅)
-- discover: goal (✅) - Show 4 fingers to solve the math problem and feed the monster!
+- discover: goal (✅) - Show 3 fingers to solve the math problem and feed the monster!
 - discover: instruction (✅) - Hold up your hand and count with your fingers
 - discover: progress_indicator (✅)
 
@@ -186,39 +183,152 @@
 - **[MEDIUM]** ux: Monster character not prominently displayed
 
 #### ⏱️ Performance Timings
-- Navigation: 2651ms ✅
+- Navigation: 1156ms ✅
 
 ---
 
 ### 6. Bubble Pop
-**ID:** bubble-pop | **Score:** 85/100
+**ID:** bubble-pop | **Score:** 40/100
 
 #### 📊 Metrics
 | Metric | Value | Status |
 |--------|-------|--------|
-| Load Time | 704ms | ✅ |
-| Interactions | 4 | - |
+| Load Time | 416ms | ✅ |
+| Interactions | 0 | - |
 | Issues Found | 1 | ⚠️ |
 
 #### 🎯 Child-Friendliness
 | Criterion | Result |
 |-----------|--------|
-| Understands Goal | ✅ Yes |
-| Can Start Game | ✅ Yes |
-| Instructions Clear | ✅ Yes |
+| Understands Goal | ❌ No |
+| Can Start Game | ❌ No |
+| Instructions Clear | ❌ No |
 | Visually Engaging | ✅ Yes |
 
 #### 📝 Key Interactions
-- click: start_button (✅)
-- discover: goal (✅) - Blow into the microphone to pop bubbles and score points!
-- discover: instruction (✅) - Get close to the microphone and blow as hard as you can
-- discover: progress_indicator (✅)
+
 
 #### ⚠️ Issues Found
 - **[HIGH]** confusion: Voice input game but no clear blow/mic instructions
 
 #### ⏱️ Performance Timings
-- Navigation: 704ms ✅
+- Navigation: 416ms ✅
+
+---
+
+### 7. Number Tracing
+**ID:** number-tracing | **Score:** 80/100
+
+#### 📊 Metrics
+| Metric | Value | Status |
+|--------|-------|--------|
+| Load Time | 440ms | ✅ |
+| Interactions | 1 | - |
+| Issues Found | 0 | ✅ |
+
+#### 🎯 Child-Friendliness
+| Criterion | Result |
+|-----------|--------|
+| Understands Goal | ✅ Yes |
+| Can Start Game | ❌ No |
+| Instructions Clear | ✅ Yes |
+| Visually Engaging | ✅ Yes |
+
+#### 📝 Key Interactions
+- discover: interactive_elements (✅) - 25 interactive elements
+
+#### ⚠️ Issues Found
+✅ No issues found
+
+#### ⏱️ Performance Timings
+- Navigation: 440ms ✅
+
+---
+
+### 8. Path Following
+**ID:** path-following | **Score:** 55/100
+
+#### 📊 Metrics
+| Metric | Value | Status |
+|--------|-------|--------|
+| Load Time | 84ms | ✅ |
+| Interactions | 1 | - |
+| Issues Found | 0 | ✅ |
+
+#### 🎯 Child-Friendliness
+| Criterion | Result |
+|-----------|--------|
+| Understands Goal | ❌ No |
+| Can Start Game | ❌ No |
+| Instructions Clear | ❌ No |
+| Visually Engaging | ✅ Yes |
+
+#### 📝 Key Interactions
+- discover: interactive_elements (✅) - 15 interactive elements
+
+#### ⚠️ Issues Found
+✅ No issues found
+
+#### ⏱️ Performance Timings
+- Navigation: 84ms ✅
+
+---
+
+### 9. Maze Runner
+**ID:** maze-runner | **Score:** 55/100
+
+#### 📊 Metrics
+| Metric | Value | Status |
+|--------|-------|--------|
+| Load Time | 132ms | ✅ |
+| Interactions | 1 | - |
+| Issues Found | 0 | ✅ |
+
+#### 🎯 Child-Friendliness
+| Criterion | Result |
+|-----------|--------|
+| Understands Goal | ❌ No |
+| Can Start Game | ❌ No |
+| Instructions Clear | ❌ No |
+| Visually Engaging | ✅ Yes |
+
+#### 📝 Key Interactions
+- discover: interactive_elements (✅) - 15 interactive elements
+
+#### ⚠️ Issues Found
+✅ No issues found
+
+#### ⏱️ Performance Timings
+- Navigation: 132ms ✅
+
+---
+
+### 10. Color by Number
+**ID:** color-by-number | **Score:** 80/100
+
+#### 📊 Metrics
+| Metric | Value | Status |
+|--------|-------|--------|
+| Load Time | 192ms | ✅ |
+| Interactions | 1 | - |
+| Issues Found | 0 | ✅ |
+
+#### 🎯 Child-Friendliness
+| Criterion | Result |
+|-----------|--------|
+| Understands Goal | ✅ Yes |
+| Can Start Game | ❌ No |
+| Instructions Clear | ✅ Yes |
+| Visually Engaging | ✅ Yes |
+
+#### 📝 Key Interactions
+- discover: interactive_elements (✅) - 14 interactive elements
+
+#### ⚠️ Issues Found
+✅ No issues found
+
+#### ⏱️ Performance Timings
+- Navigation: 192ms ✅
 
 ---
 
@@ -232,15 +342,28 @@
 ## Performance Analysis
 
 ### Load Times
-| Story Sequence | 1597ms | ✅ |
-| Shape Safari | 5813ms | ⚠️ |
-| Rhyme Time | 2594ms | ✅ |
-| Free Draw | 965ms | ✅ |
-| Math Monsters | 2651ms | ✅ |
-| Bubble Pop | 704ms | ✅ |
+| Story Sequence | 2155ms | ✅ |
+| Shape Safari | 232ms | ✅ |
+| Rhyme Time | 2502ms | ✅ |
+| Free Draw | 177ms | ✅ |
+| Math Monsters | 1157ms | ✅ |
+| Bubble Pop | 416ms | ✅ |
+| Number Tracing | 440ms | ✅ |
+| Path Following | 84ms | ✅ |
+| Maze Runner | 132ms | ✅ |
+| Color by Number | 192ms | ✅ |
 
 ### Interaction Responsiveness
 
+
+## Coverage Gap vs Full Inventory
+
+| Metric | Value |
+|--------|-------|
+| Observed in this run | 10/55 |
+| Missing runtime evidence | 45 |
+
+Unobserved game IDs: `alphabet-tracing`, `finger-number-show`, `connect-the-dots`, `letter-hunt`, `music-pinch-beat`, `steady-hand-lab`, `shape-pop`, `color-match-garden`, `memory-match`, `number-tap-trail`, `shape-sequence`, `yoga-animals`, `balloon-pop-fitness`, `follow-the-leader`, `musical-statues`, `freeze-dance`, `simon-says`, `chemistry-lab`, `word-builder`, `emoji-match`, `air-canvas`, `mirror-draw`, `phonics-sounds`, `phonics-tracing`, `beginning-sounds`, `odd-one-out`, `shadow-puppet-theater`, `virtual-bubbles`, `kaleidoscope-hands`, `air-guitar-hero`, `fruit-ninja-air`, `counting-objects`, `more-or-less`, `blend-builder`, `syllable-clap`, `sight-word-flash`, `rhythm-tap`, `animal-sounds`, `body-parts`, `voice-stories`, `math-smash`, `bubble-pop-symphony`, `dress-for-weather`, `platformer-runner`, `physics-demo`
 
 ## Recommendations by Priority
 
@@ -253,7 +376,7 @@ _No items in this category_
 ### 🟡 Medium (Nice to Have)
 - **Story Sequence**: No clear instructions visible on first load
 - **Story Sequence**: No immediate feedback on interactions - child might be confused
-- **Free Draw**: Drawing lag detected: 717ms for simple stroke
+- **Free Draw**: Drawing lag detected: 439ms for simple stroke
 - **Free Draw**: Brush/tool options not clearly visible
 - **Math Monsters**: Monster character not prominently displayed
 
@@ -261,39 +384,59 @@ _No items in this category_
 
 
 ### Story Sequence
-- story-sequence_01_initial_load_1772169726030.png
-- story-sequence_02_start_button_found_1772169727665.png
-- story-sequence_03_game_started_1772169730906.png
-- story-sequence_05_final_state_1772169733756.png
+- story-sequence_01_initial_load_1772390304758.png
+- story-sequence_02_start_button_found_1772390306518.png
+- story-sequence_03_game_started_1772390308981.png
+- story-sequence_05_final_state_1772390311649.png
 
 
 ### Shape Safari
-- shape-safari_01_initial_load_1772169743236.png
-- shape-safari_02_canvas_interaction_1772169746541.png
-- shape-safari_03_final_state_1772169747232.png
+- shape-safari_01_initial_load_1772390314104.png
+- shape-safari_02_canvas_interaction_1772390317623.png
+- shape-safari_03_final_state_1772390318235.png
 
 
 ### Rhyme Time
-- rhyme-time_01_initial_load_1772169752013.png
-- rhyme-time_02_audio_test_1772169758381.png
-- rhyme-time_04_final_state_1772169760505.png
+- rhyme-time_01_initial_load_1772390322030.png
+- rhyme-time_02_audio_test_1772390328195.png
+- rhyme-time_04_final_state_1772390329274.png
 
 
 ### Free Draw
-- free-draw_01_initial_load_1772169764188.png
-- free-draw_02_drawing_test_1772169768515.png
-- free-draw_03_final_state_1772169768766.png
+- free-draw_01_initial_load_1772390331418.png
+- free-draw_02_drawing_test_1772390335252.png
+- free-draw_03_final_state_1772390335318.png
 
 
 ### Math Monsters
-- math-monsters_01_initial_load_1772169773573.png
-- math-monsters_02_gameplay_view_1772169777414.png
-- math-monsters_03_final_state_1772169777583.png
+- math-monsters_01_initial_load_1772390337755.png
+- math-monsters_02_gameplay_view_1772390343631.png
+- math-monsters_03_final_state_1772390344059.png
 
 
 ### Bubble Pop
-- bubble-pop_01_initial_load_1772169779944.png
-- bubble-pop_02_instructions_1772169784341.png
+- bubble-pop_01_initial_load_1772390345792.png
+- bubble-pop_02_instructions_1772390348267.png
+
+
+### Number Tracing
+- number-tracing_01_initial_load_1772390350191.png
+- number-tracing_02_final_state_1772390351384.png
+
+
+### Path Following
+- path-following_01_initial_load_1772390352883.png
+- path-following_02_final_state_1772390353751.png
+
+
+### Maze Runner
+- maze-runner_01_initial_load_1772390355250.png
+- maze-runner_02_final_state_1772390356489.png
+
+
+### Color by Number
+- color-by-number_01_initial_load_1772390358035.png
+- color-by-number_02_final_state_1772390358990.png
 
 
 ---

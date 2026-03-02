@@ -8264,8 +8264,9 @@ To run tests:
 
 ```bash
 cd src/frontend
-npm run test        # Run tests
-npm run test -- --run  # Run once (CI mode)
+npm run test            # Run tests (single pass by default)
+npm run test:watch      # Start Vitest in watch/development mode
+npm run test:ci         # Run a one‑off pass with coverage (CI friendly)
 ```
 
 Status Updates:

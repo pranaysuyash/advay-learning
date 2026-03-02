@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -438,8 +437,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
   ];
 
   return (
-    <GameContainer
-      title='Mirror Draw'
+    <GameContainer webcamRef={webcamRef}       title='Mirror Draw'
       score={score}
       level={level}
       onHome={goHome}
@@ -447,13 +445,7 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
       isPlaying={isPlaying}
     >
       <div className='absolute inset-0 bg-[#FFF8F0]'>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-10 mix-blend-overlay'
-          videoConstraints={{ facingMode: 'user' }}
-        />
+        
 
         <AttentionMeter webcamRef={webcamRef} className="bottom-6 left-6" />
 

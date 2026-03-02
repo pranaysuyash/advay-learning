@@ -4,6 +4,7 @@ import {
   FaceLandmarker,
   FaceLandmarkerOptions,
 } from '@mediapipe/tasks-vision';
+import { calculateHeadPose } from '../utils/headPose';
 
 interface AttentionData {
   focusLevel: number; // 0-1 (1 = fully focused)
@@ -249,15 +250,15 @@ export function useAttentionDetection(
     const calculateEAR = (eyeLandmarks: any[]) => {
       const verticalDist1 = Math.sqrt(
         Math.pow(eyeLandmarks[1].x - eyeLandmarks[5].x, 2) +
-          Math.pow(eyeLandmarks[1].y - eyeLandmarks[5].y, 2),
+        Math.pow(eyeLandmarks[1].y - eyeLandmarks[5].y, 2),
       );
       const verticalDist2 = Math.sqrt(
         Math.pow(eyeLandmarks[2].x - eyeLandmarks[4].x, 2) +
-          Math.pow(eyeLandmarks[2].y - eyeLandmarks[4].y, 2),
+        Math.pow(eyeLandmarks[2].y - eyeLandmarks[4].y, 2),
       );
       const horizontalDist = Math.sqrt(
         Math.pow(eyeLandmarks[0].x - eyeLandmarks[3].x, 2) +
-          Math.pow(eyeLandmarks[0].y - eyeLandmarks[3].y, 2),
+        Math.pow(eyeLandmarks[0].y - eyeLandmarks[3].y, 2),
       );
 
       if (horizontalDist < 1e-6) return 1; // Avoid division by zero, treat as open
@@ -338,11 +339,13 @@ export function useAttentionDetection(
     ); // Normal blink rate is ~15/min
     const attentionLevel = (gazeFocus + blinkNormal) / 2; // Average of both factors
 
+    const headPose = calculateHeadPose(landmarks);
+
     return {
       focusLevel: attentionLevel,
       blinkRate,
       gazeDirection,
-      headPose: { pitch: 0, yaw: 0, roll: 0 }, // TODO: Implement head pose estimation
+      headPose,
       timestamp: currentTime,
     };
   };

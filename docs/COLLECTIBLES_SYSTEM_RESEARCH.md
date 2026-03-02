@@ -18,6 +18,15 @@ The current item drop system closely mirrors **adult gacha/loot-box mechanics** 
 
 **Recommendation:** Shift from a gacha-style probability model to a **deterministic collection model** where kids always get *something* for playing, rarity is earned through effort (not luck), and all feedback is visual/audio rather than text.
 
+### 2026-02-28 Backlog Linkage
+
+This recommendation is now explicitly tracked as `APP-004` in `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` (`Prioritized Backlog`).
+
+Milestones for migration tracking:
+1. Define deterministic reward contract and remove chance-only progression gates.
+2. Add acceptance checks: same-session reward guarantee and no “near miss” pressure copy.
+3. Verify with UX artifacts that reward feedback is understandable for pre-literate users.
+
 ---
 
 ## 1. Competitive Analysis — What Kids' Apps Actually Do

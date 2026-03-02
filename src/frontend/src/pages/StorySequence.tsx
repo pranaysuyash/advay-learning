@@ -18,7 +18,6 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -392,15 +391,10 @@ export default function StorySequence() {
   
   // ===== RENDER =====
   return (
-    <GameContainer title="Story Sequence" onHome={handleShowMenu}>
+    <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
-        />
+        
       </div>
       
       {showMenu ? (

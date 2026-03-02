@@ -216,6 +216,7 @@ For normal task execution in this repo, agents should follow this sequence by de
 Interpretation rules:
 - This lifecycle is the normal path for any new task unless the user explicitly asks to skip/reorder.
 - “Document” steps must update the appropriate repo artifacts (for example worklog, audits, implementation reports) with Observed/Inferred/Unknown discipline.
+- Documentation should be persisted as soon as each meaningful phase output is ready; do not wait for a chat checkpoint before writing repo docs.
 - For very small requests, steps can be compressed, but evidence and final documentation updates still apply when code or docs are changed.
 
 ---

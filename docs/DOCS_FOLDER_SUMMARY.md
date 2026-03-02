@@ -10,22 +10,23 @@
 
 ### File Categories
 
-| Category | Count | Purpose |
-|----------|-------|---------|
-| **Plans & Roadmaps** | 25+ | Enhancement plans, implementation roadmaps, game improvement plans |
-| **Audits & Findings** | 30+ | UX audits, performance audits, persona-driven reviews, remediation docs |
-| **Strategies & Research** | 40+ | Competitive analysis, monetization, deployment, feature research |
-| **Personas & Design** | 15+ | User personas, child psychology, educator perspectives |
-| **Implementation Details** | 20+ | Technical specs, architecture docs, asset migration plans |
-| **Worklog & Tickets** | 5+ | Work tracking, execution logs, status updates |
-| **Performance & Technical** | 12+ | Performance optimization, MediaPipe research, WebGL/WASM exploration |
-| **UX/Design Guidelines** | 8+ | Design systems, accessibility, brand guidelines |
+| Category                    | Count | Purpose                                                                 |
+| --------------------------- | ----- | ----------------------------------------------------------------------- |
+| **Plans & Roadmaps**        | 25+   | Enhancement plans, implementation roadmaps, game improvement plans      |
+| **Audits & Findings**       | 30+   | UX audits, performance audits, persona-driven reviews, remediation docs |
+| **Strategies & Research**   | 40+   | Competitive analysis, monetization, deployment, feature research        |
+| **Personas & Design**       | 15+   | User personas, child psychology, educator perspectives                  |
+| **Implementation Details**  | 20+   | Technical specs, architecture docs, asset migration plans               |
+| **Worklog & Tickets**       | 5+    | Work tracking, execution logs, status updates                           |
+| **Performance & Technical** | 12+   | Performance optimization, MediaPipe research, WebGL/WASM exploration    |
+| **UX/Design Guidelines**    | 8+    | Design systems, accessibility, brand guidelines                         |
 
 ---
 
 ## 🎯 Top 10 Files with Actionable Suggestions to Make the App Better
 
 ### 1. **[ENHANCEMENT_DOCUMENTATION.md](ENHANCEMENT_DOCUMENTATION.md)** ⭐ START HERE
+
 - **What it is**: Comprehensive 10-phase enhancement roadmap (12-month plan)
 - **Key suggestions**:
   - Phase 1: Advanced personalization + adaptive learning algorithms
@@ -40,6 +41,7 @@
 - **Status**: Documented, awaiting implementation prioritization
 
 ### 2. **[GAME_IMPROVEMENT_MASTER_PLAN.md](GAME_IMPROVEMENT_MASTER_PLAN.md)** ⭐ P0 IMMEDIATE
+
 - **What it is**: Detailed game-by-game assessment with critical improvements
 - **Key suggestions**:
   - **Combined CV Experiences**: Make hand + pose + face tracking work together (not in isolation)
@@ -48,7 +50,7 @@
   - **Game polish by priority**:
     - 🔴 **P0 (Next 2-4 weeks)**: Phonics Sounds, Mirror Draw, Shape Safari
     - 🟠 **P1 (1-2 months)**: Rhyme Time, Story Sequence, Free Draw, Number Tracing
-  - **Specific fixes**: 
+  - **Specific fixes**:
     - Freeze Dance needs forgiving detection
     - Shape Sequence needs audio cues
     - Letter Hunt needs better feedback
@@ -57,6 +59,7 @@
 - **Status**: Ready for implementation, games partially done
 
 ### 3. **[UI_UX_IMPROVEMENT_PLAN.md](UI_UX_IMPROVEMENT_PLAN.md)** ⭐ HIGH IMPACT
+
 - **What it is**: "Pip's Letter Adventure" visual vision + design transformation
 - **Key suggestions**:
   - **Transform the theme**: Dark/serious → Playful/magical
@@ -79,6 +82,7 @@
 - **Status**: Documented, awaiting design implementation
 
 ### 4. **[PERSONA_AND_RESEARCH_RECOMMENDATIONS.md](PERSONA_AND_RESEARCH_RECOMMENDATIONS.md)**
+
 - **What it is**: Comprehensive persona expansion beyond initial 3 (UI/UX, Game Designer, Psychologist)
 - **Key suggestions** — Add these perspectives:
   - 🏥 **Accessibility Specialist**: Ensure children with disabilities can play
@@ -96,12 +100,13 @@
 - **Status**: Recommended personas documented, awaiting formal review process
 
 ### 5. **[GAME_IMPROVEMENT_MASTER_PLAN.md](GAME_IMPROVEMENT_MASTER_PLAN.md)** (continued)
+
 - **Critical fixes for existing games**:
   - **Letter Hunt**: Visual feedback too subtle; add pulsing glow
   - **Shape Sequence**: Too hard; add audio cues for sequence
   - **Connect the Dots**: Pinch detection forgiving; kids get frustrated
   - **Yoga Animals**: Add demo videos first
-  - **Simon Says**: Pose detection unreliable; needs better thresholds
+  - **Simon Says**: Reliability + control gaps confirmed (`GAME-SIMON-SAYS-001..008`); remediation planned in Unit-1..Unit-3. See `docs/audit/src__frontend__src__pages__SimonSays.md`.
 - **Quick wins** (1-2 hours each):
   - Add visual hand cursor (where are my hands?)
   - Timer anxiety: Replace countdown with progress bar
@@ -109,6 +114,7 @@
   - Sound effects: Pop on success, gentle chirp on near-miss
 
 ### 6. **[TODO_NEXT.md](TODO_NEXT.md)** — IMMEDIATE EXECUTION LIST
+
 - **What it is**: Prioritized checklist of immediate work (updated Jan 29)
 - **✅ COMPLETED**:
   - Backend input validation
@@ -124,6 +130,7 @@
 - **Status**: Some items done, most pending
 
 ### 7. **[PARALLEL_IMPLEMENTATION_PLAN_2026-02-23.md](PARALLEL_IMPLEMENTATION_PLAN_2026-02-23.md)**
+
 - **What it is**: Multi-agent execution plan for coordinated feature implementation
 - **Key parallel streams**:
   - Stream A: Video issue reporting + parent confirmation UX
@@ -134,6 +141,7 @@
 - **Status**: Framework established, awaiting load balancing
 
 ### 8. **[LUMI_IMPLEMENTATION_PLAN.md](LUMI_IMPLEMENTATION_PLAN.md)**
+
 - **What it is**: Detailed plan for Lumi companion character feature
 - **Key suggestions**:
   - Lumi is **secondary character** who joins Pip
@@ -150,6 +158,7 @@
 - **Status**: Framework documented, awaiting art/animation
 
 ### 9. **[GAME_LOGICAL_FINDINGS_AND_RESEARCH_2026-02-23.md](GAME_LOGICAL_FINDINGS_AND_RESEARCH_2026-02-23.md)**
+
 - **Key findings**:
   - Hand embodiment (avatar hands) > Full VR (lower risk, faster delivery)
   - On-screen hand avatar improves clarity and agency for kids
@@ -159,6 +168,7 @@
 - **Status**: Research complete, awaiting product decision
 
 ### 10. **[WORKLOG_TICKETS.md](WORKLOG_TICKETS.md)** — WORK TRACKING
+
 - **What it is**: Comprehensive execution log of all work (40,000+ lines!)
 - **Current status highlights**:
   - TCK-20260223-004: EmojiMatch S1 UX Remediation — **DONE**
@@ -201,32 +211,38 @@ docs/
 ## 💡 Quick Summary: 5 High-Impact Changes to Implement NOW
 
 ### 1. **Sound Everything** (2-3 days)
+
 Every action needs audio feedback:
+
 - Success pop sound
 - Error gentle chirp
 - Navigation jingle
 - Character voice lines
-**Impact**: Transforms app from "silent software" to "engaging experience"
+  **Impact**: Transforms app from "silent software" to "engaging experience"
 
 ### 2. **Replace Scores with Stars** (1-2 days)
+
 Don't tell 4-year-olds they got "73% correct". Show 3/5 stars.
 **Impact**: Pre-literate kids understand progress
 
 ### 3. **Add Hand Cursor** (1 day)
+
 Show where child's hand is being detected (animated handprint)
 **Impact**: Kids know "the app sees me"
 
 ### 4. **Implement Pip's Emotional States** (3-5 days)
+
 - Happy dance on success
 - Encouraging giggle on near-miss
 - Curious head tilt when waiting
-**Impact**: Makes mascot feel alive and responsive
+  **Impact**: Makes mascot feel alive and responsive
 
 ### 5. **Onboarding Tutorial** (3-4 days)
+
 - First time: Show what to do (pinch, pose, dance)
 - Clear "Here's how to play" flow
 - Settable to "skip for returning users"
-**Impact**: Kids immediately understand gameplay
+  **Impact**: Kids immediately understand gameplay
 
 ---
 
@@ -243,18 +259,18 @@ Show where child's hand is being detected (animated handprint)
 
 ## 📞 How to Navigate the Docs
 
-| If you want to... | Read this file |
-|------------------|----------------|
-| See overall product vision | ENHANCEMENT_DOCUMENTATION.md |
-| Find specific game fixes | GAME_IMPROVEMENT_MASTER_PLAN.md |
-| Understand UX problems & solutions | UI_UX_IMPROVEMENT_PLAN.md |
-| Check what work is assigned | WORKLOG_TICKETS.md |
-| Learn about personas | PERSONA_AND_RESEARCH_RECOMMENDATIONS.md |
-| Find game ideas | GAME_IDEAS_CATALOG.md |
-| Understand system design | ARCHITECTURE.md |
-| Check accessibility | DEFAULT_ACCESSIBILITY_REPORT.md |
-| See what to do next | TODO_NEXT.md |
-| Explore research areas | research/ folder (40+ files) |
+| If you want to...                  | Read this file                          |
+| ---------------------------------- | --------------------------------------- |
+| See overall product vision         | ENHANCEMENT_DOCUMENTATION.md            |
+| Find specific game fixes           | GAME_IMPROVEMENT_MASTER_PLAN.md         |
+| Understand UX problems & solutions | UI_UX_IMPROVEMENT_PLAN.md               |
+| Check what work is assigned        | WORKLOG_TICKETS.md                      |
+| Learn about personas               | PERSONA_AND_RESEARCH_RECOMMENDATIONS.md |
+| Find game ideas                    | GAME_IDEAS_CATALOG.md                   |
+| Understand system design           | ARCHITECTURE.md                         |
+| Check accessibility                | DEFAULT_ACCESSIBILITY_REPORT.md         |
+| See what to do next                | TODO_NEXT.md                            |
+| Explore research areas             | research/ folder (40+ files)            |
 
 ---
 
@@ -271,6 +287,7 @@ Show where child's hand is being detected (animated handprint)
 ## 🚀 Bottom Line
 
 The app is **functionally solid** but needs:
+
 1. **More joy** (sound, animation, emotional characters)
 2. **Simpler feedback** (stars not percentages)
 3. **Combined experiences** (hand + pose + face together)
@@ -278,4 +295,3 @@ The app is **functionally solid** but needs:
 5. **Faster response** (latency hurts the "magic")
 
 **All of these are documented with specific files, personas, and implementation plans in the `/docs` folder.**
-

@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -36,7 +35,12 @@ interface GardenTarget {
   position: Point;
 }
 
-const FLOWERS: Array<{ name: string; color: string; emoji: string; assetId: string }> = [
+const FLOWERS: Array<{
+  name: string;
+  color: string;
+  emoji: string;
+  assetId: string;
+}> = [
   { name: 'Red', color: '#ef4444', emoji: '🌺', assetId: 'brush-red' },
   { name: 'Blue', color: '#3b82f6', emoji: '🪻', assetId: 'brush-blue' },
   { name: 'Green', color: '#22c55e', emoji: '🌿', assetId: 'brush-green' },
@@ -75,7 +79,9 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
   const [targets, setTargets] = useState<GardenTarget[]>([]);
   const [promptId, setPromptId] = useState<number>(0);
   const [cursor, setCursor] = useState<Point | null>(null);
-  const [feedback, setFeedback] = useState('Pinch the flower with the asked color.');
+  const [feedback, setFeedback] = useState(
+    'Pinch the flower with the asked color.',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
   const [gardenBgSrc, setGardenBgSrc] = useState<string | null>(null);
 
@@ -214,19 +220,31 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
         void playError();
       }
     },
-    [cursor, playCelebration, playError, playPop, speak, startRound, ttsEnabled],
+    [
+      cursor,
+      playCelebration,
+      playError,
+      playPop,
+      speak,
+      startRound,
+      ttsEnabled,
+    ],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
-    useGameHandTracking({
-      gameName: 'ColorMatchGarden',
-      targetFps: 30,
-      isRunning: isPlaying,
-      onFrame: handleFrame,
-      onNoVideoFrame: () => {
-        if (cursor !== null) setCursor(null);
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'ColorMatchGarden',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => {
+      if (cursor !== null) setCursor(null);
+    },
+  });
 
   useEffect(() => {
     if (isPlaying && !isHandTrackingReady && !isModelLoading) {
@@ -288,6 +306,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
 
   return (
     <GameContainer
+      webcamRef={_webcamRef}
       title='Color Match Garden'
       score={score}
       level={Math.max(1, Math.floor(score / 100) + 1)}
@@ -306,14 +325,6 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           backgroundPosition: 'center',
         }}
       >
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
-
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-base md:text-lg font-bold min-w-max'>
@@ -326,8 +337,12 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
 
         {promptTarget && (
           <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary text-lg shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold uppercase tracking-widest text-xs mr-2 opacity-60'>Find</span>
-            <span className='font-black text-advay-slate tracking-tight text-xl'>{promptTarget.name}</span>
+            <span className='font-bold uppercase tracking-widest text-xs mr-2 opacity-60'>
+              Find
+            </span>
+            <span className='font-black text-advay-slate tracking-tight text-xl'>
+              {promptTarget.name}
+            </span>
           </div>
         )}
 
@@ -335,7 +350,10 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           <div
             key={target.id}
             className='absolute w-28 h-28 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
-            style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
+            style={{
+              left: `${target.position.x * 100}%`,
+              top: `${target.position.y * 100}%`,
+            }}
             aria-hidden='true'
           >
             <div
@@ -353,8 +371,7 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
                 <div
                   className='w-full h-full'
                   style={{
-                    background:
-                      `radial-gradient(circle at 30% 30%, ${target.color}22, transparent)`,
+                    background: `radial-gradient(circle at 30% 30%, ${target.color}22, transparent)`,
                   }}
                 />
               )}
@@ -384,7 +401,21 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
           <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-white/60 backdrop-blur-sm z-20'>
             <div className='flex flex-col items-center justify-center bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] p-8 md:p-12 shadow-[0_4px_0_#E5B86E] text-center max-w-2xl w-[90%]'>
               <div className='w-32 h-32 mb-6 bg-emerald-50 rounded-[2rem] p-6 border-3 border-[#F2CC8F] flex items-center justify-center drop-shadow-md hover:scale-110 transition-transform cursor-pointer text-emerald-500'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9" /><path d="M12 16.5a4.5 4.5 0 1 0 4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 1-4.5-4.5M16.5 12H15" /><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /></svg>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='64'
+                  height='64'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <path d='M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9' />
+                  <path d='M12 16.5a4.5 4.5 0 1 0 4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 1-4.5-4.5M16.5 12H15' />
+                  <path d='M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z' />
+                </svg>
               </div>
 
               <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4 drop-shadow-[0_4px_0_#E5B86E]'>

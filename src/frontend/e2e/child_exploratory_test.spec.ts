@@ -58,6 +58,93 @@ interface TimingRecord {
   acceptable: boolean;
 }
 
+interface LightweightGameProbe {
+  gameId: string;
+  gameName: string;
+  route: string;
+}
+
+const FULL_GAME_INVENTORY_IDS = [
+  'alphabet-tracing',
+  'finger-number-show',
+  'connect-the-dots',
+  'letter-hunt',
+  'music-pinch-beat',
+  'steady-hand-lab',
+  'shape-pop',
+  'color-match-garden',
+  'color-by-number',
+  'memory-match',
+  'number-tracing',
+  'number-tap-trail',
+  'shape-sequence',
+  'yoga-animals',
+  'balloon-pop-fitness',
+  'follow-the-leader',
+  'musical-statues',
+  'freeze-dance',
+  'simon-says',
+  'chemistry-lab',
+  'word-builder',
+  'emoji-match',
+  'air-canvas',
+  'mirror-draw',
+  'phonics-sounds',
+  'phonics-tracing',
+  'beginning-sounds',
+  'odd-one-out',
+  'shadow-puppet-theater',
+  'virtual-bubbles',
+  'kaleidoscope-hands',
+  'air-guitar-hero',
+  'fruit-ninja-air',
+  'counting-objects',
+  'more-or-less',
+  'blend-builder',
+  'syllable-clap',
+  'sight-word-flash',
+  'maze-runner',
+  'path-following',
+  'rhythm-tap',
+  'animal-sounds',
+  'body-parts',
+  'voice-stories',
+  'math-smash',
+  'bubble-pop-symphony',
+  'dress-for-weather',
+  'story-sequence',
+  'shape-safari',
+  'free-draw',
+  'math-monsters',
+  'platformer-runner',
+  'bubble-pop',
+  'rhyme-time',
+  'physics-demo',
+];
+
+const LIGHTWEIGHT_PROBES: LightweightGameProbe[] = [
+  {
+    gameId: 'number-tracing',
+    gameName: 'Number Tracing',
+    route: '/games/number-tracing',
+  },
+  {
+    gameId: 'path-following',
+    gameName: 'Path Following',
+    route: '/games/path-following',
+  },
+  {
+    gameId: 'maze-runner',
+    gameName: 'Maze Runner',
+    route: '/games/maze-runner',
+  },
+  {
+    gameId: 'color-by-number',
+    gameName: 'Color by Number',
+    route: '/games/color-by-number',
+  },
+];
+
 // Helper: Random child-like delay
 const childDelay = async (page: Page, min = 500, max = 2000) => {
   const delay = Math.random() * (max - min) + min;
@@ -679,6 +766,13 @@ test.describe('🧒 Child Exploratory UX Testing', () => {
     testResults.push(result);
   });
 
+  for (const probe of LIGHTWEIGHT_PROBES) {
+    test(`Explore: ${probe.gameName} (Lightweight)`, async ({ page }) => {
+      const result = await runLightweightExploration(page, probe);
+      testResults.push(result);
+    });
+  }
+
   test.afterAll(async () => {
     // Generate comprehensive report
     const report = generateReport(testResults);
@@ -719,8 +813,97 @@ async function detectSemanticUX(page: any, result: GameTestResult) {
   }
 }
 
+async function runLightweightExploration(
+  page: Page,
+  probe: LightweightGameProbe,
+): Promise<GameTestResult> {
+  const result: GameTestResult = {
+    gameId: probe.gameId,
+    gameName: probe.gameName,
+    loadTime: 0,
+    screenshots: [],
+    interactions: [],
+    issues: [],
+    timings: [],
+    childFriendly: {
+      understandsGoal: false,
+      canStartGame: false,
+      instructionsClear: false,
+      visualEngaging: false,
+    },
+  };
+
+  const startTime = Date.now();
+
+  await measureTiming(result, 'Navigation', 5000, async () => {
+    await page.goto(`${BASE}${probe.route}`);
+    await page.waitForLoadState('domcontentloaded');
+  });
+
+  result.loadTime = Date.now() - startTime;
+  await takeScreenshot(page, probe.gameId, '01_initial_load', result);
+  await childDelay(page, 700, 1400);
+
+  const startButton = page
+    .locator('button')
+    .filter({ hasText: /start|play|begin|go|continue/i })
+    .first();
+
+  if (await startButton.isVisible().catch(() => false)) {
+    await startButton.click().catch(() => undefined);
+    await childDelay(page, 500, 1100);
+    result.childFriendly.canStartGame = true;
+    recordInteraction(result, 'click', 'start_button', true);
+  }
+
+  await detectSemanticUX(page, result);
+
+  const instructionalCopyVisible = await page
+    .locator('text=/instruction|how to|tap|drag|trace|match|click/i')
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  if (instructionalCopyVisible) {
+    result.childFriendly.instructionsClear = true;
+  }
+
+  const interactiveCount = await page
+    .locator('button, canvas, [role="button"], [draggable="true"]')
+    .count();
+  if (interactiveCount > 0) {
+    result.childFriendly.understandsGoal =
+      result.childFriendly.understandsGoal || result.childFriendly.instructionsClear;
+    recordInteraction(
+      result,
+      'discover',
+      'interactive_elements',
+      true,
+      `${interactiveCount} interactive elements`,
+    );
+  } else {
+    recordIssue(
+      result,
+      'medium',
+      'confusion',
+      'No obvious interactive element detected during lightweight probe',
+    );
+  }
+
+  const hasVisualInterest =
+    (await page.locator('canvas, svg, img, video').count()) > 0 ||
+    (await page.locator('[class*="bg-"], [style*="background"]').count()) > 4;
+  result.childFriendly.visualEngaging = hasVisualInterest;
+
+  await takeScreenshot(page, probe.gameId, '02_final_state', result);
+  return result;
+}
+
 function generateReport(results: GameTestResult[]): string {
   const timestamp = new Date().toISOString();
+  const observedGameIds = new Set(results.map((result) => result.gameId));
+  const coverageGaps = FULL_GAME_INVENTORY_IDS.filter((gameId) => !observedGameIds.has(gameId));
+  const coverageSummary = `${observedGameIds.size}/${FULL_GAME_INVENTORY_IDS.length}`;
   
   let report = `# 🧒 Child Exploratory UX Analysis Report
 
@@ -768,6 +951,15 @@ ${generatePerformanceTable(results)}
 
 ### Interaction Responsiveness
 ${generateInteractionAnalysis(results)}
+
+## Coverage Gap vs Full Inventory
+
+| Metric | Value |
+|--------|-------|
+| Observed in this run | ${coverageSummary} |
+| Missing runtime evidence | ${coverageGaps.length} |
+
+${coverageGaps.length > 0 ? `Unobserved game IDs: ${coverageGaps.map((id) => `\`${id}\``).join(', ')}` : 'All listed games were observed in this run.'}
 
 ## Recommendations by Priority
 

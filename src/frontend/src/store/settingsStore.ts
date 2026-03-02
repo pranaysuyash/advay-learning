@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import type { FeatureFlags } from '../config/features';
+
 interface Settings {
+  /** Feature flag user overrides */
+  features?: Partial<FeatureFlags>;
   language: string;
   gameLanguage: string; // NEW: Separate game content language
   difficulty: string;
@@ -23,6 +27,7 @@ interface SettingsState extends Settings {
 }
 
 const defaultSettings: Settings = {
+  features: {}, // Feature flags default to empty (use system defaults)
   language: 'en',
   gameLanguage: 'en', // Default game language (2-letter codes for consistency with profiles)
   difficulty: 'medium', // Default to medium (more letters than easy)

@@ -31,7 +31,13 @@
  * ```
  */
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 import Webcam from 'react-webcam';
 
 import { useHandTracking } from './useHandTracking';
@@ -47,6 +53,7 @@ import type {
 } from '../types/tracking';
 import { createDefaultPinchState } from '../utils/pinchDetection';
 import type { VisionWorkerTransferMode } from '../workers/vision.protocol';
+import { useFeatureFlag } from './useFeatureFlag';
 
 const env = (import.meta as any).env ?? {};
 const VISION_WORKER_ENABLED_BY_ENV =
@@ -65,7 +72,7 @@ interface WorkerRuntimeConfig {
 
 export interface UseGameHandTrackingOptions {
   /** Name of the game for logging/debugging */
-  gameName: string;
+  gameName?: string;
   /** Hand tracking configuration */
   handTracking?: UseHandTrackingOptions;
   /** Pinch detection configuration */
@@ -127,6 +134,18 @@ export interface UseGameHandTrackingReturn {
   isLoading: boolean;
   /** Webcam ref to bind in page components */
   webcamRef: RefObject<Webcam | null>;
+  /** Backward-compatible alias for pinch state */
+  isPinching: boolean;
+  /** Backward-compatible alias for visibility state */
+  handVisible: boolean;
+  /** Backward-compatible alias for attention metric */
+  attentionLevel: number;
+  /** Tracking loss state - ISSUE-002 */
+  trackingLoss: {
+    isLost: boolean;
+    durationMs: number;
+    retry: () => void;
+  };
 }
 
 export function resolveHandTrackingRuntimeMode(params: {
@@ -155,7 +174,7 @@ export function useGameHandTracking(
   options: UseGameHandTrackingOptions,
 ): UseGameHandTrackingReturn {
   const {
-    gameName,
+    gameName: providedGameName,
     handTracking = {},
     pinch = {},
     targetFps = 30,
@@ -172,6 +191,7 @@ export function useGameHandTracking(
     workerConfig,
     onRuntimeFallback,
   } = options;
+  const gameName = providedGameName ?? 'Game';
 
   const internalWebcamRef = useRef<Webcam>(null);
   const webcamRef = externalWebcamRef ?? internalWebcamRef;
@@ -185,6 +205,21 @@ export function useGameHandTracking(
   const [runtimeFallbackReason, setRuntimeFallbackReason] = useState<
     string | null
   >(null);
+
+  // Tracking loss detection - ISSUE-002
+  const pauseOnTrackingLossEnabled = useFeatureFlag('safety.pauseOnTrackingLoss');
+  const [trackingLossState, setTrackingLossState] = useState<{
+    isLost: boolean;
+    durationMs: number;
+    lastFrameTime: number;
+  }>({
+    isLost: false,
+    durationMs: 0,
+    lastFrameTime: Date.now(),
+  });
+  const trackingLossTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const trackingLossStartTimeRef = useRef<number | null>(null);
+
   const workerRequestedByOptions =
     runtimeMode !== 'main-thread' &&
     (workerConfig?.enabled ?? true) &&
@@ -233,14 +268,26 @@ export function useGameHandTracking(
     pinchOptions: pinch,
     resetPinchOnNoHand,
     workerConfig: {
-      enabled:
-        workerRequestedByOptions &&
-        runtimeFallbackReason === null,
+      enabled: workerRequestedByOptions && runtimeFallbackReason === null,
       targetFps: workerConfig?.targetFps,
       transferMode: workerConfig?.transferMode ?? 'bitmap',
     },
     onFrame: useCallback(
       (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
+        // Reset tracking loss on frame received - ISSUE-002
+        if (trackingLossStartTimeRef.current) {
+          if (trackingLossTimerRef.current) {
+            clearTimeout(trackingLossTimerRef.current);
+            trackingLossTimerRef.current = null;
+          }
+          trackingLossStartTimeRef.current = null;
+          setTrackingLossState({
+            isLost: false,
+            durationMs: 0,
+            lastFrameTime: Date.now(),
+          });
+        }
+
         if (frame.indexTip) {
           setCursor(frame.indexTip);
         } else {
@@ -268,8 +315,23 @@ export function useGameHandTracking(
         previousPinchRef.current = defaultState;
         pinchStateRef.current = defaultState;
       }
+      
+      // Tracking loss detection - ISSUE-002
+      if (pauseOnTrackingLossEnabled && isTracking) {
+        if (!trackingLossStartTimeRef.current) {
+          trackingLossStartTimeRef.current = Date.now();
+          // Start timer to check for persistent loss (>1s)
+          trackingLossTimerRef.current = setTimeout(() => {
+            setTrackingLossState(prev => ({
+              ...prev,
+              isLost: true,
+            }));
+          }, 1000); // 1 second threshold per audit requirement
+        }
+      }
+      
       onNoVideoFrame?.();
-    }, [onNoVideoFrame, pinch, resetPinchOnNoHand]),
+    }, [onNoVideoFrame, pinch, resetPinchOnNoHand, pauseOnTrackingLossEnabled, isTracking]),
     onError: useCallback(
       (error: unknown) => {
         onError?.(error as Error);
@@ -430,6 +492,44 @@ export function useGameHandTracking(
     pinchStateRef.current = defaultState;
   }, [activeRuntimeMode, stopTracking, resetHandTracking, pinch]);
 
+  // Retry tracking after loss - ISSUE-002
+  const retryTracking = useCallback(async () => {
+    // Clear tracking loss state
+    if (trackingLossTimerRef.current) {
+      clearTimeout(trackingLossTimerRef.current);
+      trackingLossTimerRef.current = null;
+    }
+    trackingLossStartTimeRef.current = null;
+    setTrackingLossState({
+      isLost: false,
+      durationMs: 0,
+      lastFrameTime: Date.now(),
+    });
+    
+    // Reinitialize if needed
+    if (activeRuntimeMode === 'main-thread') {
+      await resetHandTracking();
+      await initializeHandTracking();
+    }
+  }, [activeRuntimeMode, resetHandTracking, initializeHandTracking]);
+
+  // Update tracking loss duration while lost - ISSUE-002
+  useEffect(() => {
+    if (!trackingLossState.isLost) return;
+    
+    const interval = setInterval(() => {
+      if (trackingLossStartTimeRef.current) {
+        const duration = Date.now() - trackingLossStartTimeRef.current;
+        setTrackingLossState(prev => ({
+          ...prev,
+          durationMs: duration,
+        }));
+      }
+    }, 100); // Update every 100ms for smooth UI
+    
+    return () => clearInterval(interval);
+  }, [trackingLossState.isLost]);
+
   // Reinitialize hand tracking
   const reinitialize = useCallback(async () => {
     if (activeRuntimeMode !== 'main-thread') return;
@@ -437,12 +537,21 @@ export function useGameHandTracking(
     if (isTracking) {
       await initializeHandTracking();
     }
-  }, [activeRuntimeMode, resetHandTracking, isTracking, initializeHandTracking]);
+  }, [
+    activeRuntimeMode,
+    resetHandTracking,
+    isTracking,
+    initializeHandTracking,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopTracking();
+      // Clear tracking loss timer - ISSUE-002
+      if (trackingLossTimerRef.current) {
+        clearTimeout(trackingLossTimerRef.current);
+      }
     };
   }, [stopTracking]);
 
@@ -471,8 +580,17 @@ export function useGameHandTracking(
     fps,
     averageFps,
     error: activeRuntimeMode === 'worker' ? workerError : handTrackingError,
-    isLoading: activeRuntimeMode === 'worker' ? isWorkerLoading : isModelLoading,
+    isLoading:
+      activeRuntimeMode === 'worker' ? isWorkerLoading : isModelLoading,
     webcamRef,
+    isPinching: pinchState.isPinching,
+    handVisible: cursor !== null,
+    attentionLevel: cursor !== null ? 1 : 0,
+    trackingLoss: {
+      isLost: trackingLossState.isLost,
+      durationMs: trackingLossState.durationMs,
+      retry: retryTracking,
+    },
   };
 }
 

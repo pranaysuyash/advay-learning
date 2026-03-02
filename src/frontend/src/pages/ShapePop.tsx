@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -114,7 +113,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     [cursor, playCelebration, playError, playPop, spawnTarget, targetCenter, speak, ttsEnabled],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } =
     useGameHandTracking({
       gameName: 'ShapePop',
       targetFps: 30,
@@ -186,13 +185,7 @@ export const ShapePop = memo(function ShapePopComponent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
+        
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 backdrop-blur-sm pointer-events-none' />
 

@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
@@ -54,7 +53,9 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const [targets, setTargets] = useState<TrailTarget[]>([]);
   const [expectedIndex, setExpectedIndex] = useState(0);
   const [cursor, setCursor] = useState<Point | null>(null);
-  const [feedback, setFeedback] = useState('Pinch numbers in order: 1, 2, 3...');
+  const [feedback, setFeedback] = useState(
+    'Pinch numbers in order: 1, 2, 3...',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
 
   const targetsRef = useRef<TrailTarget[]>(targets);
@@ -201,22 +202,37 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     [completeLevel, cursor, playError, playPop, speak, ttsEnabled],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
-    useGameHandTracking({
-      gameName: 'NumberTapTrail',
-      targetFps: 24,
-      isRunning: isPlaying && !gameCompleted,
-      onFrame: handleFrame,
-      onNoVideoFrame: () => {
-        if (cursor !== null) setCursor(null);
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'NumberTapTrail',
+    targetFps: 24,
+    isRunning: isPlaying && !gameCompleted,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => {
+      if (cursor !== null) setCursor(null);
+    },
+  });
 
   useEffect(() => {
-    if (isPlaying && !gameCompleted && !isHandTrackingReady && !isModelLoading) {
+    if (
+      isPlaying &&
+      !gameCompleted &&
+      !isHandTrackingReady &&
+      !isModelLoading
+    ) {
       void startTracking();
     }
-  }, [gameCompleted, isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
+  }, [
+    gameCompleted,
+    isHandTrackingReady,
+    isModelLoading,
+    isPlaying,
+    startTracking,
+  ]);
 
   const startGame = async () => {
     setGameCompleted(false);
@@ -276,16 +292,19 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const expectedTarget = targets[expectedIndex];
 
   return (
-    <GameContainer title='Number Tap Trail' score={score} level={level} onHome={goHome} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
-      <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
-
+    <GameContainer
+      webcamRef={_webcamRef}
+      title='Number Tap Trail'
+      score={score}
+      level={level}
+      onHome={goHome}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
+    >
+      <div
+        ref={gameAreaRef}
+        className='absolute inset-0 bg-blue-50 overflow-hidden'
+      >
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-200/40 pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[300px]'>
@@ -298,7 +317,10 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
 
         {expectedTarget && (
           <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
-            Next: <span className='flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-[#10B981] font-black'>{expectedTarget.value}</span>
+            Next:{' '}
+            <span className='flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-[#10B981] font-black'>
+              {expectedTarget.value}
+            </span>
           </div>
         )}
 
@@ -306,14 +328,18 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           <div
             key={target.id}
             className='absolute w-[5.5rem] h-[5.5rem] -translate-x-1/2 -translate-y-1/2 pointer-events-none'
-            style={{ left: `${target.position.x * 100}%`, top: `${target.position.y * 100}%` }}
+            style={{
+              left: `${target.position.x * 100}%`,
+              top: `${target.position.y * 100}%`,
+            }}
             aria-hidden='true'
           >
             <div
-              className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-3xl shadow-[0_4px_0_#E5B86E] transition-all duration-300 ${target.cleared
-                ? 'border-emerald-200 bg-emerald-100 text-emerald-500 scale-110'
-                : 'border-[#3B82F6] bg-white text-[#3B82F6] hover:scale-105'
-                }`}
+              className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-3xl shadow-[0_4px_0_#E5B86E] transition-all duration-300 ${
+                target.cleared
+                  ? 'border-emerald-200 bg-emerald-100 text-emerald-500 scale-110'
+                  : 'border-[#3B82F6] bg-white text-[#3B82F6] hover:scale-105'
+              }`}
             >
               {target.value}
             </div>
@@ -338,9 +364,28 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-blue-100 rounded-3xl border-4 border-blue-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 20-1.25-2.5L6 18" /><path d="M10 4 8.5 6.5 6 6" /><path d="m14 20 1.25-2.5L18 18" /><path d="m14 4 1.25 2.5L18 6" /><path d="M17 10h-6" /><path d="M17 14h-6" /></svg>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='48'
+                  height='48'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#3B82F6'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <path d='m10 20-1.25-2.5L6 18' />
+                  <path d='M10 4 8.5 6.5 6 6' />
+                  <path d='m14 20 1.25-2.5L18 18' />
+                  <path d='m14 4 1.25 2.5L18 6' />
+                  <path d='M17 10h-6' />
+                  <path d='M17 14h-6' />
+                </svg>
               </div>
-              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Number Tap Trail</h2>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>
+                Number Tap Trail
+              </h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>
                 Find and pinch the numbers in order from 1 to 10!
               </p>
@@ -371,10 +416,26 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-6'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-amber-100 rounded-3xl border-4 border-amber-200'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='48'
+                  height='48'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#F59E0B'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' />
+                </svg>
               </div>
-              <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>Trail Complete!</h2>
-              <p className='text-xl font-bold text-text-secondary mb-6'>Amazing job finding them all!</p>
+              <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>
+                Trail Complete!
+              </h2>
+              <p className='text-xl font-bold text-text-secondary mb-6'>
+                Amazing job finding them all!
+              </p>
               <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
                 Final Score: {score}
               </div>

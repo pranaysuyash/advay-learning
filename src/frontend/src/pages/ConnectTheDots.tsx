@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
@@ -37,7 +36,7 @@ const GAME_COLORS = {
   dotPending: '#3B82F6', // blue-500
   dotStroke: '#000000',
   dotLabel: '#FFFFFF',
-  cursorIdle: '#F59E0B', // amber-500 
+  cursorIdle: '#F59E0B', // amber-500
   cursorPinch: '#E85D04', // pip-orange
 } as const;
 
@@ -97,37 +96,33 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
           !navigator.permissions ||
           typeof navigator.permissions.query !== 'function'
         ) {
-          console.warn(
-            '[ConnectTheDots] navigator.permissions.query not available',
-          );
-        } else {
-          const result = await navigator.permissions.query({
-            name: 'camera' as PermissionName,
-          });
-          setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
-
-          if (result.state === 'denied') {
-            setShowPermissionWarning(true);
-          }
-
-          // Store PermissionStatus first and create a handler that reads the current state
-          permissionStatusRef.current = result;
-          permissionHandlerRef.current = () => {
-            const state = permissionStatusRef.current?.state as
-              | 'granted'
-              | 'denied'
-              | 'prompt';
-            setCameraPermission(state);
-            setShowPermissionWarning(state === 'denied');
-          };
-
-          result.addEventListener('change', permissionHandlerRef.current);
+          // permission API not supported; fall back silently
+          return;
         }
+
+        const result = await navigator.permissions.query({
+          name: 'camera' as PermissionName,
+        });
+        setCameraPermission(result.state as 'granted' | 'denied' | 'prompt');
+
+        if (result.state === 'denied') {
+          setShowPermissionWarning(true);
+        }
+
+        // Store PermissionStatus first and create a handler that reads the current state
+        permissionStatusRef.current = result;
+        permissionHandlerRef.current = () => {
+          const state = permissionStatusRef.current?.state as
+            | 'granted'
+            | 'denied'
+            | 'prompt';
+          setCameraPermission(state);
+          setShowPermissionWarning(state === 'denied');
+        };
+
+        result.addEventListener('change', permissionHandlerRef.current);
       } catch (error) {
-        console.warn(
-          '[ConnectTheDots] Camera permission check not supported',
-          error,
-        );
+        // ignore permission check errors; we will simply let user toggle to mouse mode
       }
     };
 
@@ -501,9 +496,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
   const normalizedCursor = handCursor
     ? {
-      x: handCursor.x / 800,
-      y: handCursor.y / 600,
-    }
+        x: handCursor.x / 800,
+        y: handCursor.y / 600,
+      }
     : null;
 
   return (
@@ -511,6 +506,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
       {/* Full Screen Game Mode */}
       {gameStarted && !gameCompleted ? (
         <GameContainer
+          webcamRef={webcamRef}
           title='Connect the Dots'
           score={score}
           level={level}
@@ -544,7 +540,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             {/* Next Dot Indicator */}
             <div className='absolute top-4 left-4 z-40'>
               <div className='bg-white px-5 py-3 rounded-[1.25rem] border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E]'>
-                <span className='text-sm font-bold uppercase tracking-widest text-text-secondary'>Next Dot</span>
+                <span className='text-sm font-bold uppercase tracking-widest text-text-secondary'>
+                  Next Dot
+                </span>
                 <span className='ml-3 font-black text-xl text-[#3B82F6]'>
                   #{currentDotIndex + 1}
                 </span>
@@ -589,19 +587,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
 
             {/* Webcam for hand tracking (hidden) */}
             {isHandTrackingEnabled && (
-              <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'>
-                <Webcam
-                  ref={webcamRef}
-                  audio={false}
-                  mirrored={true}
-                  videoConstraints={{
-                    facingMode: 'user',
-                    width: 640,
-                    height: 480,
-                  }}
-                  className='w-full h-full object-cover'
-                />
-              </div>
+              <div className='absolute top-0 left-0 w-full h-full pointer-events-none opacity-0'></div>
             )}
 
             {/* Draw dots and lines */}
@@ -657,7 +643,6 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                     </text>
                   </g>
                 ))}
-
               </svg>
             )}
 
@@ -695,7 +680,9 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
             {/* Header */}
             <header className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6'>
               <div>
-                <h1 className='text-4xl font-black text-advay-slate mb-2 tracking-tight'>Connect The Dots</h1>
+                <h1 className='text-4xl font-black text-advay-slate mb-2 tracking-tight'>
+                  Connect The Dots
+                </h1>
                 <p className='text-text-secondary font-bold text-lg'>
                   Connect the numbered dots in sequence to reveal the picture!
                 </p>
@@ -720,12 +707,8 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 role='alert'
                 className='mb-8 flex items-start gap-4 bg-red-50 border-3 border-red-100 rounded-[2rem] p-6 shadow-[0_4px_0_#E5B86E]'
               >
-                <div className="bg-white p-2 rounded-full shadow-[0_4px_0_#E5B86E]">
-                  <UIIcon
-                    name='warning'
-                    size={24}
-                    className='text-red-500'
-                  />
+                <div className='bg-white p-2 rounded-full shadow-[0_4px_0_#E5B86E]'>
+                  <UIIcon name='warning' size={24} className='text-red-500' />
                 </div>
                 <div className='text-sm text-red-700 font-medium pt-1'>
                   <p className='font-black text-lg mb-1'>
@@ -744,7 +727,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
               {!gameStarted ? (
                 <div className='flex flex-col items-center justify-center py-8'>
                   <div className='w-32 h-32 mx-auto mb-8 bg-blue-50 rounded-full flex items-center justify-center border-3 border-blue-100'>
-                    <div className="text-6xl">🔢</div>
+                    <div className='text-6xl'>🔢</div>
                   </div>
 
                   <h2 className='text-4xl font-black text-advay-slate mb-4'>
@@ -796,15 +779,34 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-12'>
                   <div className='w-32 h-32 mx-auto mb-8 text-7xl'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width='100%'
+                      height='100%'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    >
+                      <path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6' />
+                      <path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18' />
+                      <path d='M4 22h16' />
+                      <path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22' />
+                      <path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22' />
+                      <path d='M18 2H6v7a6 6 0 0 0 12 0V2Z' />
+                    </svg>
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] mb-2'>
                     Congratulations!
                   </h2>
-                  <p className='text-xl text-text-secondary font-bold mb-8'>You completed all levels!</p>
+                  <p className='text-xl text-text-secondary font-bold mb-8'>
+                    You completed all levels!
+                  </p>
                   <div className='text-3xl font-black text-advay-slate mb-10 border-3 border-[#F2CC8F] bg-slate-50 px-8 py-4 rounded-3xl'>
-                    Final Score: <span className="text-[#3B82F6]">{score}</span>
+                    Final Score: <span className='text-[#3B82F6]'>{score}</span>
                   </div>
 
                   {/* Standardized Completion Controls */}
@@ -833,7 +835,7 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
                 </li>
                 <li>• Finish all 5 levels to win the game!</li>
                 {cameraPermission === 'granted' && (
-                  <li className="pt-2">
+                  <li className='pt-2'>
                     <strong className='text-[#E85D04]'>Hand Tracking:</strong>{' '}
                     Toggle &quot;Hand Mode&quot; to use gestures. Point with
                     your index finger and pinch to connect dots!

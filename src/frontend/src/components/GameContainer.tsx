@@ -19,6 +19,8 @@ interface GameContainerProps {
   isPlaying?: boolean;
   /** Whether to report session progress (default: true). Set to false if using useGameSessionProgress hook */
   reportSession?: boolean;
+  /** Webcam ref mandatory for hand tracking to access video feed */
+  webcamRef?: any;
 }
 
 /**
@@ -43,6 +45,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
   isHandDetected,
   isPlaying,
   reportSession: shouldReportSession = true,
+  webcamRef,
 }) => {
   useSessionProgressReporter({
     gameName: title || 'game',
@@ -127,6 +130,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           <CameraThumbnail
             isHandDetected={!!isHandDetected}
             visible={isPlaying !== false}
+            webcamRef={webcamRef}
           />
         )}
       </main>

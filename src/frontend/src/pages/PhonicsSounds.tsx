@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 
@@ -422,8 +421,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const lvlCfg = LEVELS.find((l) => l.level === level) ?? LEVELS[0];
 
   return (
-    <GameContainer
-      title='Phonics Sounds'
+    <GameContainer webcamRef={webcamRef}       title='Phonics Sounds'
       score={score}
       level={level}
       onHome={goHome}
@@ -431,13 +429,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
+        
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-purple-100/40 pointer-events-none' />
 

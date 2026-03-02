@@ -1,49 +1,70 @@
 import { test, expect } from '@playwright/test';
 
-// This is a scaffolded Playwright test that depends on a running dev server
-// It demonstrates the offline -> enqueue -> online -> sync flow at a high level.
+const E2E_EMAIL = process.env.E2E_EMAIL;
+const E2E_PASSWORD = process.env.E2E_PASSWORD;
 
-test('offline progress sync end-to-end (scaffold)', async ({
-  page,
-  request,
-}) => {
-  // Replace with your local dev server URL when running locally
-  const APP_URL = process.env.APP_URL || 'http://localhost:6173';
+test.describe('Offline Progress Sync', () => {
+  test('syncs progress correctly after coming back online', async ({ page }) => {
+    test.skip(!E2E_EMAIL || !E2E_PASSWORD, 'Set E2E_EMAIL and E2E_PASSWORD to run authenticated offline sync test.');
 
-  // Go to the app
-  await page.goto(APP_URL + '/');
+    // 1. Setup and Login
+    await page.goto('/login');
+    await page.fill("#login-email-input", E2E_EMAIL!);
+    await page.fill("#login-password-input", E2E_PASSWORD!);
+    await page.click('button[type=submit]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
 
-  // Simulate a profile being present by creating one via API (assumes backend running)
-  // For the scaffold, we skip full auth flow and assume test environment can create a profile directly.
-  // TODO: Expand to full flow with login and UI interactions.
+    // 2. Head to a game 
+    await page.click('text="Games"');
+    await page.waitForURL('**/games');
 
-  // Simulate offline and enqueue via window call
-  await page.evaluate(() => {
-    // @ts-expect-error - window.progressQueue is injected by app import in test runs
-    if ((window as any).progressQueue) {
-      (window as any).progressQueue.enqueue({
-        idempotency_key: 'e2e-1',
-        profile_id: 'e2e-profile',
-        activity_type: 'letter_tracing',
-        content_id: 'E',
-        score: 90,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // Choose a game that logs deterministic progress (like Alphabet Tracing)
+    await page.click('text="Alphabet Tracing"');
+
+    // 3. Go Offline
+    await page.context().setOffline(true);
+
+    // 4. Record progress
+    // Realistically simulating game interaction in E2E without real camera is tough, 
+    // so we trigger the progressQueue via the exposed window interface which 
+    // represents the game finishing offline.
+    await page.evaluate(() => {
+      // @ts-expect-error - Expected injection during test
+      if ((window as any).progressQueue) {
+        const testProfileId = 'e2e-offline-test';
+        (window as any).progressQueue.enqueue({
+          idempotency_key: 'test-offline-sync-1',
+          profile_id: testProfileId,
+          activity_type: 'letter_tracing',
+          content_id: 'A',
+          score: 100,
+          timestamp: new Date().toISOString(),
+          completed: true
+        });
+      }
+    });
+
+    // 5. Come back online
+    await page.context().setOffline(false);
+
+    // 6. Navigate back to dashboard (should trigger sync on mount/visibility)
+    await page.click('text="Home"');
+    await page.waitForURL('**/dashboard');
+
+    // 7. Force/await the sync mechanism 
+    await page.evaluate(async () => {
+      // @ts-expect-error - Expected injection
+      if ((window as any).progressQueue && (window as any).apiClient) {
+        await (window as any).progressQueue.syncAll((window as any).apiClient);
+      }
+    });
+
+    // 8. Verify the local queue was cleared (i.e. sync was successful)
+    const queueSize = await page.evaluate(() => {
+      // @ts-expect-error
+      return ((window as any).progressQueue?.getQueue() || []).length;
+    });
+
+    expect(queueSize).toBe(0);
   });
-
-  // Bring back online and call sync
-  await page.context().setOffline(false);
-  await page.evaluate(async () => {
-    // @ts-expect-error - window.progressQueue and apiClient are injected by app import in test runs
-    if ((window as any).progressQueue && (window as any).apiClient) {
-      await (window as any).progressQueue.syncAll((window as any).apiClient);
-    }
-  });
-
-  // Verify via backend API that the record exists (scaffold - replace endpoints if needed)
-  const resp = await request.post('/api/v1/progress/batch', {
-    json: { profile_id: 'e2e-profile', items: [{ idempotency_key: 'e2e-1' }] },
-  });
-  expect(resp.status()).toBeLessThan(500);
 });

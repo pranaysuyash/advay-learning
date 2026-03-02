@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
@@ -516,12 +515,7 @@ export function VirtualChemistryLab() {
             <div className='flex flex-col h-full space-y-6'>
               {/* Camera + Canvas */}
               <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
-                <Webcam
-                  ref={webcamRef}
-                  className='absolute inset-0 w-full h-full object-cover'
-                  mirrored
-                  videoConstraints={{ facingMode: 'user' }}
-                />
+                
                 <canvas
                   ref={canvasRef}
                   className='absolute inset-0 w-full h-full pointer-events-none'

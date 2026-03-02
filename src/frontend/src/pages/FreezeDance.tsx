@@ -1,9 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
-import { Music, Sparkles, Frown, Video, Hand, Snowflake, Trophy, PartyPopper, Star, PersonStanding } from 'lucide-react';
+import {
+  Music,
+  Sparkles,
+  Frown,
+  Video,
+  Hand,
+  Snowflake,
+  Trophy,
+  PartyPopper,
+  Star,
+  PersonStanding,
+} from 'lucide-react';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -27,9 +37,11 @@ export function FreezeDance() {
   const [score, setScore] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraReady] = useState(false);
   const [isFrozen, setIsFrozen] = useState(false);
-  const [gamePhase, setGamePhase] = useState<'dancing' | 'freezing' | 'fingerChallenge'>('dancing');
+  const [gamePhase, setGamePhase] = useState<
+    'dancing' | 'freezing' | 'fingerChallenge'
+  >('dancing');
   const [round, setRound] = useState(1);
   const [stabilityScore, setStabilityScore] = useState(0);
 
@@ -46,7 +58,11 @@ export function FreezeDance() {
   const stabilityRef = useRef(0);
   const handCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { playPop: playSuccess, playFanfare: playCelebration, playPop } = useAudio();
+  const {
+    playPop: playSuccess,
+    playFanfare: playCelebration,
+    playPop,
+  } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('freeze-dance');
   const perfectFreezeStreakRef = useRef(0);
@@ -77,7 +93,10 @@ export function FreezeDance() {
             numPoses: 1,
           });
         } catch (e) {
-          console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);
+          console.warn(
+            'GPU delegate failed for PoseLandmarker, falling back to CPU:',
+            e,
+          );
           landmarker = await PoseLandmarker.createFromOptions(vision, {
             baseOptions: {
               modelAssetPath:
@@ -92,7 +111,9 @@ export function FreezeDance() {
         setIsLoading(false);
       } catch (err) {
         console.error('Failed to initialize pose landmarker:', err);
-        setError('Could not load pose detection. This might be a network issue. Try refreshing or check your internet connection.');
+        setError(
+          'Could not load pose detection. This might be a network issue. Try refreshing or check your internet connection.',
+        );
         setIsLoading(false);
       }
     }
@@ -212,7 +233,7 @@ export function FreezeDance() {
 
     // Voice cue for dancing phase
     if (ttsEnabled) {
-      void speak("Dance dance dance!");
+      void speak('Dance dance dance!');
     }
 
     const danceTimer = setTimeout(() => {
@@ -235,7 +256,10 @@ export function FreezeDance() {
           setShowHandOverlay(true);
 
           if (ttsEnabled) {
-            const targetText = target === 0 ? 'a fist' : `${target} finger${target !== 1 ? 's' : ''}`;
+            const targetText =
+              target === 0
+                ? 'a fist'
+                : `${target} finger${target !== 1 ? 's' : ''}`;
             void speak(`Freeze! Show me ${targetText}!`);
           }
 
@@ -276,17 +300,19 @@ export function FreezeDance() {
         setShowCelebration(true);
         if (ttsEnabled) {
           if (fingerChallengeComplete) {
-            void speak("Amazing! You froze perfectly and showed the right fingers!");
+            void speak(
+              'Amazing! You froze perfectly and showed the right fingers!',
+            );
           } else {
-            void speak("Great freeze! You held so still!");
+            void speak('Great freeze! You held so still!');
           }
         }
         setTimeout(() => setShowCelebration(false), 1500);
       } else if (ttsEnabled && roundScore > 0) {
-        void speak("Good try! Hold even stiller next time!");
+        void speak('Good try! Hold even stiller next time!');
       }
     } else if (ttsEnabled) {
-      void speak("You moved! Try to hold super still next time!");
+      void speak('You moved! Try to hold super still next time!');
     }
 
     setRound((r) => r + 1);
@@ -382,7 +408,9 @@ export function FreezeDance() {
     setScore(0);
     setRound(1);
     if (ttsEnabled) {
-      void speak("Let's play Freeze Dance! Dance when I say dance, and freeze when I say freeze!");
+      void speak(
+        "Let's play Freeze Dance! Dance when I say dance, and freeze when I say freeze!",
+      );
     }
   };
 
@@ -397,10 +425,6 @@ export function FreezeDance() {
     }
   };
 
-  const handleVideoLoad = () => {
-    setCameraReady(true);
-  };
-
   if (isLoading || isHandLoading) {
     return (
       <div className='min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center'>
@@ -409,14 +433,20 @@ export function FreezeDance() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className='text-6xl mb-4 flex justify-center'><Music className='w-16 h-16 text-purple-500' /></div>
+          <div className='text-6xl mb-4 flex justify-center'>
+            <Music className='w-16 h-16 text-purple-500' />
+          </div>
           <h2 className='text-2xl font-bold text-blue-700 mb-2'>
             Loading Freeze Dance...
           </h2>
           <p className='text-blue-500'>
-            {isLoading ? 'Loading pose tracking...' : 'Loading hand tracking...'}
+            {isLoading
+              ? 'Loading pose tracking...'
+              : 'Loading hand tracking...'}
           </p>
-          <p className='text-purple-500 text-sm mt-2 flex items-center justify-center gap-1'><Sparkles className='w-4 h-4' /> Now with finger challenges!</p>
+          <p className='text-purple-500 text-sm mt-2 flex items-center justify-center gap-1'>
+            <Sparkles className='w-4 h-4' /> Now with finger challenges!
+          </p>
         </motion.div>
       </div>
     );
@@ -426,7 +456,9 @@ export function FreezeDance() {
     return (
       <div className='min-h-screen bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center'>
         <div className='text-center p-8'>
-          <div className='text-6xl mb-4 flex justify-center'><Frown className='w-16 h-16 text-red-500' /></div>
+          <div className='text-6xl mb-4 flex justify-center'>
+            <Frown className='w-16 h-16 text-red-500' />
+          </div>
           <h2 className='text-2xl font-bold text-red-700 mb-2'>Oops!</h2>
           <p className='text-red-500 mb-4'>{error}</p>
           <button
@@ -453,14 +485,20 @@ export function FreezeDance() {
         >
           ← Back
         </button>
-        <h1 className='text-3xl font-black text-advay-slate tracking-tight'>Freeze Dance</h1>
+        <h1 className='text-3xl font-black text-advay-slate tracking-tight'>
+          Freeze Dance
+        </h1>
         <div className='flex items-center gap-4'>
           <div className='px-6 py-3 bg-white border-3 border-amber-100 rounded-full shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold text-amber-500 tracking-wide'>SCORE: </span>
+            <span className='font-bold text-amber-500 tracking-wide'>
+              SCORE:{' '}
+            </span>
             <span className='font-black text-amber-500 text-xl'>{score}</span>
           </div>
           <div className='px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-            <span className='text-text-secondary font-bold text-sm flex items-center gap-1'>Take your time!</span>
+            <span className='text-text-secondary font-bold text-sm flex items-center gap-1'>
+              Take your time!
+            </span>
           </div>
         </div>
       </header>
@@ -473,61 +511,94 @@ export function FreezeDance() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className='text-center mb-10'>
-              <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center gap-2'><Music className='w-20 h-20 text-purple-500' /><PersonStanding className='w-20 h-20 text-blue-500' /></div>
+              <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center gap-2'>
+                <Music className='w-20 h-20 text-purple-500' />
+                <PersonStanding className='w-20 h-20 text-blue-500' />
+              </div>
               <h2 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight mb-4'>
                 Freeze Dance!
               </h2>
               <p className='text-text-secondary font-bold text-xl'>
-                Dance when the music plays, <span className='text-blue-500 font-black'>FREEZE</span> when it stops!
+                Dance when the music plays,{' '}
+                <span className='text-blue-500 font-black'>FREEZE</span> when it
+                stops!
               </p>
             </div>
 
             <div className='bg-slate-50 border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-10'>
-              <h3 className='font-black text-advay-slate text-xl mb-6 tracking-tight'>How to Play:</h3>
+              <h3 className='font-black text-advay-slate text-xl mb-6 tracking-tight'>
+                How to Play:
+              </h3>
               <ul className='space-y-4 text-advay-slate font-medium text-lg'>
                 <li className='flex items-center gap-4'>
-                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>1</span>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>
+                    1
+                  </span>
                   <span>Stand in front of your camera</span>
                 </li>
                 <li className='flex items-center gap-4'>
-                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>2</span>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>
+                    2
+                  </span>
                   <span>Dance and move when you see "DANCE!"</span>
                 </li>
                 <li className='flex items-center gap-4'>
-                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>3</span>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>
+                    3
+                  </span>
                   <span>FREEZE when you see "FREEZE!"</span>
                 </li>
                 <li className='flex items-center gap-4'>
-                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>4</span>
+                  <span className='flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold'>
+                    4
+                  </span>
                   <span>Hold still to earn points!</span>
                 </li>
               </ul>
             </div>
 
             <div className='bg-white border-3 border-blue-200 rounded-[2rem] p-6 mb-10 shadow-sm'>
-              <h3 className='font-black text-advay-slate text-xl mb-4 text-center tracking-tight'>Choose Your Mode:</h3>
+              <h3 className='font-black text-advay-slate text-xl mb-4 text-center tracking-tight'>
+                Choose Your Mode:
+              </h3>
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                 <button
-                  onClick={() => { playPop(); setGameMode('classic'); }}
-                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'classic'
-                    ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
-                    : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
-                    }`}
+                  onClick={() => {
+                    playPop();
+                    setGameMode('classic');
+                  }}
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${
+                    gameMode === 'classic'
+                      ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+                  }`}
                 >
-                  <span className='block mb-2 flex justify-center'><Trophy className='w-10 h-10 text-blue-600' /></span>
+                  <span className='block mb-2 flex justify-center'>
+                    <Trophy className='w-10 h-10 text-blue-600' />
+                  </span>
                   Classic Mode
-                  <span className='block text-sm font-normal mt-1 opacity-80'>Just Dance & Freeze</span>
+                  <span className='block text-sm font-normal mt-1 opacity-80'>
+                    Just Dance & Freeze
+                  </span>
                 </button>
                 <button
-                  onClick={() => { playPop(); setGameMode('combo'); }}
-                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'combo'
-                    ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
-                    : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
-                    }`}
+                  onClick={() => {
+                    playPop();
+                    setGameMode('combo');
+                  }}
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${
+                    gameMode === 'combo'
+                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+                  }`}
                 >
-                  <span className='block mb-2 flex justify-center'><Hand className='w-10 h-10 text-purple-600' /></span>
+                  <span className='block mb-2 flex justify-center'>
+                    <Hand className='w-10 h-10 text-purple-600' />
+                  </span>
                   Combo Mode
-                  <span className='block text-sm font-normal mt-1 opacity-80'>Freeze + Finger Challenges!</span>
+                  <span className='block text-sm font-normal mt-1 opacity-80'>
+                    Freeze + Finger Challenges!
+                  </span>
                 </button>
               </div>
             </div>
@@ -562,24 +633,41 @@ export function FreezeDance() {
             >
               <div className='text-center'>
                 <div className='mb-4 drop-shadow-[0_4px_0_#E5B86E] flex justify-center'>
-                  {gamePhase === 'dancing' ? <Music className='w-20 h-20 text-blue-500' /> : gamePhase === 'freezing' ? <Snowflake className='w-20 h-20 text-red-500' /> : <Hand className='w-20 h-20 text-purple-500' />}
+                  {gamePhase === 'dancing' ? (
+                    <Music className='w-20 h-20 text-blue-500' />
+                  ) : gamePhase === 'freezing' ? (
+                    <Snowflake className='w-20 h-20 text-red-500' />
+                  ) : (
+                    <Hand className='w-20 h-20 text-purple-500' />
+                  )}
                 </div>
                 <h3
-                  className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing' ? 'text-[#3B82F6]' :
-                    gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
-                    }`}
+                  className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${
+                    gamePhase === 'dancing'
+                      ? 'text-[#3B82F6]'
+                      : gamePhase === 'freezing'
+                        ? 'text-[#EF4444]'
+                        : 'text-purple-500'
+                  }`}
                 >
-                  {gamePhase === 'dancing' ? 'DANCE!' :
-                    gamePhase === 'freezing' ? 'FREEZE!' : `SHOW ${targetFingers}!`}
+                  {gamePhase === 'dancing'
+                    ? 'DANCE!'
+                    : gamePhase === 'freezing'
+                      ? 'FREEZE!'
+                      : `SHOW ${targetFingers}!`}
                 </h3>
-                <p className='text-slate-400 font-bold uppercase tracking-widest'>Round {round}</p>
+                <p className='text-slate-400 font-bold uppercase tracking-widest'>
+                  Round {round}
+                </p>
               </div>
 
               {gamePhase === 'freezing' && (
                 <div className='mt-8 bg-slate-50 border-2 border-[#F2CC8F] rounded-[1.5rem] p-6'>
                   <div className='flex justify-between font-bold text-advay-slate mb-3'>
                     <span className='uppercase tracking-wide'>Hold still!</span>
-                    <span className='text-advay-slate'>{Math.round(stabilityScore)}%</span>
+                    <span className='text-advay-slate'>
+                      {Math.round(stabilityScore)}%
+                    </span>
                   </div>
                   <div className='h-6 bg-slate-200 rounded-full overflow-hidden shadow-inner'>
                     <motion.div
@@ -594,8 +682,12 @@ export function FreezeDance() {
               {gamePhase === 'fingerChallenge' && (
                 <div className='mt-8 bg-slate-50 border-2 border-[#F2CC8F] rounded-[1.5rem] p-6 space-y-5'>
                   <div className='flex justify-between font-bold text-advay-slate mb-2'>
-                    <span className='uppercase tracking-wide'>Your fingers:</span>
-                    <span className={`text-xl ${detectedFingers === targetFingers ? 'text-[#10B981]' : 'text-[#F59E0B]'}`}>
+                    <span className='uppercase tracking-wide'>
+                      Your fingers:
+                    </span>
+                    <span
+                      className={`text-xl ${detectedFingers === targetFingers ? 'text-[#10B981]' : 'text-[#F59E0B]'}`}
+                    >
                       {detectedFingers} / {targetFingers}
                     </span>
                   </div>
@@ -603,7 +695,9 @@ export function FreezeDance() {
                     <motion.div
                       className={`h-full ${detectedFingers === targetFingers ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`}
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%` }}
+                      animate={{
+                        width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%`,
+                      }}
                     />
                   </div>
                   {detectedFingers === targetFingers && (
@@ -620,12 +714,6 @@ export function FreezeDance() {
             </motion.div>
 
             <div className='relative rounded-[2.5rem] overflow-hidden bg-slate-100 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-              <Webcam
-                ref={webcamRef}
-                onLoadedData={handleVideoLoad}
-                className='w-full h-[400px] object-cover'
-                mirrored
-              />
               <canvas
                 ref={canvasRef}
                 className='absolute top-0 left-0 w-full h-[400px] pointer-events-none'
@@ -642,19 +730,40 @@ export function FreezeDance() {
 
               <div className='absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <span className='text-advay-slate font-bold whitespace-nowrap'>
-                  {cameraReady ? <span className='flex items-center gap-1'><Video className='w-4 h-4' /> Camera Ready</span> : 'Loading...'}
+                  {cameraReady ? (
+                    <span className='flex items-center gap-1'>
+                      <Video className='w-4 h-4' /> Camera Ready
+                    </span>
+                  ) : (
+                    'Loading...'
+                  )}
                   {isHandReady && <Hand className='w-4 h-4 inline' />}
                 </span>
               </div>
 
               <div className='absolute top-6 right-6 px-5 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <span
-                  className={`font-black tracking-wide ${gamePhase === 'dancing' ? 'text-[#10B981]' :
-                    gamePhase === 'freezing' ? 'text-[#EF4444]' : 'text-purple-500'
-                    }`}
+                  className={`font-black tracking-wide ${
+                    gamePhase === 'dancing'
+                      ? 'text-[#10B981]'
+                      : gamePhase === 'freezing'
+                        ? 'text-[#EF4444]'
+                        : 'text-purple-500'
+                  }`}
                 >
-                  {gamePhase === 'dancing' ? <span className='flex items-center gap-1'><Music className='w-4 h-4' /> DANCE</span> :
-                    gamePhase === 'freezing' ? <span className='flex items-center gap-1'><Snowflake className='w-4 h-4' /> FROZEN</span> : <span className='flex items-center gap-1'><Hand className='w-4 h-4' /> FINGERS</span>}
+                  {gamePhase === 'dancing' ? (
+                    <span className='flex items-center gap-1'>
+                      <Music className='w-4 h-4' /> DANCE
+                    </span>
+                  ) : gamePhase === 'freezing' ? (
+                    <span className='flex items-center gap-1'>
+                      <Snowflake className='w-4 h-4' /> FROZEN
+                    </span>
+                  ) : (
+                    <span className='flex items-center gap-1'>
+                      <Hand className='w-4 h-4' /> FINGERS
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -684,14 +793,23 @@ export function FreezeDance() {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
               >
-                <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center'><PartyPopper className='w-24 h-24 text-yellow-500' /></div>
+                <div className='mb-6 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex justify-center'>
+                  <PartyPopper className='w-24 h-24 text-yellow-500' />
+                </div>
                 <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>
-                  {fingerChallengeComplete ? 'Perfect Freeze + Fingers!' : 'Amazing Freeze!'}
+                  {fingerChallengeComplete
+                    ? 'Perfect Freeze + Fingers!'
+                    : 'Amazing Freeze!'}
                 </h2>
                 <p className='text-text-secondary font-bold text-xl'>
-                  {fingerChallengeComplete
-                    ? <span className='flex items-center justify-center gap-1'>You froze AND showed the right fingers! <Star className='w-5 h-5 text-yellow-500 inline' /></span>
-                    : 'Perfect stillness!'}
+                  {fingerChallengeComplete ? (
+                    <span className='flex items-center justify-center gap-1'>
+                      You froze AND showed the right fingers!{' '}
+                      <Star className='w-5 h-5 text-yellow-500 inline' />
+                    </span>
+                  ) : (
+                    'Perfect stillness!'
+                  )}
                 </p>
               </motion.div>
             </motion.div>

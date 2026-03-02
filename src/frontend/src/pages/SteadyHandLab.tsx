@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Webcam from 'react-webcam';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -48,7 +47,12 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   const holdProgressRef = useRef(holdProgress);
   const celebrationTimeoutRef = useRef<number | undefined>(undefined);
 
-  const { playSuccess, playError, playFanfare: playCelebration, playPop } = useAudio();
+  const {
+    playSuccess,
+    playError,
+    playFanfare: playCelebration,
+    playPop,
+  } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('steady-hand-lab');
 
@@ -183,16 +187,20 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
     ],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } =
-    useGameHandTracking({
-      gameName: 'SteadyHandLab',
-      targetFps: 30,
-      isRunning: isPlaying,
-      onFrame: handleFrame,
-      onNoVideoFrame: () => {
-        if (cursor !== null) setCursor(null);
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'SteadyHandLab',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => {
+      if (cursor !== null) setCursor(null);
+    },
+  });
 
   useEffect(() => {
     if (isPlaying && !isHandTrackingReady && !isModelLoading) {
@@ -255,6 +263,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
 
   return (
     <GameContainer
+      webcamRef={_webcamRef}
       title='Steady Hand Lab'
       score={score}
       level={round}
@@ -277,14 +286,6 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           aria-hidden='true'
         />
 
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          mirrored
-          className='absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-multiply'
-          videoConstraints={{ facingMode: 'user' }}
-        />
-
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
@@ -292,7 +293,9 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         </div>
 
         <div className='absolute top-20 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-white/90 backdrop-blur-sm border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-          <span className='text-slate-400 font-bold text-sm'>Take your time!</span>
+          <span className='text-slate-400 font-bold text-sm'>
+            Take your time!
+          </span>
         </div>
 
         <div
@@ -338,8 +341,12 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         {!isPlaying && (
           <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
-              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🖐️</div>
-              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Steady Hand</h2>
+              <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
+                🖐️
+              </div>
+              <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>
+                Steady Hand
+              </h2>
               <p className='text-text-secondary font-bold text-xl mb-10'>
                 Hold your finger steady inside the rings!
               </p>
