@@ -1,3 +1,227 @@
+### TCK-20260228-012 :: Audit HandDetectionProvider Shared Runtime Bridge
+
+Ticket Stamp: STAMP-20260228T130224Z-copilot-w06i
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-28 18:32 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Single-file audit for `src/frontend/src/components/game/HandDetectionProvider.tsx` using audit prompt v1.5.1; discovery evidence, findings, and patch plan only.
+- Out-of-scope: Code remediation across provider/hook/context files.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/components/game/HandDetectionProvider.tsx`
+- Audit artifact: `docs/audit/src__frontend__src__components__game__HandDetectionProvider.tsx.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: `prompts/audit/audit-v1.5.1.md`
+- Prompt/persona traceability: Evidence-first one-file audit lens (Observed/Inferred/Unknown discipline)
+
+Acceptance Criteria:
+
+- [x] Discovery commands executed and captured (git tracking/history, inbound/outbound refs, test discovery)
+- [x] Deterministic audit artifact created under `docs/audit/`
+- [x] Findings include severity, evidence snippets, failure modes, and patch-plan guidance
+- [x] Worklog entry linked with ticket stamp and evidence
+
+Execution log:
+
+- 2026-02-28 18:32 IST | Ticket stamp generated | Evidence: `STAMP-20260228T130224Z-copilot-w06i`
+- 2026-02-28 18:32 IST | Discovery completed for provider file | Evidence: git+rg outputs captured in audit appendix
+- 2026-02-28 18:33 IST | Audit artifact written | Evidence: `docs/audit/src__frontend__src__components__game__HandDetectionProvider.tsx.md`
+- 2026-02-28 18:33 IST | Findings recorded | Evidence: `HDP-01` (meta typing), `HDP-02` (lifecycle idempotence), `HDP-03` (detection simplification)
+
+Status updates:
+
+### TCK-20260228-013 :: Audit coordinateTransform Shared Utility
+
+Ticket Stamp: STAMP-20260228T143607Z-copilot-v0zi
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-28 19:36 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Single-file audit for `src/frontend/src/utils/coordinateTransform.ts` using audit prompt v1.5.1; discovery evidence, findings, and patch plan only.
+- Out-of-scope: Code remediation across coordinate/hand-tracking utilities.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/utils/coordinateTransform.ts`
+- Audit artifact: `docs/audit/src__frontend__src__utils__coordinateTransform.ts.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: `prompts/audit/audit-v1.5.1.md`
+- Prompt/persona traceability: Evidence-first one-file audit lens (Observed/Inferred/Unknown discipline)
+
+Acceptance Criteria:
+
+- [x] Discovery commands executed and captured (git tracking/history, inbound/outbound refs, test discovery)
+- [x] Deterministic audit artifact created under `docs/audit/`
+- [x] Findings include severity, evidence snippets, failure modes, and patch-plan guidance
+- [x] Worklog entry linked with ticket stamp and evidence
+
+Execution log:
+
+- 2026-02-28 19:36 IST | Ticket stamp generated | Evidence: `STAMP-20260228T143607Z-copilot-v0zi`
+- 2026-02-28 19:22 IST | Discovery completed | Evidence: git tracking confirmed, 8 production usage sites, test suite found at `coordinateTransform.test.ts`
+- 2026-02-28 19:36 IST | Audit artifact written | Evidence: `docs/audit/src__frontend__src__utils__coordinateTransform.ts.md` (14 findings, risk: MEDIUM)
+- 2026-02-28 19:36 IST | Findings recorded | Evidence: `CTR-01` (null canvas crash), `CTR-02` (out-of-bounds coordinates), `CTR-03` (zero-dimension guards), `CTR-09` (observability), `CTR-10` (test coverage)
+
+Status updates:
+
+- 2026-02-28 19:36 IST | **IN_PROGRESS** — Discovery and evidence collection
+- 2026-02-28 19:36 IST | **DONE** — Audit artifact completed and linked
+
+Next actions:
+
+1. Optional remediation PR for `CTR-01` and `CTR-02` (HIGH-priority crash/silent-failure safeguards).
+2. Continue coverage on next shared utility if requested.
+
+Risks/notes:
+
+- File is widely used (8 production files depend on it): defects have broad blast radius across hand-tracking games.
+- Core functions have unit tests, but `KalmanFilter`, `mapNormalizedPointToCover`, and edge cases are untested.
+- Risk rating: MEDIUM (high usage footprint + missing safeguards, but pure utility scope with no side effects).
+
+---
+
+### TCK-20260228-014 :: Document MediaPipe-to-React UI Interaction Architecture (Primary + Secondary UI)
+
+Ticket Stamp: STAMP-20260228T145145Z-copilot-ispy
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-02-28 20:21 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Documentation-first architecture and rollout plan for using MediaPipe hand tracking to control React components and defining secondary UI/fallback modes.
+- Out-of-scope: Code implementation/migration of interaction controller or page-level gesture refactors.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/research/MEDIAPIPE_REACT_UI_INTERACTION_ARCHITECTURE_2026-02-28.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: User request: "document everything first"
+- Prompt/persona traceability: Architecture/research lens grounded in existing runtime hooks and interaction components
+
+Acceptance Criteria:
+
+- [x] Current-state inventory documented with concrete code references
+- [x] Primary interaction model (point + pinch) documented
+- [x] Secondary UI/fallback model (dwell/scan/touch continuity) documented
+- [x] Phased rollout and testing strategy documented
+- [x] Risk/mitigation and implementation backlog captured
+
+Execution log:
+
+- 2026-02-28 20:20 IST | Architecture document authored | Evidence: `docs/research/MEDIAPIPE_REACT_UI_INTERACTION_ARCHITECTURE_2026-02-28.md`
+- 2026-02-28 20:21 IST | Ticket stamp generated | Evidence: `STAMP-20260228T145145Z-copilot-ispy`
+- 2026-02-28 20:21 IST | Worklog updated | Evidence: this entry in `docs/WORKLOG_ADDENDUM_v3.md`
+- 2026-02-28 20:36 IST | External research cross-check integrated | Evidence: Section "External Research Cross-Check" added to `docs/research/MEDIAPIPE_REACT_UI_INTERACTION_ARCHITECTURE_2026-02-28.md` with validation and backlog deltas
+- 2026-02-28 20:47 IST | Consolidated master research doc created (yours + repo-validated + audits) | Evidence: `docs/research/HAND_UI_RESEARCH_CONSOLIDATED_2026-02-28.md`
+- 2026-02-28 20:54 IST | Phase-1 implementation spec documented (no-code contract) | Evidence: `docs/research/HAND_UI_PHASE1_IMPLEMENTATION_SPEC_2026-02-28.md`
+
+Status updates:
+
+- 2026-02-28 20:20 IST | **IN_PROGRESS** — Documenting architecture and fallback strategy
+- 2026-02-28 20:21 IST | **DONE** — Documentation complete, ready for Phase 1 implementation
+
+Next actions:
+
+1. Implement Phase 1 only: `useHandInteractionController` + `InteractionModeResolver` behind feature flag.
+2. Pilot migration on one page (`MirrorDraw` or `MediaPipeTest`) before broad rollout.
+
+Risks/notes:
+
+### TCK-20260301-001 :: Ignore UX analysis screenshots by default
+
+Ticket Stamp: STAMP-20260301T164401Z-codex-qmoa
+
+Type: BUG
+Owner: Pranay
+Created: 2026-03-01 22:14 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Prevent `docs/ux-analysis/screenshots/` image assets from showing up in `git status` by adding the path to `.gitignore`.
+- Out-of-scope: Cleaning other screenshot directories or archiving existing captures.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `.gitignore`
+- Branch/PR: codex/wip-game-upgrades-20260227
+
+Inputs:
+
+- Prompt used: User request in chat (documented as "why are still screenshots in changes when we had excluded screenshots?")
+- Prompt/persona traceability: Maintenance/debug lens ensuring git hygiene for captured UX imagery.
+
+Acceptance Criteria:
+
+- [x] `.gitignore` includes `docs/ux-analysis/screenshots/`.
+- [x] `git status -sb` no longer lists individual UX assessment screenshots.
+
+Execution log:
+
+- 2026-03-01 22:12 IST | Observed screenshot files appearing inside `docs/ux-analysis/screenshots/` via `git status -sb` | Evidence: prior command output (images listed).
+- 2026-03-01 22:13 IST | Added `docs/ux-analysis/screenshots/` to `.gitignore` using apply_patch | Evidence: updated `.gitignore` entry.
+- 2026-03-01 22:14 IST | Verified status now hides the UX screenshot files | Evidence: `git status -sb`.
+
+Status updates:
+
+- 2026-03-01 22:14 IST | **DONE** — `.gitignore` entry merged, no further screenshot noise in git status.
+
+Next actions:
+
+1. Continue with task that triggered the UX analysis (if further code changes are requested).
+- Existing capabilities are strong but fragmented; documentation establishes a unified contract before code migration.
+- This work intentionally avoids implementation changes to keep risk low while aligning architecture.
+
+---
+
+- 2026-02-28 18:32 IST | **IN_PROGRESS** — Discovery and evidence collection
+- 2026-02-28 18:33 IST | **DONE** — Audit artifact completed and linked
+
+Next actions:
+
+1. Optional remediation PR for `HDP-01` and `HDP-02` with contract tests.
+2. Continue coverage on next shared hand-detection file if requested.
+
+Risks/notes:
+
+- Provider file is tracked (git log shows add event), but regression classification remains unknown due limited revision depth in reachable history for this path.
+
+---
+
 ### TCK-20260227-009 :: Implement Follow the Leader Game
 
 Ticket Stamp: STAMP-20260227T165432Z-claude-qp0x
@@ -42,6 +266,7 @@ Source:
 Plan:
 
 - [ ] Create followTheLeaderLogic.ts with movement patterns and validation
+
 - [ ] Implement pose detection using Pose Landmarker (reused from YogaAnimals)
 - [ ] Create movement library (penguin walk, frog hop, tiptoe, etc.)
 - [ ] Build main game page with animated guide character
@@ -226,10 +451,12 @@ Status updates:
 **Architecture Notes:**
 
 The implementation follows the established pattern from DiscoveryLab:
+
 - DiscoveryLab emits: activityType='discovery_craft', contentId='recipe-{id}'
 - AlphabetGame emits: activityType='letter_tracing', contentId='letter-{lang}-{codepoint}'
 
 Key design decisions:
+
 1. **Content ID format**: Uses Unicode codepoints (e.g., 'letter-en-41' for 'A') for robustness
 2. **Attempt tracking**: Tracks attempts per letter-language combo for struggle detection
 3. **Dual emission**: Emits on both "too few points" AND successful check for complete visibility
@@ -4053,6 +4280,7 @@ Evidence:
 **Command**: `git diff docs/security/SECURITY.md --stat`
 
 **Output**:
+
 ```
 docs/security/SECURITY.md | 89 ++++++++++++++++++++++++++++++++------------------------
 1 file changed, 65 insertions(+), 24 deletions(-)
@@ -4146,7 +4374,7 @@ Plan:
 **Phase 1: Audit All Version References**
 
 1. Search for PostgreSQL version references
-2. Search for Node.js version references  
+2. Search for Node.js version references
 3. Search for Docker image tags
 4. Identify all files needing updates
 
@@ -4188,6 +4416,7 @@ Evidence:
 **Command**: `git diff --stat`
 
 **Output**:
+
 ```
 README.md                                          |   2 +-
 docker-compose.yml                                 |   2 +-
@@ -4199,10 +4428,10 @@ src/frontend/package.json                          |   2 +-
 
 **Version Changes Summary**:
 
-| Component | Old Version | New Version | Files Updated |
-|-----------|-------------|-------------|---------------|
-| Node.js | 18+ | 22+ (LTS) | README.md, docs/SETUP.md, src/frontend/package.json |
-| PostgreSQL | 14/16 | 17 | docker-compose.yml, docs/SETUP.md, docs/security/SECURITY.md, docs/DEPLOYMENT_READINESS_REPORT.md |
+| Component  | Old Version | New Version | Files Updated                                                                                     |
+| ---------- | ----------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| Node.js    | 18+         | 22+ (LTS)   | README.md, docs/SETUP.md, src/frontend/package.json                                               |
+| PostgreSQL | 14/16       | 17          | docker-compose.yml, docs/SETUP.md, docs/security/SECURITY.md, docs/DEPLOYMENT_READINESS_REPORT.md |
 
 **Verification Commands**:
 
@@ -4211,7 +4440,7 @@ src/frontend/package.json                          |   2 +-
 grep -n "Node" README.md docs/SETUP.md
 # Output: Node.js 22+ (consistent)
 
-# PostgreSQL version check  
+# PostgreSQL version check
 grep "postgres:17-alpine" docker-compose.yml
 # Output: postgres:17-alpine ✓
 
@@ -4283,16 +4512,19 @@ Targets:
 Plan:
 
 **Phase 1: Create Constants (15 min)**
+
 - Extract magic numbers: MAX_QUEUE_SIZE, SCORE_BOUNDS, RETRY delays
 - Add JSDoc for each constant
 
 **Phase 2: Create Validation (1 hour)**
+
 - Implement UUID v4 validation regex
 - Implement field validators (score bounds, required fields, ISO timestamps)
 - Create ValidationResult type for detailed error reporting
 - No external deps (manual validation)
 
 **Phase 3: Update Queue (1 hour)**
+
 - Add `_knownIds` Set for O(1) duplicate detection
 - Update `enqueue()` with validation step
 - Return EnqueueResult instead of void
@@ -4300,6 +4532,7 @@ Plan:
 - Add `markError()` for retry foundation
 
 **Phase 4: Tests (30 min)**
+
 - Generate UUID helper for tests
 - Create valid item factory
 - Test validation failures (invalid UUID, missing fields, score bounds)
@@ -4338,6 +4571,7 @@ Status updates:
 Evidence:
 
 **Test Output**:
+
 ```
 ✓ src/services/__tests__/progressQueue.test.ts (16 tests) 16ms
 Test Files 1 passed (1)
@@ -4345,6 +4579,7 @@ Tests 16 passed (16)
 ```
 
 **Files Changed**:
+
 ```
 src/frontend/src/services/progressConstants.ts       |  48 +++++
 src/frontend/src/services/progressValidation.ts      | 123 +++++
@@ -4353,6 +4588,7 @@ src/frontend/src/services/__tests__/progressQueue.test.ts | 180 +++++-
 ```
 
 **Resolution Notes in Audit Doc**:
+
 - Duplicate detection: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 452-458
 - Input validation: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 757-763
 
@@ -4366,18 +4602,17 @@ Risks/notes:
 
 - No breaking changes - invalid items now rejected with warnings instead of causing corruption
 - Performance: Set-based lookup is O(1), no degradation
-- Memory: _knownIds Set holds only session items, cleared on page reload
+- Memory: \_knownIds Set holds only session items, cleared on page reload
 
 Dependencies:
 
 - Source audit: docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md
 - Issue register: docs/audit/PROGRESS_QUEUE_ISSUE_REGISTER.md
 
-
-
 ---
 
 ## TCK-20260227-002 :: Unit-2: Retry Logic & Dead Letter Queue (COMPLETE)
+
 Ticket Stamp: STAMP-20260227T114500Z-codex-abc1
 
 Type: IMPROVEMENT
@@ -4386,6 +4621,7 @@ Created: 2026-02-27 11:45 IST
 Status: **DONE**
 
 Scope contract:
+
 - In-scope:
   - Exponential backoff with jitter for transient failures
   - Distinguish retryable (5xx) vs non-retryable (4xx) errors
@@ -4399,11 +4635,12 @@ Scope contract:
 - Behavior change allowed: YES (new features added)
 
 Targets:
+
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - src/frontend/src/services/progressQueue.ts
   - src/frontend/src/services/progressConstants.ts
-  - src/frontend/src/services/__tests__/progressQueue.retry.test.ts
+  - src/frontend/src/services/**tests**/progressQueue.retry.test.ts
 - Branch/PR: main
 
 Plan:
@@ -4443,13 +4680,14 @@ Dependencies:
 - Issue register: docs/audit/PROGRESS_QUEUE_ISSUE_REGISTER.md
 
 **Resolution Notes in Audit Doc**:
+
 - Retry logic: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 906-914
 - Dead letter queue: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 983-991
-
 
 ---
 
 ## TCK-20260227-003 :: Unit-3: Repository Pattern for Testability (COMPLETE)
+
 Ticket Stamp: STAMP-20260227T122000Z-codex-abc2
 
 Type: ARCHITECTURE
@@ -4458,6 +4696,7 @@ Created: 2026-02-27 12:20 IST
 Status: **DONE**
 
 Scope contract:
+
 - In-scope:
   - ProgressRepository interface for storage abstraction
   - LocalStorageProgressRepository (production)
@@ -4471,6 +4710,7 @@ Scope contract:
 - Behavior change allowed: NO (backward compatible - default export unchanged)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/repositories/ProgressRepository.ts (new)
@@ -4478,7 +4718,7 @@ Targets:
   - src/frontend/src/repositories/InMemoryProgressRepository.ts (new)
   - src/frontend/src/repositories/index.ts (new)
   - src/frontend/src/services/progressQueue.ts (refactored)
-  - src/repositories/__tests__/ProgressRepository.test.ts (new)
+  - src/repositories/**tests**/ProgressRepository.test.ts (new)
 - Branch/PR: main
 
 Plan:
@@ -4522,17 +4762,20 @@ Dependencies:
 - Issue register: docs/audit/PROGRESS_QUEUE_ISSUE_REGISTER.md (ISSUE-008)
 
 **Test Summary**:
+
 - 64 repository tests (32 per implementation)
 - 31 progressQueue tests (unchanged, using default localStorage)
 - 898 total tests passing
 - 4 tests skipped (slow exponential backoff integration tests)
 
 **Resolution Notes in Audit Doc**:
+
 - Repository pattern: `docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md` Lines 1141-1151
 
 ---
 
 ## TCK-20260227-009 :: Audit Documentation Sync for Security + ProgressStore
+
 Ticket Stamp: STAMP-20260227T054829Z-codex-2ox9
 
 Type: DOCUMENTATION
@@ -4542,6 +4785,7 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope:
   - Update security authorization audit with current remediation status
   - Update progressStore multi-viewpoint audit with repository-pattern resolution notes
@@ -4550,6 +4794,7 @@ Scope contract:
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - docs/audit/security_authz_audit.md
@@ -4557,25 +4802,30 @@ Targets:
 - Branch/PR: main
 
 Prompt & persona traceability:
+
 - Prompt used: AGENTS.md remediation workflow + evidence-first discipline
 - Lenses: security hardening, reliability/testability
 
 Execution log:
+
 - 2026-02-27 | Updated security authz audit status and findings alignment
 - 2026-02-27 | Added repository-pattern resolution note in progressStore audit
 
 Evidence:
+
 - Command: `git diff --cached --name-only`
 - Output:
   - docs/audit/security_authz_audit.md
   - docs/performance/multi-viewpoint-analysis-progressStore-2026-02-23.md
 
 Status updates:
+
 - 2026-02-27 **DONE** — Audit documentation synchronized to current implementation state
 
 ---
 
 ## TCK-20260227-010 :: PERF-003 AlphabetGame Render-Churn Reduction (Phase 1)
+
 Ticket Stamp: STAMP-20260227T055600Z-codex-2iv5
 
 Type: IMPROVEMENT
@@ -4585,6 +4835,7 @@ Status: **DONE**
 Priority: P1
 
 Scope contract:
+
 - In-scope:
   - PERF-003 incremental remediation on canonical component `src/frontend/src/pages/AlphabetGame.tsx`
   - Reduce avoidable re-renders without changing game behavior
@@ -4596,6 +4847,7 @@ Scope contract:
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/pages/AlphabetGame.tsx
@@ -4603,10 +4855,12 @@ Targets:
 - Branch/PR: main
 
 Prompt & persona traceability:
+
 - Prompt used: `prompts/workflow/agent-entrypoint-v1.0.md` then `prompts/remediation/implementation-v1.6.1.md`
 - Lenses: performance axis (PERF-003), preservation-first + no-regression
 
 Execution log:
+
 - 2026-02-27 11:24 IST | Replaced broad Zustand subscriptions with selector-based subscriptions (`useSettingsStore`, `useProfileStore`)
 - 2026-02-27 11:24 IST | Memoized derived render inputs (`selectedLanguageName`, mascot props, wellness alerts)
 - 2026-02-27 11:24 IST | Replaced inline `onCameraPermission` prop callback with stable `useCallback`
@@ -4614,6 +4868,7 @@ Execution log:
 - 2026-02-27 11:26 IST | Updated PERF-003 tracker status to IN_PROGRESS with current evidence
 
 Evidence:
+
 - Command: `cd src/frontend && npm run -s type-check`
 - Output: pass (exit 0)
 - Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/Game.smoke.test.tsx src/pages/__tests__/CameraRoutes.smoke.test.tsx src/utils/__tests__/semanticHtmlAccess.test.tsx src/pages/alphabet-game/__tests__/overlayState.test.ts src/pages/alphabet-game/__tests__/sessionPersistence.test.ts`
@@ -4622,25 +4877,30 @@ Evidence:
 - Output: `1827 src/frontend/src/pages/AlphabetGame.tsx`
 
 Status updates:
+
 - 2026-02-27 11:26 IST **DONE** — PERF-003 Phase 1 shipped with additive, behavior-preserving render optimization changes
 - 2026-02-27 11:26 IST **OPEN NEXT** — Capture profiler artifact for <100ms render target and plan safe component decomposition (Phase 2)
 
 ### TCK-20260227-010 Addendum :: PERF-003 Profiler Proof
 
 Execution log:
+
 - 2026-02-27 11:57 IST | Added React Profiler benchmark test for AlphabetGame mount render in `src/frontend/src/pages/__tests__/AlphabetGame.performance.test.tsx`
 - 2026-02-27 11:57 IST | Captured profiler output: max mount commit duration `48.67ms` (<100ms target)
 
 Evidence:
+
 - Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/AlphabetGame.performance.test.tsx`
 - Output: `[PERF-003] AlphabetGame mount duration (max): 48.67ms`
 
 Status updates:
+
 - 2026-02-27 11:57 IST **DONE** — PERF-003 profiler proof captured and acceptance threshold validated in test harness
 
 ---
 
 ## TCK-20260227-011 :: Collectibles System Correction Planning (Proof-Backed)
+
 Ticket Stamp: STAMP-20260227T093738Z-codex-w8n4
 
 Type: FEATURE
@@ -4653,6 +4913,7 @@ Description:
 Produce a concrete, evidence-backed implementation plan for collectibles correction aligned to repo workflow, including deterministic-vs-hybrid reward design, source-of-truth cleanup, age-layer UX, and CC0/Kenney asset migration constraints.
 
 Scope contract:
+
 - In-scope:
   - Current-state discovery of collectibles/drop pipeline
   - Proof collection for integration gaps and minScore behavior
@@ -4665,6 +4926,7 @@ Scope contract:
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - docs/plans/TCK-20260227-011-collectibles-corrections-plan.md
@@ -4672,6 +4934,7 @@ Targets:
 - Branch/PR: main
 
 Prompt & persona traceability:
+
 - Prompts used:
   - `prompts/planning/implementation-planning-v1.0.md`
   - `prompts/workflow/worklog-v1.0.md`
@@ -4681,12 +4944,14 @@ Prompt & persona traceability:
   - preservation-first additive migration
 
 Acceptance Criteria:
+
 - [x] Concrete proof gathered from live repo files/commands (not assumptions only)
 - [x] Detailed implementation plan produced with options, recommendation, phases, test strategy, risks, rollback
 - [x] CC0/Kenney local asset constraints explicitly documented
 - [x] Worklog addendum updated with ticket stamp and command evidence
 
 Execution log:
+
 - [2026-02-27 15:08 IST] Loaded planning + worklog prompts and validated research target file | Evidence:
   - **Command**: `ls -la docs/COLLECTIBLES_SYSTEM_RESEARCH.md && wc -l docs/COLLECTIBLES_SYSTEM_RESEARCH.md`
   - **Output**:
@@ -4751,9 +5016,11 @@ Execution log:
   - **Interpretation**: `Observed` — planning deliverable and worklog update created.
 
 Status updates:
+
 - [2026-02-27 15:17 IST] **DONE** — Proof-backed collectibles correction plan completed and documented
 
 Next actions:
+
 1. Approve Option B (deterministic core + optional older-age bonus) or request Option C.
 2. Start Phase 1 implementation as a separate execution ticket with staged regression checks.
 3. Decide canonical asset path (`assets/kenney/` vs `assets/kenney-platformer/`) before broad icon migration.
@@ -4761,6 +5028,7 @@ Next actions:
 ---
 
 ## TCK-20260227-012 :: Collectibles Phase 1 Implementation (Deterministic Core + Coverage Fixes)
+
 Ticket Stamp: STAMP-20260227T095136Z-codex-yrpe
 
 Type: FEATURE
@@ -4773,6 +5041,7 @@ Description:
 Execute Phase 1 implementation from TCK-20260227-011 by switching core drops to deterministic mode, wiring missing completion calls, introducing age-aware reward toast behavior, and adding baseline tests.
 
 Scope contract:
+
 - In-scope:
   - Deterministic core reward implementation in collectibles pipeline
   - Optional bonus path scaffolding (default OFF)
@@ -4787,6 +5056,7 @@ Scope contract:
 - Behavior change allowed: YES
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - src/frontend/src/data/collectibles.ts
@@ -4797,10 +5067,11 @@ Targets:
   - src/frontend/src/pages/BubblePopSymphony.tsx
   - src/frontend/src/pages/AirCanvas.tsx
   - src/frontend/src/data/easterEggs.ts
-  - src/frontend/src/data/__tests__/collectibles.rewards.test.ts
+  - src/frontend/src/data/**tests**/collectibles.rewards.test.ts
 - Branch/PR: main
 
 Prompt & persona traceability:
+
 - Prompt lineage:
   - `prompts/planning/implementation-planning-v1.0.md` (plan source)
   - `prompts/workflow/worklog-v1.0.md` (worklog discipline)
@@ -4810,6 +5081,7 @@ Prompt & persona traceability:
   - evidence-first
 
 Acceptance Criteria:
+
 - [x] Core reward selection no longer depends on runtime RNG for normal completion
 - [x] All 30 `useGameDrops` integrations call completion path
 - [x] Bonus path exists but remains disabled by default
@@ -4817,6 +5089,7 @@ Acceptance Criteria:
 - [x] Deterministic reward unit tests pass
 
 Execution log:
+
 - [2026-02-27 15:19 IST] Implemented deterministic reward model configuration and selectors | Evidence:
   - **Command**: `git diff -- src/frontend/src/data/collectibles.ts`
   - **Output**:
@@ -4884,9 +5157,11 @@ Execution log:
   - **Interpretation**: `Observed` — repo-required pre-commit checks passed for this change set.
 
 Status updates:
+
 - [2026-02-27 15:21 IST] **DONE** — Phase 1 deterministic-core implementation completed with coverage fixes and test validation
 
 Next actions:
+
 1. Phase 2: add `icon` manifest mapping and migrate first Kenney-backed item set with emoji fallback.
 2. Phase 3: implement parent/feature toggle for optional older-age bonus.
 3. Run full staged gate sequence (`agent_gate`, `feature_regression_check`, `regression_check`) before commit.
@@ -4904,6 +5179,7 @@ Status: **IN_PROGRESS**
 Priority: P0
 
 Prompt traceability:
+
 - Primary prompt: `prompts/implementation/feature-implementation-v1.0.md`
 - Supporting governance: `AGENTS.md`
 - Audit axis/lens: Reality check `docs/GAME_IDEAS_CATALOG.md` vs `src/frontend/src/data/gameRegistry.ts`
@@ -4913,29 +5189,32 @@ Prompt traceability:
 ## Gap Analysis Summary
 
 **Evidence from GAME_IDEAS_CATALOG.md** (Observed):
+
 - 68 planned games across 7 categories
 - Statistics show: 2 Live, 2 Coming, 64 Planned
 
 **Evidence from gameRegistry.ts** (Observed):
+
 - 39 games registered and listed
 - Many P0/P1 items already implemented
 
 **Missing High-Priority Games (P0/P1)**:
 
-| Game | Priority | Status |
-|------|----------|--------|
-| Phonics Tracing (Sound It Out!) | P1 | NOT IMPLEMENTED |
-| Beginning Sounds | P2 | NOT IMPLEMENTED |
-| Counting Objects | P2 | NOT IMPLEMENTED |
-| More or Less | P2 | NOT IMPLEMENTED |
-| Maze Runner | P2 | NOT IMPLEMENTED |
-| Path Following | P2 | NOT IMPLEMENTED |
-| Animal Sounds | P2 | NOT IMPLEMENTED |
-| Body Parts | P2 | NOT IMPLEMENTED |
-| Voice Stories | P2 | NOT IMPLEMENTED |
-| Rhythm Tap | P2 | NOT IMPLEMENTED |
+| Game                            | Priority | Status          |
+| ------------------------------- | -------- | --------------- |
+| Phonics Tracing (Sound It Out!) | P1       | NOT IMPLEMENTED |
+| Beginning Sounds                | P2       | NOT IMPLEMENTED |
+| Counting Objects                | P2       | NOT IMPLEMENTED |
+| More or Less                    | P2       | NOT IMPLEMENTED |
+| Maze Runner                     | P2       | NOT IMPLEMENTED |
+| Path Following                  | P2       | NOT IMPLEMENTED |
+| Animal Sounds                   | P2       | NOT IMPLEMENTED |
+| Body Parts                      | P2       | NOT IMPLEMENTED |
+| Voice Stories                   | P2       | NOT IMPLEMENTED |
+| Rhythm Tap                      | P2       | NOT IMPLEMENTED |
 
 **Already Implemented (from registry)**:
+
 - ✅ Phonics Sounds (P0)
 - ✅ Mirror Draw (P0)
 - ✅ Shape Safari (P0)
@@ -4964,6 +5243,7 @@ Prompt traceability:
 **Why**: P1 priority, complements existing Phonics Sounds game, well-documented in GAME_IDEAS_CATALOG.md
 
 **Plan**:
+
 1. Create `src/frontend/src/games/phonicsTracingLogic.ts` - game logic with templates, coverage scoring
 2. Create `src/frontend/src/games/__tests__/phonicsTracingLogic.test.ts` - unit tests
 3. Create `src/frontend/src/pages/PhonicsTracing.tsx` - playable page
@@ -4983,6 +5263,7 @@ Prompt traceability:
 - [2026-02-27 10:30 IST] Lint passed | Evidence: npm run lint passed
 
 Status updates:
+
 - [2026-02-27 10:30 IST] **DONE** — Phonics Tracing implemented
 
 ---
@@ -5001,14 +5282,14 @@ Priority: P0
 
 ## Implemented Games (Batch)
 
-| # | Game | Files Created | Status |
-|---|------|---------------|--------|
-| 1 | Phonics Tracing | phonicsTracingLogic.ts, PhonicsTracing.tsx | ✅ DONE |
-| 2 | Beginning Sounds | beginningSoundsLogic.ts, BeginningSounds.tsx | ✅ DONE |
-| 3 | Odd One Out | oddOneOutLogic.ts, OddOneOut.tsx | ✅ DONE |
-| 4 | Shadow Puppet Theater | shadowPuppetLogic.ts, ShadowPuppetTheater.tsx | ✅ DONE |
-| 5 | Virtual Bubbles | virtualBubblesLogic.ts, VirtualBubbles.tsx | ✅ DONE |
-| 6 | Kaleidoscope Hands | kaleidoscopeHandsLogic.ts, KaleidoscopeHands.tsx | ✅ DONE |
+| #   | Game                  | Files Created                                    | Status  |
+| --- | --------------------- | ------------------------------------------------ | ------- |
+| 1   | Phonics Tracing       | phonicsTracingLogic.ts, PhonicsTracing.tsx       | ✅ DONE |
+| 2   | Beginning Sounds      | beginningSoundsLogic.ts, BeginningSounds.tsx     | ✅ DONE |
+| 3   | Odd One Out           | oddOneOutLogic.ts, OddOneOut.tsx                 | ✅ DONE |
+| 4   | Shadow Puppet Theater | shadowPuppetLogic.ts, ShadowPuppetTheater.tsx    | ✅ DONE |
+| 5   | Virtual Bubbles       | virtualBubblesLogic.ts, VirtualBubbles.tsx       | ✅ DONE |
+| 6   | Kaleidoscope Hands    | kaleidoscopeHandsLogic.ts, KaleidoscopeHands.tsx | ✅ DONE |
 
 **Routes added**: /games/phonics-tracing, /games/beginning-sounds, /games/odd-one-out, /games/shadow-puppet-theater, /games/virtual-bubbles, /games/kaleidoscope-hands
 
@@ -5020,7 +5301,7 @@ Priority: P0
 
 - [2026-02-27 10:40 IST] Starting batch game implementation | Evidence: Analyzing P0/P1 game list
 - [2026-02-27 10:45 IST] Created Beginning Sounds game | Evidence: beginningSoundsLogic.ts, BeginningSounds.tsx
-- [2026-02-27 10:50 IST] Created Odd One Out game | Evidence: oddOneOutLogic.ts, OddOneOut.tsx  
+- [2026-02-27 10:50 IST] Created Odd One Out game | Evidence: oddOneOutLogic.ts, OddOneOut.tsx
 - [2026-02-27 10:55 IST] Created Shadow Puppet Theater | Evidence: shadowPuppetLogic.ts, ShadowPuppetTheater.tsx
 - [2026-02-27 11:00 IST] Created Virtual Bubbles | Evidence: virtualBubblesLogic.ts, VirtualBubbles.tsx
 - [2026-02-27 11:05 IST] Created Kaleidoscope Hands | Evidence: kaleidoscopeHandsLogic.ts, KaleidoscopeHands.tsx
@@ -5033,6 +5314,7 @@ Priority: P0
 ## Remaining Games to Implement
 
 **P0-P1 (~15 remaining)**:
+
 - Air Guitar Hero, Finger Drum Kit, Fruit Ninja Air, Hand Ball Toss, Virtual Bowling, Tower of Balance, Sand Art Studio, Virtual Garden, Bug Hunter, etc.
 
 **P2 (~80 games)**: Literacy, Numeracy, Motor Skills, Logic, Knowledge, Music, Creative, Sports categories
@@ -5061,15 +5343,18 @@ Status: **IN_PROGRESS**
 Priority: P0
 
 Prompt traceability:
+
 - Prompt used: `prompts/workflow/agent-entrypoint-v1.0.md` + implementation workflow from user-approved unified plan
 - Persona/lens: Evidence-first, non-regression, additive-only collectibles migration
 
 Scope contract:
+
 - In-scope: icon manifest + ItemIcon fallback, older bonus opt-in setting and gating, egg hint stage model + silhouette progress, tests for manifest/gating/hints
 - Out-of-scope: broad game-system refactors and unrelated TS debt
 - Behavior change allowed: YES (collectibles UX/policy only)
 
 Execution log:
+
 - [2026-02-27 17:40 IST] Implemented item icon manifest pipeline and startup preload | Evidence: `src/frontend/public/assets/items/manifest.json`, `src/frontend/src/utils/itemsManifest.ts`, `src/frontend/src/main.tsx`
 - [2026-02-27 17:45 IST] Added reusable `ItemIcon` with image->emoji fallback and integrated into toast/inventory | Evidence: `src/frontend/src/components/ui/ItemIcon.tsx`, `src/frontend/src/components/inventory/ItemDropToast.tsx`, `src/frontend/src/pages/Inventory.tsx`
 - [2026-02-27 17:48 IST] Extended collectibles schema with `icon` + `visualTier`, merged manifest values into catalog | Evidence: `src/frontend/src/data/collectibles.ts`
@@ -5078,6 +5363,7 @@ Execution log:
 - [2026-02-27 17:54 IST] Added tests for manifest mapping and collectibles store behavior | Evidence: `src/frontend/src/utils/__tests__/itemsManifest.test.ts`, `src/frontend/src/store/inventoryStore.collectibles.test.ts`
 
 Validation evidence:
+
 - Command: `cd src/frontend && npm run -s test -- src/data/__tests__/collectibles.rewards.test.ts src/store/inventoryStore.collectibles.test.ts src/utils/__tests__/itemsManifest.test.ts`
   - Observed: PASS (10 tests)
 - Command: temp-index `./scripts/feature_regression_check.sh --staged` on collectibles-only file set
@@ -5090,12 +5376,13 @@ Validation evidence:
   - Inferred: collectibles changes are validated by focused tests + feature regression scan, but full repo TS baseline is currently red
 
 Status updates:
-- [2026-02-27 18:00 IST] **IN_PROGRESS** — Collectibles Phase 2-5 implemented and locally validated with focused checks; full-repo regression gate still blocked by pre-existing unrelated TS issues.
 
+- [2026-02-27 18:00 IST] **IN_PROGRESS** — Collectibles Phase 2-5 implemented and locally validated with focused checks; full-repo regression gate still blocked by pre-existing unrelated TS issues.
 
 ---
 
 ## TCK-20260227-004 :: Fix Production Safety Issues (COMPLETE)
+
 Ticket Stamp: STAMP-20260227T203500Z-codex-abc3
 
 Type: BUG_FIX / SAFETY
@@ -5104,6 +5391,7 @@ Created: 2026-02-27 20:35 IST
 Status: **DONE**
 
 Scope contract:
+
 - In-scope:
   - Fix missing revoked_tokens table
   - Add Settings fields for new env vars (GEMINI_API_KEY, OPENAI_API_KEY)
@@ -5117,6 +5405,7 @@ Scope contract:
 - Behavior change allowed: NO (fixes only)
 
 Targets:
+
 - Repo: learning_for_kids
 - Files:
   - src/backend/alembic/versions/d6c64c8f02e5_add_revoked_tokens_table.py (new)
@@ -5140,7 +5429,7 @@ Issues Fixed:
 
 3. **ISSUE**: No way to catch DB/model mismatches before deployment
    **Root Cause**: No automated checks
-   **Fix**: 
+   **Fix**:
    - `scripts/pre_deploy_check.py` - Comprehensive checks
    - `validate_database_schema()` - Runs at startup
    - `.githooks/pre-push` - Runs before git push
@@ -5177,9 +5466,11 @@ python scripts/pre_deploy_check.py
 ```
 
 Documentation:
+
 - `docs/DEPLOYMENT_SAFETY.md` - Complete safety guide
 
 Dependencies:
+
 - Source: User reported login issues with browser logs
 
 ---
@@ -5194,6 +5485,7 @@ Created: 2026-02-27 21:32 IST
 Status: **IN_PROGRESS**
 
 Scope contract:
+
 - In-scope:
   - Resolve remaining active PR comment concerns for subscription status debugging and Balloon Pop Fitness logic/thread validation
   - Add targeted regression coverage for Balloon Pop Fitness level-advance boundary behavior
@@ -5204,15 +5496,312 @@ Scope contract:
 - Behavior change allowed: YES (debug metadata additions only)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s):
   - `src/frontend/src/services/subscriptionApi.ts`
   - `src/frontend/src/games/__tests__/balloonPopFitnessLogic.test.ts`
 
 Execution log:
+
 - [2026-02-27 21:20 IST] Added explicit subscription status source metadata (`active_subscription` / `no_subscription` / `api_error`) and `errorReason` propagation in API failure paths | Evidence: `src/frontend/src/services/subscriptionApi.ts`
 - [2026-02-27 21:23 IST] Added targeted tests for `shouldAdvanceLevel` to lock boundary behavior and avoid frame-boundary regressions | Evidence: `src/frontend/src/games/__tests__/balloonPopFitnessLogic.test.ts`
 - [2026-02-27 21:26 IST] Validated all registry drop/reward `itemId` references map to collectible IDs (no missing IDs) | Evidence: script output `missing: []`
 
 Status updates:
+
 - [2026-02-27 21:32 IST] **IN_PROGRESS** — Code/test fixes applied; running final validation and PR thread resolution.
+
+---
+
+### TCK-20260228-010 :: Audit `HandDetectionContext.tsx` (new shared contract file)
+
+Ticket Stamp: STAMP-20260228T125031Z-copilot-kvoc
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-28 18:20 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope:
+  - One-file evidence-first audit for `src/frontend/src/components/game/HandDetectionContext.tsx`
+  - Discovery evidence (git tracking/history, inbound/outbound refs, test discovery)
+  - New audit artifact in deterministic path under `docs/audit/`
+- Out-of-scope:
+  - Implementation changes to runtime behavior
+  - Auditing provider/hook/page files beyond contract references
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/game/HandDetectionContext.tsx`
+  - `docs/audit/src__frontend__src__components__game__HandDetectionContext.tsx.md` (new)
+- Branch/PR: local working branch
+
+Inputs:
+
+- Prompt used: `prompts/audit/audit-v1.5.1.md`
+- Workflow references: `prompts/README.md`, `AGENTS.md`
+
+Execution log:
+
+- [2026-02-28 18:20 IST] Generated ticket stamp and timestamps | Evidence: `./scripts/new_ticket_stamp.sh copilot` -> `STAMP-20260228T125031Z-copilot-kvoc`
+- [2026-02-28 18:21 IST] Completed discovery pass for audit evidence | Evidence: git + rg outputs captured in audit artifact appendix
+- [2026-02-28 18:23 IST] Wrote audit artifact | Evidence: `docs/audit/src__frontend__src__components__game__HandDetectionContext.tsx.md`
+
+Status updates:
+
+- [2026-02-28 18:24 IST] **DONE** — Audit artifact created with findings, patch plan, and regression classification.
+
+Evidence:
+
+- Command: `git status --porcelain -- src/frontend/src/components/game/HandDetectionContext.tsx`
+- Output: `?? src/frontend/src/components/game/HandDetectionContext.tsx`
+- Command: `git log -n 20 --follow -- src/frontend/src/components/game/HandDetectionContext.tsx`
+- Output: _(empty; file is untracked)_
+- Command: `rg -n --hidden --no-ignore -S "HandDetectionContext" src/frontend`
+- Output: inbound references in `HandDetectionProvider.tsx` and `useHandDetection.ts`
+
+Next actions:
+
+1. Optional immediate follow-up audit: `src/frontend/src/components/game/useHandDetection.ts`
+2. If remediating HDC-01, add wrapper-contract tests for no-provider fallback and provider pass-through behavior.
+
+---
+
+### TCK-20260228-011 :: Audit `useHandDetection.ts` (shared hook contract)
+
+Ticket Stamp: STAMP-20260228T125657Z-copilot-a7xn
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-02-28 18:26 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope:
+  - One-file evidence-first audit of `src/frontend/src/components/game/useHandDetection.ts`
+  - Mandatory discovery evidence (tracking, history, inbound/outbound refs, tests)
+  - Deterministic audit artifact creation in `docs/audit/`
+- Out-of-scope:
+  - Code remediation changes
+  - Auditing non-target files beyond contract references
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/components/game/useHandDetection.ts`
+  - `docs/audit/src__frontend__src__components__game__useHandDetection.ts.md` (new)
+- Branch/PR: local working branch
+
+Inputs:
+
+- Prompt used: `prompts/audit/audit-v1.5.1.md`
+- Workflow references: `AGENTS.md`, `prompts/README.md`
+
+Execution log:
+
+- [2026-02-28 18:26 IST] Generated unique ticket stamp for this audit | Evidence: `./scripts/new_ticket_stamp.sh copilot` -> `STAMP-20260228T125657Z-copilot-a7xn`
+- [2026-02-28 18:27 IST] Completed required discovery run (git + rg) | Evidence: outputs captured in audit artifact appendix
+- [2026-02-28 18:29 IST] Wrote audit artifact for hook contract | Evidence: `docs/audit/src__frontend__src__components__game__useHandDetection.ts.md`
+
+Status updates:
+
+- [2026-02-28 18:29 IST] **DONE** — useHandDetection one-file audit completed with findings + patch plan.
+
+Evidence:
+
+- Command: `git status --porcelain -- src/frontend/src/components/game/useHandDetection.ts`
+- Output: `?? src/frontend/src/components/game/useHandDetection.ts`
+- Command: `rg -n --hidden --no-ignore -S "from '../components/game/useHandDetection'" src/frontend`
+- Output: inbound page usage observed in `EmojiMatch.tsx` and `BubblePopSymphony.tsx`
+- Command: `git log -n 20 --follow -- src/frontend/src/components/game/useHandDetection.ts`
+- Output: _(empty; file currently untracked)_
+
+Next actions:
+
+1. If remediating findings, implement and test `UHD-01` (return-shape contract lock via hook tests).
+2. Continue next foundational audit in sequence: `src/frontend/src/components/game/HandDetectionProvider.tsx`.
+
+---
+
+### TCK-20260228-015 :: Tighten .gitignore And Untrack Generated Artifacts
+
+Ticket Stamp: STAMP-20260228T151341Z-codex-2ens
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-02-28 20:43 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Adjust `.gitignore` so generated temp artifacts are ignored while repo assets, docs, tools, and reusable scripts remain trackable; untrack already-committed generated artifacts now covered by ignore rules.
+- Out-of-scope: Deleting real source/docs/assets, broad repo cleanup outside ignore-covered generated files.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `.gitignore`, `docs/WORKLOG_ADDENDUM_v3.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: User request in current chat
+- Prompt/persona traceability: Repo hygiene pass with evidence-first review of tracked ignored files and current untracked paths
+
+Acceptance Criteria:
+
+- [x] `.gitignore` ignores generated agent session files and temp artifacts without hiding useful repo content
+- [x] Reusable scripts under `scripts/` remain trackable
+- [x] Placeholder `.gitkeep` files under `assets/kenney/` remain trackable
+- [x] Already tracked generated artifacts matched by ignore rules are untracked from git index
+
+Execution log:
+
+- 2026-02-28 20:43 IST | Ticket stamp generated | Evidence: `STAMP-20260228T151341Z-codex-2ens`
+- 2026-02-28 20:43 IST | Reviewed tracked ignored files with `git ls-files -ci --exclude-standard` | Evidence: backups, screenshot artifacts, and Kenney `.gitkeep` placeholders were matched
+- 2026-02-28 20:44 IST | Updated `.gitignore` rules | Evidence: added `.agent` ignores, restored `yarn-error.log*`, fixed `assets/kenney` patterns, removed `scripts/batch_upgrade_games.js` ignore
+- 2026-02-28 20:44 IST | Untracked generated artifacts from git index | Evidence: `git rm --cached` for session files, backup files, and screenshot outputs
+
+Status updates:
+
+- 2026-02-28 20:43 IST | **IN_PROGRESS** — Reviewing ignore patterns and tracked generated files
+- 2026-02-28 20:44 IST | **DONE** — Ignore rules tightened and generated artifacts removed from index
+
+---
+
+### TCK-20260228-016 :: Restore Hidden Webcam Feeds For Pose Games
+
+Ticket Stamp: STAMP-20260228T162536Z-codex-gnid
+
+Type: BUG
+Owner: Pranay
+Created: 2026-02-28 22:55 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Merge the useful regression fix from the detached Codex worktree into the main checkout for pose-driven pages that still depend on `webcamRef` and `cameraReady`.
+- Out-of-scope: Merging stale worklog content from the detached worktree or broader camera architecture refactors.
+- Behavior change allowed: YES
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/BalloonPopFitness.tsx`, `src/frontend/src/pages/FollowTheLeader.tsx`, `src/frontend/src/pages/MusicalStatues.tsx`, `docs/WORKLOG_ADDENDUM_v3.md`
+- Branch/PR: main
+
+Inputs:
+
+- Prompt used: User request in current chat
+- Prompt/persona traceability: Minimal-diff regression restoration from detached worktree after validating `GameContainer` does not create the webcam feed
+
+Acceptance Criteria:
+
+- [x] Each affected page imports `react-webcam`
+- [x] Each affected page restores a hidden `Webcam` bound to the existing `webcamRef`
+- [x] Each affected page reconnects `onUserMedia` to set `cameraReady`
+
+Execution log:
+
+- 2026-02-28 22:53 IST | Compared detached worktree files against main checkout | Evidence: `git diff --no-index` on the three page files showed missing hidden webcam rendering in main
+- 2026-02-28 22:54 IST | Verified `GameContainer` does not create a webcam feed | Evidence: `src/frontend/src/components/GameContainer.tsx` only forwards `webcamRef` to `CameraThumbnail`
+- 2026-02-28 22:55 IST | Merged code-only regression fix into main checkout | Evidence: added `Webcam` import, restored hidden `<Webcam />`, renamed `handleCameraReady`
+
+Status updates:
+
+- 2026-02-28 22:53 IST | **IN_PROGRESS** — Validating detached worktree changes before merge
+- 2026-02-28 22:55 IST | **DONE** — Functional fix merged; stale detached worktree worklog content intentionally not merged
+
+## 2026-02-27 :: Game Quality Upgrade Sprint
+
+**TCK-20260227-XXX :: Game Quality Upgrades**
+
+Upgraded PhysicsDemo.tsx with:
+
+- Subscription access control
+- Progress tracking
+- Error handling
+- Reduce motion support
+- Wellness timer
+- GlobalErrorBoundary
+
+Status: DONE
+
+---
+
+### TCK-20260302-001 :: Feature Flag Foundation (PR-1)
+Ticket Stamp: STAMP-20260302T110000Z-codex-ff01
+
+Type: FOUNDATION  
+Owner: Pranay  
+Created: 2026-03-02 11:00 IST  
+Status: **DONE**  
+Priority: P0
+
+Description:
+Implement type-safe feature flag system for safe rollout of high-risk changes identified in GAME_INPUT_AGE_AUDIT_2026-02-28. This is Unit-0 of the implementation plan.
+
+Source:
+- Audit file: `docs/audit/GAME_INPUT_AGE_AUDIT_2026-02-28.md` Section 9-10
+- Issue: ISSUE-006
+
+Scope contract:
+- In-scope:
+  - Feature flag configuration system with TypeScript types
+  - React hook interface (useFeatureFlag, useFeatureFlags)
+  - Unit tests with 100% pass rate
+  - Settings persistence integration
+  - ADR documentation
+- Out-of-scope:
+  - UI for toggling flags (settings page integration future work)
+  - Feature flag telemetry/analytics
+- Behavior change allowed: NO (additive only)
+
+Targets:
+- Repo: learning_for_kids
+- Files: `src/frontend/src/config/features.ts`, `src/frontend/src/hooks/useFeatureFlag.ts`, `src/frontend/src/store/settingsStore.ts`
+- Branch: main
+
+Acceptance Criteria:
+- [x] All flags type-safe with TypeScript
+- [x] Hierarchy works: env var > user override > default
+- [x] Editable flags can be toggled programmatically
+- [x] Non-editable flags warn on attempted change
+- [x] Unit tests cover all access patterns (9 tests passing)
+- [x] Type-check passes
+- [x] ADR document created
+
+Execution log:
+- [2026-03-02 10:30 IST] Analysis complete | Evidence: No feature flag system existed
+- [2026-03-02 10:45 IST] Created features.ts with 4 flags | Evidence: File created
+- [2026-03-02 10:50 IST] Created useFeatureFlag.ts and tests | Evidence: 9 tests passing
+- [2026-03-02 10:55 IST] Updated settingsStore.ts | Evidence: features field added
+- [2026-03-02 11:00 IST] Created ADR-007 | Evidence: docs/adr/ADR-007-FEATURE_FLAGS.md
+- [2026-03-02 11:05 IST] Updated audit docs | Evidence: GAME_INPUT_AGE_AUDIT, IMPLEMENTATION_UNITS.md updated
+- [2026-03-02 11:10 IST] Committed PR-1 | Evidence: git commit [ISSUE-006]
+
+Status updates:
+- [2026-03-02 10:30 IST] **OPEN** — Ticket created
+- [2026-03-02 11:10 IST] **DONE** — PR-1 merged
+
+Next actions:
+1. PR-2: Tracking-loss pause/recovery (ISSUE-002)
+2. PR-3: Fallback controls pilot (ISSUE-001)
+
+Risks/notes:
+- Feature flags must be cleaned up after features stabilize (see ADR-007 cleanup criteria)
+- Environment variable override pattern: VITE_FEATURE_CONTROLS_FALLBACKV1=true
