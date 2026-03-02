@@ -9,7 +9,8 @@ export default defineConfig({
   forbidOnly: false,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 1,
-  reporter: 'html',
+  reporter: [['html', { outputFolder: '.tmp/playwright-report' }]],
+  outputDir: '.tmp/test-results',
   use: {
     baseURL: 'http://localhost:6173',
     trace: 'on-first-retry',

@@ -170,8 +170,10 @@ Access the demo page to see all avatar components:
 
 ### Screenshot Testing
 ```bash
-# Run Puppeteer screenshot test
-node screenshot-tests.js
+# Run the reusable Puppeteer screenshot capture tool
+SCREENSHOT_TEST_EMAIL="you@example.com" \
+SCREENSHOT_TEST_PASSWORD="app-password" \
+node tools/qa_analysis/profile_customization_capture.js
 ```
 
 ### Manual Testing Checklist

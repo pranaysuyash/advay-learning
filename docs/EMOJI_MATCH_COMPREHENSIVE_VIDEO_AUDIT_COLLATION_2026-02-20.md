@@ -13,10 +13,10 @@
 3. `docs/audit/emoji_match_detailed_qa_report_2026-02-20.md` - Technical hand tracking coordinate analysis (268 lines)
 4. `docs/audit/game__emoji_match__video_ux_audit_2026-02-20.md` - UX/gameplay audit (416 lines)
 5. `evaluations/emoji_match_ux_qa_report.txt` - Comprehensive QA analysis (430 lines)
-6. `latency_analysis.json` - Frame-by-frame hand/cursor position correlation (115 lines)
-7. `emoji_final_frame_analysis.txt` - End screen UX assessment
+6. `tools/video_analysis/emoji_match_artifacts/latency_analysis.json` - Frame-by-frame hand/cursor position correlation (115 lines)
+7. `tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt` - End screen UX assessment
 8. `docs/audit/emoji_match_gameplay_audit_2026-02-20.md` - Gameplay audit (371 lines)
-9. `emoji_frame_analysis_results.json` - Raw frame analysis data
+9. `tools/video_analysis/emoji_match_artifacts/emoji_frame_analysis_results.json` - Raw frame analysis data
 
 **Target Audience:** Toddlers ages 2-4 (pre-literate children)  
 **Game Type:** Computer vision hand-tracking emoji matching game using MediaPipe
@@ -145,7 +145,7 @@ Emoji Match is a webcam-based gesture-control game where players use hand pinch 
 #### Issue HT-004: Latency Analysis - Poor Hand/Cursor Correlation
 
 - **Severity:** S2 - MAJOR ⚠️
-- **Source:** `latency_analysis.json`
+- **Source:** `tools/video_analysis/emoji_match_artifacts/latency_analysis.json`
 - **Evidence:**
   - **Only 38% correlation** between hand position and cursor position
   - 13 frames analyzed: 5 aligned, 8 misaligned
@@ -222,7 +222,7 @@ Emoji Match is a webcam-based gesture-control game where players use hand pinch 
 #### Issue UI-004: Cluttered Background & Visual Noise
 
 - **Severity:** S3 - MINOR 🟡
-- **Source:** `emoji_final_frame_analysis.txt`, `emoji_match_analysis_report.md` (Issue #7)
+- **Source:** `tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt`, `emoji_match_analysis_report.md` (Issue #7)
 - **Evidence:**
   - Real-world room visible in background (ceiling fan, decorations, furniture)
   - Distracts from game elements
@@ -237,7 +237,7 @@ Emoji Match is a webcam-based gesture-control game where players use hand pinch 
 #### Issue UI-005: Obscured Game Elements
 
 - **Severity:** S3 - MINOR 🟡
-- **Source:** `emoji_final_frame_analysis.txt`
+- **Source:** `tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt`
 - **Evidence:**
   - End screen: "Happy" emoji (yellow circle, bottom-right) partially obscured by blue circle
   - Overlapping emoji circles during gameplay
@@ -247,7 +247,7 @@ Emoji Match is a webcam-based gesture-control game where players use hand pinch 
 #### Issue UI-006: Confusing End Screen Design
 
 - **Severity:** S3 - MINOR 🟡
-- **Source:** `emoji_final_frame_analysis.txt`
+- **Source:** `tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt`
 - **Findings:**
   - End screen clearly shows "Emotion Expert!" achievement and "Final Score: 690"
   - **BUT** retains active game elements (emoji circles, "Find: Happy" prompt)
@@ -1018,7 +1018,7 @@ _From `emojimatch_allonline.md` documentation_
    - Allows precise timestamp analysis
    - Enables manual QA observation
 
-4. **Latency Analysis JSON** (latency_analysis.json)
+4. **Latency Analysis JSON** (`tools/video_analysis/emoji_match_artifacts/latency_analysis.json`)
    - Compares hand position to cursor position per frame
    - Measures spatial correlation
    - Outputs: 38% correlation, 8/13 frames misaligned
@@ -1112,13 +1112,13 @@ This comprehensive audit collates work from multiple agents using different anal
    - Discovered: Conflicting findings, gaps in coverage
    - Strength: Unified view with regression test checklist
 
-6. **Agent F - Latency Analysis Agent** (`latency_analysis.json`)
+6. **Agent F - Latency Analysis Agent** (`tools/video_analysis/emoji_match_artifacts/latency_analysis.json`)
    - Focus: Quantitative hand/cursor correlation measurement
    - Framework: Frame-by-frame spatial analysis
    - Discovered: 38% correlation, 8/13 frames misaligned
    - Strength: Numerical validation of tracking failure
 
-7. **Agent G - End Screen Evaluator** (`emoji_final_frame_analysis.txt`)
+7. **Agent G - End Screen Evaluator** (`tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt`)
    - Focus: End screen UX for toddlers
    - Framework: Toddler-friendliness assessment
    - Discovered: Confusing end screen, "R10/10" notation issue

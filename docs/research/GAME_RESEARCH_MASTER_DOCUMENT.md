@@ -769,8 +769,8 @@ interface Particle {
 
 ### Tools Used
 
-- **Frame Analysis:** emoji_frame_analysis_results.json (634 frames analyzed)
-- **Performance:** latency_analysis.json
+- **Frame Analysis:** `tools/video_analysis/emoji_match_artifacts/emoji_frame_analysis_results.json` (634 frames analyzed)
+- **Performance:** `tools/video_analysis/emoji_match_artifacts/latency_analysis.json`
 - **Test Coverage:** vitest run results
 - **Code Analysis:** Manual review of 31 game files
 

@@ -173,6 +173,8 @@ src/frontend/node_modules_old/
 # Local temporary logs
 .tmp_git_log.txt
 .tmp_tests.txt
+/mcp-shell.log
+/test_dog.wav
 
 # Kenney Assets - Downloaded but not committed (copy used assets to src/frontend/public/assets/)
 assets/kenney/*/**

@@ -146,6 +146,46 @@ python3 tools/video_frame_analyzer.py tools/emoji_match.mov scenes
 
 ---
 
+## 🗂️ Emoji Match Audit Artifacts
+
+**Purpose:** Keep the derived Emoji Match review artifacts alongside the reusable video-analysis tooling instead of in the repo root.
+
+**Directory:** `tools/video_analysis/emoji_match_artifacts/`
+
+### Contents
+
+- `emoji_final_frame_analysis.txt` - end-screen UX notes
+- `emoji_frame_analysis_results.json` - raw frame-by-frame extraction data
+- `latency_analysis.json` - hand/cursor latency correlation output
+
+### Why this exists
+
+- These are supporting datasets for the analysis tooling, not top-level project entrypoints.
+- Keeping them under `tools/video_analysis/` makes the root layout cleaner and keeps doc references stable.
+
+---
+
+## 🖼️ Profile Customization Screenshot Capture
+
+**Purpose:** Capture profile customization UI screenshots for manual review without leaving an ad-hoc script in the repo root.
+
+**File:** `tools/qa_analysis/profile_customization_capture.js`
+
+### Usage
+
+```bash
+SCREENSHOT_TEST_EMAIL="you@example.com" \
+SCREENSHOT_TEST_PASSWORD="app-password" \
+node tools/qa_analysis/profile_customization_capture.js
+```
+
+### Notes
+
+- Screenshots are written to `tools/qa_analysis/screenshots/` (already ignored by git).
+- Set `SCREENSHOT_TEST_BASE_URL` or `SCREENSHOT_TEST_PROFILE_NAME` if you need a non-default target.
+
+---
+
 ## 📊 Frame Analysis Workflow
 
 ### 1. Extract Video Metadata

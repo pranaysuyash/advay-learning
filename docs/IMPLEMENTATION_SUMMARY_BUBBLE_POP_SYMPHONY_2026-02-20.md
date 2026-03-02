@@ -622,8 +622,8 @@ After launching game, must:
 
 - Original video: `~/Desktop/emoji_match.mov` (2:00, 2798×1986 @ 60fps)
 - Audit documents: 5+ files in repo root + docs/
-- Frame analysis: `emoji_final_frame_analysis.txt`
-- Latency analysis: `latency_analysis.json`
+- Frame analysis: `tools/video_analysis/emoji_match_artifacts/emoji_final_frame_analysis.txt`
+- Latency analysis: `tools/video_analysis/emoji_match_artifacts/latency_analysis.json`
 
 ---
 

@@ -6701,3 +6701,68 @@ Status updates:
 
 - [2026-03-02 23:56 IST] **IN_PROGRESS** — Porting useful stale-branch semantics into current `main` before deleting Claude branches
 - [2026-03-02 23:56 IST] **DONE** — Useful `sub-pr-1` semantics folded into current `main`; stale Claude branches can now be deleted after merge
+
+---
+
+### TCK-20260303-010 :: Root Layout Cleanup and Reference Hygiene
+Ticket Stamp: STAMP-20260302T182842Z-codex-006c
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-03-03 00:28 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Prompts used:
+- `prompts/workflow/agent-entrypoint-v1.0.md`
+- `prompts/hardening/generalized-implementer-v1.0.md`
+
+Scope contract:
+
+- In-scope:
+  - Move non-entrypoint root artifacts into existing `tools/`, `assets/`, or `logs/` structure
+  - Replace stale doc references that still point to the old root paths
+  - Move the ad-hoc root screenshot script into a reusable tool path
+  - Update `.gitignore` only where needed to keep local-only leftovers out of root/status noise
+- Out-of-scope:
+  - Moving legitimate root entrypoints such as `package.json`, `pyproject.toml`, `docker-compose.yml`, or root test configs
+  - Product feature changes
+  - Broad docs rewrites outside the affected file references
+- Behavior change allowed: YES (tooling/docs/layout only), NO (user-facing product behavior)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `.gitignore`
+  - `docs/CHILD_PROFILE_CUSTOMIZATION_IMPLEMENTATION.md`
+  - `docs/EMOJI_MATCH_COMPREHENSIVE_VIDEO_AUDIT_COLLATION_2026-02-20.md`
+  - `docs/IMPLEMENTATION_SUMMARY_BUBBLE_POP_SYMPHONY_2026-02-20.md`
+  - `docs/research/GAME_RESEARCH_MASTER_DOCUMENT.md`
+  - `docs/research/INITIATIVE_02_GAME_IMPROVEMENTS_2026-02-24.md`
+  - `tools/README.md`
+  - `tools/qa_analysis/profile_customization_capture.js`
+  - moved root artifacts under `tools/video_analysis/emoji_match_artifacts/`, `assets/audio/`, and `logs/local/`
+
+Acceptance Criteria:
+
+- [ ] Root-only analysis artifacts no longer sit at repo top level
+- [ ] The root screenshot helper is relocated under `tools/`
+- [ ] Docs point to the new file locations
+- [ ] `.gitignore` prevents the known local-only root leftovers from reappearing in status noise
+
+Execution log:
+
+- [2026-03-03 00:22 IST] Audited root-level files and separated actual entrypoints from loose artifacts
+- [2026-03-03 00:24 IST] Confirmed root `package.json`, `pyproject.toml`, `playwright.config.ts`, and `vitest.config.ts` are legitimate project entrypoints and kept them in place
+- [2026-03-03 00:27 IST] Moved Emoji Match analysis artifacts under `tools/video_analysis/emoji_match_artifacts/`
+- [2026-03-03 00:29 IST] Moved `screenshot-tests.js` into `tools/qa_analysis/profile_customization_capture.js` and updated docs to use the tool path directly
+- [2026-03-03 00:29 IST] Moved local root-only log leftovers under `logs/local/`, preserved `test_dog.wav` as `assets/audio/test_dog.wav`, and tightened ignore rules
+- [2026-03-03 00:47 IST] Command: `node --check tools/qa_analysis/profile_customization_capture.js` | Evidence: passed
+- [2026-03-03 00:47 IST] Command: `rg -n "screenshot-tests\\.js|(^|[^/])emoji_final_frame_analysis\\.txt|(^|[^/])emoji_frame_analysis_results\\.json|(^|[^/])latency_analysis\\.json" docs README.md tools -g'!node_modules/**'` | Evidence: no stale doc references outside the new tool/readme paths and this worklog entry
+- [2026-03-03 00:47 IST] Command: `git ls-files -z | xargs -0 -n1 | awk -F/ 'NF==1' | sort` | Evidence: tracked root files reduced to actual repo entrypoints/config/docs only
+
+Status updates:
+
+- [2026-03-03 00:28 IST] **IN_PROGRESS** — Reorganizing root-level stray files and patching references
+- [2026-03-03 00:47 IST] **DONE** — Root layout cleaned by functional moves; references and future Playwright output paths updated

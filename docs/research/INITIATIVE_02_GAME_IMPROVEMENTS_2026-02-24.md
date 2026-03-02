@@ -52,7 +52,7 @@
 - Target: 100% (13 games all fully audio-enabled)
 - Gap: 49.2% (needs 64 audio interactions added)
 
-### Latency Analysis (from latency_analysis.json)
+### Latency Analysis (from `tools/video_analysis/emoji_match_artifacts/latency_analysis.json`)
 
 **Baseline latencies**:
 ```
@@ -642,4 +642,3 @@ const attention = results.face.lookAtScreen; // Is child looking at screen?
 **This is the "magic" initiative**: When kids tap a shape and BOTH hear a satisfying sound AND see instant feedback (<200ms), the app feels responsive and delightful.
 
 **Success = Kids think "This responds to ME, and it's FAST!"**
-
