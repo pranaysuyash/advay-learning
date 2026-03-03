@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { REWARD_MODEL_CONFIG } from '../data/collectibles';
 import { useInventoryStore } from './inventoryStore';
+import { useSettingsStore } from './settingsStore';
 
 describe('inventoryStore collectibles enhancements', () => {
   beforeEach(() => {
@@ -59,8 +60,10 @@ describe('inventoryStore collectibles enhancements', () => {
   it('enforces bonus gating matrix by age and toggle', () => {
     const prevGlobalEnable = REWARD_MODEL_CONFIG.enableOlderBonus;
     const prevChance = REWARD_MODEL_CONFIG.olderBonusChance;
+    const prevFeatures = useSettingsStore.getState().features;
     REWARD_MODEL_CONFIG.enableOlderBonus = true;
     REWARD_MODEL_CONFIG.olderBonusChance = 1;
+    useSettingsStore.setState({ features: { 'rewards.deterministicV1': true } } as any);
 
     const store = useInventoryStore.getState();
 
@@ -84,5 +87,34 @@ describe('inventoryStore collectibles enhancements', () => {
 
     REWARD_MODEL_CONFIG.enableOlderBonus = prevGlobalEnable;
     REWARD_MODEL_CONFIG.olderBonusChance = prevChance;
+    useSettingsStore.setState({ features: prevFeatures ?? {} } as any);
+  });
+
+  it('honors rewards.deterministicV1 feature flag by producing stable drops for the same completion seed', () => {
+    const prevFeatures = useSettingsStore.getState().features;
+    useSettingsStore.setState({ features: { 'rewards.deterministicV1': true } } as any);
+
+    let store = useInventoryStore.getState();
+    const dropsA = store.processGameCompletion('word-builder', { score: 10 });
+
+    useInventoryStore.setState({
+      ownedItems: {},
+      discoveredRecipes: [],
+      foundEasterEggs: [],
+      eggHintState: {},
+      totalDiscoveries: 0,
+      gameCompletions: {},
+      lastDrops: [],
+      showDropToast: false,
+    });
+
+    store = useInventoryStore.getState();
+    const dropsB = store.processGameCompletion('word-builder', { score: 10 });
+
+    expect(dropsA.map((drop) => drop.item.id)).toEqual(
+      dropsB.map((drop) => drop.item.id),
+    );
+
+    useSettingsStore.setState({ features: prevFeatures ?? {} } as any);
   });
 });

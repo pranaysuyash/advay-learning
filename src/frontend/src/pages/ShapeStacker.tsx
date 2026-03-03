@@ -1,11 +1,10 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
-  LEVELS,
   createShapes,
   createTargets,
   checkMatch,
@@ -20,7 +19,7 @@ const GAME_COLORS = {
   slotFilled: '#22C55E',
 };
 
-const SHAPE_SVG: Record<FallingShape['shape'], JSX.Element> = {
+const SHAPE_SVG: Record<FallingShape['shape'], ReactNode> = {
   square: <rect x="5" y="5" width="30" height="30" />,
   circle: <circle cx="20" cy="20" r="18" />,
   triangle: <polygon points="20,5 35,35 5,35" />,
@@ -44,9 +43,7 @@ export function ShapeStacker() {
   const { onGameComplete } = useGameDrops('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
-  const TOTAL_ROUNDS = 3;
   const FALL_SPEED = 0.15;
-  const TARGET_Y = 70;
 
   const startGame = useCallback(() => {
     const newShapes = createShapes(currentLevel);

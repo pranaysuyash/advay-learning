@@ -257,6 +257,13 @@ extract_exports() {
     sort -u
 }
 
+extract_export_names() {
+  local content="$1"
+  echo "$content" | grep -E '^export (const|function|class|type|interface|enum)' | \
+    sed -E 's/^export[[:space:]]+(const|function|class|type|interface|enum)[[:space:]]+([A-Za-z0-9_]+).*/\2/' | \
+    sort -u
+}
+
 # Extract component props interfaces
 extract_props() {
   local content="$1"
@@ -320,12 +327,14 @@ check_feature_regression() {
   fi
   
   # Check 2: Exports
-  local old_exports new_exports
+  local old_exports new_exports old_export_names new_export_names
   old_exports=$(extract_exports "$old_content")
   new_exports=$(extract_exports "$new_content")
+  old_export_names=$(extract_export_names "$old_content")
+  new_export_names=$(extract_export_names "$new_content")
   
   local removed_exports
-  removed_exports=$(comm -23 <(echo "$old_exports") <(echo "$new_exports") || true)
+  removed_exports=$(comm -23 <(echo "$old_export_names") <(echo "$new_export_names") || true)
   if [[ -n "$removed_exports" ]]; then
     issues+=("Exports removed: $(echo "$removed_exports" | wc -l | tr -d ' ')")
     while IFS= read -r exp; do

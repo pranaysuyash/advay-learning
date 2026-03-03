@@ -1,8 +1,16 @@
+/**
+ * Mirror Draw Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -33,7 +41,7 @@ import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 const MAX_LEVEL = 4;
 const TEMPLATES_TO_PASS = 3; // pass 3/5 to unlock next level
 
-export const MirrorDraw = memo(function MirrorDrawComponent() {
+const MirrorDrawGame = memo(function MirrorDrawComponent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -557,6 +565,19 @@ export const MirrorDraw = memo(function MirrorDrawComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const MirrorDraw = memo(function MirrorDrawShell() {
+  return (
+    <GameShell
+      gameId='mirror-draw'
+      gameName='Mirror Draw'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <MirrorDrawGame />
+    </GameShell>
   );
 });
 

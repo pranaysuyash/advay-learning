@@ -29,6 +29,36 @@ To manually run the gate on your staged changes:
 ./scripts/agent_gate.sh --staged
 ```
 
+Before any code-changing commit, run a findings-first local review using:
+
+```bash
+# Follow the repo prompt before committing
+cat prompts/review/local-pre-commit-review-v1.0.md
+```
+
+For code or audit changes, the updated worklog addendum must include:
+
+```md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+```
+
+The gate also blocks premature completion metadata in worklogs:
+
+- `Status: DONE` with numbered `Next Actions:`
+- bulk refactor tickets marked `DONE` without a verification `Command:`
+- sidecar-based “100% complete” claims while tracked `*Refactored.tsx` files still exist, unless the ticket explicitly says `Sidecar Status: RETAINED`
+
+`scripts/agent_gate.sh` also blocks unresolved refactor sidecar page files by default:
+
+- touching `src/frontend/src/pages/*Refactored.tsx`
+- touching a canonical page `Foo.tsx` while a tracked `FooRefactored.tsx` twin still exists
+
+Temporary override (only when the active worklog explicitly documents why the sidecar must remain):
+
+```bash
+ALLOW_REFACTORED_SIDE_CARS=1 git commit ...
+```
+
 To generate a unique ticket stamp for worklog entries:
 
 ```bash
@@ -59,7 +89,7 @@ ALLOW_MAIN_COMMIT=1 git commit ...
 Commits and pushes now run `scripts/secret_scan.sh`:
 
 - `pre-commit` scans staged content for leaked credentials.
-- `pre-push` scans the pushed commit range for leaked credentials.
+- `pre-push` scans the exact commit history being pushed for leaked credentials, including local-only history on newly created remote branches.
 
 Scanner backend:
 
@@ -74,6 +104,9 @@ Manual checks:
 
 # Scan commit range
 ./scripts/secret_scan.sh --range origin/main..HEAD
+
+# Scan commits that only exist locally (useful before first push of a new branch)
+./scripts/secret_scan.sh --range "HEAD --not --remotes"
 ```
 
 Temporary bypass (emergency only):

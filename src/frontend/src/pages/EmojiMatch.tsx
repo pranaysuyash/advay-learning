@@ -1,7 +1,14 @@
+/**
+ * Emoji Match Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameShell } from '../components/GameShell';
 import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
@@ -59,7 +66,7 @@ const TUTORIAL_STEPS = [
   },
 ] as const;
 
-export const EmojiMatch = memo(function EmojiMatchComponent() {
+const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerRectRef = useRef<DOMRect | null>(null);
@@ -858,6 +865,19 @@ export const EmojiMatch = memo(function EmojiMatchComponent() {
         characterEmoji='⭐'
       />
     </GameContainer>
+  );
+});
+
+export const EmojiMatch = memo(function EmojiMatchShell() {
+  return (
+    <GameShell
+      gameId='emoji-match'
+      gameName='Emoji Match'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <EmojiMatchGame />
+    </GameShell>
   );
 });
 

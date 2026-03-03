@@ -21,6 +21,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -45,7 +46,7 @@ import {
   BALLOON_COLORS,
 } from '../games/balloonPopFitnessLogic';
 
-export const BalloonPopFitness = memo(function BalloonPopFitness() {
+const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('balloon-pop-fitness');
   const { playPop, playSuccess, playCelebration, playClick } = useAudio();
@@ -398,10 +399,7 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
   };
 
   const handleGameComplete = () => {
-    if (gameState) {
-      const stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', stats);
-    }
+    if (gameState) calculateFinalStats(gameState);
     setShowMenu(true);
     setGameState(null);
   };
@@ -573,6 +571,19 @@ export const BalloonPopFitness = memo(function BalloonPopFitness() {
         message="Great Workout!"
       />
     </GameContainer>
+  );
+});
+
+export const BalloonPopFitness = memo(function BalloonPopFitnessComponent() {
+  return (
+    <GameShell
+      gameId='balloon-pop-fitness'
+      gameName='Balloon Pop Fitness'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <BalloonPopFitnessGame />
+    </GameShell>
   );
 });
 

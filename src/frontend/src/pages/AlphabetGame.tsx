@@ -1,3 +1,9 @@
+/**
+ * Draw Letters Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import React, {
   useState,
   useRef,
@@ -25,6 +31,7 @@ import { recordProgressActivity } from '../services/progressTracking';
 import { getAllIcons } from '../utils/iconUtils';
 import { UIIcon } from '../components/ui/Icon';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
@@ -102,7 +109,7 @@ const LANGUAGES = [
   { code: 'ta', name: 'Tamil' },
 ] as const;
 
-export const AlphabetGame = React.memo(function AlphabetGameComponent() {
+const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const location = useLocation();
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
@@ -1421,7 +1428,7 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
   return (
     <GlobalErrorBoundary>
       <WellnessMonitor
-        videoRef={webcamRef}
+        videoRef={webcamRef as unknown as React.RefObject<HTMLVideoElement>}
         isActive={isPlaying && !isPaused && !useMouseMode}
         onAttentionAlert={handleAttentionAlert}
         onPostureAlert={handlePostureAlert}
@@ -1901,6 +1908,19 @@ export const AlphabetGame = React.memo(function AlphabetGameComponent() {
         />
       </>
     </GlobalErrorBoundary>
+  );
+});
+
+export const AlphabetGame = React.memo(function AlphabetGameShell() {
+  return (
+    <GameShell
+      gameId='alphabet-tracing'
+      gameName='Alphabet Tracing'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <AlphabetGameGame />
+    </GameShell>
   );
 });
 

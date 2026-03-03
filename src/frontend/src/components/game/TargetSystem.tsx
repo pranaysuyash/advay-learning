@@ -20,7 +20,7 @@ import {
  * Issue References: UI-002, UI-003, HT-002 from EMOJI_MATCH_COMPREHENSIVE_VIDEO_AUDIT_COLLATION_2026-02-20.md
  */
 
-interface Target {
+export interface Target {
   id: string;
   x: number;
   y: number;

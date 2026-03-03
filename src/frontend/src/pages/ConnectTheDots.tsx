@@ -1,7 +1,15 @@
+/**
+ * Connect The Dots Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { UIIcon } from '../components/ui/Icon';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -40,7 +48,7 @@ const GAME_COLORS = {
   cursorPinch: '#E85D04', // pip-orange
 } as const;
 
-export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
+const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
@@ -860,6 +868,19 @@ export const ConnectTheDots = memo(function ConnectTheDotsComponent() {
         </section>
       )}
     </>
+  );
+});
+
+export const ConnectTheDots = memo(function ConnectTheDotsShell() {
+  return (
+    <GameShell
+      gameId='connect-the-dots'
+      gameName='Connect The Dots'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ConnectTheDotsGame />
+    </GameShell>
   );
 });
 

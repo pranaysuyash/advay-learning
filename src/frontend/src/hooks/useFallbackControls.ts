@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 
 export interface DwellConfig {
   /** Dwell time in milliseconds (default: 400ms) */
@@ -50,9 +51,9 @@ export interface UseFallbackControlsReturn {
   snappedTargetId: string | null;
   /** Handlers to attach to container element */
   handlers: {
-    onPointerMove: (e: PointerEvent) => void;
-    onPointerDown: (e: PointerEvent) => void;
-    onPointerUp: (e: PointerEvent) => void;
+    onPointerMove: (e: ReactPointerEvent<HTMLElement>) => void;
+    onPointerDown: (e: ReactPointerEvent<HTMLElement>) => void;
+    onPointerUp: (e: ReactPointerEvent<HTMLElement>) => void;
     onPointerLeave: () => void;
   };
   /** Enable fallback controls */
@@ -164,7 +165,7 @@ export function useFallbackControls(
 
   // Handle pointer move
   const handlePointerMove = useCallback(
-    (e: PointerEvent) => {
+    (e: ReactPointerEvent<HTMLElement>) => {
       if (!enabled) return;
 
       const container = containerRef?.current;
@@ -195,7 +196,7 @@ export function useFallbackControls(
 
   // Handle pointer down (immediate selection)
   const handlePointerDown = useCallback(
-    (e: PointerEvent) => {
+    (e: ReactPointerEvent<HTMLElement>) => {
       if (!enabled) return;
 
       const container = containerRef?.current;

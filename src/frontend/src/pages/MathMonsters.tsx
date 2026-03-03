@@ -15,7 +15,8 @@
  * - Visual feedback for correct/incorrect
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { memo, useCallback, useRef, useState, useEffect } from 'react';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CSSMonster } from '../components/characters/CSSMonster';
@@ -48,7 +49,7 @@ import {
 const FINGER_COUNT_DEBOUNCE = 1000;
 const MIN_FINGER_HOLD_TIME = 1500;
 
-export default function MathMonsters() {
+function MathMonstersGame() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
   const { playCoin, playHurt, playSelect } = useKenneyAudio();
@@ -577,3 +578,18 @@ export default function MathMonsters() {
     </GameContainer>
   );
 }
+
+export const MathMonsters = memo(function MathMonstersComponent() {
+  return (
+    <GameShell
+      gameId='math-monsters'
+      gameName='Math Monsters'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <MathMonstersGame />
+    </GameShell>
+  );
+});
+
+export default MathMonsters;

@@ -1,9 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+/**
+ * Air Guitar Hero Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   LEVELS,
@@ -50,7 +56,6 @@ function AirGuitarHeroInner({
   const [correctCount, setCorrectCount] = useState(0);
 
   const { playClick, playPop, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('air-guitar-hero');
   const levelConfig = useMemo(() => LEVELS[currentLevel - 1], [currentLevel]);
 
   // progress handled by GamePage itself
@@ -93,23 +98,6 @@ function AirGuitarHeroInner({
       setCurrentIndex(nextIndex);
     }
   };
-
-  const handleFinishLocal = useCallback(
-    async (ctxScore: number) => {
-      playClick();
-      const finalScore = Math.round(
-        ctxScore / Math.max(levelConfig.notesToPlay, 1),
-      );
-      await onGameComplete(finalScore);
-      navigate('/games');
-    },
-    [levelConfig, onGameComplete, navigate, playClick],
-  );
-
-  // wrapper method used by GamePage
-  const onFinish = useCallback(async () => {
-    await handleFinishLocal(score);
-  }, [handleFinishLocal, score]);
 
   const currentNote = noteSequence[currentIndex];
   const noteColors = currentNote
@@ -371,10 +359,24 @@ function AirGuitarHeroInner({
   );
 }
 
-export function AirGuitarHero() {
+const AirGuitarHeroGame = memo(function AirGuitarHeroGameComponent() {
   return (
     <GamePage title='Air Guitar Hero' gameId='air-guitar-hero'>
       {(ctx) => <AirGuitarHeroInner {...ctx} />}
     </GamePage>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const AirGuitarHero = memo(function AirGuitarHeroComponent() {
+  return (
+    <GameShell
+      gameId="air-guitar-hero"
+      gameName="Air Guitar Hero"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <AirGuitarHeroGame />
+    </GameShell>
+  );
+});

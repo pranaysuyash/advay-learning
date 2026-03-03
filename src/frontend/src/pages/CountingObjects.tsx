@@ -1,12 +1,19 @@
-import { useCallback, useState } from 'react';
+/**
+ * Counting Objects Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateCountingScene, type CountingScene } from '../games/countingObjectsLogic';
 
-export function CountingObjects() {
+const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [scene, setScene] = useState<CountingScene | null>(null);
@@ -219,4 +226,18 @@ export function CountingObjects() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const CountingObjects = memo(function CountingObjectsComponent() {
+  return (
+    <GameShell
+      gameId="counting-objects"
+      gameName="Counting Objects"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <CountingObjectsGame />
+    </GameShell>
+  );
+});

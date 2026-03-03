@@ -153,14 +153,14 @@ run_frontend_tests() {
     done <<< "$source_files"
     
     if [[ -n "$file_args" ]]; then
-      npm test -- --run --reporter=dot 2>&1 || {
+      npm test -- --reporter=dot 2>&1 || {
         cd "$REPO_ROOT"
         return 1
       }
     fi
   else
     # Run all tests
-    npm test -- --run --reporter=dot 2>&1 || {
+    npm test -- --reporter=dot 2>&1 || {
       cd "$REPO_ROOT"
       return 1
     }
@@ -183,13 +183,22 @@ check_export_changes() {
     [[ -z "$file" ]] && continue
     [[ ! -f "$file" ]] && continue
     
-    # Get exports from old version (HEAD)
+    # Compare exported identifiers by name so wrapper migrations like
+    # "export function Foo" -> "export const Foo" don't false-flag as removals.
     local old_exports
-    old_exports=$(git show "HEAD:$file" 2>/dev/null | grep -E '^export (const|function|class|type|interface|enum|default)' | sed 's/export //' | sort || true)
+    old_exports=$(
+      git show "HEAD:$file" 2>/dev/null \
+        | perl -ne 'if (/^export\s+(?:const|function|class|type|interface|enum)\s+([A-Za-z0-9_]+)/) { print "$1\n"; } elsif (/^export\s+default\s+function\s+([A-Za-z0-9_]+)/) { print "$1\n"; }' \
+        | sort -u || true
+    )
     
     # Get exports from new version (staged)
     local new_exports_list
-    new_exports_list=$(git show ":$file" 2>/dev/null | grep -E '^export (const|function|class|type|interface|enum|default)' | sed 's/export //' | sort || true)
+    new_exports_list=$(
+      git show ":$file" 2>/dev/null \
+        | perl -ne 'if (/^export\s+(?:const|function|class|type|interface|enum)\s+([A-Za-z0-9_]+)/) { print "$1\n"; } elsif (/^export\s+default\s+function\s+([A-Za-z0-9_]+)/) { print "$1\n"; }' \
+        | sort -u || true
+    )
     
     # Find removed exports
     local removed

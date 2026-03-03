@@ -1,12 +1,19 @@
-import { useCallback, useState } from 'react';
+/**
+ * Color Sort Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateItems, type ColorItem } from '../games/colorSortGameLogic';
 
-export function ColorSortGame() {
+const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [items, setItems] = useState<ColorItem[]>([]);
@@ -128,4 +135,18 @@ export function ColorSortGame() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const ColorSortGame = memo(function ColorSortGameComponent() {
+  return (
+    <GameShell
+      gameId="color-sort"
+      gameName="Color Sort"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ColorSortGameGame />
+    </GameShell>
+  );
+});

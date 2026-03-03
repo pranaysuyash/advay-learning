@@ -1,4 +1,4 @@
-import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GamePage } from './GamePage';
@@ -7,7 +7,7 @@ import { progressQueue } from '../services/progressQueue';
 
 // most hooks are mocked in test/setup.ts; we only need to override
 vi.mock('../hooks/useGameDrops', () => ({
-  useGameDrops: (gameId: string) => ({
+  useGameDrops: (_gameId: string) => ({
     onGameComplete: vi.fn(),
   }),
 }));
@@ -15,7 +15,9 @@ vi.mock('../hooks/useGameDrops', () => ({
 describe('GamePage component', () => {
   beforeEach(() => {
     // ensure a profile exists so handleGameComplete proceeds
-    useProgressStore.setState({ currentProfile: { id: 'profile-1' } });
+    useProgressStore.setState({
+      currentProfile: { id: '123e4567-e89b-42d3-a456-426614174000' },
+    });
   });
 
   it('renders children and exposes score/level context', async () => {
@@ -36,7 +38,7 @@ describe('GamePage component', () => {
               <div data-testid='level'>{currentLevel}</div>
               <button onClick={() => setScore((s) => s + 5)}>inc</button>
               <button onClick={() => setCurrentLevel((l) => l + 1)}>lvl</button>
-              <button onClick={handleFinish}>finish</button>
+              <button onClick={() => void handleFinish()}>finish</button>
             </>
           )}
         </GamePage>

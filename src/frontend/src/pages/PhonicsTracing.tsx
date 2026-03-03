@@ -2,11 +2,11 @@ import { memo, useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -24,7 +24,8 @@ import {
 
 const CANVAS_SIZE = 400;
 
-export const PhonicsTracing = memo(function PhonicsTracingComponent() {
+// Inner game component
+const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -542,9 +543,21 @@ export const PhonicsTracing = memo(function PhonicsTracingComponent() {
           </div>
         </div>
 
-        {/* Wellness timer */}
-        <WellnessTimer />
       </GameContainer>
     </GlobalErrorBoundary>
+  );
+});
+
+// Main export wrapped with GameShell
+export const PhonicsTracing = memo(function PhonicsTracingComponent() {
+  return (
+    <GameShell
+      gameId="phonics-tracing"
+      gameName="Phonics Tracing"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <PhonicsTracingGame />
+    </GameShell>
   );
 });

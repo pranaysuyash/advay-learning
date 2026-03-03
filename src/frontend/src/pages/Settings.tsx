@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore, useProgressStore, useAuthStore } from '../store';
 import { useProfileStore } from '../store/profileStore';
+import { FEATURE_FLAG_META } from '../config/features';
+import { useFeatureFlags } from '../hooks/useFeatureFlag';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
 import { Button } from '../components/ui';
@@ -23,6 +25,9 @@ export function Settings() {
     resetProgress,
     getMasteredLettersCount,
   } = useProgressStore();
+
+  // feature flag helpers (editable flags only)
+  const featureFlags = useFeatureFlags();
   const confirm = useConfirm();
   const { showToast } = useToast();
   const { playClick } = useAudio();
@@ -204,6 +209,29 @@ export function Settings() {
                         </div>
                       </div>
                     )}
+
+                    {/* Feature Flags (editable, for testing) */}
+                    <div className='pt-6 border-t-4 border-[#F2CC8F]'>
+                      <h2 className='text-2xl font-black text-advay-slate mb-4'>Feature Flags</h2>
+                      {Object.entries(FEATURE_FLAG_META).map(([flag, meta]) => {
+                        if (!meta.editable) return null;
+                        const enabled = featureFlags.isEnabled(flag as any);
+                        return (
+                          <div key={flag} className='flex items-center justify-between py-3'>
+                            <div>
+                              <div className='font-black text-advay-slate text-lg'>{meta.description}</div>
+                              <div className='text-sm text-text-secondary'>Flag: {flag}</div>
+                            </div>
+                            <button
+                              onClick={() => featureFlags.updateFlag(flag as any, !enabled)}
+                              className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${enabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+                            >
+                              <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 

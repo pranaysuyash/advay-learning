@@ -5,9 +5,10 @@ import {
   getDeterministicCoreDrop,
   maybeGetDeterministicBonusDrop,
   rollDropsFromTable,
-  REWARD_MODEL_CONFIG,
   type CollectibleItem,
 } from '../data/collectibles';
+import { getFeatureFlag } from '../config/features';
+import { useSettingsStore } from './settingsStore';
 import { RECIPES_BY_ID, findCraftableRecipes, type Recipe } from '../data/recipes';
 import { getDropTable, getRegistryEasterEggById, getRegistryEasterEggs } from '../data/gameRegistry';
 
@@ -171,7 +172,11 @@ export const useInventoryStore = create<InventoryState>()(
         const completionCount = (state.gameCompletions[gameId] ?? 0) + 1;
         const droppedIds: string[] = [];
 
-        if (REWARD_MODEL_CONFIG.deterministicCore) {
+        // evaluate feature flag override (env/user) for deterministic rewards
+        const settings = useSettingsStore.getState();
+        const deterministicEnabled = getFeatureFlag('rewards.deterministicV1', settings.features ?? {});
+
+        if (deterministicEnabled) {
           const coreId = getDeterministicCoreDrop(dropTable, {
             gameId,
             completionCount,

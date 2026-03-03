@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
+    data_export,
     games,
     issue_reports,
     profile_photos,
@@ -28,4 +29,9 @@ api_router.include_router(
     subscriptions.router,
     prefix="/subscriptions",
     tags=["subscriptions"],
+)
+api_router.include_router(
+    data_export.router,
+    prefix="/export",
+    tags=["data-export"],
 )

@@ -1,6 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+/**
+ * Fruit Ninja Air Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -9,7 +16,7 @@ import { LEVELS, spawnFruit, updateFruits, checkSlice, type Fruit } from '../gam
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 500;
 
-export function FruitNinjaAir() {
+const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -175,4 +182,18 @@ export function FruitNinjaAir() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const FruitNinjaAir = memo(function FruitNinjaAirComponent() {
+  return (
+    <GameShell
+      gameId="fruit-ninja-air"
+      gameName="Fruit Ninja Air"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <FruitNinjaAirGame />
+    </GameShell>
+  );
+});

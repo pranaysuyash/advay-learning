@@ -18,7 +18,7 @@ const ANIMALS: Animal[] = [
   { name: 'Cat', emoji: '🐱', sound: 'Meow!' },
   { name: 'Cow', emoji: '🐄', sound: 'Moo!' },
   { name: 'Pig', emoji: '🐷', sound: 'Oink oink!' },
-  { name: 'Duck', emoji: '🦆', sound: 'Quack quack!' },
+  { name: 'Bird', emoji: '🐦', sound: 'Chirp chirp!' },
   { name: 'Rooster', emoji: '🐓', sound: 'Cock-a-doodle-doo!' },
   { name: 'Sheep', emoji: '🐑', sound: 'Baa baa!' },
   { name: 'Horse', emoji: '🐴', sound: 'Neigh!' },

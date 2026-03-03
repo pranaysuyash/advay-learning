@@ -271,10 +271,7 @@ export const MusicalStatues = memo(function MusicalStatues() {
   };
 
   const handleGameComplete = () => {
-    if (gameState) {
-      const stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', stats);
-    }
+    if (gameState) calculateFinalStats(gameState);
     setShowMenu(true);
     setGameState(null);
   };
