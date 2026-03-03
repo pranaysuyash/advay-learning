@@ -6,6 +6,19 @@ Use this prompt when starting a fresh batch of new games from the large backlog 
 
 The goal is to start a new batch the right way: ship real, verified, integrated games in small batches from scratch in the live codebase. Build the real game files directly, wire them fully, verify them, and report progress honestly.
 
+This prompt must be used within the repo's normal execution lifecycle in `AGENTS.md`:
+
+1. Analysis
+2. Document
+3. Plan
+4. Research
+5. Document
+6. Implement
+7. Test
+8. Document
+
+Do not jump straight to code if the game mechanics, learning goal, interaction pattern, or asset needs are still ambiguous.
+
 ## Scope Rules
 
 - Work in a small batch only: default 3 games, maximum 5 per pass
@@ -43,6 +56,28 @@ Default batch size:
 - 3 games for complex or interaction-heavy work
 - 5 games maximum for simpler games
 
+### 1.5. Do the Required Research Before Building
+
+Before implementing any game, research enough to define the real mechanic:
+
+- confirm what the game is supposed to teach or practice
+- identify the core interaction loop
+- identify age-band expectations and difficulty shape
+- identify whether camera / hand-tracking / pointer fallback is appropriate
+- identify required assets, sounds, and copy
+
+Research sources should be used in this order:
+
+1. existing repo sources first
+   - related backlog docs
+   - existing game pages
+   - existing logic modules
+   - worklog and research docs
+2. if the repo is not enough, do targeted external research on the game mechanic or teaching pattern
+3. document what was `Observed`, what was `Inferred`, and what remains `Unknown`
+
+If a mechanic is still unclear after research, stop and mark that game `BLOCKED` rather than inventing a fake-complete version.
+
 ### 2. Build in the Real App Structure
 
 Implement using the repo’s real patterns:
@@ -54,6 +89,8 @@ Implement using the repo’s real patterns:
 - existing shared components/hooks instead of one-off copies
 
 Prefer adapting a nearby working game over inventing a new structure, but produce a real new implementation, not a cosmetic clone.
+
+When choosing patterns, explicitly inspect similar existing games first and state which files are being used as references.
 
 ### 3. No Placeholder or Fake Progress
 
@@ -92,7 +129,13 @@ If verification is missing, say so explicitly and do not claim the batch is comp
 
 ### Findings / Risks First
 
-Start by listing any blockers, ambiguous game specs, or missing assets before implementation claims.
+Start by listing:
+
+- blockers
+- ambiguous game specs
+- missing assets
+- open mechanic questions
+- any research gaps that could change implementation decisions
 
 ### Per-Game Status Table
 
@@ -101,6 +144,7 @@ For every game in the batch, report:
 - game name
 - page file
 - logic file (if any)
+- research basis / reference games
 - route added: yes/no
 - registry entry added: yes/no
 - verification run
@@ -141,10 +185,11 @@ When using this prompt, add this line to the active worklog entry:
 
 1. choose the next 3 games from the 270+ list if the user has not already specified them
 2. inspect similar existing games already in the app
-3. write a concrete mini-plan for those 3 games
-4. implement the first game fully
-5. verify it
-6. repeat for the remaining games
-7. run batch-level verification
-8. update worklog honestly
-9. only then mark completed items `DONE`
+3. research the mechanic and learning goal if anything is unclear
+4. write a concrete mini-plan for those 3 games
+5. implement the first game fully
+6. verify it
+7. repeat for the remaining games
+8. run batch-level verification
+9. update worklog honestly
+10. only then mark completed items `DONE`
