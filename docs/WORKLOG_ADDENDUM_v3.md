@@ -9278,6 +9278,7 @@ Execution log:
 - [2026-03-03 10:13 IST] Updated `prompts/implementation/new-game-batch-implementation-v1.0.md` and `prompts/README.md` | Evidence: prompt now explicitly describes a clean-slate new-game implementation workflow
 - [2026-03-03 10:14 IST] Command: `cd src/frontend && npm run -s type-check` | Evidence: frontend typecheck passed
 - [2026-03-03 10:26 IST] Updated `scripts/feature_regression_check.sh` and `priorityEngine.ts` | Evidence: the regression gate now compares export names (not just export keywords) so `export function Foo` -> `export const Foo` wrapper migrations stop false-flagging, and `PriorityFactors` remains explicitly exported from `priorityEngine.ts`
+- [2026-03-03 11:08 IST] Updated `.githooks/pre-push` and `tools/audio/generate_animals_node.js` | Evidence: pre-push now runs a history-aware secret scan for pushed commit ranges (including local-only branch history), and the flagged Hugging Face token is now loaded from `HF_TOKEN` / `HUGGINGFACE_API_KEY` instead of being hardcoded
 
 Evidence:
 
@@ -9286,6 +9287,12 @@ Output:
 - Exit code 0
 - Frontend TypeScript compile passed after banner cleanup and current branch fixes
 
+Command: `./scripts/secret_scan.sh --range "HEAD --not --remotes"`
+Output:
+- Required local history-range command documented for pre-push parity
+- Hardcoded token removed from `tools/audio/generate_animals_node.js`
+
 Status updates:
 
 - [2026-03-03 10:14 IST] **DONE** — Refactored twin cleanup finalized for commit, and clean-slate new-games prompt prepared
+- [2026-03-03 11:08 IST] **DONE** — Added a history-aware local secret scan and replaced the hardcoded Hugging Face token with env-based loading

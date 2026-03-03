@@ -12,6 +12,43 @@ echo ""
 # Check if we're in the backend directory context
 cd "$(git rev-parse --show-toplevel)"
 
+# Scan commits being pushed for secrets so branch-history leaks are caught
+# locally before GitHub push protection rejects the ref update.
+had_refs=false
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [[ -z "${local_ref:-}" ]] && continue
+    had_refs=true
+
+    if [[ "$local_sha" =~ ^0+$ ]]; then
+        continue
+    fi
+
+    if [[ -n "${remote_sha:-}" && ! "$remote_sha" =~ ^0+$ ]]; then
+        range="${remote_sha}..${local_sha}"
+    else
+        range="${local_sha} --not --remotes"
+    fi
+
+    echo "🔐 Scanning pushed commit history for secrets..."
+    if ! ./scripts/secret_scan.sh --range "$range"; then
+        echo ""
+        echo "❌ Pre-push secret history scan failed!"
+        echo "Fix the secret in the pushed commit range before pushing."
+        exit 1
+    fi
+done
+
+if [[ "$had_refs" != true ]]; then
+    current_sha="$(git rev-parse HEAD)"
+    echo "🔐 Scanning local-only commit history for secrets..."
+    if ! ./scripts/secret_scan.sh --range "${current_sha} --not --remotes"; then
+        echo ""
+        echo "❌ Pre-push secret history scan failed!"
+        echo "Fix the secret in the local-only commit range before pushing."
+        exit 1
+    fi
+fi
+
 # Activate virtual environment if it exists
 if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate

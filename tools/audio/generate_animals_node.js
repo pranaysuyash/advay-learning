@@ -1,7 +1,14 @@
 import { HfInference } from "@huggingface/inference";
 import fs from "fs";
 
-const hf = new HfInference(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY || "");
+const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+
+if (!hfToken) {
+  console.error("Set HF_TOKEN or HUGGINGFACE_API_KEY before running this script.");
+  process.exit(1);
+}
+
+const hf = new HfInference(hfToken);
 
 const ANIMALS = {
   dog: "A dog barking loudly",

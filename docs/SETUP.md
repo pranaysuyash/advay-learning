@@ -89,7 +89,7 @@ ALLOW_MAIN_COMMIT=1 git commit ...
 Commits and pushes now run `scripts/secret_scan.sh`:
 
 - `pre-commit` scans staged content for leaked credentials.
-- `pre-push` scans the pushed commit range for leaked credentials.
+- `pre-push` scans the exact commit history being pushed for leaked credentials, including local-only history on newly created remote branches.
 
 Scanner backend:
 
@@ -104,6 +104,9 @@ Manual checks:
 
 # Scan commit range
 ./scripts/secret_scan.sh --range origin/main..HEAD
+
+# Scan commits that only exist locally (useful before first push of a new branch)
+./scripts/secret_scan.sh --range "HEAD --not --remotes"
 ```
 
 Temporary bypass (emergency only):
