@@ -1,4 +1,11 @@
+/**
+ * Dress For Weather Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { GameShell } from '../components/GameShell';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
@@ -197,7 +204,7 @@ const LEVELS: Level[] = [
   },
 ];
 
-export default function DressForWeather() {
+function DressForWeatherGame() {
   // Hand tracking with modern hooks
   const { onGameComplete } = useGameDrops('dress-for-weather');
   const { playClick } = useAudio();
@@ -653,3 +660,16 @@ export default function DressForWeather() {
  * - [ ] 95%+ smile/show positive emotion
  * - [ ] Zero frustration or fear
  */
+
+export default function DressForWeather() {
+  return (
+    <GameShell
+      gameId='dress-for-weather'
+      gameName='Dress For Weather'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <DressForWeatherGame />
+    </GameShell>
+  );
+}

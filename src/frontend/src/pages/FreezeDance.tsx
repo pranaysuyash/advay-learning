@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+/**
+ * Freeze Dance Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
@@ -23,9 +29,10 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameShell } from '../components/GameShell';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
-export function FreezeDance() {
+const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -818,6 +825,20 @@ export function FreezeDance() {
       </div>
     </div>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const FreezeDance = memo(function FreezeDanceComponent() {
+  return (
+    <GameShell
+      gameId="freeze-dance"
+      gameName="Freeze Dance"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <FreezeDanceGame />
+    </GameShell>
+  );
+});
 
 export default FreezeDance;

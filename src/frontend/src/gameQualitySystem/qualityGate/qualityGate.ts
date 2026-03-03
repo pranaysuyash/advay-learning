@@ -1,13 +1,14 @@
 // Quality Gate for Game Quality System
 
-import { QualityGateResult, QualityGateCheck, QualityGateStatus, AccessibilityCheck } from '../types';
+import type {
+    QualityGateResult,
+    QualityGateCheck,
+    QualityGateStatus,
+    QualityGateConfig,
+    AccessibilityCheck,
+} from '../types';
 
-export interface QualityGateConfig {
-    requiredChecks: string[];
-    minAccessibilityScore: number;
-    minTestCoverage: number;
-    requireDocumentation: boolean;
-}
+export type { QualityGateConfig };
 
 export class QualityGate {
     private readonly DEFAULT_CONFIG: QualityGateConfig = {
@@ -167,7 +168,7 @@ export class QualityGate {
         };
     }
 
-    public runCheck(checkName: string, gameId: string, gameData: any, context: any): QualityGateCheck {
+    public runCheck(checkName: string, _gameId: string, _gameData: any, context: any): QualityGateCheck {
         switch (checkName) {
             case 'auditPassed':
                 return this.checkAudit(context.auditReport);

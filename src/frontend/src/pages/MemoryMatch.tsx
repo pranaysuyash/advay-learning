@@ -14,13 +14,14 @@
  * - Mouse click also works as fallback
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -61,7 +62,7 @@ function gridCols(pairCount: number) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function MemoryMatch() {
+const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
   const { onGameComplete } = useGameDrops('memory-match');
   const { playFlip, playSuccess, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -491,6 +492,20 @@ export function MemoryMatch() {
       />
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const MemoryMatch = memo(function MemoryMatchComponent() {
+  return (
+    <GameShell
+      gameId="memory-match"
+      gameName="Memory Match"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <MemoryMatchGame />
+    </GameShell>
+  );
+});
 
 export default MemoryMatch;

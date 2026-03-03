@@ -20,6 +20,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -36,7 +37,7 @@ import {
   calculateFinalStats,
 } from '../games/followTheLeaderLogic';
 
-export const FollowTheLeader = memo(function FollowTheLeader() {
+const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('follow-the-leader');
   const { playSuccess: _playSuccess, playCelebration, playClick, playPop } = useAudio();
@@ -259,10 +260,7 @@ export const FollowTheLeader = memo(function FollowTheLeader() {
   };
 
   const handleGameComplete = () => {
-    if (gameState) {
-      const stats = calculateFinalStats(gameState);
-      // DEBUG: console.log('Game complete:', stats);
-    }
+    if (gameState) calculateFinalStats(gameState);
     setShowMenu(true);
     setGameState(null);
   };
@@ -431,6 +429,19 @@ export const FollowTheLeader = memo(function FollowTheLeader() {
         message="Great Following!"
       />
     </GameContainer>
+  );
+});
+
+export const FollowTheLeader = memo(function FollowTheLeaderComponent() {
+  return (
+    <GameShell
+      gameId='follow-the-leader'
+      gameName='Follow the Leader'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <FollowTheLeaderGame />
+    </GameShell>
   );
 });
 

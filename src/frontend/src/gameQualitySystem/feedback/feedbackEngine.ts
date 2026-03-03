@@ -1,13 +1,8 @@
 // Feedback Engine for Game Quality System
 
-import { FeedbackData, MetricsData } from '../types';
+import type { FeedbackAnalysis, FeedbackData, MetricsData } from '../types';
 
-export interface FeedbackAnalysis {
-    gameHealthScore: number;
-    recentChanges: string[];
-    recommendedActions: string[];
-    issues: string[];
-}
+export type { FeedbackAnalysis };
 
 export class FeedbackEngine {
     private readonly HEALTH_SCORE_WEIGHTS = {
@@ -24,7 +19,7 @@ export class FeedbackEngine {
         errorRate: 0.1,
     };
 
-    public analyzeFeedback(gameId: string, feedbackData: FeedbackData): FeedbackAnalysis {
+    public analyzeFeedback(_gameId: string, feedbackData: FeedbackData): FeedbackAnalysis {
         const issues: string[] = [];
         const recommendedActions: string[] = [];
         const recentChanges: string[] = [];

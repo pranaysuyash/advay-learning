@@ -27,7 +27,7 @@ if [[ "${ALLOW_WORKLOG_TICKETS_EDIT:-}" != "1" ]]; then
   fi
 fi
 
-# 1. Agent gate: worklog enforcement
+# 1. Agent gate: worklog enforcement + mandatory local pre-commit review trace
 ./scripts/agent_gate.sh --staged
 
 # 2. Secret scan: block commits that include leaked credentials

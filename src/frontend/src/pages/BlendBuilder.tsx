@@ -1,12 +1,19 @@
-import { useCallback, useState } from 'react';
+/**
+ * Blend Builder Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, getWordsForLevel, checkAnswer, type BlendWord } from '../games/blendBuilderLogic';
 
-export function BlendBuilder() {
+const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [words, setWords] = useState<BlendWord[]>([]);
@@ -249,4 +256,18 @@ export function BlendBuilder() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const BlendBuilder = memo(function BlendBuilderComponent() {
+  return (
+    <GameShell
+      gameId="blend-builder"
+      gameName="Blend Builder"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <BlendBuilderGame />
+    </GameShell>
+  );
+});

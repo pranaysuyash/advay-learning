@@ -18,6 +18,9 @@ export interface Game {
     isImplemented: boolean;
     implementationStatus?: 'not-started' | 'in-progress' | 'completed' | 'review' | 'production';
     catalogPriority?: PriorityLevel;
+    educationalObjectives?: string[];
+    userFeedback?: Array<{ sentiment?: string; [key: string]: unknown }>;
+    playCount?: number;
     lastUpdated: string;
 }
 
@@ -102,6 +105,33 @@ export interface MetricsData {
     lastUpdated: string;
 }
 
+export interface MetricsConfig {
+    trackingPeriods: string[];
+    requiredMetrics: string[];
+    statisticalThreshold: number;
+}
+
+export interface FeedbackAnalysis {
+    gameHealthScore: number;
+    recentChanges: string[];
+    recommendedActions: string[];
+    issues: string[];
+}
+
+export interface PriorityFactors {
+    educationalImpact: number;
+    userDemand: number;
+    implementationEffort: number;
+    strategicAlignment: number;
+}
+
+export interface QualityGateConfig {
+    requiredChecks: string[];
+    minAccessibilityScore: number;
+    minTestCoverage: number;
+    requireDocumentation: boolean;
+}
+
 export interface ImplementationPlan {
     gameId: GameId;
     tasks: ImplementationTask[];
@@ -149,6 +179,7 @@ export interface DocumentationEntry {
 
 export interface CatalogEntry {
     gameId: GameId;
+    id?: GameId;
     name: string;
     description: string;
     category: string;
@@ -163,5 +194,7 @@ export interface CatalogEntry {
     isImplemented: boolean;
     implementationStatus?: 'not-started' | 'in-progress' | 'completed' | 'review' | 'production';
     priority?: PriorityLevel;
+    userFeedback?: Array<{ sentiment?: string; [key: string]: unknown }>;
+    playCount?: number;
     lastUpdated: string;
 }

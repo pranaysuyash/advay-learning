@@ -1,7 +1,14 @@
-import { useCallback, useState } from 'react';
+/**
+ * Body Parts Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -35,7 +42,7 @@ function BodyPartsGame({
     'start',
   );
   const [feedback, setFeedback] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [, setError] = useState<Error | null>(null);
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('body-parts');
@@ -208,7 +215,7 @@ function BodyPartsGame({
   );
 }
 
-export function BodyParts() {
+const BodyPartsPage = memo(function BodyPartsGameComponent() {
   return (
     <GamePage title='Body Parts' gameId='body-parts'>
       {({ score, setScore, currentLevel, setCurrentLevel, handleFinish }) => (
@@ -222,4 +229,18 @@ export function BodyParts() {
       )}
     </GamePage>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const BodyParts = memo(function BodyPartsComponent() {
+  return (
+    <GameShell
+      gameId="body-parts"
+      gameName="Body Parts"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <BodyPartsPage />
+    </GameShell>
+  );
+});

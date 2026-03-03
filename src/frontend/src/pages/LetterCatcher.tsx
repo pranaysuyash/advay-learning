@@ -1,6 +1,13 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+/**
+ * Letter Catcher Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -12,7 +19,7 @@ import {
   type FallingLetter,
 } from '../games/letterCatcherLogic';
 
-export function LetterCatcher() {
+const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [letters, setLetters] = useState<FallingLetter[]>([]);
@@ -207,4 +214,18 @@ export function LetterCatcher() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const LetterCatcher = memo(function LetterCatcherComponent() {
+  return (
+    <GameShell
+      gameId="letter-catcher"
+      gameName="Letter Catcher"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <LetterCatcherGame />
+    </GameShell>
+  );
+});

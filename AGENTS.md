@@ -160,6 +160,58 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Only modify/delete files you are explicitly tasked to work on
 - When in doubt, ask the user before removing anything
 
+### 6.1 Refactor Sidecar Files Policy
+
+**Purpose:** Prevent temporary side-by-side refactor files (for example `*Refactored.tsx`) from silently accumulating in live source directories, drifting from canonical files, or being deleted before their useful changes are preserved.
+
+**Definitions:**
+
+- **Canonical file**: the runtime source-of-truth file currently used by the app (for example `Foo.tsx`)
+- **Refactor sidecar**: a temporary alternate implementation created during migration or restructuring (for example `FooRefactored.tsx`)
+
+**Allowed use (all required):**
+
+- The work is an explicit migration, decomposition, or pattern-adoption task
+- A worklog addendum ticket exists for the refactor
+- The sidecar has a documented promotion/removal plan
+- The canonical file remains the runtime entrypoint until verification is complete
+
+**Every sidecar must document:**
+
+- Why the sidecar exists
+- Which canonical file it corresponds to
+- What useful behavior it is expected to add
+- How it will be verified
+- What must happen before deletion
+- Whether it is expected to be promoted, archived, or discarded
+
+**Required review before merge:**
+
+1. Diff the canonical file against the sidecar directly
+2. Identify any useful unique behavior in the sidecar
+3. Integrate only verified improvements into the canonical file
+4. Verify the canonical file still compiles and preserves expected behavior
+5. Remove the sidecar only after its useful behavior is fully preserved or proven nonexistent
+
+**Prohibited patterns:**
+
+- Do not bulk-create sidecars without a cleanup plan
+- Do not leave sidecars in live runtime directories indefinitely
+- Do not treat comments, renamed headers, or import stubs as a completed refactor
+- Do not delete sidecars before reviewing whether they contain useful behavior
+- Do not bulk-delete multiple sidecars without per-file audit evidence
+
+**Main branch rule:**
+
+- `*Refactored.tsx` files should not land on `main` by default
+- If temporary sidecars must exist, they are WIP-only and require an explicit override plus a worklog note
+- Promotion into the canonical file should happen before merge whenever possible
+
+**Override policy:**
+
+- `ALLOW_REFACTORED_SIDE_CARS=1` for intentional temporary sidecar exceptions
+- Use only when the worklog documents why the sidecar must remain temporarily
+
 ### 7. Create Reusable Tools, Not One-Off Scripts
 
 **Principle:** When you create helpful code (analyzers, converters, validators, test harnesses), save it as a documented, reusable tool for future use—by any project.
@@ -263,6 +315,7 @@ Based on work type, follow the appropriate prompt:
 | Remediation    | `prompts/remediation/implementation-v1.6.1.md` | Fix audit findings              |
 | Hardening      | `prompts/hardening/hardening-v1.1.md`          | Production hardening            |
 | PR Review      | `prompts/review/pr-review-v1.6.1.md`           | Review existing PR              |
+| Local pre-commit review | `prompts/review/local-pre-commit-review-v1.0.md` | Findings-first local commit gate |
 | Verification   | `prompts/verification/verification-v1.2.md`    | Verify remediation              |
 | Merge Conflict | `prompts/merge/merge-conflict-v1.2.md`         | Resolve conflicts               |
 | Post-Merge     | `prompts/merge/post-merge-v1.0.md`             | Validate after merge            |
@@ -427,6 +480,10 @@ The audit-to-ticket gap exists because:
 
 ```markdown
 - [ ] Review your diff: `git diff --staged` or `git diff HEAD`
+- [ ] Run a findings-first local code review using `prompts/review/local-pre-commit-review-v1.0.md`
+- [ ] Record `Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md` in the updated worklog addendum for code/audit changes
+- [ ] Do not mark a ticket `DONE` if it still has numbered `Next Actions:`; finish them, move them, or keep the ticket open
+- [ ] Do not claim `100% complete` for refactor migrations while transitional sidecar files still exist unless they are explicitly marked retained
 - [ ] **FEATURE REGRESSION CHECK** (critical for >10% LOC changes):
   - [ ] For modified files with significant changes, compare to previous version
   - [ ] Ask: "Does the new version IMPROVE on the old (not just preserve)?"
@@ -700,9 +757,13 @@ The pre-commit hook runs these checks in order:
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
 - If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_ADDENDUM_*.md`.
+- If staged changes touch `src/` or `docs/audit/`, the updated addendum must include `Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md`.
 - Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
 - Any changed ticket entry must include a unique `Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent[-abcd]`.
 - Any ticket set to `Status: DONE` must include an evidence section with at least one `Command:` (or explicit `Unknown:` markers).
+- Any ticket set to `Status: DONE` is blocked if it still contains numbered `Next Actions:`.
+- Any bulk refactor ticket set to `Status: DONE` must include a concrete verification `Command:`.
+- Completion claims for sidecar-based refactors are blocked while tracked `*Refactored.tsx` files still exist, unless the ticket explicitly declares `Sidecar Status: RETAINED`.
 
 #### 2. Secret Scan (`scripts/secret_scan.sh`)
 - Detects common secret patterns (API keys, passwords, tokens).

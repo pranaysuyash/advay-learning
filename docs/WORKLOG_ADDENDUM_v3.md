@@ -8958,3 +8958,334 @@ Status updates:
 
 - 2026-03-03 12:00 IST **IN_PROGRESS** — Backend endpoints created, need verification
 
+
+---
+
+### TCK-20260303-002 :: Data Export Backend Verification
+
+Ticket Stamp: STAMP-20260303T121000Z-codex-9abc
+
+Type: VERIFICATION
+Owner: Pranay
+Created: 2026-03-03 12:10 IST
+Status: **PENDING**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Verify data export endpoints work correctly
+- Out-of-scope: Frontend integration, PDF generation
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): Data export service and endpoints
+- Branch/PR: `codex/wip-data-export` -> `main`
+
+Acceptance Criteria:
+
+- [ ] Type checking passes
+- [ ] Unit tests for data export service
+- [ ] API endpoint tests
+- [ ] End-to-end test with test data
+
+Status updates:
+
+- 2026-03-03 12:10 IST **PENDING** — Awaiting verification run
+
+---
+
+### TCK-20260303-012 :: Audit Refactored Sidecar Pages and Enforce Review Gate
+Ticket Stamp: STAMP-20260302T190225Z-codex-i0e8
+
+Type: HARDENING
+Owner: Pranay
+Created: 2026-03-03 00:22 IST
+Status: **DONE**
+Priority: P1
+
+Prompts used:
+- `prompts/workflow/agent-entrypoint-v1.0.md`
+- `prompts/hardening/generalized-implementer-v1.0.md`
+
+Scope contract:
+
+- In-scope:
+  - Audit tracked `src/frontend/src/pages/*Refactored.tsx` sidecar files for salvageable patterns
+  - Record whether they are wired into runtime usage
+  - Add a pre-commit guard so agents are forced to review these sidecar files before touching matching canonical pages
+- Out-of-scope:
+  - Promoting the sidecar files into production routes
+  - Deleting or merging the duplicate pages in this pass
+  - Broad frontend refactors beyond the guard itself
+- Behavior change allowed: YES (workflow enforcement only), NO (runtime app behavior)
+
+Acceptance Criteria:
+
+- [x] Confirm whether tracked `*Refactored.tsx` files exist
+- [x] Identify whether they are referenced by runtime code
+- [x] Add a pre-commit enforcement path that flags sidecar refactor files for review
+
+Execution log:
+
+- [2026-03-03 00:20 IST] Command: `git ls-files 'src/frontend/src/pages/*Refactored.tsx'` | Evidence: 39 tracked sidecar `*Refactored.tsx` files exist in git
+- [2026-03-03 00:21 IST] Command: compared `HEAD:...Refactored.tsx` blobs against canonical `HEAD:....tsx` files | Evidence: all 39 sidecar files differ from their canonical counterparts
+- [2026-03-03 00:21 IST] Command: sampled diffs for `BubblePop`, `NumberTracing`, `OddOneOut`, `DiscoveryLab`, `ShadowPuppetTheater`, `BalloonPopFitness`, `FollowTheLeader` | Evidence: sidecar files mainly add `GameShell`, `useGameProgress`, and wellness wrapper patterns
+- [2026-03-03 00:22 IST] Command: static flag scan over sidecar blobs | Evidence: many sidecar files contain obvious defects (missing imports, duplicate `navigate`, incomplete wrappers)
+- [2026-03-03 00:23 IST] Updated `scripts/agent_gate.sh` to block commits that modify `*Refactored.tsx` files directly or touch canonical page twins without reviewing sidecar counterparts
+- [2026-03-03 00:23 IST] Command: `bash -n scripts/agent_gate.sh` | Evidence: passed
+
+Status updates:
+
+- [2026-03-03 00:23 IST] **DONE** — Sidecar refactor files audited and pre-commit review guard added
+
+---
+
+### TCK-20260303-003 :: INCIDENT-20260303-001 Post-Mortem: Refactored.tsx Twins
+Ticket Stamp: STAMP-20260303T133000Z-codex-postmortem
+
+Type: INCIDENT_POSTMORTEM
+Owner: Pranay
+Created: 2026-03-03 13:30 IST
+Status: **RESOLVED**
+Priority: P0
+
+Summary:
+39 *Refactored.tsx sidecar files were committed claiming "100% GameShell integration"
+but most had only misleading comments. No verification was done before marking DONE.
+
+Root Causes:
+1. Batch transformation of 39 files without intermediate verification
+2. "DONE" ticket status before executing "Next Actions"
+3. Comment-driven development ("REFACTORED" header != actual code)
+4. Zero TypeScript compile checks
+
+Impact:
+- 13 files: comment-only (no wrapper)
+- 19 files: broken imports (JSX without import)
+- 7 files: correct but redundant
+- 39 files requiring manual audit/fix
+
+Resolution:
+- All 39 twins deleted
+- 21 files fixed with proper GameShell imports
+- 13 files unchanged (twins had no value)
+- Incident report: docs/incidents/INCIDENT-20260303-001-Refactored-Twins.md
+- Audit matrix: docs/TWIN_AUDIT_MATRIX.md
+
+Prevention:
+- No batch transforms >5 files without verification
+- Mandatory type check before refactor commits
+- No DONE until verification complete
+- No sidecar twins - modify originals directly
+
+Files Changed:
+- Deleted: 39 *Refactored.tsx files
+- Modified: 21 canonical files (added missing imports)
+- Created: docs/incidents/INCIDENT-20260303-001-Refactored-Twins.md
+- Created: docs/TWIN_AUDIT_MATRIX.md
+
+---
+
+### TCK-20260303-013 :: Add Mandatory Local Pre-Commit Review Prompt and Gate
+Ticket Stamp: STAMP-20260302T194023Z-codex-tu78
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-03-03 01:15 IST
+Status: **DONE**
+Priority: P1
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Scope contract:
+
+- In-scope:
+  - Add a dedicated local pre-commit review prompt to the repo prompt library
+  - Update agent workflow docs so agents are required to run a findings-first local review before code-changing commits
+  - Enforce a worklog prompt trace for code/audit changes in the local agent gate
+- Out-of-scope:
+  - Replacing PR review
+  - Expanding the gate into a full semantic reviewer
+  - Retrofitting historical worklog entries
+- Behavior change allowed: YES (workflow enforcement), NO (runtime app behavior)
+
+Acceptance Criteria:
+
+- [x] Add `prompts/review/local-pre-commit-review-v1.0.md`
+- [x] Register the prompt in `prompts/README.md`
+- [x] Update `AGENTS.md` to require this prompt before code-changing commits
+- [x] Update `scripts/agent_gate.sh` to require a matching `Prompt Trace:` line in updated addendum files for code/audit changes
+- [x] Update setup documentation so agents know the new pre-commit workflow requirement
+
+Execution log:
+
+- [2026-03-03 01:08 IST] Command: `sed -n '1,220p' prompts/README.md` | Evidence: prompt index did not yet include a local pre-commit review prompt
+- [2026-03-03 01:08 IST] Command: `sed -n '1,260p' scripts/agent_gate.sh` | Evidence: agent gate enforced worklog/ticket rules but did not require a pre-commit review prompt trace
+- [2026-03-03 01:09 IST] Created `prompts/review/local-pre-commit-review-v1.0.md` | Evidence: new findings-first local review prompt saved in repo prompt library
+- [2026-03-03 01:10 IST] Updated `prompts/README.md`, `AGENTS.md`, and `docs/SETUP.md` | Evidence: workflow docs now point agents to the new prompt and require the trace
+- [2026-03-03 01:11 IST] Updated `.githooks/pre-commit` and `scripts/agent_gate.sh` | Evidence: local gate now enforces `Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md` for code/audit changes
+- [2026-03-03 01:12 IST] Command: `bash -n scripts/agent_gate.sh` | Evidence: syntax check passed
+
+Evidence:
+
+Command: `bash -n scripts/agent_gate.sh`
+Output:
+- Exit code 0
+- Shell syntax valid
+
+Status updates:
+
+- [2026-03-03 01:12 IST] **DONE** — Mandatory local pre-commit review prompt and trace enforcement added
+
+---
+
+### TCK-20260303-014 :: Block Premature Worklog Completion Claims
+Ticket Stamp: STAMP-20260303T032313Z-codex-dn4t
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-03-03 09:00 IST
+Status: **DONE**
+Priority: P0
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Scope contract:
+
+- In-scope:
+  - Tighten `scripts/agent_gate.sh` to block the specific worklog failure modes that allowed the GameShell sidecar migration to be overstated
+  - Update workflow docs so agents know the new local enforcement rules
+  - Record the new completion-discipline policy in the active addendum
+- Out-of-scope:
+  - Rewriting historical tickets
+  - Auto-correcting stale completion claims
+  - General semantic review beyond the targeted worklog rules
+- Behavior change allowed: YES (workflow enforcement), NO (runtime app behavior)
+
+Acceptance Criteria:
+
+- [x] Block `Status: DONE` when a changed ticket still contains numbered `Next Actions:`
+- [x] Require a concrete `Command:` before a bulk refactor ticket can be marked `DONE`
+- [x] Block sidecar-based completion claims while tracked `*Refactored.tsx` files still exist unless the ticket explicitly records `Sidecar Status: RETAINED`
+- [x] Update `AGENTS.md` and `docs/SETUP.md` to describe the new rules
+
+Execution log:
+
+- [2026-03-03 08:52 IST] Command: `git show --stat --oneline --summary 1160666 --` | Evidence: Batch C created 30 `*Refactored.tsx` files while the worklog later claimed `39 of 39 games (100%)`
+- [2026-03-03 08:53 IST] Command: `git ls-files 'src/frontend/src/pages/*Refactored.tsx' | wc -l` | Evidence: 39 tracked sidecar files still exist in `HEAD`, so completion claims can be checked against live tracked state
+- [2026-03-03 08:56 IST] Updated `scripts/agent_gate.sh` | Evidence: changed-ticket parser now blocks premature `DONE`, bulk-refactor `DONE` without `Command:`, and sidecar completion claims without sidecar clearance/retention
+- [2026-03-03 08:58 IST] Updated `AGENTS.md` and `docs/SETUP.md` | Evidence: workflow docs now describe the stricter completion checks
+- [2026-03-03 08:59 IST] Command: `bash -n scripts/agent_gate.sh` | Evidence: syntax check passed
+
+Evidence:
+
+Command: `bash -n scripts/agent_gate.sh`
+Output:
+- Exit code 0
+- Shell syntax valid after completion-discipline enforcement changes
+
+Status updates:
+
+- [2026-03-03 08:59 IST] **DONE** — Worklog completion-claim enforcement added to the local gate
+
+---
+
+### TCK-20260303-015 :: Add New Game Batch Implementation Prompt
+Ticket Stamp: STAMP-20260303T032313Z-codex-ng15
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-03-03 09:20 IST
+Status: **DONE**
+Priority: P1
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Scope contract:
+
+- In-scope:
+  - Create a reusable repo prompt for implementing new games from the 270+ backlog in small verified batches
+  - Register the prompt in the repo prompt index
+  - Capture the anti-patterns to avoid based on the recent sidecar-refactor failure
+- Out-of-scope:
+  - Implementing a new game in this ticket
+  - Reprioritizing the 270+ game list
+  - Converting historical game tickets to the new prompt format
+- Behavior change allowed: YES (workflow guidance), NO (runtime app behavior)
+
+Acceptance Criteria:
+
+- [x] Add `prompts/implementation/new-game-batch-implementation-v1.0.md`
+- [x] Register it in `prompts/README.md`
+- [x] Include explicit rules against fake completion, sidecar files, and oversized unverified batches
+
+Execution log:
+
+- [2026-03-03 09:16 IST] Reviewed the current sidecar-refactor failure pattern | Evidence: 39 tracked `*Refactored.tsx` files still exist in `HEAD`, and 29 promoted canonicals still carry stale `REFACTORED with GameShell` banners in the worktree
+- [2026-03-03 09:18 IST] Created `prompts/implementation/new-game-batch-implementation-v1.0.md` | Evidence: new backlog-game implementation prompt saved in the prompt library
+- [2026-03-03 09:19 IST] Updated `prompts/README.md` | Evidence: new prompt is discoverable in the Engineering section
+
+Evidence:
+
+Command: `rg -n "new-game-batch-implementation-v1.0" prompts/README.md prompts/implementation/new-game-batch-implementation-v1.0.md`
+Output:
+- Prompt file present
+- Prompt index updated
+
+Status updates:
+
+- [2026-03-03 09:19 IST] **DONE** — New game batch implementation prompt added for future backlog work
+
+---
+
+### TCK-20260303-016 :: Finalize Refactored Twin Cleanup and Clean-Slate Game Prompt
+Ticket Stamp: STAMP-20260303T045011Z-codex-pwht
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-03 10:20 IST
+Status: **DONE**
+Priority: P0
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Scope contract:
+
+- In-scope:
+  - Remove the remaining misleading `REFACTORED with GameShell` banners from canonical page files
+  - Finalize the tracked `*Refactored.tsx` cleanup in the current branch commit
+  - Reframe the new-games prompt as a clean-slate implementation starter for future backlog batches
+- Out-of-scope:
+  - Implementing a new backlog game in this ticket
+  - Reprioritizing the 270+ game list
+  - Further redesign of existing game UX beyond the cleanup already in progress
+- Behavior change allowed: YES (code cleanup and workflow prompt clarity), NO (intended gameplay regressions)
+
+Acceptance Criteria:
+
+- [x] No canonical page files in this batch still contain `REFACTORED with GameShell`
+- [x] Frontend typecheck passes after the banner cleanup
+- [x] New game batch prompt is explicitly framed as a clean-slate implementation prompt
+- [x] Current branch is ready for a single commit containing the twin cleanup and related workflow fixes
+
+Execution log:
+
+- [2026-03-03 10:07 IST] Command: `rg -l "REFACTORED with GameShell" src/frontend/src/pages/*.tsx` | Evidence: 29 canonical page files still carried stale fake-refactor banners
+- [2026-03-03 10:10 IST] Removed the stale `REFACTORED with GameShell` banner text from the affected canonical page files | Evidence: banner text stripped from the live page files while preserving the actual wrapper code
+- [2026-03-03 10:12 IST] Command: `rg -n "REFACTORED with GameShell" src/frontend/src/pages/*.tsx` | Evidence: no remaining banner matches in canonical page files
+- [2026-03-03 10:13 IST] Updated `prompts/implementation/new-game-batch-implementation-v1.0.md` and `prompts/README.md` | Evidence: prompt now explicitly describes a clean-slate new-game implementation workflow
+- [2026-03-03 10:14 IST] Command: `cd src/frontend && npm run -s type-check` | Evidence: frontend typecheck passed
+- [2026-03-03 10:26 IST] Updated `scripts/feature_regression_check.sh` and `priorityEngine.ts` | Evidence: the regression gate now compares export names (not just export keywords) so `export function Foo` -> `export const Foo` wrapper migrations stop false-flagging, and `PriorityFactors` remains explicitly exported from `priorityEngine.ts`
+
+Evidence:
+
+Command: `cd src/frontend && npm run -s type-check`
+Output:
+- Exit code 0
+- Frontend TypeScript compile passed after banner cleanup and current branch fixes
+
+Status updates:
+
+- [2026-03-03 10:14 IST] **DONE** — Refactored twin cleanup finalized for commit, and clean-slate new-games prompt prepared

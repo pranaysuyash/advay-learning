@@ -1,6 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+/**
+ * Maze Runner Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -15,7 +22,7 @@ import {
 
 const CELL_SIZE = 40;
 
-export function MazeRunner() {
+const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [maze, setMaze] = useState<MazeCell[][]>([]);
@@ -304,4 +311,18 @@ export function MazeRunner() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const MazeRunner = memo(function MazeRunnerComponent() {
+  return (
+    <GameShell
+      gameId="maze-runner"
+      gameName="Maze Runner"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <MazeRunnerGame />
+    </GameShell>
+  );
+});

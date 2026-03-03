@@ -1,11 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+/**
+ * Number Tracing Game
+ *
+ * Trace numbers by following dotted guides.
+ * Demonstrates GameShell integration pattern.
+ * 
+ * @ticket GQ-002 - Subscription check
+ * @ticket GQ-003 - Progress tracking
+ * @ticket GQ-004 - Error handling
+ * @ticket GQ-005 - Reduce motion
+ * @ticket GQ-007 - Wellness features
+ */
+
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import {
-  NUMBER_TEMPLATES,
   buildScore,
   calculateTraceCoverage,
   getTemplateForDigit,
@@ -14,10 +29,18 @@ import {
 } from '../games/numberTracingLogic';
 
 const CANVAS_SIZE = 360;
+const TOTAL_DIGITS = 10;
 
-export function NumberTracing() {
+// Inner game component
+interface NumberTracingGameProps {
+  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+}
+
+const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgress }: NumberTracingGameProps) {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const reducedMotion = useReducedMotion();
+  
   const [currentDigit, setCurrentDigit] = useState(0);
   const [strokePoints, setStrokePoints] = useState<TracePoint[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -25,52 +48,49 @@ export function NumberTracing() {
   const [score, setScore] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [feedback, setFeedback] = useState('Trace the number by following the dotted guide.');
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [completedDigits, setCompletedDigits] = useState<number[]>([]);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('number-tracing');
   const currentTemplate = useMemo(() => getTemplateForDigit(currentDigit), [currentDigit]);
 
-  useGameSessionProgress({
-    gameName: 'Number Tracing',
-    score,
-    level: currentDigit + 1,
-    isPlaying: true,
-    metaData: {
-      digit: currentDigit,
-      last_accuracy: lastAccuracy,
-      hints_used: hintsUsed,
-    },
-  });
-
+  // Draw canvas
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !currentTemplate) return;
-    const context = canvas.getContext('2d');
-    if (!context) return;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas || !currentTemplate) return;
+      const context = canvas.getContext('2d');
+      if (!context) return;
 
-    context.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    context.fillStyle = '#F8FAFC';
-    context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      context.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      context.fillStyle = '#F8FAFC';
+      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    context.fillStyle = '#94A3B8';
-    currentTemplate.guidePoints.forEach((point) => {
-      context.beginPath();
-      context.arc(point.x * CANVAS_SIZE, point.y * CANVAS_SIZE, 7, 0, Math.PI * 2);
-      context.fill();
-    });
+      // Draw guide points
+      context.fillStyle = '#94A3B8';
+      currentTemplate.guidePoints.forEach((point) => {
+        context.beginPath();
+        context.arc(point.x * CANVAS_SIZE, point.y * CANVAS_SIZE, 7, 0, Math.PI * 2);
+        context.fill();
+      });
 
-    context.strokeStyle = '#60A5FA';
-    context.lineWidth = 8;
-    context.lineJoin = 'round';
-    context.lineCap = 'round';
+      // Draw stroke
+      context.strokeStyle = '#60A5FA';
+      context.lineWidth = 8;
+      context.lineJoin = 'round';
+      context.lineCap = 'round';
 
-    if (strokePoints.length > 0) {
-      context.beginPath();
-      context.moveTo(strokePoints[0].x * CANVAS_SIZE, strokePoints[0].y * CANVAS_SIZE);
-      for (let i = 1; i < strokePoints.length; i += 1) {
-        context.lineTo(strokePoints[i].x * CANVAS_SIZE, strokePoints[i].y * CANVAS_SIZE);
+      if (strokePoints.length > 0) {
+        context.beginPath();
+        context.moveTo(strokePoints[0].x * CANVAS_SIZE, strokePoints[0].y * CANVAS_SIZE);
+        for (let i = 1; i < strokePoints.length; i += 1) {
+          context.lineTo(strokePoints[i].x * CANVAS_SIZE, strokePoints[i].y * CANVAS_SIZE);
+        }
+        context.stroke();
       }
-      context.stroke();
+    } catch (err) {
+      console.error('Canvas draw error:', err);
     }
   }, [currentTemplate, strokePoints]);
 
@@ -85,6 +105,7 @@ export function NumberTracing() {
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    playClick();
     setIsDrawing(true);
     setStrokePoints([getPointFromEvent(event)]);
   };
@@ -94,140 +115,187 @@ export function NumberTracing() {
     setStrokePoints((prev) => [...prev, getPointFromEvent(event)]);
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = useCallback(() => {
     setIsDrawing(false);
-  };
 
-  const handleClear = () => {
-    setStrokePoints([]);
-    setFeedback('Canvas cleared. Try tracing again.');
-    playClick();
-  };
+    try {
+      // Calculate accuracy
+      const accuracy = calculateTraceCoverage(
+        strokePoints,
+        currentTemplate?.guidePoints ?? [],
+      );
+      setLastAccuracy(accuracy);
 
-  const handleHint = () => {
-    setHintsUsed((prev) => prev + 1);
-    setFeedback('Hint: start at the top and follow each dotted point in order.');
-    playClick();
-  };
+      if (accuracy >= 60) {
+        // Success!
+        playSuccess();
+        const points = buildScore(accuracy, hintsUsed);
+        const newScore = score + points;
+        setScore(newScore);
+        setCompletedDigits(prev => [...prev, currentDigit]);
+        setFeedback(`Great job! ${points} points!`);
 
-  const handleCheck = () => {
-    if (!currentTemplate) return;
-    const accuracy = calculateTraceCoverage(strokePoints, currentTemplate.guidePoints);
-    setLastAccuracy(accuracy);
-
-    if (accuracy >= 70) {
-      const roundScore = buildScore(accuracy, hintsUsed);
-      const nextValue = score + roundScore;
-      setScore(nextValue);
-      setFeedback(`Great tracing! ${accuracy}% accuracy.`);
-      playSuccess();
-
-      if (currentDigit === 9) {
-        playCelebration();
-        onGameComplete(nextValue);
-        setFeedback('Awesome! You completed all digits 0 to 9.');
+        // Check if all digits complete
+        if (completedDigits.length + 1 >= TOTAL_DIGITS) {
+          playCelebration();
+          setShowCelebration(true);
+          void saveProgress({
+            score: newScore,
+            completed: true,
+            metadata: {
+              completed_digits: [...completedDigits, currentDigit],
+              total_accuracy: accuracy,
+            },
+          });
+          onGameComplete(newScore);
+        } else {
+          // Next digit after delay
+          setTimeout(() => {
+            setCurrentDigit(nextDigit(currentDigit));
+            setStrokePoints([]);
+            setFeedback('Trace the next number!');
+          }, reducedMotion ? 500 : 1500);
+        }
       } else {
-        setCurrentDigit(nextDigit(currentDigit));
-        setStrokePoints([]);
+        // Try again
+        playError();
+        setFeedback('Keep trying! Follow the dots more closely.');
+        setTimeout(() => {
+          setStrokePoints([]);
+        }, reducedMotion ? 300 : 1000);
       }
-      setHintsUsed(0);
-      return;
+    } catch (err) {
+      console.error('Trace evaluation error:', err);
+      setFeedback('Oops! Try again.');
     }
+  }, [isDrawing, strokePoints, currentTemplate, hintsUsed, score, currentDigit, completedDigits, playSuccess, playError, reducedMotion, saveProgress, onGameComplete]);
 
-    setFeedback(`Keep practicing. Accuracy: ${accuracy}% (need 70%).`);
-    playError();
+  const handleUseHint = () => {
+    playClick();
+    setHintsUsed(prev => prev + 1);
+    setFeedback('Follow the dotted line with your finger!');
+  };
+
+  const handleReset = () => {
+    playClick();
+    setCurrentDigit(0);
+    setCompletedDigits([]);
+    setScore(0);
+    setHintsUsed(0);
+    setStrokePoints([]);
+    setFeedback('Trace the number by following the dotted guide.');
+    setShowCelebration(false);
   };
 
   return (
     <GameContainer
-      title='Number Tracing'
+      title="Number Tracing"
       score={score}
       level={currentDigit + 1}
       onHome={() => navigate('/games')}
-      showScore
-      reportSession={false}
+      showScore={true}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
-        <div className='max-w-5xl mx-auto space-y-4'>
-          <section className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_4px_0_#E5B86E]'>
-            <div className='flex flex-wrap items-center justify-between gap-3'>
-              <div>
-                <p className='text-sm font-black uppercase tracking-wide text-slate-500'>
-                  Trace this number
-                </p>
-                <h2 className='text-5xl font-black text-slate-900'>
-                  {currentTemplate?.digit}
-                </h2>
-                <p className='text-lg font-bold text-slate-700'>{currentTemplate?.name}</p>
-              </div>
-              <div className='text-right text-sm font-black text-slate-700'>
-                <p>Last accuracy: {lastAccuracy}%</p>
-                <p>Hints used: {hintsUsed}</p>
-                <p>Progress: {currentDigit + 1}/10</p>
-              </div>
-            </div>
-            <p className='mt-3 text-sm font-bold text-slate-600'>{feedback}</p>
-          </section>
-
-          <section className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_4px_0_#E5B86E] flex flex-col items-center gap-4'>
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_SIZE}
-              height={CANVAS_SIZE}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
-              className='w-full max-w-[360px] rounded-2xl border-2 border-slate-200 touch-none bg-slate-50'
-            />
-            <div className='flex flex-wrap gap-2 justify-center'>
-              <button
-                type='button'
-                onClick={handleHint}
-                className='px-4 py-2 rounded-xl border-2 border-[#F2CC8F] bg-white font-black'
-              >
-                Hint
-              </button>
-              <button
-                type='button'
-                onClick={handleClear}
-                className='px-4 py-2 rounded-xl border-2 border-[#F2CC8F] bg-white font-black'
-              >
-                Clear
-              </button>
-              <button
-                type='button'
-                onClick={handleCheck}
-                className='px-5 py-2 rounded-xl bg-[#3B82F6] text-white font-black'
-              >
-                Check Trace
-              </button>
-            </div>
-            <div className='flex flex-wrap gap-2 justify-center'>
-              {NUMBER_TEMPLATES.map((template) => (
-                <button
-                  key={template.digit}
-                  type='button'
-                  onClick={() => {
-                    setCurrentDigit(template.digit);
-                    setStrokePoints([]);
-                    setHintsUsed(0);
-                    setFeedback('Trace the number by following the dotted guide.');
-                    playClick();
-                  }}
-                  className={`w-9 h-9 rounded-full border-2 font-black ${
-                    template.digit === currentDigit
-                      ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
-                      : 'bg-white border-[#F2CC8F] text-slate-700'
-                  }`}
-                >
-                  {template.digit}
-                </button>
-              ))}
-            </div>
-          </section>
+      <div className="relative w-full h-full flex flex-col items-center justify-center p-4 bg-[#FFF8F0]">
+        {/* Instructions */}
+        <div className="bg-white rounded-2xl px-6 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] mb-4 max-w-md text-center">
+          <p className="text-lg font-bold text-advay-slate">{feedback}</p>
+          <p className="text-sm text-text-secondary mt-1">
+            Number {currentDigit + 1} of {TOTAL_DIGITS}
+          </p>
         </div>
+
+        {/* Canvas */}
+        <div className="relative bg-white rounded-3xl p-4 border-4 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+            className="touch-none cursor-crosshair rounded-2xl"
+            style={{ width: '300px', height: '300px' }}
+          />
+
+          {/* Accuracy indicator */}
+          {lastAccuracy > 0 && (
+            <motion.div
+              initial={reducedMotion ? {} : { opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute -top-3 -right-3 bg-emerald-500 text-white rounded-full w-16 h-16 flex items-center justify-center border-4 border-white shadow-lg"
+            >
+              <span className="font-black text-lg">{Math.round(lastAccuracy * 100)}%</span>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Controls */}
+        <div className="flex gap-4 mt-6">
+          <button
+            onClick={handleUseHint}
+            className="px-6 py-3 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-[1.5rem] font-black border-3 border-amber-300 shadow-[0_4px_0_#FCD34D] transition-all"
+          >
+            💡 Hint
+          </button>
+          <button
+            onClick={() => {
+              setStrokePoints([]);
+              setFeedback('Try again! Follow the dots.');
+            }}
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.5rem] font-black border-3 border-slate-300 shadow-[0_4px_0_#CBD5E1] transition-all"
+          >
+            🔄 Clear
+          </button>
+        </div>
+
+        {/* Progress */}
+        <div className="flex gap-2 mt-4">
+          {Array.from({ length: TOTAL_DIGITS }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                completedDigits.includes(i)
+                  ? 'bg-emerald-500 text-white'
+                  : i === currentDigit
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-slate-200 text-slate-400'
+              }`}
+            >
+              {i}
+            </div>
+          ))}
+        </div>
+
+        {/* Celebration */}
+        {showCelebration && (
+          <CelebrationOverlay
+            show={showCelebration}
+            letter={currentDigit}
+            accuracy={lastAccuracy}
+            onComplete={handleReset}
+            message='Number superstar!'
+          />
+        )}
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const NumberTracing = memo(function NumberTracingComponent() {
+  const { saveProgress } = useGameProgress('number-tracing');
+
+  return (
+    <GameShell
+      gameId="number-tracing"
+      gameName="Number Tracing"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <NumberTracingGame saveProgress={saveProgress} />
+    </GameShell>
+  );
+});
+
+export default NumberTracing;

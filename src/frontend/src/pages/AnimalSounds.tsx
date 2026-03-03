@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+/**
+ * Animal Sounds Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
-
-import { useSubscription } from '../hooks/useSubscription';
-import { useProgressStore } from '../store';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   LEVELS,
   getAnimalsForLevel,
   type Animal,
 } from '../games/animalSoundsLogic';
-import { progressQueue } from '../services/progressQueue';
 import { GamePage } from '../components/GamePage';
 import { useTTS } from '../hooks/useTTS';
 
@@ -46,6 +48,23 @@ function AnimalSoundsGame({
   const { playClick, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const allowInteractionRef = useRef(true);
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+
+  // Preload audio files
+  useEffect(() => {
+    const extMap: Record<string, string> = {
+      dog: '.wav', cat: '.wav', cow: '.ogg', pig: '.mp3',
+      bird: '.wav', rooster: '.mp3', sheep: '.ogg', horse: '.ogg',
+      lion: '.wav', elephant: '.mp3', monkey: '.wav', frog: '.wav'
+    };
+
+    // Preload them
+    Object.keys(extMap).forEach(animal => {
+      const audio = new Audio(`/assets/sounds/animals/${animal}${extMap[animal]}`);
+      audio.preload = 'auto';
+      audioRefs.current[animal] = audio;
+    });
+  }, []);
 
   useGameSessionProgress({
     gameName: 'Animal Sounds',
@@ -67,7 +86,7 @@ function AnimalSoundsGame({
     setFeedback('');
     allowInteractionRef.current = true;
     if (ttsEnabled) {
-      void speak(`Which animal says ${target.sound}?`);
+      void speak(`Which animal makes this sound?`);
     }
   };
 
@@ -80,18 +99,17 @@ function AnimalSoundsGame({
       playSuccess();
       setCorrect((c) => c + 1);
       setScore((s) => s + 30);
-      setFeedback(`Correct! The ${animal.name} says "${animal.sound}"`);
+      setFeedback(`Correct! The ${animal.name} makes this sound!`);
       if (ttsEnabled) {
         void speak(`Correct! The ${animal.name} says ${animal.sound}`);
       }
     } else {
       playError();
-      setFeedback(`Oops! The ${targetAnimal.name} says "${targetAnimal.sound}"`);
+      setFeedback(`Oops! The ${targetAnimal.name} makes that sound!`);
       if (ttsEnabled) {
         void speak(`Oops! Look for the ${targetAnimal.name}. It says ${targetAnimal.sound}`);
       }
     }
-
     setTimeout(() => {
       const nextRound = round + 1;
       if (nextRound >= 5) {
@@ -108,7 +126,7 @@ function AnimalSoundsGame({
         setFeedback('');
         allowInteractionRef.current = true;
         if (ttsEnabled) {
-          void speak(`Which animal says ${nextTarget.sound}?`);
+          void speak(`Which animal makes this sound?`);
         }
       }
     }, 2800);
@@ -169,8 +187,8 @@ function AnimalSoundsGame({
                 setCurrentLevel(l.level);
               }}
               className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-gray-200'
+                ? 'bg-amber-500 text-white'
+                : 'bg-gray-200'
                 }`}
             >
               Level {l.level}
@@ -197,22 +215,25 @@ function AnimalSoundsGame({
           <div className='text-center w-full max-w-2xl'>
             <div className='bg-white shadow-xl rounded-2xl p-6 mb-8 border-4 border-amber-100 relative overflow-hidden'>
               <div className='absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent pointer-events-none' />
-              <p className='text-xl font-bold mb-2 text-slate-500'>Which animal says:</p>
-              <div className='flex items-center justify-center gap-4'>
+              <p className='text-xl font-bold mb-2 text-slate-500'>Which animal makes this sound?</p>
+              <div className='flex items-center justify-center gap-4 my-4'>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className='text-2xl p-3 bg-amber-100 rounded-full hover:bg-amber-200 text-amber-600'
+                  className='text-5xl p-6 bg-amber-100 rounded-full hover:bg-amber-200 text-amber-600 shadow-md border-4 border-amber-300'
+                  title="Play Sound"
                   onClick={() => {
-                    if (ttsEnabled) void speak(targetAnimal.sound);
-                    playClick();
+                    const aName = targetAnimal.name.toLowerCase();
+                    if (audioRefs.current[aName]) {
+                      audioRefs.current[aName].currentTime = 0;
+                      void audioRefs.current[aName].play().catch(e => console.warn("Audio play blocked", e));
+                    } else if (ttsEnabled) {
+                      void speak(targetAnimal.sound);
+                    }
                   }}
                 >
                   🔊
                 </motion.button>
-                <p className='text-4xl md:text-5xl font-black text-amber-500 drop-shadow-sm'>
-                  "{targetAnimal.sound}"
-                </p>
               </div>
             </div>
 
@@ -295,7 +316,7 @@ function AnimalSoundsGame({
   );
 }
 
-export function AnimalSounds() {
+const AnimalSoundsPage = memo(function AnimalSoundsGameComponent() {
   return (
     <GamePage
       title='Animal Sounds'
@@ -313,4 +334,18 @@ export function AnimalSounds() {
       )}
     </GamePage>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const AnimalSounds = memo(function AnimalSoundsComponent() {
+  return (
+    <GameShell
+      gameId="animal-sounds"
+      gameName="Animal Sounds"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <AnimalSoundsPage />
+    </GameShell>
+  );
+});

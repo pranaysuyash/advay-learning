@@ -28,6 +28,8 @@ export interface GameState {
   poppedCount: number;
   missedCount: number;
   level: number;
+  timeLeft: number;
+  gameOver: boolean;
   isPlaying: boolean;
   lastBlowTime: number;
   blowStrength: number;  // 0-1 from microphone
@@ -71,6 +73,8 @@ export function initializeGame(): GameState {
     poppedCount: 0,
     missedCount: 0,
     level: 1,
+    timeLeft: 30,
+    gameOver: false,
     isPlaying: false,
     lastBlowTime: 0,
     blowStrength: 0,
@@ -82,6 +86,8 @@ export function startGame(state: GameState): GameState {
   return {
     ...state,
     isPlaying: true,
+    timeLeft: 30,
+    gameOver: false,
     bubbles: [createBubble(state.level)],
   };
 }
@@ -113,6 +119,7 @@ export function updateBubbles(state: GameState, deltaTime: number): GameState {
     ...state,
     bubbles: updatedBubbles,
     missedCount: state.missedCount + missed,
+    timeLeft: Math.max(0, state.timeLeft - deltaTime / 1000),
   };
 }
 
@@ -184,5 +191,6 @@ export function endGame(state: GameState): GameState {
   return {
     ...state,
     isPlaying: false,
+    gameOver: true,
   };
 }

@@ -1,12 +1,8 @@
 // Metrics Collector for Game Quality System
 
-import { MetricsData } from '../types';
+import type { MetricsConfig, MetricsData } from '../types';
 
-export interface MetricsConfig {
-    trackingPeriods: string[];
-    requiredMetrics: string[];
-    statisticalThreshold: number;
-}
+export type { MetricsConfig };
 
 export class MetricsCollector {
     private readonly DEFAULT_CONFIG: MetricsConfig = {
@@ -19,6 +15,7 @@ export class MetricsCollector {
 
     constructor(config: Partial<MetricsConfig> = {}) {
         this.config = { ...this.DEFAULT_CONFIG, ...config };
+        void this.config;
     }
 
     public collectMetrics(gameId: string, metricsData: any): MetricsData {
@@ -42,6 +39,8 @@ export class MetricsCollector {
 
     public collectLaunchMetrics(gameId: string, launchData: any): MetricsData {
         const { week1, month1, month3 } = launchData;
+        void month1;
+        void month3;
 
         return {
             gameId,

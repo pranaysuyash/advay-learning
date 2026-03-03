@@ -1,13 +1,13 @@
 // Priority Engine for Game Quality System
 
-import { PriorityScore, PriorityLevel, Game, CatalogEntry } from '../types';
-
-export interface PriorityFactors {
-    educationalImpact: number;
-    userDemand: number;
-    implementationEffort: number;
-    strategicAlignment: number;
-}
+import type {
+    PriorityScore,
+    PriorityLevel,
+    PriorityFactors as SharedPriorityFactors,
+    Game,
+    CatalogEntry,
+} from '../types';
+export type PriorityFactors = SharedPriorityFactors;
 
 export class PriorityEngine {
     private readonly WEIGHTS: PriorityFactors = {
@@ -26,6 +26,7 @@ export class PriorityEngine {
 
     public calculatePriorityScore(game: Game | CatalogEntry, factors: Partial<PriorityFactors> = {}): PriorityScore {
         const weightedFactors = this.applyWeights(factors);
+        const gameId = this.getEntityId(game);
         const totalScore = this.normalizeScore(
             weightedFactors.educationalImpact +
             weightedFactors.userDemand +
@@ -36,7 +37,7 @@ export class PriorityEngine {
         const priorityLevel = this.determinePriorityLevel(totalScore);
 
         return {
-            gameId: game.id,
+            gameId,
             totalScore,
             educationalImpact: weightedFactors.educationalImpact,
             userDemand: weightedFactors.userDemand,
@@ -89,11 +90,15 @@ export class PriorityEngine {
 
     private applyWeights(factors: Partial<PriorityFactors>): PriorityFactors {
         return {
-            educationalImpact: factors.educationalImpact ?? 50,
-            userDemand: factors.userDemand ?? 50,
-            implementationEffort: factors.implementationEffort ?? 50,
-            strategicAlignment: factors.strategicAlignment ?? 50,
+            educationalImpact: (factors.educationalImpact ?? 50) * this.WEIGHTS.educationalImpact,
+            userDemand: (factors.userDemand ?? 50) * this.WEIGHTS.userDemand,
+            implementationEffort: (factors.implementationEffort ?? 50) * this.WEIGHTS.implementationEffort,
+            strategicAlignment: (factors.strategicAlignment ?? 50) * this.WEIGHTS.strategicAlignment,
         };
+    }
+
+    private getEntityId(game: Game | CatalogEntry): string {
+        return game.id ?? ('gameId' in game ? game.gameId : '');
     }
 
     private normalizeScore(score: number): number {

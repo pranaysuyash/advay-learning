@@ -29,15 +29,27 @@ export function generateFraction(level: number): Fraction {
   return { numerator, denominator };
 }
 
-export function generateOptions(correct: Fraction): number[] {
-  const correctValue = correct.numerator / correct.denominator;
-  const options = new Set<number>([correctValue]);
-  while (options.size < 4) {
-    const offset = (Math.random() - 0.5) * 0.4;
-    const val = Math.max(0.01, correctValue + offset);
-    if (Math.abs(val - correctValue) > 0.1) {
-      options.add(Math.round(val * 100) / 100);
+export function generateOptions(correct: Fraction): string[] {
+  const options: Fraction[] = [correct];
+
+  while (options.length < 4) {
+    const denom = Math.floor(Math.random() * 7) + 2; // 2 to 8
+    const num = Math.floor(Math.random() * denom) || 1; // 1 to denom
+
+    // Convert to lowest terms approx to check equivalency easily
+    const val1 = correct.numerator / correct.denominator;
+    const val2 = num / denom;
+
+    const isDuplicate = options.some(
+      opt => Math.abs((opt.numerator / opt.denominator) - val2) < 0.01
+    );
+
+    if (!isDuplicate && Math.abs(val1 - val2) > 0.05) {
+      options.push({ numerator: num, denominator: denom });
     }
   }
-  return Array.from(options).sort(() => Math.random() - 0.5);
+
+  return options
+    .sort(() => Math.random() - 0.5)
+    .map(f => `${f.numerator}/${f.denominator}`);
 }

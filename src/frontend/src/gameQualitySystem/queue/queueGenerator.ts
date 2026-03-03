@@ -1,6 +1,6 @@
 // Queue Generator for Game Quality System
 
-import { QueueEntry, PriorityLevel, PriorityScore, Game, CatalogEntry } from '../types';
+import type { QueueEntry, PriorityLevel, PriorityScore, Game, CatalogEntry } from '../types';
 
 export interface QueueConfig {
     maxQueueSize: number;
@@ -26,6 +26,7 @@ export class QueueGenerator {
         games: Record<string, Game | CatalogEntry>,
         developerAvailability: number = 40
     ): QueueEntry[] {
+        void developerAvailability;
         const queue: QueueEntry[] = [];
 
         for (const score of scores) {
@@ -53,20 +54,24 @@ export class QueueGenerator {
         priorityScores: Record<string, PriorityScore>
     ): QueueEntry[] {
         const sortedGames = [...games].sort((a, b) => {
-            const scoreA = priorityScores[a.id]?.totalScore || 0;
-            const scoreB = priorityScores[b.id]?.totalScore || 0;
+            const scoreA = priorityScores[this.getEntityId(a)]?.totalScore || 0;
+            const scoreB = priorityScores[this.getEntityId(b)]?.totalScore || 0;
             return scoreB - scoreA;
         });
 
-        return sortedGames.map((game, index) => ({
-            gameId: game.id,
-            gameName: game.name,
-            priority: priorityScores[game.id]?.priorityLevel || 'P3',
-            estimatedEffortHours: game.estimatedTime || 20,
-            dependencies: [],
-            recommendedStartDate: this.calculateStartDateFromIndex(index),
-            status: 'pending',
-        }));
+        return sortedGames.map((game, index) => {
+            const gameId = this.getEntityId(game);
+
+            return {
+                gameId,
+                gameName: game.name,
+                priority: priorityScores[gameId]?.priorityLevel || 'P3',
+                estimatedEffortHours: game.estimatedTime || 20,
+                dependencies: [],
+                recommendedStartDate: this.calculateStartDateFromIndex(index),
+                status: 'pending',
+            };
+        });
     }
 
     public prioritizeQueue(queue: QueueEntry[]): QueueEntry[] {
@@ -144,5 +149,9 @@ export class QueueGenerator {
         }
 
         return weeklyBreakdown;
+    }
+
+    private getEntityId(game: Game | CatalogEntry): string {
+        return game.id ?? ('gameId' in game ? game.gameId : '');
     }
 }

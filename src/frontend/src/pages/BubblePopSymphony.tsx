@@ -1,4 +1,11 @@
+/**
+ * Bubble Pop Symphony Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import {
+  memo,
   useState,
   useEffect,
   useRef,
@@ -6,6 +13,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Music, Play } from 'lucide-react';
+import { GameShell } from '../components/GameShell';
 import { GameCursor } from '../components/game/GameCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
@@ -63,7 +71,7 @@ const MUSICAL_NOTES = [
   { note: 'A4', pitch: 440.0, color: '#95E1D3', icon: 'circle' as const },
 ] as const;
 
-export default function BubblePopSymphony() {
+function BubblePopSymphonyGame() {
   // game logic hooks
   const { onGameComplete } = useGameDrops('bubble-pop-symphony');
   const { playClick } = useAudio();
@@ -454,3 +462,18 @@ export default function BubblePopSymphony() {
     </HandDetectionProvider>
   );
 }
+
+export const BubblePopSymphony = memo(function BubblePopSymphonyComponent() {
+  return (
+    <GameShell
+      gameId='bubble-pop-symphony'
+      gameName='Bubble Pop Symphony'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <BubblePopSymphonyGame />
+    </GameShell>
+  );
+});
+
+export default BubblePopSymphony;

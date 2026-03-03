@@ -8,6 +8,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Palette, Paintbrush, Trash2, Save } from 'lucide-react';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
@@ -33,7 +34,7 @@ import {
   COLOR_PALETTE,
 } from '../games/freeDrawLogic';
 
-export const FreeDraw = memo(function FreeDrawComponent() {
+const FreeDrawGame = memo(function FreeDrawComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -393,6 +394,19 @@ export const FreeDraw = memo(function FreeDrawComponent() {
         <WellnessTimer />
       </div>
     </GlobalErrorBoundary>
+  );
+});
+
+export const FreeDraw = memo(function FreeDrawShell() {
+  return (
+    <GameShell
+      gameId='free-draw'
+      gameName='Free Draw'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <FreeDrawGame />
+    </GameShell>
   );
 });
 

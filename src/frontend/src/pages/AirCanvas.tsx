@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+/**
+ * Air Canvas Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -9,6 +15,7 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameShell } from '../components/GameShell';
 import {
   assetLoader,
   PAINT_ASSETS,
@@ -56,7 +63,7 @@ const COLORS = [
   '#FF1493', '#00FFFF', '#FF00FF', '#FFFFFF', '#000000', '#FFD700', '#FF6347',
 ];
 
-export function AirCanvas() {
+const AirCanvasGame = memo(function AirCanvasGameComponent() {
   const navigate = useNavigate();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('air-canvas');
   const usedColorsRef = useRef<Set<string>>(new Set());
@@ -619,6 +626,20 @@ export function AirCanvas() {
       />
     </div>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const AirCanvas = memo(function AirCanvasComponent() {
+  return (
+    <GameShell
+      gameId="air-canvas"
+      gameName="Air Canvas"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <AirCanvasGame />
+    </GameShell>
+  );
+});
 
 export default AirCanvas;

@@ -1,6 +1,16 @@
+/**
+ * Letter Hunt Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { useCallback, useEffect, useRef, useState, memo } from 'react';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useFallbackControls } from '../hooks/useFallbackControls';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -52,7 +62,7 @@ const getLetterColorClass = (color?: string) =>
   (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
   'text-pip-orange';
 
-export const LetterHunt = memo(function LetterHuntComponent() {
+const LetterHuntGame = memo(function LetterHuntComponent() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const webcamRef = useRef<Webcam>(null);
@@ -65,6 +75,45 @@ export const LetterHunt = memo(function LetterHuntComponent() {
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(
     null,
   );
+
+  // feature flag for fallback controls
+  const fallbackFlag = useFeatureFlag('controls.fallbackV1');
+
+  // configure fallback controls (tap/dwell/snap) when mouse mode is active
+  const fallback = useFallbackControls({
+    enabled: useMouseFallback && fallbackFlag,
+    dwell: { dwellTimeMs: 400 },
+    snap: {
+      snapRadiusPx: 32,
+      targets: optionRefs.current.map((el, idx) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            id: idx.toString(),
+          };
+        }
+        return { x: 0, y: 0, id: idx.toString() };
+      }),
+    },
+    onDwellSelect: (id) => {
+      const idx = parseInt(id, 10);
+      const opt = options[idx];
+      if (opt) handleSelectOption(opt);
+    },
+    onCursorMove: (pos) => setCursor(pos),
+    containerRef: cameraAreaRef,
+  });
+
+  // enable/disable fallback when mode or flag changes
+  useEffect(() => {
+    if (fallbackFlag && useMouseFallback) {
+      fallback.enable();
+    } else {
+      fallback.disable();
+    }
+  }, [fallbackFlag, useMouseFallback, fallback]);
   const [isPinching, setIsPinching] = useState<boolean>(false);
 
   const [score, setScore] = useState<number>(0);
@@ -429,6 +478,7 @@ export const LetterHunt = memo(function LetterHuntComponent() {
             <figure
               ref={cameraAreaRef}
               className='relative w-full h-full overflow-hidden m-0 border-3 border-[#F2CC8F] rounded-[2.5rem]'
+              {...fallback.handlers}
             >
               
 
@@ -694,6 +744,19 @@ export const LetterHunt = memo(function LetterHuntComponent() {
         </section>
       )}
     </>
+  );
+});
+
+export const LetterHunt = memo(function LetterHuntShell() {
+  return (
+    <GameShell
+      gameId='letter-hunt'
+      gameName='Letter Hunt'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <LetterHuntGame />
+    </GameShell>
   );
 });
 

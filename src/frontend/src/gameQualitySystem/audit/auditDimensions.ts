@@ -57,7 +57,7 @@ export const AUDIT_CRITERIA: Record<AuditDimension, ScoringCriteria> = {
 export function scoreDimension(
     dimension: AuditDimension,
     gameData: any,
-    auditContext: any
+    _auditContext: any
 ): AuditScore {
     const criteria = AUDIT_CRITERIA[dimension];
     let score = 1;

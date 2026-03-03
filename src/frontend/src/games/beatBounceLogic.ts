@@ -42,7 +42,7 @@ export function getBeatInterval(bpm: number): number {
   return 60000 / bpm;
 }
 
-export function createBall(id: number, level: number): BouncingBall {
+export function createBall(id: number, _level: number): BouncingBall {
   return {
     id,
     x: 30 + Math.random() * 40,

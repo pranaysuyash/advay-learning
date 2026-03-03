@@ -1,13 +1,19 @@
+/**
+ * Discovery Lab Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { memo, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
+import WellnessTimer from '../components/WellnessTimer';
 import { useInventoryStore } from '../store';
 import {
   getItem,
@@ -17,8 +23,10 @@ import {
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { progressQueue } from '../services/progressQueue';
 
-export const DiscoveryLab = memo(function DiscoveryLabComponent() {
+// Inner game component
+const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion() ?? false;
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -489,6 +497,20 @@ export const DiscoveryLab = memo(function DiscoveryLabComponent() {
         </AnimatePresence>
       </div>
     </GlobalErrorBoundary>
+  );
+});
+
+// Main export wrapped with GameShell
+export const DiscoveryLab = memo(function DiscoveryLabComponent() {
+  return (
+    <GameShell
+      gameId="discovery-lab"
+      gameName="Discovery Lab"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <DiscoveryLabGame />
+    </GameShell>
   );
 });
 

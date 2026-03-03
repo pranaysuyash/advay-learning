@@ -1,7 +1,14 @@
+/**
+ * Color Match Garden Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameShell } from '../components/GameShell';
 import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
@@ -68,7 +75,7 @@ function buildRoundTargets(): { targets: GardenTarget[]; promptId: number } {
   return { targets, promptId };
 }
 
-export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
+const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -462,6 +469,19 @@ export const ColorMatchGarden = memo(function ColorMatchGardenComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const ColorMatchGarden = memo(function ColorMatchGardenShell() {
+  return (
+    <GameShell
+      gameId='color-match-garden'
+      gameName='Color Match Garden'
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ColorMatchGardenGame />
+    </GameShell>
   );
 });
 

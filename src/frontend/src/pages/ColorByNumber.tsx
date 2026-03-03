@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   COLOR_BY_NUMBER_TEMPLATES,
   COLOR_PALETTE,
@@ -24,7 +26,12 @@ const resultMessage: Record<string, string> = {
   'missing-region': 'Could not find that region.',
 };
 
-export function ColorByNumber() {
+// Inner game component
+interface ColorByNumberGameProps {
+  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+}
+
+const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress: _saveProgress }: ColorByNumberGameProps) {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('color-by-number');
@@ -368,6 +375,22 @@ export function ColorByNumber() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const ColorByNumber = memo(function ColorByNumberComponent() {
+  const { saveProgress } = useGameProgress('color-by-number');
+
+  return (
+    <GameShell
+      gameId="color-by-number"
+      gameName="Color By Number"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ColorByNumberGame saveProgress={saveProgress} />
+    </GameShell>
+  );
+});
 
 export default ColorByNumber;

@@ -52,10 +52,12 @@ This folder contains the reusable prompts that govern how agents work on this re
 - **Implementation planning (before coding)**: `prompts/planning/implementation-planning-v1.0.md`
 - Planning-first product + engineering agent prompt: `prompts/planning/planning-first-product-engineering-agent-v1.0.md`
 - Implement a feature slice (non-audit): `prompts/implementation/feature-implementation-v1.0.md`
+- Clean-slate new game implementation batch (start fresh, build real games in small verified batches): `prompts/implementation/new-game-batch-implementation-v1.0.md`
 - Hardening (one scope): `prompts/hardening/hardening-v1.1.md`
 - React best practices (Vercel-aligned): `prompts/hardening/react-best-practices-v1.0.md`
 - Generalized hardening (local review, no PR): `prompts/hardening/generalized-implementer-v1.0.md`
 - Generalized code review + audit (report-only): `prompts/review/generalized-code-review-audit-v1.0.md`
+- Local pre-commit review (mandatory before code-changing commits): `prompts/review/local-pre-commit-review-v1.0.md`
 - PR review: `prompts/review/pr-review-v1.6.1.md`
 - Verify remediation: `prompts/verification/verification-v1.2.md`
 - Merge conflicts: `prompts/merge/merge-conflict-v1.2.md`

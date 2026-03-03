@@ -72,14 +72,16 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
     }
     
     try {
-      await progressQueue.add({
+      progressQueue.add({
         profileId: currentProfile.id,
         gameId,
         score: data.score,
         completed: data.completed,
-        level: data.level,
-        metadata: data.metadata,
-        timestamp: Date.now(),
+        metadata: {
+          ...data.metadata,
+          ...(data.level !== undefined ? { level: data.level } : {}),
+        },
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error(`[useGameProgress] Failed to save progress:`, error);

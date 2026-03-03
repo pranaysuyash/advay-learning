@@ -2,11 +2,11 @@ import { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -18,7 +18,8 @@ import {
   type BeginningSoundsRound,
 } from '../games/beginningSoundsLogic';
 
-export const BeginningSounds = memo(function BeginningSoundsComponent() {
+// Inner game component
+const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -389,9 +390,21 @@ export const BeginningSounds = memo(function BeginningSoundsComponent() {
           </div>
         </div>
         
-        {/* Wellness timer */}
-        <WellnessTimer />
       </GameContainer>
     </GlobalErrorBoundary>
+  );
+});
+
+// Main export wrapped with GameShell
+export const BeginningSounds = memo(function BeginningSoundsComponent() {
+  return (
+    <GameShell
+      gameId="beginning-sounds"
+      gameName="Beginning Sounds"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <BeginningSoundsGame />
+    </GameShell>
   );
 });

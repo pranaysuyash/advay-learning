@@ -1,6 +1,13 @@
-import { useCallback, useState, useRef, useEffect } from 'react';
+/**
+ * Digital Jenga Game
+ * 
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ */
+
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -10,7 +17,7 @@ import {
   type Block,
 } from '../games/digitalJengaLogic';
 
-export function DigitalJenga() {
+const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -277,4 +284,18 @@ export function DigitalJenga() {
       </div>
     </GameContainer>
   );
-}
+});
+
+// Main export wrapped with GameShell
+export const DigitalJenga = memo(function DigitalJengaComponent() {
+  return (
+    <GameShell
+      gameId="digital-jenga"
+      gameName="Digital Jenga"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <DigitalJengaGame />
+    </GameShell>
+  );
+});
