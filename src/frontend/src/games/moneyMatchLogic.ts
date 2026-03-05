@@ -2,6 +2,8 @@
  * Money Match game logic — count money and make change.
  */
 
+import { calculateScore as _calculateScore, ScorePresets } from '../utils/scoring';
+
 export interface Coin {
   value: number;
   name: string;
@@ -47,3 +49,21 @@ export function getCoinsForAmount(amount: number): Coin[] {
   }
   return coins;
 }
+
+// Difficulty multipliers for scoring (preserved for backward compatibility)
+export const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+  1: 1,
+  2: 1.5,
+  3: 2,
+};
+
+/**
+ * Calculate score based on streak and level
+ * Base: 15 points + streak bonus (max 15) = 30 max base
+ * Multiplied by difficulty (level 1: 1×, level 2: 1.5×, level 3: 2×)
+ * Max per round: 60 points (level 3, streak 5+)
+ *
+ * @deprecated Use `calculateScore` from `utils/scoring.ts` with `ScorePresets.high` directly
+ */
+export const calculateScore = (streak: number, level: number): number =>
+  _calculateScore(streak, level, ScorePresets.high);

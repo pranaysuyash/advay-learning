@@ -6,7 +6,7 @@ This directory contains reusable tools for analyzing and improving kids learning
 
 ## 🧰 Kenney Asset Sync Tool
 
-**Purpose:** Synchronize Kenney `new-platformer-pack` assets from local downloaded packs into the frontend canonical asset path.
+**Purpose:** Synchronize Kenney `New Platformer Pack` assets from the local purchased Kenney bundle into the frontend canonical asset path.
 
 **File:** `tools/sync_kenney_platformer_assets.sh`
 
@@ -14,7 +14,8 @@ This directory contains reusable tools for analyzing and improving kids learning
 
 - Avoid manual copy mistakes and partial imports.
 - Keep one canonical runtime path: `src/frontend/public/assets/kenney/platformer`.
-- Make future pack refreshes repeatable when new Kenney downloads are added.
+- Make future pack refreshes repeatable from the purchased local Kenney bundle.
+- Ensure agents check the in-project runtime asset folder first before importing new files.
 
 ### Usage
 
@@ -24,9 +25,15 @@ tools/sync_kenney_platformer_assets.sh
 
 # Or pass explicit source and destination
 tools/sync_kenney_platformer_assets.sh \
-  /Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1 \
+  "/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0/2D assets/New Platformer Pack" \
   src/frontend/public/assets/kenney/platformer
 ```
+
+### Source of truth
+
+1. Check whether the required file already exists under `src/frontend/public/assets/kenney/`.
+2. If it does not, source it from `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`.
+3. For platformer assets, use this sync tool instead of hand-copying individual files.
 
 ### What it syncs
 

@@ -16,7 +16,10 @@ import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { useMicrophoneInput } from '../hooks/useMicrophoneInput';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -27,12 +30,22 @@ import {
   checkBlowHits,
   getStats,
   endGame,
+  advanceLevel,
+  BUBBLE_GAME_CONFIG,
   type GameState,
   type Bubble,
 } from '../games/bubblePopLogic';
 
+// Animation constants
 const TARGET_FPS = 60;
 const FRAME_TIME = 1000 / TARGET_FPS;
+
+// Destructure config for cleaner usage
+const {
+  BLOW_THRESHOLD,
+  MIN_BLOW_DURATION,
+  BLOW_COOLDOWN,
+} = BUBBLE_GAME_CONFIG;
 
 // Inner game component - receives progress hook from GameShell wrapper
 interface BubblePopGameProps {
@@ -53,6 +66,9 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
   const [showMenu, setShowMenu] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   // Animation refs
   const lastFrameTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -66,6 +82,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
   const handleGameComplete = useCallback(
     async (finalScore: number) => {
       try {
+        triggerHaptic('celebration');
         await saveProgress({
           score: finalScore,
           completed: true,
@@ -84,7 +101,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
     [saveProgress, gameState.level, gameState.poppedCount, gameState.missedCount, onGameComplete]
   );
 
-  // Microphone input for blow detection
+  // Microphone input for blow detection - using config constants
   const {
     isActive,
     volume,
@@ -93,18 +110,68 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
     start,
     stop,
   } = useMicrophoneInput({
-    blowThreshold: 0.12,
-    minBlowDuration: 100,
-    cooldown: 200,
+    blowThreshold: BLOW_THRESHOLD,
+    minBlowDuration: MIN_BLOW_DURATION,
+    cooldown: BLOW_COOLDOWN,
     onBlow: () => {
       setGameState((prev) => {
-        const newState = checkBlowHits(prev, 0.5);
-        if (ttsEnabled && newState.poppedCount > prev.poppedCount) {
+        // Use current volume for hit detection radius
+        const newState = checkBlowHits(prev, prev.blowStrength || 0.5);
+        if (newState.poppedCount > prev.poppedCount) {
           const newlyPopped = newState.poppedCount - prev.poppedCount;
-          if (newState.poppedCount % 5 === 0) {
-            void speak(`${newState.poppedCount} bubbles popped! Great job!`);
-          } else if (newlyPopped >= 3) {
-            void speak('Wow! You popped a lot!');
+          lastPopTimeRef.current = Date.now();
+          
+          // Find newly popped bubbles for particle effects
+          const newlyPoppedBubbles = newState.bubbles.filter(
+            b => b.isPopped && !prev.bubbles.find(pb => pb.id === b.id)?.isPopped
+          );
+          
+          // Add particle effects
+          if (newlyPoppedBubbles.length > 0) {
+            const newParticles = newlyPoppedBubbles.map(b => ({
+              id: `${b.id}-${Date.now()}`,
+              x: b.x,
+              y: b.y,
+              color: b.color,
+            }));
+            setPoppedBubbles(prevParticles => [...prevParticles, ...newParticles]);
+            
+            // Remove particles after animation
+            setTimeout(() => {
+              setPoppedBubbles(prevParticles =>
+                prevParticles.filter(p => !newParticles.find(np => np.id === p.id))
+              );
+            }, 500);
+          }
+          
+          // Build streak and calculate bonus
+          const newStreak = incrementStreak(newlyPopped);
+
+          // Calculate score with streak bonus
+          const basePoints = newlyPopped * 10;
+          const streakBonus = Math.min(newStreak * 2, 20);
+          const totalPoints = basePoints + streakBonus;
+
+          // Show score popup at first popped bubble position
+          if (newlyPoppedBubbles.length > 0) {
+            const firstBubble = newlyPoppedBubbles[0];
+            setScorePopup({
+              points: totalPoints,
+              x: firstBubble.x * 100,
+              y: firstBubble.y * 100
+            });
+          }
+
+          // Haptics
+          triggerHaptic('success');
+          
+          // TTS feedback
+          if (ttsEnabled) {
+            if (newState.poppedCount % STREAK_MILESTONE_INTERVAL === 0) {
+              void speak(`${newState.poppedCount} bubbles popped! Great job!`);
+            } else if (newlyPopped >= 3) {
+              void speak('Wow! You popped a lot!');
+            }
           }
         }
         return newState;
@@ -133,15 +200,40 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         setGameState((prev) => {
           let newState = updateBubbles(prev, deltaTime);
 
-          if (isActive && volume > 0.12) {
+          if (isActive && volume > BLOW_THRESHOLD) {
             newState = checkBlowHits(newState, volume);
           }
 
+          // Check for level advancement (every N pops or N seconds)
+          const { LEVEL_ADVANCE_POPS, LEVEL_ADVANCE_TIME_SECONDS, MAX_LEVEL } = BUBBLE_GAME_CONFIG;
+          const popsForNextLevel = newState.level * LEVEL_ADVANCE_POPS;
+          const timeForNextLevel = newState.level * LEVEL_ADVANCE_TIME_SECONDS;
+          const elapsedTime = BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS - newState.timeLeft;
+          
+          if (newState.level < MAX_LEVEL && 
+              (newState.poppedCount >= popsForNextLevel || elapsedTime >= timeForNextLevel)) {
+            newState = advanceLevel(newState);
+            
+            // Announce level up via TTS (with cooldown to prevent spam)
+            if (ttsEnabled && newState.level > lastAnnouncedLevelRef.current) {
+              lastAnnouncedLevelRef.current = newState.level;
+              void speak(`Level ${newState.level}! Bubbles are getting faster!`);
+            }
+          }
+          
           // Check for game over
           if (newState.timeLeft <= 0 && !prev.gameOver) {
             newState = endGame(newState);
             void handleGameComplete(newState.score);
             setShowCelebration(true);
+            
+            // Final stats announcement
+            if (ttsEnabled) {
+              const finalMessage = newState.poppedCount >= 20
+                ? `Amazing! You popped ${newState.poppedCount} bubbles!`
+                : `Great job! You popped ${newState.poppedCount} bubbles!`;
+              void speak(finalMessage);
+            }
           }
 
           return newState;
@@ -150,9 +242,13 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         lastFrameTimeRef.current = timestamp;
       }
 
-      if (!gameStateRef.current.gameOver) {
-        animationFrameRef.current = requestAnimationFrame(gameLoop);
-      }
+      // Use functional state check to avoid stale ref issues (BP-01 fix)
+      setGameState(current => {
+        if (!current.gameOver) {
+          animationFrameRef.current = requestAnimationFrame(gameLoop);
+        }
+        return current;
+      });
     },
     [isActive, volume, handleGameComplete]
   );
@@ -176,6 +272,39 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
       stopTTS();
     };
   }, [stop, stopTTS]);
+  
+  // Inactivity detection - encourage player if no pops for 8 seconds
+  useEffect(() => {
+    if (!isActive || showMenu || gameState.gameOver) return;
+    
+    const checkInactivity = setInterval(() => {
+      const timeSinceLastPop = Date.now() - lastPopTimeRef.current;
+      const gameTimeElapsed = BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS - gameState.timeLeft;
+      
+      // Only encourage after game has started (3s grace period) and if inactive
+      if (gameTimeElapsed > 3 && timeSinceLastPop > 8000 && gameState.poppedCount === 0) {
+        if (ttsEnabled) {
+          void speak("Try blowing gently into the microphone to pop bubbles!");
+        }
+        // Reset to avoid spam
+        lastPopTimeRef.current = Date.now();
+      } else if (gameTimeElapsed > 5 && timeSinceLastPop > 10000 && gameState.poppedCount > 0) {
+        // Encouragement for returning players
+        if (ttsEnabled) {
+          const encouragements = [
+            "Keep going! You're doing great!",
+            "Blow harder to pop more bubbles!",
+            "Almost there! Keep popping!",
+          ];
+          const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+          void speak(randomEncouragement);
+        }
+        lastPopTimeRef.current = Date.now();
+      }
+    }, 2000);
+    
+    return () => clearInterval(checkInactivity);
+  }, [isActive, showMenu, gameState.gameOver, gameState.timeLeft, gameState.poppedCount, ttsEnabled]);
 
   // Start game handler
   const handleStartGame = async () => {
@@ -184,7 +313,14 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
     setGameState(startGame(gameState));
     setShowMenu(false);
     setShowCelebration(false);
+    resetStreak();
     lastFrameTimeRef.current = 0;
+    lastAnnouncedLevelRef.current = 1;
+    
+    // Welcome TTS
+    if (ttsEnabled) {
+      void speak("Let's pop some bubbles! Blow into the microphone!");
+    }
   };
 
   // Reset game handler
@@ -195,9 +331,20 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
     setGameState(initializeGame());
     setShowMenu(true);
     setShowCelebration(false);
+    resetStreak();
     lastFrameTimeRef.current = 0;
+    lastAnnouncedLevelRef.current = 1;
   };
 
+  // Track last announced level to prevent spam
+  const lastAnnouncedLevelRef = useRef(1);
+  
+  // Track popped bubbles for particle effects
+  const [poppedBubbles, setPoppedBubbles] = useState<Array<{ id: string; x: number; y: number; color: string }>>([]);
+  
+  // Track last pop time for activity detection
+  const lastPopTimeRef = useRef<number>(0);
+  
   // Stats for display
   const stats = getStats(gameState);
 
@@ -254,6 +401,63 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
               <div className="text-sm font-bold text-text-secondary">Score</div>
               <div className="text-3xl font-black text-advay-slate">{gameState.score}</div>
             </div>
+            
+            {/* Level */}
+            <div className="absolute top-4 right-32 bg-white rounded-2xl px-6 py-3 border-3 border-purple-200 shadow-[0_4px_0_#C4B5FD]">
+              <div className="text-sm font-bold text-purple-500">Level</div>
+              <div className="text-3xl font-black text-purple-700">{gameState.level}</div>
+            </div>
+
+            {/* Kenney Heart HUD */}
+            <div className="absolute top-4 left-32 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={streak >= (i + 1) * 2
+                      ? '/assets/kenney/platformer/hud/hud_heart.png'
+                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                    alt=""
+                    className="w-6 h-6"
+                  />
+                ))}
+                <span className="ml-2 text-sm font-bold text-pink-500">x{streak}</span>
+              </div>
+            </div>
+
+            {/* Score Popup Animation */}
+            {scorePopup && (
+              <motion.div
+                initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                exit={{ opacity: 0 }}
+                style={{ 
+                  position: 'absolute', 
+                  left: `${scorePopup.x}%`, 
+                  top: `${scorePopup.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+                className="pointer-events-none z-50"
+              >
+                <div className="text-4xl font-black text-green-500 drop-shadow-lg">
+                  +{scorePopup.points}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Streak Milestone */}
+            {showMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1.2, rotate: 0 }}
+                exit={{ scale: 0 }}
+                className="absolute top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+              >
+                <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             {/* Time */}
             <div className="absolute top-4 left-4 bg-white rounded-2xl px-6 py-3 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
@@ -308,6 +512,44 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
                 />
               ))}
             </div>
+            
+            {/* Pop Particle Effects */}
+            {!reducedMotion && poppedBubbles.map((particle) => (
+              <div key={particle.id} className="absolute inset-0 pointer-events-none">
+                {/* Main pop ring */}
+                <motion.div
+                  className="absolute rounded-full border-4"
+                  style={{
+                    left: `${particle.x}%`,
+                    top: `${particle.y}%`,
+                    borderColor: particle.color,
+                    backgroundColor: 'transparent',
+                  }}
+                  initial={{ width: 40, height: 40, x: -20, y: -20, opacity: 1, scale: 0.5 }}
+                  animate={{ opacity: 0, scale: 2 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                />
+                {/* Sparkle particles */}
+                {[...Array(4)].map((_, i) => (
+                  <motion.div
+                    key={`${particle.id}-sparkle-${i}`}
+                    className="absolute w-2 h-2 rounded-full"
+                    style={{
+                      left: `${particle.x}%`,
+                      top: `${particle.y}%`,
+                      backgroundColor: particle.color,
+                    }}
+                    initial={{ x: 0, y: 0, opacity: 1 }}
+                    animate={{
+                      x: Math.cos((i * Math.PI) / 2) * 30,
+                      y: Math.sin((i * Math.PI) / 2) * 30,
+                      opacity: 0,
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  />
+                ))}
+              </div>
+            ))}
           </>
         )}
 

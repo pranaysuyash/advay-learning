@@ -1,6 +1,6 @@
 /**
  * Blend Builder Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -11,6 +11,8 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getWordsForLevel, checkAnswer, type BlendWord } from '../games/blendBuilderLogic';
 
 const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
@@ -25,6 +27,9 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('blend-builder');
@@ -48,6 +53,7 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
     setShowResult(false);
     setFeedback('');
     setGameState('playing');
+    resetStreak();
   };
 
   const handleSubmit = () => {
@@ -58,12 +64,23 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
     setShowResult(true);
     if (isCorrect) {
       playSuccess();
+      const newStreak = incrementStreak();
       setCorrect((c) => c + 1);
-      setScore((s) => s + 30);
+      const basePoints = 10;
+      const streakBonus = Math.min(newStreak * 2, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScore((s) => s + totalPoints);
+      setScorePopup({ points: totalPoints, x: 50, y: 30 });
       setFeedback(`✅ "${currentWord.word}" — well done!`);
-      if (correct > 0 && (correct + 1) % 5 === 0) playCelebration();
+      triggerHaptic('success');
+      if (newStreak > 0 && newStreak % 5 === 0) {
+        playCelebration();
+        triggerHaptic('celebration');
+      }
     } else {
       playError();
+      resetStreak();
+      triggerHaptic('error');
       setFeedback(`❌ The word is "${currentWord.word}"!`);
     }
     setTimeout(() => {
@@ -107,7 +124,7 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
               <button
                 key={l.level}
                 type='button'
-                onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); }}
+                onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); resetStreak(); }}
                 className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#15803D] ${currentLevel === l.level
                     ? 'bg-[#22C55E] text-white border-2 border-green-600'
                     : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-green-300'
@@ -149,7 +166,14 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
               <div className='bg-white rounded-2xl border-2 border-[#F2CC8F] px-5 py-3 shadow-[0_3px_0_#E5B86E]'>
                 <div className='flex items-center justify-between mb-2'>
                   <span className='text-sm font-black uppercase tracking-widest text-green-500'>Word {currentIndex + 1} of {words.length}</span>
-                  <span className='text-sm font-black text-slate-500'>Correct: {correct}</span>
+                  <div className='flex items-center gap-3'>
+                    {streak > 0 && (
+                      <span className='text-sm font-black text-orange-500 flex items-center gap-1 animate-pulse'>
+                        🔥 {streak}
+                      </span>
+                    )}
+                    <span className='text-sm font-black text-slate-500'>Correct: {correct}</span>
+                  </div>
                 </div>
                 <div className='w-full h-2 bg-slate-100 rounded-full overflow-hidden'>
                   <div
@@ -210,6 +234,31 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
                     : 'bg-red-50 border-red-300 text-red-700'
                   }`}>
                   {feedback}
+                </div>
+              )}
+
+              {/* Score Popup */}
+              {scorePopup && (
+                <div
+                  className='fixed pointer-events-none z-50 animate-bounce'
+                  style={{
+                    left: `${scorePopup.x}%`,
+                    top: `${scorePopup.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <div className='bg-gradient-to-br from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full font-black text-xl shadow-lg animate-pulse'>
+                    +{scorePopup.points}
+                  </div>
+                </div>
+              )}
+
+              {/* Streak Milestone */}
+              {showMilestone && (
+                <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+                  <div className='bg-gradient-to-br from-orange-400 to-red-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse border-4 border-yellow-300'>
+                    🔥 {streak} STREAK! 🔥
+                  </div>
                 </div>
               )}
             </>

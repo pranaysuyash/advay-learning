@@ -104,13 +104,13 @@ This document defines the technical architecture for transforming the Advay Visi
 
 ### 1.2 Design Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Local-First** | Prefer local processing for latency and privacy |
+| Principle                | Description                                               |
+| ------------------------ | --------------------------------------------------------- |
+| **Local-First**          | Prefer local processing for latency and privacy           |
 | **Graceful Degradation** | App works without cloud; features scale with connectivity |
-| **Privacy by Design** | No camera frames stored; minimal data retention |
-| **Child Safety First** | All AI outputs filtered for age-appropriateness |
-| **Parent Transparency** | Parents see what AI is doing without full transcripts |
+| **Privacy by Design**    | No camera frames stored; minimal data retention           |
+| **Child Safety First**   | All AI outputs filtered for age-appropriateness           |
+| **Parent Transparency**  | Parents see what AI is doing without full transcripts     |
 
 ---
 
@@ -124,20 +124,82 @@ Generate Pip's responses, stories, activity descriptions, and personalized feedb
 
 #### Provider Options
 
-| Provider | Type | Latency | Cost | Quality | Offline |
-|----------|------|---------|------|---------|---------|
-| **Claude API** | Cloud | 500-2000ms | $$ | Excellent | No |
-| **OpenAI GPT-4** | Cloud | 500-1500ms | $$$ | Excellent | No |
-| **Ollama (Llama 3.2)** | Local | 100-500ms | Free | Good | Yes |
-| **Ollama (Phi-3)** | Local | 50-200ms | Free | Moderate | Yes |
+**Research Source:** `docs/research/LLM_PROVIDER_SURVEY_2026-03-05.md` (Updated March 2026: Qwen3.5 Series – New Generational Standard)
 
-#### Recommended Strategy
+| Provider                                           | Type                | Model                  | Download (q4f16) | Latency         | Quality                                     | Key Features                                                  | Offline | License        |
+| -------------------------------------------------- | ------------------- | ---------------------- | ---------------- | --------------- | ------------------------------------------- | ------------------------------------------------------------- | ------- | -------------- |
+| **🥇 PRIMARY MVP: Transformers.js (Qwen3.5-1.5B)** | Local/browser, Node | Qwen3.5-1.5B-Instruct  | ~400 MB          | 1.5-3s/100tk    | Excellent (20-30% better than SmolLM2-1.7B) | Multilingual (29+ langs); 32K context                         | Yes     | Apache 2.0     |
+| **🥈 Mobile: Qwen3.5-0.5B**                        | Local/browser, Node | Qwen3.5-0.5B-Instruct  | ~135 MB          | <500ms/response | Very Good (dramatic leap from Qwen2.5-0.5B) | Ultra-lightweight; sub-500ms latency                          | Yes     | Apache 2.0     |
+| **🥉 Reasoning: SmolLM3-3B**                       | Local/browser, Node | SmolLM3-3B             | ~800 MB          | 2-4s/100tk      | Excellent (3B class)                        | Dual-mode reasoning (`/think`, `/no_think`); 64K-128K context | Yes     | Apache 2.0     |
+| **Alternative: Qwen3.5-3B**                        | Local/browser, Node | Qwen3.5-3B-Instruct    | ~750 MB          | 2-4s/100tk      | Excellent (best 3B)                         | Multilingual; simpler reasoning than SmolLM3                  | Yes     | Apache 2.0     |
+| **Desktop: Qwen3.5-7B or Ollama**                  | Local/server        | Qwen3.5-7B or Qwen3-8B | 1.8-2.1 GB       | 1-3s/100tk      | State-of-art (7B-8B class)                  | 32K-131K context; thinking mode (Qwen3-8B)                    | Yes     | Apache 2.0     |
+| **Cloud Fallback: HF Inference API**               | Cloud               | Any HF model (Qwen3.5) | N/A              | 500-1500ms      | Excellent                                   | Unlimited context; feature-gated; parent consent              | No      | Per-token cost |
+| **Cloud Alt: Claude 3.5 Sonnet**                   | Cloud               | Claude 3 family        | N/A              | 500-2000ms      | Excellent                                   | Extended thinking; best reasoning                             | No      | subscription   |
+| **Cloud Alt: OpenAI GPT-4**                        | Cloud               | GPT-4 Turbo            | N/A              | 500-1500ms      | Excellent                                   | N/A                                                           | No      | $$$ per token  |
+
+#### Recommended Strategy (POST-RESEARCH, MARCH 2026 – QWEN3.5 STANDARD)
 
 ```
-Primary: Ollama (Llama 3.2 3B) - Fast local responses
-Fallback: Claude API - Complex generation (stories, activities)
-Cache: Redis/LocalStorage - Repeated responses
+## PRIMARY STRATEGY (MVP): On-Device with Browser Support – QWEN3.5 NEW STANDARD
+
+1. ★ DEFAULT (RECOMMENDED): Transformers.js v3/v4 with Qwen3.5-1.5B-Instruct (q4f16)
+   - NEW GENERATIONAL STANDARD (March 2026): "rewritten from ground up"
+   - Download: 400 MB (q4f16, ONNX via Transformers.js)
+   - Latency: 1.5-3s/100 tokens (browser WebGPU); <500ms (Ollama desktop)
+   - Quality: 20-30% better than SmolLM2-1.7B; multilingual (29+ languages)
+   - Features: 32K context; Apache 2.0 license
+   - Suitable for: PRIMARY runtime for MVP – story generation, task classification, feedback
+   - Cost: Zero (local inference)
+
+2. MOBILE FALLBACK: Transformers.js v3/v4 with Qwen3.5-0.5B-Instruct (q4f16)
+   - Download: 135 MB (dramatic improvement over Qwen2.5-0.5B)
+   - Latency: <500ms/response (sub-second on modern phones)
+   - Quality: Functional across all child-oriented tasks
+   - Features: Multilingual (29+ languages); 32K context
+   - Suitable for: Constrained mobile devices; fallback for low-memory environments
+   - Cost: Zero (local inference)
+
+3. REASONING TIER (If dual-mode reasoning critical): SmolLM3-3B OR Qwen3.5-3B
+   - SmolLM3-3B: 800 MB; dual-mode reasoning (`/think` vs `/no_think`); 64K-128K context
+   - Qwen3.5-3B: 750 MB; simpler reasoning; multilingual (29+ langs)
+   - Latency: 2-4s/100 tokens
+   - Suitable for: Parent-facing analysis, complex narratives, quiz generation
+   - Trade-off: Pick SmolLM3 for explicit reasoning control; Qwen3.5-3B for multilingual
+
+4. DESKTOP/BACKEND ADVANCED: Qwen3.5-7B or Ollama with Qwen3-8B
+   - Qwen3.5-7B: 1.8 GB; best-in-class 7B; 32K context
+   - Qwen3-8B: 2.1 GB; 131K context; thinking mode; best reasoning
+   - Latency: 1-3s/100 tokens (Transformers.js v4 provides 10x speedups)
+   - Provider: Ollama (desktop) or Transformers.js v4 (backend Node.js)
+   - Suitable for: Desktop testing; advanced parent features (content analysis, progress reports)
+   - NOT critical for children's MVP (bounded tasks)
+
+5. CLOUD FALLBACK (Parent-Gated Feature): Hugging Face Inference API
+   - Cost: $0.003-$0.06 per M tokens (Qwen3.5-0.5B to 8B tier)
+   - Latency: 500-1500ms (network dependent)
+   - Gatekeeping: Feature flag + parent explicit consent + usage tracking
+   - Suitable for: Only when local inference unavailable + parent opts in
+   - Privacy: Data leaves device; appropriate only for parent-facing features
+
+## RUNTIME SELECTION LOGIC:
+- Browser + WebGPU available        → Transformers.js v3/v4 + Qwen3.5-1.5B (primary)
+- Browser + no WebGPU (WASM)        → Transformers.js v3/v4 + Qwen3.5-0.5B (fallback)
+- Node.js / Desktop with local GPU  → Transformers.js v4 + Qwen3.5-3B or Qwen3-8B
+- Desktop without GPU               → Ollama server + Qwen3.5-1.5B or Qwen3-8B
+- Mobile + constrained memory       → Qwen3.5-0.5B (sub-500ms latency)
+- Feature flag + parent consent     → HF Inference API (cloud)
+- Offline / no connectivity         → Pre-composed responses + cached generations
+
+## ARCHITECTURE ALIGNMENT:
+✓ Local-first principle: Qwen3.5-1.5B enables on-device inference without APIs
+✓ Privacy-by-design: No data leaves device (unless parent explicitly enables cloud)
+✓ COPPA/FERPA compliance: No third-party tracking; local inference
+✓ Offline capability: Fully functional without internet after model download
+✓ Fallback chain: Graceful degradation from browser → mobile → desktop → cloud
+✓ Cost-effective: Zero per-token cost; flat model download (400 MB one-time)
 ```
+
+> **Note:** Qwen3.5 series (March 2026) represents generational improvement over Qwen3, Qwen2.5, and SmolLM2. SmolLM2-1.7B is SUPERSEDED by Qwen3.5-1.5B (same params, 20-30% better quality). For complete evaluation, trade-offs, and benchmarks, see `docs/research/LLM_PROVIDER_SURVEY_2026-03-05.md`.
 
 #### Interface Definition
 
@@ -150,7 +212,10 @@ interface LLMService {
   generateStory(prompt: StoryPrompt): Promise<Story>;
 
   // Activity creation
-  generateActivity(type: ActivityType, childProfile: ChildProfile): Promise<Activity>;
+  generateActivity(
+    type: ActivityType,
+    childProfile: ChildProfile,
+  ): Promise<Activity>;
 
   // Feedback on tracing
   generateFeedback(traceResult: TraceResult): Promise<Feedback>;
@@ -201,13 +266,17 @@ Give Pip a voice. All text responses should be speakable.
 
 #### Provider Options
 
-| Provider | Type | Latency | Quality | Customization | Cost |
-|----------|------|---------|---------|---------------|------|
-| **Web Speech API** | Local | <100ms | Basic | Limited | Free |
-| **ElevenLabs** | Cloud | 200-500ms | Excellent | High | $$$ |
-| **Google Cloud TTS** | Cloud | 100-300ms | Very Good | Medium | $$ |
-| **Piper TTS** | Local | <50ms | Good | Medium | Free |
-| **Coqui TTS** | Local | 50-150ms | Good | High | Free |
+| Provider                   | Type                 | Latency       | Quality   | Customization           | Cost             |
+| -------------------------- | -------------------- | ------------- | --------- | ----------------------- | ---------------- |
+| **Kokoro‑82M (kokoro-js)** | Local/browser & Node | 1‑2s (WebGPU) | Excellent | 20+ voices, q8/q4 quant | Free, Apache‑2.0 |
+| **Web Speech API**         | Local/browser        | <100ms        | Basic     | Limited; vendor bias    | Free             |
+| **Piper TTS**              | Local                | <50ms         | Good      | phoneme control         | Free             |
+| **Coqui TTS**              | Local                | 50‑150ms      | Good      | High                    | Free             |
+| **ElevenLabs**             | Cloud                | 200‑500ms     | Top‑tier  | Custom voices           | $$$              |
+| **Google Cloud TTS**       | Cloud                | 100‑300ms     | Very good | Medium                  | $$               |
+
+> _See `docs/research/TTS_PROVIDER_SURVEY_2026-03-05.md` for full
+> comparison and Kokoro model details._
 
 #### Recommended Strategy
 
@@ -236,7 +305,7 @@ interface TTSService {
 
 interface TTSOptions {
   voice?: 'pip' | 'narrator' | 'letter';
-  rate?: number;  // 0.5 - 2.0
+  rate?: number; // 0.5 - 2.0
   pitch?: number; // 0.5 - 2.0
   volume?: number; // 0 - 1
 }
@@ -263,7 +332,7 @@ const VOICE_PERSONAS = {
     rate: 0.9,
     pitch: 1.0,
     provider: 'elevenlabs',
-  }
+  },
 };
 ```
 
@@ -275,12 +344,23 @@ Allow children to talk to Pip. Voice input is more natural for young children th
 
 #### Provider Options
 
-| Provider | Type | Latency | Accuracy | Child Voice | Cost |
-|----------|------|---------|----------|-------------|------|
-| **Web Speech API** | Local | Real-time | Moderate | Fair | Free |
-| **Whisper API** | Cloud | 500-1500ms | Excellent | Good | $$ |
-| **Whisper.cpp** | Local | 200-500ms | Very Good | Good | Free |
-| **Vosk** | Local | Real-time | Good | Fair | Free |
+| Provider                  | Type       | Latency    | Accuracy  | Child Voice | Offline     | Cost         |
+| ------------------------- | ---------- | ---------- | --------- | ----------- | ----------- | ------------ |
+| **Web Speech API**        | Browser    | ~500ms²    | Moderate  | Fair        | 🔶 partial¹ | Free         |
+| **Whisper.cpp (ggml)**    | Local/WASM | 200-1500ms | Very Good | Good        | ✅          | Free, MIT    |
+| **Vosk**                  | Local      | real-time  | Good      | Fair        | ✅          | Free         |
+| **OpenAI Whisper API**    | Cloud      | 500-1200ms | Excellent | Good        | ❌          | $$ per token |
+| **Google Speech-to-Text** | Cloud      | 300-800ms  | Excellent | Good        | ❌          | $$           |
+
+> _Refer to `docs/research/STT_PROVIDER_SURVEY_2026-03-05.md` for details._
+
+#### Recommended Strategy
+
+```
+Primary: Web Speech API (fallback to Whisper.cpp where API unavailable)
+Enhanced: Whisper.cpp local (quantized tiny/base for child voices)
+Fallback: OpenAI/Google cloud APIs with parent consent
+```
 
 #### Recommended Strategy
 
@@ -308,7 +388,7 @@ interface STTService {
 }
 
 interface STTOptions {
-  language?: string;  // 'en-US', 'hi-IN', etc.
+  language?: string; // 'en-US', 'hi-IN', etc.
   continuous?: boolean;
   interimResults?: boolean;
   maxDuration?: number; // Max seconds to listen
@@ -320,10 +400,10 @@ interface STTOptions {
 ```typescript
 const CHILD_VOICE_CONFIG = {
   // Children speak differently - adjust processing
-  minConfidence: 0.6,        // Lower threshold for acceptance
-  maxSilenceDuration: 2000,  // Kids pause longer
-  promptOnSilence: true,     // Pip prompts if silence too long
-  repeatThreshold: 2,        // Ask to repeat after 2 low-confidence results
+  minConfidence: 0.6, // Lower threshold for acceptance
+  maxSilenceDuration: 2000, // Kids pause longer
+  promptOnSilence: true, // Pip prompts if silence too long
+  repeatThreshold: 2, // Ask to repeat after 2 low-confidence results
 };
 ```
 
@@ -335,11 +415,14 @@ Understand what the child shows to the camera and enable AR-style interactions.
 
 #### Provider Options
 
-| Provider | Type | Use Case | Latency | Cost |
-|----------|------|----------|---------|------|
-| **MediaPipe** | Local | Hand tracking, face mesh | <50ms | Free |
-| **TensorFlow.js** | Local | Object detection | 50-200ms | Free |
-| **Claude Vision** | Cloud | Scene understanding | 1-3s | $$$ |
+| Provider      | Type  | Use Case                       | Latency | Cost |
+| ------------- | ----- | ------------------------------ | ------- | ---- |
+| **MediaPipe** | Local | Hand tracking, face mesh, pose | <50ms   | Free |
+
+> _Primary vision engine; see `docs/research/VISION_PROVIDER_SURVEY_2026-03-05.md` for
+> comparison vs. TF.js/ONNX/others._
+> | **TensorFlow.js** | Local | Object detection | 50-200ms | Free |
+> | **Claude Vision** | Cloud | Scene understanding | 1-3s | $$$ |
 | **GPT-4 Vision** | Cloud | Scene understanding | 1-3s | $$$ |
 
 #### Recommended Strategy
@@ -519,49 +602,49 @@ Child traces letter "D" successfully
 
 **Goal:** Basic AI infrastructure with local-first approach
 
-| Component | Task | Priority |
-|-----------|------|----------|
-| TTS | Integrate Web Speech API | P0 |
-| TTS | Create Pip voice persona | P0 |
-| LLM | Set up Ollama with Llama 3.2 | P1 |
-| LLM | Create basic response templates | P1 |
-| Architecture | Provider abstraction layer | P1 |
+| Component    | Task                            | Priority |
+| ------------ | ------------------------------- | -------- |
+| TTS          | Integrate Web Speech API        | P0       |
+| TTS          | Create Pip voice persona        | P0       |
+| LLM          | Set up Ollama with Llama 3.2    | P1       |
+| LLM          | Create basic response templates | P1       |
+| Architecture | Provider abstraction layer      | P1       |
 
 ### Phase 2: Voice Input (Weeks 3-4)
 
 **Goal:** Children can talk to Pip
 
-| Component | Task | Priority |
-|-----------|------|----------|
-| STT | Integrate Web Speech API | P0 |
-| STT | Child voice optimization | P1 |
-| LLM | Conversation context manager | P1 |
-| UI | Microphone indicator and controls | P0 |
-| Safety | Input content filtering | P0 |
+| Component | Task                              | Priority |
+| --------- | --------------------------------- | -------- |
+| STT       | Integrate Web Speech API          | P0       |
+| STT       | Child voice optimization          | P1       |
+| LLM       | Conversation context manager      | P1       |
+| UI        | Microphone indicator and controls | P0       |
+| Safety    | Input content filtering           | P0       |
 
 ### Phase 3: Smart Responses (Weeks 5-6)
 
 **Goal:** Pip responds contextually
 
-| Component | Task | Priority |
-|-----------|------|----------|
-| LLM | Claude API integration | P1 |
-| LLM | Story generation pipeline | P2 |
-| LLM | Activity generation | P2 |
-| Safety | Output content filtering | P0 |
-| Cache | Response caching layer | P1 |
+| Component | Task                      | Priority |
+| --------- | ------------------------- | -------- |
+| LLM       | Claude API integration    | P1       |
+| LLM       | Story generation pipeline | P2       |
+| LLM       | Activity generation       | P2       |
+| Safety    | Output content filtering  | P0       |
+| Cache     | Response caching layer    | P1       |
 
 ### Phase 4: Vision Features (Weeks 7-8)
 
 **Goal:** Camera-based interactions
 
-| Component | Task | Priority |
-|-----------|------|----------|
-| Vision | Object detection (TensorFlow.js) | P1 |
-| Vision | "Show and tell" feature | P2 |
-| Vision | AR overlays (face stickers) | P3 |
-| Safety | Camera privacy indicators | P0 |
-| Parent | Camera feature toggle | P0 |
+| Component | Task                             | Priority |
+| --------- | -------------------------------- | -------- |
+| Vision    | Object detection (TensorFlow.js) | P1       |
+| Vision    | "Show and tell" feature          | P2       |
+| Vision    | AR overlays (face stickers)      | P3       |
+| Safety    | Camera privacy indicators        | P0       |
+| Parent    | Camera feature toggle            | P0       |
 
 ---
 
@@ -607,15 +690,15 @@ const AI_FEATURES = {
   llm_responses: true,
 
   // Advanced features
-  story_generation: false,    // Enable in Phase 3
+  story_generation: false, // Enable in Phase 3
   activity_generation: false, // Enable in Phase 3
-  object_detection: false,    // Enable in Phase 4
-  ar_overlays: false,         // Enable in Phase 4
+  object_detection: false, // Enable in Phase 4
+  ar_overlays: false, // Enable in Phase 4
 
   // Cloud features (cost implications)
-  cloud_llm: false,           // Parent-enabled
-  cloud_tts: false,           // Parent-enabled
-  cloud_vision: false,        // Parent-enabled
+  cloud_llm: false, // Parent-enabled
+  cloud_tts: false, // Parent-enabled
+  cloud_vision: false, // Parent-enabled
 };
 ```
 
@@ -623,13 +706,13 @@ const AI_FEATURES = {
 
 ## 6. Performance Budgets
 
-| Operation | Target Latency | Max Latency | Notes |
-|-----------|----------------|-------------|-------|
-| Pip quick response | <500ms | 1000ms | Local LLM |
-| TTS start speaking | <200ms | 500ms | Web Speech |
-| STT transcript | Real-time | 500ms delay | Web Speech |
-| Object detection | <200ms | 500ms | TensorFlow.js |
-| Story generation | <3000ms | 5000ms | Cloud LLM |
+| Operation          | Target Latency | Max Latency | Notes         |
+| ------------------ | -------------- | ----------- | ------------- |
+| Pip quick response | <500ms         | 1000ms      | Local LLM     |
+| TTS start speaking | <200ms         | 500ms       | Web Speech    |
+| STT transcript     | Real-time      | 500ms delay | Web Speech    |
+| Object detection   | <200ms         | 500ms       | TensorFlow.js |
+| Story generation   | <3000ms        | 5000ms      | Cloud LLM     |
 
 ---
 
@@ -640,19 +723,19 @@ const AI_FEATURES = {
 ```typescript
 const FALLBACK_CHAIN = {
   llm: [
-    'ollama',      // Try local first
-    'claude',      // Fall back to cloud
-    'templates',   // Fall back to pre-written responses
+    'ollama', // Try local first
+    'claude', // Fall back to cloud
+    'templates', // Fall back to pre-written responses
   ],
   tts: [
-    'piper',       // Try local first
-    'web-speech',  // Fall back to browser
-    'text-only',   // Fall back to text display
+    'piper', // Try local first
+    'web-speech', // Fall back to browser
+    'text-only', // Fall back to text display
   ],
   stt: [
-    'web-speech',  // Try browser first
-    'whisper',     // Fall back to cloud
-    'text-input',  // Fall back to keyboard/touch
+    'web-speech', // Try browser first
+    'whisper', // Fall back to cloud
+    'text-input', // Fall back to keyboard/touch
   ],
 };
 ```
@@ -662,7 +745,7 @@ const FALLBACK_CHAIN = {
 ```typescript
 const CHILD_ERROR_MESSAGES = {
   llm_unavailable: "Pip is thinking really hard... Let's try again!",
-  tts_unavailable: "Pip lost their voice! Can you read what Pip says?",
+  tts_unavailable: 'Pip lost their voice! Can you read what Pip says?',
   stt_unavailable: "Pip can't hear right now. Can you tap instead?",
   camera_denied: "Pip can't see! Ask a grown-up to help with the camera.",
   network_error: "Pip got lost in the clouds. Let's play something else!",
@@ -733,6 +816,6 @@ logger.info('ai_response_generated', {
 
 ## Changelog
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0.0 | 2026-01-29 | Initial architecture document |
+| Version | Date       | Changes                       |
+| ------- | ---------- | ----------------------------- |
+| 1.0.0   | 2026-01-29 | Initial architecture document |

@@ -19,6 +19,7 @@ import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import {
   buildScore,
@@ -27,6 +28,7 @@ import {
   nextDigit,
   type TracePoint,
 } from '../games/numberTracingLogic';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const CANVAS_SIZE = 360;
 const TOTAL_DIGITS = 10;
@@ -50,6 +52,8 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
   const [feedback, setFeedback] = useState('Trace the number by following the dotted guide.');
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedDigits, setCompletedDigits] = useState<number[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('number-tracing');
@@ -128,12 +132,23 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
 
       if (accuracy >= 60) {
         // Success!
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        
         playSuccess();
-        const points = buildScore(accuracy, hintsUsed);
+        triggerHaptic('success');
+        const points = buildScore(accuracy, hintsUsed) + Math.min(newStreak * 3, 20);
         const newScore = score + points;
         setScore(newScore);
         setCompletedDigits(prev => [...prev, currentDigit]);
         setFeedback(`Great job! ${points} points!`);
+        
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), 1500);
+        }
 
         // Check if all digits complete
         if (completedDigits.length + 1 >= TOTAL_DIGITS) {
@@ -181,6 +196,8 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
     setCurrentDigit(0);
     setCompletedDigits([]);
     setScore(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setHintsUsed(0);
     setStrokePoints([]);
     setFeedback('Trace the number by following the dotted guide.');
@@ -196,12 +213,31 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
       showScore={true}
     >
       <div className="relative w-full h-full flex flex-col items-center justify-center p-4 bg-[#FFF8F0]">
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
+        )}
+
         {/* Instructions */}
         <div className="bg-white rounded-2xl px-6 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] mb-4 max-w-md text-center">
           <p className="text-lg font-bold text-advay-slate">{feedback}</p>
-          <p className="text-sm text-text-secondary mt-1">
-            Number {currentDigit + 1} of {TOTAL_DIGITS}
-          </p>
+          <div className="flex items-center justify-center gap-4 mt-1">
+            <p className="text-sm text-text-secondary">
+              Number {currentDigit + 1} of {TOTAL_DIGITS}
+            </p>
+            {streak > 0 && (
+              <span className="text-orange-500 font-bold text-sm">🔥 {streak}</span>
+            )}
+          </div>
         </div>
 
         {/* Canvas */}

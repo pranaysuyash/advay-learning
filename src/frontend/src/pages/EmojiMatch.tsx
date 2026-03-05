@@ -5,6 +5,7 @@
  */
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -15,14 +16,18 @@ import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameContainer } from '../components/GameContainer';
+import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useHandDetection } from '../components/game/useHandDetection';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
 import { UIIcon } from '../components/ui/Icon';
 import {
@@ -90,7 +95,6 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const [showTutorial, setShowTutorial] = useState(true);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
   const [missCount, setMissCount] = useState(0);
   const [level, setLevel] = useState(1);
   const [round, setRound] = useState(1);
@@ -120,11 +124,20 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const [lastHitId, setLastHitId] = useState<number | null>(null);
   const [lastMissId, setLastMissId] = useState<number | null>(null);
 
+  // Streak tracking
+  const { streak, scorePopup, showMilestone, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const targetsRef = useRef<EmotionTarget[]>(targets);
   const correctIdRef = useRef(correctId);
   const streakRef = useRef(streak);
   const roundRef = useRef(round);
   const levelRef = useRef(level);
+
+  // Keep streak ref in sync for closure access in handleFrame
+  useEffect(() => {
+    streakRef.current = streak;
+  }, [streak]);
+
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const showDebug = Boolean((import.meta as any)?.env?.DEV);
 
@@ -137,9 +150,6 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   useEffect(() => {
     correctIdRef.current = correctId;
   }, [correctId]);
-  useEffect(() => {
-    streakRef.current = streak;
-  }, [streak]);
   useEffect(() => {
     roundRef.current = round;
   }, [round]);
@@ -246,7 +256,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
     roundTimerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          setStreak(0);
+          resetStreak();
           const nextMisses = missCountRef.current + 1;
           setMissCount(nextMisses);
           setFeedback('Time is up! Try the next emoji.');
@@ -278,7 +288,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const startGame = useCallback(async () => {
     setGameCompleted(false);
     setScore(0);
-    setStreak(0);
+    resetStreak();
     setMissCount(0);
     setLevel(1);
     setRound(1);
@@ -301,7 +311,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       void speak("Let's play Emoji Match! Show me your hand!");
     }
     playClick();
-  }, [playClick, speak, ttsEnabled]);
+  }, [playClick, speak, ttsEnabled, resetStreak, incrementStreak]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
@@ -318,11 +328,11 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         containerRef.current?.getBoundingClientRect();
       const mappedTip = containerRect
         ? mapNormalizedPointToCover(
-            tip,
-            { width: meta.video.videoWidth, height: meta.video.videoHeight },
-            { width: containerRect.width, height: containerRect.height },
-            { mirrored: false },
-          )
+          tip,
+          { width: meta.video.videoWidth, height: meta.video.videoHeight },
+          { width: containerRect.width, height: containerRect.height },
+          { mirrored: false },
+        )
         : tip;
 
       if (!isHandDetected) setIsHandDetected(true);
@@ -331,9 +341,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
 
       const tipPx = containerRect
         ? {
-            x: containerRect.left + mappedTip.x * containerRect.width,
-            y: containerRect.top + mappedTip.y * containerRect.height,
-          }
+          x: containerRect.left + mappedTip.x * containerRect.width,
+          y: containerRect.top + mappedTip.y * containerRect.height,
+        }
         : null;
       const smoothedPx = tipPx ? kalmanRef.current.update(tipPx) : null;
 
@@ -356,13 +366,13 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
           const buttonRect = startButtonRef.current?.getBoundingClientRect();
           const target = buttonRect
             ? {
-                x: buttonRect.left + buttonRect.width / 2,
-                y: buttonRect.top + buttonRect.height / 2,
-              }
+              x: buttonRect.left + buttonRect.width / 2,
+              y: buttonRect.top + buttonRect.height / 2,
+            }
             : {
-                x: (containerRect?.left ?? 0) + (containerRect?.width ?? 0) / 2,
-                y: (containerRect?.top ?? 0) + (containerRect?.height ?? 0) / 2,
-              };
+              x: (containerRect?.left ?? 0) + (containerRect?.width ?? 0) / 2,
+              y: (containerRect?.top ?? 0) + (containerRect?.height ?? 0) / 2,
+            };
           const radius = buttonRect
             ? Math.max(buttonRect.width, buttonRect.height) / 2
             : START_TARGET_FALLBACK_RADIUS;
@@ -407,10 +417,21 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       if (!expected) return;
 
       if (hit.id === expected.id) {
-        const nextStreak = streakRef.current + 1;
-        setStreak(nextStreak);
+        const nextStreak = incrementStreak();
         setMissCount(0);
-        setScore((prev) => prev + 10 + Math.min(15, nextStreak * 3));
+
+        // Calculate score
+        const basePoints = 10;
+        const streakBonus = Math.min(15, nextStreak * 3);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+
+        // Show score popup
+        setScorePopup({ points: totalPoints });
+
+        // Haptics
+        triggerHaptic('success');
+
         setFeedback(`Yes! That's the ${expected.name} emoji!`);
         if (ttsEnabled) {
           void speak(`Yes! That's the ${expected.name} emoji!`);
@@ -428,6 +449,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         highlightTimeoutRef.current = setTimeout(() => setLastHitId(null), 900);
 
         if (nextStreak > 0 && nextStreak % 5 === 0) {
+          triggerHaptic('celebration');
           setCelebrationMessage('Great job!');
           setShowCelebration(true);
           if (ttsEnabled) {
@@ -447,7 +469,8 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
           nextRound();
         }, MATCH_PAUSE_MS);
       } else {
-        setStreak(0);
+        resetStreak();
+        triggerHaptic('error');
         setMissCount((current) => current + 1);
         setFeedback(`Oops! That's ${hit.name}. Find ${expected.name}.`);
         if (ttsEnabled) {
@@ -487,6 +510,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
     isReady: isHandTrackingReady,
     startTracking,
     webcamRef: _webcamRef,
+    trackingLoss,
   } = useGameHandTracking({
     gameName: 'EmojiMatch',
     targetFps: 30,
@@ -505,6 +529,8 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       kalmanRef.current.reset();
     },
   });
+
+  const fallbackEnabled = useFeatureFlag('controls.fallbackV1');
 
   useEffect(() => {
     if (!gameCompleted && !isHandTrackingReady && !isModelLoading) {
@@ -643,14 +669,58 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
           </div>
         )}
 
+        {/* Kenney Heart HUD */}
+        {isPlaying && (
+          <div className="absolute bottom-6 left-6 flex items-center gap-1 bg-white/90 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <img
+                key={i}
+                src={streak >= (i + 1) * 2
+                  ? '/assets/kenney/platformer/hud/hud_heart.png'
+                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                alt=""
+                className="w-7 h-7"
+              />
+            ))}
+            <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+          </div>
+        )}
+
+        {/* Score Popup Animation */}
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 0, y: 0, scale: 0.5 }}
+            animate={{ opacity: 1, y: -40, scale: 1.2 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+          >
+            <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+              +{scorePopup.points}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Streak Milestone */}
+        {showMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1.2, rotate: 0 }}
+            exit={{ scale: 0 }}
+            className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+          >
+            <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
+        )}
+
         {isPlaying && (
           <div className='absolute top-32 left-1/2 -translate-x-1/2 flex gap-2'>
             {progressDots.map((filled, index) => (
               <span
                 key={`dot-${index}`}
-                className={`h-3 w-3 rounded-full border border-white/40 ${
-                  filled ? 'bg-emerald-400' : 'bg-white/20'
-                }`}
+                className={`h-3 w-3 rounded-full border border-white/40 ${filled ? 'bg-emerald-400' : 'bg-white/20'
+                  }`}
               />
             ))}
             {isAdaptive && (
@@ -675,9 +745,8 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-transform ${
-                  isHit ? 'scale-110' : ''
-                }`}
+                className={`absolute inset-0 rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-transform ${isHit ? 'scale-110' : ''
+                  }`}
                 style={{
                   borderColor: target.color,
                   backgroundColor: 'white',
@@ -863,6 +932,15 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         type='stars'
         showCharacter
         characterEmoji='⭐'
+      />
+
+      {/* GI-002: Tracking-loss recovery overlay */}
+      <TrackingLossOverlay
+        isVisible={trackingLoss.isLost}
+        onRetryCamera={trackingLoss.retry}
+        lossDurationMs={trackingLoss.durationMs}
+        fallbackAvailable={fallbackEnabled}
+        onExitToGames={goHome}
       />
     </GameContainer>
   );

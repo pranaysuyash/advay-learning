@@ -30,7 +30,7 @@ export function calculateHeadPose(landmarks: NormalizedLandmark[]): HeadPose {
     // 1. Roll: angle between the eyes
     const deltaX = rightEyeOuter.x - leftEyeOuter.x;
     const deltaY = rightEyeOuter.y - leftEyeOuter.y;
-    let roll = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    const roll = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
     // 2. Yaw: ratio of nose-to-right-cheek vs nose-to-left-cheek distances
     const distNoseToLeft = Math.hypot(nose.x - leftCheekEdge.x, nose.y - leftCheekEdge.y);

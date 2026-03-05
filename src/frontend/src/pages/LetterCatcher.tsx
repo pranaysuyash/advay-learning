@@ -1,16 +1,18 @@
 /**
  * Letter Catcher Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   spawnLetter,
@@ -18,6 +20,7 @@ import {
   checkCatch,
   type FallingLetter,
 } from '../games/letterCatcherLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const navigate = useNavigate();
@@ -31,6 +34,9 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const letterIdRef = useRef(0);
   const intervalRef = useRef<number | null>(null);
 
@@ -50,6 +56,9 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
     setScore(0);
     setCaught(0);
     setMissed(0);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setGameState('playing');
     letterIdRef.current = 0;
   };
@@ -92,6 +101,19 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
     if (caughtLetter) {
       if (caughtLetter.letter === targetLetter) {
         playSuccess();
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const basePoints = 10;
+        const streakBonus = Math.min(newStreak * 2, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScorePopup({ points: totalPoints, x: caughtLetter.x, y: caughtLetter.y });
+        setTimeout(() => setScorePopup(null), 700);
+        triggerHaptic('success');
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
         setCaught((prevCaught) => {
           const nextCaught = prevCaught + 1;
           if (nextCaught > 5) {
@@ -99,9 +121,11 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
           }
           return nextCaught;
         });
-        setScore((s) => s + 20);
+        setScore((s) => s + totalPoints);
       } else {
         playError();
+        setStreak(0);
+        triggerHaptic('error');
         setScore((s) => Math.max(s - 10, 0));
       }
       setLetters((prev) => prev.filter((l) => l.id !== caughtLetter.id));
@@ -169,6 +193,43 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
             <div className='absolute top-2 left-2 bg-white px-3 py-1 rounded-full text-amber-600 font-bold'>
               Catch: {targetLetter}
             </div>
+            {streak > 0 && (
+              <div className='absolute top-2 right-2 bg-orange-500 text-white px-3 py-1 rounded-full font-bold flex items-center gap-1'>
+                <span>🔥</span>
+                <span>{streak}</span>
+              </div>
+            )}
+            <AnimatePresence>
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 1, y: scorePopup.y, x: scorePopup.x, scale: 1 }}
+                  animate={{ opacity: 0, y: scorePopup.y - 40, scale: 1.2 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className='absolute text-green-600 font-bold text-lg pointer-events-none'
+                  style={{ left: scorePopup.x, top: scorePopup.y }}
+                >
+                  +{scorePopup.points}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence>
+              {showStreakMilestone && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.3 }}
+                  className='absolute inset-0 flex items-center justify-center pointer-events-none z-10'
+                >
+                  <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl font-bold text-2xl shadow-lg flex items-center gap-2'>
+                    <span className='text-3xl'>🔥</span>
+                    <span>{streak} STREAK!</span>
+                    <span className='text-3xl'>🔥</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {letters.map((letter) => (
               <div
                 key={letter.id}
@@ -192,6 +253,11 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
             <p className='text-6xl mb-4'>🎉</p>
             <h2 className='text-2xl font-bold mb-2'>Great Job!</h2>
             <p className='text-xl mb-4'>Caught {caught} letters!</p>
+            {streak > 0 && (
+              <p className='text-lg mb-2 text-orange-500 font-bold'>
+                🔥 Best Streak: {streak}
+              </p>
+            )}
             <p className='text-2xl font-bold text-green-600 mb-4'>
               Score: {score}
             </p>

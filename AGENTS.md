@@ -72,8 +72,8 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.6  
-**Last Updated**: 2026-02-23  
+**Version**: 1.7  
+**Last Updated**: 2026-03-05  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -123,6 +123,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 **No deletions without explicit approval**:
 
 - Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
+- Strict command rule: do not run `rm`, `git rm`, or any delete-equivalent command on project files unless the user explicitly requests deletion in the current chat.
 - If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
 - **Exception**: Deletion is acceptable after completing the investigation workflow in CODE_PRESERVATION_GUIDELINES.md and documenting why deletion was chosen over implementation.
 
@@ -131,6 +132,9 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Always stage changes with: `git add -A`
 - Do not “selectively stage” unless the user explicitly asks.
 - Do not use staging as a mechanism to “drop” other agents’ work.
+- Once `git add -A` has been run, every staged file is in scope for that commit/PR.
+- For staged files, treat failures as current branch code issues to resolve, not as “pre-existing/unrelated” exemptions.
+- Parallel-agent changes included by `git add -A` are part of the same commit and merge workflow by default.
 
 ### 6. Branch and Parallel Work Preservation (CRITICAL)
 
@@ -156,6 +160,8 @@ This document governs how AI agents (including myself and others) work on the Ad
 **🚫 NEVER delete or revert files with unrecognized changes.**
 
 - Unrecognized changes may be from parallel agents working simultaneously
+- Multiple agents are expected to work in parallel in this repo; treat all Source Control entries (including `??` untracked files) as part of active project work by default.
+- Do not delete, rename, move, or “clean up” files just because they are untracked; only mark files to be untracked via `.gitignore` when the user explicitly requests that outcome.
 - If you see changes you do not recognize, PRESERVE them
 - Only modify/delete files you are explicitly tasked to work on
 - When in doubt, ask the user before removing anything
@@ -251,6 +257,28 @@ cat > tools/video_frame_analyzer.html << 'EOF'
 EOF
 echo "Added to tools/README.md with usage examples"
 ```
+
+### 7.1 Kenney Asset Source Policy
+
+**Canonical local source for this repo:**
+
+- `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`
+- Local bundle snapshot added: `2026-03-03`
+- Current `New Platformer Pack` payload timestamp: `2025-12-03`
+
+**Required workflow when an agent needs Kenney assets:**
+
+1. Check whether the asset already exists in the project under `src/frontend/public/assets/kenney/`.
+2. If it exists, reuse that in-project runtime asset instead of importing a duplicate.
+3. If it does not exist, source it from the local purchased Kenney bundle above.
+4. For New Platformer Pack assets, use `tools/sync_kenney_platformer_assets.sh` instead of ad-hoc copying.
+5. If the local bundle is replaced with a newer Kenney download, update the recorded snapshot dates in `AGENTS.md`, `docs/SETUP.md`, and `assets/kenney/README.md` as part of the same change.
+
+**Do not:**
+
+- Re-download a Kenney pack if the purchased local bundle already contains it.
+- Introduce a second runtime asset path when `src/frontend/public/assets/kenney/` already covers the use case.
+- Treat `assets/kenney/` as the canonical runtime source; it is documentation only.
 
 ### 8. Default Execution Lifecycle (Mandatory Unless User Overrides)
 
@@ -471,7 +499,7 @@ The audit-to-ticket gap exists because:
 - [ ] Run discovery commands (git status, git log, rg searches)
 - [ ] Identify exact code locations (semantic anchors, not line numbers)
 - [ ] Check for existing tests
-- [ ] Verify no uncommitted changes in unrelated files
+- [ ] Preserve uncommitted parallel work; do not drop unrecognized files/edits
 - [ ] Confirm scope contract is clear
 - [ ] Stage changes using `git add -A` (unless user explicitly requests partial staging)
 ```
@@ -616,6 +644,28 @@ cd src/frontend && npm install
 
 **Always Verify**: After commit, check `git log --oneline -1` to confirm commit succeeded, even if terminal output looks corrupted.
 
+### Safe Multi-Line File Writes (Required)
+
+The heredoc warning above is not just about commit messages. Multi-line shell writes routinely cause false “saved” and false “done” claims when agents write docs/specs/code directly from the terminal.
+
+Required rules:
+
+- **Do not** use heredoc (`cat > file <<EOF`, `tee file <<EOF`) to create or overwrite tracked repo files
+- Use structured file editing instead
+- `/tmp` is scratch only and does **not** count as a saved project deliverable
+- After any multi-line write, immediately verify the final repo file with:
+
+```bash
+sed -n '1,40p' <file>
+git diff -- <file>
+git status --short -- <file>
+```
+
+- Do not mark work complete based on terminal output alone
+- Do not mark parent checklist items complete while child implementation items remain incomplete unless the document explicitly defines the parent as a coarse milestone
+
+See `docs/process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md` for the full failure patterns and required workflow.
+
 ### Parallel Work Preservation (CRITICAL)
 
 **Principle**: Multiple agents may work simultaneously on the same branch. Never discard unrecognized changes.
@@ -752,8 +802,9 @@ The pre-commit hook runs these checks in order:
 |-------|--------|---------|-----------|
 | **1. Agent Gate** | `scripts/agent_gate.sh` | Worklog updates, audit artifacts, ticket evidence | - |
 | **2. Secret Scan** | `scripts/secret_scan.sh` | Block leaked credentials/API keys | `SKIP_SECRET_SCAN=1` |
-| **3. Feature Regression** | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors | `SKIP_FEATURE_CHECK=1` |
-| **4. Regression Tests** | `scripts/regression_check.sh` | Tests, export changes, TypeScript validation | `SKIP_REGRESSION_CHECK=1` |
+| **3. Static Maintainability** | `scripts/maintainability_guard.sh` | Block oversized/high-complexity staged source files, including new files | `SKIP_MAINTAINABILITY_CHECK=1` |
+| **4. Feature Regression** | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors | `SKIP_FEATURE_CHECK=1` |
+| **5. Regression Tests** | `scripts/regression_check.sh` | Tests, export changes, TypeScript validation | `SKIP_REGRESSION_CHECK=1` |
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
 - If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_ADDENDUM_*.md`.
@@ -769,7 +820,42 @@ The pre-commit hook runs these checks in order:
 - Detects common secret patterns (API keys, passwords, tokens).
 - Fails if any potential secrets are found in staged files.
 
-#### 3. Feature Regression Check (`scripts/feature_regression_check.sh`) ⭐ NEW
+#### 3. Static Maintainability Guard (`scripts/maintainability_guard.sh`)
+**Critical:** Blocks newly added oversized source files and existing files whose maintainability metrics get materially worse.
+
+**Checks staged blobs directly (including newly added files):**
+- New files fail immediately if they exceed `MAX_FILE_LOC` (default: 1000), `MAX_FILE_BYTES` (default: 60000), or `MAX_FILE_CCN` (default: 60)
+- Existing files fail when they cross a threshold from below
+- Existing files already above a threshold fail only if they get materially worse again (size grows further or max CCN increases)
+
+**Why this exists:**
+- Diff-based checks only see how much changed in the current commit
+- Very large files can keep passing when later commits touch only a few lines
+- This guard enforces a static ceiling so files like `wordBuilderLogic.ts` cannot silently remain unflagged once touched
+
+**When this check triggers - AGENT MUST:**
+
+1. **Do not treat it as noise**
+   - Large files are a maintainability risk even when behavior is unchanged
+
+2. **Choose the right mitigation:**
+   ```bash
+   # Measure the file explicitly
+   wc -l <file>
+   wc -c <file>
+   ```
+
+3. **Reduce the risk intentionally:**
+   - Split the file into cohesive modules
+   - Move embedded datasets/assets into dedicated data files
+   - Extract helpers or pure functions
+   - Only override thresholds for an explicitly justified exception
+
+4. **If an exception is truly intentional:**
+   - Document why the file must remain large
+   - Use an explicit env override for that commit
+
+#### 4. Feature Regression Check (`scripts/feature_regression_check.sh`) ⭐ NEW
 **Critical:** Detects when large refactors remove functionality.
 
 **Triggers when:**
@@ -1035,9 +1121,10 @@ Pass if:
 11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
 12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
-14. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
-15. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
-16. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
+14. **Never** reclassify staged files as “out of scope” after running `git add -A`; staged changes must be carried through gate, PR, and merge workflow
+15. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
+16. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
+17. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
 
 ---
 

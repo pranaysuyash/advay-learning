@@ -29,7 +29,7 @@ def upgrade() -> None:
         ["parent_id"],
         unique=False,
     )
-    
+
     # Index on achievements.profile_id for faster profile lookups
     op.create_index(
         "ix_achievements_profile_id",

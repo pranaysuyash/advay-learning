@@ -55,7 +55,9 @@ jobs:
         working-directory: src/backend
         run: uv run pytest
         env:
+          APP_ENV: test
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/advay_learning_test
+          SECRET_KEY: ci_key_for_tests_only_not_prod_123456789012
           TESTING: true
 
   # =============================================================================

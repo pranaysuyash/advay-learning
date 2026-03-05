@@ -20,7 +20,10 @@ import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
-import { subscriptionApi, type SubscriptionStatus } from '../services/api';
+import { subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
+import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
+import { useGameStatsMapForProfile } from '../hooks/useGameStats';
+import type { ProgressItem } from '../types/progress';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -64,6 +67,17 @@ const RECOMMENDED_GAMES = [
     ageRange: '3-6 years',
     category: 'Drawing',
     difficulty: 'Easy',
+  },
+  {
+    id: 'physics-playground',
+    title: 'Physics Playground',
+    description: 'Explore sand, water, and fire with your hands! 🌟',
+    path: '/games/physics-playground',
+    icon: 'sparkles' as IconName,
+    ageRange: '4-8 years',
+    category: 'Science',
+    difficulty: 'Easy',
+    isNew: true,
   }
 ];
 
@@ -77,14 +91,14 @@ export const Dashboard = memo(function Dashboard() {
   const { showToast } = useToast();
 
   const [exporting, setExporting] = useState(false);
-  
+
   // Add Child Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState(5);
   const [childLanguage, setChildLanguage] = useState('en');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Edit Profile Modal State
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState<typeof currentProfile>(null);
@@ -92,6 +106,7 @@ export const Dashboard = memo(function Dashboard() {
   const [editLanguage, setEditLanguage] = useState('en');
   const [editAvatarConfig, setEditAvatarConfig] = useState<AvatarConfig | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [progress, setProgress] = useState<ProgressItem[]>([]);
 
   useEffect(() => {
     if (!isGuest) {
@@ -122,7 +137,23 @@ export const Dashboard = memo(function Dashboard() {
       setCurrentProfile(defaultProfile);
     }
   }, [defaultProfile, currentProfile, setCurrentProfile, isGuest]);
-  
+
+  // Fetch progress for game recommendations
+  useEffect(() => {
+    if (!defaultProfile?.id || isGuest) return;
+    
+    const fetchProgress = async () => {
+      try {
+        const res = await progressApi.getProgress(defaultProfile.id);
+        setProgress(res.data);
+      } catch (err) {
+        console.error('Failed to fetch progress:', err);
+      }
+    };
+    
+    fetchProgress();
+  }, [defaultProfile?.id, isGuest]);
+
   const { updateProfile } = useProfileStore();
 
   // Calculate total XP/Stars
@@ -142,6 +173,32 @@ export const Dashboard = memo(function Dashboard() {
     return baseStars;
   }, [letterProgress, isGuest, guestSession, profiles]);
 
+  const { statsMap } = useGameStatsMapForProfile(defaultProfile?.age);
+
+  // Dynamic game recommendations based on profile and play history
+  const gameRecommendations: GameRecommendation[] = useMemo(() => {
+    if (!defaultProfile) return [];
+    
+    // Extract played game IDs from progress
+    const playedGameIds = progress
+      .filter(p => p.activity_type === 'game')
+      .map(p => p.content_id);
+    
+    return getGameRecommendationsForProfile(
+      defaultProfile.age,
+      playedGameIds,
+      Object.fromEntries(statsMap)
+    );
+  }, [defaultProfile, progress, statsMap]);
+
+  // Time-based greeting
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
   const handleExport = async () => {
     setExporting(true);
     const exportData = {
@@ -160,10 +217,10 @@ export const Dashboard = memo(function Dashboard() {
     URL.revokeObjectURL(url);
     setExporting(false);
   };
-  
+
   const handleAddChild = async () => {
     if (!childName.trim()) return;
-    
+
     setIsSubmitting(true);
     try {
       await createProfile({
@@ -183,7 +240,7 @@ export const Dashboard = memo(function Dashboard() {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleEditProfile = (profile: typeof currentProfile) => {
     if (!profile) return;
     setEditingProfile(profile);
@@ -192,17 +249,17 @@ export const Dashboard = memo(function Dashboard() {
     setEditAvatarConfig((profile.settings?.avatar_config as AvatarConfig) || null);
     setShowEditModal(true);
   };
-  
+
   const handleSaveProfile = async () => {
     if (!editingProfile || !editName.trim()) return;
-    
+
     setIsSubmitting(true);
     try {
       const updateData: Parameters<typeof updateProfile>[1] = {
         name: editName.trim(),
         preferred_language: editLanguage,
       };
-      
+
       // Include avatar config if it was changed
       if (editAvatarConfig) {
         updateData.settings = {
@@ -210,7 +267,7 @@ export const Dashboard = memo(function Dashboard() {
           avatar_config: editAvatarConfig,
         };
       }
-      
+
       await updateProfile(editingProfile.id, updateData);
       await fetchProfiles();
       setShowEditModal(false);
@@ -240,9 +297,9 @@ export const Dashboard = memo(function Dashboard() {
           <Mascot state='happy' responsiveSize='sm' hideOnMobile={false} className="hidden sm:block" />
           <div>
             <h1 className='text-3xl sm:text-4xl font-extrabold text-[#1E293B]'>
-              {defaultProfile?.name
-                ? t('dashboard:welcome.title', { name: defaultProfile.name })
-                : t('dashboard:welcome.titleAnonymous')} <span className="text-yellow-400">★</span>
+              {greeting}, {defaultProfile?.name
+                ? defaultProfile.name
+                : 'Explorer'}! <span className="text-yellow-400">★</span>
             </h1>
             <p className='text-lg font-medium text-slate-500 mt-1'>
               {t('dashboard:welcome.subtitle')}
@@ -290,11 +347,10 @@ export const Dashboard = memo(function Dashboard() {
                   e.preventDefault();
                   handleEditProfile(p);
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition ${
-                  p.id === currentProfile?.id 
-                    ? 'bg-[#3B82F6] text-white shadow-sm' 
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition ${p.id === currentProfile?.id
+                    ? 'bg-[#3B82F6] text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-50'
-                }`}
+                  }`}
                 title={`${p.name}${p.age ? ` (${p.age} years)` : ''} - Right-click to edit`}
               >
                 <AvatarWithBadge
@@ -332,26 +388,59 @@ export const Dashboard = memo(function Dashboard() {
         <section>
           <div className='flex justify-between items-end mb-6'>
             <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-              <span className="text-[#E85D04]">Featured Games</span>
+              <span className="text-[#E85D04]">For You</span>
             </h2>
             <Link to="/games" className='text-lg font-bold text-[#3B82F6] hover:underline'>
               {t('dashboard:featuredGames.seeAll')} →
             </Link>
           </div>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-            {RECOMMENDED_GAMES.map((game, idx) => (
-              <GameCard
-                key={game.id}
-                {...game}
-                animationDelay={idx * 0.1}
-                isNew={game.isNew}
-                buttonText={t('dashboard:featuredGames.playNow')}
-                onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
-                reducedMotion={false}
-              />
-            ))}
-          </div>
+          {gameRecommendations.length > 0 ? (
+            <div className='space-y-8'>
+              {gameRecommendations.slice(0, 3).map((section) => (
+                <div key={section.slot}>
+                  <h3 className='text-lg font-bold text-slate-700 mb-3 flex items-center gap-2'>
+                    {section.title}
+                    {section.slot === 'new' && <span className='bg-green-500 text-white text-xs px-2 py-0.5 rounded-full'>NEW</span>}
+                  </h3>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+                    {section.games.slice(0, 4).map((game, idx) => (
+                      <GameCard
+                        key={game.id}
+                        id={game.id}
+                        title={game.title}
+                        description={game.tagline}
+                        path={game.path}
+                        icon={game.icon}
+                        ageRange={game.ageRange}
+                        category={game.vibe}
+                        difficulty='Easy'
+                        animationDelay={idx * 0.1}
+                        isNew={game.isNew}
+                        buttonText={t('dashboard:featuredGames.playNow')}
+                        onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
+                        reducedMotion={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+              {RECOMMENDED_GAMES.map((game, idx) => (
+                <GameCard
+                  key={game.id}
+                  {...game}
+                  animationDelay={idx * 0.1}
+                  isNew={game.isNew}
+                  buttonText={t('dashboard:featuredGames.playNow')}
+                  onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
+                  reducedMotion={false}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* SECONDARY AREA: ADVENTURE MAP (Keep logic, style to match V1) */}
@@ -375,7 +464,7 @@ export const Dashboard = memo(function Dashboard() {
         </section>
 
       </main>
-      
+
       {/* ADD CHILD MODAL */}
       <AddChildModal
         isOpen={showAddModal}
@@ -389,7 +478,7 @@ export const Dashboard = memo(function Dashboard() {
         onSubmit={handleAddChild}
         isSubmitting={isSubmitting}
       />
-      
+
       {/* EDIT PROFILE MODAL */}
       <EditProfileModal
         isOpen={showEditModal}
@@ -408,7 +497,7 @@ export const Dashboard = memo(function Dashboard() {
         onSubmit={handleSaveProfile}
         isSubmitting={isSubmitting}
       />
-      
+
       {/* AVATAR PICKER MODAL */}
       <AvatarPickerModal
         isOpen={showAvatarPicker}
@@ -484,7 +573,7 @@ function SubscriptionCard() {
                 </span>
               </div>
             </div>
-            
+
             {subscription.days_remaining !== null && (
               <p className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}>
                 {isExpiringSoon ? '⚠️ ' : ''}{subscription.days_remaining} days remaining

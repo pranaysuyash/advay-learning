@@ -11,6 +11,41 @@
  * - Counting
  */
 
+// Game configuration constants - centralized for easy tuning
+export const BUBBLE_GAME_CONFIG = {
+  // Blow detection settings
+  BLOW_THRESHOLD: 0.12,
+  MIN_BLOW_DURATION: 100,
+  BLOW_COOLDOWN: 300,
+  
+  // Scoring
+  BASE_POINTS_PER_BUBBLE: 10,
+  COMBO_BONUS_PER_EXTRA_BUBBLE: 5,
+  ACCURACY_BONUS: 50,
+  
+  // Level progression
+  LEVEL_ADVANCE_POPS: 10,
+  LEVEL_ADVANCE_TIME_SECONDS: 10,
+  MAX_LEVEL: 10,
+  
+  // Physics
+  BASE_BUBBLE_SPEED: 0.002,
+  SPEED_VARIANCE: 0.003,
+  WOBBLE_SPEED: 0.05,
+  SPAWN_CHANCE_BASE: 0.01,
+  SPAWN_CHANCE_PER_LEVEL: 0.005,
+  MAX_BUBBLES_BASE: 5,
+  
+  // Timing
+  GAME_DURATION_SECONDS: 30,
+  FRAME_TIME_MS: 16,
+  
+  // Hit detection
+  BASE_HIT_RADIUS: 0.15,
+  VOLUME_HIT_RADIUS_MULTIPLIER: 0.1,
+  MIN_HIT_VOLUME: 0.2,
+} as const;
+
 export interface Bubble {
   id: string;
   x: number;        // 0-1 normalized
@@ -73,7 +108,7 @@ export function initializeGame(): GameState {
     poppedCount: 0,
     missedCount: 0,
     level: 1,
-    timeLeft: 30,
+    timeLeft: BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS,
     gameOver: false,
     isPlaying: false,
     lastBlowTime: 0,
@@ -86,7 +121,7 @@ export function startGame(state: GameState): GameState {
   return {
     ...state,
     isPlaying: true,
-    timeLeft: 30,
+    timeLeft: BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS,
     gameOver: false,
     bubbles: [createBubble(state.level)],
   };
@@ -96,11 +131,18 @@ export function startGame(state: GameState): GameState {
 export function updateBubbles(state: GameState, deltaTime: number): GameState {
   if (!state.isPlaying) return state;
   
+  const {
+    FRAME_TIME_MS,
+    SPAWN_CHANCE_BASE,
+    SPAWN_CHANCE_PER_LEVEL,
+    MAX_BUBBLES_BASE,
+  } = BUBBLE_GAME_CONFIG;
+  
   const updatedBubbles = state.bubbles
     .map(bubble => ({
       ...bubble,
-      y: bubble.y - bubble.speed * (deltaTime / 16),
-      wobble: bubble.wobble + 0.05,
+      y: bubble.y - bubble.speed * (deltaTime / FRAME_TIME_MS),
+      wobble: bubble.wobble + BUBBLE_GAME_CONFIG.WOBBLE_SPEED,
     }))
     .filter(bubble => !bubble.isPopped && bubble.y > -0.2);
   
@@ -110,8 +152,9 @@ export function updateBubbles(state: GameState, deltaTime: number): GameState {
   ).length;
   
   // Spawn new bubbles based on level
-  const spawnChance = 0.01 + (state.level * 0.005);
-  if (Math.random() < spawnChance && updatedBubbles.length < 5 + state.level) {
+  const spawnChance = SPAWN_CHANCE_BASE + (state.level * SPAWN_CHANCE_PER_LEVEL);
+  const maxBubbles = MAX_BUBBLES_BASE + state.level;
+  if (Math.random() < spawnChance && updatedBubbles.length < maxBubbles) {
     updatedBubbles.push(createBubble(state.level));
   }
   
@@ -129,12 +172,22 @@ export function checkBlowHits(
   blowVolume: number,
   blowX: number = 0.5  // Center by default
 ): GameState {
-  if (!state.isPlaying || blowVolume < 0.2) return state;
+  const {
+    MIN_HIT_VOLUME,
+    BLOW_COOLDOWN,
+    BASE_HIT_RADIUS,
+    VOLUME_HIT_RADIUS_MULTIPLIER,
+    BASE_POINTS_PER_BUBBLE,
+    COMBO_BONUS_PER_EXTRA_BUBBLE,
+  } = BUBBLE_GAME_CONFIG;
+  
+  if (!state.isPlaying || blowVolume < MIN_HIT_VOLUME) return state;
   
   const now = Date.now();
-  if (now - state.lastBlowTime < 300) return state;  // Cooldown
+  if (now - state.lastBlowTime < BLOW_COOLDOWN) return state;
   
-  const hitRadius = 0.15 + (blowVolume * 0.1);
+  // Hit radius scales with blow volume - louder = bigger area
+  const hitRadius = BASE_HIT_RADIUS + (blowVolume * VOLUME_HIT_RADIUS_MULTIPLIER);
   let hitCount = 0;
   
   const updatedBubbles = state.bubbles.map(bubble => {
@@ -153,10 +206,14 @@ export function checkBlowHits(
   });
   
   if (hitCount > 0) {
+    // Base score + combo bonus for multiple bubbles
+    const baseScore = hitCount * BASE_POINTS_PER_BUBBLE * state.level;
+    const comboBonus = Math.max(0, (hitCount - 1) * COMBO_BONUS_PER_EXTRA_BUBBLE);
+    
     return {
       ...state,
       bubbles: updatedBubbles,
-      score: state.score + (hitCount * 10 * state.level),
+      score: state.score + baseScore + comboBonus,
       poppedCount: state.poppedCount + hitCount,
       lastBlowTime: now,
       blowStrength: blowVolume,
@@ -168,7 +225,7 @@ export function checkBlowHits(
 
 // Advance level
 export function advanceLevel(state: GameState): GameState {
-  const newLevel = Math.min(10, state.level + 1);
+  const newLevel = Math.min(BUBBLE_GAME_CONFIG.MAX_LEVEL, state.level + 1);
   return {
     ...state,
     level: newLevel,

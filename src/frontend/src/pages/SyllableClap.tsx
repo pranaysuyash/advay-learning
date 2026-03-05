@@ -1,10 +1,13 @@
 import { useCallback, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, getWordsForLevel, checkAnswer, type SyllableWord } from '../games/syllableClapLogic';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 export function SyllableClap() {
   const navigate = useNavigate();
@@ -18,8 +21,11 @@ export function SyllableClap() {
   const [feedback, setFeedback] = useState('');
   const [lastAnswer, setLastAnswer] = useState<number | null>(null);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
-  const { playClick, playSuccess, playError, playCelebration } = useAudio();
+  const { playClick, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('syllable-clap');
 
   useGameSessionProgress({
@@ -37,6 +43,9 @@ export function SyllableClap() {
     setRound(0);
     setScore(0);
     setCorrect(0);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setShowResult(false);
     setFeedback('');
     setLastAnswer(null);
@@ -51,12 +60,37 @@ export function SyllableClap() {
     setShowResult(true);
     setLastAnswer(answer);
     if (isCorrect) {
-      playSuccess();
+      // Build streak
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      
+      // Calculate score with streak bonus
+      const basePoints = 15;
+      const streakBonus = Math.min(newStreak * 3, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScore((s) => s + totalPoints);
       setCorrect((c) => c + 1);
-      setScore((s) => s + 25);
+      
+      // Show score popup
+      setScorePopup({ points: totalPoints });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Haptics
+      triggerHaptic('success');
+
+      // Milestone every 5
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        playCelebration();
+      }
+      
       setFeedback(`✅ Yes! "${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
-      if (correct > 0 && (correct + 1) % 5 === 0) playCelebration();
     } else {
+      // Wrong - break streak
+      setStreak(0);
+      setShowStreakMilestone(false);
+      triggerHaptic('error');
       playError();
       setFeedback(`❌ "${currentWord.word}" has ${currentWord.syllableCount} syllable${currentWord.syllableCount > 1 ? 's' : ''}!`);
     }
@@ -69,6 +103,7 @@ export function SyllableClap() {
         setLastAnswer(null);
       } else {
         setGameState('complete');
+        triggerHaptic('celebration');
         if (correct >= words.length * 0.8) playCelebration();
       }
     }, 2500);
@@ -153,6 +188,49 @@ export function SyllableClap() {
                   />
                 </div>
               </div>
+
+              {/* Kenney Heart HUD */}
+              <div className="flex items-center justify-center gap-1 bg-white rounded-2xl px-4 py-2 border-2 border-pink-200 shadow-sm">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={streak >= (i + 1) * 2
+                      ? '/assets/kenney/platformer/hud/hud_heart.png'
+                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                    alt=""
+                    className="w-7 h-7"
+                  />
+                ))}
+                <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+              </div>
+
+              {/* Score Popup Animation */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+                >
+                  <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              {showStreakMilestone && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1.2, rotate: 0 }}
+                  exit={{ scale: 0 }}
+                  className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+                >
+                  <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                    🔥 {streak} Streak! 🔥
+                  </div>
+                </motion.div>
+              )}
 
               {/* Word card */}
               <div className='bg-gradient-to-br from-blue-50 via-purple-50 to-white rounded-3xl border-3 border-[#F2CC8F] p-8 shadow-[0_6px_0_#E5B86E] text-center'>

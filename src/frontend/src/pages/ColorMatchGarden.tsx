@@ -14,11 +14,13 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { triggerHaptic } from '../utils/haptics';
 import {
   isPointInCircle,
   pickSpacedPoints,
@@ -32,6 +34,10 @@ import {
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+
+// Kenney heart assets for streak HUD
+const HEART_FULL = '/assets/kenney/platformer/hud/hud_heart.png';
+const HEART_EMPTY = '/assets/kenney/platformer/hud/hud_heart_empty.png';
 
 interface GardenTarget {
   id: number;
@@ -81,8 +87,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [_timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [targets, setTargets] = useState<GardenTarget[]>([]);
   const [promptId, setPromptId] = useState<number>(0);
   const [cursor, setCursor] = useState<Point | null>(null);
@@ -91,6 +96,12 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   );
   const [showCelebration, setShowCelebration] = useState(false);
   const [gardenBgSrc, setGardenBgSrc] = useState<string | null>(null);
+
+  // Timer display ref for color changes
+  const timeLeftRef = useRef(60);
+
+  // Streak tracking - note: we need refs for closure access in handleFrame
+  const { streak, incrementStreak, resetStreak } = useStreakTracking();
 
   const scoreRef = useRef(score);
   const streakRef = useRef(streak);
@@ -139,9 +150,18 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
     targetsRef.current = targets;
   }, [targets]);
 
+  // Keep streak ref in sync for handleFrame closure
+  useEffect(() => {
+    streakRef.current = streak;
+  }, [streak]);
+
   useEffect(() => {
     promptRef.current = promptId;
   }, [promptId]);
+  
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -195,9 +215,8 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
       if (!expected) return;
 
       if (hitTarget.id === expected.id) {
-        const nextStreak = streakRef.current + 1;
+        const nextStreak = incrementStreak();
         const nextScore = scoreRef.current + 12 + Math.min(18, nextStreak * 2);
-        setStreak(nextStreak);
         setScore(nextScore);
         setFeedback(`Yes! ${expected.name} flower collected.`);
         if (ttsEnabled) {
@@ -205,6 +224,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
         }
         assetLoader.playSound('pop', 0.5);
         void playPop();
+        triggerHaptic('success');
 
         if (nextStreak > 0 && nextStreak % 6 === 0) {
           setShowCelebration(true);
@@ -218,13 +238,14 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
 
         startRound();
       } else {
-        setStreak(0);
+        resetStreak();
         setFeedback(`That was ${hitTarget.name}. Find ${expected.name}.`);
         if (ttsEnabled) {
           void speak(`Try again! Find the ${expected.name} flower!`);
         }
         assetLoader.playSound('wrong', 0.65);
         void playError();
+        triggerHaptic('error');
       }
     },
     [
@@ -235,6 +256,8 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
       speak,
       startRound,
       ttsEnabled,
+      incrementStreak,
+      resetStreak,
     ],
   );
 
@@ -261,7 +284,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
 
   const startGame = async () => {
     setScore(0);
-    setStreak(0);
+    resetStreak();
     setTimeLeft(60);
     setFeedback('Pinch the flower with the asked color.');
     setCursor(null);
@@ -338,9 +361,31 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-lg shadow-[0_4px_0_#E5B86E]'>
-          Take your time!
-        </div>
+        {/* Timer display */}
+        {isPlaying && (
+          <div className={`absolute top-6 right-6 px-6 py-3 rounded-full border-3 font-black text-lg shadow-[0_4px_0_#E5B86E] transition-all ${
+            timeLeft <= 10 ? 'bg-red-50 border-red-300 text-red-700 animate-pulse' : 
+            timeLeft <= 20 ? 'bg-orange-50 border-orange-300 text-orange-700' :
+            'bg-white border-[#F2CC8F] text-advay-slate'
+          }`}>
+            ⏱️ {timeLeft}s
+          </div>
+        )}
+        
+        {/* Streak heart HUD */}
+        {isPlaying && (
+          <div className='absolute top-20 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+            <span className='font-bold text-advay-slate mr-2'>Streak:</span>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <img
+                key={i}
+                src={streak >= i ? HEART_FULL : HEART_EMPTY}
+                alt={streak >= i ? 'Full heart' : 'Empty heart'}
+                className='w-6 h-6'
+              />
+            ))}
+          </div>
+        )}
 
         {promptTarget && (
           <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary text-lg shadow-[0_4px_0_#E5B86E]'>

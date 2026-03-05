@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -15,9 +16,19 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
 import { findHitTarget } from '../games/hitTarget';
 import {
-  pickWordForLevel,
+  loadWordBank,
+  loadCurriculum,
+  pickWord,
   createLetterTargets,
+  startSession,
+  recordWordCompleted,
+  recordTouch,
+  endSession,
+  getAnalyticsSummary,
+  getStoredSessions,
+  clearAnalytics,
   type LetterTarget,
+  type SessionAnalytics,
 } from '../games/wordBuilderLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -27,13 +38,26 @@ import {
   SOUND_ASSETS,
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 3;
-
-// Touch-friendly sizing constants for kids
 const CURSOR_SIZE = 84; // Increased for easier visibility
 const TARGET_SIZE = 120; // Increased from 80 for kids' fingers
+type WordBuilderMode = 'explore' | 'phonics';
+
+const PHONICS_STAGES: { id: string; label: string }[] = [
+  { id: 'cvc_a', label: 'CVC Short A' },
+  { id: 'cvc_e', label: 'CVC Short E' },
+  { id: 'cvc_all', label: 'All CVC' },
+  { id: 'blends', label: 'Simple Blends' },
+  { id: 'digraphs', label: 'Digraphs (SH/CH/TH/WH)' },
+  { id: 'long_vowels', label: 'Long Vowels' },
+  { id: 'sight_words_3', label: 'Sight Words' },
+  { id: 'advanced', label: 'Advanced' },
+];
+
+const SETTINGS_HOLD_MS = 900;
 
 export const WordBuilder = memo(function WordBuilderComponent() {
   const navigate = useNavigate();
@@ -47,17 +71,45 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const [timeLeft, setTimeLeft] = useState(90);
   const [word, setWord] = useState('');
   const [targets, setTargets] = useState<LetterTarget[]>([]);
+  const [gameMode, setGameMode] = useState<WordBuilderMode>(() => {
+    const saved = localStorage.getItem('wordbuilder.mode');
+    return saved === 'phonics' ? 'phonics' : 'explore';
+  });
+  const [phonicsStageId, setPhonicsStageId] = useState<string>(() => {
+    return localStorage.getItem('wordbuilder.stageId') ?? 'cvc_all';
+  });
+  const [showSettings, setShowSettings] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<{
+    summary: ReturnType<typeof getAnalyticsSummary>;
+    sessions: SessionAnalytics[];
+  } | null>(null);
+  const [autoAdvance, setAutoAdvance] = useState<boolean>(() => {
+    return localStorage.getItem('wordbuilder.autoAdvance') === 'true';
+  });
+  const [wordsCompletedInStage, setWordsCompletedInStage] = useState<number>(() => {
+    return parseInt(localStorage.getItem('wordbuilder.wordsCompleted') ?? '0', 10);
+  });
+  const WORDS_PER_STAGE = 10; // Advance after this many words
   const [stepIndex, setStepIndex] = useState(0);
   const [cursor, setCursor] = useState<Point | null>(null);
   const [feedback, setFeedback] = useState('Pinch letters to spell the word!');
   const [showCelebration, setShowCelebration] = useState(false);
   const [, setCompletedLetters] = useState<string[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const targetsRef = useRef<LetterTarget[]>(targets);
   const stepIndexRef = useRef(stepIndex);
   const wordRef = useRef(word);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
+  const gameModeRef = useRef<WordBuilderMode>(gameMode);
+  const phonicsStageIdRef = useRef<string>(phonicsStageId);
+  const autoAdvanceRef = useRef<boolean>(autoAdvance);
+  const wordsCompletedRef = useRef<number>(wordsCompletedInStage);
+  const settingsHoldRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -78,6 +130,83 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
+  useEffect(() => {
+    gameModeRef.current = gameMode;
+  }, [gameMode]);
+  useEffect(() => {
+    phonicsStageIdRef.current = phonicsStageId;
+  }, [phonicsStageId]);
+  useEffect(() => {
+    autoAdvanceRef.current = autoAdvance;
+  }, [autoAdvance]);
+  useEffect(() => {
+    wordsCompletedRef.current = wordsCompletedInStage;
+  }, [wordsCompletedInStage]);
+
+  // Batch localStorage writes for all settings (single write per state change)
+  useEffect(() => {
+    localStorage.setItem('wordbuilder.mode', gameMode);
+    localStorage.setItem('wordbuilder.stageId', phonicsStageId);
+    localStorage.setItem('wordbuilder.autoAdvance', String(autoAdvance));
+    localStorage.setItem('wordbuilder.wordsCompleted', String(wordsCompletedInStage));
+  }, [gameMode, phonicsStageId, autoAdvance, wordsCompletedInStage]);
+
+  // Settings helpers
+  const beginSettingsHold = () => {
+    if (settingsHoldRef.current) clearTimeout(settingsHoldRef.current);
+    settingsHoldRef.current = setTimeout(() => {
+      setShowSettings(true);
+      settingsHoldRef.current = null;
+    }, SETTINGS_HOLD_MS);
+  };
+
+  const cancelSettingsHold = () => {
+    if (settingsHoldRef.current) {
+      clearTimeout(settingsHoldRef.current);
+      settingsHoldRef.current = null;
+    }
+  };
+
+  const applySettings = (nextMode: WordBuilderMode, nextStageId: string) => {
+    setGameMode(nextMode);
+    setPhonicsStageId(nextStageId);
+    setWordsCompletedInStage(0); // Reset progress when changing settings
+
+    // Restart cleanly if game is running to avoid mixed-mode state.
+    if (isPlaying) {
+      resetGame();
+    }
+    setShowSettings(false);
+  };
+
+  // Insights panel helpers
+  const loadInsights = () => {
+    const summary = getAnalyticsSummary();
+    const sessions = getStoredSessions();
+    setAnalyticsData({ summary, sessions });
+    setShowInsights(true);
+  };
+
+  const exportAnalytics = () => {
+    const sessions = getStoredSessions();
+    const dataStr = JSON.stringify(sessions, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `wordbuilder-analytics-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const resetAnalytics = () => {
+    if (confirm('Clear all learning analytics? This cannot be undone.')) {
+      clearAnalytics();
+      setAnalyticsData({ summary: getAnalyticsSummary(), sessions: [] });
+    }
+  };
 
   // Asset preloading for premium polish
   useEffect(() => {
@@ -121,15 +250,30 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   }, [isPlaying, gameCompleted]);
 
   const startNewWord = useCallback(() => {
-    const newWord = pickWordForLevel(levelRef.current, randomFloat01);
-    setWord(newWord);
+    const mode = gameModeRef.current;
+
+    const newWord =
+      mode === 'explore'
+        ? pickWord({ mode: 'explore', level: levelRef.current }, randomFloat01)
+        : pickWord({ mode: 'phonics', stageId: phonicsStageIdRef.current }, randomFloat01);
+
+    if (!newWord) {
+      setFeedback('Loading words...');
+      return;
+    }
+
+    setWord(newWord.word);
     setStepIndex(0);
     setCompletedLetters([]);
-    const distractors = Math.min(3, 2 + Math.floor(levelRef.current / 2));
-    setTargets(createLetterTargets(newWord, distractors, randomFloat01));
-    setFeedback(`Spell: ${newWord}`);
+
+    // Keep distractors gentle. You can tune this per-mode.
+    const base = mode === 'phonics' ? 2 : 2 + Math.floor(levelRef.current / 2);
+    const distractors = Math.min(3, base);
+
+    setTargets(createLetterTargets(newWord.word, distractors, randomFloat01));
+    setFeedback(`Spell: ${newWord.word}`);
     if (ttsEnabled) {
-      void speak(`Spell the word: ${newWord}!`);
+      void speak(`Spell the word: ${newWord.word}!`);
     }
   }, [speak, ttsEnabled]);
 
@@ -146,19 +290,58 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     setScore((prev) => prev + 30 + timeLeftRef.current);
     triggerEasterEgg('egg-first-word');
 
+    // Increment words completed in phonics mode
+    const mode = gameModeRef.current;
+    let shouldAdvanceStage = false;
+    if (mode === 'phonics') {
+      const newCount = wordsCompletedRef.current + 1;
+      setWordsCompletedInStage(newCount);
+      
+      // Check if we should auto-advance
+      if (autoAdvanceRef.current && newCount >= WORDS_PER_STAGE) {
+        shouldAdvanceStage = true;
+      }
+    }
+
     // Slower pacing for kids - 3 seconds instead of 1.8s
     levelTimeoutRef.current = setTimeout(() => {
       setShowCelebration(false);
-      if (levelRef.current >= MAX_LEVEL) {
-        onGameComplete();
-        setGameCompleted(true);
-        setIsPlaying(false);
+
+      if (mode === 'explore') {
+        if (levelRef.current >= MAX_LEVEL) {
+          onGameComplete();
+          setGameCompleted(true);
+          setIsPlaying(false);
+        } else {
+          setLevel((prev) => prev + 1);
+        }
       } else {
-        setLevel((prev) => prev + 1);
+        // phonics mode
+        if (shouldAdvanceStage) {
+          // Auto-advance to next stage
+          const currentIndex = PHONICS_STAGES.findIndex(s => s.id === phonicsStageIdRef.current);
+          const nextStage = PHONICS_STAGES[currentIndex + 1];
+          if (nextStage) {
+            // Advance to next stage
+            setPhonicsStageId(nextStage.id);
+            setWordsCompletedInStage(0);
+            if (ttsEnabled) {
+              void speak(`Great job! Moving to ${nextStage.label}!`);
+            }
+          } else {
+            // At last stage - stay here but celebrate completion
+            setWordsCompletedInStage(0);
+            if (ttsEnabled) {
+              void speak('Amazing! You completed all phonics stages! Keep practicing!');
+            }
+          }
+        }
+        startNewWord();
       }
+
       levelTimeoutRef.current = null;
     }, 3000);
-  }, [playCelebration, onGameComplete]);
+  }, [playCelebration, onGameComplete, startNewWord, ttsEnabled, speak]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -188,11 +371,34 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         return;
       }
 
+      // Record touch for analytics
+      recordTouch(expectedLetter, hit.letter, hit.letter === expectedLetter);
+
       if (hit.letter === expectedLetter) {
+        // Build streak
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        
+        // Calculate score with streak bonus
+        const basePoints = 15;
+        const streakBonus = Math.min(newStreak * 3, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+        
+        // Show score popup
+        setScorePopup({ points: totalPoints });
+        setTimeout(() => setScorePopup(null), 700);
+        
         playPop();
         triggerHaptic('success');
         setCompletedLetters((prev) => [...prev, hit.letter]);
-        setScore((prev) => prev + 15);
+        
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
 
         const nextStep = currentStep + 1;
         setStepIndex(nextStep);
@@ -203,6 +409,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
             void speak(`Great job! You spelled ${currentWord}!`);
           }
           triggerHaptic('celebration');
+          recordWordCompleted(); // Analytics
           completeWord();
         } else {
           setFeedback(`Great! Next: "${currentWord[nextStep]}"`);
@@ -211,6 +418,9 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           }
         }
       } else {
+        // Wrong - break streak
+        setStreak(0);
+        setShowStreakMilestone(false);
         setFeedback(`That's "${hit.letter}". Find "${expectedLetter}".`);
         if (ttsEnabled) {
           void speak(`That's ${hit.letter}. Find ${expectedLetter}!`);
@@ -255,8 +465,18 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   ]);
 
   const startGame = async () => {
+    setFeedback('Loading words...');
+    
+    // Load word bank and curriculum before starting
+    await loadWordBank();
+    if (gameMode === 'phonics') {
+      await loadCurriculum();
+    }
     setGameCompleted(false);
     setScore(0);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setLevel(1);
     setTimeLeft(90);
     setStepIndex(0);
@@ -264,6 +484,10 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     setFeedback('Pinch letters to spell the word!');
     setCursor(null);
     setIsPlaying(true);
+    
+    // Start analytics session
+    startSession(gameMode, gameMode === 'phonics' ? phonicsStageId : undefined);
+    
     if (ttsEnabled) {
       void speak("Let's build words together! Show me your hand!");
     }
@@ -279,11 +503,18 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       clearTimeout(levelTimeoutRef.current);
       levelTimeoutRef.current = null;
     }
+    
+    // End analytics session
+    endSession();
+    
     setIsPlaying(false);
     setGameCompleted(false);
     setTargets([]);
     setStepIndex(0);
     setCompletedLetters([]);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setCursor(null);
     setTimeLeft(90);
     setFeedback('Pinch letters to spell the word!');
@@ -371,6 +602,51 @@ export const WordBuilder = memo(function WordBuilderComponent() {
             </div>
           )}
 
+          {/* Kenney Heart HUD */}
+          {isPlaying && (
+            <div className="absolute bottom-8 left-8 flex items-center gap-1 bg-white/95 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] z-20">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <img
+                  key={i}
+                  src={streak >= (i + 1) * 2
+                    ? '/assets/kenney/platformer/hud/hud_heart.png'
+                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                  alt=""
+                  className="w-7 h-7"
+                />
+              ))}
+              <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+            </div>
+          )}
+
+          {/* Score Popup Animation */}
+          {scorePopup && (
+            <motion.div
+              initial={{ opacity: 0, y: 0, scale: 0.5 }}
+              animate={{ opacity: 1, y: -40, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+            >
+              <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                +{scorePopup.points}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Streak Milestone */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1.2, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+            >
+              <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                🔥 {streak} Streak! 🔥
+              </div>
+            </motion.div>
+          )}
+
           {targets.map((target) => {
             const isExpected =
               target.letter === expectedLetter && target.isCorrect;
@@ -446,6 +722,22 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                 >
                   Start Spelling
                 </button>
+
+                <div className='mt-4 text-sm text-slate-400 font-semibold'>
+                  Parent settings: press and hold ⚙︎
+                </div>
+
+                <button
+                  type='button'
+                  onPointerDown={beginSettingsHold}
+                  onPointerUp={cancelSettingsHold}
+                  onPointerCancel={cancelSettingsHold}
+                  onPointerLeave={cancelSettingsHold}
+                  className='mt-2 inline-flex items-center justify-center w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 text-2xl'
+                  aria-label='Parent settings (press and hold)'
+                >
+                  ⚙︎
+                </button>
               </div>
             </div>
           )}
@@ -462,6 +754,226 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                 <div className='inline-block bg-emerald-50 text-emerald-600 font-black text-2xl px-6 py-2 rounded-full mt-4'>
                   Score: {score}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {showSettings && (
+            <div className='absolute inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center'>
+              <div className='bg-white rounded-[2rem] border-[6px] border-[#F2CC8F] shadow-[0_6px_0_#E5B86E] w-[92%] max-w-lg p-8'>
+                <div className='text-2xl font-black text-advay-slate mb-6'>
+                  Parent Settings
+                </div>
+
+                <div className='space-y-6'>
+                  <div>
+                    <div className='font-bold text-slate-700 mb-2'>Mode</div>
+                    <div className='flex gap-3'>
+                      <button
+                        type='button'
+                        onClick={() => applySettings('explore', phonicsStageIdRef.current)}
+                        className={`flex-1 py-3 rounded-xl border-2 font-black ${
+                          gameMode === 'explore'
+                            ? 'bg-blue-50 border-blue-300 text-blue-700'
+                            : 'bg-white border-slate-200 text-slate-500'
+                        }`}
+                      >
+                        Explore
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => applySettings('phonics', phonicsStageIdRef.current)}
+                        className={`flex-1 py-3 rounded-xl border-2 font-black ${
+                          gameMode === 'phonics'
+                            ? 'bg-amber-50 border-amber-300 text-amber-700'
+                            : 'bg-white border-slate-200 text-slate-500'
+                        }`}
+                      >
+                        Phonics Path
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={`${gameMode === 'phonics' ? '' : 'opacity-50 pointer-events-none'}`}>
+                    <div className='font-bold text-slate-700 mb-2'>Phonics stage</div>
+                    <select
+                      value={phonicsStageId}
+                      onChange={(e) => setPhonicsStageId(e.target.value)}
+                      className='w-full py-3 px-4 rounded-xl border-2 border-slate-200 font-bold'
+                    >
+                      {PHONICS_STAGES.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {/* Progress indicator */}
+                    <div className='mt-3 text-sm text-slate-500'>
+                      Progress: {wordsCompletedInStage} / {WORDS_PER_STAGE} words
+                      {wordsCompletedInStage >= WORDS_PER_STAGE && autoAdvance && (
+                        <span className='text-amber-600 font-bold ml-2'>→ Will advance!</span>
+                      )}
+                    </div>
+                    
+                    {/* Auto-advance toggle */}
+                    <div className='mt-4 flex items-center gap-3'>
+                      <input
+                        type='checkbox'
+                        id='autoAdvance'
+                        checked={autoAdvance}
+                        onChange={(e) => setAutoAdvance(e.target.checked)}
+                        className='w-5 h-5 rounded border-2 border-slate-300'
+                      />
+                      <label htmlFor='autoAdvance' className='font-bold text-slate-700 cursor-pointer'>
+                        Auto-advance after {WORDS_PER_STAGE} words
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Insights button */}
+                  <div className='pt-2 border-t-2 border-slate-100'>
+                    <button
+                      type='button'
+                      onClick={loadInsights}
+                      className='w-full py-3 rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-700 font-black hover:bg-emerald-100'
+                    >
+                      📊 View Learning Insights
+                    </button>
+                  </div>
+
+                  <div className='flex gap-3 pt-2'>
+                    <button
+                      type='button'
+                      onClick={() => setShowSettings(false)}
+                      className='flex-1 py-3 rounded-xl border-2 border-slate-200 font-black text-slate-600'
+                    >
+                      Close
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => applySettings(gameMode, phonicsStageId)}
+                      className='flex-1 py-3 rounded-xl border-2 border-blue-200 bg-blue-600 text-white font-black'
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Insights Panel */}
+          {showInsights && analyticsData && (
+            <div className='absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center'>
+              <div className='bg-white rounded-[2rem] border-[6px] border-emerald-200 shadow-[0_6px_0_#10B981] w-[92%] max-w-lg p-8 max-h-[80vh] overflow-y-auto'>
+                <div className='text-2xl font-black text-emerald-700 mb-2'>
+                  📊 Learning Insights
+                </div>
+                <div className='text-sm text-slate-500 mb-6'>
+                  Track your child's progress over time
+                </div>
+
+                {analyticsData.sessions.length === 0 ? (
+                  <div className='text-center py-8 text-slate-400'>
+                    No sessions yet. Play some games to see insights!
+                  </div>
+                ) : (
+                  <div className='space-y-6'>
+                    {/* Summary stats */}
+                    <div className='grid grid-cols-2 gap-4'>
+                      <div className='bg-blue-50 rounded-xl p-4 text-center'>
+                        <div className='text-3xl font-black text-blue-600'>
+                          {analyticsData.summary.totalSessions}
+                        </div>
+                        <div className='text-sm font-bold text-blue-700'>Total Sessions</div>
+                      </div>
+                      <div className='bg-amber-50 rounded-xl p-4 text-center'>
+                        <div className='text-3xl font-black text-amber-600'>
+                          {analyticsData.summary.totalWords}
+                        </div>
+                        <div className='text-sm font-bold text-amber-700'>Words Spelled</div>
+                      </div>
+                    </div>
+
+                    {/* Accuracy */}
+                    <div className='bg-slate-50 rounded-xl p-4'>
+                      <div className='flex justify-between items-center mb-2'>
+                        <span className='font-bold text-slate-700'>Overall Accuracy</span>
+                        <span className='text-2xl font-black text-emerald-600'>
+                          {analyticsData.summary.avgAccuracy.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className='w-full bg-slate-200 rounded-full h-3'>
+                        <div
+                          className='bg-emerald-500 h-3 rounded-full transition-all'
+                          style={{ width: `${Math.min(analyticsData.summary.avgAccuracy, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Top confusion */}
+                    {analyticsData.summary.topConfusions.length > 0 && (
+                      <div className='bg-red-50 rounded-xl p-4'>
+                        <div className='font-bold text-red-700 mb-2'>Letters to Practice</div>
+                        <div className='flex flex-wrap gap-2'>
+                          {analyticsData.summary.topConfusions.slice(0, 3).map(([pair, count]) => (
+                            <span
+                              key={pair}
+                              className='px-3 py-1 bg-red-100 text-red-700 rounded-full font-bold text-sm'
+                            >
+                              {pair}: {count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Last session */}
+                    {analyticsData.sessions.length > 0 && (
+                      <div className='bg-slate-50 rounded-xl p-4'>
+                        <div className='font-bold text-slate-700 mb-2'>Last Session</div>
+                        <div className='text-sm text-slate-600 space-y-1'>
+                          <div>Words: {analyticsData.sessions[analyticsData.sessions.length - 1].wordsCompleted}</div>
+                          <div>Accuracy: {(
+                            (analyticsData.sessions[analyticsData.sessions.length - 1].correctTouches /
+                              (analyticsData.sessions[analyticsData.sessions.length - 1].correctTouches +
+                                analyticsData.sessions[analyticsData.sessions.length - 1].incorrectTouches || 1)) * 100
+                          ).toFixed(0)}%</div>
+                          <div className='text-xs text-slate-400'>
+                            {new Date(analyticsData.sessions[analyticsData.sessions.length - 1].timestamp).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className='flex gap-3 pt-2'>
+                      <button
+                        type='button'
+                        onClick={() => setShowInsights(false)}
+                        className='flex-1 py-3 rounded-xl border-2 border-slate-200 font-black text-slate-600'
+                      >
+                        Back
+                      </button>
+                      <button
+                        type='button'
+                        onClick={exportAnalytics}
+                        className='flex-1 py-3 rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-700 font-black'
+                      >
+                        Export JSON
+                      </button>
+                      <button
+                        type='button'
+                        onClick={resetAnalytics}
+                        className='px-4 py-3 rounded-xl border-2 border-red-200 text-red-600 font-bold'
+                        title='Clear all data'
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

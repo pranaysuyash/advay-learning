@@ -23,6 +23,7 @@ import {
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import { progressQueue } from '../services/progressQueue';
 
 // Inner game component
@@ -139,6 +140,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
         if (result.success) {
           playSuccess();
           playCelebration();
+          triggerHaptic('celebration');
           setCraftResult({
             success: true,
             item: result.outputItem,
@@ -152,6 +154,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
           }
         } else {
           playError();
+          triggerHaptic('error');
           setCraftResult({ success: false });
         }
       } catch (err) {

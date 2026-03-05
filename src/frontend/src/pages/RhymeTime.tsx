@@ -1,13 +1,13 @@
 /**
  * Rhyme Time Game
- * 
+ *
  * Children match rhyming words to build phonological awareness.
- * 
+ *
  * Educational Focus:
  * - Phonological awareness (critical for reading success)
  * - Rhyme recognition and discrimination
  * - Vocabulary building
- * 
+ *
  * Controls:
  * - Pinch to select the word that rhymes
  * - TTS reads words aloud
@@ -15,6 +15,7 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   Target,
   Music,
@@ -37,6 +38,8 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { SVGBird } from '../components/characters/SVGBird';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
@@ -77,6 +80,8 @@ export default function RhymeTime() {
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   
   // Initialize audio
   useEffect(() => {
@@ -179,9 +184,27 @@ export default function RhymeTime() {
       playSuccess();
       playChirp();
       setBirdExpression('happy');
+      triggerHaptic('success');
+      
+      // Show score popup (base 15 + streak bonus)
+      const basePoints = 15;
+      const streakBonus = Math.min((gameState?.streak || 0) * 3, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScorePopup({ points: totalPoints });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Check milestone
+      const newStreak = (gameState?.streak || 0) + 1;
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
     } else {
       playError();
       setBirdExpression('thinking');
+      triggerHaptic('error');
+      setShowStreakMilestone(false);
     }
     
     // Speak the selected word
@@ -196,6 +219,7 @@ export default function RhymeTime() {
     
     if (newGameState.completed) {
       playCelebration();
+      triggerHaptic('celebration');
       setShowCelebration(true);
     } else {
       // Generate next round
@@ -214,6 +238,8 @@ export default function RhymeTime() {
   
   const handlePlayAgain = () => {
     playClick();
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     if (difficulty) {
       startGame(difficulty);
     }
@@ -226,6 +252,8 @@ export default function RhymeTime() {
     setGameState(null);
     setCurrentRound(null);
     setShowCelebration(false);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
   };
   
   const handleSpeakTarget = () => {
@@ -441,13 +469,49 @@ export default function RhymeTime() {
             </div>
           </div>
           
-          {/* Streak indicator */}
-          {gameState && gameState.streak > 1 && (
-            <div className="text-center mb-2">
-              <span className="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold">
-                <Flame className="w-4 h-4 inline" /> {gameState.streak} streak!
-              </span>
+          {/* Kenney Heart HUD */}
+          {gameState && (
+            <div className="flex items-center justify-center gap-1 mb-3 bg-white rounded-2xl px-4 py-2 border-2 border-pink-200 shadow-sm inline-flex mx-auto">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <img
+                  key={i}
+                  src={gameState.streak >= (i + 1) * 2
+                    ? '/assets/kenney/platformer/hud/hud_heart.png'
+                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                  alt=""
+                  className="w-6 h-6"
+                />
+              ))}
+              <span className="ml-2 text-sm font-bold text-pink-500">x{gameState.streak}</span>
             </div>
+          )}
+
+          {/* Score Popup Animation */}
+          {scorePopup && (
+            <motion.div
+              initial={{ opacity: 0, y: 0, scale: 0.5 }}
+              animate={{ opacity: 1, y: -40, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+            >
+              <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                +{scorePopup.points}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Streak Milestone */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1.2, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+            >
+              <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                🔥 {gameState?.streak} Streak! 🔥
+              </div>
+            </motion.div>
           )}
           
           {/* Bird Character */}

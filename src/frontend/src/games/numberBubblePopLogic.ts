@@ -2,6 +2,9 @@
  * Number Bubble Pop game logic — pop bubbles with correct numbers.
  */
 
+import { calculateScore as _calculateScore, ScorePresets } from '../utils/scoring';
+import { shuffle } from '../utils/random';
+
 export interface Bubble {
   id: number;
   number: number;
@@ -43,7 +46,7 @@ export function generateBubbles(count: number, target: number, numberRange: numb
   while (allNumbers.length < count) {
     allNumbers.push(Math.floor(Math.random() * safeRange) + 1);
   }
-  const shuffledNumbers = allNumbers.sort(() => Math.random() - 0.5);
+  const shuffledNumbers = shuffle(allNumbers);
   for (let i = 0; i < count; i++) {
     bubbles.push({
       id: i,
@@ -54,3 +57,21 @@ export function generateBubbles(count: number, target: number, numberRange: numb
   }
   return bubbles;
 }
+
+// Difficulty multipliers (preserved for backward compatibility)
+export const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+  1: 1,    // 1-5 range
+  2: 1.5,  // 1-10 range
+  3: 2,    // 1-20 range
+};
+
+/**
+ * Calculate score based on streak and level
+ * Base: 15 points + streak bonus (max 15) = 30 max base
+ * Multiplied by difficulty (level 1: 1×, level 2: 1.5×, level 3: 2×)
+ * Max per pop: 60 points (level 3, streak 5+)
+ *
+ * @deprecated Use `calculateScore` from `utils/scoring.ts` with `ScorePresets.high` directly
+ */
+export const calculateScore = (streak: number, level: number): number =>
+  _calculateScore(streak, level, ScorePresets.high);

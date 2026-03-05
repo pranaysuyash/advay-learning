@@ -1,5 +1,6 @@
 import { progressApi } from './api';
 import { progressQueue } from './progressQueue';
+import type { Attempt } from '../types/progress';
 
 const UUID_V4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -15,6 +16,7 @@ export interface GameProgressPayload {
   sessionId?: string;
   metaData?: Record<string, unknown>;
   completed?: boolean;
+  attempts?: Attempt[];
 }
 
 export interface ProgressActivityPayload {
@@ -28,6 +30,15 @@ export interface ProgressActivityPayload {
   idempotencyKey?: string;
   metaData?: Record<string, unknown>;
   completed?: boolean;
+  attempts?: Attempt[];
+}
+
+export interface TimeOnTask {
+  itemId: string;
+  startTime: number;
+  endTime?: number;
+  activeTime: number;
+  idleTime: number;
 }
 
 function normalizeScore(score: number): number {

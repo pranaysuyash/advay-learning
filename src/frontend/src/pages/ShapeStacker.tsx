@@ -1,9 +1,11 @@
 import { useCallback, useState, useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   createShapes,
   createTargets,
@@ -12,6 +14,7 @@ import {
   type FallingShape,
   type TargetSlot,
 } from '../games/shapeStackerLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const GAME_COLORS = {
   background: '#F8FAFC',
@@ -35,6 +38,9 @@ export function ShapeStacker() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [matches, setMatches] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const timerRef = useRef<number | null>(null);
   const gameLoopRef = useRef<number | null>(null);
@@ -52,6 +58,9 @@ export function ShapeStacker() {
     setTargets(newTargets);
     setScore(0);
     setMatches(0);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setTimeLeft(45);
     setGameState('playing');
     playClick();
@@ -76,7 +85,28 @@ export function ShapeStacker() {
       ));
       setShapes(prev => prev.filter(s => s.id !== shape.id));
       setMatches(m => m + 1);
+      
+      // Streak and scoring
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      const basePoints = 15;
+      const streakBonus = Math.min(newStreak * 2, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScore(s => s + totalPoints);
+      
+      // Show popup at shape position
+      setScorePopup({ points: totalPoints, x: shape.x, y: shape.y });
+      setTimeout(() => setScorePopup(null), 700);
+      
       playSuccess();
+      triggerHaptic('success');
+
+      // Milestone every 5
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
 
       const remainingShapes = shapes.filter(s => s.id !== shape.id);
       const unfilledTargets = targets.filter(t => !t.filled);
@@ -86,9 +116,11 @@ export function ShapeStacker() {
       }
     } else {
       playError();
+      triggerHaptic('error');
+      setStreak(0);
       setScore(s => Math.max(0, s - 20));
     }
-  }, [gameState, shapes, targets, playSuccess, playError, handleComplete]);
+  }, [gameState, shapes, targets, playSuccess, playError, handleComplete, streak]);
 
   useEffect(() => {
     if (gameState !== 'playing') {
@@ -117,6 +149,8 @@ export function ShapeStacker() {
         const missedShapes = updated.filter(s => s.y > 100);
         if (missedShapes.length > 0) {
           playError();
+          triggerHaptic('error');
+          setStreak(0);
           setScore(s => Math.max(0, s - 30));
         }
 
@@ -228,10 +262,48 @@ export function ShapeStacker() {
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Matches: {matches}/{targets.length}</span>
           </div>
+          {streak > 0 && (
+            <div className="bg-orange-100 rounded-lg px-4 py-2 shadow border-2 border-orange-200">
+              <span className="font-bold text-orange-600">🔥 {streak}</span>
+            </div>
+          )}
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Time: {timeLeft}s</span>
           </div>
         </div>
+
+        {/* Score Popup */}
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0, y: -50, scale: 1.2 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="absolute pointer-events-none z-20"
+            style={{
+              left: `${scorePopup.x}%`,
+              top: `${scorePopup.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div className="text-2xl font-bold text-green-500 drop-shadow-lg">
+              +{scorePopup.points}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Streak Milestone */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+          >
+            <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg">
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
+        )}
 
         <div className="absolute bottom-[30%] left-0 right-0 flex justify-center gap-8 px-8">
           {targets.map((target) => (

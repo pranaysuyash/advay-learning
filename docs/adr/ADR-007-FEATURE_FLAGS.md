@@ -50,8 +50,13 @@ src/frontend/src/hooks/useFeatureFlag.ts  # React hook re-export
 
 1. **Phase 1** (PR-1): Foundation + `safety.pauseOnTrackingLoss` (default on)
 2. **Phase 2** (PR-3): `controls.fallbackV1` for pilot games (default off)
+   - pilot integration added to LetterHunt page (AlphabetGame already has manual mouse mode)
+   - UI toggles added under Settings for editable flags
+   - additional fallback support added to BeginningSounds for voice flag
 3. **Phase 3** (PR-5): `rewards.deterministicV1` (policy-driven, no UI)
+   - gating wired into inventory reward pipeline
 4. **Phase 4** (PR-6): `controls.voiceFallbackV1`
+   - flag exposed in Settings; voice-fallback implementation used for BeginningSounds tap fallback pilot
 
 ## Cleanup Criteria
 

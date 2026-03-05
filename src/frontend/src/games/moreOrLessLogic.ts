@@ -4,6 +4,8 @@
  * Which group has MORE? Which group has LESS?
  */
 
+import { calculateScore as _calculateScore, ScorePresets } from '../utils/scoring';
+
 export interface QuantityGroup {
   emoji: string;
   count: number;
@@ -46,3 +48,21 @@ export function generateQuestion(level: number): CompareQuestion {
     question,
   };
 }
+
+// Difficulty multipliers (preserved for backward compatibility)
+export const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+  1: 1,    // 1-5 count range
+  2: 1.5,  // 3-8 count range
+  3: 2,    // 5-12 count range
+};
+
+/**
+ * Calculate score based on streak and level
+ * Base: 10 points + streak bonus (max 15) = 25 max base
+ * Multiplied by difficulty (level 1: 1×, level 2: 1.5×, level 3: 2×)
+ * Max per answer: 50 points (level 3, streak 5+)
+ *
+ * @deprecated Use `calculateScore` from `utils/scoring.ts` with `ScorePresets.standard` directly
+ */
+export const calculateScore = (streak: number, level: number): number =>
+  _calculateScore(streak, level, ScorePresets.standard);

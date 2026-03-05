@@ -1,9 +1,9 @@
 """Game schemas."""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class GameBase(BaseModel):
@@ -25,7 +25,7 @@ class GameBase(BaseModel):
     config_json: Optional[dict] = None
 
     @field_validator("config_json", mode="before")
-    def _parse_config_json(cls, v):
+    def _parse_config_json(cls, v):  # noqa: N805 - Pydantic validator classmethod signature
         """Parse config_json when it's provided as a JSON string.
 
         Pydantic can receive values from raw dicts or ORM objects; the
@@ -36,17 +36,16 @@ class GameBase(BaseModel):
                 import json
 
                 return json.loads(v)
-            except Exception:
-                return {}
+            except Exception as e:
+                raise ValueError("config_json must be a JSON object or valid JSON string") from e
         # leave as-is (None or already dict)
         return v
 
     @model_validator(mode="after")
     def validate_age_range(self):
         """Ensure age_range_max > age_range_min."""
-        if self.age_range_min and self.age_range_max:
-            if self.age_range_max <= self.age_range_min:
-                raise ValueError("age_range_max must be greater than age_range_min")
+        if self.age_range_max <= self.age_range_min:
+            raise ValueError("age_range_max must be greater than age_range_min")
         return self
 
 
@@ -117,7 +116,8 @@ class GlobalGameStat(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    game_name: str = Field(serialization_alias="gameName")
+    game_key: str = Field(serialization_alias="gameKey", description="Game slug or fallback content identifier")
+    game_name: str = Field(serialization_alias="gameName", description="Human-readable game title")
     total_plays: int = Field(serialization_alias="totalPlays")
     avg_session_minutes: float = Field(serialization_alias="avgSessionMinutes")
     completion_rate: float = Field(serialization_alias="completionRate")
@@ -134,3 +134,5 @@ class GlobalGameStatsResponse(BaseModel):
     age_group: Optional[str] = Field(default=None, serialization_alias="ageGroup")
     generated_at: datetime = Field(serialization_alias="generatedAt")
     games: List[GlobalGameStat]
+    error: Optional[str] = Field(default=None, description="Error message if stats computation failed")
+    error_code: Optional[Literal["STATS_COMPUTE_FAILED"]] = Field(default=None, serialization_alias="errorCode", description="Stable error code for operational monitoring")

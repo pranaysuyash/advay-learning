@@ -4,12 +4,15 @@ import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
   generateAmount,
   COINS,
+  calculateScore,
   type Coin,
 } from '../games/moneyMatchLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 export function MoneyMatch() {
   const navigate = useNavigate();
@@ -19,6 +22,15 @@ export function MoneyMatch() {
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
@@ -42,6 +54,7 @@ export function MoneyMatch() {
     setScore(0);
     setCorrect(0);
     setRound(0);
+    resetStreak();
     setGameState('playing');
     setFeedback('');
   };
@@ -53,13 +66,27 @@ export function MoneyMatch() {
     const total =
       selectedCoins.reduce((sum, c) => sum + c.value, 0) + coin.value;
     if (total === targetAmount) {
+      // Correct amount - build streak
+      incrementStreak();
+
+      // Calculate score with streak and level multiplier
+      const points = calculateScore(streak + 1, currentLevel);
+      setScore((s) => s + points);
+
+      // Show score popup
+      setScorePopup({ points });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+
       playSuccess();
       setCorrect((c) => c + 1);
-      setScore((s) => s + 25);
       setFeedback('Perfect!');
       setTimeout(() => {
         if (round >= 4) {
           setGameState('complete');
+          triggerHaptic('celebration');
         } else {
           setRound((r) => r + 1);
           const newAmount = generateAmount(currentLevel);
@@ -69,6 +96,9 @@ export function MoneyMatch() {
         }
       }, 1000);
     } else if (total > targetAmount) {
+      // Too much - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
       setFeedback(`Too much! You have ${total}¢`);
       setTimeout(() => setSelectedCoins([]), 1000);
@@ -127,6 +157,37 @@ export function MoneyMatch() {
 
         {gameState === 'playing' && (
           <div className='text-center'>
+            {/* Streak HUD */}
+            <div className="flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm">
+              <span className="font-black text-lg">🔥 Streak</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      streak >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                    className="w-6 h-6"
+                  />
+                ))}
+              </div>
+              <span className="font-black text-2xl text-orange-500 min-w-[2ch] text-center">
+                {streak}
+              </span>
+            </div>
+
+            {/* Streak milestone popup */}
+            {showMilestone && (
+              <div className="animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block">
+                <p className="text-xl font-black text-orange-600">
+                  🔥 {streak} Streak! 🔥
+                </p>
+              </div>
+            )}
+
             <p className='text-xl font-bold mb-2'>Make this amount:</p>
             <p className='text-5xl font-bold text-green-600 mb-4'>
               ${(targetAmount / 100).toFixed(2)}
@@ -169,17 +230,28 @@ export function MoneyMatch() {
             >
               Clear
             </button>
+            {/* Score popup */}
+            {scorePopup && (
+              <div className="font-black text-3xl text-green-500 animate-bounce mb-2">
+                +{scorePopup.points}
+              </div>
+            )}
+
             <p className='text-lg font-medium text-purple-600 mt-2'>
               {feedback}
             </p>
             <div className='flex gap-4 mt-4'>
-              <div className='bg-green-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Correct</p>
-                <p className='text-2xl font-bold'>{correct}</p>
+              <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
+                <p className='text-xs font-black uppercase text-green-600'>Correct</p>
+                <p className='text-2xl font-bold text-green-700'>{correct}</p>
               </div>
-              <div className='bg-yellow-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Round</p>
-                <p className='text-2xl font-bold'>{round + 1}/5</p>
+              <div className='bg-yellow-100 px-4 py-2 rounded-xl text-center border-2 border-yellow-200'>
+                <p className='text-xs font-black uppercase text-yellow-600'>Round</p>
+                <p className='text-2xl font-bold text-yellow-700'>{round + 1}/5</p>
+              </div>
+              <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
+                <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
+                <p className='text-2xl font-bold text-orange-700'>{maxStreak}</p>
               </div>
             </div>
           </div>

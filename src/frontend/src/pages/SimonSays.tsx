@@ -21,6 +21,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 // Icon components for body actions
 const HeadIcon = () => (
@@ -172,6 +174,9 @@ export const SimonSays = memo(function SimonSays() {
   const [score, setScore] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [cameraReady] = useState(false);
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [matchProgress, setMatchProgress] = useState(0);
@@ -346,11 +351,34 @@ export const SimonSays = memo(function SimonSays() {
       if (poseMatches && fingerMatches) {
         holdTimeRef.current += 50;
         if (holdTimeRef.current >= HOLD_DURATION) {
+          // Build streak
+          const newStreak = streak + 1;
+          setStreak(newStreak);
+          
+          // Calculate score with streak bonus
+          const basePoints = 15;
+          const streakBonus = Math.min(newStreak * 3, 15);
+          const totalPoints = basePoints + streakBonus;
+          setScore((s: number) => s + totalPoints);
+          
+          // Show score popup
+          setScorePopup({ points: totalPoints });
+          setTimeout(() => setScorePopup(null), 700);
+          
+          // Haptics
+          triggerHaptic('success');
+          
+          // Milestone every 5
+          if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+            setShowStreakMilestone(true);
+            triggerHaptic('celebration');
+          }
+          
           playFanfare();
-          setScore((s: number) => s + 100);
           setShowResult(true);
           setShowCelebration(true);
           setTimeout(() => {
+            setShowStreakMilestone(false);
             setShowCelebration(false);
             setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
             setShowResult(false);
@@ -392,6 +420,9 @@ export const SimonSays = memo(function SimonSays() {
     playPop();
     setIsPlaying(true);
     setScore(0);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setCurrentActionIndex(0);
     setRound(1);
     holdTimeRef.current = 0;
@@ -497,6 +528,53 @@ export const SimonSays = memo(function SimonSays() {
           <Star className='w-6 h-6 fill-amber-500' /> <span>{score}</span>
         </div>
       </header>
+
+      {/* Kenney Heart HUD */}
+      {isPlaying && (
+        <div className="flex justify-center mb-4">
+          <div className="flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <img
+                key={i}
+                src={streak >= (i + 1) * 2
+                  ? '/assets/kenney/platformer/hud/hud_heart.png'
+                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                alt=""
+                className="w-7 h-7"
+              />
+            ))}
+            <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Score Popup Animation */}
+      {scorePopup && (
+        <motion.div
+          initial={{ opacity: 0, y: 0, scale: 0.5 }}
+          animate={{ opacity: 1, y: -40, scale: 1.2 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+        >
+          <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+            +{scorePopup.points}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1.2, rotate: 0 }}
+          exit={{ scale: 0 }}
+          className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+        >
+          <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+            🔥 {streak} Streak! 🔥
+          </div>
+        </motion.div>
+      )}
 
       <div className='max-w-5xl mx-auto w-full flex-1 flex flex-col'>
         {!isPlaying ? (

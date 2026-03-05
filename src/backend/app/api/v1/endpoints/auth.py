@@ -1,13 +1,14 @@
 """Authentication endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db, get_current_user
+from app.api.deps import get_current_user, get_db
 from app.core.config import settings
 from app.core.email import EmailService
 from app.core.rate_limit import RateLimits, limiter

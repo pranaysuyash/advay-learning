@@ -3,7 +3,6 @@
 import logging
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
@@ -12,9 +11,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.api.permissions import require_roles
+from app.db.models.game import Game as GameModel
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
-from app.schemas.game import Game, GameCreate, GameList, GameUpdate, GlobalGameStat, GlobalGameStatsResponse
+from app.schemas.game import (
+    Game,
+    GameCreate,
+    GameList,
+    GameUpdate,
+    GlobalGameStat,
+    GlobalGameStatsResponse,
+)
 from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
 from app.services.subscription_service import SubscriptionService
@@ -25,6 +32,10 @@ logger = logging.getLogger(__name__)
 UUID_PATTERN = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
 
 CACHE_TTL_SECONDS = 3600
+# WARNING: This is a process-local cache suitable for single-worker deployments.
+# In multi-worker or multi-instance deployments, each worker will have its own cache,
+# leading to inconsistent stats and higher database load. Consider Redis for production.
+# Cache invalidation on new progress writes is not implemented; stats may be stale up to TTL.
 _GAME_STATS_CACHE: TTLCache[str, GlobalGameStatsResponse] = TTLCache(maxsize=100, ttl=CACHE_TTL_SECONDS)
 
 
@@ -155,16 +166,22 @@ async def get_games_stats(
         if age_max is not None:
             filters.append(Profile.age <= age_max)
 
+        # Create reusable expressions for cleaner group_by clause
+        game_key_expr = func.coalesce(GameModel.slug, Progress.content_id)
+        game_name_expr = func.coalesce(GameModel.title, Progress.content_id)
+
         stmt = (
             select(
-                Progress.content_id.label("game_name"),
+                game_key_expr.label("game_key"),
+                game_name_expr.label("game_name"),
                 func.count(Progress.id).label("total_plays"),
                 func.coalesce(func.avg(cast(Progress.duration_seconds, Float)) / 60.0, 0.0).label("avg_session_minutes"),
                 func.coalesce(func.avg(cast(Progress.completed, Integer)), 0.0).label("completion_rate"),
             )
             .join(Profile, Profile.id == Progress.profile_id)
+            .outerjoin(GameModel, GameModel.slug == Progress.content_id)
             .where(and_(*filters))
-            .group_by(Progress.content_id)
+            .group_by(game_key_expr, game_name_expr)
         )
 
         result = await db.execute(stmt)
@@ -178,6 +195,7 @@ async def get_games_stats(
 
             stats.append(
                 {
+                    "game_key": str(row.game_key),
                     "game_name": str(row.game_name),
                     "total_plays": total_plays,
                     "avg_session_minutes": avg_session_minutes,
@@ -192,6 +210,7 @@ async def get_games_stats(
         for idx, item in enumerate(stats, start=1):
             games.append(
                 GlobalGameStat(
+                    game_key=item["game_key"],
                     game_name=item["game_name"],
                     total_plays=item["total_plays"],
                     avg_session_minutes=item["avg_session_minutes"],
@@ -212,20 +231,22 @@ async def get_games_stats(
 
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to compute games stats; returning empty response")
         return GlobalGameStatsResponse(
             period=period,
             age_group=age_group,
             generated_at=datetime.now(timezone.utc),
             games=[],
+            error=f"Failed to compute statistics: {str(e)}",
+            error_code="STATS_COMPUTE_FAILED",
         )
 
 
 @router.get("/{identifier}", response_model=Game)
 async def get_game(identifier: str = Path(..., description="Game slug or ID"), db: AsyncSession = Depends(get_db)) -> Game:
     """Get game details by slug or ID."""
-    return await resolve_game_identifier(identifier, db)
+    return await resolve_game_identifier(identifier=identifier, db=db)
 
 
 @router.get("/{identifier}/access")
@@ -235,43 +256,49 @@ async def check_game_access(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Check if the current user can access a game.
-    
+
     Returns:
         {
             "can_access": bool,
             "reason": str,
-            "game_id": str,
-            "subscription_status": "active" | "expired" | "none"
+            "game_id": str,  # Database ID
+            "game_slug": str,  # URL-friendly identifier
+            "subscription_status": "active" | "none",
+            "plan_type": str  # Only present when subscription exists
         }
     """
     # Get game
-    game = await resolve_game_identifier(identifier, db)
-    
+    game = await resolve_game_identifier(identifier=identifier, db=db)
+
     # Check subscription
     subscription = await SubscriptionService.get_active_subscription(
         db=db, parent_id=current_user.id
     )
-    
+
     if not subscription:
         return {
             "can_access": False,
             "reason": "No active subscription",
             "game_id": game.id,
+            "game_slug": game.slug,
             "subscription_status": "none",
         }
-    
+
     # Check game access
     can_access, reason = await SubscriptionService.can_access_game(
         db=db, parent_id=current_user.id, game_id=game.id
     )
-    
-    return {
+
+    response = {
         "can_access": can_access,
         "reason": reason,
         "game_id": game.id,
-        "subscription_status": "active",
+        "game_slug": game.slug,
+        "subscription_status": "active",  # We only return here if subscription exists and is active
         "plan_type": subscription.plan_type.value,
     }
+
+    return response
 
 
 @router.post("/", response_model=Game, status_code=status.HTTP_201_CREATED)

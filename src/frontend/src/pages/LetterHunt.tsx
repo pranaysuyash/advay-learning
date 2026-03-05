@@ -21,6 +21,8 @@ import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
@@ -130,6 +132,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   const [round, setRound] = useState<number>(1);
   const [totalRounds] = useState<number>(10);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   // Sound effects
   const { playFanfare: playCelebration, playSuccess, playError } = useAudio();
@@ -201,6 +206,8 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   }, [gameStarted, timeLeft, gameCompleted]);
 
   const handleTimeout = () => {
+    setStreak(0);
+    setShowStreakMilestone(false);
     setFeedback({
       message: `Time's up! The target was ${targetLetter}`,
       type: 'error',
@@ -211,8 +218,30 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   const handleSelectOption = useCallback(
     (option: LetterOption) => {
       if (option.isTarget) {
-        playSuccess();
-        setScore((prev) => prev + timeLeft * 5);
+        // Build streak
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        
+        // Calculate score with streak bonus
+        const basePoints = timeLeft * 5;
+        const streakBonus = Math.min(newStreak * 3, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+        
+        // Show score popup
+        setScorePopup({ points: totalPoints });
+        setTimeout(() => setScorePopup(null), 700);
+        
+        // Haptics
+        triggerHaptic('success');
+        
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
+        
         foundCountRef.current += 1;
         if (foundCountRef.current >= 8) {
           triggerEasterEgg('egg-treasure-hunter');
@@ -223,6 +252,11 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         }
         setTimeout(nextRound, 1500);
       } else {
+        // Wrong - break streak
+        setStreak(0);
+        setShowStreakMilestone(false);
+        triggerHaptic('error');
+        
         playError();
         setFeedback({
           message: `Oops! That was ${option.char}, not ${targetLetter}`,
@@ -234,7 +268,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         setTimeout(nextRound, 1500);
       }
     },
-    [targetLetter, timeLeft, playSuccess, playError, speak, ttsEnabled],
+    [targetLetter, timeLeft, streak, playSuccess, playError, speak, ttsEnabled],
   );
 
   const nextRound = () => {
@@ -301,6 +335,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
     setCursor(null);
     setHoveredOptionIndex(null);
     setIsPinching(false);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     lastSelectAtRef.current = 0;
   };
 
@@ -506,7 +543,50 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                     Level {level} · Round {round}/{totalRounds} · <span className='text-slate-400'>Take your time!</span>
                   </div>
                 </div>
+
+                {/* Kenney Heart HUD */}
+                <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-[1.5rem] border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <img
+                      key={i}
+                      src={streak >= (i + 1) * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                      alt=""
+                      className="w-7 h-7"
+                    />
+                  ))}
+                  <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+                </div>
               </div>
+
+              {/* Score Popup Animation */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+                >
+                  <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              {showStreakMilestone && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1.2, rotate: 0 }}
+                  exit={{ scale: 0 }}
+                  className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+                >
+                  <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                    🔥 {streak} Streak! 🔥
+                  </div>
+                </motion.div>
+              )}
 
               {/* Tracking status */}
               {!isHandTrackingReady && (

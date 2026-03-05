@@ -1,7 +1,10 @@
 import asyncio
+
 from sqlalchemy.future import select
-from app.db.session import async_session
+
 from app.db.models.user import User
+from app.db.session import async_session
+
 
 async def verify_user():
     async with async_session() as session:

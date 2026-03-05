@@ -1,6 +1,6 @@
 """Profile model for children."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import uuid4
 

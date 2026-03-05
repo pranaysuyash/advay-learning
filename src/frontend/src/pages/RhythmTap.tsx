@@ -1,10 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export function RhythmTap() {
   const navigate = useNavigate();
@@ -19,6 +22,8 @@ export function RhythmTap() {
   >('start');
   const [feedback, setFeedback] = useState('');
   const [tapping, setTapping] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('rhythm-tap');
@@ -56,6 +61,8 @@ export function RhythmTap() {
     setRound(0);
     setScore(0);
     setCorrect(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     startRound();
   };
 
@@ -73,10 +80,29 @@ export function RhythmTap() {
       if (isCorrect) {
         playSuccess();
         setCorrect((c) => c + 1);
-        setScore((s) => s + 30);
+        
+        // Streak and scoring
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const basePoints = 30;
+        const streakBonus = Math.min(newStreak * 3, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((s) => s + totalPoints);
+        
+        triggerHaptic('success');
+        
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
+        
         setFeedback('🎵 Perfect rhythm!');
       } else {
         playError();
+        setStreak(0);
+        triggerHaptic('error');
         setFeedback('❌ Not quite — try again!');
       }
       setTimeout(() => {
@@ -160,12 +186,31 @@ export function RhythmTap() {
             </div>
           )}
 
+          {/* Streak Milestone */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, rotate: 180 }}
+              className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+            >
+              <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+                🔥 {streak} Streak! 🔥
+              </div>
+            </motion.div>
+          )}
+
           {/* Showing pattern */}
           {gameState === 'showing' && (
             <div className='flex flex-col items-center gap-6 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <p className='text-sm font-black uppercase tracking-widest text-pink-400'>
-                Round {round + 1} of 5
-              </p>
+              <div className='flex items-center gap-4'>
+                <p className='text-sm font-black uppercase tracking-widest text-pink-400'>
+                  Round {round + 1} of 5
+                </p>
+                {streak > 0 && (
+                  <span className='text-orange-500 font-bold'>🔥 {streak}</span>
+                )}
+              </div>
               <div className='text-5xl'>👂</div>
               <p className='text-2xl font-black text-slate-700'>
                 Listen to the pattern...
@@ -184,6 +229,13 @@ export function RhythmTap() {
           {/* Listening / result */}
           {(gameState === 'listening' || gameState === 'result') && (
             <div className='flex flex-col items-center gap-6'>
+              {/* Streak Display */}
+              {streak > 0 && (
+                <div className='bg-orange-100 px-4 py-2 rounded-full border-2 border-orange-200'>
+                  <span className='text-orange-600 font-bold'>🔥 {streak} Streak</span>
+                </div>
+              )}
+              
               {/* Status */}
               {feedback && (
                 <div

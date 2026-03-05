@@ -41,7 +41,7 @@ describe('Settings page feature flags', () => {
     );
     fireEvent.click(screen.getByText('Unlock Parent Gate'));
 
-    Object.entries(FEATURE_FLAG_META).forEach(([flag, meta]) => {
+    Object.entries(FEATURE_FLAG_META).forEach(([_flag, meta]) => {
       if (meta.editable) {
         expect(screen.getByText(meta.description)).toBeTruthy();
       }
@@ -57,7 +57,7 @@ describe('Settings page feature flags', () => {
     fireEvent.click(screen.getByText('Unlock Parent Gate'));
 
     // pick a known editable flag (first one) to interact with
-    const [flagKey, flagMeta] = Object.entries(FEATURE_FLAG_META).find(
+    const [flagKey, _flagMeta] = Object.entries(FEATURE_FLAG_META).find(
       ([, m]) => m.editable,
     ) as [string, typeof FEATURE_FLAG_META[keyof typeof FEATURE_FLAG_META]];
 

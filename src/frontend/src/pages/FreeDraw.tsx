@@ -18,6 +18,7 @@ import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useHandClick } from '../hooks/useHandClick';
 import type { Point } from '../types/tracking';
@@ -47,6 +48,8 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
   const [showMenu, setShowMenu] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [strokeCount, setStrokeCount] = useState(0);
+  const [showMilestone, setShowMilestone] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastPointRef = useRef<Point | null>(null);
@@ -144,6 +147,16 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
 
     if (pinch.isPinching && !wasPinchingRef.current) {
       setGameState((prev) => startStroke(prev, point));
+      setStrokeCount(c => c + 1);
+      triggerHaptic('success');
+      
+      // Milestone every 10 strokes
+      const newCount = strokeCount + 1;
+      if (newCount % 10 === 0) {
+        setShowMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowMilestone(false), 1200);
+      }
     } else if (pinch.isPinching) {
       setGameState((prev) => continueStroke(prev, point));
     } else if (!pinch.isPinching && wasPinchingRef.current) {
@@ -216,6 +229,8 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
     try {
       playClick();
       setGameState((prev) => clearCanvas(prev));
+      setStrokeCount(0);
+      setShowMilestone(false);
     } catch (err) {
       console.error('Clear failed:', err);
       setError(err as Error);
@@ -362,6 +377,7 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
                     try {
                       playClick();
                       setGameState((prev) => setBrushColor(prev, color));
+                      triggerHaptic('success');
                     } catch (err) {
                       console.error('Color change failed:', err);
                     }
@@ -388,6 +404,15 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
           >
             Art saved! 🎨
           </motion.div>
+        )}
+
+        {/* Stroke Milestone Overlay */}
+        {showMilestone && (
+          <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+            <div className='bg-gradient-to-r from-purple-400 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+              🎨 {strokeCount} Strokes! 🎨
+            </div>
+          </div>
         )}
 
         {/* Wellness timer */}

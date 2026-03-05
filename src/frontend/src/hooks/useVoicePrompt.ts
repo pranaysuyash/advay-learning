@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useFeatureFlag } from './useFeatureFlag';
+import { llmService } from '../services/ai/llm';
 import { ttsService } from '../services/ai/tts/TTSService';
 
 interface VoicePromptOptions {
@@ -25,6 +27,7 @@ interface UseVoicePromptReturn {
  */
 export function useVoicePrompt(): UseVoicePromptReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const llmResponsesEnabled = useFeatureFlag('ai.llmResponsesV1');
 
   // Cleanup on unmount
   useEffect(() => {
@@ -33,20 +36,34 @@ export function useVoicePrompt(): UseVoicePromptReturn {
     };
   }, []);
 
-  const speak = useCallback((text: string, options: VoicePromptOptions = {}) => {
-    ttsService.stop();
-    setIsSpeaking(true);
+  const speak = useCallback(
+    (text: string, options: VoicePromptOptions = {}) => {
+      ttsService.stop();
+      setIsSpeaking(true);
 
-    ttsService.speak(text, {
-      rate: options.rate ?? 0.9,
-      volume: options.volume ?? 1,
-      lang: options.lang ?? 'en-US',
-    }).then(() => {
-      setIsSpeaking(false);
-    }).catch(() => {
-      setIsSpeaking(false);
-    });
-  }, []);
+      void (async () => {
+        try {
+          let finalText = text;
+
+          if (llmResponsesEnabled) {
+            const generated = await llmService.generateText({ prompt: text });
+            if (generated.text.trim().length > 0) {
+              finalText = generated.text;
+            }
+          }
+
+          await ttsService.speak(finalText, {
+            rate: options.rate ?? 0.9,
+            volume: options.volume ?? 1,
+            lang: options.lang ?? 'en-US',
+          });
+        } finally {
+          setIsSpeaking(false);
+        }
+      })();
+    },
+    [llmResponsesEnabled],
+  );
 
   const stop = useCallback(() => {
     ttsService.stop();
@@ -59,9 +76,8 @@ export function useVoicePrompt(): UseVoicePromptReturn {
     isSpeaking,
     isSupported: ttsService.isAvailable(),
     availableVoices: [] as never[],
-    setPreferredVoice: () => { },
+    setPreferredVoice: () => {},
   };
 }
 
 export default useVoicePrompt;
-

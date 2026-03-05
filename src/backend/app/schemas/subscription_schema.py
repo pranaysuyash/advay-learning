@@ -41,12 +41,13 @@ class SubscriptionCreate(SubscriptionBase):
 class SubscriptionGameSelectionCreate(BaseModel):
     """Game selection creation schema."""
 
-    game_ids: list[str] = Field(..., min_length=1, max_length=10)
+    game_ids: list[str] = Field(..., min_length=1)
 
 
 class SubscriptionGameSwap(BaseModel):
     """Game swap schema."""
 
+    old_game_id: Optional[str] = None
     new_game_id: str
 
 

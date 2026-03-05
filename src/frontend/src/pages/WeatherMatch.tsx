@@ -4,7 +4,9 @@ import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { LEVELS, generateGame, type Weather, type Clothing } from '../games/weatherMatchLogic';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { LEVELS, generateGame, calculateScore, type Weather, type Clothing } from '../games/weatherMatchLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 interface GamePair {
   weather: Weather;
@@ -18,6 +20,15 @@ export function WeatherMatch() {
   const [selectedWeather, setSelectedWeather] = useState<Weather | null>(null);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
 
   const { playClick, playSuccess, playError } = useAudio();
@@ -31,6 +42,7 @@ export function WeatherMatch() {
     setSelectedWeather(null);
     setScore(0);
     setCorrect(0);
+    resetStreak();
     setGameState('playing');
   };
 
@@ -44,13 +56,30 @@ export function WeatherMatch() {
     if (!selectedWeather || gameState !== 'playing') return;
     playClick();
     if (pair.weather.name === selectedWeather.name) {
+      // Correct match - build streak
+      incrementStreak();
+
+      // Calculate score with streak and level multiplier
+      const points = calculateScore(streak + 1, currentLevel);
+      setScore(s => s + points);
+
+      // Show score popup
+      setScorePopup({ points });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+
       playSuccess();
       setCorrect(c => c + 1);
-      setScore(s => s + 30);
       if (correct + 1 >= pairs.length) {
         setGameState('complete');
+        triggerHaptic('celebration');
       }
     } else {
+      // Wrong match - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
     }
     setSelectedWeather(null);
@@ -75,13 +104,50 @@ export function WeatherMatch() {
           <div className="text-center">
             <p className="text-6xl mb-4">🌤️</p>
             <h2 className="text-2xl font-bold mb-2">Weather Match!</h2>
-            <p className="mb-4">Match weather to clothing!</p>
-            <button type="button" onClick={handleStart} className="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold text-xl">Start!</button>
+            <p className="mb-2">Match weather to clothing!</p>
+            <div className="bg-slate-50 rounded-xl p-3 text-sm text-slate-600 mb-4 inline-block">
+              <p className="font-bold mb-1">🎯 Scoring:</p>
+              <p>Base 15 pts + streak bonus</p>
+              <p>× Level: L1 1× | L2 1.5× | L3 2×</p>
+            </div>
+            <br />
+            <button type="button" onClick={handleStart} className="px-8 py-4 bg-sky-500 text-white rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform">Start!</button>
           </div>
         )}
 
         {gameState === 'playing' && (
           <div className="text-center">
+            {/* Streak HUD */}
+            <div className="flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm">
+              <span className="font-black text-lg">🔥 Streak</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      streak >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                    className="w-6 h-6"
+                  />
+                ))}
+              </div>
+              <span className="font-black text-2xl text-orange-500 min-w-[2ch] text-center">
+                {streak}
+              </span>
+            </div>
+
+            {/* Streak milestone popup */}
+            {showMilestone && (
+              <div className="animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block">
+                <p className="text-xl font-black text-orange-600">
+                  🔥 {streak} Match Streak! 🔥
+                </p>
+              </div>
+            )}
+
             <p className="text-lg font-bold mb-4">Select weather, then pick the right clothing!</p>
             <div className="flex gap-4 mb-6">
               {pairs.map((pair) => (
@@ -105,9 +171,26 @@ export function WeatherMatch() {
                 </div>
               </div>
             )}
+            {/* Score popup */}
+            {scorePopup && (
+              <div className="font-black text-3xl text-green-500 animate-bounce mb-2">
+                +{scorePopup.points}
+              </div>
+            )}
+
             <div className="flex gap-4 mt-4">
-              <div className="bg-green-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Correct</p><p className="text-2xl font-bold">{correct}</p></div>
-              <div className="bg-sky-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Score</p><p className="text-2xl font-bold">{score}</p></div>
+              <div className="bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200">
+                <p className="text-xs font-black uppercase text-green-600">Correct</p>
+                <p className="text-2xl font-bold text-green-700">{correct}</p>
+              </div>
+              <div className="bg-sky-100 px-4 py-2 rounded-xl text-center border-2 border-sky-200">
+                <p className="text-xs font-black uppercase text-sky-600">Score</p>
+                <p className="text-2xl font-bold text-sky-700">{score}</p>
+              </div>
+              <div className="bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200">
+                <p className="text-xs font-black uppercase text-orange-600">Best Streak</p>
+                <p className="text-2xl font-bold text-orange-700">{maxStreak}</p>
+              </div>
             </div>
           </div>
         )}
@@ -117,9 +200,31 @@ export function WeatherMatch() {
             <p className="text-6xl mb-4">🎉</p>
             <h2 className="text-2xl font-bold mb-2">Great Job!</h2>
             <p className="text-xl mb-4">You matched all weather!</p>
-            <p className="text-2xl font-bold text-green-600 mb-4">Score: {score}</p>
-            <button type="button" onClick={handleStart} className="px-6 py-3 bg-sky-500 text-white rounded-xl font-bold mr-4">Play Again</button>
-            <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold">Finish</button>
+            {/* Streak badge */}
+            {maxStreak >= 5 && (
+              <div className="flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full mb-4">
+                <img
+                  src="/assets/kenney/platformer/collectibles/star.png"
+                  alt="star"
+                  className="w-6 h-6"
+                />
+                <span className="font-black text-orange-700">
+                  Best Streak: {maxStreak}!
+                </span>
+              </div>
+            )}
+            <div className="flex justify-center gap-4 mb-4">
+              <div className="bg-sky-50 border-2 border-sky-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-sky-600">Score</p>
+                <p className="text-3xl font-black text-sky-700">{score}</p>
+              </div>
+              <div className="bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-orange-600">Max Streak</p>
+                <p className="text-3xl font-black text-orange-700">{maxStreak}</p>
+              </div>
+            </div>
+            <button type="button" onClick={handleStart} className="px-6 py-3 bg-sky-500 text-white rounded-xl font-bold mr-4 hover:scale-105 transition-transform">Play Again</button>
+            <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition-colors">Finish</button>
           </div>
         )}
       </div>

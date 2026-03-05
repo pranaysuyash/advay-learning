@@ -24,6 +24,9 @@ import {
   RETRY_BASE_DELAY_MS,
   MAX_RETRY_DELAY_MS,
   RETRY_JITTER_MS,
+  ENQUEUE_RATE_LIMIT_MS,
+  MAX_ENQUEUE_PER_MINUTE,
+  ENQUEUE_WINDOW_MS,
 } from './progressConstants';
 import { ProgressRepository, progressRepository } from '../repositories';
 
@@ -102,6 +105,13 @@ export function createProgressQueue(repo: ProgressRepository) {
   const _knownIds = new Set<string>();
   const _subscribers = new Set<Subscriber>();
 
+  // PQ-005: Rate-limiting state
+  // Per-profile: track last enqueue timestamp to enforce ENQUEUE_RATE_LIMIT_MS gap
+  const _lastEnqueueAt = new Map<string, number>();
+  // Global: sliding window counter to enforce MAX_ENQUEUE_PER_MINUTE
+  let _enqueueWindowStart = Date.now();
+  let _enqueueWindowCount = 0;
+
   function _notify() {
     _subscribers.forEach((cb) => {
       try {
@@ -162,6 +172,31 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Add a progress item to the queue
      */
     enqueue(item: ProgressItem): EnqueueResult {
+      // PQ-005: Per-profile rate-limit gate (ENQUEUE_RATE_LIMIT_MS)
+      const now = Date.now();
+      const lastAt = _lastEnqueueAt.get(item.profile_id) ?? 0;
+      if (now - lastAt < ENQUEUE_RATE_LIMIT_MS) {
+        console.warn(
+          `[ProgressQueue] Rate-limited (per-profile): ${item.profile_id} — ` +
+          `${now - lastAt}ms since last enqueue (min: ${ENQUEUE_RATE_LIMIT_MS}ms)`,
+        );
+        return { success: false, item, error: 'rate-limited: too many enqueue calls from this profile' };
+      }
+
+      // PQ-005: Global sliding-window circuit-breaker (MAX_ENQUEUE_PER_MINUTE)
+      if (now - _enqueueWindowStart > ENQUEUE_WINDOW_MS) {
+        // Reset window
+        _enqueueWindowStart = now;
+        _enqueueWindowCount = 0;
+      }
+      if (_enqueueWindowCount >= MAX_ENQUEUE_PER_MINUTE) {
+        console.warn(
+          `[ProgressQueue] Circuit-breaker tripped: ${_enqueueWindowCount} enqueues in last minute ` +
+          `(max: ${MAX_ENQUEUE_PER_MINUTE})`,
+        );
+        return { success: false, item, error: 'rate-limited: global enqueue circuit-breaker' };
+      }
+
       // Validation
       const validation = validateProgressItem(item);
       if (!validation.valid) {
@@ -206,6 +241,9 @@ export function createProgressQueue(repo: ProgressRepository) {
 
       repo.save(itemWithStatus);
       _knownIds.add(item.idempotency_key);
+      // PQ-005: Record successful enqueue for rate-limiting tracking
+      _lastEnqueueAt.set(item.profile_id, Date.now());
+      _enqueueWindowCount++;
       _notify();
 
       return { success: true, item: itemWithStatus };

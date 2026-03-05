@@ -38,8 +38,10 @@ import {
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { HandDetectionProvider } from '../components/game/HandDetectionProvider';
 import { useHandDetection } from '../components/game/useHandDetection';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 interface Bubble {
   id: string;
@@ -81,10 +83,7 @@ function BubblePopSymphonyGame() {
   });
   const [isPinching, setIsPinching] = useState(false);
   const [isHandDetected, setIsHandDetected] = useState(false);
-  const [screenDims, setScreenDims] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const screenDims = useWindowSize();
 
   // when cursor changes we derive hand detection and pixel position
   const { cursor, pinch, webcamRef: _webcamRef } = useHandDetection();
@@ -162,15 +161,6 @@ function BubblePopSymphonyGame() {
     },
     [getAudioContext],
   );
-
-  useEffect(() => {
-    function handleResize() {
-      setScreenDims({ width: window.innerWidth, height: window.innerHeight });
-    }
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     async function preloadAssets() {
@@ -313,6 +303,7 @@ function BubblePopSymphonyGame() {
         playNote(hitBubble.pitch);
         assetLoader.playSound('pop', 0.45);
         setShowSuccess(true);
+        triggerHaptic('success');
         setScore((current) => {
           const newScore = current + 1;
           // Voice feedback for first pop and milestones
@@ -325,6 +316,7 @@ function BubblePopSymphonyGame() {
             newScore === 20
           ) {
             speak(`Amazing! ${newScore} bubbles popped!`);
+            triggerHaptic('celebration');
           }
           return newScore;
         });

@@ -23,6 +23,15 @@ export const RETRY_JITTER_MS = 500;
 /** Debounce window for rapid enqueue operations in milliseconds */
 export const ENQUEUE_DEBOUNCE_MS = 100;
 
+/** Minimum ms between enqueue() calls from the same profile_id (per-profile gate) */
+export const ENQUEUE_RATE_LIMIT_MS = 50;
+
+/** Maximum enqueue() calls allowed globally per minute (circuit-breaker ceiling) */
+export const MAX_ENQUEUE_PER_MINUTE = 120;
+
+/** Duration of the global throughput measurement window in milliseconds */
+export const ENQUEUE_WINDOW_MS = 60_000;
+
 /** localStorage key for queue persistence */
 export const STORAGE_KEY = 'advay:progressQueue:v1';
 

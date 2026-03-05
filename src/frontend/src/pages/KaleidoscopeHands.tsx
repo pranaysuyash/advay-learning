@@ -4,6 +4,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
@@ -11,6 +12,7 @@ import {
   getLevelConfig,
   getColorForPoint,
 } from '../games/kaleidoscopeHandsLogic';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const CANVAS_SIZE = 400;
 
@@ -31,6 +33,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
   const [points, setPoints] = useState<Point[]>([]);
   const [handPosition, setHandPosition] = useState<Point>({ x: 0.5, y: 0.5 });
   const [score, setScore] = useState(0);
+  const strokeMilestoneRef = useRef(0);
   const colorProgressRef = useRef(0);
 
   const { playClick, playPop } = useAudio();
@@ -148,7 +151,21 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
     const y = (event.clientY - rect.top) / rect.height;
     setHandPosition({ x, y });
 
-    setPoints((prev) => [...prev, { x, y }]);
+    setPoints((prev) => {
+      const newPoints = [...prev, { x, y }];
+      // Haptic feedback every 20 points
+      if (newPoints.length % 20 === 0) {
+        triggerHaptic('success');
+        const newMilestone = Math.floor(newPoints.length / 20);
+        if (newMilestone > strokeMilestoneRef.current) {
+          strokeMilestoneRef.current = newMilestone;
+          if (newMilestone % STREAK_MILESTONE_INTERVAL === 0) {
+            triggerHaptic('celebration');
+          }
+        }
+      }
+      return newPoints;
+    });
     playPop();
   };
 

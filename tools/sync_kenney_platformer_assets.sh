@@ -4,10 +4,10 @@ set -euo pipefail
 # Sync Kenney "New Platformer Pack" assets into the frontend canonical path.
 # Usage:
 #   tools/sync_kenney_platformer_assets.sh \
-#     /Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1 \
+#     "/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0/2D assets/New Platformer Pack" \
 #     src/frontend/public/assets/kenney/platformer
 
-SRC_ROOT="${1:-/Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1}"
+SRC_ROOT="${1:-/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0/2D assets/New Platformer Pack}"
 DEST_ROOT="${2:-src/frontend/public/assets/kenney/platformer}"
 
 require_dir() {

@@ -1,3 +1,5 @@
+import { shuffle } from '../utils/random';
+
 export interface NumberBubble {
   id: number;
   value: number;
@@ -23,11 +25,11 @@ export const LEVELS: Level[] = [
 
 export function generateBubbles(level: Level): NumberBubble[] {
   const numbers = Array.from({ length: level.numberRange }, (_, i) => i + 1);
-  const shuffled = shuffleArray(numbers);
-  
+  const shuffled = shuffle(numbers);
+
   const bubbles: NumberBubble[] = [];
   const positions = generatePositions(level.numberRange, 12, 18);
-  
+
   for (let i = 0; i < shuffled.length; i++) {
     bubbles.push({
       id: i,
@@ -38,7 +40,7 @@ export function generateBubbles(level: Level): NumberBubble[] {
       popped: false,
     });
   }
-  
+
   return bubbles;
 }
 
@@ -76,15 +78,6 @@ function generatePositions(count: number, margin: number, minDistance: number): 
   return positions;
 }
 
-function shuffleArray<T>(array: T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
 export function checkPop(
   bubbles: NumberBubble[],
   bubbleId: number,
@@ -115,4 +108,25 @@ export function checkPop(
     nextExpected, 
     allPopped: bubbles.every(b => b.popped) 
   };
+}
+
+// Difficulty multipliers
+const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+  1: 1,    // 1-3 range
+  2: 1.5,  // 1-5 range
+  3: 2,    // 1-7 range
+  4: 2.5,  // 1-10 range
+};
+
+/**
+ * Calculate score based on consecutive pops and level
+ * Base: 10 points + consecutive bonus (max 20)
+ * Multiplied by difficulty
+ * Max per pop: 75 points (level 4, 10+ consecutive)
+ */
+export function calculateScore(consecutivePops: number, level: number): number {
+  const baseScore = 10;
+  const consecutiveBonus = Math.min(consecutivePops * 2, 20);
+  const multiplier = DIFFICULTY_MULTIPLIERS[level] ?? 1;
+  return Math.floor((baseScore + consecutiveBonus) * multiplier);
 }

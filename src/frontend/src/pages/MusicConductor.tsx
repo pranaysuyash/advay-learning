@@ -1,9 +1,11 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   updateNotes,
@@ -32,6 +34,8 @@ export function MusicConductor() {
     false,
     false,
   ]);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const startTimeRef = useRef<number>(0);
   const lastNoteTimeRef = useRef<number>(0);
@@ -109,11 +113,26 @@ export function MusicConductor() {
           const comboScore = calculateComboScore(noteScore, combo);
           setScore((s) => s + comboScore);
           setCombo((c) => c + 1);
+          
+          // Streak tracking
+          const newStreak = streak + 1;
+          setStreak(newStreak);
           playClick();
+          triggerHaptic('success');
+          
+          // Milestone every 10
+          if (newStreak > 0 && newStreak % 10 === 0) {
+            setShowStreakMilestone(true);
+            triggerHaptic('celebration');
+            setTimeout(() => setShowStreakMilestone(false), 1200);
+          }
+          
           return prev.map((n) => (n.id === hit.id ? { ...n, hit: true } : n));
         } else {
           setCombo(0);
+          setStreak(0);
           playError();
+          triggerHaptic('error');
           return prev;
         }
       });
@@ -133,6 +152,8 @@ export function MusicConductor() {
     setNotes([]);
     setScore(0);
     setCombo(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setGameState('playing');
     playClick();
   }, [playClick]);
@@ -209,7 +230,24 @@ export function MusicConductor() {
           <>
             <div className='absolute top-4 left-4 text-white'>
               <p className='text-xl'>Combo: {combo}</p>
+              {streak > 0 && (
+                <p className='text-lg text-orange-300'>🔥 {streak}</p>
+              )}
             </div>
+
+            {/* Streak Milestone Overlay */}
+            {showStreakMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'
+              >
+                <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             <div className='absolute top-4 right-4 text-white'>
               <p className='text-xl'>

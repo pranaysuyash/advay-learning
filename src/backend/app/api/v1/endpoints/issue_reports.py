@@ -1,10 +1,9 @@
 """Issue reporting endpoints (contract-first foundation)."""
 
+import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict
 from uuid import uuid4
-import os
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
@@ -82,7 +81,7 @@ async def upload_issue_report_clip(
     """Upload a recorded issue clip for an existing report session."""
     cache_key = get_session_cache_key(report_id)
     report = await cache_service.get(cache_key)
-    
+
     if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -172,7 +171,7 @@ async def finalize_issue_report(
     """Finalize issue report metadata after clip upload."""
     cache_key = get_session_cache_key(report_id)
     report = await cache_service.get(cache_key)
-    
+
     if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -197,7 +196,7 @@ async def finalize_issue_report(
     report["finalize_payload"] = payload.model_dump()
 
     await cache_service.set(cache_key, report, ttl=SESSION_TTL_SECONDS)
-    
+
     return IssueReportResponse(
         report_id=report_id,
         status="submitted",

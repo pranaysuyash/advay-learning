@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   Dog,
   Cat,
@@ -29,6 +30,7 @@ import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
@@ -128,6 +130,8 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [subError, setSubError] = useState<Error | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playPop, playFanfare } = useAudio();
 
@@ -373,9 +377,24 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
           setHoldTime((prev) => {
             const newTime = prev + 50;
             if (newTime >= HOLD_DURATION && !showCelebration) {
+              // Streak and scoring
+              const newStreak = streak + 1;
+              setStreak(newStreak);
+              const basePoints = 100;
+              const streakBonus = Math.min(newStreak * 10, 50);
+              
               playFanfare();
-              setScore((s) => s + 100);
+              triggerHaptic('success');
+              setScore((s) => s + basePoints + streakBonus);
               setShowCelebration(true);
+              
+              // Milestone every 5
+              if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+                setShowStreakMilestone(true);
+                triggerHaptic('celebration');
+                setTimeout(() => setShowStreakMilestone(false), 1500);
+              }
+              
               setTimeout(() => {
                 setShowCelebration(false);
                 setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length);
@@ -468,6 +487,8 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
     setCurrentPoseIndex(0);
     setHoldTime(0);
     setMatchProgress(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
   }, [playPop]);
 
   const stopGame = useCallback(async () => {
@@ -541,8 +562,15 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
             Yoga Animals
           </h1>
 
-          <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-            <Sparkles className='w-6 h-6' /> <span>{score}</span>
+          <div className='flex items-center gap-3'>
+            {streak > 0 && (
+              <div className='bg-orange-50 border-3 border-orange-100 px-4 py-2 rounded-[1.5rem] font-bold text-orange-500 text-lg shadow-[0_4px_0_#E5B86E] flex items-center gap-1'>
+                <span>🔥</span> <span>{streak}</span>
+              </div>
+            )}
+            <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
+              <Sparkles className='w-6 h-6' /> <span>{score}</span>
+            </div>
           </div>
         </header>
 
@@ -825,6 +853,15 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
 
         {/* Wellness timer */}
         <WellnessTimer />
+        
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+              🔥 {streak} Streak! 🔥
+            </div>
+          </div>
+        )}
       </div>
     </GlobalErrorBoundary>
   );

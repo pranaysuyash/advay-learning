@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
-from app.db.models.subscription import Subscription
+from app.db.models.subscription_model import Subscription
 from app.db.models.user import User
 from app.schemas.data_export import (
     DataExportResponse,
@@ -32,13 +32,13 @@ class DataExportService:
         include_subscriptions: bool = True,
     ) -> DataExportResponse:
         """Export all data for a user.
-        
+
         Args:
             db: Database session
             user_id: User ID to export
             include_progress: Whether to include progress data
             include_subscriptions: Whether to include subscription data
-            
+
         Returns:
             DataExportResponse with all user data
         """
@@ -47,7 +47,7 @@ class DataExportService:
             select(User).where(User.id == user_id)
         )
         user = user_result.scalar_one()
-        
+
         # Get profiles with related data
         profiles_result = await db.execute(
             select(Profile)
@@ -55,11 +55,11 @@ class DataExportService:
             .options(selectinload(Profile.progress) if include_progress else None)
         )
         profiles = profiles_result.scalars().all()
-        
+
         # Build profile export data
         profile_exports: List[ProfileExportData] = []
         progress_exports: List[ProgressExportData] = []
-        
+
         for profile in profiles:
             profile_exports.append(
                 ProfileExportData(
@@ -72,7 +72,7 @@ class DataExportService:
                     updated_at=profile.updated_at,
                 )
             )
-            
+
             if include_progress and hasattr(profile, 'progress'):
                 for progress in profile.progress:
                     progress_exports.append(
@@ -89,7 +89,7 @@ class DataExportService:
                             idempotency_key=progress.idempotency_key,
                         )
                     )
-        
+
         # Get subscriptions if requested
         subscription_exports: List[SubscriptionExportData] = []
         if include_subscriptions:
@@ -97,7 +97,7 @@ class DataExportService:
                 select(Subscription).where(Subscription.user_id == user_id)
             )
             subscriptions = subs_result.scalars().all()
-            
+
             for sub in subscriptions:
                 subscription_exports.append(
                     SubscriptionExportData(
@@ -110,7 +110,7 @@ class DataExportService:
                         updated_at=sub.updated_at,
                     )
                 )
-        
+
         # Build user export data
         user_export = UserExportData(
             id=user.id,
@@ -121,7 +121,7 @@ class DataExportService:
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
-        
+
         return DataExportResponse(
             export_id=str(uuid4()),
             generated_at=datetime.now(timezone.utc),
@@ -137,11 +137,11 @@ class DataExportService:
         user_id: str,
     ) -> dict:
         """Get summary of data that would be exported.
-        
+
         Args:
             db: Database session
             user_id: User ID to summarize
-            
+
         Returns:
             Summary dict with counts
         """
@@ -151,7 +151,7 @@ class DataExportService:
         )
         profiles = profile_count_result.scalars().all()
         profile_count = len(profiles)
-        
+
         # Count progress records
         profile_ids = [p.id for p in profiles]
         progress_count = 0
@@ -160,13 +160,13 @@ class DataExportService:
                 select(Progress).where(Progress.profile_id.in_(profile_ids))
             )
             progress_count = len(progress_result.scalars().all())
-        
+
         # Count subscriptions
         sub_result = await db.execute(
             select(Subscription).where(Subscription.user_id == user_id)
         )
         subscription_count = len(sub_result.scalars().all())
-        
+
         return {
             "profile_count": profile_count,
             "progress_count": progress_count,

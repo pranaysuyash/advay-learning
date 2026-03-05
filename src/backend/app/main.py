@@ -15,8 +15,8 @@ from app.core.health import get_health_status
 from app.core.logging_config import setup_logging
 from app.core.rate_limit import setup_rate_limiting
 from app.db.session import get_db
+from app.middleware.error_handler import ErrorHandlerMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
-
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -46,33 +46,30 @@ def validate_cors_configuration(settings_instance: Settings) -> None:
 
 async def validate_database_schema() -> None:
     """Validate that all SQLAlchemy models have corresponding database tables.
-    
+
     This runs at startup to catch missing migrations early.
     """
     from sqlalchemy import inspect
-    from app.db.session import engine
+
     from app.db.base_class import Base
-    
+
     # Import all models to ensure they're registered with Base
-    from app.db.models import (
-        user, profile, progress, achievement,
-        subscription, game, audit_log, revoked_token
-    )
-    
+    from app.db.session import engine
+
     async with engine.connect() as conn:
         def check_tables(sync_conn):
             inspector = inspect(sync_conn)
             existing_tables = set(inspector.get_table_names())
             existing_tables.discard('alembic_version')  # Managed by alembic
             model_tables = set(Base.metadata.tables.keys())
-            
+
             missing_tables = model_tables - existing_tables
             if missing_tables:
                 raise RuntimeError(
                     f"Database schema mismatch: Missing tables {missing_tables}. "
                     f"Run: alembic revision --autogenerate -m 'add missing tables' && alembic upgrade head"
                 )
-        
+
         await conn.run_sync(check_tables)
 
 
@@ -98,6 +95,9 @@ app = FastAPI(
 
 # Setup rate limiting
 setup_rate_limiting(app)
+
+# Error handling (early to catch all errors)
+app.add_middleware(ErrorHandlerMiddleware)
 
 # Security headers
 app.add_middleware(SecurityHeadersMiddleware)

@@ -1,6 +1,6 @@
 /**
  * Freeze Dance Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -28,9 +28,11 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameShell } from '../components/GameShell';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   const navigate = useNavigate();
@@ -51,6 +53,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   >('dancing');
   const [round, setRound] = useState(1);
   const [stabilityScore, setStabilityScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   // Game Mode: 'classic' = pose only, 'combo' = pose + fingers
   const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
@@ -301,7 +305,20 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     }
 
     if (success) {
+      // Streak logic
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
       setScore((s) => s + roundScore);
+      triggerHaptic('success');
+
+      // Milestone every 5
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), 1500);
+      }
+      
       if (roundScore > 50) {
         void playCelebration();
         setShowCelebration(true);
@@ -318,8 +335,12 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
       } else if (ttsEnabled && roundScore > 0) {
         void speak('Good try! Hold even stiller next time!');
       }
-    } else if (ttsEnabled) {
-      void speak('You moved! Try to hold super still next time!');
+    } else {
+      setStreak(0);
+      triggerHaptic('error');
+      if (ttsEnabled) {
+        void speak('You moved! Try to hold super still next time!');
+      }
     }
 
     setRound((r) => r + 1);
@@ -351,6 +372,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
         if (fingerCount === targetFingers && !fingerChallengeComplete) {
           setFingerChallengeComplete(true);
           void playSuccess();
+          triggerHaptic('success');
         }
 
         landmarks.forEach((lm) => {
@@ -413,6 +435,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     playPop();
     setIsPlaying(true);
     setScore(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setRound(1);
     if (ttsEnabled) {
       void speak(
@@ -427,6 +451,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     setIsPlaying(false);
     setGamePhase('dancing');
     setIsFrozen(false);
+    setStreak(0);
+    setShowStreakMilestone(false);
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -775,6 +801,15 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
               </div>
             </div>
 
+            {/* Streak Display */}
+            {streak > 0 && (
+              <div className='flex justify-center pt-2'>
+                <div className='bg-orange-100 px-4 py-2 rounded-xl border-2 border-orange-200'>
+                  <span className='text-orange-600 font-bold'>🔥 {streak} Streak</span>
+                </div>
+              </div>
+            )}
+
             <div className='flex justify-center pt-2'>
               <button
                 onClick={stopGame}
@@ -818,6 +853,27 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                     'Perfect stillness!'
                   )}
                 </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Streak Milestone Overlay */}
+        <AnimatePresence>
+          {showStreakMilestone && (
+            <motion.div
+              className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 pointer-events-none'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+              >
+                🔥 {streak} Streak! 🔥
               </motion.div>
             </motion.div>
           )}

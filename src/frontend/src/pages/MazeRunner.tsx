@@ -1,16 +1,18 @@
 /**
  * Maze Runner Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
 import { memo, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   createMaze,
@@ -19,6 +21,7 @@ import {
   type MazeCell,
   type Position,
 } from '../games/mazeRunnerLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const CELL_SIZE = 40;
 
@@ -31,6 +34,9 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'won'>('start');
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('maze-runner');
@@ -51,6 +57,9 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
     setScore(0);
     setMoves(0);
     setGameState('playing');
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     playClick();
   };
 
@@ -63,13 +72,29 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
       setMoves((m) => m + 1);
       if (checkWin(newPos, endPos)) {
         const timeBonus = Math.max(100 - moves, 20);
-        const finalScore = 100 + timeBonus;
+        const basePoints = 100;
+        const streakBonus = Math.min(streak * 2, 15);
+        const finalScore = basePoints + timeBonus + streakBonus;
         setScore(finalScore);
         setGameState('won');
         playSuccess();
+        
+        // Streak and score popup logic
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const totalPoints = basePoints + timeBonus + streakBonus;
+        setScorePopup({ points: totalPoints, x: 50, y: 30 });
+        setTimeout(() => setScorePopup(null), 700);
+        triggerHaptic('success');
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
       }
     } else {
       playError();
+      triggerHaptic('error');
     }
   }, [gameState, playerPos, maze, endPos, moves, playClick, playError, playSuccess]);
 
@@ -183,6 +208,11 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
                   <span>Bonus target:</span>
                   <span className='text-emerald-600'>&lt; {100 - 20} moves</span>
                 </div>
+                {/* Streak counter */}
+                <div className='flex items-center gap-1 text-sm font-black text-slate-500'>
+                  <span className='text-lg'>🔥</span>
+                  <span className='text-orange-600 text-lg'>{streak}</span>
+                </div>
                 <button
                   type='button'
                   onClick={startGame}
@@ -232,6 +262,38 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
                   )}
                 </div>
               </div>
+
+              {/* Score Popup */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 0, y: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -30, scale: 1 }}
+                  exit={{ opacity: 0, y: -50 }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className='fixed pointer-events-none z-50'
+                  style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+                >
+                  <div className='bg-emerald-500 text-white px-4 py-2 rounded-xl font-black text-lg shadow-lg border-2 border-emerald-600'>
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              {showStreakMilestone && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1.2, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.4, ease: 'backOut' }}
+                  className='fixed pointer-events-none z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'
+                >
+                  <div className='bg-gradient-to-br from-orange-400 to-red-500 text-white px-6 py-4 rounded-2xl font-black text-2xl shadow-2xl border-4 border-orange-300 text-center'>
+                    <div className='text-4xl mb-1'>🔥</div>
+                    <div>{streak} Streak!</div>
+                  </div>
+                </motion.div>
+              )}
 
               {/* D-pad controls for touch */}
               <div className='flex flex-col items-center gap-1'>

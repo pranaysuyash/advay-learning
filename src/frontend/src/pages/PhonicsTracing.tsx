@@ -10,6 +10,7 @@ import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import {
   calculateScore,
   calculateTraceAccuracy,
@@ -347,6 +348,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
         setLettersCompleted((prev) => prev + 1);
 
         playCelebration();
+        triggerHaptic('celebration');
 
         if (accuracy >= levelConfig.passThreshold) {
           setFeedback(
@@ -354,6 +356,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
           );
           speakLetter(currentLetter);
           playSuccess();
+          triggerHaptic('success');
 
           setTimeout(() => {
             const next = getNextLetter(currentLetter, currentLevel);
@@ -363,6 +366,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
           }, 2000);
         } else {
           setFeedback('Try again! Trace the letter more completely.');
+          triggerHaptic('error');
           setTimeout(() => {
             setStrokePoints([]);
             setFeedback('Trace the letter and hear the sound!');

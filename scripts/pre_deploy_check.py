@@ -97,7 +97,7 @@ async def check_database_schema() -> tuple[bool, list[str]]:
         # Import all models to register them with Base
         from app.db.models import (
             user, profile, progress, achievement,
-            subscription, game, audit_log, revoked_token
+            subscription_model, game, audit_log, revoked_token
         )
         
         async with engine.connect() as conn:

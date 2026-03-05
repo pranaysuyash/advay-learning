@@ -12,6 +12,7 @@
  */
 
 import Matter from 'matter-js';
+import { STREAK_MILESTONE_INTERVAL } from './constants';
 
 // Re-export Matter types for convenience
 export const { Engine, Render, Runner, Bodies, Composite, Events, Vector } = Matter;
@@ -229,7 +230,7 @@ export function updateGameState(
   }
   
   // Level up every 5 sorted balls
-  if (state.ballsSorted > 0 && state.ballsSorted % 5 === 0) {
+  if (state.ballsSorted > 0 && state.ballsSorted % STREAK_MILESTONE_INTERVAL === 0) {
     const newLevel = Math.floor(state.ballsSorted / 5) + 1;
     if (newLevel > state.level) {
       state.level = newLevel;

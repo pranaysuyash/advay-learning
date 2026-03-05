@@ -12,6 +12,7 @@ import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   getLevelConfig,
@@ -19,6 +20,7 @@ import {
   speakShape,
   type PuppetShape,
 } from '../games/shadowPuppetLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 // Inner game component
 interface ShadowPuppetTheaterGameProps {
@@ -35,6 +37,8 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
   const [gameState, setGameState] = useState<'playing' | 'complete'>('playing');
   const [usedShapes, setUsedShapes] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Make the shape with your hands!');
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('shadow-puppet-theater');
@@ -66,10 +70,24 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
   }, [gameState, currentLevel, currentShape, usedShapes]);
 
   const handleGotIt = () => {
+    // Streak and scoring
+    const newStreak = streak + 1;
+    setStreak(newStreak);
+    const basePoints = 25;
+    const streakBonus = Math.min(newStreak * 3, 20);
+    
     playSuccess();
+    triggerHaptic('success');
     setCorrectCount((prev) => prev + 1);
-    setScore((prev) => prev + 25);
+    setScore((prev) => prev + basePoints + streakBonus);
     setFeedback('Great job! Next shape...');
+
+    // Milestone every 5
+    if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+      setShowStreakMilestone(true);
+      triggerHaptic('celebration');
+      setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+    }
 
     setTimeout(() => {
       const nextIndex = shapeIndex + 1;
@@ -188,6 +206,12 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
                 <p className="text-sm text-green-600 font-medium">Done</p>
                 <p className="text-2xl font-bold text-green-700">{correctCount}</p>
               </div>
+              {streak > 0 && (
+                <div className="bg-orange-100 px-4 py-2 rounded-xl">
+                  <p className="text-sm text-orange-600 font-medium">Streak</p>
+                  <p className="text-2xl font-bold text-orange-700">🔥 {streak}</p>
+                </div>
+              )}
               <div className="bg-blue-100 px-4 py-2 rounded-xl">
                 <p className="text-sm text-blue-600 font-medium">Score</p>
                 <p className="text-2xl font-bold text-blue-700">{score}</p>
@@ -208,6 +232,15 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
               You made {correctCount} shadow shapes!
             </p>
             <p className="text-2xl font-bold text-purple-600 mb-6">Score: {score}</p>
+          </div>
+        )}
+
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+              🔥 {streak} Streak! 🔥
+            </div>
           </div>
         )}
 

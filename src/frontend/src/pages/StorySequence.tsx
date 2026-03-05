@@ -23,6 +23,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
+import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -41,6 +42,7 @@ import {
   returnCardToPool,
   getDifficultyDisplay,
 } from '../games/storySequenceLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export default function StorySequence() {
   // ===== AUDIO =====
@@ -74,12 +76,28 @@ export default function StorySequence() {
   const isPinchingRef = useRef(false);
   const dragSourceRef = useRef<{ type: 'slot' | 'pool'; index: number } | null>(null);
   
+  // Streak tracking for correct placements
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  
   // ===== AUDIO EFFECTS =====
   useEffect(() => {
     if (lastPlacedSlot !== null && gameState && isSlotCorrect(gameState.slots, lastPlacedSlot)) {
       playSuccess();
+      triggerHaptic('success');
+      
+      // Update streak on correct placement
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
+      // Milestone every 5
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
     }
-  }, [lastPlacedSlot, gameState]);
+  }, [lastPlacedSlot, gameState, streak]);
   
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
@@ -347,6 +365,8 @@ export default function StorySequence() {
     setShowMenu(false);
     setShowHint(null);
     setLastPlacedSlot(null);
+    setStreak(0);
+    setShowStreakMilestone(false);
   };
   
   const handleGameComplete = () => {
@@ -372,6 +392,8 @@ export default function StorySequence() {
     setGameState(null);
     setCurrentStory(null);
     setSelectedStoryId(null);
+    setStreak(0);
+    setShowStreakMilestone(false);
   };
   
   const handleShowHint = () => {
@@ -504,6 +526,11 @@ export default function StorySequence() {
               <div className="text-advay-slate text-sm">
                 Correct: <span className="text-green-500 font-bold">{correctCount}/{totalSlots}</span>
               </div>
+              {streak > 0 && (
+                <div className="text-orange-600 text-sm">
+                  Streak: <span className="font-bold">🔥 {streak}</span>
+                </div>
+              )}
               <button
                 onClick={handleShowHint}
                 className="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-sm transition-colors"
@@ -653,6 +680,15 @@ export default function StorySequence() {
         onComplete={() => setShowCelebration(false)}
         message="Story Complete!"
       />
+      
+      {/* Streak Milestone Overlay */}
+      {showStreakMilestone && (
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </div>
+      )}
     </GameContainer>
   );
 }

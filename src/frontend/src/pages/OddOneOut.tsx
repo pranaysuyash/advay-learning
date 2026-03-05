@@ -13,13 +13,14 @@ import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
   buildOddOneOutRound,
   checkAnswer,
-  calculateScore,
   type OddOneOutRound,
 } from '../games/oddOneOutLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 // Inner game component
 interface OddOneOutGameProps {
@@ -37,6 +38,15 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
   const [gameState, setGameState] = useState<'playing' | 'complete'>('playing');
   const [usedCategories, setUsedCategories] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Tap the one that does NOT belong!');
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const navigate = useNavigate();
   const { playClick, playSuccess, playError } = useAudio();
@@ -52,6 +62,14 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
     }
   }, [gameState, currentLevel, currentRound, usedCategories]);
 
+  // Calculate score with streak bonus
+  const calculateRoundScore = (isCorrect: boolean, currentStreak: number): number => {
+    if (!isCorrect) return 0;
+    const baseScore = 15;
+    const streakBonus = Math.min(currentStreak * 3, 15);
+    return baseScore + streakBonus;
+  };
+
   const handleAnswer = (itemName: string) => {
     if (showResult || !currentRound) return;
 
@@ -63,14 +81,29 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
       currentRound.items.find((i) => i.name === itemName)!,
       currentRound.oddItem
     );
-    const roundScore = calculateScore(isCorrect, 5, levelConfig.timePerRound);
 
     if (isCorrect) {
+      // Correct answer - build streak
+      incrementStreak();
+
+      // Calculate score with streak bonus
+      const roundScore = calculateRoundScore(true, streak + 1);
+      setScore((prev) => prev + roundScore);
+
+      // Show score popup
+      setScorePopup({ points: roundScore, x: 50, y: 30 });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+
       playSuccess();
       setCorrectCount((prev) => prev + 1);
-      setScore((prev) => prev + roundScore);
       setFeedback(`Yes! ${currentRound.oddItem.name} doesn't belong!`);
     } else {
+      // Wrong answer - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
       setFeedback(`The odd one out is ${currentRound.oddItem.name} ${currentRound.oddItem.emoji}`);
     }
@@ -79,6 +112,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
       const nextIndex = roundIndex + 1;
       if (nextIndex >= levelConfig.roundCount) {
         setGameState('complete');
+        triggerHaptic('celebration');
       } else {
         setRoundIndex(nextIndex);
         const newRound = buildOddOneOutRound(currentLevel, usedCategories);
@@ -97,6 +131,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
     setRoundIndex(0);
     setScore(0);
     setCorrectCount(0);
+    resetStreak();
     setUsedCategories([]);
     setCurrentRound(null);
     setGameState('playing');
@@ -130,6 +165,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
     setRoundIndex(0);
     setScore(0);
     setCorrectCount(0);
+    resetStreak();
     setUsedCategories([]);
     setCurrentRound(null);
     setGameState('playing');
@@ -163,6 +199,44 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
 
         {gameState === 'playing' && currentRound && (
           <>
+            {/* Streak HUD */}
+            <div className="flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm">
+              <span className="font-black text-lg">🔥 Streak</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      streak >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                    className="w-6 h-6"
+                  />
+                ))}
+              </div>
+              <span className="font-black text-2xl text-orange-500 min-w-[2ch] text-center">
+                {streak}
+              </span>
+            </div>
+
+            {/* Streak milestone popup */}
+            {showMilestone && (
+              <div className="animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 text-center">
+                <p className="text-xl font-black text-orange-600">
+                  🔥 {streak} Streak! 🔥
+                </p>
+              </div>
+            )}
+
+            {/* Score popup */}
+            {scorePopup && (
+              <div className="font-black text-3xl text-green-500 animate-bounce mb-2 text-center">
+                +{scorePopup.points}
+              </div>
+            )}
+
             <div className="text-center">
               <p className="text-lg text-gray-700 font-medium">{feedback}</p>
             </div>
@@ -194,17 +268,21 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
             </div>
 
             <div className="flex gap-4 text-center">
-              <div className="bg-green-100 px-4 py-2 rounded-xl">
-                <p className="text-sm text-green-600 font-medium">Correct</p>
+              <div className="bg-green-100 px-4 py-2 rounded-xl border-2 border-green-200">
+                <p className="text-xs font-black uppercase text-green-600">Correct</p>
                 <p className="text-2xl font-bold text-green-700">{correctCount}</p>
               </div>
-              <div className="bg-blue-100 px-4 py-2 rounded-xl">
-                <p className="text-sm text-blue-600 font-medium">Score</p>
+              <div className="bg-blue-100 px-4 py-2 rounded-xl border-2 border-blue-200">
+                <p className="text-xs font-black uppercase text-blue-600">Score</p>
                 <p className="text-2xl font-bold text-blue-700">{score}</p>
               </div>
-              <div className="bg-purple-100 px-4 py-2 rounded-xl">
-                <p className="text-sm text-purple-600 font-medium">Round</p>
+              <div className="bg-purple-100 px-4 py-2 rounded-xl border-2 border-purple-200">
+                <p className="text-xs font-black uppercase text-purple-600">Round</p>
                 <p className="text-2xl font-bold text-purple-700">{roundIndex + 1}/{levelConfig.roundCount}</p>
+              </div>
+              <div className="bg-orange-100 px-4 py-2 rounded-xl border-2 border-orange-200">
+                <p className="text-xs font-black uppercase text-orange-600">Best Streak</p>
+                <p className="text-2xl font-bold text-orange-700">{maxStreak}</p>
               </div>
             </div>
           </>
@@ -217,7 +295,29 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
             <p className="text-xl text-gray-600 mb-4">
               You got {correctCount} out of {levelConfig.roundCount} correct!
             </p>
-            <p className="text-2xl font-bold text-purple-600 mb-6">Score: {score}</p>
+            {/* Streak badge */}
+            {maxStreak >= 5 && (
+              <div className="flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full mb-4">
+                <img
+                  src="/assets/kenney/platformer/collectibles/star.png"
+                  alt="star"
+                  className="w-6 h-6"
+                />
+                <span className="font-black text-orange-700">
+                  Best Streak: {maxStreak}!
+                </span>
+              </div>
+            )}
+            <div className="flex justify-center gap-4 mb-6">
+              <div className="bg-blue-50 border-2 border-blue-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-blue-600">Score</p>
+                <p className="text-3xl font-black text-blue-700">{score}</p>
+              </div>
+              <div className="bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-orange-600">Max Streak</p>
+                <p className="text-3xl font-black text-orange-700">{maxStreak}</p>
+              </div>
+            </div>
           </div>
         )}
 

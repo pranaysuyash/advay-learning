@@ -24,7 +24,10 @@ import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 
 import { useAudio } from '../utils/hooks/useAudio';
 import { useKenneyAudio } from '../utils/hooks/useKenneyAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import '../styles/animations.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -69,6 +72,8 @@ function MathMonstersGame() {
   const [fingerHoldStart, setFingerHoldStart] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   // Initialize audio on first interaction
   useEffect(() => {
@@ -154,6 +159,8 @@ function MathMonstersGame() {
     setShowMenu(false);
     setMonsterExpression('hungry');
     setMonsterMessage(getRandomPhrase(getMonsterForLevel(LEVELS[0]), 'request'));
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     if (ttsEnabled && newGameState.currentProblem) {
       void speak(`Feed the monster! Show ${newGameState.currentProblem.answer} fingers!`);
     }
@@ -181,6 +188,22 @@ function MathMonstersGame() {
       playSuccess();
       playCoin(); // Kenney coin sound
       setMonsterExpression('eating');
+      triggerHaptic('success');
+      
+      // Calculate and show score popup
+      const basePoints = 10;
+      const streakBonus = Math.min(gameState.streak * 2, 20);
+      const totalPoints = basePoints + streakBonus;
+      setScorePopup({ points: totalPoints });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Streak milestone every 5
+      const newStreak = gameState.streak + 1;
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+      }
+      
       if (ttsEnabled) {
         void speak('Yum! Correct answer!');
       }
@@ -189,6 +212,8 @@ function MathMonstersGame() {
       playError();
       playHurt(); // Kenney hurt sound
       setMonsterExpression('sad');
+      triggerHaptic('error');
+      setShowStreakMilestone(false);
       if (ttsEnabled) {
         void speak(`That's ${fingerCount}. Try ${gameState.currentProblem?.answer} fingers!`);
       }
@@ -204,6 +229,7 @@ function MathMonstersGame() {
 
     if (newGameState.completed) {
       playFanfare();
+      triggerHaptic('celebration');
       onGameComplete();
       setShowCelebration(true);
     } else {
@@ -226,6 +252,8 @@ function MathMonstersGame() {
     playClick();
     startGame();
     setShowCelebration(false);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
   };
 
   const handleShowMenu = () => {
@@ -401,7 +429,7 @@ function MathMonstersGame() {
             </div>
           </div>
 
-          {/* Progress Bar */}
+          {/* Progress Bar with Kenney Heart HUD */}
           <div className="px-4 py-2 bg-white border-b border-[#F2CC8F]">
             <div className="flex justify-between text-sm text-text-secondary mb-1">
               <span>Level {gameState.currentLevel} of {LEVELS.length}</span>
@@ -413,14 +441,60 @@ function MathMonstersGame() {
                 style={{ width: `${levelProgress}%` }}
               />
             </div>
-            {gameState.streak > 1 && (
-              <div className="text-center mt-1">
+            <div className="flex items-center justify-between mt-2">
+              {/* Kenney Heart HUD */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={gameState.streak >= (i + 1) * 2
+                      ? '/assets/kenney/platformer/hud/hud_heart.png'
+                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                    alt=""
+                    className="w-6 h-6"
+                  />
+                ))}
+                <span className="ml-2 text-sm font-bold text-pink-500">x{gameState.streak}</span>
+              </div>
+              {gameState.streak > 1 && (
                 <span className="inline-block bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">
                   🔥 {gameState.streak} streak!
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+
+          {/* Score Popup Animation */}
+          <AnimatePresence>
+            {scorePopup && (
+              <motion.div
+                initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                exit={{ opacity: 0 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+              >
+                <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                  +{scorePopup.points}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Streak Milestone */}
+          <AnimatePresence>
+            {showStreakMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1.2, rotate: 0 }}
+                exit={{ scale: 0 }}
+                className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+              >
+                <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                  🔥 {gameState.streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Helper indicator */}
           <div className="absolute top-20 right-4 z-10">

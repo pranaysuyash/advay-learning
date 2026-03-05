@@ -4,7 +4,9 @@ import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { LEVELS, generateQuestion, type CompareQuestion } from '../games/moreOrLessLogic';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { LEVELS, generateQuestion, calculateScore, type CompareQuestion } from '../games/moreOrLessLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 export function MoreOrLess() {
   const navigate = useNavigate();
@@ -13,6 +15,15 @@ export function MoreOrLess() {
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
   const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -49,19 +60,44 @@ export function MoreOrLess() {
     setShowResult(true);
     const correctSide = getCorrectSide(question);
     if (side === correctSide) {
+      // Correct answer - build streak
+      incrementStreak();
+
+      // Calculate score with streak and level
+      const points = calculateScore(streak + 1, currentLevel);
+      setScore((s) => s + points);
+
+      // Show score popup
+      setScorePopup({ points, x: 50, y: 30 });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+      if (streak + 1 > 0 && (streak + 1) % 5 === 0) {
+        playCelebration();
+      }
+
       playSuccess();
       setCorrect((c) => c + 1);
-      setScore((s) => s + 20);
       setFeedback('✅ Correct! Great job!');
-      if (correct > 0 && (correct + 1) % 5 === 0) playCelebration();
     } else {
+      // Wrong answer - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
       setFeedback(`❌ The ${correctSide} group has ${question.question}!`);
     }
     setTimeout(startNewRound, 2200);
   };
 
-  const handleStart = () => { playClick(); startNewRound(); };
+  const handleStart = () => {
+    playClick();
+    setScore(0);
+    setCorrect(0);
+    setRound(0);
+    resetStreak();
+    startNewRound();
+  };
   const handleFinish = useCallback(async () => {
     playClick();
     await onGameComplete(Math.round(score / 20));
@@ -139,9 +175,10 @@ export function MoreOrLess() {
                 <h2 className='text-4xl font-black text-slate-900 tracking-tight'>More or Less!</h2>
                 <p className='text-lg font-bold text-slate-600 mt-2'>Compare two groups — which has MORE or LESS?</p>
               </div>
-              <div className='flex items-center gap-4 text-sm font-bold text-slate-600'>
-                <span className='px-3 py-1 bg-purple-50 rounded-full border border-purple-200'>Score +20 per correct</span>
-                <span className='px-3 py-1 bg-blue-50 rounded-full border border-blue-200'>3 Levels</span>
+              <div className='bg-purple-50 rounded-xl p-3 text-sm text-slate-600'>
+                <p className='font-bold mb-1'>🎯 Scoring:</p>
+                <p>Base 10 pts + streak bonus</p>
+                <p>× Level: L1 1× | L2 1.5× | L3 2×</p>
               </div>
               <button
                 type='button'
@@ -153,6 +190,44 @@ export function MoreOrLess() {
             </div>
           ) : (
             <>
+              {/* Streak HUD */}
+              <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 shadow-sm'>
+                <span className='font-black text-lg'>🔥 Streak</span>
+                <div className='flex gap-1'>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <img
+                      key={i}
+                      src={
+                        streak >= i * 2
+                          ? '/assets/kenney/platformer/hud/hud_heart.png'
+                          : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                      }
+                      alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                      className='w-6 h-6'
+                    />
+                  ))}
+                </div>
+                <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
+                  {streak}
+                </span>
+              </div>
+
+              {/* Streak milestone popup */}
+              {showMilestone && (
+                <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 text-center'>
+                  <p className='text-xl font-black text-orange-600'>
+                    🔥 {streak} Streak! 🔥
+                  </p>
+                </div>
+              )}
+
+              {/* Score popup */}
+              {scorePopup && (
+                <div className='font-black text-3xl text-green-500 animate-bounce text-center'>
+                  +{scorePopup.points}
+                </div>
+              )}
+
               {/* Question prompt */}
               <div className='bg-white rounded-2xl border-2 border-[#F2CC8F] px-5 py-4 shadow-[0_4px_0_#E5B86E] text-center'>
                 <p className='text-sm font-black uppercase tracking-widest text-purple-400 mb-1'>Round {round}</p>
@@ -193,6 +268,10 @@ export function MoreOrLess() {
                   <div className='bg-purple-50 border-2 border-purple-200 px-4 py-2 rounded-xl text-center'>
                     <p className='text-xs font-black uppercase text-purple-600'>Score</p>
                     <p className='text-2xl font-black text-purple-700'>{score}</p>
+                  </div>
+                  <div className='bg-orange-50 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
+                    <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
+                    <p className='text-2xl font-black text-orange-700'>{maxStreak}</p>
                   </div>
                 </div>
                 <button

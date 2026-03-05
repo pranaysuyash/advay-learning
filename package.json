@@ -1,10 +1,16 @@
 {
   "scripts": {
     "check:db-migration": "bash ./scripts/ci_db_migration_check.sh",
-    "check:mandatory": "npm run -s check:db-migration && npm -C src/frontend run -s type-check && npm -C src/frontend run -s test -- --run && (cd src/backend && uv run pytest -q)"
+    "check:mandatory": "npm run -s check:db-migration && npm -C src/frontend run -s type-check && npm -C src/frontend run -s test && (cd src/backend && uv run pytest -q)"
   },
   "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "matter-js": "^0.20.0",
     "puppeteer": "^24.37.5"
   },
-  "packageManager": "pnpm@10.30.1+sha512.3590e550d5384caa39bd5c7c739f72270234b2f6059e13018f975c313b1eb9fefcc09714048765d4d9efe961382c312e624572c0420762bdc5d5940cdf9be73a"
+  "packageManager": "pnpm@10.30.1+sha512.3590e550d5384caa39bd5c7c739f72270234b2f6059e13018f975c313b1eb9fefcc09714048765d4d9efe961382c312e624572c0420762bdc5d5940cdf9be73a",
+  "devDependencies": {
+    "fast-check": "^4.5.3"
+  }
 }

@@ -1,10 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, generateWordSearch } from '../games/wordSearchLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export function WordSearch() {
   const navigate = useNavigate();
@@ -14,6 +17,8 @@ export function WordSearch() {
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [selected, setSelected] = useState<{ x: number; y: number }[]>([]);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
@@ -36,6 +41,8 @@ export function WordSearch() {
     setFoundWords([]);
     setSelected([]);
     setScore(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setGameState('playing');
   };
 
@@ -53,14 +60,30 @@ export function WordSearch() {
     if (newSelected.length >= 2) {
       const word = newSelected.map((s) => grid[s.x][s.y]).join('');
       const reversed = word.split('').reverse().join('');
+      const handleWordFound = (foundWord: string) => {
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const basePoints = foundWord.length * 10;
+        const streakBonus = Math.min(newStreak * 3, 20);
+        const totalPoints = basePoints + streakBonus;
+        
+        playSuccess();
+        triggerHaptic('success');
+        setFoundWords((f) => [...f, foundWord]);
+        setScore((s) => s + totalPoints);
+
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
+      };
+      
       if (words.includes(word) && !foundWords.includes(word)) {
-        playSuccess();
-        setFoundWords((f) => [...f, word]);
-        setScore((s) => s + word.length * 10);
+        handleWordFound(word);
       } else if (words.includes(reversed) && !foundWords.includes(reversed)) {
-        playSuccess();
-        setFoundWords((f) => [...f, reversed]);
-        setScore((s) => s + reversed.length * 10);
+        handleWordFound(reversed);
       }
       setSelected([]);
 
@@ -148,8 +171,27 @@ export function WordSearch() {
                 )),
               )}
             </div>
-            <div className='text-xl font-bold'>Score: {score}</div>
+            <div className='flex items-center justify-center gap-4'>
+              <div className='text-xl font-bold'>Score: {score}</div>
+              {streak > 0 && (
+                <div className='text-orange-500 font-bold text-xl'>🔥 {streak}</div>
+              )}
+            </div>
           </div>
+        )}
+
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
         )}
 
         {gameState === 'complete' && (

@@ -1,14 +1,16 @@
-# GitHub Issues Workflow (Worklog is Canonical)
+# GitHub Issues Workflow (Issue Register Canonical)
 
 This repo uses **two layers** of tracking:
 
-1) **Canonical**: `docs/WORKLOG_ADDENDUM_*.md` (append-only; evidence-first; scope contract required)
-2) **Collaboration mirror**: **GitHub Issues** (labels, assignees, discussion, PR linking)
+1) **Canonical issue status**: `docs/audit/ISSUE_REGISTER.md` (deduped, decision-facing register)
+2) **Execution log**: `docs/WORKLOG_ADDENDUM_*.md` (append-only; evidence-first; scope contract required)
+3) **Collaboration mirror**: **GitHub Issues** (labels, assignees, discussion, PR linking)
 
 ## Rules
 
-1. **The worklog is the source of truth.**
-   - Scope, evidence, and final status live in the worklog.
+1. **The issue register is the source of truth for status.**
+   - Scope and status live in `docs/audit/ISSUE_REGISTER.md`.
+   - Detailed evidence and execution chronology live in worklog addendums.
    - Issues are a mirror for visibility and collaboration.
 
 2. **1:1 mapping for important work**

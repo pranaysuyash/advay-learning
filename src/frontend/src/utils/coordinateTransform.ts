@@ -36,19 +36,28 @@ export interface ScreenCoordinate {
  * ```
  */
 export function getCanvasCoordinates(
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | null,
   normalizedPoint: { x: number; y: number },
-): { x: number; y: number } {
+): { x: number; y: number } | null {
+  // Null guard - prevents game crashes during component mount
+  if (!canvas) {
+    return null;
+  }
+
   // Get CSS pixel dimensions (accounts for transforms, responsive sizing)
   const rect = canvas.getBoundingClientRect();
 
   // Get actual device pixel ratio (for high-DPI displays)
   const dpr = window.devicePixelRatio || 1;
 
+  // Clamp normalized coordinates to valid range [0, 1] - prevents off-screen rendering bugs
+  const clampedX = Math.max(0, Math.min(1, normalizedPoint.x));
+  const clampedY = Math.max(0, Math.min(1, normalizedPoint.y));
+
   // Convert normalized [0,1] to actual canvas pixels
   return {
-    x: normalizedPoint.x * rect.width * dpr,
-    y: normalizedPoint.y * rect.height * dpr,
+    x: clampedX * rect.width * dpr,
+    y: clampedY * rect.height * dpr,
   };
 }
 
@@ -62,9 +71,13 @@ export function getCanvasCoordinates(
  * @returns Point in normalized [0,1] space
  */
 export function getNormalizedCoordinates(
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | null,
   pixelPoint: { x: number; y: number },
-): { x: number; y: number } {
+): { x: number; y: number } | null {
+  if (!canvas) {
+    return null;
+  }
+
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
 

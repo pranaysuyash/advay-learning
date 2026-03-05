@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 
@@ -20,8 +21,10 @@ import {
 } from '../games/phonicsSoundsLogic';
 import { assetLoader, SOUND_ASSETS } from '../utils/assets';
 import { isPointInCircle } from '../games/targetPracticeLogic';
+import { triggerHaptic } from '../utils/haptics';
 import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const HIT_RADIUS = 0.12;
 const MAX_LEVEL = 3;
@@ -58,6 +61,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const [showExample, setShowExample] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const targetsRef = useRef<PhonicsTarget[]>(targets);
   const streakRef = useRef(streak);
@@ -229,7 +234,13 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         const nextStreak = streakRef.current + 1;
         setStreak(nextStreak);
         setCorrectCount((prev) => prev + 1);
-        setScore((prev) => prev + 10 + Math.min(15, nextStreak * 3));
+        const basePoints = 10;
+        const streakBonus = Math.min(nextStreak * 2, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+        setScorePopup({ points: totalPoints, x: 50, y: 30 });
+        setTimeout(() => setScorePopup(null), 700);
+        triggerHaptic('success');
         setFeedback(`Yes! ${hit.phoneme.letter} = ${hit.phoneme.exampleWord} ${hit.phoneme.exampleEmoji}`);
         setShowExample(true);
         if (ttsEnabled) {
@@ -246,7 +257,9 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
           }
         }
 
-        if (nextStreak > 0 && nextStreak % 5 === 0) {
+        if (nextStreak > 0 && nextStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
           setShowCelebration(true);
           void playCelebration();
           if (ttsEnabled) {
@@ -257,7 +270,9 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
           }
           celebrationTimeoutRef.current = setTimeout(() => {
             setShowCelebration(false);
+            setShowStreakMilestone(false);
           }, 1800);
+          setTimeout(() => setShowStreakMilestone(false), 1200);
         }
 
         if (nextRoundTimeoutRef.current) {
@@ -266,6 +281,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         nextRoundTimeoutRef.current = setTimeout(() => nextRound(), 1200);
       } else {
         setStreak(0);
+        triggerHaptic('error');
         setFeedback(`That's "${hit.phoneme.sound}". Listen again!`);
         if (ttsEnabled) {
           void speak(`That's ${hit.phoneme.sound}. Try again!`);
@@ -340,6 +356,8 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
     setFeedback('Pinch the letter that makes this sound!');
     setCursor(null);
     setShowExample(false);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setIsPlaying(true);
     isAdvancingRef.current = false;
     playPop();
@@ -454,11 +472,43 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
           </div>
         )}
 
-        {/* Streak */}
+        {/* Streak HUD */}
         {streak > 0 && (
           <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full border-3 border-orange-200 bg-orange-100/90 text-orange-600 font-black text-lg shadow-[0_4px_0_#E5B86E] drop-shadow-[0_4px_0_#E5B86E]'>
             🔥 {streak} streak!
           </div>
+        )}
+
+        {/* Score Popup */}
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.5 }}
+            animate={{ opacity: 1, y: -20, scale: 1.2 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className='absolute left-1/2 -translate-x-1/2 pointer-events-none z-20'
+            style={{ top: `${scorePopup.y}%` }}
+          >
+            <div className='px-6 py-3 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-white font-black text-2xl shadow-lg border-2 border-emerald-300'>
+              +{scorePopup.points}
+              {scorePopup.points > 10 && <span className='ml-2 text-lg'>✨</span>}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Streak Milestone */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3, rotate: -10 }}
+            animate={{ opacity: 1, scale: 1.2, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
+            transition={{ duration: 0.4, type: 'spring', stiffness: 200 }}
+            className='absolute inset-0 flex items-center justify-center pointer-events-none z-30'
+          >
+            <div className='px-10 py-6 rounded-[2.5rem] bg-gradient-to-br from-orange-400 via-red-400 to-pink-400 text-white font-black text-4xl shadow-2xl border-4 border-orange-200'>
+              <span className='drop-shadow-lg'>🔥 {streak} STREAK! 🔥</span>
+            </div>
+          </motion.div>
         )}
 
         {/* Letter targets */}

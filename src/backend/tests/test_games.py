@@ -1,6 +1,6 @@
 """Tests for games API."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -71,7 +71,7 @@ async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
                 id=str(uuid4()),
                 profile_id=in_range.id,
                 activity_type="game",
-                content_id="color-by-number",
+                content_id="alphabet-tracing",
                 score=90,
                 duration_seconds=120,
                 completed=True,
@@ -81,7 +81,7 @@ async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
                 id=str(uuid4()),
                 profile_id=in_range.id,
                 activity_type="game",
-                content_id="color-by-number",
+                content_id="alphabet-tracing",
                 score=70,
                 duration_seconds=180,
                 completed=False,
@@ -91,7 +91,7 @@ async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
                 id=str(uuid4()),
                 profile_id=out_range.id,
                 activity_type="game",
-                content_id="color-by-number",
+                content_id="alphabet-tracing",
                 score=80,
                 duration_seconds=240,
                 completed=True,
@@ -109,12 +109,66 @@ async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
     assert data["ageGroup"] == "4-6"
     assert len(data["games"]) >= 1
 
-    target = next((g for g in data["games"] if g["gameName"] == "color-by-number"), None)
+    target = next((g for g in data["games"] if g["gameKey"] == "alphabet-tracing"), None)
     assert target is not None
     assert target["totalPlays"] == 2
     assert target["avgSessionMinutes"] == 2.5
     assert target["completionRate"] == 0.5
     assert target["ageCohortRank"] >= 1
+    assert target["gameKey"] == "alphabet-tracing"
+    # Verify error field structure (even though no error in this case)
+    assert "errorCode" in data or data.get("errorCode") is None
+
+
+@pytest.mark.asyncio
+async def test_games_stats_handles_missing_games(db_session: AsyncSession, client: AsyncClient):
+    """Stats endpoint should handle progress rows for missing/deleted games gracefully."""
+    from uuid import uuid4
+
+    from app.core.security import get_password_hash
+    from app.db.models.user import User
+
+    # Create user and profile
+    parent = User(
+        id=str(uuid4()),
+        email=f"missing-game-parent-{uuid4()}@test.com",
+        hashed_password=get_password_hash("Test123!@#"),
+        is_active=True,
+        email_verified=True,
+    )
+    db_session.add(parent)
+    await db_session.flush()
+
+    profile = Profile(id=str(uuid4()), parent_id=parent.id, name="Test Kid", age=5)
+    db_session.add(profile)
+    await db_session.flush()
+
+    # Create progress for non-existent game to test outer join fallback
+    now = datetime.utcnow()
+    db_session.add(
+        Progress(
+            id=str(uuid4()),
+            profile_id=profile.id,
+            activity_type="game",
+            content_id="non-existent-game-slug",  # This game doesn't exist in DB
+            score=50,
+            duration_seconds=300,
+            completed=True,
+            completed_at=now - timedelta(hours=1),
+        )
+    )
+    await db_session.commit()
+
+    # Request stats - should not fail and should include the missing game with fallback data
+    response = await client.get("/api/v1/games/stats?period=all")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Should include the non-existent game with fallback content_id as game_key
+    missing_game = next((g for g in data["games"] if g["gameKey"] == "non-existent-game-slug"), None)
+    assert missing_game is not None
+    assert missing_game["gameName"] == "non-existent-game-slug"  # Falls back to content_id
+    assert missing_game["totalPlays"] == 1
 
 
 @pytest.mark.asyncio
@@ -257,8 +311,9 @@ async def create_test_user(db_session, role: UserRole = UserRole.ADMIN) -> UserM
     """
     from uuid import uuid4
 
-    from app.core.security import get_password_hash
     from sqlalchemy import select
+
+    from app.core.security import get_password_hash
 
     email = f"{role.value}@test.com"
     # look for existing user first

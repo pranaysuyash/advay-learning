@@ -2,12 +2,12 @@
 
 Provides structured logging with context for production debugging.
 """
-import logging
 import json
+import logging
 import sys
-from datetime import datetime
-from typing import Any
 from functools import wraps
+from typing import Any
+
 
 # Configure structured logging
 def setup_logging() -> None:
@@ -59,14 +59,14 @@ def log_api_call(logger: StructuredLogger):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             func_name = func.__name__
-            logger.debug(f"API call started", function=func_name)
+            logger.debug("API call started", function=func_name)
             try:
                 result = await func(*args, **kwargs)
-                logger.debug(f"API call completed", function=func_name, status="success")
+                logger.debug("API call completed", function=func_name, status="success")
                 return result
             except Exception as e:
                 logger.exception(
-                    f"API call failed",
+                    "API call failed",
                     function=func_name,
                     error_type=type(e).__name__,
                     error_message=str(e),

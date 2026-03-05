@@ -26,23 +26,53 @@ import {
   type PhysicsBodies,
 } from '../games/colorSortLogic';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useHandTracking } from '../hooks/useHandTracking';
+import { triggerHaptic } from '../utils/haptics';
+import { useProgressMetrics } from '../hooks/useProgressMetrics';
+import { useTTS } from '../hooks/useTTS';
 
 export const PhysicsDemo = memo(function PhysicsDemoComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('physics-demo');
+  const { playClick, playSuccess, playError, playLevelUp } = useAudio();
+  const { speak } = useTTS();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const physicsRef = useRef<PhysicsBodies | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const { playClick, playSuccess, playError, playLevelUp } = useAudio();
+  useHandTracking({
+    numHands: 1,
+    minDetectionConfidence: 0.3,
+  });
+  // metrics hook invoked for side effects only; progress value not needed here
+  useProgressMetrics([]);
 
   const [gameState, setGameState] = useState<GameState>(initializeGame());
   const [nextColor, setNextColor] = useState<string>(getRandomColor());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
+
+  // Update canvas size on window resize
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        setCanvasSize({
+          width: Math.max(800, rect.width),
+          height: Math.max(500, rect.height),
+        });
+      }
+    };
+
+    window.addEventListener('resize', updateCanvasSize);
+    updateCanvasSize();
+
+    return () => window.removeEventListener('resize', updateCanvasSize);
+  }, []);
 
   // Show loading while checking subscription
   if (subLoading) {
@@ -89,8 +119,8 @@ export const PhysicsDemo = memo(function PhysicsDemoComponent() {
 
     try {
       const canvas = canvasRef.current;
-      const width = canvas.width;
-      const height = canvas.height;
+      const width = canvasSize.width;
+      const height = canvasSize.height;
 
       // Create physics world
       const physics = createPhysicsWorld(width, height);
@@ -115,18 +145,22 @@ export const PhysicsDemo = memo(function PhysicsDemoComponent() {
               switch (event.type) {
                 case 'correct':
                   playSuccess();
+                  triggerHaptic('success');
                   setFeedback('✓ Correct!');
                   setTimeout(() => setFeedback(null), 1000);
                   break;
                 case 'wrong':
                   playError();
+                  triggerHaptic('error');
                   setFeedback('✗ Wrong bucket!');
                   setTimeout(() => setFeedback(null), 1000);
                   break;
                 case 'levelup':
                   playLevelUp();
+                  triggerHaptic('celebration');
                   setFeedback(`Level ${event.level}!`);
                   setTimeout(() => setFeedback(null), 2000);
+                  speak(`Level ${event.level}!`);
                   break;
               }
             });
@@ -336,8 +370,8 @@ export const PhysicsDemo = memo(function PhysicsDemoComponent() {
           <div className='flex-1 relative'>
             <canvas
               ref={canvasRef}
-              width={800}
-              height={500}
+              width={canvasSize.width}
+              height={canvasSize.height}
               onClick={handleCanvasClick}
               className='w-full h-full cursor-crosshair'
               style={{ imageRendering: 'crisp-edges' }}
@@ -381,6 +415,8 @@ export const PhysicsDemo = memo(function PhysicsDemoComponent() {
             onHydrationReminder={() => console.log('Hydration reminder')}
             onStretchReminder={() => console.log('Stretch reminder')}
           />
+
+          {/* Progress tracking (hidden placeholder removed) */}
         </div>
       </GameContainer>
     </GlobalErrorBoundary>

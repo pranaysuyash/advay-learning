@@ -18,13 +18,37 @@ export interface LevelConfig {
   level: number;
   notesToPlay: number;
   timeLimit: number;
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 export const LEVELS: LevelConfig[] = [
-  { level: 1, notesToPlay: 8, timeLimit: 30 },
-  { level: 2, notesToPlay: 12, timeLimit: 25 },
-  { level: 3, notesToPlay: 16, timeLimit: 20 },
+  { level: 1, notesToPlay: 8, timeLimit: 30, difficulty: 'easy' },
+  { level: 2, notesToPlay: 12, timeLimit: 25, difficulty: 'medium' },
+  { level: 3, notesToPlay: 16, timeLimit: 20, difficulty: 'hard' },
 ];
+
+// Difficulty multipliers for scoring
+const DIFFICULTY_MULTIPLIERS: Record<string, number> = {
+  easy: 1,
+  medium: 1.5,
+  hard: 2,
+};
+
+/**
+ * Calculate score based on streak and difficulty
+ * Base: 10 points + streak bonus (max 20) = 30 max base
+ * Multiplied by difficulty (easy 1x, medium 1.5x, hard 2x)
+ * Max per note: 60 points (hard, streak 10+)
+ */
+export function calculateScore(
+  streak: number,
+  difficulty: 'easy' | 'medium' | 'hard' = 'easy',
+): number {
+  const baseScore = 10;
+  const streakBonus = Math.min(streak * 2, 20);
+  const multiplier = DIFFICULTY_MULTIPLIERS[difficulty] ?? 1;
+  return Math.floor((baseScore + streakBonus) * multiplier);
+}
 
 export const NOTES: GuitarNote[] = [
   { id: 'e2', name: 'E2', fret: 0, string: 6, color: '#FF6B6B' },

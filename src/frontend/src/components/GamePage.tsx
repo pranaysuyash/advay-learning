@@ -112,13 +112,14 @@ export function GamePage({
   // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL RETURNS
   const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
-  const { currentProfile } = useProgressStore();
+  const { currentProfile, recordGamePlay } = useProgressStore();
   const { onGameComplete } = useGameDrops(gameId);
 
   // internal refs keep the latest values synchronously so callers can
   // update and immediately finish without having to pass explicit opts.
   const scoreRef = useRef(0);
   const levelRef = useRef(1);
+  const startTimeRef = useRef<number>(Date.now());
 
   const [score, _setScore] = useState(0);
   const [currentLevel, _setCurrentLevel] = useState(1);
@@ -159,6 +160,8 @@ export function GamePage({
         // session expired; treat as an error so the caller can react.
         throw new Error('No profile selected');
       }
+      const durationSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      recordGamePlay(currentProfile.id, gameId, durationSeconds, finalScore);
       await progressQueue.add({
         profileId: currentProfile.id,
         gameId,
@@ -168,7 +171,7 @@ export function GamePage({
       });
       onGameComplete(finalScore);
     },
-    [currentProfile, gameId, onGameComplete],
+    [currentProfile, gameId, onGameComplete, recordGamePlay],
   );
 
   const handleFinish = useCallback(

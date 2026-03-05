@@ -2,6 +2,24 @@
  * Types for progress tracking and metrics
  */
 
+export interface Attempt {
+  id: string;
+  index: number;
+  score: number;
+  durationSeconds: number;
+  accuracy?: number;
+  errors?: ErrorDetail[];
+  timestamp: string;
+  completed: boolean;
+}
+
+export interface ErrorDetail {
+  type: 'confusion' | 'timeout' | 'miss' | 'help';
+  target?: string;
+  timestamp: number;
+  position?: { x: number; y: number };
+}
+
 export interface ProgressItem {
   id: string;
   activity_type: string;
@@ -11,7 +29,18 @@ export interface ProgressItem {
   completed_at: string;
   duration_seconds?: number;
   meta_data?: Record<string, unknown>;
-  attempt_count?: number; // Number of attempts to complete (undefined = not tracked, assume 1)
+  attempt_count?: number;
+  attempts?: Attempt[];
+  struggle_indicators?: StruggleIndicator;
+}
+
+export interface StruggleIndicator {
+  attempts: number;
+  errorPattern?: string;
+  timeOnTask: number;
+  helped: boolean;
+  abandoned: boolean;
+  attentionLevel?: 'none' | 'low' | 'medium' | 'high';
 }
 
 export interface ProgressStats {
