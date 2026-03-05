@@ -18,6 +18,7 @@ Targets:
 - Branch/PR: `codex/wip-tck-20260305-016` -> `main`
 
 Prompt Trace: user-provided "Intent-First Test Fixer" workflow; prompts/intent-first/development/intent-first-testing-v1.0.md; prompts/review/local-pre-commit-review-v1.0.md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 Intent statements (Step 0):
 - Observed: `useStreakTracking` is the shared streak+popup abstraction and returns `scorePopup`/milestone fields used by games (`src/frontend/src/hooks/useStreakTracking.ts`).
@@ -80,3 +81,5 @@ Post-fix checkpoint:
   - Backend config/services accept realistic environment values used in this repo test flow.
 - Command:
   - `npm run -s check:mandatory`
+- 2026-03-05T16:12:00Z Fixed pre-push deployment gate import mapping (`subscription` -> `subscription_model`) and hardened migration `e1b4c3a9f7d2` to deduplicate legacy `payment_reference` values before adding unique constraint. | Evidence: `python scripts/pre_deploy_check.py`, `cd src/backend && alembic upgrade head`
+- 2026-03-05T16:20:00Z Updated `AGENTS.md` workflow policy: after `git add -A`, all staged files are in-scope and must pass gate/PR workflow; parallel-agent staged changes are part of the same commit flow by default. | Evidence: `git diff -- AGENTS.md`

@@ -18,6 +18,29 @@ depends_on = None
 
 def upgrade() -> None:
     """Add subscription integrity constraints and webhook event tracking."""
+    # Normalize duplicate non-null payment references before enforcing uniqueness.
+    # Keep the first row as-is and rewrite subsequent duplicates deterministically.
+    op.execute(
+        sa.text(
+            """
+            WITH ranked AS (
+                SELECT id, payment_reference,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY payment_reference
+                           ORDER BY created_at NULLS LAST, id
+                       ) AS rn
+                FROM subscriptions
+                WHERE payment_reference IS NOT NULL
+            )
+            UPDATE subscriptions AS s
+            SET payment_reference = ranked.payment_reference || '_dup_' || s.id
+            FROM ranked
+            WHERE s.id = ranked.id
+              AND ranked.rn > 1
+            """
+        )
+    )
+
     op.create_unique_constraint(
         "uq_payment_reference",
         "subscriptions",

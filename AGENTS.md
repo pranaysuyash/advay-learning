@@ -72,8 +72,8 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.6  
-**Last Updated**: 2026-02-23  
+**Version**: 1.7  
+**Last Updated**: 2026-03-05  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -132,6 +132,9 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Always stage changes with: `git add -A`
 - Do not “selectively stage” unless the user explicitly asks.
 - Do not use staging as a mechanism to “drop” other agents’ work.
+- Once `git add -A` has been run, every staged file is in scope for that commit/PR.
+- For staged files, treat failures as current branch code issues to resolve, not as “pre-existing/unrelated” exemptions.
+- Parallel-agent changes included by `git add -A` are part of the same commit and merge workflow by default.
 
 ### 6. Branch and Parallel Work Preservation (CRITICAL)
 
@@ -496,7 +499,7 @@ The audit-to-ticket gap exists because:
 - [ ] Run discovery commands (git status, git log, rg searches)
 - [ ] Identify exact code locations (semantic anchors, not line numbers)
 - [ ] Check for existing tests
-- [ ] Verify no uncommitted changes in unrelated files
+- [ ] Preserve uncommitted parallel work; do not drop unrecognized files/edits
 - [ ] Confirm scope contract is clear
 - [ ] Stage changes using `git add -A` (unless user explicitly requests partial staging)
 ```
@@ -1118,9 +1121,10 @@ Pass if:
 11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
 12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
-14. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
-15. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
-16. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
+14. **Never** reclassify staged files as “out of scope” after running `git add -A`; staged changes must be carried through gate, PR, and merge workflow
+15. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
+16. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
+17. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
 
 ---
 
