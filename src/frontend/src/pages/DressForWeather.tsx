@@ -1,6 +1,6 @@
 /**
  * Dress For Weather Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -22,13 +22,6 @@ import {
 } from '../components/game/DragDropSystem';
 import { type ScreenCoordinate } from '../utils/coordinateTransform';
 import {
-  assetLoader,
-  CLOTHING_ASSETS,
-  WEATHER_BACKGROUNDS,
-  SOUND_ASSETS,
-  createSVGIcon,
-} from '../utils/assets';
-import {
   SunIcon,
   CloudRainIcon,
   SnowflakeIcon,
@@ -39,9 +32,12 @@ import {
 
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useWindowSize } from '../hooks/useWindowSize';
+import { triggerHaptic } from '../utils/haptics';
 
 /**
  * Dress for Weather - Weather awareness and clothing matching game
@@ -173,6 +169,21 @@ const CLOTHING_ITEMS: ClothingItem[] = [
   },
 ];
 
+const ITEM_EMOJIS: Record<string, string> = {
+  sunglasses: '🕶️',
+  't-shirt': '👕',
+  shorts: '🩳',
+  raincoat: '🧥',
+  umbrella: '☔',
+  boots: '👢',
+  coat: '🧥',
+  scarf: '🧣',
+  mittens: '🧤',
+  hat: '🧢',
+  'winter-hat': '❄️👒',
+  sandals: '🩴',
+};
+
 const LEVELS: Level[] = [
   {
     weather: 'sunny',
@@ -227,16 +238,17 @@ function DressForWeatherGame() {
   );
   const [showSuccess, setShowSuccess] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Streak tracking
+  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
+
   const [weatherImageSrc, setWeatherImageSrc] = useState<string | null>(null);
 
   // Voice instructions
   const { speak } = useVoiceInstructions();
 
   // Screen dimensions
-  const [screenDims, setScreenDims] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const screenDims = useWindowSize();
 
   useGameSessionProgress({
     gameName: 'Dress for Weather',
@@ -246,104 +258,34 @@ function DressForWeatherGame() {
     metaData: { weather: LEVELS[currentLevel]?.weather },
   });
 
+  // No external visual asset loading required, background colors handle states.
   useEffect(() => {
-    function handleResize() {
-      setScreenDims({ width: window.innerWidth, height: window.innerHeight });
-    }
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Preload visual/audio assets for richer gameplay.
-  useEffect(() => {
-    let mounted = true;
-
-    async function preloadAssets() {
-      try {
-        await assetLoader.loadImages([
-          ...Object.values(CLOTHING_ASSETS),
-          ...Object.values(WEATHER_BACKGROUNDS),
-        ]);
-        await assetLoader.loadSounds(Object.values(SOUND_ASSETS));
-      } catch (error) {
-        console.error('Failed to preload dress-for-weather assets', error);
-      }
-
-      if (!mounted) return;
-      const level = LEVELS[currentLevel];
-      const weatherAsset = WEATHER_BACKGROUNDS[level.weather];
-      const loaded = assetLoader.getImage(weatherAsset.id);
-      setWeatherImageSrc(loaded?.src || null);
-    }
-
-    void preloadAssets();
-
-    return () => {
-      mounted = false;
-    };
+    // Keep setWeatherImageSrc empty to use crisp CSS gradients
+    setWeatherImageSrc(null);
   }, [currentLevel]);
 
   const buildItemVisual = useCallback((item: ClothingItem, size: number) => {
-    const imageAsset = CLOTHING_ASSETS[item.id];
-    const loaded = imageAsset ? assetLoader.getImage(imageAsset.id) : null;
-
-    if (loaded?.src) {
-      return (
-        <img
-          src={loaded.src}
-          alt={item.name}
-          style={{
-            width: size * 0.7,
-            height: size * 0.7,
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))',
-          }}
-        />
-      );
-    }
-
-    const svg = createSVGIcon(item.id, 128);
-    if (svg) {
-      const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-      return (
-        <img
-          src={dataUrl}
-          alt={item.name}
-          style={{
-            width: size * 0.72,
-            height: size * 0.72,
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))',
-          }}
-        />
-      );
-    }
-
+    const emoji = ITEM_EMOJIS[item.id] || '👕';
     return (
-      <span
+      <div
+        className="flex items-center justify-center rounded-[2rem] bg-white border-4 shadow-xl select-none"
         style={{
-          lineHeight: 1,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           width: size,
           height: size,
+          borderColor: item.color,
+          boxShadow: `0 8px 0 ${item.color}88, inset 0 -4px 0 rgba(0,0,0,0.05)`,
         }}
       >
-        <svg
-          width={size * 0.8}
-          height={size * 0.8}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={item.color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <span
+          style={{
+            fontSize: `${size * 0.55}px`,
+            lineHeight: 1,
+            filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))',
+          }}
         >
-          <circle cx="12" cy="12" r="10" />
-        </svg>
-      </span>
+          {emoji}
+        </span>
+      </div>
     );
   }, []);
 
@@ -448,9 +390,13 @@ function DressForWeatherGame() {
         // Correct item!
         setItems((prev) => prev.filter((i) => i.id !== item.id));
         setCorrectlyPlaced((prev) => new Set([...prev, item.id]));
-        setScore((prev) => prev + 1);
+        // Streak and scoring
+        const newStreak = incrementStreak();
+        setScore((prev) => prev + 10 + Math.min(newStreak * 2, 15));
+
         setShowSuccess(true);
-        assetLoader.playSound('success', 0.8);
+        void playClick();
+        triggerHaptic('success');
 
         speak(`Perfect! ${item.data.name} is great for ${level.weatherName}!`);
 
@@ -461,11 +407,11 @@ function DressForWeatherGame() {
         if (newCorrect.size >= requiredItems) {
           setTimeout(() => {
             if (currentLevel < LEVELS.length - 1) {
-              assetLoader.playSound('level-complete', 0.7);
+              void playClick();
               setCurrentLevel((prev) => prev + 1);
               speak("Amazing! Let's try the next weather!");
             } else {
-              assetLoader.playSound('level-complete', 0.9);
+              void playClick();
               onGameComplete();
               speak("You finished all the weather! You're a weather expert!");
             }
@@ -473,13 +419,14 @@ function DressForWeatherGame() {
         }
       } else {
         // Wrong item
-        assetLoader.playSound('wrong', 0.65);
+        resetStreak();
+        void playClick();
         speak(
           `Hmm, ${item.data.name} isn't quite right for ${level.weatherName}. Try another!`,
         );
       }
     },
-    [currentLevel, correctlyPlaced, onGameComplete, speak],
+    [currentLevel, correctlyPlaced, onGameComplete, resetStreak, speak],
   );
 
   // Handle item dropped outside
@@ -499,7 +446,7 @@ function DressForWeatherGame() {
     setGameStarted(true);
     setCurrentLevel(0);
     setScore(0);
-    assetLoader.playSound('pop', 0.55);
+    void playClick();
     speak('Dress the character for different weather! Drag the right clothes!');
   }, [speak, playClick]);
 
@@ -521,7 +468,7 @@ function DressForWeatherGame() {
       }}
     >
       {/* Hidden webcam */}
-      
+
 
       <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
 
@@ -546,9 +493,14 @@ function DressForWeatherGame() {
             <h2 className='text-2xl font-black text-advay-slate tracking-tight m-0'>
               {level.weatherName}
             </h2>
-            <p className='text-lg font-bold text-text-secondary m-0'>
-              Score: <span className='text-[#10B981]'>{score}</span>
-            </p>
+            <div className='flex items-center gap-3'>
+              <p className='text-lg font-bold text-text-secondary m-0'>
+                Score: <span className='text-[#10B981]'>{score}</span>
+              </p>
+              {streak > 0 && (
+                <span className='text-orange-500 font-bold'>🔥 {streak}</span>
+              )}
+            </div>
             <p className='text-sm font-bold text-slate-400 m-0 mt-1 flex items-center justify-center gap-1'>
               Take your time! <RainbowIcon size={14} className="text-slate-400" />
             </p>
@@ -625,6 +577,15 @@ function DressForWeatherGame() {
         duration={1500}
         onComplete={() => { playClick(); setShowSuccess(false); }}
       />
+
+      {/* Streak Milestone Overlay */}
+      {showMilestone && (
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </div>
+      )}
     </div>
   );
 }

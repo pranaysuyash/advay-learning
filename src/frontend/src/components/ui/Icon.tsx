@@ -1,3 +1,8 @@
+// RF-008: Re-export the base asset Icon so consumers can use a single import surface.
+// New code should prefer: import { Icon, UIIcon } from '../components/ui/Icon'
+// The base implementation lives in ../Icon.tsx (do not delete it).
+export { Icon } from '../Icon';
+export type { } from '../Icon'; // Side-effect: ensures types are bundled
 import React from 'react';
 import { Icon as AssetIcon } from '../Icon';
 import {

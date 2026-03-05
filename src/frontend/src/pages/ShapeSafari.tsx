@@ -17,14 +17,19 @@
  */
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import type { TrackedHandFrame, Point } from '../types/tracking';
 import {
   type SafariScene,
@@ -54,6 +59,9 @@ export const ShapeSafari = memo(function ShapeSafari() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [foundObject, setFoundObject] = useState<{ name: string; emoji: string } | null>(null);
   const [showHint, setShowHint] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   // Canvas state
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -109,12 +117,14 @@ export const ShapeSafari = memo(function ShapeSafari() {
     }
   }, [gameState, isTracing, activeShape]);
 
-  useGameHandTracking({
+  const { trackingLoss } = useGameHandTracking({
     gameName: 'ShapeSafari',
     isRunning: !showMenu && !showCelebration,
     webcamRef,
     onFrame: handleHandFrame,
   });
+
+  const fallbackEnabled = useFeatureFlag('controls.fallbackV1');
 
   // ===== CANVAS RENDERING =====
   const renderCanvas = useCallback(() => {
@@ -258,10 +268,34 @@ export const ShapeSafari = memo(function ShapeSafari() {
       const newFoundShapes = new Set(gameState.foundShapes);
       newFoundShapes.add(activeShape.id);
 
+      // Build streak
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      
+      // Calculate score with streak bonus
+      const basePoints = 15;
+      const streakBonus = Math.min(newStreak * 3, 15);
+      const totalPoints = basePoints + streakBonus;
+      
+      // Show score popup
+      setScorePopup({ points: totalPoints });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Haptics
+      triggerHaptic('success');
+      
+      // Milestone every 5
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
+
       setGameState({
         ...gameState,
         currentScene: updatedScene,
         foundShapes: newFoundShapes,
+        score: (gameState.score || 0) + totalPoints,
       });
 
       // Show found object with sound and TTS
@@ -352,6 +386,9 @@ export const ShapeSafari = memo(function ShapeSafari() {
     setCurrentScene(scene);
     setShowMenu(false);
     setShowHint(null);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
 
     // Canvas initialization happens in useEffect after menu is hidden
   };
@@ -375,6 +412,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
 
   const handleGameComplete = () => {
     playCelebration();
+    triggerHaptic('celebration');
     setShowCelebration(true);
     if (gameState) {
       calculateFinalScore(gameState);
@@ -413,7 +451,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
     <GameContainer webcamRef={webcamRef} title="Shape Safari" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        
+
       </div>
 
       {showMenu ? (
@@ -434,7 +472,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
             Find hidden shapes by tracing around them with your finger.
             Discover animals and objects hiding in each scene!
           </p>
-          
+
           {/* Voice Instructions */}
           {ttsEnabled && (
             <div className="mb-4">
@@ -510,6 +548,20 @@ export const ShapeSafari = memo(function ShapeSafari() {
               <p className="text-advay-slate text-xs">{currentScene?.description}</p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Kenney Heart HUD */}
+              <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-1 border-2 border-pink-200 shadow-sm">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={streak >= (i + 1) * 2
+                      ? '/assets/kenney/platformer/hud/hud_heart.png'
+                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                    alt=""
+                    className="w-5 h-5"
+                  />
+                ))}
+                <span className="ml-1 text-sm font-bold text-pink-500">x{streak}</span>
+              </div>
               <div className="text-advay-slate text-sm">
                 Found: <span className="text-green-500 font-bold">{progress.found}/{progress.total}</span>
               </div>
@@ -521,6 +573,34 @@ export const ShapeSafari = memo(function ShapeSafari() {
               </button>
             </div>
           </div>
+
+          {/* Score Popup Animation */}
+          {scorePopup && (
+            <motion.div
+              initial={{ opacity: 0, y: 0, scale: 0.5 }}
+              animate={{ opacity: 1, y: -40, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+            >
+              <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                +{scorePopup.points}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Streak Milestone */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1.2, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+            >
+              <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                🔥 {streak} Streak! 🔥
+              </div>
+            </motion.div>
+          )}
 
           {/* Hint Banner */}
           {showHint && (
@@ -594,6 +674,15 @@ export const ShapeSafari = memo(function ShapeSafari() {
         accuracy={100}
         onComplete={() => setShowCelebration(false)}
         message="All Shapes Found!"
+      />
+
+      {/* GI-002: Tracking-loss recovery overlay */}
+      <TrackingLossOverlay
+        isVisible={trackingLoss.isLost}
+        onRetryCamera={trackingLoss.retry}
+        lossDurationMs={trackingLoss.durationMs}
+        fallbackAvailable={fallbackEnabled}
+        onExitToGames={handleShowMenu}
       />
     </GameContainer>
   );

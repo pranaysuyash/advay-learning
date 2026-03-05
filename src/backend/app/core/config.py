@@ -21,6 +21,20 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def coerce_debug(cls, v: object) -> bool:
+        """Support legacy DEBUG env values like 'release'/'development'."""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            normalized = v.strip().lower()
+            if normalized in {"1", "true", "yes", "on", "debug", "development", "dev"}:
+                return True
+            if normalized in {"0", "false", "no", "off", "release", "production", "prod"}:
+                return False
+        raise ValueError("DEBUG must be a boolean-compatible value")
+
     @field_validator("SECRET_KEY")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
@@ -80,6 +94,14 @@ class Settings(BaseSettings):
     # AI/LLM API Keys
     GEMINI_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
+
+    # LLM runtime controls (contract-first rollout)
+    AI_LLM_ENABLED: bool = False
+    AI_LLM_PROVIDER: str = "mock"
+    AI_LLM_MODEL: str = "qwen3.5-1.5b-instruct"
+    AI_LLM_FALLBACK_MODEL: str = "qwen3.5-0.5b-instruct"
+    AI_LLM_MAX_RESPONSE_LENGTH: int = 220
+    AI_CLOUD_FALLBACK_ENABLED: bool = False
 
 
 @lru_cache()

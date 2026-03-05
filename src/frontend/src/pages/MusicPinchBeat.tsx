@@ -10,9 +10,11 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
+import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { getLaneFromNormalizedX, pickNextLane } from '../games/musicPinchLogic';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const LANE_COUNT = 3;
 const LANE_LABELS = ['Sa', 'Re', 'Ga'] as const;
@@ -74,6 +76,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
 
       if (lane === targetLaneRef.current) {
         void playPop();
+        triggerHaptic('success');
 
         const nextStreak = streakRef.current + 1;
         setStreak(nextStreak);
@@ -83,11 +86,16 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         if (playedLanesRef.current.size >= LANE_COUNT) {
           triggerEasterEgg('egg-full-scale');
         }
-        if (ttsEnabled && nextStreak % 5 === 0) {
+
+        // Celebration haptic at streak milestones
+        if (nextStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          triggerHaptic('celebration');
+        }
+        if (ttsEnabled && nextStreak % STREAK_MILESTONE_INTERVAL === 0) {
           void speak('Great rhythm! Keep going!');
         }
 
-        if (nextStreak > 0 && nextStreak % 5 === 0) {
+        if (nextStreak > 0 && nextStreak % STREAK_MILESTONE_INTERVAL === 0) {
           setShowCelebration(true);
           void playCelebration();
           setTimeout(() => setShowCelebration(false), 1800);
@@ -96,6 +104,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         setTargetLane((prev) => pickNextLane(prev, LANE_COUNT));
       } else {
         void playError();
+        triggerHaptic('error');
         setStreak(0);
         setFeedback('Missed beat. Move to the glowing lane and pinch again!');
         if (ttsEnabled) {

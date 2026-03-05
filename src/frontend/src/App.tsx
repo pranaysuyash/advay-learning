@@ -99,6 +99,11 @@ const NumberTapTrail = lazy(() =>
     default: module.NumberTapTrail,
   })),
 );
+const NumberSequence = lazy(() =>
+  import('./pages/NumberSequence').then((module) => ({
+    default: module.NumberSequence,
+  })),
+);
 const ShapeSequence = lazy(() =>
   import('./pages/ShapeSequence').then((module) => ({
     default: module.ShapeSequence,
@@ -325,6 +330,11 @@ const ColorSplash = lazy(() =>
     default: module.ColorSplash,
   })),
 );
+const ColorMixing = lazy(() =>
+  import('./pages/ColorMixing').then((module) => ({
+    default: module.ColorMixing,
+  })),
+);
 const RainbowBridge = lazy(() =>
   import('./pages/RainbowBridge').then((module) => ({
     default: module.RainbowBridge,
@@ -348,6 +358,11 @@ const FeedTheMonster = lazy(() =>
 const ShapeStacker = lazy(() =>
   import('./pages/ShapeStacker').then((module) => ({
     default: module.ShapeStacker,
+  })),
+);
+const SizeSorting = lazy(() =>
+  import('./pages/SizeSorting').then((module) => ({
+    default: module.SizeSorting,
   })),
 );
 const NumberBubblePop = lazy(() =>
@@ -425,8 +440,8 @@ const RhymeTime = lazy(() =>
     default: module.default,
   })),
 );
-const PhysicsDemo = lazy(() =>
-  import('./pages/PhysicsDemo').then((module) => ({
+const PhysicsPlayground = lazy(() =>
+  import('./pages/PhysicsPlayground').then((module) => ({
     default: module.default,
   })),
 );
@@ -643,6 +658,14 @@ function App() {
                       <CameraSafeRoute gameName='Number Tap Trail'>
                         <NumberTapTrail />
                       </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/number-sequence'
+                  element={
+                    <ProtectedRoute>
+                      <NumberSequence />
                     </ProtectedRoute>
                   }
                 />
@@ -997,6 +1020,14 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/color-mixing'
+                  element={
+                    <ProtectedRoute>
+                      <ColorMixing />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/rainbow-bridge'
                   element={
                     <ProtectedRoute>
@@ -1033,6 +1064,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ShapeStacker />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/size-sorting'
+                  element={
+                    <ProtectedRoute>
+                      <SizeSorting />
                     </ProtectedRoute>
                   }
                 />
@@ -1089,130 +1128,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <WordSearch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/fruit-ninja-air'
-                  element={
-                    <ProtectedRoute>
-                      <FruitNinjaAir />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/kaleidoscope-hands'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Kaleidoscope Hands'>
-                        <KaleidoscopeHands />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/virtual-bubbles'
-                  element={
-                    <ProtectedRoute>
-                      <VirtualBubbles />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shadow-puppet-theater'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shadow Puppet Theater'>
-                        <ShadowPuppetTheater />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/odd-one-out'
-                  element={
-                    <ProtectedRoute>
-                      <OddOneOut />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/counting-objects'
-                  element={
-                    <ProtectedRoute>
-                      <CountingObjects />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/more-or-less'
-                  element={
-                    <ProtectedRoute>
-                      <MoreOrLess />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/blend-builder'
-                  element={
-                    <ProtectedRoute>
-                      <BlendBuilder />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/syllable-clap'
-                  element={
-                    <ProtectedRoute>
-                      <SyllableClap />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/sight-word-flash'
-                  element={
-                    <ProtectedRoute>
-                      <SightWordFlash />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/path-following'
-                  element={
-                    <ProtectedRoute>
-                      <PathFollowing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/rhythm-tap'
-                  element={
-                    <ProtectedRoute>
-                      <RhythmTap />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/animal-sounds'
-                  element={
-                    <ProtectedRoute>
-                      <AnimalSounds />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/body-parts'
-                  element={
-                    <ProtectedRoute>
-                      <BodyParts />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/voice-stories'
-                  element={
-                    <ProtectedRoute>
-                      <VoiceStories />
                     </ProtectedRoute>
                   }
                 />
@@ -1305,10 +1220,10 @@ function App() {
                   }
                 />
                 <Route
-                  path='/games/word-search'
+                  path='/games/physics-playground'
                   element={
                     <ProtectedRoute>
-                      <WordSearch />
+                      <PhysicsPlayground />
                     </ProtectedRoute>
                   }
                 />
@@ -1316,7 +1231,7 @@ function App() {
                   path='/games/physics-demo'
                   element={
                     <ProtectedRoute>
-                      <PhysicsDemo />
+                      <PhysicsPlayground />
                     </ProtectedRoute>
                   }
                 />

@@ -1,6 +1,6 @@
 /**
  * Air Guitar Hero Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -11,11 +11,14 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
   generateNoteSequence,
+  calculateScore,
   type GuitarNote,
 } from '../games/airGuitarHeroLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 // Note color map for visual variety
 const NOTE_COLORS: Record<
@@ -54,6 +57,15 @@ function AirGuitarHeroInner({
     'start',
   );
   const [correctCount, setCorrectCount] = useState(0);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const { playClick, playPop, playCelebration } = useAudio();
   const levelConfig = useMemo(() => LEVELS[currentLevel - 1], [currentLevel]);
@@ -74,6 +86,7 @@ function AirGuitarHeroInner({
     setCurrentIndex(0);
     setFeedback('');
     setScore(0);
+    resetStreak();
     setGameState('playing');
   };
 
@@ -86,13 +99,26 @@ function AirGuitarHeroInner({
     setStrumAnimating(true);
     setTimeout(() => setStrumAnimating(false), 150);
 
-    setScore((prev) => prev + 25);
+    // Update streak and calculate score
+    incrementStreak();
+
+    const points = calculateScore(streak + 1, levelConfig.difficulty);
+    setScore((prev) => prev + points);
+
+    // Show score popup
+    setScorePopup({ points, x: 50, y: 40 });
+    setTimeout(() => setScorePopup(null), 700);
+
+    // Haptic feedback
+    triggerHaptic('success');
+
     setCorrectCount((prev) => prev + 1);
     setFeedback(`🎵 ${currentNote.name} string!`);
 
     const nextIndex = currentIndex + 1;
     if (nextIndex >= levelConfig.notesToPlay) {
       setGameState('complete');
+      triggerHaptic('celebration');
       playCelebration();
     } else {
       setCurrentIndex(nextIndex);
@@ -147,7 +173,7 @@ function AirGuitarHeroInner({
                   Air Guitar Hero!
                 </h2>
                 <p className='text-lg font-bold text-slate-600 mt-2'>
-                  STRUM each string in order to play a rockstar melody!
+                  STRUM each string to build combos and become a rockstar!
                 </p>
               </div>
               <div className='grid grid-cols-3 gap-2'>
@@ -165,6 +191,12 @@ function AirGuitarHeroInner({
                   </span>
                 ))}
               </div>
+              {/* Scoring info */}
+              <div className='bg-slate-50 rounded-xl p-4 text-sm text-slate-600'>
+                <p className='font-bold mb-1'>🎯 Scoring:</p>
+                <p>Base 10 pts + streak bonus (max 20)</p>
+                <p>× Difficulty: Easy 1× | Medium 1.5× | Hard 2×</p>
+              </div>
               <button
                 type='button'
                 onClick={handleStart}
@@ -178,14 +210,62 @@ function AirGuitarHeroInner({
           {/* Playing */}
           {gameState === 'playing' && currentNote && (
             <>
+              {/* Streak HUD */}
+              <div className='flex items-center justify-center gap-3 bg-white rounded-2xl border-2 border-[#F2CC8F] p-3 shadow-[0_3px_0_#E5B86E]'>
+                <span className='font-black text-lg'>🔥 Streak</span>
+                <div className='flex gap-1'>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <img
+                      key={i}
+                      src={
+                        // threshold of 2 streak points per heart is standard across
+                        // games; earlier implementation used 5 so update here for
+                        // consistency (see review guide).
+                        streak >= i * 2
+                          ? '/assets/kenney/platformer/hud/hud_heart.png'
+                          : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                      }
+                      alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                      className='w-6 h-6'
+                    />
+                  ))}
+                </div>
+                <span className='font-black text-2xl text-orange-500 min-w-[3ch] text-center'>
+                  {streak}
+                </span>
+              </div>
+
               {/* Current note spotlight */}
               <div
-                className='rounded-3xl border-3 p-8 text-center transition-all shadow-[0_6px_0_#E5B86E]'
+                className='rounded-3xl border-3 p-8 text-center transition-all shadow-[0_6px_0_#E5B86E] relative'
                 style={{
                   backgroundColor: noteColors.bg,
                   borderColor: noteColors.border,
                 }}
               >
+                {/* Streak milestone popup */}
+                {showMilestone && (
+                  <div className='absolute inset-0 flex items-center justify-center bg-black/20 rounded-3xl animate-pulse'>
+                    <div className='bg-white rounded-2xl px-6 py-4 shadow-2xl animate-bounce'>
+                      <p className='text-3xl font-black text-orange-500'>
+                        🔥 {streak} Note Streak! 🔥
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {/* Score popup */}
+                {scorePopup && (
+                  <div
+                    className='absolute font-black text-3xl text-yellow-500 animate-bounce pointer-events-none'
+                    style={{
+                      left: `${scorePopup.x}%`,
+                      top: `${scorePopup.y}%`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    +{scorePopup.points}
+                  </div>
+                )}
                 <p
                   className='text-sm font-black uppercase tracking-widest mb-2'
                   style={{ color: noteColors.text }}
@@ -307,6 +387,14 @@ function AirGuitarHeroInner({
                       {score}
                     </p>
                   </div>
+                  <div className='bg-orange-50 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
+                    <p className='text-xs font-black uppercase text-orange-600'>
+                      Best Streak
+                    </p>
+                    <p className='text-2xl font-black text-orange-700'>
+                      {maxStreak}
+                    </p>
+                  </div>
                 </div>
                 <button
                   type='button'
@@ -327,12 +415,33 @@ function AirGuitarHeroInner({
               <p className='text-lg text-slate-600 font-bold'>
                 You shredded {correctCount} notes!
               </p>
+              {/* Max streak badge */}
+              {maxStreak >= 5 && (
+                <div className='flex items-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full'>
+                  <img
+                    src='/assets/kenney/platformer/collectibles/star.png'
+                    alt='star'
+                    className='w-6 h-6'
+                  />
+                  <span className='font-black text-orange-700'>
+                    Best Streak: {maxStreak}!
+                  </span>
+                </div>
+              )}
               <div className='flex gap-4'>
                 <div className='bg-purple-50 border-2 border-purple-200 px-6 py-3 rounded-xl text-center'>
                   <p className='text-xs font-black uppercase text-purple-600'>
                     Score
                   </p>
                   <p className='text-3xl font-black text-purple-700'>{score}</p>
+                </div>
+                <div className='bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center'>
+                  <p className='text-xs font-black uppercase text-orange-600'>
+                    Max Streak
+                  </p>
+                  <p className='text-3xl font-black text-orange-700'>
+                    {maxStreak}
+                  </p>
                 </div>
               </div>
               <div className='flex gap-3'>

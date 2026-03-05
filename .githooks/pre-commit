@@ -46,7 +46,16 @@ else
   echo "[pre-commit] Skipping DB migration check (SKIP_DB_MIGRATION_CHECK=1)"
 fi
 
-# 4. Feature regression check: detect removed functionality in large refactors
+# 4. Static maintainability guard: catch oversized/high-complexity source files
+# Checks staged blobs directly, including newly added files.
+# Skip with SKIP_MAINTAINABILITY_CHECK=1 or --no-verify
+if [[ "${SKIP_MAINTAINABILITY_CHECK:-}" != "1" ]]; then
+  ./scripts/maintainability_guard.sh --staged
+else
+  echo "[pre-commit] Skipping maintainability guard (SKIP_MAINTAINABILITY_CHECK=1)"
+fi
+
+# 5. Feature regression check: detect removed functionality in large refactors
 # Triggered when >10% LOC changed in existing files
 # Skip with SKIP_FEATURE_CHECK=1 or --no-verify
 if [[ "${SKIP_FEATURE_CHECK:-}" != "1" ]]; then
@@ -55,7 +64,7 @@ else
   echo "[pre-commit] Skipping feature regression check (SKIP_FEATURE_CHECK=1)"
 fi
 
-# 5. Regression check: tests + export comparison + TypeScript
+# 6. Regression check: tests + export comparison + TypeScript
 # Skip with SKIP_REGRESSION_CHECK=1 or --no-verify
 if [[ "${SKIP_REGRESSION_CHECK:-}" != "1" ]]; then
   ./scripts/regression_check.sh --staged

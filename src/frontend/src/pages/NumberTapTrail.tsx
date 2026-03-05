@@ -16,7 +16,9 @@ import { findHitTarget } from '../games/hitTarget';
 import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
+import { triggerHaptic } from '../utils/haptics';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 interface TrailTarget {
   id: number;
@@ -57,6 +59,9 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     'Pinch numbers in order: 1, 2, 3...',
   );
   const [showCelebration, setShowCelebration] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const targetsRef = useRef<TrailTarget[]>(targets);
   const expectedIndexRef = useRef(expectedIndex);
@@ -175,6 +180,8 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           void speak(`That is ${hit.value}. Look for ${expected.value}!`);
         }
         void playError();
+        setStreak(0);
+        triggerHaptic('error');
         return;
       }
 
@@ -192,14 +199,27 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         setFeedback(`Level ${levelRef.current} complete!`);
         completeLevel();
       } else {
-        setScore((prev) => prev + 8);
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const basePoints = 10;
+        const streakBonus = Math.min(newStreak * 2, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+        setScorePopup({ points: totalPoints, x: 50, y: 30 });
+        setTimeout(() => setScorePopup(null), 700);
+        triggerHaptic('success');
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
         setFeedback(`Great! Now find ${activeTargets[nextIndex].value}.`);
         if (ttsEnabled) {
           void speak(`Great! Now find ${activeTargets[nextIndex].value}!`);
         }
       }
     },
-    [completeLevel, cursor, playError, playPop, speak, ttsEnabled],
+    [completeLevel, cursor, playError, playPop, speak, ttsEnabled, streak],
   );
 
   const {
@@ -241,6 +261,9 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     setTimeLeft(90);
     setFeedback('Pinch numbers in order: 1, 2, 3...');
     setCursor(null);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setIsPlaying(true);
     if (ttsEnabled) {
       void speak('Pinch the numbers in order from one to ten!');
@@ -311,8 +334,13 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           {feedback}
         </div>
 
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-slate-400 font-bold text-lg'>
-          Take your time!
+        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-slate-400 font-bold text-lg flex items-center gap-2'>
+          {streak > 0 && (
+            <span className='flex items-center gap-1 text-orange-500'>
+              🔥 {streak}
+            </span>
+          )}
+          {streak === 0 && <span>Take your time!</span>}
         </div>
 
         {expectedTarget && (
@@ -454,6 +482,27 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
           message={`Level ${level} cleared!`}
           onComplete={() => setShowCelebration(false)}
         />
+      )}
+
+      {/* Score Popup */}
+      {scorePopup && (
+        <div
+          className='fixed z-50 pointer-events-none animate-bounce'
+          style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+        >
+          <div className='bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-xl shadow-lg'>
+            +{scorePopup.points}
+          </div>
+        </div>
+      )}
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
+          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </div>
       )}
     </GameContainer>
   );

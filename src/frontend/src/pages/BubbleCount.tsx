@@ -1,6 +1,6 @@
 /**
  * Bubble Count Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -11,6 +11,8 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
 import {
   createGame,
   checkAnswer,
@@ -40,6 +42,9 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
   const [showResult, setShowResult] = useState<boolean | null>(null);
   const [round, setRound] = useState(1);
 
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const timerRef = useRef<number | null>(null);
   const groupsRef = useRef<BubbleGroup[]>([]);
 
@@ -60,9 +65,10 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
     setRound(1);
     setSelectedGroup(null);
     setShowResult(null);
+    resetStreak();
     setGameState('playing');
     playClick();
-  }, [currentLevel, playClick]);
+  }, [currentLevel, playClick, resetStreak]);
 
   const handleComplete = useCallback(() => {
     setGameState('complete');
@@ -78,9 +84,14 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
     setShowResult(isCorrect);
 
     if (isCorrect) {
-      const points = calculateScore(true, timeLeft);
-      setScore(s => s + points);
+      const newStreak = incrementStreak();
+      const basePoints = calculateScore(true, timeLeft);
+      const streakBonus = Math.min(newStreak * 2, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScore(s => s + totalPoints);
+      setScorePopup({ points: totalPoints, x: 50, y: 30 });
       playSuccess();
+      triggerHaptic('success');
 
       setTimeout(() => {
         if (round < TOTAL_ROUNDS) {
@@ -99,13 +110,15 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
         }
       }, 1000);
     } else {
+      resetStreak();
       playError();
+      triggerHaptic('error');
       setTimeout(() => {
         setSelectedGroup(null);
         setShowResult(null);
       }, 800);
     }
-  }, [gameState, showResult, targetCount, timeLeft, round, currentLevel, playSuccess, playError, playClick, handleComplete]);
+  }, [gameState, showResult, targetCount, timeLeft, round, currentLevel, playSuccess, playError, playClick, handleComplete, incrementStreak, resetStreak]);
 
   useEffect(() => {
     if (gameState !== 'playing') {
@@ -223,7 +236,29 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Time: {timeLeft}s</span>
           </div>
+          <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
+            <span className="font-bold text-slate-700">🔥 {streak}</span>
+          </div>
         </div>
+
+        {/* Score Popup */}
+        {scorePopup && (
+          <div
+            className="absolute z-50 animate-bounce text-2xl font-bold text-green-600 pointer-events-none"
+            style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+          >
+            +{scorePopup.points}
+          </div>
+        )}
+
+        {/* Streak Milestone */}
+        {showMilestone && (
+          <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl shadow-2xl animate-pulse">
+              <p className="text-3xl font-bold">🔥 {streak} Streak! 🔥</p>
+            </div>
+          </div>
+        )}
 
         <div className="absolute top-20 left-0 right-0 flex flex-col items-center gap-8 p-4">
           <div className="bg-white rounded-xl px-8 py-4 shadow-lg">

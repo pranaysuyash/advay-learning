@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getWordsForLevel, type SightWord } from '../games/sightWordFlashLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export function SightWordFlash() {
   const navigate = useNavigate();
@@ -17,6 +20,8 @@ export function SightWordFlash() {
   const [showWord, setShowWord] = useState(false);
   const [flashProgress, setFlashProgress] = useState(0); // 0-100 countdown for flash timer
   const [gameState, setGameState] = useState<'start' | 'showing' | 'answering' | 'complete'>('start');
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('sight-word-flash');
@@ -64,20 +69,39 @@ export function SightWordFlash() {
     setRound(0);
     setScore(0);
     setCorrect(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setShowWord(false);
     setFlashProgress(0);
     setGameState('showing');
   };
 
   const handleKnow = () => {
+    const newStreak = streak + 1;
+    setStreak(newStreak);
+    const basePoints = 20;
+    const streakBonus = Math.min(newStreak * 3, 20);
+    const totalPoints = basePoints + streakBonus;
+    
     playSuccess();
+    triggerHaptic('success');
     setCorrect((c) => c + 1);
-    setScore((s) => s + 20);
+    setScore((s) => s + totalPoints);
+
+    // Milestone every 5
+    if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+      setShowStreakMilestone(true);
+      triggerHaptic('celebration');
+      setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+    }
+    
     nextWord();
   };
 
   const handleDontKnow = () => {
     playError();
+    triggerHaptic('error');
+    setStreak(0);
     nextWord();
   };
 
@@ -190,6 +214,20 @@ export function SightWordFlash() {
             </div>
           )}
 
+          {/* Streak Milestone Overlay */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, rotate: 180 }}
+              className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+            >
+              <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+                🔥 {streak} Streak! 🔥
+              </div>
+            </motion.div>
+          )}
+
           {/* Answering */}
           {gameState === 'answering' && !showWord && currentWord && (
             <>
@@ -225,6 +263,12 @@ export function SightWordFlash() {
                     <p className='text-xs font-black uppercase text-slate-500'>Word</p>
                     <p className='text-2xl font-black text-slate-700'>{currentIndex + 1}/{words.length}</p>
                   </div>
+                  {streak > 0 && (
+                    <div className='bg-orange-50 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
+                      <p className='text-xs font-black uppercase text-orange-600'>Streak</p>
+                      <p className='text-2xl font-black text-orange-700'>🔥 {streak}</p>
+                    </div>
+                  )}
                 </div>
                 <button
                   type='button'

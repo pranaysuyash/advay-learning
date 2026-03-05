@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
@@ -17,6 +18,8 @@ import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 interface SequenceTarget {
   id: number;
@@ -71,6 +74,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     'Pinch the shapes in the shown order.',
   );
   const [showCelebration, setShowCelebration] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const targetsRef = useRef<SequenceTarget[]>(targets);
   const orderRef = useRef<number[]>(order);
@@ -190,20 +196,35 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
 
       if (hit.id !== expectedId) {
         setStepIndex(0);
+        setStreak(0);
         setFeedback('Wrong order. Sequence reset to start.');
         if (ttsEnabled) {
           void speak('Oops! Start again from the first shape!');
         }
         void playError();
+        triggerHaptic('error');
         return;
       }
 
       void playPop();
-      setScore((prev) => prev + 10);
       const nextStep = stepIndexRef.current + 1;
       setStepIndex(nextStep);
 
       if (nextStep >= orderRef.current.length) {
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        const basePoints = 10;
+        const streakBonus = Math.min(newStreak * 2, 15);
+        const totalPoints = basePoints + streakBonus;
+        setScore((prev) => prev + totalPoints);
+        setScorePopup({ points: totalPoints, x: 50, y: 30 });
+        setTimeout(() => setScorePopup(null), 700);
+        triggerHaptic('success');
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
         setFeedback(`Level ${levelRef.current} sequence complete!`);
         if (ttsEnabled) {
           void speak(`Level ${levelRef.current} complete! Amazing!`);
@@ -258,6 +279,9 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
     setScore(0);
     setLevel(1);
     setTimeLeft(60);
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     setFeedback('Pinch the shapes in the shown order.');
     setCursor(null);
     setIsPlaying(true);
@@ -344,6 +368,47 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
             {sequenceShapes.join(' ')}
           </span>
         </div>
+
+        {isPlaying && (
+          <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
+            <span className='text-2xl'>{streak > 0 ? '🔥' : '⚡'}</span>
+            <span className={`${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`}>
+              {streak}x Streak
+            </span>
+          </div>
+        )}
+
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 0, y: 0, scale: 0.5 }}
+            animate={{ opacity: 1, y: -40, scale: 1.2 }}
+            exit={{ opacity: 0, y: -60 }}
+            transition={{ duration: 0.7 }}
+            className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none'
+          >
+            <div className='text-5xl font-black text-green-500 drop-shadow-lg'>
+              +{scorePopup.points}
+            </div>
+          </motion.div>
+        )}
+
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.4 }}
+            className='absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-3xl shadow-2xl border-4 border-white flex items-center gap-4'>
+              <span className='text-6xl'>🔥</span>
+              <div className='text-center'>
+                <div className='text-3xl font-black'>STREAK {streak}!</div>
+                <div className='text-lg font-bold opacity-90'>Keep it up!</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {targets.map((target) => {
           const isExpected = order[stepIndex] === target.id;

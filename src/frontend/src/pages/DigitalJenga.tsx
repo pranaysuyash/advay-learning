@@ -1,16 +1,19 @@
 /**
  * Digital Jenga Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
 import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   generateInitialBlocks,
@@ -27,6 +30,10 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
   const [gameState, setGameState] = useState<
     'start' | 'playing' | 'fall' | 'complete'
   >('start');
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<{
     meshes: unknown[];
@@ -111,6 +118,7 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
     setBlocks(initialBlocks);
     setTowerHeight(currentLevel);
     setScore(0);
+    resetStreak();
     setSelectedBlock(null);
     setGameState('playing');
     initScene();
@@ -135,13 +143,26 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
     playClick();
     const newBlocks = blocks.filter((b) => b.id !== selectedBlock);
     setBlocks(newBlocks);
-    setScore((s) => s + 10);
+
+    // Streak and scoring
+    const newStreak = incrementStreak();
+    const basePoints = 10;
+    const streakBonus = Math.min(newStreak * 2, 15);
+    const totalPoints = basePoints + streakBonus;
+    setScore((s) => s + totalPoints);
+
+    // Show popup
+    setScorePopup({ points: totalPoints, x: 50, y: 40 });
+
+    // Haptics
+    triggerHaptic('success');
 
     const newHeight = Math.max(...newBlocks.map((b) => b.position[1])) / 0.3;
     setTowerHeight(Math.floor(newHeight));
 
     if (newBlocks.length === 0) {
       playSuccess();
+      triggerHaptic('celebration');
       setScore((s) => s + 100);
       setGameState('complete');
     } else {
@@ -151,6 +172,8 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
       if (maxX > 1.5 || maxZ > 1.5) {
         setTimeout(() => {
           playError();
+          triggerHaptic('error');
+          resetStreak();
           setGameState('fall');
         }, 500);
       }
@@ -192,6 +215,7 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
               onClick={() => {
                 playClick();
                 setCurrentLevel(l.level);
+                resetStreak();
               }}
               className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level ? 'bg-amber-600 text-white' : 'bg-gray-200'}`}
             >
@@ -222,13 +246,60 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
                 ? 'Tap to select a block'
                 : 'Tap to remove!'}
             </p>
-            <canvas
-              ref={canvasRef}
-              width={400}
-              height={300}
-              onClick={handleCanvasClick}
-              className='rounded-xl cursor-pointer shadow-lg'
-            />
+            <div className='relative inline-block'>
+              <canvas
+                ref={canvasRef}
+                width={400}
+                height={300}
+                onClick={handleCanvasClick}
+                className='rounded-xl cursor-pointer shadow-lg'
+              />
+              
+              {/* Score Popup */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 1, y: 0, scale: 1 }}
+                  animate={{ opacity: 0, y: -50, scale: 1.2 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: `${scorePopup.x}%`,
+                    top: `${scorePopup.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <div className="text-2xl font-bold text-green-500 drop-shadow-lg">
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              {showMilestone && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  exit={{ scale: 0, rotate: 180 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg">
+                    🔥 {streak} Streak! 🔥
+                  </div>
+                </motion.div>
+              )}
+            </div>
+            <div className='flex gap-4 justify-center mt-2'>
+              {streak > 0 && (
+                <div className='bg-orange-100 px-4 py-2 rounded-xl text-center'>
+                  <p className='text-sm text-orange-600'>Streak</p>
+                  <p className='text-xl font-bold'>🔥 {streak}</p>
+                </div>
+              )}
+              <div className='bg-yellow-100 px-4 py-2 rounded-xl text-center'>
+                <p className='text-sm text-yellow-600'>Score</p>
+                <p className='text-xl font-bold'>{score}</p>
+              </div>
+            </div>
             <p className='text-sm text-gray-500 mt-2'>
               Select a block from the top layer, then tap again to remove it!
             </p>

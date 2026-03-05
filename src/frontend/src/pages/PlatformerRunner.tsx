@@ -11,7 +11,9 @@ import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import type { TrackedHandFrame } from '../types/tracking';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 // --- Assets ---
 const ASSET_BASE = '/assets/kenney/platformer';
@@ -118,6 +120,8 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
   const [lives, setLives] = useState(3);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const gameLoopRef = useRef<number | null>(null);
@@ -334,14 +338,29 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
 
           if (checkCollision(player, collectible)) {
             collectible.active = false;
+            
+            // Streak and scoring
+            const newStreak = streak + 1;
+            setStreak(newStreak);
+            const streakBonus = Math.min(newStreak * 2, 15);
+            
             if (collectible.type === 'coin') {
               setCoins((c) => c + 1);
-              setScore((s) => s + 10);
+              setScore((s) => s + 10 + streakBonus);
             } else if (collectible.type === 'star') {
               setCoins((c) => c + 5);
-              setScore((s) => s + 50);
+              setScore((s) => s + 50 + streakBonus);
             }
+            
             playSuccess();
+            triggerHaptic('success');
+            
+            // Milestone every 5
+            if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+              setShowStreakMilestone(true);
+              triggerHaptic('celebration');
+              setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+            }
           }
         });
 
@@ -408,6 +427,8 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
       setScore(0);
       setCoins(0);
       setLives(3);
+      setStreak(0);
+      setShowStreakMilestone(false);
       playerRef.current.x = 100;
       playerRef.current.y = GROUND_Y - 64;
       playerRef.current.vy = 0;
@@ -457,8 +478,28 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
                 <span className='text-text-secondary text-sm'>Lives:</span>
                 <span className='font-bold text-red-600 ml-2'>{lives}</span>
               </div>
+              {streak > 0 && (
+                <div>
+                  <span className='text-text-secondary text-sm'>Streak:</span>
+                  <span className='font-bold text-orange-600 ml-2'>🔥 {streak}</span>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Streak Milestone Overlay */}
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, rotate: 180 }}
+              className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+            >
+              <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+                🔥 {streak} Streak! 🔥
+              </div>
+            </motion.div>
+          )}
 
           {/* Game Canvas */}
           <div className='flex-1 relative'>

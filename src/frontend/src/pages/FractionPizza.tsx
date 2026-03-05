@@ -26,6 +26,9 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useWindowSize } from '../hooks/useWindowSize';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import {
   LEVELS,
   generateFraction,
@@ -33,6 +36,7 @@ import {
   type Fraction,
 } from '../games/fractionPizzaLogic';
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 
 function PizzaVisual({ fraction, size }: { fraction: Fraction, size: number }) {
   const slices = [];
@@ -99,13 +103,13 @@ function FractionPizzaGame() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { speak } = useVoiceInstructions();
 
-  const [screenDims, setScreenDims] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const screenDims = useWindowSize();
 
   useGameSessionProgress({
     gameName: 'Fraction Pizza',
@@ -114,14 +118,6 @@ function FractionPizzaGame() {
     isPlaying: gameStarted,
     metaData: { round },
   });
-
-  useEffect(() => {
-    function handleResize() {
-      setScreenDims({ width: window.innerWidth, height: window.innerHeight });
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     const tip = frame.indexTip;
@@ -204,21 +200,47 @@ function FractionPizzaGame() {
   }, [gameStarted, round, currentLevel, screenDims]);
 
   const handleItemDropped = useCallback(
-    (item: DraggableItem, _zone: DropZone) => {
+    (item: DraggableItem, zone: DropZone) => {
       if (item.data.isCorrect) {
+        // Build streak
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+
+        
+        // Calculate score: base 15 + streak bonus (max 15)
+        const baseScore = 15;
+        const streakBonus = Math.min(newStreak * 3, 15);
+        const totalScore = baseScore + streakBonus;
+        setScore((prev) => prev + totalScore);
+        
+        // Show popup at drop zone position
+        setScorePopup({ points: totalScore, x: zone.x, y: zone.y });
+        setTimeout(() => setScorePopup(null), 700);
+        
+        // Haptics
+        triggerHaptic('success');
+        
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+        }
+        
         playSuccess();
-        setScore((prev) => prev + 25);
         setShowSuccess(true);
         speak(`Yummy! That's exactly ${item.data.label} of the pizza!`);
 
         setTimeout(() => {
+          setShowStreakMilestone(false);
           if (round >= 4) {
             if (currentLevel < LEVELS.length - 1) {
               setCurrentLevel((prev) => prev + 1);
               setRound(0);
+              setStreak(0);
               speak("Amazing! Let's try harder pizzas!");
             } else {
               onGameComplete();
+              triggerHaptic('celebration');
               speak("You're a Fraction Pizza Master!");
             }
           } else {
@@ -227,11 +249,14 @@ function FractionPizzaGame() {
           }
         }, 2000);
       } else {
+        // Wrong - break streak
+        setStreak(0);
+        triggerHaptic('error');
         playError();
         speak(`Oops! That slice says ${item.data.label}. Try another one!`);
       }
     },
-    [round, currentLevel, speak, onGameComplete, playSuccess, playError]
+    [round, currentLevel, streak, speak, onGameComplete, playSuccess, playError]
   );
 
   const handleItemDroppedOutside = useCallback((item: DraggableItem) => {
@@ -249,6 +274,10 @@ function FractionPizzaGame() {
     setCurrentLevel(0);
     setScore(0);
     setRound(0);
+    setStreak(0);
+
+    setShowStreakMilestone(false);
+    setScorePopup(null);
     playPop();
     speak('Look at the pizza! Drag the right fraction label to the tray!');
   }, [speak, playPop]);
@@ -271,7 +300,50 @@ function FractionPizzaGame() {
             <h2 className='text-2xl font-black text-slate-700 tracking-tight m-0'>Level {LEVELS[currentLevel].level}</h2>
             <p className='text-lg font-bold text-orange-600 m-0'>Score: {score}</p>
           </div>
+          {/* Kenney Heart HUD */}
+          <div className="flex items-center gap-1 ml-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <img
+                key={i}
+                src={streak >= (i + 1) * 2
+                  ? '/assets/kenney/platformer/hud/hud_heart.png'
+                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                alt=""
+                className="w-7 h-7"
+              />
+            ))}
+            <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+          </div>
         </div>
+      )}
+
+      {/* Score Popup Animation */}
+      {scorePopup && (
+        <motion.div
+          initial={{ opacity: 0, y: 0, scale: 0.5 }}
+          animate={{ opacity: 1, y: -40, scale: 1.2 }}
+          exit={{ opacity: 0 }}
+          style={{ left: scorePopup.x, top: scorePopup.y }}
+          className="fixed pointer-events-none z-50"
+        >
+          <div className="text-4xl font-black text-green-500 drop-shadow-lg">
+            +{scorePopup.points}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1.2, rotate: 0 }}
+          exit={{ scale: 0 }}
+          className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+        >
+          <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+            🔥 {streak} Streak! 🔥
+          </div>
+        </motion.div>
       )}
 
       {!gameStarted && (

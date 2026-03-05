@@ -12,7 +12,7 @@ from app.schemas.user import UserRole
 
 if TYPE_CHECKING:
     from app.db.models.profile import Profile
-    from app.db.models.subscription import Subscription
+    from app.db.models.subscription_model import Subscription
 
 
 class User(Base):

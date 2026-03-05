@@ -1,9 +1,9 @@
 /**
  * Feature Flag Configuration
- * 
+ *
  * Centralized type-safe feature flags for progressive delivery.
  * Hierarchy: env var > user override > default
- * 
+ *
  * @see docs/adr/ADR-007-FEATURE_FLAGS.md
  * @ticket ISSUE-006
  */
@@ -20,6 +20,12 @@ export interface FeatureFlags {
   'rewards.deterministicV1': boolean;
   /** Enable voice-game tap fallbacks */
   'controls.voiceFallbackV1': boolean;
+  /** Enable AI-generated LLM responses (contract-first rollout) */
+  'ai.llmResponsesV1': boolean;
+  /** Enable the new story generator service (Phase 3 rollout) */
+  'ai.storyGeneratorV1': boolean;
+  /** Enable the new activity generator service (Phase 3 rollout) */
+  'ai.activityGeneratorV1': boolean;
 }
 
 /** Default flag values */
@@ -28,12 +34,15 @@ export const DEFAULT_FEATURES: FeatureFlags = {
   'safety.pauseOnTrackingLoss': true,
   'rewards.deterministicV1': false,
   'controls.voiceFallbackV1': false,
+  'ai.llmResponsesV1': false,
+  'ai.storyGeneratorV1': false,
+  'ai.activityGeneratorV1': false,
 };
 
 /** Feature flag metadata for UI display */
 export interface FeatureFlagMeta {
   description: string;
-  category: 'controls' | 'safety' | 'rewards';
+  category: 'controls' | 'safety' | 'rewards' | 'ai';
   editable: boolean;
 }
 
@@ -58,6 +67,21 @@ export const FEATURE_FLAG_META: Record<keyof FeatureFlags, FeatureFlagMeta> = {
     category: 'controls',
     editable: true,
   },
+  'ai.llmResponsesV1': {
+    description: 'Enable LLM-backed dynamic Pip responses',
+    category: 'ai',
+    editable: true,
+  },
+  'ai.storyGeneratorV1': {
+    description: 'Turn on the stubbed story generator service',
+    category: 'ai',
+    editable: true,
+  },
+  'ai.activityGeneratorV1': {
+    description: 'Turn on the stubbed activity generator service',
+    category: 'ai',
+    editable: true,
+  },
 };
 
 /** Get environment override for a flag */
@@ -72,7 +96,7 @@ function getEnvOverride(flag: keyof FeatureFlags): boolean | undefined {
 /** Evaluate a feature flag with full hierarchy */
 export function getFeatureFlag(
   flag: keyof FeatureFlags,
-  userOverrides?: Partial<FeatureFlags>
+  userOverrides?: Partial<FeatureFlags>,
 ): boolean {
   // 1. Environment variable override (highest priority)
   const envValue = getEnvOverride(flag);
@@ -98,9 +122,21 @@ export function useFeatureFlags(): {
 
   const flags: FeatureFlags = {
     'controls.fallbackV1': getFeatureFlag('controls.fallbackV1', userOverrides),
-    'safety.pauseOnTrackingLoss': getFeatureFlag('safety.pauseOnTrackingLoss', userOverrides),
-    'rewards.deterministicV1': getFeatureFlag('rewards.deterministicV1', userOverrides),
-    'controls.voiceFallbackV1': getFeatureFlag('controls.voiceFallbackV1', userOverrides),
+    'safety.pauseOnTrackingLoss': getFeatureFlag(
+      'safety.pauseOnTrackingLoss',
+      userOverrides,
+    ),
+    'rewards.deterministicV1': getFeatureFlag(
+      'rewards.deterministicV1',
+      userOverrides,
+    ),
+    'controls.voiceFallbackV1': getFeatureFlag(
+      'controls.voiceFallbackV1',
+      userOverrides,
+    ),
+    'ai.llmResponsesV1': getFeatureFlag('ai.llmResponsesV1', userOverrides),
+    'ai.storyGeneratorV1': getFeatureFlag('ai.storyGeneratorV1', userOverrides),
+    'ai.activityGeneratorV1': getFeatureFlag('ai.activityGeneratorV1', userOverrides),
   };
 
   const isEnabled = (flag: keyof FeatureFlags): boolean => flags[flag];

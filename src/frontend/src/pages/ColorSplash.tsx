@@ -1,16 +1,19 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { 
-  LEVELS, 
-  generateObjects, 
-  splashObject, 
-  COLORS, 
-  type ColorObject, 
-  type ColorName 
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
+import {
+  LEVELS,
+  generateObjects,
+  splashObject,
+  COLORS,
+  type ColorObject,
+  type ColorName
 } from '../games/colorSplashLogic';
 
 export function ColorSplash() {
@@ -22,7 +25,10 @@ export function ColorSplash() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [correct, setCorrect] = useState(0);
-  
+
+  // Streak tracking
+  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
+
   const timerRef = useRef<number | null>(null);
 
   const { playClick, playSuccess, playError, playPop } = useAudio();
@@ -37,10 +43,11 @@ export function ColorSplash() {
     setTargetColor(newTarget);
     setScore(0);
     setCorrect(0);
+    resetStreak();
     setTimeLeft(level.timeLimit);
     setGameState('playing');
     playClick();
-  }, [level, playClick]);
+  }, [level, playClick, resetStreak]);
 
   const handleObjectClick = useCallback((objectId: number) => {
     if (gameState !== 'playing') return;
@@ -48,20 +55,27 @@ export function ColorSplash() {
     const result = splashObject(objects, objectId, targetColor);
     
     if (result.correct) {
+      // Streak and scoring
+      const newStreak = incrementStreak();
+      const streakBonus = Math.min(newStreak * 3, 20);
+
       playPop();
-      setObjects(prev => prev.map(o => 
+      triggerHaptic('success');
+      setObjects(prev => prev.map(o =>
         o.id === objectId ? { ...o, splashed: true } : o
       ));
       setCorrect(c => c + 1);
-      setScore(s => s + result.scoreDelta);
+      setScore(s => s + result.scoreDelta + streakBonus);
 
       if (result.allSplashed) {
         setGameState('complete');
-        onGameComplete(score + 50);
+        onGameComplete(score + 50 + streakBonus);
         playSuccess();
       }
     } else {
       playError();
+      triggerHaptic('error');
+      resetStreak();
       setScore(s => Math.max(s + result.scoreDelta, 0));
     }
   }, [gameState, objects, targetColor, score, onGameComplete, playPop, playError, playSuccess]);
@@ -144,6 +158,26 @@ export function ColorSplash() {
             <div className="absolute bottom-4 left-4 bg-white/80 rounded-lg px-4 py-2">
               <p className="text-sm text-gray-600">Score: {score}</p>
             </div>
+
+            {streak > 0 && (
+              <div className="absolute bottom-4 right-4 bg-orange-100 rounded-lg px-4 py-2 border-2 border-orange-200">
+                <p className="text-sm text-orange-600 font-bold">🔥 {streak}</p>
+              </div>
+            )}
+
+            {/* Streak Milestone Overlay */}
+            {showMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'
+              >
+                <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             {objects.map((obj) => (
               <button

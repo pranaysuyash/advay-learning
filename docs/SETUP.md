@@ -20,7 +20,7 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh scripts/maintainability_guard.sh
 ```
 
 To manually run the gate on your staged changes:
@@ -28,6 +28,38 @@ To manually run the gate on your staged changes:
 ```bash
 ./scripts/agent_gate.sh --staged
 ```
+
+## Safe Multi-Line Writes (Required)
+
+Do not use heredoc shell writes as the primary way to create or overwrite tracked repo files.
+
+Avoid patterns like:
+
+```bash
+cat > docs/some_file.md <<'EOF'
+...
+EOF
+```
+
+Why:
+
+- terminal success does not prove the right file was saved
+- `/tmp` scratch files are often mistaken for actual repo deliverables
+- agents frequently overstate completion after unverified shell writes
+
+After any multi-line write to a repo file, verify immediately:
+
+```bash
+sed -n '1,40p' <file>
+git diff -- <file>
+git status --short -- <file>
+```
+
+If the file was created as a temporary scratch file, move it into the repo intentionally and verify the repo copy before treating it as complete.
+
+See [AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md](/Users/pranay/Projects/learning_for_kids/docs/process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md) for the full rule set.
+
+---
 
 Before any code-changing commit, run a findings-first local review using:
 
@@ -139,6 +171,37 @@ Temporary bypass (emergency only):
 ```bash
 SKIP_DB_MIGRATION_CHECK=1 git commit ...
 SKIP_DB_MIGRATION_CHECK=1 git push ...
+```
+
+### Static Maintainability Guard (Required)
+
+Commits run `scripts/maintainability_guard.sh` to catch newly added oversized
+source files and existing files that get materially less maintainable:
+
+- Evaluates staged blobs directly, including newly added files.
+- New files fail when they exceed any of:
+  - `MAX_FILE_LOC` (default: 1000 lines)
+  - `MAX_FILE_BYTES` (default: 60000 bytes)
+  - `MAX_FILE_CCN` (default: 60 max cyclomatic complexity) when Python `lizard` is installed
+- Existing files fail when they newly cross a threshold or worsen beyond it again.
+
+Manual checks:
+
+```bash
+# Check staged files
+./scripts/maintainability_guard.sh --staged
+```
+
+Temporary bypass (explicit only):
+
+```bash
+SKIP_MAINTAINABILITY_CHECK=1 git commit ...
+```
+
+Threshold overrides:
+
+```bash
+MAX_FILE_LOC=1000 MAX_FILE_BYTES=60000 MAX_FILE_CCN=30 git commit ...
 ```
 
 ### No-Bypass Push Checks (Required)
@@ -318,7 +381,7 @@ The `tools/` directory contains reusable utilities for development and QA:
 
 - **Video Frame Analyzer** (`tools/video_frame_analyzer.html`) - Frame-by-frame video analysis for UX/QA testing
 - **Contrast Calculator** (`tools/contrast_calculator.py`) - WCAG contrast ratio validation
-- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync downloaded Kenney platformer packs into canonical frontend runtime path
+- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync the purchased Kenney bundle's New Platformer Pack into the canonical frontend runtime path
 
 See [tools/README.md](../tools/README.md) for full documentation and usage examples.
 
@@ -326,7 +389,18 @@ See [tools/README.md](../tools/README.md) for full documentation and usage examp
 
 ## Kenney Asset Workflow
 
-When new Kenney packs are downloaded under `/Users/pranay/Projects/adhoc_resources`, sync them into the app runtime folder:
+Canonical local Kenney source for this repo:
+
+- `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`
+- Local bundle snapshot added to shared resources: `2026-03-03`
+- Current `2D assets/New Platformer Pack` payload timestamp: `2025-12-03`
+
+Use this workflow before importing or refreshing Kenney assets:
+
+1. Check whether the needed file already exists under `src/frontend/public/assets/kenney/`.
+2. If it already exists, reuse that runtime path in code instead of re-importing.
+3. If it does not exist, source it from the purchased Kenney bundle path above.
+4. For New Platformer Pack assets, sync into the canonical runtime folder with the repo tool:
 
 ```bash
 # From repo root
@@ -341,6 +415,8 @@ Note:
 
 - Keep this path as the source of truth for frontend game asset URLs.
 - Avoid creating new ad-hoc runtime paths when importing new packs.
+- Do not re-download or duplicate Kenney assets if the purchased local bundle already contains them.
+- When the purchased bundle is refreshed with newer Kenney packs, update these dates in this section so future agents can tell whether the local snapshot is stale.
 
 ---
 

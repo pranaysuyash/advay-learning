@@ -29,7 +29,7 @@ test.describe('Offline Progress Sync', () => {
     // so we trigger the progressQueue via the exposed window interface which 
     // represents the game finishing offline.
     await page.evaluate(() => {
-      // @ts-expect-error - Expected injection during test
+      // @ts-expect-error - testing infrastructure: window type extension for progressQueue
       if ((window as any).progressQueue) {
         const testProfileId = 'e2e-offline-test';
         (window as any).progressQueue.enqueue({
@@ -53,7 +53,7 @@ test.describe('Offline Progress Sync', () => {
 
     // 7. Force/await the sync mechanism 
     await page.evaluate(async () => {
-      // @ts-expect-error - Expected injection
+      // @ts-expect-error - testing infrastructure: window type extension for progressQueue and apiClient
       if ((window as any).progressQueue && (window as any).apiClient) {
         await (window as any).progressQueue.syncAll((window as any).apiClient);
       }
@@ -61,7 +61,7 @@ test.describe('Offline Progress Sync', () => {
 
     // 8. Verify the local queue was cleared (i.e. sync was successful)
     const queueSize = await page.evaluate(() => {
-      // @ts-expect-error
+      // @ts-expect-error - testing infrastructure: window type extension for progressQueue
       return ((window as any).progressQueue?.getQueue() || []).length;
     });
 

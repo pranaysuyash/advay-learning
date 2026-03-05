@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, createPath, isOnPath, type PathPoint } from '../games/pathFollowingLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export function PathFollowing() {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ export function PathFollowing() {
   const [progress, setProgress] = useState(0);
   const [offPath, setOffPath] = useState(false);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('path-following');
@@ -49,9 +53,21 @@ export function PathFollowing() {
       setOffPath(false);
       setProgress((p) => {
         const newProgress = Math.min(p + 1, 100);
+        // Add streak for every 10 progress points
+        if (newProgress % 10 === 0 && newProgress > p) {
+          const newStreak = Math.floor(newProgress / 10);
+          setStreak(newStreak);
+          triggerHaptic('success');
+          if (newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+            triggerHaptic('celebration');
+            setShowStreakMilestone(true);
+            setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+          }
+        }
         if (newProgress >= 100) {
           playSuccess();
-          setScore((s) => s + 100);
+          triggerHaptic('celebration');
+          setScore((s) => s + 100 + streak * 10);
           setGameState('complete');
           playCelebration();
         }
@@ -60,6 +76,10 @@ export function PathFollowing() {
     } else {
       setOffPath(true);
       setScore((s) => Math.max(s - 5, 0));
+      if (streak > 0) {
+        setStreak(0);
+        triggerHaptic('error');
+      }
     }
   };
 
@@ -250,6 +270,15 @@ export function PathFollowing() {
           )}
         </div>
       </div>
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+          <div className='bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </div>
+      )}
     </GameContainer>
   );
 }

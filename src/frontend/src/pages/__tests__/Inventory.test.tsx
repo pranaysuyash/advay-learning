@@ -4,7 +4,6 @@ import { Inventory } from '../Inventory';
 import { MemoryRouter } from 'react-router-dom';
 import { useInventoryStore } from '../../store';
 import { ALL_ITEMS } from '../../data/collectibles';
-import { vi } from 'vitest';
 
 let originalItems: any[] = [];
 

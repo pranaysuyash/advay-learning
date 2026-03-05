@@ -26,6 +26,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import {
   type GameState,
   MOVEMENT_PATTERNS,
@@ -36,6 +37,7 @@ import {
   advanceLevel,
   calculateFinalStats,
 } from '../games/followTheLeaderLogic';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   // ===== HOOKS =====
@@ -50,6 +52,10 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const lastCompletedRef = useRef(0);
+  const wasMatchingRef = useRef(false);
 
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
@@ -150,15 +156,39 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
         return updateGameState(prevState, poseMatch, deltaTime);
       });
 
-      // Play success sound when matching starts
-      if (poseMatch.matches && gameState.holdTime === 0) {
+      // Play success sound and haptic when matching starts
+      if (poseMatch.matches && !wasMatchingRef.current) {
         playPop();
+        triggerHaptic('success');
+      }
+      
+      // Reset streak when pose breaks
+      if (!poseMatch.matches && wasMatchingRef.current && gameState.holdTime > 0) {
+        setStreak(0);
+        triggerHaptic('error');
+      }
+      
+      wasMatchingRef.current = poseMatch.matches;
+    }
+
+    // Check for movement completion (streak increase)
+    if (gameState.completedMovements > lastCompletedRef.current) {
+      lastCompletedRef.current = gameState.completedMovements;
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
+      // Celebration haptic at streak milestones
+      if (newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        triggerHaptic('celebration');
+        setShowStreakMilestone(true);
+        setTimeout(() => setShowStreakMilestone(false), 1500);
       }
     }
 
     // Check for level completion
     if (isLevelComplete(gameState)) {
       playCelebration();
+      triggerHaptic('celebration');
       setGameState(advanceLevel(gameState));
       setShowGuide(true);
       setTimeout(() => setShowGuide(false), 3000);
@@ -362,10 +392,17 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
                 Score: <span className="text-orange-600 font-bold">{gameState?.score || 0}</span>
               </p>
             </div>
-            <div className="text-advay-slate text-sm">
-              Movements: <span className="text-orange-600 font-bold">
-                {gameState?.completedMovements || 0}/4
-              </span>
+            <div className="flex items-center gap-4">
+              {streak > 0 && (
+                <div className="bg-orange-100 px-3 py-1 rounded-full text-sm">
+                  <span className="text-orange-600 font-bold">🔥 {streak}</span>
+                </div>
+              )}
+              <div className="text-advay-slate text-sm">
+                Movements: <span className="text-orange-600 font-bold">
+                  {gameState?.completedMovements || 0}/4
+                </span>
+              </div>
             </div>
           </div>
 
@@ -428,6 +465,20 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
         }}
         message="Great Following!"
       />
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          exit={{ scale: 0, rotate: 180 }}
+          className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+        >
+          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </motion.div>
+      )}
     </GameContainer>
   );
 });

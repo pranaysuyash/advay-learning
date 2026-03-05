@@ -4,7 +4,8 @@ import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { LEVELS, generateBubbles, checkPop, type NumberBubble } from '../games/popTheNumberLogic';
+import { LEVELS, generateBubbles, checkPop, calculateScore, type NumberBubble } from '../games/popTheNumberLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 export function PopTheNumber() {
   const navigate = useNavigate();
@@ -16,6 +17,10 @@ export function PopTheNumber() {
   const [nextExpected, setNextExpected] = useState(1);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(1);
+  const [consecutivePops, setConsecutivePops] = useState(0);
+  const [maxConsecutive, setMaxConsecutive] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showMilestone, setShowMilestone] = useState(false);
   
   const timerRef = useRef<number | null>(null);
   const levelRef = useRef(LEVELS[0]);
@@ -34,6 +39,9 @@ export function PopTheNumber() {
     setScore(0);
     setCorrect(0);
     setRound(1);
+    setConsecutivePops(0);
+    setMaxConsecutive(0);
+    setShowMilestone(false);
     setTimeLeft(level.timeLimit);
     setGameState('playing');
     playClick();
@@ -51,33 +59,59 @@ export function PopTheNumber() {
     const result = checkPop(bubbles, bubbleId, nextExpected);
     
     if (result.correct) {
+      // Correct pop - build consecutive count
+      const newConsecutive = consecutivePops + 1;
+      setConsecutivePops(newConsecutive);
+      setMaxConsecutive(prev => Math.max(prev, newConsecutive));
+
+      // Calculate score with consecutive bonus
+      const points = calculateScore(newConsecutive, currentLevel);
+      
       playPop();
+      triggerHaptic('success');
       setBubbles(prev => prev.map(b => 
         b.id === bubbleId ? { ...b, popped: true } : b
       ));
       setCorrect(c => c + 1);
-      setScore(s => s + 25);
+      setScore(s => s + points);
       setNextExpected(result.nextExpected);
+
+      // Show score popup
+      setScorePopup({ points });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Milestone celebration
+      if (newConsecutive > 0 && newConsecutive % 10 === 0) {
+        setShowMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowMilestone(false), 1200);
+      }
 
       if (result.allPopped) {
         const timeBonus = timeLeft * 2;
         setScore(s => s + timeBonus);
+        triggerHaptic('celebration');
         
         if (round < level.rounds) {
           setTimeout(() => {
             setRound(r => r + 1);
             setBubbles(generateBubbles(level));
             setNextExpected(1);
+            setConsecutivePops(0);
+            setShowMilestone(false);
           }, 500);
         } else {
           handleComplete();
         }
       }
     } else {
+      // Wrong pop - reset consecutive
+      setConsecutivePops(0);
+      triggerHaptic('error');
       playError();
       setScore(s => Math.max(s - 10, 0));
     }
-  }, [gameState, bubbles, nextExpected, timeLeft, round, level, playPop, playError, handleComplete]);
+  }, [gameState, bubbles, nextExpected, timeLeft, round, level, currentLevel, consecutivePops, playPop, playError, handleComplete]);
 
   const handleBack = useCallback(() => {
     navigate('/games');
@@ -130,7 +164,22 @@ export function PopTheNumber() {
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <h2 className="text-4xl font-bold text-green-600 mb-4">Amazing!</h2>
             <p className="text-2xl text-green-700 mb-2">You popped {correct} numbers!</p>
-            <p className="text-xl text-green-600 mb-8">Score: {score}</p>
+            {maxConsecutive >= 10 && (
+              <div className="flex items-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full mb-4">
+                <img src="/assets/kenney/platformer/collectibles/star.png" alt="star" className="w-6 h-6" />
+                <span className="font-black text-orange-700">Best Streak: {maxConsecutive}!</span>
+              </div>
+            )}
+            <div className="flex gap-4 mb-8">
+              <div className="bg-green-50 border-2 border-green-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-green-600">Score</p>
+                <p className="text-3xl font-black text-green-700">{score}</p>
+              </div>
+              <div className="bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center">
+                <p className="text-xs font-black uppercase text-orange-600">Best Streak</p>
+                <p className="text-3xl font-black text-orange-700">{maxConsecutive}</p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={handleBack}
@@ -143,13 +192,47 @@ export function PopTheNumber() {
 
         {gameState === 'playing' && (
           <>
-            <div className="absolute top-4 left-4 bg-white/80 rounded-lg px-4 py-2">
+            {/* Streak HUD */}
+            <div className="absolute top-2 left-2 right-2 flex items-center justify-center gap-2 bg-white/90 rounded-xl border-2 border-orange-200 px-2 py-1 z-10">
+              <span className="font-black text-sm">🔥 Streak</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      consecutivePops >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={consecutivePops >= i * 2 ? 'filled' : 'empty'}
+                    className="w-4 h-4"
+                  />
+                ))}
+              </div>
+              <span className="font-black text-sm text-orange-500">{consecutivePops}</span>
+            </div>
+
+            {/* Score popup */}
+            {scorePopup && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 font-black text-2xl text-green-500 animate-bounce z-10">
+                +{scorePopup.points}
+              </div>
+            )}
+
+            {/* Milestone */}
+            {showMilestone && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-orange-100 border-2 border-orange-300 rounded-xl px-4 py-2 z-10">
+                <p className="text-lg font-black text-orange-600">🔥 {consecutivePops} Streak! 🔥</p>
+              </div>
+            )}
+
+            <div className="absolute top-14 left-4 bg-white/80 rounded-lg px-4 py-2">
               <p className="text-lg font-bold text-blue-600">
                 Next: <span className="text-2xl">{nextExpected}</span>
               </p>
             </div>
 
-            <div className="absolute top-4 right-4 bg-white/80 rounded-lg px-4 py-2">
+            <div className="absolute top-14 right-4 bg-white/80 rounded-lg px-4 py-2">
               <p className="text-lg font-bold text-orange-500">
                 Time: {timeLeft}s
               </p>

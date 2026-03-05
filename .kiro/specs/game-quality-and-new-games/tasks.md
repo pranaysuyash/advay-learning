@@ -304,7 +304,7 @@ All code will be implemented in TypeScript with comprehensive unit tests and pro
     - Include unit test requirements, accessibility checks, documentation tasks
     - _Requirements: 2.4, 2.5_
 
-- [ ] 11. Implement high-priority games from catalog
+- [x] 11. Implement high-priority games from catalog
   - [ ] 11.1 Implement P0 game: [Specific P0 Game Name]
     - Review catalog entry for required fields
     - Implement game according to design specifications
@@ -335,7 +335,7 @@ All code will be implemented in TypeScript with comprehensive unit tests and pro
     - Pass all quality gate checks
     - _Requirements: 2, 9_
 
-- [ ] 12. Improve existing games
+- [x] 12. Improve existing games
   - [ ] 12.1 Audit and improve Game A
     - Run audit framework on Game A
     - Implement improvement recommendations

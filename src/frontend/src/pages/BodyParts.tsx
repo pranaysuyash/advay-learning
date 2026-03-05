@@ -12,11 +12,14 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
   getPartsForLevel,
+  calculateScore,
   type BodyPart,
 } from '../games/bodyPartsLogic';
+import { triggerHaptic } from '../utils/haptics';
 
 interface BodyPartsCtx {
   score: number;
@@ -43,6 +46,15 @@ function BodyPartsGame({
   );
   const [feedback, setFeedback] = useState('');
   const [, setError] = useState<Error | null>(null);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('body-parts');
@@ -64,6 +76,7 @@ function BodyPartsGame({
     setScore(0);
     setCorrect(0);
     setRound(0);
+    resetStreak();
     setGameState('playing');
     setFeedback('');
   };
@@ -72,11 +85,27 @@ function BodyPartsGame({
     if (!targetPart || gameState !== 'playing') return;
     playClick();
     if (part.name === targetPart.name) {
+      // Correct answer - build streak
+      incrementStreak();
+
+      // Calculate score with streak and level multiplier
+      const points = calculateScore(streak + 1, currentLevel);
+      setScore((s) => s + points);
+
+      // Show score popup
+      setScorePopup({ points, x: 50, y: 30 });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+
       playSuccess();
       setCorrect((c) => c + 1);
-      setScore((s) => s + 25);
       setFeedback(`Correct! That's the ${part.name}!`);
     } else {
+      // Wrong answer - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
       setFeedback(`Oops! That's the ${part.name}.`);
     }
@@ -88,6 +117,7 @@ function BodyPartsGame({
       setFeedback('');
       if (round >= 4) {
         setGameState('complete');
+        triggerHaptic('celebration');
       }
     }, 2000);
   };
@@ -143,11 +173,17 @@ function BodyPartsGame({
           <div className='text-center'>
             <p className='text-6xl mb-4'>🧘</p>
             <h2 className='text-2xl font-bold mb-2'>Body Parts!</h2>
-            <p className='mb-4'>Point to the body part!</p>
+            <p className='mb-2'>Point to the body part!</p>
+            <div className='bg-rose-50 rounded-xl p-3 text-sm text-slate-600 mb-4 inline-block'>
+              <p className='font-bold mb-1'>🎯 Scoring:</p>
+              <p>Base 15 pts + streak bonus</p>
+              <p>× Level: L1 1× | L2 1.5× | L3 2×</p>
+            </div>
+            <br />
             <button
               type='button'
               onClick={handleStart}
-              className='px-8 py-4 bg-rose-500 text-white rounded-2xl font-bold text-xl'
+              className='px-8 py-4 bg-rose-500 text-white rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform'
             >
               Start!
             </button>
@@ -156,6 +192,37 @@ function BodyPartsGame({
 
         {gameState === 'playing' && targetPart && (
           <div className='text-center'>
+            {/* Streak HUD */}
+            <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
+              <span className='font-black text-lg'>🔥 Streak</span>
+              <div className='flex gap-1'>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      streak >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                    className='w-6 h-6'
+                  />
+                ))}
+              </div>
+              <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
+                {streak}
+              </span>
+            </div>
+
+            {/* Streak milestone popup */}
+            {showMilestone && (
+              <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
+                <p className='text-xl font-black text-orange-600'>
+                  🔥 {streak} Streak! 🔥
+                </p>
+              </div>
+            )}
+
             <p className='text-2xl font-bold mb-4'>Point to your:</p>
             <p className='text-5xl font-bold text-rose-600 mb-4'>
               {targetPart.name}
@@ -172,15 +239,26 @@ function BodyPartsGame({
                 </button>
               ))}
             </div>
+            {/* Score popup */}
+            {scorePopup && (
+              <div className='font-black text-3xl text-green-500 animate-bounce mb-2'>
+                +{scorePopup.points}
+              </div>
+            )}
+
             <p className='text-lg font-medium text-purple-600'>{feedback}</p>
             <div className='flex gap-4 mt-4'>
-              <div className='bg-green-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Correct</p>
-                <p className='text-2xl font-bold'>{correct}</p>
+              <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
+                <p className='text-xs font-black uppercase text-green-600'>Correct</p>
+                <p className='text-2xl font-bold text-green-700'>{correct}</p>
               </div>
-              <div className='bg-rose-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Round</p>
-                <p className='text-2xl font-bold'>{round + 1}/5</p>
+              <div className='bg-rose-100 px-4 py-2 rounded-xl text-center border-2 border-rose-200'>
+                <p className='text-xs font-black uppercase text-rose-600'>Round</p>
+                <p className='text-2xl font-bold text-rose-700'>{round + 1}/5</p>
+              </div>
+              <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
+                <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
+                <p className='text-2xl font-bold text-orange-700'>{maxStreak}</p>
               </div>
             </div>
           </div>
@@ -191,20 +269,40 @@ function BodyPartsGame({
             <p className='text-6xl mb-4'>🎉</p>
             <h2 className='text-2xl font-bold mb-2'>Great Job!</h2>
             <p className='text-xl mb-4'>You got {correct} right!</p>
-            <p className='text-2xl font-bold text-green-600 mb-4'>
-              Score: {score}
-            </p>
+            {/* Streak badge */}
+            {maxStreak >= 5 && (
+              <div className='flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full mb-4'>
+                <img
+                  src='/assets/kenney/platformer/collectibles/star.png'
+                  alt='star'
+                  className='w-6 h-6'
+                />
+                <span className='font-black text-orange-700'>
+                  Best Streak: {maxStreak}!
+                </span>
+              </div>
+            )}
+            <div className='flex justify-center gap-4 mb-4'>
+              <div className='bg-rose-50 border-2 border-rose-200 px-6 py-3 rounded-xl text-center'>
+                <p className='text-xs font-black uppercase text-rose-600'>Score</p>
+                <p className='text-3xl font-black text-rose-700'>{score}</p>
+              </div>
+              <div className='bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center'>
+                <p className='text-xs font-black uppercase text-orange-600'>Max Streak</p>
+                <p className='text-3xl font-black text-orange-700'>{maxStreak}</p>
+              </div>
+            </div>
             <button
               type='button'
               onClick={handleStart}
-              className='px-6 py-3 bg-rose-500 text-white rounded-xl font-bold mr-4'
+              className='px-6 py-3 bg-rose-500 text-white rounded-xl font-bold mr-4 hover:scale-105 transition-transform'
             >
               Play Again
             </button>
             <button
               type='button'
               onClick={handleFinish}
-              className='px-6 py-3 bg-gray-200 rounded-xl font-bold'
+              className='px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition-colors'
             >
               Finish
             </button>

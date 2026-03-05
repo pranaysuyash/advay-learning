@@ -26,7 +26,9 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import {
   type GameState,
   type PopAction,
@@ -61,6 +63,9 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   const [currentAction, setCurrentAction] = useState<string | null>(null);
   const [lastSpawnTime, setLastSpawnTime] = useState(0);
 
+  // ===== STREAK TRACKING =====
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -81,24 +86,29 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     async function initPose() {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
         );
 
         let landmarker: PoseLandmarker;
         try {
           landmarker = await PoseLandmarker.createFromOptions(vision, {
             baseOptions: {
-              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              modelAssetPath:
+                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
               delegate: 'GPU',
             },
             runningMode: 'VIDEO',
             numPoses: 1,
           });
         } catch (e) {
-          console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);
+          console.warn(
+            'GPU delegate failed for PoseLandmarker, falling back to CPU:',
+            e,
+          );
           landmarker = await PoseLandmarker.createFromOptions(vision, {
             baseOptions: {
-              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              modelAssetPath:
+                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
               delegate: 'CPU',
             },
             runningMode: 'VIDEO',
@@ -110,7 +120,9 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         setIsLoading(false);
       } catch (err) {
         console.error('Failed to initialize pose landmarker:', err);
-        setError('Could not load pose detection. Try refreshing or check your internet connection.');
+        setError(
+          'Could not load pose detection. Try refreshing or check your internet connection.',
+        );
         setIsLoading(false);
       }
     }
@@ -171,10 +183,13 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     lastFrameTimeRef.current = currentTime;
 
     // Detect pose
-    const results = poseLandmarkerRef.current.detectForVideo(video, currentTime);
+    const results = poseLandmarkerRef.current.detectForVideo(
+      video,
+      currentTime,
+    );
 
     // Update game state
-    setGameState(prevState => {
+    setGameState((prevState) => {
       if (!prevState) return prevState;
 
       // Spawn new balloons
@@ -195,7 +210,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         detectedActions = detectAllActions(landmarks);
 
         // Update current action display
-        const activeAction = detectedActions.find(a => a.detected);
+        const activeAction = detectedActions.find((a) => a.detected);
         if (activeAction && activeAction.confidence > 0.6) {
           setCurrentAction(getActionText(activeAction.type));
         } else {
@@ -209,7 +224,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         const landmarks = results.landmarks[0] as any[];
 
         // Check each balloon for collision with relevant body points
-        updatedBalloons = updatedBalloons.map(balloon => {
+        updatedBalloons = updatedBalloons.map((balloon) => {
           if (balloon.popped) return balloon;
 
           let popped = false;
@@ -243,12 +258,24 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
 
         const { updatedState: processedState, poppedBalloons } = processPops(
           { ...updatedState, balloons: updatedBalloons },
-          detectedActions
+          detectedActions,
         );
 
-        // Play sounds for popped balloons
-        poppedBalloons.forEach(() => {
+        // Play sounds and haptics for popped balloons
+        poppedBalloons.forEach((balloon) => {
           playPop();
+
+          // Streak and scoring
+          const newStreak = incrementStreak();
+          const basePoints = 15;
+          const streakBonus = Math.min(newStreak * 2, 15);
+          const totalPoints = basePoints + streakBonus;
+
+          // Show popup at balloon position
+          setScorePopup({ points: totalPoints, x: balloon.x * 100, y: balloon.y * 100 });
+
+          // Haptics
+          triggerHaptic('success');
         });
 
         if (poppedBalloons.length > 0) {
@@ -283,7 +310,16 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     renderCanvas();
 
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState, cameraReady, showMenu, lastSpawnTime, playPop, playSuccess, playCelebration, onGameComplete]);
+  }, [
+    gameState,
+    cameraReady,
+    showMenu,
+    lastSpawnTime,
+    playPop,
+    playSuccess,
+    playCelebration,
+    onGameComplete,
+  ]);
 
   // Start game loop when ready
   useEffect(() => {
@@ -334,7 +370,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     ctx.fill();
 
     // Draw balloons
-    gameState.balloons.forEach(balloon => {
+    gameState.balloons.forEach((balloon) => {
       if (balloon.popped) return;
 
       const x = balloon.x * width;
@@ -358,7 +394,15 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       // Add highlight
       ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.beginPath();
-      ctx.ellipse(x - size * 0.3, y - size * 0.3, size * 0.2, size * 0.3, -0.5, 0, Math.PI * 2);
+      ctx.ellipse(
+        x - size * 0.3,
+        y - size * 0.3,
+        size * 0.2,
+        size * 0.3,
+        -0.5,
+        0,
+        Math.PI * 2,
+      );
       ctx.fill();
 
       // Draw balloon knot
@@ -396,6 +440,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     setShowMenu(false);
     setLastSpawnTime(Date.now());
     setCurrentAction(null);
+    resetStreak();
   };
 
   const handleGameComplete = () => {
@@ -412,6 +457,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     }
     setShowMenu(true);
     setGameState(null);
+    resetStreak();
   };
 
   // ===== CAMERA READY HANDLER =====
@@ -421,24 +467,29 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
 
   // ===== RENDER =====
   return (
-    <GameContainer webcamRef={webcamRef} title="Balloon Pop Fitness" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer
+      webcamRef={webcamRef}
+      title='Balloon Pop Fitness'
+      onHome={handleShowMenu}
+      reportSession={false}
+    >
       {/* Hidden webcam for pose detection */}
-      <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
+      <div className='absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden'>
         <Webcam
           ref={webcamRef}
           audio={false}
           onUserMedia={handleCameraReady}
           videoConstraints={{ width: 320, height: 240, facingMode: 'user' }}
-          className="w-full h-full object-cover"
+          className='w-full h-full object-cover'
         />
       </div>
 
       {showMenu ? (
         // ===== MAIN MENU =====
-        <div className="flex flex-col items-center justify-center h-full p-6">
+        <div className='flex flex-col items-center justify-center h-full p-6'>
           {/* Animated Balloon Icon */}
           <motion.div
-            className="relative mb-6"
+            className='relative mb-6'
             animate={{
               y: [0, -20, 0],
             }}
@@ -448,40 +499,51 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
               ease: 'easeInOut',
             }}
           >
-            <div className="text-8xl">🎈</div>
-            <div className="absolute -top-2 -right-2 text-4xl animate-bounce">💪</div>
+            <div className='text-8xl'>🎈</div>
+            <div className='absolute -top-2 -right-2 text-4xl animate-bounce'>
+              💪
+            </div>
           </motion.div>
 
-          <h2 className="text-3xl font-bold text-advay-slate mb-3">
+          <h2 className='text-3xl font-bold text-advay-slate mb-3'>
             Balloon Pop Fitness!
           </h2>
-          <p className="text-advay-slate mb-6 text-center max-w-md">
-            Pop floating balloons using different body movements based on their colors!
+          <p className='text-advay-slate mb-6 text-center max-w-md'>
+            Pop floating balloons using different body movements based on their
+            colors!
           </p>
 
           {/* Color Instructions */}
-          <div className="grid grid-cols-1 gap-3 mb-6 max-w-md w-full">
-            <div className="bg-red-100 border-2 border-red-300 rounded-lg p-4 flex items-center gap-3">
-              <div className="text-3xl">🔴</div>
+          <div className='grid grid-cols-1 gap-3 mb-6 max-w-md w-full'>
+            <div className='bg-red-100 border-2 border-red-300 rounded-lg p-4 flex items-center gap-3'>
+              <div className='text-3xl'>🔴</div>
               <div>
-                <div className="font-bold text-red-700">Jump and Touch!</div>
-                <div className="text-sm text-red-600">Jump up to pop red balloons</div>
+                <div className='font-bold text-red-700'>Jump and Touch!</div>
+                <div className='text-sm text-red-600'>
+                  Jump up to pop red balloons
+                </div>
               </div>
             </div>
 
-            <div className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 flex items-center gap-3">
-              <div className="text-3xl">🔵</div>
+            <div className='bg-blue-100 border-2 border-blue-300 rounded-lg p-4 flex items-center gap-3'>
+              <div className='text-3xl'>🔵</div>
               <div>
-                <div className="font-bold text-blue-700">Wave Your Hand!</div>
-                <div className="text-sm text-blue-600">Raise your hand to pop blue balloons</div>
+                <div className='font-bold text-blue-700'>Wave Your Hand!</div>
+                <div className='text-sm text-blue-600'>
+                  Raise your hand to pop blue balloons
+                </div>
               </div>
             </div>
 
-            <div className="bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3">
-              <div className="text-3xl">🟡</div>
+            <div className='bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3'>
+              <div className='text-3xl'>🟡</div>
               <div>
-                <div className="font-bold text-yellow-700">Clap Your Hands!</div>
-                <div className="text-sm text-yellow-600">Clap to pop yellow balloons</div>
+                <div className='font-bold text-yellow-700'>
+                  Clap Your Hands!
+                </div>
+                <div className='text-sm text-yellow-600'>
+                  Clap to pop yellow balloons
+                </div>
               </div>
             </div>
           </div>
@@ -490,37 +552,49 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
           <button
             onClick={startGame}
             disabled={isLoading}
-            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-lg font-bold shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-lg font-bold shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {isLoading ? 'Loading...' : 'Start Popping! 🎈'}
           </button>
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 text-red-600 text-center max-w-md">
+            <div className='mt-4 text-red-600 text-center max-w-md'>
               {error}
             </div>
           )}
         </div>
       ) : (
         // ===== GAME AREA =====
-        <div className="flex flex-col h-full">
+        <div className='flex flex-col h-full'>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2 bg-white/50 border-b border-purple-200">
+          <div className='flex items-center justify-between px-4 py-2 bg-white/50 border-b border-purple-200'>
             <div>
-              <h2 className="text-lg font-bold text-advay-slate">Level {gameState?.level || 1}</h2>
-              <p className="text-advay-slate text-xs">
-                Score: <span className="text-purple-600 font-bold">{gameState?.score || 0}</span>
+              <h2 className='text-lg font-bold text-advay-slate'>
+                Level {gameState?.level || 1}
+              </h2>
+              <p className='text-advay-slate text-xs'>
+                Score:{' '}
+                <span className='text-purple-600 font-bold'>
+                  {gameState?.score || 0}
+                </span>
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              {gameState?.combo && gameState.combo > 1 && (
-                <div className="text-orange-500 font-bold">
-                  🔥 {gameState.combo}x Combo!
+            <div className='flex items-center gap-4'>
+              {streak > 0 && (
+                <div className='flex items-center gap-1 text-orange-500 font-bold'>
+                  <span>🔥</span>
+                  <span>{streak}</span>
                 </div>
               )}
-              <div className="text-advay-slate text-sm">
-                Time: <span className="text-purple-600 font-bold">
+              {gameState?.combo && gameState.combo > 1 && (
+                <div className='text-orange-500 font-bold'>
+                  ⚡ {gameState.combo}x
+                </div>
+              )}
+              <div className='text-advay-slate text-sm'>
+                Time:{' '}
+                <span className='text-purple-600 font-bold'>
                   {Math.ceil((gameState?.timeRemaining || 0) / 1000)}s
                 </span>
               </div>
@@ -528,27 +602,65 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
           </div>
 
           {/* Game Canvas */}
-          <div className="flex-1 relative">
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full"
-            />
+          <div className='flex-1 relative'>
+            <canvas ref={canvasRef} className='w-full h-full' />
+
+            {/* Score Popup */}
+            {scorePopup && (
+              <motion.div
+                initial={{ opacity: 1, y: 0, scale: 1 }}
+                animate={{ opacity: 0, y: -50, scale: 1.2 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className='absolute pointer-events-none'
+                style={{
+                  left: `${scorePopup.x}%`,
+                  top: `${scorePopup.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <div className='text-2xl font-bold text-green-500 drop-shadow-lg'>
+                  +{scorePopup.points}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Streak Milestone */}
+            {showMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                className='absolute inset-0 flex items-center justify-center pointer-events-none'
+              >
+                <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             {/* Game Over Overlay */}
             {gameState && !gameState.gameActive && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-                  <div className="text-5xl mb-4">🎈</div>
-                  <h3 className="text-2xl font-bold text-advay-slate mb-2">Great Workout!</h3>
-                  <p className="text-advay-slate mb-2">
-                    Final Score: <span className="text-purple-600 font-bold">{gameState.score}</span>
+              <div className='absolute inset-0 bg-black/50 flex items-center justify-center'>
+                <div className='bg-white rounded-2xl p-8 text-center max-w-md'>
+                  <div className='text-5xl mb-4'>🎈</div>
+                  <h3 className='text-2xl font-bold text-advay-slate mb-2'>
+                    Great Workout!
+                  </h3>
+                  <p className='text-advay-slate mb-2'>
+                    Final Score:{' '}
+                    <span className='text-purple-600 font-bold'>
+                      {gameState.score}
+                    </span>
                   </p>
-                  <p className="text-advay-slate mb-4">
-                    Level Reached: <span className="text-purple-600 font-bold">{gameState.level}</span>
+                  <p className='text-advay-slate mb-4'>
+                    Level Reached:{' '}
+                    <span className='text-purple-600 font-bold'>
+                      {gameState.level}
+                    </span>
                   </p>
                   <button
                     onClick={handleShowMenu}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold transition-all transform hover:scale-105"
+                    className='px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold transition-all transform hover:scale-105'
                   >
                     Back to Menu
                   </button>
@@ -562,13 +674,13 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       {/* Celebration Overlay */}
       <CelebrationOverlay
         show={showCelebration}
-        letter="🎈"
+        letter='🎈'
         accuracy={100}
         onComplete={() => {
           setShowCelebration(false);
           handleGameComplete();
         }}
-        message="Great Workout!"
+        message='Great Workout!'
       />
     </GameContainer>
   );

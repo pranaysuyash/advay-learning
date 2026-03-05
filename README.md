@@ -137,7 +137,8 @@ This project uses a comprehensive AI agent coordination system:
 
 - **AGENTS.md**: Central coordination guide
 - **prompts/**: Reusable AI prompts for all development phases
-- **docs/WORKLOG_TICKETS.md**: Single source of truth for work tracking
+- **docs/audit/ISSUE_REGISTER.md**: Canonical deduplicated issue status
+- **docs/WORKLOG_ADDENDUM_*.md**: Execution logs and evidence trail
 - **docs/audit/**: Audit artifacts for code review
 
 See [AGENTS.md](AGENTS.md) for detailed workflow.

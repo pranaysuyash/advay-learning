@@ -53,6 +53,8 @@ import { usePhonics } from '../hooks/usePhonics';
 import { useCameraPermission } from '../hooks/useCameraPermission';
 import { useInitialCameraPermission } from '../hooks/useInitialCameraPermission';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { LanguageFlag } from '../components/ui/LanguageFlag';
 import { WellnessMonitor } from '../components/game/WellnessMonitor';
 // Centralized hand tracking hooks
@@ -195,6 +197,8 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState<number>(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const [showHandTutorial, setShowHandTutorial] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
@@ -508,8 +512,29 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
       if (ttsEnabled) {
         void speak(`Amazing! You traced ${currentLetter.name}!`);
       }
-      setScore((s) => s + Math.round(nextAccuracy));
+      
+      // Calculate score with streak bonus
+      const basePoints = Math.round(nextAccuracy);
+      const streakBonus = Math.min(streak * 3, 15);
+      const totalPoints = basePoints + streakBonus;
+      setScore((s) => s + totalPoints);
+      
+      // Show score popup
+      setScorePopup({ points: totalPoints });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Haptics
+      triggerHaptic('success');
+
       setStreak((s) => s + 1);
+
+      // Milestone every 5
+      if ((streak + 1) > 0 && (streak + 1) % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
+      
       setCelebrationTitle(`You traced ${currentLetter.name}!`);
       setShowCelebration(true);
     } else {
@@ -518,6 +543,8 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
         void speak('Keep going! Trace the whole letter!');
       }
       setStreak(0);
+      setShowStreakMilestone(false);
+      triggerHaptic('error');
       try {
         playPop(); // Encouraging feedback
       } catch (error) {
@@ -1584,6 +1611,49 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
 
                 {/* Standardized Game Controls - Bottom Right */}
                 <GameControls controls={gameControls} position='bottom-right' />
+
+                {/* Kenney Heart HUD */}
+                <div className="absolute bottom-20 right-4 flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] z-20">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <img
+                      key={i}
+                      src={streak >= (i + 1) * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                      alt=""
+                      className="w-7 h-7"
+                    />
+                  ))}
+                  <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+                </div>
+
+                {/* Score Popup Animation */}
+                {scorePopup && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+                  >
+                    <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                      +{scorePopup.points}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Streak Milestone */}
+                {showStreakMilestone && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1.2, rotate: 0 }}
+                    exit={{ scale: 0 }}
+                    className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+                  >
+                    <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                      🔥 {streak} Streak! 🔥
+                    </div>
+                  </motion.div>
+                )}
               </GameLayout>
             </div>
           </GameContainer>

@@ -1,7 +1,8 @@
 # Kenney Platformer Pack Implementation Plan
 
 **Asset Pack:** Kenney New Platformer Pack 1.1  
-**Source:** `/Users/pranay/Projects/adhoc_resources/kenney_new-platformer-pack-1.1`  
+**Source:** `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0/2D assets/New Platformer Pack`  
+**Current Local Payload Timestamp:** `2025-12-03`  
 **License:** CC0 (Public Domain)  
 **Total Assets:** ~140 sprites, 11 sounds (~512 KB)  
 **Status:** Partially Integrated (MathMonsters)  

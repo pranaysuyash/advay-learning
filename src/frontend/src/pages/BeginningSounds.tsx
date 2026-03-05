@@ -1,5 +1,8 @@
-import { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import { memo, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useFallbackControls } from '../hooks/useFallbackControls';
+import { GameCursor } from '../components/game/GameCursor';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
@@ -10,6 +13,8 @@ import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   buildBeginningSoundsRound,
@@ -38,10 +43,60 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const [usedWords, setUsedWords] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Tap the sound you hear at the start!');
   const [error, setError] = useState<Error | null>(null);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
 
   const levelConfig = useMemo(() => LEVELS.find((l) => l.level === currentLevel) ?? LEVELS[0], [currentLevel]);
+
+  // voice fallback flag (placeholder)
+  const voiceFallback = useFeatureFlag('controls.voiceFallbackV1');
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const snapTargets = useMemo(() => {
+    const container = containerRef.current;
+    if (!container || !currentRound) return [];
+    const rect = container.getBoundingClientRect();
+    return currentRound.options.map((option, idx) => {
+      const el = optionRefs.current[idx];
+      if (el) {
+        const r = el.getBoundingClientRect();
+        return {
+          x: r.left + r.width / 2 - rect.left,
+          y: r.top + r.height / 2 - rect.top,
+          id: option.letter,
+        };
+      }
+      return null;
+    }).filter((t): t is { x: number; y: number; id: string } => !!t);
+  }, [currentRound]);
+
+  const fallback = useFallbackControls({
+    enabled: voiceFallback,
+    snap: { snapRadiusPx: 80, targets: snapTargets },
+    onDwellSelect: (id) => handleAnswer(id),
+    onCursorMove: (pos) => setCursor(pos),
+    containerRef,
+  });
+
+  useEffect(() => {
+    if (voiceFallback) {
+      fallback.enable();
+    } else {
+      fallback.disable();
+      setCursor(null);
+    }
+  }, [voiceFallback, fallback]);
 
   // Show loading while checking subscription
   if (subLoading) {
@@ -179,15 +234,31 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
       setShowResult(true);
 
       const isCorrect = checkAnswer(letter, currentRound.targetWord.firstLetter);
-      const roundScore = calculateScore(isCorrect, 5, levelConfig.timePerRound);
-
+      
       if (isCorrect) {
+        // Correct - build streak
+        incrementStreak();
+
+        // Calculate score with streak
+        const roundScore = calculateScore(true, 5, levelConfig.timePerRound) + Math.min((streak + 1) * 3, 15);
+        setScore((prev) => prev + roundScore);
+
+        // Show popup
+        setScorePopup({ points: roundScore, x: 50, y: 30 });
+        setTimeout(() => setScorePopup(null), 700);
+
+        // Haptics
+        triggerHaptic('success');
+
         playSuccess();
         setCorrectCount((prev) => prev + 1);
-        setScore((prev) => prev + roundScore);
         setFeedback(`Yes! ${currentRound.targetWord.firstSound} is for ${currentRound.targetWord.word}! ${currentRound.targetWord.emoji}`);
         speakSound(currentRound.targetWord.firstLetter);
       } else {
+        // Wrong - break streak
+        resetStreak();
+        triggerHaptic('error');
+
         playError();
         setFeedback(`Oops! The answer is ${currentRound.targetWord.firstLetter} for ${currentRound.targetWord.word} ${currentRound.targetWord.emoji}`);
         speakSound(currentRound.targetWord.firstLetter);
@@ -198,7 +269,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
         if (nextIndex >= levelConfig.roundCount) {
           setGameState('complete');
           playCelebration();
-          await handleGameComplete(score + roundScore);
+          triggerHaptic('celebration');
+          await handleGameComplete(score + (isCorrect ? calculateScore(true, 5, levelConfig.timePerRound) + Math.min(streak + 1, 5) * 3 : 0));
         } else {
           setRoundIndex(nextIndex);
           const newRound = buildBeginningSoundsRound(currentLevel, usedWords);
@@ -233,7 +305,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     setSelectedAnswer(null);
     setShowResult(false);
     setFeedback('Tap the sound you hear at the start!');
-  }, [playClick]);
+    resetStreak();
+  }, [playClick, resetStreak]);
 
   const handleRestart = useCallback(() => {
     playClick();
@@ -246,7 +319,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     setSelectedAnswer(null);
     setShowResult(false);
     setFeedback('Tap the sound you hear at the start!');
-  }, [playClick]);
+    resetStreak();
+  }, [playClick, resetStreak]);
 
   const handleFinish = useCallback(async () => {
     playClick();
@@ -265,6 +339,11 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
         reportSession={false}
       >
         <div className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
+          {voiceFallback && (
+            <div className="w-full bg-yellow-100 text-yellow-800 p-2 rounded text-center">
+              Voice fallback enabled. You can tap answers if voice recognition fails.
+            </div>
+          )}
           {/* Level selector */}
           <div className="flex gap-2">
             {LEVELS.map((level) => (
@@ -312,8 +391,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
 
               <p className="text-lg text-purple-600 font-medium">{feedback}</p>
 
-              <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-                {currentRound.options.map((option) => {
+              <div ref={containerRef} {...fallback.handlers} className="grid grid-cols-2 gap-3 w-full max-w-md">
+                {currentRound.options.map((option, idx) => {
                   let buttonClass = 'bg-white border-4 border-gray-200 hover:border-blue-300';
 
                   if (showResult) {
@@ -328,6 +407,7 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
                     <motion.button
                       type="button"
                       key={option.letter}
+                      ref={(el) => { optionRefs.current[idx] = el; }}
                       onClick={() => handleAnswer(option.letter)}
                       disabled={showResult}
                       whileHover={reducedMotion ? {} : { scale: showResult ? 1 : 1.05 }}
@@ -339,6 +419,60 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
                   );
                 })}
               </div>
+
+              {cursor && (
+                <GameCursor
+                  position={cursor}
+                  isPinching={false}
+                  isHandDetected={false}
+                  size={48}
+                  highContrast={true}
+                  icon="👆"
+                />
+              )}
+
+              {/* Kenney Heart HUD */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={streak >= (i + 1) * 2
+                      ? '/assets/kenney/platformer/hud/hud_heart.png'
+                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                    alt=""
+                    className="w-8 h-8"
+                  />
+                ))}
+                <span className="ml-2 text-lg font-bold text-pink-500">x{streak}</span>
+              </div>
+
+              {/* Score Popup Animation */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+                >
+                  <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              {showMilestone && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1.2, rotate: 0 }}
+                  exit={{ scale: 0 }}
+                  className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+                >
+                  <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                    🔥 {streak} Streak! 🔥
+                  </div>
+                </motion.div>
+              )}
 
               <div className="flex gap-4 text-center">
                 <div className="bg-green-100 px-4 py-2 rounded-xl">
@@ -364,7 +498,10 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
               <p className="text-xl text-gray-600 mb-4">
                 You got {correctCount} out of {levelConfig.roundCount} correct!
               </p>
-              <p className="text-2xl font-bold text-purple-600 mb-6">Score: {score}</p>
+              <p className="text-2xl font-bold text-purple-600 mb-2">Score: {score}</p>
+              {maxStreak >= 5 && (
+                <p className="text-lg font-bold text-orange-500 mb-6">🔥 Best Streak: {maxStreak}!</p>
+              )}
             </div>
           )}
 

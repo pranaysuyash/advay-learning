@@ -1,10 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getStoriesForLevel, type Story } from '../games/voiceStoriesLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 export function VoiceStories() {
   const navigate = useNavigate();
@@ -13,6 +16,8 @@ export function VoiceStories() {
   const [currentLine, setCurrentLine] = useState(0);
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'reading' | 'complete'>('start');
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess } = useAudio();
   const { onGameComplete } = useGameDrops('voice-stories');
@@ -24,6 +29,8 @@ export function VoiceStories() {
     setCurrentStory(stories[0]);
     setCurrentLine(0);
     setScore(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setGameState('reading');
   };
 
@@ -31,10 +38,22 @@ export function VoiceStories() {
     playClick();
     if (!currentStory) return;
     if (currentLine < currentStory.lines.length - 1) {
+      // Streak for each page turned
+      const newStreak = streak + 1;
+      setStreak(newStreak);
       setCurrentLine(l => l + 1);
+      triggerHaptic('success');
+
+      // Milestone every 5 pages
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
     } else {
       playSuccess();
-      setScore(s => s + 50);
+      triggerHaptic('celebration');
+      setScore(s => s + 50 + streak * 5);
       setGameState('complete');
     }
   };
@@ -65,9 +84,28 @@ export function VoiceStories() {
           </div>
         )}
 
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
+              🔥 {streak} Pages! 🔥
+            </div>
+          </motion.div>
+        )}
+
         {gameState === 'reading' && currentStory && currentLineData && (
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">{currentStory.title}</p>
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <p className="text-sm text-gray-500">{currentStory.title}</p>
+              {streak > 0 && (
+                <span className="text-orange-500 font-bold">🔥 {streak}</span>
+              )}
+            </div>
             <p className="text-8xl mb-4">{currentLineData.emoji}</p>
             <p className="text-2xl font-bold text-violet-700 mb-4 px-8">{currentLineData.text}</p>
             <div className="flex items-center justify-center gap-2 mb-4">

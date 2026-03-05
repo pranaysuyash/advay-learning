@@ -7,6 +7,9 @@ import {
   TimeBreakdownSummary,
   StruggleAnalysis,
   StruggleSummary,
+  Attempt,
+  ErrorDetail,
+  StruggleIndicator,
 } from '../types/progress';
 
 function getMetaNumber(item: ProgressItem, key: string): number | undefined {
@@ -26,6 +29,17 @@ function getMetaNumber(item: ProgressItem, key: string): number | undefined {
 function getMetaString(item: ProgressItem, key: string): string | undefined {
   const value = item.meta_data?.[key];
   return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Sum the durationSeconds field across all attempts.
+ * Extracted to eliminate duplication (2 locations).
+ *
+ * @param attempts - Array of attempts with durationSeconds field
+ * @returns Total duration in seconds
+ */
+export function sumDurationSeconds(attempts: Attempt[]): number {
+  return attempts.reduce((sum, a) => sum + a.durationSeconds, 0);
 }
 
 /**
@@ -542,4 +556,158 @@ export function formatAttempts(attemptCount: number | undefined): string {
   if (attempts === 2) return '2nd try';
   if (attempts === 3) return '3rd try';
   return `${attempts}th try`;
+}
+
+/**
+ * Generate a unique attempt ID
+ */
+export function generateAttemptId(): string {
+  return `attempt-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/**
+ * Create a new attempt record
+ */
+export function createAttempt(
+  index: number,
+  score: number,
+  durationSeconds: number,
+  options?: {
+    accuracy?: number;
+    errors?: ErrorDetail[];
+    completed?: boolean;
+  },
+): Attempt {
+  return {
+    id: generateAttemptId(),
+    index,
+    score,
+    durationSeconds,
+    accuracy: options?.accuracy,
+    errors: options?.errors,
+    timestamp: new Date().toISOString(),
+    completed: options?.completed ?? true,
+  };
+}
+
+/**
+ * Calculate struggle indicators from attempts
+ */
+export function calculateStruggleIndicator(attempts: Attempt[]): StruggleIndicator {
+  if (attempts.length === 0) {
+    return {
+      attempts: 0,
+      timeOnTask: 0,
+      helped: false,
+      abandoned: false,
+    };
+  }
+
+  const totalTime = sumDurationSeconds(attempts);
+  const helpErrors = attempts.flatMap((a) => a.errors ?? []).filter((e) => e.type === 'help').length;
+  const lastAttempt = attempts[attempts.length - 1];
+  const abandoned = !lastAttempt.completed && attempts.length > 1;
+
+  const errorPatterns = detectErrorPatterns(attempts);
+
+  return {
+    attempts: attempts.length,
+    errorPattern: errorPatterns,
+    timeOnTask: totalTime,
+    helped: helpErrors > 0,
+    abandoned,
+  };
+}
+
+/**
+ * Detect common error patterns in letter learning
+ */
+export function detectErrorPatterns(attempts: Attempt[]): string | undefined {
+  const errors = attempts.flatMap((a) => a.errors ?? []);
+  
+  const confusionErrors = errors.filter((e) => e.type === 'confusion');
+  const targetCounts = new Map<string, number>();
+  
+  for (const error of confusionErrors) {
+    if (error.target) {
+      targetCounts.set(error.target, (targetCounts.get(error.target) ?? 0) + 1);
+    }
+  }
+
+  const confusedPairs: Record<string, string[]> = {
+    'b': ['d', 'p'],
+    'd': ['b', 'p'],
+    'p': ['b', 'd'],
+    'q': ['g', 'p'],
+    'g': ['q', '9'],
+    'm': ['n', 'w'],
+    'n': ['m', 'u'],
+    '6': ['9', 'b'],
+    '9': ['6', 'q'],
+  };
+
+  for (const [letter, confused] of Object.entries(confusedPairs)) {
+    const count = targetCounts.get(letter) ?? 0;
+    for (const conf of confused) {
+      const confCount = targetCounts.get(conf) ?? 0;
+      if (count > 1 && confCount > 1) {
+        return `confusion:${letter}-${conf}`;
+      }
+    }
+  }
+
+  if (errors.some((e) => e.type === 'timeout')) {
+    return 'timeout-issues';
+  }
+
+  return undefined;
+}
+
+/**
+ * Determine attention level based on attempts and time
+ */
+export function determineAttentionLevel(
+  attempts: number,
+  timeOnTask: number,
+  helped: boolean,
+): 'none' | 'low' | 'medium' | 'high' {
+  if (attempts <= 1 && timeOnTask < 60) return 'none';
+  if (attempts >= 4 || timeOnTask > 300) return 'high';
+  if (attempts >= 2 || timeOnTask > 120 || helped) return 'medium';
+  return 'low';
+}
+
+/**
+ * Aggregate attempts into progress item
+ */
+export function aggregateAttempts(
+  activityType: string,
+  contentId: string,
+  attempts: Attempt[],
+): ProgressItem {
+  const bestAttempt = attempts.reduce((best, a) => (a.score > best.score ? a : best), attempts[0]);
+  const totalTime = sumDurationSeconds(attempts);
+  
+  const struggleIndicator = calculateStruggleIndicator(attempts);
+  const attentionLevel = determineAttentionLevel(
+    attempts.length,
+    totalTime,
+    struggleIndicator.helped,
+  );
+
+  return {
+    id: `progress-${contentId}-${Date.now()}`,
+    activity_type: activityType,
+    content_id: contentId,
+    score: bestAttempt.score,
+    completed: bestAttempt.completed,
+    completed_at: bestAttempt.timestamp,
+    duration_seconds: totalTime,
+    attempt_count: attempts.length,
+    attempts,
+    struggle_indicators: {
+      ...struggleIndicator,
+      attentionLevel,
+    },
+  };
 }

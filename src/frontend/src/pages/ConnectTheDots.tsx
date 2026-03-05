@@ -19,8 +19,10 @@ import { OptionChips } from '../components/game/OptionChips';
 import { GameCursor } from '../components/game/GameCursor';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -71,6 +73,9 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
     'easy',
   );
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   // Live refs for game state used by the tracking loop to avoid stale closures
   const dotsRef = useRef<Dot[]>([]);
@@ -355,6 +360,7 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
 
       // Level completed - play celebration!
       playCelebration();
+      triggerHaptic('celebration');
       setShowCelebration(true);
       setScore((prev) => prev + timeLeft * 10); // Bonus points for remaining time
 
@@ -377,6 +383,7 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
     setGameStarted(true);
     setGameCompleted(false);
     setScore(0);
+    resetStreak();
     setLevel(1);
     // timeLeft will be set by the dots initialization effect based on difficulty
     if (ttsEnabled) {
@@ -390,6 +397,21 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
 
     // Validate against the live ref index - avoids stale closure mismatches
     if (dotId !== currentDotIndexRef.current) return;
+
+    // Build streak
+    const newStreak = incrementStreak();
+
+    // Calculate score with streak bonus
+    const basePoints = 10;
+    const streakBonus = Math.min(newStreak * 2, 15);
+    const totalPoints = basePoints + streakBonus;
+    setScore((prev) => prev + totalPoints);
+
+    // Show score popup
+    setScorePopup({ points: totalPoints });
+
+    // Haptics
+    triggerHaptic('success');
 
     try {
       playPop(); // Play pop - guard in case audio unavailable
@@ -556,6 +578,49 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
                 </span>
               </div>
             </div>
+
+            {/* Kenney Heart HUD */}
+            <div className="absolute bottom-4 left-4 flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] z-40">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <img
+                  key={i}
+                  src={streak >= (i + 1) * 2
+                    ? '/assets/kenney/platformer/hud/hud_heart.png'
+                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                  alt=""
+                  className="w-7 h-7"
+                />
+              ))}
+              <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+            </div>
+
+            {/* Score Popup Animation */}
+            {scorePopup && (
+              <motion.div
+                initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                exit={{ opacity: 0 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+              >
+                <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                  +{scorePopup.points}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Streak Milestone */}
+            {showMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1.2, rotate: 0 }}
+                exit={{ scale: 0 }}
+                className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+              >
+                <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             <canvas
               ref={canvasRef}

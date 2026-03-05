@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -95,12 +96,15 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
             }.`,
           );
           playCelebration();
+          triggerHaptic('celebration');
           onGameComplete(outcome.state.score);
         } else {
           playSuccess();
+          triggerHaptic('success');
         }
       } else if (outcome.result !== 'already-painted') {
         playError();
+        triggerHaptic('error');
       }
 
       return outcome.state;
@@ -236,6 +240,21 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                   Hint: number {suggestedNumber} has the most unpainted regions.
                 </p>
               )}
+            </div>
+
+            {/* Kenney Heart HUD */}
+            <div className="flex items-center justify-center gap-1 mt-3 bg-white rounded-2xl px-4 py-2 border-2 border-pink-200 shadow-sm">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <img
+                  key={i}
+                  src={gameState.streak >= (i + 1) * 2
+                    ? '/assets/kenney/platformer/hud/hud_heart.png'
+                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                  alt=""
+                  className="w-6 h-6"
+                />
+              ))}
+              <span className="ml-2 text-sm font-bold text-pink-500">x{gameState.streak}</span>
             </div>
           </section>
 

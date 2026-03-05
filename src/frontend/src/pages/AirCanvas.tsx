@@ -14,6 +14,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTTS } from '../hooks/useTTS';
+import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameShell } from '../components/GameShell';
 import {
@@ -79,6 +80,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
   const [showUI, setShowUI] = useState(true);
   const [snapshot, setSnapshot] = useState<string | null>(null);
   const [showIssueReport, setShowIssueReport] = useState(false);
+  const [particleMilestone, setParticleMilestone] = useState(false);
   const colorIndexRef = useRef(0);
   const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
@@ -210,6 +212,14 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
       if (handOpen) {
         setIsDrawing(true);
         addParticles(x, y, velocityX, velocityY);
+        triggerHaptic('success');
+        
+        // Milestone every 100 particles
+        if (particleCount > 0 && particleCount % 100 === 0) {
+          setParticleMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setParticleMilestone(false), 1500);
+        }
       } else {
         setIsDrawing(false);
       }
@@ -445,6 +455,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
                       setSelectedBrush(brush);
                       assetLoader.playSound('pop', 0.28);
                       void playPop();
+                      triggerHaptic('success');
                       if (ttsEnabled) {
                         void speak(`${brush.name} brush selected!`);
                       }
@@ -476,6 +487,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
                         }
                         assetLoader.playSound('pop', 0.2);
                         void playPop();
+                        triggerHaptic('success');
                       }}
                       title={`Select color ${color}`}
                       aria-label={`Select color ${color}`}
@@ -610,6 +622,15 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Particle Milestone Overlay */}
+      {particleMilestone && (
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+          <div className='bg-gradient-to-r from-purple-400 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+            ✨ {particleCount} Particles! ✨
+          </div>
+        </div>
+      )}
 
       <IssueReportFlowModal
         isOpen={showIssueReport}

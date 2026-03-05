@@ -8,6 +8,7 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useAudio } from '../utils/hooks/useAudio';
 
@@ -113,6 +114,8 @@ export function VirtualChemistryLab() {
   const [showReactionEffect, setShowReactionEffect] = useState(false);
   const [score, setScore] = useState(0);
   const [discoveredReactions, setDiscoveredReactions] = useState<Set<string>>(new Set());
+  const [reactionStreak, setReactionStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [isPouring, setIsPouring] = useState(false);
   const [bubbles, setBubbles] = useState<Array<{ x: number; y: number; size: number; speed: number }>>([]);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
@@ -144,8 +147,23 @@ export function VirtualChemistryLab() {
           setDiscoveredReactions((prev) => new Set([...prev, reaction.id]));
           setLastReaction(reaction);
           setShowReactionEffect(true);
-          setScore((s) => s + 50);
+          
+          // Streak tracking for new reactions
+          const newStreak = reactionStreak + 1;
+          setReactionStreak(newStreak);
+          const basePoints = 50;
+          const streakBonus = Math.min(newStreak * 5, 25);
+          
+          setScore((s) => s + basePoints + streakBonus);
           playSuccess();
+          triggerHaptic('success');
+          
+          // Milestone every 3 reactions
+          if (newStreak > 0 && newStreak % 3 === 0) {
+            setShowStreakMilestone(true);
+            triggerHaptic('celebration');
+            setTimeout(() => setShowStreakMilestone(false), 1500);
+          }
 
           const newSize = discoveredReactions.size + 1;
           if (newSize >= 3) triggerEasterEgg('egg-gold-reaction');
@@ -173,7 +191,7 @@ export function VirtualChemistryLab() {
         break;
       }
     }
-  }, [beakerContents, discoveredReactions, playSuccess, speak, ttsEnabled]);
+  }, [beakerContents, discoveredReactions, playSuccess, speak, ttsEnabled, reactionStreak]);
 
   // Animate bubbles
   useEffect(() => {
@@ -403,9 +421,17 @@ export function VirtualChemistryLab() {
         <h1 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight text-center flex-1'>
           Virtual Chemistry Lab
         </h1>
-        <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='#F59E0B' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>
-          <span>{score}</span>
+        <div className='flex items-center gap-3'>
+          {reactionStreak > 0 && (
+            <div className='bg-orange-50 border-3 border-orange-100 px-4 py-2 rounded-[1.5rem] font-bold text-orange-500 text-lg shadow-[0_4px_0_#E5B86E] flex items-center gap-1'>
+              <span>🔥</span>
+              <span>{reactionStreak}</span>
+            </div>
+          )}
+          <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='#F59E0B' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>
+            <span>{score}</span>
+          </div>
         </div>
       </header>
 
@@ -638,6 +664,15 @@ export function VirtualChemistryLab() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Streak Milestone Overlay */}
+      {showStreakMilestone && (
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+            🔥 {reactionStreak} Reactions! 🔥
+          </div>
+        </div>
+      )}
 
       <IssueReportFlowModal
         isOpen={isIssueModalOpen}

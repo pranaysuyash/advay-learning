@@ -456,6 +456,24 @@ export const GAME_REGISTRY: GameManifest[] = [
     easterEggs: [],
   },
   {
+    id: 'number-sequence',
+    name: 'Number Sequence',
+    tagline: 'Complete the missing number in each pattern! 🔢',
+    path: '/games/number-sequence',
+    icon: 'numbers',
+    worldId: 'number-jungle',
+    vibe: 'educational',
+    ageRange: '4-7',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'number-one', chance: 0.2 },
+      { itemId: 'math-plus', chance: 0.12 },
+    ],
+    easterEggs: [],
+  },
+  {
     id: 'blend-builder',
     name: 'Blend Builder',
     tagline: 'Blend sounds to make words! 🧩',
@@ -780,6 +798,24 @@ export const GAME_REGISTRY: GameManifest[] = [
     easterEggs: [],
   },
   {
+    id: 'size-sorting',
+    name: 'Size Sorting',
+    tagline: 'Tap objects from smallest to biggest (or reverse)! 📏',
+    path: '/games/size-sorting',
+    icon: 'scale',
+    worldId: 'shape-garden',
+    vibe: 'puzzle',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'shape-circle', chance: 0.18 },
+      { itemId: 'shape-star', chance: 0.12 },
+    ],
+    easterEggs: [],
+  },
+  {
     id: 'digital-jenga',
     name: 'Digital Jenga',
     tagline: 'Remove blocks carefully! 🧱',
@@ -1012,6 +1048,26 @@ export const GAME_REGISTRY: GameManifest[] = [
       { itemId: 'color-yellow', chance: 0.35 },
       { itemId: 'color-green', chance: 0.25 },
       { itemId: 'material-seed', chance: 0.08, minScore: 70 },
+    ],
+    easterEggs: [],
+  },
+  {
+    id: 'color-mixing',
+    name: 'Color Mixing',
+    tagline: 'Mix two colors and discover what they become! 🎨',
+    path: '/games/color-mixing',
+    icon: 'palette',
+    worldId: 'color-splash',
+    vibe: 'creative',
+    ageRange: '3-6',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'color-red', chance: 0.2 },
+      { itemId: 'color-blue', chance: 0.2 },
+      { itemId: 'color-yellow', chance: 0.2 },
+      { itemId: 'tool-paintbrush', chance: 0.08, minScore: 75 },
     ],
     easterEggs: [],
   },
@@ -1732,10 +1788,10 @@ export const GAME_REGISTRY: GameManifest[] = [
     easterEggs: [],
   },
   {
-    id: 'physics-demo',
-    name: 'Physics Demo',
-    tagline: 'Explore physics with your hands! ⚛️',
-    path: '/games/physics-demo',
+    id: 'physics-playground',
+    name: 'Physics Playground',
+    tagline: 'Pour, mix, and explore playful physics! ⚛️',
+    path: '/games/physics-playground',
     icon: 'atom',
     worldId: 'discovery-lab',
     vibe: 'educational',
@@ -1750,9 +1806,15 @@ export const GAME_REGISTRY: GameManifest[] = [
 // ─── LOOKUP HELPERS ─────────────────────────────────────────────────────
 
 const _byId = new Map(GAME_REGISTRY.map((g) => [g.id, g]));
+const PHYSICS_ALIAS_ID = 'physics-demo';
+const PHYSICS_CANONICAL_ID = 'physics-playground';
+
+function resolveManifestId(id: string): string {
+  return id === PHYSICS_ALIAS_ID ? PHYSICS_CANONICAL_ID : id;
+}
 
 export function getGameManifest(id: string): GameManifest | undefined {
-  return _byId.get(id);
+  return _byId.get(resolveManifestId(id));
 }
 
 export function getListedGames(): GameManifest[] {
@@ -1778,7 +1840,7 @@ export function getAllWorlds(): string[] {
  * This replaces the hardcoded GAME_DROP_TABLES in collectibles.ts.
  */
 export function getDropTable(gameId: string): DropEntry[] {
-  return _byId.get(gameId)?.drops ?? [];
+  return _byId.get(resolveManifestId(gameId))?.drops ?? [];
 }
 
 /**
@@ -1786,7 +1848,7 @@ export function getDropTable(gameId: string): DropEntry[] {
  * Auto-injects gameId from the manifest.
  */
 export function getRegistryEasterEggs(gameId: string): EasterEgg[] {
-  const manifest = _byId.get(gameId);
+  const manifest = _byId.get(resolveManifestId(gameId));
   if (!manifest) return [];
   return manifest.easterEggs.map((egg) => ({ ...egg, gameId }));
 }

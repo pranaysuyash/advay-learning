@@ -1,6 +1,6 @@
 /**
  * Animal Sounds Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -11,11 +11,14 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
   getAnimalsForLevel,
+  calculateScore,
   type Animal,
 } from '../games/animalSoundsLogic';
+import { triggerHaptic } from '../utils/haptics';
 import { GamePage } from '../components/GamePage';
 import { useTTS } from '../hooks/useTTS';
 
@@ -44,6 +47,15 @@ function AnimalSoundsGame({
   );
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState<Error | null>(null);
+  const {
+    streak,
+    maxStreak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const { playClick, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -82,6 +94,7 @@ function AnimalSoundsGame({
     setScore(0);
     setCorrect(0);
     setRound(0);
+    resetStreak();
     setGameState('playing');
     setFeedback('');
     allowInteractionRef.current = true;
@@ -96,14 +109,30 @@ function AnimalSoundsGame({
     allowInteractionRef.current = false;
 
     if (animal.name === targetAnimal.name) {
+      // Correct answer - build streak
+      incrementStreak();
+
+      // Calculate score with streak and level multiplier
+      const points = calculateScore(streak + 1, currentLevel);
+      setScore((s) => s + points);
+
+      // Show score popup
+      setScorePopup({ points });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Haptic feedback
+      triggerHaptic('success');
+
       playSuccess();
       setCorrect((c) => c + 1);
-      setScore((s) => s + 30);
       setFeedback(`Correct! The ${animal.name} makes this sound!`);
       if (ttsEnabled) {
         void speak(`Correct! The ${animal.name} says ${animal.sound}`);
       }
     } else {
+      // Wrong answer - break streak
+      resetStreak();
+      triggerHaptic('error');
       playError();
       setFeedback(`Oops! The ${targetAnimal.name} makes that sound!`);
       if (ttsEnabled) {
@@ -200,11 +229,17 @@ function AnimalSoundsGame({
           <div className='text-center'>
             <p className='text-6xl mb-4'>🐾</p>
             <h2 className='text-2xl font-bold mb-2'>Animal Sounds!</h2>
-            <p className='mb-4'>Which animal makes this sound?</p>
+            <p className='mb-2'>Which animal makes this sound?</p>
+            <div className='bg-amber-50 rounded-xl p-3 text-sm text-slate-600 mb-4 inline-block'>
+              <p className='font-bold mb-1'>🎯 Scoring:</p>
+              <p>Base 15 pts + streak bonus</p>
+              <p>× Level: L1 1× | L2 1.5× | L3 2×</p>
+            </div>
+            <br />
             <button
               type='button'
               onClick={handleStart}
-              className='px-8 py-4 bg-amber-500 text-white rounded-2xl font-bold text-xl'
+              className='px-8 py-4 bg-amber-500 text-white rounded-2xl font-bold text-xl shadow-lg hover:scale-105 transition-transform'
             >
               Start!
             </button>
@@ -213,6 +248,37 @@ function AnimalSoundsGame({
 
         {gameState === 'playing' && targetAnimal && (
           <div className='text-center w-full max-w-2xl'>
+            {/* Streak HUD */}
+            <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
+              <span className='font-black text-lg'>🔥 Streak</span>
+              <div className='flex gap-1'>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <img
+                    key={i}
+                    src={
+                      streak >= i * 2
+                        ? '/assets/kenney/platformer/hud/hud_heart.png'
+                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                    }
+                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                    className='w-6 h-6'
+                  />
+                ))}
+              </div>
+              <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
+                {streak}
+              </span>
+            </div>
+
+            {/* Streak milestone popup */}
+            {showMilestone && (
+              <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
+                <p className='text-xl font-black text-orange-600'>
+                  🔥 {streak} Streak! 🔥
+                </p>
+              </div>
+            )}
+
             <div className='bg-white shadow-xl rounded-2xl p-6 mb-8 border-4 border-amber-100 relative overflow-hidden'>
               <div className='absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent pointer-events-none' />
               <p className='text-xl font-bold mb-2 text-slate-500'>Which animal makes this sound?</p>
@@ -259,6 +325,13 @@ function AnimalSoundsGame({
               </AnimatePresence>
             </div>
 
+            {/* Score popup */}
+            {scorePopup && (
+              <div className='font-black text-3xl text-green-500 animate-bounce mb-2'>
+                +{scorePopup.points}
+              </div>
+            )}
+
             <div className='h-12'>
               <AnimatePresence mode="wait">
                 {feedback && (
@@ -275,13 +348,17 @@ function AnimalSoundsGame({
               </AnimatePresence>
             </div>
             <div className='flex gap-4 mt-4'>
-              <div className='bg-green-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Correct</p>
-                <p className='text-2xl font-bold'>{correct}</p>
+              <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
+                <p className='text-xs font-black uppercase text-green-600'>Correct</p>
+                <p className='text-2xl font-bold text-green-700'>{correct}</p>
               </div>
-              <div className='bg-amber-100 px-4 py-2 rounded-xl text-center'>
-                <p className='text-sm'>Round</p>
-                <p className='text-2xl font-bold'>{round + 1}/5</p>
+              <div className='bg-amber-100 px-4 py-2 rounded-xl text-center border-2 border-amber-200'>
+                <p className='text-xs font-black uppercase text-amber-600'>Round</p>
+                <p className='text-2xl font-bold text-amber-700'>{round + 1}/5</p>
+              </div>
+              <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
+                <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
+                <p className='text-2xl font-bold text-orange-700'>{maxStreak}</p>
               </div>
             </div>
           </div>
@@ -292,20 +369,40 @@ function AnimalSoundsGame({
             <p className='text-6xl mb-4'>🎉</p>
             <h2 className='text-2xl font-bold mb-2'>Great Job!</h2>
             <p className='text-xl mb-4'>You got {correct} animals right!</p>
-            <p className='text-2xl font-bold text-green-600 mb-4'>
-              Score: {score}
-            </p>
+            {/* Streak badge */}
+            {maxStreak >= 5 && (
+              <div className='flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-300 px-4 py-2 rounded-full mb-4'>
+                <img
+                  src='/assets/kenney/platformer/collectibles/star.png'
+                  alt='star'
+                  className='w-6 h-6'
+                />
+                <span className='font-black text-orange-700'>
+                  Best Streak: {maxStreak}!
+                </span>
+              </div>
+            )}
+            <div className='flex justify-center gap-4 mb-4'>
+              <div className='bg-amber-50 border-2 border-amber-200 px-6 py-3 rounded-xl text-center'>
+                <p className='text-xs font-black uppercase text-amber-600'>Score</p>
+                <p className='text-3xl font-black text-amber-700'>{score}</p>
+              </div>
+              <div className='bg-orange-50 border-2 border-orange-200 px-6 py-3 rounded-xl text-center'>
+                <p className='text-xs font-black uppercase text-orange-600'>Max Streak</p>
+                <p className='text-3xl font-black text-orange-700'>{maxStreak}</p>
+              </div>
+            </div>
             <button
               type='button'
               onClick={handleStart}
-              className='px-6 py-3 bg-amber-500 text-white rounded-xl font-bold mr-4'
+              className='px-6 py-3 bg-amber-500 text-white rounded-xl font-bold mr-4 hover:scale-105 transition-transform'
             >
               Play Again
             </button>
             <button
               type='button'
               onClick={finish}
-              className='px-6 py-3 bg-gray-200 rounded-xl font-bold'
+              className='px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition-colors'
             >
               Finish
             </button>

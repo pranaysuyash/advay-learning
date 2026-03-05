@@ -26,6 +26,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { triggerHaptic } from '../utils/haptics';
 import {
   type GameState,
   initializeGame,
@@ -34,6 +35,7 @@ import {
   calculateFinalStats,
   getLevelDisplayName,
 } from '../games/musicalStatuesLogic';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 export const MusicalStatues = memo(function MusicalStatues() {
   // ===== HOOKS =====
@@ -168,6 +170,24 @@ export const MusicalStatues = memo(function MusicalStatues() {
       }
     };
   }, [isLoading, showMenu, gameState?.gameActive, gameLoop]);
+
+  // Haptic feedback for game events
+  useEffect(() => {
+    if (!gameState || !gameState.gameActive) return;
+
+    // Haptic on successful freeze (combo increased)
+    if (gameState.combo > 0 && gameState.feedback.includes('Great!')) {
+      triggerHaptic('success');
+      // Celebration haptic at combo milestones
+      if (gameState.combo % STREAK_MILESTONE_INTERVAL === 0) {
+        triggerHaptic('celebration');
+      }
+    }
+    // Error haptic on move during freeze
+    if (gameState.feedback.includes('moved') || gameState.feedback.includes('Try again')) {
+      triggerHaptic('error');
+    }
+  }, [gameState?.combo, gameState?.feedback, gameState?.gameActive]);
 
   // ===== CANVAS RENDERING =====
   const renderCanvas = useCallback(() => {

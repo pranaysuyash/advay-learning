@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { triggerHaptic } from '../utils/haptics';
 import {
   advanceObstacleCourseState,
   completeCurrentObstacle,
@@ -25,6 +26,7 @@ import {
   type PoseBaseline,
   type PoseMetrics,
 } from '../games/poseMovementAnalysis';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 type GamePhase = 'menu' | 'calibrating' | 'playing' | 'summary';
 
@@ -100,6 +102,9 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
   const [depthRatio, setDepthRatio] = useState(1);
   const [avatarLane, setAvatarLane] = useState(1);
   const [finalSummary, setFinalSummary] = useState<FinalSummary | null>(null);
+  const [scorePopup, setScorePopup] = useState<{ value: number; x: number; y: number } | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playError, playLevelUp, playCelebration, playSuccess } =
     useAudio();
@@ -408,6 +413,22 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
       setRoundState(completedRound);
       roundStateRef.current = completedRound;
       playSuccess();
+      triggerHaptic('success');
+
+      // Show score popup for obstacle completion
+      const baseScore = 15;
+      const streakBonus = Math.min(completedRound.streak * 2, 15);
+      setScorePopup({ value: baseScore + streakBonus, x: 50, y: 30 });
+      setTimeout(() => setScorePopup(null), 700);
+
+      // Track streak and trigger celebration at milestones
+      const newStreak = completedRound.streak;
+      setStreak(newStreak);
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        triggerHaptic('celebration');
+        setShowStreakMilestone(true);
+        setTimeout(() => setShowStreakMilestone(false), 1500);
+      }
 
       if (completedRound.status === 'complete') {
         handleRoundCompletion(completedRound);
@@ -421,6 +442,8 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
     ) {
       lastErrorAtRef.current = Date.now();
       playError();
+      triggerHaptic('error');
+      setStreak(0);
     }
 
     animationFrameRef.current = requestAnimationFrame(processFrame);
@@ -888,6 +911,27 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Score Popup */}
+      {scorePopup && (
+        <div
+          className='fixed z-50 pointer-events-none animate-bounce'
+          style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+        >
+          <div className='bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2 rounded-full font-bold text-xl shadow-lg'>
+            +{scorePopup.value}
+          </div>
+        </div>
+      )}
+
+      {/* Streak Milestone */}
+      {showStreakMilestone && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
+          <div className='bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse'>
+            🔥 {streak} Streak! 🔥
           </div>
         </div>
       )}

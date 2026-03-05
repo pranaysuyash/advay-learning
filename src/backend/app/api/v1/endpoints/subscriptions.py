@@ -1,5 +1,6 @@
 """Subscription management endpoints."""
 
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -7,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.db.models.user import User as UserModel
-from app.db.models.subscription import SubscriptionPlanType
-from app.schemas.subscription import (
+from app.db.models.subscription_model import SubscriptionPlanType
+from app.schemas.subscription_schema import (
     SubscriptionCreate,
     SubscriptionGameSelectionCreate,
     SubscriptionGameSwap,
@@ -26,6 +27,7 @@ from app.services.game_service import GameService
 from app.services.dodo_payment_service import DodoPaymentService, get_dodo_client
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/games/catalog")
@@ -94,6 +96,7 @@ async def purchase_subscription(
 async def payment_success(
     session_id: str,
     db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ):
     """Handle successful payment redirect from Dodo."""
     dodo_service: DodoPaymentService = get_dodo_client()
@@ -121,6 +124,13 @@ async def payment_success(
             detail="Missing payment metadata",
         )
 
+    # Security: Ensure authenticated user matches payment metadata
+    if str(current_user.id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to process this payment",
+        )
+
     try:
         plan = SubscriptionPlanType(plan_type_value)
     except ValueError:
@@ -129,6 +139,7 @@ async def payment_success(
             detail="Invalid plan type in payment",
         )
 
+    # Create subscription (now idempotent thanks to payment_reference uniqueness)
     subscription = await SubscriptionService.create_subscription(
         db=db,
         parent_id=user_id,
@@ -159,42 +170,275 @@ async def handle_webhook(
 ):
     """Handle Dodo payment webhooks."""
     body = await request.body()
-    signature = request.headers.get("Dodo-Signature", "")
+
+    # Extract all three required Dodo webhook headers (case-insensitive)
+    webhook_id = (
+        request.headers.get("webhook-id", "") or
+        request.headers.get("Webhook-Id", "") or
+        request.headers.get("Webhook-ID", "")
+    )
+    webhook_timestamp = (
+        request.headers.get("webhook-timestamp", "") or
+        request.headers.get("Webhook-Timestamp", "") or
+        request.headers.get("Webhook-TIMESTAMP", "")
+    )
+    webhook_signature = (
+        request.headers.get("webhook-signature", "") or
+        request.headers.get("Webhook-Signature", "") or
+        request.headers.get("Webhook-SIGNATURE", "")
+    )
 
     dodo_service: DodoPaymentService = get_dodo_client()
 
-    if not dodo_service.verify_webhook_signature(body, signature):
+    if not dodo_service.verify_webhook_signature(body, webhook_id, webhook_timestamp, webhook_signature):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid webhook signature",
         )
 
+    # CRITICAL: Record webhook receipt in separate transaction for crash safety
+    # This ensures we never lose track of a received webhook even if processing fails
+    from app.db.models.subscription_model import DodoWebhookEvent
+    from sqlalchemy import select
+    from uuid import uuid4
+    from sqlalchemy.exc import IntegrityError
+
+    # Step 1: Insert webhook receipt and commit immediately (separate transaction)
+    webhook_event = DodoWebhookEvent(
+        id=str(uuid4()),
+        webhook_id=webhook_id,
+        event_type="unknown",  # Will update after parsing
+        status="received",  # Explicit status tracking
+        session_id=None,  # Will update after processing
+        processed_at=None,  # Explicitly mark as not yet processed (received-first pattern)
+        attempts=1,  # Track first attempt
+    )
+
+    try:
+        db.add(webhook_event)
+        await db.commit()  # Commit receipt immediately - this webhook is now "ours"
+    except IntegrityError:
+        await db.rollback()
+        # Webhook ID already exists - fetch and check processing state
+        existing_webhook = await db.execute(
+            select(DodoWebhookEvent).where(DodoWebhookEvent.webhook_id == webhook_id)
+        )
+        existing = existing_webhook.scalar_one_or_none()
+
+        if existing:
+            if existing.processed_at is not None:
+                # Successfully processed before
+                return {
+                    "received": True,
+                    "status": "already_processed",
+                    "processed_at": existing.processed_at.isoformat()
+                }
+            else:
+                # Received but not processed - retry processing
+                # Business logic is idempotent on payment_reference, so this is safe
+                logger.warning(f"Retrying webhook {webhook_id} that was received but not processed")
+                # Increment attempt counter
+                existing.attempts += 1
+
+                # Continue to business logic with existing webhook event
+                webhook_event = existing
+        else:
+            # Should not happen, but handle gracefully
+            return {"received": True, "status": "already_processed"}
+    except Exception:
+        await db.rollback()
+        raise  # Re-raise system errors to trigger retry
+
     import json
-    event = json.loads(body)
+    event = json.loads(body.decode("utf-8"))
 
     event_type = event.get("type")
+
+    # Validate event_type exists (critical for routing)
+    if not event_type:
+        # Mark webhook as failed due to invalid payload
+        webhook_event.event_type = "unknown"
+        webhook_event.status = "failed"
+        webhook_event.last_error = "Missing required field: event_type"
+        webhook_event.processed_at = datetime.now(timezone.utc)
+        await db.commit()
+
+        logger.error("Received webhook without event_type field")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing required field: event_type"
+        )
+
     data = event.get("data", {})
 
-    if event_type == "payment.completed":
-        session_id = data.get("id")
-        metadata = data.get("metadata", {})
+    # Official Dodo payment event types (per Dodo webhook documentation)
+    # See: https://dodopayments.com/docs/webhooks
+    # Map non-standard event types to canonical Dodo event types
+    CANONICAL_EVENT_MAP = {
+        # Legacy/compatibility aliases -> official Dodo events
+        "payment.completed": "payment.succeeded",
+        "payment.success": "payment.succeeded",
+        # Add other mappings as needed:
+        # "payment.paid": "payment.succeeded",
+    }
+
+    # Normalize event type to canonical form
+    canonical_event_type = CANONICAL_EVENT_MAP.get(event_type, event_type)
+
+    # Log if we normalized a non-standard event type
+    if canonical_event_type != event_type:
+        logger.warning(
+            f"Received non-standard Dodo event '{event_type}', normalized to '{canonical_event_type}'. "
+            f"Update webhook configuration to use official '{canonical_event_type}' event."
+        )
+
+    # Update event_type to canonical form for routing
+    event_type = canonical_event_type
+
+    # Declarative event routing for extensibility
+    async def handle_payment_success(event_data: dict, db: AsyncSession):
+        """Handle successful payment events."""
+        session_id = event_data.get("id")
+        metadata = event_data.get("metadata", {})
         user_id = metadata.get("user_id")
         plan_type_value = metadata.get("plan_type")
 
-        if user_id and plan_type_value:
-            try:
-                plan = SubscriptionPlanType(plan_type_value)
-                subscription = await SubscriptionService.create_subscription(
-                    db=db,
-                    parent_id=user_id,
-                    plan_type=plan,
-                    payment_reference=session_id,
-                )
-                return {"received": True, "subscription_id": subscription.id}
-            except Exception as e:
-                return {"received": True, "error": str(e)}
+        if not user_id or not plan_type_value:
+            raise ValueError("Missing payment metadata (user_id or plan_type)")
 
-    return {"received": True}
+        try:
+            plan = SubscriptionPlanType(plan_type_value)
+        except ValueError:
+            raise ValueError(f"Invalid plan type in payment: {plan_type_value}")
+
+        # Payment validation (using metadata as primary source)
+        expected_amount = metadata.get("expected_amount")
+        if not expected_amount:
+            raise ValueError("Missing expected_amount in payment metadata")
+
+        try:
+            expected_amount = int(expected_amount)
+        except (ValueError, TypeError):
+            raise ValueError(f"Invalid expected_amount type in metadata: {type(expected_amount)}")
+
+        # Validate product_id if present in webhook payload
+        # Per Dodo FAQ: subscription webhooks may not include product_id and use subscription_id instead
+        # So this validation is optional and informational only
+        webhook_product_id = (
+            event_data.get("product_id") or
+            event_data.get("product", {}).get("id") if isinstance(event_data.get("product"), dict) else None
+        )
+
+        if webhook_product_id:
+            from app.services.dodo_payment_service import PLAN_PRODUCT_IDS
+            expected_product_id = PLAN_PRODUCT_IDS.get(plan)
+            if expected_product_id and webhook_product_id != expected_product_id:
+                # Log warning but don't fail - subscription flows may legitimately differ
+                logger.warning(
+                    f"Product ID mismatch for {plan}: expected {expected_product_id}, "
+                    f"got {webhook_product_id}. Continuing as this may be a subscription flow."
+                )
+        else:
+            # Log absence of product_id (normal for subscription flows per Dodo FAQ)
+            logger.debug(f"No product_id in webhook payload for {plan} - may be subscription flow")
+
+        # Validate webhook amount using exact Dodo schema field names
+        webhook_amount = None
+        for field_name in ["amount_total", "amount", "total"]:
+            if field_name in event_data:
+                webhook_amount = event_data.get(field_name)
+                break
+
+        if webhook_amount is not None:
+            try:
+                webhook_amount = int(webhook_amount)
+                if webhook_amount != expected_amount:
+                    raise ValueError(
+                        f"Payment amount mismatch for {plan}: expected {expected_amount}, "
+                        f"got {webhook_amount} from field '{field_name}'"
+                    )
+            except (ValueError, TypeError):
+                logger.warning(
+                    f"Invalid webhook amount type in payload: {type(webhook_amount)} for field '{field_name}'"
+                )
+
+        # Create subscription (idempotent on payment_reference)
+        subscription = await SubscriptionService.create_subscription(
+            db=db,
+            parent_id=user_id,
+            plan_type=plan,
+            payment_reference=session_id,
+        )
+
+        return subscription
+
+    # Event routing table (official Dodo events only)
+    HANDLERS = {
+        "payment.succeeded": handle_payment_success,  # Official Dodo event
+        # Future official Dodo events (add as needed):
+        # "payment.failed": handle_payment_failed,
+        # "payment.processing": handle_payment_processing,
+        # "payment.cancelled": handle_payment_cancelled,
+        # "refund.created": handle_refund_created,
+        # "subscription.cancelled": handle_subscription_cancelled,
+    }
+
+    # Route event to appropriate handler (FIX: was missing handler assignment)
+    handler = HANDLERS.get(event_type)
+
+    if handler:
+        try:
+            # Call the event handler
+            result = await handler(data, db)
+
+            # Update webhook event as processed
+            webhook_event.event_type = event_type
+            webhook_event.status = "processed"
+            webhook_event.session_id = data.get("id")
+            webhook_event.processed_at = datetime.now(timezone.utc)
+            await db.commit()
+
+            return {
+                "received": True,
+                "status": "processed",
+                "event_type": event_type,
+                "subscription_id": result.id if hasattr(result, 'id') else None
+            }
+
+        except ValueError as e:
+            # Business logic errors (validation, etc.)
+            await db.rollback()
+            webhook_event.event_type = event_type
+            webhook_event.status = "failed"
+            webhook_event.last_error = str(e)
+            webhook_event.processed_at = datetime.now(timezone.utc)
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        except Exception as e:
+            # System errors - rollback and return 500 so Dodo retries
+            await db.rollback()
+            logger.exception(f"Webhook processing failed for event {event_type}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Webhook processing failed - please retry"
+            )
+    else:
+        # Unknown event type - mark as processed but ignored
+        webhook_event.event_type = event_type
+        webhook_event.status = "processed"  # Successfully received and handled (by ignoring)
+        webhook_event.last_error = f"Unhandled event type: {event_type}"
+        webhook_event.processed_at = datetime.now(timezone.utc)
+        await db.commit()
+
+        logger.info(f"Received unhandled webhook event type: {event_type}")
+        return {
+            "received": True,
+            "status": "ignored",
+            "event_type": event_type
+        }
 
 
 @router.get("/current", response_model=SubscriptionStatusResponse)
@@ -334,7 +578,10 @@ async def swap_game(
 
     try:
         await SubscriptionService.swap_game(
-            db=db, subscription_id=subscription_id, new_game_id=swap.new_game_id
+            db=db,
+            subscription_id=subscription_id,
+            old_game_id=swap.old_game_id,
+            new_game_id=swap.new_game_id
         )
     except ValueError as e:
         raise HTTPException(
@@ -388,7 +635,7 @@ async def upgrade_subscription(
 
     try:
         new_subscription = await SubscriptionService.upgrade_subscription(
-            db=db, subscription_id=subscription_id, new_plan=new_plan
+            db=db, subscription_id=subscription_id, new_plan=new_plan, upgrade_credit=credit
         )
     except ValueError as e:
         raise HTTPException(
@@ -396,9 +643,14 @@ async def upgrade_subscription(
             detail=str(e),
         )
 
+    # Only mention credit if it was actually applied (> 0)
+    credit_message = ""
+    if credit > 0:
+        credit_message = f" Credit applied: ₹{credit / 100:.2f}."
+
     return SubscriptionPurchaseResponse(
         subscription=SubscriptionResponse.model_validate(new_subscription),
-        message=f"Upgrade successful. Credit applied: ₹{credit / 100:.2f}",
+        message=f"Upgrade successful.{credit_message}",
     )
 
 

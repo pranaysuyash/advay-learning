@@ -1,9 +1,11 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   RAINBOW_COLORS,
   createGame,
@@ -12,6 +14,7 @@ import {
   calculateScore,
   type Dot,
 } from '../games/rainbowBridgeLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const GAME_COLORS = {
   sky: '#87CEEB',
@@ -49,6 +52,8 @@ export function RainbowBridge() {
   const [timeLeft, setTimeLeft] = useState<number>(30);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [rainbowSegments, setRainbowSegments] = useState<RainbowSegment[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const timerRef = useRef<number | null>(null);
   const dotsRef = useRef<Dot[]>([]);
@@ -67,6 +72,8 @@ export function RainbowBridge() {
     setCurrentDotIndex(0);
     currentIndexRef.current = 0;
     setScore(0);
+    setStreak(0);
+    setShowStreakMilestone(false);
     setTimeLeft(45);
     setRainbowSegments([]);
     setGameState('playing');
@@ -88,7 +95,20 @@ export function RainbowBridge() {
     const result = checkDotClick(x, y, dotsData, currentIndex);
 
     if (result.success) {
+      // Streak tracking
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      
       playPop();
+      triggerHaptic('success');
+
+      // Milestone every 5 dots
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
+      
       const newDots = [...dotsData];
       newDots[currentIndex] = { ...newDots[currentIndex], connected: true };
       setDots(newDots);
@@ -232,10 +252,29 @@ export function RainbowBridge() {
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Next: {currentDotIndex + 1}</span>
           </div>
+          {streak > 0 && (
+            <div className="bg-orange-100 rounded-lg px-4 py-2 shadow border-2 border-orange-200">
+              <span className="font-bold text-orange-600">🔥 {streak}</span>
+            </div>
+          )}
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Time: {timeLeft}s</span>
           </div>
         </div>
+
+        {/* Streak Milestone Overlay */}
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
+        )}
 
         <svg className="w-full h-full absolute top-0 left-0" style={{ pointerEvents: 'none' }} aria-label="Rainbow segments">
           <title>Rainbow Bridge</title>

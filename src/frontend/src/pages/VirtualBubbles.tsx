@@ -11,6 +11,7 @@ import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   createBubble,
@@ -18,6 +19,7 @@ import {
   checkBubblePop,
   type Bubble,
 } from '../games/virtualBubblesLogic';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 400;
@@ -35,6 +37,8 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [poppedCount, setPoppedCount] = useState(0);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
@@ -202,9 +206,23 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
             CANVAS_HEIGHT,
           );
           if (result.popped) {
+            // Streak and scoring
+            const newStreak = streak + 1;
+            setStreak(newStreak);
+            const basePoints = 10;
+            const streakBonus = Math.min(newStreak * 2, 15);
+            
             setPoppedCount((p) => p + 1);
-            setScore((s) => s + 10);
+            setScore((s) => s + basePoints + streakBonus);
             playPop();
+            triggerHaptic('success');
+
+            // Milestone every 5
+            if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+              setShowStreakMilestone(true);
+              triggerHaptic('celebration');
+              setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+            }
           }
           return result.remaining;
         });
@@ -267,6 +285,8 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
       setBubbles([]);
       setPoppedCount(0);
       setScore(0);
+      setStreak(0);
+      setShowStreakMilestone(false);
       setMicState('requesting');
       bubbleIdRef.current = 0;
     } catch (err) {
@@ -294,6 +314,8 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
       setBubbles([]);
       setPoppedCount(0);
       setScore(0);
+      setStreak(0);
+      setShowStreakMilestone(false);
     },
     [playClick],
   );
@@ -343,7 +365,27 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
                   {poppedCount}/{levelConfig.bubblesToPop}
                 </span>
               </div>
+              {streak > 0 && (
+                <div>
+                  <span className='text-text-secondary text-sm'>Streak:</span>
+                  <span className='font-bold text-orange-600 ml-2'>🔥 {streak}</span>
+                </div>
+              )}
             </div>
+
+            {/* Streak Milestone Overlay */}
+            {showStreakMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'
+              >
+                <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
 
             {/* Level selector */}
             <div className='flex gap-2'>

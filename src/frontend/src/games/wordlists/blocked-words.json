@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "description": "Blocked words policy for children's educational games",
+    "policyVersion": "1.0",
+    "categories": {
+      "sexual": "Sexual content, anatomy, adult themes",
+      "profanity": "Profanity, slurs, vulgar language",
+      "violence_weapons": "Violence, weapons, harm",
+      "death_dying": "Death, dying, fatal outcomes",
+      "fear_trauma": "Words causing fear or trauma in young children",
+      "substances": "Drugs, alcohol, substance abuse",
+      "political": "Political figures, charged political terms",
+      "self_harm": "Self-harm, suicide references",
+      "bodily_inappropriate": "Inappropriate bodily references for ages 3-7",
+      "strong_negative_emotion": "Intense negative emotions (hate, rage) for early levels"
+    },
+    "lastUpdated": "2026-03-03",
+    "rationale": "Ages 3-7: avoid scary, violent, sexual, or politically charged content that could upset children or parents"
+  },
+  "blockedWords": [
+    "SEX", "SEXY", "XXX", "PORN", "NAKED", "NUDE",
+    "DAMN", "HELL", "CRAP", "BASTARD", "BITCH", "ASS", "BLOODY", "BOLLOCKS", "BUGGER",
+    "KILL", "KILLS", "KILLED", "KILLING", "GUN", "GUNS", "NUKE", "NUKES", "BOMB", "BOMBS",
+    "SHOOT", "SHOOTS", "SHOT", "STAB", "STABS", "KNIFE", "SWORD", "WEAPON",
+    "DEAD", "DEATH", "DIE", "DIES", "DIED", "DYING", "DEATHS", "FATAL", "FATALLY",
+    "FEAR", "AFRAID", "SCARY", "TERROR", "HORROR", "NIGHTMARE",
+    "COCAINE", "HEROIN", "METH", "CRACK", "VODKA", "BEER", "WINE", "DRUNK",
+    "TRUMP", "BIDEN", "HITLER", "NAZI",
+    "SUICIDE", "SUICIDAL", "HANG", "HANGS", "HANGED",
+    "POOP", "PEE", "PEEPEE", "FART", "BURP", "VOMIT", "PUKE", "SNOT", "BOOGER",
+    "HATE", "HATES", "HATED", "HATING", "RAGE", "RAGING", "FURY", "FURIOUS",
+    "THEFT", "THIEF", "THIEVES", "STEAL", "STEALS", "STOLE", "STEALING", "ROB", "ROBS", "ROBBED",
+    "SCREW", "SCREWS", "SCREWED",
+    "ORAL", "ANAL",
+    "RIOT", "RIOTS", "MOB", "MOBS"
+  ]
+}

@@ -1,10 +1,11 @@
 /**
  * Math Smash Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -24,6 +25,9 @@ import type { TrackedHandFrame } from '../types/tracking';
 import { TargetSystem } from '../components/game/TargetSystem';
 import type { Target } from '../components/game/TargetSystem';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
+import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { useWindowSize } from '../hooks/useWindowSize';
 
 function MathSmashGameComponent() {
   const { onGameComplete } = useGameDrops('math-smash');
@@ -45,28 +49,22 @@ function MathSmashGameComponent() {
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
 
+  // Combo/Streak System
+  const [streak, setStreak] = useState(0);
+  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
+  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
   const { speak } = useVoiceInstructions();
 
-  const [screenDims, setScreenDims] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const screenDims = useWindowSize();
 
   useGameSessionProgress({
     gameName: 'Math Smash',
     score,
     level: currentLevel + 1,
     isPlaying: gameStarted,
-    metaData: { correct, round },
+    metaData: { correct, round, streak },
   });
-
-  useEffect(() => {
-    function handleResize() {
-      setScreenDims({ width: window.innerWidth, height: window.innerHeight });
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     const tip = frame.indexTip;
@@ -139,9 +137,31 @@ function MathSmashGameComponent() {
 
   const handleSmash = useCallback((target: Target) => {
     if (target.data.isCorrect) {
+      // Calculate streak and score
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      
+      const basePoints = 10;
+      const streakBonus = Math.min(newStreak * 2, 15);
+      const totalPoints = basePoints + streakBonus;
+      
+      // Show score popup at center of screen
+      setScorePopup({ points: totalPoints, x: 50, y: 30 });
+      setTimeout(() => setScorePopup(null), 700);
+      
+      // Trigger haptic feedback for correct answer
+      triggerHaptic('success');
+      
+      // Check for streak milestone (every 5)
+      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+        setShowStreakMilestone(true);
+        triggerHaptic('celebration');
+        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+      }
+
       playSuccess();
       setCorrect(c => c + 1);
-      setScore(s => s + 25);
+      setScore(s => s + totalPoints);
       setShowSuccess(true);
       speak('Smashing! You got it!');
 
@@ -162,11 +182,14 @@ function MathSmashGameComponent() {
         }
       }, 2000);
     } else {
+      // Wrong answer: reset streak and trigger error haptic
+      setStreak(0);
+      triggerHaptic('error');
       playError();
       speak(`Oops! The answer is not ${target.data.value}. Try again!`);
       // Shake animation could go here
     }
-  }, [round, currentLevel, correct, speak, onGameComplete, playSuccess, playError]);
+  }, [round, currentLevel, correct, speak, onGameComplete, playSuccess, playError, streak]);
 
   const startGame = useCallback(() => {
     setGameStarted(true);
@@ -174,6 +197,10 @@ function MathSmashGameComponent() {
     setScore(0);
     setCorrect(0);
     setRound(0);
+    // Reset streak state
+    setStreak(0);
+    setScorePopup(null);
+    setShowStreakMilestone(false);
     playPop();
     speak('Pinch to smash the correct answer!');
   }, [speak, playPop]);
@@ -191,12 +218,20 @@ function MathSmashGameComponent() {
 
       {gameStarted && question && (
         <>
+          {/* Updated HUD with streak counter */}
           <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] px-8 py-4 border-3 border-red-300 shadow-[0_4px_0_#FCA5A5] flex items-center gap-6'>
             <span className='text-5xl drop-shadow-md text-red-500'>🔨</span>
             <div>
               <h2 className='text-2xl font-black text-slate-700 tracking-tight m-0'>Level {LEVELS[currentLevel].level}</h2>
               <p className='text-lg font-bold text-red-600 m-0'>Score: {score}</p>
             </div>
+            {/* Streak counter */}
+            {streak > 0 && (
+              <div className='flex items-center gap-2 bg-orange-100 px-4 py-2 rounded-full border-2 border-orange-300'>
+                <span className='text-2xl'>🔥</span>
+                <span className='text-xl font-black text-orange-600'>{streak}</span>
+              </div>
+            )}
           </div>
 
           <div className='absolute top-36 left-1/2 -translate-x-1/2 px-12 py-6 rounded-[2.5rem] bg-white border-4 border-red-400 text-center shadow-[0_6px_0_#F87171] z-20'>
@@ -266,6 +301,50 @@ function MathSmashGameComponent() {
         duration={1500}
         onComplete={() => { setShowSuccess(false); }}
       />
+
+      {/* Score Popup Animation */}
+      <AnimatePresence>
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 0, y: 0, scale: 0.5 }}
+            animate={{ opacity: 1, y: -50, scale: 1.2 }}
+            exit={{ opacity: 0, y: -80, scale: 0.8 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className='absolute z-50 pointer-events-none'
+            style={{
+              left: `${scorePopup.x}%`,
+              top: `${scorePopup.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div className='text-4xl font-black text-green-500 drop-shadow-lg'>
+              +{scorePopup.points}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Streak Milestone Animation */}
+      <AnimatePresence>
+        {showStreakMilestone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3, rotate: -20 }}
+            animate={{ opacity: 1, scale: 1.2, rotate: 0 }}
+            exit={{ opacity: 0, scale: 1.5, rotate: 20 }}
+            transition={{ duration: 0.4, ease: 'backOut' }}
+            className='absolute inset-0 flex items-center justify-center z-50 pointer-events-none'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-[2rem] shadow-2xl border-4 border-white'>
+              <div className='text-5xl font-black text-center'>
+                🔥 {streak} STREAK! 🔥
+              </div>
+              <div className='text-xl font-bold text-center mt-2'>
+                Keep it up!
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

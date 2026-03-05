@@ -1,0 +1,98 @@
+{
+  "metadata": {
+    "version": "1.1",
+    "description": "Phonics curriculum stages for Word Builder game",
+    "totalStages": 8
+  },
+  "stages": [
+    {
+      "id": "cvc_a",
+      "name": "CVC Short A",
+      "description": "Simple consonant-vowel-consonant words with short 'a' sound (CAT, HAT, MAP)",
+      "difficulty": 1,
+      "criteria": {
+        "pattern": ["cvc"],
+        "length": [3],
+        "vowel": ["A"]
+      },
+      "exampleWords": ["CAT", "HAT", "BAT", "MAP", "CAP"]
+    },
+    {
+      "id": "cvc_e",
+      "name": "CVC Short E",
+      "description": "CVC words with short 'e' sound (BED, HEN, PEN)",
+      "difficulty": 1,
+      "criteria": {
+        "pattern": ["cvc"],
+        "length": [3],
+        "vowel": ["E"]
+      },
+      "exampleWords": ["BED", "HEN", "PEN", "RED", "WED"]
+    },
+    {
+      "id": "cvc_all",
+      "name": "All CVC Words",
+      "description": "All consonant-vowel-consonant patterns (any vowel)",
+      "difficulty": 2,
+      "criteria": {
+        "pattern": ["cvc"],
+        "length": [3]
+      },
+      "exampleWords": ["CAT", "DOG", "SUN", "BIG", "CUP"]
+    },
+    {
+      "id": "blends",
+      "name": "Simple Blends",
+      "description": "CCVC and CVCC words with consonant blends",
+      "difficulty": 2,
+      "criteria": {
+        "pattern": ["ccvc", "cvcc", "blend"],
+        "length": [4]
+      },
+      "exampleWords": ["STOP", "FROG", "DUCK", "HAND", "NEST"]
+    },
+    {
+      "id": "digraphs",
+      "name": "Digraphs (sh, ch, th, wh)",
+      "description": "Words with common digraphs",
+      "difficulty": 3,
+      "criteria": {
+        "pattern": ["digraph_sh", "digraph_ch", "digraph_th", "digraph_wh"],
+        "length": [3, 4]
+      },
+      "exampleWords": ["SHIP", "CHAT", "THIN", "WHEN"]
+    },
+    {
+      "id": "long_vowels",
+      "name": "Long Vowel Sounds",
+      "description": "Words with long vowel patterns and silent e",
+      "difficulty": 3,
+      "criteria": {
+        "pattern": ["vowel_team"],
+        "length": [4, 5]
+      },
+      "exampleWords": ["TREE", "RAIN", "GOAT", "CAKE"]
+    },
+    {
+      "id": "sight_words_3",
+      "name": "Sight Words (3-4 letters)",
+      "description": "Common sight words that don't follow regular phonics rules",
+      "difficulty": 2,
+      "criteria": {
+        "is_sight": true,
+        "length": [3, 4]
+      },
+      "exampleWords": ["THE", "SAID", "WAS", "COME", "HAVE"]
+    },
+    {
+      "id": "advanced",
+      "name": "Advanced Words",
+      "description": "Longer words with mixed patterns",
+      "difficulty": 4,
+      "criteria": {
+        "length": [5]
+      },
+      "exampleWords": ["APPLE", "WATER", "HAPPY", "TIGER"]
+    }
+  ]
+}

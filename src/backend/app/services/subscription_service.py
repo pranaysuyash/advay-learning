@@ -4,10 +4,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
-from app.db.models.subscription import (
+from app.db.models.subscription_model import (
     Subscription,
     SubscriptionGameSelection,
     SubscriptionPlanType,
@@ -43,7 +44,16 @@ class SubscriptionService:
         plan_type: SubscriptionPlanType,
         payment_reference: Optional[str] = None,
     ) -> Subscription:
-        """Create a new subscription."""
+        """Create a new subscription (idempotent on payment_reference)."""
+        # Check for existing subscription with same payment_reference (idempotency)
+        if payment_reference:
+            existing = await db.execute(
+                select(Subscription).where(Subscription.payment_reference == payment_reference)
+            )
+            existing_sub = existing.scalar_one_or_none()
+            if existing_sub:
+                return existing_sub  # Return existing subscription instead of creating duplicate
+
         now = datetime.now(timezone.utc)
         duration = PLAN_DURATIONS[plan_type]
 
@@ -59,9 +69,23 @@ class SubscriptionService:
             payment_reference=payment_reference,
         )
 
-        db.add(subscription)
-        await db.commit()
-        await db.refresh(subscription)
+        try:
+            db.add(subscription)
+            await db.commit()
+            await db.refresh(subscription)
+        except IntegrityError:
+            # Handle race condition where subscription was created concurrently
+            await db.rollback()
+            # Fetch and return the existing subscription
+            existing = await db.execute(
+                select(Subscription).where(Subscription.payment_reference == payment_reference)
+            )
+            subscription = existing.scalar_one_or_none()
+            if subscription:
+                return subscription
+            else:
+                raise  # Re-raise if it's a different integrity error
+
         return subscription
 
     @staticmethod
@@ -95,30 +119,50 @@ class SubscriptionService:
         game_ids: list[str],
     ) -> list[SubscriptionGameSelection]:
         """Add game selections to a subscription."""
-        subscription = await SubscriptionService.get_subscription_by_id(
-            db, subscription_id
+        # Lock subscription row to prevent race conditions on limit checking
+        result = await db.execute(
+            select(Subscription)
+            .where(Subscription.id == subscription_id)
+            .with_for_update()
         )
+        subscription = result.scalar_one_or_none()
+
         if not subscription:
             raise ValueError("Subscription not found")
 
         game_limit = PACK_GAME_LIMITS.get(subscription.plan_type, 0)
-        existing = len(subscription.game_selections)
+        # Count only active selections (swapped_at IS NULL)
+        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
+        existing = len(active_selections)
 
-        if existing + len(game_ids) > game_limit:
+        # Dedupe game_ids before processing to avoid treating user input duplicates as DB errors
+        unique_game_ids = list(dict.fromkeys(game_ids))  # Preserve order while deduping
+
+        if existing + len(unique_game_ids) > game_limit:
             raise ValueError(
-                f"Cannot add {len(game_ids)} games. Limit is {game_limit}, "
+                f"Cannot add {len(unique_game_ids)} games. Limit is {game_limit}, "
                 f"currently have {existing}"
             )
 
         selections = []
-        for game_id in game_ids:
-            selection = SubscriptionGameSelection(
-                id=str(uuid4()),
-                subscription_id=subscription_id,
-                game_id=game_id,
-            )
-            db.add(selection)
-            selections.append(selection)
+        for game_id in unique_game_ids:
+            try:
+                selection = SubscriptionGameSelection(
+                    id=str(uuid4()),
+                    subscription_id=subscription_id,
+                    game_id=game_id,
+                )
+                db.add(selection)
+                # Flush to catch constraint violations immediately
+                await db.flush()
+                selections.append(selection)
+            except IntegrityError:
+                # Handle duplicate game_id from uniqueness constraint
+                await db.rollback()
+                raise ValueError(f"Game {game_id} is already in your selection")
+            except Exception:
+                await db.rollback()
+                raise
 
         await db.commit()
         for sel in selections:
@@ -129,36 +173,73 @@ class SubscriptionService:
     async def swap_game(
         db: AsyncSession,
         subscription_id: str,
+        old_game_id: str,
         new_game_id: str,
     ) -> SubscriptionGameSelection:
         """Swap one game in the subscription (1 free swap per pack)."""
-        subscription = await SubscriptionService.get_subscription_by_id(
-            db, subscription_id
-        )
-        if not subscription:
-            raise ValueError("Subscription not found")
+        if old_game_id == new_game_id:
+            raise ValueError("Old and new game must be different")
 
-        if subscription.game_swap_used:
-            raise ValueError("Game swap already used")
+        try:
+            # Lock subscription row to prevent race conditions on swap usage
+            result = await db.execute(
+                select(Subscription)
+                .where(Subscription.id == subscription_id)
+                .with_for_update()
+            )
+            subscription = result.scalar_one_or_none()
 
-        if subscription.status != SubscriptionStatus.ACTIVE:
-            raise ValueError("Subscription not active")
+            if not subscription:
+                raise ValueError("Subscription not found")
+            if subscription.status != SubscriptionStatus.ACTIVE:
+                raise ValueError("Subscription not active")
+            if subscription.game_swap_used:
+                raise ValueError("Game swap already used")
 
-        # Mark swap as used
-        subscription.game_swap_used = True
+            # Find the active selection for old game to swap out
+            old_selection = next(
+                (s for s in subscription.game_selections
+                 if s.game_id == old_game_id and s.swapped_at is None),
+                None
+            )
+            if not old_selection:
+                raise ValueError(f"Game {old_game_id} not found in active selections")
 
-        # Create new selection
-        selection = SubscriptionGameSelection(
-            id=str(uuid4()),
-            subscription_id=subscription_id,
-            game_id=new_game_id,
-            swapped_at=datetime.now(timezone.utc),
-        )
+            # Prevent swapping into a game already selected (active)
+            already_active = any(
+                s.game_id == new_game_id and s.swapped_at is None
+                for s in subscription.game_selections
+            )
+            if already_active:
+                raise ValueError(f"Game {new_game_id} is already in your active selection")
 
-        db.add(selection)
-        await db.commit()
-        await db.refresh(selection)
-        return selection
+            # Mark old selection as swapped
+            old_selection.swapped_at = datetime.now(timezone.utc)
+            old_selection.original_game_id = old_game_id
+
+            # Mark swap as used
+            subscription.game_swap_used = True
+
+            # Create new active selection
+            new_selection = SubscriptionGameSelection(
+                id=str(uuid4()),
+                subscription_id=subscription_id,
+                game_id=new_game_id,
+            )
+            db.add(new_selection)
+
+            # Flush catches uniqueness violations before commit
+            await db.flush()
+            await db.commit()
+            await db.refresh(new_selection)
+            return new_selection
+
+        except IntegrityError:
+            await db.rollback()
+            raise ValueError(f"Game {new_game_id} is already in your selection")
+        except Exception:
+            await db.rollback()
+            raise
 
     @staticmethod
     async def calculate_upgrade_credit(
@@ -175,13 +256,15 @@ class SubscriptionService:
         if subscription.end_date <= now:
             return 0
 
-        remaining_days = (subscription.end_date - now).days
-        total_days = PLAN_DURATIONS[subscription.plan_type]
+        # Use total_seconds() for accurate proration (not .days)
+        total_duration = (subscription.end_date - subscription.start_date).total_seconds()
+        remaining_duration = (subscription.end_date - now).total_seconds()
 
-        if remaining_days <= 0:
+        if remaining_duration <= 0:
             return 0
 
-        credit = (remaining_days / total_days) * subscription.amount_paid
+        # Calculate credit as proportion of remaining time
+        credit = (remaining_duration / total_duration) * subscription.amount_paid
         return int(credit)
 
     @staticmethod
@@ -189,6 +272,7 @@ class SubscriptionService:
         db: AsyncSession,
         subscription_id: str,
         new_plan: SubscriptionPlanType,
+        upgrade_credit: int = 0,
     ) -> Subscription:
         """Upgrade to a new subscription plan."""
         old_subscription = await SubscriptionService.get_subscription_by_id(
@@ -200,31 +284,36 @@ class SubscriptionService:
         if old_subscription.status != SubscriptionStatus.ACTIVE:
             raise ValueError("Cannot upgrade inactive subscription")
 
-        # Calculate credit for upgrade (applied to new subscription)
-        upgrade_credit = await SubscriptionService.calculate_upgrade_credit(
-            db, subscription_id
-        )
         new_price = PLAN_PRICES[new_plan]
+
+        # Actually apply upgrade credit by reducing the amount_paid
+        final_amount = max(0, new_price - upgrade_credit)
 
         # Mark old as upgraded
         old_subscription.status = SubscriptionStatus.UPGRADED
         old_subscription.upgraded_to_id = None  # Will be set after new is created
 
-        # Create new subscription
+        # Create new subscription with credit applied
         now = datetime.now(timezone.utc)
         new_duration = PLAN_DURATIONS[new_plan]
+
+        notes_parts = [f"Upgraded from {old_subscription.plan_type.value}"]
+        if upgrade_credit > 0:
+            notes_parts.append(f"Credit applied: ₹{upgrade_credit / 100:.2f}")
+            notes_parts.append(f"Original price: ₹{new_price / 100:.2f}")
+            notes_parts.append(f"Final price: ₹{final_amount / 100:.2f}")
 
         new_subscription = Subscription(
             id=str(uuid4()),
             parent_id=old_subscription.parent_id,
             plan_type=new_plan,
-            amount_paid=new_price,
+            amount_paid=final_amount,  # Credit actually applied!
             currency="INR",
             start_date=now,
             end_date=now + timedelta(days=new_duration),
             status=SubscriptionStatus.ACTIVE,
             payment_reference=f"UPGRADE:{subscription_id}",
-            notes=f"Upgrade credit applied: ₹{upgrade_credit / 100:.2f}",
+            notes=". ".join(notes_parts),
         )
 
         # Link old to new
@@ -263,7 +352,9 @@ class SubscriptionService:
             raise ValueError("Subscription not found")
 
         game_limit = PACK_GAME_LIMITS.get(subscription.plan_type, 0)
-        selected_count = len(subscription.game_selections)
+        # Count only active selections (swapped_at IS NULL)
+        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
+        selected_count = len(active_selections)
         swap_remaining = not subscription.game_swap_used
 
         return {
@@ -279,27 +370,27 @@ class SubscriptionService:
         db: AsyncSession, parent_id: str, game_id: str
     ) -> tuple[bool, str]:
         """Check if user can access a specific game.
-        
+
         Returns:
             tuple of (can_access: bool, reason: str)
         """
         subscription = await SubscriptionService.get_active_subscription(
             db=db, parent_id=parent_id
         )
-        
+
         if not subscription:
             return False, "No active subscription"
-        
+
         # Full annual = access to all games
         if subscription.plan_type == SubscriptionPlanType.FULL_ANNUAL:
             return True, "Full annual subscription"
-        
-        # For packs, check game selection
-        selected_game_ids = {s.game_id for s in subscription.game_selections}
-        
-        if game_id in selected_game_ids:
+
+        # For packs, check only active game selections (swapped_at IS NULL)
+        active_selections = {s.game_id for s in subscription.game_selections if s.swapped_at is None}
+
+        if game_id in active_selections:
             return True, "Game selected in pack"
-        
+
         return False, f"Game not in your {subscription.plan_type.value} selection"
 
     @staticmethod

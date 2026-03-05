@@ -11,6 +11,7 @@ from app.api.v1.endpoints import (
     progress,
     subscriptions,
     users,
+    achievements,
 )
 
 api_router = APIRouter()
@@ -20,6 +21,7 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(progress.router, prefix="/progress", tags=["progress"])
 api_router.include_router(profile_photos.router, tags=["profile-photos"])
 api_router.include_router(games.router, prefix="/games", tags=["games"])
+api_router.include_router(achievements.router, prefix="/achievements", tags=["achievements"])
 api_router.include_router(
     issue_reports.router,
     prefix="/issue-reports",

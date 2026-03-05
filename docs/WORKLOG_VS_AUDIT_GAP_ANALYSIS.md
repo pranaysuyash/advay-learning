@@ -1,6 +1,8 @@
 # Worklog vs Audit Documentation Gap Analysis
 
-**Date**: 2026-01-30  
+> Status Note (2026-03-04): Consolidated tracking now uses `docs/audit/ISSUE_REGISTER.md` for status and `docs/WORKLOG_ADDENDUM_*.md` for execution evidence.
+
+**Date**: 2026-01-30
 **Purpose**: Identify what's documented in audit reports but not yet tracked in worklog tickets
 
 ---

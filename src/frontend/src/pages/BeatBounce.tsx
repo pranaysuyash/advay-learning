@@ -1,16 +1,19 @@
 /**
  * Beat Bounce Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { triggerHaptic } from '../utils/haptics';
 import {
   LEVELS,
   createBalls,
@@ -41,6 +44,9 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
   const [combo, setCombo] = useState(0);
   const [lastHit, setLastHit] = useState<'perfect' | 'good' | 'miss' | null>(null);
 
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const timerRef = useRef<number | null>(null);
   const gameLoopRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
@@ -67,12 +73,13 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
     ballsRef.current = newBalls;
     setScore(0);
     setCombo(0);
+    resetStreak();
     setTimeLeft(45);
     setLastHit(null);
     setGameState('playing');
     beatTimeRef.current = Date.now();
     playClick();
-  }, [currentLevel, playClick]);
+  }, [currentLevel, playClick, resetStreak]);
 
   const handleComplete = useCallback(() => {
     setGameState('complete');
@@ -90,6 +97,19 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
     const timing = checkBeatTiming(ball.y, GROUND_Y, level.bpm);
 
     if (timing) {
+      // Calculate streak and points
+      const newStreak = incrementStreak();
+
+      const basePoints = 10;
+      const streakBonus = Math.min(newStreak * 2, 15);
+      const totalPoints = basePoints + streakBonus;
+
+      // Show score popup at ball position
+      setScorePopup({ points: totalPoints, x: ball.x, y: ball.y });
+
+      // Trigger haptic feedback
+      triggerHaptic('success');
+
       const points = calculateScore(timing, combo);
       setScore(s => s + points);
       setCombo(c => c + 1);
@@ -106,11 +126,14 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
       setBalls(newBalls);
       ballsRef.current = newBalls;
     } else {
+      // Reset streak on miss
+      resetStreak();
       setCombo(0);
       setLastHit('miss');
+      triggerHaptic('error');
       playError();
     }
-  }, [gameState, level.bpm, combo, playSuccess, playClick, playError]);
+  }, [gameState, level.bpm, combo, incrementStreak, resetStreak, playSuccess, playClick, playError]);
 
   useEffect(() => {
     if (gameState !== 'playing') {
@@ -220,6 +243,7 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
           <h2 className="text-4xl font-bold text-pink-500">Great Beats! 🎵</h2>
           <p className="text-2xl font-bold text-slate-700">Score: {score}</p>
           <p className="text-lg text-slate-600">Max Combo: {combo}</p>
+          <p className="text-lg text-slate-600">Best Streak: {streak}</p>
           <div className="flex gap-4">
             <button
               type="button"
@@ -261,6 +285,19 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
             <span className="font-bold text-white">Time: {timeLeft}s</span>
           </div>
         </div>
+        
+        {/* Streak Counter HUD */}
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
+          <motion.div 
+            className="flex items-center gap-2 bg-orange-500/80 backdrop-blur rounded-full px-4 py-2"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: streak > 0 ? 1 : 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+          >
+            <span className="text-2xl">🔥</span>
+            <span className="font-bold text-white text-xl">{streak}</span>
+          </motion.div>
+        </div>
 
         <div
           className="absolute w-full transition-colors duration-100"
@@ -296,6 +333,54 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
             {!lastHit && 'Tap on the beat!'}
           </p>
         </div>
+        
+        {/* Score Popup Animation */}
+        <AnimatePresence>
+          {scorePopup && (
+            <motion.div
+              key={`popup-${scorePopup.points}-${Date.now()}`}
+              className="absolute pointer-events-none"
+              style={{
+                left: `${scorePopup.x}%`,
+                top: `${scorePopup.y}%`,
+              }}
+              initial={{ opacity: 1, y: 0, scale: 0.5 }}
+              animate={{ opacity: 0, y: -50, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
+              <span className="font-bold text-yellow-400 text-2xl drop-shadow-lg">
+                +{scorePopup.points}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Streak Milestone Celebration */}
+        <AnimatePresence>
+          {showMilestone && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl px-8 py-6 shadow-2xl">
+                <motion.div
+                  initial={{ y: 10 }}
+                  animate={{ y: [-10, 10, -10] }}
+                  transition={{ duration: 0.5, repeat: 2 }}
+                  className="text-center"
+                >
+                  <span className="text-5xl">🔥</span>
+                  <p className="text-white font-bold text-3xl mt-2">{streak} Streak!</p>
+                  <p className="text-white/80 text-lg">Amazing!</p>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </button>
     </GameContainer>
   );

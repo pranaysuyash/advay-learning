@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { progressQueue, ProgressItem } from '../progressQueue';
-import { MAX_QUEUE_SIZE } from '../progressConstants';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { progressQueue, createProgressQueue, ProgressItem } from '../progressQueue';
+import { MAX_QUEUE_SIZE, ENQUEUE_RATE_LIMIT_MS, MAX_ENQUEUE_PER_MINUTE } from '../progressConstants';
 
 // Helper to generate valid UUID v4
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
@@ -38,7 +38,7 @@ describe('progressQueue', () => {
 
       expect(result.success).toBe(true);
       expect(result.item.status).toBe('pending');
-      
+
       const pending = progressQueue.getPending(item.profile_id);
       expect(pending.length).toBe(1);
       expect(pending[0].idempotency_key).toBe(item.idempotency_key);
@@ -93,15 +93,15 @@ describe('progressQueue', () => {
       for (let i = 0; i < MAX_QUEUE_SIZE; i++) {
         progressQueue.enqueue(createValidItem({ idempotency_key: generateUUID() }));
       }
-      
+
       expect(progressQueue.getPending()).toHaveLength(MAX_QUEUE_SIZE);
-      
+
       // Add one more - should drop oldest
       const newItem = createValidItem({ content_id: 'newest' });
       progressQueue.enqueue(newItem);
-      
+
       expect(progressQueue.getPending()).toHaveLength(MAX_QUEUE_SIZE);
-      
+
       // Verify newest is present
       const items = progressQueue.getPending();
       expect(items.some(i => i.content_id === 'newest')).toBe(true);
@@ -127,7 +127,7 @@ describe('progressQueue', () => {
     it('returns only pending items', () => {
       const item1 = createValidItem();
       const item2 = createValidItem();
-      
+
       progressQueue.enqueue(item1);
       progressQueue.enqueue(item2);
       progressQueue.markSynced(item1.idempotency_key);
@@ -141,7 +141,7 @@ describe('progressQueue', () => {
     it('filters by profile_id', () => {
       const profile1 = generateUUID();
       const profile2 = generateUUID();
-      
+
       progressQueue.enqueue(createValidItem({ profile_id: profile1 }));
       progressQueue.enqueue(createValidItem({ profile_id: profile2 }));
 
@@ -165,7 +165,7 @@ describe('progressQueue', () => {
     it('marks item as synced', () => {
       const item = createValidItem();
       progressQueue.enqueue(item);
-      
+
       progressQueue.markSynced(item.idempotency_key);
 
       const pending = progressQueue.getPending();
@@ -182,12 +182,12 @@ describe('progressQueue', () => {
     it('marks item as error with message', () => {
       const item = createValidItem();
       progressQueue.enqueue(item);
-      
+
       progressQueue.markError(item.idempotency_key, 'Network timeout');
 
       // Error items are not pending
       expect(progressQueue.getPending()).toHaveLength(0);
-      
+
       // But item is still in storage with error status
       const allItems = JSON.parse(localStorage.getItem('advay:progressQueue:v1') || '[]');
       const errorItem = allItems.find((i: ProgressItem) => i.idempotency_key === item.idempotency_key);
@@ -228,4 +228,107 @@ describe('progressQueue', () => {
       expect(callback).not.toHaveBeenCalled();
     });
   });
+
+  describe('rate-limiting (PQ-005)', () => {
+    // Use a fresh queue instance per test so timestamp state does not bleed
+    function makeFreshQueue() {
+      const store = new Map<string, string>();
+      const repo = {
+        getAll: () => JSON.parse(store.get('items') ?? '[]'),
+        getByStatus: (status: string) =>
+          JSON.parse(store.get('items') ?? '[]').filter((i: ProgressItem) => i.status === status),
+        findById: (key: string) =>
+          JSON.parse(store.get('items') ?? '[]').find((i: ProgressItem) => i.idempotency_key === key) ?? null,
+        exists: (key: string) =>
+          JSON.parse(store.get('items') ?? '[]').some((i: ProgressItem) => i.idempotency_key === key),
+        save: (item: ProgressItem) => {
+          const all = JSON.parse(store.get('items') ?? '[]').filter(
+            (i: ProgressItem) => i.idempotency_key !== item.idempotency_key,
+          );
+          store.set('items', JSON.stringify([...all, item]));
+        },
+        remove: (key: string) => {
+          const all = JSON.parse(store.get('items') ?? '[]').filter(
+            (i: ProgressItem) => i.idempotency_key !== key,
+          );
+          store.set('items', JSON.stringify(all));
+        },
+        markSynced: () => true,
+        markError: () => true,
+        clear: () => { store.clear(); },
+        getStats: () => ({ total: JSON.parse(store.get('items') ?? '[]').length, pending: 0, synced: 0, error: 0 }),
+        getDeadLetters: () => [], getDeadLetterCount: () => 0,
+        addDeadLetter: () => { }, removeDeadLetter: () => false, retryDeadLetter: () => false,
+      } as any;
+      return createProgressQueue(repo);
+    }
+
+    it('blocks second enqueue from same profile within ENQUEUE_RATE_LIMIT_MS window', () => {
+      const q = makeFreshQueue();
+      const profileId = generateUUID();
+
+      // First enqueue should succeed
+      const r1 = q.enqueue(createValidItem({ profile_id: profileId }));
+      expect(r1.success).toBe(true);
+
+      // Immediate second enqueue from same profile should be rate-limited
+      const r2 = q.enqueue(createValidItem({ profile_id: profileId }));
+      expect(r2.success).toBe(false);
+      expect(r2.error).toContain('rate-limited');
+    });
+
+    it('allows enqueue from same profile after rate-limit window elapses', async () => {
+      const q = makeFreshQueue();
+      const profileId = generateUUID();
+
+      const r1 = q.enqueue(createValidItem({ profile_id: profileId }));
+      expect(r1.success).toBe(true);
+
+      // Wait for the per-profile gate to reset
+      await new Promise((resolve) => setTimeout(resolve, ENQUEUE_RATE_LIMIT_MS + 10));
+
+      const r2 = q.enqueue(createValidItem({ profile_id: profileId }));
+      expect(r2.success).toBe(true);
+    });
+
+    it('allows concurrent enqueues from different profiles within rate-limit window', () => {
+      const q = makeFreshQueue();
+      const profileA = generateUUID();
+      const profileB = generateUUID();
+
+      // Different profiles are gated independently
+      const rA = q.enqueue(createValidItem({ profile_id: profileA }));
+      const rB = q.enqueue(createValidItem({ profile_id: profileB }));
+
+      expect(rA.success).toBe(true);
+      expect(rB.success).toBe(true);
+    });
+
+    it('trips global circuit-breaker after MAX_ENQUEUE_PER_MINUTE successful enqueues', () => {
+      const q = makeFreshQueue();
+      let successCount = 0;
+
+      // Enqueue from many different profiles to avoid per-profile gate
+      // Use fake timestamps by patching Date.now for each iteration
+      const baseTime = Date.now();
+      let callCount = 0;
+      const originalNow = Date.now;
+      // Advance clock by ENQUEUE_RATE_LIMIT_MS+1 per call so per-profile gate never triggers
+      vi.spyOn(Date, 'now').mockImplementation(() => baseTime + callCount++ * (ENQUEUE_RATE_LIMIT_MS + 1));
+
+      try {
+        for (let i = 0; i <= MAX_ENQUEUE_PER_MINUTE + 5; i++) {
+          const r = q.enqueue(createValidItem({ profile_id: generateUUID() }));
+          if (r.success) successCount++;
+        }
+      } finally {
+        vi.restoreAllMocks();
+        void originalNow; // keep reference
+      }
+
+      expect(successCount).toBeLessThanOrEqual(MAX_ENQUEUE_PER_MINUTE);
+      expect(successCount).toBeGreaterThan(0);
+    });
+  });
 });
+

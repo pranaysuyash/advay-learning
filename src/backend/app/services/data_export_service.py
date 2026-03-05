@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
-from app.db.models.subscription import Subscription
+from app.db.models.subscription_model import Subscription
 from app.db.models.user import User
 from app.schemas.data_export import (
     DataExportResponse,

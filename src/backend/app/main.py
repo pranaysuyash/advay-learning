@@ -15,6 +15,7 @@ from app.core.health import get_health_status
 from app.core.logging_config import setup_logging
 from app.core.rate_limit import setup_rate_limiting
 from app.db.session import get_db
+from app.middleware.error_handler import ErrorHandlerMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 
 
@@ -98,6 +99,9 @@ app = FastAPI(
 
 # Setup rate limiting
 setup_rate_limiting(app)
+
+# Error handling (early to catch all errors)
+app.add_middleware(ErrorHandlerMiddleware)
 
 # Security headers
 app.add_middleware(SecurityHeadersMiddleware)

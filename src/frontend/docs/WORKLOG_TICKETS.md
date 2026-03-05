@@ -1,6 +1,9 @@
 # Worklog Tickets - UI/UX Design Audit
 
-**Audit Date:** 2026-02-01  
+> Status Note (2026-03-04): This file is a historical snapshot.
+> Canonical issue status now lives in `docs/audit/ISSUE_REGISTER.md`, with execution logs in `docs/WORKLOG_ADDENDUM_*.md`.
+
+**Audit Date:** 2026-02-01
 **Audit Type:** UI/UX Design + Frontend Code Review  
 **App:** Advay Vision Learning (Camera-based kids learning app)  
 **Base:** main@8790dc0  

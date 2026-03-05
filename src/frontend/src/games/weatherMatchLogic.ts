@@ -2,6 +2,9 @@
  * Weather Match game logic — match weather to clothing.
  */
 
+import { calculateScore as _calculateScore, ScorePresets } from '../utils/scoring';
+import { shuffle } from '../utils/random';
+
 export interface Weather {
   name: string;
   emoji: string;
@@ -48,7 +51,7 @@ export function getLevelConfig(level: number): LevelConfig {
 
 export function generateGame(level: number) {
   const config = getLevelConfig(level);
-  const shuffled = [...WEATHER].sort(() => Math.random() - 0.5);
+  const shuffled = shuffle(WEATHER);
   const selected = shuffled.slice(0, config.pairCount);
   const pairs = selected.map(w => ({
     weather: w,
@@ -56,3 +59,21 @@ export function generateGame(level: number) {
   }));
   return pairs;
 }
+
+// Difficulty multipliers for scoring (preserved for backward compatibility)
+export const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+  1: 1,
+  2: 1.5,
+  3: 2,
+};
+
+/**
+ * Calculate score based on streak and level
+ * Base: 15 points + streak bonus (max 15) = 30 max base
+ * Multiplied by difficulty (level 1: 1×, level 2: 1.5×, level 3: 2×)
+ * Max per match: 60 points (level 3, streak 5+)
+ *
+ * @deprecated Use `calculateScore` from `utils/scoring.ts` with `ScorePresets.high` directly
+ */
+export const calculateScore = (streak: number, level: number): number =>
+  _calculateScore(streak, level, ScorePresets.high);

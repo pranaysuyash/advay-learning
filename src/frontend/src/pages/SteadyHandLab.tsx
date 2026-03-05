@@ -13,6 +13,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
+import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import { pickTargetPoint, updateHoldProgress } from '../games/steadyHandLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -145,7 +146,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
           triggerEasterEgg('egg-surgeon-hands');
         }
 
-        if ((round + 1) % 5 === 0) {
+        if ((round + 1) % STREAK_MILESTONE_INTERVAL === 0) {
           setShowCelebration(true);
           triggerHaptic('celebration');
           void playCelebration();
