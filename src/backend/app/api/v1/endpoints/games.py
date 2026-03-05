@@ -14,7 +14,14 @@ from app.api.permissions import require_roles
 from app.db.models.game import Game as GameModel
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
-from app.schemas.game import Game, GameCreate, GameList, GameUpdate, GlobalGameStat, GlobalGameStatsResponse
+from app.schemas.game import (
+    Game,
+    GameCreate,
+    GameList,
+    GameUpdate,
+    GlobalGameStat,
+    GlobalGameStatsResponse,
+)
 from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
 from app.services.subscription_service import SubscriptionService

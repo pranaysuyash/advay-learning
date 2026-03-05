@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    achievements,
     auth,
     data_export,
     games,
@@ -11,7 +12,6 @@ from app.api.v1.endpoints import (
     progress,
     subscriptions,
     users,
-    achievements,
 )
 
 api_router = APIRouter()

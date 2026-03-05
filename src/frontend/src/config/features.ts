@@ -22,9 +22,9 @@ export interface FeatureFlags {
   'controls.voiceFallbackV1': boolean;
   /** Enable AI-generated LLM responses (contract-first rollout) */
   'ai.llmResponsesV1': boolean;
-  /** Enable the new story generator service (Phase 3 rollout) */
+  /** Enable the new story generator service (Phase 3 rollout) */
   'ai.storyGeneratorV1': boolean;
-  /** Enable the new activity generator service (Phase 3 rollout) */
+  /** Enable the new activity generator service (Phase 3 rollout) */
   'ai.activityGeneratorV1': boolean;
 }
 

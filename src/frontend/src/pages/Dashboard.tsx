@@ -22,6 +22,7 @@ import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
 import { subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
 import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
+import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
 
 // Minimal recommended games for the dashboard
@@ -172,6 +173,8 @@ export const Dashboard = memo(function Dashboard() {
     return baseStars;
   }, [letterProgress, isGuest, guestSession, profiles]);
 
+  const { statsMap } = useGameStatsMapForProfile(defaultProfile?.age);
+
   // Dynamic game recommendations based on profile and play history
   const gameRecommendations: GameRecommendation[] = useMemo(() => {
     if (!defaultProfile) return [];
@@ -183,9 +186,10 @@ export const Dashboard = memo(function Dashboard() {
     
     return getGameRecommendationsForProfile(
       defaultProfile.age,
-      playedGameIds
+      playedGameIds,
+      Object.fromEntries(statsMap)
     );
-  }, [defaultProfile, progress]);
+  }, [defaultProfile, progress, statsMap]);
 
   // Time-based greeting
   const greeting = useMemo(() => {

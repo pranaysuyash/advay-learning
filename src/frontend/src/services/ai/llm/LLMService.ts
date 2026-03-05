@@ -258,10 +258,11 @@ export class LLMService {
         return new TransformersJsLLMProvider(model);
       case 'web-llm':
         return new WebLLMLLMProvider(model);
-      case 'ollama':
+      case 'ollama': {
         // allow overriding the Ollama local server URL via env var
         const ollamaUrl = (import.meta as any).env?.VITE_OLLAMA_BASE_URL;
         return new OllamaLLMProvider(model, ollamaUrl);
+      }
       case 'hf-inference':
         return new HFInferenceLLMProvider(
           model,

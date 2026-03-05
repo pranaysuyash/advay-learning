@@ -241,9 +241,16 @@ Each research document should include:
 | CHILD_ANALYTICS_FRAMEWORK.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
 | OFFLINE_FIRST_SYNC_STRATEGY.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
 | CONTENT_SAFETY_MODERATION.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
-| ACCESSIBILITY_INCLUSIVE_DESIGN.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
-| PARENT_DASHBOARD_SPEC.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
-| SOCIAL_FEATURES_SAFETY.md | 📋 Pending | - | - | - |
+| ACCESSIBILITY_INCLUSIVE_DESIGN.md | ✅ Complete | (existed) | - | - |
+| PARENT_DASHBOARD_SPEC.md | ✅ Complete | (existed) | - | - |
+| SOCIAL_FEATURES_SAFETY.md | ✅ Complete | 2026-03-05 | 2026-03-05 | - |
+
+### Code-Specific Research (Bonus)
+| Document | Status | Focus |
+|----------|--------|-------|
+| LLMSERVICE_IMPLEMENTATION_PATTERNS.md | ✅ Complete | Transformers.js/WebLLM/Ollama integration, provider abstraction, prompt engineering |
+| MEDIAPIPE_REACT_OPTIMIZATION.md | ✅ Complete | Hand tracking hook, WebWorker bridge, gesture state machine, adaptive performance |
+| INDEXEDDB_SCHEMA_DESIGN.md | ✅ Complete | Dexie.js schema, event sourcing, sync protocol, privacy-preserving queries |
 
 ---
 

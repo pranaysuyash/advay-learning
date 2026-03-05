@@ -4,9 +4,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import select, and_
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.subscription_model import (
     Subscription,

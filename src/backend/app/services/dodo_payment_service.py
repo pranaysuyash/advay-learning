@@ -1,10 +1,9 @@
 """Dodo Payment service for subscription purchases."""
 
-import os
-import hmac
 import hashlib
+import hmac
 import logging
-from typing import Optional
+import os
 
 from dodopayments import DodoPayments
 
@@ -187,7 +186,7 @@ class DodoPaymentService:
             # Use constant-time comparison to prevent timing attacks
             return hmac.compare_digest(expected_signature, webhook_signature)
 
-        except Exception as e:
+        except Exception:
             logger.exception("Webhook signature verification failed")
             return False
 

@@ -34,7 +34,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
 
     def _handle_app_exception(self, exc: AppException, request: Request) -> JSONResponse:
         """Handle known application exceptions.
-        
+
         Returns a structured error response with appropriate status code.
         """
         # Log the error with context
@@ -48,7 +48,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                 "details": exc.details,
             },
         )
-        
+
         response_data: dict[str, Any] = {
             "success": False,
             "error": {
@@ -56,11 +56,11 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                 "message": exc.message,
             },
         }
-        
+
         # Include details for client-side error handling
         if exc.details:
             response_data["error"]["details"] = exc.details
-        
+
         return JSONResponse(
             status_code=exc.status_code,
             content=response_data,
@@ -68,12 +68,12 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
 
     def _handle_unexpected_exception(self, exc: Exception, request: Request) -> JSONResponse:
         """Handle unexpected exceptions.
-        
+
         Returns a generic error response to avoid leaking internal details.
         Logs full traceback for debugging.
         """
         settings = get_settings()
-        
+
         # Log the full error with traceback
         logger.exception(
             f"Unexpected error in {request.method} {request.url.path}",
@@ -83,7 +83,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                 "error_type": type(exc).__name__,
             },
         )
-        
+
         # In development, include more details
         if settings.DEBUG:
             error_details = {
@@ -102,7 +102,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                     "message": "An unexpected error occurred. Please try again later.",
                 }
             }
-        
+
         return JSONResponse(
             status_code=500,
             content={"success": False, **error_details},

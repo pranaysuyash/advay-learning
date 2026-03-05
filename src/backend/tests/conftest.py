@@ -148,6 +148,7 @@ async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     from uuid import uuid4
 
     from sqlalchemy import select
+
     from app.core.security import get_password_hash
     from app.db.models.user import User
 

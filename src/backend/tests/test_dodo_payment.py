@@ -1,11 +1,10 @@
 """Tests for Dodo payment service signature verification."""
 
-import hmac
 import hashlib
+import hmac
 import time
 from unittest.mock import patch
 
-import pytest
 from app.services.dodo_payment_service import DodoPaymentService
 
 

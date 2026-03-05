@@ -1,6 +1,6 @@
 """Tests for games API."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -123,9 +123,10 @@ async def test_games_stats_returns_aggregates(client: AsyncClient, db_session):
 @pytest.mark.asyncio
 async def test_games_stats_handles_missing_games(db_session: AsyncSession, client: AsyncClient):
     """Stats endpoint should handle progress rows for missing/deleted games gracefully."""
+    from uuid import uuid4
+
     from app.core.security import get_password_hash
     from app.db.models.user import User
-    from uuid import uuid4
 
     # Create user and profile
     parent = User(
@@ -310,8 +311,9 @@ async def create_test_user(db_session, role: UserRole = UserRole.ADMIN) -> UserM
     """
     from uuid import uuid4
 
-    from app.core.security import get_password_hash
     from sqlalchemy import select
+
+    from app.core.security import get_password_hash
 
     email = f"{role.value}@test.com"
     # look for existing user first

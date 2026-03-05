@@ -51,7 +51,7 @@ class Progress(Base):
     )
     # Relationships
     profile: Mapped["Profile"] = relationship(
-        "Profile", 
+        "Profile",
         back_populates="progress",
         lazy="joined",
     )

@@ -16,6 +16,15 @@ export interface BatchProgress {
   unlockedDate?: string;
 }
 
+export interface GamePlayHistoryEntry {
+  gameId: string;
+  lastPlayed: string;
+  playCount: number;
+  totalSeconds: number;
+  bestScore: number;
+  avgScore: number;
+}
+
 interface ProgressState {
   // Backward-compat profile pointer used by some legacy game pages
   currentProfile: { id: string } | null;
@@ -23,6 +32,8 @@ interface ProgressState {
   letterProgress: Record<string, LetterProgress[]>; // language -> progress array
   batchProgress: Record<string, BatchProgress[]>; // language -> batch array
   earnedBadges: string[];
+  // Game play history for recommendations
+  gameHistory: Record<string, GamePlayHistoryEntry[]>; // profileId -> history[]
 
   // Actions
   markLetterAttempt: (
@@ -39,6 +50,17 @@ interface ProgressState {
   resetProgress: (language: string) => void;
   addBadge: (badgeId: string) => void;
   hasBadge: (badgeId: string) => boolean;
+  // Game history actions
+  recordGamePlay: (
+    profileId: string,
+    gameId: string,
+    durationSeconds: number,
+    score: number,
+  ) => void;
+  getRecentGames: (profileId: string, limit: number) => GamePlayHistoryEntry[];
+  getTopGames: (profileId: string, limit: number) => GamePlayHistoryEntry[];
+  hasPlayedGame: (profileId: string, gameId: string) => boolean;
+  getPlayedGameIds: (profileId: string) => string[];
 }
 
 const BATCH_SIZE = 5;
@@ -52,6 +74,7 @@ export const useProgressStore = create<ProgressState>()(
       letterProgress: {},
       batchProgress: {},
       earnedBadges: [],
+      gameHistory: {},
 
       markLetterAttempt: (language, letter, accuracy) => {
         set((state) => {
@@ -213,6 +236,88 @@ export const useProgressStore = create<ProgressState>()(
 
       hasBadge: (badgeId) => {
         return get().earnedBadges.includes(badgeId);
+      },
+
+      // Game play history for recommendations
+      recordGamePlay: (profileId, gameId, durationSeconds, score) => {
+        set((state) => {
+          const profileHistory = state.gameHistory[profileId] || [];
+          const existingIndex = profileHistory.findIndex((h) => h.gameId === gameId);
+          const now = new Date().toISOString();
+
+          let updatedHistory: GamePlayHistoryEntry[];
+
+          if (existingIndex >= 0) {
+            // Update existing entry
+            updatedHistory = [...profileHistory];
+            const existing = updatedHistory[existingIndex];
+            updatedHistory[existingIndex] = {
+              ...existing,
+              lastPlayed: now,
+              playCount: existing.playCount + 1,
+              totalSeconds: existing.totalSeconds + durationSeconds,
+              bestScore: Math.max(existing.bestScore, score),
+              avgScore: Math.round(
+                (existing.avgScore * existing.playCount + score) /
+                  (existing.playCount + 1),
+              ),
+            };
+          } else {
+            // Create new entry
+            updatedHistory = [
+              ...profileHistory,
+              {
+                gameId,
+                lastPlayed: now,
+                playCount: 1,
+                totalSeconds: durationSeconds,
+                bestScore: score,
+                avgScore: score,
+              },
+            ];
+          }
+
+          // Sort by last played (most recent first)
+          updatedHistory.sort(
+            (a, b) =>
+              new Date(b.lastPlayed).getTime() -
+              new Date(a.lastPlayed).getTime(),
+          );
+
+          // Keep only last 50 games per profile
+          if (updatedHistory.length > 50) {
+            updatedHistory = updatedHistory.slice(0, 50);
+          }
+
+          return {
+            gameHistory: {
+              ...state.gameHistory,
+              [profileId]: updatedHistory,
+            },
+          };
+        });
+      },
+
+      getRecentGames: (profileId, limit) => {
+        const history = get().gameHistory[profileId] || [];
+        return history.slice(0, limit);
+      },
+
+      getTopGames: (profileId, limit) => {
+        const history = get().gameHistory[profileId] || [];
+        return [...history]
+          .sort((a, b) => b.playCount - a.playCount || b.bestScore - a.bestScore)
+          .slice(0, limit);
+      },
+
+      hasPlayedGame: (profileId, gameId) => {
+        const history = get().gameHistory[profileId] || [];
+        return history.some((h) => h.gameId === gameId);
+      },
+
+      getPlayedGameIds: (profileId) => {
+        const history = get().gameHistory[profileId] || [];
+        return history.map((h) => h.gameId);
       },
     }),
     {

@@ -7,24 +7,24 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.db.models.user import User as UserModel
 from app.db.models.subscription_model import SubscriptionPlanType
+from app.db.models.user import User as UserModel
+from app.schemas.game import Game
 from app.schemas.subscription_schema import (
-    SubscriptionCreate,
+    SubscriptionAvailableGames,
     SubscriptionGameSelectionCreate,
     SubscriptionGameSwap,
-    SubscriptionUpgrade,
+    SubscriptionPurchaseResponse,
     SubscriptionResponse,
     SubscriptionStatusResponse,
-    SubscriptionAvailableGames,
-    SubscriptionPurchaseResponse,
+    SubscriptionUpgrade,
+)
+from app.schemas.subscription_schema import (
     SubscriptionPlanType as SchemaPlanType,
 )
-from app.schemas.game import Game
-
-from app.services.subscription_service import SubscriptionService
-from app.services.game_service import GameService
 from app.services.dodo_payment_service import DodoPaymentService, get_dodo_client
+from app.services.game_service import GameService
+from app.services.subscription_service import SubscriptionService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ async def payment_success(
 
     try:
         payment = dodo_service.get_payment_status(session_id)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid payment session",
@@ -198,10 +198,12 @@ async def handle_webhook(
 
     # CRITICAL: Record webhook receipt in separate transaction for crash safety
     # This ensures we never lose track of a received webhook even if processing fails
-    from app.db.models.subscription_model import DodoWebhookEvent
-    from sqlalchemy import select
     from uuid import uuid4
+
+    from sqlalchemy import select
     from sqlalchemy.exc import IntegrityError
+
+    from app.db.models.subscription_model import DodoWebhookEvent
 
     # Step 1: Insert webhook receipt and commit immediately (separate transaction)
     webhook_event = DodoWebhookEvent(
@@ -274,7 +276,7 @@ async def handle_webhook(
     # Official Dodo payment event types (per Dodo webhook documentation)
     # See: https://dodopayments.com/docs/webhooks
     # Map non-standard event types to canonical Dodo event types
-    CANONICAL_EVENT_MAP = {
+    canonical_event_map = {
         # Legacy/compatibility aliases -> official Dodo events
         "payment.completed": "payment.succeeded",
         "payment.success": "payment.succeeded",
@@ -283,7 +285,7 @@ async def handle_webhook(
     }
 
     # Normalize event type to canonical form
-    canonical_event_type = CANONICAL_EVENT_MAP.get(event_type, event_type)
+    canonical_event_type = canonical_event_map.get(event_type, event_type)
 
     # Log if we normalized a non-standard event type
     if canonical_event_type != event_type:
@@ -357,7 +359,7 @@ async def handle_webhook(
                         f"Payment amount mismatch for {plan}: expected {expected_amount}, "
                         f"got {webhook_amount} from field '{field_name}'"
                     )
-            except (ValueError, TypeError):
+            except TypeError:
                 logger.warning(
                     f"Invalid webhook amount type in payload: {type(webhook_amount)} for field '{field_name}'"
                 )
@@ -373,7 +375,7 @@ async def handle_webhook(
         return subscription
 
     # Event routing table (official Dodo events only)
-    HANDLERS = {
+    handlers = {
         "payment.succeeded": handle_payment_success,  # Official Dodo event
         # Future official Dodo events (add as needed):
         # "payment.failed": handle_payment_failed,
@@ -384,7 +386,7 @@ async def handle_webhook(
     }
 
     # Route event to appropriate handler (FIX: was missing handler assignment)
-    handler = HANDLERS.get(event_type)
+    handler = handlers.get(event_type)
 
     if handler:
         try:
@@ -417,7 +419,7 @@ async def handle_webhook(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e)
             )
-        except Exception as e:
+        except Exception:
             # System errors - rollback and return 500 so Dodo retries
             await db.rollback()
             logger.exception(f"Webhook processing failed for event {event_type}")
@@ -576,11 +578,26 @@ async def swap_game(
             detail="Not authorized to access this subscription",
         )
 
+    old_game_id = swap.old_game_id
+    if not old_game_id:
+        # Backward-compatibility: legacy clients send only new_game_id.
+        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
+        replacement_candidate = next(
+            (s.game_id for s in active_selections if s.game_id != swap.new_game_id),
+            None,
+        )
+        if not replacement_candidate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No eligible game available to swap out",
+            )
+        old_game_id = replacement_candidate
+
     try:
         await SubscriptionService.swap_game(
             db=db,
             subscription_id=subscription_id,
-            old_game_id=swap.old_game_id,
+            old_game_id=old_game_id,
             new_game_id=swap.new_game_id
         )
     except ValueError as e:

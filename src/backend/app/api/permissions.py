@@ -3,7 +3,7 @@ from typing import Iterable
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user
 from app.db.models.user import User, UserRole
 from app.services.profile_service import ProfileService
 
@@ -50,7 +50,7 @@ async def assert_access(
     profile_id: str,
 ) -> None:
     """Assert that a user has access to a specific profile.
-    
+
     Raises:
         HTTPException: 403 if user doesn't own the profile
     """
@@ -61,9 +61,9 @@ async def assert_access(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found",
         )
-    
+
     # Check if user owns this profile
-    if profile.user_id != user_id:
+    if profile.parent_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",

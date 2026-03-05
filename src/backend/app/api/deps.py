@@ -12,7 +12,6 @@ from app.core.config import settings
 from app.db.models.user import User
 from app.db.session import async_session
 from app.schemas.token import TokenPayload
-
 from app.services.token_service import TokenService
 
 oauth2_scheme = OAuth2PasswordBearer(

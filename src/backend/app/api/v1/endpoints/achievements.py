@@ -10,7 +10,6 @@ from app.schemas.achievement import AchievementCreate, AchievementResponse
 from app.schemas.user import User
 from app.services.achievement_service import AchievementService
 
-
 router = APIRouter()
 
 
@@ -23,7 +22,7 @@ async def get_achievements(
     """Get all achievements for a profile."""
     # Ensure current user has access to this profile
     await assert_access(db, user_id=current_user.id, profile_id=profile_id)
-    
+
     return await AchievementService.get_by_profile(db=db, profile_id=profile_id)
 
 

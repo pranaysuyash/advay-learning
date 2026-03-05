@@ -47,7 +47,7 @@ class SubscriptionGameSelectionCreate(BaseModel):
 class SubscriptionGameSwap(BaseModel):
     """Game swap schema."""
 
-    old_game_id: str
+    old_game_id: Optional[str] = None
     new_game_id: str
 
 

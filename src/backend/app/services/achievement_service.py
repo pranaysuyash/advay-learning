@@ -1,6 +1,6 @@
 import logging
-from typing import Sequence
 import uuid
+from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.achievement import Achievement
 from app.db.models.profile import Profile
 from app.schemas.achievement import AchievementCreate
-
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ class AchievementService:
         stmt = select(Achievement).where(Achievement.profile_id == profile_id)
         result = await db.execute(stmt)
         return result.scalars().all()
-    
+
     @staticmethod
     async def unlock_achievement(db: AsyncSession, obj_in: AchievementCreate) -> Achievement:
         """Unlock a new achievement for a profile. Is idempotent (returns existing if already unlocked)."""
@@ -37,7 +36,7 @@ class AchievementService:
         )
         existing_result = await db.execute(stmt)
         existing = existing_result.scalar_one_or_none()
-        
+
         if existing:
             return existing
 
@@ -50,6 +49,6 @@ class AchievementService:
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
-        
+
         logger.info(f"Unlocked achievement '{obj_in.achievement_type}' for profile {obj_in.profile_id}")
         return db_obj

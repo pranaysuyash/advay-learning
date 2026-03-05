@@ -35,8 +35,6 @@ export class WebLLMLLMProvider implements LLMProviderAdapter {
       // resolving the path during build. we also wrap it in try/catch so
       // tests and environments without the package continue functioning.
       const pkgName = '@sashido/web-llm';
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const lib = await import(/* @vite-ignore */ pkgName);
       this.runtimeLib = lib;
 

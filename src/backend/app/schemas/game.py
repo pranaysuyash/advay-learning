@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class GameBase(BaseModel):
@@ -25,7 +25,7 @@ class GameBase(BaseModel):
     config_json: Optional[dict] = None
 
     @field_validator("config_json", mode="before")
-    def _parse_config_json(cls, v):
+    def _parse_config_json(cls, v):  # noqa: N805 - Pydantic validator classmethod signature
         """Parse config_json when it's provided as a JSON string.
 
         Pydantic can receive values from raw dicts or ORM objects; the

@@ -174,10 +174,11 @@ class TestAccessTokenRevocation:
 
     async def test_token_revoked_on_logout(self, client: AsyncClient, db_session: AsyncSession):
         # create and verify a user directly
-        from app.services.user_service import UserService
-        from app.schemas.user import UserCreate
         from uuid import uuid4
+
         from app.core.config import settings
+        from app.schemas.user import UserCreate
+        from app.services.user_service import UserService
 
         test_email = f"revoke-{uuid4()}@test.com"
 
@@ -204,10 +205,10 @@ class TestAccessTokenRevocation:
         await client.post("/api/v1/auth/logout", cookies={"access_token": access})
 
         # after logout the token should be persisted in blacklist
-        from app.services.token_service import TokenService
         # extract jti from token using same secret as app
         from jose import jwt
-        from app.core.config import settings
+
+        from app.services.token_service import TokenService
 
         payload = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
         jti = payload.get("jti")
@@ -227,8 +228,8 @@ class TestAccessTokenRevocation:
 
     async def test_cookie_samesite_strict(self, client: AsyncClient, db_session: AsyncSession):
         # create and verify user directly
-        from app.services.user_service import UserService
         from app.schemas.user import UserCreate
+        from app.services.user_service import UserService
 
         user = await UserService.create(
             db_session,
@@ -248,6 +249,7 @@ class TestAccessTokenRevocation:
 
         # instead of relying on httpx header handling, directly test helper
         from starlette.responses import Response
+
         from app.api.v1.endpoints.auth import set_auth_cookies
 
         r = Response()
@@ -404,11 +406,11 @@ class TestAuthorization:
     """Authorization enforcement tests for admin-only routes."""
 
     async def test_parent_cannot_create_game(self, client: AsyncClient, db_session: AsyncSession):
-        from app.services.user_service import UserService
-        from app.schemas.user import UserCreate
-
         # create ordinary parent user with unique email to avoid collisions
         from uuid import uuid4
+
+        from app.schemas.user import UserCreate
+        from app.services.user_service import UserService
         parent_email = f"parent-{uuid4()}@test.com"
         user = await UserService.create(
             db_session,
@@ -444,11 +446,11 @@ class TestAuthorization:
         assert create_resp.status_code == 403
 
     async def test_admin_can_create_game(self, client: AsyncClient, db_session: AsyncSession):
-        from app.services.user_service import UserService
-        from app.schemas.user import UserCreate, UserRole
-
         # create admin user with unique address
         from uuid import uuid4
+
+        from app.schemas.user import UserCreate, UserRole
+        from app.services.user_service import UserService
         admin_email = f"admin-{uuid4()}@test.com"
         game_slug = f"admin-game-{uuid4()}"
         admin = await UserService.create(

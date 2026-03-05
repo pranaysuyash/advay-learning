@@ -24,13 +24,13 @@ async def export_user_data(
     db: AsyncSession = Depends(get_db),
 ) -> DataExportResponse:
     """Export all user data for GDPR/COPPA compliance.
-    
+
     Returns complete export of:
     - User account information
     - Child profiles
     - Learning progress
     - Subscription history
-    
+
     Use format="csv" for CSV export (downloads file).
     """
     export_data = await DataExportService.export_user_data(
@@ -39,7 +39,7 @@ async def export_user_data(
         include_progress=include_progress,
         include_subscriptions=include_subscriptions,
     )
-    
+
     return export_data
 
 
@@ -52,7 +52,7 @@ async def download_user_data(
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
     """Download user data as a file.
-    
+
     Supports JSON and CSV formats.
     """
     export_data = await DataExportService.export_user_data(
@@ -61,9 +61,9 @@ async def download_user_data(
         include_progress=include_progress,
         include_subscriptions=include_subscriptions,
     )
-    
+
     timestamp = export_data.generated_at.strftime("%Y%m%d_%H%M%S")
-    
+
     if format.lower() == "csv":
         # Generate CSV content
         csv_content = _generate_csv(export_data)
@@ -73,14 +73,14 @@ async def download_user_data(
     else:
         # JSON format
         import json
-        
+
         # Convert datetime objects to ISO strings
         data_dict = export_data.model_dump(mode="json")
         json_content = json.dumps(data_dict, indent=2)
         filename = f"advay_export_{timestamp}.json"
         media_type = "application/json"
         content = json_content.encode("utf-8")
-    
+
     return StreamingResponse(
         io.BytesIO(content),
         media_type=media_type,
@@ -96,7 +96,7 @@ async def get_export_summary(
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
     """Get summary of data that would be exported.
-    
+
     Returns counts of profiles, progress records, and subscriptions
     without returning the actual data.
     """
@@ -111,10 +111,10 @@ def _generate_csv(export_data: DataExportResponse) -> str:
     """Generate CSV content from export data."""
     import csv
     import io
-    
+
     output = io.StringIO()
     writer = csv.writer(output)
-    
+
     # User info section
     writer.writerow(["USER INFORMATION"])
     writer.writerow(["ID", export_data.user.id])
@@ -125,7 +125,7 @@ def _generate_csv(export_data: DataExportResponse) -> str:
     writer.writerow(["Created At", export_data.user.created_at])
     writer.writerow(["Updated At", export_data.user.updated_at])
     writer.writerow([])
-    
+
     # Profiles section
     writer.writerow(["PROFILES"])
     writer.writerow(["ID", "Name", "Age", "Language", "Settings", "Created", "Updated"])
@@ -140,7 +140,7 @@ def _generate_csv(export_data: DataExportResponse) -> str:
             profile.updated_at,
         ])
     writer.writerow([])
-    
+
     # Progress section
     if export_data.progress:
         writer.writerow(["PROGRESS"])
@@ -157,7 +157,7 @@ def _generate_csv(export_data: DataExportResponse) -> str:
                 progress.completed_at,
             ])
         writer.writerow([])
-    
+
     # Subscriptions section
     if export_data.subscriptions:
         writer.writerow(["SUBSCRIPTIONS"])
@@ -171,7 +171,7 @@ def _generate_csv(export_data: DataExportResponse) -> str:
                 sub.expires_at,
                 sub.created_at,
             ])
-    
+
     return output.getvalue()
 
 
@@ -182,7 +182,7 @@ async def request_data_export(
     db: AsyncSession = Depends(get_db),
 ) -> DataExportResponse:
     """Request data export with options.
-    
+
     Allows specifying which data to include.
     """
     if request.format.lower() not in ["json", "csv"]:
@@ -190,12 +190,12 @@ async def request_data_export(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Format must be 'json' or 'csv'"
         )
-    
+
     export_data = await DataExportService.export_user_data(
         db=db,
         user_id=current_user.id,
         include_progress=request.include_progress,
         include_subscriptions=request.include_subscriptions,
     )
-    
+
     return export_data
