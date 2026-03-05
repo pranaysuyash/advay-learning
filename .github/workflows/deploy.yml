@@ -56,6 +56,7 @@ jobs:
         run: uv run pytest
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/advay_learning_test
+          SECRET_KEY: ci-test-secret-key
           TESTING: true
 
   # =============================================================================
