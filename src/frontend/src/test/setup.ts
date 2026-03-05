@@ -61,6 +61,9 @@ if (typeof HTMLCanvasElement !== 'undefined') {
           moveTo: vi.fn(),
           lineTo: vi.fn(),
           closePath: vi.fn(),
+          createLinearGradient: vi.fn(() => ({
+            addColorStop: vi.fn(),
+          })),
           createRadialGradient: vi.fn(() => ({
             addColorStop: vi.fn(),
           })),

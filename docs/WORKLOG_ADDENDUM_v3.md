@@ -11619,3 +11619,66 @@ Acceptance Criteria:
 Execution log:
 
 Status updates:
+
+---
+
+### TCK-20260305-018 :: ISSUE-001 — Stabilize PhysicsPlayground Smoke Canvas Mock
+
+Ticket Stamp: STAMP-20260305T123923Z-codex-9tyy
+
+Type: BUG_FIX
+Owner: Pranay
+Created: 2026-03-05 18:12 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Harden shared Vitest canvas mock to include missing 2D APIs used by smoke-rendered pages, focused on PhysicsPlayground stability.
+- Out-of-scope: Physics gameplay behavior changes, production rendering code changes, non-canvas test refactors.
+- Behavior change allowed: NO (test-infra reliability only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/test/setup.ts`, `docs/WORKLOG_ADDENDUM_v3.md`, `docs/audit/ISSUE_REGISTER.md`
+
+Source:
+
+- Canonical issue: `docs/audit/ISSUE_REGISTER.md` ISSUE-001 (systemic game quality/test reliability)
+- Follow-up from prior execution: `docs/WORKLOG_ADDENDUM_v3.md` ticket `STAMP-20260304T111512Z-codex-lc0a` next action #1
+
+Acceptance Criteria:
+
+- [x] Canvas mock defines `createLinearGradient` with `addColorStop` support
+- [x] Targeted smoke suite for game pages passes in current environment
+- [x] Worklog and issue register updated with evidence and status delta
+
+Inputs:
+
+- Prompt used: `prompts/hardening/hardening-v1.1.md` (targeted test-infra stabilization flow)
+- Prompt Trace: `prompts/review/local-pre-commit-review-v1.0.md`
+- Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Execution log:
+
+- [2026-03-05 18:09 IST] Reproduced baseline smoke status before edits | Evidence: `npm run -s test -- src/pages/__tests__/GamePages.smoke.test.tsx` passed (21/21)
+- [2026-03-05 18:10 IST] Added linear gradient canvas mock in shared setup | Evidence: `src/frontend/src/test/setup.ts` adds `createLinearGradient` with `addColorStop`.
+- [2026-03-05 18:10 IST] Re-verified smoke + route consistency suites | Evidence:
+  - Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/GamePages.smoke.test.tsx`
+  - Output: PASS (21/21)
+  - Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/AllGamesSmoke.test.tsx`
+  - Output: PASS (92/92)
+  - Command: `cd src/frontend && npm run -s test -- src/pages/__tests__/RouteRegistryConsistency.test.ts`
+  - Output: PASS (2/2)
+
+Status updates:
+
+- [2026-03-05 18:12 IST] **IN_PROGRESS** — Starting canvas mock hardening + documentation sync.
+- [2026-03-05 18:13 IST] **DONE** — Shared canvas mock hardened; targeted smoke and route-consistency suites pass.
+
+Risks/notes:
+
+- Remaining console warnings in smoke runs (`act(...)`, router future flags) are non-blocking and pre-existing in this test harness.
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
