@@ -34,8 +34,8 @@ describe('Physics Playground - Property 10: State Persistence', () => {
                         )
                     )
                 ),
-                (particleData) => {
-                    const particles: Particle[] = particleData.map(([x, y, type], index) => ({
+                (particleData: Array<[number, number, ParticleType]>) => {
+                    const particles: Particle[] = particleData.map(([x, y, type]: [number, number, ParticleType], index: number) => ({
                         id: `particle-${index}`,
                         type,
                         x,
@@ -97,21 +97,20 @@ describe('Physics Playground - Property 10: State Persistence', () => {
             fc.property(
                 fc.boolean(),
                 fc.boolean(),
-                fc.oneof(
-                    fc.constant('none'),
-                    fc.constant('keyboard'),
-                    fc.constant('screen_reader'),
-                    fc.constant('high_contrast'),
-                    fc.constant('colorblind')
-                ),
+                fc.constantFrom(...Object.values(AccessibilityMode)),
                 fc.oneof(fc.constant('pour'), fc.constant('draw')),
-                (audioEnabled, handTrackingEnabled, accessibilityMode, interactionMode) => {
+                (
+                    audioEnabled: boolean,
+                    handTrackingEnabled: boolean,
+                    accessibilityMode: AccessibilityMode,
+                    interactionMode: 'pour' | 'draw'
+                ) => {
                     const settings: Settings = {
                         particleCountLimit: 500,
                         audioEnabled,
                         handTrackingEnabled,
-                        accessibilityMode: accessibilityMode as AccessibilityMode,
-                        interactionMode: interactionMode as 'pour' | 'draw',
+                        accessibilityMode,
+                        interactionMode,
                     };
 
                     // Update settings

@@ -13,7 +13,7 @@ describe('Physics Playground - Property 5: Performance Threshold', () => {
         fc.assert(
             fc.property(
                 fc.integer({ min: 1, max: 500 }),
-                (particleCount) => {
+                (particleCount: number) => {
                     // Create particles
                     const particles: Particle[] = [];
                     for (let i = 0; i < particleCount; i++) {
@@ -67,7 +67,7 @@ describe('Physics Playground - Property 5: Performance Threshold', () => {
         fc.assert(
             fc.property(
                 fc.integer({ min: 501, max: 1000 }),
-                (attemptedCount) => {
+                (attemptedCount: number) => {
                     // Simulate particle count limit enforcement
                     const actualCount = Math.min(attemptedCount, MAX_PARTICLES);
                     const particles: Particle[] = [];
@@ -118,7 +118,7 @@ describe('Physics Playground - Property 5: Performance Threshold', () => {
                     ),
                     { minLength: 1, maxLength: 500 }
                 ),
-                (particleTypes) => {
+                (particleTypes: ParticleType[]) => {
                     const particles: Particle[] = [];
 
                     for (let i = 0; i < particleTypes.length; i++) {
