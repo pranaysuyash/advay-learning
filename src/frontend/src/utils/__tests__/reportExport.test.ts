@@ -67,15 +67,30 @@ describe('reportExport', () => {
 
       expect(report).toContain('💡 RECOMMENDATIONS');
     });
+
+    it('includes a share invite with attributed home link', () => {
+      const data = generateReportData('Isha', mockProgress);
+      const report = generateTextReport(data, 'https://example.com');
+
+      expect(report).toContain('🌟 TRY ADVAY');
+      expect(report).toContain(
+        'https://example.com/?ref=progress_share&entry=report',
+      );
+    });
   });
 
   describe('generateWhatsAppShareUrl', () => {
     it('generates valid WhatsApp URL', () => {
       const data = generateReportData('Isha', mockProgress);
-      const url = generateWhatsAppShareUrl(data);
+      const url = generateWhatsAppShareUrl(data, 'https://example.com');
 
       expect(url).toContain('https://wa.me/?text=');
       expect(url).toContain(encodeURIComponent("Isha's Learning Report"));
+      expect(url).toContain(
+        encodeURIComponent(
+          'https://example.com/?ref=progress_share&entry=report',
+        ),
+      );
     });
   });
 

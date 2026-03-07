@@ -164,17 +164,43 @@ abstract class SoundEffect {
 class ParticleAddSound extends SoundEffect {
     play(particleType?: ParticleType): void {
         // Different pitch for different particle types
-        let frequency = 440; // A4
+        let frequency = 440; // A4 (default)
+        const waveType: OscillatorType = 'sine';
 
-        if (particleType === ParticleType.FIRE) {
-            frequency = 660; // Higher pitch for fire
-        } else if (particleType === ParticleType.BUBBLE) {
-            frequency = 330; // Lower pitch for bubble
-        } else if (particleType === ParticleType.STAR) {
-            frequency = 880; // Even higher for star
+        switch (particleType) {
+            case ParticleType.FIRE:
+                frequency = 660; // Higher pitch for fire
+                break;
+            case ParticleType.BUBBLE:
+                frequency = 330; // Lower pitch for bubble
+                break;
+            case ParticleType.STAR:
+                frequency = 880; // Even higher for star
+                break;
+            case ParticleType.SAND:
+                frequency = 220; // Low rumble
+                break;
+            case ParticleType.WATER:
+                frequency = 293; // Mid tone
+                break;
+            case ParticleType.LEAF:
+                frequency = 349; // Natural tone
+                break;
+            case ParticleType.SEED:
+                frequency = 392; // Small but solid
+                break;
+            case ParticleType.GAS:
+                frequency = 196; // Very low, airy
+                break;
+            case ParticleType.STEAM:
+                frequency = 262; // Hissing tone
+                break;
+            case ParticleType.PLANT:
+                frequency = 330; // Growing tone
+                break;
         }
 
-        this.createOscillator(frequency, 'sine', 0.15);
+        this.createOscillator(frequency, waveType, 0.15);
     }
 }
 
@@ -187,24 +213,47 @@ class CollisionSound extends SoundEffect {
         let type: OscillatorType = 'triangle';
         let frequency = 220;
 
-        if (particleType === ParticleType.SAND) {
-            type = 'square';
-            frequency = 110;
-        } else if (particleType === ParticleType.WATER) {
-            type = 'sine';
-            frequency = 176;
-        } else if (particleType === ParticleType.FIRE) {
-            type = 'sawtooth';
-            frequency = 294;
-        } else if (particleType === ParticleType.BUBBLE) {
-            type = 'sine';
-            frequency = 352;
-        } else if (particleType === ParticleType.STAR) {
-            type = 'triangle';
-            frequency = 440;
-        } else if (particleType === ParticleType.LEAF) {
-            type = 'sawtooth';
-            frequency = 110;
+        switch (particleType) {
+            case ParticleType.SAND:
+                type = 'square';
+                frequency = 110;
+                break;
+            case ParticleType.WATER:
+                type = 'sine';
+                frequency = 176;
+                break;
+            case ParticleType.FIRE:
+                type = 'sawtooth';
+                frequency = 294;
+                break;
+            case ParticleType.BUBBLE:
+                type = 'sine';
+                frequency = 352;
+                break;
+            case ParticleType.STAR:
+                type = 'triangle';
+                frequency = 440;
+                break;
+            case ParticleType.LEAF:
+                type = 'sawtooth';
+                frequency = 110;
+                break;
+            case ParticleType.SEED:
+                type = 'triangle';
+                frequency = 165;
+                break;
+            case ParticleType.GAS:
+                type = 'sine';
+                frequency = 98;
+                break;
+            case ParticleType.STEAM:
+                type = 'triangle';
+                frequency = 131;
+                break;
+            case ParticleType.PLANT:
+                type = 'sawtooth';
+                frequency = 143;
+                break;
         }
 
         this.createOscillator(frequency, type, 0.1);
@@ -219,12 +268,25 @@ class BoundarySound extends SoundEffect {
         // Lower pitch for boundary collisions
         let frequency = 110;
 
-        if (particleType === ParticleType.FIRE) {
-            frequency = 165;
-        } else if (particleType === ParticleType.BUBBLE) {
-            frequency = 88;
-        } else if (particleType === ParticleType.STAR) {
-            frequency = 220;
+        switch (particleType) {
+            case ParticleType.FIRE:
+                frequency = 165;
+                break;
+            case ParticleType.BUBBLE:
+                frequency = 88;
+                break;
+            case ParticleType.STAR:
+                frequency = 220;
+                break;
+            case ParticleType.GAS:
+                frequency = 73;
+                break;
+            case ParticleType.STEAM:
+                frequency = 82;
+                break;
+            case ParticleType.PLANT:
+                frequency = 98;
+                break;
         }
 
         this.createOscillator(frequency, 'triangle', 0.2);

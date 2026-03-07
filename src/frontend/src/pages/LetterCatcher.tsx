@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -20,7 +21,6 @@ import {
   checkCatch,
   type FallingLetter,
 } from '../games/letterCatcherLogic';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const navigate = useNavigate();
@@ -34,9 +34,10 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const letterIdRef = useRef(0);
   const intervalRef = useRef<number | null>(null);
 
@@ -56,9 +57,7 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
     setScore(0);
     setCaught(0);
     setMissed(0);
-    setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
+    resetStreak();
     setGameState('playing');
     letterIdRef.current = 0;
   };
@@ -101,18 +100,14 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
     if (caughtLetter) {
       if (caughtLetter.letter === targetLetter) {
         playSuccess();
-        const newStreak = streak + 1;
-        setStreak(newStreak);
+        const newStreak = incrementStreak();
         const basePoints = 10;
         const streakBonus = Math.min(newStreak * 2, 15);
         const totalPoints = basePoints + streakBonus;
         setScorePopup({ points: totalPoints, x: caughtLetter.x, y: caughtLetter.y });
-        setTimeout(() => setScorePopup(null), 700);
         triggerHaptic('success');
-        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-          setShowStreakMilestone(true);
+        if (newStreak > 0 && newStreak % 5 === 0) {
           triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
         }
         setCaught((prevCaught) => {
           const nextCaught = prevCaught + 1;
@@ -124,7 +119,7 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
         setScore((s) => s + totalPoints);
       } else {
         playError();
-        setStreak(0);
+        resetStreak();
         triggerHaptic('error');
         setScore((s) => Math.max(s - 10, 0));
       }
@@ -202,19 +197,19 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
             <AnimatePresence>
               {scorePopup && (
                 <motion.div
-                  initial={{ opacity: 1, y: scorePopup.y, x: scorePopup.x, scale: 1 }}
-                  animate={{ opacity: 0, y: scorePopup.y - 40, scale: 1.2 }}
+                  initial={{ opacity: 1, y: scorePopup.y || 0, x: scorePopup.x || 0, scale: 1 }}
+                  animate={{ opacity: 0, y: (scorePopup.y || 0) - 40, scale: 1.2 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.7, ease: 'easeOut' }}
                   className='absolute text-green-600 font-bold text-lg pointer-events-none'
-                  style={{ left: scorePopup.x, top: scorePopup.y }}
+                  style={{ left: scorePopup.x || 0, top: scorePopup.y || 0 }}
                 >
                   +{scorePopup.points}
                 </motion.div>
               )}
             </AnimatePresence>
             <AnimatePresence>
-              {showStreakMilestone && (
+              {showMilestone && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}

@@ -25,8 +25,8 @@ export function StoryModal({
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm'>
-      <div className='bg-white rounded-3xl p-8 w-full max-w-md text-center shadow-2xl'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-[#FFF8F0]/80 backdrop-blur-sm'>
+      <div className='bg-white rounded-3xl p-8 w-full max-w-md text-center shadow-[0_6px_0_0_#000000] border-3 border-[#F2CC8F]'>
         <div className='flex justify-center mb-4'>
           <Mascot state='celebrating' message={message || 'Amazing job!'} />
         </div>

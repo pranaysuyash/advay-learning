@@ -32,13 +32,13 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-[#FFF8F0]/80 backdrop-blur-sm p-4"
             >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-2xl border-3 border-[#F2CC8F]"
+                    className="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-[0_12px_40px_rgba(0,0,0,0.1),_0_6px_0_#E5B86E] border-4 border-[#F2CC8F]"
                 >
                     <div className="flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-3 border-blue-100">
                         <Mascot state="waiting" message={mascotMessage ?? "Paused! Take a breather."} />
@@ -55,18 +55,18 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                         <button
                             type="button"
                             onClick={onResume}
-                            className="w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 flex items-center justify-center gap-3"
+                            className="w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl border-3 border-emerald-700 shadow-[0_6px_0_#047857] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#047857] flex items-center justify-center gap-3"
                         >
                             <UIIcon name="check" size={28} />
                             Resume Game
                         </button>
-                        
+
                         {/* Fallback Mode Button (when available) */}
                         {fallbackAvailable && onSwitchToFallback && (
                             <button
                                 type="button"
                                 onClick={onSwitchToFallback}
-                                className="w-full px-6 py-4 min-h-[64px] bg-[#F59E0B] hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#D97706] transition-all hover:scale-105 flex items-center justify-center gap-3"
+                                className="w-full px-6 py-4 min-h-[64px] bg-[#F59E0B] hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-xl border-3 border-amber-700 shadow-[0_6px_0_#B45309] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#B45309] flex items-center justify-center gap-3"
                             >
                                 <UIIcon name="hand" size={28} />
                                 Use Tap Mode
@@ -76,7 +76,7 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                         <button
                             type="button"
                             onClick={onExit}
-                            className="w-full px-6 py-4 min-h-[64px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3"
+                            className="w-full px-6 py-4 min-h-[64px] bg-slate-50 hover:bg-white text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl shadow-[0_6px_0_#E5B86E] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#E5B86E] flex items-center justify-center gap-3"
                         >
                             <UIIcon name="home" size={24} />
                             Exit to Home

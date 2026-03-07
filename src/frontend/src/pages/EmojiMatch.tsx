@@ -1,6 +1,6 @@
 /**
  * Emoji Match Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -124,8 +124,15 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const [lastHitId, setLastHitId] = useState<number | null>(null);
   const [lastMissId, setLastMissId] = useState<number | null>(null);
 
-  // Streak tracking
-  const { streak, scorePopup, showMilestone, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+  // Streak tracking (hook provides state & setters so we no longer maintain our own)
+  const {
+    streak,
+    scorePopup,
+    showMilestone,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const targetsRef = useRef<EmotionTarget[]>(targets);
   const correctIdRef = useRef(correctId);
@@ -328,11 +335,11 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         containerRef.current?.getBoundingClientRect();
       const mappedTip = containerRect
         ? mapNormalizedPointToCover(
-          tip,
-          { width: meta.video.videoWidth, height: meta.video.videoHeight },
-          { width: containerRect.width, height: containerRect.height },
-          { mirrored: false },
-        )
+            tip,
+            { width: meta.video.videoWidth, height: meta.video.videoHeight },
+            { width: containerRect.width, height: containerRect.height },
+            { mirrored: false },
+          )
         : tip;
 
       if (!isHandDetected) setIsHandDetected(true);
@@ -341,9 +348,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
 
       const tipPx = containerRect
         ? {
-          x: containerRect.left + mappedTip.x * containerRect.width,
-          y: containerRect.top + mappedTip.y * containerRect.height,
-        }
+            x: containerRect.left + mappedTip.x * containerRect.width,
+            y: containerRect.top + mappedTip.y * containerRect.height,
+          }
         : null;
       const smoothedPx = tipPx ? kalmanRef.current.update(tipPx) : null;
 
@@ -366,13 +373,13 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
           const buttonRect = startButtonRef.current?.getBoundingClientRect();
           const target = buttonRect
             ? {
-              x: buttonRect.left + buttonRect.width / 2,
-              y: buttonRect.top + buttonRect.height / 2,
-            }
+                x: buttonRect.left + buttonRect.width / 2,
+                y: buttonRect.top + buttonRect.height / 2,
+              }
             : {
-              x: (containerRect?.left ?? 0) + (containerRect?.width ?? 0) / 2,
-              y: (containerRect?.top ?? 0) + (containerRect?.height ?? 0) / 2,
-            };
+                x: (containerRect?.left ?? 0) + (containerRect?.width ?? 0) / 2,
+                y: (containerRect?.top ?? 0) + (containerRect?.height ?? 0) / 2,
+              };
           const radius = buttonRect
             ? Math.max(buttonRect.width, buttonRect.height) / 2
             : START_TARGET_FALLBACK_RADIUS;
@@ -671,18 +678,22 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
 
         {/* Kenney Heart HUD */}
         {isPlaying && (
-          <div className="absolute bottom-6 left-6 flex items-center gap-1 bg-white/90 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
+          <div className='absolute bottom-6 left-6 flex items-center gap-1 bg-white/90 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]'>
             {Array.from({ length: 5 }).map((_, i) => (
               <img
                 key={i}
-                src={streak >= (i + 1) * 2
-                  ? '/assets/kenney/platformer/hud/hud_heart.png'
-                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                alt=""
-                className="w-7 h-7"
+                src={
+                  streak >= (i + 1) * 2
+                    ? '/assets/kenney/platformer/hud/hud_heart.png'
+                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                }
+                alt=''
+                className='w-7 h-7'
               />
             ))}
-            <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+            <span className='ml-2 text-base font-bold text-pink-500'>
+              x{streak}
+            </span>
           </div>
         )}
 
@@ -692,9 +703,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
             initial={{ opacity: 0, y: 0, scale: 0.5 }}
             animate={{ opacity: 1, y: -40, scale: 1.2 }}
             exit={{ opacity: 0 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+            className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50'
           >
-            <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+            <div className='text-5xl font-black text-green-500 drop-shadow-lg'>
               +{scorePopup.points}
             </div>
           </motion.div>
@@ -706,9 +717,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1.2, rotate: 0 }}
             exit={{ scale: 0 }}
-            className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+            className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
           >
-            <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
+            <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
               🔥 {streak} Streak! 🔥
             </div>
           </motion.div>
@@ -719,8 +730,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
             {progressDots.map((filled, index) => (
               <span
                 key={`dot-${index}`}
-                className={`h-3 w-3 rounded-full border border-white/40 ${filled ? 'bg-emerald-400' : 'bg-white/20'
-                  }`}
+                className={`h-3 w-3 rounded-full border border-white/40 ${
+                  filled ? 'bg-emerald-400' : 'bg-white/20'
+                }`}
               />
             ))}
             {isAdaptive && (
@@ -745,8 +757,9 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-transform ${isHit ? 'scale-110' : ''
-                  }`}
+                className={`absolute inset-0 rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-transform ${
+                  isHit ? 'scale-110' : ''
+                }`}
                 style={{
                   borderColor: target.color,
                   backgroundColor: 'white',
@@ -859,7 +872,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         )}
 
         {isPaused && isPlaying && (
-          <div className='absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-50'>
+          <div className='absolute inset-0 flex items-center justify-center bg-[#FFF8F0]/80 backdrop-blur-sm z-50'>
             <div className='rounded-[2.5rem] bg-white border-3 border-[#F2CC8F] p-10 text-center shadow-2xl max-w-md w-[90%]'>
               <div className='flex items-center justify-center w-24 h-24 mx-auto bg-amber-50 rounded-[1.5rem] border-3 border-amber-100 text-5xl mb-6'>
                 ⏸️

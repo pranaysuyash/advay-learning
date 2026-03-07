@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { subscriptionApi, SubscriptionPlanType, SubscriptionStatus } from '../services/api';
+import { getErrorMessage } from '../utils/errorUtils';
 
 const PRICING_PLANS = [
   {
@@ -103,7 +104,7 @@ export function Pricing() {
         setCurrentSubscription(sub.data);
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to start purchase');
+      setError(getErrorMessage(err, 'Failed to start purchase'));
     } finally {
       setLoading(null);
     }

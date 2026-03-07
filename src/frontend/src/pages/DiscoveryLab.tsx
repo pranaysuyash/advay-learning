@@ -373,7 +373,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className='fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4'
+                className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4'
                 onClick={() => {
                   playClick();
                   setCraftResult(null);
@@ -538,11 +538,10 @@ function RecipeCard({
     <motion.div
       whileHover={reducedMotion ? {} : { scale: 1.02 }}
       whileTap={reducedMotion ? {} : { scale: 0.98 }}
-      className={`bg-white border-3 rounded-2xl p-4 transition-all ${
-        canCraft
+      className={`bg-white border-3 rounded-2xl p-4 transition-all ${canCraft
           ? 'border-[#a855f7] shadow-lg hover:shadow-xl'
           : 'border-[#F2CC8F] opacity-80'
-      }`}
+        }`}
     >
       <div className='flex items-start gap-3'>
         {/* Output preview */}
@@ -551,9 +550,9 @@ function RecipeCard({
           style={
             outputItem
               ? {
-                  backgroundColor: RARITY_CONFIG[outputItem.rarity].bg,
-                  borderColor: RARITY_CONFIG[outputItem.rarity].color,
-                }
+                backgroundColor: RARITY_CONFIG[outputItem.rarity].bg,
+                borderColor: RARITY_CONFIG[outputItem.rarity].color,
+              }
               : { backgroundColor: '#f1f5f9', borderColor: '#e2e8f0' }
           }
         >
@@ -609,11 +608,10 @@ function RecipeCard({
               return (
                 <span
                   key={i}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${
-                    enough
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${enough
                       ? 'bg-[#10B981]/20 text-[#10B981]'
                       : 'bg-red-50 text-red-400'
-                  }`}
+                    }`}
                 >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -650,11 +648,10 @@ function RecipeCard({
           }}
           whileHover={reducedMotion ? {} : { scale: 1.05 }}
           whileTap={reducedMotion ? {} : { scale: 0.95 }}
-          className={`px-4 py-2 rounded-xl font-black text-sm shrink-0 transition-colors ${
-            canCraft
+          className={`px-4 py-2 rounded-xl font-black text-sm shrink-0 transition-colors ${canCraft
               ? 'bg-[#a855f7] text-white hover:bg-purple-600'
               : 'bg-slate-200 text-slate-700 cursor-help'
-          }`}
+            }`}
           disabled={!canCraft && !onCraft}
           aria-disabled={!canCraft}
           aria-label={

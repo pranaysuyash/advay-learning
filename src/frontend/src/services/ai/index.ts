@@ -29,8 +29,40 @@ export {
   type StoryParams,
   type StoryResult,
   StubStoryGenerator,
+  StoryGeneratorService,
   type ActivityGenerator,
   type ActivityParams,
   type ActivityResult,
   StubActivityGenerator,
+  ActivityGeneratorService,
 } from './generators';
+
+// STT (Speech-to-Text)
+export {
+  STTService,
+  sttService,
+  WebSpeechSTTProvider,
+  WhisperSTTProvider,
+  type STTServiceOptions,
+  type STTServiceStatus,
+  type STTServiceDependencies,
+  type STTProvider,
+  type STTProviderOptions,
+  type STTTranscript,
+  type STTProviderStatus,
+} from './stt';
+
+// Vision (Hand/Pose/Face)
+export {
+  VisionService,
+  visionService,
+  MediaPipeVisionProvider,
+  type VisionServiceOptions,
+  type VisionServiceDependencies,
+  type VisionProvider,
+  type VisionTask,
+  type VisionProviderOptions,
+  type VisionResult,
+  type VisionProviderStatus,
+  type HandResult,
+} from './vision';

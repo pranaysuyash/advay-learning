@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getRecommendedGames,
   getGameRecommendationsForProfile,
@@ -259,8 +259,15 @@ describe('gameRecommendations', () => {
     });
 
     it('should have recommended slot for vibe matching', () => {
+      // Use fake timers to set a consistent time (6 AM = 'chill' vibe)
+      // Hour 6 maps to 'chill' which matches game-1 in MOCK_GAMES
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-01-01T06:00:00'));
+      
       const result = getRecommendedGames({});
       expect(result.some(r => r.slot === 'recommended')).toBe(true);
+      
+      vi.useRealTimers();
     });
 
     it('should have discover slot for unplayed games', () => {

@@ -49,7 +49,7 @@ class TestProfileDeletion:
             headers=auth_headers,
         )
         assert delete_response.status_code == 401
-        assert "Incorrect password" in delete_response.json()["detail"]
+        assert "Incorrect password" in delete_response.json()["error"]["message"]
 
     async def test_delete_profile_success(
         self, client: AsyncClient, test_user: dict, auth_headers: dict
@@ -118,7 +118,7 @@ class TestAccountDeletion:
             headers=auth_headers,
         )
         assert delete_response.status_code == 401
-        assert "Incorrect password" in delete_response.json()["detail"]
+        assert "Incorrect password" in delete_response.json()["error"]["message"]
 
     async def test_delete_account_success(
         self, client: AsyncClient, test_user: dict, auth_headers: dict

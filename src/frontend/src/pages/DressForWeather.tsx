@@ -240,7 +240,8 @@ function DressForWeatherGame() {
   const [score, setScore] = useState(0);
 
   // Streak tracking
-  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
+  const { streak, showMilestone, incrementStreak, resetStreak } =
+    useStreakTracking();
 
   const [weatherImageSrc, setWeatherImageSrc] = useState<string | null>(null);
 
@@ -268,7 +269,7 @@ function DressForWeatherGame() {
     const emoji = ITEM_EMOJIS[item.id] || '👕';
     return (
       <div
-        className="flex items-center justify-center rounded-[2rem] bg-white border-4 shadow-xl select-none"
+        className='flex items-center justify-center rounded-[2rem] bg-white border-4 shadow-xl select-none'
         style={{
           width: size,
           height: size,
@@ -318,13 +319,16 @@ function DressForWeatherGame() {
     [speak, screenDims],
   );
 
-  const { isReady: isHandTrackingReady, isLoading: isModelLoading, startTracking } =
-    useGameHandTracking({
-      gameName: 'DressForWeather',
-      isRunning: gameStarted,
-      webcamRef,
-      onFrame: handleHandFrame,
-    });
+  const {
+    isReady: isHandTrackingReady,
+    isLoading: isModelLoading,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'DressForWeather',
+    isRunning: gameStarted,
+    webcamRef,
+    onFrame: handleHandFrame,
+  });
 
   useEffect(() => {
     if (gameStarted && !isHandTrackingReady && !isModelLoading) {
@@ -469,7 +473,6 @@ function DressForWeatherGame() {
     >
       {/* Hidden webcam */}
 
-
       <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
 
       {/* Hand tracking status */}
@@ -502,7 +505,8 @@ function DressForWeatherGame() {
               )}
             </div>
             <p className='text-sm font-bold text-slate-400 m-0 mt-1 flex items-center justify-center gap-1'>
-              Take your time! <RainbowIcon size={14} className="text-slate-400" />
+              Take your time!{' '}
+              <RainbowIcon size={14} className='text-slate-400' />
             </p>
           </div>
         </div>
@@ -525,7 +529,10 @@ function DressForWeatherGame() {
             </p>
 
             <button
-              onClick={() => { playClick(); startGame(); }}
+              onClick={() => {
+                playClick();
+                startGame();
+              }}
               className='px-12 py-5 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
             >
               Start Game!
@@ -575,7 +582,10 @@ function DressForWeatherGame() {
         type='hearts'
         message='Perfect!'
         duration={1500}
-        onComplete={() => { playClick(); setShowSuccess(false); }}
+        onComplete={() => {
+          playClick();
+          setShowSuccess(false);
+        }}
       />
 
       {/* Streak Milestone Overlay */}

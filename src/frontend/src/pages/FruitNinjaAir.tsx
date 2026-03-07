@@ -11,10 +11,10 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, spawnFruit, updateFruits, checkSlice, type Fruit } from '../games/fruitNinjaAirLogic';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 500;
@@ -27,9 +27,10 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   const [slicedCount, setSlicedCount] = useState(0);
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+
   const slicePathRef = useRef<{ x: number; y: number }[]>([]);
   const fruitIdRef = useRef(0);
 
@@ -113,34 +114,30 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
     const { sliced, remaining } = checkSlice(fruits, slicePathRef.current);
     if (sliced.length > 0) {
       playPop();
-      
+
       // Streak and scoring
-      const newStreak = streak + sliced.length;
-      setStreak(newStreak);
+      const newStreak = incrementStreak(sliced.length);
       const basePoints = 10 * sliced.length;
       const streakBonus = Math.min(newStreak * 2, 15);
       const totalPoints = basePoints + streakBonus;
       setScore((prev) => prev + totalPoints);
-      
+
       // Show popup at slice position
       if (slicePathRef.current.length > 0) {
         const lastPoint = slicePathRef.current[slicePathRef.current.length - 1];
-        setScorePopup({ 
-          points: totalPoints, 
-          x: (lastPoint.x / CANVAS_WIDTH) * 100, 
-          y: (lastPoint.y / CANVAS_HEIGHT) * 100 
+        setScorePopup({
+          points: totalPoints,
+          x: (lastPoint.x / CANVAS_WIDTH) * 100,
+          y: (lastPoint.y / CANVAS_HEIGHT) * 100
         });
-        setTimeout(() => setScorePopup(null), 700);
       }
-      
+
       // Haptics
       triggerHaptic('success');
 
-      // Milestone every 5
-      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-        setShowStreakMilestone(true);
+      // Milestone every 5 - hook handles the show state
+      if (newStreak > 0 && newStreak % 5 === 0) {
         triggerHaptic('celebration');
-        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
       }
       
       setSlicedCount((prev) => prev + sliced.length);
@@ -153,16 +150,14 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
     }
   };
 
-  const handleStart = () => { 
-    playClick(); 
-    setGameState('playing'); 
-    setFruits([]); 
-    setSlicedCount(0); 
-    setScore(0); 
-    setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
-    fruitIdRef.current = 0; 
+  const handleStart = () => {
+    playClick();
+    setGameState('playing');
+    setFruits([]);
+    setSlicedCount(0);
+    setScore(0);
+    resetStreak();
+    fruitIdRef.current = 0;
   };
   const handleLevelChange = (level: number) => { playClick(); setCurrentLevel(level); };
   const handleFinish = useCallback(async () => { playClick(); await onGameComplete(Math.round(score / 10)); navigate('/games'); }, [score, onGameComplete, navigate, playClick]);
@@ -218,7 +213,7 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
               )}
 
               {/* Streak Milestone */}
-              {showStreakMilestone && (
+              {showMilestone && (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}

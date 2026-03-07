@@ -6,6 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
+from app.core.exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+    ResourceNotFoundError,
+    ValidationError as AppValidationError,
+)
 from app.core.security import verify_password
 from app.core.validation import ValidationError, validate_uuid
 from app.db.models.user import User as UserModel
@@ -47,16 +53,10 @@ async def get_and_validate_profile(
 
     profile = await ProfileService.get_by_id(db, profile_id)
     if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found",
-        )
+        raise ResourceNotFoundError("profile", profile_id)
 
     if profile.parent_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions",
-        )
+        raise AuthorizationError("Not enough permissions")
 
     return profile
 
@@ -78,24 +78,15 @@ async def get_user(
     try:
         validate_uuid(user_id, "user_id")
     except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
-        )
+        raise AppValidationError(str(e))
 
     # Only allow users to view themselves or superusers to view anyone
     if current_user.id != user_id and not getattr(current_user, "is_superuser", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions",
-        )
+        raise AuthorizationError("Not enough permissions")
 
     user = await UserService.get_by_id(db, user_id)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
+        raise ResourceNotFoundError("user", user_id)
     return user  # type: ignore[return-value]
 
 
@@ -138,10 +129,7 @@ async def delete_my_account(
             verification_required=True,
             verification_method="password_reauth",
         )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password. Account deletion cancelled.",
-        )
+        raise AuthenticationError("Incorrect password. Account deletion cancelled.")
 
     # Store user info for audit log before deletion
     user_id = current_user.id
@@ -271,10 +259,7 @@ async def delete_profile(
             verification_required=True,
             verification_method="password_reauth",
         )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password. Profile deletion cancelled.",
-        )
+        raise AuthenticationError("Incorrect password. Profile deletion cancelled.")
 
     # Log the deletion with verification
     await AuditService.log_action(
@@ -308,27 +293,18 @@ async def update_user_role(
     """
     # Verify current user is superuser or admin
     if not (current_user.is_superuser or current_user.role == UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only superusers or admins can update user roles",
-        )
+        raise AuthorizationError("Only superusers or admins can update user roles")
 
     # Validate user_id format
     try:
         validate_uuid(user_id, "user_id")
     except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e),
-        )
+        raise AppValidationError(str(e))
 
     # Get target user
     target_user = await UserService.get_by_id(db, user_id)
     if not target_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
+        raise ResourceNotFoundError("user", user_id)
 
     # Update role
     target_user.role = role_update.role

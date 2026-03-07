@@ -98,7 +98,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden'
+        className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden'
       >
         <div className='w-full max-w-xl mx-4 relative overflow-hidden'>
           {/* Progress Indicators */}

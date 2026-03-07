@@ -90,30 +90,42 @@ These are documented here but **NOT PRIORITIZED** for implementation.
 
 **Research**: `docs/research/GAME_ROTATION_DISCOVERY_STRATEGY_2026-02-25.md`
 
-### Implemented Features (2026-03-05)
+### Implemented Features (2026-03-05 - COMPREHENSIVE)
 
 | Feature | Status | File |
-|---------|--------|------|
-| Dynamic game recommendations | ✅ | `src/services/gameRecommendations.ts` |
-| Personal history (continue playing) | ✅ | Uses progress API |
+|---------|--------| game recommendations | ✅------|
+| Dynamic | `src/services/gameRecommendations.ts` |
+| Personal history (continue playing) | ✅ | Uses progress API + local gameHistory |
 | New games section | ✅ | Based on isNew flag |
-| Popular with kids | ✅ | Random shuffle fallback |
-| Time-based vibes | ✅ | Morning=brainy, Afternoon=active, Evening=chill |
-| Age-appropriate filtering | ✅ | Filters based on profile age |
+| Trending (real global popularity) | ✅ | Uses `/api/v1/games/stats` |
+| Popular with kids | ✅ | Weekly rotation (shuffle-based) |
+| Time-based vibes (9 vibes) | ✅ | Full day-hour mapping: chill/relaxed/brainy/focus/active/creative/musical |
+| Age-appropriate filtering | ✅ | Filters based on profile age ±1 year |
 | Device capability check | ✅ | Filters CV games if no camera |
 | Time-of-day greeting | ✅ | "Good morning/afternoon/evening" |
 | "For You" personalized section | ✅ | Dashboard.tsx |
+| Social proof badges | ✅ | 🔥 TRENDING, ⭐ TOP RATED (from backend stats) |
+| Local game history tracking | ✅ | progressStore.recordGamePlay() |
+| useGameStats hook | ✅ | `src/hooks/useGameStats.ts` |
 
 ### How It Works
 
 1. Dashboard fetches progress from API on mount
-2. Extracts played game IDs from progress items
-3. Generates dynamic recommendations:
-   - **Continue Playing**: Games from play history
+2. Extracts played game IDs from progress items + local gameHistory
+3. Fetches global game stats from `/api/v1/games/stats`
+4. Generates 6-slot dynamic recommendations:
+   - **Trending**: Top games by popularity_score from backend
+   - **Continue Playing**: Games from local play history
    - **New Games**: Games with isNew flag
-   - **Popular**: Randomized selection
-   - **Perfect for [time]**: Based on current hour
+   - **Weekly Favorites**: Weekly rotating selection
+   - **Perfect for [time]**: Time-vibe matching (9 vibes)
    - **Haven't Tried**: Unplayed games filtered by age
+
+### Integration Points
+
+- `GamePage` calls `recordGamePlay()` on game completion → populates local history
+- Backend provides global stats via `/api/v1/games/stats` → drives trending
+- Profile age → filters age-appropriate games across all slots
 
 ---
 

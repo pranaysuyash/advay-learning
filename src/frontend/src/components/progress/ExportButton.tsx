@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReportData, downloadTextReport, generateWhatsAppShareUrl, copyReportToClipboard } from '../../utils/reportExport';
 import { UIIcon } from '../ui/Icon';
+import { getAppOrigin, recordGrowthEvent } from '../../services/growthAttribution';
 
 interface ExportButtonProps {
   data: ReportData;
@@ -15,10 +16,19 @@ export function ExportButton({ data }: ExportButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const appOrigin = getAppOrigin();
 
   const handleCopy = async () => {
-    const success = await copyReportToClipboard(data);
+    recordGrowthEvent('progress_share_clicked', {
+      channel: 'clipboard',
+      entry: 'report',
+    });
+    const success = await copyReportToClipboard(data, appOrigin);
     if (success) {
+      recordGrowthEvent('progress_share_copied', {
+        channel: 'clipboard',
+        entry: 'report',
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -26,12 +36,20 @@ export function ExportButton({ data }: ExportButtonProps) {
   };
 
   const handleDownload = () => {
-    downloadTextReport(data);
+    downloadTextReport(data, appOrigin);
     setIsOpen(false);
   };
 
   const handleWhatsApp = () => {
-    const url = generateWhatsAppShareUrl(data);
+    recordGrowthEvent('progress_share_clicked', {
+      channel: 'whatsapp',
+      entry: 'report',
+    });
+    const url = generateWhatsAppShareUrl(data, appOrigin);
+    recordGrowthEvent('progress_share_whatsapp_opened', {
+      channel: 'whatsapp',
+      entry: 'report',
+    });
     window.open(url, '_blank');
     setIsOpen(false);
   };
@@ -142,10 +160,19 @@ export function ExportButton({ data }: ExportButtonProps) {
  */
 export function ExportButtonCompact({ data }: ExportButtonProps) {
   const [copied, setCopied] = useState(false);
+  const appOrigin = getAppOrigin();
 
   const handleCopy = async () => {
-    const success = await copyReportToClipboard(data);
+    recordGrowthEvent('progress_share_clicked', {
+      channel: 'clipboard',
+      entry: 'report',
+    });
+    const success = await copyReportToClipboard(data, appOrigin);
     if (success) {
+      recordGrowthEvent('progress_share_copied', {
+        channel: 'clipboard',
+        entry: 'report',
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -161,7 +188,7 @@ export function ExportButtonCompact({ data }: ExportButtonProps) {
         <UIIcon name="copy" size={18} className="text-advay-slate" />
       </button>
       <button
-        onClick={() => downloadTextReport(data)}
+        onClick={() => downloadTextReport(data, appOrigin)}
         className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl border-2 border-[#F2CC8F] transition-colors"
         title="Download report"
       >

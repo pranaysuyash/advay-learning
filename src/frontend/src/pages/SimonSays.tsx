@@ -308,32 +308,32 @@ export const SimonSays = memo(function SimonSays() {
         case 'head':
           matchScore =
             (leftWrist.y < 0.3 && Math.abs(leftWrist.x - nose.x) < 0.2) ||
-            (rightWrist.y < 0.3 && Math.abs(rightWrist.x - nose.x) < 0.2)
+              (rightWrist.y < 0.3 && Math.abs(rightWrist.x - nose.x) < 0.2)
               ? 100
               : 0;
           break;
         case 'armsUp':
           matchScore =
             leftWrist.y < leftShoulder.y - 0.1 &&
-            rightWrist.y < rightShoulder.y - 0.1
+              rightWrist.y < rightShoulder.y - 0.1
               ? 100
               : 0;
           break;
         case 'handsOnHips':
           matchScore =
             leftWrist.y > 0.4 &&
-            leftWrist.y < 0.6 &&
-            rightWrist.y > 0.4 &&
-            rightWrist.y < 0.6
+              leftWrist.y < 0.6 &&
+              rightWrist.y > 0.4 &&
+              rightWrist.y < 0.6
               ? 100
               : 0;
           break;
         case 'shoulders':
           matchScore =
             Math.abs(leftWrist.x - leftShoulder.x) < 0.15 &&
-            Math.abs(leftWrist.y - leftShoulder.y) < 0.15 &&
-            Math.abs(rightWrist.x - rightShoulder.x) < 0.15 &&
-            Math.abs(rightWrist.y - rightShoulder.y) < 0.15
+              Math.abs(leftWrist.y - leftShoulder.y) < 0.15 &&
+              Math.abs(rightWrist.x - rightShoulder.x) < 0.15 &&
+              Math.abs(rightWrist.y - rightShoulder.y) < 0.15
               ? 100
               : 0;
           break;
@@ -354,26 +354,26 @@ export const SimonSays = memo(function SimonSays() {
           // Build streak
           const newStreak = streak + 1;
           setStreak(newStreak);
-          
+
           // Calculate score with streak bonus
           const basePoints = 15;
           const streakBonus = Math.min(newStreak * 3, 15);
           const totalPoints = basePoints + streakBonus;
           setScore((s: number) => s + totalPoints);
-          
+
           // Show score popup
           setScorePopup({ points: totalPoints });
           setTimeout(() => setScorePopup(null), 700);
-          
+
           // Haptics
           triggerHaptic('success');
-          
+
           // Milestone every 5
           if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
             setShowStreakMilestone(true);
             triggerHaptic('celebration');
           }
-          
+
           playFanfare();
           setShowResult(true);
           setShowCelebration(true);
@@ -654,11 +654,10 @@ export const SimonSays = memo(function SimonSays() {
                   playPop();
                   setGameMode('classic');
                 }}
-                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${
-                  gameMode === 'classic'
+                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'classic'
                     ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
                     : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <span className='text-3xl block mb-2 flex justify-center'>
                   <div className='w-10 h-10'>
@@ -684,11 +683,10 @@ export const SimonSays = memo(function SimonSays() {
                   playPop();
                   setGameMode('combo');
                 }}
-                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${
-                  gameMode === 'combo'
+                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'combo'
                     ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
                     : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <span className='text-3xl block mb-2 flex justify-center'>
                   <Hand className='w-10 h-10' />
@@ -880,7 +878,7 @@ export const SimonSays = memo(function SimonSays() {
         <AnimatePresence>
           {showCelebration && (
             <motion.div
-              className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50'
+              className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

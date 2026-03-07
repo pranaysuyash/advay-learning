@@ -42,6 +42,17 @@ export default [
       }],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-explicit-any': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value=/bg-slate-900/]",
+          message: "Do not use bg-slate-900. Use V1 child-centric light theme classes instead (e.g. bg-[#FFF8F0], white cards)."
+        },
+        {
+          selector: "TemplateElement[value.raw=/bg-slate-900/]",
+          message: "Do not use bg-slate-900. Use V1 child-centric light theme classes instead (e.g. bg-[#FFF8F0], white cards)."
+        }
+      ],
     },
   },
 ];

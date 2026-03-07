@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { authApi } from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
+import { getErrorMessage } from '../utils/errorUtils';
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -81,8 +82,7 @@ export function ResetPassword() {
       }, 3000);
     } catch (err: unknown) {
       setStatus('idle');
-      const errorMsg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(errorMsg || 'Failed to reset password. The link may have expired.');
+      setError(getErrorMessage(err, 'Failed to reset password. The link may have expired.'));
     }
   };
 

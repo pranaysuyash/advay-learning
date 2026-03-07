@@ -51,7 +51,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     'Pinch when your finger is inside the shape ring.',
   );
   const [showCelebration, setShowCelebration] = useState(false);
-  
+
   // Combo/scoring system
   const [streak, setStreak] = useState(0);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -68,7 +68,7 @@ export const ShapePop = memo(function ShapePopComponent() {
   useEffect(() => {
     scoreRef.current = score;
   }, [score]);
-  
+
   useEffect(() => {
     streakRef.current = streak;
   }, [streak]);
@@ -78,7 +78,7 @@ export const ShapePop = memo(function ShapePopComponent() {
     const randomIndex = Math.floor(randomFloat01() * KENNEY_TARGETS.length);
     setTargetCollectible(KENNEY_TARGETS[randomIndex] ?? KENNEY_TARGETS[1]);
   }, []);
-  
+
   // Calculate score with combo bonus and collectible type
   const calculateScore = useCallback((currentStreak: number, basePoints: number) => {
     const comboBonus = Math.min(currentStreak * 2, 10); // +2 per streak, max +10
@@ -105,12 +105,12 @@ export const ShapePop = memo(function ShapePopComponent() {
         // Hit - update streak and calculate score
         const newStreak = streakRef.current + 1;
         setStreak(newStreak);
-        
+
         const collectiblePoints = targetCollectible.points;
         const points = calculateScore(newStreak, collectiblePoints);
         const nextScore = scoreRef.current + points;
         setScore(nextScore);
-        
+
         // Feedback with collectible and streak info
         const collectibleName = targetCollectible.name;
         if (newStreak >= 5) {
@@ -125,7 +125,7 @@ export const ShapePop = memo(function ShapePopComponent() {
             void speak(`${collectibleName} popped! Great hit!`);
           }
         }
-        
+
         void playPop();
         triggerHaptic('success');
 
@@ -151,11 +151,11 @@ export const ShapePop = memo(function ShapePopComponent() {
         // Miss - reset streak
         const lostStreak = streakRef.current;
         setStreak(0);
-        
+
         if (lostStreak >= 5 && ttsEnabled) {
           void speak('Oops! Streak lost! Try again!');
         }
-        
+
         setFeedback(lostStreak >= 3 ? `💥 Streak lost! Try again!` : 'Close! Move into the ring, then pinch.');
         if (ttsEnabled && lostStreak < 3) {
           void speak('Pinch when you are inside the target!');
@@ -302,7 +302,7 @@ export const ShapePop = memo(function ShapePopComponent() {
         )}
 
         {showMenu && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-2xl w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform text-[#3B82F6]'>
                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
@@ -314,7 +314,7 @@ export const ShapePop = memo(function ShapePopComponent() {
               <p className='text-sm text-slate-400 font-bold mb-6'>
                 Build streaks for bonus points!
               </p>
-              
+
               {/* Kenney collectibles preview */}
               <div className='flex items-center justify-center gap-4 mb-6'>
                 {KENNEY_TARGETS.map((target) => (
@@ -324,7 +324,7 @@ export const ShapePop = memo(function ShapePopComponent() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Difficulty selection */}
               <div className='grid grid-cols-3 gap-3 mb-6'>
                 {[
@@ -344,7 +344,7 @@ export const ShapePop = memo(function ShapePopComponent() {
                   </button>
                 ))}
               </div>
-              
+
               {ttsEnabled && (
                 <VoiceInstructions
                   instructions={[

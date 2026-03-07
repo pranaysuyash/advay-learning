@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -21,7 +22,6 @@ import {
   type MazeCell,
   type Position,
 } from '../games/mazeRunnerLogic';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 const CELL_SIZE = 40;
 
@@ -34,9 +34,9 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'won'>('start');
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('maze-runner');
@@ -57,9 +57,7 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
     setScore(0);
     setMoves(0);
     setGameState('playing');
-    setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
+    resetStreak();
     playClick();
   };
 
@@ -78,18 +76,14 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
         setScore(finalScore);
         setGameState('won');
         playSuccess();
-        
+
         // Streak and score popup logic
-        const newStreak = streak + 1;
-        setStreak(newStreak);
+        const newStreak = incrementStreak();
         const totalPoints = basePoints + timeBonus + streakBonus;
         setScorePopup({ points: totalPoints, x: 50, y: 30 });
-        setTimeout(() => setScorePopup(null), 700);
         triggerHaptic('success');
-        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-          setShowStreakMilestone(true);
+        if (newStreak > 0 && newStreak % 5 === 0) {
           triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
         }
       }
     } else {
@@ -161,8 +155,8 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
                 type='button'
                 onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); }}
                 className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#3730A3] ${currentLevel === l.level
-                    ? 'bg-[#6366F1] text-white border-2 border-indigo-600'
-                    : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-indigo-300'
+                  ? 'bg-[#6366F1] text-white border-2 border-indigo-600'
+                  : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-indigo-300'
                   }`}
               >
                 Level {l.level}
@@ -225,7 +219,7 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
               {/* Maze grid */}
               <div className='flex justify-center'>
                 <div
-                  className='grid gap-0.5 bg-slate-900 p-2 rounded-2xl shadow-2xl border-4 border-slate-700'
+                  className='grid gap-0.5 bg-white p-2 rounded-3xl shadow-[0_8px_0_#E5B86E] border-4 border-[#F2CC8F]'
                   style={{ gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)` }}
                 >
                   {maze.map((row, y) =>
@@ -236,17 +230,16 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
                         <div
                           key={`cell-${x}-${y}`}
                           className={[
-                            'flex items-center justify-center rounded-sm transition-colors',
-                            `w-[${CELL_SIZE}px] h-[${CELL_SIZE}px]`,
+                            'flex items-center justify-center rounded-md transition-colors',
                             cell.isWall
-                              ? 'bg-slate-700'
+                              ? 'bg-slate-300 shadow-sm'
                               : cell.isStart
-                                ? 'bg-emerald-700'
+                                ? 'bg-emerald-100'
                                 : cell.isEnd
-                                  ? 'bg-red-700'
+                                  ? 'bg-rose-100'
                                   : cell.isPath
-                                    ? 'bg-indigo-900/40'
-                                    : 'bg-slate-800',
+                                    ? 'bg-indigo-50'
+                                    : 'bg-slate-50',
                           ].join(' ')}
                           style={{ width: CELL_SIZE, height: CELL_SIZE }}
                         >
@@ -280,7 +273,7 @@ const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
               )}
 
               {/* Streak Milestone */}
-              {showStreakMilestone && (
+              {showMilestone && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
                   animate={{ opacity: 1, scale: 1.2, rotate: 0 }}

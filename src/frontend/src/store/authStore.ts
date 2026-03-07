@@ -58,10 +58,14 @@ function getErrorMessage(error: any): string {
 
   const data = error.response.data;
 
-  // Simple string detail
+  // NEW: Structured error format from custom exceptions
+  // { success: false, error: { code: '...', message: '...', details: {} } }
+  if (data.error?.message) return data.error.message;
+
+  // Simple string detail (legacy FastAPI format)
   if (typeof data.detail === 'string') return data.detail;
 
-  // Array of validation errors
+  // Array of validation errors (legacy FastAPI format)
   if (Array.isArray(data.detail)) {
     return data.detail
       .map((err: any) => err.msg || err.message || 'Invalid input')

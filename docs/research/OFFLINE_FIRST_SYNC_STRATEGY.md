@@ -3,11 +3,18 @@
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Created**: 2026-03-05
-**Status**: Research & Design
+**Updated**: 2026-03-06
+**Status**: IMPLEMENTED (Foundation Layer)
 **Owner**: Engineering Team
 **Priority**: P0 (Critical for "Local-First" Principle)
+
+> **Implementation Note (2026-03-06):**
+> - IndexedDB storage layer: `src/frontend/src/services/storage/indexedDB.ts`
+> - Online status hooks: `src/frontend/src/hooks/useOnlineStatus.ts`
+> - Progress queue: existing `services/progressQueue.ts` (localStorage-based)
+> - PWA: ✅ IMPLEMENTED via `vite-plugin-pwa` in `vite.config.ts`
 
 ---
 

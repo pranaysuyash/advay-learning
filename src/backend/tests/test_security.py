@@ -110,7 +110,7 @@ class TestEmailVerification:
             data={"username": "unverified@test.com", "password": "testPassword123!!"},
         )
         assert login_response.status_code == 403
-        assert "not verified" in login_response.json()["detail"].lower()
+        assert "not verified" in login_response.json()["error"]["message"].lower()
 
     async def test_email_verification_flow(self, client: AsyncClient):
         """Test complete email verification flow."""
@@ -149,8 +149,8 @@ class TestEmailVerification:
     async def test_invalid_verification_token(self, client: AsyncClient):
         """Verify invalid tokens are rejected."""
         response = await client.post("/api/v1/auth/verify-email", params={"token": "invalid-token"})
-        assert response.status_code == 400
-        assert "invalid" in response.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "invalid" in response.json()["error"]["message"].lower()
 
     async def test_resend_verification(self, client: AsyncClient):
         """Test resending verification email."""
@@ -364,8 +364,8 @@ class TestPasswordReset:
             "/api/v1/auth/reset-password",
             params={"token": "invalid-token", "new_password": "newpassword456"},
         )
-        assert response.status_code == 400
-        assert "invalid" in response.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "invalid" in response.json()["error"]["message"].lower()
 
     async def test_reset_password_short_password(self, client: AsyncClient):
         """Test password reset rejects short passwords."""
@@ -388,8 +388,8 @@ class TestPasswordReset:
             "/api/v1/auth/reset-password",
             params={"token": token, "new_password": "short"},
         )
-        assert response.status_code == 400
-        assert "at least 8 characters" in response.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "password" in response.json()["error"]["message"].lower()
 
     async def test_forgot_password_nonexistent_user(self, client: AsyncClient):
         """Test forgot password for non-existent user returns generic message."""
@@ -492,7 +492,7 @@ class TestRateLimiting:
 
     async def test_verify_and_resend_exist(self, client: AsyncClient):
         r1 = await client.post("/api/v1/auth/verify-email", params={"token": "none"})
-        assert r1.status_code in (400, 401, 404, 200)
+        assert r1.status_code in (400, 401, 404, 422, 200)
         r2 = await client.post("/api/v1/auth/resend-verification", params={"email": "noone@xyz"})
         assert r2.status_code == 200
 

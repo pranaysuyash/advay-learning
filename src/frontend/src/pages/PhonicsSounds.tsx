@@ -439,7 +439,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const lvlCfg = LEVELS.find((l) => l.level === level) ?? LEVELS[0];
 
   return (
-    <GameContainer webcamRef={webcamRef}       title='Phonics Sounds'
+    <GameContainer webcamRef={webcamRef} title='Phonics Sounds'
       score={score}
       level={level}
       onHome={goHome}
@@ -447,7 +447,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-        
+
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-purple-100/40 pointer-events-none' />
 
@@ -565,7 +565,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Pre-game screen */}
         {!isPlaying && !gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>🔤🔊</div>
               <h2 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4'>Phonics Sounds</h2>
@@ -597,7 +597,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
 
         {/* Game complete */}
         {gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
               <div className='text-5xl mb-4 text-amber-500 font-bold drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>★</div>
               <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-2'>Phonics Pro! 🔤</h2>

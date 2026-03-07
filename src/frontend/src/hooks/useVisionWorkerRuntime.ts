@@ -11,6 +11,7 @@ import {
   type VisionWorkerTransferMode,
   type WorkerFrameRequest,
 } from '../workers/vision.protocol';
+import { visionService } from '../services/ai/vision';
 
 interface VisionWorkerConfig {
   enabled: boolean;
@@ -152,6 +153,7 @@ export function useVisionWorkerRuntime(
     worker.addEventListener('message', handleMessage);
     worker.addEventListener('error', handleError);
 
+    const cdn = visionService.getCDNConfig();
     worker.postMessage({
       type: 'init',
       numHands: handTracking?.numHands ?? 1,
@@ -159,9 +161,8 @@ export function useVisionWorkerRuntime(
       minHandPresenceConfidence: handTracking?.minHandPresenceConfidence ?? 0.3,
       minTrackingConfidence: handTracking?.minTrackingConfidence ?? 0.3,
       delegate: handTracking?.delegate ?? 'GPU',
-      modelAssetPath:
-        'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-      wasmBasePath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm',
+      modelAssetPath: cdn.model,
+      wasmBasePath: cdn.wasm,
       pinchOptions,
       resetPinchOnNoHand,
     });

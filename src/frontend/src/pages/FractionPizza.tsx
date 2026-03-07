@@ -23,12 +23,12 @@ import {
 import { type ScreenCoordinate } from '../utils/coordinateTransform';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useWindowSize } from '../hooks/useWindowSize';
 import { triggerHaptic } from '../utils/haptics';
-import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import {
   LEVELS,
   generateFraction,
@@ -103,9 +103,9 @@ function FractionPizzaGame() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const { speak } = useVoiceInstructions();
 
@@ -203,40 +203,36 @@ function FractionPizzaGame() {
     (item: DraggableItem, zone: DropZone) => {
       if (item.data.isCorrect) {
         // Build streak
-        const newStreak = streak + 1;
-        setStreak(newStreak);
+        const newStreak = incrementStreak();
 
-        
+
         // Calculate score: base 15 + streak bonus (max 15)
         const baseScore = 15;
         const streakBonus = Math.min(newStreak * 3, 15);
         const totalScore = baseScore + streakBonus;
         setScore((prev) => prev + totalScore);
-        
+
         // Show popup at drop zone position
         setScorePopup({ points: totalScore, x: zone.x, y: zone.y });
-        setTimeout(() => setScorePopup(null), 700);
-        
+
         // Haptics
         triggerHaptic('success');
-        
-        // Milestone every 5
-        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-          setShowStreakMilestone(true);
+
+        // Milestone every 5 - hook handles the show state
+        if (newStreak > 0 && newStreak % 5 === 0) {
           triggerHaptic('celebration');
         }
-        
+
         playSuccess();
         setShowSuccess(true);
         speak(`Yummy! That's exactly ${item.data.label} of the pizza!`);
 
         setTimeout(() => {
-          setShowStreakMilestone(false);
           if (round >= 4) {
             if (currentLevel < LEVELS.length - 1) {
               setCurrentLevel((prev) => prev + 1);
               setRound(0);
-              setStreak(0);
+              resetStreak();
               speak("Amazing! Let's try harder pizzas!");
             } else {
               onGameComplete();
@@ -250,13 +246,13 @@ function FractionPizzaGame() {
         }, 2000);
       } else {
         // Wrong - break streak
-        setStreak(0);
+        resetStreak();
         triggerHaptic('error');
         playError();
         speak(`Oops! That slice says ${item.data.label}. Try another one!`);
       }
     },
-    [round, currentLevel, streak, speak, onGameComplete, playSuccess, playError]
+    [round, currentLevel, speak, onGameComplete, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]
   );
 
   const handleItemDroppedOutside = useCallback((item: DraggableItem) => {
@@ -274,13 +270,10 @@ function FractionPizzaGame() {
     setCurrentLevel(0);
     setScore(0);
     setRound(0);
-    setStreak(0);
-
-    setShowStreakMilestone(false);
-    setScorePopup(null);
+    resetStreak();
     playPop();
     speak('Look at the pizza! Drag the right fraction label to the tray!');
-  }, [speak, playPop]);
+  }, [speak, playPop, resetStreak]);
 
   return (
     <div className='w-screen h-screen overflow-hidden relative bg-orange-50 font-sans'>
@@ -333,7 +326,7 @@ function FractionPizzaGame() {
       )}
 
       {/* Streak Milestone */}
-      {showStreakMilestone && (
+      {showMilestone && (
         <motion.div
           initial={{ scale: 0, rotate: -20 }}
           animate={{ scale: 1.2, rotate: 0 }}

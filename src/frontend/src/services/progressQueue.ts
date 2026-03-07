@@ -396,7 +396,10 @@ export function createProgressQueue(repo: ProgressRepository) {
         return { success: true, shouldRetry: false };
       } catch (error: any) {
         const errorMessage =
-          error?.response?.data?.detail || error?.message || 'Unknown error';
+          error?.response?.data?.error?.message ||
+          error?.response?.data?.detail ||
+          error?.message ||
+          'Unknown error';
         const statusCode = error?.response?.status;
 
         // Don't retry 4xx errors
@@ -461,10 +464,18 @@ export function createProgressQueue(repo: ProgressRepository) {
           this.markSynced(item.idempotency_key);
           result.synced++;
         } else if (processResult.shouldRetry) {
-          this.markError(item.idempotency_key, processResult.error);
+          // Increment retry count and keep in pending for next sync cycle
+          const updatedItem: ProgressItem = {
+            ...item,
+            status: 'pending',
+            retryCount: (item.retryCount || 0) + 1,
+            lastError: processResult.error,
+            lastRetryAt: new Date().toISOString(),
+          };
+          repo.save(updatedItem);
           result.errors.push({
             idempotency_key: item.idempotency_key,
-            error: processResult.error || 'Unknown',
+            error: `Retry ${updatedItem.retryCount}/${MAX_RETRIES}: ${processResult.error || 'Unknown'}`,
           });
         } else {
           // Permanent failure

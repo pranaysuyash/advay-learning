@@ -1,11 +1,19 @@
 # Content Safety & Moderation for AI-Native Children's Learning Platform
 
 **Document ID:** RESEARCH-012-SAFETY-MODERATION-V2
-**Status:** DRAFT
+**Status:** IMPLEMENTED (2026-03-06)
 **Date:** 2026-03-05
 **Priority:** CRITICAL
 **Target Age Group:** 3-8 years old
 **Compliance Scope:** COPPA (USA), GDPR-K (EU), DPDP Act (India)
+
+> **Implementation Note (2026-03-06):**
+> Pattern-based safety filtering is now implemented:
+> - `src/frontend/src/services/ai/safety/SafetyService.ts`
+> - Uses existing `blocked-words.json`
+> - Feature flag: `safety.contentFilterV1` (always on)
+>
+> ML-based toxicity classifier deferred to Phase 2.
 
 ---
 

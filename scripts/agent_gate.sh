@@ -79,15 +79,15 @@ if [[ "${ALLOW_REFACTORED_SIDE_CARS:-}" != "1" ]]; then
 
         imports="$(printf '%s\n' "$content" | rg '^import ' || true)"
 
-        if printf '%s\n' "$content" | rg -q '\bGameShell\b' && ! printf '%s\n' "$imports" | rg -q 'GameShell'; then
+        if rg -q '\bGameShell\b' <<<"$content" && ! rg -q 'GameShell' <<<"$imports"; then
           die "$ref_path uses GameShell but does not import it. Promote only after fixing the sidecar or integrating the pattern safely."
         fi
 
-        if printf '%s\n' "$content" | rg -q '\bmemo\(' && ! printf '%s\n' "$imports" | rg -q '\bmemo\b'; then
+        if rg -q '\bmemo\(' <<<"$content" && ! rg -q '\bmemo\b' <<<"$imports"; then
           die "$ref_path uses memo() but does not import memo."
         fi
 
-        if printf '%s\n' "$content" | rg -q '\buseReducedMotion\(' && ! printf '%s\n' "$imports" | rg -q 'useReducedMotion'; then
+        if rg -q '\buseReducedMotion\(' <<<"$content" && ! rg -q 'useReducedMotion' <<<"$imports"; then
           die "$ref_path uses useReducedMotion() but does not import it."
         fi
 
@@ -117,17 +117,17 @@ if [[ "${ALLOW_REFACTORED_SIDE_CARS:-}" != "1" ]]; then
 fi
 
 touches_code_or_audit=false
-if echo "$changed_paths" | rg -q '^(src/|docs/audit/)'; then
+if printf '%s\n' "$changed_paths" | rg -q '^(src/|docs/audit/)'; then
   touches_code_or_audit=true
 fi
 
 touches_worklog_addendum=false
-if echo "$changed_paths" | rg -q '^docs/WORKLOG_ADDENDUM.*\.md$'; then
+if printf '%s\n' "$changed_paths" | rg -q '^docs/WORKLOG_ADDENDUM.*\.md$'; then
   touches_worklog_addendum=true
 fi
 
 touches_worklog_tickets=false
-if echo "$changed_paths" | rg -q '^docs/WORKLOG_TICKETS\.md$'; then
+if printf '%s\n' "$changed_paths" | rg -q '^docs/WORKLOG_TICKETS\.md$'; then
   touches_worklog_tickets=true
 fi
 
@@ -144,25 +144,25 @@ if [[ "$touches_code_or_audit" == true ]]; then
   while IFS= read -r worklog_path; do
     [[ -z "$worklog_path" ]] && continue
     content="$(read_file_from_target "$worklog_path" || true)"
-    if echo "$content" | rg -q 'Prompt Trace:[[:space:]]+prompts/review/local-pre-commit-review-v1\.0\.md'; then
+    if rg -q 'Prompt Trace:[[:space:]]+prompts/review/local-pre-commit-review-v1\.0\.md' <<<"$content"; then
       review_prompt_trace_found=true
       break
     fi
-  done < <(echo "$changed_paths" | rg '^docs/WORKLOG_ADDENDUM.*\.md$' || true)
+  done < <(printf '%s\n' "$changed_paths" | rg '^docs/WORKLOG_ADDENDUM.*\.md$' || true)
 
   if [[ "$review_prompt_trace_found" != true ]]; then
     die "code/audit changes require a local pre-commit review trace in the updated addendum: Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md"
   fi
 fi
 
-if echo "$changed_paths" | rg -q '^docs/audit/.*\.md$'; then
+if printf '%s\n' "$changed_paths" | rg -q '^docs/audit/.*\.md$'; then
   while IFS= read -r audit_path; do
     [[ -z "$audit_path" ]] && continue
     content="$(read_file_from_target "$audit_path" || true)"
-    if ! echo "$content" | rg -q 'TCK-[0-9]{8}-[0-9]{3}'; then
+    if ! rg -q 'TCK-[0-9]{8}-[0-9]{3}' <<<"$content"; then
       die "audit artifact $audit_path must reference a ticket id (TCK-YYYYMMDD-###)."
     fi
-  done < <(echo "$changed_paths" | rg '^docs/audit/.*\.md$')
+  done < <(printf '%s\n' "$changed_paths" | rg '^docs/audit/.*\.md$')
 fi
 
 if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true ]]; then
@@ -198,9 +198,9 @@ if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true 
   # Do not retroactively enforce evidence on historical tickets. Only enforce
   # tickets that are actually modified in this staged/commit payload.
   if [[ "${ALLOW_WORKLOG_TICKETS_EDIT:-}" == "1" ]]; then
-    worklog_files="$(echo "$changed_paths" | rg '^docs/WORKLOG_(TICKETS|ADDENDUM.*)\.md$' || true)"
+    worklog_files="$(printf '%s\n' "$changed_paths" | rg '^docs/WORKLOG_(TICKETS|ADDENDUM.*)\.md$' || true)"
   else
-    worklog_files="$(echo "$changed_paths" | rg '^docs/WORKLOG_ADDENDUM.*\.md$' || true)"
+    worklog_files="$(printf '%s\n' "$changed_paths" | rg '^docs/WORKLOG_ADDENDUM.*\.md$' || true)"
   fi
 
   if [[ -z "${worklog_files//$'\n'/}" ]]; then

@@ -99,7 +99,7 @@ export function Settings() {
         {parentGatePassed && (
           <>
             <div className="mb-10 text-center relative z-10">
-              <div className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-[2rem] border-3 border-purple-200 mb-6 drop-shadow-[0_4px_0_#E5B86E]">
+              <div className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-[2rem] border-4 border-purple-200 mb-6 shadow-[0_6px_0_#E5B86E]">
                 <UIIcon name={'settings' as any} size={48} className="text-purple-600" />
               </div>
               <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight gap-3'>
@@ -114,7 +114,7 @@ export function Settings() {
               <div className="space-y-8">
 
                 {/* Learning Preferences */}
-                <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
+                <div className='bg-white border-4 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_6px_0_#E5B86E] overflow-hidden'>
                   <div className="bg-[#3B82F6] px-8 py-5 border-b-4 border-blue-600">
                     <h2 className='text-2xl font-black text-white flex items-center gap-3 drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]'>
                       <UIIcon name={'target' as any} size={28} className="text-blue-100" />
@@ -132,7 +132,7 @@ export function Settings() {
                       <select
                         value={settings.language}
                         onChange={(e) => settings.updateSettings({ language: e.target.value })}
-                        className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100'
+                        className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         {getLanguageOptions().map((lang) => (
                           <option key={lang.value} value={lang.value}>
@@ -149,7 +149,7 @@ export function Settings() {
                       <select
                         value={settings.difficulty}
                         onChange={(e) => settings.updateSettings({ difficulty: e.target.value })}
-                        className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100'
+                        className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         <option value='easy'>{t('settings:difficulty.options.easy')}</option>
                         <option value='medium'>{t('settings:difficulty.options.medium')}</option>
@@ -167,9 +167,9 @@ export function Settings() {
                       </div>
                       <button
                         onClick={() => { playClick(); settings.updateSettings({ soundEnabled: !settings.soundEnabled }); }}
-                        className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.soundEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+                        className={`w-24 h-12 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.soundEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
-                        <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.soundEnabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.soundEnabled ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
@@ -177,7 +177,7 @@ export function Settings() {
                     <div className='flex items-center justify-between pt-6 border-t-4 border-[#F2CC8F]'>
                       <div>
                         <div className='font-black text-advay-slate text-lg flex items-center gap-2'>
-                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z'/><path d='M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12'/></svg> Calm Mode
+                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z' /><path d='M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12' /></svg> Calm Mode
                         </div>
                         <div className='text-base font-bold text-text-secondary mt-1'>
                           Softer colors, slower animations, no background music
@@ -189,20 +189,20 @@ export function Settings() {
                       <button
                         onClick={() => { playClick(); settings.updateSettings({ calmMode: !settings.calmMode }); }}
                         aria-label={settings.calmMode ? 'Turn Calm Mode off' : 'Turn Calm Mode on'}
-                        className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.calmMode ? 'bg-[#7C9CB5] border-[#6B8BA4]' : 'bg-slate-200 border-slate-300'}`}
+                        className={`w-24 h-12 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.calmMode ? 'bg-[#7C9CB5] border-[#6B8BA4]' : 'bg-slate-200 border-slate-300'}`}
                       >
-                        <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.calmMode ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.calmMode ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
                     {settings.calmMode && (
-                      <div className='px-5 py-4 rounded-[1.5rem] bg-teal-50 text-teal-700 border-3 border-teal-200'>
+                      <div className='px-5 py-4 rounded-[1.5rem] bg-teal-50 text-teal-700 border-4 border-teal-200'>
                         <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-teal-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><polyline points='20 6 9 17 4 12'/></svg></div>
+                          <div className="w-6 h-6 rounded-full bg-teal-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><polyline points='20 6 9 17 4 12' /></svg></div>
                           <div>
                             <div className="font-black text-lg">Calm Mode is ON</div>
                             <div className="text-sm font-bold text-teal-600 mt-1">
-                              Games will use muted colors, slower animations, and only essential sounds. 
+                              Games will use muted colors, slower animations, and only essential sounds.
                               Celebrations will be gentler.
                             </div>
                           </div>
@@ -224,9 +224,9 @@ export function Settings() {
                             </div>
                             <button
                               onClick={() => featureFlags.updateFlag(flag as any, !enabled)}
-                              className={`w-20 h-10 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${enabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+                              className={`w-24 h-12 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${enabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                             >
-                              <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                              <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enabled ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                             </button>
                           </div>
                         );
@@ -236,7 +236,7 @@ export function Settings() {
                 </div>
 
                 {/* Device & Camera */}
-                <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
+                <div className='bg-white border-4 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_6px_0_#E5B86E] overflow-hidden'>
                   <div className="bg-[#8B5CF6] px-8 py-5 border-b-4 border-purple-600">
                     <h2 className='text-2xl font-black text-white flex items-center gap-3 drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]'>
                       <UIIcon name={'camera' as any} size={28} className="text-purple-100" />
@@ -249,33 +249,33 @@ export function Settings() {
                     <div className='flex items-center justify-between'>
                       <div className="flex-1 pr-4">
                         <div className='font-black text-advay-slate text-lg flex items-center gap-2'>
-                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke={settings.cameraEnabled ? '#10B981' : '#EF4444'} strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z'/><circle cx='12' cy='13' r='3'/></svg> Camera for Games
+                          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke={settings.cameraEnabled ? '#10B981' : '#EF4444'} strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z' /><circle cx='12' cy='13' r='3' /></svg> Camera for Games
                         </div>
                         <div className='text-sm font-bold text-text-secondary mt-2 leading-relaxed'>
-                          {settings.cameraEnabled 
-                            ? 'Camera is ON — Used for hand tracking games. Video stays on this device only.' 
+                          {settings.cameraEnabled
+                            ? 'Camera is ON — Used for hand tracking games. Video stays on this device only.'
                             : 'Camera is OFF — Games will use touch/click instead of hand gestures.'}
                         </div>
                       </div>
                       <button
                         onClick={handleCameraToggle}
                         aria-label={settings.cameraEnabled ? 'Turn camera off' : 'Turn camera on'}
-                        className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.cameraEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+                        className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.cameraEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
-                        <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.cameraEnabled ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.cameraEnabled ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
                     {/* Privacy Indicator Explanation */}
                     {settings.cameraEnabled && (
-                      <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-3 border-blue-200'>
+                      <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200'>
                         <div className="flex items-start gap-3">
                           <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white shadow-[0_4px_0_#E5B86E] shrink-0 mt-0.5 animate-pulse" />
                           <div>
                             <div className="font-black text-lg">Privacy Indicator</div>
                             <div className="text-sm font-bold text-blue-600 mt-1">
-                              When camera is active, a green dot appears on screen. 
-                              This means video is being processed on your device only — 
+                              When camera is active, a green dot appears on screen.
+                              This means video is being processed on your device only —
                               we never see or store it.
                             </div>
                           </div>
@@ -284,12 +284,12 @@ export function Settings() {
                     )}
 
                     {cameraPermission === 'granted' && (
-                      <div className='px-5 py-4 rounded-[1.5rem] bg-emerald-50 text-emerald-700 border-3 border-emerald-200 flex items-center gap-3 font-black text-lg'>
+                      <div className='px-5 py-4 rounded-[1.5rem] bg-emerald-50 text-emerald-700 border-4 border-emerald-200 flex items-center gap-3 font-black text-lg'>
                         <UIIcon name={'check-circle' as any} size={24} /> Device camera active
                       </div>
                     )}
                     {cameraPermission === 'denied' && (
-                      <div className='px-5 py-4 rounded-[1.5rem] bg-red-50 text-red-700 border-3 border-red-200 flex items-center gap-3 font-black text-lg'>
+                      <div className='px-5 py-4 rounded-[1.5rem] bg-red-50 text-red-700 border-4 border-red-200 flex items-center gap-3 font-black text-lg'>
                         <UIIcon name={'alert-circle' as any} size={24} /> Camera blocked
                       </div>
                     )}
@@ -299,7 +299,7 @@ export function Settings() {
                       <select
                         value={settings.handTrackingDelegate}
                         onChange={(e) => settings.updateSettings({ handTrackingDelegate: e.target.value as 'GPU' | 'CPU' })}
-                        className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-purple-500/20 focus:border-[#8B5CF6] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100 mb-3'
+                        className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-purple-500/20 focus:border-[#8B5CF6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100 mb-3'
                       >
                         <option value='GPU'>Hardware Accelerated (GPU)</option>
                         <option value='CPU'>Compatibility Mode (CPU)</option>
@@ -318,7 +318,7 @@ export function Settings() {
               <div className="space-y-8">
 
                 {/* Parental Controls */}
-                <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
+                <div className='bg-white border-4 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_6px_0_#E5B86E] overflow-hidden'>
                   <div className="bg-[#E85D04] px-8 py-5 border-b-4 border-orange-600">
                     <h2 className='text-2xl font-black text-white flex items-center gap-3 drop-shadow-[0_2px_2px_rgba(0,0,0,0.1)]'>
                       <UIIcon name={'lock' as any} size={28} className="text-orange-100" />
@@ -332,7 +332,7 @@ export function Settings() {
                       <select
                         value={settings.timeLimit}
                         onChange={(e) => settings.updateSettings({ timeLimit: parseInt(e.target.value) })}
-                        className='w-full px-5 py-4 bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-orange-500/20 focus:border-[#E85D04] font-bold text-advay-slate text-lg transition-all appearance-none cursor-pointer hover:bg-slate-100'
+                        className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-orange-500/20 focus:border-[#E85D04] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         <option value={0}>No Limit</option>
                         <option value={15}>15 minutes</option>
@@ -348,9 +348,9 @@ export function Settings() {
                       </div>
                       <button
                         onClick={() => settings.updateSettings({ showHints: !settings.showHints })}
-                        className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${settings.showHints ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+                        className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.showHints ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
-                        <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.showHints ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                        <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.showHints ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
@@ -365,7 +365,7 @@ export function Settings() {
                       </div>
 
                       {!currentProfile && (
-                        <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-3 border-blue-200'>
+                        <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200'>
                           <div className='font-black'>No child profile selected.</div>
                           <div className='text-sm font-bold mt-1'>
                             Select a profile to customize collectibles behavior.
@@ -391,14 +391,14 @@ export function Settings() {
                             });
                             showToast('Collectibles bonus preference updated', 'success');
                           }}
-                          className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${enableOlderBonus ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${enableOlderBonus ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
                           aria-label={
                             enableOlderBonus
                               ? 'Disable mystery bonus rewards'
                               : 'Enable mystery bonus rewards'
                           }
                         >
-                          <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enableOlderBonus ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enableOlderBonus ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                         </button>
                       </div>
 
@@ -420,20 +420,20 @@ export function Settings() {
                             });
                             showToast('Rarity text preference updated', 'success');
                           }}
-                          className={`w-20 h-10 flex-shrink-0 rounded-full transition-colors relative border-3 flex items-center p-1 cursor-pointer ${showRarityTextForOlder ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${showRarityTextForOlder ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
                           aria-label={
                             showRarityTextForOlder
                               ? 'Hide rarity text for older kids'
                               : 'Show rarity text for older kids'
                           }
                         >
-                          <div className={`w-6 h-6 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${showRarityTextForOlder ? 'translate-x-[2.25rem]' : 'translate-x-0'}`} />
+                          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${showRarityTextForOlder ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                         </button>
                       </div>
                     </div>
 
                     <div className="pt-6 border-t-4 border-[#F2CC8F] space-y-4">
-                      <div className='bg-slate-50 rounded-[1.5rem] p-5 mb-4 border-3 border-[#F2CC8F]'>
+                      <div className='bg-slate-50 rounded-[1.5rem] p-5 mb-4 border-4 border-[#F2CC8F]'>
                         <div className='text-sm font-black uppercase tracking-widest text-slate-400 mb-2'>Alphabet System</div>
                         <div className='text-advay-slate flex items-baseline gap-2'>
                           <span className='font-black text-3xl'>{getMasteredLettersCount(settings.language)}</span>
@@ -443,7 +443,7 @@ export function Settings() {
 
                       <Button
                         variant='secondary'
-                        className="w-full text-lg font-black text-advay-slate bg-white border-3 border-[#F2CC8F] hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_4px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                        className="w-full text-lg font-black text-advay-slate bg-white border-4 border-[#F2CC8F] hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                         onClick={async () => {
                           if (await confirm({
                             title: 'Reset Tutorials?',
@@ -461,7 +461,7 @@ export function Settings() {
 
                       <Button
                         variant='secondary'
-                        className="w-full text-lg font-black text-red-500 bg-red-50 border-3 border-red-200 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_4px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                        className="w-full text-lg font-black text-red-500 bg-red-50 border-4 border-red-200 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                         onClick={async () => {
                           if (await confirm({
                             title: 'Erase Curriculum Progress?',
@@ -482,7 +482,7 @@ export function Settings() {
                 </div>
 
                 {/* Account & Data */}
-                <div className='bg-white border-3 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
+                <div className='bg-white border-4 border-[#F2CC8F] rounded-[2.5rem] shadow-[0_6px_0_#E5B86E] overflow-hidden'>
                   <div className='p-8 space-y-6'>
                     {user ? (
                       <div className='flex items-center justify-between mb-4'>
@@ -492,7 +492,7 @@ export function Settings() {
                         </div>
                         <Button
                           variant="secondary"
-                          className="px-6 py-3 h-auto text-sm font-black bg-white border-3 border-[#F2CC8F] text-advay-slate hover:bg-slate-50 rounded-[1rem] shadow-[0_4px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                          className="px-6 py-3 h-auto text-sm font-black bg-white border-4 border-[#F2CC8F] text-advay-slate hover:bg-slate-50 rounded-[1rem] shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                           onClick={() => { logout(); navigate('/login'); }}
                         >
                           Sign Out
@@ -504,7 +504,7 @@ export function Settings() {
                         <p className="font-bold text-advay-slate mb-5 text-lg leading-tight">You are playing on a guest profile. Sign up to sync progress across devices.</p>
                         <Button
                           variant="primary"
-                          className="w-full text-lg font-black bg-[#E85D04] hover:bg-orange-600 border-3 border-orange-700 py-4 rounded-[1.5rem] shadow-[0_4px_0_0_rgba(194,65,12,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                          className="w-full text-lg font-black bg-[#E85D04] hover:bg-orange-600 border-4 border-orange-700 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(194,65,12,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                           onClick={() => navigate('/register')}
                         >
                           Create Account
@@ -513,22 +513,22 @@ export function Settings() {
                     )}
 
                     {/* Privacy Policy Link - COPPA Compliance */}
-                    <div className="px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-3 border-blue-200">
+                    <div className="px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200">
                       <div className="flex items-start gap-3">
                         <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>
+                          <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' /></svg>
                         </div>
                         <div className="flex-1">
                           <div className="font-black text-lg">Your Privacy Matters</div>
                           <div className="text-sm font-bold text-blue-600 mt-1">
                             We never see or store camera video. All processing happens on your device.
                           </div>
-                          <a 
-                            href="/privacy" 
+                          <a
+                            href="/privacy"
                             className="inline-flex items-center gap-2 mt-3 text-sm font-black text-blue-700 hover:text-blue-800 hover:underline"
                           >
                             Read our Privacy Policy
-                            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14'/><path d='m12 5 7 7-7 7'/></svg>
+                            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14' /><path d='m12 5 7 7-7 7' /></svg>
                           </a>
                         </div>
                       </div>
@@ -537,14 +537,14 @@ export function Settings() {
                     <div className="pt-6 border-t-4 border-[#F2CC8F] flex flex-col sm:flex-row gap-4">
                       <Button
                         variant='secondary'
-                        className="flex-1 text-sm font-black bg-white border-3 border-[#F2CC8F] text-advay-slate hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_4px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                        className="flex-1 text-sm font-black bg-white border-4 border-[#F2CC8F] text-advay-slate hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                         onClick={() => showToast('Data export will be available in the next update.', 'info')}
                       >
                         Export Data
                       </Button>
                       <Button
                         variant='secondary'
-                        className="flex-1 text-sm font-black bg-red-50 border-3 border-red-200 text-red-500 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_4px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[4px] transition-all"
+                        className="flex-1 text-sm font-black bg-red-50 border-4 border-red-200 text-red-500 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                         onClick={async () => {
                           if (await confirm({
                             title: 'Restore Factory Defaults?',

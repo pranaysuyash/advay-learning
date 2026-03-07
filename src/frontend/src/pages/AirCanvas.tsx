@@ -213,7 +213,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
         setIsDrawing(true);
         addParticles(x, y, velocityX, velocityY);
         triggerHaptic('success');
-        
+
         // Milestone every 100 particles
         if (particleCount > 0 && particleCount % 100 === 0) {
           setParticleMilestone(true);
@@ -384,7 +384,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E]"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m12 3 9 9-9 9-9-9 9-9Z"/></svg></div>
+          <div className="inline-block bg-blue-50 text-[5rem] mb-6 p-6 rounded-[2rem] border-3 border-blue-100 drop-shadow-[0_4px_0_#E5B86E]"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18" /><path d="M3 12h18" /><path d="m12 3 9 9-9 9-9-9 9-9Z" /></svg></div>
           <h2 className="text-3xl md:text-4xl font-black text-advay-slate tracking-tight mb-4">Loading Air Canvas...</h2>
           <div className="w-16 h-16 border-8 border-[#F2CC8F] border-t-[#3B82F6] rounded-full animate-spin mx-auto mb-6"></div>
           <p className="text-xl font-bold text-text-secondary">Preparing magic brushes...</p>
@@ -401,7 +401,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           onClick={() => navigate('/games')}
           className="pointer-events-auto px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F]/50 rounded-[1.5rem] font-bold text-advay-slate shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg> Back
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg> Back
         </button>
         <div className="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-3 rounded-[2rem]">
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas</h1>
@@ -431,7 +431,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
       />
 
       {/* Webcam (hidden but functional) */}
-      
+
 
       <CameraThumbnail isHandDetected={isHandReady} position="bottom-right" />
 
@@ -518,13 +518,13 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
                   onClick={clearCanvas}
                   className="px-6 py-3 bg-red-100 hover:bg-red-200 border-3 border-red-200 rounded-[1.5rem] font-black text-red-600 shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Clear
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg> Clear
                 </button>
                 <button
                   onClick={takeSnapshot}
                   className="px-6 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-400 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Snap
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg> Snap
                 </button>
               </div>
             </div>
@@ -542,7 +542,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
             exit={{ opacity: 0, scale: 0.8 }}
           >
             <div className="bg-white/95 backdrop-blur-md border-3 border-amber-200 rounded-[2.5rem] p-10 text-center shadow-lg">
-              <div className="text-[6rem] mb-4 drop-shadow-md"><svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
+              <div className="text-[6rem] mb-4 drop-shadow-md"><svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" /><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" /><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></svg></div>
               <h2 className="text-3xl font-black text-advay-slate tracking-tight mb-2">Open Hand to Draw!</h2>
               <div className="inline-block bg-slate-100 rounded-full px-6 py-2 mt-2">
                 <p className="text-lg font-bold text-text-secondary">Close fingers to pause</p>
@@ -587,14 +587,14 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
       <AnimatePresence>
         {snapshot && (
           <motion.div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <div className="bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-10 max-w-2xl w-full shadow-2xl">
               <div className="text-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E85D04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E85D04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z" /></svg>
                 <h2 className="text-4xl font-black text-advay-slate tracking-tight">Your Masterpiece!</h2>
               </div>
               <div className="border-3 border-[#F2CC8F] rounded-[2rem] overflow-hidden mb-8 shadow-inner">
@@ -609,7 +609,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
                   onClick={downloadSnapshot}
                   className="flex-1 py-4 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-400 rounded-[1.5rem] font-black text-white text-xl shadow-[0_6px_0_0_rgba(59,130,246,0.6)] hover:shadow-none hover:translate-y-[6px] transition-all flex items-center justify-center gap-2"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Download
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg> Download
                 </button>
                 <button
                   onClick={() => setSnapshot(null)}

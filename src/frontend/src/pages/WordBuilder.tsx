@@ -20,16 +20,20 @@ import {
   loadCurriculum,
   pickWord,
   createLetterTargets,
+  type LetterTarget,
+} from '../games/wordBuilderLogic';
+
+// Unified Analytics SDK
+import {
   startSession,
-  recordWordCompleted,
-  recordTouch,
   endSession,
   getAnalyticsSummary,
   getStoredSessions,
   clearAnalytics,
-  type LetterTarget,
-  type SessionAnalytics,
-} from '../games/wordBuilderLogic';
+  type AnalyticsSession,
+  wordBuilder,
+  isWordBuilderExtension,
+} from '../analytics';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -82,7 +86,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const [showInsights, setShowInsights] = useState(false);
   const [analyticsData, setAnalyticsData] = useState<{
     summary: ReturnType<typeof getAnalyticsSummary>;
-    sessions: SessionAnalytics[];
+    sessions: AnalyticsSession[];
   } | null>(null);
   const [autoAdvance, setAutoAdvance] = useState<boolean>(() => {
     return localStorage.getItem('wordbuilder.autoAdvance') === 'true';
@@ -296,7 +300,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     if (mode === 'phonics') {
       const newCount = wordsCompletedRef.current + 1;
       setWordsCompletedInStage(newCount);
-      
+
       // Check if we should auto-advance
       if (autoAdvanceRef.current && newCount >= WORDS_PER_STAGE) {
         shouldAdvanceStage = true;
@@ -371,28 +375,28 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         return;
       }
 
-      // Record touch for analytics
-      recordTouch(expectedLetter, hit.letter, hit.letter === expectedLetter);
+      // Record touch for unified analytics
+      wordBuilder.recordTouch(expectedLetter, hit.letter, hit.letter === expectedLetter);
 
       if (hit.letter === expectedLetter) {
         // Build streak
         const newStreak = streak + 1;
         setStreak(newStreak);
-        
+
         // Calculate score with streak bonus
         const basePoints = 15;
         const streakBonus = Math.min(newStreak * 3, 15);
         const totalPoints = basePoints + streakBonus;
         setScore((prev) => prev + totalPoints);
-        
+
         // Show score popup
         setScorePopup({ points: totalPoints });
         setTimeout(() => setScorePopup(null), 700);
-        
+
         playPop();
         triggerHaptic('success');
         setCompletedLetters((prev) => [...prev, hit.letter]);
-        
+
         // Milestone every 5
         if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
           setShowStreakMilestone(true);
@@ -409,7 +413,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
             void speak(`Great job! You spelled ${currentWord}!`);
           }
           triggerHaptic('celebration');
-          recordWordCompleted(); // Analytics
+          wordBuilder.recordWordCompleted(currentWord); // Unified analytics
           completeWord();
         } else {
           setFeedback(`Great! Next: "${currentWord[nextStep]}"`);
@@ -466,7 +470,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
   const startGame = async () => {
     setFeedback('Loading words...');
-    
+
     // Load word bank and curriculum before starting
     await loadWordBank();
     if (gameMode === 'phonics') {
@@ -484,10 +488,12 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     setFeedback('Pinch letters to spell the word!');
     setCursor(null);
     setIsPlaying(true);
-    
-    // Start analytics session
-    startSession(gameMode, gameMode === 'phonics' ? phonicsStageId : undefined);
-    
+
+    // Start unified analytics session
+    const childId = localStorage.getItem('activeProfileId') || undefined;
+    startSession('wordbuilder', childId);
+    wordBuilder.initWordBuilderSession(gameMode, gameMode === 'phonics' ? phonicsStageId : undefined);
+
     if (ttsEnabled) {
       void speak("Let's build words together! Show me your hand!");
     }
@@ -503,10 +509,12 @@ export const WordBuilder = memo(function WordBuilderComponent() {
       clearTimeout(levelTimeoutRef.current);
       levelTimeoutRef.current = null;
     }
-    
-    // End analytics session
-    endSession();
-    
+
+    // End unified analytics session
+    wordBuilder.finalizeAccuracy();
+    wordBuilder.populateUniversalMetrics();
+    endSession('completed');
+
     setIsPlaying(false);
     setGameCompleted(false);
     setTargets([]);
@@ -665,11 +673,10 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                 aria-hidden='true'
               >
                 <div
-                  className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-5xl shadow-[0_4px_0_#E5B86E] ${
-                    isExpected
+                  className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-5xl shadow-[0_4px_0_#E5B86E] ${isExpected
                       ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B] z-10 scale-110'
                       : 'border-[#3B82F6] bg-blue-50 text-[#3B82F6]'
-                  }`}
+                    }`}
                 >
                   {target.letter}
                 </div>
@@ -692,7 +699,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           )}
 
           {!isPlaying && !gameCompleted && (
-            <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-40 flex items-center justify-center rounded-[2.5rem]'>
+            <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-40 flex items-center justify-center rounded-[2.5rem]'>
               <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
                 <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
                   🔤
@@ -759,7 +766,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
           )}
 
           {showSettings && (
-            <div className='absolute inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center'>
+            <div className='absolute inset-0 z-50 bg-[#FFF8F0]/80 backdrop-blur-sm flex items-center justify-center'>
               <div className='bg-white rounded-[2rem] border-[6px] border-[#F2CC8F] shadow-[0_6px_0_#E5B86E] w-[92%] max-w-lg p-8'>
                 <div className='text-2xl font-black text-advay-slate mb-6'>
                   Parent Settings
@@ -772,22 +779,20 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                       <button
                         type='button'
                         onClick={() => applySettings('explore', phonicsStageIdRef.current)}
-                        className={`flex-1 py-3 rounded-xl border-2 font-black ${
-                          gameMode === 'explore'
+                        className={`flex-1 py-3 rounded-xl border-2 font-black ${gameMode === 'explore'
                             ? 'bg-blue-50 border-blue-300 text-blue-700'
                             : 'bg-white border-slate-200 text-slate-500'
-                        }`}
+                          }`}
                       >
                         Explore
                       </button>
                       <button
                         type='button'
                         onClick={() => applySettings('phonics', phonicsStageIdRef.current)}
-                        className={`flex-1 py-3 rounded-xl border-2 font-black ${
-                          gameMode === 'phonics'
+                        className={`flex-1 py-3 rounded-xl border-2 font-black ${gameMode === 'phonics'
                             ? 'bg-amber-50 border-amber-300 text-amber-700'
                             : 'bg-white border-slate-200 text-slate-500'
-                        }`}
+                          }`}
                       >
                         Phonics Path
                       </button>
@@ -807,7 +812,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                         </option>
                       ))}
                     </select>
-                    
+
                     {/* Progress indicator */}
                     <div className='mt-3 text-sm text-slate-500'>
                       Progress: {wordsCompletedInStage} / {WORDS_PER_STAGE} words
@@ -815,7 +820,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                         <span className='text-amber-600 font-bold ml-2'>→ Will advance!</span>
                       )}
                     </div>
-                    
+
                     {/* Auto-advance toggle */}
                     <div className='mt-4 flex items-center gap-3'>
                       <input
@@ -865,7 +870,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
           {/* Insights Panel */}
           {showInsights && analyticsData && (
-            <div className='absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center'>
+            <div className='absolute inset-0 z-[60] bg-[#FFF8F0]/80 backdrop-blur-sm flex items-center justify-center'>
               <div className='bg-white rounded-[2rem] border-[6px] border-emerald-200 shadow-[0_6px_0_#10B981] w-[92%] max-w-lg p-8 max-h-[80vh] overflow-y-auto'>
                 <div className='text-2xl font-black text-emerald-700 mb-2'>
                   📊 Learning Insights
@@ -890,7 +895,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                       </div>
                       <div className='bg-amber-50 rounded-xl p-4 text-center'>
                         <div className='text-3xl font-black text-amber-600'>
-                          {analyticsData.summary.totalWords}
+                          {analyticsData.summary.totalItemsCompleted}
                         </div>
                         <div className='text-sm font-bold text-amber-700'>Words Spelled</div>
                       </div>
@@ -901,13 +906,13 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                       <div className='flex justify-between items-center mb-2'>
                         <span className='font-bold text-slate-700'>Overall Accuracy</span>
                         <span className='text-2xl font-black text-emerald-600'>
-                          {analyticsData.summary.avgAccuracy.toFixed(1)}%
+                          {analyticsData.summary.overallAccuracy.toFixed(1)}%
                         </span>
                       </div>
                       <div className='w-full bg-slate-200 rounded-full h-3'>
                         <div
                           className='bg-emerald-500 h-3 rounded-full transition-all'
-                          style={{ width: `${Math.min(analyticsData.summary.avgAccuracy, 100)}%` }}
+                          style={{ width: `${Math.min(analyticsData.summary.overallAccuracy, 100)}%` }}
                         />
                       </div>
                     </div>
@@ -934,12 +939,17 @@ export const WordBuilder = memo(function WordBuilderComponent() {
                       <div className='bg-slate-50 rounded-xl p-4'>
                         <div className='font-bold text-slate-700 mb-2'>Last Session</div>
                         <div className='text-sm text-slate-600 space-y-1'>
-                          <div>Words: {analyticsData.sessions[analyticsData.sessions.length - 1].wordsCompleted}</div>
-                          <div>Accuracy: {(
-                            (analyticsData.sessions[analyticsData.sessions.length - 1].correctTouches /
-                              (analyticsData.sessions[analyticsData.sessions.length - 1].correctTouches +
-                                analyticsData.sessions[analyticsData.sessions.length - 1].incorrectTouches || 1)) * 100
-                          ).toFixed(0)}%</div>
+                          {(() => {
+                            const session = analyticsData.sessions[analyticsData.sessions.length - 1];
+                            const ext = session.extension;
+                            if (!isWordBuilderExtension(ext)) return null;
+                            return (
+                              <>
+                                <div>Words: {ext.wordsCompleted.length}</div>
+                                <div>Accuracy: {ext.accuracy.toFixed(0)}%</div>
+                              </>
+                            );
+                          })()}
                           <div className='text-xs text-slate-400'>
                             {new Date(analyticsData.sessions[analyticsData.sessions.length - 1].timestamp).toLocaleDateString()}
                           </div>
