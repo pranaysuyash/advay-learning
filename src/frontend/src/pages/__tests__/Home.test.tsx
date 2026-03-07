@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Home } from '../Home';
 import { useAuthStore, useSettingsStore } from '../../store';
+import {
+  clearGrowthTrackingState,
+  getGrowthEvents,
+} from '../../services/growthAttribution';
 
 beforeEach(() => {
   // Reset stores to deterministic state
@@ -12,6 +16,7 @@ beforeEach(() => {
     onboardingCompleted: true,
     demoMode: false,
   });
+  clearGrowthTrackingState();
 });
 
 describe('Home landing', () => {
@@ -21,7 +26,9 @@ describe('Home landing', () => {
         <Home />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('button', { name: /Create a Profile/i })).toBeDefined();
+    expect(
+      screen.getAllByRole('button', { name: /Create (a|Child) Profile/i }).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /Try The Magic/i })).toBeDefined();
   });
 
@@ -62,5 +69,29 @@ describe('Home landing', () => {
       /Digital Magic, Physical Reality/i.test(el.textContent ?? ''),
     );
     expect(featuresHeading).toBeTruthy();
+  });
+
+  it('shows shared-visit copy and tracks CTA starts from shared links', () => {
+    render(
+      <MemoryRouter initialEntries={['/?ref=progress_share&entry=report']}>
+        <Home />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Shared by a parent/i)).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: /Try The Magic/i }));
+
+    const events = getGrowthEvents();
+    expect(events.some((event) => event.name === 'shared_visit_landed')).toBe(
+      true,
+    );
+    expect(
+      events.some(
+        (event) =>
+          event.name === 'shared_visit_cta_started' &&
+          event.payload.cta === 'demo',
+      ),
+    ).toBe(true);
   });
 });

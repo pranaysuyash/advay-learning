@@ -21,12 +21,12 @@ import {
   useVoiceInstructions,
 } from '../components/game/VoiceInstructions';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import { TargetSystem } from '../components/game/TargetSystem';
 import type { Target } from '../components/game/TargetSystem';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
 import { triggerHaptic } from '../utils/haptics';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useWindowSize } from '../hooks/useWindowSize';
 
 function MathSmashGameComponent() {
@@ -50,9 +50,7 @@ function MathSmashGameComponent() {
   const [round, setRound] = useState(0);
 
   // Combo/Streak System
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const { speak } = useVoiceInstructions();
 
@@ -138,26 +136,17 @@ function MathSmashGameComponent() {
   const handleSmash = useCallback((target: Target) => {
     if (target.data.isCorrect) {
       // Calculate streak and score
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      
+      const newStreak = incrementStreak();
+
       const basePoints = 10;
       const streakBonus = Math.min(newStreak * 2, 15);
       const totalPoints = basePoints + streakBonus;
-      
+
       // Show score popup at center of screen
       setScorePopup({ points: totalPoints, x: 50, y: 30 });
-      setTimeout(() => setScorePopup(null), 700);
-      
+
       // Trigger haptic feedback for correct answer
       triggerHaptic('success');
-      
-      // Check for streak milestone (every 5)
-      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-        setShowStreakMilestone(true);
-        triggerHaptic('celebration');
-        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
-      }
 
       playSuccess();
       setCorrect(c => c + 1);
@@ -183,13 +172,13 @@ function MathSmashGameComponent() {
       }, 2000);
     } else {
       // Wrong answer: reset streak and trigger error haptic
-      setStreak(0);
+      resetStreak();
       triggerHaptic('error');
       playError();
       speak(`Oops! The answer is not ${target.data.value}. Try again!`);
       // Shake animation could go here
     }
-  }, [round, currentLevel, correct, speak, onGameComplete, playSuccess, playError, streak]);
+  }, [round, currentLevel, correct, speak, onGameComplete, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]);
 
   const startGame = useCallback(() => {
     setGameStarted(true);
@@ -198,12 +187,10 @@ function MathSmashGameComponent() {
     setCorrect(0);
     setRound(0);
     // Reset streak state
-    setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
+    resetStreak();
     playPop();
     speak('Pinch to smash the correct answer!');
-  }, [speak, playPop]);
+  }, [speak, playPop, resetStreak]);
 
   return (
     <div className='w-screen h-screen overflow-hidden relative bg-slate-100 font-sans'>
@@ -326,7 +313,7 @@ function MathSmashGameComponent() {
 
       {/* Streak Milestone Animation */}
       <AnimatePresence>
-        {showStreakMilestone && (
+        {showMilestone && (
           <motion.div
             initial={{ opacity: 0, scale: 0.3, rotate: -20 }}
             animate={{ opacity: 1, scale: 1.2, rotate: 0 }}

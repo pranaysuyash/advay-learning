@@ -12,7 +12,6 @@ interface CelebrationOverlayProps {
 
 // Confetti particle component
 function ConfettiParticle({ delay, color }: { delay: number; color: string }) {
-    const randomX = Math.random() * 100;
     const randomRotation = Math.random() * 360;
     const size = 8 + Math.random() * 8;
 
@@ -20,27 +19,31 @@ function ConfettiParticle({ delay, color }: { delay: number; color: string }) {
         <motion.div
             className="absolute rounded-sm"
             style={{
-                left: `${randomX}%`,
-                top: '-20px',
+                left: `50%`,
+                top: `50%`,
                 width: size,
                 height: size * 0.6,
                 backgroundColor: color,
             }}
-            initial={{ y: 0, opacity: 1, rotate: 0 }}
+            initial={{ y: 0, x: 0, opacity: 1, scale: 0 }}
             animate={{
-                y: [0, 400, 500],
-                opacity: [1, 1, 0],
-                rotate: [0, randomRotation, randomRotation + 180],
-                x: [0, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 150],
+                y: [(Math.random() - 0.5) * 800 - 200, (Math.random() - 0.2) * 1200],
+                x: [(Math.random() - 0.5) * 800, (Math.random() - 0.5) * 1200],
+                opacity: [0, 1, 1, 0],
+                rotate: [0, randomRotation, randomRotation + 720],
+                scale: [0, 1.5, 1],
             }}
             transition={{
-                duration: 2.5,
+                duration: 2.5 + Math.random() * 1.5,
                 delay: delay,
-                ease: 'easeOut',
+                ease: [0.23, 1, 0.32, 1], // easeOutQuint for explosive start
             }}
         />
     );
 }
+
+// Dancing Pip mascot
+import { Mascot } from './Mascot';
 
 // Star burst component
 function StarBurst({ letter }: { letter: React.ReactNode }) {
@@ -82,9 +85,14 @@ function StarBurst({ letter }: { letter: React.ReactNode }) {
                     ease: 'easeInOut',
                 }}
             >
-                <span className="text-6xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <motion.span
+                    className="text-8xl font-bold bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 bg-clip-text text-transparent"
+                    style={{ textShadow: '0 8px 0 rgba(147,51,234,0.3)' }}
+                    animate={{ y: [0, -15, 0] }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                >
                     {letter}
-                </span>
+                </motion.span>
             </motion.div>
 
             {/* Rotating stars */}
@@ -113,48 +121,6 @@ function StarBurst({ letter }: { letter: React.ReactNode }) {
     );
 }
 
-// Dancing Pip mascot
-function DancingPip() {
-    return (
-        <motion.div
-            className="relative"
-            animate={{
-                y: [0, -10, 0, -5, 0],
-                rotate: [-5, 5, -5, 5, 0],
-            }}
-            transition={{
-                duration: 0.8,
-                repeat: 3,
-                ease: 'easeInOut',
-            }}
-        >
-            <div className="text-6xl">🦊</div>
-            {/* Celebration sparkles around Pip */}
-            {[...Array(5)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    className="absolute text-xl"
-                    style={{
-                        left: `${50 + (Math.random() - 0.5) * 60}%`,
-                        top: `${50 + (Math.random() - 0.5) * 60}%`,
-                    }}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{
-                        opacity: [0, 1, 0],
-                        scale: [0, 1, 0],
-                    }}
-                    transition={{
-                        duration: 0.6,
-                        delay: i * 0.15,
-                        repeat: 2,
-                    }}
-                >
-                    ✨
-                </motion.div>
-            ))}
-        </motion.div>
-    );
-}
 
 // Accuracy badge
 function AccuracyBadge({ accuracy }: { accuracy: number }) {
@@ -213,7 +179,7 @@ export function CelebrationOverlay({
         <AnimatePresence>
             {show && (
                 <motion.div
-                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#FFF8F0] via-[#FFF8F0]/95 to-[#3B82F6]/10 backdrop-blur-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -221,10 +187,10 @@ export function CelebrationOverlay({
                 >
                     {/* Confetti particles */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        {[...Array(30)].map((_, i) => (
+                        {[...Array(100)].map((_, i) => (
                             <ConfettiParticle
                                 key={i}
-                                delay={i * 0.05}
+                                delay={i * 0.02}
                                 color={confettiColors[i % confettiColors.length]}
                             />
                         ))}
@@ -240,17 +206,27 @@ export function CelebrationOverlay({
                         {/* Star burst with letter */}
                         <StarBurst letter={letter} />
 
-                        {/* Message */}
+                        {/* Message with massive 3D bouncy typography */}
                         <motion.div
                             className="text-center"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
+                            initial={{ opacity: 0, y: 50, scale: 0.5 }}
+                            animate={{ opacity: 1, y: [0, -20, 0], scale: 1 }}
+                            transition={{
+                                opacity: { duration: 0.5 },
+                                scale: { type: 'spring', stiffness: 200, damping: 15 },
+                                y: { delay: 0.8, duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+                            }}
                         >
-                            <h2 className="text-3xl font-bold text-white mb-2">
+                            <h2
+                                className="text-5xl md:text-7xl font-black text-[#F2CC8F] tracking-tight mb-4"
+                                style={{
+                                    WebkitTextStroke: '2px #78350F',
+                                    textShadow: '0 8px 0 #D97706, 0 16px 20px rgba(0,0,0,0.2)'
+                                }}
+                            >
                                 {message || `Great job! 🎉`}
                             </h2>
-                            <p className="text-white/80 text-lg">
+                            <p className="text-blue-600 font-bold text-2xl md:text-3xl bg-white/80 px-6 py-2 rounded-full shadow-[0_4px_0_rgba(59,130,246,0.3)] inline-block">
                                 You traced {letter} beautifully!
                             </p>
                         </motion.div>
@@ -258,18 +234,27 @@ export function CelebrationOverlay({
                         {/* Accuracy stars */}
                         <AccuracyBadge accuracy={accuracy} />
 
-                        {/* Dancing Pip */}
+                        {/* Mascot Integration with Glowing Backdrop */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.4, type: 'spring' }}
+                            className="relative mt-8"
+                            initial={{ opacity: 0, scale: 0, y: 100 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ delay: 0.4, type: 'spring', stiffness: 150, damping: 12 }}
                         >
-                            <DancingPip />
+                            <motion.div
+                                className="absolute inset-0 bg-yellow-400 rounded-full blur-2xl -z-10 mix-blend-screen"
+                                animate={{
+                                    scale: [1, 1.4, 1],
+                                    opacity: [0.4, 0.8, 0.4],
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                            <Mascot state="celebrating" responsiveSize="lg" hideOnMobile={false} decorative={true} />
                         </motion.div>
 
                         {/* Tap to continue hint */}
                         <motion.p
-                            className="text-white/60 text-sm"
+                            className="text-slate-400 text-sm"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 1.5 }}

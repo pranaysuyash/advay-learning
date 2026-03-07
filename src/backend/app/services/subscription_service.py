@@ -297,7 +297,8 @@ class SubscriptionService:
         now = datetime.now(timezone.utc)
         new_duration = PLAN_DURATIONS[new_plan]
 
-        notes_parts = [f"Upgraded from {old_subscription.plan_type.value}"]
+        plan_type_str = old_subscription.plan_type.value if hasattr(old_subscription.plan_type, 'value') else old_subscription.plan_type
+        notes_parts = [f"Upgraded from {plan_type_str}"]
         if upgrade_credit > 0:
             notes_parts.append(f"Credit applied: ₹{upgrade_credit / 100:.2f}")
             notes_parts.append(f"Original price: ₹{new_price / 100:.2f}")
@@ -316,10 +317,12 @@ class SubscriptionService:
             notes=". ".join(notes_parts),
         )
 
-        # Link old to new
+        db.add(new_subscription)
+        await db.flush()  # Flush to get new_subscription.id assigned and persisted
+
+        # Link old to new after new subscription is persisted
         old_subscription.upgraded_to_id = new_subscription.id
 
-        db.add(new_subscription)
         await db.commit()
         await db.refresh(new_subscription)
         return new_subscription
@@ -362,7 +365,7 @@ class SubscriptionService:
             "selected_count": selected_count,
             "remaining_slots": game_limit - selected_count,
             "swap_available": swap_remaining,
-            "plan_type": subscription.plan_type.value,
+            "plan_type": subscription.plan_type.value if hasattr(subscription.plan_type, 'value') else subscription.plan_type,
         }
 
     @staticmethod
@@ -391,7 +394,8 @@ class SubscriptionService:
         if game_id in active_selections:
             return True, "Game selected in pack"
 
-        return False, f"Game not in your {subscription.plan_type.value} selection"
+        plan_type_str = subscription.plan_type.value if hasattr(subscription.plan_type, 'value') else subscription.plan_type
+        return False, f"Game not in your {plan_type_str} selection"
 
     @staticmethod
     async def get_subscription_for_parent(

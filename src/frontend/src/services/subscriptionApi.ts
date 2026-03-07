@@ -23,7 +23,12 @@ type ApiErrorLike = {
   message?: string;
   response?: {
     status?: number;
-    data?: { detail?: string; message?: string; reason?: string };
+    data?: { 
+      detail?: string; 
+      message?: string; 
+      reason?: string;
+      error?: { message?: string };
+    };
   };
 };
 
@@ -42,10 +47,15 @@ function describeApiError(error: unknown): string {
   }
 
   const status = maybeAxios.response?.status;
+  const data = maybeAxios.response?.data;
+  
+  // New structured error format
   const detail =
-    maybeAxios.response?.data?.detail ||
-    maybeAxios.response?.data?.message ||
-    maybeAxios.response?.data?.reason;
+    data?.error?.message ||
+    data?.detail ||
+    data?.message ||
+    data?.reason;
+  
   if (status && detail) return `HTTP ${status}: ${detail}`;
   if (status) return `HTTP ${status}`;
   if (maybeAxios.message) return maybeAxios.message;

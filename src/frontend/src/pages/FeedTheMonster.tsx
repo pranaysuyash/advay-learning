@@ -27,8 +27,8 @@ import {
   useVoiceInstructions,
 } from '../components/game/VoiceInstructions';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { TrackedHandFrame } from '../types/tracking';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { DragDropSystem, type DraggableItem, type DropZone } from '../components/game/DragDropSystem';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
 import { triggerHaptic } from '../utils/haptics';
@@ -72,10 +72,8 @@ function FeedTheMonsterGameComponent() {
 
   const [isEating, setIsEating] = useState(false);
 
-  // Streak/Combo system state
-  const [streak, setStreak] = useState(0);
-  const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  // Streak tracking
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const TOTAL_ROUNDS = 5;
 
@@ -207,10 +205,8 @@ function FeedTheMonsterGameComponent() {
     setIsEating(true);
 
     if (isCorrect) {
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-
       // Calculate points with streak bonus
+      const newStreak = incrementStreak();
       const basePoints = 10;
       const streakBonus = Math.min(newStreak * 2, 15);
       const totalPoints = basePoints + streakBonus;
@@ -222,14 +218,6 @@ function FeedTheMonsterGameComponent() {
 
       // Show score popup
       setScorePopup({ points: totalPoints, x: 50, y: 30 });
-      setTimeout(() => setScorePopup(null), 700);
-
-      // Check for streak milestone (every 5)
-      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-        setShowStreakMilestone(true);
-        triggerHaptic('celebration');
-        setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
-      }
 
       setShowSuccess(true);
       speak('Yummy! That was delicious!');
@@ -247,7 +235,7 @@ function FeedTheMonsterGameComponent() {
         }
       }, 2000);
     } else {
-      setStreak(0);
+      resetStreak();
       setCombo(0);
       playError();
       triggerHaptic('error');
@@ -269,13 +257,11 @@ function FeedTheMonsterGameComponent() {
     setGameStarted(true);
     setScore(0);
     setCombo(0);
-    setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
+    resetStreak();
     setRound(1);
     playPop();
     speak('Pinch the food and drag it to the monster to feed it!');
-  }, [speak, playPop]);
+  }, [speak, playPop, resetStreak]);
 
   const getMonsterStyle = () => {
     if (!monster) return {};
@@ -344,7 +330,7 @@ function FeedTheMonsterGameComponent() {
       )}
 
       {!gameStarted && (
-        <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-slate-900/60 backdrop-blur-md z-20'>
+        <div className='absolute inset-0 flex flex-col items-center justify-center gap-8 bg-[#FFF8F0]/80 backdrop-blur-md z-20'>
           <div className='flex flex-col items-center justify-center bg-white border-4 border-purple-400 rounded-[3rem] p-10 md:p-14 shadow-[0_12px_40px_rgba(0,0,0,0.3)] text-center max-w-2xl w-[90%]'>
             <div className='text-[8rem] mb-6 drop-shadow-lg hover:animate-bounce transition-transform'>👾</div>
             <h1 className='text-6xl font-black text-purple-600 tracking-tight mb-4 drop-shadow-sm'>
@@ -420,7 +406,7 @@ function FeedTheMonsterGameComponent() {
       )}
 
       {/* Streak Milestone Celebration */}
-      {showStreakMilestone && (
+      {showMilestone && (
         <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
           <div className="bg-orange-500 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce border-4 border-yellow-400">
             <div className="text-4xl font-black flex items-center gap-3">

@@ -382,19 +382,19 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
               setStreak(newStreak);
               const basePoints = 100;
               const streakBonus = Math.min(newStreak * 10, 50);
-              
+
               playFanfare();
               triggerHaptic('success');
               setScore((s) => s + basePoints + streakBonus);
               setShowCelebration(true);
-              
+
               // Milestone every 5
               if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
                 setShowStreakMilestone(true);
                 triggerHaptic('celebration');
                 setTimeout(() => setShowStreakMilestone(false), 1500);
               }
-              
+
               setTimeout(() => {
                 setShowCelebration(false);
                 setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length);
@@ -796,7 +796,7 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
           <AnimatePresence>
             {showCelebration && (
               <motion.div
-                className='fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4'
+                className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4'
                 initial={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1 }}
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0 }}
@@ -853,7 +853,7 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
 
         {/* Wellness timer */}
         <WellnessTimer />
-        
+
         {/* Streak Milestone Overlay */}
         {showStreakMilestone && (
           <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>

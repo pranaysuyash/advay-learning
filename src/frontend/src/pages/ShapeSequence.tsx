@@ -423,11 +423,10 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
               aria-hidden='true'
             >
               <div
-                className={`absolute inset-0 rounded-[2rem] border-[6px] shadow-[0_4px_0_#E5B86E] flex items-center justify-center font-black text-5xl transition-colors ${
-                  isExpected
+                className={`absolute inset-0 rounded-[2rem] border-[6px] shadow-[0_4px_0_#E5B86E] flex items-center justify-center font-black text-5xl transition-colors ${isExpected
                     ? 'border-[#D946EF] bg-fuchsia-50 text-[#D946EF]'
                     : 'border-[#3B82F6] bg-white text-[#3B82F6]'
-                }`}
+                  }`}
               >
                 {target.shape}
               </div>
@@ -450,7 +449,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         )}
 
         {!isPlaying && !gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-blue-100 rounded-3xl border-4 border-blue-200'>
                 <svg
@@ -503,7 +502,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         )}
 
         {gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-amber-100 rounded-3xl border-4 border-amber-200'>
                 <svg

@@ -340,7 +340,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
         )}
 
         {!isPlaying && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='text-[5rem] mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform'>
                 🖐️

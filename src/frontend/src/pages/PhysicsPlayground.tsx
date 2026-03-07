@@ -5,6 +5,8 @@ import { Particle } from '../features/physics-playground/particles/Particle';
 import { ParticleSystem } from '../features/physics-playground/particles/ParticleSystem';
 import { CanvasRenderer } from '../features/physics-playground/renderer/CanvasRenderer';
 import { StateManager } from '../features/physics-playground/state/StateManager';
+import { HandInteraction } from '../features/physics-playground/hand-tracking/HandInteraction';
+import { HandTracker } from '../features/physics-playground/hand-tracking/HandTracker';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import {
   AccessibilityMode,
@@ -22,14 +24,18 @@ const PARTICLE_OPTIONS: Array<{
   label: string;
   swatch: string;
   accent: string;
+  description: string;
 }> = [
-    { type: ParticleType.SAND, label: 'Sand', swatch: '#e6c229', accent: '#7a5c00' },
-    { type: ParticleType.WATER, label: 'Water', swatch: '#4da6ff', accent: '#0f5ca8' },
-    { type: ParticleType.FIRE, label: 'Fire', swatch: '#ff6b35', accent: '#9f2d00' },
-    { type: ParticleType.BUBBLE, label: 'Bubbles', swatch: '#ffffff', accent: '#475569' },
-    { type: ParticleType.STAR, label: 'Stars', swatch: '#ffd700', accent: '#7c5f00' },
-    { type: ParticleType.LEAF, label: 'Leaves', swatch: '#90ee90', accent: '#1f6b35' },
-    { type: ParticleType.SEED, label: 'Seeds', swatch: '#8B4513', accent: '#5c2d0c' },
+    { type: ParticleType.SAND, label: 'Sand', swatch: '#e6c229', accent: '#7a5c00', description: 'Heavy and settles quickly' },
+    { type: ParticleType.WATER, label: 'Water', swatch: '#4da6ff', accent: '#0f5ca8', description: 'Fluid and flows freely' },
+    { type: ParticleType.FIRE, label: 'Fire', swatch: '#ff6b35', accent: '#9f2d00', description: 'Rises and burns leaves' },
+    { type: ParticleType.BUBBLE, label: 'Bubbles', swatch: '#ffffff', accent: '#475569', description: 'Floats upward gently' },
+    { type: ParticleType.STAR, label: 'Stars', swatch: '#ffd700', accent: '#7c5f00', description: 'Sparkly and bouncy' },
+    { type: ParticleType.LEAF, label: 'Leaves', swatch: '#90ee90', accent: '#1f6b35', description: 'Light and fluttery' },
+    { type: ParticleType.SEED, label: 'Seeds', swatch: '#8B4513', accent: '#5c2d0c', description: 'Grows plants when watered' },
+    { type: ParticleType.GAS, label: 'Gas', swatch: '#c2b280', accent: '#8B7355', description: 'Rises quickly, created by fire' },
+    { type: ParticleType.STEAM, label: 'Steam', swatch: '#d0d0d0', accent: '#808080', description: 'Floats up, fire + water' },
+    { type: ParticleType.PLANT, label: 'Plants', swatch: '#228B22', accent: '#006400', description: 'Grows from seeds + water' },
   ];
 
 function clamp(value: number, min: number, max: number): number {
@@ -78,10 +84,12 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const particleSystemRef = useRef<ParticleSystem | null>(null);
   const audioSystemRef = useRef<AudioSystem | null>(null);
+  const handTrackerRef = useRef<HandTracker | null>(null);
+  const handInteractionRef = useRef<HandInteraction | null>(null);
   const pointerActiveRef = useRef(false);
   const stateManagerRef = useRef(new StateManager());
   const settingsRef = useRef<Settings>({
-    particleCountLimit: 260,
+    particleCountLimit: 500,
     audioEnabled: true,
     handTrackingEnabled: false,
     accessibilityMode: AccessibilityMode.KEYBOARD,
@@ -100,7 +108,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [helperText, setHelperText] = useState(
-    'Tap/drag OR pinch in the air to pour particles. Use 1-7 to switch materials.',
+    'Tap/drag OR pinch in the air to pour particles. Use 1-9 and 0 to switch materials.',
   );
 
   const { cursor, startTracking, stopTracking, isPinching, isReady } = useGameHandTracking({
@@ -119,6 +127,11 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
     cursorRef.current = cursor;
     isPinchingRef.current = isPinching;
     selectedTypeRef.current = selectedType;
+
+    // Update hand interaction with current particle type
+    if (handInteractionRef.current) {
+      handInteractionRef.current.setParticleType(selectedType);
+    }
   }, [cursor, isPinching, selectedType]);
 
   useEffect(() => {
@@ -134,9 +147,18 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
     const particleSystem = new ParticleSystem(settingsRef.current);
     const audioSystem = new AudioSystem();
 
+    // Create hand tracker and interaction manager
+    const handTracker = new HandTracker();
+    const handInteraction = new HandInteraction(handTracker, particleSystem);
+
+    // Wire up audio system to particle system
+    particleSystem.setAudioSystem(audioSystem);
+
     rendererRef.current = renderer;
     particleSystemRef.current = particleSystem;
     audioSystemRef.current = audioSystem;
+    handTrackerRef.current = handTracker;
+    handInteractionRef.current = handInteraction;
 
     const savedState = stateManagerRef.current.load();
     if (savedState?.particles?.length) {
@@ -151,15 +173,26 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
         applyBounds(particle, canvas.width, canvas.height);
       }
 
-      // Handle hand-tracking continuous pinching (Sandbox open play semantic)
-      if (cursorRef.current && isPinchingRef.current) {
-        // Mirrored X mapping (hand tracking origin is top-left, but mirror transforms it naturally)
+      // Handle hand-tracking gestures via HandInteraction
+      if (handTrackerRef.current && handInteractionRef.current && cursorRef.current) {
         const cameraX = cursorRef.current.x * canvas.width;
         const cameraY = cursorRef.current.y * canvas.height;
+
+        // Feed gesture data to HandTracker
+        const gestures = [];
+        if (isPinchingRef.current) {
+          gestures.push({
+            type: 'pinch',
+            position: { x: cameraX, y: cameraY },
+          } as const);
+        }
+        handTrackerRef.current.setFrameData({ x: cameraX, y: cameraY }, gestures);
+
+        // Process gestures through HandInteraction
+        handInteractionRef.current.processGestures();
+
+        // Update emitter position for cursor display
         emitterRef.current = { x: cameraX, y: cameraY };
-        particleSystem.addMultipleParticles(selectedTypeRef.current, cameraX, cameraY, 3);
-        audioSystem.resume();
-        audioSystem.playParticleAdd();
       }
 
       renderer.clear();
@@ -245,17 +278,35 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
       setParticleCount(particleSystem.getParticleCount());
     }, 150);
 
+    // Focus loss handling - reduce simulation complexity when app loses focus
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Reduce simulation complexity when app loses focus
+        setIsPaused(true);
+      } else {
+        // Resume simulation when app regains focus
+        setIsPaused(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       stateManagerRef.current.save(
         particleSystem.getSerializableParticles(),
         settingsRef.current,
       );
       window.clearInterval(counterInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       renderer.stopAnimationLoop();
       rendererRef.current = null;
       particleSystemRef.current = null;
       audioSystemRef.current?.dispose();
       audioSystemRef.current = null;
+      handTrackerRef.current?.stopCamera();
+      handInteractionRef.current?.dispose();
+      handTrackerRef.current = null;
+      handInteractionRef.current = null;
     };
   }, []);
 
@@ -382,7 +433,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
     const current = emitterRef.current;
 
-    const keyIndex = Number(event.key);
+    const keyIndex = event.key === '0' ? 10 : Number(event.key);
     if (
       Number.isInteger(keyIndex) &&
       keyIndex >= 1 &&
@@ -391,7 +442,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
       const option = PARTICLE_OPTIONS[keyIndex - 1];
       if (option) {
         setSelectedType(option.type);
-        setHelperText(`Selected ${option.label}. Press space to spawn at the crosshair.`);
+        setHelperText(`Selected ${option.label}: ${option.description}. Press space to spawn at the crosshair.`);
       }
       return;
     }
@@ -498,7 +549,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
                 tabIndex={0}
                 aria-label='Physics playground canvas. Click or drag to pour particles. Use arrow keys to move the crosshair and space to spawn.'
               />
-              <p className='mt-3 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white'>
+              <p className='mt-3 rounded-2xl border-2 border-[#F2CC8F] bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-[0_4px_0_#E5B86E]'>
                 {helperText}
               </p>
             </div>
@@ -537,11 +588,11 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
                       type='button'
                       onClick={() => {
                         setSelectedType(option.type);
-                        setHelperText(`Selected ${option.label}. Drag across the canvas to pour it.`);
+                        setHelperText(`Selected ${option.label}: ${option.description}`);
                       }}
-                      className={`flex items-center justify-between rounded-3xl border px-4 py-3 text-left transition ${isActive
-                        ? 'border-slate-900 bg-slate-900 text-white'
-                        : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300'
+                      className={`flex items-center justify-between rounded-3xl border-2 px-4 py-3 text-left transition ${isActive
+                        ? 'border-[#6366F1] bg-[#6366F1] text-white shadow-[0_4px_0_#3730A3] translate-y-[-2px]'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 shadow-sm'
                         }`}
                     >
                       <span className='flex items-center gap-3'>
@@ -552,7 +603,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
                         <span className='font-bold'>{option.label}</span>
                       </span>
                       <span className='text-xs font-black uppercase tracking-[0.2em] opacity-70'>
-                        {index + 1}
+                        {index === 9 ? '0' : index + 1}
                       </span>
                     </button>
                   );
@@ -584,7 +635,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
                 <button
                   type='button'
                   onClick={toggleMute}
-                  className='rounded-3xl bg-slate-900 px-4 py-3 text-left font-black text-white shadow-[0_8px_20px_rgba(15,23,42,0.28)] transition hover:bg-slate-800'
+                  className='rounded-3xl bg-[#6366F1] px-4 py-3 text-left font-black text-white shadow-[0_6px_0_#3730A3] transition hover:bg-indigo-500 hover:translate-y-[2px] active:shadow-none'
                 >
                   {isMuted ? 'Turn Sound On' : 'Mute Sound'}
                 </button>
@@ -606,7 +657,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
 
               <div className='rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700'>
                 <p className='font-black text-slate-900'>Keyboard</p>
-                <p className='mt-2'>`1-7` pick materials, arrow keys move the crosshair, `Space` spawns, `W` sends wind, `C` clears.</p>
+                <p className='mt-2'>`1-9,0` pick materials, arrow keys move crosshair, `Space` spawns, `W` wind, `C` clears.</p>
               </div>
             </aside>
           </section>

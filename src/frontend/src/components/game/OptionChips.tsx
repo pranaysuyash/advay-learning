@@ -40,16 +40,16 @@ export function OptionChips(props: Props) {
 
   const baseButton =
     theme === 'dark'
-      ? 'bg-black/35 text-white border border-white/20 hover:bg-black/45'
-      : 'bg-bg-tertiary text-text-primary border border-border hover:bg-white';
+      ? 'bg-black/35 text-white border-2 border-white/20 hover:bg-black/45 shadow-[0_3px_0_rgba(255,255,255,0.2)] hover:translate-y-[1px] hover:shadow-[0_2px_0_rgba(255,255,255,0.2)]'
+      : 'bg-white text-advay-slate border-3 border-slate-200 hover:bg-slate-50 shadow-[0_4px_0_#E2E8F0] hover:translate-y-[2px] hover:shadow-[0_2px_0_#E2E8F0]';
   const selectedButton =
     theme === 'dark'
-      ? 'bg-white text-advay-slate border border-white shadow-soft'
-      : 'bg-pip-orange text-white shadow-soft border border-pip-orange';
+      ? 'bg-white text-advay-slate border-3 border-white shadow-[0_6px_0_rgba(255,255,255,0.8)] translate-y-[-2px]'
+      : 'bg-[#F2CC8F] text-advay-slate border-3 border-[#D97706] shadow-[0_6px_0_#B45309] translate-y-[-2px]';
   const disabledButton =
     theme === 'dark'
-      ? 'bg-black/20 text-white/50 border border-white/10 cursor-not-allowed'
-      : 'bg-bg-tertiary text-text-secondary border border-border cursor-not-allowed opacity-60';
+      ? 'bg-black/20 text-white/50 border-2 border-white/10 cursor-not-allowed shadow-none translate-y-[3px]'
+      : 'bg-slate-100 text-slate-400 border-3 border-slate-200 cursor-not-allowed shadow-none translate-y-[4px]';
 
   return (
     <div

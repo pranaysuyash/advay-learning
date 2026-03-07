@@ -190,13 +190,37 @@ import { SkeletonCard, Loading } from '../components/ui/Skeleton';
 
 ---
 
+## API Change Notice
+
+The error response format has changed from FastAPI's default:
+
+**Old:** `{"detail": "Error message"}`  
+**New:** `{"success": false, "error": {"code": "ERROR_CODE", "message": "Error message"}}`
+
+This is a breaking change for frontend error handling.
+
+### Migration Required
+
+Frontend code needs to be updated:
+```typescript
+// Old
+const message = error.response?.data?.detail;
+
+// New
+const message = error.response?.data?.error?.message;
+const code = error.response?.data?.error?.code;
+```
+
+---
+
 ## Next Steps (For Future Work)
 
 The infrastructure is complete. Future work could include:
 
-1. **Apply exceptions throughout API**: Replace generic HTTPExceptions with specific custom exceptions
-2. **Add toast notifications to more pages**: Currently only used in Dashboard/Settings
-3. **Add skeleton screens**: Apply to async loading areas
+1. **Migrate remaining API endpoints**: Replace generic HTTPExceptions with specific custom exceptions
+2. **Update frontend error handling**: Adapt to new error response format
+3. **Add toast notifications to more pages**: Currently only used in Dashboard/Settings
+4. **Add skeleton screens**: Apply to async loading areas
 4. **Error tracking integration**: Connect to Sentry/DataDog for production monitoring
 
 ---
@@ -211,6 +235,17 @@ The infrastructure is complete. Future work could include:
 - `src/backend/app/main.py` (+2 lines)
 - `src/backend/app/api/permissions.py` (+25 lines)
 - `docs/WORKLOG_ADDENDUM_ERROR_HANDLING_2026-03-05.md` (tracking)
+
+---
+
+## Test Results
+
+```
+Before:  93 passed, 6 failed, 1 skipped (due to error format change)
+After:   99 passed, 0 failed, 1 skipped (Dodo payment test - needs API key)
+```
+
+All tests updated to use new error format.
 
 ---
 

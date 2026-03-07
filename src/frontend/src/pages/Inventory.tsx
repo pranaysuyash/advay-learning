@@ -21,20 +21,20 @@ import { getListedGames } from '../data/gameRegistry';
 import { ItemIcon } from '../components/ui/ItemIcon';
 
 const CATEGORY_CONFIG: Record<ItemCategory, { label: string; emoji: string }> =
-  {
-    element: { label: 'Elements', emoji: '⚗️' },
-    color: { label: 'Colors', emoji: '🎨' },
-    shape: { label: 'Shapes', emoji: '🔷' },
-    creature: { label: 'Creatures', emoji: '🐾' },
-    note: { label: 'Notes', emoji: '🎵' },
-    emotion: { label: 'Emotions', emoji: '💖' },
-    material: { label: 'Materials', emoji: '🧪' },
-    tool: { label: 'Tools', emoji: '🔧' },
-    artifact: { label: 'Artifacts', emoji: '🏆' },
-    food: { label: 'Food', emoji: '🍪' },
-    letter: { label: 'Letters', emoji: '🔤' },
-    number: { label: 'Numbers', emoji: '🔢' },
-  };
+{
+  element: { label: 'Elements', emoji: '⚗️' },
+  color: { label: 'Colors', emoji: '🎨' },
+  shape: { label: 'Shapes', emoji: '🔷' },
+  creature: { label: 'Creatures', emoji: '🐾' },
+  note: { label: 'Notes', emoji: '🎵' },
+  emotion: { label: 'Emotions', emoji: '💖' },
+  material: { label: 'Materials', emoji: '🧪' },
+  tool: { label: 'Tools', emoji: '🔧' },
+  artifact: { label: 'Artifacts', emoji: '🏆' },
+  food: { label: 'Food', emoji: '🍪' },
+  letter: { label: 'Letters', emoji: '🔤' },
+  number: { label: 'Numbers', emoji: '🔢' },
+};
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG) as ItemCategory[];
 
@@ -183,11 +183,10 @@ export const Inventory = memo(function Inventory() {
         <div className='flex flex-wrap gap-2 mb-6'>
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-              selectedCategory === 'all'
+            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedCategory === 'all'
                 ? 'bg-[#3B82F6] text-white shadow-lg'
                 : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
-            }`}
+              }`}
           >
             <span className='flex items-center gap-1'>
               <Sparkles className='w-4 h-4' />
@@ -215,11 +214,10 @@ export const Inventory = memo(function Inventory() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                  selectedCategory === cat
+                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedCategory === cat
                     ? 'bg-[#3B82F6] text-white shadow-lg'
                     : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
-                }`}
+                  }`}
               >
                 {config.emoji} {config.label}
               </button>
@@ -336,11 +334,10 @@ export const Inventory = memo(function Inventory() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedItem(item)}
-                className={`relative aspect-square rounded-2xl border-3 flex flex-col items-center justify-center gap-1 transition-all ${
-                  item.discovered
+                className={`relative aspect-square rounded-2xl border-3 flex flex-col items-center justify-center gap-1 transition-all ${item.discovered
                     ? 'bg-white border-[#F2CC8F] hover:border-[#E85D04] shadow-[0_4px_0_#E5B86E]'
                     : 'bg-slate-100 border-[#F2CC8F] opacity-40'
-                }`}
+                  }`}
                 style={item.discovered ? { boxShadow: rarity.glow } : undefined}
               >
                 <span
@@ -376,7 +373,7 @@ export const Inventory = memo(function Inventory() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4'
+              className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4'
               onClick={() => setSelectedItem(null)}
             >
               <motion.div

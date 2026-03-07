@@ -218,6 +218,25 @@ This document governs how AI agents (including myself and others) work on the Ad
 - `ALLOW_REFACTORED_SIDE_CARS=1` for intentional temporary sidecar exceptions
 - Use only when the worklog documents why the sidecar must remain temporarily
 
+### 6.2 Merge Quality Gate (Mandatory)
+
+**Purpose:** A merge to `main` is a quality decision, not a branch-closure action.
+
+**Rules:**
+
+- Do not merge a branch into `main` unless there is positive evidence the resulting code is at least non-regressive and preferably additive (better/comprehensive behavior, or explicit accepted tradeoff).
+- Do not use strategy merges (for example `-s ours`) to mark branches as merged unless the user explicitly asks for administrative closure-only behavior in the current chat.
+- Before merging, run and record the canonical checks for the merged result (lint/type/tests/build or repo-equivalent gates).
+- If conflicts occur, resolve semantically with intent-first analysis (preserve good changes from both sides when possible), not by mechanical discard.
+- If a branch cannot be merged without reducing quality or violating acceptance criteria, stop and escalate with options instead of force-merging.
+- Treat local-only merges the same as remote merges: same quality bar, same regression checks, same documentation/evidence requirements.
+
+**Required evidence before merge:**
+
+- Diff review summary of what improves/preserves behavior.
+- Command evidence showing checks pass on the merge result.
+- Explicit note of any known risks/follow-ups.
+
 ### 7. Create Reusable Tools, Not One-Off Scripts
 
 **Principle:** When you create helpful code (analyzers, converters, validators, test harnesses), save it as a documented, reusable tool for future use—by any project.

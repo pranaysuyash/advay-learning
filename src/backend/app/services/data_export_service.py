@@ -49,11 +49,10 @@ class DataExportService:
         user = user_result.scalar_one()
 
         # Get profiles with related data
-        profiles_result = await db.execute(
-            select(Profile)
-            .where(Profile.parent_id == user_id)
-            .options(selectinload(Profile.progress) if include_progress else None)
-        )
+        query = select(Profile).where(Profile.parent_id == user_id)
+        if include_progress:
+            query = query.options(selectinload(Profile.progress))
+        profiles_result = await db.execute(query)
         profiles = profiles_result.scalars().all()
 
         # Build profile export data
@@ -94,7 +93,7 @@ class DataExportService:
         subscription_exports: List[SubscriptionExportData] = []
         if include_subscriptions:
             subs_result = await db.execute(
-                select(Subscription).where(Subscription.user_id == user_id)
+                select(Subscription).where(Subscription.parent_id == user_id)
             )
             subscriptions = subs_result.scalars().all()
 
@@ -163,7 +162,7 @@ class DataExportService:
 
         # Count subscriptions
         sub_result = await db.execute(
-            select(Subscription).where(Subscription.user_id == user_id)
+            select(Subscription).where(Subscription.parent_id == user_id)
         )
         subscription_count = len(sub_result.scalars().all())
 

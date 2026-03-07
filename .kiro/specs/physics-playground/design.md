@@ -68,12 +68,16 @@ interface ParticleProperties {
 }
 
 enum ParticleType {
-  SAND = 'sand',
-  WATER = 'water',
-  FIRE = 'fire',
-  BUBBLE = 'bubble',
-  STAR = 'star',
-  LEAF = 'leaf'
+  SAND = 'sand',      // Heavy, settles quickly
+  WATER = 'water',    // Fluid, flows freely
+  FIRE = 'fire',      // Rises, burns leaves, creates gas with leaves
+  BUBBLE = 'bubble',  // Floats upward gently
+  STAR = 'star',      // Sparkly and bouncy
+  LEAF = 'leaf',      // Light and fluttery, catches fire
+  SEED = 'seed',      // Grows plants when watered
+  GAS = 'gas',        // Rises quickly, created by fire + leaf
+  STEAM = 'steam',    // Floats up, created by fire + water
+  PLANT = 'plant'     // Static, created by water + seed
 }
 ```
 
@@ -121,6 +125,27 @@ interface AudioSystem {
 }
 ```
 
+### Elemental Reactions
+
+When certain particle types collide, they can transform into new types:
+
+| Reaction A | Reaction B | Result | Chance | Description |
+|------------|------------|--------|--------|-------------|
+| Fire | Leaf | Fire + Gas | 20% | Leaf catches fire and releases gas |
+| Fire | Water | Steam | 50% | Fire extinguishes and creates steam |
+| Water | Seed | Plant | 30% | Seed grows into a plant when watered |
+
+These reactions encourage experimentation and discovery. Children can observe how different materials interact and create new materials.
+
+```typescript
+interface ElementalReaction {
+  typeA: ParticleType;
+  typeB: ParticleType;
+  resultType: ParticleType | ParticleType[];
+  probability: number; // 0-1
+}
+```
+
 ## Data Models
 
 ### Particle Configuration
@@ -162,6 +187,48 @@ enum AccessibilityMode {
   VOICE_COMMANDS = 'voice_commands'
 }
 ```
+
+### Accessibility Implementation
+
+The Physics Playground supports multiple accessibility modes to ensure inclusive play:
+
+| Mode | Status | Description |
+|------|--------|-------------|
+| **NONE** | ✅ Implemented | Default mode, standard rendering |
+| **KEYBOARD** | ✅ Implemented | Full keyboard controls: 1-9/0 for materials, arrow keys for cursor, Space to spawn, W for wind, C to clear |
+| **HIGH_CONTRAST** | ✅ Implemented | High contrast color palette with distinct colors for all particle types. Black background with bright foreground colors. |
+| **COLORBLIND** | ✅ Implemented | Adds patterns and shapes to particles beyond just color differentiation. Dots for sand, waves for water, triangles for fire, etc. |
+| **SCREEN_READER** | 🔄 Planned | ARIA labels and live announcements for particle counts and interactions. Handled at component level. |
+| **SWITCH_ACCESS** | 📋 Planned | Single-switch scanning mode for particle selection and interaction. |
+| **VOICE_COMMANDS** | 📋 Planned | Voice commands for material selection and actions (e.g., "pour sand", "clear"). |
+
+**Keyboard Controls (FULLY IMPLEMENTED)**:
+- `1-9, 0` - Select particle type (1=Sand through 0=Plant)
+- `Arrow Keys` - Move the crosshair emitter
+- `Space` - Spawn particles at crosshair
+- `W` - Send wind gust
+- `C` - Clear playground
+- `P` - Pause/Resume motion
+- `M` - Mute/Unmute sound
+
+**High Contrast Colors**:
+- Sand: Yellow (#FFFF00)
+- Water: Cyan (#00FFFF)
+- Fire: Red (#FF0000)
+- Bubbles: White (#FFFFFF)
+- Stars: Magenta (#FF00FF)
+- Leaves: Green (#00FF00)
+- Seeds: Orange (#FF6600)
+- Gas: Gray (#999999)
+- Steam: Light Gray (#CCCCCC)
+- Plants: Dark Green (#008000)
+
+**Colorblind Patterns**:
+- Sand: Small dots inside circle
+- Water: Wavy line through circle
+- Fire: Triangle overlay
+- Seeds: Circle outline
+- Other types: Distinct shapes (star, leaf)
 
 ## Correctness Properties
 
@@ -292,7 +359,11 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
           fc.constant(ParticleType.FIRE),
           fc.constant(ParticleType.BUBBLE),
           fc.constant(ParticleType.STAR),
-          fc.constant(ParticleType.LEAF)
+          fc.constant(ParticleType.LEAF),
+          fc.constant(ParticleType.SEED),
+          fc.constant(ParticleType.GAS),
+          fc.constant(ParticleType.STEAM),
+          fc.constant(ParticleType.PLANT)
         ),
         (particleType) => {
           // Test implementation
@@ -311,8 +382,9 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
 
 ### Test Coverage
 
-- **Particle types**: All 6 particle types (sand, water, fire, bubbles, stars, leaves)
+- **Particle types**: All 10 particle types (sand, water, fire, bubbles, stars, leaves, seeds, gas, steam, plants)
 - **Interactions**: Particle-particle, particle-boundary, particle-hand
+- **Elemental reactions**: Fire+Leaf=Gas, Fire+Water=Steam, Water+Seed=Plant
 - **Edge cases**: Empty canvas, maximum particles, rapid creation/deletion
 - **Accessibility**: All accessibility modes (keyboard, screen reader, high contrast, colorblind, switch access, voice commands)
 - **Performance**: Frame rate, memory usage, CPU usage

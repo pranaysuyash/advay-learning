@@ -25,6 +25,7 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -32,7 +33,6 @@ import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameShell } from '../components/GameShell';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
-import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   const navigate = useNavigate();
@@ -53,8 +53,9 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   >('dancing');
   const [round, setRound] = useState(1);
   const [stabilityScore, setStabilityScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
 
   // Game Mode: 'classic' = pose only, 'combo' = pose + fingers
   const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
@@ -306,19 +307,16 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
 
     if (success) {
       // Streak logic
-      const newStreak = streak + 1;
-      setStreak(newStreak);
+      const newStreak = incrementStreak();
 
       setScore((s) => s + roundScore);
       triggerHaptic('success');
 
-      // Milestone every 5
-      if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-        setShowStreakMilestone(true);
+      // Milestone every 5 - hook handles the show state
+      if (newStreak > 0 && newStreak % 5 === 0) {
         triggerHaptic('celebration');
-        setTimeout(() => setShowStreakMilestone(false), 1500);
       }
-      
+
       if (roundScore > 50) {
         void playCelebration();
         setShowCelebration(true);
@@ -336,7 +334,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
         void speak('Good try! Hold even stiller next time!');
       }
     } else {
-      setStreak(0);
+      resetStreak();
       triggerHaptic('error');
       if (ttsEnabled) {
         void speak('You moved! Try to hold super still next time!');
@@ -435,8 +433,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     playPop();
     setIsPlaying(true);
     setScore(0);
-    setStreak(0);
-    setShowStreakMilestone(false);
+    resetStreak();
     setRound(1);
     if (ttsEnabled) {
       void speak(
@@ -451,8 +448,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     setIsPlaying(false);
     setGamePhase('dancing');
     setIsFrozen(false);
-    setStreak(0);
-    setShowStreakMilestone(false);
+    resetStreak();
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -600,11 +596,10 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                     playPop();
                     setGameMode('classic');
                   }}
-                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${
-                    gameMode === 'classic'
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'classic'
                       ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
                       : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <span className='block mb-2 flex justify-center'>
                     <Trophy className='w-10 h-10 text-blue-600' />
@@ -619,11 +614,10 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                     playPop();
                     setGameMode('combo');
                   }}
-                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${
-                    gameMode === 'combo'
+                  className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'combo'
                       ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
                       : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <span className='block mb-2 flex justify-center'>
                     <Hand className='w-10 h-10 text-purple-600' />
@@ -675,13 +669,12 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                   )}
                 </div>
                 <h3
-                  className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${
-                    gamePhase === 'dancing'
+                  className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing'
                       ? 'text-[#3B82F6]'
                       : gamePhase === 'freezing'
                         ? 'text-[#EF4444]'
                         : 'text-purple-500'
-                  }`}
+                    }`}
                 >
                   {gamePhase === 'dancing'
                     ? 'DANCE!'
@@ -776,13 +769,12 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
 
               <div className='absolute top-6 right-6 px-5 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <span
-                  className={`font-black tracking-wide ${
-                    gamePhase === 'dancing'
+                  className={`font-black tracking-wide ${gamePhase === 'dancing'
                       ? 'text-[#10B981]'
                       : gamePhase === 'freezing'
                         ? 'text-[#EF4444]'
                         : 'text-purple-500'
-                  }`}
+                    }`}
                 >
                   {gamePhase === 'dancing' ? (
                     <span className='flex items-center gap-1'>
@@ -824,7 +816,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
         <AnimatePresence>
           {showCelebration && (
             <motion.div
-              className='fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50'
+              className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm flex items-center justify-center z-50'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -860,9 +852,9 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
 
         {/* Streak Milestone Overlay */}
         <AnimatePresence>
-          {showStreakMilestone && (
+          {showMilestone && (
             <motion.div
-              className='fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 pointer-events-none'
+              className='fixed inset-0 bg-[#FFF8F0]/60 backdrop-blur-sm flex items-center justify-center z-50 pointer-events-none'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

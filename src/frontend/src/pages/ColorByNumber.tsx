@@ -91,8 +91,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
             Math.min(COLOR_BY_NUMBER_TEMPLATES.length - 1, Math.max(prev, templateIndex + 1)),
           );
           setFeedback(
-            `Picture complete! You earned ${summary.stars} star${
-              summary.stars === 1 ? '' : 's'
+            `Picture complete! You earned ${summary.stars} star${summary.stars === 1 ? '' : 's'
             }.`,
           );
           playCelebration();
@@ -151,11 +150,10 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                       type='button'
                       disabled={locked}
                       onClick={() => startLevel(idx)}
-                      className={`text-left rounded-2xl border-2 p-4 transition-transform ${
-                        locked
+                      className={`text-left rounded-2xl border-2 p-4 transition-transform ${locked
                           ? 'border-slate-200 bg-slate-100 text-slate-400'
                           : 'border-[#F2CC8F] bg-white hover:-translate-y-0.5'
-                      }`}
+                        }`}
                     >
                       <p className='text-sm font-black uppercase tracking-wide'>
                         Level {idx + 1}
@@ -205,22 +203,21 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                 {COLOR_BY_NUMBER_TEMPLATES.map((template, idx) => {
                   const locked = idx > unlockedLevel;
                   return (
-                  <button
-                    key={template.id}
-                    type='button'
-                    disabled={locked}
-                    onClick={() => startLevel(idx)}
-                    className={`px-3 py-2 rounded-xl border-2 font-bold text-sm ${
-                      idx === templateIndex
-                        ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
-                        : locked
-                          ? 'bg-slate-100 text-slate-400 border-slate-200'
-                          : 'bg-white text-slate-700 border-[#F2CC8F]'
-                    }`}
-                  >
-                    {template.name} {locked ? '🔒' : ''}
-                  </button>
-                );
+                    <button
+                      key={template.id}
+                      type='button'
+                      disabled={locked}
+                      onClick={() => startLevel(idx)}
+                      className={`px-3 py-2 rounded-xl border-2 font-bold text-sm ${idx === templateIndex
+                          ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
+                          : locked
+                            ? 'bg-slate-100 text-slate-400 border-slate-200'
+                            : 'bg-white text-slate-700 border-[#F2CC8F]'
+                        }`}
+                    >
+                      {template.name} {locked ? '🔒' : ''}
+                    </button>
+                  );
                 })}
               </div>
             </div>
@@ -270,9 +267,8 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                     key={entry.number}
                     type='button'
                     onClick={() => handleSelectColor(entry.number)}
-                    className={`rounded-xl border-2 p-3 text-left ${
-                      selected ? 'border-slate-800 shadow-lg' : 'border-[#F2CC8F]'
-                    }`}
+                    className={`rounded-xl border-2 p-3 text-left ${selected ? 'border-slate-800 shadow-lg' : 'border-[#F2CC8F]'
+                      }`}
                     style={{ backgroundColor: `${entry.color}33` }}
                     aria-label={`Select color ${entry.number} ${entry.label}`}
                   >
@@ -300,11 +296,10 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                     type='button'
                     onClick={() => handlePaintRegion(region.id)}
                     disabled={region.painted || gameState.completed}
-                    className={`rounded-2xl border-2 p-4 min-h-24 text-left transition-transform ${
-                      region.painted
+                    className={`rounded-2xl border-2 p-4 min-h-24 text-left transition-transform ${region.painted
                         ? 'border-emerald-300'
                         : 'border-[#F2CC8F] hover:-translate-y-0.5'
-                    }`}
+                      }`}
                     style={{
                       backgroundColor:
                         region.painted && palette ? `${palette.color}88` : '#FFFFFF',
@@ -319,14 +314,14 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
             </div>
           </section>
 
-          <section className='bg-slate-900 text-white rounded-2xl p-4 border-2 border-slate-700'>
-            <p className='text-sm font-bold uppercase tracking-wide text-slate-300'>Coach</p>
-            <p className='text-lg font-black mt-1'>{feedback}</p>
-            <div className='mt-3 flex flex-wrap gap-2'>
+          <section className='bg-white text-slate-800 rounded-2xl p-5 border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+            <p className='text-sm font-bold uppercase tracking-wide text-slate-400'>Coach</p>
+            <p className='text-xl font-black mt-1 text-slate-900'>{feedback}</p>
+            <div className='mt-4 flex flex-wrap gap-3'>
               <button
                 type='button'
                 onClick={() => startLevel(templateIndex)}
-                className='px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold'
+                className='px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-bold shadow-sm hover:bg-slate-50'
               >
                 Restart Level
               </button>
@@ -336,7 +331,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
                   playClick();
                   setView('menu');
                 }}
-                className='px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold'
+                className='px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-bold shadow-sm hover:bg-slate-50'
               >
                 Level Select
               </button>

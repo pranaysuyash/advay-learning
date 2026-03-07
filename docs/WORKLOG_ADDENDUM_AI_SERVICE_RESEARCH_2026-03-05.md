@@ -274,6 +274,25 @@ AI‑006/AI‑007/AI‑010.
 1. **TCK-20260305-014 :: Phase 3 Service Design**
 2. **TCK-20260305-015 :: Phase 3 Implementation Plan (Weeks 5–8)**
 
+### Implementation Updates (2026-03-06)
+
+- ✅ 2026-03-06 | Created STTService with WhisperSTTProvider (PRIMARY)
+  - Files: `src/frontend/src/services/ai/stt/STTService.ts`, `STTProvider.ts`, `WhisperSTTProvider.ts`
+  - Uses Transformers.js with distil-whisper-tiny.en model (~75MB)
+  - Runs locally via WebGPU - privacy-first, offline capable
+  - Primary provider: Whisper (local)
+  - Fallback: Web Speech API (browser native)
+  - Research: `speech_experiments/model-lab/ASR_MODEL_RESEARCH_2026-02.md`
+- ✅ 2026-03-06 | Created VisionService with MediaPipeVisionProvider
+  - Files: `src/frontend/src/services/ai/vision/VisionService.ts`, `VisionProvider.ts`, `MediaPipeVisionProvider.ts`
+  - Wraps existing MediaPipe usage in typed service abstraction
+  - Supports hand, pose, face tasks
+  - Research: `docs/research/VISION_PROVIDER_SURVEY_2026-03-05.md`
+
+**Status**: STT and Vision services implemented with local-first approach (Whisper, not Web Speech as primary)
+
+---
+
 **Next Actions:**
 - Begin coding generator stubs and unit tests for each interface.
 - Build UI screens for parental limits and feature toggles.

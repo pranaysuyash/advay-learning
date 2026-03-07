@@ -11,6 +11,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_db
 from app.core.config import settings
 from app.core.email import EmailService
+from app.core.exceptions import (
+    AccountLockedError,
+    AuthenticationError,
+    AuthorizationError,
+    DuplicateResourceError,
+    TokenInvalidError,
+    ValidationError,
+)
 from app.core.rate_limit import RateLimits, limiter
 from app.core.security import create_access_token
 from app.schemas.user import User, UserCreate
@@ -113,16 +121,7 @@ async def login(
     # Check if account is locked
     if await AccountLockoutService.is_account_locked(email):
         remaining_time = await AccountLockoutService.get_remaining_lockout_time(email)
-        if remaining_time:
-            raise HTTPException(
-                status_code=status.HTTP_423_LOCKED,
-                detail=f"Account temporarily locked due to multiple failed login attempts. Try again in {remaining_time} seconds.",
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_423_LOCKED,
-                detail="Account temporarily locked due to multiple failed login attempts. Please try again later.",
-            )
+        raise AccountLockedError(locked_until=f"{remaining_time}s" if remaining_time else None)
 
     # Authenticate user
     user = await UserService.authenticate(db, email, form_data.password)
@@ -131,32 +130,19 @@ async def login(
         should_lock = await AccountLockoutService.record_failed_attempt(email)
 
         if should_lock:
-            raise HTTPException(
-                status_code=status.HTTP_423_LOCKED,
-                detail="Account locked due to multiple failed login attempts. Please try again later.",
-            )
+            raise AccountLockedError()
 
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise AuthenticationError("Incorrect email or password")
 
     # Clear failed attempts on successful login
     await AccountLockoutService.clear_failed_attempts(email)
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user",
-        )
+        raise AuthorizationError("Account is inactive")
 
     # Check email verification
     if not user.email_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Email not verified. Please check your email for verification link.",
-        )
+        raise AuthorizationError("Email not verified. Please check your email for verification link.")
 
     # Create tokens
     access_token = create_access_token(data={"sub": user.id})
@@ -211,10 +197,7 @@ async def verify_email(request: Request, token: str, db: AsyncSession = Depends(
     """Verify email address using verification token."""
     user = await UserService.get_by_verification_token(db, token)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired verification token",
-        )
+        raise ValidationError("Invalid or expired verification token")
 
     await UserService.verify_email(db, user)
     return {"message": "Email verified successfully. You can now log in."}
@@ -274,17 +257,12 @@ async def reset_password(
     """Reset password using reset token."""
     user = await UserService.get_by_password_reset_token(db, token)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired reset token",
-        )
+        raise ValidationError("Invalid or expired reset token")
 
     # Validate password length
     if len(new_password) < 8:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters",
-        )
+        from app.core.exceptions import PasswordStrengthError
+        raise PasswordStrengthError()
 
     # Reset password
     await UserService.reset_password(db, user, new_password)
@@ -301,42 +279,27 @@ async def refresh_token(
     # Get refresh token from cookie
     refresh_token = request.cookies.get(REFRESH_TOKEN_COOKIE)
     if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No refresh token provided",
-        )
+        raise TokenInvalidError("No refresh token provided")
 
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id: str | None = payload.get("sub")
         if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token",
-            )
+            raise TokenInvalidError()
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token",
-        )
+        raise TokenInvalidError()
 
     # Verify user exists
     user = await UserService.get_by_id(db, user_id)
     if not user or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found or inactive",
-        )
+        raise AuthenticationError("User not found or inactive")
 
     # Validate the refresh token against the database
     is_valid = await RefreshTokenService.validate_refresh_token(db, refresh_token, user)
     if not is_valid:
         # Invalid or revoked token, clear cookies
         clear_auth_cookies(response)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or revoked refresh token",
-        )
+        raise TokenInvalidError("Invalid or revoked refresh token")
 
     # Revoke the old refresh token (rotation)
     await RefreshTokenService.revoke_refresh_token(db, refresh_token)

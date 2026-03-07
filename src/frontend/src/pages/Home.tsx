@@ -1,10 +1,17 @@
-import { memo } from 'react';
-import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { memo, useEffect, useState } from 'react';
+import { Navigate, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAuthStore, useSettingsStore } from '../store';
 import { OnboardingFlow } from '../components/OnboardingFlow';
 import { Mascot } from '../components/Mascot';
 import { Sparkles, Hand, ShieldCheck, Activity, FlaskConical } from 'lucide-react';
+import {
+  getPersistedGrowthAttribution,
+  parseGrowthAttribution,
+  persistGrowthAttribution,
+  recordGrowthEvent,
+  type GrowthAttribution,
+} from '../services/growthAttribution';
 
 // Reusable animated feature card
 const DynamicFeatureCard = ({
@@ -49,11 +56,51 @@ export const Home = memo(function Home() {
   const { isAuthenticated } = useAuthStore();
   const { onboardingCompleted, setDemoMode } = useSettingsStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const reducedMotion = useReducedMotion();
+  const [shareAttribution, setShareAttribution] =
+    useState<GrowthAttribution | null>(() => getPersistedGrowthAttribution());
+
+  useEffect(() => {
+    const parsedAttribution = parseGrowthAttribution(
+      location.search,
+      location.pathname,
+    );
+
+    if (parsedAttribution) {
+      persistGrowthAttribution(parsedAttribution);
+      setShareAttribution(parsedAttribution);
+      recordGrowthEvent('shared_visit_landed', {
+        ref: parsedAttribution.ref,
+        entry: parsedAttribution.entry ?? 'unknown',
+      });
+      return;
+    }
+
+    setShareAttribution(getPersistedGrowthAttribution());
+  }, [location.pathname, location.search]);
+
+  const trackSharedVisitCta = (cta: 'demo' | 'register') => {
+    if (!shareAttribution) {
+      return;
+    }
+
+    recordGrowthEvent('shared_visit_cta_started', {
+      cta,
+      ref: shareAttribution.ref,
+      entry: shareAttribution.entry ?? 'unknown',
+    });
+  };
 
   const startDemo = () => {
+    trackSharedVisitCta('demo');
     setDemoMode(true);
     navigate('/games');
+  };
+
+  const startRegistration = () => {
+    trackSharedVisitCta('register');
+    navigate('/register');
   };
 
   if (isAuthenticated) {
@@ -113,6 +160,18 @@ export const Home = memo(function Home() {
               ✨ The magic camera playground
             </motion.div>
 
+            {shareAttribution?.ref === 'progress_share' && (
+              <motion.div
+                initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 inline-flex items-center gap-2 px-5 py-2 bg-[#E8F7EE] text-[#0F766E] rounded-full font-black text-sm border-2 border-[#A7F3D0] shadow-[0_4px_0_#D1FAE5]"
+              >
+                <span>Shared by a parent</span>
+                <span aria-hidden="true">•</span>
+                <span>See the progress report, then try the demo</span>
+              </motion.div>
+            )}
+
             <h1 className='text-6xl md:text-8xl font-black mb-8 text-[#2D3748] tracking-tight leading-[1.1]'>
               Learn With Your <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#0EA5E9]">
@@ -127,7 +186,7 @@ export const Home = memo(function Home() {
             <div className='flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-xl mx-auto'>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <button
-                  onClick={() => navigate('/register')}
+                  onClick={startRegistration}
                   className="w-full bg-[#E85D04] hover:bg-[#ff6c14] text-white px-10 py-5 rounded-full font-black text-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-3"
                 >
                   Create a Profile
@@ -143,7 +202,11 @@ export const Home = memo(function Home() {
                 </button>
               </motion.div>
             </div>
-            <p className="mt-8 text-sm font-black text-slate-400 tracking-widest uppercase">No extra hardware required • Runs safely in your browser</p>
+            <p className="mt-8 text-sm font-black text-slate-400 tracking-widest uppercase">
+              {shareAttribution?.ref === 'progress_share'
+                ? 'Real family progress reports • No extra hardware required'
+                : 'No extra hardware required • Runs safely in your browser'}
+            </p>
           </motion.div>
         </section>
 
@@ -223,7 +286,7 @@ export const Home = memo(function Home() {
               <p className="text-2xl text-slate-400 mb-12 font-bold leading-relaxed">
                 We built Advay Learning on WebAssembly. That means our complex Computer Vision runs entirely inside your device browser. Uncompromising privacy by design.
               </p>
-              <button onClick={() => navigate('/register')} className="bg-[#FFF8F0] text-slate-900 hover:bg-white text-2xl font-black px-12 py-6 rounded-full border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-xl inline-block max-w-full">
+              <button onClick={startRegistration} className="bg-[#FFF8F0] text-slate-900 hover:bg-white text-2xl font-black px-12 py-6 rounded-full border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-xl inline-block max-w-full">
                 Create Child Profile
               </button>
             </div>

@@ -363,11 +363,10 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
             aria-hidden='true'
           >
             <div
-              className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-3xl shadow-[0_4px_0_#E5B86E] transition-all duration-300 ${
-                target.cleared
+              className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-3xl shadow-[0_4px_0_#E5B86E] transition-all duration-300 ${target.cleared
                   ? 'border-emerald-200 bg-emerald-100 text-emerald-500 scale-110'
                   : 'border-[#3B82F6] bg-white text-[#3B82F6] hover:scale-105'
-              }`}
+                }`}
             >
               {target.value}
             </div>
@@ -389,7 +388,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         )}
 
         {!isPlaying && !gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-blue-100 rounded-3xl border-4 border-blue-200'>
                 <svg
@@ -441,7 +440,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         )}
 
         {gameCompleted && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-6'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-6'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[80%] shadow-[0_4px_0_#E5B86E]'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-amber-100 rounded-3xl border-4 border-amber-200'>
                 <svg

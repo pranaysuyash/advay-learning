@@ -19,7 +19,11 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
                     fc.constant(ParticleType.FIRE),
                     fc.constant(ParticleType.BUBBLE),
                     fc.constant(ParticleType.STAR),
-                    fc.constant(ParticleType.LEAF)
+                    fc.constant(ParticleType.LEAF),
+                    fc.constant(ParticleType.SEED),
+                    fc.constant(ParticleType.GAS),
+                    fc.constant(ParticleType.STEAM),
+                    fc.constant(ParticleType.PLANT)
                 ),
                 (particleType) => {
                     // Create a particle of the selected type
@@ -78,6 +82,23 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
                             expect(particle.properties.friction).toBeCloseTo(0.97);
                             expect(particle.properties.specific.color).toBe('#90ee90');
                             break;
+                        case ParticleType.SEED:
+                            expect(particle.properties.gravity).toBeCloseTo(0.4);
+                            expect(particle.properties.friction).toBeCloseTo(0.9);
+                            expect(particle.properties.specific.color).toBe('#8B4513');
+                            break;
+                        case ParticleType.GAS:
+                            expect(particle.properties.gravity).toBeLessThan(0); // Gas floats up
+                            expect(particle.properties.specific.color).toBe('#c2b280');
+                            break;
+                        case ParticleType.STEAM:
+                            expect(particle.properties.gravity).toBeLessThan(0); // Steam floats up
+                            expect(particle.properties.specific.color).toBe('#d0d0d0');
+                            break;
+                        case ParticleType.PLANT:
+                            expect(particle.properties.gravity).toBe(0); // Static/anchored
+                            expect(particle.properties.specific.color).toBe('#228B22');
+                            break;
                     }
 
                     return true;
@@ -93,7 +114,10 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
                 fc.oneof(
                     fc.constant(ParticleType.SAND),
                     fc.constant(ParticleType.WATER),
-                    fc.constant(ParticleType.FIRE)
+                    fc.constant(ParticleType.FIRE),
+                    fc.constant(ParticleType.GAS),
+                    fc.constant(ParticleType.STEAM),
+                    fc.constant(ParticleType.LEAF)
                 ),
                 fc.integer({ min: 1, max: 10 }),
                 (particleType, numUpdates) => {
@@ -110,11 +134,11 @@ describe('Physics Playground - Property 1: Particle Type Rendering', () => {
                     expect(particle.y).not.toBe(100);
 
                     // Verify velocity changed based on gravity
-                    if (particleType === ParticleType.FIRE) {
-                        // Fire should have negative gravity (rises)
+                    if (particleType === ParticleType.FIRE || particleType === ParticleType.GAS || particleType === ParticleType.STEAM) {
+                        // Fire, gas, and steam should have negative gravity (rises)
                         expect(particle.vy).toBeLessThan(initialVy);
                     } else {
-                        // Sand and water should have positive gravity (falls)
+                        // Sand, water, and leaf should have positive gravity (falls)
                         expect(particle.vy).toBeGreaterThan(initialVy);
                     }
 

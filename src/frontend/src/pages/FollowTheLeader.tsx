@@ -25,6 +25,7 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -37,7 +38,6 @@ import {
   advanceLevel,
   calculateFinalStats,
 } from '../games/followTheLeaderLogic';
-import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
 const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   // ===== HOOKS =====
@@ -52,8 +52,10 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
-  const [streak, setStreak] = useState(0);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+
+  // Streak tracking
+  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
+
   const lastCompletedRef = useRef(0);
   const wasMatchingRef = useRef(false);
 
@@ -161,10 +163,10 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
         playPop();
         triggerHaptic('success');
       }
-      
+
       // Reset streak when pose breaks
       if (!poseMatch.matches && wasMatchingRef.current && gameState.holdTime > 0) {
-        setStreak(0);
+        resetStreak();
         triggerHaptic('error');
       }
       
@@ -174,14 +176,11 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
     // Check for movement completion (streak increase)
     if (gameState.completedMovements > lastCompletedRef.current) {
       lastCompletedRef.current = gameState.completedMovements;
-      const newStreak = streak + 1;
-      setStreak(newStreak);
+      incrementStreak();
 
-      // Celebration haptic at streak milestones
-      if (newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+      // Celebration haptic at streak milestones is handled by the hook
+      if (streak > 0 && streak % 5 === 0) {
         triggerHaptic('celebration');
-        setShowStreakMilestone(true);
-        setTimeout(() => setShowStreakMilestone(false), 1500);
       }
     }
 
@@ -467,7 +466,7 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
       />
 
       {/* Streak Milestone */}
-      {showStreakMilestone && (
+      {showMilestone && (
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}

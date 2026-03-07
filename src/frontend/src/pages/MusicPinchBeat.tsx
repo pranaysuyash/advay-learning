@@ -221,16 +221,14 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
                 className='relative flex items-center justify-center'
               >
                 <div
-                  className={`absolute inset-0 rounded-[2.5rem] border-3 transition-all duration-300 ${
-                    isTarget
+                  className={`absolute inset-0 rounded-[2.5rem] border-3 transition-all duration-300 ${isTarget
                       ? 'bg-amber-100/50 border-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.5)]'
                       : 'bg-white/40 border-[#F2CC8F]'
-                  }`}
+                    }`}
                 />
                 <div
-                  className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${
-                    isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
-                  } transition-transform drop-shadow-[0_4px_0_#E5B86E]`}
+                  className={`relative z-10 mt-12 text-5xl font-black tracking-widest ${isSelected ? 'text-[#3B82F6] scale-110' : 'text-slate-400'
+                    } transition-transform drop-shadow-[0_4px_0_#E5B86E]`}
                 >
                   {LANE_LABELS[laneIndex]}
                 </div>
@@ -268,7 +266,7 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
         </div>
 
         {!isPlaying && (
-          <div className='absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-[#FFF8F0]/80 backdrop-blur-sm z-30 flex items-center justify-center'>
             <div className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-[0_4px_0_#E5B86E] relative'>
               <div className='w-20 h-20 mx-auto mb-4 drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform flex items-center justify-center bg-purple-100 rounded-3xl border-4 border-purple-200'>
                 <svg

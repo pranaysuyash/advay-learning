@@ -117,6 +117,36 @@ const particleTypeConfigs: Record<ParticleType, ParticleProperties> = {
     }
 };
 
+// Object pool for particles to reduce garbage collection
+class ParticlePool {
+    private pool: Particle[] = [];
+    private maxSize: number = 500;
+
+    constructor(maxSize: number = 500) {
+        this.maxSize = maxSize;
+    }
+
+    get(type: ParticleType, x: number, y: number): Particle {
+        if (this.pool.length > 0) {
+            const particle = this.pool.pop()!;
+            particle.resetPosition(x, y);
+            particle.type = type;
+            return particle;
+        }
+        return Particle.create(type, x, y);
+    }
+
+    release(particle: Particle): void {
+        if (this.pool.length < this.maxSize) {
+            this.pool.push(particle);
+        }
+    }
+
+    clear(): void {
+        this.pool = [];
+    }
+}
+
 export class Particle implements ParticleInterface {
     id: string;
     type: ParticleType;
@@ -199,3 +229,6 @@ export class Particle implements ParticleInterface {
         return new Particle(type, x, y);
     }
 }
+
+// Export the pool for use in ParticleSystem
+export const particlePool = new ParticlePool(500);

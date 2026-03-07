@@ -1,13 +1,15 @@
-import { Particle } from './Particle';
+import { Particle, particlePool } from './Particle';
 import { Particle as ParticleShape, ParticleType, Vector2, Settings } from '../types';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { CollisionHandler } from '../physics/CollisionHandler';
+import { AudioSystem } from '../audio/AudioSystem';
 
 export class ParticleSystem {
     private particles: Particle[] = [];
     private physicsWorld: PhysicsWorld;
     private collisionHandler: CollisionHandler;
     private maxParticles: number;
+    private audioSystem: AudioSystem | null = null;
 
     constructor(settings: Settings) {
         this.maxParticles = settings.particleCountLimit;
@@ -23,6 +25,13 @@ export class ParticleSystem {
         this.physicsWorld.start();
 
         this.setupElementalReactions();
+    }
+
+    /**
+     * Set audio system for sound effects
+     */
+    setAudioSystem(audioSystem: AudioSystem): void {
+        this.audioSystem = audioSystem;
     }
 
     private setupElementalReactions() {
@@ -66,6 +75,8 @@ export class ParticleSystem {
         }
         this.particles.push(particle);
         this.physicsWorld.createParticle(particle);
+        // Play sound when particle is added
+        this.audioSystem?.playParticleAdd();
         return true;
     }
 
@@ -73,9 +84,11 @@ export class ParticleSystem {
         if (this.particles.length >= this.maxParticles) {
             return false;
         }
-        const particle = Particle.create(type, x, y);
+        const particle = particlePool.get(type, x, y);
         this.particles.push(particle);
         this.physicsWorld.createParticle(particle);
+        // Play sound when particle is added
+        this.audioSystem?.playParticleAdd();
         return true;
     }
 
@@ -109,6 +122,7 @@ export class ParticleSystem {
         const deadParticles = this.particles.filter(p => p.isDead());
         for (const dead of deadParticles) {
             this.physicsWorld.removeParticle(dead);
+            particlePool.release(dead);
         }
         this.particles = this.particles.filter(p => !p.isDead());
     }
@@ -163,6 +177,7 @@ export class ParticleSystem {
     }
 
     clear(): void {
+        this.particles.forEach(p => particlePool.release(p));
         this.particles = [];
         this.physicsWorld.clear();
         this.physicsWorld.addBoundaries(960, 540); // Need to re-add boundaries after clear

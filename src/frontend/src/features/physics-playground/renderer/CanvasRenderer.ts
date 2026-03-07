@@ -1,10 +1,16 @@
 import { Particle } from '../particles/Particle';
+import { AccessibilityMode, ParticleType } from '../types';
 
 /**
  * CanvasRenderer - Renders particles to HTML5 Canvas
- * 
+ *
  * This class provides rendering functionality for the physics playground,
  * drawing particles with appropriate visual styles and effects.
+ *
+ * Supports multiple accessibility modes:
+ * - HIGH_CONTRAST: Uses high contrast colors and patterns
+ * - COLORBLIND: Adds shape/pattern distinctions to particles
+ * - SCREEN_READER: Provides ARIA labels (handled at component level)
  */
 export class CanvasRenderer {
     private context: CanvasRenderingContext2D;
@@ -13,6 +19,24 @@ export class CanvasRenderer {
     private backgroundGradient: CanvasGradient | null = null;
     private animationFrameId: number | null = null;
     private isPaused: boolean = false;
+    private accessibilityMode: AccessibilityMode = AccessibilityMode.NONE;
+
+    // High contrast color palette
+    private static readonly HIGH_CONTRAST_COLORS = {
+        [ParticleType.SAND]: '#FFFF00',      // Yellow
+        [ParticleType.WATER]: '#00FFFF',     // Cyan
+        [ParticleType.FIRE]: '#FF0000',      // Red
+        [ParticleType.BUBBLE]: '#FFFFFF',    // White
+        [ParticleType.STAR]: '#FF00FF',      // Magenta
+        [ParticleType.LEAF]: '#00FF00',      // Green
+        [ParticleType.SEED]: '#FF6600',      // Orange
+        [ParticleType.GAS]: '#999999',       // Gray
+        [ParticleType.STEAM]: '#CCCCCC',     // Light Gray
+        [ParticleType.PLANT]: '#008000',     // Dark Green
+    };
+
+    // Colorblind mode patterns (for shape differentiation)
+    private colorblindPatternCanvas: HTMLCanvasElement | null = null;
 
     constructor(canvas: HTMLCanvasElement) {
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -21,6 +45,7 @@ export class CanvasRenderer {
 
         // Create background gradient
         this.createBackgroundGradient();
+        this.createColorblindPatterns();
     }
 
     /**
@@ -36,6 +61,142 @@ export class CanvasRenderer {
         this.backgroundGradient = this.context.createLinearGradient(0, 0, 0, this.height);
         this.backgroundGradient.addColorStop(0, '#87CEEB'); // Sky blue
         this.backgroundGradient.addColorStop(1, '#E0F7FA'); // Light cyan
+    }
+
+    /**
+     * Create colorblind-friendly patterns for particle differentiation
+     */
+    private createColorblindPatterns(): void {
+        if (typeof document === 'undefined') return;
+
+        this.colorblindPatternCanvas = document.createElement('canvas');
+        this.colorblindPatternCanvas.width = 20;
+        this.colorblindPatternCanvas.height = 20;
+        const patternCtx = this.colorblindPatternCanvas.getContext('2d');
+        if (!patternCtx) return;
+    }
+
+    /**
+     * Set accessibility mode
+     */
+    setAccessibilityMode(mode: AccessibilityMode): void {
+        this.accessibilityMode = mode;
+        this.updateBackgroundForAccessibility();
+    }
+
+    /**
+     * Get current accessibility mode
+     */
+    getAccessibilityMode(): AccessibilityMode {
+        return this.accessibilityMode;
+    }
+
+    /**
+     * Update background based on accessibility mode
+     */
+    private updateBackgroundForAccessibility(): void {
+        if (typeof this.context.createLinearGradient !== 'function') {
+            this.backgroundGradient = null;
+            return;
+        }
+
+        this.backgroundGradient = this.context.createLinearGradient(0, 0, 0, this.height);
+
+        if (this.accessibilityMode === AccessibilityMode.HIGH_CONTRAST) {
+            this.backgroundGradient.addColorStop(0, '#000000');
+            this.backgroundGradient.addColorStop(1, '#000000');
+        } else {
+            this.backgroundGradient.addColorStop(0, '#87CEEB');
+            this.backgroundGradient.addColorStop(1, '#E0F7FA');
+        }
+    }
+
+    /**
+     * Get color for particle based on accessibility mode
+     */
+    private getParticleColor(particle: Particle): string {
+        if (this.accessibilityMode === AccessibilityMode.HIGH_CONTRAST) {
+            return CanvasRenderer.HIGH_CONTRAST_COLORS[particle.type] || particle.color;
+        }
+        return particle.color;
+    }
+
+    /**
+     * Draw colorblind pattern for particle
+     */
+    private drawColorblindPattern(particle: Particle): void {
+        if (this.accessibilityMode !== AccessibilityMode.COLORBLIND) {
+            return;
+        }
+
+        const { x, y, radius } = particle;
+        this.context.save();
+
+        // Draw different patterns based on particle type
+        switch (particle.type) {
+            case ParticleType.SAND:
+                // Dots pattern
+                this.drawPatternDots(x, y, radius);
+                break;
+            case ParticleType.WATER:
+                // Wave pattern
+                this.drawPatternWave(x, y, radius);
+                break;
+            case ParticleType.FIRE:
+                // Triangle pattern
+                this.drawPatternTriangle(x, y, radius);
+                break;
+            case ParticleType.STAR:
+                // Star shape (already drawn)
+                break;
+            case ParticleType.LEAF:
+                // Leaf shape (already drawn)
+                break;
+            case ParticleType.SEED:
+                // Circle outline
+                this.context.strokeStyle = '#000';
+                this.context.lineWidth = 2;
+                this.context.beginPath();
+                this.context.arc(x, y, radius * 0.6, 0, Math.PI * 2);
+                this.context.stroke();
+                break;
+        }
+
+        this.context.restore();
+    }
+
+    private drawPatternDots(x: number, y: number, radius: number): void {
+        this.context.fillStyle = 'rgba(0,0,0,0.3)';
+        this.context.beginPath();
+        this.context.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.15, 0, Math.PI * 2);
+        this.context.arc(x + radius * 0.3, y + radius * 0.3, radius * 0.15, 0, Math.PI * 2);
+        this.context.fill();
+    }
+
+    private drawPatternWave(x: number, y: number, radius: number): void {
+        this.context.strokeStyle = 'rgba(0,0,0,0.3)';
+        this.context.lineWidth = 1;
+        this.context.beginPath();
+        this.context.moveTo(x - radius * 0.6, y);
+        // Fallback for canvas mocks that don't support quadraticCurveTo
+        if (typeof this.context.quadraticCurveTo === 'function') {
+            this.context.quadraticCurveTo(x - radius * 0.3, y - radius * 0.3, x, y);
+            this.context.quadraticCurveTo(x + radius * 0.3, y + radius * 0.3, x + radius * 0.6, y);
+        } else {
+            // Simple line fallback
+            this.context.lineTo(x + radius * 0.6, y);
+        }
+        this.context.stroke();
+    }
+
+    private drawPatternTriangle(x: number, y: number, radius: number): void {
+        this.context.fillStyle = 'rgba(0,0,0,0.2)';
+        this.context.beginPath();
+        this.context.moveTo(x, y - radius * 0.5);
+        this.context.lineTo(x + radius * 0.4, y + radius * 0.3);
+        this.context.lineTo(x - radius * 0.4, y + radius * 0.3);
+        this.context.closePath();
+        this.context.fill();
     }
 
     /**
@@ -102,7 +263,17 @@ export class CanvasRenderer {
      * Render particles
      */
     renderParticles(particles: Particle[]): void {
+        // Canvas culling - only render particles within visible bounds
         for (const particle of particles) {
+            // Skip particles that are far outside the canvas
+            if (
+                particle.x < -particle.radius * 2 ||
+                particle.x > this.width + particle.radius * 2 ||
+                particle.y < -particle.radius * 2 ||
+                particle.y > this.height + particle.radius * 2
+            ) {
+                continue;
+            }
             this.renderParticle(particle);
         }
     }
@@ -119,6 +290,9 @@ export class CanvasRenderer {
         // Draw particle
         this.drawParticleShape(particle);
 
+        // Draw colorblind patterns if enabled
+        this.drawColorblindPattern(particle);
+
         // Apply visual effects
         this.applyVisualEffects(particle);
 
@@ -129,13 +303,14 @@ export class CanvasRenderer {
      * Apply particle style
      */
     private applyParticleStyle(particle: Particle): void {
-        this.context.fillStyle = particle.color;
-        this.context.strokeStyle = particle.color;
+        const color = this.getParticleColor(particle);
+        this.context.fillStyle = color;
+        this.context.strokeStyle = color;
         this.context.lineWidth = 1;
 
-        // Add glow effect for glowing particles
-        if (particle.properties.specific.glow) {
-            this.context.shadowColor = particle.color;
+        // Add glow effect for glowing particles (unless in high contrast mode)
+        if (particle.properties.specific.glow && this.accessibilityMode !== AccessibilityMode.HIGH_CONTRAST) {
+            this.context.shadowColor = color;
             this.context.shadowBlur = particle.radius * 2;
         } else {
             this.context.shadowBlur = 0;
@@ -192,7 +367,13 @@ export class CanvasRenderer {
      */
     private drawLeaf(cx: number, cy: number, size: number): void {
         this.context.beginPath();
-        this.context.ellipse(cx, cy, size, size * 0.6, Math.PI / 4, 0, Math.PI * 2);
+        // Use ellipse if available, otherwise fall back to circle
+        if (typeof this.context.ellipse === 'function') {
+            this.context.ellipse(cx, cy, size, size * 0.6, Math.PI / 4, 0, Math.PI * 2);
+        } else {
+            // Fallback to a simple circle for compatibility
+            this.context.arc(cx, cy, size * 0.8, 0, Math.PI * 2);
+        }
         this.context.fill();
     }
 

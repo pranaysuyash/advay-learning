@@ -130,8 +130,8 @@ class TestUserIdValidation:
         response = await client.get("/api/v1/users/invalid-uuid", headers=auth_headers)
         assert response.status_code == 422
         assert (
-            "user_id" in response.json()["detail"].lower()
-            or "uuid" in response.json()["detail"].lower()
+            "user_id" in response.json()["error"]["message"].lower()
+            or "uuid" in response.json()["error"]["message"].lower()
         )
 
 

@@ -205,9 +205,24 @@ const BeginningSounds = lazy(() =>
     default: module.BeginningSounds,
   })),
 );
+const EndingSounds = lazy(() =>
+  import('./pages/EndingSounds').then((module) => ({
+    default: module.EndingSounds,
+  })),
+);
 const OddOneOut = lazy(() =>
   import('./pages/OddOneOut').then((module) => ({
     default: module.OddOneOut,
+  })),
+);
+const SameAndDifferent = lazy(() =>
+  import('./pages/SameAndDifferent').then((module) => ({
+    default: module.SameAndDifferent,
+  })),
+);
+const ShadowMatch = lazy(() =>
+  import('./pages/ShadowMatch').then((module) => ({
+    default: module.ShadowMatch,
   })),
 );
 const ShadowPuppetTheater = lazy(() =>
@@ -290,9 +305,24 @@ const VoiceStories = lazy(() =>
     default: module.VoiceStories,
   })),
 );
+const ReadingAlong = lazy(() =>
+  import('./pages/ReadingAlong').then((module) => ({
+    default: module.ReadingAlong,
+  })),
+);
 const WordSearch = lazy(() =>
   import('./pages/WordSearch').then((module) => ({
     default: module.WordSearch,
+  })),
+);
+const LetterSoundMatch = lazy(() =>
+  import('./pages/LetterSoundMatch').then((module) => ({
+    default: module.LetterSoundMatch,
+  })),
+);
+const StoryBuilder = lazy(() =>
+  import('./pages/StoryBuilder').then((module) => ({
+    default: module.StoryBuilder,
   })),
 );
 const MathSmash = lazy(() =>
@@ -826,10 +856,34 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/ending-sounds'
+                  element={
+                    <ProtectedRoute>
+                      <EndingSounds />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/odd-one-out'
                   element={
                     <ProtectedRoute>
                       <OddOneOut />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/same-and-different'
+                  element={
+                    <ProtectedRoute>
+                      <SameAndDifferent />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/shadow-match'
+                  element={
+                    <ProtectedRoute>
+                      <ShadowMatch />
                     </ProtectedRoute>
                   }
                 />
@@ -968,6 +1022,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <VoiceStories />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/reading-along'
+                  element={
+                    <ProtectedRoute>
+                      <ReadingAlong />
                     </ProtectedRoute>
                   }
                 />
@@ -1128,6 +1190,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <WordSearch />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/letter-sound-match'
+                  element={
+                    <ProtectedRoute>
+                      <LetterSoundMatch />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/story-builder'
+                  element={
+                    <ProtectedRoute>
+                      <StoryBuilder />
                     </ProtectedRoute>
                   }
                 />

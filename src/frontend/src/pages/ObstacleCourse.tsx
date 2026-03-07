@@ -595,7 +595,7 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
                   <button
                     type='button'
                     onClick={startSession}
-                    className='rounded-3xl bg-slate-900 px-6 py-4 text-base font-black text-white shadow-[0_8px_0_#1E293B] transition-transform hover:translate-y-[1px]'
+                    className='rounded-3xl bg-[#6366F1] px-6 py-4 text-base font-black text-white shadow-[0_6px_0_#3730A3] transition-transform hover:translate-y-[2px] hover:shadow-[0_4px_0_#3730A3] active:translate-y-[6px] active:shadow-none'
                   >
                     Start Obstacle Course
                   </button>
@@ -688,7 +688,7 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
               <button
                 type='button'
                 onClick={startSession}
-                className='rounded-3xl bg-slate-900 px-6 py-4 text-base font-black text-white shadow-[0_8px_0_#1E293B]'
+                className='rounded-3xl bg-[#6366F1] px-6 py-4 text-base font-black text-white shadow-[0_6px_0_#3730A3] hover:translate-y-[2px] transition-transform active:translate-y-[6px] active:shadow-none'
               >
                 Run Again
               </button>
@@ -756,13 +756,12 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
                 return (
                   <div
                     key={obstacle.id}
-                    className={`rounded-2xl border-2 px-4 py-3 transition-colors ${
-                      isDone
+                    className={`rounded-2xl border-2 px-4 py-3 transition-colors ${isDone
                         ? 'border-emerald-200 bg-emerald-50'
                         : isActive
                           ? 'border-sky-200 bg-sky-50'
                           : 'border-slate-100 bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <div className='flex items-center justify-between gap-3'>
                       <div>
@@ -799,11 +798,10 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
                   return (
                     <div
                       key={laneLabel}
-                      className={`relative rounded-[1.5rem] border-2 p-4 ${
-                        obstacleHere
+                      className={`relative rounded-[1.5rem] border-2 p-4 ${obstacleHere
                           ? 'border-sky-200 bg-sky-50'
                           : 'border-slate-100 bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div className='mb-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-slate-500'>
                         {laneLabel}
@@ -844,11 +842,10 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
 
                       <div className='absolute inset-x-0 bottom-4 flex justify-center'>
                         <div
-                          className={`rounded-full border-4 px-5 py-3 text-2xl shadow-md ${
-                            playerHere
+                          className={`rounded-full border-4 px-5 py-3 text-2xl shadow-md ${playerHere
                               ? 'border-emerald-300 bg-emerald-100'
                               : 'border-slate-200 bg-white'
-                          }`}
+                            }`}
                         >
                           🧒
                         </div>

@@ -137,11 +137,10 @@ export const Games = memo(function Games() {
         <div className='flex flex-wrap gap-2 mb-8'>
           <button
             onClick={() => setSelectedWorld('all')}
-            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${
-              selectedWorld === 'all'
+            className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${selectedWorld === 'all'
                 ? 'bg-[#3B82F6] text-white shadow-lg'
                 : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
-            }`}
+              }`}
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -168,11 +167,10 @@ export const Games = memo(function Games() {
               <button
                 key={wId}
                 onClick={() => setSelectedWorld(wId)}
-                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                  selectedWorld === wId
+                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedWorld === wId
                     ? 'text-white shadow-lg'
                     : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-slate-400'
-                }`}
+                  }`}
                 style={
                   selectedWorld === wId
                     ? { backgroundColor: world.color }
@@ -327,7 +325,7 @@ export const Games = memo(function Games() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4'
+              className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4'
               onClick={() => setShowProfilePicker(false)}
             >
               <motion.div
