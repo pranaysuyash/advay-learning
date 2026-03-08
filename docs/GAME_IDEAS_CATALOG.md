@@ -407,7 +407,7 @@ These game concepts heavily utilize the 2D characters, tiles, enemies, and colle
 **Concept:** A runner or maze game where letters are scattered across platforms. The child is prompted to spell a word (e.g., "CAT") and must collect the letters in the correct order while dodging passive enemies like slimes.
 **Assets Used:** `characters`, `tiles`, `enemies` (as obstacles), `sounds`.
 
-#### 3. Counting Collect-a-thon (Scavenger Hunt)
+#### 3. Counting Collect-a-thon (Scavenger Hunt) - ✅ LIVE
 
 **Age:** 3-5 | **Effort:** 1 week
 **Concept:** A relaxed, non-scrolling environment built using the platform tiles. The prompt asks to "Collect exactly 4 blue gems!". The child guides the character to grab the correct items and avoid the wrong ones.

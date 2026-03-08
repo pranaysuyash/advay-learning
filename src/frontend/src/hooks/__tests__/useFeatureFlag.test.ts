@@ -25,6 +25,7 @@ describe('getFeatureFlag', () => {
   it('returns default value when no overrides', () => {
     expect(getFeatureFlag('controls.fallbackV1', {})).toBe(false);
     expect(getFeatureFlag('safety.pauseOnTrackingLoss', {})).toBe(true);
+    expect(getFeatureFlag('ai.cloudFallbackV1', {})).toBe(false);
   });
 
   it('returns user override when provided', () => {
@@ -78,6 +79,11 @@ describe('useFeatureFlags', () => {
     result.current.updateFlag('controls.fallbackV1', true);
     expect(mockUpdateSettings).toHaveBeenCalledWith({
       features: { 'controls.fallbackV1': true },
+    });
+
+    result.current.updateFlag('ai.cloudFallbackV1', true);
+    expect(mockUpdateSettings).toHaveBeenCalledWith({
+      features: { 'ai.cloudFallbackV1': true },
     });
   });
 

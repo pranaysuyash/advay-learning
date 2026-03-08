@@ -22,3 +22,6 @@ export { useConfirm } from './useConfirm';
 // Layout
 export { Layout } from './Layout';
 export { ProtectedRoute } from './ProtectedRoute';
+
+// Sync Status
+export { SyncStatusIndicator } from './SyncStatusIndicator';

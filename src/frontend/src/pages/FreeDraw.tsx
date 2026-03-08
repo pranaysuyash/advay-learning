@@ -118,9 +118,10 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
     },
     [
       currentProfile,
+      onGameComplete,
+      // explicitly derive primitive dependencies to keep callback stable
       gameState.canvas.strokes.length,
       gameState.currentBrush.type,
-      onGameComplete,
     ],
   );
 
@@ -147,16 +148,17 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
 
     if (pinch.isPinching && !wasPinchingRef.current) {
       setGameState((prev) => startStroke(prev, point));
-      setStrokeCount(c => c + 1);
+      setStrokeCount((prev) => {
+        const updated = prev + 1;
+        // milestone check here so we always use fresh value
+        if (updated % 10 === 0) {
+          setShowMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowMilestone(false), 1200);
+        }
+        return updated;
+      });
       triggerHaptic('success');
-      
-      // Milestone every 10 strokes
-      const newCount = strokeCount + 1;
-      if (newCount % 10 === 0) {
-        setShowMilestone(true);
-        triggerHaptic('celebration');
-        setTimeout(() => setShowMilestone(false), 1200);
-      }
     } else if (pinch.isPinching) {
       setGameState((prev) => continueStroke(prev, point));
     } else if (!pinch.isPinching && wasPinchingRef.current) {

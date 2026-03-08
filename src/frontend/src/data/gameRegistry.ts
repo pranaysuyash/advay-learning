@@ -1834,6 +1834,35 @@ export const GAME_REGISTRY: GameManifest[] = [
       },
     ],
   },
+  {
+    id: 'counting-collectathon',
+    name: 'Counting Collect-a-thon',
+    tagline: 'Collect the treasures! How many can you get? ⭐🪙💎',
+    path: '/games/counting-collectathon',
+    icon: 'treasure',
+    worldId: 'number-jungle',
+    vibe: 'active',
+    ageRange: '2-5',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.25 },
+      { itemId: 'shape-circle', chance: 0.2 },
+      { itemId: 'shape-triangle', chance: 0.15 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-treasure-master',
+        name: 'Treasure Master',
+        description: 'Complete all 5 rounds without mistakes!',
+        trigger: 'perfect-rounds-5',
+        reward: { itemId: 'element-au', quantity: 1 },
+        hint: 'Collect only the right items…',
+        difficulty: 'hard',
+      },
+    ],
+  },
 
   // ── Voice Input (Experimental) ────────────────────────────────────
   {

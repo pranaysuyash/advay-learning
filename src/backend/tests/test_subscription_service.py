@@ -15,6 +15,22 @@ from app.db.models.subscription_model import (
 from app.db.models.user import User
 
 
+async def create_subscription_test_user(db_session: AsyncSession, email_prefix: str) -> User:
+    """Create a unique verified user for subscription tests."""
+    from app.core.security import get_password_hash
+
+    user = User(
+        email=f"{email_prefix}_{uuid4()}@test.com",
+        hashed_password=get_password_hash("password123"),
+        is_active=True,
+        email_verified=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
 class TestCreateSubscription:
     """Test subscription creation."""
 
@@ -388,6 +404,151 @@ class TestCanAccessGame:
         assert can_access is False
         assert "No active subscription" in reason
 
+    async def test_can_access_game_pack_selection(self, db_session: AsyncSession):
+        """Test that pack subscriptions only allow selected games."""
+        from app.services.subscription_service import SubscriptionService
+
+        user = await create_subscription_test_user(db_session, "sub_pack_access")
+        subscription = await SubscriptionService.create_subscription(
+            db=db_session,
+            parent_id=user.id,
+            plan_type=SubscriptionPlanType.GAME_PACK_5,
+            payment_reference=f"pay_pack_access_{uuid4()}",
+        )
+
+        await SubscriptionService.add_game_selection(
+            db_session,
+            subscription.id,
+            ["game-1", "game-2", "game-3", "game-4", "game-5"],
+        )
+
+        can_access, reason = await SubscriptionService.can_access_game(db_session, user.id, "game-3")
+        assert can_access is True
+        assert "selected in pack" in reason
+
+        can_access, reason = await SubscriptionService.can_access_game(db_session, user.id, "game-8")
+        assert can_access is False
+        assert "game_pack_5" in reason
+
+    async def test_can_access_game_invalid_plan_type_raises(self, db_session: AsyncSession):
+        """Test that unsupported plan values fail loudly."""
+        from app.services.subscription_service import SubscriptionService
+
+        user = await create_subscription_test_user(db_session, "sub_invalid_plan")
+        subscription = Subscription(
+            id=str(uuid4()),
+            parent_id=user.id,
+            plan_type="quarterly",
+            amount_paid=250000,
+            currency="INR",
+            start_date=datetime.now(timezone.utc),
+            end_date=datetime.now(timezone.utc) + timedelta(days=90),
+            status=SubscriptionStatus.ACTIVE,
+        )
+        db_session.add(subscription)
+        await db_session.commit()
+
+        with pytest.raises(ValueError, match="Unsupported subscription plan type"):
+            await SubscriptionService.can_access_game(db_session, user.id, "game-1")
+
+
+class TestPackRefreshBehavior:
+    """Test quarterly refresh-window behavior."""
+
+    async def test_game_pack_10_exposes_monthly_refresh_windows(self, db_session: AsyncSession):
+        """Test refresh availability by monthly cycle without accumulation."""
+        from app.services.subscription_service import SubscriptionService
+
+        user = await create_subscription_test_user(db_session, "sub_refresh_window")
+        start_date = datetime.now(timezone.utc) - timedelta(days=35)
+        subscription = Subscription(
+            id=str(uuid4()),
+            parent_id=user.id,
+            plan_type=SubscriptionPlanType.GAME_PACK_10,
+            amount_paid=250000,
+            currency="INR",
+            start_date=start_date,
+            end_date=start_date + timedelta(days=90),
+            status=SubscriptionStatus.ACTIVE,
+            last_refresh_cycle_used=0,
+        )
+        db_session.add(subscription)
+        await db_session.commit()
+
+        available = await SubscriptionService.get_available_games(db_session, subscription.id)
+        assert available["refresh_available"] is True
+        assert available["current_cycle_index"] == 2
+        assert available["total_cycles"] == 3
+        assert available["refresh_window_label"] == "Month 2 of 3"
+
+    async def test_game_pack_10_refresh_replaces_active_selection(self, db_session: AsyncSession):
+        """Test that quarterly refresh swaps the full active set for the current cycle."""
+        from app.services.subscription_service import SubscriptionService
+
+        user = await create_subscription_test_user(db_session, "sub_refresh_apply")
+        start_date = datetime.now(timezone.utc) - timedelta(days=35)
+        subscription = Subscription(
+            id=str(uuid4()),
+            parent_id=user.id,
+            plan_type=SubscriptionPlanType.GAME_PACK_10,
+            amount_paid=250000,
+            currency="INR",
+            start_date=start_date,
+            end_date=start_date + timedelta(days=90),
+            status=SubscriptionStatus.ACTIVE,
+            last_refresh_cycle_used=0,
+        )
+        db_session.add(subscription)
+        await db_session.commit()
+        await db_session.refresh(subscription)
+
+        await SubscriptionService.add_game_selection(
+            db_session,
+            subscription.id,
+            [f"game-{index}" for index in range(1, 11)],
+        )
+
+        refreshed = await SubscriptionService.add_game_selection(
+            db_session,
+            subscription.id,
+            [f"game-{index}" for index in range(11, 21)],
+        )
+
+        assert len(refreshed) == 10
+
+        refreshed_subscription = await SubscriptionService.get_subscription_by_id(db_session, subscription.id)
+        active_ids = {selection.game_id for selection in refreshed_subscription.game_selections if selection.swapped_at is None}
+        swapped_ids = {selection.game_id for selection in refreshed_subscription.game_selections if selection.swapped_at is not None}
+
+        assert active_ids == {f"game-{index}" for index in range(11, 21)}
+        assert swapped_ids == {f"game-{index}" for index in range(1, 11)}
+        assert refreshed_subscription.last_refresh_cycle_used == 2
+
+    async def test_game_pack_5_rejects_mid_cycle_changes(self, db_session: AsyncSession):
+        """Test that monthly packs remain fixed during the active month."""
+        from app.services.subscription_service import SubscriptionService
+
+        user = await create_subscription_test_user(db_session, "sub_monthly_fixed")
+        subscription = await SubscriptionService.create_subscription(
+            db=db_session,
+            parent_id=user.id,
+            plan_type=SubscriptionPlanType.GAME_PACK_5,
+            payment_reference=f"pay_monthly_fixed_{uuid4()}",
+        )
+
+        await SubscriptionService.add_game_selection(
+            db_session,
+            subscription.id,
+            ["game-a", "game-b", "game-c", "game-d", "game-e"],
+        )
+
+        with pytest.raises(ValueError, match="keeps the same games for the full term"):
+            await SubscriptionService.add_game_selection(
+                db_session,
+                subscription.id,
+                ["game-f", "game-g", "game-h", "game-i", "game-j"],
+            )
+
 
 class TestPlanConstants:
     """Test plan constants."""
@@ -396,7 +557,7 @@ class TestPlanConstants:
         """Test plan duration constants."""
         from app.services.subscription_service import PLAN_DURATIONS, SubscriptionPlanType
 
-        assert PLAN_DURATIONS[SubscriptionPlanType.GAME_PACK_5] == 90
+        assert PLAN_DURATIONS[SubscriptionPlanType.GAME_PACK_5] == 30
         assert PLAN_DURATIONS[SubscriptionPlanType.GAME_PACK_10] == 90
         assert PLAN_DURATIONS[SubscriptionPlanType.FULL_ANNUAL] == 365
 

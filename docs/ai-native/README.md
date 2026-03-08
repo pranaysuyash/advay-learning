@@ -15,23 +15,23 @@ This directory contains all documentation for the AI-native features of the Adva
 
 ### Core Documentation
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture for AI services | Developers |
-| [FEATURE_SPECS.md](./FEATURE_SPECS.md) | Detailed feature specifications | Developers, PMs |
-| [SAFETY_GUIDELINES.md](./SAFETY_GUIDELINES.md) | Safety and privacy requirements | All |
-| [ROADMAP.md](./ROADMAP.md) | Implementation timeline | All |
+| Document                                       | Purpose                                | Audience        |
+| ---------------------------------------------- | -------------------------------------- | --------------- |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)           | Technical architecture for AI services | Developers      |
+| [FEATURE_SPECS.md](./FEATURE_SPECS.md)         | Detailed feature specifications        | Developers, PMs |
+| [SAFETY_GUIDELINES.md](./SAFETY_GUIDELINES.md) | Safety and privacy requirements        | All             |
+| [ROADMAP.md](./ROADMAP.md)                     | Implementation timeline                | All             |
 
 ### Prompts (in `/prompts/ai-native/`)
 
-| Prompt | Purpose | When to Use |
-|--------|---------|-------------|
-| [ai-feature-check-v1.0.md](../../prompts/ai-native/ai-feature-check-v1.0.md) | Health check AI features | After deployment, debugging |
-| [ai-feature-build-v1.0.md](../../prompts/ai-native/ai-feature-build-v1.0.md) | Guide new feature implementation | Building new AI features |
-| [ai-feature-verify-v1.0.md](../../prompts/ai-native/ai-feature-verify-v1.0.md) | Comprehensive verification | Before PR merge |
-| [ai-feature-explore-v1.0.md](../../prompts/ai-native/ai-feature-explore-v1.0.md) | Research possibilities | Planning, brainstorming |
-| [ai-feature-research-v1.0.md](../../prompts/ai-native/ai-feature-research-v1.0.md) | Deep-dive research | Evaluating providers/tech |
-| [ai-feature-update-v1.0.md](../../prompts/ai-native/ai-feature-update-v1.0.md) | Safely update features | Provider changes, bug fixes |
+| Prompt                                                                             | Purpose                          | When to Use                 |
+| ---------------------------------------------------------------------------------- | -------------------------------- | --------------------------- |
+| [ai-feature-check-v1.0.md](../../prompts/ai-native/ai-feature-check-v1.0.md)       | Health check AI features         | After deployment, debugging |
+| [ai-feature-build-v1.0.md](../../prompts/ai-native/ai-feature-build-v1.0.md)       | Guide new feature implementation | Building new AI features    |
+| [ai-feature-verify-v1.0.md](../../prompts/ai-native/ai-feature-verify-v1.0.md)     | Comprehensive verification       | Before PR merge             |
+| [ai-feature-explore-v1.0.md](../../prompts/ai-native/ai-feature-explore-v1.0.md)   | Research possibilities           | Planning, brainstorming     |
+| [ai-feature-research-v1.0.md](../../prompts/ai-native/ai-feature-research-v1.0.md) | Deep-dive research               | Evaluating providers/tech   |
+| [ai-feature-update-v1.0.md](../../prompts/ai-native/ai-feature-update-v1.0.md)     | Safely update features           | Provider changes, bug fixes |
 
 ---
 
@@ -44,7 +44,7 @@ This directory contains all documentation for the AI-native features of the Adva
 │           LOCAL (Preferred)             │
 ├─────────────────────────────────────────┤
 │ LLM:    Ollama (Llama 3.2)             │
-│ TTS:    Web Speech API / Piper         │
+│ TTS:    Web Speech API / Kokoro         │
 │ STT:    Web Speech API                 │
 │ Vision: MediaPipe / TensorFlow.js      │
 └─────────────────────────────────────────┘
@@ -62,12 +62,12 @@ This directory contains all documentation for the AI-native features of the Adva
 
 ### Implementation Phases
 
-| Phase | Weeks | Features |
-|-------|-------|----------|
-| 1 | 1-2 | Pip Voice, Letter Sounds, Quick Responses |
-| 2 | 3-4 | Voice Input, Pip Conversations |
-| 3 | 5-8 | Stories, Activities, Adaptive Learning |
-| 4 | 9-12 | Show & Tell, AR Overlays |
+| Phase | Weeks | Features                                  |
+| ----- | ----- | ----------------------------------------- |
+| 1     | 1-2   | Pip Voice, Letter Sounds, Quick Responses |
+| 2     | 3-4   | Voice Input, Pip Conversations            |
+| 3     | 5-8   | Stories, Activities, Adaptive Learning    |
+| 4     | 9-12  | Show & Tell, AR Overlays                  |
 
 ### Privacy Non-Negotiables
 
@@ -122,7 +122,7 @@ This directory contains all documentation for the AI-native features of the Adva
 1. Built into all modern browsers
 2. Zero setup required
 3. Good enough quality for MVP
-4. Can upgrade to Piper/ElevenLabs later
+4. Can upgrade to Kokoro/ElevenLabs later
 
 ---
 

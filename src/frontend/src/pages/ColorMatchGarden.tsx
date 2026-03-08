@@ -48,6 +48,18 @@ interface GardenTarget {
   position: Point;
 }
 
+// Particle effect for celebrations
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+}
+
 const FLOWERS: Array<{
   name: string;
   color: string;
@@ -96,6 +108,10 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   );
   const [showCelebration, setShowCelebration] = useState(false);
   const [gardenBgSrc, setGardenBgSrc] = useState<string | null>(null);
+  
+  // Celebration particles - Unit 2
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const particleIdRef = useRef(0);
 
   // Timer display ref for color changes
   const timeLeftRef = useRef(60);
@@ -163,6 +179,48 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
 
+  // Particle animation system - Unit 2
+  useEffect(() => {
+    if (particles.length === 0) return;
+
+    const interval = setInterval(() => {
+      setParticles((prev) =>
+        prev
+          .map((p) => ({
+            ...p,
+            x: p.x + p.vx * 0.1,
+            y: p.y + p.vy * 0.1,
+            vy: p.vy + 0.3, // Gravity
+            life: p.life - 0.02,
+          }))
+          .filter((p) => p.life > 0)
+      );
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [particles.length]);
+
+  const spawnCelebrationParticles = useCallback((x: number, y: number) => {
+    const colors = ['#F59E0B', '#EF4444', '#3B82F6', '#10B981', '#EC4899', '#8B5CF6'];
+    const newParticles: Particle[] = [];
+    
+    for (let i = 0; i < 20; i++) {
+      const angle = (Math.PI * 2 * i) / 20 + randomFloat01() * 0.5;
+      const speed = 3 + randomFloat01() * 4;
+      newParticles.push({
+        id: particleIdRef.current++,
+        x: x * 100,
+        y: y * 100,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 3, // Upward burst
+        life: 1,
+        color: colors[Math.floor(randomFloat01() * colors.length)]!,
+        size: 6 + randomFloat01() * 6,
+      });
+    }
+    setParticles((prev) => [...prev, ...newParticles]);
+  }, []);
+
   useEffect(() => {
     if (!isPlaying) return;
 
@@ -220,7 +278,16 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
         setScore(nextScore);
         setFeedback(`Yes! ${expected.name} flower collected.`);
         if (ttsEnabled) {
-          void speak(`Yes! ${expected.name}! Great job!`);
+          // Varied TTS responses - Unit 2
+          const correctResponses = [
+            `Yes! ${expected.name}! Great job!`,
+            `Perfect! You found ${expected.name}!`,
+            `Excellent! That's ${expected.name}!`,
+            `Wonderful! ${expected.name} is correct!`,
+            `Yes! ${expected.name}! You are doing great!`,
+          ];
+          const randomResponse = correctResponses[Math.floor(randomFloat01() * correctResponses.length)]!;
+          void speak(randomResponse);
         }
         assetLoader.playSound('pop', 0.5);
         void playPop();
@@ -230,8 +297,16 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
           setShowCelebration(true);
           assetLoader.playSound('success', 0.75);
           void playCelebration();
+          // Spawn celebration particles - Unit 2
+          spawnCelebrationParticles(0.5, 0.5);
           if (ttsEnabled) {
-            void speak('Amazing streak! Six in a row!');
+            const celebrations = [
+              'Amazing streak! Six in a row!',
+              'Incredible! Six flowers matched!',
+              'You are on fire! Six in a row!',
+              'Fantastic streak! Keep it up!',
+            ];
+            void speak(celebrations[Math.floor(randomFloat01() * celebrations.length)]!);
           }
           setTimeout(() => setShowCelebration(false), 1800);
         }
@@ -258,6 +333,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
       ttsEnabled,
       incrementStreak,
       resetStreak,
+      spawnCelebrationParticles,
     ],
   );
 
@@ -413,28 +489,52 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
               style={{ borderColor: target.color, backgroundColor: 'white' }}
             />
             <div className='absolute inset-2 overflow-hidden rounded-full'>
-              {assetLoader.getImage(target.assetId)?.src ? (
-                <img
-                  src={assetLoader.getImage(target.assetId)?.src || ''}
-                  alt={target.name}
-                  className='w-full h-full object-cover opacity-90'
-                />
-              ) : (
-                <div
-                  className='w-full h-full'
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, ${target.color}22, transparent)`,
-                  }}
-                />
-              )}
-            </div>
-            <div className='absolute inset-0 flex items-center justify-center text-5xl drop-shadow-[0_4px_0_#E5B86E]'>
-              {target.emoji}
+              {/* Prioritize loaded assets, fallback to emoji only if asset fails - Unit 2 */}
+              {(() => {
+                const assetSrc = assetLoader.getImage(target.assetId)?.src;
+                return assetSrc ? (
+                  <img
+                    src={assetSrc}
+                    alt={target.name}
+                    className='w-full h-full object-cover opacity-95'
+                  />
+                ) : (
+                  <>
+                    <div
+                      className='w-full h-full'
+                      style={{
+                        background: `radial-gradient(circle at 30% 30%, ${target.color}33, transparent)`,
+                      }}
+                    />
+                    <div className='absolute inset-0 flex items-center justify-center text-5xl drop-shadow-[0_4px_0_#E5B86E]'>
+                      {target.emoji}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
             <div className='absolute -bottom-8 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-xs text-advay-slate font-bold uppercase tracking-wider whitespace-nowrap'>
               {target.name}
             </div>
           </div>
+        ))}
+
+        {/* Celebration particles - Unit 2 */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className='absolute rounded-full pointer-events-none'
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              backgroundColor: p.color,
+              opacity: p.life,
+              transform: `scale(${p.life})`,
+              boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+            }}
+          />
         ))}
 
         {cursor && (

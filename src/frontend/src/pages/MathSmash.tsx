@@ -194,14 +194,16 @@ function MathSmashGameComponent() {
 
   return (
     <div className='w-screen h-screen overflow-hidden relative bg-slate-100 font-sans'>
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
 
-      <HandTrackingStatus
-        isHandDetected={isHandDetected}
-        pauseOnHandLost={true}
-        voicePrompt={true}
-        showMascot={true}
-      />
+      {gameStarted && (
+        <HandTrackingStatus
+          isHandDetected={isHandDetected}
+          pauseOnHandLost={true}
+          voicePrompt={true}
+          showMascot={true}
+        />
+      )}
 
       {gameStarted && question && (
         <>

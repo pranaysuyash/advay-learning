@@ -32,7 +32,7 @@ export const LEVELS: LevelConfig[] = [
 ];
 
 // Category-based item banks
-const CATEGORY_BANKS: Record<string, OddItem[]> = {
+export const CATEGORY_BANKS: Record<string, OddItem[]> = {
   fruits: [
     { name: 'Apple', emoji: '🍎', category: 'fruit' },
     { name: 'Banana', emoji: '🍌', category: 'fruit' },
@@ -103,7 +103,7 @@ const CATEGORY_BANKS: Record<string, OddItem[]> = {
   ],
 };
 
-const CATEGORY_NAMES = Object.keys(CATEGORY_BANKS);
+export const CATEGORY_NAMES = Object.keys(CATEGORY_BANKS);
 
 export function getCategoriesForLevel(level: number): string[] {
   if (level === 1) return ['fruits', 'animals', 'colors'];

@@ -80,8 +80,12 @@ class Subscription(Base):
         String, ForeignKey("subscriptions.id"), nullable=True
     )
 
-    # Game swap (1 free per pack)
+    # Legacy single-swap flag retained for compatibility with prelaunch data.
     game_swap_used: Mapped[bool] = mapped_column(default=False)
+
+    # Quarterly packs can refresh once per monthly checkpoint (cycles 2 and 3).
+    # Stores the last cycle index that consumed a refresh. 0 means none used yet.
+    last_refresh_cycle_used: Mapped[int] = mapped_column(default=0)
 
     # Payment reference (from payment gateway)
     payment_reference: Mapped[str | None] = mapped_column(String, nullable=True)

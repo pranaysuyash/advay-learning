@@ -277,14 +277,16 @@ function FractionPizzaGame() {
 
   return (
     <div className='w-screen h-screen overflow-hidden relative bg-orange-50 font-sans'>
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
 
-      <HandTrackingStatus
-        isHandDetected={isHandDetected}
-        pauseOnHandLost={true}
-        voicePrompt={true}
-        showMascot={true}
-      />
+      {gameStarted && (
+        <HandTrackingStatus
+          isHandDetected={isHandDetected}
+          pauseOnHandLost={true}
+          voicePrompt={true}
+          showMascot={true}
+        />
+      )}
 
       {gameStarted && (
         <div className='absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] px-8 py-4 border-3 border-orange-300 shadow-[0_4px_0_#FDBA74] flex items-center gap-6'>

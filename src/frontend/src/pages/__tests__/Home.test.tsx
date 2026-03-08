@@ -1,12 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { Home } from '../Home';
 import { useAuthStore, useSettingsStore } from '../../store';
 import {
   clearGrowthTrackingState,
   getGrowthEvents,
 } from '../../services/growthAttribution';
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid='location-display'>{location.pathname}</div>;
+}
 
 beforeEach(() => {
   // Reset stores to deterministic state
@@ -32,7 +37,7 @@ describe('Home landing', () => {
     expect(screen.getByRole('button', { name: /Try The Magic/i })).toBeDefined();
   });
 
-  it('clicking Try The Magic sets demoMode and does not request camera permission', async () => {
+  it('clicking Try The Magic creates a guest demo session and does not request camera permission', async () => {
     // Mock getUserMedia to fail loudly if called
     const mockGetUserMedia = vi.fn(() =>
       Promise.reject(new Error('should not be called')),
@@ -45,6 +50,7 @@ describe('Home landing', () => {
     render(
       <MemoryRouter>
         <Home />
+        <LocationDisplay />
       </MemoryRouter>,
     );
 
@@ -53,6 +59,9 @@ describe('Home landing', () => {
 
     // demo mode should be enabled in the settings store
     expect(useSettingsStore.getState().demoMode).toBe(true);
+    expect(useAuthStore.getState().isGuest).toBe(true);
+    expect(useAuthStore.getState().guestSession).not.toBeNull();
+    expect(screen.getByTestId('location-display').textContent).toBe('/dashboard');
 
     // and camera should NOT have been requested
     expect(mockGetUserMedia).not.toHaveBeenCalled();

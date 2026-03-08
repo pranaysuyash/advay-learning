@@ -16,7 +16,7 @@ export interface LevelConfig {
   wordCount: number;
 }
 
-const BLEND_WORDS: BlendWord[] = [
+export const BLEND_WORDS: BlendWord[] = [
   { word: 'cat', onset: 'c', rime: 'at', hint: 'A furry pet that says meow' },
   { word: 'dog', onset: 'd', rime: 'og', hint: 'A furry pet that barks' },
   { word: 'sun', onset: 's', rime: 'un', hint: 'It shines in the sky' },

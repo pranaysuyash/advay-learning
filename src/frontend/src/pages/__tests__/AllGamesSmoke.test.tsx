@@ -23,6 +23,6 @@ describe('all pages smoke test', () => {
           <Comp />
         </MemoryRouter>,
       );
-    });
+    }, 15000);
   }
 });

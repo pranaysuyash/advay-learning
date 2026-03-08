@@ -73,7 +73,11 @@ export class STTService {
     this.options = { ...DEFAULT_OPTIONS, ...options };
 
     if (this.options.provider === 'auto') {
-      this.options.provider = await this.detectBestProvider();
+      // delegate to shared runtime utility which encapsulates the
+      // whisper/web‑speech/cloud decision logic used across the project
+      const { detectBestSTTProvider } =
+        await import('../../../utils/runtimeUtils');
+      this.options.provider = await detectBestSTTProvider();
     }
 
     await this.initializeProvider();
@@ -89,6 +93,12 @@ export class STTService {
     return this._status !== 'unavailable';
   }
 
+  // `detectBestProvider` logic has been moved into the shared
+  // runtimeUtils module. The old implementation is left here as a
+  // comment for historical reference and will be removed once all
+  // callers are updated.
+
+  /*
   private async detectBestProvider(): Promise<
     'whisper' | 'web-speech' | 'cloud'
   > {
@@ -96,9 +106,13 @@ export class STTService {
       return 'cloud';
     }
 
-    const hasWebGPU = await this.checkWebGPU();
+    // delegate to shared runtime utility
+    const { hasWebGPU, isMobile } = await import('../../utils/runtimeUtils').then(m => ({
+      hasWebGPU: m.hasWebGPU(),
+      isMobile: m.isMobile(),
+    }));
 
-    if (hasWebGPU) {
+    if (await hasWebGPU) {
       return 'whisper';
     }
 
@@ -113,20 +127,7 @@ export class STTService {
 
     return 'cloud';
   }
-
-  private async checkWebGPU(): Promise<boolean> {
-    try {
-      const nav = navigator as Navigator & {
-        gpu?: { requestAdapter: () => Promise<unknown> };
-      };
-
-      if (!nav.gpu) return false;
-      const adapter = await nav.gpu.requestAdapter();
-      return !!adapter;
-    } catch {
-      return false;
-    }
-  }
+  */
 
   private async initializeProvider(): Promise<void> {
     switch (this.options.provider) {

@@ -1,5 +1,6 @@
 import { useId, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 type Option = {
   id: string;
@@ -32,6 +33,7 @@ export function OptionChips(props: Props) {
 
   const groupId = useId();
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const { playClick, playHover } = useAudio();
 
   const selectedIndex = useMemo(() => {
     const idx = options.findIndex((opt) => opt.id === selectedId);
@@ -75,7 +77,10 @@ export function OptionChips(props: Props) {
 
         // Move focus and select (radio-like behavior).
         buttonRefs.current[nextIndex]?.focus();
-        if (!disabled && !next.disabled) onSelect(next.id);
+        if (!disabled && !next.disabled) {
+          playClick();
+          onSelect(next.id);
+        }
       }}
     >
       {options.map((opt, idx) => {
@@ -100,8 +105,10 @@ export function OptionChips(props: Props) {
             aria-disabled={isDisabled}
             tabIndex={idx === selectedIndex ? 0 : -1}
             disabled={isDisabled}
+            onMouseEnter={playHover}
             onClick={() => {
               if (isDisabled) return;
+              playClick();
               onSelect(opt.id);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${buttonMinHeightClassName ?? ''} ${className}`}

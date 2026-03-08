@@ -19,6 +19,8 @@ interface Settings {
   tutorialCompleted: boolean;
   onboardingCompleted: boolean;
   calmMode: boolean; // NEW: Calm Mode for sensory-sensitive children
+  parentConsentForCloudAI: boolean;
+  aiCloudUsageCount: number;
 }
 
 interface SettingsState extends Settings {
@@ -41,6 +43,8 @@ const defaultSettings: Settings = {
   tutorialCompleted: false,
   onboardingCompleted: false,
   calmMode: false, // NEW: Default to off (full experience)
+  parentConsentForCloudAI: false,
+  aiCloudUsageCount: 0,
 };
 
 interface SettingsState extends Settings {

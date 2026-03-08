@@ -1,8 +1,15 @@
 /**
- * LocalStorageProgressRepository
- * 
+ * LocalStorageProgressRepository v2 - Optimized with Map-based caching
+ *
  * Production implementation of ProgressRepository using localStorage.
- * Provides persistence across browser sessions.
+ * Now with O(1) lookups via in-memory Map cache.
+ *
+ * Performance improvements:
+ * - Map-based item storage (O(1) vs O(n) array scans)
+ * - Status indexes for fast filtering
+ * - Lazy loading with cache invalidation
+ *
+ * @ticket TCK-20260306-003 (ISSUE-004 Performance)
  */
 
 import { ProgressItem } from '../services/progressQueue';
@@ -16,6 +23,15 @@ export class LocalStorageProgressRepository implements ProgressRepository {
   private deadLetterKey: string;
   private listeners: Set<() => void> = new Set();
 
+  // v2: Map-based cache for O(1) lookups
+  private itemsCache: Map<string, ProgressItem> | null = null;
+  private deadLettersCache: Map<string, DeadLetterItem> | null = null;
+
+  // v2: Status indexes for fast filtering
+  private pendingIndex: Set<string> = new Set();
+  private errorIndex: Set<string> = new Set();
+  private syncedIndex: Set<string> = new Set();
+
   constructor(
     storageKey: string = STORAGE_KEY,
     deadLetterKey: string = DEAD_LETTER_KEY
@@ -24,114 +40,219 @@ export class LocalStorageProgressRepository implements ProgressRepository {
     this.deadLetterKey = deadLetterKey;
   }
 
-  // Item Operations
+  // v2: Load items into Map cache
+  private loadItems(): Map<string, ProgressItem> {
+    if (this.itemsCache) {
+      return this.itemsCache;
+    }
 
-  getAll(): ProgressItem[] {
     try {
       const data = localStorage.getItem(this.storageKey);
-      return data ? JSON.parse(data) : [];
+      const items: ProgressItem[] = data ? JSON.parse(data) : [];
+
+      this.itemsCache = new Map();
+      this.pendingIndex.clear();
+      this.errorIndex.clear();
+      this.syncedIndex.clear();
+
+      for (const item of items) {
+        this.itemsCache.set(item.idempotency_key, item);
+        this.updateStatusIndex(item.idempotency_key, item.status);
+      }
+
+      return this.itemsCache;
     } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to getAll:', error);
-      return [];
+      console.error('[LocalStorageProgressRepository] Failed to load items:', error);
+      this.itemsCache = new Map();
+      return this.itemsCache;
     }
+  }
+
+  // v2: Load dead letters into Map cache
+  private loadDeadLetters(): Map<string, DeadLetterItem> {
+    if (this.deadLettersCache) {
+      return this.deadLettersCache;
+    }
+
+    try {
+      const data = localStorage.getItem(this.deadLetterKey);
+      const deadLetters: DeadLetterItem[] = data ? JSON.parse(data) : [];
+
+      this.deadLettersCache = new Map();
+      for (const dl of deadLetters) {
+        this.deadLettersCache.set(dl.item.idempotency_key, dl);
+      }
+
+      return this.deadLettersCache;
+    } catch (error) {
+      console.error('[LocalStorageProgressRepository] Failed to load dead letters:', error);
+      this.deadLettersCache = new Map();
+      return this.deadLettersCache;
+    }
+  }
+
+  // v2: Persist items from cache to localStorage
+  private persistItems(): void {
+    if (!this.itemsCache) return;
+
+    try {
+      const items = Array.from(this.itemsCache.values());
+      localStorage.setItem(this.storageKey, JSON.stringify(items));
+    } catch (error) {
+      console.error('[LocalStorageProgressRepository] Failed to persist items:', error);
+    }
+  }
+
+  // v2: Persist dead letters from cache to localStorage
+  private persistDeadLetters(): void {
+    if (!this.deadLettersCache) return;
+
+    try {
+      const deadLetters = Array.from(this.deadLettersCache.values());
+      localStorage.setItem(this.deadLetterKey, JSON.stringify(deadLetters));
+    } catch (error) {
+      console.error('[LocalStorageProgressRepository] Failed to persist dead letters:', error);
+    }
+  }
+
+  // v2: Update status indexes
+  private updateStatusIndex(id: string, status?: ProgressItem['status']): void {
+    this.pendingIndex.delete(id);
+    this.errorIndex.delete(id);
+    this.syncedIndex.delete(id);
+
+    if (status === 'pending') this.pendingIndex.add(id);
+    else if (status === 'error') this.errorIndex.add(id);
+    else if (status === 'synced') this.syncedIndex.add(id);
+  }
+
+  // Item Operations - O(1) with Map cache
+
+  getAll(): ProgressItem[] {
+    return Array.from(this.loadItems().values());
   }
 
   getByStatus(status: ProgressItem['status']): ProgressItem[] {
-    return this.getAll().filter(item => item.status === status);
+    const items = this.loadItems();
+    let keys: Set<string>;
+
+    switch (status) {
+      case 'pending':
+        keys = this.pendingIndex;
+        break;
+      case 'error':
+        keys = this.errorIndex;
+        break;
+      case 'synced':
+        keys = this.syncedIndex;
+        break;
+      default:
+        return [];
+    }
+
+    const result: ProgressItem[] = [];
+    for (const key of keys) {
+      const item = items.get(key);
+      if (item) result.push(item);
+    }
+    return result;
   }
 
   getPending(): ProgressItem[] {
-    return this.getAll().filter(
-      item => item.status === 'pending'
-    );
+    return this.getByStatus('pending');
   }
 
   getRetryable(maxRetries: number): ProgressItem[] {
-    return this.getAll().filter(
-      item => item.status === 'error' && (item.retryCount || 0) < maxRetries
-    );
+    const items = this.loadItems();
+    const result: ProgressItem[] = [];
+
+    for (const key of this.errorIndex) {
+      const item = items.get(key);
+      if (item && (item.retryCount || 0) < maxRetries) {
+        result.push(item);
+      }
+    }
+    return result;
   }
 
   save(item: ProgressItem): void {
-    const items = this.getAll();
-    const idx = items.findIndex(i => i.idempotency_key === item.idempotency_key);
-
-    if (idx !== -1) {
-      items[idx] = { ...items[idx], ...item };
-    } else {
-      items.push(item);
-    }
-
-    this.saveAll(items);
+    const items = this.loadItems();
+    items.set(item.idempotency_key, { ...item });
+    this.updateStatusIndex(item.idempotency_key, item.status);
+    this.persistItems();
+    this.notify();
   }
 
   saveMany(itemsToSave: ProgressItem[]): void {
-    const items = this.getAll();
+    const items = this.loadItems();
 
     for (const item of itemsToSave) {
-      const idx = items.findIndex(i => i.idempotency_key === item.idempotency_key);
-      if (idx !== -1) {
-        items[idx] = { ...items[idx], ...item };
-      } else {
-        items.push(item);
-      }
+      items.set(item.idempotency_key, { ...item });
+      this.updateStatusIndex(item.idempotency_key, item.status);
     }
 
-    this.saveAll(items);
+    this.persistItems();
+    this.notify();
   }
 
   remove(idempotencyKey: string): boolean {
-    const items = this.getAll();
-    const filtered = items.filter(i => i.idempotency_key !== idempotencyKey);
+    const items = this.loadItems();
+    const existed = items.has(idempotencyKey);
 
-    if (filtered.length === items.length) {
-      return false;
+    if (existed) {
+      items.delete(idempotencyKey);
+      this.updateStatusIndex(idempotencyKey, undefined);
+      this.persistItems();
+      this.notify();
     }
 
-    this.saveAll(filtered);
-    return true;
+    return existed;
   }
 
   removeMany(idempotencyKeys: string[]): number {
-    const items = this.getAll();
-    const keySet = new Set(idempotencyKeys);
-    const filtered = items.filter(i => !keySet.has(i.idempotency_key));
-    const removed = items.length - filtered.length;
+    const items = this.loadItems();
+    let removed = 0;
+
+    for (const key of idempotencyKeys) {
+      if (items.delete(key)) {
+        this.updateStatusIndex(key, undefined);
+        removed++;
+      }
+    }
 
     if (removed > 0) {
-      this.saveAll(filtered);
+      this.persistItems();
+      this.notify();
     }
 
     return removed;
   }
 
   findById(idempotencyKey: string): ProgressItem | undefined {
-    return this.getAll().find(i => i.idempotency_key === idempotencyKey);
+    return this.loadItems().get(idempotencyKey);
   }
 
   exists(idempotencyKey: string): boolean {
-    return this.getAll().some(i => i.idempotency_key === idempotencyKey);
+    return this.loadItems().has(idempotencyKey);
   }
 
-  // Status Operations
+  // Status Operations - O(1) with Map cache
 
   updateStatus(
     idempotencyKey: string,
     status: ProgressItem['status'],
     metadata?: Partial<ProgressItem>
   ): boolean {
-    const items = this.getAll();
-    const idx = items.findIndex(i => i.idempotency_key === idempotencyKey);
+    const items = this.loadItems();
+    const item = items.get(idempotencyKey);
 
-    if (idx === -1) return false;
+    if (!item) return false;
 
-    items[idx] = {
-      ...items[idx],
-      status,
-      ...metadata,
-    };
-
-    this.saveAll(items);
+    const updatedItem = { ...item, status, ...metadata };
+    items.set(idempotencyKey, updatedItem);
+    this.updateStatusIndex(idempotencyKey, status);
+    this.persistItems();
+    this.notify();
     return true;
   }
 
@@ -142,142 +263,121 @@ export class LocalStorageProgressRepository implements ProgressRepository {
   }
 
   markError(idempotencyKey: string, errorMessage: string): boolean {
-    const items = this.getAll();
-    const idx = items.findIndex(i => i.idempotency_key === idempotencyKey);
+    const items = this.loadItems();
+    const item = items.get(idempotencyKey);
 
-    if (idx === -1) return false;
+    if (!item) return false;
 
-    const currentRetryCount = items[idx].retryCount || 0;
-
-    items[idx] = {
-      ...items[idx],
+    const currentRetryCount = item.retryCount || 0;
+    const updatedItem: ProgressItem = {
+      ...item,
       status: 'error',
       retryCount: currentRetryCount + 1,
       lastError: errorMessage,
       lastRetryAt: new Date().toISOString(),
     };
 
-    this.saveAll(items);
+    items.set(idempotencyKey, updatedItem);
+    this.updateStatusIndex(idempotencyKey, 'error');
+    this.persistItems();
+    this.notify();
     return true;
   }
 
   clear(): void {
+    this.itemsCache = new Map();
+    this.deadLettersCache = new Map();
+    this.pendingIndex.clear();
+    this.errorIndex.clear();
+    this.syncedIndex.clear();
+
     localStorage.removeItem(this.storageKey);
     localStorage.removeItem(this.deadLetterKey);
     this.notify();
   }
 
-  // Statistics
+  // Statistics - O(1) with index counts
 
   getStats(): QueueStats {
-    const items = this.getAll();
-    const deadLetters = this.getDeadLetters();
-
     return {
-      total: items.length,
-      pending: items.filter(i => i.status === 'pending').length,
-      error: items.filter(i => i.status === 'error').length,
-      synced: items.filter(i => i.status === 'synced').length,
-      deadLetters: deadLetters.length,
+      total: this.loadItems().size,
+      pending: this.pendingIndex.size,
+      error: this.errorIndex.size,
+      synced: this.syncedIndex.size,
+      deadLetters: this.loadDeadLetters().size,
     };
   }
 
-  // Dead Letter Queue Operations
+  // Dead Letter Queue Operations - O(1) with Map cache
 
   getDeadLetters(profileId?: string): DeadLetterItem[] {
-    try {
-      const data = localStorage.getItem(this.deadLetterKey);
-      const deadLetters: DeadLetterItem[] = data ? JSON.parse(data) : [];
+    const deadLetters = Array.from(this.loadDeadLetters().values());
 
-      if (profileId) {
-        return deadLetters.filter(dl => dl.item.profile_id === profileId);
-      }
-      return deadLetters;
-    } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to getDeadLetters:', error);
-      return [];
+    if (profileId) {
+      return deadLetters.filter(dl => dl.item.profile_id === profileId);
     }
+    return deadLetters;
   }
 
   addDeadLetter(deadLetter: DeadLetterItem): void {
-    const deadLetters = this.getDeadLetters();
+    const deadLetters = this.loadDeadLetters();
 
-    // Remove if already exists
-    const filtered = deadLetters.filter(
-      dl => dl.item.idempotency_key !== deadLetter.item.idempotency_key
-    );
+    deadLetters.set(deadLetter.item.idempotency_key, deadLetter);
 
-    filtered.push(deadLetter);
+    // Remove from main queue
+    const items = this.loadItems();
+    items.delete(deadLetter.item.idempotency_key);
+    this.updateStatusIndex(deadLetter.item.idempotency_key, undefined);
 
-    try {
-      localStorage.setItem(this.deadLetterKey, JSON.stringify(filtered));
-      // Remove from main queue
-      this.remove(deadLetter.item.idempotency_key);
-      this.notify();
-    } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to addDeadLetter:', error);
-    }
+    this.persistDeadLetters();
+    this.persistItems();
+    this.notify();
   }
 
   removeDeadLetter(idempotencyKey: string): boolean {
-    const deadLetters = this.getDeadLetters();
-    const filtered = deadLetters.filter(
-      dl => dl.item.idempotency_key !== idempotencyKey
-    );
+    const deadLetters = this.loadDeadLetters();
+    const existed = deadLetters.has(idempotencyKey);
 
-    if (filtered.length === deadLetters.length) {
-      return false;
-    }
-
-    try {
-      localStorage.setItem(this.deadLetterKey, JSON.stringify(filtered));
+    if (existed) {
+      deadLetters.delete(idempotencyKey);
+      this.persistDeadLetters();
       this.notify();
-      return true;
-    } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to removeDeadLetter:', error);
-      return false;
     }
+
+    return existed;
   }
 
   retryDeadLetter(idempotencyKey: string): boolean {
-    const deadLetters = this.getDeadLetters();
-    const deadLetter = deadLetters.find(
-      dl => dl.item.idempotency_key === idempotencyKey
-    );
+    const deadLetters = this.loadDeadLetters();
+    const deadLetter = deadLetters.get(idempotencyKey);
 
     if (!deadLetter) return false;
 
-    // Remove from dead letters
-    const filtered = deadLetters.filter(
-      dl => dl.item.idempotency_key !== idempotencyKey
-    );
+    deadLetters.delete(idempotencyKey);
 
-    try {
-      localStorage.setItem(this.deadLetterKey, JSON.stringify(filtered));
+    const itemToRetry: ProgressItem = {
+      ...deadLetter.item,
+      status: 'pending',
+      retryCount: 0,
+      lastError: undefined,
+      lastRetryAt: undefined,
+    };
 
-      // Add back to queue with reset retry count
-      const itemToRetry: ProgressItem = {
-        ...deadLetter.item,
-        status: 'pending',
-        retryCount: 0,
-        lastError: undefined,
-        lastRetryAt: undefined,
-      };
+    const items = this.loadItems();
+    items.set(idempotencyKey, itemToRetry);
+    this.updateStatusIndex(idempotencyKey, 'pending');
 
-      this.save(itemToRetry);
-      this.notify();
-      return true;
-    } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to retryDeadLetter:', error);
-      return false;
-    }
+    this.persistDeadLetters();
+    this.persistItems();
+    this.notify();
+    return true;
   }
 
   getDeadLetterCount(): number {
-    return this.getDeadLetters().length;
+    return this.loadDeadLetters().size;
   }
 
-  // Subscription (for reactive updates)
+  // Subscription
 
   subscribe(callback: () => void): () => void {
     this.listeners.add(callback);
@@ -286,17 +386,16 @@ export class LocalStorageProgressRepository implements ProgressRepository {
     };
   }
 
-  // Private helpers
-
-  private saveAll(items: ProgressItem[]): void {
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(items));
-      this.notify();
-    } catch (error) {
-      console.error('[LocalStorageProgressRepository] Failed to save:', error);
-      throw error;
-    }
+  // v2: Clear cache (useful for testing or memory management)
+  clearCache(): void {
+    this.itemsCache = null;
+    this.deadLettersCache = null;
+    this.pendingIndex.clear();
+    this.errorIndex.clear();
+    this.syncedIndex.clear();
   }
+
+  // Private helpers
 
   private notify(): void {
     this.listeners.forEach(cb => {

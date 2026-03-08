@@ -37,13 +37,13 @@ export function getLevelConfig(level: number): LevelConfig {
   return LEVELS.find((l) => l.level === level) ?? LEVELS[0];
 }
 
-export function spawnFruit(id: number, canvasWidth: number): Fruit {
+export function spawnFruit(id: number, canvasWidth: number, canvasHeight: number): Fruit {
   return {
     id,
     x: Math.random() * (canvasWidth - 100) + 50,
-    y: -50,
-    vx: (Math.random() - 0.5) * 4,
-    vy: -(Math.random() * 3 + 4),
+    y: canvasHeight + 50,
+    vx: (Math.random() - 0.5) * 6,
+    vy: -(Math.random() * 4 + 10), // Shoot upwards strongly
     rotation: 0,
     rotationSpeed: (Math.random() - 0.5) * 0.2,
     emoji: FRUITS[Math.floor(Math.random() * FRUITS.length)],
@@ -51,7 +51,7 @@ export function spawnFruit(id: number, canvasWidth: number): Fruit {
   };
 }
 
-export function updateFruits(fruits: Fruit[], canvasHeight: number, gravity: number = 0.15): Fruit[] {
+export function updateFruits(fruits: Fruit[], canvasHeight: number, gravity: number = 0.2): Fruit[] {
   return fruits
     .map((f) => ({
       ...f,
@@ -60,7 +60,10 @@ export function updateFruits(fruits: Fruit[], canvasHeight: number, gravity: num
       vy: f.vy + gravity,
       rotation: f.rotation + f.rotationSpeed,
     }))
-    .filter((f) => f.y < canvasHeight + 100);
+    .filter((f) => {
+      // Only filter out if it's moving DOWNWARD and reached past the bottom
+      return !(f.vy > 0 && f.y > canvasHeight + 100);
+    });
 }
 
 export function checkSlice(fruits: Fruit[], slicePath: { x: number; y: number }[]): { sliced: Fruit[]; remaining: Fruit[] } {

@@ -4,9 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store';
 import { authApi } from '../services/api';
+import { profileApi } from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
 import { useAudio } from '../utils/hooks/useAudio';
+import {
+  clearPendingLearnerProfile,
+  loadPendingLearnerProfile,
+} from '../services/pendingLearnerProfile';
 
 export function Login() {
   const { playSuccess, playError } = useAudio();
@@ -63,6 +68,21 @@ export function Login() {
 
     try {
       await login(email, password);
+      const pendingLearnerProfile = loadPendingLearnerProfile();
+      if (pendingLearnerProfile) {
+        try {
+          await profileApi.createProfile(pendingLearnerProfile);
+          clearPendingLearnerProfile();
+        } catch (profileError) {
+          console.error(
+            'Deferred learner profile creation failed after login:',
+            profileError,
+          );
+          setInlineError(
+            'Signed in, but we could not finish learner setup yet. Please try again from the dashboard.',
+          );
+        }
+      }
       playSuccess();
       // Wait for state to settle, then navigate
       setTimeout(() => navigate('/dashboard'), 50);

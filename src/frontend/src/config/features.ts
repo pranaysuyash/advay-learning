@@ -32,6 +32,8 @@ export interface FeatureFlags {
   'ai.sttV1': boolean;
   /** Enable TTS (text-to-speech) for Pip to speak */
   'ai.ttsV1': boolean;
+  /** Enable cloud fallback path for AI providers (parent consent still required) */
+  'ai.cloudFallbackV1': boolean;
 }
 
 /** Default flag values */
@@ -46,6 +48,7 @@ export const DEFAULT_FEATURES: FeatureFlags = {
   'ai.activityGeneratorV1': false,
   'ai.sttV1': false,
   'ai.ttsV1': true, // TTS already works
+  'ai.cloudFallbackV1': false,
 };
 
 /** Feature flag metadata for UI display */
@@ -105,6 +108,11 @@ export const FEATURE_FLAG_META: Record<keyof FeatureFlags, FeatureFlagMeta> = {
     description: 'Enable text-to-speech for Pip to speak',
     category: 'ai',
     editable: false, // Already working
+  },
+  'ai.cloudFallbackV1': {
+    description: 'Allow cloud AI fallback when local providers are unavailable',
+    category: 'ai',
+    editable: true,
   },
 };
 
@@ -170,6 +178,7 @@ export function useFeatureFlags(): {
     ),
     'ai.sttV1': getFeatureFlag('ai.sttV1', userOverrides),
     'ai.ttsV1': getFeatureFlag('ai.ttsV1', userOverrides),
+    'ai.cloudFallbackV1': getFeatureFlag('ai.cloudFallbackV1', userOverrides),
   };
 
   const isEnabled = (flag: keyof FeatureFlags): boolean => flags[flag];

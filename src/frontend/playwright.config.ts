@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const fakeCameraArgs = [
+  '--use-fake-ui-for-media-stream',
+  '--use-fake-device-for-media-stream',
+];
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
@@ -15,8 +20,22 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'chromium-fake-camera',
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera'],
+        launchOptions: {
+          args: fakeCameraArgs,
+        },
+      },
+    },
+    {
+      name: 'chromium-manual-camera',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        headless: false,
+      },
     },
   ],
   // Auto-start dev server before tests

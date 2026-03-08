@@ -15,10 +15,8 @@ import {
   Camera,
   Eye,
   Activity,
-  Lightbulb,
   CheckCircle2,
   Loader2,
-  Target,
   SkipForward,
 } from 'lucide-react';
 import { KenneyEnemy } from '../components/characters/KenneyCharacter';
@@ -31,6 +29,12 @@ import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
+import { calculateAngle } from '../utils/geometry';
+import {
+  MatchStatusBadge,
+  YogaProgressBars,
+  PoseInstructionCard,
+} from '../components/games/yogaAnimals';
 
 // Animal pose definitions with target landmarks
 interface AnimalPose {
@@ -92,19 +96,6 @@ const ANIMAL_POSES: AnimalPose[] = [
     targets: { leftArmAngle: 170, rightArmAngle: 170, torsoAngle: 0 },
   },
 ];
-
-// Calculate angle between three points
-function calculateAngle(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-  c: { x: number; y: number },
-): number {
-  const radians =
-    Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-  let angle = Math.abs((radians * 180.0) / Math.PI);
-  if (angle > 180.0) angle = 360.0 - angle;
-  return angle;
-}
 
 export const YogaAnimals = memo(function YogaAnimalsComponent() {
   const navigate = useNavigate();
@@ -651,79 +642,21 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
                   reducedMotion ? { duration: 0.01 } : { duration: 0.3 }
                 }
               >
-                <div className='text-center mb-10'>
-                  <div className='inline-flex items-center justify-center bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 text-[5rem] mb-6 drop-shadow-[0_4px_0_#E5B86E]'>
-                    {currentPose.icon}
-                  </div>
-                  <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
-                    {currentPose.name}
-                  </h3>
-                  <p className='text-xl font-bold text-text-secondary mb-8'>
-                    {currentPose.description}
-                  </p>
+                <PoseInstructionCard
+                  icon={currentPose.icon}
+                  name={currentPose.name}
+                  description={currentPose.description}
+                  instruction={currentPose.instruction}
+                  currentIndex={currentPoseIndex}
+                  totalCount={ANIMAL_POSES.length}
+                />
 
-                  <div className='bg-blue-50 border-3 border-blue-100 rounded-2xl p-4 inline-block text-left'>
-                    <p className='text-lg text-blue-800 font-bold flex items-center gap-2'>
-                      <Lightbulb className='w-5 h-5' />{' '}
-                      {currentPose.instruction}
-                    </p>
-                  </div>
-                </div>
-
-                <div className='space-y-6 mt-auto'>
-                  <div>
-                    <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
-                      <span>Pose Match</span>
-                      <span
-                        className={matchProgress > 70 ? 'text-[#10B981]' : ''}
-                      >
-                        {Math.round(matchProgress)}%
-                      </span>
-                    </div>
-                    <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
-                      <motion.div
-                        className={`h-full rounded-full ${matchProgress > 70 ? 'bg-[#10B981]' : 'bg-[#3B82F6]'}`}
-                        initial={
-                          reducedMotion
-                            ? { width: `${matchProgress}%` }
-                            : { width: 0 }
-                        }
-                        animate={{ width: `${matchProgress}%` }}
-                        transition={
-                          reducedMotion
-                            ? { duration: 0.01 }
-                            : { type: 'spring', bounce: 0, duration: 0.3 }
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
-                      <span>Hold the pose!</span>
-                      <span
-                        className={
-                          holdTime / HOLD_DURATION >= 1 ? 'text-amber-500' : ''
-                        }
-                      >
-                        {Math.round((holdTime / HOLD_DURATION) * 100)}%
-                      </span>
-                    </div>
-                    <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
-                      <motion.div
-                        className='h-full bg-[#F59E0B] rounded-full'
-                        animate={{
-                          width: `${(holdTime / HOLD_DURATION) * 100}%`,
-                        }}
-                        transition={
-                          reducedMotion
-                            ? { duration: 0.01 }
-                            : { type: 'tween', duration: 0.1 }
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
+                <YogaProgressBars
+                  matchProgress={matchProgress}
+                  holdTime={holdTime}
+                  holdDuration={HOLD_DURATION}
+                  reducedMotion={reducedMotion ?? undefined}
+                />
               </motion.div>
 
               <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
@@ -750,21 +683,7 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
                     </span>
                   </div>
 
-                  <div
-                    className={`absolute top-6 right-6 px-6 py-2 backdrop-blur-md rounded-full border-3 shadow-[0_4px_0_#E5B86E] transition-colors ${matchProgress > 70 ? 'bg-[#10B981]/90 border-emerald-400' : 'bg-black/40 border-white/20'}`}
-                  >
-                    <span
-                      className={`text-sm font-black tracking-wide flex items-center gap-1 ${matchProgress > 70 ? 'text-white' : 'text-white'}`}
-                    >
-                      {matchProgress > 70 ? (
-                        <>
-                          <Target className='w-4 h-4' /> Perfect Match!
-                        </>
-                      ) : (
-                        `${Math.round(matchProgress)}% Matched`
-                      )}
-                    </span>
-                  </div>
+                  <MatchStatusBadge matchProgress={matchProgress} />
                 </div>
 
                 <div className='flex gap-4'>

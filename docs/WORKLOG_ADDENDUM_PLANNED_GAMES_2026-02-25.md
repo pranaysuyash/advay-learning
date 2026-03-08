@@ -140,7 +140,7 @@ Ticket Stamp: STAMP-20260225T082846Z-codex-imra
 Type: FEATURE
 Owner: Pranay (human owner, agent: codex)
 Created: 2026-02-25
-Status: IN_PROGRESS
+Status: **DONE**
 Priority: P1
 
 Prompt traceability:

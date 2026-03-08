@@ -16,9 +16,15 @@ class UserService:
     """User service."""
 
     @staticmethod
+    def _normalize_email(email: str) -> str:
+        """Normalize email for consistent lookups and storage."""
+        return email.strip().lower()
+
+    @staticmethod
     async def get_by_email(db: AsyncSession, email: str) -> Optional[User]:
         """Get user by email."""
-        result = await db.execute(select(User).where(User.email == email))
+        normalized_email = UserService._normalize_email(email)
+        result = await db.execute(select(User).where(User.email == normalized_email))
         return result.scalar_one_or_none()
 
     @staticmethod
@@ -33,9 +39,10 @@ class UserService:
         # Generate verification token
         verification_token = EmailService.generate_verification_token()
         verification_expires = EmailService.get_verification_expiry()
+        normalized_email = UserService._normalize_email(str(user_in.email))
 
         user = User(
-            email=user_in.email,
+            email=normalized_email,
             hashed_password=get_password_hash(user_in.password),
             role=user_in.role,
             is_active=user_in.is_active,
@@ -125,6 +132,9 @@ class UserService:
         """Update user."""
         update_data = user_in.model_dump(exclude_unset=True)
 
+        if "email" in update_data and update_data["email"]:
+            update_data["email"] = UserService._normalize_email(str(update_data["email"]))
+
         if "password" in update_data:
             update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
 
@@ -144,7 +154,8 @@ class UserService:
     @staticmethod
     async def authenticate(db: AsyncSession, email: str, password: str) -> Optional[User]:
         """Authenticate user with constant-time comparison to prevent timing attacks."""
-        user = await UserService.get_by_email(db, email)
+        normalized_email = UserService._normalize_email(email)
+        user = await UserService.get_by_email(db, normalized_email)
 
         if not user:
             # Perform dummy verification to maintain constant time

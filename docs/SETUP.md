@@ -29,6 +29,35 @@ To manually run the gate on your staged changes:
 ./scripts/agent_gate.sh --staged
 ```
 
+## Playwright Camera Modes
+
+This repo now uses two explicit browser modes for camera flows:
+
+- Automated E2E: fake camera device + auto-accepted permission for deterministic runs
+- Manual regression: headed real Chrome with a persistent profile so an agent can verify the native permission prompt
+
+Commands:
+
+```bash
+# Deterministic fake-camera Playwright run
+cd src/frontend
+npm run test:e2e
+
+# Manual real-permission flow for paid-user path
+cd src/frontend
+npm run test:e2e:manual-camera
+
+# Manual real-permission flow for guest alphabet path
+cd src/frontend
+npm run test:e2e:manual-camera:guest
+```
+
+Notes:
+
+- `test:e2e` defaults to Playwright project `chromium-fake-camera`
+- `test:e2e:manual-camera*` launches a persistent Chrome profile under `.tmp/playwright-manual-camera-profile`
+- the manual mode intentionally does not pre-grant camera permission, so Chrome should show the real camera prompt after you click the in-app camera CTA
+
 ## Safe Multi-Line Writes (Required)
 
 Do not use heredoc shell writes as the primary way to create or overwrite tracked repo files.

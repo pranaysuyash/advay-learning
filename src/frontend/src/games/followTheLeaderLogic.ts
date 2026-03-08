@@ -19,6 +19,8 @@
  * - Swim like a fish 🐟
  */
 
+import { calculateAngle } from '../utils/geometry';
+
 // ===== TYPES =====
 
 export interface MovementPattern {
@@ -165,20 +167,6 @@ export const GAME_CONFIG = {
 };
 
 // ===== POSE MATCHING =====
-
-/**
- * Calculate angle between three points
- */
-function calculateAngle(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-  c: { x: number; y: number }
-): number {
-  const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-  let angle = Math.abs((radians * 180.0) / Math.PI);
-  if (angle > 180.0) angle = 360.0 - angle;
-  return angle;
-}
 
 /**
  * Check if current pose matches target pattern

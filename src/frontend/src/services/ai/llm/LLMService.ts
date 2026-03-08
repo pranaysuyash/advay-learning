@@ -17,6 +17,9 @@ import { WebLLMLLMProvider } from './providers/WebLLMLLMProvider';
 import { OllamaLLMProvider } from './providers/OllamaLLMProvider';
 import { HFInferenceLLMProvider } from './providers/HFInferenceLLMProvider';
 
+// runtime utility functions (avoids duplication of environment logic)
+import { selectLLMRuntimePlan } from '../../../utils/runtimeUtils';
+
 export type LLMProvider =
   | 'transformers-js'
   | 'web-llm'
@@ -60,16 +63,33 @@ export interface LLMRuntimeConfig {
   model: LLMModel;
   fallbackModel: LLMModel;
   maxResponseLength: number;
-}
-
-export interface LLMRuntimeEnvironment {
-  isBrowser: boolean;
-  hasWebGPU: boolean;
-  isMobile: boolean;
-  hasLocalOllama: boolean;
   cloudFallbackEnabled: boolean;
   parentConsent: boolean;
 }
+
+export interface LLMUsageEvent {
+  provider: LLMProvider;
+  model: LLMModel;
+  source: LLMResponseSource;
+  latencyMs: number;
+  cached: boolean;
+  fallbackUsed: boolean;
+  reason:
+    | 'service_disabled'
+    | 'category_mock'
+    | 'provider_success'
+    | 'cloud_blocked_no_consent_or_flag'
+    | 'provider_error_fallback';
+  timestamp: string;
+}
+
+// reuse the generic RuntimeEnv from runtimeUtils rather than
+// duplicating the shape here.  This keeps the environment detection
+// logic in one place and enables other services to share the same
+// data structure.
+import type { RuntimeEnv } from '../../../utils/runtimeUtils';
+
+export type LLMRuntimeEnvironment = RuntimeEnv;
 
 export interface LLMRuntimePlan {
   provider: LLMProvider;
@@ -142,6 +162,8 @@ function buildDefaultRuntimeConfigFromEnv(
       'qwen3.5-0.5b-instruct',
     ),
     maxResponseLength: parsePositiveInt(env.VITE_AI_MAX_RESPONSE_LENGTH, 220),
+    cloudFallbackEnabled: parseBoolean(env.VITE_AI_CLOUD_FALLBACK_ENABLED, false),
+    parentConsent: parseBoolean(env.VITE_AI_PARENT_CONSENT, false),
   };
 }
 
@@ -160,6 +182,7 @@ function buildDefaultRuntimeConfigFromEnv(
 export class LLMService {
   private config: LLMRuntimeConfig;
   private readonly providers = new Map<string, LLMProviderAdapter>();
+  private readonly usageListeners = new Set<(event: LLMUsageEvent) => void>();
 
   constructor(config?: Partial<LLMRuntimeConfig>) {
     // build default config at construction time so callers can override env
@@ -186,56 +209,31 @@ export class LLMService {
     this.config.enabled = enabled;
   }
 
+  subscribeUsage(listener: (event: LLMUsageEvent) => void): () => void {
+    this.usageListeners.add(listener);
+    return () => {
+      this.usageListeners.delete(listener);
+    };
+  }
+
+  private emitUsage(event: LLMUsageEvent): void {
+    this.usageListeners.forEach((listener) => {
+      try {
+        listener(event);
+      } catch (error) {
+        console.warn('[LLMService] usage listener failed:', error);
+      }
+    });
+  }
+
   /**
    * Select provider/model using architecture-aligned runtime rules.
    */
   selectRuntimePlan(env: LLMRuntimeEnvironment): LLMRuntimePlan {
-    if (env.isBrowser && env.hasWebGPU && !env.isMobile) {
-      return {
-        provider: 'transformers-js',
-        model: 'qwen3.5-1.5b-instruct',
-        reason: 'Browser with WebGPU available: use primary MVP model.',
-      };
-    }
-
-    if (env.isBrowser && env.isMobile) {
-      return {
-        provider: 'transformers-js',
-        model: 'qwen3.5-0.5b-instruct',
-        reason:
-          'Mobile profile: prioritize lightweight latency-optimized model.',
-      };
-    }
-
-    if (env.isBrowser && !env.hasWebGPU) {
-      return {
-        provider: 'transformers-js',
-        model: 'qwen3.5-0.5b-instruct',
-        reason: 'No WebGPU: use smaller fallback model for WASM compatibility.',
-      };
-    }
-
-    if (env.hasLocalOllama) {
-      return {
-        provider: 'ollama',
-        model: 'qwen3.5-1.5b-instruct',
-        reason: 'Local desktop runtime available: use Ollama local inference.',
-      };
-    }
-
-    if (env.cloudFallbackEnabled && env.parentConsent) {
-      return {
-        provider: 'hf-inference',
-        model: 'qwen3.5-3b-instruct',
-        reason: 'Cloud fallback enabled with parent consent.',
-      };
-    }
-
-    return {
-      provider: 'mock',
-      model: 'qwen3.5-0.5b-instruct',
-      reason: 'No local/cloud provider available: safe mock fallback.',
-    };
+    // delegate to shared utility so that the same rule set is available
+    // to tests, documentation, and any other consumers who don't need a
+    // full LLMService instance.
+    return selectLLMRuntimePlan(env);
   }
 
   applyRuntimePlan(plan: LLMRuntimePlan): void {
@@ -307,7 +305,7 @@ export class LLMService {
         category: 'waiting',
       });
       const elapsed = Math.max(1, Date.now() - startedAt);
-      return {
+      const response: LLMResponse = {
         text: mock.text.slice(0, this.config.maxResponseLength),
         provider: 'mock',
         model: this.config.fallbackModel,
@@ -316,13 +314,24 @@ export class LLMService {
         cached: Boolean(mock.cached),
         timestamp: new Date().toISOString(),
       };
+      this.emitUsage({
+        provider: response.provider,
+        model: response.model,
+        source: response.source,
+        latencyMs: response.latencyMs,
+        cached: response.cached,
+        fallbackUsed: true,
+        reason: 'service_disabled',
+        timestamp: response.timestamp,
+      });
+      return response;
     }
 
     // Category-first responses remain child-safe and deterministic.
     if (request.category) {
       const mock = await mockProvider.generate({ ...request, prompt });
       const elapsed = Math.max(1, Date.now() - startedAt);
-      return {
+      const response: LLMResponse = {
         text: mock.text.slice(0, this.config.maxResponseLength),
         provider: 'mock',
         model: this.config.model,
@@ -331,9 +340,27 @@ export class LLMService {
         cached: Boolean(mock.cached),
         timestamp: new Date().toISOString(),
       };
+      this.emitUsage({
+        provider: response.provider,
+        model: response.model,
+        source: response.source,
+        latencyMs: response.latencyMs,
+        cached: response.cached,
+        fallbackUsed: false,
+        reason: 'category_mock',
+        timestamp: response.timestamp,
+      });
+      return response;
     }
 
     try {
+      if (
+        this.config.provider === 'hf-inference' &&
+        (!this.config.cloudFallbackEnabled || !this.config.parentConsent)
+      ) {
+        throw new Error('Cloud fallback blocked: parent consent or flag missing.');
+      }
+
       const provider = await this.getProvider(
         this.config.provider,
         this.config.model,
@@ -346,7 +373,7 @@ export class LLMService {
       const text = generated.text?.trim() || getRandomResponse('encouragement');
       const elapsed = Math.max(1, Date.now() - startedAt);
 
-      return {
+      const response: LLMResponse = {
         text: text.slice(0, this.config.maxResponseLength),
         provider: this.config.provider,
         model: generated.model ?? this.config.model,
@@ -355,6 +382,17 @@ export class LLMService {
         cached: Boolean(generated.cached),
         timestamp: new Date().toISOString(),
       };
+      this.emitUsage({
+        provider: response.provider,
+        model: response.model,
+        source: response.source,
+        latencyMs: response.latencyMs,
+        cached: response.cached,
+        fallbackUsed: false,
+        reason: 'provider_success',
+        timestamp: response.timestamp,
+      });
+      return response;
     } catch (error) {
       console.warn(
         '[LLMService] Provider failed, falling back to mock:',
@@ -362,7 +400,7 @@ export class LLMService {
       );
       const mock = await mockProvider.generate({ ...request, prompt });
       const elapsed = Math.max(1, Date.now() - startedAt);
-      return {
+      const response: LLMResponse = {
         text: mock.text.slice(0, this.config.maxResponseLength),
         provider: 'mock',
         model: this.config.fallbackModel,
@@ -371,6 +409,22 @@ export class LLMService {
         cached: Boolean(mock.cached),
         timestamp: new Date().toISOString(),
       };
+      const reason =
+        this.config.provider === 'hf-inference' &&
+        (!this.config.cloudFallbackEnabled || !this.config.parentConsent)
+          ? 'cloud_blocked_no_consent_or_flag'
+          : 'provider_error_fallback';
+      this.emitUsage({
+        provider: response.provider,
+        model: response.model,
+        source: response.source,
+        latencyMs: response.latencyMs,
+        cached: response.cached,
+        fallbackUsed: true,
+        reason,
+        timestamp: response.timestamp,
+      });
+      return response;
     }
   }
 }

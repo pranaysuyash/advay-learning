@@ -255,6 +255,51 @@ describe('AuthStore', () => {
   });
 
   describe('error message extraction', () => {
+    it('should format account lockout message with retry time', async () => {
+      const error = {
+        response: {
+          data: {
+            success: false,
+            error: {
+              code: 'ACCOUNT_LOCKED',
+              message: 'Account is temporarily locked due to multiple failed attempts',
+              details: {
+                retry_after_seconds: 125,
+              },
+            },
+          },
+        },
+      };
+      vi.mocked(authApi.login).mockRejectedValueOnce(error);
+
+      const store = useAuthStore.getState();
+      await expect(store.login('a', 'b')).rejects.toEqual(error);
+
+      expect(useAuthStore.getState().error).toBe(
+        'Account is temporarily locked. Try again in 2m 5s.',
+      );
+    });
+
+    it('should show friendly session-expired message for missing refresh token', async () => {
+      const error = {
+        response: {
+          data: {
+            success: false,
+            error: {
+              code: 'TOKEN_INVALID',
+              message: 'No refresh token provided',
+            },
+          },
+        },
+      };
+      vi.mocked(authApi.login).mockRejectedValueOnce(error);
+
+      const store = useAuthStore.getState();
+      await expect(store.login('a', 'b')).rejects.toEqual(error);
+
+      expect(useAuthStore.getState().error).toBe('Your session expired. Please sign in again.');
+    });
+
     it('should extract string detail', async () => {
       const error = { response: { data: { detail: 'Custom error' } } };
       vi.mocked(authApi.login).mockRejectedValueOnce(error);

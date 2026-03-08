@@ -121,53 +121,12 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const showHints = useSettingsStore((state) => state.showHints);
   const difficulty = useSettingsStore((state) => state.difficulty);
   const gameLanguageSetting = useSettingsStore((state) => state.gameLanguage);
-  useAuthStore();
+  const isGuest = useAuthStore((state) => state.isGuest);
   const markLetterAttempt = useProgressStore(
     (state) => state.markLetterAttempt,
   );
 
   const [error, setError] = useState<Error | null>(null);
-
-  // Show loading while checking subscription
-  if (subLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
-      </div>
-    );
-  }
-
-  // Check subscription access
-  if (!hasAccess) {
-    return (
-      <AccessDenied gameName='Alphabet Tracing' gameId='alphabet-tracing' />
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <GameContainer title='Alphabet Tracing' onHome={() => navigate('/games')}>
-        <div className='flex items-center justify-center min-h-screen'>
-          <div className='text-center'>
-            <h2 className='text-2xl font-bold text-red-600 mb-4'>
-              Oops! Something went wrong
-            </h2>
-            <p className='text-slate-600 mb-4'>{error.message}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                window.location.reload();
-              }}
-              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </GameContainer>
-    );
-  }
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -251,6 +210,13 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const startGame = async () => {
     // Auto-enable drawing mode when game starts for better UX
     setIsDrawing(true);
+
+    // Respect child/parent choice to play without camera from tutorial.
+    if (useMouseMode) {
+      setIsPlaying(true);
+      setFeedback('Use your finger to draw! 👆');
+      return;
+    }
 
     // Check camera permission before starting
     try {
@@ -593,6 +559,12 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     }
   };
 
+  const handleSkipCameraTutorial = () => {
+    setUseMouseMode(true);
+    setFeedback('Use your finger to draw! 👆');
+    handleSkipTutorial();
+  };
+
   const handleHandTutorialComplete = () => {
     setShowHandTutorial(false);
   };
@@ -617,9 +589,11 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
       localStorage.getItem(ALPHABET_GAME_TUTORIAL_KEY) === 'true';
     setTutorialCompleted(hasCompletedTutorial);
 
-    // Fetch profiles to ensure we have the latest data
-    useProfileStore.getState().fetchProfiles();
-  }, []);
+    if (!isGuest) {
+      // Fetch profiles to ensure we have the latest data for signed-in users.
+      useProfileStore.getState().fetchProfiles();
+    }
+  }, [isGuest]);
 
   // Bootstrap camera permission on mount (Permissions API + getUserMedia fallback)
   useInitialCameraPermission(
@@ -642,13 +616,13 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   // Single, stable initialization effect for profiles
   const hasFetchedRef = useRef(false);
   useEffect(() => {
-    if (!hasFetchedRef.current && profiles.length === 0) {
+    if (!isGuest && !hasFetchedRef.current && profiles.length === 0) {
       hasFetchedRef.current = true;
       fetchProfiles().catch(() => {
         // Error handled in store
       });
     }
-  }, [fetchProfiles, profiles.length]);
+  }, [fetchProfiles, isGuest, profiles.length]);
 
   // Auto-select first available profile if none provided
   const resolvedProfileId = profileId ?? currentProfile?.id ?? profiles[0]?.id;
@@ -1243,7 +1217,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
         icon: isModelLoading ? 'timer' : 'sparkles',
         label: isModelLoading
           ? 'Loading hand tracking...'
-          : cameraPermission === 'denied'
+          : useMouseMode || cameraPermission === 'denied'
             ? 'Play with Mouse/Touch'
             : 'Start Learning!',
         onClick: startGame,
@@ -1251,7 +1225,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
         disabled: isModelLoading,
       },
     ],
-    [goToHome, isModelLoading, cameraPermission, startGame],
+    [goToHome, isModelLoading, cameraPermission, useMouseMode, startGame],
   );
 
   // If no profile is available yet, show a loading state with option to continue as guest
@@ -1452,6 +1426,44 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     ];
   }, [hydrationReminderCount, wellnessReminderType]);
 
+  if (subLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <AccessDenied gameName='Alphabet Tracing' gameId='alphabet-tracing' />
+    );
+  }
+
+  if (error) {
+    return (
+      <GameContainer title='Alphabet Tracing' onHome={() => navigate('/games')}>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h2 className='text-2xl font-bold text-red-600 mb-4'>
+              Oops! Something went wrong
+            </h2>
+            <p className='text-slate-600 mb-4'>{error.message}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </GameContainer>
+    );
+  }
+
   return (
     <GlobalErrorBoundary>
       <WellnessMonitor
@@ -1465,6 +1477,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
           <GameTutorial
             onComplete={handleTutorialComplete}
             onSkip={handleSkipTutorial}
+            onSkipCamera={handleSkipCameraTutorial}
           />
         )}
 

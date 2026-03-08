@@ -449,6 +449,11 @@ async def get_current_subscription(
     current_user: UserModel = Depends(get_current_user),
 ):
     """Get current active subscription for the user."""
+    def normalize_utc(value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
     subscription = await SubscriptionService.get_active_subscription(
         db=db, parent_id=current_user.id
     )
@@ -461,10 +466,21 @@ async def get_current_subscription(
             available_games=None,
         )
 
-    days_remaining = (subscription.end_date - datetime.now(timezone.utc)).days
+    days_remaining = max(
+        0,
+        (normalize_utc(subscription.end_date) - datetime.now(timezone.utc)).days,
+    )
+
+    try:
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
 
     available_games = None
-    if subscription.plan_type in [
+    if normalized_plan in [
         SubscriptionPlanType.GAME_PACK_5,
         SubscriptionPlanType.GAME_PACK_10,
     ]:
@@ -505,9 +521,15 @@ async def get_available_games(
             detail="Not authorized to access this subscription",
         )
 
-    available = await SubscriptionService.get_available_games(
-        db=db, subscription_id=subscription_id
-    )
+    try:
+        available = await SubscriptionService.get_available_games(
+            db=db, subscription_id=subscription_id
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
 
     return SubscriptionAvailableGames(**available)
 
@@ -561,7 +583,7 @@ async def swap_game(
     db: AsyncSession = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Swap one game in the subscription (1 free swap per pack)."""
+    """Legacy swap endpoint retained as an explicit error for prelaunch reset clients."""
     subscription = await SubscriptionService.get_subscription_by_id(
         db=db, subscription_id=subscription_id
     )
@@ -578,26 +600,11 @@ async def swap_game(
             detail="Not authorized to access this subscription",
         )
 
-    old_game_id = swap.old_game_id
-    if not old_game_id:
-        # Backward-compatibility: legacy clients send only new_game_id.
-        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
-        replacement_candidate = next(
-            (s.game_id for s in active_selections if s.game_id != swap.new_game_id),
-            None,
-        )
-        if not replacement_candidate:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No eligible game available to swap out",
-            )
-        old_game_id = replacement_candidate
-
     try:
         await SubscriptionService.swap_game(
             db=db,
             subscription_id=subscription_id,
-            old_game_id=old_game_id,
+            old_game_id=swap.old_game_id or "",
             new_game_id=swap.new_game_id
         )
     except ValueError as e:
@@ -701,8 +708,16 @@ async def get_subscription_status(
             (subscription.end_date - datetime.now(timezone.utc)).days,
         )
 
+    try:
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+
     available_games = None
-    if subscription.plan_type in [
+    if normalized_plan in [
         SubscriptionPlanType.GAME_PACK_5,
         SubscriptionPlanType.GAME_PACK_10,
     ]:

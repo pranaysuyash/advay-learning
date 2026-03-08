@@ -3,7 +3,7 @@
 **Ticket Stamp:** STAMP-20260303T164500Z-codex-batch6  
 **Type:** GAME_IMPROVEMENTS  
 **Owner:** Pranay  
-**Status:** IN_PROGRESS  
+**Status:** DONE  
 **Created:** 2026-03-03  
 
 ## Scope

@@ -433,7 +433,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
       {/* Webcam (hidden but functional) */}
 
 
-      <CameraThumbnail isHandDetected={isHandReady} position="bottom-right" />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandReady} position="bottom-right" />
 
       {/* UI Panel */}
       <AnimatePresence>

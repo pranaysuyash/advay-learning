@@ -201,4 +201,18 @@ export class ParticleSystem {
     }
 
     // Save/Load omitted to keep minimal
+
+    /**
+     * Play collision sound for a particle
+     */
+    playCollisionSound(particle: Particle): void {
+        this.audioSystem?.playCollision(particle.type);
+    }
+
+    /**
+     * Play boundary collision sound for a particle
+     */
+    playBoundaryCollisionSound(particle: Particle): void {
+        this.audioSystem?.playBoundaryCollision(particle.type);
+    }
 }

@@ -5,7 +5,7 @@ Ticket Stamp: STAMP-20260303T061228Z-codex-2sc6
 Type: GAME_IMPROVEMENT
 Owner: Pranay
 Created: 2026-03-03 10:35 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:

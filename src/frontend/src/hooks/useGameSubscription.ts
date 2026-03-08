@@ -38,7 +38,7 @@ export interface UseGameSubscriptionReturn {
  * ```
  */
 export function useGameSubscription(gameId: string): UseGameSubscriptionReturn {
-  const { canAccessGame, isLoading } = useSubscription();
+  const { canAccessGame, isLoading, statusSource, errorReason } = useSubscription();
   
   const hasAccess = useMemo(() => {
     if (isLoading) return false;
@@ -48,7 +48,10 @@ export function useGameSubscription(gameId: string): UseGameSubscriptionReturn {
   return {
     hasAccess,
     isLoading,
-    error: null,
+    error:
+      statusSource === 'api_error' || statusSource === 'invalid_plan'
+        ? new Error(errorReason || 'Subscription service is temporarily unavailable.')
+        : null,
     gameId,
   };
 }

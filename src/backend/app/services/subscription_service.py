@@ -7,6 +7,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.db.models.subscription_model import (
     Subscription,
@@ -16,7 +17,7 @@ from app.db.models.subscription_model import (
 )
 
 PLAN_DURATIONS = {
-    SubscriptionPlanType.GAME_PACK_5: 90,  # days
+    SubscriptionPlanType.GAME_PACK_5: 30,  # days
     SubscriptionPlanType.GAME_PACK_10: 90,  # days
     SubscriptionPlanType.FULL_ANNUAL: 365,  # days
 }
@@ -33,9 +34,107 @@ PACK_GAME_LIMITS = {
     SubscriptionPlanType.FULL_ANNUAL: 35,  # All games
 }
 
+PACK_PLANS = {
+    SubscriptionPlanType.GAME_PACK_5,
+    SubscriptionPlanType.GAME_PACK_10,
+}
+QUARTERLY_REFRESH_WINDOW_DAYS = 30
+QUARTERLY_TOTAL_CYCLES = 3
+
 
 class SubscriptionService:
     """Service for managing subscriptions."""
+
+    @staticmethod
+    def _normalize_plan_type(plan_type: SubscriptionPlanType | str) -> SubscriptionPlanType:
+        """Validate and normalize a stored subscription plan type."""
+        if isinstance(plan_type, SubscriptionPlanType):
+            return plan_type
+
+        try:
+            return SubscriptionPlanType(plan_type)
+        except ValueError as exc:
+            raise ValueError(
+                f"Unsupported subscription plan type '{plan_type}'. Update the subscription record."
+            ) from exc
+
+    @staticmethod
+    def _normalize_datetime(value: datetime) -> datetime:
+        """Normalize persisted datetimes to UTC-aware values."""
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
+    @staticmethod
+    def _get_active_selections(subscription: Subscription) -> list[SubscriptionGameSelection]:
+        return [selection for selection in subscription.game_selections if selection.swapped_at is None]
+
+    @staticmethod
+    async def _list_active_selections(
+        db: AsyncSession,
+        subscription_id: str,
+    ) -> list[SubscriptionGameSelection]:
+        result = await db.execute(
+            select(SubscriptionGameSelection).where(
+                SubscriptionGameSelection.subscription_id == subscription_id,
+                SubscriptionGameSelection.swapped_at.is_(None),
+            )
+        )
+        return list(result.scalars().all())
+
+    @staticmethod
+    def _get_pack_limit(plan_type: SubscriptionPlanType | str) -> int:
+        normalized_plan = SubscriptionService._normalize_plan_type(plan_type)
+        return PACK_GAME_LIMITS.get(normalized_plan, 0)
+
+    @staticmethod
+    def _is_full_access_plan(plan_type: SubscriptionPlanType | str) -> bool:
+        return SubscriptionService._normalize_plan_type(plan_type) == SubscriptionPlanType.FULL_ANNUAL
+
+    @staticmethod
+    def _is_pack_plan(plan_type: SubscriptionPlanType | str) -> bool:
+        return SubscriptionService._normalize_plan_type(plan_type) in PACK_PLANS
+
+    @staticmethod
+    def _get_quarterly_cycle(subscription: Subscription, now: datetime | None = None) -> int:
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        if normalized_plan != SubscriptionPlanType.GAME_PACK_10:
+            return 1
+
+        reference_now = now or datetime.now(timezone.utc)
+        start_date = SubscriptionService._normalize_datetime(subscription.start_date)
+        elapsed_days = max(0, (reference_now - start_date).days)
+        return min(QUARTERLY_TOTAL_CYCLES, (elapsed_days // QUARTERLY_REFRESH_WINDOW_DAYS) + 1)
+
+    @staticmethod
+    def _get_refresh_state(subscription: Subscription, now: datetime | None = None) -> dict:
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        if normalized_plan != SubscriptionPlanType.GAME_PACK_10:
+            return {
+                "refresh_available": False,
+                "current_cycle_index": 1,
+                "total_cycles": 1,
+                "last_refresh_cycle_used": subscription.last_refresh_cycle_used,
+                "next_refresh_at": None,
+                "refresh_window_label": None,
+            }
+
+        reference_now = now or datetime.now(timezone.utc)
+        current_cycle = SubscriptionService._get_quarterly_cycle(subscription, reference_now)
+        next_refresh_at = None
+        if current_cycle < QUARTERLY_TOTAL_CYCLES:
+            next_refresh_at = SubscriptionService._normalize_datetime(subscription.start_date) + timedelta(
+                days=current_cycle * QUARTERLY_REFRESH_WINDOW_DAYS
+            )
+
+        return {
+            "refresh_available": current_cycle > 1 and subscription.last_refresh_cycle_used < current_cycle,
+            "current_cycle_index": current_cycle,
+            "total_cycles": QUARTERLY_TOTAL_CYCLES,
+            "last_refresh_cycle_used": subscription.last_refresh_cycle_used,
+            "next_refresh_at": next_refresh_at,
+            "refresh_window_label": f"Month {current_cycle} of {QUARTERLY_TOTAL_CYCLES}",
+        }
 
     @staticmethod
     async def create_subscription(
@@ -95,6 +194,8 @@ class SubscriptionService:
         """Get the active subscription for a parent."""
         result = await db.execute(
             select(Subscription)
+            .execution_options(populate_existing=True)
+            .options(selectinload(Subscription.game_selections))
             .where(Subscription.parent_id == parent_id)
             .where(Subscription.status == SubscriptionStatus.ACTIVE)
             .where(Subscription.end_date > datetime.now(timezone.utc))
@@ -108,7 +209,10 @@ class SubscriptionService:
     ) -> Optional[Subscription]:
         """Get subscription by ID."""
         result = await db.execute(
-            select(Subscription).where(Subscription.id == subscription_id)
+            select(Subscription)
+            .execution_options(populate_existing=True)
+            .options(selectinload(Subscription.game_selections))
+            .where(Subscription.id == subscription_id)
         )
         return result.scalar_one_or_none()
 
@@ -122,6 +226,8 @@ class SubscriptionService:
         # Lock subscription row to prevent race conditions on limit checking
         result = await db.execute(
             select(Subscription)
+            .execution_options(populate_existing=True)
+            .options(selectinload(Subscription.game_selections))
             .where(Subscription.id == subscription_id)
             .with_for_update()
         )
@@ -130,13 +236,32 @@ class SubscriptionService:
         if not subscription:
             raise ValueError("Subscription not found")
 
-        game_limit = PACK_GAME_LIMITS.get(subscription.plan_type, 0)
-        # Count only active selections (swapped_at IS NULL)
-        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        if normalized_plan == SubscriptionPlanType.FULL_ANNUAL:
+            raise ValueError("Full annual subscriptions do not require game selection")
+
+        game_limit = SubscriptionService._get_pack_limit(normalized_plan)
+        active_selections = await SubscriptionService._list_active_selections(db, subscription_id)
         existing = len(active_selections)
 
         # Dedupe game_ids before processing to avoid treating user input duplicates as DB errors
         unique_game_ids = list(dict.fromkeys(game_ids))  # Preserve order while deduping
+
+        if not unique_game_ids:
+            raise ValueError("At least one game selection is required")
+
+        if len(unique_game_ids) > game_limit:
+            raise ValueError(f"Cannot select more than {game_limit} games for this plan")
+
+        if existing > 0:
+            if normalized_plan != SubscriptionPlanType.GAME_PACK_10:
+                raise ValueError("This plan keeps the same games for the full term. Choose a new set at renewal.")
+            await SubscriptionService.refresh_game_selection(
+                db=db,
+                subscription=subscription,
+                game_ids=unique_game_ids,
+            )
+            return await SubscriptionService._list_active_selections(db, subscription_id)
 
         if existing + len(unique_game_ids) > game_limit:
             raise ValueError(
@@ -170,76 +295,63 @@ class SubscriptionService:
         return selections
 
     @staticmethod
+    async def refresh_game_selection(
+        db: AsyncSession,
+        subscription: Subscription,
+        game_ids: list[str],
+    ) -> list[SubscriptionGameSelection]:
+        """Refresh the active quarterly selection during the current monthly window."""
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        if normalized_plan != SubscriptionPlanType.GAME_PACK_10:
+            raise ValueError("Only the quarterly 10-game pack can refresh games mid-term")
+
+        refresh_state = SubscriptionService._get_refresh_state(subscription)
+        if not refresh_state["refresh_available"]:
+            raise ValueError("A monthly refresh is not available right now")
+
+        unique_game_ids = list(dict.fromkeys(game_ids))
+        game_limit = SubscriptionService._get_pack_limit(normalized_plan)
+        if len(unique_game_ids) != game_limit:
+            raise ValueError(f"Quarterly refresh requires exactly {game_limit} selected games")
+
+        active_selections = await SubscriptionService._list_active_selections(db, subscription.id)
+        active_game_ids = {selection.game_id for selection in active_selections}
+        if active_game_ids == set(unique_game_ids):
+            raise ValueError("Choose at least one different game before refreshing")
+
+        now = datetime.now(timezone.utc)
+        for selection in active_selections:
+            selection.swapped_at = now
+            selection.original_game_id = selection.game_id
+
+        new_selections: list[SubscriptionGameSelection] = []
+        for game_id in unique_game_ids:
+            selection = SubscriptionGameSelection(
+                id=str(uuid4()),
+                subscription_id=subscription.id,
+                game_id=game_id,
+            )
+            db.add(selection)
+            new_selections.append(selection)
+
+        subscription.last_refresh_cycle_used = refresh_state["current_cycle_index"]
+        await db.flush()
+        await db.commit()
+        for selection in new_selections:
+            await db.refresh(selection)
+        return new_selections
+
+    @staticmethod
     async def swap_game(
         db: AsyncSession,
         subscription_id: str,
         old_game_id: str,
         new_game_id: str,
     ) -> SubscriptionGameSelection:
-        """Swap one game in the subscription (1 free swap per pack)."""
-        if old_game_id == new_game_id:
-            raise ValueError("Old and new game must be different")
-
-        try:
-            # Lock subscription row to prevent race conditions on swap usage
-            result = await db.execute(
-                select(Subscription)
-                .where(Subscription.id == subscription_id)
-                .with_for_update()
-            )
-            subscription = result.scalar_one_or_none()
-
-            if not subscription:
-                raise ValueError("Subscription not found")
-            if subscription.status != SubscriptionStatus.ACTIVE:
-                raise ValueError("Subscription not active")
-            if subscription.game_swap_used:
-                raise ValueError("Game swap already used")
-
-            # Find the active selection for old game to swap out
-            old_selection = next(
-                (s for s in subscription.game_selections
-                 if s.game_id == old_game_id and s.swapped_at is None),
-                None
-            )
-            if not old_selection:
-                raise ValueError(f"Game {old_game_id} not found in active selections")
-
-            # Prevent swapping into a game already selected (active)
-            already_active = any(
-                s.game_id == new_game_id and s.swapped_at is None
-                for s in subscription.game_selections
-            )
-            if already_active:
-                raise ValueError(f"Game {new_game_id} is already in your active selection")
-
-            # Mark old selection as swapped
-            old_selection.swapped_at = datetime.now(timezone.utc)
-            old_selection.original_game_id = old_game_id
-
-            # Mark swap as used
-            subscription.game_swap_used = True
-
-            # Create new active selection
-            new_selection = SubscriptionGameSelection(
-                id=str(uuid4()),
-                subscription_id=subscription_id,
-                game_id=new_game_id,
-            )
-            db.add(new_selection)
-
-            # Flush catches uniqueness violations before commit
-            await db.flush()
-            await db.commit()
-            await db.refresh(new_selection)
-            return new_selection
-
-        except IntegrityError:
-            await db.rollback()
-            raise ValueError(f"Game {new_game_id} is already in your selection")
-        except Exception:
-            await db.rollback()
-            raise
+        """Legacy single-game swap path is disabled in the clean prelaunch model."""
+        raise ValueError(
+            "Single-game swaps are no longer supported. Quarterly plans refresh the full selection monthly."
+        )
 
     @staticmethod
     async def calculate_upgrade_credit(
@@ -252,13 +364,17 @@ class SubscriptionService:
         if not subscription:
             raise ValueError("Subscription not found")
 
+        SubscriptionService._normalize_plan_type(subscription.plan_type)
+
         now = datetime.now(timezone.utc)
-        if subscription.end_date <= now:
+        start_date = SubscriptionService._normalize_datetime(subscription.start_date)
+        end_date = SubscriptionService._normalize_datetime(subscription.end_date)
+        if end_date <= now:
             return 0
 
         # Use total_seconds() for accurate proration (not .days)
-        total_duration = (subscription.end_date - subscription.start_date).total_seconds()
-        remaining_duration = (subscription.end_date - now).total_seconds()
+        total_duration = (end_date - start_date).total_seconds()
+        remaining_duration = (end_date - now).total_seconds()
 
         if remaining_duration <= 0:
             return 0
@@ -283,6 +399,8 @@ class SubscriptionService:
 
         if old_subscription.status != SubscriptionStatus.ACTIVE:
             raise ValueError("Cannot upgrade inactive subscription")
+
+        SubscriptionService._normalize_plan_type(old_subscription.plan_type)
 
         new_price = PLAN_PRICES[new_plan]
 
@@ -354,18 +472,28 @@ class SubscriptionService:
         if not subscription:
             raise ValueError("Subscription not found")
 
-        game_limit = PACK_GAME_LIMITS.get(subscription.plan_type, 0)
-        # Count only active selections (swapped_at IS NULL)
-        active_selections = [s for s in subscription.game_selections if s.swapped_at is None]
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        game_limit = SubscriptionService._get_pack_limit(normalized_plan)
+        active_selections = await SubscriptionService._list_active_selections(db, subscription.id)
         selected_count = len(active_selections)
-        swap_remaining = not subscription.game_swap_used
+        refresh_state = SubscriptionService._get_refresh_state(subscription)
+        renewal_prompt = None
+        if normalized_plan == SubscriptionPlanType.GAME_PACK_5:
+            renewal_prompt = "At renewal you can keep the same 5 games or choose a new 5."
 
         return {
             "game_limit": game_limit,
             "selected_count": selected_count,
             "remaining_slots": game_limit - selected_count,
-            "swap_available": swap_remaining,
-            "plan_type": subscription.plan_type.value if hasattr(subscription.plan_type, 'value') else subscription.plan_type,
+            "swap_available": False,
+            "plan_type": normalized_plan.value,
+            "refresh_available": refresh_state["refresh_available"],
+            "current_cycle_index": refresh_state["current_cycle_index"],
+            "total_cycles": refresh_state["total_cycles"],
+            "last_refresh_cycle_used": refresh_state["last_refresh_cycle_used"],
+            "next_refresh_at": refresh_state["next_refresh_at"],
+            "refresh_window_label": refresh_state["refresh_window_label"],
+            "renewal_prompt": renewal_prompt,
         }
 
     @staticmethod
@@ -385,17 +513,20 @@ class SubscriptionService:
             return False, "No active subscription"
 
         # Full annual = access to all games
-        if subscription.plan_type == SubscriptionPlanType.FULL_ANNUAL:
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+        if normalized_plan == SubscriptionPlanType.FULL_ANNUAL:
             return True, "Full annual subscription"
 
         # For packs, check only active game selections (swapped_at IS NULL)
-        active_selections = {s.game_id for s in subscription.game_selections if s.swapped_at is None}
+        active_selections = {
+            selection.game_id
+            for selection in await SubscriptionService._list_active_selections(db, subscription.id)
+        }
 
         if game_id in active_selections:
             return True, "Game selected in pack"
 
-        plan_type_str = subscription.plan_type.value if hasattr(subscription.plan_type, 'value') else subscription.plan_type
-        return False, f"Game not in your {plan_type_str} selection"
+        return False, f"Game not in your {normalized_plan.value} selection"
 
     @staticmethod
     async def get_subscription_for_parent(

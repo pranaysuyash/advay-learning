@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { subscriptionApi, SubscriptionStatus } from '../services/api';
+import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
 
 interface Game {
   id: string;
@@ -122,7 +123,7 @@ export function GameSelection() {
     );
   }
 
-  const isFullAnnual = subscription.subscription.plan_type === 'full_annual';
+  const isFullAnnual = isFullAccessPlan(subscription.subscription.plan_type);
 
   if (isFullAnnual) {
     return (
@@ -155,7 +156,7 @@ export function GameSelection() {
             Select Your Games
           </h1>
           <p className="text-gray-600">
-            Choose up to {gameLimit} games for your {subscription.subscription.plan_type?.replace('_', ' ')} subscription
+            Choose up to {gameLimit} games for your {getPlanLabel(subscription.subscription.plan_type)}.
           </p>
         </div>
 
@@ -171,8 +172,17 @@ export function GameSelection() {
             )}
           </div>
           <div className="flex gap-4">
-            {subscription.available_games?.swap_available && (
-              <span className="text-green-600">1 swap available</span>
+            {subscription.available_games?.renewal_prompt && (
+              <span className="text-gray-500">{subscription.available_games.renewal_prompt}</span>
+            )}
+            {isQuarterlyPack(subscription.subscription.plan_type) && subscription.available_games?.refresh_window_label && (
+              <span className={subscription.available_games.refresh_available ? 'text-green-600' : 'text-blue-600'}>
+                {subscription.available_games.refresh_available
+                  ? `${subscription.available_games.refresh_window_label} refresh is available`
+                  : subscription.available_games.next_refresh_at
+                  ? `Next refresh opens ${new Date(subscription.available_games.next_refresh_at).toLocaleDateString()}`
+                  : 'Final monthly set is active'}
+              </span>
             )}
             {subscription.days_remaining && (
               <span className="text-gray-500">
@@ -266,6 +276,12 @@ export function GameSelection() {
           </div>
         )}
 
+        {getPlanRenewalMessage(subscription.subscription.plan_type) && (
+          <p className="text-center text-sm text-gray-500 mb-6">
+            {getPlanRenewalMessage(subscription.subscription.plan_type)}
+          </p>
+        )}
+
         {/* Save Button */}
         <div className="flex justify-center gap-4">
           <button
@@ -277,7 +293,7 @@ export function GameSelection() {
                 : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
           >
-            {saving ? 'Saving...' : 'Save Selection'}
+            {saving ? 'Saving...' : isQuarterlyPack(subscription.subscription.plan_type) && selectedGames.size === gameLimit ? 'Save Current 10 Games' : 'Save Selection'}
           </button>
         </div>
       </div>

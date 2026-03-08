@@ -2,6 +2,7 @@
 
 import { AuditScore, AuditReport, Game, AuditDimension } from '../types';
 import { scoreDimension, AUDIT_CRITERIA } from './auditDimensions';
+import { ReportGenerator, DetailedAuditReport } from './reportGenerator';
 
 export interface AuditContext {
     gameData: any;
@@ -13,6 +14,11 @@ export interface AuditContext {
 export class AuditEngine {
     private readonly MIN_TOTAL_SCORE = 12;
     private readonly MIN_DIMENSION_SCORE = 3;
+    private readonly reportGenerator: ReportGenerator;
+
+    constructor() {
+        this.reportGenerator = new ReportGenerator();
+    }
 
     public auditGame(game: Game, context: AuditContext): AuditReport {
         const scores: AuditScore[] = [];
@@ -28,7 +34,13 @@ export class AuditEngine {
         }
 
         const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
-        const isFlaggedForImprovement = totalScore < this.MIN_TOTAL_SCORE;
+
+        // Flag for improvement if:
+        // 1. Any dimension score is below MIN_DIMENSION_SCORE (3) - Requirement 1.3
+        // 2. Total score is below MIN_TOTAL_SCORE (12) - Requirement 1.4
+        const hasLowDimensionScore = scores.some(s => s.score < this.MIN_DIMENSION_SCORE);
+        const hasLowTotalScore = totalScore < this.MIN_TOTAL_SCORE;
+        const isFlaggedForImprovement = hasLowDimensionScore || hasLowTotalScore;
 
         const improvementRecommendations = this.generateRecommendations(scores, issues);
 
@@ -106,5 +118,20 @@ export class AuditEngine {
         }
 
         return breakdown;
+    }
+
+    /**
+     * Generate a detailed audit report with specific improvement recommendations
+     * Requirement 1.5: Generate detailed report with specific improvement recommendations
+     */
+    public generateDetailedReport(auditReport: AuditReport): DetailedAuditReport {
+        return this.reportGenerator.generateDetailedReport(auditReport);
+    }
+
+    /**
+     * Generate a formatted text report
+     */
+    public generateTextReport(detailedReport: DetailedAuditReport): string {
+        return this.reportGenerator.generateTextReport(detailedReport);
     }
 }

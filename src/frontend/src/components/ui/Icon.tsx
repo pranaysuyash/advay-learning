@@ -62,6 +62,7 @@ type UIIconNamedProps = {
   size?: number;
   className?: string;
   color?: string;
+  style?: React.CSSProperties;
 };
 
 type UIIconSrcProps = {
@@ -132,7 +133,13 @@ export function UIIcon(props: UIIconProps) {
     );
   }
 
-  const { name, size = 24, className = '', color = 'currentColor' } = props;
+  const {
+    name,
+    size = 24,
+    className = '',
+    color = 'currentColor',
+    style,
+  } = props;
 
   const IconComponent = LucideMap[name as string] || HelpCircle;
 
@@ -141,6 +148,7 @@ export function UIIcon(props: UIIconProps) {
       size={size}
       className={`inline-block ${className}`}
       color={color !== 'currentColor' ? color : undefined}
+      style={style}
     />
   );
 }

@@ -277,14 +277,16 @@ function FeedTheMonsterGameComponent() {
 
   return (
     <div className='w-screen h-screen overflow-hidden relative font-sans' style={{ backgroundColor: GAME_COLORS.background }}>
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
 
-      <HandTrackingStatus
-        isHandDetected={isHandDetected}
-        pauseOnHandLost={true}
-        voicePrompt={true}
-        showMascot={true}
-      />
+      {gameStarted && (
+        <HandTrackingStatus
+          isHandDetected={isHandDetected}
+          pauseOnHandLost={true}
+          voicePrompt={true}
+          showMascot={true}
+        />
+      )}
 
       {gameStarted && monster && (
         <>

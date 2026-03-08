@@ -71,7 +71,11 @@ describe('AirCanvas page', () => {
   it('shows loading screen when hand tracking is loading', async () => {
     vi.resetModules();
     vi.doMock('../../hooks/useGameHandTracking', () => ({
-      useGameHandTracking: () => ({ isLoading: true, isReady: false, startTracking: () => {} }),
+      useGameHandTracking: () => ({
+        isLoading: true,
+        isReady: false,
+        startTracking: () => {},
+      }),
     }));
 
     const { AirCanvas: LoadingCanvas } = await import('../AirCanvas');

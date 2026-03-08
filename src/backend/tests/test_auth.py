@@ -51,6 +51,20 @@ class TestAuth:
         assert "access_token" in cookies
         assert "refresh_token" in cookies
 
+    async def test_login_success_with_case_and_spaces_in_email(self, client: AsyncClient, test_user: dict):
+        """Test login succeeds with case/whitespace variations in email input."""
+        response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": f"  {test_user['email'].upper()}  ",
+                "password": test_user["password"],
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["message"] == "Login successful"
+        assert data["user"]["email"] == test_user["email"]
+
     async def test_login_invalid_credentials(self, client: AsyncClient):
         """Test login with invalid credentials fails."""
         response = await client.post(
@@ -58,6 +72,8 @@ class TestAuth:
             data={"username": "wrong@example.com", "password": "wrongpassword"},
         )
         assert response.status_code == 401
+        assert response.headers["www-authenticate"] == "Bearer"
+        assert response.json()["detail"] == "Incorrect email or password"
 
     async def test_login_unverified_email(self, client: AsyncClient, db_session: AsyncSession):
         """Test login with unverified email fails."""
@@ -264,8 +280,8 @@ class TestAuthPasswordReset:
             "/api/v1/auth/reset-password",
             params={"token": "invalid_token", "new_password": "NewPass123!"},
         )
-        assert response.status_code == 422
-        assert "invalid or expired" in response.json()["error"]["message"].lower()
+        assert response.status_code == 400
+        assert "invalid or expired" in response.json()["detail"].lower()
 
     async def test_reset_password_short_password(self, client: AsyncClient, db_session: AsyncSession):
         """Test password reset with short password fails."""
@@ -345,8 +361,8 @@ class TestAuthEmailVerification:
             "/api/v1/auth/verify-email",
             params={"token": "invalid_token"},
         )
-        assert response.status_code == 422
-        assert "invalid or expired" in response.json()["error"]["message"].lower()
+        assert response.status_code == 400
+        assert "invalid or expired" in response.json()["detail"].lower()
 
     async def test_resend_verification_existing_user(self, client: AsyncClient, db_session: AsyncSession):
         """Test resend verification for unverified user."""

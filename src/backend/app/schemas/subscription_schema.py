@@ -97,6 +97,13 @@ class SubscriptionAvailableGames(BaseModel):
     remaining_slots: int
     swap_available: bool
     plan_type: str
+    refresh_available: bool = False
+    current_cycle_index: int = 1
+    total_cycles: int = 1
+    last_refresh_cycle_used: int = 0
+    next_refresh_at: Optional[datetime] = None
+    refresh_window_label: Optional[str] = None
+    renewal_prompt: Optional[str] = None
 
 
 class SubscriptionStatusResponse(BaseModel):

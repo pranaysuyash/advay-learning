@@ -8,17 +8,18 @@ export interface ConductorNote {
 
 export interface ConductorLevel {
   id: number;
+  level: number;
   bpm: number;
   duration: number;
   lanes: number;
+  hitTolerance: number;
 }
 
 export const LEVELS: ConductorLevel[] = [
-  { id: 1, bpm: 60, duration: 30, lanes: 3 },
-  { id: 2, bpm: 80, duration: 30, lanes: 3 },
-  { id: 3, bpm: 100, duration: 45, lanes: 3 },
-  { id: 4, bpm: 80, duration: 45, lanes: 4 },
-  { id: 5, bpm: 100, duration: 60, lanes: 4 },
+  { id: 1, level: 1, bpm: 50, duration: 40, lanes: 2, hitTolerance: 0.25 }, // Age 4-6, easy
+  { id: 2, level: 2, bpm: 60, duration: 45, lanes: 3, hitTolerance: 0.20 },
+  { id: 3, level: 3, bpm: 80, duration: 60, lanes: 4, hitTolerance: 0.15 }, // Age 6-8, normal
+  { id: 4, level: 4, bpm: 100, duration: 60, lanes: 4, hitTolerance: 0.12 }, // Age 6-8, fast
 ];
 
 export function createNote(lane: number, y: number, speed: number): ConductorNote {

@@ -259,18 +259,67 @@ Priority 4 (Cloud opt-in): HF Inference API with parental consent + feature flag
 **Status**: Research complete; follow-up tickets created, awaiting downstream implementation.
 **Evidence:** All updates to docs completed and verified; web search results integrated; model cards fetched for specs confirmation
 
+---
+
+## TCK-20260307-001 :: Vision Provider Test Harness (Phase-3 Start)
+
+**Ticket Stamp:** STAMP-20260307T160816Z-codex-vph1
+
+Type: HARDENING  
+Owner: Pranay (user), Codex (execution)  
+Created: 2026-03-07 16:08 UTC  
+Status: **DONE**
+
+### Scope Contract
+
+- In-scope:
+  - Create reusable test harness for vision providers
+  - Add harness-based tests for MediaPipe and a contract fake provider
+  - Fix immediate LLM test blocker found during validation
+- Out-of-scope:
+  - New ONNX provider implementation
+  - Production telemetry/analytics wiring
+- Behavior change allowed: YES (tests + small import-path bug fix)
+
+### Execution Log
+
+- ✅ 2026-03-07T16:00:00Z — Added `src/frontend/src/services/ai/vision/__tests__/visionProviderHarness.ts` with reusable lifecycle contract runner (`init -> ready -> detect -> callback -> dispose`).
+- ✅ 2026-03-07T16:03:00Z — Added `src/frontend/src/services/ai/vision/__tests__/VisionProviderHarness.test.ts` with:
+  - fake provider contract validation,
+  - MediaPipe provider harness validation using mocked fileset.
+- ✅ 2026-03-07T16:06:00Z — Fixed runtime util import path in `src/frontend/src/services/ai/llm/LLMService.ts` from `../../utils/runtimeUtils` to `../../../utils/runtimeUtils`.
+- ✅ 2026-03-07T16:08:16Z — Ran targeted tests.
+
+### Evidence
+
+Command: `npm run test --silent -- src/services/ai/vision/__tests__/VisionProviderHarness.test.ts src/services/ai/vision/__tests__/MediaPipeVisionProvider.test.ts src/services/ai/vision/__tests__/VisionService.test.ts src/services/ai/llm/LLMService.test.ts`
+
+Observed:
+
+- 4 test files passed
+- 21 tests passed
+- Harness tests passed for fake + MediaPipe providers
+- LLM suite now passes after import path fix
+
+### Prompt Trace
+
+- `prompts/review/local-pre-commit-review-v1.0.md` (findings-first discipline)
+- User workflow directive in chat: "start with test harness for vision providers, use my workflow"
+
 ## Phase 7: Phase 3 Design Kickoff (2026-03-05)
+
 - ✅ 2026-03-05 23:30 | Drafted service contracts for story, activity and adaptive
-learning generators (`docs/research/PHASE3_SERVICE_DESIGN_2026-03-05.md`).
+  learning generators (`docs/research/PHASE3_SERVICE_DESIGN_2026-03-05.md`).
   Interfaces, templates, runtime rules and example JSON blueprints were
   specified.
 - ✅ 2026-03-05 23:45 | Added roadmap links and updated feature-specs for
-AI‑006/AI‑007/AI‑010.
+  AI‑006/AI‑007/AI‑010.
 - ✅ 2026-03-05 23:50 | Created two new tickets for Phase 3 implementation:
   TCK-20260305-014 (service design) and TCK-20260305-015 (implementation
   plan).
 
 ### Tickets Created
+
 1. **TCK-20260305-014 :: Phase 3 Service Design**
 2. **TCK-20260305-015 :: Phase 3 Implementation Plan (Weeks 5–8)**
 
@@ -294,6 +343,7 @@ AI‑006/AI‑007/AI‑010.
 ---
 
 **Next Actions:**
+
 - Begin coding generator stubs and unit tests for each interface.
 - Build UI screens for parental limits and feature toggles.
 - Prepare prompt audit for story/activity templates.
@@ -450,6 +500,7 @@ AI‑006/AI‑007/AI‑010.
   `src/frontend/src/services/ai/generators/Generator.test.ts` verifying
   stub output and ensuring compile-time coverage. Test suite runs and
   passes:
+
   ```bash
   ✓ src/services/ai/generators/Generator.test.ts (2 tests) 2ms
   ```
@@ -475,7 +526,6 @@ AI‑006/AI‑007/AI‑010.
 > the interface can be wired, feature‑flagged, and tested without
 > committing to LLM prompts or blueprints. Actual story/activity logic
 > will be implemented in weeks 5–6 per the Phase 3 plan.
-
 
 **Prompt Trace:**
 
@@ -530,3 +580,116 @@ AI‑006/AI‑007/AI‑010.
 **Research conducted:** 2026-03-04 to 2026-03-05  
 **Documents updated:** ARCHITECTURE.md, LLM_PROVIDER_SURVEY_2026-03-05.md  
 **Prompt used:** Custom `prompts/audit/doc-review-v1.0.prompt.md` for audit phase; direct research for discovery phase
+
+---
+
+## TCK-20260308-001 :: Full LLM Integration Test Hardening
+
+**Ticket Stamp:** STAMP-20260308T104200Z-codex-llmfull
+
+Type: HARDENING  
+Owner: Pranay (user), Codex (execution)  
+Created: 2026-03-08 10:42 UTC  
+Status: **DONE**
+
+### Scope Contract
+
+- In-scope:
+  - Expand `LLMService.test.ts` from smoke coverage to full integration matrix.
+  - Validate runtime plan decisions, config mutation APIs, env-config parsing, provider routing, provider caching, and fallback guarantees.
+  - Add end-to-end service tests for Ollama success/failure and HF success/failure paths.
+- Out-of-scope:
+  - Production code refactors in `LLMService.ts` (no runtime behavior changes).
+  - New providers or new model integration.
+- Behavior change allowed: YES (tests/docs only)
+
+### Execution Log
+
+- ✅ 2026-03-08T10:38:00Z — Audited current LLM service/provider architecture and existing tests.
+- ✅ 2026-03-08T10:40:00Z — Expanded `src/frontend/src/services/ai/llm/LLMService.test.ts` with comprehensive scenarios:
+  - runtime plan matrix (browser/webgpu/mobile/ollama/cloud/mock),
+  - `applyRuntimePlan`, `setEnabled`, `updateConfig` contract checks,
+  - disabled-state + category-state mock safety checks,
+  - output truncation via `maxResponseLength`,
+  - provider-unavailable fallback behavior,
+  - Ollama success/failure and adapter-cache reuse,
+  - HF success/failure routes,
+  - env parsing (invalid fallback + valid acceptance),
+  - response contract fields (latency/timestamp).
+- ✅ 2026-03-08T10:41:00Z — Fixed one failing HF success-path test by injecting a ready HF adapter into service cache (avoids brittle env mutation assumptions under Vitest).
+- ✅ 2026-03-08T10:42:00Z — Re-ran targeted test suite successfully.
+
+### Evidence
+
+Command: `npm test -- src/services/ai/llm/LLMService.test.ts`
+
+Observed:
+
+- 1 test file passed
+- 21 tests passed
+- No failing assertions
+- Expected stderr warning remains for WebLLM missing package (`@sashido/web-llm`) in negative-path test; assertions validate fallback behavior.
+
+### Prompt Trace
+
+- `prompts/review/local-pre-commit-review-v1.0.md` (findings-first local validation discipline)
+- User directive in chat: “proceed, dont limit to smaller task set, do it properly in full”
+
+## TCK-20260308-002 :: Cloud Fallback Consent Flow + Usage Telemetry
+
+**Ticket Stamp:** STAMP-20260308T105300Z-codex-cloudflow
+
+Type: HARDENING  
+Owner: Pranay (user), Codex (execution)  
+Created: 2026-03-08 10:53 UTC  
+Status: **DONE**
+
+### Scope Contract
+
+- In-scope:
+  - Add explicit cloud-fallback feature flag and parental consent gating for LLM cloud provider usage.
+  - Wire runtime consent/flag config into voice prompt flow and parent approval UX.
+  - Add AI usage telemetry store + settings usage counters for visibility.
+  - Extend tests for new cloud-gating + telemetry behavior.
+- Out-of-scope:
+  - Backend/cloud billing pipeline changes.
+  - New provider integrations beyond existing HF/ollama/mock adapters.
+- Behavior change allowed: YES (intentional UX/runtime behavior updates)
+
+### Execution Log
+
+- ✅ 2026-03-08T10:45:00Z — Added editable feature flag `ai.cloudFallbackV1` in `src/frontend/src/config/features.ts`.
+- ✅ 2026-03-08T10:46:00Z — Extended settings state in `src/frontend/src/store/settingsStore.ts` with:
+  - `parentConsentForCloudAI`
+  - `aiCloudUsageCount`
+- ✅ 2026-03-08T10:47:00Z — Added `src/frontend/src/store/aiTelemetryStore.ts` (persisted counters + bounded event history) and exported it from `src/frontend/src/store/index.ts`.
+- ✅ 2026-03-08T10:48:00Z — Updated `src/frontend/src/services/ai/llm/LLMService.ts` with:
+  - `cloudFallbackEnabled` + `parentConsent` runtime config,
+  - usage event subscription API,
+  - cloud-provider block logic when consent/flag missing,
+  - usage event emission across success/fallback/blocked/disabled paths.
+- ✅ 2026-03-08T10:49:00Z — Updated voice flow and UI:
+  - `src/frontend/src/hooks/useVoicePrompt.ts` (consent-required state, usage recording, cloud counter updates),
+  - `src/frontend/src/components/ui/VoiceButton.tsx` (ParentGate approval flow before cloud path),
+  - `src/frontend/src/pages/Settings.tsx` (consent toggle + usage summary panel).
+- ✅ 2026-03-08T10:52:00Z — Added/updated tests:
+  - `src/frontend/src/services/ai/llm/LLMService.test.ts` (cloud-block path, usage event emission, env parsing for consent/flag),
+  - `src/frontend/src/hooks/__tests__/useFeatureFlag.test.ts` (`ai.cloudFallbackV1` defaults + editability),
+  - `src/frontend/src/store/__tests__/aiTelemetryStore.test.ts` (record/counters/cap/reset).
+- ✅ 2026-03-08T10:53:00Z — Ran targeted test validation successfully.
+
+### Evidence
+
+Command: `npm run -s test -- src/services/ai/llm/LLMService.test.ts src/hooks/__tests__/useFeatureFlag.test.ts src/store/__tests__/aiTelemetryStore.test.ts`
+
+Observed:
+
+- 3 test files passed
+- 36 tests passed
+- Cloud consent gate assertions pass in LLM service tests
+- AI telemetry store tests pass for totals/cloud/fallback/history cap/reset behavior
+
+### Prompt Trace
+
+- `prompts/review/local-pre-commit-review-v1.0.md` (findings-first validation discipline)
+- User directive in chat: “continue with the todos”

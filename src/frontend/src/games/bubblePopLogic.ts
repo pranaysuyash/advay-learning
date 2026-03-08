@@ -150,11 +150,14 @@ export function updateBubbles(state: GameState, deltaTime: number): GameState {
   const missed = state.bubbles.filter(
     b => !b.isPopped && b.y <= -0.2
   ).length;
+  const removedBubbleCount = state.bubbles.length - updatedBubbles.length;
   
   // Spawn new bubbles based on level
   const spawnChance = SPAWN_CHANCE_BASE + (state.level * SPAWN_CHANCE_PER_LEVEL);
   const maxBubbles = MAX_BUBBLES_BASE + state.level;
-  if (Math.random() < spawnChance && updatedBubbles.length < maxBubbles) {
+  if (removedBubbleCount === 0 && updatedBubbles.length === 0) {
+    updatedBubbles.push(createBubble(state.level));
+  } else if (removedBubbleCount === 0 && Math.random() < spawnChance && updatedBubbles.length < maxBubbles) {
     updatedBubbles.push(createBubble(state.level));
   }
   

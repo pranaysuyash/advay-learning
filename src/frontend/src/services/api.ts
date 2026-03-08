@@ -31,9 +31,19 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
+    const requestUrl = String(originalRequest?.url || '');
+    const isAuthEndpoint =
+      /\/auth\/(login|register|refresh|verify-email|resend-verification|forgot-password|reset-password)$/.test(
+        requestUrl,
+      );
 
     // Only attempt refresh once per request to prevent infinite loops
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -109,7 +119,12 @@ export const profileApi = {
   }) => apiClient.post('/users/me/profiles', data),
   updateProfile: (
     profileId: string,
-    data: Partial<{ name: string; age?: number; preferred_language?: string; settings?: Record<string, unknown> }>,
+    data: Partial<{
+      name: string;
+      age?: number;
+      preferred_language?: string;
+      settings?: Record<string, unknown>;
+    }>,
   ) => apiClient.patch(`/users/me/profiles/${profileId}`, data),
   deleteProfile: (profileId: string) =>
     apiClient.delete(`/users/me/profiles/${profileId}`),
@@ -140,21 +155,34 @@ export const progressApi = {
 // Issue Reporting API
 export const issueReportsApi = {
   createSession: (payload: IssueReportSessionCreatePayload) =>
-    apiClient.post<IssueReportSessionResponse>('/issue-reports/sessions', payload),
+    apiClient.post<IssueReportSessionResponse>(
+      '/issue-reports/sessions',
+      payload,
+    ),
 
   uploadClip: (reportId: string, formData: FormData) =>
-    apiClient.post<IssueReportUploadResponse>(`/issue-reports/${reportId}/clip`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    apiClient.post<IssueReportUploadResponse>(
+      `/issue-reports/${reportId}/clip`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    }),
+    ),
 
   finalizeReport: (reportId: string, payload: IssueReportFinalizePayload) =>
-    apiClient.post<IssueReportResponse>(`/issue-reports/${reportId}/finalize`, payload),
+    apiClient.post<IssueReportResponse>(
+      `/issue-reports/${reportId}/finalize`,
+      payload,
+    ),
 };
 
 // Subscription API
-export type SubscriptionPlanType = 'game_pack_5' | 'game_pack_10' | 'full_annual';
+export type SubscriptionPlanType =
+  | 'game_pack_5'
+  | 'game_pack_10'
+  | 'full_annual';
 
 export interface SubscriptionStatus {
   has_active: boolean;
@@ -172,6 +200,10 @@ export interface SubscriptionStatus {
     selected_count: number;
     remaining_slots: number;
     swap_available: boolean;
+    refresh_available?: boolean;
+    next_refresh_at?: string | null;
+    refresh_window_label?: string | null;
+    renewal_prompt?: string | null;
   } | null;
 }
 
@@ -188,15 +220,31 @@ export const subscriptionApi = {
       params: { plan_type: planType },
     }),
   getGamesCatalog: () =>
-    apiClient.get<{ games: any[]; total: number }>('/subscriptions/games/catalog'),
+    apiClient.get<{ games: any[]; total: number }>(
+      '/subscriptions/games/catalog',
+    ),
   getAvailableGames: (subscriptionId: string) =>
-    apiClient.get('/subscriptions/games/available', { params: { subscription_id: subscriptionId } }),
+    apiClient.get('/subscriptions/games/available', {
+      params: { subscription_id: subscriptionId },
+    }),
   updateGameSelection: (subscriptionId: string, gameIds: string[]) =>
-    apiClient.put(`/subscriptions/games`, { game_ids: gameIds }, { params: { subscription_id: subscriptionId } }),
+    apiClient.put(
+      `/subscriptions/games`,
+      { game_ids: gameIds },
+      { params: { subscription_id: subscriptionId } },
+    ),
   swapGame: (subscriptionId: string, newGameId: string) =>
-    apiClient.put('/subscriptions/games/swap', { new_game_id: newGameId }, { params: { subscription_id: subscriptionId } }),
+    apiClient.put(
+      '/subscriptions/games/swap',
+      { new_game_id: newGameId },
+      { params: { subscription_id: subscriptionId } },
+    ),
   upgrade: (subscriptionId: string, newPlan: SubscriptionPlanType) =>
-    apiClient.post('/subscriptions/upgrade', { new_plan: newPlan }, { params: { subscription_id: subscriptionId } }),
+    apiClient.post(
+      '/subscriptions/upgrade',
+      { new_plan: newPlan },
+      { params: { subscription_id: subscriptionId } },
+    ),
 };
 
 export default apiClient;
