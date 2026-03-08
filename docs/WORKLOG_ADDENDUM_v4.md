@@ -1115,14 +1115,14 @@ Acceptance criteria:
 - [x] Combined staged branch state clears `agent_gate`, secret scan, maintainability, feature regression, and regression/typecheck gates.
 - [x] Manual pre-commit review is recorded with `Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md`.
 - [x] Subscription reset, guest/demo flow fixes, and Playwright camera-mode verification are documented in repo worklogs.
-- [ ] Commit lands with valid ticket reference.
-- [ ] PR review is executed and documented before merge.
-- [ ] Merge to `main` happens only after review resolution and final validation.
+- [x] Commit lands with valid ticket reference.
+- [x] PR review is executed and documented before merge.
+- [x] Merge to `main` happens only after review resolution and final validation.
 
 Execution log:
 - [2026-03-09 21:44 IST] Local staged gate suite completed cleanly. | Evidence: `./scripts/secret_scan.sh --staged`, `./scripts/maintainability_guard.sh --staged`, `./scripts/feature_regression_check.sh --staged`, `./scripts/agent_gate.sh --staged; echo EXIT:$?`, `./scripts/regression_check.sh`
 - [2026-03-09 21:50 IST] First commit attempt blocked by commit-msg hook because the message lacked a `TCK-...` reference. | Evidence: `commit-msg: missing ticket reference (TCK-YYYYMMDD-###) in commit message for src/ or docs/audit/ changes.`
-- [2026-03-09 21:48 IST] Commit landed after adding ticket reference and rerunning full hook chain. | Evidence:
+- [2026-03-09 21:52 IST] Commit landed after adding ticket reference and rerunning full hook chain. | Evidence:
   - **Commit**: `6eaa8c7`
   - **Message**: `TCK-20260309-101 Integrated remediation, audits, and gate fixes across frontend/backend`
   - **Interpretation**: Observed — commit hooks completed with passing secret, maintainability, feature-regression, and regression/typecheck checks.
@@ -1153,6 +1153,9 @@ Risk and gate notes:
 
 Review recommendation:
 - `APPROVE`
+
+Follow-up remediation:
+- [2026-03-09 22:31 IST] Resolved post-merge review-note consistency issues by aligning acceptance checklist state and correcting execution-log chronology for commit timing.
 
 Must-keep follow-ups post-merge:
 1. Track remaining non-fatal startup noise (TTS autoplay `not-allowed` logs).
