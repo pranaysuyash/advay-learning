@@ -56,14 +56,18 @@ vi.mock('../../components/WellnessReminder', () => ({
 vi.mock('../../components/Icon', () => ({
   Icon: () => <div data-testid='icon' />,
 }));
-vi.mock('../../components/ui', () => ({
-  UIIcon: () => <span data-testid='ui-icon' />,
-  Button: ({ children, ...props }: { children: ReactNode }) => (
-    <button type='button' {...props}>
-      {children}
-    </button>
-  ),
-}));
+vi.mock('../../components/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../components/ui')>();
+  return {
+    ...actual,
+    UIIcon: () => <span data-testid='ui-icon' />,
+    Button: ({ children, ...props }: { children: ReactNode }) => (
+      <button type='button' {...props}>
+        {children}
+      </button>
+    ),
+  };
+});
 vi.mock('../../components/ui/Icon', () => ({
   UIIcon: () => <span data-testid='ui-icon' />,
 }));

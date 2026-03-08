@@ -16,6 +16,8 @@ MAX_FILE_CCN="${MAX_FILE_CCN:-60}"
 LOC_WORSEN_DELTA="${LOC_WORSEN_DELTA:-100}"
 BYTES_WORSEN_DELTA="${BYTES_WORSEN_DELTA:-4096}"
 CCN_WORSEN_DELTA="${CCN_WORSEN_DELTA:-30}"
+CCN_ANALYSIS_MIN_LOC="${CCN_ANALYSIS_MIN_LOC:-250}"
+CCN_ANALYSIS_MIN_BYTES="${CCN_ANALYSIS_MIN_BYTES:-12000}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -85,10 +87,7 @@ get_changed_files() {
 }
 
 HAS_LIZARD=0
-if python3 - <<'PY' >/dev/null 2>&1
-import lizard  # noqa: F401
-PY
-then
+if python3 -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("lizard") else 1)' >/dev/null 2>&1; then
   HAS_LIZARD=1
 fi
 
@@ -158,7 +157,10 @@ main() {
     loc="$(wc -l < "$tmp_blob" | tr -d ' ')"
     bytes="$(wc -c < "$tmp_blob" | tr -d ' ')"
 
-    metrics="$(complexity_metrics_for_path "$tmp_blob")"
+    metrics="none|0|0|0"
+    if (( loc >= CCN_ANALYSIS_MIN_LOC || bytes >= CCN_ANALYSIS_MIN_BYTES )); then
+      metrics="$(complexity_metrics_for_path "$tmp_blob")"
+    fi
     engine="$(echo "$metrics" | cut -d'|' -f1)"
     max_ccn="$(echo "$metrics" | cut -d'|' -f2)"
     avg_ccn="$(echo "$metrics" | cut -d'|' -f3)"

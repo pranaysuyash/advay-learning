@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { motion } from 'framer-motion';
+import { memo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UIIcon, type IconName } from './ui/Icon';
-import { Card } from './ui/Card';
 import { Button, ButtonLink } from './ui/Button';
+import { useAudio } from '../utils/hooks/useAudio';
 
 interface GameCardProps {
     id: string;
@@ -75,18 +75,85 @@ export const GameCard = memo(function GameCard({
     const diffLevel = difficulty.split(' ')[0];
     const diffColor = DIFFICULTY_COLORS[diffLevel] || DIFFICULTY_COLORS.default;
 
+    const { playHover } = useAudio();
+    const [isHovered, setIsHovered] = useState(false);
+
+    const isHoverable = !comingSoon && !reducedMotion;
+    const hexColor = categoryColor.text.match(/#([0-9a-fA-F]+)/)?.[0] || '#3B82F6';
+
     const CardContent = (
-        <Card
-            hover={!comingSoon && !reducedMotion}
-            className={`relative h-full overflow-hidden group flex flex-col ${comingSoon ? 'opacity-60 grayscale cursor-not-allowed' : ''}`}
-            padding="none"
+        <motion.div
+            onMouseEnter={() => {
+                if (isHoverable) playHover();
+            }}
+            onHoverStart={() => isHoverable && setIsHovered(true)}
+            onHoverEnd={() => isHoverable && setIsHovered(false)}
+            whileHover={
+                isHoverable
+                    ? {
+                        y: -4,
+                        scale: 1.01,
+                        rotateZ: -1,
+                        borderColor: hexColor,
+                        boxShadow: `0 8px 0 ${hexColor}, 0 0 25px ${hexColor}60`,
+                    }
+                    : undefined
+            }
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className={`
+                bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_4px_0_#E5B86E]
+                relative h-full overflow-hidden group flex flex-col transition-colors duration-300
+                ${isHoverable ? 'cursor-pointer' : ''}
+                ${comingSoon ? 'opacity-60 grayscale cursor-not-allowed' : ''}
+            `}
         >
             <motion.div
                 initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
                 animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay, duration: 0.3 }}
-                className="h-full flex flex-col"
+                className="h-full flex flex-col relative"
             >
+                {/* Magical Floating Particles */}
+                <AnimatePresence>
+                    {isHovered && !reducedMotion && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 pointer-events-none z-20 overflow-hidden"
+                        >
+                            {[...Array(6)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{
+                                        opacity: 0,
+                                        y: '100%',
+                                        x: `${20 + Math.random() * 60}%`,
+                                        scale: 0.5
+                                    }}
+                                    animate={{
+                                        opacity: [0, 1, 0],
+                                        y: '-10%',
+                                        x: `${(Math.random() * 100)}%`,
+                                        rotate: Math.random() * 360,
+                                        scale: [0.5, 1.2, 0.5]
+                                    }}
+                                    transition={{
+                                        duration: 1.5 + Math.random() * 1.5,
+                                        repeat: Infinity,
+                                        delay: Math.random() * 1.5,
+                                        ease: "linear"
+                                    }}
+                                    className="absolute bottom-0 w-2 h-2 rounded-full"
+                                    style={{
+                                        backgroundColor: hexColor,
+                                        boxShadow: `0 0 8px ${hexColor}`
+                                    }}
+                                />
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 {/* Preview Image or Icon Header */}
                 <div className="relative h-40 bg-slate-50 overflow-hidden border-b-4 border-[#F2CC8F] shrink-0">
                     {previewImage ? (
@@ -95,12 +162,15 @@ export const GameCard = memo(function GameCard({
                             alt={title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-[1.12] transition-transform duration-500"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                            <div className="w-20 h-20 bg-white rounded-[1.5rem] shadow-[0_4px_0_#E5B86E] flex items-center justify-center border-3 border-[#F2CC8F] group-hover:border-[#E85D04] transition-colors group-hover:scale-110 duration-300">
-                                <UIIcon name={icon} size={40} className="text-[#E85D04]" />
+                            <div
+                                className="w-20 h-20 bg-white rounded-[1.5rem] shadow-[0_4px_0_#E5B86E] flex items-center justify-center border-3 border-[#F2CC8F] group-hover:scale-110 duration-300 transition-colors"
+                                style={isHovered ? { borderColor: hexColor } : undefined}
+                            >
+                                <UIIcon name={icon} size={40} className="transition-colors duration-300" style={isHovered ? { color: hexColor } : { color: '#E85D04' }} />
                             </div>
                         </div>
                     )}
@@ -203,7 +273,7 @@ export const GameCard = memo(function GameCard({
                     </div>
                 </div>
             </motion.div>
-        </Card>
+        </motion.div>
     );
 
     return CardContent;

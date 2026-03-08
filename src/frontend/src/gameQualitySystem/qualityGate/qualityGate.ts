@@ -7,6 +7,7 @@ import type {
     QualityGateConfig,
     AccessibilityCheck,
 } from '../types';
+import { AuditTrail, createAutomatedReviewer, type ReviewerInfo } from './auditTrail';
 
 export type { QualityGateConfig };
 
@@ -19,12 +20,30 @@ export class QualityGate {
     };
 
     private config: QualityGateConfig;
+    private auditTrail: AuditTrail;
+    private defaultReviewer: ReviewerInfo;
 
-    constructor(config: Partial<QualityGateConfig> = {}) {
+    constructor(config: Partial<QualityGateConfig> = {}, auditTrailConfig?: { auditTrail?: AuditTrail }) {
         this.config = { ...this.DEFAULT_CONFIG, ...config };
+        this.auditTrail = auditTrailConfig?.auditTrail ?? new AuditTrail();
+        this.defaultReviewer = createAutomatedReviewer();
     }
 
-    public checkGame(gameId: string, gameData: any, context: any): QualityGateResult {
+    /**
+     * Get the audit trail instance for querying past checks
+     */
+    public getAuditTrail(): AuditTrail {
+        return this.auditTrail;
+    }
+
+    /**
+     * Set a custom reviewer for subsequent checks
+     */
+    public setReviewer(reviewer: ReviewerInfo): void {
+        this.defaultReviewer = reviewer;
+    }
+
+    public checkGame(gameId: string, gameData: any, context: any, reviewer?: ReviewerInfo): QualityGateResult {
         const checks: QualityGateCheck[] = [];
         let allPassed = true;
 
@@ -39,13 +58,18 @@ export class QualityGate {
 
         const status: QualityGateStatus = allPassed ? 'passed' : 'failed';
 
-        return {
+        const result: QualityGateResult = {
             gameId,
             status,
             checks,
             releaseCertificate: allPassed ? this.generateReleaseCertificate(gameId) : undefined,
             failureReasons: allPassed ? undefined : checks.filter(c => c.status === 'failed').map(c => c.details),
         };
+
+        // Record in audit trail
+        this.auditTrail.recordCheck(gameId, result, reviewer ?? this.defaultReviewer);
+
+        return result;
     }
 
     public checkAccessibility(accessibilityData: AccessibilityCheck): QualityGateCheck {

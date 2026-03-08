@@ -2,9 +2,12 @@
 
 **Version:** 1.0.1
 **Date:** 2026-01-29
-**Status:** ACTIVE - Partially Implemented
+
+> **Note:** The former "Piper TTS" provider has been renamed to **Kokoro TTS** in the codebase; documentation below reflects the current name.
+> **Status:** ACTIVE - Partially Implemented
 
 > **Implementation Status (2026-03-06):**
+>
 > - ✅ TTS: Kokoro + Web Speech (implemented in `src/frontend/src/services/ai/tts/`)
 > - ✅ STT: Whisper + Web Speech (implemented in `src/frontend/src/services/ai/stt/`)
 > - ✅ LLM: Transformers.js + WebLLM + Ollama + HF (implemented in `src/frontend/src/services/ai/llm/`)
@@ -86,7 +89,7 @@ This document defines the technical architecture for transforming the Advay Visi
 │  │    LOCAL PROVIDERS   │  │    CLOUD PROVIDERS   │                    │
 │  │  - Ollama (Llama)    │  │  - Claude API        │                    │
 │  │  - Web Speech API    │  │  - OpenAI API        │                    │
-│  │  - Piper TTS         │  │  - ElevenLabs        │                    │
+│  │  - Kokoro TTS        │  │  - ElevenLabs        │                    │
 │  │  - MediaPipe         │  │  - Google Cloud      │                    │
 │  └──────────────────────┘  └──────────────────────┘                    │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -144,6 +147,19 @@ Generate Pip's responses, stories, activity descriptions, and personalized feedb
 | **Cloud Fallback: HF Inference API**               | Cloud               | Any HF model (Qwen3.5) | N/A              | 500-1500ms      | Excellent                                   | Unlimited context; feature-gated; parent consent              | No      | Per-token cost |
 | **Cloud Alt: Claude 3.5 Sonnet**                   | Cloud               | Claude 3 family        | N/A              | 500-2000ms      | Excellent                                   | Extended thinking; best reasoning                             | No      | subscription   |
 | **Cloud Alt: OpenAI GPT-4**                        | Cloud               | GPT-4 Turbo            | N/A              | 500-1500ms      | Excellent                                   | N/A                                                           | No      | $$$ per token  |
+
+#### Recommended Strategy (POST-RESEARCH, MARCH 2026 – QWEN3.5 STANDARD)
+
+**Model Download & Caching**
+
+- All on-device models are pulled via Transformers.js (v3/v4) or WebLLM; the
+  underlying loader persists weights using the browser's IndexedDB / OPFS
+  storage layer. Once a model has been downloaded it is cached locally,
+  enabling instant startup on subsequent sessions and offline reuse. The
+  LLMService constructors/adapter factories handle cache checks implicitly
+  (see `src/frontend/src/services/ai/llm`), so developers need never reimplement
+  download logic. Desktop runtimes such as Ollama rely on their own
+  local-server cache but behave similarly.
 
 #### Recommended Strategy (POST-RESEARCH, MARCH 2026 – QWEN3.5 STANDARD)
 
@@ -278,7 +294,7 @@ Give Pip a voice. All text responses should be speakable.
 | -------------------------- | -------------------- | ------------- | --------- | ----------------------- | ---------------- |
 | **Kokoro‑82M (kokoro-js)** | Local/browser & Node | 1‑2s (WebGPU) | Excellent | 20+ voices, q8/q4 quant | Free, Apache‑2.0 |
 | **Web Speech API**         | Local/browser        | <100ms        | Basic     | Limited; vendor bias    | Free             |
-| **Piper TTS**              | Local                | <50ms         | Good      | phoneme control         | Free             |
+| **Kokoro TTS**             | Local                | <50ms         | Good      | phoneme control         | Free             |
 | **Coqui TTS**              | Local                | 50‑150ms      | Good      | High                    | Free             |
 | **ElevenLabs**             | Cloud                | 200‑500ms     | Top‑tier  | Custom voices           | $$$              |
 | **Google Cloud TTS**       | Cloud                | 100‑300ms     | Very good | Medium                  | $$               |
@@ -290,7 +306,7 @@ Give Pip a voice. All text responses should be speakable.
 
 ```
 Primary: Web Speech API - Immediate feedback (letters, simple words)
-Enhanced: Piper TTS (local) - Pip's voice for longer responses
+Enhanced: Kokoro TTS (local) - Pip's voice for longer responses
 Premium: ElevenLabs - Story narration (optional, parent-enabled)
 ```
 
@@ -327,7 +343,7 @@ const VOICE_PERSONAS = {
     // Pip's character voice - warm, slightly high, playful
     rate: 1.1,
     pitch: 1.2,
-    provider: 'piper', // or custom ElevenLabs voice
+    provider: 'kokoro', // or custom ElevenLabs voice
   },
   letter: {
     // Clear letter pronunciation

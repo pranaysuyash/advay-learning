@@ -61,6 +61,7 @@ src/frontend/test-results/
 src/frontend/playwright-report/
 src/frontend/.playwright/
 src/frontend/.vite/
+src/frontend/.vite_cache_new/
 src/frontend/.turbo/
 src/frontend/.parcel-cache/
 *.local
@@ -105,6 +106,7 @@ storage/drawings/*
 
 # Backend runtime uploads (generated during issue-report flows/tests)
 src/backend/storage/issue_reports/**
+src/backend/public/profile_photos/**
 
 # Runtime temp files
 .tmp/
@@ -114,6 +116,7 @@ src/backend/storage/issue_reports/**
 *.key
 *.pem
 secrets/
+local_login_credentials.txt
 
 # Playwright artifacts (global)
 /playwright-report/

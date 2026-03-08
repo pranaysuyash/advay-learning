@@ -220,7 +220,11 @@ export function Mascot({
   }, [state]);
 
   const containerVariants = {
-    idle: { scale: 1, y: 0 },
+    idle: {
+      scale: [1, 1.03, 1],
+      y: [0, -2, 0],
+      transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' as const },
+    },
     happy: {
       scale: [1, 1.15, 1],
       y: [0, -20, 0],
@@ -272,7 +276,7 @@ export function Mascot({
       <motion.div
         variants={containerVariants}
         animate={state}
-        className={`relative cursor-pointer ${getSizeClasses()} ${hideOnMobile ? 'hidden sm:flex' : ''}`}
+        className={`relative cursor-pointer group ${getSizeClasses()} ${hideOnMobile ? 'hidden sm:flex' : ''}`}
         onClick={() => {
           // If TTS is blocked by autoplay policies, this click provides the required user gesture.
           if (ttsEnabled && message) {
@@ -288,9 +292,20 @@ export function Mascot({
             videoRef.current?.play().catch(() => setShowVideo(false));
           }
         }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{
+          scale: 1.05,
+          rotate: [0, -2, 2, 0],
+          transition: {
+            rotate: { repeat: Infinity, duration: 2, ease: 'easeInOut' },
+            scale: { duration: 0.2 },
+          },
+        }}
+        whileTap={{ scale: 0.92, y: 4 }}
       >
+        {/* Subtle hover glow (invisible by default, fades in on hover) */}
+        {!decorative && (
+          <div className="absolute inset-0 rounded-full bg-[#E85D04] blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+        )}
         {/* Glow effect for celebrating state */}
         {(state === 'celebrating' || state === 'happy') && (
           <motion.div
@@ -327,9 +342,9 @@ export function Mascot({
             animate={
               bounce
                 ? {
-                    y: [0, -15, 0, -8, 0],
-                    transition: { duration: 0.6 },
-                  }
+                  y: [0, -15, 0, -8, 0],
+                  transition: { duration: 0.6 },
+                }
                 : {}
             }
           >

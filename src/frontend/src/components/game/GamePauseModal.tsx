@@ -10,6 +10,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Mascot } from '../Mascot';
 import { UIIcon } from '../ui/Icon';
+import { useAudio } from '../../utils/hooks/useAudio';
 
 interface GamePauseModalProps {
     isVisible: boolean;
@@ -25,6 +26,8 @@ interface GamePauseModalProps {
 
 export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
     ({ isVisible, onResume, onExit, onSwitchToFallback, fallbackAvailable = false, mascotMessage }) => {
+        const { playClick, playHover } = useAudio();
+
         if (!isVisible) return null;
 
         return (
@@ -54,7 +57,11 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                     <div className="space-y-4">
                         <button
                             type="button"
-                            onClick={onResume}
+                            onMouseEnter={playHover}
+                            onClick={() => {
+                                playClick();
+                                onResume();
+                            }}
                             className="w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl border-3 border-emerald-700 shadow-[0_6px_0_#047857] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#047857] flex items-center justify-center gap-3"
                         >
                             <UIIcon name="check" size={28} />
@@ -65,7 +72,11 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                         {fallbackAvailable && onSwitchToFallback && (
                             <button
                                 type="button"
-                                onClick={onSwitchToFallback}
+                                onMouseEnter={playHover}
+                                onClick={() => {
+                                    playClick();
+                                    onSwitchToFallback();
+                                }}
                                 className="w-full px-6 py-4 min-h-[64px] bg-[#F59E0B] hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-xl border-3 border-amber-700 shadow-[0_6px_0_#B45309] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#B45309] flex items-center justify-center gap-3"
                             >
                                 <UIIcon name="hand" size={28} />
@@ -75,7 +86,11 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
 
                         <button
                             type="button"
-                            onClick={onExit}
+                            onMouseEnter={playHover}
+                            onClick={() => {
+                                playClick();
+                                onExit();
+                            }}
                             className="w-full px-6 py-4 min-h-[64px] bg-slate-50 hover:bg-white text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl shadow-[0_6px_0_#E5B86E] transition-all hover:-translate-y-1 active:translate-y-[4px] active:shadow-[0_2px_0_#E5B86E] flex items-center justify-center gap-3"
                         >
                             <UIIcon name="home" size={24} />

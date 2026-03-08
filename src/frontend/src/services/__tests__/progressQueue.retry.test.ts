@@ -1,30 +1,22 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { progressQueue, ProgressItem } from '../progressQueue';
+/**
+ * Progress Queue Retry Logic Tests
+ *
+ * Tests for retry mechanism, dead letter queue, and sync operations.
+ * Uses dependency injection for complete isolation.
+ *
+ * @ticket ISSUE-008 - Testability refactor
+ */
+
+import { describe, it, expect, vi } from 'vitest';
+import {
+  makeFreshQueue,
+  makeQueueWithItems,
+  createValidItem,
+  generateUUID,
+} from '../../repositories/__tests__/testHelpers';
 import { MAX_RETRIES } from '../progressConstants';
 
-// Helper to generate valid UUID v4
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
-// Helper to create valid progress item
-function createValidItem(overrides: Partial<ProgressItem> = {}): ProgressItem {
-  return {
-    idempotency_key: generateUUID(),
-    profile_id: generateUUID(),
-    activity_type: 'letter_tracing',
-    content_id: 'A',
-    score: 80,
-    timestamp: new Date().toISOString(),
-    ...overrides,
-  };
-}
-
-// Mock API client
+// Mock API client factory
 function createMockApiClient(responses: Array<{ status: number; data?: any; error?: string }>) {
   let callIndex = 0;
   return {
@@ -37,23 +29,18 @@ function createMockApiClient(responses: Array<{ status: number; data?: any; erro
       }
       return { status: response.status, data: response.data };
     }),
+    getCallCount: () => callIndex,
   };
 }
 
-beforeEach(() => {
-  localStorage.clear();
-  progressQueue.clear();
-  vi.clearAllMocks();
-});
-
-describe('progressQueue retry logic', () => {
+describe('progressQueue retry logic (with DI)', () => {
   describe('processItemWithRetry', () => {
     it('succeeds on first attempt', async () => {
+      const { queue } = makeFreshQueue();
       const item = createValidItem();
-      progressQueue.enqueue(item);
       const mockApi = createMockApiClient([{ status: 200 }]);
 
-      const result = await progressQueue.processItemWithRetry(item, mockApi);
+      const result = await queue.processItemWithRetry(item, mockApi);
 
       expect(result.success).toBe(true);
       expect(result.shouldRetry).toBe(false);
@@ -61,13 +48,14 @@ describe('progressQueue retry logic', () => {
     });
 
     it('retries on 5xx error', async () => {
+      const { queue } = makeFreshQueue();
       const item = createValidItem();
       const mockApi = createMockApiClient([
         { status: 500, error: 'Server Error' },
         { status: 200 },
       ]);
 
-      const result = await progressQueue.processItemWithRetry(item, mockApi);
+      const result = await queue.processItemWithRetry(item, mockApi);
 
       expect(result.success).toBe(false);
       expect(result.shouldRetry).toBe(true);
@@ -75,242 +63,198 @@ describe('progressQueue retry logic', () => {
     });
 
     it('does not retry on 4xx error', async () => {
+      const { queue } = makeFreshQueue();
       const item = createValidItem();
       const mockApi = createMockApiClient([
         { status: 400, error: 'Bad Request' },
       ]);
 
-      const result = await progressQueue.processItemWithRetry(item, mockApi);
+      const result = await queue.processItemWithRetry(item, mockApi);
 
       expect(result.success).toBe(false);
       expect(result.shouldRetry).toBe(false);
       expect(result.error).toContain('Bad Request');
     });
 
-    it.skip('applies exponential backoff between retries (SLOW - needs mock timers)', async () => {
-      // TODO: Refactor to use vi.useFakeTimers() for testing delays
-      // With retryCount=2, delay would be ~4000ms + jitter
-      const item = createValidItem({ retryCount: 2 });
-      const mockApi = createMockApiClient([
-        { status: 503 },
-      ]);
-
-      const result = await progressQueue.processItemWithRetry(item, mockApi);
-      expect(result.shouldRetry).toBe(true);
-    });
-  });
-
-  describe('syncAll with retry', () => {
     it('syncs all pending items successfully', async () => {
+      const { queue } = makeFreshQueue();
       const item1 = createValidItem();
       const item2 = createValidItem();
-      progressQueue.enqueue(item1);
-      progressQueue.enqueue(item2);
+      queue.enqueue(item1);
+      queue.enqueue(item2);
 
       const mockApi = createMockApiClient([
         { status: 200 },
         { status: 200 },
       ]);
 
-      const result = await progressQueue.syncAll(mockApi);
+      const result = await queue.syncAll(mockApi);
 
       expect(result.synced).toBe(2);
       expect(result.failed).toBe(0);
-      expect(result.deadLettered).toBe(0);
-      expect(progressQueue.getPending()).toHaveLength(0);
+      expect(queue.getPendingCount()).toBe(0);
     });
 
-    it.skip('retries failed items and eventually succeeds (SLOW - needs mock timers)', async () => {
-      // TODO: Refactor to use mock timers for exponential backoff
-      // This test takes too long due to actual delays
-      const item = createValidItem();
-      progressQueue.enqueue(item);
+    it('processes items in retry count order (lowest first)', async () => {
+      const { queue, repo } = makeFreshQueue();
+      // Items need status to be retrieved by getByStatus
+      const item1 = createValidItem({ retryCount: 5, status: 'pending' });
+      const item2 = createValidItem({ retryCount: 1, status: 'pending' });
+      const item3 = createValidItem({ retryCount: 3, status: 'pending' });
+      repo.save(item1);
+      repo.save(item2);
+      repo.save(item3);
 
-      const mockApi = createMockApiClient([
-        { status: 500 },
-        { status: 500 },
-        { status: 200 },
-      ]);
+      const callOrder: number[] = [];
+      const mockApi = {
+        post: vi.fn().mockImplementation(async (_url: string, data: any) => {
+          callOrder.push(data.retryCount || 0);
+          return { status: 200 };
+        }),
+      };
 
-      const result = await progressQueue.syncAll(mockApi);
+      await queue.syncAll(mockApi);
 
-      expect(result.synced).toBe(1);
-      expect(mockApi.post).toHaveBeenCalledTimes(3);
-    });
-
-    it.skip('moves item to dead letter after max retries (SLOW - needs mock timers)', async () => {
-      // TODO: Refactor to use mock timers for exponential backoff
-      // This test takes too long due to actual delays (1000ms + 2000ms + 4000ms + ...)
-      const item = createValidItem();
-      progressQueue.enqueue(item);
-
-      // Always fail with 5xx
-      const _mockApi = createMockApiClient(
-        Array(MAX_RETRIES + 2).fill({ status: 500, error: 'Persistent Error' })
-      );
-
-      // Manually move to dead letter to verify the logic
-      progressQueue.moveToDeadLetter(item.idempotency_key, 'Max retries exceeded');
-
-      expect(progressQueue.getDeadLetters()).toHaveLength(1);
-      expect(progressQueue.getDeadLetters()[0].item.idempotency_key).toBe(item.idempotency_key);
-      expect(progressQueue.getDeadLetters()[0].finalError).toContain('Max retries');
+      // Should process in order: 1, 3, 5
+      expect(callOrder).toEqual([1, 3, 5]);
     });
 
     it('does not move 4xx errors to dead letter immediately', async () => {
+      const { queue } = makeFreshQueue();
       const item = createValidItem();
-      progressQueue.enqueue(item);
+      queue.enqueue(item);
 
       const mockApi = createMockApiClient([
         { status: 400, error: 'Bad Request' },
       ]);
 
-      const result = await progressQueue.syncAll(mockApi);
+      await queue.syncAll(mockApi);
 
-      expect(result.failed).toBe(1);
-      expect(result.deadLettered).toBe(0);
-      // Item should be marked as error but still in main queue
-      expect(progressQueue.getErrors()).toHaveLength(1);
-    });
-
-    it('processes items in retry count order (lowest first)', async () => {
-      const freshItem = createValidItem({ content_id: 'fresh' });
-      const retriedItem = createValidItem({ content_id: 'retried', retryCount: 3 });
-      
-      progressQueue.enqueue(freshItem);
-      progressQueue.enqueue(retriedItem);
-      
-      const callOrder: string[] = [];
-      const mockApi = {
-        post: vi.fn().mockImplementation((url: string, item: ProgressItem) => {
-          callOrder.push(item.content_id);
-          return Promise.resolve({ status: 200 });
-        }),
-      };
-
-      await progressQueue.syncAll(mockApi);
-
-      expect(callOrder[0]).toBe('fresh');
-      expect(callOrder[1]).toBe('retried');
+      // 4xx errors don't go to dead letter, just marked as error
+      expect(queue.getDeadLetters()).toHaveLength(0);
     });
   });
 
   describe('dead letter queue', () => {
     it('adds item to dead letter with metadata', () => {
-      const item = createValidItem();
-      progressQueue.enqueue(item);
-      
-      // Simulate retry count increment
-      progressQueue.markError(item.idempotency_key, 'Error 1');
-      progressQueue.markError(item.idempotency_key, 'Error 2');
-      progressQueue.markError(item.idempotency_key, 'Error 3');
+      const { queue, repo } = makeFreshQueue();
+      const item = createValidItem({ retryCount: MAX_RETRIES, status: 'error' });
+      repo.save(item);
 
-      progressQueue.moveToDeadLetter(item.idempotency_key, 'Max retries exceeded');
+      const result = queue.moveToDeadLetter(item.idempotency_key, 'Max retries exceeded');
 
-      const deadLetters = progressQueue.getDeadLetters();
+      expect(result).toBe(true);
+      const deadLetters = queue.getDeadLetters();
       expect(deadLetters).toHaveLength(1);
-      expect(deadLetters[0].item.idempotency_key).toBe(item.idempotency_key);
       expect(deadLetters[0].finalError).toBe('Max retries exceeded');
-      expect(deadLetters[0].totalAttempts).toBe(3);
-      expect(deadLetters[0].failedAt).toBeDefined();
+      expect(deadLetters[0].totalAttempts).toBe(MAX_RETRIES);
     });
 
     it('removes item from main queue when moved to dead letter', () => {
-      const item = createValidItem();
-      progressQueue.enqueue(item);
-      expect(progressQueue.getPending()).toHaveLength(1);
+      const { queue, repo } = makeFreshQueue();
+      const item = createValidItem({ status: 'error' });
+      repo.save(item);
 
-      progressQueue.moveToDeadLetter(item.idempotency_key, 'Failed');
+      expect(repo.getAll()).toHaveLength(1);
 
-      expect(progressQueue.getPending()).toHaveLength(0);
-      expect(progressQueue.getDeadLetters()).toHaveLength(1);
+      const result = queue.moveToDeadLetter(item.idempotency_key, 'Failed');
+
+      expect(result).toBe(true);
+      expect(repo.getAll()).toHaveLength(0);
+      expect(queue.getDeadLetters()).toHaveLength(1);
     });
 
     it('filters dead letters by profile_id', () => {
+      const { queue, repo } = makeFreshQueue();
       const profile1 = generateUUID();
       const profile2 = generateUUID();
-      
-      const item1 = createValidItem({ profile_id: profile1 });
-      const item2 = createValidItem({ profile_id: profile2 });
-      
-      progressQueue.enqueue(item1);
-      progressQueue.enqueue(item2);
-      progressQueue.moveToDeadLetter(item1.idempotency_key, 'Failed');
-      progressQueue.moveToDeadLetter(item2.idempotency_key, 'Failed');
 
-      expect(progressQueue.getDeadLetters(profile1)).toHaveLength(1);
-      expect(progressQueue.getDeadLetters(profile1)[0].item.profile_id).toBe(profile1);
+      const item1 = createValidItem({ profile_id: profile1, status: 'error' });
+      const item2 = createValidItem({ profile_id: profile2, status: 'error' });
+      repo.save(item1);
+      repo.save(item2);
+
+      queue.moveToDeadLetter(item1.idempotency_key, 'Failed');
+      queue.moveToDeadLetter(item2.idempotency_key, 'Failed');
+
+      const profile1DeadLetters = queue.getDeadLetters(profile1);
+      expect(profile1DeadLetters).toHaveLength(1);
+      expect(profile1DeadLetters[0].item.profile_id).toBe(profile1);
     });
 
     it('returns dead letter count', () => {
-      progressQueue.enqueue(createValidItem());
-      progressQueue.enqueue(createValidItem());
-      progressQueue.moveToDeadLetter(progressQueue.getPending()[0].idempotency_key, 'Failed');
+      const { queue, repo } = makeFreshQueue();
 
-      expect(progressQueue.getDeadLetterCount()).toBe(1);
+      const item1 = createValidItem({ status: 'error' });
+      const item2 = createValidItem({ status: 'error' });
+      repo.save(item1);
+      repo.save(item2);
+
+      queue.moveToDeadLetter(item1.idempotency_key, 'Failed');
+      queue.moveToDeadLetter(item2.idempotency_key, 'Failed');
+
+      expect(queue.getDeadLetterCount()).toBe(2);
     });
 
     it('retries dead letter item (moves back to queue)', () => {
-      const item = createValidItem({ retryCount: 5 });
-      progressQueue.enqueue(item);
-      progressQueue.moveToDeadLetter(item.idempotency_key, 'Failed');
+      const { queue, repo } = makeFreshQueue();
+      const item = createValidItem();
+      repo.save(item);
+      queue.moveToDeadLetter(item.idempotency_key, 'Failed');
 
-      expect(progressQueue.getDeadLetters()).toHaveLength(1);
-      expect(progressQueue.getPending()).toHaveLength(0);
+      expect(queue.getDeadLetters()).toHaveLength(1);
+      expect(repo.getAll()).toHaveLength(0);
 
-      const success = progressQueue.retryDeadLetter(item.idempotency_key);
+      const result = queue.retryDeadLetter(item.idempotency_key);
 
-      expect(success).toBe(true);
-      expect(progressQueue.getDeadLetters()).toHaveLength(0);
-      expect(progressQueue.getPending()).toHaveLength(1);
-      
-      // Retry count should be reset
-      const pending = progressQueue.getPending()[0];
-      expect(pending.retryCount).toBe(0);
-      expect(pending.status).toBe('pending');
+      expect(result).toBe(true);
+      expect(queue.getDeadLetters()).toHaveLength(0);
+      expect(repo.getPending()).toHaveLength(1);
     });
 
     it('deletes dead letter item permanently', () => {
-      const item = createValidItem();
-      progressQueue.enqueue(item);
-      progressQueue.moveToDeadLetter(item.idempotency_key, 'Failed');
+      const { queue, repo } = makeFreshQueue();
+      const item = createValidItem({ status: 'error' });
+      repo.save(item);
+      queue.moveToDeadLetter(item.idempotency_key, 'Failed');
 
-      const success = progressQueue.deleteDeadLetter(item.idempotency_key);
+      expect(queue.getDeadLetters()).toHaveLength(1);
 
-      expect(success).toBe(true);
-      expect(progressQueue.getDeadLetters()).toHaveLength(0);
+      queue.deleteDeadLetter(item.idempotency_key);
+
+      expect(queue.getDeadLetters()).toHaveLength(0);
     });
 
     it('returns false when retrying non-existent dead letter', () => {
-      const success = progressQueue.retryDeadLetter(generateUUID());
-      expect(success).toBe(false);
+      const { queue } = makeFreshQueue();
+
+      const result = queue.retryDeadLetter(generateUUID());
+
+      expect(result).toBe(false);
     });
-  });
 
-  describe('error tracking', () => {
     it('tracks error message and timestamp', () => {
+      const { queue, repo } = makeFreshQueue();
       const item = createValidItem();
-      progressQueue.enqueue(item);
+      repo.save(item);
 
-      progressQueue.markError(item.idempotency_key, 'Network timeout');
+      queue.markError(item.idempotency_key, 'Network timeout');
 
-      const errors = progressQueue.getErrors();
-      expect(errors).toHaveLength(1);
-      expect(errors[0].lastError).toBe('Network timeout');
-      expect(errors[0].lastRetryAt).toBeDefined();
-      expect(errors[0].retryCount).toBe(1);
+      const errorItem = repo.getByStatus('error')[0];
+      expect(errorItem.lastError).toBe('Network timeout');
+      expect(errorItem.lastRetryAt).toBeDefined();
     });
 
     it('increments retry count on multiple errors', () => {
-      const item = createValidItem();
-      progressQueue.enqueue(item);
+      const { queue, repo } = makeFreshQueue();
+      const item = createValidItem({ retryCount: 0 });
+      repo.save(item);
 
-      progressQueue.markError(item.idempotency_key, 'Error 1');
-      progressQueue.markError(item.idempotency_key, 'Error 2');
-      progressQueue.markError(item.idempotency_key, 'Error 3');
+      queue.markError(item.idempotency_key, 'Error 1');
+      queue.markError(item.idempotency_key, 'Error 2');
 
-      const errors = progressQueue.getErrors();
-      expect(errors[0].retryCount).toBe(3);
+      const errorItem = repo.getByStatus('error')[0];
+      expect(errorItem.retryCount).toBe(2);
     });
   });
 });

@@ -9,6 +9,8 @@ import type {
 } from '../types';
 export type PriorityFactors = SharedPriorityFactors;
 
+import { calculateEducationalImpact } from './educationalImpact';
+
 export class PriorityEngine {
     private readonly WEIGHTS: PriorityFactors = {
         educationalImpact: 0.4,
@@ -128,41 +130,13 @@ export class PriorityEngine {
     }
 
     private calculateEducationalImpact(game: Game): number {
-        if (!game.educationalObjectives || game.educationalObjectives.length === 0) return 0;
-
-        const objectiveCount = game.educationalObjectives.length;
-        const ageRangeScore = this.calculateAgeRangeScore(game.ageRange);
-
-        return Math.min(100, (objectiveCount * 15) + ageRangeScore);
+        const impact = calculateEducationalImpact(game);
+        return impact.totalScore;
     }
 
     private calculateEducationalImpactFromCatalog(catalogEntry: CatalogEntry): number {
-        if (!catalogEntry.educationalObjectives || catalogEntry.educationalObjectives.length === 0) return 0;
-
-        const objectiveCount = catalogEntry.educationalObjectives.length;
-        const ageRangeScore = this.calculateAgeRangeScore(catalogEntry.ageRange);
-
-        return Math.min(100, (objectiveCount * 15) + ageRangeScore);
-    }
-
-    private calculateAgeRangeScore(ageRange: string): number {
-        if (!ageRange || ageRange === '') return 0;
-
-        const ranges = ageRange.split('-');
-        if (ranges.length !== 2) return 50;
-
-        const minAge = parseInt(ranges[0], 10);
-        const maxAge = parseInt(ranges[1], 10);
-
-        if (isNaN(minAge) || isNaN(maxAge)) return 50;
-
-        const rangeSize = maxAge - minAge;
-        const baseScore = 50;
-
-        if (rangeSize <= 1) return baseScore + 20;
-        if (rangeSize <= 2) return baseScore + 15;
-        if (rangeSize <= 4) return baseScore;
-        return baseScore - 10;
+        const impact = calculateEducationalImpact(catalogEntry);
+        return impact.totalScore;
     }
 
     private calculateUserDemand(game: Game): number {

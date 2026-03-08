@@ -92,4 +92,36 @@ describe('STTService', () => {
 
     service.dispose();
   });
+
+  it('auto provider option queries runtimeUtils helper', async () => {
+    // spy on the shared utility to ensure STTService delegates
+    const runtime = await import('../../../utils/runtimeUtils');
+    const spy = vi
+      .spyOn(runtime, 'detectBestSTTProvider')
+      .mockResolvedValue('web-speech');
+
+    const service = new STTService({
+      createWebSpeechProvider: () => new FakeSTTProvider(),
+    });
+
+    await service.init({ provider: 'auto' });
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it('cloud provider without consent stays unavailable', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const service = new STTService({
+      createWebSpeechProvider: () => new FakeSTTProvider(),
+    });
+
+    // force cloud; parent consent is always false by default
+    const ready = await service.init({ provider: 'cloud' });
+    expect(ready).toBe(false);
+    expect(service.status).toBe('unavailable');
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[STTService] Cloud STT requires parent consent',
+    );
+    warnSpy.mockRestore();
+  });
 });

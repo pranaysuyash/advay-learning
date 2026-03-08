@@ -188,7 +188,7 @@ function TimeTellGameComponent() {
       const basePoints = 25;
       const streakBonus = Math.min(newStreak * 3, 20);
       const totalPoints = basePoints + streakBonus;
-      
+
       playSuccess();
       triggerHaptic('success');
       setCorrect(c => c + 1);
@@ -245,14 +245,16 @@ function TimeTellGameComponent() {
 
   return (
     <div className='w-screen h-screen overflow-hidden relative font-sans bg-indigo-50'>
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
 
-      <HandTrackingStatus
-        isHandDetected={isHandDetected}
-        pauseOnHandLost={true}
-        voicePrompt={true}
-        showMascot={true}
-      />
+      {gameStarted && (
+        <HandTrackingStatus
+          isHandDetected={isHandDetected}
+          pauseOnHandLost={true}
+          voicePrompt={true}
+          showMascot={true}
+        />
+      )}
 
       {gameStarted && question && (
         <>
@@ -365,7 +367,7 @@ function TimeTellGameComponent() {
         duration={1500}
         onComplete={() => { setShowSuccess(false); }}
       />
-      
+
       {/* Streak Milestone Overlay */}
       {showStreakMilestone && (
         <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>

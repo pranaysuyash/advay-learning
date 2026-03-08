@@ -22,6 +22,7 @@ import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
 import { subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
 import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
+import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
 import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
 
@@ -555,9 +556,10 @@ function SubscriptionCard() {
   }
 
   const sub = subscription.subscription;
-  const planName = sub.plan_type?.replace('_', ' ').replace('game pack', 'Game Pack').replace('full annual', 'Full Annual');
+  const planName = getPlanLabel(sub.plan_type);
   const isExpiringSoon = subscription.days_remaining !== null && subscription.days_remaining <= 14;
-  const isAnnual = sub.plan_type === 'full_annual';
+  const isAnnual = isFullAccessPlan(sub.plan_type);
+  const renewalMessage = subscription.available_games?.renewal_prompt || getPlanRenewalMessage(sub.plan_type);
 
   return (
     <div className="px-6 lg:px-12 mb-6">
@@ -577,6 +579,19 @@ function SubscriptionCard() {
             {subscription.days_remaining !== null && (
               <p className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}>
                 {isExpiringSoon ? '⚠️ ' : ''}{subscription.days_remaining} days remaining
+              </p>
+            )}
+            {renewalMessage && (
+              <p className="mt-1 text-sm text-slate-500">{renewalMessage}</p>
+            )}
+            {isQuarterlyPack(sub.plan_type) && subscription.available_games?.refresh_window_label && (
+              <p className="mt-1 text-sm text-blue-600">
+                {subscription.available_games.refresh_window_label}
+                {subscription.available_games.refresh_available
+                  ? ' • Refresh available now'
+                  : subscription.available_games.next_refresh_at
+                  ? ` • Next refresh opens ${new Date(subscription.available_games.next_refresh_at).toLocaleDateString()}`
+                  : ' • Final monthly set is active'}
               </p>
             )}
           </div>

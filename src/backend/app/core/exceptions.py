@@ -157,12 +157,29 @@ class RateLimitExceededError(AppException):
 class AccountLockedError(AppException):
     """Raised when account is locked due to failed attempts."""
 
-    def __init__(self, locked_until: Optional[str] = None):
-        details = {}
+    def __init__(self, retry_after_seconds: Optional[int] = None, locked_until: Optional[str] = None):
+        details: dict[str, Any] = {}
+        if retry_after_seconds is not None:
+            details["retry_after_seconds"] = retry_after_seconds
+            minutes = retry_after_seconds // 60
+            seconds = retry_after_seconds % 60
+            if minutes > 0:
+                message = (
+                    f"Account is temporarily locked due to multiple failed attempts. "
+                    f"Try again in {minutes}m {seconds}s."
+                )
+            else:
+                message = (
+                    f"Account is temporarily locked due to multiple failed attempts. "
+                    f"Try again in {seconds}s."
+                )
+        else:
+            message = "Account is temporarily locked due to multiple failed attempts"
+
         if locked_until:
             details["locked_until"] = locked_until
         super().__init__(
-            message="Account is temporarily locked due to multiple failed attempts",
+            message=message,
             status_code=423,
             error_code="ACCOUNT_LOCKED",
             details=details,

@@ -4,6 +4,66 @@ This directory contains reusable tools for analyzing and improving kids learning
 
 ---
 
+## 🎬 Toddler ML Data Collector
+
+**Purpose:** Record hand tracking data from your toddler for ML training/analysis.
+
+**File:** `tools/toddler-data-collector/index.html`
+
+### Why this exists
+
+- Collect authentic hand tracking data from young children (ages 2-4)
+- Identify gaps between "designed for toddlers" vs "actually works for toddlers"
+- Build labeled dataset for improving MediaPipe models
+- All data stays local - no cloud upload
+
+### Usage
+
+```bash
+# Open in browser
+open tools/toddler-data-collector/index.html
+
+# Or serve locally
+cd tools && python3 -m http.server 8080
+# Then open http://localhost:8080/toddler-data-collector/index.html
+```
+
+### Features
+
+- Real-time MediaPipe hand landmark visualization
+- Event tagging (success, error, frustrated, engaged, etc.)
+- Frame counting and session timing
+- Download data as JSON for ML training
+- Webcam mirrored for intuitive interaction
+
+### Data Output
+
+```json
+{
+  "sessionStart": 1234567890,
+  "frameCount": 1500,
+  "events": [
+    { "timestamp": 5000, "type": "success", "frame": 150 }
+  ],
+  "frames": [
+    {
+      "timestamp": 0,
+      "frame": 0,
+      "hands": [[{x: 0.5, y: 0.3, z: 0.1}, ...21 landmarks]],
+      "handedness": [{index: 0, score: 0.9, label: "Right"}],
+      "handPresent": true,
+      "handScore": 0.95
+    }
+  ]
+}
+```
+
+### See Also
+
+- Collection plan: `docs/toddler-ml-dataset/COLLECTION_PLAN.md`
+
+---
+
 ## 🧰 Kenney Asset Sync Tool
 
 **Purpose:** Synchronize Kenney `New Platformer Pack` assets from the local purchased Kenney bundle into the frontend canonical asset path.

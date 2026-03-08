@@ -8,18 +8,18 @@
 
 ## Feature Index
 
-| ID | Feature | Priority | Phase | Status |
-|----|---------|----------|-------|--------|
-| AI-001 | Pip Voice (TTS) | P0 | 1 | Planned |
-| AI-002 | Letter Pronunciation | P0 | 1 | Planned |
-| AI-003 | Pip Quick Responses | P1 | 1 | Planned |
-| AI-004 | Voice Input (STT) | P1 | 2 | Planned |
-| AI-005 | Conversation with Pip | P1 | 2 | Planned |
-| AI-006 | Story Generator | P2 | 3 | Planned |
-| AI-007 | Activity Generator | P2 | 3 | Planned |
-| AI-008 | Show and Tell (Vision) | P2 | 4 | Planned |
-| AI-009 | AR Face Overlays | P3 | 4 | Planned |
-| AI-010 | Adaptive Learning Path | P2 | 3 | Planned |
+| ID     | Feature                | Priority | Phase | Status  |
+| ------ | ---------------------- | -------- | ----- | ------- |
+| AI-001 | Pip Voice (TTS)        | P0       | 1     | Planned |
+| AI-002 | Letter Pronunciation   | P0       | 1     | Planned |
+| AI-003 | Pip Quick Responses    | P1       | 1     | Planned |
+| AI-004 | Voice Input (STT)      | P1       | 2     | Planned |
+| AI-005 | Conversation with Pip  | P1       | 2     | Planned |
+| AI-006 | Story Generator        | P2       | 3     | Planned |
+| AI-007 | Activity Generator     | P2       | 3     | Planned |
+| AI-008 | Show and Tell (Vision) | P2       | 4     | Planned |
+| AI-009 | AR Face Overlays       | P3       | 4     | Planned |
+| AI-010 | Adaptive Learning Path | P2       | 3     | Planned |
 
 ---
 
@@ -32,7 +32,7 @@
 **Technical Spec:**
 
 - Primary: Web Speech API
-- Enhanced: Piper TTS (local)
+- Enhanced: Kokoro TTS (local)
 - Voice: Rate 1.1, Pitch 1.2 (warm, friendly)
 - Latency: <200ms
 
@@ -213,12 +213,12 @@ interface StoryRequest {
 
 **Mastery Levels:**
 
-| Level | Criteria | Guidance |
-|-------|----------|----------|
-| New | Never tried | Maximum hints |
-| Learning | <70% avg | High guidance |
-| Practicing | 70-85% avg | Medium guidance |
-| Mastered | 85%+ (3 sessions) | Review queue |
+| Level      | Criteria          | Guidance        |
+| ---------- | ----------------- | --------------- |
+| New        | Never tried       | Maximum hints   |
+| Learning   | <70% avg          | High guidance   |
+| Practicing | 70-85% avg        | Medium guidance |
+| Mastered   | 85%+ (3 sessions) | Review queue    |
 
 **Spaced Repetition:**
 
@@ -273,13 +273,13 @@ interface StoryRequest {
 
 ## Parent Controls Summary
 
-| Feature | Controls Available |
-|---------|-------------------|
-| TTS | Volume, Mute |
-| Voice Input | Enable/Disable |
-| Conversation | Enable/Disable, Daily limit |
+| Feature         | Controls Available          |
+| --------------- | --------------------------- |
+| TTS             | Volume, Mute                |
+| Voice Input     | Enable/Disable              |
+| Conversation    | Enable/Disable, Daily limit |
 | Story Generator | Enable/Disable, Daily limit |
-| Camera Features | Enable/Disable, Timeout |
+| Camera Features | Enable/Disable, Timeout     |
 
 ---
 

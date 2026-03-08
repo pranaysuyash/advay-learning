@@ -490,6 +490,11 @@ const PlatformerRunner = lazy(() =>
     default: module.PlatformerRunner,
   })),
 );
+const CountingCollectathon = lazy(() =>
+  import('./pages/CountingCollectathon').then((module) => ({
+    default: module.CountingCollectathon,
+  })),
+);
 
 // Loading component for suspense boundaries
 const PageLoader = () => (
@@ -1275,6 +1280,16 @@ function App() {
                     <ProtectedRoute>
                       <CameraSafeRoute gameName='Platform Runner'>
                         <PlatformerRunner />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/counting-collectathon'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Counting Collect-a-thon'>
+                        <CountingCollectathon />
                       </CameraSafeRoute>
                     </ProtectedRoute>
                   }

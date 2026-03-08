@@ -17,7 +17,6 @@ from app.core.exceptions import (
     AuthorizationError,
     DuplicateResourceError,
     TokenInvalidError,
-    ValidationError,
 )
 from app.core.rate_limit import RateLimits, limiter
 from app.core.security import create_access_token
@@ -121,7 +120,10 @@ async def login(
     # Check if account is locked
     if await AccountLockoutService.is_account_locked(email):
         remaining_time = await AccountLockoutService.get_remaining_lockout_time(email)
-        raise AccountLockedError(locked_until=f"{remaining_time}s" if remaining_time else None)
+        raise AccountLockedError(
+            retry_after_seconds=remaining_time,
+            locked_until=f"{remaining_time}s" if remaining_time else None,
+        )
 
     # Authenticate user
     user = await UserService.authenticate(db, email, form_data.password)
@@ -132,7 +134,11 @@ async def login(
         if should_lock:
             raise AccountLockedError()
 
-        raise AuthenticationError("Incorrect email or password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     # Clear failed attempts on successful login
     await AccountLockoutService.clear_failed_attempts(email)
@@ -197,7 +203,7 @@ async def verify_email(request: Request, token: str, db: AsyncSession = Depends(
     """Verify email address using verification token."""
     user = await UserService.get_by_verification_token(db, token)
     if not user:
-        raise ValidationError("Invalid or expired verification token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
 
     await UserService.verify_email(db, user)
     return {"message": "Email verified successfully. You can now log in."}
@@ -257,7 +263,7 @@ async def reset_password(
     """Reset password using reset token."""
     user = await UserService.get_by_password_reset_token(db, token)
     if not user:
-        raise ValidationError("Invalid or expired reset token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
 
     # Validate password length
     if len(new_password) < 8:

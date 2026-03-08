@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useFeatureFlag } from './useFeatureFlag';
 import { llmService } from '../services/ai/llm';
 import { ttsService } from '../services/ai/tts/TTSService';
+import { useSettingsStore, useAITelemetryStore } from '../store';
 
 interface VoicePromptOptions {
   rate?: number;
@@ -15,6 +16,8 @@ interface UseVoicePromptReturn {
   stop: () => void;
   isSpeaking: boolean;
   isSupported: boolean;
+  requiresCloudConsent: boolean;
+  approveCloudConsent: () => void;
   /** @deprecated No longer needed — ttsService manages voice selection */
   availableVoices: never[];
   /** @deprecated No longer needed — ttsService manages voice selection */
@@ -27,7 +30,14 @@ interface UseVoicePromptReturn {
  */
 export function useVoicePrompt(): UseVoicePromptReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [requiresCloudConsent, setRequiresCloudConsent] = useState(false);
   const llmResponsesEnabled = useFeatureFlag('ai.llmResponsesV1');
+  const cloudFallbackEnabled = useFeatureFlag('ai.cloudFallbackV1');
+  const parentConsentForCloudAI = useSettingsStore(
+    (s) => s.parentConsentForCloudAI,
+  );
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const recordLLMUsage = useAITelemetryStore((s) => s.recordLLMUsage);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -35,6 +45,51 @@ export function useVoicePrompt(): UseVoicePromptReturn {
       ttsService.stop();
     };
   }, []);
+
+  useEffect(() => {
+    llmService.updateConfig({
+      cloudFallbackEnabled,
+      parentConsent: parentConsentForCloudAI,
+    });
+  }, [cloudFallbackEnabled, parentConsentForCloudAI]);
+
+  useEffect(() => {
+    const unsubscribe = llmService.subscribeUsage((event) => {
+      recordLLMUsage({
+        provider: event.provider,
+        source: event.source,
+        model: event.model,
+        latencyMs: event.latencyMs,
+        cached: event.cached,
+        fallbackUsed: event.fallbackUsed,
+        reason: event.reason,
+        timestamp: event.timestamp,
+      });
+
+      if (
+        event.reason === 'cloud_blocked_no_consent_or_flag' &&
+        !parentConsentForCloudAI
+      ) {
+        setRequiresCloudConsent(true);
+      }
+
+      if (event.source === 'cloud') {
+        const nextCount = useSettingsStore.getState().aiCloudUsageCount + 1;
+        updateSettings({ aiCloudUsageCount: nextCount });
+      }
+    });
+
+    return unsubscribe;
+  }, [
+    parentConsentForCloudAI,
+    recordLLMUsage,
+    updateSettings,
+  ]);
+
+  const approveCloudConsent = useCallback(() => {
+    updateSettings({ parentConsentForCloudAI: true });
+    setRequiresCloudConsent(false);
+  }, [updateSettings]);
 
   const speak = useCallback(
     (text: string, options: VoicePromptOptions = {}) => {
@@ -75,6 +130,8 @@ export function useVoicePrompt(): UseVoicePromptReturn {
     stop,
     isSpeaking,
     isSupported: ttsService.isAvailable(),
+    requiresCloudConsent,
+    approveCloudConsent,
     availableVoices: [] as never[],
     setPreferredVoice: () => {},
   };

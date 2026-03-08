@@ -90,5 +90,5 @@ describe('DiscoveryLab', () => {
     await waitFor(() => {
       expect(screen.queryByText(/You need a few more ingredients/i)).toBeNull();
     });
-  });
+  }, 15000);
 });

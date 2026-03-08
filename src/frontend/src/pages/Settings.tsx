@@ -2,18 +2,211 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useSettingsStore, useProgressStore, useAuthStore } from '../store';
+import {
+  useSettingsStore,
+  useProgressStore,
+  useAuthStore,
+  useAITelemetryStore,
+} from '../store';
 import { useProfileStore } from '../store/profileStore';
 import { FEATURE_FLAG_META } from '../config/features';
 import { useFeatureFlags } from '../hooks/useFeatureFlag';
 import { getAlphabet } from '../data/alphabets';
 import { UIIcon } from '../components/ui/Icon';
-import { Button } from '../components/ui';
+import { Button, SyncStatusIndicator } from '../components/ui';
 import { useConfirm } from '../components/ui/useConfirm';
 import { useToast } from '../components/ui/useToast';
 import { ParentGate } from '../components/ui/ParentGate';
 import { getLanguageOptions } from '../i18n';
 import { useAudio } from '../utils/hooks/useAudio';
+
+interface CloudFallbackSectionProps {
+  parentConsentForCloudAI: boolean;
+  aiCloudUsageCount: number;
+  aiTelemetry: {
+    totalRequests: number;
+    totalCloudRequests: number;
+    totalFallbacks: number;
+    lastEvent?: {
+      provider: string;
+      source: string;
+      latencyMs: number;
+    } | null;
+  };
+  onToggleParentConsent: () => void;
+}
+
+function CloudFallbackSection({
+  parentConsentForCloudAI,
+  aiCloudUsageCount,
+  aiTelemetry,
+  onToggleParentConsent,
+}: CloudFallbackSectionProps) {
+  return (
+    <div className='pt-6 border-t-4 border-[#F2CC8F] space-y-6'>
+      <div>
+        <div className='font-black text-advay-slate text-lg mb-2'>
+          AI Cloud Fallback Consent
+        </div>
+        <div className='text-sm font-bold text-text-secondary'>
+          Allows AI to use cloud inference only when local model providers are unavailable.
+          Parent approval is required and can be revoked anytime.
+        </div>
+      </div>
+
+      <div className='flex items-center justify-between'>
+        <div className='pr-4'>
+          <div className='font-black text-advay-slate text-base'>
+            Parent consent for cloud AI fallback
+          </div>
+          <div className='text-sm font-bold text-text-secondary mt-1'>
+            Current status: {parentConsentForCloudAI ? 'Approved' : 'Not approved'}
+          </div>
+        </div>
+        <button
+          onClick={onToggleParentConsent}
+          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${parentConsentForCloudAI ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
+          aria-label={
+            parentConsentForCloudAI
+              ? 'Disable cloud AI fallback consent'
+              : 'Enable cloud AI fallback consent'
+          }
+        >
+          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${parentConsentForCloudAI ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
+        </button>
+      </div>
+
+      <div className='bg-slate-50 rounded-[1.5rem] p-5 border-4 border-[#F2CC8F]'>
+        <div className='text-sm font-black uppercase tracking-widest text-slate-400 mb-3'>
+          AI Usage Summary
+        </div>
+        <div className='grid grid-cols-2 gap-4'>
+          <div>
+            <div className='text-2xl font-black text-advay-slate'>
+              {aiTelemetry.totalRequests}
+            </div>
+            <div className='text-xs font-bold text-text-secondary'>Total AI Requests</div>
+          </div>
+          <div>
+            <div className='text-2xl font-black text-blue-600'>
+              {aiTelemetry.totalCloudRequests}
+            </div>
+            <div className='text-xs font-bold text-text-secondary'>Cloud Requests</div>
+          </div>
+          <div>
+            <div className='text-2xl font-black text-orange-600'>
+              {aiTelemetry.totalFallbacks}
+            </div>
+            <div className='text-xs font-bold text-text-secondary'>Fallback Events</div>
+          </div>
+          <div>
+            <div className='text-2xl font-black text-purple-600'>
+              {aiCloudUsageCount}
+            </div>
+            <div className='text-xs font-bold text-text-secondary'>Cloud Uses (Settings Counter)</div>
+          </div>
+        </div>
+
+        {aiTelemetry.lastEvent && (
+          <div className='mt-4 pt-4 border-t-2 border-slate-200'>
+            <div className='text-sm font-black text-advay-slate'>Last AI Provider</div>
+            <div className='text-sm font-bold text-text-secondary mt-1'>
+              {aiTelemetry.lastEvent.provider} • {aiTelemetry.lastEvent.source} • {Math.round(aiTelemetry.lastEvent.latencyMs)}ms
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface CollectiblesControlsSectionProps {
+  hasProfile: boolean;
+  enableOlderBonus: boolean;
+  showRarityTextForOlder: boolean;
+  onToggleOlderBonus: () => Promise<void>;
+  onToggleRarityText: () => Promise<void>;
+}
+
+function CollectiblesControlsSection({
+  hasProfile,
+  enableOlderBonus,
+  showRarityTextForOlder,
+  onToggleOlderBonus,
+  onToggleRarityText,
+}: CollectiblesControlsSectionProps) {
+  return (
+    <div className='pt-6 border-t-4 border-[#F2CC8F] space-y-6'>
+      <div>
+        <div className='font-black text-advay-slate text-lg mb-2'>
+          Collectibles Reward Controls
+        </div>
+        <div className='text-sm font-bold text-text-secondary'>
+          Configure optional mystery bonus rewards for older children (ages 6-9).
+        </div>
+      </div>
+
+      {!hasProfile && (
+        <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200'>
+          <div className='font-black'>No child profile selected.</div>
+          <div className='text-sm font-bold mt-1'>
+            Select a profile to customize collectibles behavior.
+          </div>
+        </div>
+      )}
+
+      <div className='flex items-center justify-between'>
+        <div className='pr-4'>
+          <div className='font-black text-advay-slate text-base'>
+            Enable mystery bonus rewards (6-9)
+          </div>
+          <div className='text-sm font-bold text-text-secondary mt-1'>
+            Default is OFF. Core deterministic rewards always stay enabled.
+          </div>
+        </div>
+        <button
+          disabled={!hasProfile}
+          onClick={() => {
+            void onToggleOlderBonus();
+          }}
+          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${enableOlderBonus ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!hasProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+          aria-label={
+            enableOlderBonus
+              ? 'Disable mystery bonus rewards'
+              : 'Enable mystery bonus rewards'
+          }
+        >
+          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enableOlderBonus ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
+        </button>
+      </div>
+
+      <div className='flex items-center justify-between'>
+        <div className='pr-4'>
+          <div className='font-black text-advay-slate text-base'>
+            Show rarity text for older kids
+          </div>
+          <div className='text-sm font-bold text-text-secondary mt-1'>
+            Keeps textual rarity labels visible for age 6-9 profiles.
+          </div>
+        </div>
+        <button
+          disabled={!hasProfile}
+          onClick={() => {
+            void onToggleRarityText();
+          }}
+          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${showRarityTextForOlder ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!hasProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+          aria-label={
+            showRarityTextForOlder
+              ? 'Hide rarity text for older kids'
+              : 'Show rarity text for older kids'
+          }
+        >
+          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${showRarityTextForOlder ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function Settings() {
   const { t } = useTranslation(['settings', 'common']);
@@ -21,6 +214,7 @@ export function Settings() {
   const settings = useSettingsStore();
   const { logout, user } = useAuthStore();
   const { currentProfile, updateCollectiblesSettings } = useProfileStore();
+  const aiTelemetry = useAITelemetryStore();
   const {
     resetProgress,
     getMasteredLettersCount,
@@ -39,6 +233,7 @@ export function Settings() {
       | undefined) ?? {};
   const enableOlderBonus = collectiblesSettings.enableOlderBonus ?? false;
   const showRarityTextForOlder = collectiblesSettings.showRarityTextForOlder ?? true;
+  const hasProfile = Boolean(currentProfile);
 
   const handleCancelGate = useCallback(() => {
     window.history.back();
@@ -73,6 +268,28 @@ export function Settings() {
     } else {
       settings.updateSettings({ cameraEnabled: false });
     }
+  };
+
+  const toggleParentConsentForCloudAI = () => {
+    settings.updateSettings({
+      parentConsentForCloudAI: !settings.parentConsentForCloudAI,
+    });
+  };
+
+  const handleToggleOlderBonus = async () => {
+    if (!currentProfile) return;
+    await updateCollectiblesSettings({
+      enableOlderBonus: !enableOlderBonus,
+    });
+    showToast('Collectibles bonus preference updated', 'success');
+  };
+
+  const handleToggleRarityText = async () => {
+    if (!currentProfile) return;
+    await updateCollectiblesSettings({
+      showRarityTextForOlder: !showRarityTextForOlder,
+    });
+    showToast('Rarity text preference updated', 'success');
   };
 
   return (
@@ -130,8 +347,11 @@ export function Settings() {
                         {t('settings:language.description')}
                       </p>
                       <select
+                        id='settings-language'
                         value={settings.language}
                         onChange={(e) => settings.updateSettings({ language: e.target.value })}
+                        aria-label='Language'
+                        title='Language'
                         className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         {getLanguageOptions().map((lang) => (
@@ -147,8 +367,11 @@ export function Settings() {
                         {t('settings:difficulty.label')}
                       </label>
                       <select
+                        id='settings-difficulty'
                         value={settings.difficulty}
                         onChange={(e) => settings.updateSettings({ difficulty: e.target.value })}
+                        aria-label='Difficulty'
+                        title='Difficulty'
                         className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 focus:border-[#3B82F6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         <option value='easy'>{t('settings:difficulty.options.easy')}</option>
@@ -167,6 +390,9 @@ export function Settings() {
                       </div>
                       <button
                         onClick={() => { playClick(); settings.updateSettings({ soundEnabled: !settings.soundEnabled }); }}
+                        type='button'
+                        aria-label={settings.soundEnabled ? 'Turn sound effects off' : 'Turn sound effects on'}
+                        title={settings.soundEnabled ? 'Turn sound effects off' : 'Turn sound effects on'}
                         className={`w-24 h-12 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.soundEnabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
                         <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.soundEnabled ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
@@ -224,6 +450,9 @@ export function Settings() {
                             </div>
                             <button
                               onClick={() => featureFlags.updateFlag(flag as any, !enabled)}
+                              type='button'
+                              aria-label={`${enabled ? 'Disable' : 'Enable'} feature flag ${flag}`}
+                              title={`${enabled ? 'Disable' : 'Enable'} feature flag ${flag}`}
                               className={`w-24 h-12 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${enabled ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                             >
                               <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enabled ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
@@ -297,8 +526,11 @@ export function Settings() {
                     <div className="pt-6 border-t-4 border-[#F2CC8F]">
                       <label className='block font-black text-advay-slate mb-3 text-lg'>AI Processing Mode</label>
                       <select
+                        id='settings-ai-processing-mode'
                         value={settings.handTrackingDelegate}
                         onChange={(e) => settings.updateSettings({ handTrackingDelegate: e.target.value as 'GPU' | 'CPU' })}
+                        aria-label='AI Processing Mode'
+                        title='AI Processing Mode'
                         className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-purple-500/20 focus:border-[#8B5CF6] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100 mb-3'
                       >
                         <option value='GPU'>Hardware Accelerated (GPU)</option>
@@ -330,8 +562,11 @@ export function Settings() {
                     <div>
                       <label className='block font-black text-advay-slate mb-3 text-lg'>Daily Time Limit</label>
                       <select
+                        id='settings-daily-time-limit'
                         value={settings.timeLimit}
                         onChange={(e) => settings.updateSettings({ timeLimit: parseInt(e.target.value) })}
+                        aria-label='Daily Time Limit'
+                        title='Daily Time Limit'
                         className='w-full px-5 py-4 bg-slate-50 border-4 border-[#F2CC8F] rounded-[1.5rem] focus:ring-4 focus:ring-orange-500/20 focus:border-[#E85D04] font-bold text-advay-slate text-xl transition-all appearance-none cursor-pointer hover:bg-slate-100'
                       >
                         <option value={0}>No Limit</option>
@@ -348,89 +583,29 @@ export function Settings() {
                       </div>
                       <button
                         onClick={() => settings.updateSettings({ showHints: !settings.showHints })}
+                        type='button'
+                        aria-label={settings.showHints ? 'Hide tracing hints' : 'Show tracing hints'}
+                        title={settings.showHints ? 'Hide tracing hints' : 'Show tracing hints'}
                         className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${settings.showHints ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'}`}
                       >
                         <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${settings.showHints ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
-                    <div className='pt-6 border-t-4 border-[#F2CC8F] space-y-6'>
-                      <div>
-                        <div className='font-black text-advay-slate text-lg mb-2'>
-                          Collectibles Reward Controls
-                        </div>
-                        <div className='text-sm font-bold text-text-secondary'>
-                          Configure optional mystery bonus rewards for older children (ages 6-9).
-                        </div>
-                      </div>
+                    <CloudFallbackSection
+                      parentConsentForCloudAI={settings.parentConsentForCloudAI}
+                      aiCloudUsageCount={settings.aiCloudUsageCount}
+                      aiTelemetry={aiTelemetry}
+                      onToggleParentConsent={toggleParentConsentForCloudAI}
+                    />
 
-                      {!currentProfile && (
-                        <div className='px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200'>
-                          <div className='font-black'>No child profile selected.</div>
-                          <div className='text-sm font-bold mt-1'>
-                            Select a profile to customize collectibles behavior.
-                          </div>
-                        </div>
-                      )}
-
-                      <div className='flex items-center justify-between'>
-                        <div className='pr-4'>
-                          <div className='font-black text-advay-slate text-base'>
-                            Enable mystery bonus rewards (6-9)
-                          </div>
-                          <div className='text-sm font-bold text-text-secondary mt-1'>
-                            Default is OFF. Core deterministic rewards always stay enabled.
-                          </div>
-                        </div>
-                        <button
-                          disabled={!currentProfile}
-                          onClick={async () => {
-                            if (!currentProfile) return;
-                            await updateCollectiblesSettings({
-                              enableOlderBonus: !enableOlderBonus,
-                            });
-                            showToast('Collectibles bonus preference updated', 'success');
-                          }}
-                          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${enableOlderBonus ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          aria-label={
-                            enableOlderBonus
-                              ? 'Disable mystery bonus rewards'
-                              : 'Enable mystery bonus rewards'
-                          }
-                        >
-                          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${enableOlderBonus ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
-                        </button>
-                      </div>
-
-                      <div className='flex items-center justify-between'>
-                        <div className='pr-4'>
-                          <div className='font-black text-advay-slate text-base'>
-                            Show rarity text for older kids
-                          </div>
-                          <div className='text-sm font-bold text-text-secondary mt-1'>
-                            Keeps textual rarity labels visible for age 6-9 profiles.
-                          </div>
-                        </div>
-                        <button
-                          disabled={!currentProfile}
-                          onClick={async () => {
-                            if (!currentProfile) return;
-                            await updateCollectiblesSettings({
-                              showRarityTextForOlder: !showRarityTextForOlder,
-                            });
-                            showToast('Rarity text preference updated', 'success');
-                          }}
-                          className={`w-24 h-12 flex-shrink-0 rounded-full transition-colors relative border-4 flex items-center p-1 cursor-pointer ${showRarityTextForOlder ? 'bg-[#10B981] border-emerald-600' : 'bg-slate-200 border-slate-300'} ${!currentProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          aria-label={
-                            showRarityTextForOlder
-                              ? 'Hide rarity text for older kids'
-                              : 'Show rarity text for older kids'
-                          }
-                        >
-                          <div className={`w-8 h-8 bg-white rounded-full shadow-[0_4px_0_#E5B86E] transition-transform ${showRarityTextForOlder ? 'translate-x-[2.5rem]' : 'translate-x-0'}`} />
-                        </button>
-                      </div>
-                    </div>
+                    <CollectiblesControlsSection
+                      hasProfile={hasProfile}
+                      enableOlderBonus={enableOlderBonus}
+                      showRarityTextForOlder={showRarityTextForOlder}
+                      onToggleOlderBonus={handleToggleOlderBonus}
+                      onToggleRarityText={handleToggleRarityText}
+                    />
 
                     <div className="pt-6 border-t-4 border-[#F2CC8F] space-y-4">
                       <div className='bg-slate-50 rounded-[1.5rem] p-5 mb-4 border-4 border-[#F2CC8F]'>
@@ -511,6 +686,19 @@ export function Settings() {
                         </Button>
                       </div>
                     )}
+
+                    {/* Sync Status - ISSUE-006 */}
+                    <div className="px-5 py-4 rounded-[1.5rem] bg-slate-50 border-4 border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-black text-lg text-slate-700">Sync Status</div>
+                          <div className="text-sm text-slate-500 mt-1">
+                            Monitor your child's progress sync status
+                          </div>
+                        </div>
+                        <SyncStatusIndicator detailed />
+                      </div>
+                    </div>
 
                     {/* Privacy Policy Link - COPPA Compliance */}
                     <div className="px-5 py-4 rounded-[1.5rem] bg-blue-50 text-blue-700 border-4 border-blue-200">

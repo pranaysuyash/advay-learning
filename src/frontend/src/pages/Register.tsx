@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store';
-import { profileApi } from '../services/api';
 import { Mascot } from '../components/Mascot';
 import { LANGUAGES } from '../data/languages';
 import { UIIcon } from '../components/ui/Icon';
 import { useAudio } from '../utils/hooks/useAudio';
+import {
+  clearPendingLearnerProfile,
+  savePendingLearnerProfile,
+} from '../services/pendingLearnerProfile';
 
 export function Register() {
   const { playSuccess, playError } = useAudio();
@@ -18,8 +21,6 @@ export function Register() {
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState(5);
   const [childLanguage, setChildLanguage] = useState('en');
-  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
-
   const { register, error: storeError, clearError, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
@@ -54,17 +55,13 @@ export function Register() {
       await register(email, password);
 
       if (showChildFields && childName.trim()) {
-        setIsCreatingProfile(true);
-        try {
-          await profileApi.createProfile({
-            name: childName,
-            age: childAge,
-            preferred_language: childLanguage,
-          });
-        } catch (profileError) {
-          console.error('Failed to create child profile:', profileError);
-        }
-        setIsCreatingProfile(false);
+        savePendingLearnerProfile({
+          name: childName.trim(),
+          age: childAge,
+          preferred_language: childLanguage,
+        });
+      } else {
+        clearPendingLearnerProfile();
       }
 
       playSuccess();
@@ -288,10 +285,10 @@ export function Register() {
 
               <button
                 type='submit'
-                disabled={isLoading || isCreatingProfile}
+                disabled={isLoading}
                 className='w-full py-4 mt-6 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xl rounded-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed group'
               >
-                {isLoading || isCreatingProfile ? (
+                {isLoading ? (
                   <span className='flex items-center justify-center gap-2'>
                     <UIIcon name={'loader' as any} className='animate-spin' size={24} /> Creating Magic...
                   </span>

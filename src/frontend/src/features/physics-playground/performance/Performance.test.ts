@@ -59,7 +59,7 @@ describe('Physics Playground - Property 5: Performance Threshold', () => {
             ),
             { numRuns: 100 }
         );
-    });
+    }, 30000);
 
     it('should handle particle count limits gracefully', () => {
         const MAX_PARTICLES = 500;

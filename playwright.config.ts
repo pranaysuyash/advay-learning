@@ -3,6 +3,11 @@ import {
   devices,
 } from './src/frontend/node_modules/@playwright/test';
 
+const fakeCameraArgs = [
+  '--use-fake-ui-for-media-stream',
+  '--use-fake-device-for-media-stream',
+];
+
 export default defineConfig({
   testDir: './src/frontend/src/**/*.e2e.test.ts',
   fullyParallel: false,
@@ -19,8 +24,22 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'chromium-fake-camera',
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['camera'],
+        launchOptions: {
+          args: fakeCameraArgs,
+        },
+      },
+    },
+    {
+      name: 'chromium-manual-camera',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        headless: false,
+      },
     },
   ],
 

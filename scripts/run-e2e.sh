@@ -83,7 +83,11 @@ fi
 
 # Run Playwright tests
 echo "[e2e] Running Playwright tests"
-npx playwright test --config=playwright.config.ts "$@"
+PLAYWRIGHT_ARGS=("$@")
+if [[ " ${PLAYWRIGHT_ARGS[*]} " != *" --project="* ]] && [[ " ${PLAYWRIGHT_ARGS[*]} " != *" --project "* ]]; then
+  PLAYWRIGHT_ARGS=("--project=chromium-fake-camera" "${PLAYWRIGHT_ARGS[@]}")
+fi
+npx playwright test --config=playwright.config.ts "${PLAYWRIGHT_ARGS[@]}"
 
 # Teardown
 echo "[e2e] Tests finished; stopping servers"

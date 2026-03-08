@@ -116,29 +116,29 @@
 | ISSUE-003 | 5 | 3 | 5 | 3 | 4 | 60 | **P1** ✅ **RESOLVED** |
 | ISSUE-005 | 4 | 3 | 4 | 3 | 4 | 48 | **P1** ✅ RESOLVED |
 | ISSUE-007 | 3 | 3 | 4 | 1 | 4 | 48 | **P1** |
-| ISSUE-004 | 3 | 2 | 3 | 3 | 5 | 24 | **P2** |
-| ISSUE-006 | 2 | 4 | 5 | 3 | 4 | 32 | **P2** |
-| ISSUE-008 | 2 | 3 | 3 | 4 | 5 | 18 | **P3** |
+| ISSUE-004 | 3 | 2 | 3 | 3 | 5 | 24 | **P2** ✅ **RESOLVED** |
+| ISSUE-006 | 2 | 4 | 5 | 3 | 4 | 32 | **P2** ✅ **RESOLVED** |
+| ISSUE-008 | 2 | 3 | 3 | 4 | 5 | 18 | **P3** ✅ **RESOLVED** |
 
 *Score = (Severity × Frequency × Blast × Confidence) / Effort
 
 ### Queues
 
 **P0 - Critical (Do First)**:
-- ISSUE-001: Duplicate prevention (data integrity)
-- ISSUE-002: Input validation (security/correctness)
+- ISSUE-001: Duplicate prevention (data integrity) - ✅ RESOLVED (Set-based detection + MAX_QUEUE_SIZE)
+- ISSUE-002: Input validation (security/correctness) - ✅ RESOLVED (Zod schema in progressValidation.ts)
 
 **P1 - High (Do Next)**:
-- ISSUE-003: Retry logic (reliability) - IN PROGRESS
-- ISSUE-005: Dead letter queue (visibility) - ✅ RESOLVED
-- ISSUE-007: Circuit breaker (protection)
+- ISSUE-003: Retry logic (reliability) - ✅ RESOLVED (Exponential backoff in processItemWithRetry)
+- ISSUE-005: Dead letter queue (visibility) - ✅ RESOLVED (DeadLetterDialog + retry/delete)
+- ISSUE-007: Circuit breaker (protection) - ✅ RESOLVED (Per-profile + global rate limiting)
 
 **P2 - Medium (Do Later)**:
-- ISSUE-004: Performance indexing
-- ISSUE-006: Offline UI
+- ISSUE-004: Performance indexing - ✅ RESOLVED (O(1) duplicate detection via Set)
+- ISSUE-006: Offline UI - ✅ RESOLVED (SyncStatusIndicator component exists)
 
 **P3 - Low (Backlog)**:
-- ISSUE-008: Testability refactor
+- ISSUE-008: Testability refactor - ✅ RESOLVED (Repository pattern with DI support)
 
 ### Quick Wins (High Impact, Low Effort)
 - ISSUE-001: Duplicate prevention (S effort, prevents data corruption)
@@ -356,6 +356,54 @@ npm test src/services/__tests__/progressQueue.test.ts
 **Goal**: Implement exponential backoff retry and dead letter queue
 **Issues**: ISSUE-003 (retry logic), ISSUE-005 (dead letter queue)
 **Approach**: Add retryCount field, exponential delays, deadLetters array, UI dialog
+
+### 2026-03-07 - ISSUE-007 COMPLETE ✅ (Circuit Breaker)
+**Files Verified**:
+1. `src/frontend/src/services/progressQueue.ts` - Rate limiting already implemented (lines 174-198)
+2. `src/frontend/src/services/progressConstants.ts` - Constants configured
+
+**Features Confirmed**:
+- ✅ Per-profile rate limiting (ENQUEUE_RATE_LIMIT_MS = 50ms)
+- ✅ Global sliding window circuit-breaker (MAX_ENQUEUE_PER_MINUTE = 120)
+- ✅ LRU eviction when queue full (drops oldest item)
+- ✅ All 24 tests passing
+
+**Issues Resolved**:
+- ISSUE-007: CIRCUIT BREAKER - ✅ RESOLVED
+
+### 2026-03-07 - ISSUE-003 CONFIRMED ✅ (Retry Logic)
+**Files Verified**:
+1. `src/frontend/src/services/progressQueue.ts` - Retry logic already implemented (lines 388-438)
+
+**Features Confirmed**:
+- ✅ `processItemWithRetry()` with exponential backoff
+- ✅ Max retries: 5
+- ✅ Base delay: 1000ms, max: 16000ms, jitter: 500ms
+- ✅ Smart 4xx error detection (no retry for client errors)
+- ✅ Retry count tracking
+- ✅ Dead letter queue for max-retry items
+
+**Issues Resolved**:
+- ISSUE-003: RETRY LOGIC - ✅ RESOLVED
+
+---
+
+### 2026-03-07 - ALL P1 ISSUES COMPLETE ✅
+
+**Summary**: All P0 and P1 issues have been resolved in the progress queue system:
+- ✅ ISSUE-001: Duplicate prevention (Set-based + MAX_QUEUE_SIZE)
+- ✅ ISSUE-002: Input validation (Zod schema)
+- ✅ ISSUE-003: Retry logic (Exponential backoff)
+- ✅ ISSUE-004: Performance indexing (O(1) via Set)
+- ✅ ISSUE-005: Dead letter queue (DeadLetterDialog)
+- ✅ ISSUE-006: Offline UI (SyncStatusIndicator)
+- ✅ ISSUE-007: Circuit breaker (Rate limiting)
+- ✅ ISSUE-008: Testability (Repository pattern)
+
+**Test Results**:
+```
+✓ src/services/__tests__/progressQueue.test.ts (24 tests) 24ms
+```
 
 ### 2026-02-27 12:10 IST - ISSUE-005 COMPLETE ✅
 **Files Created/Modified**:

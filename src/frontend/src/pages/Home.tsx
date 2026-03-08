@@ -53,7 +53,7 @@ const DynamicFeatureCard = ({
 };
 
 export const Home = memo(function Home() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, loginAsGuest } = useAuthStore();
   const { onboardingCompleted, setDemoMode } = useSettingsStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -94,8 +94,9 @@ export const Home = memo(function Home() {
 
   const startDemo = () => {
     trackSharedVisitCta('demo');
+    loginAsGuest();
     setDemoMode(true);
-    navigate('/games');
+    navigate('/dashboard');
   };
 
   const startRegistration = () => {

@@ -58,8 +58,30 @@ function getErrorMessage(error: any): string {
 
   const data = error.response.data;
 
+  const formatDuration = (seconds: number): string => {
+    const safe = Math.max(1, Math.floor(seconds));
+    const minutes = Math.floor(safe / 60);
+    const remainingSeconds = safe % 60;
+    return minutes > 0 ? `${minutes}m ${remainingSeconds}s` : `${remainingSeconds}s`;
+  };
+
   // NEW: Structured error format from custom exceptions
   // { success: false, error: { code: '...', message: '...', details: {} } }
+  if (
+    data.error?.code === 'ACCOUNT_LOCKED' &&
+    typeof data.error?.details?.retry_after_seconds === 'number'
+  ) {
+    return `Account is temporarily locked. Try again in ${formatDuration(data.error.details.retry_after_seconds)}.`;
+  }
+
+  if (
+    data.error?.code === 'TOKEN_INVALID' &&
+    typeof data.error?.message === 'string' &&
+    data.error.message.toLowerCase().includes('no refresh token provided')
+  ) {
+    return 'Your session expired. Please sign in again.';
+  }
+
   if (data.error?.message) return data.error.message;
 
   // Simple string detail (legacy FastAPI format)
@@ -100,6 +122,8 @@ export const useAuthStore = create<AuthState>()(
           // We just need to update the auth state
           set({
             isAuthenticated: true,
+            isGuest: false,
+            guestSession: null,
             isLoading: false,
           });
 
@@ -200,7 +224,11 @@ export const useAuthStore = create<AuthState>()(
       fetchUser: async () => {
         try {
           const response = await authApi.getMe();
-          set({ user: response.data });
+          set({
+            user: response.data,
+            isGuest: false,
+            guestSession: null,
+          });
         } catch (error: any) {
           // If fetching user fails, clear auth state
           set({

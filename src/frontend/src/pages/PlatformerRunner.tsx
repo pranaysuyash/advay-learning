@@ -1,61 +1,24 @@
 import { memo, useRef, useState, useEffect, useCallback } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
-import { AccessDenied } from '../components/ui/AccessDenied';
-import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
-import { useProgressStore } from '../store';
-import WellnessTimer from '../components/WellnessTimer';
-import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
-import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameDrops } from '../hooks/useGameDrops';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
+import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { VoiceInstructions, useVoiceInstructions } from '../components/game/VoiceInstructions';
 
-// --- Assets ---
-const ASSET_BASE = '/assets/kenney/platformer';
-const ASSETS = {
-  player: {
-    idle: `${ASSET_BASE}/characters/character_green_idle.png`,
-    jump: `${ASSET_BASE}/characters/character_green_jump.png`,
-    hit: `${ASSET_BASE}/characters/character_green_hit.png`,
-    walkA: `${ASSET_BASE}/characters/character_green_walk_a.png`,
-    walkB: `${ASSET_BASE}/characters/character_green_walk_b.png`,
-  },
-  enemies: {
-    slimeA: `${ASSET_BASE}/enemies/slime_normal_walk_a.png`,
-    slimeB: `${ASSET_BASE}/enemies/slime_normal_walk_b.png`,
-    beeA: `${ASSET_BASE}/enemies/bee_a.png`,
-    beeB: `${ASSET_BASE}/enemies/bee_b.png`,
-  },
-  tiles: {
-    grass: `${ASSET_BASE}/tiles/terrain_grass_horizontal_middle.png`,
-  },
-  collectibles: {
-    coin: `${ASSET_BASE}/collectibles/coin_gold.png`,
-    gem: `${ASSET_BASE}/collectibles/gem_blue.png`,
-    star: `${ASSET_BASE}/collectibles/star.png`,
-  },
-  hud: {
-    heart: `${ASSET_BASE}/hud/hud_heart.png`,
-    heartEmpty: `${ASSET_BASE}/hud/hud_heart_empty.png`,
-  },
-  bg: `${ASSET_BASE}/spritesheet-backgrounds-default.png`,
-  sounds: {
-    jump: `${ASSET_BASE}/sounds/sfx_jump.ogg`,
-    coin: `${ASSET_BASE}/sounds/sfx_coin.ogg`,
-    hurt: `${ASSET_BASE}/sounds/sfx_hurt.ogg`,
-    bump: `${ASSET_BASE}/sounds/sfx_bump.ogg`,
-    gem: `${ASSET_BASE}/sounds/sfx_gem.ogg`,
-  },
-};
-void ASSETS;
+// Fix internal canvas resolution to scale well
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
+const GROUND_Y = CANVAS_HEIGHT - 64;
 
-// --- Types & Constants ---
-type GameStateType = 'LOADING' | 'READY' | 'PLAYING' | 'GAMEOVER';
+type GameStateType = 'start' | 'playing' | 'complete';
 
 interface Rect {
   x: number;
@@ -75,12 +38,7 @@ interface GameObject extends Rect {
   startY?: number;
 }
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-const GROUND_Y = CANVAS_HEIGHT - 64;
-
-// Simple AABB Collision
-function checkCollision(r1: Rect, r2: Rect, margin = 0.8): boolean {
+function checkCollision(r1: Rect, r2: Rect, margin = 0.6): boolean {
   const mw = r1.w * (1 - margin);
   const mh = r1.h * (1 - margin);
   const r1Shrunken = {
@@ -106,26 +64,25 @@ function checkCollision(r1: Rect, r2: Rect, margin = 0.8): boolean {
   );
 }
 
-export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
+const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
   const navigate = useNavigate();
-  const reducedMotion = useReducedMotion();
-  const { canAccessGame, isLoading: subLoading } = useSubscription();
-  const hasAccess = canAccessGame('platformer-runner');
-  const { currentProfile } = useProgressStore();
-  const { onGameComplete } = useGameDrops('platformer-runner');
-  const { playClick, playSuccess, playError } = useAudio();
-
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [gameState, setGameState] = useState<GameStateType>('LOADING');
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [gameState, setGameState] = useState<GameStateType>('start');
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [streak, setStreak] = useState(0);
-  const [showStreakMilestone, setShowStreakMilestone] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+
+  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+  const { playClick, playSuccess, playError } = useAudio();
+  const { onGameComplete } = useGameDrops('platformer-runner');
+
+  const webcamRef = useRef<Webcam>(null);
+  const [isHandDetected, setIsHandDetected] = useState(false);
+  const lastHandStateRef = useRef(false);
+  const canJumpRef = useRef(true); // Must lower hand to jump again
+  const { speak } = useVoiceInstructions();
 
   const gameLoopRef = useRef<number | null>(null);
-  const webcamRef = useRef<Webcam>(null);
+
   const playerRef = useRef<GameObject>({
     id: 0,
     type: 'player',
@@ -133,7 +90,7 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
     y: GROUND_Y - 64,
     w: 48,
     h: 64,
-    vx: 0,
+    vx: 5, // Auto run speed
     vy: 0,
     active: true,
     frameTimer: 0,
@@ -142,462 +99,426 @@ export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
   const enemiesRef = useRef<GameObject[]>([]);
   const collectiblesRef = useRef<GameObject[]>([]);
   const cameraXRef = useRef(0);
+  const furthestXRef = useRef(800);
+  const objectIdCounter = useRef(0);
 
-  // Show loading while checking subscription
-  if (subLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
-      </div>
-    );
-  }
+  useGameSessionProgress({
+    gameName: 'Platform Runner',
+    score,
+    level: 1,
+    isPlaying: gameState === 'playing',
+    metaData: { coins, streak },
+  });
 
-  // Check subscription access
-  if (!hasAccess) {
-    return (
-      <AccessDenied gameName='Platform Runner' gameId='platformer-runner' />
-    );
-  }
+  const doJump = useCallback(() => {
+    if (gameState !== 'playing') return;
+    const player = playerRef.current;
+    if (player.y >= GROUND_Y - player.h - 5) { // On ground
+      player.vy = -16;
+      playClick(); // Jump sound essentially
+      triggerHaptic('success');
+    }
+  }, [gameState, playClick]);
 
-  // Error state
-  if (error) {
-    return (
-      <GameContainer title='Platform Runner' onHome={() => navigate('/games')}>
-        <div className='flex items-center justify-center min-h-screen'>
-          <div className='text-center'>
-            <h2 className='text-2xl font-bold text-red-600 mb-4'>
-              Oops! Something went wrong
-            </h2>
-            <p className='text-slate-600 mb-4'>{error.message}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                window.location.reload();
-              }}
-              className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </GameContainer>
-    );
-  }
+  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
+    if (gameState !== 'playing') return;
+    const tip = frame.indexTip;
 
-  // Save progress on game complete
-  const handleGameComplete = useCallback(
-    async (finalScore: number) => {
-      if (!currentProfile) return;
-
-      try {
-        await progressQueue.add({
-          profileId: currentProfile.id,
-          gameId: 'platformer-runner',
-          score: finalScore,
-          completed: true,
-          metadata: {
-            coins: coins,
-            lives: lives,
-          },
-        });
-        onGameComplete(finalScore);
-      } catch (err) {
-        console.error('Failed to save progress:', err);
-        setError(err as Error);
+    if (tip) {
+      if (!lastHandStateRef.current) {
+        setIsHandDetected(true);
+        lastHandStateRef.current = true;
       }
-    },
-    [currentProfile, coins, lives, onGameComplete],
-  );
 
-  // Hand tracking for jump
-  const handleHandFrame = useCallback(
-    (frame: TrackedHandFrame) => {
-      try {
-        if (!frame.indexTip) return;
+      const handRaised = tip.y < 0.4; // Top 40% of screen
+      const handLowered = tip.y > 0.6; // Bottom 40% of screen
 
-        // If hand is raised high, jump
-        const handRaised = frame.indexTip.y < 0.3;
-        if (handRaised && playerRef.current.y >= GROUND_Y - 64 - 5) {
-          playerRef.current.vy = -15;
-          playClick();
-        }
-      } catch (err) {
-        console.error('Hand tracking failed:', err);
+      if (handRaised && canJumpRef.current) {
+        doJump();
+        canJumpRef.current = false;
+      } else if (handLowered) {
+        canJumpRef.current = true;
       }
-    },
-    [playClick],
-  );
 
-  const { handVisible } = useGameHandTracking({
+    } else {
+      if (lastHandStateRef.current) {
+        setIsHandDetected(false);
+        lastHandStateRef.current = false;
+        canJumpRef.current = true; // reset jump state if hand lost
+      }
+    }
+  }, [gameState, doJump]);
+
+  const { isReady, isLoading, startTracking } = useGameHandTracking({
     gameName: 'PlatformerRunner',
+    isRunning: gameState === 'playing',
     webcamRef,
     onFrame: handleHandFrame,
   });
 
-  // Initialize game
   useEffect(() => {
-    try {
-      // Initialize enemies
-      enemiesRef.current = Array.from({ length: 10 }, (_, i) => ({
-        id: i,
-        type: 'slime',
-        x: 400 + i * 300,
-        y: GROUND_Y - 32,
-        w: 48,
-        h: 32,
-        vx: -2,
-        vy: 0,
-        active: true,
-        frameTimer: 0,
-        frameIndex: 0,
-        startY: GROUND_Y - 32,
-      }));
-
-      // Initialize collectibles
-      collectiblesRef.current = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        type: i % 5 === 0 ? 'star' : 'coin',
-        x: 300 + i * 200,
-        y: GROUND_Y - 100 - (i % 3) * 50,
-        w: 32,
-        h: 32,
-        vx: 0,
-        vy: 0,
-        active: true,
-        frameTimer: 0,
-        frameIndex: 0,
-      }));
-
-      setGameState('READY');
-    } catch (err) {
-      console.error('Game init failed:', err);
-      setError(err as Error);
+    if (gameState === 'playing' && !isReady && !isLoading) {
+      void startTracking();
     }
-  }, []);
+  }, [gameState, isReady, isLoading, startTracking]);
 
-  // Game loop
+  // Spacebar fallback
   useEffect(() => {
-    if (gameState !== 'PLAYING') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        doJump();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [doJump]);
 
-    try {
-      const gameLoop = () => {
-        const player = playerRef.current;
+  const setGameOver = useCallback(() => {
+    setGameState('complete');
+    playError();
+    triggerHaptic('error');
+    speak("Oh no, you hit a slime! Good run!");
+  }, [playError, speak]);
 
-        // Apply gravity
-        player.vy += 0.8;
-        player.y += player.vy;
+  // Main physics loop
+  useEffect(() => {
+    if (gameState !== 'playing') return;
 
-        // Ground collision
-        if (player.y > GROUND_Y - player.h) {
-          player.y = GROUND_Y - player.h;
-          player.vy = 0;
-        }
+    let lastTime = performance.now();
 
-        // Move camera with player
-        if (player.x > 300) {
-          cameraXRef.current = player.x - 300;
-        }
+    const gameLoop = (time: number) => {
+      const dt = Math.min((time - lastTime) / 16.66, 2); // Cap dt to prevent massive jumps on lag
+      lastTime = time;
 
-        // Update enemies
-        enemiesRef.current.forEach((enemy) => {
-          if (!enemy.active) return;
+      const player = playerRef.current;
 
-          enemy.x += enemy.vx;
-          enemy.frameTimer++;
-          if (enemy.frameTimer > 10) {
-            enemy.frameIndex = (enemy.frameIndex + 1) % 2;
-            enemy.frameTimer = 0;
-          }
+      // Apply physics to player
+      player.vy += 0.8 * dt; // Gravity
+      player.x += player.vx * dt; // Auto run forward
+      player.y += player.vy * dt;
 
-          // Collision with player
-          if (checkCollision(player, enemy)) {
-            if (player.vy > 0 && player.y < enemy.y) {
-              // Jumped on enemy
-              enemy.active = false;
-              player.vy = -10;
-              setScore((s) => s + 50);
-              playSuccess();
-            } else {
-              // Hit by enemy
-              setLives((l) => {
-                const newLives = l - 1;
-                if (newLives <= 0) {
-                  setGameState('GAMEOVER');
-                  void handleGameComplete(score);
-                }
-                return newLives;
-              });
-              playError();
-            }
-          }
-        });
+      // Ground collision
+      if (player.y > GROUND_Y - player.h) {
+        player.y = GROUND_Y - player.h;
+        player.vy = 0;
+      }
 
-        // Update collectibles
-        collectiblesRef.current.forEach((collectible) => {
-          if (!collectible.active) return;
+      // Move camera tightly with player (keep player at left 200px)
+      cameraXRef.current = player.x - 200;
 
-          if (checkCollision(player, collectible)) {
-            collectible.active = false;
-            
-            // Streak and scoring
-            const newStreak = streak + 1;
-            setStreak(newStreak);
-            const streakBonus = Math.min(newStreak * 2, 15);
-            
-            if (collectible.type === 'coin') {
-              setCoins((c) => c + 1);
-              setScore((s) => s + 10 + streakBonus);
-            } else if (collectible.type === 'star') {
-              setCoins((c) => c + 5);
-              setScore((s) => s + 50 + streakBonus);
-            }
-            
-            playSuccess();
-            triggerHaptic('success');
-            
-            // Milestone every 5
-            if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-              setShowStreakMilestone(true);
-              triggerHaptic('celebration');
-              setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
-            }
-          }
-        });
+      // Generate terrain ahead
+      while (furthestXRef.current < player.x + CANVAS_WIDTH * 2) {
+        const newX = furthestXRef.current + 300 + Math.random() * 400; // Scatter
 
-        // Render
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            // Clear
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-            ctx.save();
-            ctx.translate(-cameraXRef.current, 0);
-
-            // Draw ground
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(0, GROUND_Y, 5000, CANVAS_HEIGHT - GROUND_Y);
-
-            // Draw collectibles
-            collectiblesRef.current.forEach((c) => {
-              if (!c.active) return;
-              ctx.fillStyle = c.type === 'coin' ? '#FFD700' : '#FFD700';
-              ctx.beginPath();
-              ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 2, 0, Math.PI * 2);
-              ctx.fill();
+        // 70% chance coin, 30% chance enemy
+        if (Math.random() < 0.7) {
+          // Spawn 1-3 coins in an arc or row
+          const numCoins = Math.floor(Math.random() * 3) + 1;
+          const baseY = GROUND_Y - 80 - Math.random() * 60; // Sometimes high for jumps
+          for (let i = 0; i < numCoins; i++) {
+            collectiblesRef.current.push({
+              id: objectIdCounter.current++,
+              type: Math.random() < 0.1 ? 'star' : 'coin',
+              x: newX + i * 50,
+              y: baseY - (i % 2 === 1 ? 50 : 0), // Arc pattern
+              w: 32,
+              h: 32,
+              vx: 0,
+              vy: 0,
+              active: true,
+              frameTimer: 0,
+              frameIndex: 0
             });
+          }
+        } else {
+          // Spawn enemy ground level
+          enemiesRef.current.push({
+            id: objectIdCounter.current++,
+            type: 'slime',
+            x: newX,
+            y: GROUND_Y - 32,
+            w: 48,
+            h: 32,
+            vx: -1, // Slow crawl left
+            vy: 0,
+            active: true,
+            frameTimer: 0,
+            frameIndex: 0
+          });
+        }
+        furthestXRef.current = newX + 200; // Bump furthest
+      }
 
-            // Draw enemies
-            enemiesRef.current.forEach((e) => {
-              if (!e.active) return;
-              ctx.fillStyle = '#90EE90';
-              ctx.fillRect(e.x, e.y, e.w, e.h);
-            });
+      // Cleanup entities behind camera
+      const cleanupDist = cameraXRef.current - 200;
+      enemiesRef.current = enemiesRef.current.filter((e) => e.x > cleanupDist);
+      collectiblesRef.current = collectiblesRef.current.filter((c) => c.x > cleanupDist);
 
-            // Draw player
-            ctx.fillStyle = '#32CD32';
-            ctx.fillRect(player.x, player.y, player.w, player.h);
+      let isGameOver = false;
 
-            ctx.restore();
+      // Update & Collide Enemies
+      enemiesRef.current.forEach((enemy) => {
+        if (!enemy.active) return;
+        enemy.x += enemy.vx * dt;
+
+        if (checkCollision(player, enemy)) {
+          isGameOver = true;
+        }
+      });
+
+      // Update & Collide Collectibles
+      collectiblesRef.current.forEach((collectible) => {
+        if (!collectible.active) return;
+
+        if (checkCollision(player, collectible)) {
+          collectible.active = false;
+
+          const newStreak = incrementStreak(1);
+          setCoins((c) => c + 1);
+
+          const pts = collectible.type === 'star' ? 50 : 10;
+          const streakBonus = Math.min(newStreak * 2, 15);
+          const totalPoints = pts + streakBonus;
+
+          setScore((s) => s + totalPoints);
+
+          setScorePopup({
+            points: totalPoints,
+            x: ((collectible.x - cameraXRef.current) / CANVAS_WIDTH) * 100,
+            y: (collectible.y / CANVAS_HEIGHT) * 100
+          });
+
+          // Audio & Haptics
+          playSuccess();
+          triggerHaptic('success');
+
+          // Milestone every 5 
+          if (newStreak > 0 && newStreak % 5 === 0) {
+            triggerHaptic('celebration');
           }
         }
+      });
 
+      // Render
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#87CEEB';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+          ctx.save();
+          ctx.translate(-cameraXRef.current, 0);
+
+          // Draw endless ground spanning the camera viewport bounds
+          ctx.fillStyle = '#8B4513'; // Dirt brown
+          const vpX = cameraXRef.current;
+          ctx.fillRect(vpX - 100, GROUND_Y, CANVAS_WIDTH + 200, CANVAS_HEIGHT - GROUND_Y);
+          // Draw grass trim
+          ctx.fillStyle = '#228B22'; // Forest Green
+          ctx.fillRect(vpX - 100, GROUND_Y, CANVAS_WIDTH + 200, 20);
+
+
+          // Draw collectibles
+          collectiblesRef.current.forEach((c) => {
+            if (!c.active) return;
+            ctx.fillStyle = c.type === 'star' ? '#FBBF24' : '#FDE047';
+            ctx.beginPath();
+            ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 2, 0, Math.PI * 2);
+            ctx.fill();
+            // Inner ring
+            ctx.fillStyle = c.type === 'star' ? '#F59E0B' : '#FACC15';
+            ctx.beginPath();
+            ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 3, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Draw enemies
+          enemiesRef.current.forEach((e) => {
+            if (!e.active) return;
+            ctx.fillStyle = '#DC2626'; // Slime Red
+            ctx.beginPath();
+            ctx.roundRect(e.x, e.y, e.w, e.h, [10, 10, 0, 0]);
+            ctx.fill();
+            // Eyes
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(e.x + 10, e.y + e.h / 2, 4, 0, Math.PI * 2);
+            ctx.arc(e.x + e.w - 10, e.y + e.h / 2, 4, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Draw player
+          ctx.fillStyle = '#2563EB'; // Blue Player
+          ctx.beginPath();
+          ctx.roundRect(player.x, player.y, player.w, player.h, 10);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      if (isGameOver) {
+        setGameOver();
+      } else {
         gameLoopRef.current = requestAnimationFrame(gameLoop);
-      };
+      }
+    };
 
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
-    } catch (err) {
-      console.error('Game loop failed:', err);
-      setError(err as Error);
-    }
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, score, handleGameComplete, playSuccess, playError]);
+  }, [gameState, incrementStreak, playSuccess, setGameOver, setScorePopup]);
 
-  const handleStart = useCallback(() => {
-    try {
-      playClick();
-      setGameState('PLAYING');
-      setScore(0);
-      setCoins(0);
-      setLives(3);
-      setStreak(0);
-      setShowStreakMilestone(false);
-      playerRef.current.x = 100;
-      playerRef.current.y = GROUND_Y - 64;
-      playerRef.current.vy = 0;
-      cameraXRef.current = 0;
-    } catch (err) {
-      console.error('Game start failed:', err);
-      setError(err as Error);
-    }
-  }, [playClick]);
+  const handleStart = () => {
+    playClick();
+    setGameState('playing');
+    setScore(0);
+    setCoins(0);
+    resetStreak();
 
-  const handleStop = useCallback(async () => {
-    try {
-      playClick();
-      await handleGameComplete(score);
-      setGameState('READY');
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Game stop failed:', err);
-      setError(err as Error);
-    }
-  }, [score, handleGameComplete, navigate, playClick]);
+    enemiesRef.current = [];
+    collectiblesRef.current = [];
+    playerRef.current.x = 100;
+    playerRef.current.y = GROUND_Y - 64;
+    playerRef.current.vy = 0;
+    cameraXRef.current = 0;
+    furthestXRef.current = 800; // Reset generation marker
+
+    speak("Let's go! Raise your hand high to jump over the slimes and grab the coins!");
+  };
+
+  const handlePointerDown = () => {
+    doJump();
+  };
+
+  const handleFinish = useCallback(async () => {
+    playClick();
+    await onGameComplete(Math.round(score / 10));
+    navigate('/games');
+  }, [score, onGameComplete, navigate, playClick]);
 
   return (
-    <GlobalErrorBoundary>
-      <GameContainer
-        title='Platform Runner'
-        score={score}
-        level={1}
-        onHome={() => navigate('/games')}
-        reportSession={false}
-      >
-        <div className='flex flex-col h-full bg-slate-50'>
-          {/* Stats Bar */}
-          <div className='flex justify-between items-center p-4 bg-white shadow-[0_4px_0_#E5B86F]'>
-            <div className='flex gap-6'>
-              <div>
-                <span className='text-text-secondary text-sm'>Score:</span>
-                <span className='font-bold text-blue-600 ml-2 text-xl'>
-                  {score}
-                </span>
+    <GameContainer title="Platform Runner" onHome={() => navigate('/games')} reportSession={false}>
+      <div className="flex flex-col items-center gap-4 p-4 touch-none select-none">
+
+        <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
+
+        {gameState === 'playing' && (
+          <HandTrackingStatus
+            isHandDetected={isHandDetected}
+            pauseOnHandLost={true}
+            voicePrompt={true}
+            showMascot={true}
+          />
+        )}
+
+        {gameState === 'start' && (
+          <div className="text-center bg-white/80 p-12 rounded-[2rem] border-4 border-blue-300 shadow-xl max-w-xl mx-auto mt-10">
+            <p className="text-[6rem] mb-4">🏃</p>
+            <h2 className="text-4xl font-black mb-4 text-blue-600">Platform Runner!</h2>
+            <p className="mb-6 text-xl font-bold text-slate-600">Raise your hand (or tap) to jump over slimes!</p>
+            <button type="button" onClick={handleStart} className="px-10 py-5 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black text-2xl shadow-[0_6px_0_#1D4ED8] active:translate-y-2 active:shadow-none transition-all">
+              Run! 👟
+            </button>
+            <VoiceInstructions
+              instructions="Let's run! Raise your hand high to jump!"
+              autoSpeak={true}
+              showReplayButton={true}
+            />
+          </div>
+        )}
+
+        {gameState === 'playing' && (
+          <>
+            <div className="relative w-full max-w-2xl mx-auto aspect-[4/3]">
+              <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}
+                onPointerDown={handlePointerDown}
+                className="w-full h-full touch-none cursor-pointer rounded-[2rem] shadow-2xl border-4 border-blue-300 object-cover bg-sky-300"
+              />
+
+              {/* Score Popup */}
+              {scorePopup && (
+                <motion.div
+                  initial={{ opacity: 1, y: 0, scale: 1 }}
+                  animate={{ opacity: 0, y: -50, scale: 1.2 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="absolute pointer-events-none z-20"
+                  style={{
+                    left: `${scorePopup.x}%`,
+                    top: `${scorePopup.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <div className="text-4xl font-black text-white drop-shadow-[0_4px_4px_rgba(234,179,8,0.8)] stroke-yellow-500" style={{ WebkitTextStroke: '2px #CA8A04' }}>
+                    +{scorePopup.points}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Streak Milestone */}
+              <AnimatePresence>
+                {showMilestone && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                  >
+                    <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-[2rem] font-black text-4xl shadow-2xl border-4 border-white">
+                      🔥 {streak} Streak! 🔥
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="flex gap-4 relative z-10 -mt-2">
+              <div className="bg-yellow-100 px-6 py-3 rounded-2xl text-center border-2 border-yellow-200">
+                <p className="text-sm font-bold tracking-widest uppercase text-yellow-600">Coins</p>
+                <p className="text-3xl font-black text-slate-800">{coins}</p>
               </div>
-              <div>
-                <span className='text-text-secondary text-sm'>Coins:</span>
-                <span className='font-bold text-yellow-600 ml-2'>{coins}</span>
-              </div>
-              <div>
-                <span className='text-text-secondary text-sm'>Lives:</span>
-                <span className='font-bold text-red-600 ml-2'>{lives}</span>
+              <div className="bg-blue-100 px-6 py-3 rounded-2xl text-center border-2 border-blue-200">
+                <p className="text-sm font-bold tracking-widest uppercase text-blue-600">Score</p>
+                <p className="text-3xl font-black text-slate-800">{score}</p>
               </div>
               {streak > 0 && (
-                <div>
-                  <span className='text-text-secondary text-sm'>Streak:</span>
-                  <span className='font-bold text-orange-600 ml-2'>🔥 {streak}</span>
+                <div className="bg-orange-100 px-6 py-3 rounded-2xl text-center border-2 border-orange-200">
+                  <p className="text-sm font-bold tracking-widest uppercase text-orange-600">Streak</p>
+                  <p className="text-3xl font-black text-orange-600">🔥 {streak}</p>
                 </div>
               )}
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Streak Milestone Overlay */}
-          {showStreakMilestone && (
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, rotate: 180 }}
-              className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
-            >
-              <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
-                🔥 {streak} Streak! 🔥
-              </div>
-            </motion.div>
-          )}
-
-          {/* Game Canvas */}
-          <div className='flex-1 relative'>
-            {gameState === 'READY' && (
-              <div className='absolute inset-0 flex items-center justify-center bg-black/50 z-10'>
-                <motion.div
-                  initial={
-                    reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.8 }
-                  }
-                  animate={
-                    reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }
-                  }
-                  className='bg-white p-8 rounded-2xl text-center'
-                >
-                  <h2 className='text-2xl font-bold mb-4'>Platform Runner!</h2>
-                  <p className='text-slate-600 mb-6'>
-                    Raise your hand to jump!
-                  </p>
-                  <motion.button
-                    onClick={handleStart}
-                    whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                    className='px-8 py-4 bg-[#3B82F6] text-white rounded-xl font-bold'
-                  >
-                    Start Game
-                  </motion.button>
-                </motion.div>
-              </div>
-            )}
-
-            {gameState === 'GAMEOVER' && (
-              <div className='absolute inset-0 flex items-center justify-center bg-black/50 z-10'>
-                <motion.div
-                  initial={
-                    reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.8 }
-                  }
-                  animate={
-                    reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }
-                  }
-                  className='bg-white p-8 rounded-2xl text-center'
-                >
-                  <h2 className='text-2xl font-bold text-red-600 mb-4'>
-                    Game Over!
-                  </h2>
-                  <p className='text-slate-600 mb-4'>Score: {score}</p>
-                  <p className='text-slate-600 mb-6'>Coins: {coins}</p>
-                  <motion.button
-                    onClick={handleStart}
-                    whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                    className='px-8 py-4 bg-[#3B82F6] text-white rounded-xl font-bold mr-4'
-                  >
-                    Play Again
-                  </motion.button>
-                  <motion.button
-                    onClick={handleStop}
-                    whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                    whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                    className='px-8 py-4 bg-slate-200 text-slate-700 rounded-xl font-bold'
-                  >
-                    Exit
-                  </motion.button>
-                </motion.div>
-              </div>
-            )}
-
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              className='w-full h-full'
-            />
-          </div>
-
-          {/* Controls */}
-          <div className='p-4 bg-white border-t flex justify-between items-center'>
-            <div className='flex items-center gap-2'>
-              <span className='text-sm text-slate-600'>Hand Status:</span>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-bold ${handVisible ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
-              >
-                {handVisible ? 'Visible' : 'Not Visible'}
-              </span>
+        {gameState === 'complete' && (
+          <div className="text-center bg-white p-12 rounded-[2rem] border-4 border-blue-300 shadow-xl max-w-xl mx-auto mt-10">
+            <p className="text-6xl mb-4">😵</p>
+            <h2 className="text-4xl font-black mb-2 text-blue-600">Game Over!</h2>
+            <p className="text-xl font-bold text-slate-600 mb-6">You grabbed {coins} coins!</p>
+            <div className="bg-slate-100 rounded-2xl p-6 mb-8 inline-block">
+              <p className="text-lg font-bold text-slate-500 mb-1">Final Score</p>
+              <p className="text-5xl font-black text-slate-800">{score}</p>
             </div>
-            <motion.button
-              onClick={handleStop}
-              whileHover={reducedMotion ? {} : { scale: 1.05 }}
-              whileTap={reducedMotion ? {} : { scale: 0.95 }}
-              className='px-6 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold'
-            >
-              Stop
-            </motion.button>
+            <div className="flex gap-4 justify-center">
+              <button type="button" onClick={handleFinish} className="px-8 py-4 bg-slate-200 border-2 border-slate-300 hover:bg-slate-300 text-slate-700 rounded-2xl font-black text-xl transition-all">Finish</button>
+              <button type="button" onClick={handleStart} className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black text-xl shadow-[0_4px_0_#1D4ED8] active:translate-y-1 active:shadow-none">Play Again</button>
+            </div>
           </div>
+        )}
 
-          {/* Wellness timer */}
-          <WellnessTimer />
-        </div>
-      </GameContainer>
-    </GlobalErrorBoundary>
+      </div>
+    </GameContainer>
   );
+});
+
+// Main export wrapped with GameShell
+export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
+  return <PlatformerRunnerGame />;
 });

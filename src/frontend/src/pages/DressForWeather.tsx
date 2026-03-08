@@ -473,15 +473,17 @@ function DressForWeatherGame() {
     >
       {/* Hidden webcam */}
 
-      <CameraThumbnail isHandDetected={isHandDetected} visible={gameStarted} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
 
       {/* Hand tracking status */}
-      <HandTrackingStatus
-        isHandDetected={isHandDetected}
-        pauseOnHandLost={true}
-        voicePrompt={true}
-        showMascot={true}
-      />
+      {gameStarted && (
+        <HandTrackingStatus
+          isHandDetected={isHandDetected}
+          pauseOnHandLost={true}
+          voicePrompt={true}
+          showMascot={true}
+        />
+      )}
 
       {/* Weather indicator */}
       {gameStarted && (

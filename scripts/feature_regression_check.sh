@@ -269,7 +269,7 @@ extract_props() {
   local content="$1"
   echo "$content" | grep -E '(interface|type)\s+.*Props' -A 20 | \
     grep -E '^\s+\w+\?:' | \
-    sed 's/^\s*\([a-zA-Z0-9_?]*\):.*/\1/' | \
+    sed -E 's/^[[:space:]]*([A-Za-z0-9_?]+):.*/\1/' | \
     sort -u
 }
 

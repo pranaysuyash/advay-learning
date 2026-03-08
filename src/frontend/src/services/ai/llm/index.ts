@@ -12,5 +12,6 @@ export {
   type LLMRuntimeConfig,
   type LLMRuntimeEnvironment,
   type LLMRuntimePlan,
+  type LLMUsageEvent,
 } from './LLMService';
 export { default } from './LLMService';

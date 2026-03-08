@@ -506,7 +506,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
       {/* Background blur overlay for clean look */}
       <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-      <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandReady} visible={isPlaying} />
       <header className='flex justify-between items-center mb-8 max-w-5xl mx-auto'>
         <button
           onClick={() => navigate('/games')}
@@ -597,8 +597,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                     setGameMode('classic');
                   }}
                   className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'classic'
-                      ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+                    ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
                     }`}
                 >
                   <span className='block mb-2 flex justify-center'>
@@ -615,8 +615,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                     setGameMode('combo');
                   }}
                   className={`flex-1 py-4 px-6 rounded-2xl border-4 font-bold text-lg transition-all ${gameMode === 'combo'
-                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+                    ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
                     }`}
                 >
                   <span className='block mb-2 flex justify-center'>
@@ -670,10 +670,10 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                 </div>
                 <h3
                   className={`text-4xl md:text-5xl font-black mb-3 tracking-tight ${gamePhase === 'dancing'
-                      ? 'text-[#3B82F6]'
-                      : gamePhase === 'freezing'
-                        ? 'text-[#EF4444]'
-                        : 'text-purple-500'
+                    ? 'text-[#3B82F6]'
+                    : gamePhase === 'freezing'
+                      ? 'text-[#EF4444]'
+                      : 'text-purple-500'
                     }`}
                 >
                   {gamePhase === 'dancing'
@@ -770,10 +770,10 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
               <div className='absolute top-6 right-6 px-5 py-2 bg-white/90 backdrop-blur-sm rounded-full border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                 <span
                   className={`font-black tracking-wide ${gamePhase === 'dancing'
-                      ? 'text-[#10B981]'
-                      : gamePhase === 'freezing'
-                        ? 'text-[#EF4444]'
-                        : 'text-purple-500'
+                    ? 'text-[#10B981]'
+                    : gamePhase === 'freezing'
+                      ? 'text-[#EF4444]'
+                      : 'text-purple-500'
                     }`}
                 >
                   {gamePhase === 'dancing' ? (

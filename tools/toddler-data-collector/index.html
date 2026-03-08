@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toddler ML Data Collector</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1677124024/drawing_utils.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s;
+    }
+    button:active { transform: scale(0.95); }
+    .btn-start { background: #22c55e; color: white; }
+    .btn-stop { background: #ef4444; color: white; }
+    .btn-tag { background: #3b82f6; color: white; }
+    .btn-tag.active { background: #f59e0b; }
+    
+    .main-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 800px) {
+      .main-view { grid-template-columns: 1fr; }
+    }
+    
+    .video-container {
+      position: relative;
+      background: #16213e;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    video {
+      width: 100%;
+      display: block;
+      transform: scaleX(-1);
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+    }
+    
+    .info-panel {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-value { font-size: 24px; font-weight: bold; color: #22c55e; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 5px; }
+    
+    .event-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .event-tag {
+      padding: 8px 16px;
+      background: #1a1a2e;
+      border: 2px solid #3b82f6;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.1s;
+    }
+    .event-tag:hover { background: #3b82f6; }
+    .event-tag.recorded {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+    
+    .session-info {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .session-info div { padding: 2px 0; }
+    .timestamp { color: #888; }
+    
+    .status {
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .status.recording { background: #ef4444; }
+    .status.ready { background: #22c55e; }
+    .status.stopped { background: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 Toddler ML Data Collector</h1>
+    
+    <div class="controls">
+      <button class="btn-start" onclick="startSession()">▶ Start Session</button>
+      <button class="btn-stop" onclick="stopSession()" disabled>⏹ Stop Session</button>
+      <button class="btn-tag" onclick="downloadData()">💾 Download Data</button>
+    </div>
+    
+    <div id="status" class="status ready">Ready to record</div>
+    
+    <div class="main-view">
+      <div class="video-container">
+        <video id="video"></video>
+        <canvas id="canvas"></canvas>
+      </div>
+      
+      <div class="info-panel">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="frameCount">0</div>
+            <div class="stat-label">Frames</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="eventCount">0</div>
+            <div class="stat-label">Events</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="handScore">-</div>
+            <div class="stat-label">Hand Score</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="sessionTime">0:00</div>
+            <div class="stat-label">Duration</div>
+          </div>
+        </div>
+        
+        <h3 style="margin-bottom: 10px;">Event Tags (click to mark)</h3>
+        <div class="event-tags">
+          <button class="event-tag" onclick="tagEvent('success')">✅ Success</button>
+          <button class="event-tag" onclick="tagEvent('error')">❌ Error</button>
+          <button class="event-tag" onclick="tagEvent('help_needed')">🆘 Help Needed</button>
+          <button class="event-tag" onclick="tagEvent('frustrated')">😤 Frustrated</button>
+          <button class="event-tag" onclick="tagEvent('engaged')">👀 Engaged</button>
+          <button class="event-tag" onclick="tagEvent('disengaged')">😴 Disengaged</button>
+          <button class="event-tag" onclick="tagEvent('tracking_lost')">🔴 Tracking Lost</button>
+          <button class="event-tag" onclick="tagEvent('fallback_used')">🖱️ Fallback</button>
+        </div>
+        
+        <h3 style="margin-bottom: 10px;">Session Log</h3>
+        <div class="session-info" id="sessionLog">
+          <div>Waiting to start...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let video, canvas, canvasCtx;
+    let camera;
+    let hands;
+    let isRecording = false;
+    let sessionStart = 0;
+    let frameCount = 0;
+    let eventCount = 0;
+    let sessionData = [];
+    let sessionEvents = [];
+    let handPresent = false;
+    let handScore = 0;
+
+    const eventTypes = ['success', 'error', 'help_needed', 'frustrated', 'engaged', 'disengaged', 'tracking_lost', 'fallback_used'];
+
+    window.onload = () => {
+      video = document.getElementById('video');
+      canvas = document.getElementById('canvas');
+      canvasCtx = canvas.getContext('2d');
+      
+      initMediaPipe();
+    };
+
+    function initMediaPipe() {
+      hands = new Hands({locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`;
+      }});
+      
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      
+      hands.onResults(onResults);
+      
+      camera = new Camera(video, {
+        onFrame: async () => {
+          await hands.send({image: video});
+        },
+        width: 1280,
+        height: 720
+      });
+    }
+
+    function onResults(results) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+      canvasCtx.restore();
+
+      handPresent = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
+      
+      if (results.multiHandLandmarks) {
+        for (const landmarks of results.multiHandLandmarks) {
+          drawConnectors(canvasCtx, landmarks, HAND_CONNECTORS, {color: '#00FF00', lineWidth: 2});
+          drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1, radius: 3});
+        }
+      }
+
+      const timestamp = Date.now();
+      handScore = results.multiHandedness ? results.multiHandedness.map(h => h.score).reduce((a, b) => a + b, 0) / (results.multiHandedness.length || 1) : 0;
+
+      if (isRecording && frameCount % 5 === 0) {
+        const frameData = {
+          timestamp: timestamp - sessionStart,
+          frame: frameCount,
+          hands: results.multiHandLandmarks || [],
+          handedness: results.multiHandedness || [],
+          handPresent: handPresent,
+          handScore: handScore
+        };
+        sessionData.push(frameData);
+      }
+
+      frameCount++;
+      updateUI();
+    }
+
+    function startSession() {
+      if (isRecording) return;
+      
+      camera.start();
+      
+      isRecording = true;
+      sessionStart = Date.now();
+      frameCount = 0;
+      eventCount = 0;
+      sessionData = [];
+      sessionEvents = [];
+      
+      logEvent('Session started');
+      
+      document.getElementById('status').textContent = '🔴 Recording...';
+      document.getElementById('status').className = 'status recording';
+      document.querySelector('.btn-start').disabled = true;
+      document.querySelector('.btn-stop').disabled = false;
+      
+      setInterval(updateTimer, 1000);
+    }
+
+    function stopSession() {
+      if (!isRecording) return;
+      
+      isRecording = false;
+      
+      logEvent(`Session ended - ${frameCount} frames, ${eventCount} events`);
+      
+      document.getElementById('status').textContent = 'Session saved';
+      document.getElementById('status').className = 'status stopped';
+      document.querySelector('.btn-start').disabled = false;
+      document.querySelector('.btn-stop').disabled = true;
+    }
+
+    function tagEvent(type) {
+      if (!isRecording) {
+        alert('Start a session first!');
+        return;
+      }
+      
+      const timestamp = Date.now() - sessionStart;
+      const event = { timestamp, type, frame: frameCount };
+      sessionEvents.push(event);
+      eventCount++;
+      
+      logEvent(`Tagged: ${type}`);
+      
+      const btn = document.querySelector(`.event-tag[onclick="tagEvent('${type}')"]`);
+      btn.classList.add('recorded');
+      setTimeout(() => btn.classList.remove('recorded'), 1000);
+    }
+
+    function logEvent(message) {
+      const log = document.getElementById('sessionLog');
+      const time = isRecording ? formatTime(Date.now() - sessionStart) : '00:00';
+      log.innerHTML = `<div><span class="timestamp">[${time}]</span> ${message}</div>` + log.innerHTML;
+    }
+
+    function updateUI() {
+      document.getElementById('frameCount').textContent = frameCount;
+      document.getElementById('eventCount').textContent = eventCount;
+      document.getElementById('handScore').textContent = handPresent ? handScore.toFixed(2) : '-';
+    }
+
+    function updateTimer() {
+      if (!isRecording) return;
+      const elapsed = Date.now() - sessionStart;
+      document.getElementById('sessionTime').textContent = formatTime(elapsed);
+    }
+
+    function formatTime(ms) {
+      const secs = Math.floor(ms / 1000);
+      const mins = Math.floor(secs / 60);
+      return `${mins}:${(secs % 60).toString().padStart(2, '0')}`;
+    }
+
+    function downloadData() {
+      if (sessionData.length === 0 && sessionEvents.length === 0) {
+        alert('No data to download. Start a session first!');
+        return;
+      }
+
+      const data = {
+        sessionStart: sessionStart,
+        frameCount: frameCount,
+        events: sessionEvents,
+        frames: sessionData
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `toddler_ml_data_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      
+      logEvent('Data downloaded');
+    }
+  </script>
+</body>
+</html>

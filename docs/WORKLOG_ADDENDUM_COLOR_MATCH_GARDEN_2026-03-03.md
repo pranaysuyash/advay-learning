@@ -5,7 +5,7 @@ Ticket Stamp: STAMP-20260303T081020Z-codex-q2xo
 Type: GAME_IMPROVEMENT
 Owner: Pranay
 Created: 2026-03-03 14:00 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
@@ -104,3 +104,100 @@ Status updates:
 ---
 
 *Following 9-step workflow: Analysis → Document → Plan → Research → Document → Implement → Test → Document*
+
+---
+
+## Unit 2 Completion (2026-03-07)
+
+**Status**: ✅ **DONE** — All improvements complete
+
+### Unit 2: Polish & Assets Implementation
+
+**Features Implemented:**
+
+1. **Asset Usage Fix (GAP-01)**
+   - Reordered rendering to prioritize loaded brush assets over emojis
+   - Assets now display when available (`assetLoader.getImage(target.assetId)`)
+   - Emoji only shows as fallback when asset fails to load
+   - Improved opacity (0.95) for better asset visibility
+
+2. **Celebration Particles**
+   - Added particle system for streak milestones (every 6 streaks)
+   - 20 colorful particles burst from screen center
+   - Gravity physics with fade-out animation
+   - Rainbow colors (orange, red, blue, green, pink, purple)
+
+3. **TTS Variety Improvements**
+   - Added 5 varied responses for correct matches:
+     - "Yes! {color}! Great job!"
+     - "Perfect! You found {color}!"
+     - "Excellent! That's {color}!"
+     - "Wonderful! {color} is correct!"
+     - "Yes! {color}! You are doing great!"
+   - Added 4 varied responses for streak celebrations:
+     - "Amazing streak! Six in a row!"
+     - "Incredible! Six flowers matched!"
+     - "You are on fire! Six in a row!"
+     - "Fantastic streak! Keep it up!"
+
+**Technical Implementation:**
+
+```typescript
+// Particle system
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+}
+
+const [particles, setParticles] = useState<Particle[]>([]);
+const spawnCelebrationParticles = (x: number, y: number) => {
+  // Spawn 20 colorful particles with physics
+};
+
+// Asset prioritization
+{(() => {
+  const assetSrc = assetLoader.getImage(target.assetId)?.src;
+  return assetSrc ? (
+    <img src={assetSrc} ... />  // Prioritize asset
+  ) : (
+    <>{target.emoji}</>  // Fallback to emoji
+  );
+})()}
+```
+
+**Gap Resolution:**
+- GAP-01 (Asset usage): ✅ FIXED - Assets prioritized over emojis
+- GAP-02 (Timer visible): ✅ FIXED in Unit 1 - Visible countdown with color warnings
+- GAP-03 (Streak HUD): ✅ FIXED in Unit 1 - Kenney heart HUD
+- GAP-04 (Haptics): ✅ FIXED in Unit 1 - Success/error haptics
+- GAP-05 (Difficulty): 🔄 ACCEPTABLE - 60s is appropriate for target age
+- GAP-06 (Color variety): 🔄 ACCEPTABLE - 6 colors adequate for 3-7 age
+
+### Verification
+
+```bash
+npx eslint src/pages/ColorMatchGarden.tsx  # Clean
+npm run type-check                           # 24 errors (pre-existing, unrelated)
+```
+
+### Final Status
+
+**All Units Complete:**
+- ✅ Unit 1: Timer + Streak HUD + Haptics
+- ✅ Unit 2: Asset fixes + Particles + TTS variety
+
+**Game Features:**
+- Visible countdown timer with color-coded warnings
+- Kenney heart streak HUD
+- Haptic feedback on correct/wrong matches
+- Asset-prioritized flower rendering
+- Celebration particles on streak milestones
+- Varied TTS responses for engagement
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

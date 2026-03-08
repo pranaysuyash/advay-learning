@@ -285,9 +285,16 @@ async def check_game_access(
         }
 
     # Check game access
-    can_access, reason = await SubscriptionService.can_access_game(
-        db=db, parent_id=current_user.id, game_id=game.id
-    )
+    try:
+        can_access, reason = await SubscriptionService.can_access_game(
+            db=db, parent_id=current_user.id, game_id=game.id
+        )
+        normalized_plan = SubscriptionService._normalize_plan_type(subscription.plan_type)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
 
     response = {
         "can_access": can_access,
@@ -295,7 +302,7 @@ async def check_game_access(
         "game_id": game.id,
         "game_slug": game.slug,
         "subscription_status": "active",  # We only return here if subscription exists and is active
-        "plan_type": subscription.plan_type.value,
+        "plan_type": normalized_plan.value,
     }
 
     return response

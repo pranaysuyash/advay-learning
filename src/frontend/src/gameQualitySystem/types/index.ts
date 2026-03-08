@@ -19,8 +19,9 @@ export interface Game {
     implementationStatus?: 'not-started' | 'in-progress' | 'completed' | 'review' | 'production';
     catalogPriority?: PriorityLevel;
     educationalObjectives?: string[];
-    userFeedback?: Array<{ sentiment?: string; [key: string]: unknown }>;
+    userFeedback?: Array<{ sentiment?: string; score?: number;[key: string]: unknown }>;
     playCount?: number;
+    completionRate?: number; // Percentage of users who complete the game (0-100)
     lastUpdated: string;
 }
 
@@ -125,6 +126,25 @@ export interface PriorityFactors {
     strategicAlignment: number;
 }
 
+/**
+ * User Demand breakdown with individual component scores
+ */
+export interface UserDemandBreakdown {
+    userFeedbackScore: number;    // 0-100: Aggregate score from user feedback
+    playCount: number;            // 0-100: Normalized play count score
+    completionRate: number;       // 0-100: Normalized completion rate score
+    totalScore: number;           // 0-100: Weighted total user demand score
+}
+
+/**
+ * Weights for user demand components
+ */
+export const USER_DEMAND_WEIGHTS = {
+    userFeedbackScore: 0.4,
+    playCount: 0.3,
+    completionRate: 0.3,
+};
+
 export interface QualityGateConfig {
     requiredChecks: string[];
     minAccessibilityScore: number;
@@ -194,7 +214,79 @@ export interface CatalogEntry {
     isImplemented: boolean;
     implementationStatus?: 'not-started' | 'in-progress' | 'completed' | 'review' | 'production';
     priority?: PriorityLevel;
-    userFeedback?: Array<{ sentiment?: string; [key: string]: unknown }>;
+    userFeedback?: Array<{ sentiment?: string; score?: number;[key: string]: unknown }>;
     playCount?: number;
+    completionRate?: number; // Percentage of users who complete the game (0-100)
     lastUpdated: string;
+}
+
+/**
+ * Game metrics extracted from user interaction data
+ * Requirement 10.1: Extract Play_Count, Completion_Rate, Average_Score, Time_On_Task, and Error_Rate
+ */
+export interface GameMetrics {
+    gameId: GameId;
+    playCount: number;           // Number of unique play sessions
+    completionRate: number;      // Percentage of sessions that completed (0-100)
+    averageScore: number;        // Average score from completed sessions (0-100)
+    timeOnTask: number;          // Average session duration in seconds
+    errorRate: number;           // Errors per session (0-1 scale)
+    lastUpdated: string;
+}
+
+/**
+ * Raw interaction event from gameplay
+ */
+export interface InteractionEvent {
+    eventType: 'click' | 'keypress' | 'drag' | 'drop' | 'hover' | 'input' | 'start' | 'complete' | 'pause' | 'resume';
+    timestamp: number;
+    targetElement?: string;
+    metadata?: Record<string, unknown>;
+}
+
+/**
+ * Session data from gameplay sessions
+ */
+export interface SessionData {
+    sessionId: string;
+    startTime: number;
+    endTime: number;
+    gameId: string;
+    userId?: string;
+    completed: boolean;
+    score?: number;
+}
+
+/**
+ * Game result from a completed session
+ */
+export interface GameResult {
+    resultId: string;
+    sessionId: string;
+    score: number;
+    completed: boolean;
+    completionTime: number;
+    timestamp: number;
+}
+
+/**
+ * Error event during gameplay
+ */
+export interface ErrorEvent {
+    errorId: string;
+    timestamp: number;
+    errorType: string;
+    errorMessage: string;
+    sessionId: string;
+    recoverable: boolean;
+}
+
+/**
+ * Raw user interaction data for metrics extraction
+ */
+export interface RawInteractionData {
+    events: InteractionEvent[];
+    sessions: SessionData[];
+    gameResults: GameResult[];
+    errorEvents: ErrorEvent[];
 }

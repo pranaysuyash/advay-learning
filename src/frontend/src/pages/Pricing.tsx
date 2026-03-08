@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { subscriptionApi, SubscriptionPlanType, SubscriptionStatus } from '../services/api';
+import { getPlanLabel, isFullAccessPlan } from '../services/subscriptionPlan';
 import { getErrorMessage } from '../utils/errorUtils';
 
 const PRICING_PLANS = [
@@ -7,14 +8,15 @@ const PRICING_PLANS = [
     id: 'game_pack_5' as SubscriptionPlanType,
     name: 'Explorer Pack',
     games: 5,
-    duration: '3 months',
+    duration: '1 month',
     price: 1500,
     priceDisplay: '₹1,500',
-    description: 'Perfect for trying out our games',
+    description: 'Low-upfront starter pack for focused play',
     features: [
       'Access to 5 games',
-      '3 months of play',
-      '1 free game swap',
+      '30 days of play',
+      'Fixed for the month',
+      'Renew with the same 5 or choose a new 5',
       'Progress tracking',
     ],
     popular: false,
@@ -26,11 +28,12 @@ const PRICING_PLANS = [
     duration: '3 months',
     price: 2500,
     priceDisplay: '₹2,500',
-    description: 'More games for variety',
+    description: 'Quarterly pack with monthly refresh windows',
     features: [
       'Access to 10 games',
       '3 months of play',
-      '1 free game swap',
+      '1 refresh window each month',
+      'Refresh changes your next active 10 games',
       'Progress tracking',
     ],
     popular: false,
@@ -42,11 +45,11 @@ const PRICING_PLANS = [
     duration: '12 months',
     price: 6000,
     priceDisplay: '₹6,000',
-    description: 'Best value - unlimited access',
+    description: 'Best value for families who want every game unlocked',
     features: [
       'All games unlocked',
       '12 months of play',
-      'Unlimited game swaps',
+      'No game-selection limits',
       'Priority support',
       'Save ₹3,000 vs packs',
     ],
@@ -72,10 +75,12 @@ export function Pricing() {
   const daysRemaining = currentSubscription?.days_remaining;
 
   const getUpgradeCredit = () => {
-    if (!currentSubscription?.subscription || currentPlan === 'full_annual') return 0;
+    if (!currentSubscription?.subscription || isFullAccessPlan(currentPlan)) return 0;
     const priceMap: Record<string, number> = { game_pack_5: 1500, game_pack_10: 2500 };
     const basePrice = priceMap[currentPlan || ''] || 0;
-    return Math.round(((daysRemaining || 0) / 90) * basePrice);
+    const durationMap: Record<string, number> = { game_pack_5: 30, game_pack_10: 90 };
+    const totalDays = durationMap[currentPlan || ''] || 90;
+    return Math.round(((daysRemaining || 0) / totalDays) * basePrice);
   };
 
   const upgradeCredit = getUpgradeCredit();
@@ -86,7 +91,7 @@ export function Pricing() {
 
     try {
       // Upgrade flow
-      if (currentSubscriptionId && hasActiveSubscription && planId === 'full_annual' && currentPlan !== 'full_annual') {
+      if (currentSubscriptionId && hasActiveSubscription && planId === 'full_annual' && !isFullAccessPlan(currentPlan)) {
         await subscriptionApi.upgrade(currentSubscriptionId, planId);
         alert(`Upgrade successful! Credit of ₹${upgradeCredit} applied.`);
         const sub = await subscriptionApi.getCurrent();
@@ -129,6 +134,7 @@ export function Pricing() {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8 text-center">
             <p className="text-green-800">
               You have an active {currentPlan?.replace('_', ' ')} subscription
+              {currentPlan && ` (${getPlanLabel(currentPlan)})`}
               {currentSubscription.days_remaining && ` • ${currentSubscription.days_remaining} days remaining`}
             </p>
           </div>
@@ -230,8 +236,9 @@ export function Pricing() {
                 Can I change games during my subscription?
               </h3>
               <p className="text-gray-600">
-                Yes! Game packs include 1 free game swap. Full annual subscribers
-                have unlimited swaps.
+                The 5-game monthly pack stays fixed for the month. The 10-game
+                quarterly pack gets one refresh window at each monthly checkpoint.
+                Full annual subscribers always have all games unlocked.
               </p>
             </div>
             <div>
@@ -239,8 +246,9 @@ export function Pricing() {
                 What happens when my subscription ends?
               </h3>
               <p className="text-gray-600">
-                You can renew or upgrade to a longer plan. Your progress is saved
-                and will be restored when you resubscribe.
+                You can renew or upgrade to a longer plan. Monthly renewals let
+                you keep your current 5 games or pick a new set. Your progress is
+                saved and restored when you renew.
               </p>
             </div>
             <div>

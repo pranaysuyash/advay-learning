@@ -408,7 +408,7 @@ export function VirtualChemistryLab() {
 
   return (
     <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 font-sans relative'>
-      <CameraThumbnail isHandDetected={isHandReady} visible={isPlaying} />
+      <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandReady} visible={isPlaying} />
       {/* Header */}
       <header className='flex justify-between items-center mb-6 max-w-7xl mx-auto'>
         <button

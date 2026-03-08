@@ -33,8 +33,8 @@ ALLOW_PLACEHOLDER = os.getenv("ALLOW_PLACEHOLDER_MODE", "false").lower() == "tru
 DODO_VERIFY_DIAGNOSTIC = os.getenv("DODO_VERIFY_DIAGNOSTIC", "false").lower() == "true" and DODO_ENV == "test"
 
 PLAN_NAMES = {
-    SubscriptionPlanType.GAME_PACK_5: "5-Game Pack (3 months)",
-    SubscriptionPlanType.GAME_PACK_10: "10-Game Pack (3 months)",
+    SubscriptionPlanType.GAME_PACK_5: "5-Game Pack (1 month)",
+    SubscriptionPlanType.GAME_PACK_10: "10-Game Pack (3 months, monthly refresh)",
     SubscriptionPlanType.FULL_ANNUAL: "Full Annual Subscription",
 }
 

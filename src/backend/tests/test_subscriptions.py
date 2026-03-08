@@ -1,10 +1,15 @@
 """Tests for subscription endpoints."""
 
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.models.subscription_model import Subscription, SubscriptionStatus
+from app.services.subscription_service import SubscriptionPlanType
+from app.services.user_service import UserService
 
 
 class TestSubscriptionCatalog:
@@ -297,6 +302,39 @@ class TestSubscriptionStatus:
         """Test getting status without auth fails."""
         response = await client.get("/api/v1/subscriptions/current")
         assert response.status_code == 401
+
+    async def test_get_subscription_status_active_subscription(
+        self,
+        client: AsyncClient,
+        auth_headers: dict,
+        db_session: AsyncSession,
+        test_user: dict,
+    ):
+        """Test current subscription returns active payload even with naive end_date values."""
+        user = await UserService.get_by_email(db_session, test_user["email"])
+        assert user is not None
+
+        subscription = Subscription(
+          parent_id=user.id,
+          plan_type=SubscriptionPlanType.FULL_ANNUAL,
+          amount_paid=600000,
+          currency="INR",
+          start_date=datetime.utcnow() - timedelta(days=2),
+          end_date=datetime.utcnow() + timedelta(days=30),
+          status=SubscriptionStatus.ACTIVE,
+        )
+        db_session.add(subscription)
+        await db_session.commit()
+
+        response = await client.get(
+            "/api/v1/subscriptions/current", headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["has_active"] is True
+        assert data["subscription"]["plan_type"] == "full_annual"
+        assert data["days_remaining"] is not None
 
 
 class TestSubscriptionGameSelection:

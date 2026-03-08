@@ -8,6 +8,22 @@ This folder contains the reusable prompts that govern how agents work on this re
 2. Update tracking: `docs/WORKLOG_ADDENDUM_*.md` (append-only)
 3. Ensure local enforcement is enabled: `git config core.hooksPath .githooks` (see `AGENTS.md`)
 
+## 🚀 Launch Sprint (March 8-12, 2026)
+
+**Active Sprint**: See `docs/LAUNCH_SPRINT_SPEC.md` for 4-day launch readiness plan.
+
+### Quick Links
+- Spec: `docs/LAUNCH_SPRINT_SPEC.md`
+- Ticket: `TCK-20260308-002` in `docs/WORKLOG_ADDENDUM_v4.md`
+
+### Sprint Tasks
+| Track | Priority | Spec Section |
+|-------|----------|-------------|
+| Subscription + Progress (45 games) | P0 | Track A |
+| Test Stability | P0 | Track B |
+| Security (npm audit) | P1 | Track C |
+| Accessibility | P2 | Track D |
+
 ## 🚫 Critical Rules
 
 **Use short-lived PR branches for commits.** Iteration can happen locally on `main`, but commit on `codex/wip-<ticket-or-scope>` and merge back to `main` only after review.
@@ -43,6 +59,7 @@ This folder contains the reusable prompts that govern how agents work on this re
   - Core principle: "Docs are hypotheses. Code is ground truth."
   - 7-phase process: orientation → standards discovery → docs inventory → code verification → discrepancy handling → doc debt closure → readiness assessment
   - Use for: comprehensive audits, readiness checks, documentation debt identification
+- **Full-flow findings auditor** (stakeholder simulation + immediate finding capture across runtime, logic, structure, and optimization): `prompts/audit/full-flow-findings-auditor-v1.0.md`
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
 - Master audit agent prompt (full coverage + research runway; two-pass): `prompts/audit/master-audit-agent-v1.0.md`
 - Camera game multi-persona audit (single game file): `prompts/audit/camera-game-multipersona-audit-v1.0.md`

@@ -4,13 +4,19 @@
  */
 
 import api from './api';
+import { isFullAccessPlan, isSupportedSubscriptionPlan } from './subscriptionPlan';
 
 export interface SubscriptionStatus {
   hasActiveSubscription: boolean;
   accessibleGames: string[] | null;
   planType?: string;
   daysRemaining?: number;
-  source?: 'active_subscription' | 'no_subscription' | 'api_error';
+  source?:
+    | 'active_subscription'
+    | 'no_subscription'
+    | 'api_error'
+    | 'guest_demo'
+    | 'invalid_plan';
   errorReason?: string;
 }
 
@@ -23,9 +29,9 @@ type ApiErrorLike = {
   message?: string;
   response?: {
     status?: number;
-    data?: { 
-      detail?: string; 
-      message?: string; 
+    data?: {
+      detail?: string;
+      message?: string;
       reason?: string;
       error?: { message?: string };
     };
@@ -48,14 +54,11 @@ function describeApiError(error: unknown): string {
 
   const status = maybeAxios.response?.status;
   const data = maybeAxios.response?.data;
-  
+
   // New structured error format
   const detail =
-    data?.error?.message ||
-    data?.detail ||
-    data?.message ||
-    data?.reason;
-  
+    data?.error?.message || data?.detail || data?.message || data?.reason;
+
   if (status && detail) return `HTTP ${status}: ${detail}`;
   if (status) return `HTTP ${status}`;
   if (maybeAxios.message) return maybeAxios.message;
@@ -66,12 +69,12 @@ export const subscriptionApi = {
   /**
    * Get subscription status for a user
    */
-  async getSubscriptionStatus(userId: string): Promise<SubscriptionStatus> {
+  async getSubscriptionStatus(_userId: string): Promise<SubscriptionStatus> {
     try {
-      const response = await api.get(`/subscriptions/current?user_id=${userId}`);
+      const response = await api.get('/subscriptions/current');
       const data = response.data;
-      
-      if (!data.subscription) {
+
+      if (!data.has_active || !data.subscription) {
         return {
           hasActiveSubscription: false,
           accessibleGames: null,
@@ -79,13 +82,24 @@ export const subscriptionApi = {
         };
       }
 
+      const planType = data.subscription.plan_type;
+      if (!isSupportedSubscriptionPlan(planType)) {
+        return {
+          hasActiveSubscription: false,
+          accessibleGames: null,
+          planType,
+          source: 'invalid_plan',
+          errorReason: `Unsupported subscription plan type "${planType}" found in account data.`,
+        };
+      }
+
       // Full annual = all games (*)
-      if (data.subscription.plan_type === 'full_annual') {
+      if (isFullAccessPlan(planType)) {
         return {
           hasActiveSubscription: true,
           accessibleGames: ['*'],
-          planType: data.subscription.plan_type,
-          daysRemaining: data.subscription.days_remaining,
+          planType,
+          daysRemaining: data.days_remaining,
           source: 'active_subscription',
         };
       }
@@ -93,9 +107,12 @@ export const subscriptionApi = {
       // Pack plans = selected games only
       return {
         hasActiveSubscription: true,
-        accessibleGames: data.subscription.selected_games || [],
-        planType: data.subscription.plan_type,
-        daysRemaining: data.subscription.days_remaining,
+        accessibleGames:
+          data.subscription.game_selections?.map(
+            (selection: { game_id: string }) => selection.game_id,
+          ) || [],
+        planType,
+        daysRemaining: data.days_remaining,
         source: 'active_subscription',
       };
     } catch (error) {
@@ -122,9 +139,14 @@ export const subscriptionApi = {
   /**
    * Check if user can access a specific game
    */
-  async checkGameAccess(userId: string, gameId: string): Promise<SubscriptionGameAccess> {
+  async checkGameAccess(
+    userId: string,
+    gameId: string,
+  ): Promise<SubscriptionGameAccess> {
     try {
-      const response = await api.get(`/games/${gameId}/access?user_id=${userId}`);
+      const response = await api.get(
+        `/games/${gameId}/access?user_id=${userId}`,
+      );
       return {
         hasAccess: response.data.has_access,
         reason: response.data.reason,
@@ -142,7 +164,9 @@ export const subscriptionApi = {
       if (status === 404) {
         return {
           hasAccess: false,
-          reason: apiError?.response?.data?.reason || 'Game or subscription not found',
+          reason:
+            apiError?.response?.data?.reason ||
+            'Game or subscription not found',
         };
       }
 
@@ -159,7 +183,9 @@ export const subscriptionApi = {
    * Get available games for subscription selection
    */
   async getAvailableGames(subscriptionId: string) {
-    const response = await api.get(`/subscriptions/games/available?subscription_id=${subscriptionId}`);
+    const response = await api.get(
+      `/subscriptions/games/available?subscription_id=${subscriptionId}`,
+    );
     return response.data;
   },
 
