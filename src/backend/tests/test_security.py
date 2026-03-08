@@ -545,7 +545,10 @@ class TestCookieAuthentication:
         assert hdrs.get("x-content-type-options") == "nosniff"
         assert hdrs.get("x-frame-options") == "DENY"
         assert "strict-transport-security" in hdrs
-        assert "permissions-policy" in hdrs
+        assert (
+            hdrs.get("permissions-policy")
+            == "camera=(self), microphone=(self), geolocation=()"
+        )
 
     async def test_logout_clears_cookies(self, client: AsyncClient):
         """Verify logout clears authentication cookies."""

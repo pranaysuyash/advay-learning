@@ -55,6 +55,7 @@ npm run test:e2e:manual-camera:guest
 Notes:
 
 - `test:e2e` defaults to Playwright project `chromium-fake-camera`
+- `scripts/run-e2e.sh` also defaults to `chromium-fake-camera`; set `PLAYWRIGHT_REAL_CAMERA=1` to default to `chromium-manual-camera`
 - `test:e2e:manual-camera*` launches a persistent Chrome profile under `.tmp/playwright-manual-camera-profile`
 - the manual mode intentionally does not pre-grant camera permission, so Chrome should show the real camera prompt after you click the in-app camera CTA
 

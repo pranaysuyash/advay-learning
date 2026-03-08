@@ -85,7 +85,14 @@ fi
 echo "[e2e] Running Playwright tests"
 PLAYWRIGHT_ARGS=("$@")
 if [[ " ${PLAYWRIGHT_ARGS[*]} " != *" --project="* ]] && [[ " ${PLAYWRIGHT_ARGS[*]} " != *" --project "* ]]; then
-  PLAYWRIGHT_ARGS=("--project=chromium-fake-camera" "${PLAYWRIGHT_ARGS[@]}")
+  if [[ "${PLAYWRIGHT_REAL_CAMERA:-0}" == "1" ]]; then
+    echo "[e2e] PLAYWRIGHT_REAL_CAMERA=1 -> using chromium-manual-camera (real browser prompt expected)"
+    PLAYWRIGHT_ARGS=("--project=chromium-manual-camera" "${PLAYWRIGHT_ARGS[@]}")
+  else
+    echo "[e2e] Defaulting to chromium-fake-camera (no real camera permission prompt)."
+    echo "[e2e] For real prompt testing, run with PLAYWRIGHT_REAL_CAMERA=1 or pass --project=chromium-manual-camera."
+    PLAYWRIGHT_ARGS=("--project=chromium-fake-camera" "${PLAYWRIGHT_ARGS[@]}")
+  fi
 fi
 npx playwright test --config=playwright.config.ts "${PLAYWRIGHT_ARGS[@]}"
 

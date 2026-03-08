@@ -1157,3 +1157,53 @@ Review recommendation:
 Must-keep follow-ups post-merge:
 1. Track remaining non-fatal startup noise (TTS autoplay `not-allowed` logs).
 2. Continue next simulation audit under a different stakeholder lens (for example viral launch funnel) after this landing.
+
+## TCK-20260309-102 :: Restore Camera Permission Prompt in Browser Flows
+
+Type: `BUG`
+Owner: Pranay (human owner, agent execution by Codex)
+Created: 2026-03-09
+Status: `DONE`
+Priority: `P0`
+
+Scope contract:
+- In-scope: Fix backend header policy that prevented camera/microphone permission prompts in first-party game flows and update tests accordingly.
+- Out-of-scope: Changing game-level camera runtime logic or introducing new browser automation flow.
+- Behavior change allowed: `YES`
+
+Targets:
+- Repo: `learning_for_kids`
+- Files:
+  - `src/backend/app/middleware/security_headers.py`
+  - `src/backend/tests/test_security.py`
+
+Acceptance criteria:
+- [x] Security header allows same-origin camera access requests.
+- [x] Security header allows same-origin microphone access requests.
+- [x] Security test asserts exact expected `Permissions-Policy` value.
+- [x] Targeted backend security test passes.
+
+Execution log:
+- [2026-03-09 22:11 IST] `Observed` middleware policy was `camera=(), microphone=(), geolocation=()`, which blocks browser permission prompts entirely. | Evidence: `src/backend/app/middleware/security_headers.py`
+- [2026-03-09 22:13 IST] Updated header to `camera=(self), microphone=(self), geolocation=()` for first-party runtime prompts. | Evidence: git diff in `src/backend/app/middleware/security_headers.py`
+- [2026-03-09 22:14 IST] Tightened test to assert exact permissions policy contract string. | Evidence: git diff in `src/backend/tests/test_security.py`
+- [2026-03-09 22:19 IST] Validated targeted regression check passes. | Evidence: `pytest -q src/backend/tests/test_security.py -k security_headers_present` -> `1 passed`
+
+## 2026-03-09 PR Review (PR #12)
+
+Prompt Trace:
+- `prompts/review/pr-review-v1.6.1.md`
+
+Discovery evidence:
+- **Command**: `git diff --name-only origin/main..HEAD | wc -l`
+  - **Output**: `5`
+- **Command**: `git diff --stat origin/main..HEAD`
+  - **Output**: `5 files changed, 46 insertions(+), 3 deletions(-)`
+- **Command**: `pytest -q src/backend/tests/test_security.py -k security_headers_present`
+  - **Output**: `1 passed`
+
+Review findings:
+- No merge-blocking findings for this scope.
+
+Review recommendation:
+- `APPROVE`
