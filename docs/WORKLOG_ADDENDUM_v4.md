@@ -1210,3 +1210,32 @@ Review findings:
 
 Review recommendation:
 - `APPROVE`
+
+## TCK-20260309-103 :: Add Hard PR Comment Closure Gate
+
+Type: `DEVOPS_HARDENING`
+Owner: Pranay (human owner, agent execution by Codex)
+Created: 2026-03-09
+Status: `DONE`
+Priority: `P0`
+
+Scope contract:
+- In-scope: Add a GitHub Action gate that fails when PR review threads are unresolved and document required branch-protection setup.
+- Out-of-scope: Retroactively re-running old merged PR checks.
+- Behavior change allowed: `YES`
+
+Targets:
+- `.github/workflows/pr-comment-gate.yml`
+- `docs/SETUP.md`
+
+Acceptance criteria:
+- [x] New `pr-comment-gate` workflow exists and runs on PR lifecycle + thread resolution events.
+- [x] Gate fails if unresolved review threads exist.
+- [x] Setup docs include required branch-protection settings and required check name.
+
+Execution log:
+- [2026-03-09 22:35 IST] Added `.github/workflows/pr-comment-gate.yml` using GraphQL review-thread traversal with explicit failure on unresolved threads.
+- [2026-03-09 22:36 IST] Documented branch-protection + required check setup in `docs/SETUP.md`.
+
+Prompt Trace:
+- `prompts/remediation/implementation-v1.6.1.md`

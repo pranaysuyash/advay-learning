@@ -1,0 +1,102 @@
+name: PR Comment Gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  pull_request_review_thread:
+    types: [resolved, unresolved]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-comment-gate:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block merge when review threads are unresolved
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber =
+              context.payload.pull_request?.number ||
+              context.payload.pull_request_review_thread?.pull_request_url?.split('/').pop();
+
+            if (!pullNumber) {
+              core.setFailed('Unable to determine pull request number for pr-comment-gate.');
+              return;
+            }
+
+            const query = `
+              query($owner: String!, $repo: String!, $pullNumber: Int!, $after: String) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pullNumber) {
+                    number
+                    url
+                    reviewThreads(first: 100, after: $after) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        isResolved
+                        path
+                        line
+                        comments(first: 1) {
+                          nodes {
+                            url
+                            body
+                            author { login }
+                            createdAt
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            let unresolved = [];
+            let after = null;
+
+            while (true) {
+              const res = await github.graphql(query, {
+                owner,
+                repo,
+                pullNumber: Number(pullNumber),
+                after,
+              });
+
+              const pr = res.repository.pullRequest;
+              const threads = pr.reviewThreads.nodes || [];
+
+              for (const thread of threads) {
+                if (!thread.isResolved) {
+                  unresolved.push(thread);
+                }
+              }
+
+              const pageInfo = pr.reviewThreads.pageInfo;
+              if (!pageInfo.hasNextPage) {
+                break;
+              }
+              after = pageInfo.endCursor;
+            }
+
+            if (unresolved.length > 0) {
+              const details = unresolved.slice(0, 20).map((thread, index) => {
+                const c = thread.comments.nodes[0];
+                const where = thread.path ? `${thread.path}${thread.line ? `:${thread.line}` : ''}` : 'unknown location';
+                const author = c?.author?.login || 'unknown';
+                const url = c?.url || '';
+                return `${index + 1}. ${where} by @${author}${url ? ` -> ${url}` : ''}`;
+              }).join('\n');
+
+              core.setFailed(
+                `Found ${unresolved.length} unresolved review thread(s). Resolve all PR conversations before merge.\n${details}`
+              );
+              return;
+            }
+
+            core.info('No unresolved review threads found. pr-comment-gate passed.');

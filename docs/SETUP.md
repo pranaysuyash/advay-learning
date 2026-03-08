@@ -29,6 +29,25 @@ To manually run the gate on your staged changes:
 ./scripts/agent_gate.sh --staged
 ```
 
+## Enforce PR Comment Closure Before Merge (Required)
+
+To hard-block merges with unresolved PR conversations:
+
+1. Enable branch protection on `main`:
+   - `Require a pull request before merging`
+   - `Require approvals` (recommended: at least 1)
+   - `Dismiss stale approvals when new commits are pushed`
+   - `Require conversation resolution before merging`
+   - `Require status checks to pass before merging`
+
+2. Mark this check as required:
+   - `PR Comment Gate / pr-comment-gate`
+
+The workflow is defined at:
+- `.github/workflows/pr-comment-gate.yml`
+
+It fails whenever any review thread is unresolved.
+
 ## Playwright Camera Modes
 
 This repo now uses two explicit browser modes for camera flows:
