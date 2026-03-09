@@ -24,11 +24,37 @@ def upgrade() -> None:
     """Create parental consent tables for DPDPA 2023 compliance."""
     
     # Create enum types
-    verification_method = sa.Enum('email', 'credit_card', 'declaration', name='verificationmethod')
-    verification_method.create(op.get_bind())
+    verification_method_type = postgresql.ENUM(
+        'email',
+        'credit_card',
+        'declaration',
+        name='verificationmethod',
+    )
+    verification_method_type.create(op.get_bind(), checkfirst=True)
+    verification_method = postgresql.ENUM(
+        'email',
+        'credit_card',
+        'declaration',
+        name='verificationmethod',
+        create_type=False,
+    )
     
-    consent_status = sa.Enum('pending', 'verified', 'withdrawn', 'expired', name='consentstatus')
-    consent_status.create(op.get_bind())
+    consent_status_type = postgresql.ENUM(
+        'pending',
+        'verified',
+        'withdrawn',
+        'expired',
+        name='consentstatus',
+    )
+    consent_status_type.create(op.get_bind(), checkfirst=True)
+    consent_status = postgresql.ENUM(
+        'pending',
+        'verified',
+        'withdrawn',
+        'expired',
+        name='consentstatus',
+        create_type=False,
+    )
     
     # Create parental_consents table
     op.create_table(
@@ -87,5 +113,5 @@ def downgrade() -> None:
     op.drop_table('parental_consents')
     
     # Drop enum types
-    sa.Enum(name='verificationmethod').drop(op.get_bind())
-    sa.Enum(name='consentstatus').drop(op.get_bind())
+    postgresql.ENUM(name='verificationmethod').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM(name='consentstatus').drop(op.get_bind(), checkfirst=True)
