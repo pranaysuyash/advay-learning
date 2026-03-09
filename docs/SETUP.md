@@ -75,6 +75,18 @@ Then set repository configuration:
 2. Add repository secret `PROJECT_TOKEN` (token with repo + project scope).
 3. In branch protection, require status check: `PR Link Gate / enforce-pr-linking`.
 
+Current repo state (as of 2026-03-09):
+
+- `PROJECT_URL` is configured to `https://github.com/users/pranaysuyash/projects/1`.
+- `PROJECT_TOKEN` is configured.
+
+Verification:
+
+```bash
+gh variable list --repo pranaysuyash/advay-learning
+gh api repos/pranaysuyash/advay-learning/actions/secrets --jq '.secrets[].name'
+```
+
 PRs now must include both:
 
 - `Closes #<issue-number>`

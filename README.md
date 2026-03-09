@@ -141,6 +141,22 @@ This project uses a comprehensive AI agent coordination system:
 - **docs/WORKLOG_ADDENDUM_*.md**: Execution logs and evidence trail
 - **docs/audit/**: Audit artifacts for code review
 
+### GitHub Task Backbone (Required)
+
+- Issues are the shared collaboration layer for all agents.
+- Project board: [Advay Engineering Board](https://github.com/users/pranaysuyash/projects/1)
+- Every implementation PR must include:
+  - `Closes #<issue-number>`
+  - `TCK-YYYYMMDD-NNN`
+- Use issue forms under `.github/ISSUE_TEMPLATE/` for bug, feature, audit/remediation, and CI failures.
+
+One-time maintainer bootstrap commands:
+
+```bash
+./scripts/bootstrap_github_labels.sh
+./scripts/bootstrap_github_project.sh
+```
+
 See [AGENTS.md](AGENTS.md) for detailed workflow.
 
 ## 🔒 Privacy & Security

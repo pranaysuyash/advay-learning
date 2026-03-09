@@ -101,6 +101,23 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Direct edits to `docs/WORKLOG_TICKETS.md` are allowed only for explicit curation tasks and require intentional override in local gates.
 - If any instruction below says “update `docs/WORKLOG_TICKETS.md`”, interpret it as “update a `docs/WORKLOG_ADDENDUM_*.md` file” unless the user explicitly requests ticket-file curation.
 
+### 2.2 GitHub Issues + Project Mirror (Required)
+
+- Collaboration mirror is mandatory in GitHub Issues + Project:
+  - Board: `Advay Engineering Board` (`https://github.com/users/pranaysuyash/projects/1`)
+- For implementation work, maintain 1:1 linkage between:
+  - Worklog ticket (`TCK-...`)
+  - GitHub Issue (`#...`)
+  - PR (`Closes #...`, `TCK-...` in PR body)
+- Do not open or merge a PR without both references in the PR description.
+- Use repository issue forms in `.github/ISSUE_TEMPLATE/` (bug, feature, audit-remediation, ci-failure).
+- Keep issue labels current using shared taxonomy:
+  - `priority/*`, `status/*`, `area/*`, `type/*`, `agent/*`
+- Automation sources of truth:
+  - `.github/workflows/pr-link-gate.yml`
+  - `.github/workflows/pr-path-labeler.yml`
+  - `.github/workflows/project-and-issue-automation.yml`
+
 ### 3. Scope Discipline
 
 - One audit = One file
@@ -502,6 +519,8 @@ The audit-to-ticket gap exists because:
 ```markdown
 - [ ] Read AGENTS.md (this file)
 - [ ] Check `docs/WORKLOG_*.md` for existing work
+- [ ] Confirm/create linked GitHub Issue and set status label (`status/inbox` or `status/in-progress`)
+- [ ] Confirm the issue appears on Advay Engineering Board (or record blocker with evidence)
 - [ ] Ensure local workflow gate is enabled (`git config core.hooksPath .githooks`)
 - [ ] Find the correct prompt in prompts/README.md and follow it
 - [ ] Determine work type and select correct prompt
@@ -549,6 +568,7 @@ The audit-to-ticket gap exists because:
 
 ```markdown
 - [ ] All changes map to finding IDs (for remediation)
+- [ ] PR body includes `Closes #<issue-number>` and `TCK-YYYYMMDD-NNN`
 - [ ] Invariants preserved (or Behavior change: YES declared)
 - [ ] Tests added for HIGH/MEDIUM findings
 - [ ] Local verification run (typecheck, lint, tests)

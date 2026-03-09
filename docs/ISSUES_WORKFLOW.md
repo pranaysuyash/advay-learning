@@ -6,6 +6,10 @@ This repo uses **two layers** of tracking:
 2) **Execution log**: `docs/WORKLOG_ADDENDUM_*.md` (append-only; evidence-first; scope contract required)
 3) **Collaboration mirror**: **GitHub Issues** (labels, assignees, discussion, PR linking)
 
+Live project board for this repository:
+
+- **Advay Engineering Board**: https://github.com/users/pranaysuyash/projects/1
+
 ## Rules
 
 1. **The issue register is the source of truth for status.**
@@ -65,3 +69,8 @@ Recommended project board status columns:
 - `PR Open`
 - `Review`
 - `Done`
+
+Repository automation settings (active):
+
+- Repository variable: `PROJECT_URL=https://github.com/users/pranaysuyash/projects/1`
+- Repository secret: `PROJECT_TOKEN` (used by project-automation workflow)
