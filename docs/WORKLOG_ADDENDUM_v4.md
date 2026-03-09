@@ -1283,6 +1283,7 @@ Execution log:
 - [2026-03-09 18:17 IST] Auto-push was blocked by the pre-push deployment gate because the configured Postgres instance was missing `parental_consents` and `consent_audit_logs`; root cause was the consent migration creating PostgreSQL enum types twice during upgrade. | Evidence: auto-push hook output, `../../.venv/bin/alembic upgrade head`
 - [2026-03-09 18:18 IST] Patched `scripts/maintainability_guard.sh` to stop falsely claiming `lizard` is unavailable when complexity analysis is simply not needed, and updated the consent migration to create/drop enum types idempotently for real database upgrades. | Evidence: `bash ./scripts/maintainability_guard.sh --staged`, `git diff -- scripts/maintainability_guard.sh src/backend/alembic/versions/20260307_add_parental_consent.py`
 - [2026-03-09 18:19 IST] Verified the consent migration now upgrades the configured Postgres database to head successfully without duplicate enum failures. | Evidence: `cd src/backend && ../../.venv/bin/alembic upgrade head && ../../.venv/bin/alembic current`
+- [2026-03-09 18:21 IST] PR check failure root cause: `.github/labeler.yml` still used the legacy schema while `.github/workflows/pr-path-labeler.yml` runs `actions/labeler` v5; updated the config to the v5 `changed-files` format so the path-label automation can run successfully. | Evidence: `gh run view 22854225018 --log-failed`, `git diff -- .github/labeler.yml`
 
 Review findings summary:
 1. `Observed` — `roiAnalysis.ts` was not commit-ready; the export path broke the frontend build and metrics tests.

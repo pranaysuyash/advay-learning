@@ -1,18 +1,28 @@
 area/frontend:
-  - src/frontend/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/frontend/**/*
 
 area/backend:
-  - src/backend/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/backend/**/*
 
 area/docs:
-  - docs/**/*
-  - prompts/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**/*
+          - prompts/**/*
 
 area/ci:
-  - .github/workflows/**/*
-  - .githooks/**/*
-  - scripts/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**/*
+          - .githooks/**/*
+          - scripts/**/*
 
 area/assets:
-  - src/frontend/public/assets/**/*
-  - assets/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/frontend/public/assets/**/*
+          - assets/**/*
