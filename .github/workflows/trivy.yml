@@ -16,24 +16,31 @@ permissions:
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    env:
+      # Keep PR checks informative/non-blocking, enforce on main/schedule.
+      TRIVY_EXIT_CODE: ${{ github.event_name == 'pull_request' && '0' || '1' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy filesystem scan (vuln + misconfig + secrets)
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
         with:
-          scan-type: fs
-          scan-ref: .
-          format: sarif
-          output: trivy-results.sarif
-          scanners: vuln,misconfig,secret
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: "1"
+          version: latest
+
+      - name: Run Trivy filesystem scan (vuln + misconfig + secrets)
+        run: |
+          trivy fs \
+            --scanners vuln,misconfig,secret \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --format sarif \
+            --output trivy-results.sarif \
+            --exit-code "${TRIVY_EXIT_CODE}" \
+            .
 
       - name: Upload SARIF to GitHub code scanning
-        if: always()
+        if: always() && hashFiles('trivy-results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
