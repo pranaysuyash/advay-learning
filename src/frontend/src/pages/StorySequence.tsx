@@ -27,6 +27,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameStartButton } from '../components/game/GameStartButton';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
@@ -129,7 +130,7 @@ function StorySelectionMenu({
             <line x1="50" y1="25" x2="50" y2="75" stroke="white" strokeWidth="2" />
           </svg>
         </div>
-        <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg></div>
+        <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z' /></svg></div>
       </div>
       <h2 className="text-2xl font-bold text-advay-slate mb-2">Put the Story in Order!</h2>
       <p className="text-advay-slate mb-6 text-center max-w-md">
@@ -152,14 +153,16 @@ function StorySelectionMenu({
         </div>
       )}
 
-      <button
+      <div
         data-ux-goal="Arrange the picture cards in the right order to tell the story!"
         data-ux-instruction="Drag cards from the bottom to the numbered slots above"
-        onClick={() => startGame('butterfly')}
-        className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-3 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105"
+        className="mb-8"
       >
-        Start Adventure!
-      </button>
+        <GameStartButton
+          onClick={() => startGame('butterfly')}
+          text="PLAY"
+        />
+      </div>
 
       <p className="text-text-secondary text-sm mb-4">Or pick your own story:</p>
 
@@ -172,7 +175,7 @@ function StorySelectionMenu({
               onClick={() => startGame(story.id)}
               className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-[0_4px_0_#E5B86E]"
             >
-              <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='9' x2='15' y1='3' y2='21'/></svg></div>
+              <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2' /><line x1='9' x2='15' y1='3' y2='21' /></svg></div>
               <h3 className="font-bold text-advay-slate text-sm mb-1 group-hover:text-blue-500">
                 {story.title}
               </h3>
@@ -184,7 +187,7 @@ function StorySelectionMenu({
       </div>
 
       <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm bg-blue-50 px-4 py-2 rounded-xl">
-        <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>
+        <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0' /><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2' /><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8' /><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15' /></svg>
         <span>Pinch and drag with your hand, or use your mouse!</span>
       </div>
     </div>
@@ -251,7 +254,7 @@ function StorySequenceBoard({
         className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl mb-4 shadow-lg border-2 border-indigo-300"
       >
         <div className="flex items-center justify-center gap-2">
-          <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg>
+          <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10' /><circle cx='12' cy='12' r='6' /><circle cx='12' cy='12' r='2' /></svg>
           <p className="font-black text-lg">GOAL: Drag cards to numbered slots in the RIGHT ORDER!</p>
           <span className="text-lg font-black text-white/80">1 → 2 → 3</span>
         </div>
@@ -368,7 +371,7 @@ function StorySequenceBoard({
       {gameState?.completed && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-            <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg></div>
+            <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6' /><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18' /><path d='M4 22h16' /><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22' /><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22' /><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z' /></svg></div>
             <h3 className="text-2xl font-bold text-advay-slate mb-2">Story Complete!</h3>
             <p className="text-advay-slate mb-4">
               Great job arranging the {currentStory?.title.toLowerCase()} story!
@@ -435,25 +438,25 @@ function StorySequenceContent() {
   const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('story-sequence');
-  
+
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentStory, setCurrentStory] = useState<SequenceStory | null>(null);
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(true);
-  
+
   // Drag state
   const [draggedCard, setDraggedCard] = useState<SequenceCard | null>(null);
   const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
-  
+
   // Feedback
   const [showHint, setShowHint] = useState<string | null>(null);
   const [lastPlacedSlot, setLastPlacedSlot] = useState<number | null>(null);
-  
+
   // Celebration
   const [showCelebration, setShowCelebration] = useState(false);
-  
+
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -461,17 +464,17 @@ function StorySequenceContent() {
   const poolRef = useRef<HTMLDivElement>(null);
   const isPinchingRef = useRef(false);
   const dragSourceRef = useRef<DragSource | null>(null);
-  
+
   // Streak tracking for correct placements
   const [streak, setStreak] = useState(0);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
-  
+
   // ===== AUDIO EFFECTS =====
   useEffect(() => {
     if (lastPlacedSlot !== null && gameState && isSlotCorrect(gameState.slots, lastPlacedSlot)) {
       playSuccess();
       triggerHaptic('success');
-      
+
       // Update streak on correct placement
       const newStreak = streak + 1;
       setStreak(newStreak);
@@ -484,14 +487,14 @@ function StorySequenceContent() {
       }
     }
   }, [lastPlacedSlot, gameState, streak]);
-  
+
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip) return;
-    
+
     const { x, y } = frame.indexTip;
     const isPinching = frame.pinch?.state.isPinching || false;
-    
+
     // Handle pinch state changes
     if (isPinching && !isPinchingRef.current) {
       // Pinch started - try to grab a card
@@ -506,14 +509,14 @@ function StorySequenceContent() {
       handleDrag(x, y);
     }
   }, [draggedCard]);
-  
+
   useGameHandTracking({
     gameName: 'StorySequence',
     isRunning: !showMenu && !showCelebration,
     webcamRef,
     onFrame: handleHandFrame,
   });
-  
+
   // ===== INTERACTION HANDLERS =====
   const handlePinchStart = (x: number, y: number) => {
     if (!gameState) return;
@@ -537,14 +540,14 @@ function StorySequenceContent() {
     dragSourceRef.current = { type: 'slot', index: slotIndex };
     setDragPosition({ x, y });
   };
-  
+
   const handleDrag = (x: number, y: number) => {
     setDragPosition({ x, y });
 
     const viewportPoint = getViewportCoordinates(x, y);
     setHoveredSlot(findSlotAtPosition(slotRefs, viewportPoint, 0.2));
   };
-  
+
   const handlePinchEnd = (x: number, y: number) => {
     if (!draggedCard || !gameState) {
       setDraggedCard(null);
@@ -552,14 +555,14 @@ function StorySequenceContent() {
       setHoveredSlot(null);
       return;
     }
-    
+
     const viewportPoint = getViewportCoordinates(x, y);
     const droppedInSlot = findSlotAtPosition(slotRefs, viewportPoint, 0.3);
-    
+
     if (droppedInSlot !== null) {
       // Play flip sound when placing card
       playFlip();
-      
+
       // Place card in slot
       const { newSlots, newPool } = placeCard(
         draggedCard,
@@ -567,16 +570,16 @@ function StorySequenceContent() {
         gameState.slots,
         gameState.pool
       );
-      
+
       setGameState({
         ...gameState,
         slots: newSlots,
         pool: newPool,
         attempts: gameState.attempts + 1,
       });
-      
+
       setLastPlacedSlot(droppedInSlot);
-      
+
       // TTS feedback for placement
       if (ttsEnabled) {
         const isCorrectSlot = isSlotCorrect(newSlots, droppedInSlot);
@@ -586,7 +589,7 @@ function StorySequenceContent() {
           void speak('Try a different spot!');
         }
       }
-      
+
       // Check if sequence is complete and correct
       if (checkSequence(newSlots)) {
         handleGameComplete();
@@ -606,19 +609,19 @@ function StorySequenceContent() {
         });
       }
     }
-    
+
     setDraggedCard(null);
     setDragPosition(null);
     setHoveredSlot(null);
     dragSourceRef.current = null;
   };
-  
+
   // ===== MOUSE FALLBACK HANDLERS =====
   const handleMouseDown = (card: SequenceCard, source: 'slot' | 'pool', index: number) => {
     setDraggedCard(card);
     dragSourceRef.current = { type: source, index };
   };
-  
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!draggedCard || !gameAreaRef.current) return;
 
@@ -631,13 +634,13 @@ function StorySequenceContent() {
       findSlotAtPosition(slotRefs, { x: e.clientX, y: e.clientY }, 0.2),
     );
   };
-  
+
   const handleMouseUp = (e: React.MouseEvent) => {
     if (!draggedCard || !gameState) {
       setDraggedCard(null);
       return;
     }
-    
+
     const droppedInSlot = findSlotAtPosition(
       slotRefs,
       { x: e.clientX, y: e.clientY },
@@ -651,16 +654,16 @@ function StorySequenceContent() {
         gameState.slots,
         gameState.pool
       );
-      
+
       setGameState({
         ...gameState,
         slots: newSlots,
         pool: newPool,
         attempts: gameState.attempts + 1,
       });
-      
+
       setLastPlacedSlot(droppedInSlot);
-      
+
       if (checkSequence(newSlots)) {
         handleGameComplete();
       }
@@ -676,19 +679,19 @@ function StorySequenceContent() {
         pool: newPool,
       });
     }
-    
+
     setDraggedCard(null);
     setDragPosition(null);
     setHoveredSlot(null);
     dragSourceRef.current = null;
   };
-  
+
   // ===== GAME FLOW =====
   const startGame = (storyId: string) => {
     playClick();
     const story = STORY_SEQUENCES.find(s => s.id === storyId);
     if (!story) return;
-    
+
     setCurrentStory(story);
     setGameState(initializeGame(story));
     setSelectedStoryId(storyId);
@@ -698,7 +701,7 @@ function StorySequenceContent() {
     setStreak(0);
     setShowStreakMilestone(false);
   };
-  
+
   const handleGameComplete = () => {
     onGameComplete();
     playCelebration();
@@ -707,7 +710,7 @@ function StorySequenceContent() {
       setGameState({ ...gameState, completed: true });
     }
   };
-  
+
   const handleNextStory = () => {
     playClick();
     // Pick a different story
@@ -715,7 +718,7 @@ function StorySequenceContent() {
     const nextStory = availableStories[Math.floor(Math.random() * availableStories.length)];
     startGame(nextStory.id);
   };
-  
+
   const handleShowMenu = () => {
     playClick();
     setShowMenu(true);
@@ -725,7 +728,7 @@ function StorySequenceContent() {
     setStreak(0);
     setShowStreakMilestone(false);
   };
-  
+
   const handleShowHint = () => {
     playClick();
     if (!gameState) return;
@@ -736,17 +739,17 @@ function StorySequenceContent() {
       setTimeout(() => setShowHint(null), 3000);
     }
   };
-  
+
   // ===== RENDER HELPERS =====
   const correctCount = gameState ? getCorrectCount(gameState.slots) : 0;
   const totalSlots = gameState?.slots.length || 0;
-  
+
   // ===== RENDER =====
   return (
     <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        
+
       </div>
 
       {showMenu ? (

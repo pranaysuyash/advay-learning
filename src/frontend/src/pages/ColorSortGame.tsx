@@ -14,6 +14,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateItems, calculateScore, type ColorItem } from '../games/colorSortGameLogic';
 import { triggerHaptic } from '../utils/haptics';
+import { GameHUD } from '../components/game/GameHUD';
 
 const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const navigate = useNavigate();
@@ -128,26 +129,21 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
 
         {gameState === 'playing' && (
           <div className="flex flex-col items-center gap-6">
-            {/* Streak HUD */}
-            <div className="flex items-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 shadow-sm">
-              <span className="font-black text-lg">🔥 Streak</span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <img
-                    key={i}
-                    src={
-                      streak >= i * 2
-                        ? '/assets/kenney/platformer/hud/hud_heart.png'
-                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                    }
-                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
-                    className="w-6 h-6"
-                  />
-                ))}
-              </div>
-              <span className="font-black text-2xl text-orange-500 min-w-[2ch] text-center">
-                {streak}
-              </span>
+            <div className="fixed top-20 left-4 right-4 z-10 max-w-4xl mx-auto">
+              <GameHUD
+                score={score}
+                streak={streak}
+                levelInfo={
+                  <div className="bg-cyan-100 text-cyan-700 px-4 py-1.5 rounded-xl font-black border-2 border-cyan-200 shadow-sm">
+                    Level {currentLevel}
+                  </div>
+                }
+                rightHeaderContent={
+                  <div className="bg-green-100 text-green-700 px-4 py-1.5 rounded-xl font-black border-2 border-green-200 shadow-sm flex items-center gap-2">
+                    <span>✓</span> {correct} Correct
+                  </div>
+                }
+              />
             </div>
 
             {/* Streak milestone popup */}
@@ -170,7 +166,7 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
             <div className="flex gap-4">
               {targets.map((target) => (
                 <div key={target.name} className="flex flex-col items-center gap-2">
-                  <div 
+                  <div
                     className="w-20 h-24 border-4 border-dashed rounded-xl flex flex-col items-center justify-end pb-2 overflow-hidden bg-slate-50 transition-all hover:bg-slate-100 cursor-pointer"
                     style={{ borderColor: target.hex }}
                     onClick={() => handleBucketClick(target)}
@@ -197,20 +193,7 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
               </div>
             )}
 
-            <div className="flex gap-4">
-              <div className="bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200">
-                <p className="text-xs font-black uppercase text-green-600">Correct</p>
-                <p className="text-2xl font-bold text-green-700">{correct}</p>
-              </div>
-              <div className="bg-cyan-100 px-4 py-2 rounded-xl text-center border-2 border-cyan-200">
-                <p className="text-xs font-black uppercase text-cyan-600">Score</p>
-                <p className="text-2xl font-bold text-cyan-700">{score}</p>
-              </div>
-              <div className="bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200">
-                <p className="text-xs font-black uppercase text-orange-600">Best Streak</p>
-                <p className="text-2xl font-bold text-orange-700">{maxStreak}</p>
-              </div>
-            </div>
+            {/* Bottom stats removed as they are now integrated into GameHUD */}
           </div>
         )}
 

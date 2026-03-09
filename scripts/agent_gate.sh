@@ -179,7 +179,15 @@ if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true 
       die "worklog ticket headings cannot be removed. Worklogs are append-only. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
     fi
 
-    if echo "$deleted_worklog_lines" | rg -q '^-[^-@]'; then
+    # Ticket field updates (Status:, Execution log lines, Status updates:) are
+    # legitimate in-place edits per AGENTS.md §2.1 and are exempt from the
+    # append-only restriction. Strip those lines before checking for deletions.
+    filtered_deleted="$(echo "$deleted_worklog_lines" | rg '^-[^-@]' \
+      | rg -v '^-Status:[[:space:]]' \
+      | rg -v '^-[[:space:]]*-[[:space:]][0-9]{4}-[0-9]{2}-[0-9]{2}' \
+      | rg -v '^-Status updates:' \
+      || true)"
+    if [[ -n "${filtered_deleted//$'\n'/}" ]]; then
       die "worklog deletions detected. Worklogs are append-only by default. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
     fi
   fi

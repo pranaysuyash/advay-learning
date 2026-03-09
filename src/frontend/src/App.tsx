@@ -84,6 +84,11 @@ const ColorByNumber = lazy(() =>
     default: module.ColorByNumber,
   })),
 );
+const ColorPotions = lazy(() =>
+  import('./pages/ColorPotions').then((module) => ({
+    default: module.ColorPotions,
+  })),
+);
 const MemoryMatch = lazy(() =>
   import('./pages/MemoryMatch').then((module) => ({
     default: module.MemoryMatch,
@@ -238,6 +243,11 @@ const VirtualBubbles = lazy(() =>
 const KaleidoscopeHands = lazy(() =>
   import('./pages/KaleidoscopeHands').then((module) => ({
     default: module.KaleidoscopeHands,
+  })),
+);
+const ShadowPortal = lazy(() =>
+  import('./pages/ShadowPortal').then((module) => ({
+    default: module.default,
   })),
 );
 const AirGuitarHero = lazy(() =>
@@ -495,6 +505,16 @@ const CountingCollectathon = lazy(() =>
     default: module.CountingCollectathon,
   })),
 );
+const TargetPractice = lazy(() =>
+  import('./pages/TargetPractice').then((module) => ({
+    default: module.default,
+  })),
+);
+const CuttingPractice = lazy(() =>
+  import('./pages/CuttingPractice').then((module) => ({
+    default: module.default,
+  })),
+);
 
 // Loading component for suspense boundaries
 const PageLoader = () => (
@@ -583,6 +603,16 @@ function App() {
                   element={<Navigate to='/games/alphabet-tracing' replace />}
                 />
                 <Route
+                  path='/games/target-practice'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Target Practice'>
+                        <TargetPractice />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games'
                   element={
                     <ProtectedRoute>
@@ -667,6 +697,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ColorByNumber />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/color-potions'
+                  element={
+                    <ProtectedRoute>
+                      <ColorPotions />
                     </ProtectedRoute>
                   }
                 />
@@ -918,6 +956,16 @@ function App() {
                     <ProtectedRoute>
                       <CameraSafeRoute gameName='Kaleidoscope Hands'>
                         <KaleidoscopeHands />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/shadow-portal'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Shadow Portal'>
+                        <ShadowPortal />
                       </CameraSafeRoute>
                     </ProtectedRoute>
                   }
@@ -1325,6 +1373,16 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <PhysicsPlayground />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/cutting-practice'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Cutting Practice'>
+                        <CuttingPractice />
+                      </CameraSafeRoute>
                     </ProtectedRoute>
                   }
                 />

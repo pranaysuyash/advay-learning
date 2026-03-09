@@ -5,14 +5,14 @@
  * https://kenney.nl/assets/ui-pack
  * 
  * Button Colors: blue, green, red, yellow, grey
- * Styles: default, square, small, large
+ * Styles: default, square, gloss
  */
 
 import { ReactNode } from 'react';
 
 export type KenneyButtonColor = 'blue' | 'green' | 'red' | 'yellow' | 'grey';
 export type KenneyButtonSize = 'small' | 'default' | 'large';
-export type KenneyButtonStyle = 'default' | 'square';
+export type KenneyButtonStyle = 'default' | 'square' | 'gloss';
 
 interface KenneyButtonProps {
   children: ReactNode;
@@ -29,10 +29,9 @@ interface KenneyButtonProps {
  * Kenney UI Button
  * 
  * Maps to Kenney UI Pack sprites:
- * - button_[color].png - Default button
+ * - button_[color].png - Default flat button
  * - button_[color]_square.png - Square button
- * - button_[color]_small.png - Small button
- * - button_[color]_large.png - Large button
+ * - button_[color]_gloss.png - Glossy button
  */
 export function KenneyButton({
   children,
@@ -46,10 +45,9 @@ export function KenneyButton({
 }: KenneyButtonProps) {
   // Build the sprite path
   const getSpritePath = () => {
-    const basePath = '/assets/kenney/ui-pack/PNG';
-    const styleSuffix = style === 'square' ? '_square' : '';
-    const sizeSuffix = size === 'small' ? '_small' : size === 'large' ? '_large' : '';
-    return `${basePath}/button_${color}${styleSuffix}${sizeSuffix}.png`;
+    const basePath = '/assets/kenney/ui/buttons';
+    const styleSuffix = style === 'square' ? '_square' : style === 'gloss' ? '_gloss' : '';
+    return `${basePath}/button_${color}${styleSuffix}.png`;
   };
 
   // Size classes for text and padding
@@ -87,8 +85,9 @@ export function KenneyButton({
 
 /**
  * Kenney UI Panel
- * 
- * Background panels from UI Pack
+ *
+ * Background panels from UI Pack.
+ * @deprecated No consumers found — scheduled for removal in a dedicated cleanup commit.
  */
 interface KenneyPanelProps {
   children: ReactNode;
@@ -101,22 +100,11 @@ export function KenneyPanel({
   variant = 'default',
   className = '',
 }: KenneyPanelProps) {
-  const getPanelPath = () => {
-    const basePath = '/assets/kenney/ui-pack/PNG';
-    if (variant === 'default') {
-      return `${basePath}/panel_brown.png`;
-    }
-    return `${basePath}/panel_${variant}.png`;
-  };
-
+  const color = variant === 'default' ? 'grey' : variant;
   return (
     <div
-      className={`p-6 ${className}`}
-      style={{
-        backgroundImage: `url(${getPanelPath()})`,
-        backgroundSize: '100% 100%',
-        backgroundRepeat: 'no-repeat',
-      }}
+      className={`p-6 rounded-2xl bg-gray-100 ${className}`}
+      data-kenney-panel={color}
     >
       {children}
     </div>
@@ -124,7 +112,8 @@ export function KenneyPanel({
 }
 
 /**
- * Kenney UI Progress Bar
+ * 
+ * Uses 9-slice scaling for smooth progress bars
  */
 interface KenneyProgressBarProps {
   progress: number; // 0-100
@@ -137,13 +126,15 @@ export function KenneyProgressBar({
   color = 'blue',
   className = '',
 }: KenneyProgressBarProps) {
+  const colorCapitalized = color.charAt(0).toUpperCase() + color.slice(1);
+  
   return (
     <div className={`relative h-8 ${className}`}>
       {/* Background */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(/assets/kenney/ui-pack/PNG/barBack_horizontalLeft.png), url(/assets/kenney/ui-pack/PNG/barBack_horizontalMid.png), url(/assets/kenney/ui-pack/PNG/barBack_horizontalRight.png)`,
+          backgroundImage: `url(/assets/kenney/ui/progress/barBack_horizontalLeft.png), url(/assets/kenney/ui/progress/barBack_horizontalMid.png), url(/assets/kenney/ui/progress/barBack_horizontalRight.png)`,
           backgroundSize: 'auto 100%, calc(100% - 16px) 100%, auto 100%',
           backgroundPosition: 'left center, 8px center, right center',
           backgroundRepeat: 'no-repeat, repeat-x, no-repeat',
@@ -154,7 +145,7 @@ export function KenneyProgressBar({
         className="absolute left-1 top-1 bottom-1 transition-all duration-300"
         style={{
           width: `calc(${Math.min(100, Math.max(0, progress))}% - 8px)`,
-          backgroundImage: `url(/assets/kenney/ui-pack/PNG/bar${color.charAt(0).toUpperCase() + color.slice(1)}_horizontalLeft.png), url(/assets/kenney/ui-pack/PNG/bar${color.charAt(0).toUpperCase() + color.slice(1)}_horizontalMid.png)`,
+          backgroundImage: `url(/assets/kenney/ui/progress/bar${colorCapitalized}_horizontalLeft.png), url(/assets/kenney/ui/progress/bar${colorCapitalized}_horizontalMid.png)`,
           backgroundSize: 'auto 100%, 100% 100%',
           backgroundPosition: 'left center, center center',
           backgroundRepeat: 'no-repeat, repeat-x',
@@ -190,7 +181,7 @@ export function KenneySlider({
       <div
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-4"
         style={{
-          backgroundImage: 'url(/assets/kenney/ui-pack/PNG/sliderBack.png)',
+          backgroundImage: 'url(/assets/kenney/ui/progress/sliderBack.png)',
           backgroundSize: '100% 100%',
         }}
       />
@@ -199,7 +190,7 @@ export function KenneySlider({
         className="absolute top-1/2 -translate-y-1/2 w-8 h-8 -ml-4 transition-all active:scale-95"
         style={{
           left: `${percentage}%`,
-          backgroundImage: 'url(/assets/kenney/ui-pack/PNG/sliderBlue.png)',
+          backgroundImage: 'url(/assets/kenney/ui/progress/sliderBlue.png)',
           backgroundSize: '100% 100%',
           border: 'none',
           backgroundColor: 'transparent',

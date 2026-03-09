@@ -26,9 +26,11 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { GameStartButton } from '../components/game/GameStartButton';
+import { GameHUD } from '../components/game/GameHUD';
 import {
   type GameState,
   type PopAction,
@@ -549,13 +551,13 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
           </div>
 
           {/* Start Button */}
-          <button
-            onClick={startGame}
-            disabled={isLoading}
-            className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-lg font-bold shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {isLoading ? 'Loading...' : 'Start Popping! 🎈'}
-          </button>
+          <div className="mt-4">
+            <GameStartButton
+              onClick={startGame}
+              disabled={isLoading}
+              text={isLoading ? 'LOADING' : 'WORKOUT'}
+            />
+          </div>
 
           {/* Error Message */}
           {error && (
@@ -568,37 +570,29 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         // ===== GAME AREA =====
         <div className='flex flex-col h-full'>
           {/* Header */}
-          <div className='flex items-center justify-between px-4 py-2 bg-white/50 border-b border-purple-200'>
-            <div>
-              <h2 className='text-lg font-bold text-advay-slate'>
-                Level {gameState?.level || 1}
-              </h2>
-              <p className='text-advay-slate text-xs'>
-                Score:{' '}
-                <span className='text-purple-600 font-bold'>
-                  {gameState?.score || 0}
-                </span>
-              </p>
-            </div>
-            <div className='flex items-center gap-4'>
-              {streak > 0 && (
-                <div className='flex items-center gap-1 text-orange-500 font-bold'>
-                  <span>🔥</span>
-                  <span>{streak}</span>
+          <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+            <GameHUD
+              score={gameState?.score}
+              streak={streak}
+              levelInfo={
+                <div className="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-xl font-black border-2 border-purple-200 shadow-sm">
+                  Layer {gameState?.level}
                 </div>
-              )}
-              {gameState?.combo && gameState.combo > 1 && (
-                <div className='text-orange-500 font-bold'>
-                  ⚡ {gameState.combo}x
+              }
+              rightHeaderContent={
+                <div className="flex gap-4 items-center">
+                  {gameState?.combo && gameState.combo > 1 && (
+                    <div className='bg-orange-100 text-orange-600 px-3 py-1 rounded-xl font-black border-2 border-orange-200 shadow-sm animate-pulse'>
+                      ⚡ {gameState.combo}x
+                    </div>
+                  )}
+                  <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm ${(gameState?.timeRemaining || 0) < 10000 ? 'bg-red-100 border-red-300 text-red-700 animate-pulse' : 'bg-white/90 border-slate-200 text-slate-600'
+                    }`}>
+                    ⏳ {Math.ceil((gameState?.timeRemaining || 0) / 1000)}s
+                  </div>
                 </div>
-              )}
-              <div className='text-advay-slate text-sm'>
-                Time:{' '}
-                <span className='text-purple-600 font-bold'>
-                  {Math.ceil((gameState?.timeRemaining || 0) / 1000)}s
-                </span>
-              </div>
-            </div>
+              }
+            />
           </div>
 
           {/* Game Canvas */}

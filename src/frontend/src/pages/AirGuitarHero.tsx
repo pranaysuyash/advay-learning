@@ -19,6 +19,7 @@ import {
   type GuitarNote,
 } from '../games/airGuitarHeroLogic';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 // Note color map for visual variety
 const NOTE_COLORS: Record<
@@ -410,7 +411,11 @@ function AirGuitarHeroInner({
           {/* Complete */}
           {gameState === 'complete' && (
             <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <div className='text-6xl'>🎸🌟🎸</div>
+              <div className='flex items-center justify-center gap-2'>
+                <span className='text-5xl'>🎸</span>
+                <KenneyIcon type="star" size={48} />
+                <span className='text-5xl'>🎸</span>
+              </div>
               <h2 className='text-4xl font-black text-slate-900'>Rockstar!</h2>
               <p className='text-lg text-slate-600 font-bold'>
                 You shredded {correctCount} notes!

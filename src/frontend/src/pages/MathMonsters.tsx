@@ -33,6 +33,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameStartButton } from '../components/game/GameStartButton';
+import { GameHUD } from '../components/game/GameHUD';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -189,21 +191,21 @@ function MathMonstersGame() {
       playCoin(); // Kenney coin sound
       setMonsterExpression('eating');
       triggerHaptic('success');
-      
+
       // Calculate and show score popup
       const basePoints = 10;
       const streakBonus = Math.min(gameState.streak * 2, 20);
       const totalPoints = basePoints + streakBonus;
       setScorePopup({ points: totalPoints });
       setTimeout(() => setScorePopup(null), 700);
-      
+
       // Streak milestone every 5
       const newStreak = gameState.streak + 1;
       if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
         setShowStreakMilestone(true);
         triggerHaptic('celebration');
       }
-      
+
       if (ttsEnabled) {
         void speak('Yum! Correct answer!');
       }
@@ -272,7 +274,7 @@ function MathMonstersGame() {
     <GameContainer webcamRef={webcamRef} title="Math Monsters" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        
+
       </div>
 
       {showMenu ? (
@@ -349,12 +351,12 @@ function MathMonstersGame() {
             ))}
           </div>
 
-          <button
-            onClick={startGame}
-            className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold text-xl transition-colors shadow-lg hover-lift"
-          >
-            Start Feeding!
-          </button>
+          <div className="mt-2 mb-4">
+            <GameStartButton
+              onClick={startGame}
+              text="PLAY"
+            />
+          </div>
         </div>
       ) : gameState.completed ? (
         // ===== GAME COMPLETE =====
@@ -429,40 +431,13 @@ function MathMonstersGame() {
             </div>
           </div>
 
-          {/* Progress Bar with Kenney Heart HUD */}
-          <div className="px-4 py-2 bg-white border-b border-[#F2CC8F]">
-            <div className="flex justify-between text-sm text-text-secondary mb-1">
-              <span>Level {gameState.currentLevel} of {LEVELS.length}</span>
-              <span>Score: {gameState.score}</span>
-            </div>
-            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${levelProgress}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              {/* Kenney Heart HUD */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <img
-                    key={i}
-                    src={gameState.streak >= (i + 1) * 2
-                      ? '/assets/kenney/platformer/hud/hud_heart.png'
-                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                    alt=""
-                    className="w-6 h-6"
-                  />
-                ))}
-                <span className="ml-2 text-sm font-bold text-pink-500">x{gameState.streak}</span>
-              </div>
-              {gameState.streak > 1 && (
-                <span className="inline-block bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs font-bold">
-                  🔥 {gameState.streak} streak!
-                </span>
-              )}
-            </div>
-          </div>
+          {/* Unified Kenney Game HUD */}
+          <GameHUD
+            score={gameState.score}
+            streak={gameState.streak}
+            levelInfo={`Level ${gameState.currentLevel} of ${LEVELS.length}`}
+            progressPercentage={levelProgress}
+          />
 
           {/* Score Popup Animation */}
           <AnimatePresence>

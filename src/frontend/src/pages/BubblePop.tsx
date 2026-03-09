@@ -35,6 +35,7 @@ import {
   type GameState,
   type Bubble,
 } from '../games/bubblePopLogic';
+import { GameHUD } from '../components/game/GameHUD';
 
 // Animation constants
 const TARGET_FPS = 60;
@@ -120,12 +121,12 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         if (newState.poppedCount > prev.poppedCount) {
           const newlyPopped = newState.poppedCount - prev.poppedCount;
           lastPopTimeRef.current = Date.now();
-          
+
           // Find newly popped bubbles for particle effects
           const newlyPoppedBubbles = newState.bubbles.filter(
             b => b.isPopped && !prev.bubbles.find(pb => pb.id === b.id)?.isPopped
           );
-          
+
           // Add particle effects
           if (newlyPoppedBubbles.length > 0) {
             const newParticles = newlyPoppedBubbles.map(b => ({
@@ -135,7 +136,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
               color: b.color,
             }));
             setPoppedBubbles(prevParticles => [...prevParticles, ...newParticles]);
-            
+
             // Remove particles after animation
             setTimeout(() => {
               setPoppedBubbles(prevParticles =>
@@ -143,7 +144,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
               );
             }, 500);
           }
-          
+
           // Build streak and calculate bonus
           const newStreak = incrementStreak(newlyPopped);
 
@@ -164,7 +165,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
 
           // Haptics
           triggerHaptic('success');
-          
+
           // TTS feedback
           if (ttsEnabled) {
             if (newState.poppedCount % STREAK_MILESTONE_INTERVAL === 0) {
@@ -209,24 +210,24 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
           const popsForNextLevel = newState.level * LEVEL_ADVANCE_POPS;
           const timeForNextLevel = newState.level * LEVEL_ADVANCE_TIME_SECONDS;
           const elapsedTime = BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS - newState.timeLeft;
-          
-          if (newState.level < MAX_LEVEL && 
-              (newState.poppedCount >= popsForNextLevel || elapsedTime >= timeForNextLevel)) {
+
+          if (newState.level < MAX_LEVEL &&
+            (newState.poppedCount >= popsForNextLevel || elapsedTime >= timeForNextLevel)) {
             newState = advanceLevel(newState);
-            
+
             // Announce level up via TTS (with cooldown to prevent spam)
             if (ttsEnabled && newState.level > lastAnnouncedLevelRef.current) {
               lastAnnouncedLevelRef.current = newState.level;
               void speak(`Level ${newState.level}! Bubbles are getting faster!`);
             }
           }
-          
+
           // Check for game over
           if (newState.timeLeft <= 0 && !prev.gameOver) {
             newState = endGame(newState);
             void handleGameComplete(newState.score);
             setShowCelebration(true);
-            
+
             // Final stats announcement
             if (ttsEnabled) {
               const finalMessage = newState.poppedCount >= 20
@@ -272,15 +273,15 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
       stopTTS();
     };
   }, [stop, stopTTS]);
-  
+
   // Inactivity detection - encourage player if no pops for 8 seconds
   useEffect(() => {
     if (!isActive || showMenu || gameState.gameOver) return;
-    
+
     const checkInactivity = setInterval(() => {
       const timeSinceLastPop = Date.now() - lastPopTimeRef.current;
       const gameTimeElapsed = BUBBLE_GAME_CONFIG.GAME_DURATION_SECONDS - gameState.timeLeft;
-      
+
       // Only encourage after game has started (3s grace period) and if inactive
       if (gameTimeElapsed > 3 && timeSinceLastPop > 8000 && gameState.poppedCount === 0) {
         if (ttsEnabled) {
@@ -302,7 +303,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         lastPopTimeRef.current = Date.now();
       }
     }, 2000);
-    
+
     return () => clearInterval(checkInactivity);
   }, [isActive, showMenu, gameState.gameOver, gameState.timeLeft, gameState.poppedCount, ttsEnabled]);
 
@@ -316,7 +317,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
     resetStreak();
     lastFrameTimeRef.current = 0;
     lastAnnouncedLevelRef.current = 1;
-    
+
     // Welcome TTS
     if (ttsEnabled) {
       void speak("Let's pop some bubbles! Blow into the microphone!");
@@ -338,13 +339,13 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
 
   // Track last announced level to prevent spam
   const lastAnnouncedLevelRef = useRef(1);
-  
+
   // Track popped bubbles for particle effects
   const [poppedBubbles, setPoppedBubbles] = useState<Array<{ id: string; x: number; y: number; color: string }>>([]);
-  
+
   // Track last pop time for activity detection
   const lastPopTimeRef = useRef<number>(0);
-  
+
   // Stats for display
   const stats = getStats(gameState);
 
@@ -396,33 +397,21 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         {/* Game Screen */}
         {!showMenu && (
           <>
-            {/* Score */}
-            <div className="absolute top-4 right-4 bg-white rounded-2xl px-6 py-3 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
-              <div className="text-sm font-bold text-text-secondary">Score</div>
-              <div className="text-3xl font-black text-advay-slate">{gameState.score}</div>
-            </div>
-            
-            {/* Level */}
-            <div className="absolute top-4 right-32 bg-white rounded-2xl px-6 py-3 border-3 border-purple-200 shadow-[0_4px_0_#C4B5FD]">
-              <div className="text-sm font-bold text-purple-500">Level</div>
-              <div className="text-3xl font-black text-purple-700">{gameState.level}</div>
-            </div>
-
-            {/* Kenney Heart HUD */}
-            <div className="absolute top-4 left-32 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <img
-                    key={i}
-                    src={streak >= (i + 1) * 2
-                      ? '/assets/kenney/platformer/hud/hud_heart.png'
-                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                    alt=""
-                    className="w-6 h-6"
-                  />
-                ))}
-                <span className="ml-2 text-sm font-bold text-pink-500">x{streak}</span>
-              </div>
+            <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+              <GameHUD
+                score={gameState.score}
+                streak={streak}
+                levelInfo={
+                  <div className="flex gap-4 items-center">
+                    <div className="bg-purple-100 text-purple-700 px-3 py-1 rounded-xl font-bold border-2 border-purple-200 shadow-sm">
+                      Level {gameState.level}
+                    </div>
+                    <div className={`px-3 py-1 rounded-xl font-bold border-2 shadow-sm ${gameState.timeLeft < 10 ? 'bg-red-100 text-red-600 border-red-200 animate-pulse' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      ⏳ {Math.ceil(gameState.timeLeft)}s
+                    </div>
+                  </div>
+                }
+              />
             </div>
 
             {/* Score Popup Animation */}
@@ -431,9 +420,9 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
                 initial={{ opacity: 0, y: 0, scale: 0.5 }}
                 animate={{ opacity: 1, y: -40, scale: 1.2 }}
                 exit={{ opacity: 0 }}
-                style={{ 
-                  position: 'absolute', 
-                  left: `${scorePopup.x}%`, 
+                style={{
+                  position: 'absolute',
+                  left: `${scorePopup.x}%`,
                   top: `${scorePopup.y}%`,
                   transform: 'translate(-50%, -50%)'
                 }}
@@ -459,13 +448,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
               </motion.div>
             )}
 
-            {/* Time */}
-            <div className="absolute top-4 left-4 bg-white rounded-2xl px-6 py-3 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
-              <div className="text-sm font-bold text-text-secondary">Time</div>
-              <div className={`text-3xl font-black ${gameState.timeLeft < 10 ? 'text-red-500' : 'text-advay-slate'}`}>
-                {Math.ceil(gameState.timeLeft)}s
-              </div>
-            </div>
+            {/* Time HUD migrated to GameHUD above */}
 
             {/* Volume Meter */}
             <div className="absolute bottom-4 left-4 right-4 max-w-md mx-auto">
@@ -512,7 +495,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
                 />
               ))}
             </div>
-            
+
             {/* Pop Particle Effects */}
             {!reducedMotion && poppedBubbles.map((particle) => (
               <div key={particle.id} className="absolute inset-0 pointer-events-none">

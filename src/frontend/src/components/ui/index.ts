@@ -1,5 +1,29 @@
 // UI Components
 export { Button, ButtonLink, PrimaryButton, SecondaryButton, DangerButton, SuccessButton, GhostButton } from './Button';
+
+// Kenney Game Assets
+export { 
+  KenneyButton, 
+  KenneyProgressBar, 
+  KenneySlider 
+} from './KenneyButton';
+export type { 
+  KenneyButtonColor, 
+  KenneyButtonSize, 
+  KenneyButtonStyle 
+} from './KenneyButton';
+
+export { 
+  KenneyIcon, 
+  KenneyIconSet, 
+  LivesDisplay, 
+  ScoreDisplay 
+} from './KenneyIcon';
+export type { 
+  KenneyIconType 
+} from './KenneyIcon';
+
+export { ItemIcon } from './ItemIcon';
 export type { ButtonProps, ButtonLinkProps } from './Button';
 
 export { Card, CardHeader, CardFooter, StatCard, FeatureCard } from './Card';
