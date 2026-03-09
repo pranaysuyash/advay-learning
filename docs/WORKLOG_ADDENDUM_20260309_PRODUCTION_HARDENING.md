@@ -161,3 +161,4 @@ Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - 2026-03-09: **DONE** - Local CI-equivalent backend/frontend checks are green; changes ready for commit/push for PR re-run.
 - 2026-03-09: **IN PROGRESS** - Follow-up lockfile normalization for Node 24 `npm ci` sync error (AJV/Rollup mismatch) after first PR rerun.
 - 2026-03-09: **IN PROGRESS** - CI workflow hardening: pin npm `11.6.2` in frontend test job to eliminate runner npm-version drift.
+- 2026-03-09: **IN PROGRESS** - Switched frontend CI install command to `npm install --no-audit --no-fund` due reproducible GitHub-only `npm ci` lockfile desync error.
