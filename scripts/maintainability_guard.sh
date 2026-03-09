@@ -10,6 +10,15 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+PYTHON_BIN="$REPO_ROOT/.venv/bin/python3"
+if [[ ! -x "$PYTHON_BIN" ]]; then
+  PYTHON_BIN="$(command -v python3 || true)"
+fi
+if [[ -z "$PYTHON_BIN" ]]; then
+  echo "[maint-check] python3 not found in PATH and .venv/bin/python3 missing." >&2
+  exit 1
+fi
+
 MAX_FILE_LOC="${MAX_FILE_LOC:-1000}"
 MAX_FILE_BYTES="${MAX_FILE_BYTES:-60000}"
 MAX_FILE_CCN="${MAX_FILE_CCN:-60}"
@@ -87,7 +96,7 @@ get_changed_files() {
 }
 
 HAS_LIZARD=0
-if python3 -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("lizard") else 1)' >/dev/null 2>&1; then
+if "$PYTHON_BIN" -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("lizard") else 1)' >/dev/null 2>&1; then
   HAS_LIZARD=1
 fi
 
@@ -100,7 +109,7 @@ complexity_metrics_for_path() {
     return
   fi
 
-  python3 - "$blob_path" <<'PY'
+  "$PYTHON_BIN" - "$blob_path" <<'PY'
 import sys
 import lizard
 

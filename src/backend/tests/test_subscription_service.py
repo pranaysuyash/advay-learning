@@ -1,7 +1,6 @@
 """Tests for subscription service."""
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -36,8 +35,8 @@ class TestCreateSubscription:
 
     async def test_create_subscription_success(self, db_session: AsyncSession):
         """Test creating a subscription."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         # Create a unique user for this test
         user = User(
@@ -65,8 +64,8 @@ class TestCreateSubscription:
 
     async def test_create_subscription_idempotent(self, db_session: AsyncSession):
         """Test that creating subscription with same payment ref is idempotent."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_idem_{uuid4()}@test.com",
@@ -105,8 +104,8 @@ class TestGetActiveSubscription:
 
     async def test_get_active_subscription_exists(self, db_session: AsyncSession):
         """Test getting active subscription when one exists."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_active_{uuid4()}@test.com",
@@ -135,8 +134,8 @@ class TestGetActiveSubscription:
 
     async def test_get_active_subscription_none(self, db_session: AsyncSession):
         """Test getting active subscription when none exists."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_none_{uuid4()}@test.com",
@@ -156,8 +155,8 @@ class TestGetSubscriptionById:
 
     async def test_get_subscription_by_id_success(self, db_session: AsyncSession):
         """Test getting subscription by ID."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_byid_{uuid4()}@test.com",
@@ -196,8 +195,8 @@ class TestCancelSubscription:
 
     async def test_cancel_subscription_success(self, db_session: AsyncSession):
         """Test cancelling a subscription."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_cancel_{uuid4()}@test.com",
@@ -235,8 +234,8 @@ class TestCalculateUpgradeCredit:
 
     async def test_calculate_upgrade_credit_active(self, db_session: AsyncSession):
         """Test credit calculation for active subscription."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_credit_{uuid4()}@test.com",
@@ -265,8 +264,8 @@ class TestCalculateUpgradeCredit:
 
     async def test_calculate_upgrade_credit_expired(self, db_session: AsyncSession):
         """Test credit calculation for expired subscription."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_expired_{uuid4()}@test.com",
@@ -308,8 +307,8 @@ class TestUpgradeSubscription:
 
     async def test_upgrade_subscription_success(self, db_session: AsyncSession):
         """Test upgrading a subscription."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_upgrade_{uuid4()}@test.com",
@@ -355,8 +354,8 @@ class TestCanAccessGame:
 
     async def test_can_access_game_full_annual(self, db_session: AsyncSession):
         """Test that full annual subscribers can access all games."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_full_{uuid4()}@test.com",
@@ -385,8 +384,8 @@ class TestCanAccessGame:
 
     async def test_can_access_game_no_subscription(self, db_session: AsyncSession):
         """Test that users without subscription cannot access games."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_nosub_{uuid4()}@test.com",
@@ -583,8 +582,8 @@ class TestGetSubscriptionForParent:
 
     async def test_get_subscription_for_parent(self, db_session: AsyncSession):
         """Test getting subscription for parent."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_parent_{uuid4()}@test.com",
@@ -612,8 +611,8 @@ class TestGetSubscriptionForParent:
 
     async def test_get_subscription_for_parent_none(self, db_session: AsyncSession):
         """Test getting subscription when none exists."""
-        from app.services.subscription_service import SubscriptionService
         from app.core.security import get_password_hash
+        from app.services.subscription_service import SubscriptionService
 
         user = User(
             email=f"sub_noparent_{uuid4()}@test.com",

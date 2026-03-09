@@ -33,7 +33,6 @@ export class MediaPipeVisionProvider implements VisionProvider {
   readonly name = 'MediaPipe';
   readonly supportedTasks: VisionTask[] = ['hand', 'pose', 'face'];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private filesetResolver: any | null = null;
   private handLandmarker: HandLandmarker | null = null;
   private poseLandmarker: PoseLandmarker | null = null;
@@ -69,7 +68,6 @@ export class MediaPipeVisionProvider implements VisionProvider {
 
       switch (task) {
         case 'hand':
-          // @ts-ignore - types from @mediapipe/tasks-vision are incomplete
           this.handLandmarker = await (
             this.filesetResolver as any
           ).createHandLandmarker({
@@ -81,7 +79,6 @@ export class MediaPipeVisionProvider implements VisionProvider {
           });
           break;
         case 'pose':
-          // @ts-ignore - types are missing
           this.poseLandmarker = await (
             this.filesetResolver as any
           ).createPoseLandmarker({
@@ -92,7 +89,6 @@ export class MediaPipeVisionProvider implements VisionProvider {
           });
           break;
         case 'face':
-          // @ts-ignore - types are missing
           this.faceLandmarker = await (
             this.filesetResolver as any
           ).createFaceLandmarker({
@@ -184,7 +180,6 @@ export class MediaPipeVisionProvider implements VisionProvider {
           worldLandmarks: result.worldLandmarks[i],
           handedness: result.handedness[i].map((h) => ({
             category: h.categoryName,
-            // @ts-ignore - property name differs in types
             score: (h as any).probability,
           })),
         });

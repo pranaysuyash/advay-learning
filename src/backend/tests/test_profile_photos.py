@@ -1,10 +1,7 @@
 """Tests for profile photo upload endpoints."""
 
 import io
-from pathlib import Path
-from unittest.mock import patch
 
-import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -120,11 +117,11 @@ class TestProfilePhotoUpload:
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
     ):
         """Test uploading photo to profile not owned by user fails."""
-        from app.db.models.profile import Profile
         from uuid import uuid4
 
         # Create a user first
         from app.core.security import get_password_hash
+        from app.db.models.profile import Profile
         from app.db.models.user import User
         other_user = User(
             email=f"other_{uuid4()}@test.com",
@@ -320,10 +317,11 @@ class TestProfilePhotoGet:
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
     ):
         """Test getting photo of profile not owned by user fails."""
+        from uuid import uuid4
+
+        from app.core.security import get_password_hash
         from app.db.models.profile import Profile
         from app.db.models.user import User
-        from app.core.security import get_password_hash
-        from uuid import uuid4
 
         other_user = User(
             email=f"other_{uuid4()}@test.com",
@@ -394,10 +392,11 @@ class TestProfilePhotoDelete:
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
     ):
         """Test deleting photo of profile not owned by user fails."""
+        from uuid import uuid4
+
+        from app.core.security import get_password_hash
         from app.db.models.profile import Profile
         from app.db.models.user import User
-        from app.core.security import get_password_hash
-        from uuid import uuid4
 
         other_user = User(
             email=f"other_{uuid4()}@test.com",

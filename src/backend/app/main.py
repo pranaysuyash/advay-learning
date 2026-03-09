@@ -132,7 +132,7 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 async def startup_event():
     """Run startup validations."""
     logger.info("Running startup validations...")
-    
+
     # Initialize Sentry if configured
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
@@ -146,7 +146,7 @@ async def startup_event():
         logger.info(f"✅ Sentry initialized (environment: {settings.APP_ENV})")
     else:
         logger.info("Sentry not configured (set SENTRY_DSN environment variable)")
-    
+
     try:
         await validate_database_schema()
         logger.info("✅ Database schema validation passed")

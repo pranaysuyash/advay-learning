@@ -1,6 +1,5 @@
 """Account lockout service for tracking failed login attempts and implementing account lockout."""
 
-import json
 import logging
 import os
 import time
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AccountLockoutService:
     """Service for tracking failed login attempts and implementing account lockout.
-    
+
     Uses Redis for distributed lockout storage (works across multiple workers/instances).
     Falls back to in-memory storage when Redis is unavailable (dev mode).
     """
@@ -24,14 +23,14 @@ class AccountLockoutService:
     MAX_FAILED_ATTEMPTS = 5
     LOCKOUT_DURATION_MINUTES = 15
     ATTEMPT_WINDOW_SECONDS = 900  # 15 minutes window
-    
+
     # Redis key prefixes
     ATTEMPTS_PREFIX = "lockout:attempts:"
     LOCKOUT_PREFIX = "lockout:locked:"
-    
+
     # Singleton Redis client
     _redis_client: Optional[redis.Redis] = None
-    
+
     # In-memory fallback for dev/CI
     _failed_attempts: Dict[str, List[float]] = {}
     _account_lockouts: Dict[str, datetime] = {}
@@ -44,7 +43,7 @@ class AccountLockoutService:
             if not redis_url:
                 logger.debug("REDIS_URL not configured, using in-memory lockout storage")
                 return None
-            
+
             try:
                 cls._redis_client = redis.from_url(redis_url, decode_responses=True)
                 # Test connection
@@ -53,7 +52,7 @@ class AccountLockoutService:
             except Exception as e:
                 logger.warning(f"Redis connection failed, falling back to in-memory: {e}")
                 cls._redis_client = None
-        
+
         return cls._redis_client
 
     @classmethod
@@ -68,28 +67,28 @@ class AccountLockoutService:
         """
         now = time.time()
         client = await cls._get_redis_client()
-        
+
         if client:
             # Redis path
             try:
                 key = f"{cls.ATTEMPTS_PREFIX}{email}"
-                
+
                 # Add current attempt to list
                 await client.lpush(key, now)
-                
+
                 # Trim list to only keep attempts within window
                 await client.ltrim(key, 0, cls.MAX_FAILED_ATTEMPTS - 1)
-                
+
                 # Set expiry on the key
                 await client.expire(key, cls.ATTEMPT_WINDOW_SECONDS)
-                
+
                 # Get all attempts within window
                 attempts = await client.lrange(key, 0, -1)
                 attempts = [float(a) for a in attempts if now - float(a) <= cls.ATTEMPT_WINDOW_SECONDS]
-                
+
                 # Check if we've exceeded the limit
                 should_lock = len(attempts) >= cls.MAX_FAILED_ATTEMPTS
-                
+
                 if should_lock:
                     # Set lockout with TTL
                     lockout_key = f"{cls.LOCKOUT_PREFIX}{email}"
@@ -99,13 +98,13 @@ class AccountLockoutService:
                         datetime.now().isoformat()
                     )
                     logger.warning(f"Account locked: {email}")
-                
+
                 return should_lock
-                
+
             except redis.RedisError as e:
                 logger.warning(f"Redis error recording attempt, falling back to in-memory: {e}")
                 # Fall through to in-memory implementation
-        
+
         # In-memory fallback (original implementation)
         if email not in cls._failed_attempts:
             cls._failed_attempts[email] = []
@@ -137,7 +136,7 @@ class AccountLockoutService:
             True if account is locked, False otherwise
         """
         client = await cls._get_redis_client()
-        
+
         if client:
             # Redis path
             try:
@@ -148,7 +147,7 @@ class AccountLockoutService:
             except redis.RedisError as e:
                 logger.warning(f"Redis error checking lockout, falling back to in-memory: {e}")
                 # Fall through to in-memory implementation
-        
+
         # In-memory fallback
         lockout_time = cls._account_lockouts.get(email)
 
@@ -179,13 +178,13 @@ class AccountLockoutService:
             Remaining lockout time in seconds, or None if not locked
         """
         client = await cls._get_redis_client()
-        
+
         if client:
             # Redis path
             try:
                 lockout_key = f"{cls.LOCKOUT_PREFIX}{email}"
                 ttl = await client.ttl(lockout_key)
-                
+
                 # TTL values: -2 = key doesn't exist, -1 = no expiry, >0 = seconds remaining
                 if ttl > 0:
                     return ttl
@@ -193,7 +192,7 @@ class AccountLockoutService:
             except redis.RedisError as e:
                 logger.warning(f"Redis error getting TTL, falling back to in-memory: {e}")
                 # Fall through to in-memory implementation
-        
+
         # In-memory fallback
         lockout_time = cls._account_lockouts.get(email)
 
@@ -220,13 +219,13 @@ class AccountLockoutService:
             email: The email for which to clear attempts
         """
         client = await cls._get_redis_client()
-        
+
         if client:
             # Redis path
             try:
                 attempts_key = f"{cls.ATTEMPTS_PREFIX}{email}"
                 lockout_key = f"{cls.LOCKOUT_PREFIX}{email}"
-                
+
                 # Delete both keys
                 await client.delete(attempts_key, lockout_key)
                 logger.info(f"Cleared lockout state for: {email}")
@@ -234,7 +233,7 @@ class AccountLockoutService:
             except redis.RedisError as e:
                 logger.warning(f"Redis error clearing attempts, falling back to in-memory: {e}")
                 # Fall through to in-memory implementation
-        
+
         # In-memory fallback
         if email in cls._failed_attempts:
             del cls._failed_attempts[email]
@@ -255,13 +254,13 @@ class AccountLockoutService:
         """
         # Check if locked first
         was_locked = await cls.is_account_locked(email)
-        
+
         if was_locked:
             await cls.clear_failed_attempts(email)
             logger.info(f"Manually unlocked account: {email}")
-        
+
         return was_locked
-    
+
     @classmethod
     async def close(cls):
         """Close Redis connection."""

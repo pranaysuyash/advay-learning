@@ -118,3 +118,44 @@
 ## Summary
 
 4 P1 issues identified from audit. All are operational infrastructure gaps that block production deployment.
+
+---
+
+## TCK-20260309-006 :: CI Pipeline Remediation (PR #15)
+
+**Ticket Stamp**: STAMP-20260309T141500Z-ci
+
+**Type**: HARDENING  
+**Owner**: Pranay  
+**Status**: **DONE**  
+**Priority**: P1
+
+### Scope Contract
+
+- **In-scope**:
+  - Fix failing `frontend-test` dependency/build pipeline errors
+  - Fix backend lint/test regressions blocking reliable CI verification
+- **Out-of-scope**:
+  - Broader refactors unrelated to current CI failures
+  - Deployment workflow changes
+- **Behavior change allowed**: YES (test/build pipeline stability)
+
+### Prompt Trace
+
+- `prompts/review/local-pre-commit-review-v1.0.md`
+- `AGENTS.md` §8 default lifecycle
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+### Execution Log
+
+- 2026-03-09: Upgraded frontend PWA/tooling deps to versions compatible with Vite 7.
+- 2026-03-09: Updated `vite.config.js` Workbox cache size threshold to prevent build failure on large `tts.worker` chunk.
+- 2026-03-09: Ran frontend checks (`npm ci`, `npm run lint`, `npm run type-check`, `npm run build`) and verified pass locally.
+- 2026-03-09: Fixed backend lint findings via Ruff autofix + cleanup and revalidated lint.
+- 2026-03-09: Aligned backend tests with current auth API behavior (`400` for invalid reset/verify tokens).
+- 2026-03-09: Fixed `test_progress_service` fixture regressions (`email_verified` field + unique progress IDs) to remove DB key collisions.
+- 2026-03-09: Ran backend tests and verified pass locally (`290 passed, 1 skipped`).
+
+### Status Updates
+
+- 2026-03-09: **DONE** - Local CI-equivalent backend/frontend checks are green; changes ready for commit/push for PR re-run.

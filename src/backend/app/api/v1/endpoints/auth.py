@@ -15,7 +15,6 @@ from app.core.exceptions import (
     AccountLockedError,
     AuthenticationError,
     AuthorizationError,
-    DuplicateResourceError,
     TokenInvalidError,
 )
 from app.core.rate_limit import RateLimits, limiter

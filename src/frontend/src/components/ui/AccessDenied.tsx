@@ -21,7 +21,7 @@ export function AccessDenied({ gameName, gameId }: AccessDeniedProps) {
   };
 
   return (
-    <div className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4'>
+    <div className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50 p-4'>
       <div className='bg-white border-4 border-[#F2CC8F] rounded-[2rem] p-8 max-w-md w-full shadow-2xl relative overflow-hidden'>
         {/* Decorative background */}
         <div className='absolute top-0 left-0 w-full h-24 bg-[#3B82F6]/10 -z-10'></div>

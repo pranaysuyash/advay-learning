@@ -240,7 +240,7 @@ export function IssueReportFlowModal({
   return (
     <AnimatePresence>
       <motion.div
-        className='fixed inset-0 z-[70] bg-slate-900/70 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center'
+        className='fixed inset-0 z-[70] bg-[#FFF8F0]/80 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.refresh_token import RefreshToken
@@ -15,8 +14,8 @@ class TestRefreshTokenService:
 
     async def test_create_refresh_token(self, db_session: AsyncSession):
         """Test creating a refresh token."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         # Create user
         user = User(
@@ -40,8 +39,8 @@ class TestRefreshTokenService:
 
     async def test_validate_refresh_token_valid(self, db_session: AsyncSession):
         """Test validating a valid refresh token."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         user = User(
             email=f"rt_valid_{uuid4()}@test.com",
@@ -65,8 +64,8 @@ class TestRefreshTokenService:
 
     async def test_validate_refresh_token_invalid(self, db_session: AsyncSession):
         """Test validating an invalid refresh token."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         user = User(
             email=f"rt_invalid_{uuid4()}@test.com",
@@ -87,8 +86,8 @@ class TestRefreshTokenService:
 
     async def test_validate_refresh_token_wrong_user(self, db_session: AsyncSession):
         """Test validating token for wrong user."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         user1 = User(
             email=f"rt_user1_{uuid4()}@test.com",
@@ -120,8 +119,8 @@ class TestRefreshTokenService:
 
     async def test_revoke_refresh_token(self, db_session: AsyncSession):
         """Test revoking a refresh token."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         user = User(
             email=f"rt_revoke_{uuid4()}@test.com",
@@ -146,8 +145,8 @@ class TestRefreshTokenService:
 
     async def test_validate_expired_token(self, db_session: AsyncSession):
         """Test validating an expired refresh token."""
-        from app.services.refresh_token_service import RefreshTokenService
         from app.core.security import get_password_hash
+        from app.services.refresh_token_service import RefreshTokenService
 
         user = User(
             email=f"rt_expired_{uuid4()}@test.com",

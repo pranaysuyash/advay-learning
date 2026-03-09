@@ -1,13 +1,13 @@
 """Tests for GameService."""
 
+import uuid
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import uuid
-
-from app.services.game_service import GameService
-from app.schemas.game import GameCreate, GameUpdate
 from app.db.models.game import Game
+from app.schemas.game import GameCreate, GameUpdate
+from app.services.game_service import GameService
 
 
 @pytest.fixture
@@ -68,7 +68,7 @@ class TestGetAll:
     async def test_get_all_games(self, db_session: AsyncSession, test_games: list[Game]):
         """Test getting all published games."""
         games, total = await GameService.get_all(db_session)
-        
+
         # Should at least have our test games
         assert len(games) >= 5
         assert total >= 5
@@ -76,7 +76,7 @@ class TestGetAll:
     async def test_get_all_with_category_filter(self, db_session: AsyncSession, test_games: list[Game]):
         """Test filtering by category."""
         games, total = await GameService.get_all(db_session, category="math")
-        
+
         # Should have at least our 3 test games (indices 0, 2, 4)
         assert len(games) >= 3
         assert total >= 3
@@ -86,7 +86,7 @@ class TestGetAll:
     async def test_get_all_with_difficulty_filter(self, db_session: AsyncSession, test_games: list[Game]):
         """Test filtering by difficulty."""
         games, total = await GameService.get_all(db_session, difficulty="easy")
-        
+
         # Should have at least our 2 test games (indices 0, 1)
         assert len(games) >= 2
         assert total >= 2
@@ -96,7 +96,7 @@ class TestGetAll:
     async def test_get_all_with_age_min_filter(self, db_session: AsyncSession, test_games: list[Game]):
         """Test filtering by minimum age."""
         games, total = await GameService.get_all(db_session, age_min=5)
-        
+
         # All test games have age_range_min >= 5
         assert len(games) >= 5
         assert total >= 5
@@ -104,7 +104,7 @@ class TestGetAll:
     async def test_get_all_with_age_max_filter(self, db_session: AsyncSession, test_games: list[Game]):
         """Test filtering by maximum age."""
         games, total = await GameService.get_all(db_session, age_max=8)
-        
+
         # Test games 0, 1, 2 have age_range_max <= 8
         assert len(games) >= 3
         assert total >= 3
@@ -112,7 +112,7 @@ class TestGetAll:
     async def test_get_all_with_featured_filter(self, db_session: AsyncSession, test_games: list[Game]):
         """Test filtering by featured status."""
         games, total = await GameService.get_all(db_session, is_featured=True)
-        
+
         # Should have at least our 1 featured test game
         assert len(games) >= 1
         assert total >= 1
@@ -138,30 +138,30 @@ class TestGetAll:
         )
         db_session.add(unpublished)
         await db_session.commit()
-        
+
         games, total = await GameService.get_all(db_session, is_published=False)
-        
+
         assert len(games) == 1
         assert games[0].is_published is False
 
     async def test_get_all_pagination(self, db_session: AsyncSession, test_games: list[Game]):
         """Test pagination."""
         games, total = await GameService.get_all(db_session, page=1, page_size=2)
-        
+
         assert len(games) == 2
         assert total >= 5
 
     async def test_get_all_pagination_page_2(self, db_session: AsyncSession, test_games: list[Game]):
         """Test pagination page 2."""
         games, total = await GameService.get_all(db_session, page=2, page_size=2)
-        
+
         assert len(games) == 2
         assert total >= 5
 
     async def test_get_all_pagination_last_page(self, db_session: AsyncSession, test_games: list[Game]):
         """Test pagination last page."""
         games, total = await GameService.get_all(db_session, page=3, page_size=2)
-        
+
         assert len(games) >= 1
         assert total >= 5
 
@@ -170,7 +170,7 @@ class TestGetAll:
         # Use a unique category that shouldn't exist
         unique_cat = f"nonexistent-{uuid.uuid4()}"
         games, total = await GameService.get_all(db_session, category=unique_cat)
-        
+
         assert len(games) == 0
         assert total == 0
 
@@ -181,7 +181,7 @@ class TestGetBySlug:
     async def test_get_by_slug_success(self, db_session: AsyncSession, test_game: Game):
         """Test getting game by slug."""
         result = await GameService.get_by_slug(db_session, test_game.slug)
-        
+
         assert result is not None
         assert result.id == test_game.id
         assert result.title == "Test Game"
@@ -189,7 +189,7 @@ class TestGetBySlug:
     async def test_get_by_slug_not_found(self, db_session: AsyncSession):
         """Test getting non-existent game by slug."""
         result = await GameService.get_by_slug(db_session, "nonexistent")
-        
+
         assert result is None
 
 
@@ -199,7 +199,7 @@ class TestGetById:
     async def test_get_by_id_success(self, db_session: AsyncSession, test_game: Game):
         """Test getting game by ID."""
         result = await GameService.get_by_id(db_session, test_game.id)
-        
+
         assert result is not None
         assert result.id == test_game.id
         assert result.title == "Test Game"
@@ -207,7 +207,7 @@ class TestGetById:
     async def test_get_by_id_not_found(self, db_session: AsyncSession):
         """Test getting non-existent game by ID."""
         result = await GameService.get_by_id(db_session, "nonexistent-id")
-        
+
         assert result is None
 
 
@@ -228,9 +228,9 @@ class TestCreate:
             age_range_min=5,
             age_range_max=10,
         )
-        
+
         game = await GameService.create(db_session, game_data, "admin")
-        
+
         assert game.title == "New Game"
         assert f"new-game-{unique_id}" in game.slug
         assert game.created_by == "admin"
@@ -251,9 +251,9 @@ class TestCreate:
             age_range_max=10,
             config_json={"key": "value", "number": 123},
         )
-        
+
         game = await GameService.create(db_session, game_data, "admin")
-        
+
         assert game.config_json is not None
         # Verify it was stored as JSON string
         assert '"key": "value"' in game.config_json
@@ -269,9 +269,9 @@ class TestUpdate:
             title="Updated Title",
             description="Updated description",
         )
-        
+
         updated = await GameService.update(db_session, test_game.id, update_data)
-        
+
         assert updated is not None
         assert updated.title == "Updated Title"
         assert updated.description == "Updated description"
@@ -281,17 +281,17 @@ class TestUpdate:
     async def test_update_game_not_found(self, db_session: AsyncSession):
         """Test updating non-existent game."""
         update_data = GameUpdate(title="New Title")
-        
+
         result = await GameService.update(db_session, "nonexistent-id", update_data)
-        
+
         assert result is None
 
     async def test_update_game_partial(self, db_session: AsyncSession, test_game: Game):
         """Test partial update (only some fields)."""
         update_data = GameUpdate(title="Only Title Updated")
-        
+
         updated = await GameService.update(db_session, test_game.id, update_data)
-        
+
         assert updated is not None
         assert updated.title == "Only Title Updated"
         assert updated.description == "A test game"  # Unchanged
@@ -301,9 +301,9 @@ class TestUpdate:
         update_data = GameUpdate(
             config_json={"updated": True, "level": 5},
         )
-        
+
         updated = await GameService.update(db_session, test_game.id, update_data)
-        
+
         assert updated is not None
         assert '"updated": true' in updated.config_json
 
@@ -314,9 +314,9 @@ class TestDelete:
     async def test_delete_game(self, db_session: AsyncSession, test_game: Game):
         """Test deleting a game."""
         result = await GameService.delete(db_session, test_game.id)
-        
+
         assert result is True
-        
+
         # Verify it's gone
         deleted = await GameService.get_by_id(db_session, test_game.id)
         assert deleted is None
@@ -324,5 +324,5 @@ class TestDelete:
     async def test_delete_game_not_found(self, db_session: AsyncSession):
         """Test deleting non-existent game."""
         result = await GameService.delete(db_session, "nonexistent-id")
-        
+
         assert result is False
