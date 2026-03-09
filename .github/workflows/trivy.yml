@@ -23,21 +23,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.2
-        with:
-          version: v0.56.2
-
       - name: Run Trivy filesystem scan (vuln + misconfig + secrets)
-        run: |
-          trivy fs \
-            --scanners vuln,misconfig,secret \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            --format sarif \
-            --output trivy-results.sarif \
-            --exit-code "${TRIVY_EXIT_CODE}" \
-            .
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: ${{ env.TRIVY_EXIT_CODE }}
 
       - name: Upload SARIF to GitHub code scanning
         if: always() && hashFiles('trivy-results.sarif') != ''
