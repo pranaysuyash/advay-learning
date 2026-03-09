@@ -1,7 +1,7 @@
 """Add parental consent tables for DPDPA compliance
 
 Revision ID: 20260307_add_parental_consent
-Revises: 
+Revises:
 Create Date: 2026-03-07 23:55:00.000000
 
 @ticket TCK-20260307-CRIT-002
@@ -10,8 +10,9 @@ Create Date: 2026-03-07 23:55:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '20260307_add_parental_consent'
@@ -22,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create parental consent tables for DPDPA 2023 compliance."""
-    
+
     # Create enum types
     verification_method_type = postgresql.ENUM(
         'email',
@@ -38,7 +39,7 @@ def upgrade() -> None:
         name='verificationmethod',
         create_type=False,
     )
-    
+
     consent_status_type = postgresql.ENUM(
         'pending',
         'verified',
@@ -55,7 +56,7 @@ def upgrade() -> None:
         name='consentstatus',
         create_type=False,
     )
-    
+
     # Create parental_consents table
     op.create_table(
         'parental_consents',
@@ -87,7 +88,7 @@ def upgrade() -> None:
     op.create_index('ix_parental_consents_parent_id', 'parental_consents', ['parent_id'])
     op.create_index('ix_parental_consents_child_id', 'parental_consents', ['child_id'])
     op.create_index('ix_parental_consents_status', 'parental_consents', ['status'])
-    
+
     # Create consent_audit_logs table
     op.create_table(
         'consent_audit_logs',
@@ -108,10 +109,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Drop parental consent tables."""
-    
+
     op.drop_table('consent_audit_logs')
     op.drop_table('parental_consents')
-    
+
     # Drop enum types
     postgresql.ENUM(name='verificationmethod').drop(op.get_bind(), checkfirst=True)
     postgresql.ENUM(name='consentstatus').drop(op.get_bind(), checkfirst=True)

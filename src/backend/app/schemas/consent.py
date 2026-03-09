@@ -8,6 +8,7 @@ DPDPA 2023 Section 9(1) Compliance
 from datetime import datetime
 from enum import Enum
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 

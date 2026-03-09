@@ -11,9 +11,9 @@ from app.db.base_class import Base
 from app.schemas.user import UserRole
 
 if TYPE_CHECKING:
+    from app.db.models.consent import ParentalConsent
     from app.db.models.profile import Profile
     from app.db.models.subscription_model import Subscription
-    from app.db.models.consent import ParentalConsent
 
 
 class User(Base):

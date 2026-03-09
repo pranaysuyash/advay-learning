@@ -51,14 +51,14 @@ async def create_consent(
 ) -> Any:
     """
     Create new parental consent record.
-    
+
     This is the first step in DPDPA-compliant parental consent flow.
     The consent starts as PENDING and must be verified via the chosen method.
     """
     db_verification_method = map_schema_verification_method(
         consent_in.verification_method
     )
-    
+
     # Check if user already has active consent for this child
     result = await db.execute(
         select(ParentalConsent).where(
@@ -68,13 +68,13 @@ async def create_consent(
         )
     )
     existing = result.scalar_one_or_none()
-    
+
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Active consent already exists for this child",
         )
-    
+
     # Create consent record
     consent = ParentalConsent(
         parent_id=current_user.id,
@@ -87,11 +87,11 @@ async def create_consent(
         user_agent=request.headers.get("user-agent"),
         status=ConsentStatus.PENDING,
     )
-    
+
     db.add(consent)
     await db.commit()
     await db.refresh(consent)
-    
+
     # Create audit log
     audit_log = ConsentAuditLog(
         consent_id=consent.id,
@@ -103,7 +103,7 @@ async def create_consent(
     )
     db.add(audit_log)
     await db.commit()
-    
+
     return consent
 
 
@@ -118,7 +118,7 @@ async def verify_consent(
 ) -> Any:
     """
     Verify parental consent using chosen method.
-    
+
     - EMAIL: Requires verification code
     - CREDIT_CARD: Requires payment processor token
     - DECLARATION: Requires explicit acceptance
@@ -130,23 +130,23 @@ async def verify_consent(
         )
     )
     consent = result.scalar_one_or_none()
-    
+
     if not consent:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Consent not found",
         )
-    
+
     if consent.status != ConsentStatus.PENDING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Consent is already {consent.status}",
         )
-    
+
     verification_method = map_schema_verification_method(
         verification.verification_method
     )
-    
+
     if verification_method == VerificationMethod.EMAIL:
         if not verification.email_code:
             raise HTTPException(
@@ -155,7 +155,7 @@ async def verify_consent(
             )
         # TODO: Implement actual email verification logic
         consent.email_verified = True
-        
+
     elif verification_method == VerificationMethod.CREDIT_CARD:
         # Payment verification happens through a provider webhook after checkout.
         if not verification.payment_token:
@@ -165,7 +165,7 @@ async def verify_consent(
             )
         consent.card_transaction_id = verification.payment_token
         # Don't mark as verified yet - wait for webhook
-        
+
     elif verification_method == VerificationMethod.DECLARATION:
         if not verification.declaration_accepted:
             raise HTTPException(
@@ -173,15 +173,15 @@ async def verify_consent(
                 detail="Declaration must be accepted",
             )
         consent.declaration_signed = True
-    
+
     # Check if all required verifications are complete
     # Note: For CREDIT_CARD, verification happens via webhook, not here
     if consent.email_verified or consent.declaration_signed:
         consent.status = ConsentStatus.VERIFIED
         consent.consent_timestamp = datetime.utcnow()
-    
+
     db.add(consent)
-    
+
     # Create audit log
     audit_log = ConsentAuditLog(
         consent_id=consent.id,
@@ -194,7 +194,7 @@ async def verify_consent(
     db.add(audit_log)
     await db.commit()
     await db.refresh(consent)
-    
+
     return consent
 
 
@@ -209,7 +209,7 @@ async def withdraw_consent(
 ) -> Any:
     """
     Withdraw parental consent.
-    
+
     Per DPDPA 2023, consent withdrawal must be:
     - As easy as giving consent
     - Effective immediately
@@ -222,24 +222,24 @@ async def withdraw_consent(
         )
     )
     consent = result.scalar_one_or_none()
-    
+
     if not consent:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Consent not found",
         )
-    
+
     if consent.status == ConsentStatus.WITHDRAWN:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Consent already withdrawn",
         )
-    
+
     consent.status = ConsentStatus.WITHDRAWN
     consent.withdrawal_timestamp = datetime.utcnow()
-    
+
     db.add(consent)
-    
+
     # Create audit log
     audit_log = ConsentAuditLog(
         consent_id=consent.id,
@@ -252,7 +252,7 @@ async def withdraw_consent(
     db.add(audit_log)
     await db.commit()
     await db.refresh(consent)
-    
+
     return consent
 
 
@@ -267,7 +267,7 @@ async def list_consents(
         select(ParentalConsent).where(ParentalConsent.parent_id == current_user.id)
     )
     consents = result.scalars().all()
-    
+
     return consents
 
 
@@ -286,13 +286,13 @@ async def get_consent(
         )
     )
     consent = result.scalar_one_or_none()
-    
+
     if not consent:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Consent not found",
         )
-    
+
     return consent
 
 
@@ -305,7 +305,7 @@ async def check_child_consent_status(
 ) -> dict:
     """
     Check if valid consent exists for a child.
-    
+
     Used by other endpoints to verify consent before processing child data.
     """
     result = await db.execute(
@@ -316,7 +316,7 @@ async def check_child_consent_status(
         )
     )
     consent = result.scalar_one_or_none()
-    
+
     return {
         "has_valid_consent": consent is not None and consent.is_active(),
         "consent_id": str(consent.id) if consent else None,
@@ -335,7 +335,7 @@ async def handle_dodopayments_webhook(
 ) -> dict:
     """
     Handle Dodopayments payment webhooks for parental verification.
-    
+
     @note TEMPORARY: Disabled until database enum migration is complete.
     """
     # TODO: Implement webhook handling after database migration
