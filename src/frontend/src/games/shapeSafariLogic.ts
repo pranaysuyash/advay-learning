@@ -15,6 +15,7 @@
  */
 
 import type { Point } from '../types/tracking';
+import { recordCVError } from '../analytics/extensions/countingCollectathon';
 
 export type ShapeType = 'circle' | 'square' | 'triangle' | 'rectangle' | 'star' | 'oval' | 'diamond' | 'heart';
 
@@ -65,12 +66,15 @@ export interface TracingState {
 
 export interface GameState {
   currentScene: SafariScene | null;
-  foundShapes: Set<string>;
+  // DECISION-2026-03-08: Removed foundShapes Set
+  // RATIONALE: Duplicated state - shapes[].isFound already tracks this
+  // Use getProgress() or shapes.filter(s => s.isFound).length instead
   tracingState: TracingState;
   score: number;
   startTime: number;
   hintsUsed: number;
   completed: boolean;
+  // Note: completed is set by markShapeFound when all shapes found
 }
 
 // Shape drawing functions (normalized coordinates 0-1)
@@ -607,8 +611,11 @@ export function getScenesByDifficulty(difficulty?: 1 | 2 | 3): SafariScene[] {
 }
 
 // Get random scene
-export function getRandomScene(difficulty?: 1 | 2 | 3): SafariScene {
+// DECISION-2026-03-08: Returns null on empty filter instead of undefined
+// RATIONALE: Forces caller to handle "no scenes" case explicitly
+export function getRandomScene(difficulty?: 1 | 2 | 3): SafariScene | null {
   const scenes = getScenesByDifficulty(difficulty);
+  if (scenes.length === 0) return null;
   return scenes[Math.floor(Math.random() * scenes.length)];
 }
 
@@ -618,7 +625,7 @@ export function initializeGame(scene: SafariScene, canvasWidth: number, canvasHe
   
   return {
     currentScene: initializedScene,
-    foundShapes: new Set(),
+    // foundShapes removed - use shapes[].isFound instead
     tracingState: {
       isTracing: false,
       currentPath: [],
@@ -653,6 +660,8 @@ export function findShapeAtPoint(
 }
 
 // Check if point is near a path
+// DECISION-2026-03-08: Added NaN validation for Point inputs
+// RATIONALE: CV/tracking can produce invalid coordinates; fail gracefully
 function isPointNearPath(
   point: Point,
   path: Point[],
@@ -660,6 +669,14 @@ function isPointNearPath(
   canvasWidth: number,
   canvasHeight: number
 ): boolean {
+  // NaN/Infinity validation
+  // DECISION-2026-03-08: Using recordCVError for telemetry + console fallback
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+    if (!Number.isFinite(point.x)) recordCVError('handX', point.x);
+    if (!Number.isFinite(point.y)) recordCVError('handY', point.y);
+    return false;
+  }
+  
   if (path.length < 2) return false;
   
   const px = point.x * canvasWidth;
@@ -782,6 +799,43 @@ export function checkAllShapesFound(gameState: GameState): boolean {
   return gameState.currentScene.shapes.every(s => s.isFound);
 }
 
+// Mark a shape as found and update game state
+// DECISION-2026-03-08: Centralized shape-finding logic
+// RATIONALE: Ensures completed flag is set, score updated, state consistent
+export function markShapeFound(
+  gameState: GameState,
+  shapeId: string,
+  currentTime: number = Date.now()
+): GameState {
+  if (!gameState.currentScene) return gameState;
+
+  const targetShape = gameState.currentScene.shapes.find(shape => shape.id === shapeId);
+  if (!targetShape || targetShape.isFound) return gameState;
+  
+  // Find and mark the shape
+  const updatedShapes = gameState.currentScene.shapes.map(shape =>
+    shape.id === shapeId ? { ...shape, isFound: true } : shape
+  );
+  
+  const updatedScene = { ...gameState.currentScene, shapes: updatedShapes };
+  
+  // Check if all shapes found
+  const allFound = updatedShapes.every(s => s.isFound);
+  
+  // Calculate new score
+  const newScore = calculateFinalScore(
+    { ...gameState, currentScene: updatedScene },
+    currentTime
+  );
+  
+  return {
+    ...gameState,
+    currentScene: updatedScene,
+    score: newScore,
+    completed: allFound,
+  };
+}
+
 // Get shape display name
 export function getShapeDisplayName(type: ShapeType): string {
   const names: Record<ShapeType, string> = {
@@ -804,10 +858,18 @@ export function getProgress(gameState: GameState): { found: number; total: numbe
   return { found, total: gameState.currentScene.shapes.length };
 }
 
+// DECISION-2026-03-08: Using found count from shapes instead of foundShapes Set
+// RATIONALE: Single source of truth - shapes[].isFound is the canonical state
+// MAGIC NUMBERS: Should extract to config (see CONFIG below)
+const BASE_SCORE_PER_SHAPE = 100;
+const TIME_BONUS_SECONDS = 300;
+const HINT_PENALTY = 50;
+
 // Calculate final score
-export function calculateFinalScore(gameState: GameState): number {
-  const baseScore = gameState.foundShapes.size * 100;
-  const timeBonus = Math.max(0, 300 - Math.floor((Date.now() - gameState.startTime) / 1000));
-  const hintPenalty = gameState.hintsUsed * 50;
+export function calculateFinalScore(gameState: GameState, currentTime: number = Date.now()): number {
+  const progress = getProgress(gameState);
+  const baseScore = progress.found * BASE_SCORE_PER_SHAPE;
+  const timeBonus = Math.max(0, TIME_BONUS_SECONDS - Math.floor((currentTime - gameState.startTime) / 1000));
+  const hintPenalty = gameState.hintsUsed * HINT_PENALTY;
   return Math.max(0, baseScore + timeBonus - hintPenalty);
 }

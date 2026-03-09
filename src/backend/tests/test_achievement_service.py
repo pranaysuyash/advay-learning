@@ -5,7 +5,6 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.achievement import Achievement
 from app.db.models.profile import Profile
 from app.db.models.user import User
 from app.schemas.achievement import AchievementCreate
@@ -16,8 +15,8 @@ class TestAchievementService:
 
     async def test_unlock_achievement_success(self, db_session: AsyncSession):
         """Test unlocking an achievement."""
-        from app.services.achievement_service import AchievementService
         from app.core.security import get_password_hash
+        from app.services.achievement_service import AchievementService
 
         # Create user and profile
         user = User(
@@ -54,8 +53,8 @@ class TestAchievementService:
 
     async def test_unlock_achievement_idempotent(self, db_session: AsyncSession):
         """Test unlocking same achievement twice returns existing."""
-        from app.services.achievement_service import AchievementService
         from app.core.security import get_password_hash
+        from app.services.achievement_service import AchievementService
 
         # Create user and profile
         user = User(
@@ -103,8 +102,8 @@ class TestAchievementService:
 
     async def test_get_by_profile(self, db_session: AsyncSession):
         """Test getting achievements by profile."""
-        from app.services.achievement_service import AchievementService
         from app.core.security import get_password_hash
+        from app.services.achievement_service import AchievementService
 
         # Create user and profile
         user = User(
@@ -144,8 +143,8 @@ class TestAchievementService:
 
     async def test_get_by_profile_empty(self, db_session: AsyncSession):
         """Test getting achievements for profile with none."""
-        from app.services.achievement_service import AchievementService
         from app.core.security import get_password_hash
+        from app.services.achievement_service import AchievementService
 
         # Create user and profile
         user = User(

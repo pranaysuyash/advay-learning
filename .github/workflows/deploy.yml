@@ -8,7 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.13'
-  NODE_VERSION: '24'
+  NODE_VERSION: '22'
 
 jobs:
   # =============================================================================
@@ -77,9 +77,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: src/frontend/package-lock.json
 
+      - name: Pin npm version
+        run: |
+          npm install -g npm@11.6.2
+          node --version
+          npm --version
+
       - name: Install frontend dependencies
         working-directory: src/frontend
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Run frontend lints
         working-directory: src/frontend

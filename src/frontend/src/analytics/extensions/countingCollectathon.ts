@@ -4,10 +4,12 @@
  * Provides typed helpers for CV input validation tracking
  * and game-specific metrics.
  * 
- * STATUS: INTERFACE DEFINED, NOT YET IMPLEMENTED
- * PHASE 3 TODO: Implement functions, wire into game logic
- * FALLBACK: console.warn in countingCollectathonLogic.ts (lines 150-155)
+ * STATUS: PHASE 3 IMPLEMENTED
+ * IMPLEMENTED: recordCVError - logs CV input validation errors
+ * FALLBACK: console.warn in countingCollectathonLogic.ts (lines 150-155) - TO BE REPLACED
  */
+
+import { logEvent } from '../index';
 
 // ============================================================================
 // EXTENSION DATA TYPE
@@ -56,36 +58,35 @@ export function initCountingSession(): void {
  * Record CV input validation error
  * 
  * USAGE: Call in updatePlayerPosition when Number.isFinite() fails
- * PHASE 3: Replace console.warn with this function
+ * PHASE 3: IMPLEMENTED - Replaces console.warn
+ * 
+ * DECISION-2026-03-08: Using logEvent directly instead of extension state
+ * RATIONALE: Simpler implementation, extension state can be added later if needed
+ * REVISIT: Add extension state tracking if CV error metrics become important
  * 
  * @param field - Which field failed validation ('handX', 'handY', etc.)
  * @param value - The invalid value received
  */
 export function recordCVError(
-  _field: 'handX' | 'handY',
-  _value: number
+  field: 'handX' | 'handY',
+  value: number
 ): void {
-  // TODO: Implement in Phase 3
-  // const session = getActiveSession();
-  // if (!session) return;
-  //
-  // const current = session.extensionData as Partial<CountingCollectathonExtension>;
-  // const cvErrors = current.cvErrors || { invalidHandX: 0, invalidHandY: 0, totalFrames: 0 };
-  //
-  // if (field === 'handX') {
-  //   cvErrors.invalidHandX++;
-  // } else {
-  //   cvErrors.invalidHandY++;
-  // }
-  //
-  // updateExtension({ cvErrors });
-  //
-  // logEvent('cv_input_error', {
-  //   game: 'counting-collectathon',
-  //   field,
-  //   value: String(value), // Stringify to handle NaN/Infinity
-  //   valueType: typeof value,
-  // });
+  // Log the error event
+  // Note: logEvent handles "no active session" internally (warns to console)
+  // This provides graceful degradation - we try to log, but don't crash if no session
+  logEvent('cv_input_error', {
+    game: 'counting-collectathon',
+    field,
+    value: String(value), // Stringify to handle NaN/Infinity
+    valueType: typeof value,
+  });
+  
+  // Also log to console for development visibility
+  // DECISION-2026-03-08: Keeping console.warn as fallback for debugging
+  // RATIONALE: Helps developers see errors during development
+  if (import.meta.env.DEV) {
+    console.warn(`[CountingCollectathon] Invalid ${field} received:`, value);
+  }
 }
 
 /**

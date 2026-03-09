@@ -271,7 +271,7 @@ export function MusicConductor() {
       onHome={handleBack}
       reportSession={false}
     >
-      <div className='relative w-full h-full bg-slate-900 rounded-lg overflow-hidden touch-none select-none'>
+      <div className='relative w-full h-full bg-[#FFF8F0] rounded-lg overflow-hidden touch-none select-none'>
 
         <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
 

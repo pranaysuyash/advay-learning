@@ -6,6 +6,10 @@ This repo uses **two layers** of tracking:
 2) **Execution log**: `docs/WORKLOG_ADDENDUM_*.md` (append-only; evidence-first; scope contract required)
 3) **Collaboration mirror**: **GitHub Issues** (labels, assignees, discussion, PR linking)
 
+Live project board for this repository:
+
+- **Advay Engineering Board**: https://github.com/users/pranaysuyash/projects/1
+
 ## Rules
 
 1. **The issue register is the source of truth for status.**
@@ -38,3 +42,35 @@ If the workspace is not a git checkout or GH auth is not configured:
 
 - Work normally using the worklog only.
 - Set `Issue: Unknown` and record why under Evidence (Observed/Unknown).
+
+## GitHub Configuration Pack
+
+This repo ships an in-repo issue-management configuration:
+
+- Issue forms:
+  - `.github/ISSUE_TEMPLATE/bug-report.yml`
+  - `.github/ISSUE_TEMPLATE/feature-request.yml`
+  - `.github/ISSUE_TEMPLATE/audit-remediation.yml`
+  - `.github/ISSUE_TEMPLATE/ci-failure.yml`
+- PR template:
+  - `.github/PULL_REQUEST_TEMPLATE.md`
+- Required PR link gate:
+  - `.github/workflows/pr-link-gate.yml`
+- Path auto-labeling:
+  - `.github/workflows/pr-path-labeler.yml`
+- Project/issue lifecycle automation:
+  - `.github/workflows/project-and-issue-automation.yml`
+
+Recommended project board status columns:
+
+- `Inbox`
+- `Ready`
+- `In Progress`
+- `PR Open`
+- `Review`
+- `Done`
+
+Repository automation settings (active):
+
+- Repository variable: `PROJECT_URL=https://github.com/users/pranaysuyash/projects/1`
+- Repository secret: `PROJECT_TOKEN` (used by project-automation workflow)

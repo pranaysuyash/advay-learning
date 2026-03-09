@@ -1,9 +1,8 @@
 """Tests for cache service."""
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
-import pytest
 import redis.asyncio as redis
 
 

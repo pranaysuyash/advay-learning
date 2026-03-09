@@ -6,9 +6,11 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -30,7 +32,20 @@ const TARGET_RADIUS = 0.18; // Increased from 0.12 for kids' easier targeting
 const CURSOR_SIZE = 84; // Increased for easier visibility
 const TARGET_SIZE = 160; // Increased for kids' fingers
 
-export const SteadyHandLab = memo(function SteadyHandLabComponent() {
+export const SteadyHandLab = memo(function SteadyHandLabShell() {
+  return (
+    <GameShell
+      gameId="steady-hand-lab"
+      gameName="Steady Hand Lab"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <SteadyHandLabContent />
+    </GameShell>
+  );
+});
+
+const SteadyHandLabContent = memo(function SteadyHandLabComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +71,7 @@ export const SteadyHandLab = memo(function SteadyHandLabComponent() {
   } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('steady-hand-lab');
+  useGameProgress('steady-hand-lab');
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;

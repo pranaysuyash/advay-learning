@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a defect with reproducible evidence.
+title: "bug: "
+labels:
+  - type/bug
+  - status/inbox
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line defect summary.
+      placeholder: "Crash on game start when camera permission is denied"
+    validations:
+      required: true
+  - type: textarea
+    id: scope_contract
+    attributes:
+      label: Scope contract
+      description: Define exact in-scope and out-of-scope boundaries.
+      placeholder: |
+        In-scope:
+        Out-of-scope:
+        Behavior change allowed: YES/NO
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Checklist of observable done conditions.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Ordered steps to reproduce.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Include command output, screenshots, logs, and label each claim as Observed/Inferred/Unknown.
+      placeholder: |
+        Command:
+        Output:
+        Interpretation: Observed/Inferred/Unknown
+    validations:
+      required: true
+  - type: input
+    id: prompt_trace
+    attributes:
+      label: Prompt trace
+      description: Prompt(s) followed for this work.
+      placeholder: prompts/review/local-pre-commit-review-v1.0.md
+    validations:
+      required: true
+  - type: input
+    id: worklog_ticket
+    attributes:
+      label: Linked worklog ticket
+      description: Required TCK id from docs/WORKLOG_ADDENDUM_*.md.
+      placeholder: TCK-20260309-006
+    validations:
+      required: true

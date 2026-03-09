@@ -1,0 +1,44 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    env:
+      # Keep PR checks informative/non-blocking, enforce on main/schedule.
+      TRIVY_EXIT_CODE: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan (vuln + misconfig + secrets)
+        run: |
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            aquasec/trivy:0.56.2 fs \
+            --scanners vuln,misconfig,secret \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --format sarif \
+            --output trivy-results.sarif \
+            --exit-code "${TRIVY_EXIT_CODE}" \
+            .
+
+      - name: Upload SARIF to GitHub code scanning
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif

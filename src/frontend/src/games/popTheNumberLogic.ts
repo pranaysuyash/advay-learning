@@ -111,7 +111,7 @@ export function checkPop(
 }
 
 // Difficulty multipliers
-const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
+export const DIFFICULTY_MULTIPLIERS: Record<number, number> = {
   1: 1,    // 1-3 range
   2: 1.5,  // 1-5 range
   3: 2,    // 1-7 range

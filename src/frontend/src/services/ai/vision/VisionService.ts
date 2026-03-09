@@ -124,7 +124,6 @@ export class VisionService {
     try {
       const { HandLandmarker } = await import('@mediapipe/tasks-vision');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.handLandmarker = await HandLandmarker.createFromOptions(vision as any, {
         baseOptions: {
           modelAssetPath: MEDIAPIPE_CDN.model,

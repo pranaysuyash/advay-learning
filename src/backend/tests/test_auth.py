@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -285,11 +284,10 @@ class TestAuthPasswordReset:
 
     async def test_reset_password_short_password(self, client: AsyncClient, db_session: AsyncSession):
         """Test password reset with short password fails."""
-        from app.services.user_service import UserService
-
         # Create a user and generate reset token
         from app.core.security import get_password_hash
         from app.db.models.user import User
+        from app.services.user_service import UserService
 
         user = User(
             email="shortpass@example.com",
@@ -317,7 +315,6 @@ class TestAuthEmailVerification:
     async def test_verify_email_success(self, client: AsyncClient, db_session: AsyncSession):
         """Test email verification with valid token."""
         from app.core.email import EmailService
-        from app.services.user_service import UserService
 
         # Create unverified user
         user_data = {"email": "verify@example.com", "password": "TestPass123!"}
@@ -366,7 +363,6 @@ class TestAuthEmailVerification:
 
     async def test_resend_verification_existing_user(self, client: AsyncClient, db_session: AsyncSession):
         """Test resend verification for unverified user."""
-        from app.core.email import EmailService
 
         # Create unverified user
         from app.core.security import get_password_hash

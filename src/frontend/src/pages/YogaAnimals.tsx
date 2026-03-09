@@ -3,6 +3,8 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
+import { GameShell } from '../components/GameShell';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -97,13 +99,14 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
 ];
 
-export const YogaAnimals = memo(function YogaAnimalsComponent() {
+const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('yoga-animals');
   const { currentProfile } = useProgressStore();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('yoga-animals');
+  useGameProgress('yoga-animals');
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -783,5 +786,18 @@ export const YogaAnimals = memo(function YogaAnimalsComponent() {
         )}
       </div>
     </GlobalErrorBoundary>
+  );
+});
+
+export const YogaAnimals = memo(function YogaAnimalsShell() {
+  return (
+    <GameShell
+      gameId="yoga-animals"
+      gameName="Yoga Animals"
+      showWellnessTimer={false}
+      enableErrorBoundary={true}
+    >
+      <YogaAnimalsContent />
+    </GameShell>
   );
 });

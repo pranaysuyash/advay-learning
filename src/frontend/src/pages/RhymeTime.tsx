@@ -15,6 +15,7 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import {
   Target,
@@ -37,6 +38,8 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { SVGBird } from '../components/characters/SVGBird';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
@@ -61,11 +64,204 @@ import {
   getStarRating,
 } from '../games/rhymeTimeLogic';
 
-export default function RhymeTime() {
+interface DifficultyMenuProps {
+  ttsEnabled: boolean;
+  startGame: (difficulty: Difficulty) => void;
+}
+
+function DifficultyMenu({ ttsEnabled, startGame }: DifficultyMenuProps) {
+  const difficultyMeta: Record<
+    Difficulty,
+    { label: string; description: string; icon: ReactNode }
+  > = {
+    easy: {
+      label: 'Easy',
+      description: '3 simple rhymes',
+      icon: <Sprout className="w-10 h-10 mx-auto text-green-500" />,
+    },
+    medium: {
+      label: 'Medium',
+      description: '6 rhyme families',
+      icon: <Sprout className="w-10 h-10 mx-auto text-green-600" />,
+    },
+    hard: {
+      label: 'Hard',
+      description: '10 rhyme families',
+      icon: <TreeDeciduous className="w-10 h-10 mx-auto text-green-700" />,
+    },
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-6">
+      <SVGBird expression="singing" size="lg" className="mb-4 animate-float" />
+      <h2 className="text-2xl font-bold text-advay-slate mb-2">Rhyme Time!</h2>
+
+      <div
+        data-ux-goal="Match words that sound the same to help the bird sing!"
+        data-ux-instruction="Click the word that sounds the same as the target word"
+        data-ux-action="click"
+        className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4 max-w-md border-2 border-purple-300"
+      >
+        <div className="flex items-center gap-3">
+          <Target className="w-8 h-8 text-purple-600" />
+          <div>
+            <p className="font-bold text-purple-800">GOAL:</p>
+            <p className="text-purple-700">Match words that sound the same!</p>
+            <p className="text-purple-600 text-sm flex items-center justify-center gap-1"><Music className="w-4 h-4" /> Cat → Bat, Dog → Frog <Music className="w-4 h-4" /></p>
+          </div>
+        </div>
+      </div>
+
+      {ttsEnabled && (
+        <div className="mb-4">
+          <VoiceInstructions
+            instructions={[
+              'Listen to the target word.',
+              'Find the word that rhymes!',
+              'Pinch to select!',
+            ]}
+            autoSpeak={true}
+            showReplayButton={true}
+            replayButtonPosition='bottom-right'
+          />
+        </div>
+      )}
+
+      <p className="text-text-secondary mb-6 text-sm text-center max-w-md">
+        Rhyming helps you learn to read! <Languages className="w-4 h-4 inline" />
+      </p>
+
+      <div className="grid grid-cols-3 gap-4 max-w-2xl w-full">
+        {(['easy', 'medium', 'hard'] as Difficulty[]).map((difficulty) => {
+          const display = getDifficultyDisplay(difficulty);
+          const meta = difficultyMeta[difficulty];
+          return (
+            <button
+              key={difficulty}
+              onClick={() => startGame(difficulty)}
+              className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-6 transition-all transform hover:scale-105 text-center group shadow-[0_4px_0_#E5B86E]"
+            >
+              <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
+                {meta.icon}
+              </div>
+              <h3 className={`font-bold text-lg mb-1 ${display.color}`}>
+                {display.label}
+              </h3>
+              <p className="text-text-secondary text-xs">
+                {meta.description}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 bg-blue-50 rounded-xl p-4 max-w-md">
+        <h3 className="font-bold text-blue-800 mb-2">Example:</h3>
+        <p className="text-blue-700 text-sm mb-2">
+          Which word rhymes with <span className="font-bold">CAT</span>?
+        </p>
+        <div className="flex gap-2 justify-center">
+          <span className="bg-white px-3 py-1 rounded-lg text-sm">DOG</span>
+          <span className="bg-green-100 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1">BAT <Check className="w-3 h-3" /></span>
+          <span className="bg-white px-3 py-1 rounded-lg text-sm">CAR</span>
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm">
+        <Hand className="w-6 h-6 text-orange-500" />
+        <span>Point and pinch to select, or use your mouse!</span>
+      </div>
+    </div>
+  );
+}
+
+interface CompletionScreenProps {
+  accuracy: number;
+  gameState: GameState;
+  handleShowMenu: () => void;
+  handlePlayAgain: () => void;
+}
+
+function CompletionScreen({
+  accuracy,
+  gameState,
+  handleShowMenu,
+  handlePlayAgain,
+}: CompletionScreenProps) {
+  const stars = getStarRating(accuracy);
+  const resultIcon = stars >= 3
+    ? (
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+    )
+    : stars >= 2
+      ? <Star className="w-16 h-16 text-yellow-400 fill-yellow-400" />
+      : <span className="text-6xl">Great job!</span>;
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="text-6xl mb-4">{resultIcon}</div>
+      <h2 className="text-3xl font-bold text-advay-slate mb-2">
+        {getPerformanceFeedback(accuracy).message}
+      </h2>
+
+      <div className="flex gap-1 mb-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <span
+            key={i}
+            className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-gray-300'}`}
+          >
+            <Star className="text-4xl text-yellow-400 fill-yellow-400" />
+          </span>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl p-6 shadow-[0_4px_0_#E5B86E] mb-6 text-center">
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-text-secondary text-sm">Final Score</p>
+            <p className="text-3xl font-bold text-blue-600">{gameState.score}</p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-sm">Accuracy</p>
+            <p className="text-3xl font-bold text-green-600">{accuracy}%</p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-sm">Best Streak</p>
+            <p className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">{gameState.maxStreak} <Flame className="w-6 h-6" /></p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-sm">Correct</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {gameState.correctAnswers}/{gameState.totalRounds}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={handleShowMenu}
+          className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl font-bold transition-colors"
+        >
+          Back to Menu
+        </button>
+        <button
+          onClick={handlePlayAgain}
+          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-colors"
+        >
+          <span className="flex items-center gap-2"><RefreshCw className="w-5 h-5" /> Play Again</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RhymeTimeContent() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playChirp, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('rhyme-time');
+  useGameProgress('rhyme-time');
   
   // ===== GAME STATE =====
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -279,155 +475,14 @@ export default function RhymeTime() {
       </div>
       
       {showMenu ? (
-        // ===== DIFFICULTY SELECTION MENU =====
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          <SVGBird expression="singing" size="lg" className="mb-4 animate-float" />
-          <h2 className="text-2xl font-bold text-advay-slate mb-2">Rhyme Time!</h2>
-          
-          {/* Goal Statement with Semantic Attributes */}
-          <div 
-            data-ux-goal="Match words that sound the same to help the bird sing!"
-            data-ux-instruction="Click the word that sounds the same as the target word"
-            data-ux-action="click"
-            className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4 max-w-md border-2 border-purple-300"
-          >
-            <div className="flex items-center gap-3">
-              <Target className="w-8 h-8 text-purple-600" />
-              <div>
-                <p className="font-bold text-purple-800">GOAL:</p>
-                <p className="text-purple-700">Match words that sound the same!</p>
-                <p className="text-purple-600 text-sm flex items-center justify-center gap-1"><Music className="w-4 h-4" /> Cat → Bat, Dog → Frog <Music className="w-4 h-4" /></p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Voice Instructions */}
-          {ttsEnabled && (
-            <div className="mb-4">
-              <VoiceInstructions
-                instructions={[
-                  'Listen to the target word.',
-                  'Find the word that rhymes!',
-                  'Pinch to select!',
-                ]}
-                autoSpeak={true}
-                showReplayButton={true}
-                replayButtonPosition='bottom-right'
-              />
-            </div>
-          )}
-          
-          <p className="text-text-secondary mb-6 text-sm text-center max-w-md">
-            Rhyming helps you learn to read! <Languages className="w-4 h-4 inline" />
-          </p>
-          
-          <div className="grid grid-cols-3 gap-4 max-w-2xl w-full">
-            {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => {
-              const display = getDifficultyDisplay(diff);
-              return (
-                <button
-                  key={diff}
-                  onClick={() => startGame(diff)}
-                  className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-6 transition-all transform hover:scale-105 text-center group shadow-[0_4px_0_#E5B86E]"
-                >
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                    {diff === 'easy' ? <Sprout className="w-10 h-10 mx-auto text-green-500" /> : diff === 'medium' ? <Sprout className="w-10 h-10 mx-auto text-green-600" /> : <TreeDeciduous className="w-10 h-10 mx-auto text-green-700" />}
-                  </div>
-                  <h3 className={`font-bold text-lg mb-1 ${display.color}`}>
-                    {display.label}
-                  </h3>
-                  <p className="text-text-secondary text-xs">
-                    {diff === 'easy' && '3 simple rhymes'}
-                    {diff === 'medium' && '6 rhyme families'}
-                    {diff === 'hard' && '10 rhyme families'}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-          
-          <div className="mt-8 bg-blue-50 rounded-xl p-4 max-w-md">
-            <h3 className="font-bold text-blue-800 mb-2">Example:</h3>
-            <p className="text-blue-700 text-sm mb-2">
-              Which word rhymes with <span className="font-bold">CAT</span>?
-            </p>
-            <div className="flex gap-2 justify-center">
-              <span className="bg-white px-3 py-1 rounded-lg text-sm">DOG</span>
-              <span className="bg-green-100 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1">BAT <Check className="w-3 h-3" /></span>
-              <span className="bg-white px-3 py-1 rounded-lg text-sm">CAR</span>
-            </div>
-          </div>
-          
-          <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm">
-            <Hand className="w-6 h-6 text-orange-500" />
-            <span>Point and pinch to select, or use your mouse!</span>
-          </div>
-        </div>
+        <DifficultyMenu ttsEnabled={ttsEnabled} startGame={startGame} />
       ) : gameState?.completed ? (
-        // ===== GAME COMPLETE SCREEN =====
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          <div className="text-6xl mb-4">
-            {getStarRating(accuracy) >= 3 ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            ) : getStarRating(accuracy) >= 2 ? (
-              <Star className="w-16 h-16 text-yellow-400 fill-yellow-400" />
-            ) : (
-              <span className="text-6xl">Great job!</span>
-            )}
-          </div>
-          <h2 className="text-3xl font-bold text-advay-slate mb-2">
-            {getPerformanceFeedback(accuracy).message}
-          </h2>
-          
-          <div className="flex gap-1 mb-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <span
-                key={i}
-                className={`text-4xl ${i < getStarRating(accuracy) ? 'text-yellow-400' : 'text-gray-300'}`}
-              >
-                <Star className="text-4xl text-yellow-400 fill-yellow-400" />
-              </span>
-            ))}
-          </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-[0_4px_0_#E5B86E] mb-6 text-center">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-text-secondary text-sm">Final Score</p>
-                <p className="text-3xl font-bold text-blue-600">{gameState.score}</p>
-              </div>
-              <div>
-                <p className="text-text-secondary text-sm">Accuracy</p>
-                <p className="text-3xl font-bold text-green-600">{accuracy}%</p>
-              </div>
-              <div>
-                <p className="text-text-secondary text-sm">Best Streak</p>
-                <p className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">{gameState.maxStreak} <Flame className="w-6 h-6" /></p>
-              </div>
-              <div>
-                <p className="text-text-secondary text-sm">Correct</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {gameState.correctAnswers}/{gameState.totalRounds}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-3">
-            <button
-              onClick={handleShowMenu}
-              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl font-bold transition-colors"
-            >
-              Back to Menu
-            </button>
-            <button
-              onClick={handlePlayAgain}
-              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-colors"
-            >
-              <span className="flex items-center gap-2"><RefreshCw className="w-5 h-5" /> Play Again</span>
-            </button>
-          </div>
-        </div>
+        <CompletionScreen
+          accuracy={accuracy}
+          gameState={gameState}
+          handleShowMenu={handleShowMenu}
+          handlePlayAgain={handlePlayAgain}
+        />
       ) : (
         // ===== GAME PLAY =====
         <div className="flex flex-col h-full p-4">
@@ -661,3 +716,16 @@ export default function RhymeTime() {
     </GameContainer>
   );
 }
+
+export const RhymeTime = () => (
+  <GameShell
+    gameId="rhyme-time"
+    gameName="Rhyme Time"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <RhymeTimeContent />
+  </GameShell>
+);
+
+export default RhymeTime;

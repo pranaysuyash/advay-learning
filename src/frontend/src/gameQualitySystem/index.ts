@@ -50,5 +50,45 @@ export {
 export { MetricsCollector } from './metrics/metricsCollector';
 export { QueueGenerator } from './queue/queueGenerator';
 export { DocumentationGenerator } from './documentation/documentationGenerator';
+export {
+    ChangeLog,
+    createChangeLog,
+    type ChangeLogEntry,
+    type ChangeLogConfig,
+    DEFAULT_CHANGE_LOG_CONFIG,
+} from './documentation/changeLog';
+export {
+    ImplementationReport,
+    createImplementationReport,
+    type BeforeAfterComparison,
+    type KeyDecision,
+    type LessonLearned,
+    type NextStep,
+    type ImplementationReportConfig,
+    DEFAULT_IMPLEMENTATION_REPORT_CONFIG,
+} from './documentation/implementationReport';
+export {
+    MetricsReport,
+    createMetricsReport,
+    type MetricChange,
+    type MetricsReportConfig,
+    DEFAULT_METRICS_REPORT_CONFIG,
+} from './documentation/metricsReport';
+export {
+    ReportStorage,
+    createReportStorage,
+    type StoredReport,
+    type ReportStorageConfig,
+    DEFAULT_REPORT_STORAGE_CONFIG,
+} from './documentation/reportStorage';
+export {
+    WeeklySummary,
+    createWeeklySummary,
+    type GameImproved,
+    type GameImplemented,
+    type WeeklySummaryData,
+    type WeeklySummaryConfig,
+    DEFAULT_WEEKLY_SUMMARY_CONFIG,
+} from './documentation/weeklySummary';
 export { IntegrationEngine } from './integration/integrationEngine';
 export { ImplementationGate } from './implementationGate/implementationGate';

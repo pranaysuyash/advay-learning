@@ -124,7 +124,7 @@ git push -u origin feature/hand-tracking-basics
 
 # Create PR (using GitHub CLI or web)
 gh pr create --title "feat(hand_tracking): add hand landmark detection" \
-             --body-file .github/pull_request_template.md
+             --body-file .github/PULL_REQUEST_TEMPLATE.md
 ```
 
 ### 6. PR Review Checklist

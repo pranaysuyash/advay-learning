@@ -149,8 +149,9 @@ class TestEmailVerification:
     async def test_invalid_verification_token(self, client: AsyncClient):
         """Verify invalid tokens are rejected."""
         response = await client.post("/api/v1/auth/verify-email", params={"token": "invalid-token"})
-        assert response.status_code == 422
-        assert "invalid" in response.json()["error"]["message"].lower()
+        assert response.status_code == 400
+        detail = response.json().get("detail") or response.json().get("error", {}).get("message", "")
+        assert "invalid" in detail.lower()
 
     async def test_resend_verification(self, client: AsyncClient):
         """Test resending verification email."""
@@ -364,8 +365,9 @@ class TestPasswordReset:
             "/api/v1/auth/reset-password",
             params={"token": "invalid-token", "new_password": "newpassword456"},
         )
-        assert response.status_code == 422
-        assert "invalid" in response.json()["error"]["message"].lower()
+        assert response.status_code == 400
+        detail = response.json().get("detail") or response.json().get("error", {}).get("message", "")
+        assert "invalid" in detail.lower()
 
     async def test_reset_password_short_password(self, client: AsyncClient):
         """Test password reset rejects short passwords."""

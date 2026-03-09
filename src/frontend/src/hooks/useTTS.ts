@@ -17,6 +17,8 @@ export interface UseTTSReturn {
   speak: (text: string, options?: TTSOptions) => Promise<void>;
   /** Speak text in a specific language */
   speakInLanguage: (text: string, languageCode: string) => Promise<void>;
+  /** Speak a phoneme letter using pre-generated audio when available */
+  speakLetter: (letter: string, ttsText: string) => Promise<void>;
   /** Stop any ongoing speech */
   stop: () => void;
   /** Whether TTS is currently speaking */
@@ -162,6 +164,24 @@ export function useTTS(): UseTTSReturn {
     [soundEnabled],
   );
 
+  const speakLetter = useCallback(
+    async (letter: string, ttsText: string) => {
+      if (!soundEnabled) return;
+      setIsSpeaking(true);
+      try {
+        await ttsService.speakLetter(letter, ttsText);
+        if (mountedRef.current) {
+          setActiveEngine(ttsService.lastActiveEngine);
+        }
+      } finally {
+        if (mountedRef.current) {
+          setIsSpeaking(false);
+        }
+      }
+    },
+    [soundEnabled],
+  );
+
   const stop = useCallback(() => {
     ttsService.stop();
     setIsSpeaking(false);
@@ -170,6 +190,7 @@ export function useTTS(): UseTTSReturn {
   return {
     speak,
     speakInLanguage,
+    speakLetter,
     stop,
     isSpeaking,
     isAvailable: ttsService.isAvailable(),

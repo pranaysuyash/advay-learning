@@ -27,8 +27,8 @@ export function CameraCrashFallback({
   showHomeAction = true,
 }: CameraCrashFallbackProps) {
   return (
-    <div className='min-h-screen flex items-center justify-center bg-slate-950 px-4'>
-      <div className='w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900/90 p-6 text-slate-100 shadow-xl'>
+    <div className='min-h-screen flex items-center justify-center bg-[#FFF8F0] px-4'>
+      <div className='w-full max-w-lg rounded-2xl border border-[#F2CC8F] bg-white p-6 text-advay-slate shadow-xl'>
         <h1 className='text-xl font-bold'>Camera Issue in {gameName}</h1>
         <p className='mt-3 text-slate-300'>{ERROR_COPY[errorKind]}</p>
         {message && (

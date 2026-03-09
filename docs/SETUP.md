@@ -20,7 +20,7 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh scripts/maintainability_guard.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh scripts/maintainability_guard.sh scripts/auto_pr_threshold.sh
 ```
 
 To manually run the gate on your staged changes:
@@ -28,6 +28,69 @@ To manually run the gate on your staged changes:
 ```bash
 ./scripts/agent_gate.sh --staged
 ```
+
+### Auto Push/PR at Staged Threshold (Optional, Enabled by Default)
+
+When staged files reach a threshold (default: `130`), hooks can auto-push the current
+`codex/wip-*` branch and auto-create a PR after commit.
+
+- Pre-commit checks still run first.
+- Auto-push/PR runs in `post-commit`.
+- Open PRs are reused (no duplicate PRs).
+
+Controls:
+
+```bash
+# disable automation for this shell/session
+export AUTO_PR_THRESHOLD_ENABLED=0
+
+# change threshold (default 130)
+export AUTO_PR_STAGED_THRESHOLD=130
+```
+
+## GitHub Issues Backbone (Required for Multi-Agent Coordination)
+
+The repository now includes:
+
+- Issue forms in `.github/ISSUE_TEMPLATE/`
+- Issue template config in `.github/ISSUE_TEMPLATE/config.yml`
+- PR template requirements in `.github/PULL_REQUEST_TEMPLATE.md`
+- PR link gate workflow in `.github/workflows/pr-link-gate.yml`
+- Path-based auto labeling in `.github/workflows/pr-path-labeler.yml`
+- Project + issue automation in `.github/workflows/project-and-issue-automation.yml`
+
+One-time bootstrap commands:
+
+```bash
+# 1) Create/update standard labels
+./scripts/bootstrap_github_labels.sh
+
+# 2) Create GitHub Project board
+./scripts/bootstrap_github_project.sh
+```
+
+Then set repository configuration:
+
+1. Add repository variable `PROJECT_URL` (URL printed by bootstrap script).
+2. Add repository secret `PROJECT_TOKEN` (token with repo + project scope).
+3. In branch protection, require status check: `PR Link Gate / enforce-pr-linking`.
+
+Current repo state (as of 2026-03-09):
+
+- `PROJECT_URL` is configured to `https://github.com/users/pranaysuyash/projects/1`.
+- `PROJECT_TOKEN` is configured.
+
+Verification:
+
+```bash
+gh variable list --repo pranaysuyash/advay-learning
+gh api repos/pranaysuyash/advay-learning/actions/secrets --jq '.secrets[].name'
+```
+
+PRs now must include both:
+
+- `Closes #<issue-number>`
+- `TCK-YYYYMMDD-NNN`
 
 ## Enforce PR Comment Closure Before Merge (Required)
 
@@ -42,11 +105,23 @@ To hard-block merges with unresolved PR conversations:
 
 2. Mark this check as required:
    - `PR Comment Gate / pr-comment-gate`
+   - `CI/CD Pipeline / backend-test`
+   - `CI/CD Pipeline / frontend-test`
+   - `CodeQL / Analyze (python)`
+   - `CodeQL / Analyze (javascript-typescript)`
+   - `Dependency Review / dependency-review`
+   - `Secret Scan (Gitleaks) / gitleaks`
+   - `Trivy Security Scan / trivy`
 
 The workflow is defined at:
 - `.github/workflows/pr-comment-gate.yml`
 
 It fails whenever any review thread is unresolved.
+
+Additional security workflows:
+
+- `.github/workflows/scorecards.yml` (OpenSSF Scorecards + SARIF upload)
+- `.github/workflows/trivy.yml` (filesystem vuln/misconfig/secret scan + SARIF upload)
 
 ## Playwright Camera Modes
 

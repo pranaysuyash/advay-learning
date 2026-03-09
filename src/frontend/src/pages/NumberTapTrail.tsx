@@ -6,7 +6,9 @@ import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -27,7 +29,7 @@ interface TrailTarget {
   cleared: boolean;
 }
 
-const HIT_RADIUS = 0.1;
+const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 6;
 
 function createRoundTargets(level: number): TrailTarget[] {
@@ -42,7 +44,7 @@ function createRoundTargets(level: number): TrailTarget[] {
   }));
 }
 
-export const NumberTapTrail = memo(function NumberTapTrailComponent() {
+const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
   const navigate = useNavigate();
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -67,10 +69,12 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   const expectedIndexRef = useRef(expectedIndex);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
+  const scoreRef = useRef(score);
 
   const { playPop, playError, playFanfare } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('number-tap-trail');
+  const { saveProgress } = useGameProgress('number-tap-trail');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -87,6 +91,10 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
 
   useEffect(() => {
     if (!isPlaying || gameCompleted) return;
@@ -130,11 +138,12 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
     }
     setScore((prev) => prev + 35 + timeLeftRef.current * 2);
 
-    levelTimeoutRef.current = setTimeout(() => {
+    levelTimeoutRef.current = setTimeout(async () => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
         onGameComplete();
         triggerEasterEgg('egg-golden-number');
+        await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
         setGameCompleted(true);
         setIsPlaying(false);
       } else {
@@ -142,7 +151,7 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
       }
       levelTimeoutRef.current = null;
     }, 1800);
-  }, [playFanfare]);
+  }, [playFanfare, saveProgress]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -504,6 +513,19 @@ export const NumberTapTrail = memo(function NumberTapTrailComponent() {
         </div>
       )}
     </GameContainer>
+  );
+});
+
+export const NumberTapTrail = memo(function NumberTapTrailShell() {
+  return (
+    <GameShell
+      gameId="number-tap-trail"
+      gameName="Number Tap Trail"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <NumberTapTrailContent />
+    </GameShell>
   );
 });
 

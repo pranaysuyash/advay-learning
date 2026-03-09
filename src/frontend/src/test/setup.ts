@@ -218,3 +218,19 @@ vi.mock('../hooks/useSubscription', () => ({
     isFullyAccessible: true,
   }),
 }));
+
+// Mock Path2D for Shape Safari and other canvas-based games
+if (typeof globalThis.Path2D === 'undefined') {
+  class MockPath2D {
+    moveTo = vi.fn();
+    lineTo = vi.fn();
+    closePath = vi.fn();
+    arc = vi.fn();
+    rect = vi.fn();
+  }
+  Object.defineProperty(globalThis, 'Path2D', {
+    configurable: true,
+    writable: true,
+    value: MockPath2D,
+  });
+}

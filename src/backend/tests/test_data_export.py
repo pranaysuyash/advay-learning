@@ -1,8 +1,6 @@
 """Tests for data export endpoints and service (GDPR/COPPA compliance)."""
 
-from unittest.mock import patch
 
-import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,10 +15,10 @@ class TestDataExportEndpoints:
             params={"format": "json", "include_progress": True, "include_subscriptions": True},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Verify response structure
         assert "export_id" in data
         assert "generated_at" in data
@@ -28,7 +26,7 @@ class TestDataExportEndpoints:
         assert "profiles" in data
         assert "progress" in data
         assert "subscriptions" in data
-        
+
         # Verify user data
         assert "id" in data["user"]
         assert "email" in data["user"]
@@ -41,12 +39,12 @@ class TestDataExportEndpoints:
             params={"format": "csv", "include_progress": True, "include_subscriptions": True},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         assert "text/csv" in response.headers["content-type"]
         assert "attachment" in response.headers["content-disposition"]
         assert ".csv" in response.headers["content-disposition"]
-        
+
         # Verify CSV content
         content = response.content.decode("utf-8")
         assert "USER INFORMATION" in content
@@ -59,7 +57,7 @@ class TestDataExportEndpoints:
             params={"format": "json"},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/json"
         assert "attachment" in response.headers["content-disposition"]
@@ -82,7 +80,7 @@ class TestDataExportEndpoints:
             params={"include_progress": False, "include_subscriptions": True},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         # Progress should be empty list
@@ -95,7 +93,7 @@ class TestDataExportEndpoints:
             params={"include_progress": True, "include_subscriptions": False},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         # Subscriptions should be empty list
@@ -111,15 +109,15 @@ class TestDataExportSummary:
             "/api/v1/export/export/summary",
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Verify summary structure
         assert "profile_count" in data
         assert "progress_count" in data
         assert "subscription_count" in data
-        
+
         # Counts should be non-negative integers
         assert isinstance(data["profile_count"], int)
         assert isinstance(data["progress_count"], int)
@@ -148,7 +146,7 @@ class TestDataExportRequest:
             },
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         assert "export_id" in data
@@ -165,7 +163,7 @@ class TestDataExportRequest:
             },
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         assert "export_id" in data
@@ -181,7 +179,7 @@ class TestDataExportRequest:
             },
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 422
         assert "format" in response.json()["detail"].lower() or "json" in response.json()["detail"].lower()
 
@@ -281,7 +279,7 @@ class TestDataExportAuthorization:
         self, client: AsyncClient, auth_headers: dict, test_user: dict
     ):
         """Test that users can only access their own export data.
-        
+
         This is implicitly tested by the get_current_user dependency
         which ensures the user can only export their own data.
         """
@@ -291,10 +289,10 @@ class TestDataExportAuthorization:
             "/api/v1/export/export",
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         data = response.json()
-        
+
         # Verify the exported data belongs to the authenticated user
         assert data["user"]["email"] == test_user["email"]
 
@@ -332,14 +330,14 @@ class TestDataExportCSVGeneration:
             params={"format": "csv"},
             headers=auth_headers,
         )
-        
+
         assert response.status_code == 200
         content = response.content.decode("utf-8")
-        
+
         # CSV should have sections
         lines = content.strip().split("\n")
         assert len(lines) > 0
-        
+
         # Should contain user info section
         assert any("USER INFORMATION" in line for line in lines)
         assert any("PROFILES" in line for line in lines)

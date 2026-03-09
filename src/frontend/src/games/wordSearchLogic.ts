@@ -13,7 +13,7 @@ export interface LevelConfig {
   wordCount: number;
 }
 
-const WORD_LISTS: Record<number, string[]> = {
+export const WORD_LISTS: Record<number, string[]> = {
   1: ['CAT', 'DOG', 'SUN', 'HAT', 'BAT', 'PIG', 'CUP', 'BUS'],
   2: ['FROG', 'FISH', 'BEAR', 'DUCK', 'LION', 'MOON', 'STAR', 'TREE'],
   3: ['APPLE', 'HOUSE', 'MOUSE', 'WATER', 'BREAD', 'GRAPE', 'TIGER', 'ZEBRA'],
@@ -31,25 +31,38 @@ export function getLevelConfig(level: number): LevelConfig {
 
 function placeWord(grid: string[][], word: string): boolean {
   const size = grid.length;
-  const directions = [[0, 1], [1, 0], [1, 1], [-1, 1]];
-  const dir = directions[Math.floor(Math.random() * directions.length)];
+  const directions: Array<[number, number]> = [[0, 1], [1, 0], [1, 1], [-1, 1]];
   
   for (let attempts = 0; attempts < 100; attempts++) {
-    let x, y;
-    if (dir[0] === 0) { x = Math.floor(Math.random() * (size - word.length)); y = Math.floor(Math.random() * size); }
-    else if (dir[1] === 0) { x = Math.floor(Math.random() * size); y = Math.floor(Math.random() * (size - word.length)); }
-    else { x = Math.floor(Math.random() * (size - word.length)); y = Math.floor(Math.random() * (size - word.length)); }
+    const dir = directions[Math.floor(Math.random() * directions.length)];
+    const [dx, dy] = dir;
+
+    const minX = dx === -1 ? word.length - 1 : 0;
+    const maxX = dx === 1 ? size - word.length : size - 1;
+    const minY = dy === -1 ? word.length - 1 : 0;
+    const maxY = dy === 1 ? size - word.length : size - 1;
+
+    if (maxX < minX || maxY < minY) {
+      continue;
+    }
+
+    const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+    const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
     
     let canPlace = true;
     for (let i = 0; i < word.length; i++) {
-      const nx = x + i * dir[0];
-      const ny = y + i * dir[1];
+      const nx = x + i * dx;
+      const ny = y + i * dy;
+      if (nx < 0 || nx >= size || ny < 0 || ny >= size) {
+        canPlace = false;
+        break;
+      }
       if (grid[nx][ny] !== '' && grid[nx][ny] !== word[i]) { canPlace = false; break; }
     }
     if (canPlace) {
       for (let i = 0; i < word.length; i++) {
-        const nx = x + i * dir[0];
-        const ny = y + i * dir[1];
+        const nx = x + i * dx;
+        const ny = y + i * dy;
         grid[nx][ny] = word[i];
       }
       return true;
@@ -60,7 +73,10 @@ function placeWord(grid: string[][], word: string): boolean {
 
 export function generateWordSearch(level: number): { grid: string[][]; words: string[] } {
   const config = getLevelConfig(level);
-  const grid = Array(config.gridSize).fill(null).map(() => Array(config.gridSize).fill(''));
+  const grid: string[][] = [];
+  for (let i = 0; i < config.gridSize; i++) {
+    grid.push(Array(config.gridSize).fill(''));
+  }
   const words = WORD_LISTS[level]?.slice(0, config.wordCount) || WORD_LISTS[1].slice(0, 3);
   
   for (const word of words) {

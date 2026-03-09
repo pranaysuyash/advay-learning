@@ -10,7 +10,7 @@ export interface SameAndDifferentRound {
   answer: 'same' | 'different';
 }
 
-const ITEM_BANK: SameDifferentItem[] = [
+export const ITEM_BANK: SameDifferentItem[] = [
   { id: 'cat', label: 'Cat', emoji: 'cat' },
   { id: 'dog', label: 'Dog', emoji: 'dog' },
   { id: 'ball', label: 'Ball', emoji: 'ball' },
