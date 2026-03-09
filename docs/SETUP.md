@@ -99,11 +99,17 @@ To hard-block merges with unresolved PR conversations:
    - `CodeQL / Analyze (javascript-typescript)`
    - `Dependency Review / dependency-review`
    - `Secret Scan (Gitleaks) / gitleaks`
+   - `Trivy Security Scan / trivy`
 
 The workflow is defined at:
 - `.github/workflows/pr-comment-gate.yml`
 
 It fails whenever any review thread is unresolved.
+
+Additional security workflows:
+
+- `.github/workflows/scorecards.yml` (OpenSSF Scorecards + SARIF upload)
+- `.github/workflows/trivy.yml` (filesystem vuln/misconfig/secret scan + SARIF upload)
 
 ## Playwright Camera Modes
 
