@@ -9,7 +9,7 @@
 ## What Worked (Keep Doing)
 
 ### 1. Grep-First Discovery
-**Pattern:** Always start with `rg` to find consumers, then decide fate.
+**Pattern:** Always start with `rg` to find consumers and candidate sites, then investigate intent/contract before deciding what to change.
 
 **Evidence:**
 - Found `lastCollectTime` unused → deleted safely

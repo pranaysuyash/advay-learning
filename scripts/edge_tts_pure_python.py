@@ -69,6 +69,7 @@ def synthesize(text, output_file):
     key = binascii.b2a_base64(os.urandom(16))[:-1].decode()
     
     context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     s = socket.create_connection((host, 443))
     sock = context.wrap_socket(s, server_hostname=host)
     

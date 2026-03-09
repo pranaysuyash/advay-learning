@@ -86,7 +86,7 @@ Math Smash is an educational math game where children solve arithmetic problems 
 | Metric | Value |
 |--------|-------|
 | Lines of code | 61 |
-| Exports | 5 (2 interfaces, 3 functions, 1 constant) |
+| Exports | 6 (2 interfaces, 3 functions, 1 constant) |
 | Test coverage | 25 tests |
 | Test pass rate | 100% |
 | Levels | 4 |
@@ -128,8 +128,8 @@ interface LevelConfig {
 ```typescript
 function generateQuestion(level: number): Question {
   const config = getLevelConfig(level);
-  const num1 = Math.floor(Math.random() × config.maxNum) + 1;
-  const num2 = Math.floor(Math.random() × config.maxNum) + 1;
+  const num1 = Math.floor(Math.random() * config.maxNum) + 1;
+  const num2 = Math.floor(Math.random() * config.maxNum) + 1;
   let answer: number;
   let operator = config.operator;
 
@@ -163,9 +163,9 @@ function generateOptions(
 ): number[] {
   const options = new Set<number>([correctAnswer]);
   while (options.size < count) {
-    const offset = Math.floor(Math.random() × 5) + 1;
+    const offset = Math.floor(Math.random() * 5) + 1;
     const sign = Math.random() > 0.5 ? 1 : -1;
-    const wrongAnswer = correctAnswer + offset × sign;
+    const wrongAnswer = correctAnswer + offset * sign;
     if (wrongAnswer > 0) options.add(wrongAnswer);
   }
   return Array.from(options).sort(() => Math.random() - 0.5);

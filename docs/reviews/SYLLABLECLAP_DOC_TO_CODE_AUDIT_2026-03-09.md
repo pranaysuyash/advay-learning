@@ -112,7 +112,7 @@ Syllable Clap is an educational game where children listen to a word and clap or
 | Metric | Value |
 |--------|-------|
 | Lines of code | 69 |
-| Exports | 6 (2 interfaces, 3 functions, 2 constants) |
+| Exports | 7 (2 interfaces, 3 functions, 2 constants) |
 | Test coverage | 45 tests |
 | Test pass rate | 100% |
 | Total words | 25 |
