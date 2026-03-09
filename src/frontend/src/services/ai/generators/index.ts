@@ -116,6 +116,6 @@ export function createForcedLLMStoryGenerator(): LLMStoryGenerator {
 /**
  * Get a story generator that always uses fallback library (for offline mode)
  */
-export function createOfflineStoryGenerator(): StubStoryGenerator {
-  return new StubStoryGenerator();
+export function createOfflineStoryGenerator(): StoryGenerator {
+  return new StoryGeneratorService();
 }

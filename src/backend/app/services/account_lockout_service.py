@@ -30,6 +30,8 @@ class AccountLockoutService:
 
     # Singleton Redis client
     _redis_client: Optional[redis.Redis] = None
+    _redis_unavailable_until: Optional[float] = None
+    _redis_retry_cooldown_seconds: int = 30
 
     # In-memory fallback for dev/CI
     _failed_attempts: Dict[str, List[float]] = {}
@@ -38,20 +40,28 @@ class AccountLockoutService:
     @classmethod
     async def _get_redis_client(cls) -> Optional[redis.Redis]:
         """Get or create Redis client with graceful fallback."""
-        if cls._redis_client is None:
-            redis_url = os.getenv("REDIS_URL")
-            if not redis_url:
-                logger.debug("REDIS_URL not configured, using in-memory lockout storage")
-                return None
+        redis_url = os.getenv("REDIS_URL")
+        if not redis_url:
+            logger.debug("REDIS_URL not configured, using in-memory lockout storage")
+            return None
 
+        if (
+            cls._redis_unavailable_until is not None
+            and time.time() < cls._redis_unavailable_until
+        ):
+            return None
+
+        if cls._redis_client is None:
             try:
                 cls._redis_client = redis.from_url(redis_url, decode_responses=True)
                 # Test connection
                 await cls._redis_client.ping()
+                cls._redis_unavailable_until = None
                 logger.info("Redis lockout storage initialized")
             except Exception as e:
                 logger.warning(f"Redis connection failed, falling back to in-memory: {e}")
                 cls._redis_client = None
+                cls._redis_unavailable_until = time.time() + cls._redis_retry_cooldown_seconds
 
         return cls._redis_client
 
@@ -103,6 +113,8 @@ class AccountLockoutService:
 
             except redis.RedisError as e:
                 logger.warning(f"Redis error recording attempt, falling back to in-memory: {e}")
+                cls._redis_client = None
+                cls._redis_unavailable_until = time.time() + cls._redis_retry_cooldown_seconds
                 # Fall through to in-memory implementation
 
         # In-memory fallback (original implementation)
@@ -145,8 +157,12 @@ class AccountLockoutService:
                 locked = await client.exists(lockout_key)
                 return bool(locked)
             except redis.RedisError as e:
-                logger.warning(f"Redis error checking lockout, falling back to in-memory: {e}")
-                # Fall through to in-memory implementation
+                logger.warning(f"Redis error checking lockout: {e}")
+                cls._redis_client = None
+                cls._redis_unavailable_until = time.time() + cls._redis_retry_cooldown_seconds
+                # If Redis is configured but unavailable, fail closed to avoid bypassing lockouts.
+                if os.getenv("REDIS_URL"):
+                    return True
 
         # In-memory fallback
         lockout_time = cls._account_lockouts.get(email)
@@ -191,6 +207,8 @@ class AccountLockoutService:
                 return None
             except redis.RedisError as e:
                 logger.warning(f"Redis error getting TTL, falling back to in-memory: {e}")
+                cls._redis_client = None
+                cls._redis_unavailable_until = time.time() + cls._redis_retry_cooldown_seconds
                 # Fall through to in-memory implementation
 
         # In-memory fallback
@@ -232,6 +250,8 @@ class AccountLockoutService:
                 return
             except redis.RedisError as e:
                 logger.warning(f"Redis error clearing attempts, falling back to in-memory: {e}")
+                cls._redis_client = None
+                cls._redis_unavailable_until = time.time() + cls._redis_retry_cooldown_seconds
                 # Fall through to in-memory implementation
 
         # In-memory fallback
@@ -267,3 +287,4 @@ class AccountLockoutService:
         if cls._redis_client:
             await cls._redis_client.close()
             cls._redis_client = None
+        cls._redis_unavailable_until = None

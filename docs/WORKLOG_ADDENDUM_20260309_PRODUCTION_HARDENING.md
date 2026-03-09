@@ -211,3 +211,4 @@ Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - 2026-03-09: **DONE** - Added additional GitHub security workflows: OpenSSF Scorecards (`.github/workflows/scorecards.yml`) and Trivy SARIF scan (`.github/workflows/trivy.yml`).
 - 2026-03-09: **DONE** - Fixed PR CI instability in Trivy workflow by switching to `setup-trivy` + CLI execution, making PR scans non-blocking (`exit-code=0`) and keeping push/schedule enforcement (`exit-code=1`), and guarding SARIF upload on file existence.
 - 2026-03-09: **DONE** - Updated agent-facing instructions in `README.md`, `AGENTS.md`, `docs/ISSUES_WORKFLOW.md`, and `docs/SETUP.md` to mandate Issue/Project/PR linkage and include the live board URL (`https://github.com/users/pranaysuyash/projects/1`).
+- 2026-03-09: **IN PROGRESS** - Active PR-review remediation for unresolved findings (security/workflow + backend lockout + consent + analytics + queue ordering/state preservation) is underway.

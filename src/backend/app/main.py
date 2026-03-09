@@ -136,14 +136,38 @@ async def startup_event():
     # Initialize Sentry if configured
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
-        import sentry_sdk
-        sentry_sdk.init(
-            dsn=sentry_dsn,
-            traces_sample_rate=1.0,  # Capture 100% of errors in dev, adjust for production
-            environment=settings.APP_ENV,
-            release=getattr(settings, "RELEASE_VERSION", "0.1.0"),
-        )
-        logger.info(f"✅ Sentry initialized (environment: {settings.APP_ENV})")
+        try:
+            import sentry_sdk
+        except ImportError:
+            logger.warning(
+                "SENTRY_DSN is set but sentry_sdk is not installed; skipping Sentry init."
+            )
+        else:
+            default_traces_sample_rate = 0.1 if settings.APP_ENV == "production" else 1.0
+            traces_sample_rate = default_traces_sample_rate
+            traces_sample_rate_env = os.getenv("SENTRY_TRACES_SAMPLE_RATE")
+            if traces_sample_rate_env is not None:
+                try:
+                    parsed = float(traces_sample_rate_env)
+                    traces_sample_rate = max(0.0, min(1.0, parsed))
+                except ValueError:
+                    logger.warning(
+                        "Invalid SENTRY_TRACES_SAMPLE_RATE=%r; using default %.2f",
+                        traces_sample_rate_env,
+                        default_traces_sample_rate,
+                    )
+
+            sentry_sdk.init(
+                dsn=sentry_dsn,
+                traces_sample_rate=traces_sample_rate,
+                environment=settings.APP_ENV,
+                release=getattr(settings, "RELEASE_VERSION", "0.1.0"),
+            )
+            logger.info(
+                "✅ Sentry initialized (environment: %s, traces_sample_rate: %.2f)",
+                settings.APP_ENV,
+                traces_sample_rate,
+            )
     else:
         logger.info("Sentry not configured (set SENTRY_DSN environment variable)")
 

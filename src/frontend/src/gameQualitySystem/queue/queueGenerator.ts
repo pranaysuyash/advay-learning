@@ -271,8 +271,14 @@ export class QueueGenerator {
             0
         );
 
-        // Adjust order based on available capacity
+        // Adjust ordering only within the same priority tier.
         return [...entries].sort((a, b) => {
+            const priorityA = this.priorityOrder[a.priorityLevel as PriorityLevel] ?? 4;
+            const priorityB = this.priorityOrder[b.priorityLevel as PriorityLevel] ?? 4;
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
             const effortA = a.implementationEffort ?? 50;
             const effortB = b.implementationEffort ?? 50;
 
@@ -292,7 +298,8 @@ export class QueueGenerator {
     private generateQueueEntries(
         entries: UnifiedPriorityEntry[],
         games: Map<string, Game | CatalogEntry>,
-        includeDependencies: boolean
+        includeDependencies: boolean,
+        statusByGameId?: Map<string, QueueEntry['status']>
     ): QueueEntry[] {
         return entries.map((entry, index) => {
             const estimatedEffortHours = this.estimateEffortHours(entry);
@@ -306,7 +313,7 @@ export class QueueGenerator {
                 estimatedEffortHours,
                 dependencies,
                 recommendedStartDate,
-                status: 'pending',
+                status: statusByGameId?.get(entry.gameId) ?? 'pending',
             };
         });
     }
@@ -317,7 +324,8 @@ export class QueueGenerator {
     private generateQueueEntriesFromUnified(
         entries: UnifiedPriorityEntry[],
         games: Map<string, Game | CatalogEntry>,
-        includeDependencies: boolean
+        includeDependencies: boolean,
+        statusByGameId?: Map<string, QueueEntry['status']>
     ): QueueEntry[] {
         return entries.map((entry, index) => {
             const estimatedEffortHours = this.estimateEffortHours(entry);
@@ -331,7 +339,7 @@ export class QueueGenerator {
                 estimatedEffortHours,
                 dependencies,
                 recommendedStartDate,
-                status: 'pending',
+                status: statusByGameId?.get(entry.gameId) ?? 'pending',
             };
         });
     }
@@ -431,14 +439,15 @@ export class QueueGenerator {
         });
 
         // Re-sort the queue based on new priority
-        const priorityScores = updatedQueue.map(entry => this.queueEntryToPriorityScore(entry));
+        const priorityScores = updatedQueue.map(entry => this.queueEntryToPriorityScore(entry, games.get(entry.gameId)));
         const gamesMap = this.queueEntriesToGameMap(updatedQueue, games);
         const sortedEntries = this.createUnifiedEntries(priorityScores, gamesMap);
         const reorderedEntries = this.sortByPriority(sortedEntries);
         const p0Sorted = this.sortP0GamesByImpactAndEffort(reorderedEntries);
+        const statusByGameId = new Map(updatedQueue.map(entry => [entry.gameId, entry.status] as const));
 
         // Generate new queue entries
-        const newQueue = this.generateQueueEntries(p0Sorted, gamesMap, true);
+        const newQueue = this.generateQueueEntries(p0Sorted, gamesMap, true, statusByGameId);
 
         // Notify development team
         this.sendNotification({
@@ -459,8 +468,9 @@ export class QueueGenerator {
         games: Map<string, Game | CatalogEntry>
     ): QueueEntry[] {
         // Convert queue entries to priority scores
-        const priorityScores = currentQueue.map(entry => this.queueEntryToPriorityScore(entry));
+        const priorityScores = currentQueue.map(entry => this.queueEntryToPriorityScore(entry, games.get(entry.gameId)));
         const gamesMap = this.queueEntriesToGameMap(currentQueue, games);
+        const statusByGameId = new Map(currentQueue.map(entry => [entry.gameId, entry.status] as const));
 
         // Re-sort the queue
         const sortedEntries = this.createUnifiedEntries(priorityScores, gamesMap);
@@ -468,18 +478,31 @@ export class QueueGenerator {
         const p0Sorted = this.sortP0GamesByImpactAndEffort(reorderedEntries);
 
         // Generate new queue entries
-        return this.generateQueueEntries(p0Sorted, gamesMap, true);
+        return this.generateQueueEntries(p0Sorted, gamesMap, true, statusByGameId);
     }
 
     /**
      * Convert queue entry to priority score
      */
-    private queueEntryToPriorityScore(entry: QueueEntry): PriorityScore {
+    private queueEntryToPriorityScore(
+        entry: QueueEntry,
+        game?: Game | CatalogEntry
+    ): PriorityScore {
+        const objectivesCount =
+            game && 'educationalObjectives' in game
+                ? game.educationalObjectives?.length ?? 0
+                : 0;
+        const educationalImpact = Math.max(0, Math.min(100, 40 + objectivesCount * 10));
+        const userDemand =
+            game && 'playCount' in game && typeof game.playCount === 'number'
+                ? Math.max(0, Math.min(100, game.playCount))
+                : 50;
+
         return {
             gameId: entry.gameId,
             totalScore: this.priorityToScore(entry.priority),
-            educationalImpact: 50,
-            userDemand: 50,
+            educationalImpact,
+            userDemand,
             implementationEffort: this.hoursToEffortScore(entry.estimatedEffortHours),
             strategicAlignment: 50,
             priorityLevel: entry.priority,

@@ -45,9 +45,11 @@ export function ParentalConsentFlow({
   const [emailCode, setEmailCode] = useState('');
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [declarationAccepted, setDeclarationAccepted] = useState(false);
 
   const handleMethodSelect = (method: 'email' | 'credit-card' | 'declaration') => {
     setConsentData(prev => ({ ...prev, verificationMethod: method }));
+    setDeclarationAccepted(false);
     if (method === 'email') setStep('email-verify');
     else if (method === 'credit-card') setStep('card-verify');
     else setStep('declaration');
@@ -76,6 +78,10 @@ export function ParentalConsentFlow({
   };
 
   const signDeclaration = async () => {
+    if (!declarationAccepted) {
+      return;
+    }
+
     const finalConsent: ConsentData = {
       ...consentData as ConsentData,
       consentTimestamp: new Date().toISOString(),
@@ -398,6 +404,8 @@ export function ParentalConsentFlow({
             <label className="flex items-start gap-3 mb-6 cursor-pointer">
               <input
                 type="checkbox"
+                checked={declarationAccepted}
+                onChange={(e) => setDeclarationAccepted(e.target.checked)}
                 className="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-sm text-text-secondary">
@@ -406,7 +414,7 @@ export function ParentalConsentFlow({
               </span>
             </label>
 
-            <Button onClick={signDeclaration} className="w-full">
+            <Button onClick={signDeclaration} disabled={!declarationAccepted} className="w-full">
               Sign Digital Consent
             </Button>
 

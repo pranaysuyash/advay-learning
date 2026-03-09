@@ -9,7 +9,7 @@
  * FALLBACK: console.warn in countingCollectathonLogic.ts (lines 150-155) - TO BE REPLACED
  */
 
-import { logEvent } from '../store';
+import { logEvent } from '../index';
 
 // ============================================================================
 // EXTENSION DATA TYPE
@@ -84,7 +84,9 @@ export function recordCVError(
   // Also log to console for development visibility
   // DECISION-2026-03-08: Keeping console.warn as fallback for debugging
   // RATIONALE: Helps developers see errors during development
-  console.warn(`[CountingCollectathon] Invalid ${field} received:`, value);
+  if (import.meta.env.DEV) {
+    console.warn(`[CountingCollectathon] Invalid ${field} received:`, value);
+  }
 }
 
 /**

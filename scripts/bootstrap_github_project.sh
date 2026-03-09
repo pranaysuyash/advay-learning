@@ -17,7 +17,11 @@ PROJECT_TITLE="${2:-Advay Engineering Board}"
 echo "Owner: $OWNER"
 echo "Project title: $PROJECT_TITLE"
 
-existing_number="$(gh project list --owner "$OWNER" --limit 200 --format json --jq ".projects[] | select(.title == \"$PROJECT_TITLE\") | .number" | head -n 1 || true)"
+existing_number="$(
+  gh project list --owner "$OWNER" --limit 200 --format json \
+    | jq -r --arg title "$PROJECT_TITLE" '.projects[] | select(.title == $title) | .number' \
+    | head -n 1 || true
+)"
 
 if [[ -n "${existing_number:-}" ]]; then
   echo "[INFO] Project already exists: #$existing_number"
@@ -26,8 +30,16 @@ else
   gh project create --owner "$OWNER" --title "$PROJECT_TITLE" >/dev/null
 fi
 
-project_url="$(gh project list --owner "$OWNER" --limit 200 --format json --jq ".projects[] | select(.title == \"$PROJECT_TITLE\") | .url" | head -n 1)"
-project_number="$(gh project list --owner "$OWNER" --limit 200 --format json --jq ".projects[] | select(.title == \"$PROJECT_TITLE\") | .number" | head -n 1)"
+project_url="$(
+  gh project list --owner "$OWNER" --limit 200 --format json \
+    | jq -r --arg title "$PROJECT_TITLE" '.projects[] | select(.title == $title) | .url' \
+    | head -n 1
+)"
+project_number="$(
+  gh project list --owner "$OWNER" --limit 200 --format json \
+    | jq -r --arg title "$PROJECT_TITLE" '.projects[] | select(.title == $title) | .number' \
+    | head -n 1
+)"
 
 echo "[OK] Project URL: $project_url"
 echo "[OK] Project Number: $project_number"

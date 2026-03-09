@@ -96,6 +96,7 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
   useEffect(() => { streakRef.current = streak; }, [streak]);
   useEffect(() => { roundRef.current = round; }, [round]);
   useEffect(() => { levelRef.current = level; }, [level]);
+  useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
   useEffect(() => { usedLettersRef.current = usedLetters; }, [usedLetters]);
 

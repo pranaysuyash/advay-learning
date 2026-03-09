@@ -56,11 +56,11 @@ arm() {
     return 0
   fi
 
-  cat > "$marker_file" <<EOF
-AUTO_PR_BRANCH=$branch
-AUTO_PR_THRESHOLD=$threshold
-AUTO_PR_STAGED_COUNT=$staged_count
-EOF
+  {
+    printf 'AUTO_PR_BRANCH=%s\n' "$branch"
+    printf 'AUTO_PR_THRESHOLD=%s\n' "$threshold"
+    printf 'AUTO_PR_STAGED_COUNT=%s\n' "$staged_count"
+  } > "$marker_file"
   echo "[auto-pr-threshold] armed: $staged_count staged files (threshold: $threshold)."
 }
 
@@ -74,8 +74,14 @@ run_after_commit() {
     return 0
   fi
 
-  # shellcheck disable=SC1090
-  source "$marker_file"
+  local AUTO_PR_BRANCH="" AUTO_PR_THRESHOLD="" AUTO_PR_STAGED_COUNT=""
+  while IFS='=' read -r key value; do
+    case "$key" in
+      AUTO_PR_BRANCH) AUTO_PR_BRANCH="$value" ;;
+      AUTO_PR_THRESHOLD) AUTO_PR_THRESHOLD="$value" ;;
+      AUTO_PR_STAGED_COUNT) AUTO_PR_STAGED_COUNT="$value" ;;
+    esac
+  done < "$marker_file"
   rm -f "$marker_file"
 
   local current_branch
