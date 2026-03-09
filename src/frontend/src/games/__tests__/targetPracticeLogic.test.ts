@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { clamp01 } from '../../utils/geometry';
 
 import {
   Point,
   TargetPoint,
-  clamp01,
   distanceBetweenPoints,
   isPointInCircle,
   pickRandomPoint,

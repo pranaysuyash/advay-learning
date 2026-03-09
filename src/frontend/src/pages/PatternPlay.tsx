@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
@@ -13,7 +15,7 @@ const COLOR_MAP: Record<string, string> = {
   red: 'bg-red-500', blue: 'bg-blue-500', green: 'bg-green-500', purple: 'bg-purple-500', orange: 'bg-orange-500',
 };
 
-export function PatternPlay() {
+export function PatternPlayContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pattern, setPattern] = useState<{ shown: PatternItem[]; answer: PatternItem } | null>(null);
@@ -208,3 +210,11 @@ export function PatternPlay() {
     </GameContainer>
   );
 }
+
+export const PatternPlay = () => (
+  <GameShell gameId="pattern-play" gameName="Pattern Play">
+    <PatternPlayContent />
+  </GameShell>
+);
+
+export default PatternPlay;

@@ -221,7 +221,7 @@ main() {
       reasons+=("max_ccn=${max_ccn} > ${MAX_FILE_CCN}")
     fi
 
-    if [[ "$engine" == "none" && "$lizard_noted" == "0" ]]; then
+    if [[ "$HAS_LIZARD" != "1" && "$lizard_noted" == "0" ]]; then
       log_warn "python lizard is not installed; complexity enforcement is skipped for this run."
       lizard_noted=1
     fi

@@ -1,6 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -29,7 +31,7 @@ import {
 const LANE_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
 const HIT_Y = 0.85;
 
-export function MusicConductor() {
+export function MusicConductorContent() {
   const navigate = useNavigate();
   const screenDims = useWindowSize();
   const [notes, setNotes] = useState<ConductorNote[]>([]);
@@ -480,3 +482,11 @@ export function MusicConductor() {
     </GameContainer>
   );
 }
+
+export const MusicConductor = () => (
+  <GameShell gameId="music-conductor" gameName="Music Conductor">
+    <MusicConductorContent />
+  </GameShell>
+);
+
+export default MusicConductor;

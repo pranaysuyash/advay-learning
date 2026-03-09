@@ -1,14 +1,16 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateBubbles, calculateScore, type Bubble } from '../games/numberBubblePopLogic';
 import { triggerHaptic } from '../utils/haptics';
 
-export function NumberBubblePop() {
+function NumberBubblePopContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetNumber, setTargetNumber] = useState(1);
@@ -29,6 +31,7 @@ export function NumberBubblePop() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('number-bubble-pop');
+  const { saveProgress: _saveProgress } = useGameProgress('number-bubble-pop');
 
   useGameSessionProgress({ gameName: 'Number Bubble Pop', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
@@ -193,3 +196,16 @@ export function NumberBubblePop() {
     </GameContainer>
   );
 }
+
+export const NumberBubblePop = () => (
+  <GameShell
+    gameId="number-bubble-pop"
+    gameName="Number Bubble Pop"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <NumberBubblePopContent />
+  </GameShell>
+);
+
+export default NumberBubblePop;

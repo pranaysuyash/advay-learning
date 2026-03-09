@@ -244,3 +244,266 @@ export interface ActivityWithRubric extends ActivityRecord {
 **Evidence Label:** Observed - Code analysis; Inferred - User needs from research docs
 
 **Prompt Trace:** AGENTS.md §8 lifecycle, User 9-step workflow
+
+---
+
+## Implementation Complete: Phase 1
+
+**Date:** 2026-03-07 23:45 IST  
+**Status:** Phase 1 Complete ✅
+
+### Changes Made
+
+#### 1. Settings.tsx - Removed Alphabet Tracking
+
+**Removed:**
+- `getAlphabet` import
+- `useProgressStore` import (no longer needed)
+- `getMasteredLettersCount` usage
+- "Letters Explored" section with counter
+- "Reset Curriculum Progress" button (alphabet-specific)
+
+**Rationale:** Settings is for configuration, not progress tracking. All activity tracking now unified in Dashboard.
+
+#### 2. Dashboard.tsx - Added Unified Activity Feed
+
+**Added:**
+- Import for `UnifiedActivityFeed` component
+- Import for `gameHistory` from progressStore
+- `<UnifiedActivityFeed>` component after game grid
+- Shows only for logged-in users (not guests)
+- Passes: letterProgress, gameHistory, profileId, language
+
+#### 3. UnifiedActivityFeed.tsx - New Component
+
+**Created:** `src/components/dashboard/UnifiedActivityFeed.tsx`
+
+**Features:**
+- Displays alphabet activities + game activities together
+- Shows: play count, total time, last played
+- Summary stats: total minutes, activities explored
+- "Recently Played" list (up to 10, sorted by recency)
+- Vision-aligned language: "played", "explored" (not "mastered")
+
+**Code:**
+```typescript
+export interface UnifiedActivity {
+  id: string;
+  type: 'alphabet' | 'game' | 'creative';
+  name: string;
+  lastPlayed: string;
+  playCount: number;
+  totalTimeMinutes: number;
+  // ...
+}
+```
+
+#### 4. Dashboard Components Index
+
+**Updated:** `src/components/dashboard/index.ts`
+- Added export for `UnifiedActivityFeed`
+
+### Before / After
+
+**Before:**
+```
+Settings
+├── Language
+├── Sound
+├── Camera
+└── ❌ Letters Explored (5/26 Mastered)  ← WRONG PLACE
+    └── Reset Curriculum Progress
+
+Dashboard
+├── Game Grid
+└── Adventure Map
+    (No alphabet activity visible)
+```
+
+**After:**
+```
+Settings
+├── Language
+├── Sound
+├── Camera
+└── ✅ Tutorials Reset Only (config)
+
+Dashboard
+├── Game Grid
+├── ✅ UNIFIED ACTIVITY FEED  ← NEW
+│   ├── Alphabet Tracing: 5 plays, 10 min
+│   ├── Word Builder: 3 plays, 15 min
+│   ├── Free Draw: 8 plays, 45 min
+│   └── ...
+└── Adventure Map
+```
+
+### TypeScript Verification
+
+```bash
+$ npm run type-check
+✅ Settings.tsx - No errors
+✅ Dashboard.tsx - No errors  
+✅ UnifiedActivityFeed.tsx - No errors
+```
+
+### Acceptance Criteria Status
+
+- [x] Alphabet tracking removed from Settings
+- [x] Unified activity view in Dashboard
+- [x] All activities (alphabet + games) displayed together
+- [x] No "mastered" language (uses "played", "explored")
+- [ ] Play pattern tracking (Phase 2)
+- [ ] Content gating removed (Phase 3)
+- [ ] Teacher rubric types preserved ✅
+
+### Next Steps
+
+**Phase 2:** Data Model Unification
+- Create unified ActivityRecord type
+- Migrate letterProgress to ActivityRecord
+- Migrate gameHistory to ActivityRecord
+
+**Phase 3:** Remove Gating
+- Remove UNLOCK_THRESHOLD
+- Remove batch unlock logic
+- Make all content always available
+
+---
+
+**Evidence:**
+```bash
+git diff --stat
+ src/components/dashboard/UnifiedActivityFeed.tsx | 234 +++++++++++++++++
+ src/components/dashboard/index.ts                |   1 +
+ src/pages/Dashboard.tsx                          |  17 ++
+ src/pages/Settings.tsx                           |  51 +---
+ 4 files changed, 259 insertions(+), 44 deletions(-)
+```
+
+**Prompt Trace:** AGENTS.md §8 lifecycle, User 9-step workflow
+
+---
+
+## Implementation Complete: Phase 3 (Content Gating Removed)
+
+**Date:** 2026-03-07 23:55 IST  
+**Status:** Phase 3 Complete ✅ - All Content Now Open
+
+### Changes Made
+
+#### 1. progressStore.ts - Removed Gating Logic
+
+**Removed:**
+- `UNLOCK_THRESHOLD` constant (was 3)
+- Batch unlock logic from `markLetterAttempt()`
+- Export of `UNLOCK_THRESHOLD`
+
+**Modified:**
+- `isBatchUnlocked()` → Now always returns `true`
+- `getUnlockedBatches()` → Returns all batches
+- `getAvailableLetterIndices()` → Returns all letters
+
+**Before:**
+```typescript
+// Required 3/5 letters "mastered" to unlock next batch
+if (masteredInBatch >= UNLOCK_THRESHOLD) {
+  unlockNextBatch();
+}
+```
+
+**After:**
+```typescript
+// All content always available - no gating
+// Every letter playable from the start
+```
+
+#### 2. store/index.ts - Updated Exports
+
+**Removed:** `UNLOCK_THRESHOLD` from exports
+
+#### 3. LetterJourney.tsx - Updated UI
+
+**Removed:**
+- "Master 3 letters to unlock" messaging
+- Lock icons on locked batches
+- "X/3 to unlock" text
+- Disabled state on letters
+- "Locked" legend
+
+**Changed:**
+- Title: "Master 3 letters..." → "Explore letters at your own pace!"
+- Subtitle: Added "All letters are available - just pick one and play"
+- Legend: "Mastered/Available/Locked" → "Played Often/Ready to Explore"
+- All letters now clickable (no `isUnlocked` check)
+
+### Vision Alignment
+
+**Now aligns with North Star Vision:**
+> "We are building an Open Playground... Complex games aren't locked behind an arbitrary age."
+
+**Before (Violated Vision):**
+- Linear progression (must complete batch 1 to access batch 2)
+- Performance gating (need 70% accuracy to "master")
+- Lock icons creating visual pressure
+- "Must master" language
+
+**After (Vision-Aligned):**
+- All content available from start
+- No accuracy thresholds
+- No lock icons
+- Explore at your own pace
+
+### Impact
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Letter Access | Locked by batch | All available |
+| Unlock Requirement | 3/5 "mastered" | None |
+| UI Messaging | "Master to unlock" | "Explore at your pace" |
+| Visual Indicators | Lock icons | None |
+| Child Experience | Gated, pressured | Free, exploratory |
+
+### Acceptance Criteria Status
+
+- [x] Alphabet tracking removed from Settings
+- [x] Unified activity view in Dashboard
+- [x] All activities displayed together
+- [x] No "mastered" language
+- [ ] Play pattern tracking (Phase 2 - Future)
+- [x] **Content gating removed** ✅
+- [x] Teacher rubric types preserved
+
+### TypeScript Verification
+
+```bash
+$ npx tsc --noEmit
+✅ progressStore.ts - No errors
+✅ LetterJourney.tsx - No errors
+✅ store/index.ts - No errors
+```
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `progressStore.ts` | Removed UNLOCK_THRESHOLD, modified 4 functions |
+| `store/index.ts` | Removed UNLOCK_THRESHOLD export |
+| `LetterJourney.tsx` | Removed lock UI, updated messaging |
+
+### Lines Changed
+
+```bash
+git diff --stat
+ src/components/LetterJourney.tsx    | 40 +++++----------
+ src/store/index.ts                   |  3 +-
+ src/store/progressStore.ts          | 50 +++++--------------
+ 3 files changed, 26 insertions(+), 67 deletions(-)
+```
+
+---
+
+**Phase 3 Complete: Open Playground Achieved** 🎉
+
+All letters now available from the start - no gating, no pressure, just exploration!
+

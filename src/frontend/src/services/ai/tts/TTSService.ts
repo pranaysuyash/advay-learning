@@ -145,7 +145,15 @@ export class TTSService {
       utterance.volume = Math.min(options.volume ?? 1.0, this.volume);
       const lang = options.lang || PIP_VOICE_DEFAULTS.lang!;
       utterance.lang = lang;
-      const voice = this.findVoiceForLanguage(lang);
+
+      // Use specified voice name if provided, otherwise find by language
+      let voice: SpeechSynthesisVoice | null = null;
+      if (options.voiceName) {
+        voice = this.voices.find((v) => v.name === options.voiceName) ?? null;
+      }
+      if (!voice) {
+        voice = this.findVoiceForLanguage(lang);
+      }
       if (voice) utterance.voice = voice;
 
       utterance.onend = () => resolve();

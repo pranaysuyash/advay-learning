@@ -19,6 +19,7 @@ import { AdventureMap } from '../components/Map';
 import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
+import { UnifiedActivityFeed } from '../components/dashboard/UnifiedActivityFeed';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
 import { subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
 import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
@@ -87,7 +88,7 @@ export const Dashboard = memo(function Dashboard() {
   const navigate = useNavigate();
   const { isGuest, guestSession } = useAuthStore();
   const { profiles, currentProfile, setCurrentProfile, fetchProfiles, createProfile } = useProfileStore();
-  const { letterProgress } = useProgressStore();
+  const { letterProgress, gameHistory } = useProgressStore();
   const { demoMode, setDemoMode } = useSettingsStore();
   const { showToast } = useToast();
 
@@ -443,6 +444,18 @@ export const Dashboard = memo(function Dashboard() {
             </div>
           )}
         </section>
+
+        {/* UNIFIED ACTIVITY FEED - Shows alphabet + game activity together */}
+        {!isGuest && defaultProfile && (
+          <section>
+            <UnifiedActivityFeed
+              letterProgress={letterProgress}
+              gameHistory={gameHistory}
+              currentProfileId={defaultProfile.id}
+              currentLanguage={defaultProfile.preferred_language || 'en'}
+            />
+          </section>
+        )}
 
         {/* SECONDARY AREA: ADVENTURE MAP (Keep logic, style to match V1) */}
         <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>

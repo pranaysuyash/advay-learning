@@ -11,6 +11,7 @@ from app.db.base_class import Base
 
 if TYPE_CHECKING:
     from app.db.models.achievement import Achievement
+    from app.db.models.consent import ParentalConsent
     from app.db.models.progress import Progress
     from app.db.models.user import User
 
@@ -50,4 +51,12 @@ class Profile(Base):
         back_populates="profile",
         lazy="selectin",
         cascade="all, delete-orphan",
+    )
+
+    # Parental consent for this child (DPDPA compliance)
+    consent: Mapped["ParentalConsent"] = relationship(
+        "ParentalConsent",
+        back_populates="child",
+        lazy="selectin",
+        uselist=False,  # One consent per child
     )

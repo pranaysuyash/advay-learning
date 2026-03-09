@@ -38,33 +38,27 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
   const alphabet = getAlphabet(language);
   const {
     letterProgress,
-    batchProgress,
     isLetterMastered,
     getBatchMasteryCount,
   } = useProgressStore();
 
   const langProgress = letterProgress[language] || [];
-  const langBatches = batchProgress[language] || [];
   const totalBatches = Math.ceil(alphabet.letters.length / BATCH_SIZE);
 
-  // Get unlocked batch indices
-  const unlockedBatches = new Set([0]);
-  langBatches.forEach((b) => {
-    if (b.unlocked) unlockedBatches.add(b.batchIndex);
-  });
+  // Note: All batches are now always unlocked (open playground model)
+  // Every letter is available from the start
 
   return (
     <div className='bg-white/10 border border-border rounded-xl p-6 shadow-[0_4px_0_#E5B86E]'>
       <h2 className='text-2xl font-bold mb-2'>Letter Journey</h2>
       <p className='text-slate-300 mb-6'>
-        Master 3 letters in each batch to unlock the next! (
+        Explore letters at your own pace! All letters are available - just pick one and play. (
         {langProgress.filter((p) => p.mastered).length} of{' '}
         {alphabet.letters.length} mastered)
       </p>
 
       <div className='space-y-6'>
         {Array.from({ length: totalBatches }, (_, batchIndex) => {
-          const isUnlocked = unlockedBatches.has(batchIndex);
           const startIdx = batchIndex * BATCH_SIZE;
           const endIdx = Math.min(
             startIdx + BATCH_SIZE,
@@ -82,9 +76,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                     isCompleted
                       ? 'bg-green-500 text-white'
-                      : isUnlocked
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white/20 text-white/60'
+                      : 'bg-blue-500 text-white'
                   }`}
                 >
                   {isCompleted ? (
@@ -93,18 +85,15 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                     batchIndex + 1
                   )}
                 </div>
-                <span className='font-medium flex items-center gap-2'>
+                <span className='font-medium'>
                   Batch {batchIndex + 1}
-                  {!isUnlocked && (
-                    <UIIcon name='lock' size={14} className='text-slate-400' aria-label='Locked - complete previous batch to unlock' />
-                  )}
                 </span>
                 <span className='text-sm text-slate-400'>
-                  {masteredCount}/3 to unlock
+                  {masteredCount} mastered
                 </span>
               </div>
 
-              {/* Letters grid */}
+              {/* Letters grid - all always available */}
               <div className='grid grid-cols-5 gap-2 ml-11'>
                 {batchLetters.map((letter) => {
                   const isMastered = isLetterMastered(language, letter.char);
@@ -116,24 +105,16 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                   return (
                     <motion.button
                       key={letter.char}
-                      whileHover={isUnlocked ? { scale: 1.05 } : {}}
-                      whileTap={isUnlocked ? { scale: 0.95 } : {}}
-                      onClick={() => isUnlocked && onLetterClick?.(letter.char)}
-                      disabled={!isUnlocked}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => onLetterClick?.(letter.char)}
                       className={`
                         aspect-square rounded-lg flex flex-col items-center justify-center gap-1
-                        transition-all duration-200
-                        ${
-                          isUnlocked
-                            ? 'cursor-pointer hover:shadow-lg'
-                            : 'cursor-not-allowed opacity-50'
-                        }
+                        transition-all duration-200 cursor-pointer hover:shadow-lg
                         ${
                           isMastered
                             ? 'bg-green-500/30 border-2 border-green-500 shadow-md'
-                            : isUnlocked
-                              ? 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-[0_4px_0_#E5B86E]'
-                              : 'bg-white/10 border border-border opacity-70'
+                            : 'bg-white/10 border border-border hover:bg-white/20 hover:border-border-strong shadow-[0_4px_0_#E5B86E]'
                         }
                       `}
                     >
@@ -173,17 +154,15 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
       <div className='mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-sm'>
         <div className='flex items-center gap-2'>
           <div className='w-4 h-4 rounded bg-green-500/30 border border-green-500' />
-          <span className='text-slate-400'>Mastered</span>
+          <span className='text-slate-400'>Played Often</span>
         </div>
         <div className='flex items-center gap-2'>
           <div className='w-4 h-4 rounded bg-white/10 border border-border' />
-          <span className='text-slate-400'>Available</span>
-        </div>
-        <div className='flex items-center gap-2'>
-          <div className='w-4 h-4 rounded bg-white/10 border border-border opacity-50' />
-          <span className='text-slate-400'>Locked</span>
+          <span className='text-slate-400'>Ready to Explore</span>
         </div>
       </div>
     </div>
   );
 }
+
+export default LetterJourney;

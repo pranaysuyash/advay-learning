@@ -1,9 +1,11 @@
-import { useCallback, useState, useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useState, useEffect, useRef, type ReactNode as _ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -16,20 +18,26 @@ import {
 } from '../games/shapeStackerLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
+
+// SVG shapes for rendering
+import type { JSX } from 'react';
+const SHAPE_SVG: Record<string, JSX.Element> = {
+  square: <svg viewBox="0 0 100 100" width="100%" height="100%"><rect x="10" y="10" width="80" height="80" fill="currentColor" /></svg>,
+  circle: <svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="40" fill="currentColor" /></svg>,
+  triangle: <svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="50,10 90,90 10,90" fill="currentColor" /></svg>,
+  star: <svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="50,5 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="currentColor" /></svg>,
+};
+
+// Game colors
 const GAME_COLORS = {
-  background: '#F8FAFC',
-  slot: '#E2E8F0',
-  slotFilled: '#22C55E',
+  background: '#F3F4F6',
+  slot: '#E5E7EB',
+  slotFilled: '#D1D5DB',
+  targetFilled: '#10B981',
+  border: '#9CA3AF',
+  borderFilled: '#059669',
 };
-
-const SHAPE_SVG: Record<FallingShape['shape'], ReactNode> = {
-  square: <rect x="5" y="5" width="30" height="30" />,
-  circle: <circle cx="20" cy="20" r="18" />,
-  triangle: <polygon points="20,5 35,35 5,35" />,
-  star: <polygon points="20,2 25,15 38,15 28,24 32,37 20,29 8,37 12,24 2,15 15,15" />,
-};
-
-export function ShapeStacker() {
+function ShapeStackerContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [shapes, setShapes] = useState<FallingShape[]>([]);
@@ -47,6 +55,7 @@ export function ShapeStacker() {
 
   const { playSuccess, playClick, playError } = useAudio();
   const { onGameComplete } = useGameDrops('shape-stacker');
+  const { saveProgress: _saveProgress } = useGameProgress('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const FALL_SPEED = 0.15;
@@ -338,3 +347,16 @@ export function ShapeStacker() {
     </GameContainer>
   );
 }
+
+export const ShapeStacker = () => (
+  <GameShell
+    gameId="shape-stacker"
+    gameName="Shape Stacker"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <ShapeStackerContent />
+  </GameShell>
+);
+
+export default ShapeStacker;

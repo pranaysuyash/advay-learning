@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -9,7 +11,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, generateWordSearch } from '../games/wordSearchLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function WordSearch() {
+export function WordSearchContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [grid, setGrid] = useState<string[][]>([]);
@@ -222,3 +224,11 @@ export function WordSearch() {
     </GameContainer>
   );
 }
+
+export const WordSearch = () => (
+  <GameShell gameId="word-search" gameName="Word Search">
+    <WordSearchContent />
+  </GameShell>
+);
+
+export default WordSearch;

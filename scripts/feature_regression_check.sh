@@ -264,6 +264,16 @@ extract_export_names() {
     sort -u
 }
 
+extract_intentional_export_removals() {
+  local content="$1"
+  echo "$content" | grep -oE 'INTENTIONAL_EXPORT_REMOVAL:[[:space:]]*[A-Za-z0-9_, -]+' | \
+    sed -E 's/.*INTENTIONAL_EXPORT_REMOVAL:[[:space:]]*//' | \
+    tr ',' '\n' | \
+    sed -E 's/^[[:space:]]+|[[:space:]]+$//g' | \
+    sed '/^$/d' | \
+    sort -u
+}
+
 # Extract component props interfaces
 extract_props() {
   local content="$1"
@@ -335,6 +345,13 @@ check_feature_regression() {
   
   local removed_exports
   removed_exports=$(comm -23 <(echo "$old_export_names") <(echo "$new_export_names") || true)
+  if [[ -n "$removed_exports" ]]; then
+    local intentional_export_removals
+    intentional_export_removals=$(extract_intentional_export_removals "$new_content")
+    if [[ -n "$intentional_export_removals" ]]; then
+      removed_exports=$(comm -23 <(echo "$removed_exports") <(echo "$intentional_export_removals") || true)
+    fi
+  fi
   if [[ -n "$removed_exports" ]]; then
     issues+=("Exports removed: $(echo "$removed_exports" | wc -l | tr -d ' ')")
     while IFS= read -r exp; do

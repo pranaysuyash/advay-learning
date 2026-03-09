@@ -2,6 +2,7 @@
 
 from app.db.models.achievement import Achievement
 from app.db.models.audit_log import AuditLog
+from app.db.models.consent import ConsentAuditLog, ParentalConsent
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
 from app.db.models.refresh_token import RefreshToken
@@ -17,4 +18,6 @@ __all__ = [
     "RefreshToken",
     "Subscription",
     "SubscriptionGameSelection",
+    "ParentalConsent",
+    "ConsentAuditLog",
 ]

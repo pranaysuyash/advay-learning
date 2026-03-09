@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
@@ -103,7 +105,7 @@ const REACTIONS: Reaction[] = [
   },
 ];
 
-export function VirtualChemistryLab() {
+export function VirtualChemistryLabContent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -690,5 +692,11 @@ export function VirtualChemistryLab() {
     </div>
   );
 }
+
+export const VirtualChemistryLab = () => (
+  <GameShell gameId="virtual-chemistry-lab" gameName="Virtual Chemistry Lab">
+    <VirtualChemistryLabContent />
+  </GameShell>
+);
 
 export default VirtualChemistryLab;

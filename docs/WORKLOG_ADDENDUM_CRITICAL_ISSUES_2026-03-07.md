@@ -1237,3 +1237,283 @@ CREATE TABLE parent_consents (
 **Prompt Trace:** AGENTS.md §8 lifecycle, User directive for vision alignment
 
 **All Active Tickets Complete.**
+
+---
+
+## Implementation Complete: CRIT-002 Backend Integration (DPDPA)
+
+**Date:** 2026-03-08 00:15 IST  
+**Status:** Backend API Complete ✅
+
+### Files Created
+
+#### 1. Schemas
+**File:** `src/backend/app/schemas/consent.py`
+- `ParentalConsentBase`, `ParentalConsentCreate`, `ParentalConsentResponse`
+- `ConsentVerificationRequest`, `ConsentWithdrawalRequest`
+- `ConsentAuditLog` schema
+- Enums: `VerificationMethod`, `ConsentStatus`
+
+#### 2. Database Models
+**File:** `src/backend/app/db/models/consent.py`
+- `ParentalConsent` model with all DPDPA fields
+- `ConsentAuditLog` model for audit trail
+- Methods: `is_active()` for checking consent validity
+
+**Updated:** `src/backend/app/db/models/user.py`
+- Added `consents` relationship
+
+**Updated:** `src/backend/app/db/models/profile.py`
+- Added `consent` relationship
+
+**Updated:** `src/backend/app/db/models/__init__.py`
+- Exported new consent models
+
+#### 3. API Endpoints
+**File:** `src/backend/app/api/v1/endpoints/consent.py`
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/consent/` | POST | Create new consent record |
+| `/consent/{id}/verify` | POST | Verify consent (email/card/declaration) |
+| `/consent/{id}/withdraw` | POST | Withdraw consent (DPDPA right) |
+| `/consent/` | GET | List all consents |
+| `/consent/{id}` | GET | Get specific consent |
+| `/consent/child/{id}/status` | GET | Check consent status for child |
+
+**Updated:** `src/backend/app/api/v1/api.py`
+- Added consent router
+
+#### 4. Database Migration
+**File:** `src/backend/alembic/versions/20260307_add_parental_consent.py`
+- Creates `parental_consents` table
+- Creates `consent_audit_logs` table
+- Creates PostgreSQL enums
+- Adds indexes for performance
+
+### API Usage
+
+#### Create Consent
+```bash
+POST /api/v1/consent/
+{
+  "parent_email": "parent@example.com",
+  "child_name": "Aarav",
+  "verification_method": "email",
+  "consent_version": "1.0"
+}
+```
+
+#### Verify Consent
+```bash
+POST /api/v1/consent/{consent_id}/verify
+{
+  "verification_method": "email",
+  "email_code": "123456"
+}
+```
+
+#### Withdraw Consent (DPDPA Right)
+```bash
+POST /api/v1/consent/{consent_id}/withdraw
+{
+  "reason": "No longer using the service",
+  "effective_immediately": true
+}
+```
+
+### DPDPA 2023 Compliance Features
+
+✅ **Section 9(1)**: Verifiable parental consent required  
+✅ **Section 6**: Easy consent withdrawal  
+✅ **Section 8**: Data processing purpose disclosed  
+✅ **Section 12**: Right to access (list/get endpoints)  
+✅ **Section 14**: Right to erasure (withdrawal)  
+✅ **Audit Trail**: All actions logged with IP/user agent  
+
+### Integration Steps (Frontend)
+
+The frontend `ParentalConsentFlow` component is ready to integrate:
+
+```typescript
+// In Register.tsx or child creation flow:
+import { ParentalConsentFlow } from '@/components/consent';
+
+// 1. Create consent
+const consent = await api.post('/consent', {
+  parent_email: email,
+  child_name: childName,
+  verification_method: 'email'
+});
+
+// 2. Verify consent
+await api.post(`/consent/${consent.id}/verify`, {
+  verification_method: 'email',
+  email_code: code
+});
+
+// 3. Create child profile with consent link
+await api.post('/profiles', {
+  name: childName,
+  consent_id: consent.id
+});
+```
+
+### Remaining Work
+
+**Frontend Integration:**
+- Wire up `ParentalConsentFlow` to backend API
+- Add consent check before creating child profile
+- Handle verification flow (email OTP, card, declaration)
+
+**Payment Integration (Optional):**
+- Integrate Stripe/Razorpay for ₹1 card verification
+- Webhook to confirm verification
+
+### Files Modified/Created
+
+```
+src/backend/
+├── app/schemas/consent.py              ✅ NEW
+├── app/db/models/consent.py            ✅ NEW
+├── app/db/models/user.py               ✅ Modified
+├── app/db/models/profile.py            ✅ Modified
+├── app/db/models/__init__.py           ✅ Modified
+├── app/api/v1/endpoints/consent.py     ✅ NEW
+├── app/api/v1/api.py                   ✅ Modified
+└── alembic/versions/20260307_...       ✅ NEW
+```
+
+### Status
+
+| Component | Status |
+|-----------|--------|
+| Database Schema | ✅ Complete |
+| API Endpoints | ✅ Complete |
+| Frontend Component | ✅ Complete (earlier) |
+| Integration | ⬜ Pending |
+| Payment Gateway | ⬜ Optional |
+
+**CRIT-002 Backend: COMPLETE** ✅
+
+
+---
+
+## Payment Provider Update: Dodopayments (India)
+
+**Date:** 2026-03-08 00:25 IST  
+**Decision:** Use Dodopayments for parental verification
+
+### Context
+
+User confirmed payment provider priorities for India:
+1. **Dodopayments** - Primary choice (India-optimized)
+2. **Razorpay** - Alternative (future consideration)  
+3. **Stripe** - ❌ Not viable in India
+
+### Why Dodopayments?
+
+| Feature | Dodopayments | Stripe | Razorpay |
+|---------|-------------|--------|----------|
+| India UPI | ✅ Native | ❌ Limited | ✅ Yes |
+| Small Transactions | ✅ Optimized | ⚠️ Expensive | ✅ Yes |
+| Local Rails | ✅ Fast | ⚠️ Slow | ✅ Fast |
+| Pricing | ✅ Low | ❌ High | ✅ Medium |
+| India Focus | ✅ Yes | ❌ Global | ✅ Yes |
+
+### Documentation Created
+
+**File:** `docs/PAYMENT_INTEGRATION_DODOPAYMENTS.md`
+
+**Contents:**
+- Flow overview (₹1 verification → webhook → refund)
+- API integration examples
+- Frontend SDK integration
+- UPI deep link support
+- Webhook security (signature verification)
+- Refund logic (automatic after verification)
+- Testing guide
+- Future Razorpay migration path
+
+### Backend Updates
+
+**Modified Files:**
+
+1. `app/schemas/consent.py`
+   - Changed `CREDIT_CARD` → `DODOPAYMENTS`
+   - Added `RAZORPAY` (for future)
+
+2. `app/api/v1/endpoints/consent.py`
+   - Updated verification logic for Dodopayments
+   - Added webhook handler (`/webhooks/dodopayments`)
+   - Signature verification
+   - Async refund trigger
+
+3. `app/db/models/consent.py`
+   - Added `dodopayments_intent_id` field
+   - Added `razorpay_order_id` field (future)
+
+### Implementation Status
+
+| Component | Status |
+|-----------|--------|
+| Backend API | ✅ Complete (verification + webhook) |
+| Database Schema | ✅ Complete (intent IDs stored) |
+| Frontend Component | ✅ Complete (earlier) |
+| Dodopayments SDK | ⬜ Pending (need API keys) |
+| Webhook Endpoint | ✅ Ready (needs public URL) |
+| Refund Logic | ✅ Specified (async) |
+
+### Next Steps for Payment Integration
+
+1. **Get Dodopayments API Keys**
+   - Sign up at dodopayments.com
+   - Get test API key: `dp_test_xxxxxxxx`
+   - Get webhook secret
+
+2. **Environment Setup**
+   ```bash
+   DODOPAYMENTS_API_KEY=dp_test_xxxxxxxx
+   DODOPAYMENTS_WEBHOOK_SECRET=whsec_xxxxxxxx
+   ```
+
+3. **Frontend SDK**
+   ```bash
+   npm install @dodopayments/js
+   ```
+
+4. **Webhook Testing**
+   - Use ngrok for local webhook testing
+   - Configure webhook URL in Dodopayments dashboard
+   - Test with ₹1 payment
+
+### API Flow
+
+```
+Parent selects "UPI/Card Verification"
+           ↓
+POST /consent/ (creates PENDING)
+           ↓
+Backend creates Dodopayments intent
+           ↓
+Parent pays ₹1 (UPI/Card/NetBanking)
+           ↓
+Dodopayments → POST /consent/webhooks/dodopayments
+           ↓
+Backend verifies payment → marks consent VERIFIED
+           ↓
+Async refund initiated (₹1 returned)
+           ↓
+Child account activated
+```
+
+### Security
+
+- ✅ Webhook signature verification
+- ✅ Payment metadata includes consent_id
+- ✅ No card numbers stored (only intent IDs)
+- ✅ HTTPS only
+- ₹1 verification charge (immediately refunded)
+
+**Provider Decision Documented:** Dodopayments (India-First) ✅
+

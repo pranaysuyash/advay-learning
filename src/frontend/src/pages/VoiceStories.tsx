@@ -2,14 +2,16 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getStoriesForLevel, type Story } from '../games/voiceStoriesLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function VoiceStories() {
+function VoiceStoriesContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
@@ -21,6 +23,7 @@ export function VoiceStories() {
 
   const { playClick, playSuccess } = useAudio();
   const { onGameComplete } = useGameDrops('voice-stories');
+  const { saveProgress: _saveProgress } = useGameProgress('voice-stories');
 
   useGameSessionProgress({ gameName: 'Voice Stories', score, level: currentLevel, isPlaying: true, metaData: { currentLine } });
 
@@ -133,3 +136,16 @@ export function VoiceStories() {
     </GameContainer>
   );
 }
+
+export const VoiceStories = () => (
+  <GameShell
+    gameId="voice-stories"
+    gameName="Voice Stories"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <VoiceStoriesContent />
+  </GameShell>
+);
+
+export default VoiceStories;

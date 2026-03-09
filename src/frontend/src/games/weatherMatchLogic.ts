@@ -16,6 +16,11 @@ export interface Clothing {
   emoji: string;
 }
 
+export interface GamePair {
+  weather: Weather;
+  clothing: Clothing;
+}
+
 export interface LevelConfig {
   level: number;
   pairCount: number;

@@ -64,8 +64,9 @@ interface ProgressState {
 }
 
 const BATCH_SIZE = 5;
+// Note: MASTERY_THRESHOLD kept for backward compatibility but no longer used for gating
+// All content is now always available (open playground model)
 const MASTERY_THRESHOLD = 70;
-const UNLOCK_THRESHOLD = 3; // Need 3/5 letters mastered to unlock next batch
 
 export const useProgressStore = create<ProgressState>()(
   persist(
@@ -110,44 +111,13 @@ export const useProgressStore = create<ProgressState>()(
             ];
           }
 
-          // Check if we should unlock next batch
-          const batchIndex = Math.floor(
-            (updatedProgress.length - 1) / BATCH_SIZE,
-          );
-          const langBatches = state.batchProgress[language] || [];
-
-          // Count mastered letters in current batch
-          const batchStart = batchIndex * BATCH_SIZE;
-          const batchEnd = batchStart + BATCH_SIZE;
-          const masteredInBatch = updatedProgress
-            .slice(batchStart, batchEnd)
-            .filter((p) => p.mastered).length;
-
-          // Unlock next batch if threshold met
-          const updatedBatches = [...langBatches];
-          if (masteredInBatch >= UNLOCK_THRESHOLD) {
-            const nextBatchIndex = batchIndex + 1;
-            const nextBatchExists = updatedBatches.some(
-              (b) => b.batchIndex === nextBatchIndex,
-            );
-
-            if (!nextBatchExists) {
-              updatedBatches.push({
-                batchIndex: nextBatchIndex,
-                unlocked: true,
-                unlockedDate: new Date().toISOString(),
-              });
-            }
-          }
+          // Note: All content is now always available (open playground model)
+          // No batch unlocking needed - every letter available from start
 
           return {
             letterProgress: {
               ...state.letterProgress,
               [language]: updatedProgress,
-            },
-            batchProgress: {
-              ...state.batchProgress,
-              [language]: updatedBatches,
             },
           };
         });
@@ -159,20 +129,16 @@ export const useProgressStore = create<ProgressState>()(
         return letterProg?.mastered || false;
       },
 
-      isBatchUnlocked: (language, batchIndex) => {
-        // Batch 0 is always unlocked
-        if (batchIndex === 0) return true;
-
-        const langBatches = get().batchProgress[language] || [];
-        return langBatches.some(
-          (b) => b.batchIndex === batchIndex && b.unlocked,
-        );
+      isBatchUnlocked: () => {
+        // All batches are always unlocked (open playground model)
+        // Every letter available from the start - no gating
+        return true;
       },
 
-      getUnlockedBatches: (language) => {
-        const langBatches = get().batchProgress[language] || [];
-        // Count batch 0 (always unlocked) + unlocked batches
-        return 1 + langBatches.filter((b) => b.unlocked).length;
+      getUnlockedBatches: (_language, totalBatches?: number) => {
+        // All batches are always unlocked
+        // Return total batches or a high number if not provided
+        return totalBatches || 10;
       },
 
       getMasteredLettersCount: (language) => {
@@ -340,30 +306,15 @@ const syncCurrentProfileFromProfileStore = () => {
 syncCurrentProfileFromProfileStore();
 useProfileStore.subscribe(syncCurrentProfileFromProfileStore);
 
-// Helper function to get available letters based on unlocked batches
+// Helper function to get available letters
+// Note: All letters are now always available (open playground model)
 export function getAvailableLetterIndices(
-  language: string,
+  _language: string,
   totalLetters: number,
 ): number[] {
-  const { batchProgress } = useProgressStore.getState();
-  const langBatches = batchProgress[language] || [];
-
-  // Batch 0 is always unlocked
-  const unlockedBatches = new Set([0]);
-  langBatches.forEach((b) => {
-    if (b.unlocked) unlockedBatches.add(b.batchIndex);
-  });
-
-  const indices: number[] = [];
-  unlockedBatches.forEach((batchIndex) => {
-    const start = batchIndex * BATCH_SIZE;
-    const end = Math.min(start + BATCH_SIZE, totalLetters);
-    for (let i = start; i < end; i++) {
-      indices.push(i);
-    }
-  });
-
-  return indices;
+  // Return all letter indices - no gating, everything available from start
+  return Array.from({ length: totalLetters }, (_, i) => i);
 }
 
-export { BATCH_SIZE, MASTERY_THRESHOLD, UNLOCK_THRESHOLD };
+export { BATCH_SIZE, MASTERY_THRESHOLD };
+// Note: UNLOCK_THRESHOLD removed - all content now always available

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authApi } from '../services/api';
+import { getErrorMessage as extractErrorMessage } from '../utils/errorUtils';
 
 export enum UserRole {
   PARENT = 'parent',
@@ -53,54 +54,10 @@ interface AuthState {
 }
 
 // Helper to extract error message from various error formats
+// REFACTOR-2026-03-07: Now delegates to centralized errorUtils
+// See: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md CONSOL-004
 function getErrorMessage(error: any): string {
-  if (!error.response?.data) return 'An error occurred';
-
-  const data = error.response.data;
-
-  const formatDuration = (seconds: number): string => {
-    const safe = Math.max(1, Math.floor(seconds));
-    const minutes = Math.floor(safe / 60);
-    const remainingSeconds = safe % 60;
-    return minutes > 0 ? `${minutes}m ${remainingSeconds}s` : `${remainingSeconds}s`;
-  };
-
-  // NEW: Structured error format from custom exceptions
-  // { success: false, error: { code: '...', message: '...', details: {} } }
-  if (
-    data.error?.code === 'ACCOUNT_LOCKED' &&
-    typeof data.error?.details?.retry_after_seconds === 'number'
-  ) {
-    return `Account is temporarily locked. Try again in ${formatDuration(data.error.details.retry_after_seconds)}.`;
-  }
-
-  if (
-    data.error?.code === 'TOKEN_INVALID' &&
-    typeof data.error?.message === 'string' &&
-    data.error.message.toLowerCase().includes('no refresh token provided')
-  ) {
-    return 'Your session expired. Please sign in again.';
-  }
-
-  if (data.error?.message) return data.error.message;
-
-  // Simple string detail (legacy FastAPI format)
-  if (typeof data.detail === 'string') return data.detail;
-
-  // Array of validation errors (legacy FastAPI format)
-  if (Array.isArray(data.detail)) {
-    return data.detail
-      .map((err: any) => err.msg || err.message || 'Invalid input')
-      .join(', ');
-  }
-
-  // Object with msg
-  if (data.msg) return data.msg;
-
-  // Object with message
-  if (data.message) return data.message;
-
-  return 'An error occurred';
+  return extractErrorMessage(error);
 }
 
 export const useAuthStore = create<AuthState>()(

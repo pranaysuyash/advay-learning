@@ -8,6 +8,8 @@ import {
   isValidationError,
   isNotFoundError,
   isRateLimitError,
+  formatDuration,
+  ERROR_CODES,
 } from '../errorUtils';
 
 describe('errorUtils', () => {
@@ -117,9 +119,9 @@ describe('errorUtils', () => {
 
     it('handles network error without response', () => {
       const error = {
-        message: 'Network Error',
+        message: 'Some other error',
       };
-      expect(getErrorMessage(error)).toBe('Network Error');
+      expect(getErrorMessage(error)).toBe('Some other error');
     });
 
     it('handles empty error object', () => {
@@ -130,8 +132,8 @@ describe('errorUtils', () => {
       const error = {
         message: 12345,
       };
-      // The function returns the message as-is if it exists, even if not a string
-      expect(getErrorMessage(error)).toBe(12345);
+      // Non-string messages fall through to fallback
+      expect(getErrorMessage(error)).toBe('An error occurred');
     });
 
     it('prioritizes error.error.message over data.message', () => {
@@ -427,6 +429,122 @@ describe('errorUtils', () => {
         },
       };
       expect(isRateLimitError(error)).toBe(false);
+    });
+  });
+
+  // =============================================================================
+  // NEW CONSOLIDATED ERROR HANDLING TESTS
+  // See: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md CONSOL-004
+  // =============================================================================
+
+  describe('formatDuration', () => {
+    it('formats seconds only', () => {
+      expect(formatDuration(45)).toBe('45s');
+    });
+
+    it('formats minutes and seconds', () => {
+      expect(formatDuration(90)).toBe('1m 30s');
+      expect(formatDuration(150)).toBe('2m 30s');
+    });
+
+    it('handles zero seconds', () => {
+      expect(formatDuration(0)).toBe('1s'); // Minimum 1 second
+    });
+
+    it('rounds down seconds', () => {
+      expect(formatDuration(90.9)).toBe('1m 30s');
+    });
+
+    it('handles large durations', () => {
+      expect(formatDuration(3600)).toBe('60m 0s');
+    });
+  });
+
+  describe('getErrorMessage - ACCOUNT_LOCKED handling', () => {
+    it('formats ACCOUNT_LOCKED with duration', () => {
+      const error = {
+        response: {
+          data: {
+            error: {
+              code: 'ACCOUNT_LOCKED',
+              message: 'Account is locked',
+              details: {
+                retry_after_seconds: 300,
+              },
+            },
+          },
+        },
+      };
+      expect(getErrorMessage(error)).toBe('Account is temporarily locked. Try again in 5m 0s.');
+    });
+
+    it('formats ACCOUNT_LOCKED with short duration', () => {
+      const error = {
+        response: {
+          data: {
+            error: {
+              code: 'ACCOUNT_LOCKED',
+              details: {
+                retry_after_seconds: 45,
+              },
+            },
+          },
+        },
+      };
+      expect(getErrorMessage(error)).toBe('Account is temporarily locked. Try again in 45s.');
+    });
+  });
+
+  describe('getErrorMessage - TOKEN_INVALID handling', () => {
+    it('returns session expired message for no refresh token', () => {
+      const error = {
+        response: {
+          data: {
+            error: {
+              code: 'TOKEN_INVALID',
+              message: 'No refresh token provided',
+            },
+          },
+        },
+      };
+      expect(getErrorMessage(error)).toBe('Your session expired. Please sign in again.');
+    });
+
+    it('returns original message for other TOKEN_INVALID', () => {
+      const error = {
+        response: {
+          data: {
+            error: {
+              code: 'TOKEN_INVALID',
+              message: 'Token signature invalid',
+            },
+          },
+        },
+      };
+      expect(getErrorMessage(error)).toBe('Token signature invalid');
+    });
+  });
+
+  describe('getErrorMessage - Network Error handling', () => {
+    it('returns friendly message for Network Error', () => {
+      const error = {
+        message: 'Network Error',
+      };
+      expect(getErrorMessage(error)).toBe('Network connection failed. Please check your internet connection.');
+    });
+  });
+
+  describe('ERROR_CODES constants', () => {
+    it('contains all expected error codes', () => {
+      expect(ERROR_CODES.ACCOUNT_LOCKED).toBe('ACCOUNT_LOCKED');
+      expect(ERROR_CODES.TOKEN_INVALID).toBe('TOKEN_INVALID');
+      expect(ERROR_CODES.TOKEN_EXPIRED).toBe('TOKEN_EXPIRED');
+      expect(ERROR_CODES.AUTHENTICATION_ERROR).toBe('AUTHENTICATION_ERROR');
+      expect(ERROR_CODES.AUTHORIZATION_ERROR).toBe('AUTHORIZATION_ERROR');
+      expect(ERROR_CODES.VALIDATION_ERROR).toBe('VALIDATION_ERROR');
+      expect(ERROR_CODES.PASSWORD_STRENGTH_ERROR).toBe('PASSWORD_STRENGTH_ERROR');
+      expect(ERROR_CODES.RESOURCE_NOT_FOUND).toBe('RESOURCE_NOT_FOUND');
+      expect(ERROR_CODES.RATE_LIMIT_EXCEEDED).toBe('RATE_LIMIT_EXCEEDED');
     });
   });
 });
