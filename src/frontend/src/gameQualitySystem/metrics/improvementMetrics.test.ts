@@ -157,6 +157,31 @@ describe('ImprovementMetricsCalculator', () => {
             expect(result.overallImprovementScore).toBeCloseTo(36.25, 1);
         });
 
+        it('should honor bugReductionPositive when bug growth should count as positive', () => {
+            const calculator = createImprovementMetricsCalculator({
+                bugReductionPositive: false,
+            });
+            const baseline: ImprovementBaseline = {
+                qualityScore: 50,
+                userEngagement: 40,
+                completionRate: 60,
+                bugCount: 20,
+                timestamp: '2024-01-01T00:00:00Z',
+            };
+            const outcome: ImprovementOutcome = {
+                qualityScore: 75,
+                userEngagement: 50,
+                completionRate: 75,
+                bugCount: 10,
+                timestamp: '2024-02-01T00:00:00Z',
+            };
+
+            const result = calculator.calculateImprovementMetrics('game-1', baseline, outcome);
+
+            expect(result.bugReportReduction).toBe(-50);
+            expect(result.overallImprovementScore).toBeCloseTo(26.25, 1);
+        });
+
         it('should flag as statistically significant when change exceeds threshold', () => {
             const calculator = createImprovementMetricsCalculator({ statisticalThreshold: 10 });
             const baseline: ImprovementBaseline = {

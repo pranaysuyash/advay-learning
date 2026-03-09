@@ -126,7 +126,7 @@ Size Sorting is an educational game where children sort items by size (smallest-
 | Metric | Value |
 |--------|-------|
 | Lines of code | 107 |
-| Exports | 5 (3 interfaces, 3 functions, 1 constant) |
+| Exports | 6 (3 interfaces, 3 functions) |
 | Test coverage | 49 tests |
 | Test pass rate | 100% |
 | Item sets | 3 |

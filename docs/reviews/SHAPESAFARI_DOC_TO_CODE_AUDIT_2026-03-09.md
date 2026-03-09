@@ -266,9 +266,9 @@ function calculateTracingAccuracy(
     // Find closest point on target path
     let minDist = Infinity;
     for (const targetPoint of targetPath) {
-      const dx = (point.x - targetPoint.x) × canvasWidth;
-      const dy = (point.y - targetPoint.y) × canvasHeight;
-      const dist = Math.sqrt(dx × dx + dy × dy);
+      const dx = (point.x - targetPoint.x) * canvasWidth;
+      const dy = (point.y - targetPoint.y) * canvasHeight;
+      const dist = Math.sqrt(dx * dx + dy * dy);
       minDist = Math.min(minDist, dist);
     }
 

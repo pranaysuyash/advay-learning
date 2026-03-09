@@ -273,6 +273,24 @@ describe('EngagementMetricsCalculator', () => {
             // Weighted: 100*0.2 + 50*0.25 + 75*0.30 + 80*0.25 = 20 + 12.5 + 22.5 + 20 = 75
             expect(result).toBeCloseTo(75, 0);
         });
+
+        it('should clamp invalid feedback scores to avoid negative engagement contribution', () => {
+            const calculator = createEngagementMetricsCalculator();
+            const metrics = {
+                gameId: 'game-1' as const,
+                averageSessionDuration: 300,
+                repeatPlayRate: 50,
+                feedbackScore: 0,
+                completionRate: 80,
+                totalSessions: 100,
+                uniquePlayers: 80,
+                calculatedAt: '2024-01-01',
+            };
+
+            const result = calculator.calculateEngagementScore(metrics);
+
+            expect(result).toBeCloseTo(52.5, 1);
+        });
     });
 
     describe('generateSummary', () => {

@@ -133,10 +133,13 @@ export class ImprovementMetricsCalculator {
         );
 
         // Bug reduction is positive when bugs decrease
-        const bugReportReduction = calculateBugReduction(
+        const rawBugReportReduction = calculateBugReduction(
             baseline.bugCount,
             outcome.bugCount
         );
+        const bugReportReduction = this.config.bugReductionPositive
+            ? rawBugReportReduction
+            : -rawBugReportReduction;
 
         // Calculate overall improvement score (weighted average)
         const overallImprovementScore = (

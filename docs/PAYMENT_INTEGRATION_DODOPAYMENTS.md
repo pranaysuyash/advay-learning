@@ -89,28 +89,30 @@ async def handle_dodopayments_webhook(
     db: Session = Depends(get_db)
 ):
     """Handle Dodopayments payment confirmation webhooks."""
-    payload = await request.json()
-    
+    payload = await request.body()
+
     # Verify webhook signature
     signature = request.headers.get("X-Dodopayments-Signature")
     if not verify_dodo_signature(payload, signature):
         raise HTTPException(status_code=400, detail="Invalid signature")
-    
-    if payload["event"] == "payment_intent.succeeded":
-        consent_id = payload["data"]["metadata"]["consent_id"]
-        
+
+    event = json.loads(payload)
+
+    if event["event"] == "payment_intent.succeeded":
+        consent_id = event["data"]["metadata"]["consent_id"]
+
         consent = db.query(ParentalConsent).get(consent_id)
         if consent:
             consent.card_verified = True
             consent.status = ConsentStatus.VERIFIED
             consent.consent_timestamp = datetime.utcnow()
-            consent.card_transaction_id = payload["data"]["id"]
-            
+            consent.card_transaction_id = event["data"]["id"]
+
             # Create audit log
             audit_log = ConsentAuditLog(...)
             db.add(audit_log)
             db.commit()
-    
+
     return {"status": "ok"}
 ```
 

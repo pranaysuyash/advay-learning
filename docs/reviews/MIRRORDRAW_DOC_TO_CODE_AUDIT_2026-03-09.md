@@ -97,7 +97,7 @@ Mirror Draw is a creative educational game where children trace mirror images of
 | Metric | Value |
 |--------|-------|
 | Lines of code | 494 |
-| Exports | 7 (3 interfaces, 4 functions, 2 constants) |
+| Exports | 10 (3 interfaces, 5 functions, 2 constants) |
 | Test coverage | 28 tests |
 | Test pass rate | 100% |
 | Templates | 20 |

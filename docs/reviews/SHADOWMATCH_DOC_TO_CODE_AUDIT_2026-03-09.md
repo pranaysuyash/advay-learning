@@ -113,7 +113,7 @@ Shadow Match is a visual discrimination game where children match shadows to the
 | Metric | Value |
 |--------|-------|
 | Lines of code | 57 |
-| Exports | 4 (2 interfaces, 2 functions, 1 constant) |
+| Exports | 4 (2 interfaces, 2 functions) |
 | Test coverage | 47 tests |
 | Test pass rate | 100% |
 | Shadow pairs | 8 |

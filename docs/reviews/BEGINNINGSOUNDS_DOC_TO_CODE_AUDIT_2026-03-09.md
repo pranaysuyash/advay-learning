@@ -15,7 +15,7 @@
 
 **Status:** PASS ✅
 
-Beginning Sounds is an educational phonics game where children identify the beginning sound of a displayed word. The implementation includes 33 words across 3 difficulty tiers with proper letter-to-sound mapping.
+Beginning Sounds is an educational phonics game where children identify the beginning sound of a displayed word. The implementation includes 40 words across 3 difficulty tiers with proper letter-to-sound mapping.
 
 ### Test Coverage
 - **43 tests** (excellent)
@@ -27,7 +27,7 @@ Beginning Sounds is an educational phonics game where children identify the begi
 ## Implementation Quality Assessment
 
 ### Strengths
-1. **33-word vocabulary** - Distributed across 3 difficulty tiers
+1. **40-word vocabulary** - Distributed across 3 difficulty tiers
 2. **3-level progression** - Increasing rounds, decreasing time, more options
 3. **Letter-to-sound mapping** - Complete phonetic map for all 26 letters
 4. **TTS integration** - Text-to-speech for word pronunciation
@@ -113,7 +113,7 @@ Beginning Sounds is an educational phonics game where children identify the begi
 | Exports | 9 (4 interfaces, 4 functions, 3 constants) |
 | Test coverage | 43 tests |
 | Test pass rate | 100% |
-| Word bank | 33 words |
+| Word bank | 40 words |
 
 ---
 
@@ -127,7 +127,7 @@ Beginning Sounds is an educational phonics game where children identify the begi
 
 ---
 
-## 33 Word Bank
+## 40 Word Bank
 
 ### Difficulty 1 (20 words) - Common words, clear sounds
 

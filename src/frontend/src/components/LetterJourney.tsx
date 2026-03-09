@@ -54,7 +54,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
       <p className='text-slate-300 mb-6'>
         Explore letters at your own pace! All letters are available - just pick one and play. (
         {langProgress.filter((p) => p.mastered).length} of{' '}
-        {alphabet.letters.length} played with)
+        {alphabet.letters.length} mastered)
       </p>
 
       <div className='space-y-6'>
@@ -89,7 +89,7 @@ export function LetterJourney({ language, onLetterClick }: LetterJourneyProps) {
                   Batch {batchIndex + 1}
                 </span>
                 <span className='text-sm text-slate-400'>
-                  {masteredCount} played
+                  {masteredCount} mastered
                 </span>
               </div>
 

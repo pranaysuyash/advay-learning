@@ -99,7 +99,7 @@ Story Builder is an educational game where children build sentences by selecting
 | Metric | Value |
 |--------|-------|
 | Lines of code | 84 |
-| Exports | 4 (2 interfaces, 2 functions, 1 constant) |
+| Exports | 5 (2 interfaces, 2 functions, 1 constant) |
 | Test coverage | 33 tests |
 | Test pass rate | 100% |
 | Sentence prompts | 5 |

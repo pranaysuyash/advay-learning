@@ -237,7 +237,7 @@ Shuffle uses `array.sort(() => Math.random() - 0.5)` which doesn't produce unifo
 
 ```typescript
 basePoints = 15;
-streakBonus = Math.min(streak × 3, 15);
+streakBonus = Math.min(streak * 3, 15);
 totalPoints = basePoints + streakBonus;
 ```
 

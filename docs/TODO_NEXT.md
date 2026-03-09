@@ -146,7 +146,7 @@ See `docs/clarity/questions.md`:
 
 ### Remaining (Phase 1)
 
-- [x] **AI-002**: Letter Pronunciation Audio
+- [ ] **AI-002**: Letter Pronunciation Audio (English complete; other languages pending)
   - Successfully generated ~280 English audio clips for full coverage
   - Utilized macOS native \`say\` piped to \`ffmpeg\` to bypass OS module locks
   - Wired into PregenAudioCache and React hooks

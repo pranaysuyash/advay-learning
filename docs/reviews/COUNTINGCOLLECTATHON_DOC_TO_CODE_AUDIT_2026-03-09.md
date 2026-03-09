@@ -194,34 +194,53 @@ The Counting Collect-a-thon game implementation is comprehensive and well-design
 
 ### Test Suite: 31 tests covering:
 
-1. **ItemType** (3 tests)
-   - Has 3 types
-   - Valid types
-   - Emoji mapping
+1. **Initial State** (3 tests)
+   - Default READY state
+   - Age band B round 1 target
+   - Age band A round 1 target
 
-2. **ROUND_CONFIG_A** (5 tests)
+2. **Game Start** (2 tests)
+   - READY to PLAYING transition
+   - Score and streak reset
 
-3. **ROUND_CONFIG_B** (5 tests)
-
-4. **DEFAULT_CONFIG** (11 tests)
-
-5. **createInitialState** (6 tests)
-
-6. **startGame** (4 tests)
-
-7. **updatePlayerPosition** (5 tests)
+3. **Player Movement** (7 tests)
    - Updates playerX
    - Clamps to canvas bounds
-   - NaN/Infinity handling
+   - Rejects NaN/Infinity input
+   - Logs CV errors for invalid coordinates
 
-8. **spawnItem** (6 tests)
+4. **Item Spawning** (5 tests)
+   - Creates active items
+   - Honors PLAYING state
+   - Enforces max item count
+   - Uses sequential IDs
+   - Resets ID counter on restart
 
-9. **updateItems** (4 tests)
+5. **Item Updates** (2 tests)
+   - Advances falling items
+   - Removes off-screen items
 
-10. **checkCollisions** (8 tests)
-    - Correct item collection
-    - Wrong item handling
-    - Streak tracking
+6. **Collision Detection** (4 tests)
+   - Detects overlap
+   - Scores correct collections
+   - Resets streak on mistakes
+   - Completes rounds at target count
+
+7. **Timer** (3 tests)
+   - Decrements remaining time
+   - Clamps at zero
+   - Ends the game on timeout
+
+8. **Round Progression** (2 tests)
+   - Advances to next round
+   - Completes the game after round 5
+
+9. **Scoring** (1 test)
+   - Adds time and round bonuses to final score
+
+10. **Helpers** (2 tests)
+    - Returns item emoji by type
+    - Returns child-facing feedback messages
     - Score calculation
     - Round completion detection
 

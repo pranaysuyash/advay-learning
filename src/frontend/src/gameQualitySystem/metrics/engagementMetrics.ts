@@ -210,7 +210,10 @@ export class EngagementMetricsCalculator {
         // Normalize each component to 0-100 scale
         const normalizedDuration = Math.min(metrics.averageSessionDuration / 300, 1) * 100; // 5 min = max
         const normalizedRepeat = metrics.repeatPlayRate;
-        const normalizedFeedback = ((metrics.feedbackScore - 1) / 4) * 100; // 1-5 scale to 0-100
+        const normalizedFeedback = Math.max(
+            0,
+            ((metrics.feedbackScore - 1) / 4) * 100
+        ); // 1-5 scale to 0-100
         const normalizedCompletion = metrics.completionRate;
 
         // Weighted average

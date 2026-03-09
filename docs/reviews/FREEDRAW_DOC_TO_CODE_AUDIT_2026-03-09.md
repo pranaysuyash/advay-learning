@@ -135,7 +135,7 @@ Free Draw is an open-ended creative canvas where children paint with fingers or 
 | Metric | Value |
 |--------|-------|
 | Lines of code | 436 |
-| Exports | 19 (4 interfaces, 1 type, 14 functions, 2 constants) |
+| Exports | 25 (4 interfaces, 1 type, 17 functions, 3 constants) |
 | Test coverage | 44 tests |
 | Test pass rate | 100% (1 skipped) |
 | Color palette | 12 colors |
@@ -243,7 +243,7 @@ clampedSize = Math.max(5, Math.min(50, adjustedSize));
 | 0.1 | 5px (minimum) |
 | 0.5 | 7.5px |
 | 1.0 | 15px |
-| 2.0+ | 30px (clamped) |
+| 2.0 | 30px |
 
 ### Point Filtering
 
