@@ -61,6 +61,12 @@ To hard-block merges with unresolved PR conversations:
 
 2. Mark this check as required:
    - `PR Comment Gate / pr-comment-gate`
+   - `CI/CD Pipeline / backend-test`
+   - `CI/CD Pipeline / frontend-test`
+   - `CodeQL / Analyze (python)`
+   - `CodeQL / Analyze (javascript-typescript)`
+   - `Dependency Review / dependency-review`
+   - `Secret Scan (Gitleaks) / gitleaks`
 
 The workflow is defined at:
 - `.github/workflows/pr-comment-gate.yml`
