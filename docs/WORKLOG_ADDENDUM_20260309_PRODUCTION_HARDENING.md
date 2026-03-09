@@ -163,3 +163,4 @@ Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - 2026-03-09: **IN PROGRESS** - CI workflow hardening: pin npm `11.6.2` in frontend test job to eliminate runner npm-version drift.
 - 2026-03-09: **IN PROGRESS** - Switched frontend CI install command to `npm install --no-audit --no-fund` due reproducible GitHub-only `npm ci` lockfile desync error.
 - 2026-03-09: **IN PROGRESS** - Workflow-definition remediation: remove invalid `.github/workflows/ci.yml` placeholder, harden `pr-comment-gate` event guard, align CI Node pin to 22 LTS, and align backend tool targets to `py313`.
+- 2026-03-09: **IN PROGRESS** - Dependency maintenance: verified no direct deprecated frontend packages; upgraded safe direct patch/minor packages (`eslint`, `@eslint/eslintrc`, `fast-check`, `framer-motion`, `react-i18next`, `serialize-javascript`) and revalidated lint/type/build.
