@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as analytics from '../index';
+import { recordCVError } from '../extensions/countingCollectathon';
 
 // Mock the analytics module
 // DECISION-2026-03-08: Using vi.mock for module-level functions
@@ -97,15 +98,16 @@ describe('Analytics Mock Pattern - Game Integration', () => {
     );
   });
 
-  it('should handle analytics when session not started', () => {
-    // This tests the console.warn fallback case
-    // When no session, logEvent returns early
-    vi.mocked(analytics.getActiveSession).mockReturnValue(null);
+  it('should verify recordCVError payload shape via mocked logEvent', () => {
+    recordCVError('handX', Number.NaN);
 
-    // Act: Try to log without active session
-    analytics.logEvent('orphan_event', { data: 'test' });
-
-    // Assert: Function still called (implementation handles null session)
-    expect(analytics.logEvent).toHaveBeenCalled();
+    expect(analytics.logEvent).toHaveBeenCalledWith(
+      'cv_input_error',
+      expect.objectContaining({
+        game: 'counting-collectathon',
+        field: 'handX',
+        valueType: 'number',
+      })
+    );
   });
 });

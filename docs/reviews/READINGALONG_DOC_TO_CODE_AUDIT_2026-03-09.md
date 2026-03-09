@@ -105,7 +105,7 @@ All sentences:
 
 **Anti-Repetition**:
 ```typescript
-const unused = SENTENCES.filter(entry => \!usedIds.includes(entry.id));
+const unused = SENTENCES.filter(entry => !usedIds.includes(entry.id));
 const source = unused.length > 0 ? unused : SENTENCES;
 ```
 - Filters out used sentences
@@ -118,12 +118,12 @@ const source = unused.length > 0 ? unused : SENTENCES;
 
 **Sections Included**:
 - Overview and educational focus
-| Interface documentation
-| Complete sentences table
-| Function contracts with RNG pattern
-| Game progression rules
-| Technical notes (shuffle algorithm)
-| Design decisions
+- Interface documentation
+- Complete sentences table
+- Function contracts with RNG pattern
+- Game progression rules
+- Technical notes (shuffle algorithm)
+- Design decisions
 | Educational design notes
 
 ### 8. Recommendations

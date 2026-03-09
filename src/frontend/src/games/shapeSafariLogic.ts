@@ -672,7 +672,8 @@ function isPointNearPath(
   // NaN/Infinity validation
   // DECISION-2026-03-08: Using recordCVError for telemetry + console fallback
   if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
-    recordCVError('handX', point.x); // Using handX as generic coordinate field
+    if (!Number.isFinite(point.x)) recordCVError('handX', point.x);
+    if (!Number.isFinite(point.y)) recordCVError('handY', point.y);
     return false;
   }
   
@@ -807,6 +808,9 @@ export function markShapeFound(
   currentTime: number = Date.now()
 ): GameState {
   if (!gameState.currentScene) return gameState;
+
+  const targetShape = gameState.currentScene.shapes.find(shape => shape.id === shapeId);
+  if (!targetShape || targetShape.isFound) return gameState;
   
   // Find and mark the shape
   const updatedShapes = gameState.currentScene.shapes.map(shape =>

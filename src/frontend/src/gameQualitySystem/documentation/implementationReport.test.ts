@@ -218,7 +218,7 @@ describe('ImplementationReport', () => {
             const comparison = report.calculateComparison(0, 20);
 
             expect(comparison.absoluteChange).toBe(20);
-            expect(comparison.percentageChange).toBe(0);
+            expect(comparison.percentageChange).toBe(100);
         });
     });
 

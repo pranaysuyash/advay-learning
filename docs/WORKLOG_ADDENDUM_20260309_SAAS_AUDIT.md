@@ -215,8 +215,8 @@ SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 
 | Ticket | Priority | Effort | Status |
 |--------|----------|--------|--------|
-| TCK-002 | P1 | Medium | OPEN - Redis lockout |
-| TCK-003 | P1 | Low | OPEN - Sentry |
+| TCK-002 | P1 | Medium | DONE - Redis lockout |
+| TCK-003 | P1 | Low | DONE - Sentry |
 | TCK-004 | P1 | Low | OPEN - Uptime monitoring |
 | TCK-005 | P1 | Medium | OPEN - Deploy workflow + backup cron |
 
@@ -229,7 +229,7 @@ SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 - ✅ Payment webhook verification
 
 **Real Work Required**:
-1. Redis for lockout (code change)
-2. Sentry integration (code change)
-3. Uptime monitoring (external service setup)
-4. Deploy workflow + backup cron (ops setup)
+1. Uptime monitoring (external service setup)
+2. Deploy workflow + backup cron (ops setup)
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

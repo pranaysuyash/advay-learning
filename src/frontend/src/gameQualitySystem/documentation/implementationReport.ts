@@ -181,7 +181,15 @@ export class ImplementationReport {
      */
     public calculateComparison(before: number, after: number): BeforeAfterComparison {
         const absoluteChange = after - before;
-        const percentageChange = before !== 0 ? (absoluteChange / before) * 100 : 0;
+        let percentageChange: number;
+        if (before !== 0) {
+            percentageChange = (absoluteChange / before) * 100;
+        } else if (after === 0) {
+            percentageChange = 0;
+        } else {
+            // Avoid misleading "0%" when baseline is zero but result is non-zero.
+            percentageChange = absoluteChange > 0 ? 100 : -100;
+        }
 
         return {
             before,

@@ -635,10 +635,10 @@ Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 
 | ID | Issue | Effort |
 |----|-------|--------|
-| MED-006 | Add file upload validation | Low |
-| MED-007 | Implement soft delete with recovery | Medium |
-| MED-009 | Add data retention policy | Medium |
-| MED-012 | Document rollback procedure | Low |
+| SAAS-006 | Add file upload validation | Low |
+| SAAS-007 | Implement soft delete with recovery | Medium |
+| SAAS-009 | Add data retention policy | Medium |
+| SAAS-012 | Document rollback procedure | Low |
 
 ### P3 — Polish / Best Practices (Fix Eventually)
 

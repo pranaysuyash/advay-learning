@@ -43,7 +43,7 @@ The logic file is well-organized with:
 - Size: 30-70 pixels (random)
 - Y start: -50 (above screen)
 - X range: 40 to canvasWidth-40
-- SpeedY: 0.5-2.5 (floats up)
+- SpeedY: 0.5-2.5 (moves downward into screen space)
 - SpeedX: -1 to 1 (drifts sideways)
 
 ### 3. Function Contracts

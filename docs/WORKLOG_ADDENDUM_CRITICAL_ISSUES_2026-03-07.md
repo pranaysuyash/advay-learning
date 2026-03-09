@@ -1119,7 +1119,7 @@ import { ParentalConsentFlow } from '@/components/consent';
 <ParentalConsentFlow
   parentEmail={email}
   childName={childName}
-  onConsentComplete={(consentData) => {
+  onConsentComplete={async (consentData) => {
     // Save consent to backend
     await api.post('/consent', consentData);
     completeRegistration();

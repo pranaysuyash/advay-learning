@@ -75,7 +75,7 @@ All colors are child-friendly and distinct.
 ### 5. Test Coverage
 **Status**: ⚠️ LIMITED (Due to Matter.js dependency)
 
-**15 tests covering**:
+**20 tests covering**:
 - Constants (4 tests)
 - Game state management (8 tests)
 - Color values (4 tests)

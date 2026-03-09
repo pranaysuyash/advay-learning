@@ -251,7 +251,12 @@ export class MetricsReport {
         // In a real implementation, this would use standard error and sample size
         const change = after - before;
         const standardError = Math.abs(change) * 0.1; // Simplified assumption
-        const zScore = confidenceLevel === 0.95 ? 1.96 : 1.645;
+        const zScoreMap: Record<string, number> = {
+            '0.9': 1.645,
+            '0.95': 1.96,
+            '0.99': 2.576,
+        };
+        const zScore = zScoreMap[confidenceLevel.toString()] ?? 1.96;
 
         return {
             lower: change - zScore * standardError,
@@ -308,7 +313,7 @@ export class MetricsReport {
             const metricsWithCI = report.metrics.filter(m => m.confidenceInterval);
 
             if (metricsWithCI.length > 0) {
-                sections.push('## Confidence Intervals (95%)');
+                sections.push(`## Confidence Intervals (${(this.config.confidenceLevel * 100).toFixed(0)}%)`);
                 sections.push('');
 
                 for (const metric of metricsWithCI) {

@@ -40,7 +40,7 @@ The logic file is compact and focused:
 | 5 | HAT | 2 | 3 |
 | 6 | PIG | 2 | 3 |
 | 7 | CUP | 2 | 3 |
-| 8 | BUS | 3 | 4 |
+| 8 | BUS | 3 | 3 |
 | 9 | FROG | 3 | 4 |
 | 10 | STAR | 3 | 4 |
 

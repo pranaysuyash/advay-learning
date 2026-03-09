@@ -72,11 +72,11 @@ The logic file is well-organized with:
 - Emotion selection (3 tests)
 - Option generation (5 tests)
 - Answer validation (3 tests)
-| Score calculation (5 tests)
-| Integration scenarios (4 tests)
-| Edge cases (4 tests)
-| Type definitions (3 tests)
-| Educational content (4 tests)
+- Score calculation (5 tests)
+- Integration scenarios (4 tests)
+- Edge cases (4 tests)
+- Type definitions (3 tests)
+- Educational content (4 tests)
 
 **Key Test Validations**:
 - All food categories represented

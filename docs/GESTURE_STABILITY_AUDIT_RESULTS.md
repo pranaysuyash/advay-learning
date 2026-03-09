@@ -8,8 +8,8 @@
 
 ## Complete Hit Radius Comparison
 
-| Game | Hit Radius | Normalized (0-1) | Context | Status | Notes |
-|------|------------|------------------|---------|--------|-------|
+| Game | Hit Radius | Normalized (%) | Context | Status | Notes |
+|------|------------|----------------|---------|--------|-------|
 | **EmojiMatch** | 0.22 | 22% | Card matching | ✅ Excellent | Designed large |
 | **SteadyHandLab** | 0.18 | 18% | Follow path | ✅ Excellent | Increased from 0.12 |
 | **WordBuilder** | 0.15 | 15% | Letter tiles | ✅ Good | Increased from 0.1 |

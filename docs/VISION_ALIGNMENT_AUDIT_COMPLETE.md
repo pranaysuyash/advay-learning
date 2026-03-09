@@ -20,7 +20,7 @@
 **Core Principles:**
 1. 😄 **Joy** over educational outcomes
 2. 🎨 **Expression** over correctness
-3. 🏆 **Mastery** over curriculum
+3. 🏃 **Playful progress** over mastery gating
 4. 🤩 **Wonder** over lessons
 5. 🌈 **Open Playground** over linear tracks
 

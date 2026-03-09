@@ -10,10 +10,10 @@
 
 | Ticket | Title | Priority | Effort | Status | Doc Location |
 |--------|-------|----------|--------|--------|--------------|
-| TCK-20260307-CRIT-001 | AI Generator Integration | P0 | 1 week | ✅ **DONE** | `docs/ai-integration/` |
+| TCK-20260307-CRIT-001 | AI Generator Integration | P0 | 1 week | OPEN | `docs/ai-integration/` |
 | TCK-20260307-CRIT-002 | Privacy Compliance | P0 | 4 weeks | OPEN | `docs/compliance/` |
 | TCK-20260307-CRIT-003 | Curriculum Alignment | P1 | 3 weeks | OPEN | `docs/curriculum/` |
-| TCK-20260307-CRIT-004 | Gesture Stability Audit | P1 | 4 days | OPEN | `GESTURE_STABILITY_AUDIT_CHECKLIST.md` |
+| TCK-20260307-CRIT-004 | Gesture Stability Audit | P1 | 4 days | ✅ **DONE** | `GESTURE_STABILITY_AUDIT_CHECKLIST.md` |
 | TCK-20260307-CRIT-005 | Parent Dashboard | P1 | 2 weeks | OPEN | `PARENT_DASHBOARD_SPEC.md` |
 
 ---

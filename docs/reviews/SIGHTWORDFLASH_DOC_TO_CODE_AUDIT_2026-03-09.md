@@ -33,7 +33,7 @@ The logic file is compact and focused:
 |---------------|--------|--------|
 | Total words | 50+ words | ✅ Matches |
 | Difficulty 1 words | 18 words | ✅ Verified |
-| Difficulty 2 words | 20+ words | ✅ Verified |
+| Difficulty 2 words | 18 words | ✅ Verified |
 | Difficulty 3 words | 15+ words | ✅ Verified |
 
 **Word Categories Verified**:

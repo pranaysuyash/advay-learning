@@ -92,7 +92,7 @@ All 6 items present and correctly structured.
    - IDs are lowercase
    - Items are from expected set
 
-2. **createSameAndDifferentRound** (13 tests)
+2. **createSameAndDifferentRound** (10 tests)
    - Returns valid structure
    - Has required properties
    - Left item is from ITEM_BANK
@@ -111,22 +111,22 @@ All 6 items present and correctly structured.
    - Returns true for correct 'different' answer
    - Returns false for incorrect 'same' answer
    - Returns false for incorrect 'different' answer
-   - Handles all item combinations
-   - Is pure function (same input = same output)
+   - Compares answer strings exactly
+   - Handles representative item combinations
    - Returns boolean type
 
-4. **Round Generation** (4 tests)
+4. **Round Generation** (2 tests)
    - Generates valid rounds repeatedly
    - All items from bank can be used
    - Same/different distribution is balanced
    - Different rounds always have different items
 
-5. **Type Safety** (4 tests)
+5. **Type Safety** (5 tests)
    - SameDifferentItem interface
    - SameAndDifferentRound interface
    - Function signatures
 
-6. **Edge Cases** (2 tests)
+6. **Edge Cases** (5 tests)
 
 ### Coverage Quality: Excellent
 

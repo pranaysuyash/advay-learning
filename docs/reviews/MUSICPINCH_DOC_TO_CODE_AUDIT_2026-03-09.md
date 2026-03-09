@@ -128,9 +128,9 @@ Selects next lane avoiding current.
 
 **Example with 3 lanes**:
 ```
-Lane 0:    0.000 - 0.333
-Lane 1:    0.333 - 0.666
-Lane 2:    0.666 - 1.000
+Lane 0:    [0.000000, 0.333333)
+Lane 1:    [0.333333, 0.666667)
+Lane 2:    [0.666667, 1.000000]
 ```
 
 ### 7. Documentation Quality

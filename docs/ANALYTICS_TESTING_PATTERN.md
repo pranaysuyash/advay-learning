@@ -8,10 +8,10 @@
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import * as analytics from '@/analytics';  // Or relative path: '../index'
+import * as analytics from '../index';
 
 // Mock the entire module
-vi.mock('@/analytics', () => ({
+vi.mock('../index', () => ({
   logEvent: vi.fn(),
   startSession: vi.fn(),
   endSession: vi.fn(),

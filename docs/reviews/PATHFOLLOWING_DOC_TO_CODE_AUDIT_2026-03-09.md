@@ -76,7 +76,7 @@ The logic file is compact and focused:
 - Random generation creates variety
 
 ### 5. Issues Found
-**No issues found.** Implementation is straightforward and correct.
+**Issue found:** Diagonal step behavior differs from spec (`+40` fixed in code vs `40 + random` in spec).
 
 ### 6. Design Observations
 
@@ -129,7 +129,7 @@ This is simpler but less accurate than line-distance calculations.
 
 ### 8. Recommendations
 
-1. Consider diagonal path segments (currently axis-aligned)
+1. Align spec language with implemented diagonal behavior (fixed `+40` diagonal step)
 2. Could add path difficulty ratings
 3. Could add curved paths for higher levels
 4. Consider adding time pressure

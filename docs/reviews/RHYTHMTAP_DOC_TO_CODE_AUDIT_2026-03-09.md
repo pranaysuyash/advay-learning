@@ -46,7 +46,7 @@ The logic file is compact and focused:
 | 2 | 4 | 140 | +56% (560) |
 | 3 | 5 | 160 | +122% (800) |
 
-**Progression Formula**: `patternLength × bpm` increases by ~56% per level
+**Progression Formula**: `patternLength × bpm` increases across levels (+56% from L1→L2, +43% from L2→L3)
 
 ### 4. Function Contracts
 **Status**: ✅ VALIDATED

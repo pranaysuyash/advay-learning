@@ -55,11 +55,11 @@ The logic file is extremely focused:
 
 **38 tests covering**:
 - Level configuration (6 tests)
-| generateTime (8 tests)
-| formatTime (15 tests)
-| Type definitions (2 tests)
-| Edge cases (4 tests)
-| Integration scenarios (3 tests)
+- generateTime (8 tests)
+- formatTime (15 tests)
+- Type definitions (2 tests)
+- Edge cases (4 tests)
+- Integration scenarios (3 tests)
 
 **Key Test Validations**:
 - Level 1 only generates o'clock times
@@ -84,9 +84,9 @@ The logic file is extremely focused:
 **Educational Design**:
 - Clock reading (analog and digital)
 - Time vocabulary (o'clock, quarter past, etc.)
-| Number recognition (hours 1-12)
-| Progressive difficulty
-| Real-world time-telling skills
+- Number recognition (hours 1-12)
+- Progressive difficulty
+- Real-world time-telling skills
 
 **Level Progression**:
 - **Level 1**: O'clock only (simplest)

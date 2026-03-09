@@ -65,16 +65,17 @@ Covers standard guitar tuning with some variations.
 ### 4. Test Coverage
 **Status**: ✅ COMPREHENSIVE
 
-**30 tests covering**:
+**44 tests covering**:
 - Constants (5 tests)
 - Level configuration (4 tests)
-| generateNoteSequence (6 tests)
-| calculateScore (10 tests)
-| playNoteSound (2 tests)
+- getLevelConfig (4 tests)
+- generateNoteSequence (6 tests)
+- calculateScore (10 tests)
+- playNoteSound (2 tests)
 - Notes structure (5 tests)
 - Type definitions (3 tests)
 - Edge cases (3 tests)
-- Integration scenarios (3 tests)
+- Integration scenarios (4 tests)
 
 **Key Test Validations**:
 - 9 unique guitar notes defined
@@ -123,11 +124,11 @@ Covers standard guitar tuning with some variations.
 - Overview and educational focus
 - Interface documentation
 - Complete guitar notes table
-| Level configuration with multipliers
-| Function contracts with formulas
-| Scoring system with examples
-| Technical notes
-| Design decisions
+- Level configuration with multipliers
+- Function contracts with formulas
+- Scoring system with examples
+- Technical notes
+- Design decisions
 
 ### 8. Recommendations
 

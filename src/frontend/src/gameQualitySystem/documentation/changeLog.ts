@@ -217,7 +217,11 @@ export class ChangeLog {
         for (const entry of sortedEntries) {
             const date = this.formatDate(entry.timestamp);
             lines.push(`## ${date}`);
-            lines.push(`- **Game**: ${entry.gameName} (${entry.gameId})`);
+            if (this.config.includeGameName) {
+                lines.push(`- **Game**: ${entry.gameName} (${entry.gameId})`);
+            } else {
+                lines.push(`- **Game ID**: ${entry.gameId}`);
+            }
             lines.push(`- **Type**: ${entry.improvementType}`);
             lines.push(`- **Description**: ${entry.description}`);
 
@@ -225,7 +229,7 @@ export class ChangeLog {
                 lines.push(`- **Affected Dimensions**: ${entry.affectedDimensions.join(', ')}`);
             }
 
-            if (entry.relatedAuditId) {
+            if (this.config.includeAuditReference && entry.relatedAuditId) {
                 lines.push(`- **Audit Reference**: ${entry.relatedAuditId}`);
             }
 
@@ -253,7 +257,10 @@ export class ChangeLog {
             case 'ISO':
                 return now.toISOString();
             case 'LOCAL':
-                return now.toLocaleString();
+                // Keep machine-parseable local-time equivalent for stable sorting/filtering.
+                return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .replace('Z', '');
             case 'UTC':
                 return now.toUTCString();
             default:
