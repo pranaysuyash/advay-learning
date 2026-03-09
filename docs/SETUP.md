@@ -20,13 +20,32 @@ This repo uses local git hooks to enforce ticket + evidence discipline (even wit
 git config core.hooksPath .githooks
 
 # Ensure hook scripts are executable
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh scripts/maintainability_guard.sh
+chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/new_ticket_stamp.sh scripts/db_migration_guard.sh scripts/maintainability_guard.sh scripts/auto_pr_threshold.sh
 ```
 
 To manually run the gate on your staged changes:
 
 ```bash
 ./scripts/agent_gate.sh --staged
+```
+
+### Auto Push/PR at Staged Threshold (Optional, Enabled by Default)
+
+When staged files reach a threshold (default: `130`), hooks can auto-push the current
+`codex/wip-*` branch and auto-create a PR after commit.
+
+- Pre-commit checks still run first.
+- Auto-push/PR runs in `post-commit`.
+- Open PRs are reused (no duplicate PRs).
+
+Controls:
+
+```bash
+# disable automation for this shell/session
+export AUTO_PR_THRESHOLD_ENABLED=0
+
+# change threshold (default 130)
+export AUTO_PR_STAGED_THRESHOLD=130
 ```
 
 ## Enforce PR Comment Closure Before Merge (Required)

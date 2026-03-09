@@ -71,3 +71,8 @@ if [[ "${SKIP_REGRESSION_CHECK:-}" != "1" ]]; then
 else
   echo "[pre-commit] Skipping regression check (SKIP_REGRESSION_CHECK=1)"
 fi
+
+# 7. Auto-push/PR threshold arming:
+# If staged file count crosses threshold, arm post-commit automation.
+# Disable with AUTO_PR_THRESHOLD_ENABLED=0
+./scripts/auto_pr_threshold.sh arm

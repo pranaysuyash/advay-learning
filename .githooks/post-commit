@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+# Auto-push + PR creation when staged-file threshold was hit during pre-commit.
+# Disable with AUTO_PR_THRESHOLD_ENABLED=0
+./scripts/auto_pr_threshold.sh run
