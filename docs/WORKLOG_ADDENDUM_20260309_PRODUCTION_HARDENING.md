@@ -164,3 +164,47 @@ Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - 2026-03-09: **IN PROGRESS** - Switched frontend CI install command to `npm install --no-audit --no-fund` due reproducible GitHub-only `npm ci` lockfile desync error.
 - 2026-03-09: **IN PROGRESS** - Workflow-definition remediation: remove invalid `.github/workflows/ci.yml` placeholder, harden `pr-comment-gate` event guard, align CI Node pin to 22 LTS, and align backend tool targets to `py313`.
 - 2026-03-09: **IN PROGRESS** - Dependency maintenance: verified no direct deprecated frontend packages; upgraded safe direct patch/minor packages (`eslint`, `@eslint/eslintrc`, `fast-check`, `framer-motion`, `react-i18next`, `serialize-javascript`) and revalidated lint/type/build.
+
+---
+
+## TCK-20260309-007 :: GitHub Issues Backbone and PR-Issue Enforcement
+
+**Ticket Stamp**: STAMP-20260309T170500Z-codex
+
+**Type**: HARDENING
+**Owner**: Pranay
+**Status**: **DONE**
+**Priority**: P1
+
+### Scope Contract
+
+- **In-scope**:
+  - Add issue forms/templates for bug/feature/audit/ci
+  - Add standard labels bootstrap script
+  - Enforce PR body linkage (`Closes #...` + `TCK-...`)
+  - Add path-based auto-labeling and project lifecycle workflow hooks
+- **Out-of-scope**:
+  - Full GitHub Project field-option API customization
+  - Org-level permissions/policies outside this repository
+- **Behavior change allowed**: YES (repository workflow + governance)
+
+### Prompt Trace
+
+- `prompts/hardening/hardening-v1.1.md`
+- `prompts/review/local-pre-commit-review-v1.0.md`
+
+### Execution Log
+
+- 2026-03-09: Added issue forms in `.github/ISSUE_TEMPLATE/` and disabled blank issues.
+- 2026-03-09: Renamed and upgraded PR template with mandatory linked issue + TCK sections (`.github/PULL_REQUEST_TEMPLATE.md`).
+- 2026-03-09: Added `PR Link Gate` workflow to fail PRs without `Closes #...` and `TCK-YYYYMMDD-NNN`.
+- 2026-03-09: Added path-based label automation via `.github/labeler.yml` + `.github/workflows/pr-path-labeler.yml`.
+- 2026-03-09: Added project/issue automation workflow with optional project URL/token configuration.
+- 2026-03-09: Added one-time bootstrap scripts:
+  - `scripts/bootstrap_github_labels.sh`
+  - `scripts/bootstrap_github_project.sh`
+- 2026-03-09: Updated `docs/SETUP.md` and `docs/ISSUES_WORKFLOW.md` with bootstrap and policy guidance.
+
+### Status Updates
+
+- 2026-03-09: **DONE** - In-repo GitHub Issues backbone configured and ready for one-time bootstrap commands.

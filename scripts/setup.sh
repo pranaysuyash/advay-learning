@@ -28,7 +28,12 @@ print_error() {
 # Configure local repo git hooks (agent workflow gate)
 print_info "Configuring local git hooks..."
 git config core.hooksPath .githooks
-chmod +x .githooks/* scripts/agent_gate.sh scripts/secret_scan.sh scripts/auto_pr_threshold.sh || true
+chmod +x .githooks/* \
+  scripts/agent_gate.sh \
+  scripts/secret_scan.sh \
+  scripts/auto_pr_threshold.sh \
+  scripts/bootstrap_github_labels.sh \
+  scripts/bootstrap_github_project.sh || true
 print_info "Git hooks configured (core.hooksPath=.githooks) ✓"
 
 # Check if Python 3.11+ is installed

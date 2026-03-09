@@ -48,6 +48,38 @@ export AUTO_PR_THRESHOLD_ENABLED=0
 export AUTO_PR_STAGED_THRESHOLD=130
 ```
 
+## GitHub Issues Backbone (Required for Multi-Agent Coordination)
+
+The repository now includes:
+
+- Issue forms in `.github/ISSUE_TEMPLATE/`
+- Issue template config in `.github/ISSUE_TEMPLATE/config.yml`
+- PR template requirements in `.github/PULL_REQUEST_TEMPLATE.md`
+- PR link gate workflow in `.github/workflows/pr-link-gate.yml`
+- Path-based auto labeling in `.github/workflows/pr-path-labeler.yml`
+- Project + issue automation in `.github/workflows/project-and-issue-automation.yml`
+
+One-time bootstrap commands:
+
+```bash
+# 1) Create/update standard labels
+./scripts/bootstrap_github_labels.sh
+
+# 2) Create GitHub Project board
+./scripts/bootstrap_github_project.sh
+```
+
+Then set repository configuration:
+
+1. Add repository variable `PROJECT_URL` (URL printed by bootstrap script).
+2. Add repository secret `PROJECT_TOKEN` (token with repo + project scope).
+3. In branch protection, require status check: `PR Link Gate / enforce-pr-linking`.
+
+PRs now must include both:
+
+- `Closes #<issue-number>`
+- `TCK-YYYYMMDD-NNN`
+
 ## Enforce PR Comment Closure Before Merge (Required)
 
 To hard-block merges with unresolved PR conversations:

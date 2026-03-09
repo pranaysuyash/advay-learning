@@ -38,3 +38,30 @@ If the workspace is not a git checkout or GH auth is not configured:
 
 - Work normally using the worklog only.
 - Set `Issue: Unknown` and record why under Evidence (Observed/Unknown).
+
+## GitHub Configuration Pack
+
+This repo ships an in-repo issue-management configuration:
+
+- Issue forms:
+  - `.github/ISSUE_TEMPLATE/bug-report.yml`
+  - `.github/ISSUE_TEMPLATE/feature-request.yml`
+  - `.github/ISSUE_TEMPLATE/audit-remediation.yml`
+  - `.github/ISSUE_TEMPLATE/ci-failure.yml`
+- PR template:
+  - `.github/PULL_REQUEST_TEMPLATE.md`
+- Required PR link gate:
+  - `.github/workflows/pr-link-gate.yml`
+- Path auto-labeling:
+  - `.github/workflows/pr-path-labeler.yml`
+- Project/issue lifecycle automation:
+  - `.github/workflows/project-and-issue-automation.yml`
+
+Recommended project board status columns:
+
+- `Inbox`
+- `Ready`
+- `In Progress`
+- `PR Open`
+- `Review`
+- `Done`

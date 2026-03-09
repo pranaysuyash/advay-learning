@@ -1,0 +1,69 @@
+name: Project and Issue Automation
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened, closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  add-item-to-project:
+    if: >
+      (github.event_name == 'issues' || github.event_name == 'pull_request_target') &&
+      vars.PROJECT_URL != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issue or PR to GitHub Project
+        uses: actions/add-to-project@v1.0.2
+        with:
+          project-url: ${{ vars.PROJECT_URL }}
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+
+  sync-linked-issue-status:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update linked issue status labels from PR lifecycle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request?.body || "";
+            const merged = Boolean(context.payload.pull_request?.merged);
+            const isClosed = context.payload.action === "closed";
+
+            const issueNumbers = [...body.matchAll(/#(\d+)/g)].map(m => Number(m[1]));
+            const uniqueIssueNumbers = [...new Set(issueNumbers)];
+            if (!uniqueIssueNumbers.length) {
+              core.info("No linked issues found in PR body.");
+              return;
+            }
+
+            const addLabels = isClosed && merged ? ["status/done"] : ["status/pr-open"];
+            const removeLabels = isClosed && merged
+              ? ["status/inbox", "status/ready", "status/in-progress", "status/pr-open", "status/review"]
+              : ["status/inbox", "status/ready", "status/in-progress"];
+
+            for (const issue_number of uniqueIssueNumbers) {
+              try {
+                await github.rest.issues.removeLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number,
+                  labels: removeLabels,
+                });
+              } catch (error) {
+                core.info(`removeLabels skipped for #${issue_number}: ${error.message}`);
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                labels: addLabels,
+              });
+            }

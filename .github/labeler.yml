@@ -1,0 +1,18 @@
+area/frontend:
+  - src/frontend/**/*
+
+area/backend:
+  - src/backend/**/*
+
+area/docs:
+  - docs/**/*
+  - prompts/**/*
+
+area/ci:
+  - .github/workflows/**/*
+  - .githooks/**/*
+  - scripts/**/*
+
+area/assets:
+  - src/frontend/public/assets/**/*
+  - assets/**/*

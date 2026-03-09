@@ -1,0 +1,73 @@
+name: CI failure
+description: Track a failing pipeline with exact failing step evidence.
+title: "ci: "
+labels:
+  - type/ci
+  - status/inbox
+body:
+  - type: input
+    id: workflow_name
+    attributes:
+      label: Workflow name
+      placeholder: deploy.yml
+    validations:
+      required: true
+  - type: input
+    id: run_url
+    attributes:
+      label: Failed run URL
+      placeholder: https://github.com/org/repo/actions/runs/123456789
+    validations:
+      required: true
+  - type: textarea
+    id: failing_step
+    attributes:
+      label: First failing step
+      placeholder: backend-test > Run uv run pytest
+    validations:
+      required: true
+  - type: textarea
+    id: scope_contract
+    attributes:
+      label: Scope contract
+      placeholder: |
+        In-scope:
+        Out-of-scope:
+        Behavior change allowed: YES/NO
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] Reproduces locally
+        - [ ] First failing step fixed
+        - [ ] Workflow green on rerun
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Include logs and local reproduction output.
+      placeholder: |
+        Command:
+        Output:
+        Interpretation: Observed/Inferred/Unknown
+    validations:
+      required: true
+  - type: input
+    id: prompt_trace
+    attributes:
+      label: Prompt trace
+      placeholder: prompts/review/local-pre-commit-review-v1.0.md
+    validations:
+      required: true
+  - type: input
+    id: worklog_ticket
+    attributes:
+      label: Linked worklog ticket
+      placeholder: TCK-20260309-012
+    validations:
+      required: true

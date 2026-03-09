@@ -1,0 +1,58 @@
+name: Feature request
+description: Propose a scoped feature with acceptance criteria and evidence.
+title: "feature: "
+labels:
+  - type/feature
+  - status/inbox
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line feature summary.
+    validations:
+      required: true
+  - type: textarea
+    id: scope_contract
+    attributes:
+      label: Scope contract
+      placeholder: |
+        In-scope:
+        Out-of-scope:
+        Behavior change allowed: YES/NO
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence / rationale
+      description: Why this feature should be prioritized now.
+      placeholder: |
+        Observed:
+        Inferred:
+        Unknown:
+    validations:
+      required: true
+  - type: input
+    id: prompt_trace
+    attributes:
+      label: Prompt trace
+      placeholder: prompts/hardening/hardening-v1.1.md
+    validations:
+      required: true
+  - type: input
+    id: worklog_ticket
+    attributes:
+      label: Linked worklog ticket
+      placeholder: TCK-20260309-010
+    validations:
+      required: true
