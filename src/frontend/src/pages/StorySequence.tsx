@@ -18,6 +18,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -44,7 +46,391 @@ import {
 } from '../games/storySequenceLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export default function StorySequence() {
+type DragSource = { type: 'slot' | 'pool'; index: number };
+
+function getViewportCoordinates(x: number, y: number) {
+  return {
+    x: x * window.innerWidth,
+    y: y * window.innerHeight,
+  };
+}
+
+function getRelativePosition(
+  point: { x: number; y: number },
+  rect: DOMRect,
+) {
+  return {
+    x: (point.x - rect.left) / rect.width,
+    y: (point.y - rect.top) / rect.height,
+  };
+}
+
+function findSlotAtPosition(
+  slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>,
+  point: { x: number; y: number },
+  margin: number,
+): number | null {
+  for (const [index, slotEl] of slotRefs.current.entries()) {
+    if (!slotEl) continue;
+    const rect = slotEl.getBoundingClientRect();
+    const slotPoint = getRelativePosition(point, rect);
+    if (
+      slotPoint.x >= -margin &&
+      slotPoint.x <= 1 + margin &&
+      slotPoint.y >= -margin &&
+      slotPoint.y <= 1 + margin
+    ) {
+      return index;
+    }
+  }
+  return null;
+}
+
+function findPoolCardAtPosition(
+  poolRef: React.RefObject<HTMLDivElement | null>,
+  gameState: GameState,
+  point: { x: number; y: number },
+): { card: SequenceCard; index: number } | null {
+  const poolRect = poolRef.current?.getBoundingClientRect();
+  if (!poolRect) return null;
+
+  const poolPoint = getRelativePosition(point, poolRect);
+  if (
+    poolPoint.x < 0 ||
+    poolPoint.x > 1 ||
+    poolPoint.y < 0 ||
+    poolPoint.y > 1
+  ) {
+    return null;
+  }
+
+  const cardIndex = Math.floor(poolPoint.x * gameState.pool.length);
+  if (cardIndex < 0 || cardIndex >= gameState.pool.length) {
+    return null;
+  }
+
+  return { card: gameState.pool[cardIndex], index: cardIndex };
+}
+
+function StorySelectionMenu({
+  ttsEnabled,
+  startGame,
+}: {
+  ttsEnabled: boolean;
+  startGame: (storyId: string) => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="relative mb-4">
+        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg animate-float">
+          <svg viewBox="0 0 100 100" className="w-16 h-16 text-white">
+            <rect x="15" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.9" />
+            <rect x="50" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.7" />
+            <line x1="50" y1="25" x2="50" y2="75" stroke="white" strokeWidth="2" />
+          </svg>
+        </div>
+        <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg></div>
+      </div>
+      <h2 className="text-2xl font-bold text-advay-slate mb-2">Put the Story in Order!</h2>
+      <p className="text-advay-slate mb-6 text-center max-w-md">
+        Drag the picture cards to arrange them in the right order.
+        Watch how stories happen from start to finish!
+      </p>
+
+      {ttsEnabled && (
+        <div className="mb-4">
+          <VoiceInstructions
+            instructions={[
+              'Look at the story cards.',
+              'Drag them to the numbered slots.',
+              'Put them in the right order!',
+            ]}
+            autoSpeak={true}
+            showReplayButton={true}
+            replayButtonPosition='bottom-right'
+          />
+        </div>
+      )}
+
+      <button
+        data-ux-goal="Arrange the picture cards in the right order to tell the story!"
+        data-ux-instruction="Drag cards from the bottom to the numbered slots above"
+        onClick={() => startGame('butterfly')}
+        className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-3 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105"
+      >
+        Start Adventure!
+      </button>
+
+      <p className="text-text-secondary text-sm mb-4">Or pick your own story:</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full">
+        {STORY_SEQUENCES.map((story) => {
+          const diff = getDifficultyDisplay(story.difficulty);
+          return (
+            <button
+              key={story.id}
+              onClick={() => startGame(story.id)}
+              className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-[0_4px_0_#E5B86E]"
+            >
+              <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='9' x2='15' y1='3' y2='21'/></svg></div>
+              <h3 className="font-bold text-advay-slate text-sm mb-1 group-hover:text-blue-500">
+                {story.title}
+              </h3>
+              <p className={`text-xs ${diff.color} font-medium`}>{diff.label}</p>
+              <p className="text-slate-400 text-xs mt-1">{story.cards.length} cards</p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm bg-blue-50 px-4 py-2 rounded-xl">
+        <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>
+        <span>Pinch and drag with your hand, or use your mouse!</span>
+      </div>
+    </div>
+  );
+}
+
+function StorySequenceBoard({
+  gameAreaRef,
+  poolRef,
+  slotRefs,
+  gameState,
+  currentStory,
+  draggedCard,
+  hoveredSlot,
+  lastPlacedSlot,
+  showHint,
+  correctCount,
+  totalSlots,
+  streak,
+  handleMouseMove,
+  handleMouseUp,
+  handleMouseDown,
+  handleShowHint,
+  handleShowMenu,
+  handleNextStory,
+}: {
+  gameAreaRef: React.RefObject<HTMLDivElement | null>;
+  poolRef: React.RefObject<HTMLDivElement | null>;
+  slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  gameState: GameState | null;
+  currentStory: SequenceStory | null;
+  draggedCard: SequenceCard | null;
+  hoveredSlot: number | null;
+  lastPlacedSlot: number | null;
+  showHint: string | null;
+  correctCount: number;
+  totalSlots: number;
+  streak: number;
+  handleMouseMove: (e: React.MouseEvent) => void;
+  handleMouseUp: (e: React.MouseEvent) => void;
+  handleMouseDown: (card: SequenceCard, source: 'slot' | 'pool', index: number) => void;
+  handleShowHint: () => void;
+  handleShowMenu: () => void;
+  handleNextStory: () => void;
+}) {
+  const placementIsCorrect =
+    lastPlacedSlot !== null && gameState
+      ? isSlotCorrect(gameState.slots, lastPlacedSlot)
+      : false;
+
+  return (
+    <div
+      ref={gameAreaRef}
+      className="flex flex-col h-full p-4"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      <div
+        data-ux-goal="Arrange the picture cards in the right order to tell the story!"
+        data-ux-instruction="Drag cards from the bottom pool to the numbered slots above"
+        data-ux-action="drag-and-drop"
+        data-ux-progress={`${correctCount}/${totalSlots} cards correct`}
+        className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl mb-4 shadow-lg border-2 border-indigo-300"
+      >
+        <div className="flex items-center justify-center gap-2">
+          <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg>
+          <p className="font-black text-lg">GOAL: Drag cards to numbered slots in the RIGHT ORDER!</p>
+          <span className="text-lg font-black text-white/80">1 → 2 → 3</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold text-advay-slate">{currentStory?.title}</h2>
+          <p className="text-advay-slate text-sm">{currentStory?.description}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-advay-slate text-sm">
+            Correct: <span className="text-green-500 font-bold">{correctCount}/{totalSlots}</span>
+          </div>
+          {streak > 0 && (
+            <div className="text-orange-600 text-sm">
+              Streak: <span className="font-bold">🔥 {streak}</span>
+            </div>
+          )}
+          <button
+            onClick={handleShowHint}
+            className="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-sm transition-colors"
+          >
+            Hint
+          </button>
+        </div>
+      </div>
+
+      {showHint && (
+        <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 mb-4 text-yellow-800 text-center animate-pulse text-lg font-bold">
+          {showHint}
+        </div>
+      )}
+
+      {lastPlacedSlot !== null && (
+        <div
+          className={`
+            rounded-lg p-3 mb-4 text-center text-lg font-bold animate-bounce
+            ${placementIsCorrect
+              ? 'bg-green-100 border-2 border-green-400 text-green-700'
+              : 'bg-orange-100 border-2 border-orange-400 text-orange-700'}
+          `}
+        >
+          {placementIsCorrect
+            ? 'Perfect! That card is in the right spot!'
+            : 'That card might go somewhere else. Try dragging it to a different slot!'}
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="flex items-center justify-center gap-2 md:gap-4 mb-8">
+          {gameState?.slots.map((card, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                ref={(el) => {
+                  slotRefs.current[index] = el;
+                }}
+                className={`
+                  w-20 h-24 md:w-28 md:h-32 rounded-xl border-2 border-dashed
+                  flex items-center justify-center transition-all
+                  ${hoveredSlot === index
+                    ? 'border-yellow-400 bg-yellow-100 scale-105'
+                    : 'border-slate-300 bg-white'}
+                  ${card && gameState && isSlotCorrect(gameState.slots, index)
+                    ? 'border-green-400 bg-green-100'
+                    : ''}
+                  ${lastPlacedSlot === index ? 'animate-pulse' : ''}
+                `}
+                onMouseDown={() => card && handleMouseDown(card, 'slot', index)}
+              >
+                {card ? (
+                  <div className="text-5xl md:text-6xl select-none cursor-grab active:cursor-grabbing">
+                    {card.emoji}
+                  </div>
+                ) : (
+                  <span className="text-2xl md:text-3xl text-slate-400 font-bold">{index + 1}</span>
+                )}
+              </div>
+              {index < (gameState?.slots.length || 0) - 1 && (
+                <div className="text-slate-400 text-xl md:text-2xl mx-1">→</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div
+          ref={poolRef}
+          className="bg-white border-2 border-[#F2CC8F] rounded-xl p-4 min-h-[120px]"
+        >
+          <p className="text-text-secondary text-sm mb-3 text-center">
+            {gameState?.pool.length === 0
+              ? 'All cards placed! Is the order correct?'
+              : 'Drag cards from here to the numbered slots above'}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {gameState?.pool.map((card, index) => (
+              <div
+                key={card.id}
+                className={`
+                  w-16 h-20 md:w-20 md:h-24 rounded-lg bg-slate-100
+                  flex items-center justify-center cursor-grab
+                  hover:bg-slate-200 transition-all select-none
+                  ${draggedCard?.id === card.id ? 'opacity-50' : ''}
+                `}
+                onMouseDown={() => handleMouseDown(card, 'pool', index)}
+              >
+                <span className="text-4xl md:text-5xl">{card.emoji}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {gameState?.completed && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 text-center max-w-md">
+            <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg></div>
+            <h3 className="text-2xl font-bold text-advay-slate mb-2">Story Complete!</h3>
+            <p className="text-advay-slate mb-4">
+              Great job arranging the {currentStory?.title.toLowerCase()} story!
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleShowMenu}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-lg transition-colors"
+              >
+                Back to Menu
+              </button>
+              <button
+                onClick={handleNextStory}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+              >
+                Next Story →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DraggedCardOverlay({
+  draggedCard,
+  dragPosition,
+  gameAreaRef,
+}: {
+  draggedCard: SequenceCard | null;
+  dragPosition: { x: number; y: number } | null;
+  gameAreaRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  if (!draggedCard || !dragPosition) return null;
+
+  return (
+    <div
+      className="fixed pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2"
+      style={{
+        left: dragPosition.x * (gameAreaRef.current?.offsetWidth || window.innerWidth) + (gameAreaRef.current?.offsetLeft || 0),
+        top: dragPosition.y * (gameAreaRef.current?.offsetHeight || window.innerHeight) + (gameAreaRef.current?.offsetTop || 0),
+      }}
+    >
+      <div className="w-20 h-24 md:w-28 md:h-32 rounded-xl bg-white shadow-2xl flex items-center justify-center scale-110">
+        <span className="text-5xl md:text-6xl">{draggedCard.emoji}</span>
+      </div>
+    </div>
+  );
+}
+
+function StreakMilestoneOverlay({ streak }: { streak: number }) {
+  return (
+    <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
+      <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
+        🔥 {streak} Streak! 🔥
+      </div>
+    </div>
+  );
+}
+
+function StorySequenceContent() {
   // ===== AUDIO =====
   const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -74,7 +460,7 @@ export default function StorySequence() {
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const poolRef = useRef<HTMLDivElement>(null);
   const isPinchingRef = useRef(false);
-  const dragSourceRef = useRef<{ type: 'slot' | 'pool'; index: number } | null>(null);
+  const dragSourceRef = useRef<DragSource | null>(null);
   
   // Streak tracking for correct placements
   const [streak, setStreak] = useState(0);
@@ -131,60 +517,32 @@ export default function StorySequence() {
   // ===== INTERACTION HANDLERS =====
   const handlePinchStart = (x: number, y: number) => {
     if (!gameState) return;
-    
-    // Check if pinching a card in the pool
-    const poolRect = poolRef.current?.getBoundingClientRect();
-    if (poolRect) {
-      const poolX = (x * window.innerWidth - poolRect.left) / poolRect.width;
-      const poolY = (y * window.innerHeight - poolRect.top) / poolRect.height;
-      
-      if (poolX >= 0 && poolX <= 1 && poolY >= 0 && poolY <= 1) {
-        // Find which card was pinched
-        const cardIndex = Math.floor(poolX * gameState.pool.length);
-        if (cardIndex >= 0 && cardIndex < gameState.pool.length) {
-          const card = gameState.pool[cardIndex];
-          setDraggedCard(card);
-          dragSourceRef.current = { type: 'pool', index: cardIndex };
-          setDragPosition({ x, y });
-          return;
-        }
-      }
+
+    const viewportPoint = getViewportCoordinates(x, y);
+    const poolHit = findPoolCardAtPosition(poolRef, gameState, viewportPoint);
+    if (poolHit) {
+      setDraggedCard(poolHit.card);
+      dragSourceRef.current = { type: 'pool', index: poolHit.index };
+      setDragPosition({ x, y });
+      return;
     }
-    
-    // Check if pinching a card in a slot
-    slotRefs.current.forEach((slotEl, index) => {
-      if (!slotEl) return;
-      const rect = slotEl.getBoundingClientRect();
-      const slotX = (x * window.innerWidth - rect.left) / rect.width;
-      const slotY = (y * window.innerHeight - rect.top) / rect.height;
-      
-      if (slotX >= 0 && slotX <= 1 && slotY >= 0 && slotY <= 1) {
-        const card = gameState.slots[index];
-        if (card) {
-          setDraggedCard(card);
-          dragSourceRef.current = { type: 'slot', index };
-          setDragPosition({ x, y });
-        }
-      }
-    });
+
+    const slotIndex = findSlotAtPosition(slotRefs, viewportPoint, 0);
+    if (slotIndex === null) return;
+
+    const card = gameState.slots[slotIndex];
+    if (!card) return;
+
+    setDraggedCard(card);
+    dragSourceRef.current = { type: 'slot', index: slotIndex };
+    setDragPosition({ x, y });
   };
   
   const handleDrag = (x: number, y: number) => {
     setDragPosition({ x, y });
-    
-    // Check if hovering over a slot
-    let foundSlot: number | null = null;
-    slotRefs.current.forEach((slotEl, index) => {
-      if (!slotEl) return;
-      const rect = slotEl.getBoundingClientRect();
-      const slotX = (x * window.innerWidth - rect.left) / rect.width;
-      const slotY = (y * window.innerHeight - rect.top) / rect.height;
-      
-      if (slotX >= -0.2 && slotX <= 1.2 && slotY >= -0.2 && slotY <= 1.2) {
-        foundSlot = index;
-      }
-    });
-    setHoveredSlot(foundSlot);
+
+    const viewportPoint = getViewportCoordinates(x, y);
+    setHoveredSlot(findSlotAtPosition(slotRefs, viewportPoint, 0.2));
   };
   
   const handlePinchEnd = (x: number, y: number) => {
@@ -195,18 +553,8 @@ export default function StorySequence() {
       return;
     }
     
-    // Check if dropped in a slot
-    let droppedInSlot: number | null = null;
-    slotRefs.current.forEach((slotEl, index) => {
-      if (!slotEl) return;
-      const rect = slotEl.getBoundingClientRect();
-      const slotX = (x * window.innerWidth - rect.left) / rect.width;
-      const slotY = (y * window.innerHeight - rect.top) / rect.height;
-      
-      if (slotX >= -0.3 && slotX <= 1.3 && slotY >= -0.3 && slotY <= 1.3) {
-        droppedInSlot = index;
-      }
-    });
+    const viewportPoint = getViewportCoordinates(x, y);
+    const droppedInSlot = findSlotAtPosition(slotRefs, viewportPoint, 0.3);
     
     if (droppedInSlot !== null) {
       // Play flip sound when placing card
@@ -273,26 +621,15 @@ export default function StorySequence() {
   
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!draggedCard || !gameAreaRef.current) return;
-    
+
     const rect = gameAreaRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    
+
     setDragPosition({ x, y });
-    
-    // Check hover
-    let foundSlot: number | null = null;
-    slotRefs.current.forEach((slotEl, index) => {
-      if (!slotEl) return;
-      const slotRect = slotEl.getBoundingClientRect();
-      const slotX = (e.clientX - slotRect.left) / slotRect.width;
-      const slotY = (e.clientY - slotRect.top) / slotRect.height;
-      
-      if (slotX >= -0.2 && slotX <= 1.2 && slotY >= -0.2 && slotY <= 1.2) {
-        foundSlot = index;
-      }
-    });
-    setHoveredSlot(foundSlot);
+    setHoveredSlot(
+      findSlotAtPosition(slotRefs, { x: e.clientX, y: e.clientY }, 0.2),
+    );
   };
   
   const handleMouseUp = (e: React.MouseEvent) => {
@@ -301,19 +638,12 @@ export default function StorySequence() {
       return;
     }
     
-    // Find drop target
-    let droppedInSlot: number | null = null;
-    slotRefs.current.forEach((slotEl, index) => {
-      if (!slotEl) return;
-      const rect = slotEl.getBoundingClientRect();
-      const slotX = (e.clientX - rect.left) / rect.width;
-      const slotY = (e.clientY - rect.top) / rect.height;
-      
-      if (slotX >= -0.3 && slotX <= 1.3 && slotY >= -0.3 && slotY <= 1.3) {
-        droppedInSlot = index;
-      }
-    });
-    
+    const droppedInSlot = findSlotAtPosition(
+      slotRefs,
+      { x: e.clientX, y: e.clientY },
+      0.3,
+    );
+
     if (droppedInSlot !== null) {
       const { newSlots, newPool } = placeCard(
         draggedCard,
@@ -418,261 +748,38 @@ export default function StorySequence() {
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
         
       </div>
-      
+
       {showMenu ? (
-        // ===== STORY SELECTION MENU =====
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          {/* Story Book Icon */}
-          <div className="relative mb-4">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg animate-float">
-              <svg viewBox="0 0 100 100" className="w-16 h-16 text-white">
-                <rect x="15" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.9" />
-                <rect x="50" y="20" width="35" height="60" rx="3" fill="currentColor" opacity="0.7" />
-                <line x1="50" y1="25" x2="50" y2="75" stroke="white" strokeWidth="2" />
-              </svg>
-            </div>
-            <div className="absolute -top-2 -right-2 animate-bounce"><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg></div>
-          </div>
-          <h2 className="text-2xl font-bold text-advay-slate mb-2">Put the Story in Order!</h2>
-          <p className="text-advay-slate mb-6 text-center max-w-md">
-            Drag the picture cards to arrange them in the right order. 
-            Watch how stories happen from start to finish!
-          </p>
-          
-          {/* Voice Instructions */}
-          {ttsEnabled && (
-            <div className="mb-4">
-              <VoiceInstructions
-                instructions={[
-                  'Look at the story cards.',
-                  'Drag them to the numbered slots.',
-                  'Put them in the right order!',
-                ]}
-                autoSpeak={true}
-                showReplayButton={true}
-                replayButtonPosition='bottom-right'
-              />
-            </div>
-          )}
-          
-          {/* Big Start Button for Kids */}
-          <button
-            data-ux-goal="Arrange the picture cards in the right order to tell the story!"
-            data-ux-instruction="Drag cards from the bottom to the numbered slots above"
-            onClick={() => startGame('butterfly')}
-            className="mb-8 px-12 py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-black text-2xl rounded-2xl border-3 border-green-600 shadow-[0_8px_0_0_#166534] active:translate-y-[8px] active:shadow-none transition-all transform hover:scale-105"
-          >
-            Start Adventure!
-          </button>
-          
-          <p className="text-text-secondary text-sm mb-4">Or pick your own story:</p>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full">
-            {STORY_SEQUENCES.map(story => {
-              const diff = getDifficultyDisplay(story.difficulty);
-              return (
-                <button
-                  key={story.id}
-                  onClick={() => startGame(story.id)}
-                  className="bg-white border-2 border-[#F2CC8F] hover:border-blue-400 rounded-xl p-4 transition-all transform hover:scale-105 text-left group shadow-[0_4px_0_#E5B86E]"
-                >
-                  <div className="w-12 h-12 mb-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#a855f7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect width='18' height='18' x='3' y='3' rx='2' ry='2'/><line x1='9' x2='15' y1='3' y2='21'/></svg></div>
-                  <h3 className="font-bold text-advay-slate text-sm mb-1 group-hover:text-blue-500">
-                    {story.title}
-                  </h3>
-                  <p className={`text-xs ${diff.color} font-medium`}>{diff.label}</p>
-                  <p className="text-slate-400 text-xs mt-1">{story.cards.length} cards</p>
-                </button>
-              );
-            })}
-          </div>
-          
-          <div className="mt-6 flex items-center gap-2 text-text-secondary text-sm bg-blue-50 px-4 py-2 rounded-xl">
-            <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/><path d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/><path d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/><path d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/></svg>
-            <span>Pinch and drag with your hand, or use your mouse!</span>
-          </div>
-        </div>
+        <StorySelectionMenu ttsEnabled={ttsEnabled} startGame={startGame} />
       ) : (
-        // ===== GAME AREA =====
-        <div
-          ref={gameAreaRef}
-          className="flex flex-col h-full p-4"
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          {/* Instructions Header with Semantic Attributes */}
-          <div 
-            data-ux-goal="Arrange the picture cards in the right order to tell the story!"
-            data-ux-instruction="Drag cards from the bottom pool to the numbered slots above"
-            data-ux-action="drag-and-drop"
-            data-ux-progress={`${correctCount}/${totalSlots} cards correct`}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl mb-4 shadow-lg border-2 border-indigo-300"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='#E85D04' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/></svg>
-              <p className="font-black text-lg">GOAL: Drag cards to numbered slots in the RIGHT ORDER!</p>
-              <span className="text-lg font-black text-white/80">1 → 2 → 3</span>
-            </div>
-          </div>
-          
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-bold text-advay-slate">{currentStory?.title}</h2>
-              <p className="text-advay-slate text-sm">{currentStory?.description}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-advay-slate text-sm">
-                Correct: <span className="text-green-500 font-bold">{correctCount}/{totalSlots}</span>
-              </div>
-              {streak > 0 && (
-                <div className="text-orange-600 text-sm">
-                  Streak: <span className="font-bold">🔥 {streak}</span>
-                </div>
-              )}
-              <button
-                onClick={handleShowHint}
-                className="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-sm transition-colors"
-              >
-                Hint
-              </button>
-            </div>
-          </div>
-          
-          {/* Hint Banner */}
-          {showHint && (
-            <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 mb-4 text-yellow-800 text-center animate-pulse text-lg font-bold">
-              {showHint}
-            </div>
-          )}
-          
-          {/* Feedback Banner for card placement */}
-          {lastPlacedSlot !== null && (
-            <div className={`
-              rounded-lg p-3 mb-4 text-center text-lg font-bold animate-bounce
-              ${isSlotCorrect(gameState!.slots, lastPlacedSlot) 
-                ? 'bg-green-100 border-2 border-green-400 text-green-700' 
-                : 'bg-orange-100 border-2 border-orange-400 text-orange-700'
-              }
-            `}>
-              {isSlotCorrect(gameState!.slots, lastPlacedSlot) 
-                ? 'Perfect! That card is in the right spot!' 
-                : 'That card might go somewhere else. Try dragging it to a different slot!'}
-            </div>
-          )}
-          
-          {/* Sequence Slots */}
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="flex items-center justify-center gap-2 md:gap-4 mb-8">
-              {gameState?.slots.map((card, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    ref={el => { slotRefs.current[index] = el; }}
-                    className={`
-                      w-20 h-24 md:w-28 md:h-32 rounded-xl border-2 border-dashed
-                      flex items-center justify-center transition-all
-                      ${hoveredSlot === index 
-                        ? 'border-yellow-400 bg-yellow-100 scale-105' 
-                        : 'border-slate-300 bg-white'
-                      }
-                      ${card && isSlotCorrect(gameState.slots, index)
-                        ? 'border-green-400 bg-green-100'
-                        : ''
-                      }
-                      ${lastPlacedSlot === index ? 'animate-pulse' : ''}
-                    `}
-                    onMouseDown={() => card && handleMouseDown(card, 'slot', index)}
-                  >
-                    {card ? (
-                      <div className="text-5xl md:text-6xl select-none cursor-grab active:cursor-grabbing">
-                        {card.emoji}
-                      </div>
-                    ) : (
-                      <span className="text-2xl md:text-3xl text-slate-400 font-bold">{index + 1}</span>
-                    )}
-                  </div>
-                  {index < (gameState?.slots.length || 0) - 1 && (
-                    <div className="text-slate-400 text-xl md:text-2xl mx-1">→</div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            {/* Card Pool */}
-            <div
-              ref={poolRef}
-              className="bg-white border-2 border-[#F2CC8F] rounded-xl p-4 min-h-[120px]"
-            >
-              <p className="text-text-secondary text-sm mb-3 text-center">
-                {gameState?.pool.length === 0 
-                  ? 'All cards placed! Is the order correct?' 
-                  : 'Drag cards from here to the numbered slots above'}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {gameState?.pool.map((card, index) => (
-                  <div
-                    key={card.id}
-                    className={`
-                      w-16 h-20 md:w-20 md:h-24 rounded-lg bg-slate-100
-                      flex items-center justify-center cursor-grab
-                      hover:bg-slate-200 transition-all select-none
-                      ${draggedCard?.id === card.id ? 'opacity-50' : ''}
-                    `}
-                    onMouseDown={() => handleMouseDown(card, 'pool', index)}
-                  >
-                    <span className="text-4xl md:text-5xl">{card.emoji}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Completion Message */}
-          {gameState?.completed && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-                <div className="mb-4 flex justify-center"><svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6'/><path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18'/><path d='M4 22h16'/><path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22'/><path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22'/><path d='M18 2H6v7a6 6 0 0 0 12 0V2Z'/></svg></div>
-                <h3 className="text-2xl font-bold text-advay-slate mb-2">Story Complete!</h3>
-                <p className="text-advay-slate mb-4">
-                  Great job arranging the {currentStory?.title.toLowerCase()} story!
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={handleShowMenu}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-lg transition-colors"
-                  >
-                    Back to Menu
-                  </button>
-                  <button
-                    onClick={handleNextStory}
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-                  >
-                    Next Story →
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <StorySequenceBoard
+          gameAreaRef={gameAreaRef}
+          poolRef={poolRef}
+          slotRefs={slotRefs}
+          gameState={gameState}
+          currentStory={currentStory}
+          draggedCard={draggedCard}
+          hoveredSlot={hoveredSlot}
+          lastPlacedSlot={lastPlacedSlot}
+          showHint={showHint}
+          correctCount={correctCount}
+          totalSlots={totalSlots}
+          streak={streak}
+          handleMouseMove={handleMouseMove}
+          handleMouseUp={handleMouseUp}
+          handleMouseDown={handleMouseDown}
+          handleShowHint={handleShowHint}
+          handleShowMenu={handleShowMenu}
+          handleNextStory={handleNextStory}
+        />
       )}
-      
-      {/* Dragged Card Follower */}
-      {draggedCard && dragPosition && (
-        <div
-          className="fixed pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2"
-          style={{
-            left: dragPosition.x * (gameAreaRef.current?.offsetWidth || window.innerWidth) + (gameAreaRef.current?.offsetLeft || 0),
-            top: dragPosition.y * (gameAreaRef.current?.offsetHeight || window.innerHeight) + (gameAreaRef.current?.offsetTop || 0),
-          }}
-        >
-          <div className="w-20 h-24 md:w-28 md:h-32 rounded-xl bg-white shadow-2xl flex items-center justify-center scale-110">
-            <span className="text-5xl md:text-6xl">{draggedCard.emoji}</span>
-          </div>
-        </div>
-      )}
-      
-      {/* Celebration Overlay */}
+
+      <DraggedCardOverlay
+        draggedCard={draggedCard}
+        dragPosition={dragPosition}
+        gameAreaRef={gameAreaRef}
+      />
+
       <CelebrationOverlay
         show={showCelebration}
         letter="✓"
@@ -680,15 +787,16 @@ export default function StorySequence() {
         onComplete={() => setShowCelebration(false)}
         message="Story Complete!"
       />
-      
-      {/* Streak Milestone Overlay */}
-      {showStreakMilestone && (
-        <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
-          <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
-            🔥 {streak} Streak! 🔥
-          </div>
-        </div>
-      )}
+
+      {showStreakMilestone && <StreakMilestoneOverlay streak={streak} />}
     </GameContainer>
   );
 }
+
+const StorySequence = () => (
+  <GameShell gameId="story-sequence" gameName="Story Sequence">
+    <StorySequenceContent />
+  </GameShell>
+);
+
+export default StorySequence;

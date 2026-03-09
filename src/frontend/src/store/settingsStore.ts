@@ -21,6 +21,7 @@ interface Settings {
   calmMode: boolean; // NEW: Calm Mode for sensory-sensitive children
   parentConsentForCloudAI: boolean;
   aiCloudUsageCount: number;
+  preferredVoice: string; // Preferred TTS voice name
 }
 
 interface SettingsState extends Settings {
@@ -45,6 +46,7 @@ const defaultSettings: Settings = {
   calmMode: false, // NEW: Default to off (full experience)
   parentConsentForCloudAI: false,
   aiCloudUsageCount: 0,
+  preferredVoice: '', // Default: empty (use system default voice)
 };
 
 interface SettingsState extends Settings {

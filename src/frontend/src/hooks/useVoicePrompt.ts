@@ -11,6 +11,13 @@ interface VoicePromptOptions {
   lang?: string;
 }
 
+export interface TTSVoiceInfo {
+  name: string;
+  lang: string;
+  default: boolean;
+  localService: boolean;
+}
+
 interface UseVoicePromptReturn {
   speak: (text: string, options?: VoicePromptOptions) => void;
   stop: () => void;
@@ -18,10 +25,10 @@ interface UseVoicePromptReturn {
   isSupported: boolean;
   requiresCloudConsent: boolean;
   approveCloudConsent: () => void;
-  /** @deprecated No longer needed — ttsService manages voice selection */
-  availableVoices: never[];
-  /** @deprecated No longer needed — ttsService manages voice selection */
-  setPreferredVoice: (voice: unknown) => void;
+  /** Available voices for the current TTS engine */
+  availableVoices: TTSVoiceInfo[];
+  /** Set a preferred voice by name (from availableVoices) */
+  setPreferredVoice: (voiceName: string) => void;
 }
 
 /**
@@ -31,6 +38,8 @@ interface UseVoicePromptReturn {
 export function useVoicePrompt(): UseVoicePromptReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [requiresCloudConsent, setRequiresCloudConsent] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<TTSVoiceInfo[]>([]);
+  const [preferredVoice, setPreferredVoiceState] = useState<string>('');
   const llmResponsesEnabled = useFeatureFlag('ai.llmResponsesV1');
   const cloudFallbackEnabled = useFeatureFlag('ai.cloudFallbackV1');
   const parentConsentForCloudAI = useSettingsStore(
@@ -38,6 +47,32 @@ export function useVoicePrompt(): UseVoicePromptReturn {
   );
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const recordLLMUsage = useAITelemetryStore((s) => s.recordLLMUsage);
+  const recordVoiceError = useAITelemetryStore((s) => s.recordVoiceError);
+
+  // Load available voices on mount
+  useEffect(() => {
+    const voices = ttsService.getVoices();
+    setAvailableVoices(voices);
+
+    // Voices may load asynchronously in some browsers
+    if (voices.length === 0 && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const loadVoices = () => {
+        setAvailableVoices(ttsService.getVoices());
+      };
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      return () => {
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    }
+  }, []);
+
+  // Restore preferred voice from settings if available
+  useEffect(() => {
+    const settings = useSettingsStore.getState();
+    if (settings.preferredVoice) {
+      setPreferredVoiceState(settings.preferredVoice);
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -91,6 +126,11 @@ export function useVoicePrompt(): UseVoicePromptReturn {
     setRequiresCloudConsent(false);
   }, [updateSettings]);
 
+  const setPreferredVoice = useCallback((voiceName: string) => {
+    setPreferredVoiceState(voiceName);
+    updateSettings({ preferredVoice: voiceName });
+  }, [updateSettings]);
+
   const speak = useCallback(
     (text: string, options: VoicePromptOptions = {}) => {
       ttsService.stop();
@@ -111,13 +151,25 @@ export function useVoicePrompt(): UseVoicePromptReturn {
             rate: options.rate ?? 0.9,
             volume: options.volume ?? 1,
             lang: options.lang ?? 'en-US',
+            voiceName: preferredVoice || undefined,
           });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          // Check if preferred voice was unavailable (primary concern for accessibility)
+          const fallbackUsed = preferredVoice ? !availableVoices.some(v => v.name === preferredVoice) : false;
+          recordVoiceError({
+            type: 'tts_failed',
+            message,
+            preferredVoice: preferredVoice || undefined,
+            fallbackUsed,
+          });
+          console.warn('[VoicePrompt] TTS failed:', message);
         } finally {
           setIsSpeaking(false);
         }
       })();
     },
-    [llmResponsesEnabled],
+    [llmResponsesEnabled, preferredVoice, availableVoices, recordVoiceError],
   );
 
   const stop = useCallback(() => {
@@ -132,8 +184,8 @@ export function useVoicePrompt(): UseVoicePromptReturn {
     isSupported: ttsService.isAvailable(),
     requiresCloudConsent,
     approveCloudConsent,
-    availableVoices: [] as never[],
-    setPreferredVoice: () => {},
+    availableVoices,
+    setPreferredVoice,
   };
 }
 

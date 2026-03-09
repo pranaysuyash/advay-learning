@@ -4,3 +4,4 @@ export { TipsSection } from './TipsSection';
 export { StatsBar } from './StatsBar';
 export { AddChildModal } from './AddChildModal';
 export { EditProfileModal } from './EditProfileModal';
+export { UnifiedActivityFeed } from './UnifiedActivityFeed';

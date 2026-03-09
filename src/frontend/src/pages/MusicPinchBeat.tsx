@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { GameShell } from '../components/GameShell';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
@@ -19,7 +20,7 @@ import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 const LANE_COUNT = 3;
 const LANE_LABELS = ['Sa', 'Re', 'Ga'] as const;
 
-export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
+export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
   const navigate = useNavigate();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -336,5 +337,11 @@ export const MusicPinchBeat = memo(function MusicPinchBeatComponent() {
     </GameContainer>
   );
 });
+
+export const MusicPinchBeat = () => (
+  <GameShell gameId="music-pinch-beat" gameName="Music Pinch Beat">
+    <MusicPinchBeatContent />
+  </GameShell>
+);
 
 export default MusicPinchBeat;

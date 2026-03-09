@@ -4,14 +4,13 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   useSettingsStore,
-  useProgressStore,
   useAuthStore,
   useAITelemetryStore,
 } from '../store';
 import { useProfileStore } from '../store/profileStore';
 import { FEATURE_FLAG_META } from '../config/features';
 import { useFeatureFlags } from '../hooks/useFeatureFlag';
-import { getAlphabet } from '../data/alphabets';
+// Note: Alphabet tracking removed - now unified in Dashboard
 import { UIIcon } from '../components/ui/Icon';
 import { Button, SyncStatusIndicator } from '../components/ui';
 import { useConfirm } from '../components/ui/useConfirm';
@@ -215,10 +214,7 @@ export function Settings() {
   const { logout, user } = useAuthStore();
   const { currentProfile, updateCollectiblesSettings } = useProfileStore();
   const aiTelemetry = useAITelemetryStore();
-  const {
-    resetProgress,
-    getMasteredLettersCount,
-  } = useProgressStore();
+  // Note: Progress tracking moved to Dashboard for unified view
 
   // feature flag helpers (editable flags only)
   const featureFlags = useFeatureFlags();
@@ -608,17 +604,6 @@ export function Settings() {
                     />
 
                     <div className="pt-6 border-t-4 border-[#F2CC8F] space-y-4">
-                      <div className='bg-slate-50 rounded-[1.5rem] p-5 mb-4 border-4 border-[#F2CC8F]'>
-                        <div className='text-sm font-black uppercase tracking-widest text-slate-400 mb-2'>Letters Explored</div>
-                        <div className='text-advay-slate flex items-baseline gap-2'>
-                          <span className='font-black text-3xl'>{getMasteredLettersCount(settings.language)}</span>
-                          <span className="text-text-secondary font-bold text-lg">/ {getAlphabet(settings.language).letters.length} Played With</span>
-                        </div>
-                        <p className="text-xs text-text-secondary mt-2">
-                          Every letter is always available to explore. No pressure, just play!
-                        </p>
-                      </div>
-
                       <Button
                         variant='secondary'
                         className="w-full text-lg font-black text-advay-slate bg-white border-4 border-[#F2CC8F] hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
@@ -635,25 +620,6 @@ export function Settings() {
                         }}
                       >
                         Reset Application Tutorials
-                      </Button>
-
-                      <Button
-                        variant='secondary'
-                        className="w-full text-lg font-black text-red-500 bg-red-50 border-4 border-red-200 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
-                        onClick={async () => {
-                          if (await confirm({
-                            title: 'Reset Play History?',
-                            message: 'This clears your letter play history. All letters will still be available to explore!',
-                            confirmText: 'Reset History',
-                            cancelText: 'Cancel',
-                            type: 'danger',
-                          })) {
-                            resetProgress(settings.language);
-                            showToast('Play history reset - fresh start!', 'success');
-                          }
-                        }}
-                      >
-                        Reset Curriculum Progress
                       </Button>
                     </div>
                   </div>

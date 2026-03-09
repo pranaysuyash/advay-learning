@@ -2,14 +2,16 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function RhythmTap() {
+function RhythmTapContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pattern, setPattern] = useState<number[]>([]);
@@ -27,6 +29,7 @@ export function RhythmTap() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('rhythm-tap');
+  const { saveProgress: _saveProgress } = useGameProgress('rhythm-tap');
 
   useGameSessionProgress({
     gameName: 'Rhythm Tap',
@@ -342,3 +345,16 @@ export function RhythmTap() {
     </GameContainer>
   );
 }
+
+export const RhythmTap = () => (
+  <GameShell
+    gameId="rhythm-tap"
+    gameName="Rhythm Tap"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <RhythmTapContent />
+  </GameShell>
+);
+
+export default RhythmTap;

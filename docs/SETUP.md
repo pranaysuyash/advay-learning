@@ -198,6 +198,17 @@ For code or audit changes, the updated worklog addendum must include:
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 ```
 
+When `scripts/feature_regression_check.sh --staged` flags a removed export that
+was intentionally deleted and replaced before launch, document the replacement
+inline in the new file with:
+
+```ts
+// INTENTIONAL_EXPORT_REMOVAL: OldExportName
+```
+
+Use this only when the replacement path is clear in the same diff; it is not a
+blanket exemption for accidental regressions.
+
 The gate also blocks premature completion metadata in worklogs:
 
 - `Status: DONE` with numbered `Next Actions:`

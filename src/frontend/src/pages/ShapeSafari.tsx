@@ -20,40 +20,44 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
-import { VoiceInstructions } from '../components/game/VoiceInstructions';
-import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
-import type { TrackedHandFrame, Point } from '../types/tracking';
 import {
-  type SafariScene,
-  type GameState,
-  type HiddenShape,
+  GameState,
+  HiddenShape,
+  SafariScene,
+  Point,
   SAFARI_SCENES,
-  getRandomScene,
-  initializeGame,
   findShapeAtPoint,
+  initializeGame,
   checkShapeComplete,
-  getHint,
-  getShapeDisplayName,
+  markShapeFound,
   getProgress,
   calculateFinalScore,
-  markShapeFound,
+  getRandomScene,
+  getShapeDisplayName,
+  getHint,
+  STREAK_MILESTONE_INTERVAL,
+  STREAK_MILESTONE_DURATION_MS,
 } from '../games/shapeSafariLogic';
+import type { TrackedHandFrame } from '../types/tracking';
+import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 
-export const ShapeSafari = memo(function ShapeSafari() {
+const ShapeSafariContent = memo(function ShapeSafari() {
   // ===== AUDIO =====
   const { playSuccess, playClick, playCelebration, playHover } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   // ===== GAME STATE =====
   const { onGameComplete } = useGameDrops('shape-safari');
+  const { saveProgress: _saveProgress } = useGameProgress('shape-safari');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentScene, setCurrentScene] = useState<SafariScene | null>(null);
   const [showMenu, setShowMenu] = useState(true);
@@ -682,5 +686,16 @@ export const ShapeSafari = memo(function ShapeSafari() {
     </GameContainer>
   );
 });
+
+export const ShapeSafari = () => (
+  <GameShell
+    gameId="shape-safari"
+    gameName="Shape Safari"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <ShapeSafariContent />
+  </GameShell>
+);
 
 export default ShapeSafari;

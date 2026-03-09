@@ -1,22 +1,11 @@
 import { create } from 'zustand';
 import { profileApi } from '../services/api';
+import { getErrorMessage } from '../utils/errorUtils';
 
-// Helper to extract error message from various error formats
-function getErrorMessage(error: any): string | null {
-  if (!error.response?.data) return null;
-
-  const data = error.response.data;
-
-  // NEW: Structured error format from custom exceptions
-  if (data.error?.message) return data.error.message;
-
-  // Legacy FastAPI format
-  if (typeof data.detail === 'string') return data.detail;
-
-  if (data.message) return data.message;
-
-  return null;
-}
+// NOTE: Previously this store defined its own getErrorMessage helper.
+// That logic has been consolidated into utils/errorUtils.ts (see CONSOL-004).
+// We now reuse the shared version for consistency and to benefit from
+// centralized enhancements like structured error codes.
 
 export interface CollectiblesProfileSettings {
   enableOlderBonus?: boolean;
@@ -75,7 +64,7 @@ export const useProfileStore = create<ProfileState>()((set) => ({
       });
     } catch (error: any) {
       set({
-        error: getErrorMessage(error) || 'Failed to fetch profiles',
+        error: getErrorMessage(error, 'Failed to fetch profiles'),
         isLoading: false,
       });
     }
@@ -91,7 +80,7 @@ export const useProfileStore = create<ProfileState>()((set) => ({
       }));
     } catch (error: any) {
       set({
-        error: getErrorMessage(error) || 'Failed to create profile',
+        error: getErrorMessage(error, 'Failed to create profile'),
         isLoading: false,
       });
     }
@@ -112,7 +101,7 @@ export const useProfileStore = create<ProfileState>()((set) => ({
       }));
     } catch (error: any) {
       set({
-        error: getErrorMessage(error) || 'Failed to update profile',
+        error: getErrorMessage(error, 'Failed to update profile'),
         isLoading: false,
       });
     }
@@ -147,7 +136,7 @@ export const useProfileStore = create<ProfileState>()((set) => ({
       }));
     } catch (error: any) {
       set({
-        error: getErrorMessage(error) || 'Failed to delete profile',
+        error: getErrorMessage(error, 'Failed to delete profile'),
         isLoading: false,
       });
     }

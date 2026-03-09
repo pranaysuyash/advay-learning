@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Webcam from 'react-webcam';
 
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -62,7 +63,7 @@ const ASSETS = {
   },
 };
 
-export const CountingCollectathon = memo(function CountingCollectathonGame() {
+export const CountingCollectathonContent = memo(function CountingCollectathonGame() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
@@ -472,5 +473,11 @@ export const CountingCollectathon = memo(function CountingCollectathonGame() {
     </GameContainer>
   );
 });
+
+export const CountingCollectathon = () => (
+  <GameShell gameId="counting-collectathon" gameName="Counting Collectathon">
+    <CountingCollectathonContent />
+  </GameShell>
+);
 
 export default CountingCollectathon;

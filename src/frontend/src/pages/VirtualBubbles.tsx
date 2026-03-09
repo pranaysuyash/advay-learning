@@ -1,6 +1,8 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
@@ -24,7 +26,7 @@ import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../game
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 400;
 
-export const VirtualBubbles = memo(function VirtualBubblesComponent() {
+export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -526,3 +528,11 @@ export const VirtualBubbles = memo(function VirtualBubblesComponent() {
     </GlobalErrorBoundary>
   );
 });
+
+export const VirtualBubbles = () => (
+  <GameShell gameId="virtual-bubbles" gameName="Virtual Bubbles">
+    <VirtualBubblesContent />
+  </GameShell>
+);
+
+export default VirtualBubbles;

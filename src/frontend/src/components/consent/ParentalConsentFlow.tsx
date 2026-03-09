@@ -1,7 +1,7 @@
 /**
  * Parental Consent Flow Component
  * DPDPA 2023 Section 9(1) Compliance - Verifiable Parental Consent
- * 
+ *
  * @ticket TCK-20260307-CRIT-002
  */
 
@@ -13,12 +13,12 @@ export type ConsentStep = 'disclosure' | 'verification-method' | 'email-verify' 
 
 export interface ConsentData {
   parentEmail: string;
-  verificationMethod: 'email' | 'credit-card' | 'declaration';
+  verificationMethod: 'email' | 'dodopayments' | 'declaration';
   consentTimestamp: string;
   ipAddress?: string;
   consentVersion: string;
   emailVerified: boolean;
-  cardVerified: boolean;
+  cardVerified: boolean;  // Also used for Dodopayments verification
   declarationSigned: boolean;
 }
 
@@ -47,11 +47,11 @@ export function ParentalConsentFlow({
   const [codeSent, setCodeSent] = useState(false);
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
 
-  const handleMethodSelect = (method: 'email' | 'credit-card' | 'declaration') => {
+  const handleMethodSelect = (method: 'email' | 'dodopayments' | 'declaration') => {
     setConsentData(prev => ({ ...prev, verificationMethod: method }));
     setDeclarationAccepted(false);
     if (method === 'email') setStep('email-verify');
-    else if (method === 'credit-card') setStep('card-verify');
+    else if (method === 'dodopayments') setStep('card-verify');
     else setStep('declaration');
   };
 
@@ -87,7 +87,7 @@ export function ParentalConsentFlow({
       consentTimestamp: new Date().toISOString(),
       declarationSigned: true,
       emailVerified: consentData.verificationMethod === 'email' ? true : (consentData.emailVerified ?? false),
-      cardVerified: consentData.verificationMethod === 'credit-card' ? true : (consentData.cardVerified ?? false),
+      cardVerified: consentData.verificationMethod === 'dodopayments' ? true : (consentData.cardVerified ?? false),
     };
     onConsentComplete(finalConsent);
   };
@@ -118,7 +118,7 @@ export function ParentalConsentFlow({
                 Before {childName || 'your child'} can use Advay, we need your verifiable consent.
               </p>
               <p className="text-xs text-amber-700">
-                As per India&apos;s Digital Personal Data Protection Act, 2023, we require parental consent 
+                As per India&apos;s Digital Personal Data Protection Act, 2023, we require parental consent
                 to process any personal data of children under 18.
               </p>
             </div>
@@ -201,7 +201,7 @@ export function ParentalConsentFlow({
               </button>
 
               <button
-                onClick={() => handleMethodSelect('credit-card')}
+                onClick={() => handleMethodSelect('dodopayments')}
                 className="w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-green-400 hover:bg-green-50 transition text-left"
               >
                 <div className="flex items-center gap-3">
@@ -209,8 +209,8 @@ export function ParentalConsentFlow({
                     <span className="text-xl">💳</span>
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-advay-slate">Credit/Debit Card</div>
-                    <div className="text-xs text-text-secondary">₹1 charge (immediately refunded)</div>
+                    <div className="font-bold text-advay-slate">UPI / Card / NetBanking</div>
+                    <div className="text-xs text-text-secondary">₹1 via Dodopayments (India) - immediately refunded</div>
                   </div>
                   <span className="text-slate-400 text-xl">›</span>
                 </div>
@@ -257,8 +257,8 @@ export function ParentalConsentFlow({
 
             {!codeSent ? (
               <div className="text-center py-8">
-                <Button 
-                  onClick={sendEmailCode} 
+                <Button
+                  onClick={sendEmailCode}
                   isLoading={isSendingCode}
                   className="w-full"
                 >
@@ -316,10 +316,15 @@ export function ParentalConsentFlow({
             exit={{ opacity: 0, x: -20 }}
             className="bg-white rounded-3xl border-4 border-[#F2CC8F] p-6 shadow-[0_6px_0_#E5B86E]"
           >
-            <h3 className="text-xl font-black text-advay-slate mb-2">Card Verification</h3>
-            <p className="text-sm text-text-secondary mb-6">
-              We&apos;ll charge ₹1 to your card and refund it immediately. This confirms you&apos;re an adult.
+            <h3 className="text-xl font-black text-advay-slate mb-2">Secure Payment Verification</h3>
+            <p className="text-sm text-text-secondary mb-4">
+              Pay ₹1 via UPI, Card, or NetBanking. This confirms you&apos;re an adult.
+              The amount is immediately refunded.
             </p>
+            <div className="flex items-center gap-2 mb-4 text-xs text-green-700 bg-green-50 p-2 rounded-lg">
+              <span>🇮🇳</span>
+              <span>Powered by Dodopayments</span>
+            </div>
 
             <div className="bg-green-50 rounded-2xl p-4 mb-6 border-2 border-green-200">
               <div className="flex items-center gap-2 mb-2">
@@ -327,8 +332,8 @@ export function ParentalConsentFlow({
                 <span className="font-bold text-green-800">Secure & Instant Refund</span>
               </div>
               <p className="text-xs text-green-700">
-                Your card details are processed securely. The ₹1 charge will be refunded 
-                within 5-7 business days.
+                Your payment is processed securely by Dodopayments. The ₹1 verification
+                charge is refunded automatically within minutes.
               </p>
             </div>
 
@@ -359,7 +364,7 @@ export function ParentalConsentFlow({
             </div>
 
             <Button onClick={handleCardVerification} className="w-full mt-4">
-              Verify Card (₹1 refundable charge)
+              Pay ₹1 via Dodopayments (Instant Refund)
             </Button>
 
             <button
@@ -409,7 +414,7 @@ export function ParentalConsentFlow({
                 className="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-sm text-text-secondary">
-                I confirm I am the parent/legal guardian and I consent to the processing 
+                I confirm I am the parent/legal guardian and I consent to the processing
                 of my child&apos;s data as described above.
               </span>
             </label>

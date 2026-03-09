@@ -2,14 +2,16 @@ import { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, getWordsForLevel, checkAnswer, type SyllableWord } from '../games/syllableClapLogic';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
-export function SyllableClap() {
+function SyllableClapContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [words, setWords] = useState<SyllableWord[]>([]);
@@ -27,6 +29,7 @@ export function SyllableClap() {
 
   const { playClick, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('syllable-clap');
+  const { saveProgress: _saveProgress } = useGameProgress('syllable-clap');
 
   useGameSessionProgress({
     gameName: 'Syllable Clap',
@@ -327,3 +330,16 @@ export function SyllableClap() {
     </GameContainer>
   );
 }
+
+export const SyllableClap = () => (
+  <GameShell
+    gameId="syllable-clap"
+    gameName="Syllable Clap"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <SyllableClapContent />
+  </GameShell>
+);
+
+export default SyllableClap;

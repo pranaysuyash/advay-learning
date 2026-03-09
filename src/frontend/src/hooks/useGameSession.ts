@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { GAME_KEYS } from '../config/storageKeys';
 
 // Session state interface
 export interface GameSessionState {
@@ -15,20 +16,24 @@ interface UseGameSessionProps {
   sessionData: GameSessionState;
 }
 
+/**
+ * Hook for persisting game session to LocalStorage
+ *
+ * Uses centralized storage key registry (CONSOL-003)
+ * See: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md
+ */
 export function useGameSession({
   isPlaying,
   sessionData,
 }: UseGameSessionProps) {
-  const STORAGE_KEY = 'alphabetGameSession';
-
   // Save session to localStorage
   const saveSession = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
+    localStorage.setItem(GAME_KEYS.SESSION, JSON.stringify(sessionData));
   }, [sessionData]);
 
   // Load session from localStorage
   const loadSession = useCallback((): GameSessionState | null => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(GAME_KEYS.SESSION);
     if (saved) {
       try {
         const data = JSON.parse(saved) as GameSessionState;
@@ -45,7 +50,7 @@ export function useGameSession({
 
   // Clear session
   const clearSession = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(GAME_KEYS.SESSION);
   }, []);
 
   // Auto-save when playing

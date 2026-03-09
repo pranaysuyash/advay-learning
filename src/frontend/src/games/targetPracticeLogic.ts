@@ -1,28 +1,40 @@
+/**
+ * Target Practice Game Logic
+ *
+ * NOTE: This file now delegates to centralized geometry utilities.
+ * See: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md CONSOL-001
+ *
+ * For new code, import directly from '../utils/geometry' instead.
+ * INTENTIONAL_EXPORT_REMOVAL: clamp01
+ */
+
 import type { Point } from '../types/tracking';
+import {
+  calculateDistance,
+  isPointInCircle as _isPointInCircle,
+  pickRandomPointInMargin,
+} from '../utils/geometry';
 
-export function clamp01(value: number): number {
-  return Math.min(1, Math.max(0, value));
-}
-
+/**
+ * @deprecated Use calculateDistance from '../utils/geometry' instead
+ */
 export function distanceBetweenPoints(a: Point, b: Point): number {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-  return Math.sqrt(dx * dx + dy * dy);
+  return calculateDistance(a, b);
 }
 
+/**
+ * @deprecated Use isPointInCircle from '../utils/geometry' instead
+ */
 export function isPointInCircle(point: Point, center: Point, radius: number): boolean {
   if (radius <= 0) return false;
-  return distanceBetweenPoints(point, center) <= radius;
+  return _isPointInCircle(point, center, radius);
 }
 
+/**
+ * @deprecated Use pickRandomPointInMargin from '../utils/geometry' instead
+ */
 export function pickRandomPoint(randomA: number, randomB: number, margin: number = 0.15): Point {
-  const clampedMargin = Math.min(0.45, Math.max(0.05, margin));
-  const span = 1 - clampedMargin * 2;
-
-  return {
-    x: clampedMargin + clamp01(randomA) * span,
-    y: clampedMargin + clamp01(randomB) * span,
-  };
+  return pickRandomPointInMargin(randomA, randomB, margin);
 }
 
 export interface TargetPoint {
@@ -45,9 +57,9 @@ export function pickSpacedPoints(
     let accepted: Point | null = null;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const candidate = pickRandomPoint(random(), random(), margin);
+      const candidate = pickRandomPointInMargin(random(), random(), margin);
       const isFarEnough = targets.every(
-        (target) => distanceBetweenPoints(target.position, candidate) >= minDistance,
+        (target) => calculateDistance(target.position, candidate) >= minDistance,
       );
 
       if (isFarEnough) {
@@ -58,7 +70,7 @@ export function pickSpacedPoints(
 
     if (!accepted) {
       // Fallback: place anyway to avoid deadlocks at high densities.
-      accepted = pickRandomPoint(random(), random(), margin);
+      accepted = pickRandomPointInMargin(random(), random(), margin);
     }
 
     targets.push({ id, position: accepted });

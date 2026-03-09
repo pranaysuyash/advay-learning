@@ -2,14 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getWordsForLevel, type SightWord } from '../games/sightWordFlashLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function SightWordFlash() {
+function SightWordFlashContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [words, setWords] = useState<SightWord[]>([]);
@@ -25,6 +27,7 @@ export function SightWordFlash() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('sight-word-flash');
+  const { saveProgress: _saveProgress } = useGameProgress('sight-word-flash');
   const showPending = useRef(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -323,3 +326,16 @@ export function SightWordFlash() {
     </GameContainer>
   );
 }
+
+export const SightWordFlash = () => (
+  <GameShell
+    gameId="sight-word-flash"
+    gameName="Sight Word Flash"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <SightWordFlashContent />
+  </GameShell>
+);
+
+export default SightWordFlash;

@@ -1,19 +1,16 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
-import { LEVELS, generateGame, calculateScore, type Weather, type Clothing } from '../games/weatherMatchLogic';
+import { LEVELS, generateGame, calculateScore, type Weather, type GamePair } from '../games/weatherMatchLogic';
 import { triggerHaptic } from '../utils/haptics';
 
-interface GamePair {
-  weather: Weather;
-  clothing: Clothing;
-}
-
-export function WeatherMatch() {
+function WeatherMatchContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pairs, setPairs] = useState<GamePair[]>([]);
@@ -33,6 +30,7 @@ export function WeatherMatch() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('weather-match');
+  const { saveProgress: _saveProgress } = useGameProgress('weather-match');
 
   useGameSessionProgress({ gameName: 'Weather Match', score, level: currentLevel, isPlaying: true, metaData: { correct } });
 
@@ -231,3 +229,16 @@ export function WeatherMatch() {
     </GameContainer>
   );
 }
+
+export const WeatherMatch = () => (
+  <GameShell
+    gameId="weather-match"
+    gameName="Weather Match"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <WeatherMatchContent />
+  </GameShell>
+);
+
+export default WeatherMatch;

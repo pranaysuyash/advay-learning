@@ -1,6 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -43,7 +45,7 @@ const LEVELS: LevelConfig[] = [
   { level: 3, dotCount: 10 },
 ];
 
-export function RainbowBridge() {
+export function RainbowBridgeContent() {
   const navigate = useNavigate();
   const [currentLevel, _setCurrentLevel] = useState(1);
   const [dots, setDots] = useState<Dot[]>([]);
@@ -322,3 +324,11 @@ export function RainbowBridge() {
     </GameContainer>
   );
 }
+
+export const RainbowBridge = () => (
+  <GameShell gameId="rainbow-bridge" gameName="Rainbow Bridge">
+    <RainbowBridgeContent />
+  </GameShell>
+);
+
+export default RainbowBridge;

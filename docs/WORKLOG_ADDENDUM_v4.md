@@ -1239,3 +1239,60 @@ Execution log:
 
 Prompt Trace:
 - `prompts/remediation/implementation-v1.6.1.md`
+
+## TCK-20260309-104 :: Self-Review Remediation and Merge Workflow for Current Integrated Diff
+
+Type: `IMPROVEMENT`
+Owner: Pranay (human owner, agent execution by Codex)
+Created: 2026-03-09
+Status: `IN_PROGRESS`
+Priority: `P0`
+
+Scope contract:
+- In-scope: Review the current mixed working tree as a strict PR, fix concrete defects found before opening a new PR, document the verification evidence, and continue through the required branch/commit/PR/merge workflow.
+- Out-of-scope: Splitting the already-accumulated working tree into smaller historical tickets or deleting parallel-agent work.
+- Behavior change allowed: `YES`
+
+Targets:
+- Repo: `learning_for_kids`
+- Branch/PR: `codex/wip-self-review-merge-104` -> `main`
+
+Acceptance criteria:
+- [x] Findings-first local review is performed against the current diff.
+- [x] Concrete review findings are fixed before the next commit.
+- [x] Frontend targeted tests for reviewed areas pass.
+- [x] Frontend full type-check passes.
+- [x] Backend test suite passes.
+- [x] Alembic migration graph returns to a single head.
+- [ ] `git add -A`, commit, push, PR review, and merge are completed.
+
+Execution log:
+- [2026-03-09 17:48 IST] Loaded `.agent/AGENT_KICKOFF_PROMPT.txt`, `.agent/SESSION_CONTEXT.md`, `prompts/README.md`, and `prompts/review/local-pre-commit-review-v1.0.md` before implementation. | Evidence: `source .agent/STEP1_ENV.sh`, `sed -n '1,200p' .agent/AGENT_KICKOFF_PROMPT.txt`, `sed -n '1,200p' .agent/SESSION_CONTEXT.md`, `sed -n '1,220p' prompts/README.md`, `sed -n '1,220p' prompts/review/local-pre-commit-review-v1.0.md`
+- [2026-03-09 17:49 IST] Observed the repo was dirty on `main` with a large integrated diff and no open PR for the current branch. | Evidence: `git status --short`, `git branch --show-current`, `gh pr status`
+- [2026-03-09 17:51 IST] Self-review finding: `src/frontend/src/gameQualitySystem/metrics/roiAnalysis.ts` failed frontend type-check due to stale renames, missing imports, and broken identifiers. | Evidence: `npm run type-check`
+- [2026-03-09 17:52 IST] Self-review finding: `src/frontend/src/gameQualitySystem/metrics/lowEngagementFlag.ts` checked `minimumDaysForCheck` before `gracePeriodDays`, making grace-period handling unreachable. | Evidence: code review of `src/frontend/src/gameQualitySystem/metrics/lowEngagementFlag.ts` plus `src/frontend/src/gameQualitySystem/metrics/lowEngagementFlag.test.ts`
+- [2026-03-09 17:53 IST] Self-review finding: `src/backend/alembic/versions/20260307_add_parental_consent.py` created a second Alembic root because `down_revision` was unset. | Evidence: `../../.venv/bin/alembic heads`
+- [2026-03-09 17:53 IST] Self-review finding: parental consent API/schema contract drift existed across payment-token naming and ID field types. | Evidence: code review of `src/backend/app/api/v1/endpoints/consent.py` and `src/backend/app/schemas/consent.py`
+- [2026-03-09 17:54 IST] Fixed the review findings in ROI analysis, low-engagement flagging, parental consent schema/API, and migration ancestry; removed new trailing whitespace from touched files. | Evidence: git diff in `src/frontend/src/gameQualitySystem/metrics/roiAnalysis.ts`, `src/frontend/src/gameQualitySystem/metrics/lowEngagementFlag.ts`, `src/backend/app/api/v1/endpoints/consent.py`, `src/backend/app/schemas/consent.py`, `src/backend/alembic/versions/20260307_add_parental_consent.py`
+- [2026-03-09 17:55 IST] Verified reviewed frontend areas with targeted tests. | Evidence: `npx vitest run src/hooks/__tests__/useGameSubscription.test.ts src/utils/__tests__/errorUtils.test.ts src/utils/geometry.test.ts`, `npx vitest run src/gameQualitySystem/metrics/roiAnalysis.test.ts src/gameQualitySystem/metrics/lowEngagementFlag.test.ts`
+- [2026-03-09 17:56 IST] Verified no diff-hygiene issues remain and the frontend type-check is green. | Evidence: `git diff --check`, `npm run type-check`
+- [2026-03-09 17:58 IST] Verified backend regression coverage remains green after consent changes. | Evidence: `../../.venv/bin/pytest -q`
+- [2026-03-09 17:59 IST] Verified Alembic returns a single head after migration ancestry fix. | Evidence: `../../.venv/bin/alembic heads`
+
+Review findings summary:
+1. `Observed` — `roiAnalysis.ts` was not commit-ready; the export path broke the frontend build and metrics tests.
+2. `Observed` — `lowEngagementFlag.ts` contained unreachable grace-period logic.
+3. `Observed` — parental consent migration ancestry was invalid for linear upgrade history.
+4. `Observed` — parental consent API/schema used inconsistent ID types and payment verification field names.
+5. `Observed` — new trailing whitespace existed in touched source files.
+
+Current review recommendation:
+- `PASS WITH RISKS`
+
+Residual risks / verification gaps:
+1. `Observed` — `npm run lint` still reports the existing `react-refresh/only-export-components` warning in `src/frontend/src/components/GamePage.tsx`; it is not introduced by the reviewed fixes but remains repo noise.
+2. `Observed` — the working tree is still a large integrated set spanning multiple scopes, so PR review remains important even after local self-review remediation.
+
+Prompt Trace:
+- `prompts/review/local-pre-commit-review-v1.0.md`
+- `prompts/remediation/implementation-v1.6.1.md`

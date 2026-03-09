@@ -1,13 +1,15 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateBubbles, checkPop, calculateScore, type NumberBubble } from '../games/popTheNumberLogic';
 import { triggerHaptic } from '../utils/haptics';
 
-export function PopTheNumber() {
+function PopTheNumberContent() {
   const navigate = useNavigate();
   const [currentLevel, _setCurrentLevel] = useState(1);
   const [bubbles, setBubbles] = useState<NumberBubble[]>([]);
@@ -27,6 +29,7 @@ export function PopTheNumber() {
 
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const { onGameComplete } = useGameDrops('pop-the-number');
+  const { saveProgress: _saveProgress } = useGameProgress('pop-the-number');
   useGameSessionProgress({ gameName: 'Pop the Number', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.id === currentLevel) || LEVELS[0];
@@ -274,3 +277,16 @@ export function PopTheNumber() {
     </GameContainer>
   );
 }
+
+export const PopTheNumber = () => (
+  <GameShell
+    gameId="pop-the-number"
+    gameName="Pop the Number"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <PopTheNumberContent />
+  </GameShell>
+);
+
+export default PopTheNumber;

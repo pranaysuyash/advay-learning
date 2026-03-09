@@ -1,6 +1,8 @@
 import { memo, useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -520,5 +522,9 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
 
 // Main export wrapped with GameShell
 export const PlatformerRunner = memo(function PlatformerRunnerComponent() {
-  return <PlatformerRunnerGame />;
+  return (
+    <GameShell gameId="platformer-runner" gameName="Platformer Runner">
+      <PlatformerRunnerGame />
+    </GameShell>
+  );
 });

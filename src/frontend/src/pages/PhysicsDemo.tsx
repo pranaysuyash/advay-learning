@@ -9,6 +9,8 @@ import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Matter from 'matter-js';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
@@ -31,7 +33,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { useProgressMetrics } from '../hooks/useProgressMetrics';
 import { useTTS } from '../hooks/useTTS';
 
-export const PhysicsDemo = memo(function PhysicsDemoComponent() {
+export const PhysicsDemoContent = memo(function PhysicsDemoComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -422,6 +424,12 @@ export const PhysicsDemo = memo(function PhysicsDemoComponent() {
     </GlobalErrorBoundary>
   );
 });
+
+export const PhysicsDemo = () => (
+  <GameShell gameId="physics-demo" gameName="Physics Demo">
+    <PhysicsDemoContent />
+  </GameShell>
+);
 
 export default PhysicsDemo;
 

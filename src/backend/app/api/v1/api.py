@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     achievements,
     auth,
+    consent,
     data_export,
     games,
     issue_reports,
@@ -36,4 +37,9 @@ api_router.include_router(
     data_export.router,
     prefix="/export",
     tags=["data-export"],
+)
+api_router.include_router(
+    consent.router,
+    prefix="/consent",
+    tags=["parental-consent"],
 )

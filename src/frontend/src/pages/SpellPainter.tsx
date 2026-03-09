@@ -1,6 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
@@ -18,7 +20,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { triggerHaptic } from '../utils/haptics';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function SpellPainter() {
+export function SpellPainterContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [letters, setLetters] = useState<LetterPosition[]>([]);
@@ -302,3 +304,11 @@ export function SpellPainter() {
     </GameContainer>
   );
 }
+
+export const SpellPainter = () => (
+  <GameShell gameId="spell-painter" gameName="Spell Painter">
+    <SpellPainterContent />
+  </GameShell>
+);
+
+export default SpellPainter;

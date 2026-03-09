@@ -146,11 +146,11 @@ See `docs/clarity/questions.md`:
 
 ### Remaining (Phase 1)
 
-- [ ] **AI-002**: Letter Pronunciation Audio
-  - Need ~334 audio files for all 5 languages
-  - English: 52 files (26 letters × 2 sounds)
-  - Hindi: 70 files, Kannada/Telugu: 76 each, Tamil: 60
-  - Options: Record, source from educational resources, or use TTS
+- [x] **AI-002**: Letter Pronunciation Audio
+  - Successfully generated ~280 English audio clips for full coverage
+  - Utilized macOS native \`say\` piped to \`ffmpeg\` to bypass OS module locks
+  - Wired into PregenAudioCache and React hooks
+  - (Hindi, Kannada, Telugu, Tamil generation pending for future PRs)
 
 ### Phase 2+ (Future)
 

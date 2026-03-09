@@ -16,6 +16,14 @@
 
 import type { Point } from '../types/tracking';
 import { recordCVError } from '../analytics/extensions/countingCollectathon';
+import { distanceToSegment as _distanceToSegment } from '../utils/geometry';
+
+// Re-export Point type for convenience
+export type { Point } from '../types/tracking';
+
+// Game constants
+export const STREAK_MILESTONE_INTERVAL = 5; // Celebrate every 5 correct answers
+export const STREAK_MILESTONE_DURATION_MS = 1500; // Show celebration for 1.5 seconds
 
 export type ShapeType = 'circle' | 'square' | 'triangle' | 'rectangle' | 'star' | 'oval' | 'diamond' | 'heart';
 
@@ -697,34 +705,9 @@ function isPointNearPath(
 }
 
 // Distance from point to line segment
+// Uses centralized geometry utility (see: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md CONSOL-001)
 function distanceToSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
-  const A = px - x1;
-  const B = py - y1;
-  const C = x2 - x1;
-  const D = y2 - y1;
-
-  const dot = A * C + B * D;
-  const lenSq = C * C + D * D;
-  let param = -1;
-  if (lenSq !== 0) {
-    param = dot / lenSq;
-  }
-
-  let xx, yy;
-  if (param < 0) {
-    xx = x1;
-    yy = y1;
-  } else if (param > 1) {
-    xx = x2;
-    yy = y2;
-  } else {
-    xx = x1 + param * C;
-    yy = y1 + param * D;
-  }
-
-  const dx = px - xx;
-  const dy = py - yy;
-  return Math.sqrt(dx * dx + dy * dy);
+  return _distanceToSegment(px, py, x1, y1, x2, y2);
 }
 
 // Calculate tracing accuracy
