@@ -17,7 +17,7 @@ export interface LevelConfig {
   maxSyllables: number;
 }
 
-const SYLLABLE_WORDS: SyllableWord[] = [
+export const SYLLABLE_WORDS: SyllableWord[] = [
   { word: 'cat', syllableCount: 1, hint: 'A furry pet', emoji: '🐱' },
   { word: 'dog', syllableCount: 1, hint: 'A barking pet', emoji: '🐕' },
   { word: 'sun', syllableCount: 1, hint: 'It shines in the sky', emoji: '☀️' },

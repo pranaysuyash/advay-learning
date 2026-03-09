@@ -53,6 +53,94 @@ Risks/notes:
 
 ---
 
+### TCK-20260309-001 :: Feature-Folder Architecture Audit Across All Games
+
+Ticket Stamp: STAMP-20260309T044149Z-amp-0i7u
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-09 10:15 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Explain why `PhysicsPlayground` is in `features/*`, evaluate whether other games can/should use feature modules, scan all game pages for extraction opportunities, and document recommendations.
+- Out-of-scope: Refactoring game code in this pass.
+- Behavior change allowed: NO.
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `docs/reviews/GAME_FEATURE_MODULARIZATION_AUDIT_2026-03-09.md`
+
+Acceptance Criteria:
+
+- [x] PhysicsPlayground "special placement" rationale documented with code + worklog evidence.
+- [x] Confirmed that `features/*` can be used for other games (no architectural blocker).
+- [x] Portfolio scan performed across all game pages with prioritization tiers.
+- [x] Extractable feature candidates and sequence documented.
+
+Execution log:
+
+- 2026-03-09 09:48 IST | Scanned folder topology and game/page inventory | Evidence: `find src/frontend/src -maxdepth 3 -type d`, page listing
+- 2026-03-09 09:54 IST | Verified PhysicsPlayground feature imports and module composition | Evidence: `PhysicsPlayground.tsx:3-16`, class exports under `features/physics-playground/*`
+- 2026-03-09 10:01 IST | Verified repeated pose bootstrap duplication across pose games | Evidence: repeated `FilesetResolver.forVisionTasks` + `PoseLandmarker.createFromOptions` in 7 game pages
+- 2026-03-09 10:07 IST | Ran full game-page modularization heuristic scan | Evidence: 86 pages scanned, high/medium/low tier counts captured in review
+- 2026-03-09 10:12 IST | Published architecture report with recommended feature-module roadmap | Evidence: `docs/reviews/GAME_FEATURE_MODULARIZATION_AUDIT_2026-03-09.md`
+
+Prompt Trace: prompts/audit/reality-first-repo-auditor-v1.0.md, prompts/planning/implementation-planning-v1.0.md
+
+Status updates:
+
+- 2026-03-09 10:15 IST **DONE** — Architecture rationale clarified and extraction opportunities documented for discussion before implementation
+
+---
+
+### TCK-20260309-002 :: Pose-Action Blueprint + Full 86-Game Extraction Matrix
+
+Ticket Stamp: STAMP-20260309T062101Z-amp-ly1e
+
+Type: PLANNING
+Owner: Pranay
+Created: 2026-03-09 11:51 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Produce concrete `features/pose-action-games` blueprint (structure + API + phased migration) and generate a full 86-game extraction decision matrix.
+- Out-of-scope: Refactoring runtime code or moving game files in this pass.
+- Behavior change allowed: NO.
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `docs/architecture/POSE_ACTION_FEATURE_BLUEPRINT_2026-03-09.md`
+  - `docs/reviews/GAME_EXTRACTION_MATRIX_2026-03-09.md`
+
+Acceptance Criteria:
+
+- [x] Feature blueprint includes folder tree, boundaries, API draft, phases, pilot order, and risks.
+- [x] Matrix includes all 86 game pages with extraction decision and proposed module target.
+- [x] Matrix includes reason codes and summary counts.
+
+Execution log:
+
+- 2026-03-09 11:35 IST | Generated and validated full game-page dataset (86 rows) with LOC + MediaPipe signals | Evidence: scan script output
+- 2026-03-09 11:42 IST | Authored concrete pose-action module blueprint | Evidence: `docs/architecture/POSE_ACTION_FEATURE_BLUEPRINT_2026-03-09.md`
+- 2026-03-09 11:49 IST | Published full extraction matrix with per-game decisions | Evidence: `docs/reviews/GAME_EXTRACTION_MATRIX_2026-03-09.md`
+
+Prompt Trace: prompts/planning/implementation-planning-v1.0.md, prompts/audit/reality-first-repo-auditor-v1.0.md
+
+Status updates:
+
+- 2026-03-09 11:51 IST **DONE** — Deliverables 1 and 2 completed for discussion prior to implementation
+
+---
+
 ### TCK-20260303-W1-002 :: RF-008 — Deduplicate Icon Component Import Surface
 
 Ticket Stamp: STAMP-20260303T082000Z-antigravity-rf008
@@ -12382,5 +12470,168 @@ Risks/notes:
 - No runtime impact until Phase 3
 - Pattern matches existing WordBuilder extension (consistency ✓)
 - Export placeholder prevents "empty module" warnings
+
+---
+
+---
+
+### TCK-20260308-003 :: Shape Safari Audit Remediation
+
+Ticket Stamp: STAMP-20260308T173000Z-codex-ssaudit
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-08 17:30 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Fix dead code (foundShapes), add NaN validation, fix completed flag, create test file
+- Out-of-scope: Full magic number extraction to config (deferred), telemetry integration
+- Behavior change allowed: YES (scoring now works correctly)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/games/shapeSafariLogic.ts`, `src/frontend/src/pages/ShapeSafari.tsx`, `src/frontend/src/games/__tests__/shapeSafariLogic.test.ts`
+
+Source:
+
+- Audit: Qwen's comprehensive audit findings (16 issues identified)
+- Pattern: Applied lessons from Counting Collectathon audit
+
+Acceptance Criteria:
+
+- [x] Removed `foundShapes: Set<string>` (dead code/bug - was never populated but used in scoring)
+- [x] Fixed scoring to use `shapes.filter(s => s.isFound).length` (single source of truth)
+- [x] Added `markShapeFound()` function that sets `completed: true` when all shapes found
+- [x] Added NaN/Infinity validation in `isPointNearPath()` with console.warn
+- [x] Fixed `getRandomScene()` to return `null` instead of `undefined` on empty filter
+- [x] Updated `ShapeSafari.tsx` component to use new `markShapeFound()` function
+- [x] Added 30 comprehensive tests covering all functions
+- [x] Added Path2D mock to test setup for canvas-based games
+- [x] Added decision comments throughout (DECISION-2026-03-08 blocks)
+
+Execution log:
+
+- 2026-03-08 17:30 IST | Verified Qwen's findings: foundShapes was declared but never populated (scoring bug!)
+- 2026-03-08 17:35 IST | Removed foundShapes, fixed scoring to use shapes[].isFound
+- 2026-03-08 17:40 IST | Added markShapeFound() with completed flag handling
+- 2026-03-08 17:45 IST | Added NaN validation with Number.isFinite() checks
+- 2026-03-08 17:50 IST | Fixed getRandomScene() null return
+- 2026-03-08 17:55 IST | Updated ShapeSafari.tsx to use new functions
+- 2026-03-08 18:00 IST | Created 30 test cases for shapeSafariLogic
+- 2026-03-08 18:05 IST | Added Path2D mock to test/setup.ts
+- 2026-03-08 18:10 IST | All 30 tests pass
+
+Status updates:
+
+- 2026-03-08 18:10 IST **DONE** — Shape Safari audit complete, 30 tests passing
+
+Test Results:
+
+```
+✓ 30 tests passed (9 describe blocks)
+  - Scene Data (6 tests)
+  - Game Initialization (2 tests)
+  - Shape Finding (5 tests)
+  - Marking Shapes Found (4 tests)
+  - Scoring (4 tests)
+  - Hints (3 tests)
+  - Utilities (2 tests)
+  - Tracing Accuracy (4 tests)
+```
+
+Key Fixes:
+
+| Issue | Before | After |
+|-------|--------|-------|
+| foundShapes | Declared, never populated, used in scoring | Removed, scoring uses shapes[].isFound |
+| completed flag | Initialized false, never set | Set by markShapeFound() when all found |
+| getRandomScene | Could return undefined | Returns null on empty filter |
+| Point validation | No validation | Number.isFinite() checks with warnings |
+| Test coverage | 0 tests | 30 tests |
+
+Risks/notes:
+
+- Breaking change: Component must use markShapeFound() instead of manual state updates
+- Console.warn for invalid coordinates (telemetry deferred to Phase 3)
+- Magic numbers partially extracted (BASE_SCORE_PER_SHAPE, etc.)
+- Full config extraction deferred - current extraction sufficient for testing
+
+---
+
+---
+
+### TCK-20260308-004 :: Analytics Testing Pattern Discovery
+
+Ticket Stamp: STAMP-20260308T181800Z-codex-analytics-pattern
+
+Type: RESEARCH
+Owner: Pranay
+Created: 2026-03-08 18:18 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Discover working pattern for testing analytics module functions
+- Out-of-scope: Implement Phase 3 telemetry (next ticket)
+- Deliverable: Working test + documented pattern
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/analytics/__tests__/mockPattern.test.ts`, `docs/ANALYTICS_TESTING_PATTERN.md`
+
+Source:
+
+- Existing pattern: `src/hooks/useFeatureDetection.test.ts`
+- Challenge: Module-level functions with hidden state (`logEvent` in `activeSession` closure)
+
+Acceptance Criteria:
+
+- [x] Found existing vi.mock pattern in codebase
+- [x] Identified import path issue (@/analytics doesn't resolve in tests)
+- [x] Created working proof-of-concept test (6 tests)
+- [x] Documented pattern with real-world examples
+- [x] Pattern ready for Phase 3 telemetry implementation
+
+Execution log:
+
+- 2026-03-08 18:18 IST | Verified baseline: 30/30 countingCollectathon tests pass
+- 2026-03-08 18:20 IST | Explored analytics module structure (@/analytics exports logEvent from store.ts)
+- 2026-03-08 18:22 IST | Found existing vi.mock pattern in useFeatureDetection.test.ts
+- 2026-03-08 18:25 IST | Created mockPattern.test.ts with 6 test cases
+- 2026-03-08 18:28 IST | Hit import path issue - @/analytics alias doesn't resolve
+- 2026-03-08 18:30 IST | Fixed with relative import: `import * as analytics from '../index'`
+- 2026-03-08 18:35 IST | All 6 tests pass - pattern validated!
+- 2026-03-08 18:40 IST | Documented pattern in ANALYTICS_TESTING_PATTERN.md
+
+Key Findings:
+
+| Challenge | Solution | Evidence |
+|-----------|----------|----------|
+| @/analytics alias fails | Use relative imports | `import from '../index'` |
+| Module-level function mocking | `vi.mock()` with factory | `vi.mock('../index', () => ({ logEvent: vi.fn() }))` |
+| Type-safe mock access | `vi.mocked()` | `vi.mocked(analytics.logEvent).mockReturnValue(...)` |
+| Test isolation | `beforeEach(vi.clearAllMocks())` | Verified in all 6 tests |
+
+Time Investment: 22 minutes (well under 90-min guardrail)
+
+Status updates:
+
+- 2026-03-08 18:40 IST **DONE** — Pattern discovered, validated, documented
+
+Next Actions:
+
+1. TCK-20260308-005 :: Phase 3 Telemetry Implementation
+   - Implement `recordCVError()` in countingCollectathon
+   - Replace console.warn with analytics call
+   - Add test using validated pattern
+
+Pattern Document: `docs/ANALYTICS_TESTING_PATTERN.md`
+Example Test: `src/analytics/__tests__/mockPattern.test.ts` (6 passing tests)
 
 ---

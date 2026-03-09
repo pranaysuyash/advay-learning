@@ -74,7 +74,7 @@ const FLOWERS: Array<{
   { name: 'Purple', color: '#8b5cf6', emoji: '🌷', assetId: 'brush-blue' },
 ];
 
-const TARGET_RADIUS = 0.1;
+const TARGET_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 
 function buildRoundTargets(): { targets: GardenTarget[]; promptId: number } {
   const random = randomFloat01;

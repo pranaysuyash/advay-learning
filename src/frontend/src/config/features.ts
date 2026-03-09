@@ -90,12 +90,12 @@ export const FEATURE_FLAG_META: Record<keyof FeatureFlags, FeatureFlagMeta> = {
     editable: true,
   },
   'ai.storyGeneratorV1': {
-    description: 'Turn on the stubbed story generator service',
+    description: 'Enable LLM-powered story generation with caching and fallback library',
     category: 'ai',
     editable: true,
   },
   'ai.activityGeneratorV1': {
-    description: 'Turn on the stubbed activity generator service',
+    description: 'Enable AI activity recommendation generation (stub - pending implementation)',
     category: 'ai',
     editable: true,
   },

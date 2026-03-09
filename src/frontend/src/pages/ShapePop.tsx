@@ -6,9 +6,11 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -58,7 +60,7 @@ interface FloatingText {
   scale: number;
 }
 
-export const ShapePop = memo(function ShapePopComponent() {
+const ShapePopContent = memo(function ShapePopComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -175,6 +177,7 @@ export const ShapePop = memo(function ShapePopComponent() {
   }, [screenShake]);
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('shape-pop');
+  useGameProgress('shape-pop');
   const popWindowRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -656,6 +659,19 @@ export const ShapePop = memo(function ShapePopComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const ShapePop = memo(function ShapePopShell() {
+  return (
+    <GameShell
+      gameId="shape-pop"
+      gameName="Shape Pop"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ShapePopContent />
+    </GameShell>
   );
 });
 

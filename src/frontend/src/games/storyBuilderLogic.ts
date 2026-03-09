@@ -11,7 +11,7 @@ export interface StoryBuilderRound {
   options: string[];
 }
 
-const STORY_PROMPTS: StoryBuilderPrompt[] = [
+export const STORY_PROMPTS: StoryBuilderPrompt[] = [
   {
     id: 'bird-sings',
     prompt: 'Build the sentence about the bird.',

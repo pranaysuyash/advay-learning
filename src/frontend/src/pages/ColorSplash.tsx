@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -12,11 +13,11 @@ import {
   generateObjects,
   splashObject,
   COLORS,
-  type ColorObject,
-  type ColorName
+  ColorObject,
+  ColorName,
 } from '../games/colorSplashLogic';
 
-export function ColorSplash() {
+function ColorSplashContent() {
   const navigate = useNavigate();
   const [currentLevel, _setCurrentLevel] = useState(1);
   const [objects, setObjects] = useState<ColorObject[]>([]);
@@ -207,3 +208,16 @@ export function ColorSplash() {
     </GameContainer>
   );
 }
+
+export const ColorSplash = () => (
+  <GameShell
+    gameId="color-splash"
+    gameName="Color Splash"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <ColorSplashContent />
+  </GameShell>
+);
+
+export default ColorSplash;

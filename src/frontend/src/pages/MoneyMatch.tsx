@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -14,7 +15,7 @@ import {
 } from '../games/moneyMatchLogic';
 import { triggerHaptic } from '../utils/haptics';
 
-export function MoneyMatch() {
+function MoneyMatchContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetAmount, setTargetAmount] = useState(0);
@@ -38,6 +39,7 @@ export function MoneyMatch() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('money-match');
+  // saveProgress hook is available but we don't currently record progress for this game
 
   useGameSessionProgress({
     gameName: 'Money Match',
@@ -285,3 +287,16 @@ export function MoneyMatch() {
     </GameContainer>
   );
 }
+
+export const MoneyMatch = () => (
+  <GameShell
+    gameId="money-match"
+    gameName="Money Match"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <MoneyMatchContent />
+  </GameShell>
+);
+
+export default MoneyMatch;

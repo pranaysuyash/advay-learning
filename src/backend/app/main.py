@@ -1,6 +1,7 @@
 """Main FastAPI application entry point."""
 
 import logging
+import os
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -131,6 +132,21 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 async def startup_event():
     """Run startup validations."""
     logger.info("Running startup validations...")
+    
+    # Initialize Sentry if configured
+    sentry_dsn = os.getenv("SENTRY_DSN")
+    if sentry_dsn:
+        import sentry_sdk
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            traces_sample_rate=1.0,  # Capture 100% of errors in dev, adjust for production
+            environment=settings.APP_ENV,
+            release=getattr(settings, "RELEASE_VERSION", "0.1.0"),
+        )
+        logger.info(f"✅ Sentry initialized (environment: {settings.APP_ENV})")
+    else:
+        logger.info("Sentry not configured (set SENTRY_DSN environment variable)")
+    
     try:
         await validate_database_schema()
         logger.info("✅ Database schema validation passed")

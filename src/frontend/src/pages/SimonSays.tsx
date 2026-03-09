@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useCallback } from 'react';
+import { memo, useState, useEffect, useRef, useCallback, type RefObject } from 'react';
 import {
   Hand,
   Star,
@@ -18,6 +18,8 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
+import { GameShell } from '../components/GameShell';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -122,6 +124,8 @@ interface BodyAction {
   landmark: string;
 }
 
+type SimonGameMode = 'classic' | 'combo';
+
 const BODY_ACTIONS: BodyAction[] = [
   {
     name: 'Touch Head',
@@ -161,13 +165,342 @@ const BODY_ACTIONS: BodyAction[] = [
   },
 ];
 
-export const SimonSays = memo(function SimonSays() {
+function getCharacterAnimation(actionName: string) {
+  switch (actionName) {
+    case 'Arms Up':
+      return 'climb';
+    case 'Touch Head':
+      return 'duck';
+    case 'Wave':
+      return 'walk';
+    case 'Hands On Hips':
+      return 'idle';
+    case 'T-Rex Arms':
+      return 'hit';
+    case 'Touch Shoulders':
+      return 'jump';
+    default:
+      return 'idle';
+  }
+}
+
+export function SimonSaysHeader({ score, onBack }: { score: number; onBack: () => void }) {
+  return (
+    <header className='flex justify-between items-center mb-6 max-w-5xl mx-auto w-full relative z-20'>
+      <button
+        onClick={onBack}
+        className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-bold text-text-secondary transition-colors shadow-[0_4px_0_#E5B86E]'
+      >
+        <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
+        </svg>
+        <span className='hidden sm:inline'>Back</span>
+      </button>
+      <h1 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight absolute left-1/2 -translate-x-1/2'>
+        Simon Says
+      </h1>
+      <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
+        <Star className='w-6 h-6 fill-amber-500' /> <span>{score}</span>
+      </div>
+    </header>
+  );
+}
+
+export function SimonHudOverlays({
+  isPlaying,
+  streak,
+  scorePopup,
+  showStreakMilestone,
+}: {
+  isPlaying: boolean;
+  streak: number;
+  scorePopup: { points: number } | null;
+  showStreakMilestone: boolean;
+}) {
+  return (
+    <>
+      {isPlaying && (
+        <div className='flex justify-center mb-4'>
+          <div className='flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]'>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <img
+                key={i}
+                src={streak >= (i + 1) * 2 ? '/assets/kenney/platformer/hud/hud_heart.png' : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
+                alt=''
+                className='w-7 h-7'
+              />
+            ))}
+            <span className='ml-2 text-base font-bold text-pink-500'>x{streak}</span>
+          </div>
+        </div>
+      )}
+      {scorePopup && (
+        <motion.div
+          initial={{ opacity: 0, y: 0, scale: 0.5 }}
+          animate={{ opacity: 1, y: -40, scale: 1.2 }}
+          exit={{ opacity: 0 }}
+          className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50'
+        >
+          <div className='text-5xl font-black text-green-500 drop-shadow-lg'>+{scorePopup.points}</div>
+        </motion.div>
+      )}
+      {showStreakMilestone && (
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1.2, rotate: 0 }}
+          exit={{ scale: 0 }}
+          className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
+        >
+          <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
+            🔥 {streak} Streak! 🔥
+          </div>
+        </motion.div>
+      )}
+    </>
+  );
+}
+
+export function SimonSaysCelebration({ showCelebration }: { showCelebration: boolean }) {
+  return (
+    <AnimatePresence>
+      {showCelebration && (
+        <motion.div
+          className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-lg'
+            initial={{ scale: 0.8, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.8, y: 20, opacity: 0 }}
+          >
+            <div className='w-24 h-24 mx-auto mb-6 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E]'>
+              <PartyPopper className='w-full h-full' strokeWidth={1.5} />
+            </div>
+            <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-4'>Great Pose!</h2>
+            <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
+              +100 Points
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+type SimonSaysPreGameProps = {
+  gameMode: SimonGameMode;
+  onSetMode: (mode: SimonGameMode) => void;
+  onStart: () => void;
+  onPlayPop: () => void;
+};
+
+export function SimonSaysPreGame({
+  gameMode,
+  onSetMode,
+  onStart,
+  onPlayPop,
+}: SimonSaysPreGameProps) {
+  return (
+    <motion.div
+      className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 md:p-16 shadow-[0_4px_0_#E5B86E] flex-1 flex flex-col items-center justify-center text-center'
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className='w-32 h-32 mb-8 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform mx-auto'>
+        <Brain className='w-full h-full' strokeWidth={1.5} />
+      </div>
+      <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>Simon Says!</h2>
+      <p className='text-text-secondary text-xl md:text-2xl font-bold mb-12 max-w-lg'>
+        Follow the instructions-but only if Simon says so!
+      </p>
+      <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
+        <h3 className='font-black text-advay-slate text-2xl mb-6'>How to Play:</h3>
+        <ul className='space-y-4 text-advay-slate font-bold text-lg'>
+          <li className='flex items-center gap-3'><Camera className='w-8 h-8 text-blue-500' /> Stand directly in front of your camera</li>
+          <li className='flex items-center gap-3'><Ear className='w-8 h-8 text-pink-500' /> Listen carefully to what Simon says</li>
+          <li className='flex items-center gap-3'><span className='inline-block w-8' /> Do the action with your whole body!</li>
+          <li className='flex items-center gap-3'><span className='inline-block w-8' /> Hold the pose steady to complete it</li>
+          {gameMode === 'combo' && (
+            <li className='flex items-center gap-3'><Hand className='w-8 h-8 text-purple-500' /> Also show the correct number of fingers!</li>
+          )}
+        </ul>
+      </div>
+      <div className='flex gap-4 w-full max-w-md mb-6'>
+        <button
+          onClick={() => {
+            onPlayPop();
+            onSetMode('classic');
+          }}
+          className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'classic'
+            ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
+            : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
+            }`}
+        >
+          Classic
+        </button>
+        <button
+          onClick={() => {
+            onPlayPop();
+            onSetMode('combo');
+          }}
+          className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'combo'
+            ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
+            : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
+            }`}
+        >
+          Combo
+        </button>
+      </div>
+      <button
+        onClick={onStart}
+        className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3'
+      >
+        Start Playing! <Gamepad2 className='w-8 h-8' />
+      </button>
+    </motion.div>
+  );
+}
+
+type SimonSaysPlayingProps = {
+  currentAction: BodyAction;
+  currentActionIndex: number;
+  gameMode: SimonGameMode;
+  targetFingers: number | null;
+  round: number;
+  matchProgress: number;
+  holdPercentage: number;
+  detectedFingers: number;
+  cameraReady: boolean;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  onStop: () => void;
+  onSkip: () => void;
+};
+
+export function SimonSaysPlaying({
+  currentAction,
+  currentActionIndex,
+  gameMode,
+  targetFingers,
+  round,
+  matchProgress,
+  holdPercentage,
+  detectedFingers,
+  cameraReady,
+  canvasRef,
+  onStop,
+  onSkip,
+}: SimonSaysPlayingProps) {
+  return (
+    <div className='flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 min-h-0'>
+      <motion.div
+        className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 shadow-[0_4px_0_#E5B86E] flex flex-col justify-center flex-1 lg:max-w-md'
+        key={currentActionIndex}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <div className='text-center mb-10'>
+          <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 w-28 h-28 mb-4 drop-shadow-[0_4px_0_#E5B86E] text-advay-slate'>
+            {currentAction.icon}
+          </div>
+          <div className='flex justify-center mb-4'>
+            <KenneyCharacter type='beige' animation={getCharacterAnimation(currentAction.name)} size='lg' />
+          </div>
+          <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>{currentAction.name}</h3>
+          <p className='text-xl font-bold text-text-secondary mb-4'>
+            {currentAction.instruction}
+            {gameMode === 'combo' && targetFingers !== null && (
+              <span className='block mt-2 text-purple-600 text-2xl'>...AND show me {targetFingers} fingers!</span>
+            )}
+          </p>
+          <div className='inline-block bg-slate-100 text-advay-slate font-bold px-4 py-2 rounded-full text-sm uppercase tracking-wider'>
+            Round {round}
+          </div>
+        </div>
+        <div className='space-y-6 mt-auto'>
+          <div>
+            <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
+              <span>Pose Accuracy</span>
+              <span className={matchProgress > 70 ? 'text-[#10B981]' : ''}>{Math.round(matchProgress)}%</span>
+            </div>
+            <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
+              <motion.div
+                className={`h-full rounded-full ${matchProgress > 70 ? 'bg-[#10B981]' : 'bg-[#3B82F6]'}`}
+                animate={{ width: `${matchProgress}%` }}
+                transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+              />
+            </div>
+          </div>
+          <div>
+            <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
+              <span>Hold Steady!</span>
+              <span className={holdPercentage >= 100 ? 'text-amber-500' : ''}>{Math.round(holdPercentage)}%</span>
+            </div>
+            <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
+              <motion.div
+                className='h-full bg-[#F59E0B] rounded-full'
+                animate={{ width: `${holdPercentage}%` }}
+                transition={{ type: 'tween', duration: 0.1 }}
+              />
+            </div>
+          </div>
+          {gameMode === 'combo' && targetFingers !== null && (
+            <div>
+              <div className='flex justify-between font-bold text-purple-600 mb-2 uppercase tracking-wide text-sm'>
+                <span>Fingers Required</span>
+                <span>{detectedFingers} / {targetFingers}</span>
+              </div>
+              <div className='h-6 bg-purple-100 rounded-full overflow-hidden border-2 border-purple-300/50 p-1'>
+                <motion.div
+                  className='h-full bg-purple-500 rounded-full'
+                  animate={{ width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%` }}
+                  transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
+        <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
+          <canvas ref={canvasRef} className='absolute inset-0 w-full h-full' width={640} height={360} />
+          <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
+            <span className='text-white font-bold text-sm tracking-wide flex items-center gap-2'>
+              {cameraReady ? <><Check className='w-4 h-4' /> Camera Active</> : <><Hourglass className='w-4 h-4' /> Warming up...</>}
+            </span>
+          </div>
+        </div>
+
+        <div className='flex gap-4'>
+          <button
+            onClick={onStop}
+            className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-text-secondary shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
+          >
+            Stop Playing
+          </button>
+          <button
+            onClick={onSkip}
+            className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg flex items-center justify-center gap-2'
+          >
+            Skip Pose <SkipForward className='w-5 h-5' />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const SimonSaysContent = memo(function SimonSays() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const animationRef = useRef<number>(0);
   const { onGameComplete, triggerEasterEgg } = useGameDrops('simon-says');
+  useGameProgress('simon-says');
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -498,412 +831,60 @@ export const SimonSays = memo(function SimonSays() {
 
   return (
     <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 flex flex-col font-sans'>
-      {/* Header */}
-      <header className='flex justify-between items-center mb-6 max-w-5xl mx-auto w-full relative z-20'>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className='flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-bold text-text-secondary transition-colors shadow-[0_4px_0_#E5B86E]'
-        >
-          <svg
-            className='w-5 h-5'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={3}
-              d='M10 19l-7-7m0 0l7-7m-7 7h18'
-            />
-          </svg>
-          <span className='hidden sm:inline'>Back</span>
-        </button>
-
-        <h1 className='text-3xl md:text-4xl font-black text-advay-slate tracking-tight absolute left-1/2 -translate-x-1/2'>
-          Simon Says
-        </h1>
-
-        <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
-          <Star className='w-6 h-6 fill-amber-500' /> <span>{score}</span>
-        </div>
-      </header>
-
-      {/* Kenney Heart HUD */}
-      {isPlaying && (
-        <div className="flex justify-center mb-4">
-          <div className="flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <img
-                key={i}
-                src={streak >= (i + 1) * 2
-                  ? '/assets/kenney/platformer/hud/hud_heart.png'
-                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                alt=""
-                className="w-7 h-7"
-              />
-            ))}
-            <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Score Popup Animation */}
-      {scorePopup && (
-        <motion.div
-          initial={{ opacity: 0, y: 0, scale: 0.5 }}
-          animate={{ opacity: 1, y: -40, scale: 1.2 }}
-          exit={{ opacity: 0 }}
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
-        >
-          <div className="text-5xl font-black text-green-500 drop-shadow-lg">
-            +{scorePopup.points}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Streak Milestone */}
-      {showStreakMilestone && (
-        <motion.div
-          initial={{ scale: 0, rotate: -20 }}
-          animate={{ scale: 1.2, rotate: 0 }}
-          exit={{ scale: 0 }}
-          className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
-        >
-          <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
-            🔥 {streak} Streak! 🔥
-          </div>
-        </motion.div>
-      )}
-
+      <SimonSaysHeader score={score} onBack={() => navigate('/dashboard')} />
+      <SimonHudOverlays
+        isPlaying={isPlaying}
+        streak={streak}
+        scorePopup={scorePopup}
+        showStreakMilestone={showStreakMilestone}
+      />
       <div className='max-w-5xl mx-auto w-full flex-1 flex flex-col'>
-        {!isPlaying ? (
-          <motion.div
-            className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 md:p-16 shadow-[0_4px_0_#E5B86E] flex-1 flex flex-col items-center justify-center text-center'
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className='w-32 h-32 mb-8 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform mx-auto'>
-              <Brain className='w-full h-full' strokeWidth={1.5} />
-            </div>
-            <h2 className='text-4xl md:text-5xl font-black text-[#10B981] tracking-tight mb-4'>
-              Simon Says!
-            </h2>
-            <p className='text-text-secondary text-xl md:text-2xl font-bold mb-12 max-w-lg'>
-              Follow the instructions—but only if Simon says so!
-            </p>
-
-            <div className='bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-8 mb-12 max-w-2xl w-full text-left'>
-              <h3 className='font-black text-advay-slate text-2xl mb-6'>
-                How to Play:
-              </h3>
-              <ul className='space-y-4 text-advay-slate font-bold text-lg'>
-                <li className='flex items-center gap-3'>
-                  <Camera className='w-8 h-8 text-blue-500' /> Stand directly in
-                  front of your camera
-                </li>
-                <li className='flex items-center gap-3'>
-                  <Ear className='w-8 h-8 text-pink-500' /> Listen carefully to
-                  what Simon says
-                </li>
-                <li className='flex items-center gap-3'>
-                  <div className='w-8 h-8 flex items-center justify-center'>
-                    <svg
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2'
-                      className='w-7 h-7 text-green-500'
-                    >
-                      <path
-                        d='M4 16v-4M8 14v-2M12 12V8M16 10V6M20 8V4'
-                        strokeLinecap='round'
-                      />
-                      <circle cx='12' cy='18' r='2' />
-                    </svg>
-                  </div>{' '}
-                  Do the action with your whole body!
-                </li>
-                <li className='flex items-center gap-3'>
-                  <div className='w-8 h-8 flex items-center justify-center'>
-                    <svg
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2'
-                      className='w-7 h-7 text-amber-500'
-                    >
-                      <rect x='6' y='4' width='12' height='16' rx='2' />
-                      <path d='M10 8v8M14 8v8' />
-                    </svg>
-                  </div>{' '}
-                  Hold the pose steady to complete it
-                </li>
-                {gameMode === 'combo' && (
-                  <li className='flex items-center gap-3'>
-                    <Hand className='w-8 h-8 text-purple-500' /> Also show the
-                    correct number of fingers!
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            <div className='flex gap-4 w-full max-w-md mb-6'>
-              <button
-                onClick={() => {
-                  playPop();
-                  setGameMode('classic');
-                }}
-                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'classic'
-                    ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-md transform scale-105'
-                    : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:bg-slate-50'
-                  }`}
-              >
-                <span className='text-3xl block mb-2 flex justify-center'>
-                  <div className='w-10 h-10'>
-                    <svg
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2'
-                      className='w-full h-full'
-                    >
-                      <circle cx='12' cy='6' r='3' />
-                      <path
-                        d='M8 10v10M16 10v10M8 14h8'
-                        strokeLinecap='round'
-                      />
-                    </svg>
-                  </div>
-                </span>
-                Classic
-              </button>
-              <button
-                onClick={() => {
-                  playPop();
-                  setGameMode('combo');
-                }}
-                className={`flex-1 py-4 px-6 rounded-[2rem] border-4 font-black text-xl transition-all ${gameMode === 'combo'
-                    ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-md transform scale-105'
-                    : 'bg-white border-slate-200 text-slate-500 hover:border-purple-300 hover:bg-slate-50'
-                  }`}
-              >
-                <span className='text-3xl block mb-2 flex justify-center'>
-                  <Hand className='w-10 h-10' />
-                </span>
-                Combo
-              </button>
-            </div>
-
-            <button
-              onClick={startGame}
-              className='w-full max-w-md py-6 bg-[#3B82F6] hover:bg-blue-600 border-3 border-blue-200 hover:border-blue-300 text-white text-2xl font-black rounded-[2rem] shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3'
-            >
-              Start Playing! <Gamepad2 className='w-8 h-8' />
-            </button>
-          </motion.div>
+        {isPlaying ? (
+          <SimonSaysPlaying
+            currentAction={currentAction}
+            currentActionIndex={currentActionIndex}
+            gameMode={gameMode}
+            targetFingers={targetFingers}
+            round={round}
+            matchProgress={matchProgress}
+            holdPercentage={(holdTimeRef.current / HOLD_DURATION) * 100}
+            detectedFingers={detectedFingers}
+            cameraReady={cameraReady}
+            canvasRef={canvasRef}
+            onStop={stopGame}
+            onSkip={() => {
+              playPop();
+              setCurrentActionIndex((i: number) => (i + 1) % BODY_ACTIONS.length);
+              if (gameMode === 'combo') {
+                setTargetFingers(Math.floor(Math.random() * 5) + 1);
+              }
+              holdTimeRef.current = 0;
+            }}
+          />
         ) : (
-          <div className='flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 min-h-0'>
-            {/* Left Column: Instructions */}
-            <motion.div
-              className='bg-white rounded-[2.5rem] border-3 border-[#F2CC8F] p-8 shadow-[0_4px_0_#E5B86E] flex flex-col justify-center flex-1 lg:max-w-md'
-              key={currentActionIndex}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className='text-center mb-10'>
-                <div className='inline-block bg-[#FFF8F0] border-3 border-[#F2CC8F] rounded-[2rem] p-6 w-28 h-28 mb-4 drop-shadow-[0_4px_0_#E5B86E] text-advay-slate'>
-                  {currentAction.icon}
-                </div>
-                {/* Kenney Character Demonstration */}
-                <div className='flex justify-center mb-4'>
-                  <KenneyCharacter
-                    type='beige'
-                    animation={
-                      currentAction.name === 'Arms Up'
-                        ? 'climb'
-                        : currentAction.name === 'Touch Head'
-                          ? 'duck'
-                          : currentAction.name === 'Wave'
-                            ? 'walk'
-                            : currentAction.name === 'Hands On Hips'
-                              ? 'idle'
-                              : currentAction.name === 'T-Rex Arms'
-                                ? 'hit'
-                                : currentAction.name === 'Touch Shoulders'
-                                  ? 'jump'
-                                  : 'idle'
-                    }
-                    size='lg'
-                  />
-                </div>
-                <h3 className='text-4xl font-black text-advay-slate tracking-tight mb-4'>
-                  {currentAction.name}
-                </h3>
-                <p className='text-xl font-bold text-text-secondary mb-4'>
-                  {currentAction.instruction}
-                  {gameMode === 'combo' && targetFingers !== null && (
-                    <span className='block mt-2 text-purple-600 text-2xl'>
-                      ...AND show me {targetFingers} fingers!
-                    </span>
-                  )}
-                </p>
-                <div className='inline-block bg-slate-100 text-advay-slate font-bold px-4 py-2 rounded-full text-sm uppercase tracking-wider'>
-                  Round {round}
-                </div>
-              </div>
-
-              {/* Progress Bars */}
-              <div className='space-y-6 mt-auto'>
-                <div>
-                  <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
-                    <span>Pose Accuracy</span>
-                    <span
-                      className={matchProgress > 70 ? 'text-[#10B981]' : ''}
-                    >
-                      {Math.round(matchProgress)}%
-                    </span>
-                  </div>
-                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
-                    <motion.div
-                      className={`h-full rounded-full ${matchProgress > 70 ? 'bg-[#10B981]' : 'bg-[#3B82F6]'}`}
-                      animate={{ width: `${matchProgress}%` }}
-                      transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className='flex justify-between font-bold text-text-secondary mb-2 uppercase tracking-wide text-sm'>
-                    <span>Hold Steady!</span>
-                    <span
-                      className={
-                        holdTimeRef.current / HOLD_DURATION >= 1
-                          ? 'text-amber-500'
-                          : ''
-                      }
-                    >
-                      {Math.round((holdTimeRef.current / HOLD_DURATION) * 100)}%
-                    </span>
-                  </div>
-                  <div className='h-6 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]/50 p-1'>
-                    <motion.div
-                      className='h-full bg-[#F59E0B] rounded-full'
-                      animate={{
-                        width: `${(holdTimeRef.current / HOLD_DURATION) * 100}%`,
-                      }}
-                      transition={{ type: 'tween', duration: 0.1 }}
-                    />
-                  </div>
-                </div>
-
-                {gameMode === 'combo' && targetFingers !== null && (
-                  <div>
-                    <div className='flex justify-between font-bold text-purple-600 mb-2 uppercase tracking-wide text-sm'>
-                      <span>Fingers Required</span>
-                      <span>
-                        {detectedFingers} / {targetFingers}
-                      </span>
-                    </div>
-                    <div className='h-6 bg-purple-100 rounded-full overflow-hidden border-2 border-purple-300/50 p-1'>
-                      <motion.div
-                        className='h-full bg-purple-500 rounded-full'
-                        animate={{
-                          width: `${Math.min((detectedFingers / targetFingers) * 100, 100)}%`,
-                        }}
-                        transition={{
-                          type: 'spring',
-                          bounce: 0,
-                          duration: 0.3,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Right Column: Camera & Controls */}
-            <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
-              <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
-                <canvas
-                  ref={canvasRef}
-                  className='absolute inset-0 w-full h-full'
-                  width={640}
-                  height={360}
-                />
-                <div className='absolute top-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20'>
-                  <span className='text-white font-bold text-sm tracking-wide flex items-center gap-2'>
-                    {cameraReady ? (
-                      <>
-                        <Check className='w-4 h-4' /> Camera Active
-                      </>
-                    ) : (
-                      <>
-                        <Hourglass className='w-4 h-4' /> Warming up...
-                      </>
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              <div className='flex gap-4'>
-                <button
-                  onClick={stopGame}
-                  className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-text-secondary shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg'
-                >
-                  Stop Playing
-                </button>
-                <button
-                  onClick={() => {
-                    playPop();
-                    setCurrentActionIndex(
-                      (i: number) => (i + 1) % BODY_ACTIONS.length,
-                    );
-                    if (gameMode === 'combo') {
-                      setTargetFingers(Math.floor(Math.random() * 5) + 1);
-                    }
-                    holdTimeRef.current = 0;
-                  }}
-                  className='flex-1 py-4 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-200 hover:border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-[1.02] active:scale-95 text-lg flex items-center justify-center gap-2'
-                >
-                  Skip Pose <SkipForward className='w-5 h-5' />
-                </button>
-              </div>
-            </div>
-          </div>
+          <SimonSaysPreGame
+            gameMode={gameMode}
+            onSetMode={setGameMode}
+            onStart={startGame}
+            onPlayPop={playPop}
+          />
         )}
-
-        {/* Celebration Overlay */}
-        <AnimatePresence>
-          {showCelebration && (
-            <motion.div
-              className='fixed inset-0 bg-[#FFF8F0]/80 backdrop-blur-md flex items-center justify-center z-50'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                className='bg-white border-3 border-[#F2CC8F] rounded-[3rem] p-12 text-center max-w-md w-[90%] shadow-lg'
-                initial={{ scale: 0.8, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.8, y: 20, opacity: 0 }}
-              >
-                <div className='w-24 h-24 mx-auto mb-6 text-[#10B981] drop-shadow-[0_4px_0_#E5B86E]'>
-                  <PartyPopper className='w-full h-full' strokeWidth={1.5} />
-                </div>
-                <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-4'>
-                  Great Pose!
-                </h2>
-                <div className='inline-block bg-amber-50 border-3 border-amber-100 text-amber-500 text-2xl font-black rounded-full px-8 py-3'>
-                  +100 Points
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <SimonSaysCelebration showCelebration={showCelebration} />
       </div>
     </div>
+  );
+});
+
+export const SimonSays = memo(function SimonSaysShell() {
+  return (
+    <GameShell
+      gameId="simon-says"
+      gameName="Simon Says"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <SimonSaysContent />
+    </GameShell>
   );
 });
 

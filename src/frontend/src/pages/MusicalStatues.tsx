@@ -23,6 +23,7 @@ import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -37,9 +38,11 @@ import {
 } from '../games/musicalStatuesLogic';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
-export const MusicalStatues = memo(function MusicalStatues() {
+const MusicalStatuesContent = memo(function MusicalStatues() {
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('musical-statues');
+  // saveProgress returned by hook isn't used in this game yet, so omit it to avoid
+  // an unused variable error.
   const { playClick } = useAudio();
 
   // ===== GAME STATE =====
@@ -467,6 +470,19 @@ export const MusicalStatues = memo(function MusicalStatues() {
         message="Great Dancing!"
       />
     </GameContainer>
+  );
+});
+
+export const MusicalStatues = memo(function MusicalStatuesShell() {
+  return (
+    <GameShell
+      gameId="musical-statues"
+      gameName="Musical Statues"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <MusicalStatuesContent />
+    </GameShell>
   );
 });
 

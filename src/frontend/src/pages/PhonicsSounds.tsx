@@ -9,7 +9,9 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -35,7 +37,7 @@ const CARD_COLORS = [
   '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
 ];
 
-export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
+const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const webcamRef = useRef<Webcam>(null);
@@ -68,12 +70,14 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   const streakRef = useRef(streak);
   const roundRef = useRef(round);
   const levelRef = useRef(level);
+  const scoreRef = useRef(score);
   const correctCountRef = useRef(correctCount);
   const usedLettersRef = useRef<string[]>(usedLetters);
 
   const { playPop, playError, playSuccess, playCelebration, playClick, playLevelUp } = useAudio();
-  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { speak, speakLetter, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('phonics-sounds');
+  const { saveProgress } = useGameProgress('phonics-sounds');
   const correctVowelsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -95,12 +99,13 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
   useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
   useEffect(() => { usedLettersRef.current = usedLetters; }, [usedLetters]);
 
-  // Speak the phoneme using TTS
+  // Speak the phoneme using pre-generated audio (Tier 1) when available,
+  // falling back to TTS speak() for Tier 2/3.
   const speakPhoneme = useCallback((phoneme: Phoneme) => {
     if (ttsEnabled) {
-      void speak(phoneme.ttsText);
+      void speakLetter(phoneme.letter, phoneme.ttsText);
     }
-  }, [speak, ttsEnabled]);
+  }, [speakLetter, ttsEnabled]);
 
   const startRound = useCallback(() => {
     if (isAdvancingRef.current) return;
@@ -174,10 +179,11 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         }
 
         if (levelTimeoutRef.current) clearTimeout(levelTimeoutRef.current);
-        levelTimeoutRef.current = setTimeout(() => {
+        levelTimeoutRef.current = setTimeout(async () => {
           setShowCelebration(false);
           if (levelRef.current >= MAX_LEVEL) {
             onGameComplete();
+            await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
             setGameCompleted(true);
             setIsPlaying(false);
           } else {
@@ -297,7 +303,7 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         }
       }
     },
-    [cursor, nextRound, playCelebration, playError, playPop, targetPhoneme, speakPhoneme, speak, ttsEnabled],
+    [cursor, nextRound, playCelebration, playError, playPop, targetPhoneme, speakPhoneme, speak, speakLetter, ttsEnabled],
   );
 
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
@@ -622,6 +628,19 @@ export const PhonicsSounds = memo(function PhonicsSoundsComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const PhonicsSounds = memo(function PhonicsSoundsShell() {
+  return (
+    <GameShell
+      gameId="phonics-sounds"
+      gameName="Phonics Sounds"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <PhonicsSoundsContent />
+    </GameShell>
   );
 });
 

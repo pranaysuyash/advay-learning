@@ -15,6 +15,8 @@
  * - Mouse/touch fallback for non-CV
  */
 
+import { recordCVError } from '../analytics/extensions/countingCollectathon';
+
 export type ItemType = 'star' | 'coin' | 'gem';
 
 export interface FallingItem {
@@ -148,11 +150,10 @@ export function updatePlayerPosition(
 
   // NaN/Infinity validation: silently reject invalid input but log for debugging
   // RATIONALE: CV pipeline can produce invalid values; we don't want to crash
-  // DECISION-2026-03-08: Using console.warn (not telemetry) to avoid test complexity
-  // REVISIT: Add structured telemetry when analytics system stabilizes
+  // DECISION-2026-03-08: Using recordCVError for telemetry + console.warn fallback
+  // NOTE: recordCVError handles "no active session" gracefully
   if (!Number.isFinite(handX)) {
-    // eslint-disable-next-line no-console
-    console.warn('[CountingCollectathon] Invalid handX received:', handX);
+    recordCVError('handX', handX);
     return state; // Preserve last valid position
   }
 

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -8,7 +9,7 @@ import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateQuestion, calculateScore, type CompareQuestion } from '../games/moreOrLessLogic';
 import { triggerHaptic } from '../utils/haptics';
 
-export function MoreOrLess() {
+function MoreOrLessContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [question, setQuestion] = useState<CompareQuestion | null>(null);
@@ -289,3 +290,16 @@ export function MoreOrLess() {
     </GameContainer>
   );
 }
+
+export const MoreOrLess = () => (
+  <GameShell
+    gameId="more-or-less"
+    gameName="More or Less"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <MoreOrLessContent />
+  </GameShell>
+);
+
+export default MoreOrLess;

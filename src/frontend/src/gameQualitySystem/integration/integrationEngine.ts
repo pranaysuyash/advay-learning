@@ -18,6 +18,8 @@ export interface UnifiedPriorityEntry {
     auditScore: number;
     catalogPriority: number;
     priorityLevel: string;
+    educationalImpact?: number;
+    implementationEffort?: number;
 }
 
 export class IntegrationEngine {
@@ -83,6 +85,8 @@ export class IntegrationEngine {
                 auditScore: report.totalScore,
                 catalogPriority: this.priorityToScore(catalogEntry.priority),
                 priorityLevel: priorityScore.priorityLevel,
+                educationalImpact: priorityScore.educationalImpact,
+                implementationEffort: priorityScore.implementationEffort,
             });
         }
 

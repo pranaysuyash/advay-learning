@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { triggerHaptic } from '../utils/haptics';
@@ -73,7 +74,7 @@ function laneFromOffset(offset: number) {
   return 1;
 }
 
-export const ObstacleCourse = memo(function ObstacleCourse() {
+const ObstacleCourseContent = memo(function ObstacleCourse() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
@@ -109,6 +110,7 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
   const { playClick, playError, playLevelUp, playCelebration, playSuccess } =
     useAudio();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('obstacle-course');
+  // saveProgress not used at present; remove to avoid unused variable error
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -933,6 +935,19 @@ export const ObstacleCourse = memo(function ObstacleCourse() {
         </div>
       )}
     </GameContainer>
+  );
+});
+
+export const ObstacleCourse = memo(function ObstacleCourseShell() {
+  return (
+    <GameShell
+      gameId="obstacle-course"
+      gameName="Obstacle Course"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ObstacleCourseContent />
+    </GameShell>
   );
 });
 

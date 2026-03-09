@@ -7,8 +7,10 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -63,7 +65,7 @@ const PHONICS_STAGES: { id: string; label: string }[] = [
 
 const SETTINGS_HOLD_MS = 900;
 
-export const WordBuilder = memo(function WordBuilderComponent() {
+const WordBuilderContent = memo(function WordBuilderComponent() {
   const navigate = useNavigate();
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -109,6 +111,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const wordRef = useRef(word);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
+  const scoreRef = useRef(score);
   const gameModeRef = useRef<WordBuilderMode>(gameMode);
   const phonicsStageIdRef = useRef<string>(phonicsStageId);
   const autoAdvanceRef = useRef<boolean>(autoAdvance);
@@ -118,6 +121,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('word-builder');
+  const { saveProgress } = useGameProgress('word-builder');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -134,6 +138,9 @@ export const WordBuilder = memo(function WordBuilderComponent() {
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
   useEffect(() => {
     gameModeRef.current = gameMode;
   }, [gameMode]);
@@ -308,12 +315,13 @@ export const WordBuilder = memo(function WordBuilderComponent() {
     }
 
     // Slower pacing for kids - 3 seconds instead of 1.8s
-    levelTimeoutRef.current = setTimeout(() => {
+    levelTimeoutRef.current = setTimeout(async () => {
       setShowCelebration(false);
 
       if (mode === 'explore') {
         if (levelRef.current >= MAX_LEVEL) {
           onGameComplete();
+          await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
           setGameCompleted(true);
           setIsPlaying(false);
         } else {
@@ -345,7 +353,7 @@ export const WordBuilder = memo(function WordBuilderComponent() {
 
       levelTimeoutRef.current = null;
     }, 3000);
-  }, [playCelebration, onGameComplete, startNewWord, ttsEnabled, speak]);
+  }, [playCelebration, onGameComplete, startNewWord, ttsEnabled, speak, saveProgress]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -1002,6 +1010,19 @@ export const WordBuilder = memo(function WordBuilderComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const WordBuilder = memo(function WordBuilderShell() {
+  return (
+    <GameShell
+      gameId="word-builder"
+      gameName="Word Builder"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <WordBuilderContent />
+    </GameShell>
   );
 });
 

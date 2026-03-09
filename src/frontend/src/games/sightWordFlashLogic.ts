@@ -14,7 +14,7 @@ export interface LevelConfig {
   wordCount: number;
 }
 
-const SIGHT_WORDS: SightWord[] = [
+export const SIGHT_WORDS: SightWord[] = [
   { word: 'the', difficulty: 1 },
   { word: 'is', difficulty: 1 },
   { word: 'it', difficulty: 1 },
@@ -81,7 +81,16 @@ export function getLevelConfig(level: number): LevelConfig {
 
 export function getWordsForLevel(level: number): SightWord[] {
   const config = getLevelConfig(level);
-  const filtered = SIGHT_WORDS.filter(w => w.difficulty <= level);
-  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, config.wordCount);
+  const allowed = SIGHT_WORDS.filter(w => w.difficulty <= level);
+  const exactDifficulty = SIGHT_WORDS.filter(w => w.difficulty === level);
+  const shuffledAllowed = [...allowed].sort(() => Math.random() - 0.5);
+
+  // Keep progression visible: include at least one current-level word when possible.
+  if (exactDifficulty.length === 0 || config.wordCount <= 0) {
+    return shuffledAllowed.slice(0, config.wordCount);
+  }
+
+  const featured = exactDifficulty[Math.floor(Math.random() * exactDifficulty.length)];
+  const remainder = shuffledAllowed.filter(w => w.word !== featured.word || w.difficulty !== featured.difficulty);
+  return [featured, ...remainder].slice(0, config.wordCount);
 }

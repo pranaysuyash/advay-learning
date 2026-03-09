@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { triggerHaptic } from '../utils/haptics';
@@ -8,7 +9,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, createPath, isOnPath, type PathPoint } from '../games/pathFollowingLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
-export function PathFollowing() {
+function PathFollowingContent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [path, setPath] = useState<PathPoint[]>([]);
@@ -282,3 +283,16 @@ export function PathFollowing() {
     </GameContainer>
   );
 }
+
+export const PathFollowing = () => (
+  <GameShell
+    gameId="path-following"
+    gameName="Path Following"
+    showWellnessTimer={true}
+    enableErrorBoundary={true}
+  >
+    <PathFollowingContent />
+  </GameShell>
+);
+
+export default PathFollowing;

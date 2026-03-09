@@ -5,7 +5,7 @@
  * and collision detection.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   createInitialState,
   startGame,
@@ -22,6 +22,14 @@ import {
   type GameState,
   type ItemType,
 } from '../countingCollectathonLogic';
+import * as analyticsExtension from '../../analytics/extensions/countingCollectathon';
+
+// Mock the analytics extension
+// DECISION-2026-03-08: Using vi.mock for recordCVError
+// RATIONALE: Module-level function with side effects (telemetry)
+vi.mock('../../analytics/extensions/countingCollectathon', () => ({
+  recordCVError: vi.fn(),
+}));
 
 describe('CountingCollectathon Logic - Initial State', () => {
   it('should create initial state with correct defaults', () => {
@@ -131,6 +139,23 @@ describe('CountingCollectathon Logic - Player Movement', () => {
     const newState = updatePlayerPosition(state, -Infinity, DEFAULT_CONFIG);
 
     expect(newState.playerX).toBe(100); // Unchanged
+  });
+
+  it('should log CV error via telemetry when NaN input received', () => {
+    // DECISION-2026-03-08: Testing telemetry integration
+    // RATIONALE: Verify recordCVError is called for invalid input
+    const state = createInitialState();
+    state.status = 'PLAYING';
+    
+    // Clear any previous calls
+    vi.mocked(analyticsExtension.recordCVError).mockClear();
+    
+    // Act: Trigger NaN validation
+    updatePlayerPosition(state, NaN, DEFAULT_CONFIG);
+    
+    // Assert: Verify telemetry was called
+    expect(analyticsExtension.recordCVError).toHaveBeenCalledTimes(1);
+    expect(analyticsExtension.recordCVError).toHaveBeenCalledWith('handX', NaN);
   });
 });
 

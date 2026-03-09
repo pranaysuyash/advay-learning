@@ -609,11 +609,14 @@ export function Settings() {
 
                     <div className="pt-6 border-t-4 border-[#F2CC8F] space-y-4">
                       <div className='bg-slate-50 rounded-[1.5rem] p-5 mb-4 border-4 border-[#F2CC8F]'>
-                        <div className='text-sm font-black uppercase tracking-widest text-slate-400 mb-2'>Alphabet System</div>
+                        <div className='text-sm font-black uppercase tracking-widest text-slate-400 mb-2'>Letters Explored</div>
                         <div className='text-advay-slate flex items-baseline gap-2'>
                           <span className='font-black text-3xl'>{getMasteredLettersCount(settings.language)}</span>
-                          <span className="text-text-secondary font-bold text-lg">/ {getAlphabet(settings.language).letters.length} Mastered</span>
+                          <span className="text-text-secondary font-bold text-lg">/ {getAlphabet(settings.language).letters.length} Played With</span>
                         </div>
+                        <p className="text-xs text-text-secondary mt-2">
+                          Every letter is always available to explore. No pressure, just play!
+                        </p>
                       </div>
 
                       <Button
@@ -639,14 +642,14 @@ export function Settings() {
                         className="w-full text-lg font-black text-red-500 bg-red-50 border-4 border-red-200 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
                         onClick={async () => {
                           if (await confirm({
-                            title: 'Erase Curriculum Progress?',
-                            message: 'This irrevocably resets all tracked mastery. Proceed cautiously.',
-                            confirmText: 'Erase Progress',
+                            title: 'Reset Play History?',
+                            message: 'This clears your letter play history. All letters will still be available to explore!',
+                            confirmText: 'Reset History',
                             cancelText: 'Cancel',
                             type: 'danger',
                           })) {
                             resetProgress(settings.language);
-                            showToast('Curriculum progress reset', 'success');
+                            showToast('Play history reset - fresh start!', 'success');
                           }
                         }}
                       >

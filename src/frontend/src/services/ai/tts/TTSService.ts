@@ -103,8 +103,10 @@ export class TTSService {
 
     // Preload pre-generated audio cache (Tier 1). Skip in unit tests to reduce
     // noise and avoid media setup work in jsdom.
+    // preloadAll() is now async (fetches manifest.json) but we fire-and-forget
+    // since the cache degrades gracefully to Tier 2/3 until ready.
     if (typeof window !== 'undefined' && !this.isTestEnv) {
-      PregenAudioCache.preloadAll();
+      void PregenAudioCache.preloadAll('en');
     }
   }
 
@@ -243,17 +245,15 @@ export class TTSService {
     const mergedOptions = { ...this.defaultOptions, ...options };
     const effectiveVolume = Math.min(mergedOptions.volume ?? 1.0, this.volume);
 
-    // Tier 1: Pre-generated audio (instant, highest quality)
-    if (PregenAudioCache.has(text)) {
-      this._lastActiveEngine = 'pregen';
-      console.log('[TTSService] Engine: pregen');
-      return PregenAudioCache.play(text, effectiveVolume).catch((err) => {
-        console.warn('[TTSService] Pregen playback failed, falling back:', err);
-        return this.speakWithFallback(text, mergedOptions);
-      });
-    }
-
-    return this.speakWithFallback(text, mergedOptions);
+    // Always attempt pre-generated audio first (Tier 1).
+    // PregenAudioCache.play() rejects immediately if the text is not in the
+    // manifest, so we fall through to Tier 2/3 with no extra latency.
+    return PregenAudioCache.play(text, effectiveVolume)
+      .then(() => {
+        this._lastActiveEngine = 'pregen';
+        console.log('[TTSService] Engine: pregen');
+      })
+      .catch(() => this.speakWithFallback(text, mergedOptions));
   }
 
   /**
@@ -296,6 +296,21 @@ export class TTSService {
   speakInLanguage(text: string, languageCode: string): Promise<void> {
     const lang = LANGUAGE_VOICE_MAP[languageCode] || 'en-US';
     return this.speak(text, { lang });
+  }
+
+  /**
+   * Speak a phoneme letter using pre-generated audio when available.
+   * Falls back to speak(ttsText) via Tier 2/3 if not pre-generated.
+   *
+   * @param letter  - Letter or blend (e.g. 'A', 'BL')
+   * @param ttsText - The rich description text (e.g. 'Ah! Like in Apple!')
+   *                  Passed as fallback for Tier 2/3 if no pre-gen file exists.
+   */
+  speakLetter(_letter: string, ttsText: string): Promise<void> {
+    if (!this.enabled) return Promise.resolve();
+    this.stop();
+    // ttsText is the primary key in the manifest (e.g. "Ah! Like in Apple!")
+    return this.speak(ttsText);
   }
 
   stop(): void {

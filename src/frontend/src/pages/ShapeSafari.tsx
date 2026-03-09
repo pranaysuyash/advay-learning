@@ -44,6 +44,7 @@ import {
   getShapeDisplayName,
   getProgress,
   calculateFinalScore,
+  markShapeFound,
 } from '../games/shapeSafariLogic';
 
 export const ShapeSafari = memo(function ShapeSafari() {
@@ -259,20 +260,17 @@ export const ShapeSafari = memo(function ShapeSafari() {
     );
 
     if (isComplete) {
-      // Mark shape as found
-      const updatedShapes = gameState.currentScene!.shapes.map(s =>
-        s.id === activeShape.id ? { ...s, isFound: true } : s
-      );
+      // Use centralized markShapeFound function
+      // DECISION-2026-03-08: Replaced manual state update with markShapeFound
+      // RATIONALE: Ensures completed flag is set, score calculated consistently
+      const newGameState = markShapeFound(gameState, activeShape.id);
 
-      const updatedScene = { ...gameState.currentScene!, shapes: updatedShapes };
-      const newFoundShapes = new Set(gameState.foundShapes);
-      newFoundShapes.add(activeShape.id);
-
-      // Build streak
+      // Build streak (separate from game logic - UI enhancement)
       const newStreak = streak + 1;
       setStreak(newStreak);
       
-      // Calculate score with streak bonus
+      // Calculate score popup with streak bonus
+      // Note: Actual score is calculated by markShapeFound, this is just for UI feedback
       const basePoints = 15;
       const streakBonus = Math.min(newStreak * 3, 15);
       const totalPoints = basePoints + streakBonus;
@@ -291,12 +289,7 @@ export const ShapeSafari = memo(function ShapeSafari() {
         setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
       }
 
-      setGameState({
-        ...gameState,
-        currentScene: updatedScene,
-        foundShapes: newFoundShapes,
-        score: (gameState.score || 0) + totalPoints,
-      });
+      setGameState(newGameState);
 
       // Show found object with sound and TTS
       playSuccess();
@@ -310,8 +303,8 @@ export const ShapeSafari = memo(function ShapeSafari() {
       lastFoundTimeRef.current = Date.now();
       setTimeout(() => setFoundObject(null), 2000);
 
-      // Check if all shapes found
-      const allFound = updatedShapes.every(s => s.isFound);
+      // Check if all shapes found (using new game state)
+      const allFound = newGameState.currentScene?.shapes.every(s => s.isFound);
       if (allFound) {
         handleGameComplete();
       }
@@ -423,7 +416,9 @@ export const ShapeSafari = memo(function ShapeSafari() {
   const handleNextScene = () => {
     playClick();
     const nextScene = getRandomScene();
-    startGame(nextScene.id);
+    if (nextScene) {
+      startGame(nextScene.id);
+    }
   };
 
   const handleShowMenu = () => {

@@ -7,8 +7,10 @@ import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
@@ -28,7 +30,7 @@ interface SequenceTarget {
 }
 
 const SHAPES = ['◯', '□', '△', '◇', '☆', '✦'] as const;
-const HIT_RADIUS = 0.1;
+const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
 const MAX_LEVEL = 6;
 
 function createSequenceRound(level: number): {
@@ -56,7 +58,7 @@ function createSequenceRound(level: number): {
   };
 }
 
-export const ShapeSequence = memo(function ShapeSequenceComponent() {
+export const ShapeSequenceContent = memo(function ShapeSequenceComponent() {
   const navigate = useNavigate();
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,7 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
   } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('shape-sequence');
+  useGameProgress('shape-sequence');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -550,6 +553,19 @@ export const ShapeSequence = memo(function ShapeSequenceComponent() {
         />
       )}
     </GameContainer>
+  );
+});
+
+export const ShapeSequence = memo(function ShapeSequenceShell() {
+  return (
+    <GameShell
+      gameId="shape-sequence"
+      gameName="Shape Sequence"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <ShapeSequenceContent />
+    </GameShell>
   );
 });
 
