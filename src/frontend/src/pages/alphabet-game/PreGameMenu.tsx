@@ -8,6 +8,7 @@ import { LanguageFlag } from '../../components/ui/LanguageFlag';
 import { getAllIcons } from '../../utils/iconUtils';
 import { BATCH_SIZE } from '../../store';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LANGUAGES = [
   { code: 'en', name: 'English' },
   { code: 'hi', name: 'Hindi' },

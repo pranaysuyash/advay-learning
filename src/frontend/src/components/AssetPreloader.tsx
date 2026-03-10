@@ -33,6 +33,7 @@ interface LoadingState {
 /**
  * Critical assets that should be preloaded for all games
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const CRITICAL_ASSETS: AssetToPreload[] = [
   // HUD Elements
   { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
@@ -240,6 +241,7 @@ export function AssetPreloader({
 /**
  * useAssetPreloader - Hook for preloading assets outside of component tree
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAssetPreloader() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
