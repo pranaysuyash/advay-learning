@@ -47,6 +47,7 @@ export interface GameState {
   player: Player;
   timeLeft: number;
   problemsSolved: number;
+  correctAnswers: number;
   totalProblems: number;
 }
 
@@ -234,6 +235,7 @@ export function createInitialState(config: GameConfig = DEFAULT_CONFIG): GameSta
     },
     timeLeft: config.timePerProblem,
     problemsSolved: 0,
+    correctAnswers: 0,
     totalProblems: config.totalProblems,
   };
 }
@@ -263,6 +265,7 @@ export function startGame(state: GameState, difficulty: Difficulty): GameState {
     },
     timeLeft: config.timePerProblem,
     problemsSolved: 0,
+    correctAnswers: 0,
     totalProblems: config.totalProblems,
   };
 }
@@ -366,6 +369,7 @@ export function checkAnswer(state: GameState): { state: GameState; isCorrect: bo
         score: state.score + points,
         streak: newStreak,
         problemsSolved: state.problemsSolved + 1,
+        correctAnswers: state.correctAnswers + 1,
       },
       isCorrect: true,
     };
@@ -375,6 +379,7 @@ export function checkAnswer(state: GameState): { state: GameState; isCorrect: bo
         ...state,
         status: 'wrong',
         streak: 0,
+        problemsSolved: state.problemsSolved + 1,
       },
       isCorrect: false,
     };
@@ -426,6 +431,7 @@ export function updateTimer(state: GameState): GameState {
       status: 'wrong',
       streak: 0,
       timeLeft: 0,
+      problemsSolved: state.problemsSolved + 1,
     };
   }
   
@@ -454,7 +460,7 @@ export function calculateFinalScore(state: GameState): {
   streakBonus: number;
   total: number;
 } {
-  const accuracy = state.problemsSolved / state.totalProblems;
+  const accuracy = state.correctAnswers / state.totalProblems;
   const accuracyBonus = Math.round(accuracy * 200);
   const streakBonus = Math.min(state.streak * 20, 100);
   

@@ -1442,3 +1442,46 @@ Execution log:
 Prompt Trace: prompts/review/pre-push-staged-review-v1.0.md, prompts/review/copy-review-v1.0.md, prompts/review/seo-review-v1.0.md, prompts/review/content-safety-coppa-review-v1.0.md, prompts/verification/regression-verification-v1.0.md
 
 - 2026-03-10T13:10Z Fixed react-refresh ESLint warnings in AssetPreloader.tsx + PreGameMenu.tsx (eslint-disable-next-line) | Evidence: Observed: local eslint passes 1 warning
+
+---
+
+### TCK-20260310-002 :: P0-P2 Code Review Findings — PR #20 Blockers
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-10
+Status: **DONE**
+Priority: P0-P2
+
+Scope contract:
+- In-scope: Fix all 13 P0/P1/P2/P3 findings from copilot code review on PR #20
+- Out-of-scope: unrelated refactors
+- Behavior change allowed: YES (bug fixes)
+
+Targets:
+- Repo: learning_for_kids
+- Branch/PR: `codex/wip-fleet-fixes-ts-ccn-loc` → `main` (PR #20)
+
+Acceptance Criteria:
+- [x] BubbleBiology stale closure fixed (isPlayingRef)
+- [x] setTableLogic evaluateTable validates positions against UTENSIL_ITEMS map
+- [x] mathJumpersLogic: wrong/timeout branches increment problemsSolved; correctAnswers tracks hits; accuracy uses correctAnswers
+- [x] pinchPracticeLogic: !== null guard for pinchStartTime; exerciseComplete uses updatedTargets.every
+- [x] MoneyMatch: div-in-p → span-in-p; coin.icon optional guard
+- [x] BodyParts: div-in-p → span-in-p
+- [x] MirrorDraw: unique keys (star-N / empty-N)
+- [x] AssetPreloader: division-by-zero guard
+- [x] PackLunchbox: full-check first, balanced inside completion branch
+- [x] MathJumpers: removed unused sprite loading (imagesRef + loadAssets)
+- [x] SuccessAnimation: JSDoc updated for ReactNode prop
+- [x] npx tsc --noEmit: exit 0 | Evidence: Observed
+- [x] npx vitest run: 6526 passed, 0 failures | Evidence: Observed
+- [x] ESLint: 0 errors, 1 pre-existing warning | Evidence: Observed
+
+Execution log:
+- 2026-03-10T18:45Z Read all affected files to understand intent before fixing | Evidence: Observed
+- 2026-03-10T18:50Z Applied all 13 fixes; fixed duplicate isPlayingRef from prior partial edit | Evidence: Observed
+- 2026-03-10T18:52Z Updated mathJumpersLogic test to use correctAnswers field | Evidence: Observed
+- 2026-03-10T18:53Z tsc exit 0, vitest 6526 passed, eslint 1 pre-existing warning | Evidence: Observed
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

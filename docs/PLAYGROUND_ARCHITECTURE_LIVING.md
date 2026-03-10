@@ -1,6 +1,6 @@
 # PLAYGROUND ARCHITECTURE: The Living Document
 **Project Codename:** Fun-First Virtual Playground  
-**Document Version:** v1.2.0  
+**Document Version:** v1.3.0  
 **Last Updated:** 2026-03-10  
 **Status:** 🟢 Active Development  
 
@@ -14,11 +14,6 @@
 | v1.2.0 | 2026-03-10 | Added open‑playground guidelines, skill‑based gating, failure‑is‑fun; incorporated persona and accessibility audits (keyboard/mouse fallback, voice commands, UI language rules, trust indicators); created UX checklist; added 3D stack notes; integrated Physics Playground spec and game‑quality architecture; expanded accessibility priorities and input fallbacks | multiple design/audit docs including physics‑playground and game‑quality specs |
 | v1.1.0 | 2026-03-10 | +68 game concepts cataloged, +40 exploration areas mapped, +14 technical features identified, Play Pattern taxonomy expanded to 12 categories, **Flagged 15 misaligned game mechanics** requiring vision translation | `AREAS_TO_EXPLORE.md`, `FEATURE_IDEAS.md`, `GAME_IDEAS_CATALOG.md` |
 
-| Version | Date | Changes | Source Docs Reviewed |
-|---------|------|---------|---------------------|
-| v1.2.0 | 2026-03-10 | Added open‑playground guidelines, skill‑based gating, failure‑is‑fun; incorporated persona and accessibility audits (keyboard/mouse fallback, voice commands, UI language rules, trust indicators); created UX checklist; added 3D stack notes; expanded accessibility priorities and input fallbacks | multiple design/audit docs |
-| v1.1.0 | 2026-03-10 | +68 game concepts cataloged, +40 exploration areas mapped, +14 technical features identified, Play Pattern taxonomy expanded to 12 categories, **Flagged 15 misaligned game mechanics** requiring vision translation | `AREAS_TO_EXPLORE.md`, `FEATURE_IDEAS.md`, `GAME_IDEAS_CATALOG.md` |
-| v1.0.0 | 2026-03-10 | Initial synthesis from audit and opportunities docs | `VISION_ALIGNED_OPPORTUNITIES.md`, `VISION_ALIGNMENT_AUDIT_COMPLETE.md` |
 
 **Legend:**
 - 🟢 **NEW:** Fresh addition from latest review
@@ -434,7 +429,7 @@ improvement → growth (only if organic)
 
 ## 8. ANALYTICS & SUCCESS METRICS (Updated)
 *Additional engagement mechanics from Kimi’s brainstorm:*
-- Daily streaks verified via biometric gesture similarity (privacy‑light).  
+- Session engagement tracked via gesture variety (no daily-streak pressure; aligns with "No temporal pressure" principle).  
 - Sticker album unlocked through CV‑detected rare poses.  
 - Async ghost mode records pose data for friendly races.  
 - Accessibility adjustments: seated mode toggle, low‑vision audio cues, motor forgiveness slider.

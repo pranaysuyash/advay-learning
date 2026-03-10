@@ -129,14 +129,14 @@
 
 ### ⚠️ PROBLEMATIC FILES (Require Action)
 
-#### 6. 🔴 washHandsDanceLogic.ts (99 LOC) - ORPHAN
-**Status:** COMPLETELY UNUSED ❌
+#### 6. ✅ washHandsDanceLogic.ts (99 LOC) - RESOLVED
+**Status:** WIRED — integrated in WashHandsDance.tsx ✅
 
 **Integration Analysis:**
-- **Imports Found:** ZERO - not imported anywhere in codebase
-- **Test File:** ❌ Missing (no test file exists)
-- **Spec Document:** ❌ Missing (no docs/games/wash*.md file)
-- **Page Component:** ❌ Missing (no WashHandsDance.tsx component exists)
+- **Imports Found:** Imported by `src/frontend/src/pages/WashHandsDance.tsx`
+- **Test File:** ❌ Missing (unit tests still recommended as follow-up)
+- **Spec Document:** ❌ Missing (doc still recommended as follow-up)
+- **Page Component:** ✅ WashHandsDance.tsx — fully implemented with TTS, scoring, and GameShell
 
 **Code Content:**
 - Interface: `WashStep` (id, name, emoji, instruction, hint)
@@ -240,7 +240,7 @@ import {
 
 | File | LOC | Type | Page | Tests | Spec | Status | Action |
 |------|-----|------|------|-------|------|--------|--------|
-| washHandsDanceLogic.ts | 99 | Logic | ❌ | ❌ | ❌ | 🔴 ORPHAN | DELETE/RECONNECT |
+| washHandsDanceLogic.ts | 99 | Logic | ✅ | ❌ | ❌ | ✅ RESOLVED | WIRED (PR #20) |
 | chemistryLabLogic.ts | 360 | Logic | ✅ | ✅ | ✅ | ✅ ACTIVE | KEEP |
 | cuttingPracticeLogic.ts | 367 | Logic | ✅ | ✅ | ❌ | ✅ ACTIVE | KEEP + DOC |
 | platformerRunnerLogic.ts | 324 | Logic | ✅* | ✅ | ✅ | 🟡 DUPED | REFACTOR |
@@ -273,11 +273,9 @@ import {
 
 ## Recommendations
 
-### Priority 1 (CRITICAL) - Delete or Reconnect
-**washHandsDanceLogic.ts** - Complete orphaned file
-- Decision: Are you planning to use this?
-- If YES: Create WashHandsDance.tsx page + tests + spec doc
-- If NO: Delete src/frontend/src/games/washHandsDanceLogic.ts
+### Priority 1 (RESOLVED) - washHandsDanceLogic.ts — Wired in PR #20
+**washHandsDanceLogic.ts** — No longer orphaned. WashHandsDance.tsx page was created and imports this module.
+- Remaining follow-up: Add unit tests + spec doc (tracked as non-blocking P3).
 
 ### Priority 2 (HIGH) - Refactor Code Duplication
 **platformerRunnerLogic.ts** - Extracted logic not used by page
@@ -336,7 +334,7 @@ if (kenneyType && !imageFailed) {
 - emojiToKenney.ts ✅
 
 **Files with Issues (2):**
-- washHandsDanceLogic.ts 🔴 DELETE or RECONNECT (orphaned code)
+- washHandsDanceLogic.ts ✅ RESOLVED — wired in WashHandsDance.tsx (PR #20)
 - platformerRunnerLogic.ts 🟡 REFACTOR (code duplication issue)
 
 **Documentation Gaps:**

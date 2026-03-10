@@ -218,9 +218,9 @@ function BodyPartsGame({
             {/* Streak milestone popup */}
             {showMilestone && (
               <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
-                <p className='text-xl font-black text-orange-600'>
-                  <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
-                </p>
+                <div className='text-xl font-black text-orange-600'>
+                  <span className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></span>
+                </div>
               </div>
             )}
 

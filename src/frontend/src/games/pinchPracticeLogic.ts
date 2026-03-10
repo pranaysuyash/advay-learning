@@ -24,6 +24,7 @@ export interface PinchTarget {
   label?: string;
   held: boolean;
   holdProgress: number; // 0-100 for hold exercises
+  completed: boolean;
 }
 
 export interface DropZone {
@@ -112,6 +113,7 @@ function generateHoldExercise(index: number, difficulty: Difficulty): Exercise {
       label: 'HOLD',
       held: false,
       holdProgress: 0,
+      completed: false,
     }],
     timeLimit: Math.floor(10 * config.timeMultiplier),
     completed: false,
@@ -137,6 +139,7 @@ function generateDragExercise(index: number, difficulty: Difficulty): Exercise {
       color,
       held: false,
       holdProgress: 0,
+      completed: false,
     }],
     dropZones: [{
       id: 'zone-0',
@@ -174,6 +177,7 @@ function generateSortExercise(index: number, difficulty: Difficulty): Exercise {
       color,
       held: false,
       holdProgress: 0,
+      completed: false,
     });
     
     dropZones.push({
@@ -221,6 +225,7 @@ function generateTargetExercise(index: number, difficulty: Difficulty): Exercise
       label: `${i + 1}`,
       held: false,
       holdProgress: 0,
+      completed: false,
     });
   }
   
@@ -401,7 +406,7 @@ export function handlePinchHold(
   }
   
   // Update hold progress (for hold exercises)
-  if (exercise.type === 'hold' && state.pinchStartTime) {
+  if (exercise.type === 'hold' && state.pinchStartTime !== null) {
     const holdDuration = timestamp - state.pinchStartTime;
     const progress = Math.min(100, (holdDuration / config.holdTime) * 100);
     
@@ -483,10 +488,10 @@ export function handlePinchRelease(
     }
   }
   
-  // Release the target
+  // Release the target and mark it completed if the interaction succeeded
   const updatedTargets = exercise.targets.map((t) =>
     t.id === state.heldTargetId
-      ? { ...t, held: false, holdProgress: 0 }
+      ? { ...t, held: false, holdProgress: 0, completed: completed ? true : t.completed }
       : t
   );
   
@@ -503,7 +508,7 @@ export function handlePinchRelease(
     pinchStartTime: null,
   };
   
-  return { state: newState, exerciseComplete: completed };
+  return { state: newState, exerciseComplete: updatedTargets.every(t => t.completed) };
 }
 
 /**

@@ -80,13 +80,10 @@ export interface TableResult {
 }
 
 export function evaluateTable(placed: UtensilItem[]): TableResult {
+  const expectedPosition = new Map(UTENSIL_ITEMS.map(u => [u.id, u.position]));
   let correct = 0;
   for (const item of placed) {
-    if (item.position === 'center') {
-      if (placed.some(p => p.id === 'plate' && p.id === item.id)) correct++;
-    } else {
-      correct++;
-    }
+    if (item.position === expectedPosition.get(item.id)) correct++;
   }
   return {
     correct,

@@ -52,6 +52,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const [showMenu, setShowMenu] = useState(true);
   const [gameState, setGameState] = useState<GameState>(() => initializeGame());
   const [isGrabbing, setIsGrabbing] = useState(false);
+  const isPlayingRef = useRef(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [feedback, setFeedback] = useState('Pinch cells to grab them!');
   
@@ -63,6 +64,9 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('bubble-biology');
   
+  // Keep isPlayingRef in sync so the animation loop always reads fresh value
+  useEffect(() => { isPlayingRef.current = gameState.isPlaying; }, [gameState.isPlaying]);
+
   // Get canvas dimensions
   const getCanvasDimensions = useCallback(() => {
     if (!canvasRef.current) return { width: 800, height: 600 };
@@ -72,7 +76,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   
   // Game loop
   const gameLoop = useCallback((timestamp: number) => {
-    if (!gameState.isPlaying) return;
+    if (!isPlayingRef.current) return;
     
     const deltaTime = timestamp - lastTimeRef.current;
     lastTimeRef.current = timestamp;
@@ -101,7 +105,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
     }));
     
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState.isPlaying, gameState.currentCells, getCanvasDimensions, resetStreak]);
+  }, [gameState.currentCells, getCanvasDimensions, resetStreak]);
   
   // Spawn cells periodically
   const startSpawning = useCallback(() => {

@@ -18,7 +18,7 @@
 - 2 games built/enhanced
 - 73 unit tests passing (45 + 28)
 - 0 TypeScript errors
-- 8 documentation files
+- ~6 documentation files
 - ~2,500 lines of code
 
 ---

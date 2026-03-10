@@ -107,10 +107,10 @@ For constants, configs, docs, prompts:
 
 ```bash
 # TypeScript clean?
-cd src/frontend && npx tsc --noEmit 2>&1 | grep -v node_modules | head -30
+(cd src/frontend && npx tsc --noEmit 2>&1 | grep -v node_modules | head -30)
 
 # Tests passing?
-cd src/frontend && npx vitest run --reporter=verbose 2>&1 | tail -20
+(cd src/frontend && npx vitest run --reporter=verbose 2>&1 | tail -20)
 
 # Agent gate (worklog / audit artifact discipline)?
 scripts/agent_gate.sh --staged

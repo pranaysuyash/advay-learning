@@ -1,6 +1,6 @@
 ═══════════════════════════════════════════════════════════════════════════════
                  GAME LOGIC FILES AUDIT - FINAL SUMMARY
-                         March 10, 2024
+                         March 10, 2026
 ═══════════════════════════════════════════════════════════════════════════════
 
 CLASSIFICATION RESULTS
@@ -123,7 +123,7 @@ FILE-BY-FILE DECISIONS
 FULL REPORT
 ─────────────────────────────────────────────────────────────────────────────
 
-See: /Users/pranay/Projects/learning_for_kids/GAME_LOGIC_AUDIT_REPORT.md
+See: docs/GAME_LOGIC_AUDIT_REPORT.md
 
 This detailed report includes:
 • Code structure analysis for each file

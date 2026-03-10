@@ -148,7 +148,7 @@ export function AssetPreloader({
               if (!cancelled) {
                 loaded++;
                 setState(prev => ({ ...prev, loaded }));
-                onProgress?.(loaded / assets.length);
+                onProgress?.(assets.length > 0 ? loaded / assets.length : 0);
               }
             } catch {
               errors.push(asset.src);

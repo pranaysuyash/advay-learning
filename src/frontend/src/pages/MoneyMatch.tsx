@@ -185,9 +185,9 @@ function MoneyMatchContent() {
             {/* Streak milestone popup */}
             {showMilestone && (
               <div className="animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block">
-                <p className="text-xl font-black text-orange-600">
-                  <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
-                </p>
+                <div className="text-xl font-black text-orange-600">
+                  <span className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></span>
+                </div>
               </div>
             )}
 
@@ -197,7 +197,7 @@ function MoneyMatchContent() {
             </p>
             <div className='bg-yellow-100 p-4 rounded-xl mb-4 min-h-20 flex flex-wrap justify-center gap-2'>
               {selectedCoins.map((coin, idx) => (
-                <img key={idx} src={coin.icon} alt={coin.name} className='w-8 h-8' />
+                coin.icon && <img key={idx} src={coin.icon} alt={coin.name} className='w-8 h-8' />
               ))}
               {selectedCoins.length === 0 && (
                 <span className='text-gray-400'>Tap coins below!</span>
@@ -214,7 +214,7 @@ function MoneyMatchContent() {
                   onClick={() => addCoin(coin)}
                   className='px-4 py-3 bg-yellow-200 rounded-xl font-bold hover:bg-yellow-300 flex flex-col items-center'
                 >
-                  <img src={coin.icon} alt={coin.name} className='w-8 h-8 mb-1' />
+                  {coin.icon && <img src={coin.icon} alt={coin.name} className='w-8 h-8 mb-1' />}
                   <span className='text-xs'>
                     ${(coin.value / 100).toFixed(2)}
                   </span>

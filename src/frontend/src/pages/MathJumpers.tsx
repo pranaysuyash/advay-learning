@@ -38,21 +38,6 @@ import {
   calculateFinalScore,
 } from '../games/mathJumpersLogic';
 
-const ASSET_BASE = '/assets/kenney/platformer';
-const ASSETS = {
-  player: {
-    idle: `${ASSET_BASE}/characters/character_green_idle.png`,
-    jump: `${ASSET_BASE}/characters/character_green_jump.png`,
-  },
-  platform: `${ASSET_BASE}/tiles/grass_center.png`,
-  sounds: {
-    jump: `${ASSET_BASE}/sounds/sfx_jump.ogg`,
-    land: `${ASSET_BASE}/sounds/sfx_coin.ogg`,
-    correct: `${ASSET_BASE}/sounds/sfx_coin_double.ogg`,
-    wrong: `${ASSET_BASE}/sounds/sfx_bump.ogg`,
-  },
-};
-
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
 
@@ -62,13 +47,12 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   const webcamRef = useRef<Webcam>(null);
   const gameLoopRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
-  const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [gameState, setGameState] = useState<GameState>(() => createInitialState());
   const [showCelebration, setShowCelebration] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; emoji: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   
   const { onGameComplete } = useGameDrops('math-jumpers');
   const { playSuccess, playError, playCelebration } = useAudio();
@@ -76,42 +60,6 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
-  
-  // Load assets
-  const loadAssets = useCallback(async () => {
-    try {
-      const imageUrls = [
-        ASSETS.player.idle,
-        ASSETS.player.jump,
-        ASSETS.platform,
-      ];
-      
-      const loadImage = (src: string): Promise<HTMLImageElement> => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = src;
-        });
-      };
-      
-      const loadedImages = await Promise.all(imageUrls.map(loadImage));
-      imagesRef.current = {
-        playerIdle: loadedImages[0],
-        playerJump: loadedImages[1],
-        platform: loadedImages[2],
-      };
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Failed to load assets:', error);
-      setIsLoading(false);
-    }
-  }, []);
-  
-  useEffect(() => {
-    loadAssets();
-  }, [loadAssets]);
   
   // Handle hand tracking - move player based on hand X position
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {

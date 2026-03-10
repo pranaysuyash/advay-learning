@@ -514,7 +514,7 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
             className={`absolute top-6 right-6 px-6 py-3 rounded-2xl border-3 font-black text-xl shadow-[0_4px_0_#E5B86E] z-10 ${lastScore.passed ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'
               }`}
           >
-            {Array(lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={i} type='star' size={20} />)}{Array(3 - lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={i} type='heart_empty' size={20} />)}<span className='ml-2'>{lastScore.stars}/3</span>
+            {Array(lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={`star-${i}`} type='star' size={20} />)}{Array(3 - lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={`empty-${i}`} type='heart_empty' size={20} />)}<span className='ml-2'>{lastScore.stars}/3</span>
             <span className='ml-3 tracking-widest'>{Math.round(lastScore.accuracy * 100)}%</span>
           </motion.div>
         )}

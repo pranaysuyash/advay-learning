@@ -135,16 +135,20 @@ function PackLunchboxGame() {
     const newLunchboxItems = [...lunchboxItems, food];
     const result = evaluateLunchbox(newLunchboxItems);
     
-    if (result.isBalanced) {
-      speakText('Great job! Your lunchbox is balanced!');
-    } else if (newLunchboxItems.length >= LUNCHBOX_SLOTS) {
+    if (newLunchboxItems.length >= LUNCHBOX_SLOTS) {
       const finalScore = calculateScore(newLunchboxItems);
       setScore(finalScore);
       setGameState('complete');
       playCelebration();
       saveProgress({ score: finalScore, completed: true });
       onGameComplete(calculateStars(finalScore));
-      speakText('Lunchbox complete! Great job!');
+      if (result.isBalanced) {
+        speakText('Perfect lunchbox! Perfectly balanced and complete!');
+      } else {
+        speakText('Lunchbox complete! Great job!');
+      }
+    } else if (result.isBalanced) {
+      speakText('Great job! Your lunchbox is balanced!');
     } else {
       if (result.treats > 0 && result.treats >= newLunchboxItems.filter(f => f.category === 'treat').length) {
         speakText('Almost! Maybe add some fruit or vegetables?');

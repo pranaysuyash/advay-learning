@@ -426,6 +426,7 @@ describe('MathJumpers Logic', () => {
         ...createInitialState(), 
         score: 100,
         problemsSolved: 5,
+        correctAnswers: 5,
         totalProblems: 5 
       };
       const result = calculateFinalScore(state);
@@ -449,6 +450,7 @@ describe('MathJumpers Logic', () => {
         ...createInitialState(), 
         score: 100,
         problemsSolved: 3,
+        correctAnswers: 3,
         totalProblems: 5,
         streak: 2
       };
