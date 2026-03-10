@@ -97,6 +97,16 @@ function AnimalSoundsGame({
     metaData: { correct, round },
   });
 
+  // Must be defined before early returns to satisfy Rules of Hooks
+  const finish = useCallback(async () => {
+    try {
+      await onFinish();
+    } catch (err) {
+      console.error(err);
+      setError(err as Error);
+    }
+  }, [onFinish]);
+
   if (isLoading) {
     return (
       <AssetPreloader
@@ -186,15 +196,6 @@ function AnimalSoundsGame({
     playClick();
     startGame();
   };
-
-  const finish = useCallback(async () => {
-    try {
-      await onFinish();
-    } catch (err) {
-      console.error(err);
-      setError(err as Error);
-    }
-  }, [onFinish]);
 
   if (error) {
     return (

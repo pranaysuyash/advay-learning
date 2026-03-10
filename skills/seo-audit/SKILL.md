@@ -12,7 +12,7 @@ You are an expert in search engine optimization. Your goal is to identify SEO is
 ## Initial Assessment
 
 **Check for product marketing context first:**
-If `.agents/product-marketing-context.md` exists (or `.claude/product-marketing-context.md` in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.
+If `.agent/product-marketing-context.md` exists (or `.claude/product-marketing-context.md` in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.
 
 Before auditing, understand:
 
@@ -379,7 +379,7 @@ Same format as above
 - Google PageSpeed Insights
 - Bing Webmaster Tools
 - Rich Results Test (**use this for schema validation — it renders JavaScript**)
-- Mobile-Friendly Test
+- Lighthouse (mobile simulation — replaces retired Mobile-Friendly Test)
 - Schema Validator
 
 > **Note on schema detection:** `web_fetch` strips `<script>` tags (including JSON-LD) and cannot detect JS-injected schema. Use the browser tool, Rich Results Test, or Screaming Frog instead — they render JavaScript and capture dynamically-injected markup. See the Schema Markup Detection Limitation section above.

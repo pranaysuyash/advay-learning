@@ -63,13 +63,15 @@ function preloadImage(src: string): Promise<void> {
 }
 
 /**
- * Preload a single audio asset
+ * Preload a single audio asset — resolves gracefully on error or timeout (5 s)
+ * to avoid hanging the whole preloader on bad/missing audio sources.
  */
 function preloadAudio(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const audio = new Audio();
-    audio.oncanplaythrough = () => resolve();
-    audio.onerror = () => reject(new Error(`Failed to load audio: ${src}`));
+    const timeout = setTimeout(() => resolve(), 5000);
+    audio.addEventListener('canplaythrough', () => { clearTimeout(timeout); resolve(); }, { once: true });
+    audio.addEventListener('error', () => { clearTimeout(timeout); resolve(); }, { once: true });
     audio.src = src;
     audio.load();
   });

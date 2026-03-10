@@ -30,6 +30,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import type Webcam from 'react-webcam';
 import type { TrackedHandFrame } from '../types/tracking';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
 import {

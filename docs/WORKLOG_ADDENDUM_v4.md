@@ -1495,3 +1495,44 @@ Execution log:
 - 2026-03-10T18:53Z tsc exit 0, vitest 6526 passed, eslint 1 pre-existing warning | Evidence: Observed
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+---
+
+### TCK-20260310-001 :: CodeRabbit Round-2 Review Findings (PR #20)
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-03-10
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+- In-scope: 8 specific code review findings blocking PR #20 merge
+- Out-of-scope: unrelated refactors, new features
+- Behavior change allowed: NO (bug fixes only)
+
+Targets:
+- Repo: learning_for_kids
+- Branch/PR: `codex/wip-fleet-fixes-ts-ccn-loc` -> `main`
+- Files: AnimalSounds.tsx, MemoryMatch.tsx, CircleDrawing.tsx, BubbleBiology.tsx, AssetPreloader.tsx, patternPlayLogic.test.ts
+
+Fixes applied:
+
+1. [CRITICAL] AnimalSounds.tsx — moved `finish` useCallback above `if (isLoading)` early return to fix React Rules of Hooks ordering violation | Evidence: Observed
+2. [CRITICAL] MemoryMatch.tsx — added `import type Webcam from 'react-webcam'` for useRef<Webcam> type annotation | Evidence: Observed
+3. [MAJOR] CircleDrawing.tsx:handleNextLevel — replaced stale `level + 1` closure with local `nextLevel`; refactored `startGame(lvl = 1)` to accept level param so handleNextLevel delegates via `startGame(nextLevel)` | Evidence: Observed
+4. [MAJOR] BubbleBiology.tsx — removed async `useEffect` ref sync; set `isPlayingRef.current` synchronously in `handleStart` (true) and `stopGame` (false) before the corresponding `setGameState` call | Evidence: Observed
+5. [MINOR] CircleDrawing.tsx:handleFrame — added `if (!isPlaying) return;` guard at top of callback | Evidence: Observed
+6. [MINOR] CircleDrawing.tsx:startGame — reset `level` and `circlePath.current` inside `startGame` (now integrated via the lvl param approach from fix #3) | Evidence: Observed
+7. [MINOR] AssetPreloader.tsx:preloadAudio — replaced reject-only implementation with resolve-always + 5 s timeout + `error` event listener to prevent promise hang on bad audio source | Evidence: Observed
+8. [MINOR] patternPlayLogic.test.ts — replaced three probabilistic `Math.random` tests with `vi.spyOn`-based deterministic cycle (`[0, 1/6, 2/6, 3/6, 4/6, 5/6]`), spy restored after each test | Evidence: Observed
+
+Verification:
+- Command: `cd src/frontend && npx tsc --noEmit` → exit 0 | Evidence: Observed
+- Command: `cd src/frontend && npx vitest run` → 260 files / 6526 tests passed, 1 skipped | Evidence: Observed
+- Command: `cd src/frontend && npx eslint . --ext ts,tsx --max-warnings 1` → exit 0 (1 pre-existing warning in GamePage.tsx) | Evidence: Observed
+
+Ticket Stamp: STAMP-20260310T193500Z-copilot
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+Refs: TCK-20260310-001

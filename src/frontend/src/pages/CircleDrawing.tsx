@@ -46,6 +46,8 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
 
     const handleFrame = useCallback(
         (frame: TrackedHandFrame) => {
+            if (!isPlaying) return;
+
             const tip = frame.indexTip;
             if (!tip) {
                 prevPointRef.current = null;
@@ -107,10 +109,12 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
         onFrame: handleFrame,
     });
 
-    const startGame = () => {
+    const startGame = (lvl: number = 1) => {
         setIsPlaying(true);
+        setLevel(lvl);
         setProgress(0);
         setScore(0);
+        circlePath.current = createCirclePath(lvl);
         maxReachedProgressRef.current = 0;
         playPop();
         void startTracking();
@@ -118,9 +122,8 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
 
     const handleNextLevel = () => {
         setShowCelebration(false);
-        setLevel(l => l + 1);
-        circlePath.current = createCirclePath(level + 1);
-        startGame();
+        const nextLevel = level + 1;
+        startGame(nextLevel);
     };
 
     return (
@@ -202,7 +205,7 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
                                 Trace the glowing circle <span className="text-emerald-500">very slowly</span> and carefully.
                             </p>
                             <button
-                                onClick={startGame}
+                                onClick={() => startGame()}
                                 className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-xl shadow-[0_4px_0_#065F46] active:translate-y-1 transition-all"
                             >
                                 Let's Breathe & Draw

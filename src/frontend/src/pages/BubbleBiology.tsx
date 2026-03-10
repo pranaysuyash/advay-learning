@@ -64,8 +64,8 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('bubble-biology');
   
-  // Keep isPlayingRef in sync so the animation loop always reads fresh value
-  useEffect(() => { isPlayingRef.current = gameState.isPlaying; }, [gameState.isPlaying]);
+  // isPlayingRef is kept in sync synchronously in handleStart / stopGame
+  // (useEffect would be asynchronous and could miss the first animation frame)
 
   // Get canvas dimensions
   const getCanvasDimensions = useCallback(() => {
@@ -127,6 +127,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const handleStart = useCallback(() => {
     playPop();
     setShowMenu(false);
+    isPlayingRef.current = true;
     setGameState(prev => ({ ...prev, isPlaying: true }));
     lastTimeRef.current = performance.now();
     
@@ -147,6 +148,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
     if (spawnTimerRef.current) {
       clearInterval(spawnTimerRef.current);
     }
+    isPlayingRef.current = false;
     setGameState(prev => ({ ...prev, isPlaying: false }));
   }, []);
   
