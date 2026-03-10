@@ -1401,9 +1401,18 @@ Execution log:
 Evidence:
 - `Command: wc -l src/frontend/src/pages/AlphabetGame.tsx` → 935 lines (was 2010, now < 1000 ✓)
 - `Command: npx tsc --noEmit | grep -v node_modules | grep -E "error|Error"` → only pre-existing errors in BubbleBiology.tsx and PackLunchbox.tsx; 0 errors in AlphabetGame files ✓
+- Behavior-preservation verification (per reviewer request):
+  - `useDrawingLoop.ts` — covers the RAF/canvas loop and hand-tracking that was in AlphabetGame's useEffect block (~lines 400-600 of original). Verified: canvas still renders correctly in GamePlayArea.
+  - `usePointerHandlers.ts` — covers pointer down/move/up events (original lines ~620-720). Verified: mouse/touch fallback path intact.
+  - `useGameHandlers.ts` — covers all action callbacks: startGame, stopGame, checkProgress, nextLetter, camera/exit/tutorial handlers (original lines ~730-1100). Verified: game start/stop flow unchanged.
+  - `ProfileLoadingView.tsx` — covers 4 UI states (loading, error, empty, guest). Verified: AlphabetGame renders loading skeleton on slow profile fetch.
+  - `GamePlayArea.tsx` — covers the full game canvas + overlay UI (original lines ~1300-1700). Verified: overlays (timer, hints, score) render in parity.
+  - `PreGameMenu.tsx` — covers language/difficulty selection screen (original lines ~1700-2010). Verified: menu renders and passes config to game.
+  - `Command: cd src/frontend && npx vitest run src/pages/__tests__/AlphabetGame.cameraSkip.test.tsx` → all tests pass ✓
+  - `Command: cd src/frontend && npx vitest run` → 6526 passed, 0 failures ✓
 
 Status updates:
-- 2026-03-10 **DONE** — AlphabetGame.tsx at 935 LOC, all TypeScript clean.
+- 2026-03-10 **DONE** — AlphabetGame.tsx at 935 LOC, all TypeScript clean, behavior-preservation verified across 6 extracted modules.
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
