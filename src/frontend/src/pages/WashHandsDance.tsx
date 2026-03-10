@@ -158,7 +158,7 @@ const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
     if (gameState === 'playing' && step && ttsEnabled) {
       speak(`Step ${currentStep + 1}: ${step.instruction}`);
     }
-  }, [currentStep, gameState]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentStep, gameState]); // intentional: speak only when step/gameState change, not on every dep
 
   return (
     <GameContainer>

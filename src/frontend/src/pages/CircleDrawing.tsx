@@ -133,7 +133,7 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
             isHandDetected={isHandTrackingReady}
             isPlaying={isPlaying}
         >
-            <div className="absolute inset-0 bg-slate-900 overflow-hidden">
+            <div className="absolute inset-0 bg-[#1a1a2e] overflow-hidden">
                 {/* Zen Garden Background */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
                     <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900 via-slate-900 to-black" />

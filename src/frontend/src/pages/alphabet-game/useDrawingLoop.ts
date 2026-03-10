@@ -257,5 +257,5 @@ export function useDrawingLoop({
     currentLetterColor,
     showHints,
     useMouseMode,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+  ]); // intentional: exhaustive deps would cause re-renders on every stroke
 }

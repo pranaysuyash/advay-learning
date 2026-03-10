@@ -1406,3 +1406,37 @@ Status updates:
 - 2026-03-10 **DONE** — AlphabetGame.tsx at 935 LOC, all TypeScript clean.
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+---
+
+### TCK-20260310-001 :: Fleet-mode quality pass — CCN/LOC, orphan wiring, hooks, SEO, copy, safety
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-03-10
+Status: **IN_PROGRESS**
+Priority: P1
+Ticket Stamp: STAMP-20260310T182500Z-copilot-a001
+
+Scope contract:
+- In-scope: CCN/LOC reduction, orphan wiring, React hooks violations, SEO, copy, COPPA
+- Out-of-scope: App.tsx LOC refactor (separate ticket), MEDIUM/LOW pre-launch findings
+- Behavior change allowed: YES (additive only)
+
+Targets:
+- Repo: learning_for_kids
+- Branch/PR: `codex/wip-fleet-fixes-ts-ccn-loc` → `main` (PR #20, Closes #21)
+
+Acceptance Criteria:
+- [x] npx tsc --noEmit: 0 errors
+- [x] npx vitest run: 6,526 passed, 0 failures
+- [x] ESLint: 0 errors
+- [x] All HIGH findings from agents 13–20 fixed
+
+Execution log:
+- 2026-03-10T12:00Z Agents 13-16 dispatched for regression verification | Evidence: Observed
+- 2026-03-10T14:00Z Agents 17-20 dispatched for pre-push/SEO/copy/safety review | Evidence: Observed
+- 2026-03-10T18:25Z All HIGH findings fixed; TS=0, tests=6526 | Evidence: Observed: `npx tsc --noEmit` exit 0, `npx vitest run` 6526 passed
+- 2026-03-10T18:26Z Committed and pushed branch, PR #20 opened | Evidence: Observed: git log b6cd8ae
+
+Prompt Trace: prompts/review/pre-push-staged-review-v1.0.md, prompts/review/copy-review-v1.0.md, prompts/review/seo-review-v1.0.md, prompts/review/content-safety-coppa-review-v1.0.md, prompts/verification/regression-verification-v1.0.md
