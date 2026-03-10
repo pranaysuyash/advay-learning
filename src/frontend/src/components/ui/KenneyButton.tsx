@@ -112,7 +112,8 @@ export function KenneyPanel({
 }
 
 /**
- * 
+ * Kenney UI Progress Bar
+ *
  * Uses 9-slice scaling for smooth progress bars
  */
 interface KenneyProgressBarProps {
@@ -157,6 +158,11 @@ export function KenneyProgressBar({
 
 /**
  * Kenney UI Slider
+ *
+ * @deprecated Slider assets (`sliderBack.png`, `sliderBlue.png`) are not
+ * present in the local Kenney bundle and were not imported with this pack.
+ * This component renders broken until those assets are sourced.
+ * Use a plain HTML `<input type="range">` or a CSS-based slider instead.
  */
 interface KenneySliderProps {
   value: number;
