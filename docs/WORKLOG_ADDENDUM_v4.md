@@ -1452,6 +1452,7 @@ Owner: Pranay
 Created: 2026-03-10
 Status: **DONE**
 Priority: P0-P2
+Ticket Stamp: STAMP-20260310T190000Z-copilot-pr20-fixes
 
 Scope contract:
 - In-scope: Fix all 13 P0/P1/P2/P3 findings from copilot code review on PR #20
