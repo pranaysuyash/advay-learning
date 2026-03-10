@@ -367,7 +367,7 @@ Same format as above
 
 ## References
 
-- [AI Writing Detection](references/ai-writing-detection.md): Common AI writing patterns to avoid (em dashes, overused phrases, filler words)
+- **AI Writing Detection**: Common AI writing patterns to avoid: em dashes, overused phrases (delve, underscore, harness), filler words, formulaic openers
 - For AI search optimization (AEO, GEO, LLMO, AI Overviews), see the **ai-seo** skill
 
 ---
