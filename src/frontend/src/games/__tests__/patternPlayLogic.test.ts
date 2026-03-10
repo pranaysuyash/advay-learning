@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   PatternItem,
@@ -135,14 +135,24 @@ describe('generatePattern', () => {
   });
 
   it('generates different patterns on multiple calls', () => {
-    const pattern1 = generatePattern(1);
-    const pattern2 = generatePattern(1);
+    // Deterministic cycle through all indices so shapes AND colors vary predictably
+    const seq = [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6];
+    let callIdx = 0;
+    const spy = vi.spyOn(Math, 'random').mockImplementation(() => seq[callIdx++ % seq.length]);
 
-    // Due to randomness, patterns should differ
-    const sameShape = pattern1.answer.shape === pattern2.answer.shape;
-    const sameColor = pattern1.answer.color === pattern2.answer.color;
-    // At least one should differ with high probability
-    expect(sameShape && sameColor).not.toBe(true);
+    const patterns = [];
+    for (let i = 0; i < 20; i++) {
+      patterns.push(generatePattern(1));
+    }
+
+    spy.mockRestore();
+
+    const shapes = new Set(patterns.map(p => p.answer.shape));
+    const colors = new Set(patterns.map(p => p.answer.color));
+
+    // Should see multiple shapes and colors across 20 generations
+    expect(shapes.size).toBeGreaterThan(1);
+    expect(colors.size).toBeGreaterThan(1);
   });
 
   it('handles unknown level by using level 1', () => {
@@ -162,21 +172,35 @@ describe('generatePattern', () => {
   });
 
   it('generates shape from 6 options', () => {
+    const seq = [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6];
+    let callIdx = 0;
+    const spy = vi.spyOn(Math, 'random').mockImplementation(() => seq[callIdx++ % seq.length]);
+
     const shapes = new Set<string>();
     for (let i = 0; i < 20; i++) {
       const result = generatePattern(1);
       shapes.add(result.answer.shape);
     }
+
+    spy.mockRestore();
+
     // Should see multiple shapes over many iterations
     expect(shapes.size).toBeGreaterThan(1);
   });
 
   it('generates color from 5 options', () => {
+    const seq = [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6];
+    let callIdx = 0;
+    const spy = vi.spyOn(Math, 'random').mockImplementation(() => seq[callIdx++ % seq.length]);
+
     const colors = new Set<string>();
     for (let i = 0; i < 20; i++) {
       const result = generatePattern(1);
       colors.add(result.answer.color);
     }
+
+    spy.mockRestore();
+
     // Should see multiple colors over many iterations
     expect(colors.size).toBeGreaterThan(1);
   });

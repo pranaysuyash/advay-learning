@@ -46,6 +46,7 @@ import {
   getDifficultyDisplay,
 } from '../games/storySequenceLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 type DragSource = { type: 'slot' | 'pool'; index: number };
 
@@ -271,7 +272,7 @@ function StorySequenceBoard({
           </div>
           {streak > 0 && (
             <div className="text-orange-600 text-sm">
-              Streak: <span className="font-bold">🔥 {streak}</span>
+              Streak: <span className="font-bold flex items-center gap-1"><KenneyIcon type='heart' size={16} /> {streak}</span>
             </div>
           )}
           <button
@@ -427,7 +428,7 @@ function StreakMilestoneOverlay({ streak }: { streak: number }) {
   return (
     <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
       <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
-        🔥 {streak} Streak! 🔥
+        <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
       </div>
     </div>
   );

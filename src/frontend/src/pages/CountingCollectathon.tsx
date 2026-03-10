@@ -26,6 +26,7 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
+import { AssetPreloader } from '../components/AssetPreloader';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
   DEFAULT_CONFIG,
@@ -325,11 +326,16 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
 
   if (isLoading) {
     return (
-      <GameContainer title="Counting Collect-a-thon" onHome={handleHome}>
-        <div className="flex items-center justify-center min-h-[600px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-        </div>
-      </GameContainer>
+      <AssetPreloader
+        assets={[
+          { type: 'image', src: ASSETS.player.idle, priority: 'normal' },
+          { type: 'image', src: ASSETS.collectibles.star, priority: 'normal' },
+          { type: 'image', src: ASSETS.collectibles.coin, priority: 'normal' },
+          { type: 'image', src: ASSETS.collectibles.gem, priority: 'normal' },
+        ]}
+        onComplete={() => setIsLoading(false)}
+        minDisplayTime={1000}
+      />
     );
   }
 

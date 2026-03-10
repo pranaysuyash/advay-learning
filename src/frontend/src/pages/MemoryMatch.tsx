@@ -30,6 +30,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import type Webcam from 'react-webcam';
 import type { TrackedHandFrame } from '../types/tracking';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
 import {
@@ -44,6 +45,7 @@ import {
   type MemoryDifficulty,
 } from '../games/memoryMatchLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -60,10 +62,10 @@ const FLIP_PAUSE_MS = 600; // pause before hiding non-matching pair (legacy, use
 
 function difficultyLabel(d: MemoryDifficulty) {
   if (d === 'easy')
-    return { label: 'Easy', emoji: '🌱', desc: '6 pairs, 3×4 grid' };
+    return { label: 'Easy', icon: 'heart' as const, desc: '6 pairs, 3×4 grid' };
   if (d === 'medium')
-    return { label: 'Medium', emoji: '🌟', desc: '8 pairs, 4×4 grid' };
-  return { label: 'Hard', emoji: '🔥', desc: '10 pairs, 4×5 grid' };
+    return { label: 'Medium', icon: 'star' as const, desc: '8 pairs, 4×4 grid' };
+  return { label: 'Hard', icon: 'gem' as const, desc: '10 pairs, 4×5 grid' };
 }
 
 function gridCols(pairCount: number) {
@@ -442,7 +444,7 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
                       onClick={() => startGame(diff)}
                       className='flex flex-col items-center gap-2 p-5 rounded-2xl border-3 border-[#F2CC8F] bg-white hover:border-blue-400 hover:scale-105 transition-all shadow-[0_4px_0_#E5B86E] active:scale-95'
                     >
-                      <span className='text-4xl'>{info.emoji}</span>
+                      <span className='text-4xl'><KenneyIcon type={info.icon} size={40} /></span>
                       <span className='font-black text-advay-slate text-lg'>
                         {info.label}
                       </span>
@@ -534,7 +536,7 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
               className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
             >
               <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
-                🔥 {streak} Streak! 🔥
+                <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
               </div>
             </motion.div>
           )}
@@ -684,7 +686,7 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
           {completed && (
             <div className='absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-30'>
               <div className='bg-white rounded-3xl p-10 text-center border-3 border-[#F2CC8F] shadow-2xl max-w-md w-[90%]'>
-                <div className='text-5xl mb-4'>🏆</div>
+                <div className='flex justify-center mb-4'><KenneyIcon type='star' size={64} /></div>
                 <h2 className='text-3xl font-black text-advay-slate mb-2'>
                   All Pairs Found!
                 </h2>
@@ -757,7 +759,7 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
       <SuccessAnimation
         show={showSuccess}
         type='stars'
-        message='Match! ⭐'
+        message='Match!'
         duration={800}
         onComplete={() => setShowSuccess(false)}
       />

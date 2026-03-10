@@ -28,6 +28,7 @@ import {
 } from '../components/game/VoiceInstructions';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import type { TrackedHandFrame } from '../types/tracking';
 import { DragDropSystem, type DraggableItem, type DropZone } from '../components/game/DragDropSystem';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
@@ -306,7 +307,7 @@ function FeedTheMonsterGameComponent() {
             <div className="flex flex-col items-center border-l-2 border-slate-100 pl-8">
               <span className='text-xs font-bold uppercase tracking-widest text-slate-400'>Streak</span>
               <div className={`text-2xl font-black flex items-center gap-1 ${streak >= 5 ? 'text-orange-500' : 'text-slate-700'}`}>
-                <span>{streak >= 3 ? '🔥' : '⚡'}</span>
+                <span>{streak >= 3 ? <KenneyIcon type='heart' size={16} /> : <KenneyIcon type='star' size={16} />}</span>
                 <span>{streak}</span>
               </div>
             </div>
@@ -412,9 +413,9 @@ function FeedTheMonsterGameComponent() {
         <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
           <div className="bg-orange-500 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce border-4 border-yellow-400">
             <div className="text-4xl font-black flex items-center gap-3">
-              <span>🔥</span>
+              <KenneyIcon type='heart' size={16} />
               <span>{streak} Streak!</span>
-              <span>🔥</span>
+              <KenneyIcon type='heart' size={16} />
             </div>
           </div>
         </div>

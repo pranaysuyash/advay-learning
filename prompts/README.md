@@ -75,9 +75,18 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Generalized hardening (local review, no PR): `prompts/hardening/generalized-implementer-v1.0.md`
 - Generalized code review + audit (report-only): `prompts/review/generalized-code-review-audit-v1.0.md`
 - Local pre-commit review (mandatory before code-changing commits): `prompts/review/local-pre-commit-review-v1.0.md`
+- **Code review** (intent-first, single-file or multi-file, signal-only findings): `prompts/review/code-review-v1.0.md`
+- **Pre-push staged review** (final gate before branch push — full staged diff, hygiene checks, verdict): `prompts/review/pre-push-staged-review-v1.0.md`
 - PR review: `prompts/review/pr-review-v1.6.1.md`
 - Verify remediation: `prompts/verification/verification-v1.2.md`
+- **Regression verification** (feature-by-feature old vs new for files with >10% LOC delta): `prompts/verification/regression-verification-v1.0.md`
 - Merge conflicts: `prompts/merge/merge-conflict-v1.2.md`
+
+### Content, Copy & Non-Technical
+
+- **Copy & microcopy review** (age-appropriate text, TTS, ARIA, instructions, feedback tone): `prompts/review/copy-review-v1.0.md`
+- **SEO & discoverability review** (page titles, meta, OG tags, routing, gameId slugs): `prompts/review/seo-review-v1.0.md`
+- **Content safety & COPPA review** (PII, camera transparency, data storage, child-safe content): `prompts/review/content-safety-coppa-review-v1.0.md`
 
 ### Completeness / Delivery
 
@@ -163,6 +172,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Data: `prompts/intent-first/development/intent-first-data-v1.0.md`
 - Security: `prompts/intent-first/development/intent-first-security-v1.0.md`
 - Performance: `prompts/intent-first/development/intent-first-performance-v1.0.md`
+- **Intent-First Implementor** (orphan wiring, salvage-before-remove, full fix loop): `prompts/intent-first/development/intent-first-implementor-v1.0.md`
 - Documentation: `prompts/intent-first/development/intent-first-documentation-v1.0.md`
 
 **Product & Strategy:**

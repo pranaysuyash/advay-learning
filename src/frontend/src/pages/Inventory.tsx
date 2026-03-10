@@ -19,21 +19,22 @@ import {
 } from '../data/collectibles';
 import { getListedGames } from '../data/gameRegistry';
 import { ItemIcon } from '../components/ui/ItemIcon';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
-const CATEGORY_CONFIG: Record<ItemCategory, { label: string; emoji: string }> =
+const CATEGORY_CONFIG: Record<ItemCategory, { label: string; iconType?: 'star' | 'gem' | 'coin' | 'heart' | 'key_blue' }> =
 {
-  element: { label: 'Elements', emoji: '⚗️' },
-  color: { label: 'Colors', emoji: '🎨' },
-  shape: { label: 'Shapes', emoji: '🔷' },
-  creature: { label: 'Creatures', emoji: '🐾' },
-  note: { label: 'Notes', emoji: '🎵' },
-  emotion: { label: 'Emotions', emoji: '💖' },
-  material: { label: 'Materials', emoji: '🧪' },
-  tool: { label: 'Tools', emoji: '🔧' },
-  artifact: { label: 'Artifacts', emoji: '🏆' },
-  food: { label: 'Food', emoji: '🍪' },
-  letter: { label: 'Letters', emoji: '🔤' },
-  number: { label: 'Numbers', emoji: '🔢' },
+  element: { label: 'Elements', iconType: 'gem' },
+  color: { label: 'Colors', iconType: 'star' },
+  shape: { label: 'Shapes', iconType: 'gem' },
+  creature: { label: 'Creatures', iconType: 'heart' },
+  note: { label: 'Notes', iconType: 'star' },
+  emotion: { label: 'Emotions', iconType: 'heart' },
+  material: { label: 'Materials', iconType: 'coin' },
+  tool: { label: 'Tools', iconType: 'key_blue' },
+  artifact: { label: 'Artifacts', iconType: 'star' },
+  food: { label: 'Food', iconType: 'coin' },
+  letter: { label: 'Letters', iconType: 'star' },
+  number: { label: 'Numbers', iconType: 'coin' },
 };
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG) as ItemCategory[];
@@ -206,7 +207,7 @@ export const Inventory = memo(function Inventory() {
                   aria-disabled='true'
                   title='No items yet'
                 >
-                  {config.emoji} {config.label}
+                  {config.iconType ? <KenneyIcon type={config.iconType} size={16} /> : null} {config.label}
                 </button>
               );
             }
@@ -219,7 +220,7 @@ export const Inventory = memo(function Inventory() {
                     : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6]'
                   }`}
               >
-                {config.emoji} {config.label}
+                {config.iconType ? <KenneyIcon type={config.iconType} size={16} /> : null} {config.label}
               </button>
             );
           })}

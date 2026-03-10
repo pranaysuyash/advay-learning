@@ -105,6 +105,7 @@ import {
 import {
   STEADY_LABS_GAMES,
   FEELING_FOREST_GAMES,
+  WELLNESS_GAMES,
 } from './gameRegistries/wellness';
 import { SOUND_STUDIO_GAMES } from './gameRegistries/soundStudio';
 import { BODY_ZONE_GAMES } from './gameRegistries/bodyZone';
@@ -126,6 +127,7 @@ export const GAME_REGISTRY: GameManifest[] = [
   ...COLOR_SPLASH_GAMES,
   ...DOODLE_DOCK_GAMES,
   ...STEADY_LABS_GAMES,
+  ...WELLNESS_GAMES,
   ...SOUND_STUDIO_GAMES,
   ...BODY_ZONE_GAMES,
   ...LAB_OF_WONDERS_GAMES,

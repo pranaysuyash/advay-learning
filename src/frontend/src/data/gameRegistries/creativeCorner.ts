@@ -126,4 +126,23 @@ export const CREATIVE_CORNER_GAMES: GameManifest[] = [
     ],
     easterEggs: [],
   },
+  // ── Circle Drawing ────────────────────────────────────────────────
+  {
+    id: 'circle-drawing',
+    name: 'Circle Drawing',
+    tagline: 'Draw perfect circles and shapes with your finger! ⭕✏️',
+    path: '/games/circle-drawing',
+    icon: 'drop',
+    worldId: 'creative-corner',
+    vibe: 'creative',
+    ageRange: '3-7',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'color-rainbow', chance: 0.15 },
+      { itemId: 'tool-paintbrush', chance: 0.2 },
+    ],
+    easterEggs: [],
+  },
 ];

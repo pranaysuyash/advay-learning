@@ -14,7 +14,7 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-007
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { useGameSubscription } from '../hooks/useGameSubscription';
 import { GameErrorBoundary } from './errors/GameErrorBoundary';
@@ -62,6 +62,13 @@ export const GameShell: React.FC<GameShellProps> = ({
   const { hasAccess, isLoading } = useGameSubscription(gameId);
   const reducedMotion = useReducedMotion();
   const [error, setError] = useState<Error | null>(null);
+
+  // SEO-001: Set per-page document title for search indexing and social sharing
+  useEffect(() => {
+    const prev = document.title;
+    document.title = `${gameName} — Advay Learning for Kids`;
+    return () => { document.title = prev; };
+  }, [gameName]);
 
   const handleError = useCallback((err: Error) => {
     setError(err);

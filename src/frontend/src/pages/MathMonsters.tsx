@@ -54,6 +54,136 @@ import {
 const FINGER_COUNT_DEBOUNCE = 1000;
 const MIN_FINGER_HOLD_TIME = 1500;
 
+// === Module-level pure helpers (extracted to reduce component CCN) ===
+
+function getMostCommonCount(counts: number[]): number {
+  const frequency: Record<number, number> = {};
+  counts.forEach(c => {
+    frequency[c] = (frequency[c] || 0) + 1;
+  });
+  let maxCount = 0;
+  let mostCommon = 0;
+  Object.entries(frequency).forEach(([count, freq]) => {
+    if (freq > maxCount) {
+      maxCount = freq;
+      mostCommon = parseInt(count);
+    }
+  });
+  return mostCommon;
+}
+
+function getKenneyCharacterType(monsterId: string): 'beige' | 'green' | 'pink' | 'purple' {
+  if (monsterId === 'crunchy') return 'green';
+  if (monsterId === 'nibbles') return 'pink';
+  if (monsterId === 'snoozy') return 'purple';
+  return 'beige';
+}
+
+function getMonsterAnimation(
+  expression: 'idle' | 'happy' | 'sad' | 'eating' | 'hungry'
+): 'idle' | 'walk' | 'jump' | 'hit' | 'climb' {
+  if (expression === 'eating') return 'jump';
+  if (expression === 'happy') return 'walk';
+  if (expression === 'sad') return 'hit';
+  if (expression === 'hungry') return 'climb';
+  return 'idle';
+}
+
+function shouldSubmitFingerCount(
+  fingerHoldStart: number | null,
+  smoothedCount: number,
+  lastSubmitTime: number
+): boolean {
+  if (!fingerHoldStart || smoothedCount <= 0) return false;
+  const holdTime = Date.now() - fingerHoldStart;
+  if (holdTime < MIN_FINGER_HOLD_TIME) return false;
+  return (Date.now() - lastSubmitTime) >= FINGER_COUNT_DEBOUNCE;
+}
+
+interface MathProblemDisplayProps {
+  problem: NonNullable<GameState['currentProblem']>;
+}
+
+function MathProblemDisplay({ problem }: MathProblemDisplayProps) {
+  return (
+    <div className="bg-slate-100 rounded-2xl p-6 mb-6 text-center">
+      <div className="text-5xl font-black text-advay-slate mb-2">
+        {problem.visual.equation}
+      </div>
+      <div className="flex items-center justify-center gap-2 mt-3">
+        {problem.operation !== 'recognition' && (
+          <>
+            <div className="flex gap-1">
+              {Array.from({ length: problem.num1 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-6 h-6 rounded-full bg-orange-400 animate-pop-in"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                />
+              ))}
+            </div>
+            <span className="text-slate-400 text-2xl font-bold mx-2">
+              {problem.operation === 'addition' ? '+' : '-'}
+            </span>
+            <div className="flex gap-1">
+              {Array.from({ length: problem.num2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-6 h-6 rounded-full bg-blue-400 animate-pop-in"
+                  style={{ animationDelay: `${(problem.num1 + i) * 50}ms` }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface FingerDetectionDisplayProps {
+  detectedFingers: number;
+  fingerHoldStart: number | null;
+  isSubmitting: boolean;
+}
+
+function FingerDetectionDisplay({ detectedFingers, fingerHoldStart, isSubmitting }: FingerDetectionDisplayProps) {
+  return (
+    <div className="bg-gradient-to-b from-blue-100 to-blue-50 border-3 border-blue-400 rounded-3xl p-8 text-center min-w-[280px] shadow-lg">
+      <p className="text-blue-800 font-bold text-lg mb-4">🖐️ Your Answer:</p>
+      <div className="text-8xl font-black text-blue-600 mb-4">
+        {detectedFingers}
+      </div>
+      <div className="flex justify-center gap-2 text-4xl mb-4 min-h-[60px]">
+        {detectedFingers === 0 ? (
+          <span className="text-slate-400 text-2xl">Show fingers! 👆</span>
+        ) : (
+          Array.from({ length: detectedFingers }).map((_, i) => (
+            <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>☝️</span>
+          ))
+        )}
+      </div>
+      {detectedFingers > 0 && (
+        <div className="mt-4">
+          <p className="text-blue-600 text-sm font-bold mb-2">
+            {fingerHoldStart && !isSubmitting ? 'Keep holding...' : '✓ Submitted!'}
+          </p>
+          {fingerHoldStart && !isSubmitting && (
+            <div className="h-4 bg-blue-200 rounded-full overflow-hidden border-2 border-blue-300">
+              <div
+                className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all"
+                style={{
+                  width: `${Math.min(100, ((Date.now() - fingerHoldStart) / MIN_FINGER_HOLD_TIME) * 100)}%`,
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MathMonstersGame() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
@@ -115,14 +245,8 @@ function MathMonstersGame() {
     }
 
     // Check if held long enough to submit
-    if (fingerHoldStart && smoothedCount > 0) {
-      const holdTime = Date.now() - fingerHoldStart;
-      if (holdTime >= MIN_FINGER_HOLD_TIME) {
-        const timeSinceLastSubmit = Date.now() - lastSubmitTimeRef.current;
-        if (timeSinceLastSubmit >= FINGER_COUNT_DEBOUNCE) {
-          handleSubmitAnswer(smoothedCount);
-        }
-      }
+    if (shouldSubmitFingerCount(fingerHoldStart, smoothedCount, lastSubmitTimeRef.current)) {
+      handleSubmitAnswer(smoothedCount);
     }
   }, [fingerHoldStart, isSubmitting, showMenu]);
 
@@ -132,25 +256,6 @@ function MathMonstersGame() {
     webcamRef,
     onFrame: handleHandFrame,
   });
-
-  // Helper to get most common count
-  const getMostCommonCount = (counts: number[]): number => {
-    const frequency: Record<number, number> = {};
-    counts.forEach(c => {
-      frequency[c] = (frequency[c] || 0) + 1;
-    });
-
-    let maxCount = 0;
-    let mostCommon = 0;
-    Object.entries(frequency).forEach(([count, freq]) => {
-      if (freq > maxCount) {
-        maxCount = freq;
-        mostCommon = parseInt(count);
-      }
-    });
-
-    return mostCommon;
-  };
 
   // ===== GAME FLOW =====
   const startGame = () => {
@@ -339,10 +444,7 @@ function MathMonstersGame() {
             {MONSTERS.map(m => (
               <div key={m.id} className="text-center">
                 <KenneyCharacter
-                  type={(m.id === 'munchy' ? 'beige' :
-                    m.id === 'crunchy' ? 'green' :
-                      m.id === 'nibbles' ? 'pink' :
-                        m.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
+                  type={getKenneyCharacterType(m.id)}
                   animation="idle"
                   size="md"
                 />
@@ -486,14 +588,8 @@ function MathMonstersGame() {
             {/* Monster - Kenney Character */}
             <div className="mb-4">
               <KenneyCharacter
-                type={(monster.id === 'munchy' ? 'beige' :
-                  monster.id === 'crunchy' ? 'green' :
-                    monster.id === 'nibbles' ? 'pink' :
-                      monster.id === 'snoozy' ? 'purple' : 'beige') as 'beige' | 'green' | 'pink' | 'purple'}
-                animation={monsterExpression === 'eating' ? 'jump' :
-                  monsterExpression === 'happy' ? 'walk' :
-                    monsterExpression === 'sad' ? 'hit' :
-                      monsterExpression === 'hungry' ? 'climb' : 'idle'}
+                type={getKenneyCharacterType(monster.id)}
+                animation={getMonsterAnimation(monsterExpression)}
                 size="lg"
               />
             </div>
@@ -505,81 +601,15 @@ function MathMonstersGame() {
 
             {/* Math Problem */}
             {gameState.currentProblem && (
-              <div className="bg-slate-100 rounded-2xl p-6 mb-6 text-center">
-                <div className="text-5xl font-black text-advay-slate mb-2">
-                  {gameState.currentProblem.visual.equation}
-                </div>
-
-                {/* Visual representation - CSS shapes instead of emojis */}
-                <div className="flex items-center justify-center gap-2 mt-3">
-                  {gameState.currentProblem!.operation !== 'recognition' && (
-                    <>
-                      <div className="flex gap-1">
-                        {Array.from({ length: gameState.currentProblem!.num1 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-6 h-6 rounded-full bg-orange-400 animate-pop-in"
-                            style={{ animationDelay: `${i * 50}ms` }}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-slate-400 text-2xl font-bold mx-2">
-                        {gameState.currentProblem!.operation === 'addition' ? '+' : '-'}
-                      </span>
-                      <div className="flex gap-1">
-                        {Array.from({ length: gameState.currentProblem!.num2 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-6 h-6 rounded-full bg-blue-400 animate-pop-in"
-                            style={{ animationDelay: `${(gameState.currentProblem!.num1 + i) * 50}ms` }}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+              <MathProblemDisplay problem={gameState.currentProblem} />
             )}
 
             {/* Finger Detection Display - Prominent */}
-            <div className="bg-gradient-to-b from-blue-100 to-blue-50 border-3 border-blue-400 rounded-3xl p-8 text-center min-w-[280px] shadow-lg">
-              <p className="text-blue-800 font-bold text-lg mb-4">🖐️ Your Answer:</p>
-
-              {/* Big number display */}
-              <div className="text-8xl font-black text-blue-600 mb-4">
-                {detectedFingers}
-              </div>
-
-              {/* Visual finger representation */}
-              <div className="flex justify-center gap-2 text-4xl mb-4 min-h-[60px]">
-                {detectedFingers === 0 ? (
-                  <span className="text-slate-400 text-2xl">Show fingers! 👆</span>
-                ) : (
-                  Array.from({ length: detectedFingers }).map((_, i) => (
-                    <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>☝️</span>
-                  ))
-                )}
-              </div>
-
-              {/* Hold progress bar */}
-              {detectedFingers > 0 && (
-                <div className="mt-4">
-                  <p className="text-blue-600 text-sm font-bold mb-2">
-                    {fingerHoldStart && !isSubmitting ? 'Keep holding...' : '✓ Submitted!'}
-                  </p>
-                  {fingerHoldStart && !isSubmitting && (
-                    <div className="h-4 bg-blue-200 rounded-full overflow-hidden border-2 border-blue-300">
-                      <div
-                        className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all"
-                        style={{
-                          width: `${Math.min(100, ((Date.now() - fingerHoldStart) / MIN_FINGER_HOLD_TIME) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <FingerDetectionDisplay
+              detectedFingers={detectedFingers}
+              fingerHoldStart={fingerHoldStart}
+              isSubmitting={isSubmitting}
+            />
 
             {/* Hint Button */}
             <button

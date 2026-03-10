@@ -515,6 +515,52 @@ export function searchAssets(query: string): AssetInfo[] {
   );
 }
 
+// ============================================================================
+// UI ASSETS (Newly imported)
+// ============================================================================
+
+export const UI_BASE_PATH = '/assets/kenney/ui';
+
+export const UI_ICON_ASSETS: AssetInfo[] = [
+  { id: 'ui_icon_checkmark', path: `${UI_BASE_PATH}/icons/icon_checkmark.png`, category: 'ui', description: 'Checkmark icon for confirmations', used: false, usageLocations: [], tags: ['ui', 'icon', 'check', 'confirm'] },
+  { id: 'ui_icon_cross', path: `${UI_BASE_PATH}/icons/icon_cross.png`, category: 'ui', description: 'Cross icon for cancellations', used: false, usageLocations: [], tags: ['ui', 'icon', 'cross', 'cancel'] },
+  { id: 'ui_icon_circle', path: `${UI_BASE_PATH}/icons/icon_circle.png`, category: 'ui', description: 'Circle icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'circle'] },
+  { id: 'ui_icon_square', path: `${UI_BASE_PATH}/icons/icon_square.png`, category: 'ui', description: 'Square icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'square'] },
+  { id: 'ui_icon_outline_checkmark', path: `${UI_BASE_PATH}/icons/icon_outline_checkmark.png`, category: 'ui', description: 'Outlined checkmark icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'check', 'outline'] },
+  { id: 'ui_icon_outline_cross', path: `${UI_BASE_PATH}/icons/icon_outline_cross.png`, category: 'ui', description: 'Outlined cross icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'cross', 'outline'] },
+  { id: 'ui_icon_outline_circle', path: `${UI_BASE_PATH}/icons/icon_outline_circle.png`, category: 'ui', description: 'Outlined circle icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'circle', 'outline'] },
+  { id: 'ui_icon_outline_square', path: `${UI_BASE_PATH}/icons/icon_outline_square.png`, category: 'ui', description: 'Outlined square icon', used: false, usageLocations: [], tags: ['ui', 'icon', 'square', 'outline'] },
+];
+
+export const UI_PANEL_ASSETS: AssetInfo[] = [
+  { id: 'ui_panel_beige', path: `${UI_BASE_PATH}/panels/panel_beige.png`, category: 'ui', description: 'Beige panel background', used: false, usageLocations: [], tags: ['ui', 'panel', 'beige', 'background'] },
+  { id: 'ui_panel_beige_light', path: `${UI_BASE_PATH}/panels/panel_beigeLight.png`, category: 'ui', description: 'Light beige panel background', used: false, usageLocations: [], tags: ['ui', 'panel', 'beige', 'light'] },
+  { id: 'ui_panel_blue', path: `${UI_BASE_PATH}/panels/panel_blue.png`, category: 'ui', description: 'Blue panel background', used: false, usageLocations: [], tags: ['ui', 'panel', 'blue', 'background'] },
+  { id: 'ui_panel_brown', path: `${UI_BASE_PATH}/panels/panel_brown.png`, category: 'ui', description: 'Brown panel background', used: false, usageLocations: [], tags: ['ui', 'panel', 'brown', 'background'] },
+  { id: 'ui_panel_inset_beige', path: `${UI_BASE_PATH}/panels/panelInset_beige.png`, category: 'ui', description: 'Inset beige panel', used: false, usageLocations: [], tags: ['ui', 'panel', 'beige', 'inset'] },
+  { id: 'ui_panel_inset_beige_light', path: `${UI_BASE_PATH}/panels/panelInset_beigeLight.png`, category: 'ui', description: 'Inset light beige panel', used: false, usageLocations: [], tags: ['ui', 'panel', 'beige', 'inset', 'light'] },
+  { id: 'ui_panel_inset_blue', path: `${UI_BASE_PATH}/panels/panelInset_blue.png`, category: 'ui', description: 'Inset blue panel', used: false, usageLocations: [], tags: ['ui', 'panel', 'blue', 'inset'] },
+  { id: 'ui_panel_inset_brown', path: `${UI_BASE_PATH}/panels/panelInset_brown.png`, category: 'ui', description: 'Inset brown panel', used: false, usageLocations: [], tags: ['ui', 'panel', 'brown', 'inset'] },
+];
+
+export const UI_ARROW_ASSETS: AssetInfo[] = [
+  { id: 'ui_arrow_basic_e', path: `${UI_BASE_PATH}/arrows/arrow_basic_e.png`, category: 'ui', description: 'Basic arrow east', used: false, usageLocations: [], tags: ['ui', 'arrow', 'east', 'right'] },
+  { id: 'ui_arrow_basic_n', path: `${UI_BASE_PATH}/arrows/arrow_basic_n.png`, category: 'ui', description: 'Basic arrow north', used: false, usageLocations: [], tags: ['ui', 'arrow', 'north', 'up'] },
+  { id: 'ui_arrow_basic_s', path: `${UI_BASE_PATH}/arrows/arrow_basic_s.png`, category: 'ui', description: 'Basic arrow south', used: false, usageLocations: [], tags: ['ui', 'arrow', 'south', 'down'] },
+  { id: 'ui_arrow_basic_w', path: `${UI_BASE_PATH}/arrows/arrow_basic_w.png`, category: 'ui', description: 'Basic arrow west', used: false, usageLocations: [], tags: ['ui', 'arrow', 'west', 'left'] },
+  { id: 'ui_arrow_decorative_e', path: `${UI_BASE_PATH}/arrows/arrow_decorative_e.png`, category: 'ui', description: 'Decorative arrow east', used: false, usageLocations: [], tags: ['ui', 'arrow', 'east', 'right', 'decorative'] },
+  { id: 'ui_arrow_decorative_n', path: `${UI_BASE_PATH}/arrows/arrow_decorative_n.png`, category: 'ui', description: 'Decorative arrow north', used: false, usageLocations: [], tags: ['ui', 'arrow', 'north', 'up', 'decorative'] },
+  { id: 'ui_arrow_decorative_s', path: `${UI_BASE_PATH}/arrows/arrow_decorative_s.png`, category: 'ui', description: 'Decorative arrow south', used: false, usageLocations: [], tags: ['ui', 'arrow', 'south', 'down', 'decorative'] },
+  { id: 'ui_arrow_decorative_w', path: `${UI_BASE_PATH}/arrows/arrow_decorative_w.png`, category: 'ui', description: 'Decorative arrow west', used: false, usageLocations: [], tags: ['ui', 'arrow', 'west', 'left', 'decorative'] },
+];
+
+// Combined UI assets
+export const UI_ASSETS: AssetInfo[] = [
+  ...UI_ICON_ASSETS,
+  ...UI_PANEL_ASSETS,
+  ...UI_ARROW_ASSETS,
+];
+
 /**
  * Get emoji replacement suggestions
  * Maps common emojis to Kenney asset alternatives
@@ -566,6 +612,7 @@ export function generateUnusedAssetReport(): string {
 
 export default {
   assets: KENNEY_ASSETS,
+  ui: UI_ASSETS,
   characters: CHARACTER_ASSETS,
   enemies: ENEMY_ASSETS,
   sounds: SOUND_ASSETS,

@@ -4,8 +4,7 @@ export { Button, ButtonLink, PrimaryButton, SecondaryButton, DangerButton, Succe
 // Kenney Game Assets
 export { 
   KenneyButton, 
-  KenneyProgressBar, 
-  KenneySlider 
+  KenneyProgressBar,
 } from './KenneyButton';
 export type { 
   KenneyButtonColor, 

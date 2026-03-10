@@ -14,6 +14,7 @@ import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
@@ -530,9 +531,9 @@ const ShapePopContent = memo(function ShapePopComponent() {
           <div className='absolute inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center'>
             <div className='bg-white border-4 border-[#F2CC8F] rounded-[2rem] p-8 max-w-md w-[90%] shadow-[0_8px_0_#E5B86E] text-center'>
               <div className='text-5xl mb-4'>
-                {TUTORIAL_STEPS[tutorialStep].highlight === 'cursor' && '👆'}
-                {TUTORIAL_STEPS[tutorialStep].highlight === 'target' && '🎯'}
-                {TUTORIAL_STEPS[tutorialStep].highlight === 'streak' && '🔥'}
+                {TUTORIAL_STEPS[tutorialStep].highlight === 'cursor' && <KenneyIcon type='check' size={24} />}
+                {TUTORIAL_STEPS[tutorialStep].highlight === 'target' && <KenneyIcon type='circle' size={24} />}
+                {TUTORIAL_STEPS[tutorialStep].highlight === 'streak' && <KenneyIcon type='heart' size={24} />}
               </div>
               <h3 className='text-2xl font-black text-advay-slate mb-3'>
                 {TUTORIAL_STEPS[tutorialStep].title}
@@ -612,9 +613,9 @@ const ShapePopContent = memo(function ShapePopComponent() {
               {/* Difficulty selection */}
               <div className='grid grid-cols-3 gap-3 mb-6'>
                 {[
-                  { key: 'easy', label: 'Easy', emoji: '🌱', desc: 'Big targets' },
-                  { key: 'medium', label: 'Medium', emoji: '🌟', desc: 'Standard' },
-                  { key: 'hard', label: 'Hard', emoji: '🔥', desc: 'Small targets' },
+                  { key: 'easy', label: 'Easy', icon: 'heart' as const, desc: 'Big targets' },
+                  { key: 'medium', label: 'Medium', icon: 'star' as const, desc: 'Standard' },
+                  { key: 'hard', label: 'Hard', icon: 'gem' as const, desc: 'Small targets' },
                 ].map((opt) => (
                   <button
                     key={opt.key}
@@ -622,7 +623,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
                     onClick={() => startGame(opt.key as 'easy' | 'medium' | 'hard')}
                     className='flex flex-col items-center gap-1 p-4 rounded-2xl border-3 border-[#F2CC8F] bg-white hover:border-blue-400 hover:scale-105 transition-all shadow-[0_4px_0_#E5B86E] active:scale-95'
                   >
-                    <span className='text-3xl'>{opt.emoji}</span>
+                    <span className='text-3xl'><KenneyIcon type={opt.icon} size={32} /></span>
                     <span className='font-black text-advay-slate'>{opt.label}</span>
                     <span className='text-xs text-text-secondary'>{opt.desc}</span>
                   </button>

@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "name": "collectibles",
+    "description": "Coins, gems, stars, and other collectibles",
+    "generated": "2026-03-10T06:22:26.484Z",
+    "version": "1.0",
+    "format": "RGBA8888",
+    "size": {
+      "w": 204,
+      "h": 68
+    },
+    "scale": 1,
+    "totalImages": 3,
+    "method": "rectangle-packing"
+  },
+  "frames": {
+    "coin_gold": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "coin_gold.png"
+    },
+    "gem_blue": {
+      "frame": {
+        "x": 70,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "gem_blue.png"
+    },
+    "star": {
+      "frame": {
+        "x": 138,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "star.png"
+    }
+  }
+}

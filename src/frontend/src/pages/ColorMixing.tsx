@@ -8,6 +8,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import {
   BASE_COLORS,
   createColorMixRound,
@@ -166,7 +167,7 @@ function ColorMixingGame() {
               <p className='text-sm font-black uppercase tracking-wide text-slate-500'>Round {roundIndex} / {roundsPerSession}</p>
               {streak > 0 && (
                 <p className='text-sm font-black text-orange-600 flex items-center gap-1'>
-                  <span role='img' aria-label='streak'>🔥</span>
+                  <KenneyIcon type='heart' size={16} />
                   <span>{streak}</span>
                 </p>
               )}
@@ -224,9 +225,9 @@ function ColorMixingGame() {
             {showMilestone && (
               <div className='absolute inset-0 flex items-center justify-center z-20 pointer-events-none'>
                 <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl font-black text-2xl shadow-lg animate-pulse flex items-center gap-2'>
-                  <span role='img' aria-label='fire'>🔥</span>
+                  <KenneyIcon type='heart' size={20} />
                   <span>{streak} Streak!</span>
-                  <span role='img' aria-label='fire'>🔥</span>
+                  <KenneyIcon type='heart' size={20} />
                 </div>
               </div>
             )}

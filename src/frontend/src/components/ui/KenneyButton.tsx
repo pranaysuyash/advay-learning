@@ -84,34 +84,6 @@ export function KenneyButton({
 }
 
 /**
- * Kenney UI Panel
- *
- * Background panels from UI Pack.
- * @deprecated No consumers found — scheduled for removal in a dedicated cleanup commit.
- */
-interface KenneyPanelProps {
-  children: ReactNode;
-  variant?: 'default' | 'blue' | 'green' | 'red' | 'yellow';
-  className?: string;
-}
-
-export function KenneyPanel({
-  children,
-  variant = 'default',
-  className = '',
-}: KenneyPanelProps) {
-  const color = variant === 'default' ? 'grey' : variant;
-  return (
-    <div
-      className={`p-6 rounded-2xl bg-gray-100 ${className}`}
-      data-kenney-panel={color}
-    >
-      {children}
-    </div>
-  );
-}
-
-/**
  * Kenney UI Progress Bar
  *
  * Uses 9-slice scaling for smooth progress bars
@@ -151,68 +123,6 @@ export function KenneyProgressBar({
           backgroundPosition: 'left center, center center',
           backgroundRepeat: 'no-repeat, repeat-x',
         }}
-      />
-    </div>
-  );
-}
-
-/**
- * Kenney UI Slider
- *
- * @deprecated Slider assets (`sliderBack.png`, `sliderBlue.png`) are not
- * present in the local Kenney bundle and were not imported with this pack.
- * This component renders broken until those assets are sourced.
- * Use a plain HTML `<input type="range">` or a CSS-based slider instead.
- */
-interface KenneySliderProps {
-  value: number;
-  min?: number;
-  max?: number;
-  onChange?: (value: number) => void;
-  className?: string;
-}
-
-export function KenneySlider({
-  value,
-  min = 0,
-  max = 100,
-  onChange,
-  className = '',
-}: KenneySliderProps) {
-  const percentage = ((value - min) / (max - min)) * 100;
-
-  return (
-    <div className={`relative h-12 ${className}`}>
-      {/* Track */}
-      <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-4"
-        style={{
-          backgroundImage: 'url(/assets/kenney/ui/progress/sliderBack.png)',
-          backgroundSize: '100% 100%',
-        }}
-      />
-      {/* Handle */}
-      <button
-        className="absolute top-1/2 -translate-y-1/2 w-8 h-8 -ml-4 transition-all active:scale-95"
-        style={{
-          left: `${percentage}%`,
-          backgroundImage: 'url(/assets/kenney/ui/progress/sliderBlue.png)',
-          backgroundSize: '100% 100%',
-          border: 'none',
-          backgroundColor: 'transparent',
-          cursor: 'pointer',
-        }}
-        onClick={() => {}}
-      />
-      {/* Invisible range input for accessibility */}
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => onChange?.(Number(e.target.value))}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        aria-label="Slider"
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -27,6 +28,11 @@ const resultMessage: Record<string, string> = {
   'missing-region': 'Could not find that region.',
 };
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 // Inner game component
 interface ColorByNumberGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
@@ -37,6 +43,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('color-by-number');
   const [view, setView] = useState<'menu' | 'play'>('menu');
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
 
   const [templateIndex, setTemplateIndex] = useState(0);
   const activeTemplate = useMemo(
@@ -112,6 +119,16 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
 
   const completion = getCompletionPercent(gameState);
   const suggestedNumber = getSuggestedNumber(gameState);
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   if (view === 'menu') {
     return (

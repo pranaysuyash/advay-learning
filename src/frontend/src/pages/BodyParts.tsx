@@ -20,6 +20,7 @@ import {
   type BodyPart,
 } from '../games/bodyPartsLogic';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 interface BodyPartsCtx {
   score: number;
@@ -194,7 +195,7 @@ function BodyPartsGame({
           <div className='text-center'>
             {/* Streak HUD */}
             <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
-              <span className='font-black text-lg'>🔥 Streak</span>
+              <div className='flex items-center gap-1'><KenneyIcon type='heart' size={20} /><span className='font-black text-lg'>Streak</span></div>
               <div className='flex gap-1'>
                 {[1, 2, 3, 4, 5].map((i) => (
                   <img
@@ -217,9 +218,9 @@ function BodyPartsGame({
             {/* Streak milestone popup */}
             {showMilestone && (
               <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
-                <p className='text-xl font-black text-orange-600'>
-                  🔥 {streak} Streak! 🔥
-                </p>
+                <div className='text-xl font-black text-orange-600'>
+                  <span className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></span>
+                </div>
               </div>
             )}
 
@@ -266,7 +267,7 @@ function BodyPartsGame({
 
         {gameState === 'complete' && (
           <div className='text-center'>
-            <p className='text-6xl mb-4'>🎉</p>
+            <div className='flex justify-center mb-4'><KenneyIcon type='star' size={64} /></div>
             <h2 className='text-2xl font-bold mb-2'>Great Job!</h2>
             <p className='text-xl mb-4'>You got {correct} right!</p>
             {/* Streak badge */}

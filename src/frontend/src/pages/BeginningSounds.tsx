@@ -15,6 +15,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { AssetPreloader } from '../components/AssetPreloader';
 import {
   LEVELS,
   buildBeginningSoundsRound,
@@ -23,11 +24,17 @@ import {
   type BeginningSoundsRound,
 } from '../games/beginningSoundsLogic';
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 // Inner game component
 const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const hasAccess = canAccessGame('beginning-sounds');
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('beginning-sounds');
@@ -98,12 +105,14 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     }
   }, [voiceFallback, fallback]);
 
-  // Show loading while checking subscription
-  if (subLoading) {
+  // Show loading while checking subscription or loading assets
+  if (subLoading || !assetsLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-      </div>
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
     );
   }
 

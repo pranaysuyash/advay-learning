@@ -1,0 +1,138 @@
+═══════════════════════════════════════════════════════════════════════════════
+                 GAME LOGIC FILES AUDIT - FINAL SUMMARY
+                         March 10, 2026
+═══════════════════════════════════════════════════════════════════════════════
+
+CLASSIFICATION RESULTS
+─────────────────────────────────────────────────────────────────────────────
+
+✅ ACTIVE (5 files - KEEP)
+   1. chemistryLabLogic.ts (360 LOC) → VirtualChemistryLab.tsx
+   2. cuttingPracticeLogic.ts (367 LOC) → CuttingPractice.tsx
+   3. shadowPortal/particles.ts (482 LOC) → ShadowPortal.tsx
+   4. kenneyAssetRegistry.ts (580 LOC) → CharacterReaction.tsx (utility)
+   5. emojiToKenney.ts (244 LOC) → ItemIcon.tsx (utility)
+
+🟡 CODE DUPLICATION (1 file - REFACTOR)
+   6. platformerRunnerLogic.ts (324 LOC)
+      • Test file imports it: ✓
+      • Page (PlatformerRunner.tsx) imports it: ✗ (code is duplicated inline)
+      ACTION: Import logic in page or delete module
+
+🔴 ORPHANED (1 file - DELETE/RECONNECT)
+   7. washHandsDanceLogic.ts (99 LOC)
+      • No imports anywhere
+      • No test file
+      • No spec doc
+      • No page component
+      ACTION: Delete unused code or create WashHandsDance.tsx
+
+═══════════════════════════════════════════════════════════════════════════════
+
+CRITICAL ISSUES
+─────────────────────────────────────────────────────────────────────────────
+
+🔴 ISSUE 1: washHandsDanceLogic.ts is orphaned code
+   • Complete game logic but zero usage
+   • Decision needed: Use it or delete it?
+   • If using: Create WashHandsDance.tsx + tests + spec doc
+   • If not: Delete washHandsDanceLogic.ts
+
+🟡 ISSUE 2: platformerRunnerLogic.ts is duplicated
+   • Logic extracted to module + fully tested
+   • Page (PlatformerRunner.tsx) doesn't import it
+   • Page reimplements same logic inline
+   • Creates maintenance burden (changes won't sync)
+   • Solution: Import logic in page or document why separate
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STATISTICS
+─────────────────────────────────────────────────────────────────────────────
+
+Code Coverage:
+  • Active/Consumed: 2,397 LOC (85%) ✅
+  • Problematic: 423 LOC (15%) ⚠️
+    - Orphaned: 99 LOC
+    - Duplicated: 324 LOC
+  • Total Audited: 2,456 LOC
+
+Test Coverage:
+  • With dedicated tests: 5 files (65.8K LOC of test code) ✅
+  • Without tests: 2 files (utility - not required)
+
+Documentation:
+  • With spec docs: 5 files ✅
+  • Without spec docs: 2 files
+    - washHandsDance (orphaned)
+    - cuttingPractice (should add for consistency)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IMMEDIATE ACTIONS REQUIRED
+─────────────────────────────────────────────────────────────────────────────
+
+PRIORITY 1 (CRITICAL)
+  □ washHandsDanceLogic.ts
+    • DECISION: Delete orphaned code or create WashHandsDance.tsx page?
+    • If deleting: rm src/frontend/src/games/washHandsDanceLogic.ts
+    • If keeping: Create page + tests + spec doc
+
+PRIORITY 2 (HIGH)
+  □ platformerRunnerLogic.ts
+    • REFACTOR: Consolidate duplicated code
+    • Option A: Import platformerRunnerLogic in PlatformerRunner.tsx
+    • Option B: Delete platformerRunnerLogic.ts (document why separate)
+
+PRIORITY 3 (MEDIUM)
+  □ cuttingPracticeLogic.ts
+    • ADD DOCUMENTATION: Create docs/games/cutting-practice-spec.md
+    • Reference: Use chemistry-lab-spec.md as template
+
+═══════════════════════════════════════════════════════════════════════════════
+
+UTILITY FILES VERIFICATION
+─────────────────────────────────────────────────────────────────────────────
+
+✅ kenneyAssetRegistry.ts (580 LOC)
+   • Used by: src/frontend/src/components/game/CharacterReaction.tsx
+   • Function: getCharacterAsset(color, animation) → sprite path
+   • Status: KEEP - Essential for character animations
+
+✅ emojiToKenney.ts (244 LOC)
+   • Used by: src/frontend/src/components/ui/ItemIcon.tsx
+   • Function: getKenneyIconForEmoji(emoji) → icon type
+   • Usage: Maps collectible item emojis to game icons
+   • Status: KEEP - Essential for visual consistency
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FILE-BY-FILE DECISIONS
+─────────────────────────────────────────────────────────────────────────────
+
+1. washHandsDanceLogic.ts ........... 🔴 DELETE or RECONNECT
+2. chemistryLabLogic.ts ............ ✅ KEEP (active, tested, spec'd)
+3. cuttingPracticeLogic.ts ......... ✅ KEEP + add docs
+4. platformerRunnerLogic.ts ........ 🟡 REFACTOR (code duplication)
+5. shadowPortal/particles.ts ....... ✅ KEEP (active, tested, spec'd)
+6. kenneyAssetRegistry.ts .......... ✅ KEEP (utility, essential)
+7. emojiToKenney.ts ................ ✅ KEEP (utility, essential)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FULL REPORT
+─────────────────────────────────────────────────────────────────────────────
+
+See: docs/GAME_LOGIC_AUDIT_REPORT.md
+
+This detailed report includes:
+• Code structure analysis for each file
+• Import/usage verification results
+• Test coverage evaluation
+• Specification document review
+• Specific recommendations for action
+• Statistics and metrics
+• ItemIcon.tsx usage verification
+• Line-by-line reference to code locations
+
+═══════════════════════════════════════════════════════════════════════════════

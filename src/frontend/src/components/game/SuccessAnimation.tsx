@@ -40,8 +40,8 @@ interface SuccessAnimationProps {
   /** Show character celebration (default: true) */
   showCharacter?: boolean;
 
-  /** Custom character emoji (default: '🎉') */
-  characterEmoji?: string;
+  /** Custom character or emoji to display (default: '🎉') */
+  characterEmoji?: React.ReactNode;
 }
 
 interface Particle {

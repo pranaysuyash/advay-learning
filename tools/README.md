@@ -117,6 +117,145 @@ Generated: 2026-03-09
 ## Summary
 - Total Assets: 450
 - Used: 15 (3.3%)
+```
+
+---
+
+## 🚀 Asset Preloader & Lazy Loading
+
+**Purpose:** Preload critical Kenney assets before gameplay to eliminate mid-game loading delays.
+
+**Files:**
+- `src/frontend/src/components/AssetPreloader.tsx`
+- `src/frontend/src/utils/assetLoader.ts`
+
+### Why This Matters
+
+- **Perceived Performance:** Loading screen prevents janky gameplay
+- **Critical Assets First:** Hearts, coins, stars loaded before game starts
+- **Lazy Loading:** Game-specific assets load on-demand
+- **Caching:** Previously loaded assets cached for instant reuse
+
+### Usage
+
+**Preloader Component:**
+```tsx
+import { AssetPreloader, CRITICAL_ASSETS } from './components/AssetPreloader';
+
+function GameApp() {
+  const [ready, setReady] = useState(false);
+
+  if (!ready) {
+    return (
+      <AssetPreloader 
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setReady(true)}
+        minDisplayTime={1500}
+      />
+    );
+  }
+
+  return <Game />;
+}
+```
+
+**Lazy Loading:**
+```tsx
+import { lazyLoadImage, loadGameAssets, ASSET_MANIFESTS } from './utils/assetLoader';
+
+// Load single image
+const coinImage = await lazyLoadImage('/assets/kenney/platformer/collectibles/coin_gold.png');
+
+// Load all assets for a game
+const assets = await loadGameAssets('myGame', ASSET_MANIFESTS.platformer);
+```
+
+### Features
+
+- **Priority Loading:** Critical → High → Normal priority order
+- **Concurrent Loading:** 4-6 parallel requests
+- **Progress Callbacks:** Real-time loading progress
+- **Error Handling:** Graceful fallbacks for failed assets
+- **LRU Cache:** Automatic cache management (50MB default)
+
+---
+
+## 🧩 Sprite Atlas Generator
+
+**Purpose:** Combine multiple small assets into sprite atlases for fewer HTTP requests.
+
+**File:** `tools/generate-sprite-atlas.js`
+
+### Why Use Atlases
+
+- **Fewer Requests:** One atlas = one request vs. many
+- **Better Packing:** GPU-optimized texture layouts
+- **Faster Rendering:** Batch sprite draws
+
+### Usage
+
+```bash
+# Generate atlas from collectibles
+node tools/generate-sprite-atlas.js \
+  src/frontend/public/assets/kenney/platformer/collectibles \
+  src/frontend/public/assets/kenney/atlas \
+  --name collectibles
+
+# Output:
+#   atlas/collectibles.png  (combined image)
+#   atlas/collectibles.json (frame coordinates)
+```
+
+### Requirements
+
+**For full image generation:**
+- ImageMagick (`brew install imagemagick` on macOS)
+- OR Node.js Canvas library (`npm install canvas`)
+
+**Current implementation:**
+The script currently generates JSON manifests only. Full image packing requires one of the above dependencies.
+
+### Manual Atlas Creation
+
+For collectibles, a manifest is pre-generated at:
+- `src/frontend/public/assets/kenney/atlas/collectibles.json`
+
+This can be used with CSS background-position or canvas drawing.
+
+### Integration with Code
+
+```tsx
+// Use atlas instead of individual files
+import atlasManifest from '../public/assets/kenney/atlas/collectibles.json';
+
+// Get frame coordinates
+const coinFrame = atlasManifest.frames['coin_gold'];
+// Render with: background-position based on frame.x, frame.y
+```
+
+---
+
+## 📊 Kenney Asset Workflow Summary
+
+### For Game Developers
+
+1. **Check Existing Assets:** Use `kenney_asset_report.html`
+2. **Import New Assets:** Follow `assets/kenney/README.md`
+3. **Preload Critical:** Use `AssetPreloader` with `CRITICAL_ASSETS`
+4. **Lazy Load Rest:** Use `lazyLoadImage()` for game-specific assets
+5. **Replace Emoji:** Use `KenneyIcon` component
+
+### For Asset Management
+
+1. **Audit:** Run `kenney_asset_report.html` monthly
+2. **Optimize:** Generate atlases for frequently used asset groups
+3. **Document:** Update `KENNEY_ASSET_AUDIT_COMPLETE.md`
+
+---
+
+## Summary
+- Total Assets: 450
+- Used: 15 (3.3%)
 - Unused: 435 (96.7%)
 
 ## Unused Assets (435)
@@ -129,6 +268,46 @@ Generated: 2026-03-09
 2. Replace emoji with Kenney assets
 3. Use unused backgrounds for game themes
 ```
+
+---
+
+## 📊 Performance Benchmark
+
+**Purpose:** Measure and compare asset loading performance with different strategies.
+
+**File:** `tools/performance_benchmark.html`
+
+### Features
+
+- **Load Time Measurement:** Test sequential vs parallel vs cached loading
+- **Network Simulation:** Test with different throttling profiles (Fast 3G, Slow 3G)
+- **Strategy Comparison:** Compare with and without preloading
+- **Visual Results:** Charts and metrics for easy analysis
+
+### Usage
+
+```bash
+# Open in browser
+open tools/performance_benchmark.html
+
+# Or serve locally
+cd tools && python3 -m http.server 8080
+# Then open http://localhost:8080/performance_benchmark.html
+```
+
+### Test Scenarios
+
+1. **Sequential Loading:** Load assets one at a time
+2. **Parallel Loading:** Load all assets simultaneously
+3. **Cached Loading:** Load assets after they've been cached
+
+### Metrics Tracked
+
+- Average load time
+- Minimum/maximum times
+- Success rate
+- Number of requests
+- Improvement percentage
 
 ---
 

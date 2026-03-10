@@ -22,6 +22,7 @@ import {
   type TargetPoint,
 } from '../games/targetPracticeLogic';
 import { isPointInCircle } from '../utils/geometry';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 // Difficulty configuration matching spec
 interface DifficultyConfig {
@@ -436,7 +437,7 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
               {/* Streak */}
               {streak > 0 && (
                 <div className="bg-orange-500 text-white px-4 py-2 rounded-xl font-black shadow-lg flex items-center gap-2">
-                  <span className="text-2xl">🔥</span>
+                  <KenneyIcon type='heart' size={20} />
                   <span className="text-xl">{streak}</span>
                 </div>
               )}
@@ -452,7 +453,7 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
                   className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
                 >
                   <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-black text-3xl shadow-2xl border-4 border-white">
-                    🔥 {streak} Streak! 🔥
+                    <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
                   </div>
                 </motion.div>
               )}
@@ -517,10 +518,10 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
               {streak >= 3 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full font-black shadow-lg">
                   {streak >= 10
-                    ? '🔥🔥 EPIC COMBO! 🔥🔥'
+                    ? 'EPIC COMBO!'
                     : streak >= 5
-                      ? '🔥 SUPER COMBO! 🔥'
-                      : '🔥 COMBO! 🔥'}
+                      ? 'SUPER COMBO!'
+                      : 'COMBO!'}
                 </div>
               )}
             </div>
