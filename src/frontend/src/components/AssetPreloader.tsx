@@ -69,9 +69,16 @@ function preloadImage(src: string): Promise<void> {
 function preloadAudio(src: string): Promise<void> {
   return new Promise((resolve) => {
     const audio = new Audio();
-    const timeout = setTimeout(() => resolve(), 5000);
+    const timeout = setTimeout(() => {
+      console.warn(`[AssetPreloader] Audio timed out (5s): ${src}`);
+      resolve();
+    }, 5000);
     audio.addEventListener('canplaythrough', () => { clearTimeout(timeout); resolve(); }, { once: true });
-    audio.addEventListener('error', () => { clearTimeout(timeout); resolve(); }, { once: true });
+    audio.addEventListener('error', () => {
+      clearTimeout(timeout);
+      console.warn(`[AssetPreloader] Audio failed to load: ${src}`);
+      resolve();
+    }, { once: true });
     audio.src = src;
     audio.load();
   });

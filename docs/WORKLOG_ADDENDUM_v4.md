@@ -1536,3 +1536,37 @@ Ticket Stamp: STAMP-20260310T193500Z-copilot
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 Refs: TCK-20260310-001
+
+---
+
+### TCK-20260310-001-P :: AssetPreloader Audio Silent Failure Fix
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-03-10
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+- In-scope: Add console.warn on audio preload error/timeout in AssetPreloader.tsx
+- Out-of-scope: Changing graceful-resolve behavior
+- Behavior change allowed: NO (still resolves gracefully; adds logging only)
+
+Targets:
+- File: src/frontend/src/components/AssetPreloader.tsx
+
+Acceptance Criteria:
+- [x] console.warn emitted on audio error with src path
+- [x] console.warn emitted on 5s timeout with src path
+- [x] TSC exits 0
+
+Source:
+- PR #20 CodeRabbit review thread PRRT_kwDORGg-185zUCqx
+
+Execution log:
+- 2026-03-10T19:38Z Added console.warn calls in preloadAudio error + timeout handlers | Evidence: Observed — tsc exit 0
+
+Ticket Stamp: STAMP-20260310T193800Z-copilot
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+Refs: TCK-20260310-001
