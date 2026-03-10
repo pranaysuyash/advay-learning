@@ -17,6 +17,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Webcam from 'react-webcam';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -374,7 +375,11 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
               animate={{ scale: 1, opacity: 1 }}
               className="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-md"
             >
-              <div className="text-6xl mb-4">⭐ 🪙 💎</div>
+              <div className="flex items-center justify-center gap-3 mb-4">
+              <KenneyIcon type="star" size={48} />
+              <KenneyIcon type="coin" size={48} />
+              <KenneyIcon type="gem" size={48} />
+            </div>
               <h2 className="text-3xl font-bold text-slate-800 mb-4">Counting Collect-a-thon!</h2>
               <p className="text-slate-600 mb-6">
                 Help collect the treasures! Move your hand to steer the character and catch the right items!

@@ -72,8 +72,8 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.7  
-**Last Updated**: 2026-03-05  
+**Version**: 1.8  
+**Last Updated**: 2026-03-09  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -100,6 +100,8 @@ This document governs how AI agents (including myself and others) work on the Ad
 - `docs/WORKLOG_TICKETS.md` is protected and treated as a curated index/history file.
 - Direct edits to `docs/WORKLOG_TICKETS.md` are allowed only for explicit curation tasks and require intentional override in local gates.
 - If any instruction below says “update `docs/WORKLOG_TICKETS.md`”, interpret it as “update a `docs/WORKLOG_ADDENDUM_*.md` file” unless the user explicitly requests ticket-file curation.
+- **`docs/WORKLOG_ADDENDUM_*.md` files may be directly edited only to update ticket fields within an existing ticket entry** (e.g. changing `Status:`, adding an `Execution log:` line, appending `Status updates:`). All other changes must be pure appends — new tickets or new sections added at the end. Never delete lines, reorganize sections, or rewrite narrative outside of ticket fields.
+- **Do not use `ALLOW_WORKLOG_REWRITE=1` for ticket status updates.** Ticket field edits (Status, Execution log, Status updates) are legitimate in-place modifications exempt from the append-only restriction. The `ALLOW_WORKLOG_REWRITE` flag is reserved only for intentional bulk curation/rewrite tasks explicitly requested by the user.
 
 ### 2.2 GitHub Issues + Project Mirror (Required)
 
@@ -124,25 +126,27 @@ This document governs how AI agents (including myself and others) work on the Ad
 - One PR = One audit remediation OR one hardening scope
 - No scope creep without explicit approval
 
-### 4. Preservation First + Implementation Over Deletion
+### 4. Replace Legacy Code When The New Code Is Better
 
-**Principle:** Don't just delete unused code. Understand why it exists, see if it can make the app better, and implement functionality rather than delete.
+**Principle:** This repo is pre-launch. Do not preserve legacy implementations just to avoid deleting them. If a new implementation is more correct, more comprehensive, and maintainable, prefer removing the superseded code instead of carrying both paths as tech debt.
 
 **Guidelines:**
 
-- Never discard contributor code unless clearly inferior
-- Keep meaningful comments/tests/docs unless incorrect
-- Prefer merging both sides when resolving conflicts
-- **Investigate before deleting**: When you find unused code, investigate its history and purpose
-- **Prefer activation**: If code is 70%+ complete and adds value, complete it rather than delete
-- **See**: `docs/process/CODE_PRESERVATION_GUIDELINES.md` for detailed workflow
+- Do not keep duplicate legacy and replacement implementations unless there is a current, documented migration need.
+- Prefer one canonical implementation per behavior.
+- Remove older code when the replacement is demonstrably better or fully covers the intended behavior.
+- Keep comments/tests/docs only when they remain correct for the surviving implementation.
+- Prefer merging useful behavior into the canonical implementation, then delete the redundant path.
+- **Investigate before deleting**: confirm what the old code does, what the new code covers, and whether any unique behavior still needs to be preserved.
+- **Required evidence for deletion/replacement**: document why the replacement is better or comprehensive enough, and record the verification that supports removing the old path.
+- **See**: `docs/process/CODE_PRESERVATION_GUIDELINES.md` for additional workflow guidance where relevant.
 
-**No deletions without explicit approval**:
+**Deletion/replacement policy**:
 
-- Never delete files (code, docs, audits, tickets, assets) unless the user explicitly asks for deletion **or** there is explicit, recorded approval in the active ticket.
-- Strict command rule: do not run `rm`, `git rm`, or any delete-equivalent command on project files unless the user explicitly requests deletion in the current chat.
-- If cleanup is needed, move to an `archive/` folder and leave a pointer note (preserve history).
-- **Exception**: Deletion is acceptable after completing the investigation workflow in CODE_PRESERVATION_GUIDELINES.md and documenting why deletion was chosen over implementation.
+- Legacy code may be deleted without separate user approval when it is being replaced by a better/comprehensive implementation in the same scoped change.
+- Do not keep side-by-side legacy files, compatibility wrappers, or dead exports unless they are still required by a verified migration plan.
+- Do not delete unrecognized parallel-agent work just because it looks obsolete; first confirm it is actually superseded by the replacement.
+- For non-legacy project assets such as docs, audits, tickets, or user-authored content, preserve existing approval discipline unless the current task explicitly covers their removal.
 
 ### 5. Staging Is Always Comprehensive
 
@@ -198,6 +202,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 - A worklog addendum ticket exists for the refactor
 - The sidecar has a documented promotion/removal plan
 - The canonical file remains the runtime entrypoint until verification is complete
+- Sidecars are temporary only; if the replacement is ready and verified, promote it and remove the sidecar before merge
 
 **Every sidecar must document:**
 
@@ -214,21 +219,21 @@ This document governs how AI agents (including myself and others) work on the Ad
 2. Identify any useful unique behavior in the sidecar
 3. Integrate only verified improvements into the canonical file
 4. Verify the canonical file still compiles and preserves expected behavior
-5. Remove the sidecar only after its useful behavior is fully preserved or proven nonexistent
+5. Remove the sidecar once its useful behavior is fully preserved or proven unnecessary in the canonical implementation
 
 **Prohibited patterns:**
 
 - Do not bulk-create sidecars without a cleanup plan
 - Do not leave sidecars in live runtime directories indefinitely
 - Do not treat comments, renamed headers, or import stubs as a completed refactor
-- Do not delete sidecars before reviewing whether they contain useful behavior
+- Do not keep sidecars after the replacement is verified unless the ticket explicitly requires temporary coexistence
 - Do not bulk-delete multiple sidecars without per-file audit evidence
 
 **Main branch rule:**
 
 - `*Refactored.tsx` files should not land on `main` by default
 - If temporary sidecars must exist, they are WIP-only and require an explicit override plus a worklog note
-- Promotion into the canonical file should happen before merge whenever possible
+- Promotion into the canonical file and removal of the sidecar should happen before merge whenever possible
 
 **Override policy:**
 
@@ -263,7 +268,8 @@ This document governs how AI agents (including myself and others) work on the Ad
 - **Save to `tools/` directory**: Store standalone helper utilities in the project's `tools/` folder
 - **Make it standalone**: Tools should work independently with minimal dependencies
 - **Document in `tools/README.md`**: Add purpose, use cases, how-to-use, and examples
-- **Migrate from temp paths immediately**: If a helper was created in `/tmp`, move it into `tools/` before completing the task
+- **Never use `/tmp` or any path outside the project for project work.** All scripts, helpers, intermediate files, and artifacts must be created inside the project directory. Use `tools/` for reusable utilities, `docs/` for documentation, the project source tree for code. `/tmp` does not count as saved work — anything written there is considered lost.
+- **Migrate from temp paths immediately**: If a helper was accidentally created in `/tmp`, move it into `tools/` before completing the task
 - **Use descriptive names**: `video_frame_analyzer.html` not `temp_analyzer.html` or `tool1.py`
 - **Prefer portable formats**: HTML/JS for UI tools (works offline), Python for CLI tools
 - **Think cross-project**: Design tools that could be useful in other codebases

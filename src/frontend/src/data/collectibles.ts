@@ -46,22 +46,23 @@ const ELEMENTS: CollectibleItem[] = [
   { id: 'element-c',  name: 'Carbon',    emoji: '⬛', category: 'element', rarity: 'common',   description: 'The building block of life.',     funFact: 'Diamonds are made of pure carbon!' },
   { id: 'element-n',  name: 'Nitrogen',  emoji: '🌫️', category: 'element', rarity: 'common',   description: 'Most of the air is nitrogen!',   funFact: '78% of the air you breathe is nitrogen.' },
   { id: 'element-na', name: 'Sodium',    emoji: '🧂', category: 'element', rarity: 'uncommon', description: 'Half of table salt!',             funFact: 'Sodium explodes when it touches water!' },
-  { id: 'element-cl', name: 'Chlorine',  emoji: '🟢', category: 'element', rarity: 'uncommon', description: 'The other half of salt!',         funFact: 'Chlorine is used to keep swimming pools clean.' },
+  { id: 'element-cl', name: 'Chlorine',  emoji: '🟢', icon: '/assets/kenney/platformer/tiles/switch_green.png', category: 'element', rarity: 'uncommon', description: 'The other half of salt!',         funFact: 'Chlorine is used to keep swimming pools clean.' },
   { id: 'element-fe', name: 'Iron',      emoji: '🔩', category: 'element', rarity: 'uncommon', description: 'Strong metal for building!',      funFact: 'Earth\'s core is mostly made of iron.' },
-  { id: 'element-au', name: 'Gold',      emoji: '🥇', category: 'element', rarity: 'rare',     description: 'The precious golden metal!',      funFact: 'All the gold ever mined would fit in 3.5 Olympic pools.' },
+  { id: 'element-au', name: 'Gold',      emoji: '🥇', icon: '/assets/kenney/platformer/collectibles/coin_gold.png', category: 'element', rarity: 'rare',     description: 'The precious golden metal!',      funFact: 'All the gold ever mined would fit in 3.5 Olympic pools.' },
   { id: 'element-he', name: 'Helium',    emoji: '🎈', category: 'element', rarity: 'uncommon', description: 'Makes balloons float!',           funFact: 'Helium makes your voice squeaky because sound travels faster through it.' },
-  { id: 'element-s',  name: 'Sulfur',    emoji: '🟡', category: 'element', rarity: 'common',   description: 'Smells like rotten eggs!',        funFact: 'Volcanoes release sulfur, giving them their smell.' },
+  { id: 'element-s',  name: 'Sulfur',    emoji: '🟡', icon: '/assets/kenney/platformer/tiles/switch_yellow.png', category: 'element', rarity: 'common',   description: 'Smells like rotten eggs!',        funFact: 'Volcanoes release sulfur, giving them their smell.' },
 ];
 
 // ─── COLORS (from Color Match Garden + Air Canvas) ──────────────────────
+// Note: Colors use emoji since Kenney doesn't have color-specific icons
 
 const COLORS: CollectibleItem[] = [
-  { id: 'color-red',    name: 'Red',    emoji: '🔴', category: 'color', rarity: 'common',   description: 'The color of fire and love!',       funFact: 'Red is the first color babies can see.' },
-  { id: 'color-blue',   name: 'Blue',   emoji: '🔵', category: 'color', rarity: 'common',   description: 'The color of sky and ocean!',       funFact: 'Blue is the most popular favorite color in the world.' },
-  { id: 'color-yellow', name: 'Yellow', emoji: '🟡', category: 'color', rarity: 'common',   description: 'The color of sunshine!',            funFact: 'Yellow is the most visible color from a distance.' },
-  { id: 'color-green',  name: 'Green',  emoji: '🟢', category: 'color', rarity: 'common',   description: 'The color of nature!',              funFact: 'The human eye can see more shades of green than any other color.' },
+  { id: 'color-red',    name: 'Red',    emoji: '🔴', icon: '/assets/kenney/platformer/tiles/switch_red.png', category: 'color', rarity: 'common',   description: 'The color of fire and love!',       funFact: 'Red is the first color babies can see.' },
+  { id: 'color-blue',   name: 'Blue',   emoji: '🔵', icon: '/assets/kenney/platformer/tiles/switch_blue.png', category: 'color', rarity: 'common',   description: 'The color of sky and ocean!',       funFact: 'Blue is the most popular favorite color in the world.' },
+  { id: 'color-yellow', name: 'Yellow', emoji: '🟡', icon: '/assets/kenney/platformer/tiles/switch_yellow.png', category: 'color', rarity: 'common',   description: 'The color of sunshine!',            funFact: 'Yellow is the most visible color from a distance.' },
+  { id: 'color-green',  name: 'Green',  emoji: '🟢', icon: '/assets/kenney/platformer/tiles/switch_green.png', category: 'color', rarity: 'common',   description: 'The color of nature!',              funFact: 'The human eye can see more shades of green than any other color.' },
   { id: 'color-orange', name: 'Orange', emoji: '🟠', category: 'color', rarity: 'uncommon', description: 'Warm like a sunset!',               funFact: 'The color was named after the fruit, not the other way around!' },
-  { id: 'color-purple', name: 'Purple', emoji: '🟣', category: 'color', rarity: 'uncommon', description: 'The color of royalty!',             funFact: 'In ancient Rome, only emperors could wear purple.' },
+  { id: 'color-purple', name: 'Purple', emoji: '🟣', icon: '/assets/kenney/platformer/tiles/gem_blue.png', category: 'color', rarity: 'uncommon', description: 'The color of royalty!',             funFact: 'In ancient Rome, only emperors could wear purple.' },
   { id: 'color-pink',   name: 'Pink',   emoji: '🩷', category: 'color', rarity: 'uncommon', description: 'Soft and sweet!',                  funFact: 'There is no pink wavelength of light — your brain invents it!' },
   { id: 'color-white',  name: 'White',  emoji: '⚪', category: 'color', rarity: 'common',   description: 'All colors combined!',              funFact: 'White light contains all colors of the rainbow.' },
   { id: 'color-black',  name: 'Black',  emoji: '⚫', category: 'color', rarity: 'common',   description: 'The absence of light.',             funFact: 'Vantablack absorbs 99.965% of light!' },
@@ -74,9 +75,9 @@ const SHAPES: CollectibleItem[] = [
   { id: 'shape-circle',   name: 'Circle',   emoji: '⭕', category: 'shape', rarity: 'common',   description: 'Round and round, no corners!',     funFact: 'A circle has infinite lines of symmetry.' },
   { id: 'shape-triangle', name: 'Triangle', emoji: '🔺', category: 'shape', rarity: 'common',   description: 'Three sides, three corners!',       funFact: 'Triangles are the strongest shape in engineering.' },
   { id: 'shape-square',   name: 'Square',   emoji: '🟧', category: 'shape', rarity: 'common',   description: 'Four equal sides!',                 funFact: 'A square is a special type of rectangle.' },
-  { id: 'shape-star',     name: 'Star',     emoji: '⭐', category: 'shape', rarity: 'uncommon', description: 'Shining bright with five points!',  funFact: 'Real stars are actually sphere-shaped, not pointy!' },
-  { id: 'shape-heart',    name: 'Heart',    emoji: '❤️', category: 'shape', rarity: 'uncommon', description: 'The shape of love!',                funFact: 'The heart shape may come from an ancient plant called silphium.' },
-  { id: 'shape-diamond',  name: 'Diamond',  emoji: '💎', category: 'shape', rarity: 'rare',     description: 'Brilliant and precious!',           funFact: 'A diamond shape in math is called a rhombus.' },
+  { id: 'shape-star',     name: 'Star',     emoji: '⭐', icon: '/assets/kenney/platformer/collectibles/star.png', category: 'shape', rarity: 'uncommon', description: 'Shining bright with five points!',  funFact: 'Real stars are actually sphere-shaped, not pointy!' },
+  { id: 'shape-heart',    name: 'Heart',    emoji: '❤️', icon: '/assets/kenney/platformer/hud/hud_heart.png', category: 'shape', rarity: 'uncommon', description: 'The shape of love!',                funFact: 'The heart shape may come from an ancient plant called silphium.' },
+  { id: 'shape-diamond',  name: 'Diamond',  emoji: '💎', icon: '/assets/kenney/platformer/collectibles/gem_blue.png', category: 'shape', rarity: 'rare',     description: 'Brilliant and precious!',           funFact: 'A diamond shape in math is called a rhombus.' },
 ];
 
 // ─── CREATURES (from Yoga Animals + Word Builder) ───────────────────────

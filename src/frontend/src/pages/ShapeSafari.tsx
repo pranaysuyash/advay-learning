@@ -49,6 +49,8 @@ import {
 import type { TrackedHandFrame } from '../types/tracking';
 import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameStartButton } from '../components/game/GameStartButton';
+import { GameHUD } from '../components/game/GameHUD';
 
 const ShapeSafariContent = memo(function ShapeSafari() {
   // ===== AUDIO =====
@@ -272,20 +274,20 @@ const ShapeSafariContent = memo(function ShapeSafari() {
       // Build streak (separate from game logic - UI enhancement)
       const newStreak = streak + 1;
       setStreak(newStreak);
-      
+
       // Calculate score popup with streak bonus
       // Note: Actual score is calculated by markShapeFound, this is just for UI feedback
       const basePoints = 15;
       const streakBonus = Math.min(newStreak * 3, 15);
       const totalPoints = basePoints + streakBonus;
-      
+
       // Show score popup
       setScorePopup({ points: totalPoints });
       setTimeout(() => setScorePopup(null), 700);
-      
+
       // Haptics
       triggerHaptic('success');
-      
+
       // Milestone every 5
       if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
         setShowStreakMilestone(true);
@@ -488,6 +490,18 @@ const ShapeSafariContent = memo(function ShapeSafari() {
             </div>
           )}
 
+          <div className="mb-6 z-50">
+            <GameStartButton
+              onClick={() => {
+                const randomScene = SAFARI_SCENES[Math.floor(Math.random() * SAFARI_SCENES.length)];
+                startGame(randomScene.id);
+              }}
+              text="PLAY"
+            />
+          </div>
+
+          <p className="text-text-secondary text-sm mb-4">Or pick a specific scene:</p>
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl w-full">
             {SAFARI_SCENES.map(scene => (
               <button
@@ -541,37 +555,24 @@ const ShapeSafariContent = memo(function ShapeSafari() {
           </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2 bg-white/50 border-b border-[#F2CC8F]">
-            <div>
-              <h2 className="text-lg font-bold text-advay-slate">{currentScene?.name}</h2>
-              <p className="text-advay-slate text-xs">{currentScene?.description}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              {/* Kenney Heart HUD */}
-              <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-1 border-2 border-pink-200 shadow-sm">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <img
-                    key={i}
-                    src={streak >= (i + 1) * 2
-                      ? '/assets/kenney/platformer/hud/hud_heart.png'
-                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                    alt=""
-                    className="w-5 h-5"
-                  />
-                ))}
-                <span className="ml-1 text-sm font-bold text-pink-500">x{streak}</span>
-              </div>
-              <div className="text-advay-slate text-sm">
-                Found: <span className="text-green-500 font-bold">{progress.found}/{progress.total}</span>
-              </div>
-              <button
-                onClick={handleShowHint}
-                className="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-sm transition-colors"
-              >
-                💡 Hint
-              </button>
-            </div>
-          </div>
+          <GameHUD
+            streak={streak}
+            levelInfo={`${currentScene?.name || ''} - ${currentScene?.description || ''}`}
+            progressPercentage={progress.total > 0 ? (progress.found / progress.total) * 100 : 0}
+            rightHeaderContent={
+              <>
+                <div className="text-advay-slate text-sm bg-white/50 border-2 border-[#F2CC8F] px-3 py-1 rounded-xl font-black shadow-sm">
+                  Found: <span className="text-green-500">{progress.found}/{progress.total}</span>
+                </div>
+                <button
+                  onClick={handleShowHint}
+                  className="px-3 py-1 bg-yellow-100 border-2 border-yellow-300 hover:bg-yellow-200 text-yellow-700 rounded-xl text-sm transition-colors font-bold shadow-[0_2px_0_#FDE047] hover:shadow-none hover:translate-y-[2px]"
+                >
+                  💡 Hint
+                </button>
+              </>
+            }
+          />
 
           {/* Score Popup Animation */}
           {scorePopup && (

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenney Asset Browser & Report</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      line-height: 1.6;
+    }
+    
+    .header {
+      background: #16213e;
+      padding: 2rem;
+      border-bottom: 3px solid #e94560;
+    }
+    
+    .header h1 {
+      color: #e94560;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-card {
+      background: #0f3460;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #e94560;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #a0a0a0;
+    }
+    
+    .controls {
+      padding: 1.5rem 2rem;
+      background: #16213e;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #0f3460;
+      border-radius: 6px;
+      background: #1a1a2e;
+      color: #eee;
+      font-size: 1rem;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #0f3460;
+      color: #eee;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: #e94560;
+    }
+    
+    .content {
+      padding: 2rem;
+    }
+    
+    .section {
+      margin-bottom: 2rem;
+    }
+    
+    .section h2 {
+      color: #e94560;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #0f3460;
+    }
+    
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .asset-card {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 1rem;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .asset-card:hover {
+      border-color: #e94560;
+      transform: translateY(-2px);
+    }
+    
+    .asset-card.unused {
+      opacity: 0.6;
+      background: #1a1a2e;
+    }
+    
+    .asset-preview {
+      width: 100%;
+      height: 120px;
+      background: #0f3460;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    
+    .asset-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .asset-preview .placeholder {
+      font-size: 3rem;
+      opacity: 0.3;
+    }
+    
+    .asset-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .asset-path {
+      font-size: 0.75rem;
+      color: #a0a0a0;
+      word-break: break-all;
+      margin-bottom: 0.5rem;
+    }
+    
+    .asset-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    
+    .tag {
+      font-size: 0.625rem;
+      padding: 0.125rem 0.375rem;
+      background: #0f3460;
+      border-radius: 4px;
+      color: #a0a0a0;
+    }
+    
+    .tag.used {
+      background: #22c55e;
+      color: #000;
+    }
+    
+    .tag.unused {
+      background: #ef4444;
+      color: #fff;
+    }
+    
+    .usage-list {
+      font-size: 0.75rem;
+      color: #a0a0a0;
+      margin-top: 0.5rem;
+      max-height: 60px;
+      overflow-y: auto;
+    }
+    
+    .usage-list li {
+      list-style: none;
+      padding: 0.125rem 0;
+    }
+    
+    .usage-list li::before {
+      content: "→ ";
+      color: #e94560;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #a0a0a0;
+    }
+    
+    .report-output {
+      background: #0f3460;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .action-btn {
+      padding: 0.75rem 1.5rem;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+      background: #d63d56;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Kenney Asset Browser & Report</h1>
+    <p>Explore and audit Kenney assets in the Advay Vision Learning project</p>
+    <div class="stats" id="stats">
+      <!-- Stats populated by JS -->
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search assets..." />
+    </div>
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="used">Used</button>
+      <button class="filter-btn" data-filter="unused">Unused</button>
+      <button class="filter-btn" data-filter="collectible">Collectibles</button>
+      <button class="filter-btn" data-filter="hud">HUD</button>
+      <button class="filter-btn" data-filter="character">Characters</button>
+    </div>
+    <button class="action-btn" onclick="generateReport()">Generate Report</button>
+  </div>
+
+  <div class="content">
+    <div class="section">
+      <h2>Assets</h2>
+      <div class="asset-grid" id="assetGrid">
+        <!-- Assets populated by JS -->
+      </div>
+    </div>
+
+    <div class="section hidden" id="reportSection">
+      <h2>Generated Report</h2>
+      <div class="report-output" id="reportOutput"></div>
+    </div>
+  </div>
+
+  <script>
+    // Asset data - this mirrors the TypeScript registry
+    const BASE_PATH = '/assets/kenney/platformer';
+    
+    const assets = [
+      // Collectibles
+      { id: 'collectible_coin', path: `${BASE_PATH}/collectibles/coin_gold.png`, category: 'collectible', description: 'Gold coin for currency/rewards', used: true, usageLocations: ['ShapePop', 'CountingCollectathon'], tags: ['currency', 'reward', 'gold'] },
+      { id: 'collectible_gem', path: `${BASE_PATH}/collectibles/gem_blue.png`, category: 'collectible', description: 'Blue gem for premium rewards', used: true, usageLocations: ['ShapePop', 'ItemDropToast'], tags: ['currency', 'reward', 'premium'] },
+      { id: 'collectible_star', path: `${BASE_PATH}/collectibles/star.png`, category: 'collectible', description: 'Star for achievements', used: true, usageLocations: ['AirGuitarHero', 'AnimalSounds', 'BodyParts', 'ColorSortGame', 'NumberBubblePop', 'OddOneOut', 'PopTheNumber', 'ShapePop', 'WeatherMatch'], tags: ['achievement', 'score', 'star'] },
+      
+      // HUD - Hearts
+      { id: 'hud_heart_full', path: `${BASE_PATH}/hud/hud_heart.png`, category: 'hud', description: 'Full heart for lives', used: true, usageLocations: ['30+ games - lives system'], tags: ['hud', 'lives', 'health'] },
+      { id: 'hud_heart_half', path: `${BASE_PATH}/hud/hud_heart_half.png`, category: 'hud', description: 'Half heart', used: false, usageLocations: [], tags: ['hud', 'lives', 'health'] },
+      { id: 'hud_heart_empty', path: `${BASE_PATH}/hud/hud_heart_empty.png`, category: 'hud', description: 'Empty heart', used: true, usageLocations: ['30+ games - lives system'], tags: ['hud', 'lives', 'health'] },
+      
+      // Characters
+      { id: 'char_beige_idle', path: `${BASE_PATH}/characters/character_beige_idle.png`, category: 'character', description: 'Beige character idle', used: true, usageLocations: ['Avatar system', 'CharacterPicker'], tags: ['character', 'avatar', 'beige'] },
+      { id: 'char_green_idle', path: `${BASE_PATH}/characters/character_green_idle.png`, category: 'character', description: 'Green character idle', used: true, usageLocations: ['Avatar system'], tags: ['character', 'avatar', 'green'] },
+      { id: 'char_pink_idle', path: `${BASE_PATH}/characters/character_pink_idle.png`, category: 'character', description: 'Pink character idle', used: true, usageLocations: ['Avatar system'], tags: ['character', 'avatar', 'pink'] },
+      { id: 'char_purple_idle', path: `${BASE_PATH}/characters/character_purple_idle.png`, category: 'character', description: 'Purple character idle', used: true, usageLocations: ['Avatar system'], tags: ['character', 'avatar', 'purple'] },
+      { id: 'char_yellow_idle', path: `${BASE_PATH}/characters/character_yellow_idle.png`, category: 'character', description: 'Yellow character idle', used: true, usageLocations: ['Avatar system'], tags: ['character', 'avatar', 'yellow'] },
+      
+      // Enemies (sample)
+      { id: 'enemy_frog_idle', path: `${BASE_PATH}/enemies/frog_idle.png`, category: 'enemy', description: 'Frog enemy idle', used: true, usageLocations: ['Avatar system - Froggy'], tags: ['enemy', 'animal', 'frog'] },
+      { id: 'enemy_bee_rest', path: `${BASE_PATH}/enemies/bee_rest.png`, category: 'enemy', description: 'Bee enemy', used: true, usageLocations: ['Avatar system - Buzz'], tags: ['enemy', 'animal', 'bee'] },
+      { id: 'enemy_ladybug_rest', path: `${BASE_PATH}/enemies/ladybug_rest.png`, category: 'enemy', description: 'Ladybug enemy', used: true, usageLocations: ['Avatar system - Dots'], tags: ['enemy', 'animal', 'ladybug'] },
+    ];
+
+    // State
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // Initialize
+    function init() {
+      renderStats();
+      renderAssets();
+      setupEventListeners();
+    }
+
+    // Render stats
+    function renderStats() {
+      const used = assets.filter(a => a.used).length;
+      const unused = assets.filter(a => !a.used).length;
+      const byCategory = {};
+      assets.forEach(a => {
+        byCategory[a.category] = (byCategory[a.category] || 0) + 1;
+      });
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${assets.length}</div>
+          <div class="stat-label">Total Assets</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color: #22c55e">${used}</div>
+          <div class="stat-label">Used</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color: #ef4444">${unused}</div>
+          <div class="stat-label">Unused</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${Object.keys(byCategory).length}</div>
+          <div class="stat-label">Categories</div>
+        </div>
+      `;
+    }
+
+    // Render assets
+    function renderAssets() {
+      const grid = document.getElementById('assetGrid');
+      
+      let filtered = assets.filter(asset => {
+        const matchesFilter = 
+          currentFilter === 'all' ? true :
+          currentFilter === 'used' ? asset.used :
+          currentFilter === 'unused' ? !asset.used :
+          asset.category === currentFilter;
+        
+        const matchesSearch = 
+          !searchQuery || 
+          asset.id.toLowerCase().includes(searchQuery) ||
+          asset.description.toLowerCase().includes(searchQuery) ||
+          asset.tags.some(t => t.toLowerCase().includes(searchQuery));
+        
+        return matchesFilter && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <p>No assets found matching your criteria</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(asset => `
+        <div class="asset-card ${asset.used ? '' : 'unused'}">
+          <div class="asset-preview">
+            <img src="${asset.path}" 
+                 alt="${asset.id}" 
+                 onerror="this.parentElement.innerHTML='<span class=\'placeholder\'>📦</span>'">
+          </div>
+          <div class="asset-name">${asset.id}</div>
+          <div class="asset-path">${asset.path}</div>
+          <div class="asset-tags">
+            <span class="tag ${asset.used ? 'used' : 'unused'}">${asset.used ? '✓ Used' : '✗ Unused'}</span>
+            ${asset.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+          </div>
+          ${asset.usageLocations.length > 0 ? `
+            <ul class="usage-list">
+              ${asset.usageLocations.map(loc => `<li>${loc}</li>`).join('')}
+            </ul>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Search
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        renderAssets();
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          renderAssets();
+        });
+      });
+    }
+
+    // Generate report
+    function generateReport() {
+      const used = assets.filter(a => a.used);
+      const unused = assets.filter(a => !a.used);
+      
+      const report = `# Kenney Asset Usage Report
+
+Generated: ${new Date().toLocaleString()}
+
+## Summary
+- Total Assets: ${assets.length}
+- Used: ${used.length} (${((used.length / assets.length) * 100).toFixed(1)}%)
+- Unused: ${unused.length} (${((unused.length / assets.length) * 100).toFixed(1)}%)
+
+## Unused Assets (${unused.length})
+${unused.map(a => `- ${a.id}: ${a.description}`).join('\n')}
+
+## Recommendations
+1. Import UI Pack assets (868 files available)
+2. Replace emoji with Kenney assets in 100+ files
+3. Use unused backgrounds for game themes
+4. Create animated character reactions
+
+See full audit: docs/audit/KENNEY_ASSET_AUDIT_COMPLETE.md
+`;
+
+      document.getElementById('reportSection').classList.remove('hidden');
+      document.getElementById('reportOutput').textContent = report;
+      document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

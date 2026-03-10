@@ -20,6 +20,8 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import { VoiceInstructions, useVoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameStartButton } from '../components/game/GameStartButton';
+import { GameHUD } from '../components/game/GameHUD';
 
 // Fix internal canvas resolution to scale well
 const CANVAS_WIDTH = 800;
@@ -266,9 +268,12 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
             <p className="text-[6rem] mb-4">🍉</p>
             <h2 className="text-4xl font-black mb-4 text-green-600">Fruit Ninja Air!</h2>
             <p className="mb-6 text-xl font-bold text-slate-600">Wave your hands to slice the fruits as they fly up!</p>
-            <button type="button" onClick={handleStart} className="px-10 py-5 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-black text-2xl shadow-[0_6px_0_#15803D] active:translate-y-2 active:shadow-none transition-all">
-              Start Slicing! 🔪
-            </button>
+            <br />
+            <GameStartButton
+              onClick={handleStart}
+              text="SLICE"
+            />
+            <br />
             <VoiceInstructions
               instructions="Let's be a fruit ninja! Slice the flying fruit with your hands!"
               autoSpeak={true}
@@ -321,21 +326,21 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
               </AnimatePresence>
             </div>
 
-            <div className="flex gap-4 relative z-10 -mt-2">
-              <div className="bg-green-100 px-6 py-3 rounded-2xl text-center border-2 border-green-200">
-                <p className="text-sm font-bold tracking-widest uppercase text-green-600">Sliced</p>
-                <p className="text-3xl font-black text-slate-800">{slicedCount}/{levelConfig.fruitsToSlice}</p>
-              </div>
-              <div className="bg-yellow-100 px-6 py-3 rounded-2xl text-center border-2 border-yellow-200">
-                <p className="text-sm font-bold tracking-widest uppercase text-yellow-600">Score</p>
-                <p className="text-3xl font-black text-slate-800">{score}</p>
-              </div>
-              {streak > 0 && (
-                <div className="bg-orange-100 px-6 py-3 rounded-2xl text-center border-2 border-orange-200">
-                  <p className="text-sm font-bold tracking-widest uppercase text-orange-600">Streak</p>
-                  <p className="text-3xl font-black text-orange-600">🔥 {streak}</p>
-                </div>
-              )}
+            <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+              <GameHUD
+                score={score}
+                streak={streak}
+                levelInfo={
+                  <div className="bg-green-100 text-green-700 px-4 py-1.5 rounded-xl font-black border-2 border-green-200 shadow-sm">
+                    Level {currentLevel}
+                  </div>
+                }
+                rightHeaderContent={
+                  <div className="bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm">
+                    🍎 {slicedCount} / {levelConfig.fruitsToSlice}
+                  </div>
+                }
+              />
             </div>
           </>
         )}

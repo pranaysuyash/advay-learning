@@ -21,6 +21,8 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { triggerHaptic } from '../utils/haptics';
+import { GameStartButton } from '../components/game/GameStartButton';
+import { GameHUD } from '../components/game/GameHUD';
 import {
   isPointInCircle,
   pickSpacedPoints,
@@ -34,10 +36,6 @@ import {
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
-
-// Kenney heart assets for streak HUD
-const HEART_FULL = '/assets/kenney/platformer/hud/hud_heart.png';
-const HEART_EMPTY = '/assets/kenney/platformer/hud/hud_heart_empty.png';
 
 interface GardenTarget {
   id: number;
@@ -66,13 +64,13 @@ const FLOWERS: Array<{
   emoji: string;
   assetId: string;
 }> = [
-  { name: 'Red', color: '#ef4444', emoji: '🌺', assetId: 'brush-red' },
-  { name: 'Blue', color: '#3b82f6', emoji: '🪻', assetId: 'brush-blue' },
-  { name: 'Green', color: '#22c55e', emoji: '🌿', assetId: 'brush-green' },
-  { name: 'Yellow', color: '#eab308', emoji: '🌻', assetId: 'brush-yellow' },
-  { name: 'Pink', color: '#ec4899', emoji: '🌸', assetId: 'brush-red' },
-  { name: 'Purple', color: '#8b5cf6', emoji: '🌷', assetId: 'brush-blue' },
-];
+    { name: 'Red', color: '#ef4444', emoji: '🌺', assetId: 'brush-red' },
+    { name: 'Blue', color: '#3b82f6', emoji: '🪻', assetId: 'brush-blue' },
+    { name: 'Green', color: '#22c55e', emoji: '🌿', assetId: 'brush-green' },
+    { name: 'Yellow', color: '#eab308', emoji: '🌻', assetId: 'brush-yellow' },
+    { name: 'Pink', color: '#ec4899', emoji: '🌸', assetId: 'brush-red' },
+    { name: 'Purple', color: '#8b5cf6', emoji: '🌷', assetId: 'brush-blue' },
+  ];
 
 const TARGET_RADIUS = 0.1;
 
@@ -108,7 +106,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   );
   const [showCelebration, setShowCelebration] = useState(false);
   const [gardenBgSrc, setGardenBgSrc] = useState<string | null>(null);
-  
+
   // Celebration particles - Unit 2
   const [particles, setParticles] = useState<Particle[]>([]);
   const particleIdRef = useRef(0);
@@ -174,7 +172,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   useEffect(() => {
     promptRef.current = promptId;
   }, [promptId]);
-  
+
   useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
@@ -203,7 +201,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
   const spawnCelebrationParticles = useCallback((x: number, y: number) => {
     const colors = ['#F59E0B', '#EF4444', '#3B82F6', '#10B981', '#EC4899', '#8B5CF6'];
     const newParticles: Particle[] = [];
-    
+
     for (let i = 0; i < 20; i++) {
       const angle = (Math.PI * 2 * i) / 20 + randomFloat01() * 0.5;
       const speed = 3 + randomFloat01() * 4;
@@ -433,46 +431,32 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
       >
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-base md:text-lg font-bold min-w-max'>
+        {/* Unified Game HUD */}
+        {isPlaying && (
+          <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+            <GameHUD
+              score={score}
+              streak={streak}
+              levelInfo={
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs font-black uppercase tracking-widest opacity-60">Find</span>
+                  <span className="font-black text-advay-slate text-xl">{promptTarget?.name}</span>
+                </div>
+              }
+              rightHeaderContent={
+                <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm transition-all ${timeLeft <= 10 ? 'bg-red-100 border-red-300 text-red-700 animate-pulse' :
+                  'bg-slate-50 border-slate-200 text-slate-600'
+                  }`}>
+                  ⏳ {timeLeft}s
+                </div>
+              }
+            />
+          </div>
+        )}
+
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/90 border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-base md:text-lg font-bold min-w-max z-10'>
           {feedback}
         </div>
-
-        {/* Timer display */}
-        {isPlaying && (
-          <div className={`absolute top-6 right-6 px-6 py-3 rounded-full border-3 font-black text-lg shadow-[0_4px_0_#E5B86E] transition-all ${
-            timeLeft <= 10 ? 'bg-red-50 border-red-300 text-red-700 animate-pulse' : 
-            timeLeft <= 20 ? 'bg-orange-50 border-orange-300 text-orange-700' :
-            'bg-white border-[#F2CC8F] text-advay-slate'
-          }`}>
-            ⏱️ {timeLeft}s
-          </div>
-        )}
-        
-        {/* Streak heart HUD */}
-        {isPlaying && (
-          <div className='absolute top-20 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold text-advay-slate mr-2'>Streak:</span>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <img
-                key={i}
-                src={streak >= i ? HEART_FULL : HEART_EMPTY}
-                alt={streak >= i ? 'Full heart' : 'Empty heart'}
-                className='w-6 h-6'
-              />
-            ))}
-          </div>
-        )}
-
-        {promptTarget && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary text-lg shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold uppercase tracking-widest text-xs mr-2 opacity-60'>
-              Find
-            </span>
-            <span className='font-black text-advay-slate tracking-tight text-xl'>
-              {promptTarget.name}
-            </span>
-          </div>
-        )}
 
         {targets.map((target) => (
           <div
@@ -578,12 +562,12 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
                 Find and pinch the flowers with the matching colors!
               </p>
 
-              <button
-                onClick={startGame}
-                className='px-12 py-5 bg-[#10B981] hover:bg-emerald-600 border-3 border-emerald-200 hover:border-emerald-300 text-white rounded-[1.5rem] font-black text-2xl shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95'
-              >
-                Start Game!
-              </button>
+              <div className="mt-4 mb-2">
+                <GameStartButton
+                  onClick={startGame}
+                  text="PLAY"
+                />
+              </div>
 
               {ttsEnabled && (
                 <VoiceInstructions

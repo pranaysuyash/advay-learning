@@ -64,6 +64,74 @@ cd tools && python3 -m http.server 8080
 
 ---
 
+## 🎨 Kenney Asset Browser & Report
+
+**Purpose:** Interactive browser and audit tool for Kenney assets in the project. Visualize used/unused assets, generate reports, and plan asset improvements.
+
+**File:** `tools/kenney_asset_report.html`
+
+### Why This Tool Exists
+
+- **Visual Asset Discovery:** Browse all 450+ Kenney assets with previews
+- **Usage Tracking:** See which assets are used and where
+- **Unused Asset Detection:** Identify opportunities for asset utilization
+- **Report Generation:** Generate markdown audit reports for documentation
+- **Replacement Planning:** Map emojis to Kenney asset alternatives
+
+### Usage
+
+```bash
+# Open in browser
+open tools/kenney_asset_report.html
+
+# Or serve locally
+cd tools && python3 -m http.server 8080
+# Then open http://localhost:8080/kenney_asset_report.html
+```
+
+### Features
+
+- **Asset Grid:** Visual preview of all registered assets
+- **Filter Options:**
+  - All assets
+  - Used only
+  - Unused only
+  - By category (Collectibles, HUD, Characters, etc.)
+- **Search:** Find assets by name, description, or tags
+- **Usage Information:** See which games/components use each asset
+- **Report Generation:** Export audit report as markdown
+
+### Integration with Code
+
+The tool mirrors the TypeScript registry:
+- Source: `src/frontend/src/utils/kenneyAssetRegistry.ts`
+- Audit: `docs/audit/KENNEY_ASSET_AUDIT_COMPLETE.md`
+
+### Report Output Example
+
+```markdown
+# Kenney Asset Usage Report
+
+Generated: 2026-03-09
+
+## Summary
+- Total Assets: 450
+- Used: 15 (3.3%)
+- Unused: 435 (96.7%)
+
+## Unused Assets (435)
+- hud_heart_half: Half heart
+- hud_key_blue: Blue key icon
+- ...
+
+## Recommendations
+1. Import UI Pack assets (868 files available)
+2. Replace emoji with Kenney assets
+3. Use unused backgrounds for game themes
+```
+
+---
+
 ## 🧰 Kenney Asset Sync Tool
 
 **Purpose:** Synchronize Kenney `New Platformer Pack` assets from the local purchased Kenney bundle into the frontend canonical asset path.

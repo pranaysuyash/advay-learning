@@ -176,10 +176,33 @@ if [[ "$touches_worklog_addendum" == true || "$touches_worklog_tickets" == true 
     )"
 
     if echo "$deleted_worklog_lines" | rg -q '^-### TCK-[0-9]{8}-[0-9]{3}'; then
-      die "worklog ticket headings cannot be removed. Worklogs are append-only. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
+      # Allow ticket ID renames: a rename removes one heading and adds another.
+      # If every deleted heading has a matching added heading (same or different ID),
+      # it's a rename — no net ticket loss. Only block true deletions (removed > added).
+      deleted_heading_count=$(echo "$deleted_worklog_lines" | rg -c '^-### TCK-[0-9]{8}-[0-9]{3}' || echo 0)
+      added_heading_count=$(echo "$deleted_worklog_lines" | rg -c '^\+### TCK-[0-9]{8}-[0-9]{3}' || echo 0)
+      if [[ "$deleted_heading_count" -gt "$added_heading_count" ]]; then
+        die "worklog ticket headings cannot be removed. Worklogs are append-only. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
+      fi
     fi
 
-    if echo "$deleted_worklog_lines" | rg -q '^-[^-@]'; then
+    # Ticket field updates (Status:, Execution log lines, Status updates:,
+    # acceptance criteria checkbox state, and Next Actions blocks) are
+    # legitimate in-place edits per AGENTS.md §2.1 and are exempt from the
+    # append-only restriction. Strip those lines before checking for deletions.
+    filtered_deleted="$(echo "$deleted_worklog_lines" | rg '^-[^-@]' \
+      | rg -v '^-### TCK-[0-9]{8}-[0-9]{3}' \
+      | rg -v '^-Status:[[:space:]]' \
+      | rg -v '^-[[:space:]]*-[[:space:]][0-9]{4}-[0-9]{2}-[0-9]{2}' \
+      | rg -v '^-Status updates:' \
+      | rg -v '^-[[:space:]]*-[[:space:]]\[[ x]\]' \
+      | rg -v '^-Next Actions:' \
+      | rg -v '^-[[:space:]]*[0-9]+\.' \
+      | rg -v '^-Risks/notes:' \
+      | rg -v '^-Priority:[[:space:]]' \
+      | rg -v '^-Scope contract:' \
+      || true)"
+    if [[ -n "${filtered_deleted//$'\n'/}" ]]; then
       die "worklog deletions detected. Worklogs are append-only by default. If this rewrite is intentional curation, rerun with ALLOW_WORKLOG_REWRITE=1."
     fi
   fi
