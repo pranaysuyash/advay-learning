@@ -90,4 +90,33 @@ export const NUMBER_JUNGLE_EXTRA_GAMES: GameManifest[] = [
     ],
     easterEggs: [],
   },
+  {
+    id: 'math-jumpers',
+    name: 'Math Jumpers',
+    tagline: 'Jump to the correct answer and solve math problems! 🚀🔢',
+    path: '/games/math-jumpers',
+    icon: 'target',
+    worldId: 'number-jungle',
+    vibe: 'active',
+    ageRange: '4-7',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.2 },
+      { itemId: 'creature-alien', chance: 0.1 },
+      { itemId: 'element-au', chance: 0.03, minScore: 95 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-math-master',
+        name: 'Math Master',
+        description: 'Solve 5 problems in a row without mistakes!',
+        trigger: 'perfect-streak-5',
+        reward: { itemId: 'element-au', quantity: 1 },
+        hint: 'Perfect math skills reveal golden treasures...',
+        difficulty: 'hard',
+      },
+    ],
+  },
 ];

@@ -535,6 +535,7 @@ The audit-to-ticket gap exists because:
 - [ ] Verify environment (Python 3.13+, Node 18+, uv installed)
 - [ ] Check existing venv (don't create duplicates)
 - [ ] Check running servers (frontend on 6173, backend on 8001)
+- [ ] **Document every user inquiry or idea**: whenever a user asks for ideas, feedback, analysis, or requests, create or append an appropriate file under `docs/` (e.g. `BRAINSTORM_IDEAS.md`). Requests are a mandate, not optional.
 ```
 
 ### Before Code Changes

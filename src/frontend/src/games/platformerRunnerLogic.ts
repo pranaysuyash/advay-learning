@@ -10,7 +10,7 @@
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
-export const GROUND_Y = 480; // 600 - 120 (ground offset)
+export const GROUND_Y = CANVAS_HEIGHT - 64; // 536 — matches original PlatformerRunner.tsx inline value
 export const GRAVITY = 0.8;
 export const JUMP_VELOCITY = -16;
 export const PLAYER_WIDTH = 48;

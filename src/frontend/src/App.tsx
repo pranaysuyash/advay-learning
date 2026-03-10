@@ -360,6 +360,11 @@ const MusicConductor = lazy(() =>
     default: module.MusicConductor,
   })),
 );
+const BubbleBiology = lazy(() =>
+  import('./pages/BubbleBiology').then((module) => ({
+    default: module.BubbleBiology,
+  })),
+);
 const PopTheNumber = lazy(() =>
   import('./pages/PopTheNumber').then((module) => ({
     default: module.PopTheNumber,
@@ -505,6 +510,11 @@ const CountingCollectathon = lazy(() =>
     default: module.CountingCollectathon,
   })),
 );
+const MathJumpers = lazy(() =>
+  import('./pages/MathJumpers').then((module) => ({
+    default: module.MathJumpers,
+  })),
+);
 const TargetPractice = lazy(() =>
   import('./pages/TargetPractice').then((module) => ({
     default: module.default,
@@ -512,6 +522,31 @@ const TargetPractice = lazy(() =>
 );
 const CuttingPractice = lazy(() =>
   import('./pages/CuttingPractice').then((module) => ({
+    default: module.default,
+  })),
+);
+const PinchPractice = lazy(() =>
+  import('./pages/PinchPractice').then((module) => ({
+    default: module.PinchPractice,
+  })),
+);
+const CircleDrawing = lazy(() =>
+  import('./pages/CircleDrawing').then((module) => ({
+    default: module.default,
+  })),
+);
+const WashHandsDance = lazy(() =>
+  import('./pages/WashHandsDance').then((module) => ({
+    default: module.default,
+  })),
+);
+const PackLunchbox = lazy(() =>
+  import('./pages/PackLunchbox').then((module) => ({
+    default: module.default,
+  })),
+);
+const SetTheTable = lazy(() =>
+  import('./pages/SetTheTable').then((module) => ({
     default: module.default,
   })),
 );
@@ -1343,6 +1378,16 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/math-jumpers'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Math Jumpers'>
+                        <MathJumpers />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/bubble-pop'
                   element={
                     <ProtectedRoute>
@@ -1383,6 +1428,55 @@ function App() {
                       <CameraSafeRoute gameName='Cutting Practice'>
                         <CuttingPractice />
                       </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/pinch-practice'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Pinch Practice'>
+                        <PinchPractice />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/circle-drawing'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Circle Drawing'>
+                        <CircleDrawing />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/wash-hands-dance'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute
+                        gameName='Wash Hands Dance'
+                        cameraRequiredMessage='Wash Hands Dance uses your camera to detect hand movements. Please allow camera access to play this game.'
+                      >
+                        <WashHandsDance />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/pack-lunchbox'
+                  element={
+                    <ProtectedRoute>
+                      <PackLunchbox />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/set-the-table'
+                  element={
+                    <ProtectedRoute>
+                      <SetTheTable />
                     </ProtectedRoute>
                   }
                 />
@@ -1461,6 +1555,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <MusicConductor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/bubble-biology'
+                  element={
+                    <ProtectedRoute>
+                      <BubbleBiology />
                     </ProtectedRoute>
                   }
                 />

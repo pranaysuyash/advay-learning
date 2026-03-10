@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "name": "hud",
+    "description": "Hearts, keys, locks, and HUD elements",
+    "generated": "2026-03-10T06:22:33.966Z",
+    "version": "1.0",
+    "format": "RGBA8888",
+    "size": {
+      "w": 204,
+      "h": 68
+    },
+    "scale": 1,
+    "totalImages": 3,
+    "method": "rectangle-packing"
+  },
+  "frames": {
+    "hud_heart": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "hud_heart.png"
+    },
+    "hud_heart_empty": {
+      "frame": {
+        "x": 70,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "hud_heart_empty.png"
+    },
+    "hud_heart_half": {
+      "frame": {
+        "x": 138,
+        "y": 2,
+        "w": 64,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 64
+      },
+      "originalPath": "hud_heart_half.png"
+    }
+  }
+}

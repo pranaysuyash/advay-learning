@@ -25,6 +25,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import {
   assetLoader,
   SOUND_ASSETS,
@@ -513,7 +514,7 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
             className={`absolute top-6 right-6 px-6 py-3 rounded-2xl border-3 font-black text-xl shadow-[0_4px_0_#E5B86E] z-10 ${lastScore.passed ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'
               }`}
           >
-            {'⭐'.repeat(lastScore.stars)}{'☆'.repeat(3 - lastScore.stars)}
+            {Array(lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={i} type='star' size={20} />)}{Array(3 - lastScore.stars).fill(null).map((_, i) => <KenneyIcon key={i} type='heart_empty' size={20} />)}<span className='ml-2'>{lastScore.stars}/3</span>
             <span className='ml-3 tracking-widest'>{Math.round(lastScore.accuracy * 100)}%</span>
           </motion.div>
         )}
@@ -580,7 +581,7 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
       {showCelebration && (
         <CelebrationOverlay
           show={showCelebration}
-          letter={template?.emoji ?? '⭐'}
+          letter={template?.emoji ? template.emoji : <KenneyIcon type='star' size={48} />}
           accuracy={lastScore ? Math.round(lastScore.accuracy * 100) : 100}
           message={`Level ${level} complete!`}
           onComplete={() => setShowCelebration(false)}
@@ -591,7 +592,7 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
       {showStreakMilestone && (
         <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
           <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
-            🔥 {streak} Perfect! 🔥
+            <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={24} /> {streak} Perfect! <KenneyIcon type='heart' size={24} /></div>
           </div>
         </div>
       )}

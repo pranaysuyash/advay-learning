@@ -40,6 +40,15 @@ vi.mock('../../hooks/useGameHandTracking', () => ({
   }),
 }));
 
+// Mock AssetPreloader to complete immediately
+vi.mock('../../components/AssetPreloader', () => ({
+  AssetPreloader: ({ onComplete }: { onComplete: () => void }) => {
+    // Call completion in next tick
+    setTimeout(() => onComplete(), 0);
+    return null;
+  },
+}));
+
 // Basic smoke/regression tests for dot click behavior
 describe('ConnectTheDots component - regression', () => {
   it('clicking the first dot connects it and advances the next-dot indicator', async () => {
@@ -49,8 +58,8 @@ describe('ConnectTheDots component - regression', () => {
       </MemoryRouter>,
     );
 
-    // Start game
-    const startButton = screen.getByRole('button', { name: /start game/i });
+    // Start game - wait for the button to appear
+    const startButton = await screen.findByRole('button', { name: /start game/i });
     fireEvent.click(startButton);
 
     // Wait for dots to render and pick the first circle from the overlay SVG.
@@ -109,7 +118,7 @@ describe('ConnectTheDots component - regression', () => {
         <ConnectTheDots />
       </MemoryRouter>,
     );
-    const startButton = screen.getByRole('button', { name: /start game/i });
+    const startButton = await screen.findByRole('button', { name: /start game/i });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -163,18 +172,24 @@ describe('ConnectTheDots component - regression', () => {
       delete (navigator as any).permissions;
     });
 
-    it('does not warn when permissions API is absent', () => {
+    it('does not warn when permissions API is absent', async () => {
       delete (navigator as any).permissions;
       render(
         <MemoryRouter>
           <ConnectTheDots />
         </MemoryRouter>,
       );
-      expect(console.warn).not.toHaveBeenCalled();
+      // Filter out React Router warnings from our check
+      const permissionWarns = warnSpy.mock.calls.filter(
+        (call) => !call[0].includes('React Router Future Flag Warning')
+      );
+      expect(permissionWarns).toHaveLength(0);
       // component rendered; check for the Start Game button rather than ambiguous title
-      expect(
-        screen.getByRole('button', { name: /start game/i }),
-      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /start game/i }),
+        ).toBeInTheDocument();
+      });
     });
 
     it('displays warning banner when permission state is denied', async () => {

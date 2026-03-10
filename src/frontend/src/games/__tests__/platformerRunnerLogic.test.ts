@@ -61,7 +61,7 @@ describe('Platformer Runner - Game Logic', () => {
     });
 
     it('should have defined ground position', () => {
-      expect(GROUND_Y).toBe(480);
+      expect(GROUND_Y).toBe(536); // CANVAS_HEIGHT (600) - PLAYER_HEIGHT (64) = 536
     });
 
     it('should have defined physics constants', () => {

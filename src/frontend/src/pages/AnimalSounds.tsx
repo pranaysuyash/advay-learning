@@ -21,6 +21,8 @@ import {
 import { triggerHaptic } from '../utils/haptics';
 import { GamePage } from '../components/GamePage';
 import { useTTS } from '../hooks/useTTS';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader, type AssetToPreload } from '../components/AssetPreloader';
 
 interface InnerProps {
   score: number;
@@ -30,6 +32,12 @@ interface InnerProps {
   onFinish: () => Promise<void>;
 }
 
+const CRITICAL_ASSETS: AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'normal' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'normal' },
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'normal' },
+];
+
 function AnimalSoundsGame({
   score,
   setScore,
@@ -38,6 +46,7 @@ function AnimalSoundsGame({
   onFinish,
 }: InnerProps) {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [targetAnimal, setTargetAnimal] = useState<Animal | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -59,10 +68,12 @@ function AnimalSoundsGame({
 
   const { playClick, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
+
+  // All hooks must be above early returns — React Rules of Hooks
   const allowInteractionRef = useRef(true);
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
 
-  // Preload audio files
+  // Preload audio files (runs during loading, which is better UX)
   useEffect(() => {
     const extMap: Record<string, string> = {
       dog: '.wav', cat: '.wav', cow: '.ogg', pig: '.mp3',
@@ -82,9 +93,19 @@ function AnimalSoundsGame({
     gameName: 'Animal Sounds',
     score,
     level: currentLevel,
-    isPlaying: true,
+    isPlaying: !isLoading,
     metaData: { correct, round },
   });
+
+  if (isLoading) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setIsLoading(false)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   const startGame = () => {
     const newAnimals = getAnimalsForLevel(currentLevel);
@@ -227,11 +248,11 @@ function AnimalSoundsGame({
 
         {gameState === 'start' && (
           <div className='text-center'>
-            <p className='text-6xl mb-4'>🐾</p>
+            <div className='flex justify-center mb-4'><KenneyIcon type='star' size={64} /></div>
             <h2 className='text-2xl font-bold mb-2'>Animal Sounds!</h2>
             <p className='mb-2'>Which animal makes this sound?</p>
             <div className='bg-amber-50 rounded-xl p-3 text-sm text-slate-600 mb-4 inline-block'>
-              <p className='font-bold mb-1'>🎯 Scoring:</p>
+              <div className='flex items-center justify-center gap-2 mb-1'><KenneyIcon type='star' size={16} /><p className='font-bold'>Scoring:</p></div>
               <p>Base 15 pts + streak bonus</p>
               <p>× Level: L1 1× | L2 1.5× | L3 2×</p>
             </div>
@@ -250,7 +271,7 @@ function AnimalSoundsGame({
           <div className='text-center w-full max-w-2xl'>
             {/* Streak HUD */}
             <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
-              <span className='font-black text-lg'>🔥 Streak</span>
+              <div className='flex items-center gap-1'><KenneyIcon type='heart' size={20} /><span className='font-black text-lg'>Streak</span></div>
               <div className='flex gap-1'>
                 {[1, 2, 3, 4, 5].map((i) => (
                   <img
@@ -273,9 +294,11 @@ function AnimalSoundsGame({
             {/* Streak milestone popup */}
             {showMilestone && (
               <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
-                <p className='text-xl font-black text-orange-600'>
-                  🔥 {streak} Streak! 🔥
-                </p>
+                <div className='flex items-center justify-center gap-2'>
+                  <KenneyIcon type='heart' size={24} />
+                  <p className='text-xl font-black text-orange-600'>{streak} Streak!</p>
+                  <KenneyIcon type='heart' size={24} />
+                </div>
               </div>
             )}
 
@@ -298,7 +321,7 @@ function AnimalSoundsGame({
                     }
                   }}
                 >
-                  🔊
+                  <KenneyIcon type='circle' size={48} />
                 </motion.button>
               </div>
             </div>
@@ -366,7 +389,7 @@ function AnimalSoundsGame({
 
         {gameState === 'complete' && (
           <div className='text-center'>
-            <p className='text-6xl mb-4'>🎉</p>
+            <div className='flex justify-center mb-4'><KenneyIcon type='star' size={64} /></div>
             <h2 className='text-2xl font-bold mb-2'>Great Job!</h2>
             <p className='text-xl mb-4'>You got {correct} animals right!</p>
             {/* Streak badge */}

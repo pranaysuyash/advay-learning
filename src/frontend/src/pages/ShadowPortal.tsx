@@ -8,7 +8,7 @@
  * @spec docs/games/shadow-portal-spec.md
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -324,7 +324,7 @@ function renderFrame(ctx: CanvasRenderingContext2D, state: RenderState): void {
 
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
-function ShadowPortalGame() {
+const ShadowPortalGame = memo(function ShadowPortalGameComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -878,7 +878,7 @@ function ShadowPortalGame() {
       )}
     </GameShell>
   );
-}
+});
 
 export default function ShadowPortal() {
   return <ShadowPortalGame />;

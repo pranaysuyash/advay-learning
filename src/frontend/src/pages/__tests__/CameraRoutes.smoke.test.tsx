@@ -16,6 +16,15 @@ vi.mock('../../hooks/useTTS', () => ({
   }),
 }));
 
+// Mock AssetPreloader to complete immediately
+vi.mock('../../components/AssetPreloader', () => ({
+  AssetPreloader: ({ onComplete }: { onComplete: () => void }) => {
+    // Call onComplete synchronously
+    onComplete();
+    return null;
+  },
+}));
+
 const AudioContextMock = vi.fn(() => ({
   createGain: () => ({
     connect: vi.fn(),

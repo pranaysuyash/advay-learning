@@ -28,6 +28,7 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
 import { UIIcon } from '../components/ui/Icon';
 import {
@@ -720,7 +721,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
             className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
           >
             <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
-              🔥 {streak} Streak! 🔥
+              <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
             </div>
           </motion.div>
         )}
@@ -944,7 +945,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         onComplete={() => setShowSuccess(false)}
         type='stars'
         showCharacter
-        characterEmoji='⭐'
+        characterEmoji={<KenneyIcon type='star' size={32} />}
       />
 
       {/* GI-002: Tracking-loss recovery overlay */}

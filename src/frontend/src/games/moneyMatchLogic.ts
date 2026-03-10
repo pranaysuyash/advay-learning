@@ -8,6 +8,7 @@ export interface Coin {
   value: number;
   name: string;
   emoji: string;
+  icon?: string;
 }
 
 export interface LevelConfig {
@@ -16,10 +17,10 @@ export interface LevelConfig {
 }
 
 export const COINS: Coin[] = [
-  { value: 1, name: 'Penny', emoji: '🪙' },
-  { value: 5, name: 'Nickel', emoji: '🪙' },
-  { value: 10, name: 'Dime', emoji: '🪙' },
-  { value: 25, name: 'Quarter', emoji: '🪙' },
+  { value: 1, name: 'Penny', emoji: '🪙', icon: '/assets/kenney/platformer/collectibles/coin_gold.png' },
+  { value: 5, name: 'Nickel', emoji: '🪙', icon: '/assets/kenney/platformer/collectibles/coin_gold.png' },
+  { value: 10, name: 'Dime', emoji: '🪙', icon: '/assets/kenney/platformer/collectibles/coin_gold.png' },
+  { value: 25, name: 'Quarter', emoji: '🪙', icon: '/assets/kenney/platformer/collectibles/coin_gold.png' },
 ];
 
 export const LEVELS: LevelConfig[] = [

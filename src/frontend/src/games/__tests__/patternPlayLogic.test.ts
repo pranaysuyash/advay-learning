@@ -135,14 +135,18 @@ describe('generatePattern', () => {
   });
 
   it('generates different patterns on multiple calls', () => {
-    const pattern1 = generatePattern(1);
-    const pattern2 = generatePattern(1);
+    // Generate many patterns and check for variety
+    const patterns = [];
+    for (let i = 0; i < 20; i++) {
+      patterns.push(generatePattern(1));
+    }
 
-    // Due to randomness, patterns should differ
-    const sameShape = pattern1.answer.shape === pattern2.answer.shape;
-    const sameColor = pattern1.answer.color === pattern2.answer.color;
-    // At least one should differ with high probability
-    expect(sameShape && sameColor).not.toBe(true);
+    const shapes = new Set(patterns.map(p => p.answer.shape));
+    const colors = new Set(patterns.map(p => p.answer.color));
+
+    // Should see multiple shapes and colors across 20 generations
+    expect(shapes.size).toBeGreaterThan(1);
+    expect(colors.size).toBeGreaterThan(1);
   });
 
   it('handles unknown level by using level 1', () => {

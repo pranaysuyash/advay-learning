@@ -8,6 +8,7 @@ import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -16,8 +17,13 @@ import { LEVELS, generateItems, calculateScore, type ColorItem } from '../games/
 import { triggerHaptic } from '../utils/haptics';
 import { GameHUD } from '../components/game/GameHUD';
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'critical' },
+];
+
 const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const navigate = useNavigate();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [items, setItems] = useState<ColorItem[]>([]);
   const [targets, setTargets] = useState<ColorItem[]>([]);
@@ -99,6 +105,16 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
 
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => { playClick(); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick]);
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <GameContainer title="Color Sort" onHome={() => navigate('/games')} reportSession={false}>

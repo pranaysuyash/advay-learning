@@ -8,6 +8,7 @@ import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -15,8 +16,14 @@ import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateCountingScene, calculateScore, type CountingScene } from '../games/countingObjectsLogic';
 import { triggerHaptic } from '../utils/haptics';
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const navigate = useNavigate();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [scene, setScene] = useState<CountingScene | null>(null);
   const [round, setRound] = useState(0);
@@ -108,6 +115,16 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
       .sort(() => Math.random() - 0.5)
       .slice(0, 4)
     : [];
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <GameContainer

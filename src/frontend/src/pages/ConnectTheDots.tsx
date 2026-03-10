@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { UIIcon } from '../components/ui/Icon';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -50,8 +51,14 @@ const GAME_COLORS = {
   cursorPinch: '#E85D04', // pip-orange
 } as const;
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
   const navigate = useNavigate();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -530,6 +537,16 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
         y: handCursor.y / 600,
       }
     : null;
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <>

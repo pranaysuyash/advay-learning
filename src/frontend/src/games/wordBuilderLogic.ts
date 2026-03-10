@@ -7,6 +7,7 @@
 
 import type { Point } from '../types/tracking';
 import type { SelectionMode } from './analyticsStore';
+import { getStoredSessions } from '../analytics'; // unified SDK (advay.analytics.v2), not legacy analyticsStore
 
 /**
  * Simple LRU (Least Recently Used) cache with bounded size.
@@ -497,11 +498,64 @@ export {
   endSession,
   recordWordCompleted,
   recordTouch,
-  getStoredSessions,
   getAnalyticsSummary,
   exportAnalytics,
   clearAnalytics,
 } from './analyticsStore';
+export { getStoredSessions };
+
+// ============ GAME CONFIGURATION CONSTANTS ============
+
+/** Normalised hit radius for pinch targeting (0–1 coordinate space). */
+export const HIT_RADIUS = 0.15;
+
+/** Maximum explore-mode level before game completion. */
+export const MAX_LEVEL = 3;
+
+/** Cursor sprite size in pixels. */
+export const CURSOR_SIZE = 84;
+
+/** Letter-target size in pixels. */
+export const TARGET_SIZE = 120;
+
+/** Words required per phonics stage before auto-advance. */
+export const WORDS_PER_STAGE = 10;
+
+/** Hold duration (ms) to open the parent-settings panel. */
+export const SETTINGS_HOLD_MS = 900;
+
+/** Game mode: free exploration or structured phonics curriculum. */
+export type WordBuilderMode = 'explore' | 'phonics';
+
+/** Ordered list of phonics stages exposed in the settings UI. */
+export const PHONICS_STAGES: { id: string; label: string }[] = [
+  { id: 'cvc_a', label: 'CVC Short A' },
+  { id: 'cvc_e', label: 'CVC Short E' },
+  { id: 'cvc_all', label: 'All CVC' },
+  { id: 'blends', label: 'Simple Blends' },
+  { id: 'digraphs', label: 'Digraphs (SH/CH/TH/WH)' },
+  { id: 'long_vowels', label: 'Long Vowels' },
+  { id: 'sight_words_3', label: 'Sight Words' },
+  { id: 'advanced', label: 'Advanced' },
+];
+
+/**
+ * Export analytics sessions to a dated JSON file download.
+ * Pure DOM utility — no React dependencies.
+ */
+export function exportWordBuilderAnalytics(): void {
+  const sessions = getStoredSessions();
+  const dataStr = JSON.stringify(sessions, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `wordbuilder-analytics-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 // ============ DIFFICULTY UTILITIES ============
 

@@ -227,7 +227,7 @@ const ColorPotionsContent = memo(function ColorPotionsContent() {
           setTimeout(() => {
             playLevelUp();
             triggerHaptic('celebration');
-            setFeedback(`Level ${level} complete! 🎉`);
+            setFeedback(`Level ${level} complete!`);
             if (ttsEnabled) {
               speak(`Amazing! You discovered all the level ${level} potions!`);
             }

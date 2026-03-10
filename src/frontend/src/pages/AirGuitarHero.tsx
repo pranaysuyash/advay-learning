@@ -4,7 +4,7 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
@@ -20,6 +20,7 @@ import {
 } from '../games/airGuitarHeroLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader, type AssetToPreload } from '../components/AssetPreloader';
 
 // Note color map for visual variety
 const NOTE_COLORS: Record<
@@ -42,6 +43,12 @@ interface AirGuitarHeroCtx {
   handleFinish: () => Promise<void>;
 }
 
+const CRITICAL_ASSETS: AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'normal' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'normal' },
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'normal' },
+];
+
 function AirGuitarHeroInner({
   score,
   setScore,
@@ -50,6 +57,7 @@ function AirGuitarHeroInner({
   handleFinish,
 }: AirGuitarHeroCtx) {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [noteSequence, setNoteSequence] = useState<GuitarNote[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -71,14 +79,28 @@ function AirGuitarHeroInner({
   const { playClick, playPop, playCelebration } = useAudio();
   const levelConfig = useMemo(() => LEVELS[currentLevel - 1], [currentLevel]);
 
-  // progress handled by GamePage itself
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
+  // Must be above the early return to satisfy React Rules of Hooks
   useGameSessionProgress({
     gameName: 'Air Guitar Hero',
     score,
     level: currentLevel,
-    isPlaying: gameState === 'playing',
+    isPlaying: !isLoading && gameState === 'playing',
     metaData: { total: levelConfig.notesToPlay },
   });
+
+  if (isLoading) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={handleLoadingComplete}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   const handleStart = () => {
     playClick();

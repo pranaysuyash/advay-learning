@@ -23,6 +23,15 @@ import {
   pickWord,
   createLetterTargets,
   type LetterTarget,
+  HIT_RADIUS,
+  MAX_LEVEL,
+  CURSOR_SIZE,
+  TARGET_SIZE,
+  WORDS_PER_STAGE,
+  SETTINGS_HOLD_MS,
+  PHONICS_STAGES,
+  exportWordBuilderAnalytics,
+  type WordBuilderMode,
 } from '../games/wordBuilderLogic';
 
 // Unified Analytics SDK
@@ -45,25 +54,6 @@ import {
   WEATHER_BACKGROUNDS,
 } from '../utils/assets';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
-
-const HIT_RADIUS = 0.15; // Increased from 0.1 for kids' easier targeting
-const MAX_LEVEL = 3;
-const CURSOR_SIZE = 84; // Increased for easier visibility
-const TARGET_SIZE = 120; // Increased from 80 for kids' fingers
-type WordBuilderMode = 'explore' | 'phonics';
-
-const PHONICS_STAGES: { id: string; label: string }[] = [
-  { id: 'cvc_a', label: 'CVC Short A' },
-  { id: 'cvc_e', label: 'CVC Short E' },
-  { id: 'cvc_all', label: 'All CVC' },
-  { id: 'blends', label: 'Simple Blends' },
-  { id: 'digraphs', label: 'Digraphs (SH/CH/TH/WH)' },
-  { id: 'long_vowels', label: 'Long Vowels' },
-  { id: 'sight_words_3', label: 'Sight Words' },
-  { id: 'advanced', label: 'Advanced' },
-];
-
-const SETTINGS_HOLD_MS = 900;
 
 const WordBuilderContent = memo(function WordBuilderComponent() {
   const navigate = useNavigate();
@@ -96,7 +86,6 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
   const [wordsCompletedInStage, setWordsCompletedInStage] = useState<number>(() => {
     return parseInt(localStorage.getItem('wordbuilder.wordsCompleted') ?? '0', 10);
   });
-  const WORDS_PER_STAGE = 10; // Advance after this many words
   const [stepIndex, setStepIndex] = useState(0);
   const [cursor, setCursor] = useState<Point | null>(null);
   const [feedback, setFeedback] = useState('Pinch letters to spell the word!');
@@ -123,36 +112,23 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
   const { onGameComplete, triggerEasterEgg } = useGameDrops('word-builder');
   const { saveProgress } = useGameProgress('word-builder');
 
+  // Sync volatile game state to refs for use inside callbacks
   useEffect(() => {
     targetsRef.current = targets;
-  }, [targets]);
-  useEffect(() => {
     stepIndexRef.current = stepIndex;
-  }, [stepIndex]);
-  useEffect(() => {
     wordRef.current = word;
-  }, [word]);
-  useEffect(() => {
     levelRef.current = level;
-  }, [level]);
-  useEffect(() => {
     timeLeftRef.current = timeLeft;
-  }, [timeLeft]);
-  useEffect(() => {
     scoreRef.current = score;
-  }, [score]);
+  }, [targets, stepIndex, word, level, timeLeft, score]);
+
+  // Sync settings state to refs
   useEffect(() => {
     gameModeRef.current = gameMode;
-  }, [gameMode]);
-  useEffect(() => {
     phonicsStageIdRef.current = phonicsStageId;
-  }, [phonicsStageId]);
-  useEffect(() => {
     autoAdvanceRef.current = autoAdvance;
-  }, [autoAdvance]);
-  useEffect(() => {
     wordsCompletedRef.current = wordsCompletedInStage;
-  }, [wordsCompletedInStage]);
+  }, [gameMode, phonicsStageId, autoAdvance, wordsCompletedInStage]);
 
   // Batch localStorage writes for all settings (single write per state change)
   useEffect(() => {
@@ -196,20 +172,6 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
     const sessions = getStoredSessions();
     setAnalyticsData({ summary, sessions });
     setShowInsights(true);
-  };
-
-  const exportAnalytics = () => {
-    const sessions = getStoredSessions();
-    const dataStr = JSON.stringify(sessions, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `wordbuilder-analytics-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const resetAnalytics = () => {
@@ -976,7 +938,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
                       </button>
                       <button
                         type='button'
-                        onClick={exportAnalytics}
+                        onClick={exportWordBuilderAnalytics}
                         className='flex-1 py-3 rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-700 font-black'
                       >
                         Export JSON

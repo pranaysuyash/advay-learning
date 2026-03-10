@@ -17,7 +17,7 @@
  * - Camera tracks full body movements
  */
 
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, memo, type RefObject } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
@@ -27,11 +27,12 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useStreakTracking, type ScorePopup } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { GameStartButton } from '../components/game/GameStartButton';
 import { GameHUD } from '../components/game/GameHUD';
 import {
+  type Balloon,
   type GameState,
   type PopAction,
   generateBalloon,
@@ -49,6 +50,350 @@ import {
   calculateFinalStats,
   BALLOON_COLORS,
 } from '../games/balloonPopFitnessLogic';
+
+// ===== MODULE-LEVEL RENDER HELPERS =====
+
+function drawBalloon(
+  ctx: CanvasRenderingContext2D,
+  balloon: Balloon,
+  width: number,
+  height: number,
+): void {
+  const x = balloon.x * width;
+  const y = balloon.y * height;
+  const size = balloon.size * width;
+
+  ctx.strokeStyle = '#8B4513';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + size);
+  ctx.quadraticCurveTo(x + 5, y + size + 20, x, y + size + 40);
+  ctx.stroke();
+
+  ctx.fillStyle = BALLOON_COLORS[balloon.color];
+  ctx.beginPath();
+  ctx.ellipse(x, y, size, size * 1.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x - size * 0.3, y - size * 0.3, size * 0.2, size * 0.3, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = BALLOON_COLORS[balloon.color];
+  ctx.beginPath();
+  ctx.moveTo(x - 5, y + size * 1.1);
+  ctx.lineTo(x + 5, y + size * 1.1);
+  ctx.lineTo(x, y + size * 1.2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${size * 0.5}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(getBalloonEmoji(balloon.color), x, y);
+}
+
+function renderGameFrame(
+  ctx: CanvasRenderingContext2D,
+  gameState: GameState,
+  currentAction: string | null,
+): void {
+  const { width, height } = ctx.canvas;
+  ctx.clearRect(0, 0, width, height);
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, '#87CEEB');
+  gradient.addColorStop(1, '#E0F7FA');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.beginPath();
+  ctx.arc(width * 0.2, height * 0.15, 40, 0, Math.PI * 2);
+  ctx.arc(width * 0.25, height * 0.12, 50, 0, Math.PI * 2);
+  ctx.arc(width * 0.3, height * 0.15, 40, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(width * 0.7, height * 0.2, 35, 0, Math.PI * 2);
+  ctx.arc(width * 0.75, height * 0.18, 45, 0, Math.PI * 2);
+  ctx.arc(width * 0.8, height * 0.2, 35, 0, Math.PI * 2);
+  ctx.fill();
+
+  gameState.balloons.forEach((balloon) => {
+    if (!balloon.popped) drawBalloon(ctx, balloon, width, height);
+  });
+
+  if (currentAction) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(width / 2 - 150, height - 80, 300, 60);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(currentAction, width / 2, height - 50);
+  }
+}
+
+function resolveBalloonPopped(balloon: Balloon, landmarks: any[]): boolean {
+  switch (balloon.action) {
+    case 'jump':
+      return checkBodyCollisions(balloon, [landmarks[27], landmarks[28]]);
+    case 'wave':
+      return checkBodyCollisions(balloon, [landmarks[15], landmarks[16]]);
+    case 'clap':
+      return checkBodyCollisions(balloon, [landmarks[15], landmarks[16]]);
+    default:
+      return false;
+  }
+}
+
+interface GameFrameResult {
+  nextState: GameState;
+  poppedBalloons: Balloon[];
+  detectedActionText: string | null;
+  levelAdvanced: boolean;
+  gameEnded: boolean;
+  newSpawnTime: number | null;
+}
+
+function computeGameFrameUpdate(
+  prevState: GameState,
+  landmarks: any[] | null,
+  deltaTime: number,
+  lastSpawnTime: number,
+): GameFrameResult {
+  let updatedBalloons = [...prevState.balloons];
+  let newSpawnTime: number | null = null;
+
+  if (shouldSpawnBalloon(lastSpawnTime, updatedBalloons.length)) {
+    updatedBalloons = [...updatedBalloons, generateBalloon(prevState.level)];
+    newSpawnTime = Date.now();
+  }
+
+  updatedBalloons = updateBalloons(updatedBalloons, deltaTime);
+
+  let detectedActions: PopAction[] = [];
+  let detectedActionText: string | null = null;
+
+  if (landmarks) {
+    detectedActions = detectAllActions(landmarks);
+    const activeAction = detectedActions.find((a) => a.detected);
+    if (activeAction && activeAction.confidence > 0.6) {
+      detectedActionText = getActionText(activeAction.type);
+    }
+    updatedBalloons = updatedBalloons.map((balloon) => {
+      if (balloon.popped) return balloon;
+      const popped = resolveBalloonPopped(balloon, landmarks);
+      return { ...balloon, popped: popped || balloon.popped };
+    });
+  }
+
+  const { updatedState: stateAfterPops, poppedBalloons } = processPops(
+    { ...prevState, balloons: updatedBalloons },
+    detectedActions,
+  );
+
+  let nextState = updateGameTimer(stateAfterPops, deltaTime);
+
+  const levelAdvanced = shouldAdvanceLevel(nextState);
+  if (levelAdvanced) {
+    nextState = advanceLevel(nextState);
+  }
+
+  return {
+    nextState,
+    poppedBalloons,
+    detectedActionText,
+    levelAdvanced,
+    gameEnded: !nextState.gameActive,
+    newSpawnTime,
+  };
+}
+
+// ===== MENU SUB-COMPONENT =====
+
+interface BalloonMenuScreenProps {
+  isLoading: boolean;
+  error: string | null;
+  onStart: () => void;
+}
+
+const BalloonMenuScreen = memo(function BalloonMenuScreen({
+  isLoading,
+  error,
+  onStart,
+}: BalloonMenuScreenProps) {
+  return (
+    <div className='flex flex-col items-center justify-center h-full p-6'>
+      <motion.div
+        className='relative mb-6'
+        animate={{ y: [0, -20, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className='text-8xl'>🎈</div>
+        <div className='absolute -top-2 -right-2 text-4xl animate-bounce'>💪</div>
+      </motion.div>
+
+      <h2 className='text-3xl font-bold text-advay-slate mb-3'>Balloon Pop Fitness!</h2>
+      <p className='text-advay-slate mb-6 text-center max-w-md'>
+        Pop floating balloons using different body movements based on their colors!
+      </p>
+
+      <div className='grid grid-cols-1 gap-3 mb-6 max-w-md w-full'>
+        <div className='bg-red-100 border-2 border-red-300 rounded-lg p-4 flex items-center gap-3'>
+          <div className='text-3xl'>🔴</div>
+          <div>
+            <div className='font-bold text-red-700'>Jump and Touch!</div>
+            <div className='text-sm text-red-600'>Jump up to pop red balloons</div>
+          </div>
+        </div>
+        <div className='bg-blue-100 border-2 border-blue-300 rounded-lg p-4 flex items-center gap-3'>
+          <div className='text-3xl'>🔵</div>
+          <div>
+            <div className='font-bold text-blue-700'>Wave Your Hand!</div>
+            <div className='text-sm text-blue-600'>Raise your hand to pop blue balloons</div>
+          </div>
+        </div>
+        <div className='bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3'>
+          <div className='text-3xl'>🟡</div>
+          <div>
+            <div className='font-bold text-yellow-700'>Clap Your Hands!</div>
+            <div className='text-sm text-yellow-600'>Clap to pop yellow balloons</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <GameStartButton
+          onClick={onStart}
+          disabled={isLoading}
+          text={isLoading ? 'Loading…' : 'Start Workout!'}
+        />
+      </div>
+
+      {error && (
+        <div className='mt-4 text-red-600 text-center max-w-md'>{error}</div>
+      )}
+    </div>
+  );
+});
+
+// ===== GAME AREA SUB-COMPONENT =====
+
+interface BalloonGameAreaProps {
+  gameState: GameState | null;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  streak: number;
+  scorePopup: ScorePopup | null;
+  showMilestone: boolean;
+  onShowMenu: () => void;
+}
+
+const BalloonGameArea = memo(function BalloonGameArea({
+  gameState,
+  canvasRef,
+  streak,
+  scorePopup,
+  showMilestone,
+  onShowMenu,
+}: BalloonGameAreaProps) {
+  const comboActive = gameState?.combo != null && gameState.combo > 1;
+  const timeMs = gameState?.timeRemaining ?? 0;
+  const timerClass =
+    timeMs < 10000
+      ? 'bg-red-100 border-red-300 text-red-700 animate-pulse'
+      : 'bg-white/90 border-slate-200 text-slate-600';
+
+  return (
+    <div className='flex flex-col h-full'>
+      <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+        <GameHUD
+          score={gameState?.score}
+          streak={streak}
+          levelInfo={
+            <div className="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-xl font-black border-2 border-purple-200 shadow-sm">
+              Level {gameState?.level}
+            </div>
+          }
+          rightHeaderContent={
+            <div className="flex gap-4 items-center">
+              {comboActive && (
+                <div className='bg-orange-100 text-orange-600 px-3 py-1 rounded-xl font-black border-2 border-orange-200 shadow-sm animate-pulse'>
+                  ⚡ {gameState!.combo}x
+                </div>
+              )}
+              <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm ${timerClass}`}>
+                ⏳ {Math.ceil(timeMs / 1000)}s
+              </div>
+            </div>
+          }
+        />
+      </div>
+
+      <div className='flex-1 relative'>
+        <canvas ref={canvasRef} className='w-full h-full' />
+
+        {scorePopup && (
+          <motion.div
+            initial={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0, y: -50, scale: 1.2 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className='absolute pointer-events-none'
+            style={{
+              left: `${scorePopup.x}%`,
+              top: `${scorePopup.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div className='text-2xl font-bold text-green-500 drop-shadow-lg'>
+              +{scorePopup.points}
+            </div>
+          </motion.div>
+        )}
+
+        {showMilestone && (
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            className='absolute inset-0 flex items-center justify-center pointer-events-none'
+          >
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
+              🔥 {streak} Streak! 🔥
+            </div>
+          </motion.div>
+        )}
+
+        {gameState && !gameState.gameActive && (
+          <div className='absolute inset-0 bg-black/50 flex items-center justify-center'>
+            <div className='bg-white rounded-2xl p-8 text-center max-w-md'>
+              <div className='text-5xl mb-4'>🎈</div>
+              <h3 className='text-2xl font-bold text-advay-slate mb-2'>
+                Great Workout!
+              </h3>
+              <p className='text-advay-slate mb-2'>
+                Final Score:{' '}
+                <span className='text-purple-600 font-bold'>{gameState.score}</span>
+              </p>
+              <p className='text-advay-slate mb-4'>
+                Level Reached:{' '}
+                <span className='text-purple-600 font-bold'>{gameState.level}</span>
+              </p>
+              <button
+                onClick={onShowMenu}
+                className='px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold transition-all transform hover:scale-105'
+              >
+                Back to Menu
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
 
 const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   // ===== HOOKS =====
@@ -144,7 +489,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
 
   // Keep canvas backing resolution in sync with displayed size.
   useEffect(() => {
-    const syncCanvasSize = () => {
+    function syncCanvasSize() {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
@@ -154,7 +499,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         canvas.width = nextWidth;
         canvas.height = nextHeight;
       }
-    };
+    }
 
     syncCanvasSize();
     window.addEventListener('resize', syncCanvasSize);
@@ -162,7 +507,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   }, []);
 
   // ===== GAME LOOP =====
-  const gameLoop = useCallback(() => {
+  function doGameLoop() {
     if (
       !webcamRef.current ||
       !poseLandmarkerRef.current ||
@@ -170,13 +515,13 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       !gameState?.gameActive ||
       showMenu
     ) {
-      animationRef.current = requestAnimationFrame(gameLoop);
+      animationRef.current = requestAnimationFrame(doGameLoop);
       return;
     }
 
     const video = webcamRef.current.video;
     if (!video || video.readyState !== 4) {
-      animationRef.current = requestAnimationFrame(gameLoop);
+      animationRef.current = requestAnimationFrame(doGameLoop);
       return;
     }
 
@@ -184,120 +529,39 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     const deltaTime = currentTime - lastFrameTimeRef.current;
     lastFrameTimeRef.current = currentTime;
 
-    // Detect pose
-    const results = poseLandmarkerRef.current.detectForVideo(
-      video,
-      currentTime,
-    );
+    const results = poseLandmarkerRef.current.detectForVideo(video, currentTime);
+    const landmarks =
+      results.landmarks && results.landmarks.length > 0
+        ? (results.landmarks[0] as any[])
+        : null;
 
-    // Update game state
     setGameState((prevState) => {
       if (!prevState) return prevState;
 
-      // Spawn new balloons
-      let updatedBalloons = [...prevState.balloons];
-      if (shouldSpawnBalloon(lastSpawnTime, updatedBalloons.length)) {
-        const newBalloon = generateBalloon(prevState.level);
-        updatedBalloons = [...updatedBalloons, newBalloon];
-        setLastSpawnTime(Date.now());
-      }
+      const {
+        nextState,
+        poppedBalloons,
+        detectedActionText,
+        levelAdvanced,
+        gameEnded,
+        newSpawnTime,
+      } = computeGameFrameUpdate(prevState, landmarks, deltaTime, lastSpawnTime);
 
-      // Update balloon positions
-      updatedBalloons = updateBalloons(updatedBalloons, deltaTime);
+      if (newSpawnTime !== null) setLastSpawnTime(newSpawnTime);
+      setCurrentAction(detectedActionText);
 
-      // Detect actions from pose
-      let detectedActions: PopAction[] = [];
-      if (results.landmarks && results.landmarks.length > 0) {
-        const landmarks = results.landmarks[0] as any[];
-        detectedActions = detectAllActions(landmarks);
+      poppedBalloons.forEach((balloon) => {
+        playPop();
+        const newStreak = incrementStreak();
+        const streakBonus = Math.min(newStreak * 2, 15);
+        setScorePopup({ points: 15 + streakBonus, x: balloon.x * 100, y: balloon.y * 100 });
+        triggerHaptic('success');
+      });
 
-        // Update current action display
-        const activeAction = detectedActions.find((a) => a.detected);
-        if (activeAction && activeAction.confidence > 0.6) {
-          setCurrentAction(getActionText(activeAction.type));
-        } else {
-          setCurrentAction(null);
-        }
-      }
+      if (poppedBalloons.length > 0) playSuccess();
+      if (levelAdvanced) playCelebration();
 
-      // Process collisions and pops
-      let updatedState = { ...prevState, balloons: updatedBalloons };
-      if (results.landmarks && results.landmarks.length > 0) {
-        const landmarks = results.landmarks[0] as any[];
-
-        // Check each balloon for collision with relevant body points
-        updatedBalloons = updatedBalloons.map((balloon) => {
-          if (balloon.popped) return balloon;
-
-          let popped = false;
-          switch (balloon.action) {
-            case 'jump': {
-              // Check ankles/feet for jump
-              const leftAnkle = landmarks[27];
-              const rightAnkle = landmarks[28];
-              popped = checkBodyCollisions(balloon, [leftAnkle, rightAnkle]);
-              break;
-            }
-
-            case 'wave': {
-              // Check wrists for wave
-              const leftWrist = landmarks[15];
-              const rightWrist = landmarks[16];
-              popped = checkBodyCollisions(balloon, [leftWrist, rightWrist]);
-              break;
-            }
-
-            case 'clap': {
-              // Check either wrist for clap
-              const wrists = [landmarks[15], landmarks[16]];
-              popped = checkBodyCollisions(balloon, wrists);
-              break;
-            }
-          }
-
-          return { ...balloon, popped: popped || balloon.popped };
-        });
-
-        const { updatedState: processedState, poppedBalloons } = processPops(
-          { ...updatedState, balloons: updatedBalloons },
-          detectedActions,
-        );
-
-        // Play sounds and haptics for popped balloons
-        poppedBalloons.forEach((balloon) => {
-          playPop();
-
-          // Streak and scoring
-          const newStreak = incrementStreak();
-          const basePoints = 15;
-          const streakBonus = Math.min(newStreak * 2, 15);
-          const totalPoints = basePoints + streakBonus;
-
-          // Show popup at balloon position
-          setScorePopup({ points: totalPoints, x: balloon.x * 100, y: balloon.y * 100 });
-
-          // Haptics
-          triggerHaptic('success');
-        });
-
-        if (poppedBalloons.length > 0) {
-          playSuccess();
-        }
-
-        updatedState = processedState;
-      }
-
-      // Update timer
-      updatedState = updateGameTimer(updatedState, deltaTime);
-
-      // Check for level advancement
-      if (shouldAdvanceLevel(updatedState)) {
-        updatedState = advanceLevel(updatedState);
-        playCelebration();
-      }
-
-      // Check for game completion
-      if (!updatedState.gameActive && !showCelebration) {
+      if (gameEnded && !showCelebration) {
         setTimeout(() => {
           setShowCelebration(true);
           playCelebration();
@@ -305,14 +569,15 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         }, 500);
       }
 
-      return updatedState;
+      return nextState;
     });
 
-    // Render canvas
     renderCanvas();
 
-    animationRef.current = requestAnimationFrame(gameLoop);
-  }, [
+    animationRef.current = requestAnimationFrame(doGameLoop);
+  }
+
+  const gameLoop = useCallback(doGameLoop, [
     gameState,
     cameraReady,
     showMenu,
@@ -338,102 +603,14 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   }, [isLoading, showMenu, gameState?.gameActive, gameLoop]);
 
   // ===== CANVAS RENDERING =====
-  const renderCanvas = useCallback(() => {
+  function renderCanvasFrame() {
     const canvas = canvasRef.current;
     if (!canvas || !gameState) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const { width, height } = canvas;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, '#87CEEB'); // Sky blue
-    gradient.addColorStop(1, '#E0F7FA'); // Light cyan
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw clouds (decorative)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.beginPath();
-    ctx.arc(width * 0.2, height * 0.15, 40, 0, Math.PI * 2);
-    ctx.arc(width * 0.25, height * 0.12, 50, 0, Math.PI * 2);
-    ctx.arc(width * 0.3, height * 0.15, 40, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(width * 0.7, height * 0.2, 35, 0, Math.PI * 2);
-    ctx.arc(width * 0.75, height * 0.18, 45, 0, Math.PI * 2);
-    ctx.arc(width * 0.8, height * 0.2, 35, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw balloons
-    gameState.balloons.forEach((balloon) => {
-      if (balloon.popped) return;
-
-      const x = balloon.x * width;
-      const y = balloon.y * height;
-      const size = balloon.size * width;
-
-      // Draw balloon string
-      ctx.strokeStyle = '#8B4513';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x, y + size);
-      ctx.quadraticCurveTo(x + 5, y + size + 20, x, y + size + 40);
-      ctx.stroke();
-
-      // Draw balloon body
-      ctx.fillStyle = BALLOON_COLORS[balloon.color];
-      ctx.beginPath();
-      ctx.ellipse(x, y, size, size * 1.2, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Add highlight
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.beginPath();
-      ctx.ellipse(
-        x - size * 0.3,
-        y - size * 0.3,
-        size * 0.2,
-        size * 0.3,
-        -0.5,
-        0,
-        Math.PI * 2,
-      );
-      ctx.fill();
-
-      // Draw balloon knot
-      ctx.fillStyle = BALLOON_COLORS[balloon.color];
-      ctx.beginPath();
-      ctx.moveTo(x - 5, y + size * 1.1);
-      ctx.lineTo(x + 5, y + size * 1.1);
-      ctx.lineTo(x, y + size * 1.2);
-      ctx.closePath();
-      ctx.fill();
-
-      // Draw action indicator
-      ctx.fillStyle = 'white';
-      ctx.font = `bold ${size * 0.5}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(getBalloonEmoji(balloon.color), x, y);
-    });
-
-    // Draw current action indicator
-    if (currentAction) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(width / 2 - 150, height - 80, 300, 60);
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(currentAction, width / 2, height - 50);
-    }
-  }, [gameState, currentAction]);
+    renderGameFrame(ctx, gameState, currentAction);
+  }
+  const renderCanvas = useCallback(renderCanvasFrame, [gameState, currentAction]);
 
   // ===== GAME FLOW =====
   const startGame = () => {
@@ -487,182 +664,16 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       </div>
 
       {showMenu ? (
-        // ===== MAIN MENU =====
-        <div className='flex flex-col items-center justify-center h-full p-6'>
-          {/* Animated Balloon Icon */}
-          <motion.div
-            className='relative mb-6'
-            animate={{
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <div className='text-8xl'>🎈</div>
-            <div className='absolute -top-2 -right-2 text-4xl animate-bounce'>
-              💪
-            </div>
-          </motion.div>
-
-          <h2 className='text-3xl font-bold text-advay-slate mb-3'>
-            Balloon Pop Fitness!
-          </h2>
-          <p className='text-advay-slate mb-6 text-center max-w-md'>
-            Pop floating balloons using different body movements based on their
-            colors!
-          </p>
-
-          {/* Color Instructions */}
-          <div className='grid grid-cols-1 gap-3 mb-6 max-w-md w-full'>
-            <div className='bg-red-100 border-2 border-red-300 rounded-lg p-4 flex items-center gap-3'>
-              <div className='text-3xl'>🔴</div>
-              <div>
-                <div className='font-bold text-red-700'>Jump and Touch!</div>
-                <div className='text-sm text-red-600'>
-                  Jump up to pop red balloons
-                </div>
-              </div>
-            </div>
-
-            <div className='bg-blue-100 border-2 border-blue-300 rounded-lg p-4 flex items-center gap-3'>
-              <div className='text-3xl'>🔵</div>
-              <div>
-                <div className='font-bold text-blue-700'>Wave Your Hand!</div>
-                <div className='text-sm text-blue-600'>
-                  Raise your hand to pop blue balloons
-                </div>
-              </div>
-            </div>
-
-            <div className='bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 flex items-center gap-3'>
-              <div className='text-3xl'>🟡</div>
-              <div>
-                <div className='font-bold text-yellow-700'>
-                  Clap Your Hands!
-                </div>
-                <div className='text-sm text-yellow-600'>
-                  Clap to pop yellow balloons
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Start Button */}
-          <div className="mt-4">
-            <GameStartButton
-              onClick={startGame}
-              disabled={isLoading}
-              text={isLoading ? 'LOADING' : 'WORKOUT'}
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className='mt-4 text-red-600 text-center max-w-md'>
-              {error}
-            </div>
-          )}
-        </div>
+        <BalloonMenuScreen isLoading={isLoading} error={error} onStart={startGame} />
       ) : (
-        // ===== GAME AREA =====
-        <div className='flex flex-col h-full'>
-          {/* Header */}
-          <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
-            <GameHUD
-              score={gameState?.score}
-              streak={streak}
-              levelInfo={
-                <div className="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-xl font-black border-2 border-purple-200 shadow-sm">
-                  Layer {gameState?.level}
-                </div>
-              }
-              rightHeaderContent={
-                <div className="flex gap-4 items-center">
-                  {gameState?.combo && gameState.combo > 1 && (
-                    <div className='bg-orange-100 text-orange-600 px-3 py-1 rounded-xl font-black border-2 border-orange-200 shadow-sm animate-pulse'>
-                      ⚡ {gameState.combo}x
-                    </div>
-                  )}
-                  <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm ${(gameState?.timeRemaining || 0) < 10000 ? 'bg-red-100 border-red-300 text-red-700 animate-pulse' : 'bg-white/90 border-slate-200 text-slate-600'
-                    }`}>
-                    ⏳ {Math.ceil((gameState?.timeRemaining || 0) / 1000)}s
-                  </div>
-                </div>
-              }
-            />
-          </div>
-
-          {/* Game Canvas */}
-          <div className='flex-1 relative'>
-            <canvas ref={canvasRef} className='w-full h-full' />
-
-            {/* Score Popup */}
-            {scorePopup && (
-              <motion.div
-                initial={{ opacity: 1, y: 0, scale: 1 }}
-                animate={{ opacity: 0, y: -50, scale: 1.2 }}
-                transition={{ duration: 0.7, ease: 'easeOut' }}
-                className='absolute pointer-events-none'
-                style={{
-                  left: `${scorePopup.x}%`,
-                  top: `${scorePopup.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <div className='text-2xl font-bold text-green-500 drop-shadow-lg'>
-                  +{scorePopup.points}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Streak Milestone */}
-            {showMilestone && (
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                className='absolute inset-0 flex items-center justify-center pointer-events-none'
-              >
-                <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
-                  🔥 {streak} Streak! 🔥
-                </div>
-              </motion.div>
-            )}
-
-            {/* Game Over Overlay */}
-            {gameState && !gameState.gameActive && (
-              <div className='absolute inset-0 bg-black/50 flex items-center justify-center'>
-                <div className='bg-white rounded-2xl p-8 text-center max-w-md'>
-                  <div className='text-5xl mb-4'>🎈</div>
-                  <h3 className='text-2xl font-bold text-advay-slate mb-2'>
-                    Great Workout!
-                  </h3>
-                  <p className='text-advay-slate mb-2'>
-                    Final Score:{' '}
-                    <span className='text-purple-600 font-bold'>
-                      {gameState.score}
-                    </span>
-                  </p>
-                  <p className='text-advay-slate mb-4'>
-                    Level Reached:{' '}
-                    <span className='text-purple-600 font-bold'>
-                      {gameState.level}
-                    </span>
-                  </p>
-                  <button
-                    onClick={handleShowMenu}
-                    className='px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold transition-all transform hover:scale-105'
-                  >
-                    Back to Menu
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <BalloonGameArea
+          gameState={gameState}
+          canvasRef={canvasRef}
+          streak={streak}
+          scorePopup={scorePopup}
+          showMilestone={showMilestone}
+          onShowMenu={handleShowMenu}
+        />
       )}
 
       {/* Celebration Overlay */}

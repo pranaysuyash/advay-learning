@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenney Asset Loading Performance Benchmark</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #3B82F6;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #2563EB;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: #10B981;
+    }
+    button.secondary:hover {
+      background: #059669;
+    }
+    .test-config {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .test-config h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    .config-row label {
+      min-width: 150px;
+      font-weight: 500;
+    }
+    input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    .results h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .metric-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .metric-card.green {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    .metric-card.orange {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .metric-card.blue {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .metric-value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .metric-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #555;
+    }
+    tr:hover {
+      background: #f8f9fa;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .comparison-panel {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .comparison-panel h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .asset-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .asset-item {
+      width: 64px;
+      height: 64px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .asset-item img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .log {
+      background: #1a1a2e;
+      color: #eee;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .log-entry {
+      margin-bottom: 5px;
+    }
+    .log-entry.info {
+      color: #4fc3f7;
+    }
+    .log-entry.success {
+      color: #81c784;
+    }
+    .log-entry.error {
+      color: #e57373;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Kenney Asset Loading Performance Benchmark</h1>
+    <p class="subtitle">Compare asset loading performance with and without preloading strategies</p>
+
+    <div class="test-config">
+      <h3>Test Configuration</h3>
+      <div class="config-row">
+        <label>Test Assets:</label>
+        <select id="assetSet">
+          <option value="collectibles">Collectibles (3 assets)</option>
+          <option value="hud">HUD Elements (3 assets)</option>
+          <option value="characters">Characters (5 assets)</option>
+          <option value="mixed" selected>Mixed Set (10 assets)</option>
+          <option value="full">Full UI Set (32 assets)</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <label>Iterations:</label>
+        <input type="number" id="iterations" value="5" min="1" max="20">
+      </div>
+      <div class="config-row">
+        <label>Network Throttling:</label>
+        <select id="throttle">
+          <option value="none">No Throttling</option>
+          <option value="fast3g">Fast 3G</option>
+          <option value="slow3g" selected>Slow 3G</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button onclick="runBenchmark()" id="runBtn">▶️ Run Benchmark</button>
+      <button onclick="runComparison()" class="secondary" id="compareBtn">📊 Compare Strategies</button>
+      <button onclick="clearResults()" id="clearBtn">🗑️ Clear Results</button>
+    </div>
+
+    <div class="progress-bar" id="progressBar" style="display: none;">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+      <h2>📈 Benchmark Results</h2>
+      
+      <div class="metric-cards">
+        <div class="metric-card">
+          <div class="metric-value" id="avgTime">-</div>
+          <div class="metric-label">Average Load Time</div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-value" id="minTime">-</div>
+          <div class="metric-label">Minimum Time</div>
+        </div>
+        <div class="metric-card orange">
+          <div class="metric-value" id="maxTime">-</div>
+          <div class="metric-label">Maximum Time</div>
+        </div>
+        <div class="metric-card blue">
+          <div class="metric-value" id="successRate">-</div>
+          <div class="metric-label">Success Rate</div>
+        </div>
+      </div>
+
+      <div class="comparison" id="comparison" style="display: none;">
+        <div class="comparison-panel">
+          <h3>Without Preloading</h3>
+          <p><strong>Avg Time:</strong> <span id="noPreloadTime">-</span>ms</p>
+          <p><strong>Requests:</strong> <span id="noPreloadRequests">-</span></p>
+          <p><strong>Failures:</strong> <span id="noPreloadFailures">-</span></p>
+        </div>
+        <div class="comparison-panel">
+          <h3>With Preloading</h3>
+          <p><strong>Avg Time:</strong> <span id="preloadTime">-</span>ms</p>
+          <p><strong>Requests:</strong> <span id="preloadRequests">-</span></p>
+          <p><strong>Failures:</strong> <span id="preloadFailures">-</span></p>
+          <p><strong>Improvement:</strong> <span id="improvement">-</span>%</p>
+        </div>
+      </div>
+
+      <h3>Detailed Results</h3>
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>Iteration</th>
+            <th>Strategy</th>
+            <th>Load Time (ms)</th>
+            <th>Assets Loaded</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+        </tbody>
+      </table>
+
+      <h3>Asset Preview</h3>
+      <div class="asset-preview" id="assetPreview"></div>
+    </div>
+
+    <div class="log" id="log">
+      <div class="log-entry info">Ready to run benchmark. Select configuration and click "Run Benchmark".</div>
+    </div>
+  </div>
+
+  <script>
+    // Asset definitions
+    const ASSETS = {
+      collectibles: [
+        '/assets/kenney/platformer/collectibles/coin_gold.png',
+        '/assets/kenney/platformer/collectibles/gem_blue.png',
+        '/assets/kenney/platformer/collectibles/star.png'
+      ],
+      hud: [
+        '/assets/kenney/platformer/hud/hud_heart.png',
+        '/assets/kenney/platformer/hud/hud_heart_half.png',
+        '/assets/kenney/platformer/hud/hud_heart_empty.png'
+      ],
+      characters: [
+        '/assets/kenney/platformer/characters/character_green_idle.png',
+        '/assets/kenney/platformer/characters/character_green_walk_a.png',
+        '/assets/kenney/platformer/characters/character_green_jump.png',
+        '/assets/kenney/platformer/characters/character_pink_idle.png',
+        '/assets/kenney/platformer/characters/character_yellow_idle.png'
+      ],
+      mixed: [],
+      full: []
+    };
+
+    // Build mixed and full sets
+    ASSETS.mixed = [...ASSETS.collectibles, ...ASSETS.hud, ...ASSETS.characters.slice(0, 4)];
+    ASSETS.full = [
+      ...ASSETS.collectibles,
+      ...ASSETS.hud,
+      ...ASSETS.characters,
+      '/assets/kenney/ui/icons/icon_checkmark.png',
+      '/assets/kenney/ui/icons/icon_cross.png',
+      '/assets/kenney/ui/icons/icon_circle.png',
+      '/assets/kenney/ui/panels/panel_blue.png',
+      '/assets/kenney/ui/panels/panel_beige.png',
+      '/assets/kenney/ui/arrows/arrow_basic_e.png',
+      '/assets/kenney/ui/arrows/arrow_basic_n.png'
+    ];
+
+    let results = [];
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function getSelectedAssets() {
+      const set = document.getElementById('assetSet').value;
+      return ASSETS[set] || ASSETS.mixed;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const startTime = performance.now();
+        
+        img.onload = () => {
+          resolve({
+            src,
+            success: true,
+            loadTime: performance.now() - startTime
+          });
+        };
+        
+        img.onerror = () => {
+          resolve({
+            src,
+            success: false,
+            loadTime: performance.now() - startTime
+          });
+        };
+        
+        img.src = src;
+      });
+    }
+
+    async function loadAssetsSequential(assets) {
+      const startTime = performance.now();
+      const results = [];
+      
+      for (const src of assets) {
+        const result = await loadImage(src);
+        results.push(result);
+      }
+      
+      return {
+        totalTime: performance.now() - startTime,
+        results,
+        strategy: 'sequential'
+      };
+    }
+
+    async function loadAssetsParallel(assets) {
+      const startTime = performance.now();
+      const promises = assets.map(src => loadImage(src));
+      const results = await Promise.all(promises);
+      
+      return {
+        totalTime: performance.now() - startTime,
+        results,
+        strategy: 'parallel'
+      };
+    }
+
+    async function loadAssetsWithCache(assets) {
+      // First load - populate cache
+      await loadAssetsParallel(assets);
+      
+      // Second load - should be from cache
+      const startTime = performance.now();
+      const promises = assets.map(src => loadImage(src));
+      const results = await Promise.all(promises);
+      
+      return {
+        totalTime: performance.now() - startTime,
+        results,
+        strategy: 'cached'
+      };
+    }
+
+    function updateProgress(percent) {
+      document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function displayResults() {
+      const resultsEl = document.getElementById('results');
+      const tbody = document.getElementById('resultsBody');
+      
+      resultsEl.style.display = 'block';
+      tbody.innerHTML = '';
+      
+      // Calculate statistics
+      const times = results.map(r => r.totalTime);
+      const avg = times.reduce((a, b) => a + b, 0) / times.length;
+      const min = Math.min(...times);
+      const max = Math.max(...times);
+      const successCount = results.reduce((sum, r) => 
+        sum + r.results.filter(res => res.success).length, 0
+      );
+      const totalAssets = results.reduce((sum, r) => sum + r.results.length, 0);
+      
+      document.getElementById('avgTime').textContent = Math.round(avg) + 'ms';
+      document.getElementById('minTime').textContent = Math.round(min) + 'ms';
+      document.getElementById('maxTime').textContent = Math.round(max) + 'ms';
+      document.getElementById('successRate').textContent = 
+        Math.round((successCount / totalAssets) * 100) + '%';
+      
+      // Populate table
+      results.forEach((result, idx) => {
+        const row = document.createElement('tr');
+        const successCount = result.results.filter(r => r.success).length;
+        row.innerHTML = `
+          <td>#${idx + 1}</td>
+          <td>${result.strategy}</td>
+          <td>${Math.round(result.totalTime)}ms</td>
+          <td>${successCount}/${result.results.length}</td>
+          <td><span class="status ${successCount === result.results.length ? 'success' : 'warning'}">
+            ${successCount === result.results.length ? '✓ Success' : '⚠ Partial'}
+          </span></td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      // Show asset previews
+      const previewEl = document.getElementById('assetPreview');
+      previewEl.innerHTML = '';
+      const assets = getSelectedAssets();
+      assets.forEach(src => {
+        const div = document.createElement('div');
+        div.className = 'asset-item';
+        const img = document.createElement('img');
+        img.src = src;
+        img.onerror = () => {
+          div.style.background = '#fee';
+          div.textContent = '✗';
+        };
+        div.appendChild(img);
+        previewEl.appendChild(div);
+      });
+    }
+
+    async function runBenchmark() {
+      const btn = document.getElementById('runBtn');
+      const progressBar = document.getElementById('progressBar');
+      
+      btn.disabled = true;
+      progressBar.style.display = 'block';
+      results = [];
+      
+      const assets = getSelectedAssets();
+      const iterations = parseInt(document.getElementById('iterations').value);
+      
+      log(`Starting benchmark with ${assets.length} assets, ${iterations} iterations`);
+      
+      for (let i = 0; i < iterations; i++) {
+        updateProgress((i / iterations) * 100);
+        
+        // Test parallel loading
+        const result = await loadAssetsParallel(assets);
+        result.iteration = i + 1;
+        results.push(result);
+        
+        log(`Iteration ${i + 1}: ${Math.round(result.totalTime)}ms (${result.results.filter(r => r.success).length}/${result.results.length} loaded)`);
+      }
+      
+      updateProgress(100);
+      displayResults();
+      
+      btn.disabled = false;
+      progressBar.style.display = 'none';
+      
+      log('Benchmark complete!', 'success');
+    }
+
+    async function runComparison() {
+      const btn = document.getElementById('compareBtn');
+      btn.disabled = true;
+      
+      const assets = getSelectedAssets();
+      log('Running comparison: No Preload vs Preload');
+      
+      // Test without preload (clear cache by adding random param)
+      const noCacheAssets = assets.map(src => src + '?nocache=' + Date.now());
+      const noPreloadResult = await loadAssetsParallel(noCacheAssets);
+      
+      // Test with preload (second load should be cached)
+      const preloadResult = await loadAssetsWithCache(assets);
+      
+      // Display comparison
+      document.getElementById('comparison').style.display = 'grid';
+      
+      document.getElementById('noPreloadTime').textContent = 
+        Math.round(noPreloadResult.totalTime);
+      document.getElementById('noPreloadRequests').textContent = 
+        noPreloadResult.results.length;
+      document.getElementById('noPreloadFailures').textContent = 
+        noPreloadResult.results.filter(r => !r.success).length;
+      
+      document.getElementById('preloadTime').textContent = 
+        Math.round(preloadResult.totalTime);
+      document.getElementById('preloadRequests').textContent = 
+        preloadResult.results.length;
+      document.getElementById('preloadFailures').textContent = 
+        preloadResult.results.filter(r => !r.success).length;
+      
+      const improvement = ((noPreloadResult.totalTime - preloadResult.totalTime) / 
+        noPreloadResult.totalTime * 100).toFixed(1);
+      document.getElementById('improvement').textContent = improvement;
+      
+      log(`No preload: ${Math.round(noPreloadResult.totalTime)}ms`, 'info');
+      log(`With preload: ${Math.round(preloadResult.totalTime)}ms`, 'success');
+      log(`Improvement: ${improvement}%`, 'success');
+      
+      btn.disabled = false;
+    }
+
+    function clearResults() {
+      results = [];
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('comparison').style.display = 'none';
+      document.getElementById('log').innerHTML = 
+        '<div class="log-entry info">Ready to run benchmark.</div>';
+    }
+  </script>
+</body>
+</html>
+EOF
+echo "Performance benchmark tool created"

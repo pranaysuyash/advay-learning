@@ -14,20 +14,24 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import { VoiceInstructions, useVoiceInstructions } from '../components/game/VoiceInstructions';
-
-// Fix internal canvas resolution to scale well
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-const GROUND_Y = CANVAS_HEIGHT - 64;
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  GROUND_Y,
+  GRAVITY,
+  JUMP_VELOCITY,
+  COIN_POINTS,
+  STAR_POINTS,
+  STREAK_MULTIPLIER,
+  MAX_STREAK_BONUS,
+  STREAK_MILESTONE_INTERVAL,
+  HAND_RAISE_THRESHOLD,
+  HAND_LOWER_THRESHOLD,
+  checkCollision,
+  type Rect,
+} from '../games/platformerRunnerLogic';
 
 type GameStateType = 'start' | 'playing' | 'complete';
-
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
 
 interface GameObject extends Rect {
   id: number;
@@ -38,32 +42,6 @@ interface GameObject extends Rect {
   frameTimer: number;
   frameIndex: number;
   startY?: number;
-}
-
-function checkCollision(r1: Rect, r2: Rect, margin = 0.6): boolean {
-  const mw = r1.w * (1 - margin);
-  const mh = r1.h * (1 - margin);
-  const r1Shrunken = {
-    x: r1.x + mw / 2,
-    y: r1.y + mh / 2,
-    w: r1.w * margin,
-    h: r1.h * margin,
-  };
-  const r2mw = r2.w * (1 - margin);
-  const r2mh = r2.h * (1 - margin);
-  const r2Shrunken = {
-    x: r2.x + r2mw / 2,
-    y: r2.y + r2mh / 2,
-    w: r2.w * margin,
-    h: r2.h * margin,
-  };
-
-  return (
-    r1Shrunken.x < r2Shrunken.x + r2Shrunken.w &&
-    r1Shrunken.x + r1Shrunken.w > r2Shrunken.x &&
-    r1Shrunken.y < r2Shrunken.y + r2Shrunken.h &&
-    r1Shrunken.y + r1Shrunken.h > r2Shrunken.y
-  );
 }
 
 const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
@@ -116,7 +94,7 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
     if (gameState !== 'playing') return;
     const player = playerRef.current;
     if (player.y >= GROUND_Y - player.h - 5) { // On ground
-      player.vy = -16;
+      player.vy = JUMP_VELOCITY;
       playClick(); // Jump sound essentially
       triggerHaptic('success');
     }
@@ -132,8 +110,8 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
         lastHandStateRef.current = true;
       }
 
-      const handRaised = tip.y < 0.4; // Top 40% of screen
-      const handLowered = tip.y > 0.6; // Bottom 40% of screen
+      const handRaised = tip.y < HAND_RAISE_THRESHOLD; // Top 40% of screen
+      const handLowered = tip.y > HAND_LOWER_THRESHOLD; // Bottom 40% of screen
 
       if (handRaised && canJumpRef.current) {
         doJump();
@@ -196,7 +174,7 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
       const player = playerRef.current;
 
       // Apply physics to player
-      player.vy += 0.8 * dt; // Gravity
+      player.vy += GRAVITY * dt; // Gravity
       player.x += player.vx * dt; // Auto run forward
       player.y += player.vy * dt;
 
@@ -279,8 +257,8 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
           const newStreak = incrementStreak(1);
           setCoins((c) => c + 1);
 
-          const pts = collectible.type === 'star' ? 50 : 10;
-          const streakBonus = Math.min(newStreak * 2, 15);
+          const pts = collectible.type === 'star' ? STAR_POINTS : COIN_POINTS;
+          const streakBonus = Math.min(newStreak * STREAK_MULTIPLIER, MAX_STREAK_BONUS);
           const totalPoints = pts + streakBonus;
 
           setScore((s) => s + totalPoints);
@@ -296,7 +274,7 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
           triggerHaptic('success');
 
           // Milestone every 5 
-          if (newStreak > 0 && newStreak % 5 === 0) {
+          if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
             triggerHaptic('celebration');
           }
         }
