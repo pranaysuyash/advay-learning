@@ -52,3 +52,55 @@ Status updates:
 - [2026-03-11 16:05 IST] **IN PROGRESS** — Configuration changes applied; running staged gate and final verification next.
 - [2026-03-11 16:14 IST] **IN PROGRESS** — Artifact-driven Trivy noise remediation applied; pending CI/code-scanning refresh to verify Security tab is clean.
 - [2026-03-11 16:23 IST] **IN PROGRESS** — CodeQL signal-to-noise hardening applied; pending CodeQL rerun on main to confirm alert volume reduction.
+
+### TCK-20260311-008 :: Scorecard Alert Remediation (Pinned Dependencies + Workflow Permissions)
+
+Ticket Stamp: STAMP-20260311T161900Z-codex-scorecard-remediation
+
+Type: TOOLING
+Owner: Pranay (execution: Codex)
+Created: 2026-03-11
+Status: **IN PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope: remediate repository-fixable Scorecard findings by pinning workflow actions to immutable SHAs, tightening workflow token permissions, and pinning floating dependency references in Docker/scripts.
+- Out-of-scope: organization settings controls (branch protection policy, review policy) and ecosystem-level scorecard checks that do not map to repo content.
+- Behavior change allowed: YES (CI and tooling behavior only; runtime app behavior unchanged).
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `.github/workflows/*.yml` (action pinning + permissions hardening)
+  - `src/backend/Dockerfile`
+  - `src/frontend/Dockerfile`
+  - `scripts/setup.sh`
+  - `scripts/run-e2e.sh`
+  - `evaluations/run-angel-evaluation.sh`
+
+Acceptance Criteria:
+
+- [ ] All mutable workflow action refs (`@v*`) are replaced with pinned commit SHAs.
+- [ ] Deploy workflow has explicit least-privilege token permissions.
+- [ ] Floating base container tags are pinned to immutable digests.
+- [ ] Script-level unpinned dependency installs are upgraded to pinned installs where feasible.
+- [ ] Local staged gate passes without overrides.
+
+Prompt Trace:
+
+- prompts/review/local-pre-commit-review-v1.0.md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Execution log:
+
+- [2026-03-11 16:27 IST] Queried open code-scanning totals and confirmed current Security tab composition is `103` total (`59 CodeQL`, `44 Scorecard`). | Evidence: `gh api repos/pranaysuyash/advay-learning/code-scanning/alerts?state=open`
+- [2026-03-11 16:30 IST] Resolved current immutable commit SHAs for all workflow actions in use and replaced mutable refs in workflows (`checkout`, `setup-*`, `github-script`, `codeql-action`, `docker/*`, `add-to-project`). | Evidence: `.github/workflows/*.yml`
+- [2026-03-11 16:33 IST] Added explicit top-level `permissions` to deploy workflow for least privilege (`contents: read`). | Evidence: `.github/workflows/deploy.yml`
+- [2026-03-11 16:36 IST] Pinned container image references in backend/frontend Dockerfiles and Trivy scan image to immutable digests. | Evidence: `src/backend/Dockerfile`, `src/frontend/Dockerfile`, `.github/workflows/trivy.yml`
+- [2026-03-11 16:38 IST] Replaced unpinned dependency install patterns in scripts (`uv` installer script and ad-hoc npm installs) with pinned/versioned installs. | Evidence: `scripts/setup.sh`, `scripts/run-e2e.sh`, `evaluations/run-angel-evaluation.sh`
+
+Status updates:
+
+- [2026-03-11 16:39 IST] **IN PROGRESS** — Remediation edits complete; running staged local gate and preparing PR for reviewer re-check.

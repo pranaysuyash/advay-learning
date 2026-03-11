@@ -61,11 +61,11 @@ print_info "Python $PYTHON_VERSION found ✓"
 
 # Check if uv is installed
 print_info "Checking for uv..."
+UV_PINNED_VERSION="0.8.17"
 if ! command -v uv &> /dev/null; then
-    print_warn "uv not found. Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    # Add to PATH for current session
-    export PATH="$HOME/.cargo/bin:$PATH"
+    print_warn "uv not found. Installing pinned uv version ${UV_PINNED_VERSION}..."
+    python3 -m pip install --user "uv==${UV_PINNED_VERSION}"
+    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
 UV_VERSION=$(uv --version)

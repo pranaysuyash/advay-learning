@@ -21,14 +21,14 @@ jobs:
       TRIVY_EXIT_CODE: ${{ github.event_name == 'pull_request' && '0' || '1' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Run Trivy filesystem scan (vuln + misconfig + secrets)
         run: |
           docker run --rm \
             -v "$PWD:/src" \
             -w /src \
-            aquasec/trivy:0.56.2 fs \
+            aquasec/trivy:0.56.2@sha256:26245f364b6f5d223003dc344ec1eb5eb8439052bfecb31d79aeba0c74344b3a fs \
             --config .github/trivy/trivy.yaml \
             --output trivy-results.sarif \
             --exit-code "${TRIVY_EXIT_CODE}" \
@@ -36,6 +36,6 @@ jobs:
 
       - name: Upload SARIF to GitHub code scanning
         if: always() && hashFiles('trivy-results.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4
         with:
           sarif_file: trivy-results.sarif
