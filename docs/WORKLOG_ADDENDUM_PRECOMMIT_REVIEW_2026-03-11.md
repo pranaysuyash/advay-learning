@@ -31,11 +31,10 @@ Acceptance Criteria:
 Prompt Trace:
 
 - prompts/workflow/agent-entrypoint-v1.0.md
-- prompts/review/local-pre-commit-review-v1.0.md
+- Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - prompts/workflow/code-quality-remediation-v1.0.md
 - prompts/workflow/pr-merge-quality-gate-v1.0.md
 - prompts/security/dependency-audit-v1.0.md
-Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 Execution log:
 
