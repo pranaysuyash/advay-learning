@@ -64,6 +64,7 @@ src/frontend/.vite/
 src/frontend/.vite_cache_new/
 src/frontend/.turbo/
 src/frontend/.parcel-cache/
+src/frontend/.test_build/
 *.local
 
 # Node & package managers (global)

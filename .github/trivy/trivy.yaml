@@ -10,3 +10,5 @@ ignore-unfixed: true
 skip-policy-update: true
 timeout: 10m
 no-progress: true
+skip-dirs:
+  - src/frontend/.test_build
