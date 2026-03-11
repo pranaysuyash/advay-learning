@@ -20,8 +20,9 @@ cd /Users/pranay/Projects/learning_for_kids
 
 # Install Playwright if needed
 if ! npx playwright --version > /dev/null 2>&1; then
-  echo "📦 Installing Playwright..."
-  npm install @playwright/test@1.58.2 --timeout=300000 --no-audit --no-fund
+  echo "❌ Playwright CLI not found in project dependencies."
+  echo "Run 'cd src/frontend && npm ci' first, then rerun this script."
+  exit 1
 fi
 
 echo "🎬 Running evaluation with Playwright..."

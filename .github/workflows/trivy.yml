@@ -11,11 +11,13 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     env:
       # Keep PR checks informative/non-blocking, enforce on main/schedule.
       TRIVY_EXIT_CODE: ${{ github.event_name == 'pull_request' && '0' || '1' }}
