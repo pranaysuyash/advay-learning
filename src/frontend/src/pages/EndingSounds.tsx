@@ -5,6 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
   createEndingSoundsRound,
@@ -16,6 +17,7 @@ function EndingSoundsGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('ending-sounds');
+  const { saveProgress } = useGameProgress('ending-sounds');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -68,7 +70,9 @@ function EndingSoundsGame() {
 
     if (round >= roundsPerSession) {
       playCelebration();
-      await onGameComplete(score + (ok ? 20 : 0));
+      const finalScore = score + (ok ? 20 : 0);
+      await saveProgress({ score: finalScore, completed: true, level: 1 });
+      await onGameComplete(finalScore);
       setTimeout(() => {
         setActiveRound(null);
       }, 1200);

@@ -1,383 +1,508 @@
 /**
  * Maze Runner Game
  *
+ * Navigate your finger through the maze without touching walls!
+ * Hand-tracking maze navigation game.
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { GameContainer } from '../components/GameContainer';
+import { motion, AnimatePresence } from 'framer-motion';
+import Webcam from 'react-webcam';
+
 import { GameShell } from '../components/GameShell';
-import { useAudio } from '../utils/hooks/useAudio';
+import { GameContainer } from '../components/GameContainer';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useStreakTracking } from '../hooks/useStreakTracking';
-import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { useTTS } from '../hooks/useTTS';
+import type { TrackedHandFrame } from '../types/tracking';
 import {
-  LEVELS,
-  createMaze,
-  canMove,
-  checkWin,
-  type MazeCell,
-  type Position,
+  type Difficulty,
+  type GameState,
+  type Maze,
+  createInitialState,
+  startGame,
+  updatePlayerPosition,
+  updateTimer,
+  calculateFinalScore,
+  getWallHitMessage,
+  getDifficultyName,
+  DIFFICULTY_CONFIGS,
 } from '../games/mazeRunnerLogic';
 
-const CELL_SIZE = 40;
+const CANVAS_WIDTH = 600;
+const CANVAS_HEIGHT = 600;
 
-const MazeRunnerGame = memo(function MazeRunnerGameComponent() {
+export const MazeRunnerContent = memo(function MazeRunnerGame() {
   const navigate = useNavigate();
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [maze, setMaze] = useState<MazeCell[][]>([]);
-  const [playerPos, setPlayerPos] = useState<Position>({ x: 0, y: 0 });
-  const [endPos, setEndPos] = useState<Position>({ x: 0, y: 0 });
-  const [score, setScore] = useState(0);
-  const [moves, setMoves] = useState(0);
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'won'>('start');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const webcamRef = useRef<Webcam>(null);
 
-  // Streak tracking
-  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [gameState, setGameState] = useState<GameState>(() => createInitialState());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
-  const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('maze-runner');
+  const { playSuccess, playError, playCelebration } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
-  useGameSessionProgress({
-    gameName: 'Maze Runner',
-    score,
-    level: currentLevel,
-    isPlaying: gameState === 'playing',
-    metaData: { moves },
-  });
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
 
-  const startGame = () => {
-    const { maze: newMaze, start, end } = createMaze(currentLevel);
-    setMaze(newMaze);
-    setPlayerPos(start);
-    setEndPos(end);
-    setScore(0);
-    setMoves(0);
-    setGameState('playing');
-    resetStreak();
-    playClick();
-  };
+  // Draw maze
+  const drawMaze = useCallback(
+    (ctx: CanvasRenderingContext2D, maze: Maze) => {
+      const cellSize = CANVAS_WIDTH / maze.width;
 
-  const handleMove = useCallback((dx: number, dy: number) => {
-    if (gameState !== 'playing') return;
-    const newPos = { x: playerPos.x + dx, y: playerPos.y + dy };
-    if (canMove(maze, newPos)) {
-      playClick();
-      setPlayerPos(newPos);
-      setMoves((m) => m + 1);
-      if (checkWin(newPos, endPos)) {
-        const timeBonus = Math.max(100 - moves, 20);
-        const basePoints = 100;
-        const streakBonus = Math.min(streak * 2, 15);
-        const finalScore = basePoints + timeBonus + streakBonus;
-        setScore(finalScore);
-        setGameState('won');
-        playSuccess();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
 
-        // Streak and score popup logic
-        const newStreak = incrementStreak();
-        const totalPoints = basePoints + timeBonus + streakBonus;
-        setScorePopup({ points: totalPoints, x: 50, y: 30 });
-        triggerHaptic('success');
-        if (newStreak > 0 && newStreak % 5 === 0) {
-          triggerHaptic('celebration');
+      // Draw all walls
+      for (let y = 0; y < maze.height; y++) {
+        for (let x = 0; x < maze.width; x++) {
+          const cell = maze.cells[y][x];
+          const px = x * cellSize;
+          const py = y * cellSize;
+
+          ctx.beginPath();
+
+          if (cell.walls.top) {
+            ctx.moveTo(px, py);
+            ctx.lineTo(px + cellSize, py);
+          }
+          if (cell.walls.right) {
+            ctx.moveTo(px + cellSize, py);
+            ctx.lineTo(px + cellSize, py + cellSize);
+          }
+          if (cell.walls.bottom) {
+            ctx.moveTo(px + cellSize, py + cellSize);
+            ctx.lineTo(px, py + cellSize);
+          }
+          if (cell.walls.left) {
+            ctx.moveTo(px, py + cellSize);
+            ctx.lineTo(px, py);
+          }
+
+          ctx.stroke();
         }
       }
-    } else {
-      playError();
-      triggerHaptic('error');
-    }
-  }, [gameState, playerPos, maze, endPos, moves, playClick, playError, playSuccess]);
 
-  // Keyboard controls
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameState !== 'playing') return;
-      switch (e.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-          e.preventDefault();
-          handleMove(0, -1);
-          break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-          e.preventDefault();
-          handleMove(0, 1);
-          break;
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
-          e.preventDefault();
-          handleMove(-1, 0);
-          break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
-          e.preventDefault();
-          handleMove(1, 0);
-          break;
+      // Draw start (green circle)
+      const startX = maze.start.x * CANVAS_WIDTH;
+      const startY = maze.start.y * CANVAS_HEIGHT;
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.arc(startX, startY, cellSize * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('START', startX, startY + 4);
+
+      // Draw end (red circle with flag)
+      const endX = maze.end.x * CANVAS_WIDTH;
+      const endY = maze.end.y * CANVAS_HEIGHT;
+      ctx.fillStyle = '#FF5252';
+      ctx.beginPath();
+      ctx.arc(endX, endY, cellSize * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('EXIT', endX, endY + 4);
+    },
+    []
+  );
+
+  // Draw player and path
+  const drawPlayer = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      const { playerPos, path, maze } = gameState;
+      if (!maze) return;
+
+      const cellSize = CANVAS_WIDTH / maze.width;
+
+      // Draw path trail
+      if (path.length > 1) {
+        ctx.strokeStyle = '#2196F3';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+
+        path.forEach((pos, i) => {
+          const x = pos.x * CANVAS_WIDTH;
+          const y = pos.y * CANVAS_HEIGHT;
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+
+        ctx.stroke();
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleMove, gameState]);
 
-  const handleFinish = useCallback(async () => {
-    playClick();
-    await onGameComplete(Math.round(score / 50));
-    navigate('/games');
-  }, [score, onGameComplete, navigate, playClick]);
+      // Draw player cursor
+      const px = playerPos.x * CANVAS_WIDTH;
+      const py = playerPos.y * CANVAS_HEIGHT;
 
-  const cols = maze[0]?.length ?? 7;
+      // Glow effect
+      ctx.shadowColor = '#2196F3';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#2196F3';
+      ctx.beginPath();
+      ctx.arc(px, py, cellSize * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner circle
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py, cellSize * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+    },
+    [gameState]
+  );
+
+  // Handle hand tracking
+  const handleHandFrame = useCallback(
+    (frame: TrackedHandFrame) => {
+      if (!frame.indexTip || gameStateRef.current.status !== 'playing') return;
+
+      const cursor = { x: frame.indexTip.x, y: frame.indexTip.y };
+      setCursorPos(cursor);
+
+      const { state: newState, hitWall, reachedExit } = updatePlayerPosition(
+        gameStateRef.current,
+        cursor
+      );
+
+      setGameState(newState);
+
+      if (hitWall) {
+        playError();
+        triggerHaptic('error');
+        const message = getWallHitMessage(newState.wallHits, newState.maxWallHits);
+        setFeedback(message);
+        if (ttsEnabled) speak(message);
+
+        if (newState.status === 'wall-hit') {
+          setTimeout(() => {
+            setGameState((prev) => createInitialState({ difficulty: prev.difficulty, timeLimit: DIFFICULTY_CONFIGS[prev.difficulty].timeLimit, maxWallHits: prev.maxWallHits }));
+          }, 2000);
+        } else {
+          setTimeout(() => setFeedback(null), 1500);
+        }
+      }
+
+      if (reachedExit) {
+        playSuccess();
+        triggerHaptic('celebration');
+        playCelebration();
+        const scores = calculateFinalScore(newState);
+        onGameComplete(scores.total);
+        setShowCelebration(true);
+        if (ttsEnabled) speak('Maze complete! Great job!');
+      }
+    },
+    [playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]
+  );
+
+  const { handVisible } = useGameHandTracking({
+    gameName: 'MazeRunner',
+    webcamRef,
+    onFrame: handleHandFrame,
+  });
+
+  // Timer
+  useEffect(() => {
+    if (gameState.status !== 'playing') return;
+
+    const timer = setInterval(() => {
+      setGameState((prev) => {
+        const updated = updateTimer(prev);
+        if (updated.status === 'wall-hit' && prev.status === 'playing') {
+          playError();
+          if (ttsEnabled) speak("Time's up! Try again.");
+          setTimeout(() => {
+            setGameState((p) => createInitialState({ difficulty: p.difficulty, timeLimit: DIFFICULTY_CONFIGS[p.difficulty].timeLimit, maxWallHits: p.maxWallHits }));
+          }, 2000);
+        }
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState.status, playError, speak, ttsEnabled]);
+
+  // Draw canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // Draw maze
+    if (gameState.maze) {
+      drawMaze(ctx, gameState.maze);
+      drawPlayer(ctx);
+    }
+
+    // Draw hand cursor
+    if (cursorPos && gameState.status === 'playing') {
+      const cx = cursorPos.x * CANVAS_WIDTH;
+      const cy = cursorPos.y * CANVAS_HEIGHT;
+
+      ctx.strokeStyle = '#FF9800';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF9800';
+      ctx.fill();
+    }
+  }, [gameState, cursorPos, drawMaze, drawPlayer]);
+
+  const handleStart = useCallback(() => {
+    setGameState((prev) => startGame(prev, difficulty));
+    if (ttsEnabled) {
+      speak(`Navigate through the ${getDifficultyName(difficulty)} maze. Don't touch the walls!`);
+    }
+  }, [difficulty, speak, ttsEnabled]);
+
+  const handleGameComplete = useCallback(() => {
+    setShowCelebration(false);
+    setGameState(createInitialState());
+  }, []);
+
+  // Mouse fallback
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (gameState.status !== 'playing') return;
+
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const cursor = {
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      };
+
+      setCursorPos(cursor);
+
+      const { state: newState, hitWall, reachedExit } = updatePlayerPosition(
+        gameState,
+        cursor
+      );
+
+      setGameState(newState);
+
+      if (hitWall) {
+        playError();
+        const message = getWallHitMessage(newState.wallHits, newState.maxWallHits);
+        setFeedback(message);
+        if (newState.status === 'wall-hit') {
+          setTimeout(() => {
+            setGameState((prev) => createInitialState({ difficulty: prev.difficulty, timeLimit: DIFFICULTY_CONFIGS[prev.difficulty].timeLimit, maxWallHits: prev.maxWallHits }));
+          }, 2000);
+        } else {
+          setTimeout(() => setFeedback(null), 1500);
+        }
+      }
+
+      if (reachedExit) {
+        playSuccess();
+        playCelebration();
+        setShowCelebration(true);
+      }
+    },
+    [gameState, playSuccess, playError, playCelebration]
+  );
 
   return (
     <GameContainer
-      title='Maze Runner'
-      score={score}
-      level={currentLevel}
-      showScore
-      onHome={() => navigate('/games')}
-      reportSession={false}
+      title="Maze Runner"
+      score={gameState.score}
+      isPlaying={gameState.status === 'playing'}
+      isHandDetected={handVisible}
+      webcamRef={webcamRef}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
-        <div className='max-w-2xl mx-auto space-y-4'>
+      <div className="relative w-full h-full flex flex-col items-center justify-center">
+        {gameState.status === 'idle' ? (
+          <div className="flex flex-col items-center gap-6">
+            <h2 className="text-3xl font-bold text-gray-800">Maze Runner</h2>
+            <p className="text-gray-600 text-center max-w-md">
+              Navigate your finger through the maze!
+              <br />
+              🚫 Don't touch the walls!
+            </p>
 
-          {/* Level selector */}
-          <div className='flex gap-2 justify-center'>
-            {LEVELS.map((l: { level: number }) => (
-              <button
-                key={l.level}
-                type='button'
-                onClick={() => { playClick(); setCurrentLevel(l.level); setGameState('start'); }}
-                className={`px-5 py-2 rounded-full font-black text-sm transition-all shadow-[0_3px_0_#3730A3] ${currentLevel === l.level
-                  ? 'bg-[#6366F1] text-white border-2 border-indigo-600'
-                  : 'bg-white text-slate-700 border-2 border-[#F2CC8F] hover:border-indigo-300'
+            <div className="flex gap-4">
+              {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => (
+                <button
+                  key={diff}
+                  onClick={() => setDifficulty(diff)}
+                  className={`px-6 py-3 rounded-xl font-bold capitalize transition-all ${
+                    difficulty === diff
+                      ? 'bg-purple-500 text-white scale-110'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
                   }`}
-              >
-                Level {l.level}
-              </button>
-            ))}
+                >
+                  {getDifficultyName(diff)}
+                </button>
+              ))}
+            </div>
+
+            <div className="text-sm text-gray-500">
+              {difficulty === 'easy' && '8x8 maze • 60 seconds • 5 wall hits allowed'}
+              {difficulty === 'medium' && '12x12 maze • 90 seconds • 3 wall hits allowed'}
+              {difficulty === 'hard' && '16x16 maze • 120 seconds • 2 wall hits allowed'}
+            </div>
+
+            <button
+              onClick={handleStart}
+              className="mt-4 px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-xl font-bold rounded-2xl shadow-lg transition-all hover:scale-105"
+            >
+              Start Maze! 🏃
+            </button>
           </div>
+        ) : (
+          <>
+            {/* Status Bar */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-6 bg-white px-6 py-3 rounded-2xl shadow-xl">
+              <div className="text-center">
+                <div className="text-xs text-gray-500 uppercase">Time</div>
+                <div className={`text-xl font-bold ${gameState.timeLeft < 10 ? 'text-red-500' : 'text-gray-800'}`}>
+                  {gameState.timeLeft}s
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-500 uppercase">Wall Hits</div>
+                <div className={`text-xl font-bold ${
+                  gameState.wallHits >= gameState.maxWallHits - 1 ? 'text-red-500' : 'text-gray-800'
+                }`}>
+                  {gameState.wallHits}/{gameState.maxWallHits}
+                </div>
+              </div>
+            </div>
 
-          {/* Menu */}
-          {gameState === 'start' && (
-            <div className='flex flex-col items-center gap-6 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <div className='text-7xl'>🧩</div>
-              <div>
-                <h2 className='text-4xl font-black text-slate-900 tracking-tight'>Maze Runner!</h2>
-                <p className='text-lg font-bold text-slate-600 mt-2'>
-                  Navigate through the maze to reach the flag — fewer moves = more bonus!
-                </p>
-              </div>
-              <div className='flex flex-wrap items-center gap-3 justify-center text-sm font-bold text-slate-600'>
-                <span className='px-3 py-1 bg-indigo-50 rounded-full border border-indigo-200'>Arrow Keys / WASD</span>
-                <span className='px-3 py-1 bg-yellow-50 rounded-full border border-yellow-200'>or D-Pad buttons</span>
-                <span className='px-3 py-1 bg-green-50 rounded-full border border-green-200'>3 Levels</span>
-              </div>
-              <button
-                type='button'
-                onClick={startGame}
-                className='px-12 py-5 bg-[#6366F1] hover:bg-indigo-600 text-white rounded-2xl font-black text-2xl shadow-[0_4px_0_#3730A3] hover:scale-105 active:scale-95 transition-all'
+            {/* Maze Canvas */}
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              className="rounded-xl shadow-2xl cursor-crosshair bg-gray-50"
+              style={{ maxWidth: '90vw', maxHeight: '60vh' }}
+              onMouseMove={handleMouseMove}
+            />
+
+            {/* Instructions */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm">
+              Move your finger to navigate • Avoid walls • Reach the exit!
+            </div>
+
+            {/* Feedback */}
+            <AnimatePresence>
+              {feedback && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="absolute top-1/4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg"
+                >
+                  💥 {feedback}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+
+        {/* Celebration */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 flex items-center justify-center z-50"
+            >
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-white rounded-3xl p-8 text-center max-w-md"
               >
-                Enter the Maze! 🧩
-              </button>
-            </div>
-          )}
-
-          {/* Playing */}
-          {gameState === 'playing' && maze.length > 0 && (
-            <>
-              {/* Stats bar */}
-              <div className='flex items-center justify-between bg-white rounded-2xl border-2 border-[#F2CC8F] px-5 py-3 shadow-[0_3px_0_#E5B86E]'>
-                <div className='flex items-center gap-2 text-sm font-black text-slate-500'>
-                  <span>Moves:</span>
-                  <span className='text-indigo-600 text-lg'>{moves}</span>
-                </div>
-                <div className='flex items-center gap-2 text-sm font-black text-slate-500'>
-                  <span>Bonus target:</span>
-                  <span className='text-emerald-600'>&lt; {100 - 20} moves</span>
-                </div>
-                {/* Streak counter */}
-                <div className='flex items-center gap-1 text-sm font-black text-slate-500'>
-                  <span className='text-lg'>🔥</span>
-                  <span className='text-orange-600 text-lg'>{streak}</span>
-                </div>
-                <button
-                  type='button'
-                  onClick={startGame}
-                  className='px-3 py-1 text-xs font-black text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50'
-                >
-                  Restart
-                </button>
-              </div>
-
-              {/* Maze grid */}
-              <div className='flex justify-center'>
-                <div
-                  className='grid gap-0.5 bg-white p-2 rounded-3xl shadow-[0_8px_0_#E5B86E] border-4 border-[#F2CC8F]'
-                  style={{ gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)` }}
-                >
-                  {maze.map((row, y) =>
-                    row.map((cell, x) => {
-                      const isPlayer = playerPos.x === x && playerPos.y === y;
-                      const isEnd = endPos.x === x && endPos.y === y;
-                      return (
-                        <div
-                          key={`cell-${x}-${y}`}
-                          className={[
-                            'flex items-center justify-center rounded-md transition-colors',
-                            cell.isWall
-                              ? 'bg-slate-300 shadow-sm'
-                              : cell.isStart
-                                ? 'bg-emerald-100'
-                                : cell.isEnd
-                                  ? 'bg-rose-100'
-                                  : cell.isPath
-                                    ? 'bg-indigo-50'
-                                    : 'bg-slate-50',
-                          ].join(' ')}
-                          style={{ width: CELL_SIZE, height: CELL_SIZE }}
-                        >
-                          {isPlayer && (
-                            <span className='text-xl leading-none select-none'>😊</span>
-                          )}
-                          {isEnd && !isPlayer && (
-                            <span className='text-xl leading-none select-none'>🏁</span>
-                          )}
+                <div className="text-6xl mb-4">🏆🎉</div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">Maze Complete!</h2>
+                <p className="text-gray-600 mb-4">You navigated the maze perfectly!</p>
+                {(() => {
+                  const scores = calculateFinalScore(gameState);
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                        <div className="bg-gray-100 p-2 rounded">
+                          <div className="text-gray-500">Base Score</div>
+                          <div className="font-bold">{scores.baseScore}</div>
                         </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              {/* Score Popup */}
-              {scorePopup && (
-                <motion.div
-                  initial={{ opacity: 0, y: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, y: -30, scale: 1 }}
-                  exit={{ opacity: 0, y: -50 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className='fixed pointer-events-none z-50'
-                  style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
-                >
-                  <div className='bg-emerald-500 text-white px-4 py-2 rounded-xl font-black text-lg shadow-lg border-2 border-emerald-600'>
-                    +{scorePopup.points}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Streak Milestone */}
-              {showMilestone && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                  animate={{ opacity: 1, scale: 1.2, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.4, ease: 'backOut' }}
-                  className='fixed pointer-events-none z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'
-                >
-                  <div className='bg-gradient-to-br from-orange-400 to-red-500 text-white px-6 py-4 rounded-2xl font-black text-2xl shadow-2xl border-4 border-orange-300 text-center'>
-                    <div className='text-4xl mb-1'>🔥</div>
-                    <div>{streak} Streak!</div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* D-pad controls for touch */}
-              <div className='flex flex-col items-center gap-1'>
-                <button
-                  type='button'
-                  onClick={() => handleMove(0, -1)}
-                  className='w-14 h-14 flex items-center justify-center rounded-2xl bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-2xl font-black text-slate-700 hover:bg-indigo-50 active:scale-95 transition-all'
-                  aria-label='Move up'
-                >
-                  ↑
-                </button>
-                <div className='flex gap-1'>
+                        <div className="bg-green-100 p-2 rounded">
+                          <div className="text-green-600">Time Bonus</div>
+                          <div className="font-bold">+{scores.timeBonus}</div>
+                        </div>
+                        <div className="bg-blue-100 p-2 rounded">
+                          <div className="text-blue-600">Path Bonus</div>
+                          <div className="font-bold">+{scores.pathBonus}</div>
+                        </div>
+                        <div className="bg-red-100 p-2 rounded">
+                          <div className="text-red-600">Wall Penalty</div>
+                          <div className="font-bold">-{scores.wallPenalty}</div>
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-purple-600 mb-6">Total: {scores.total}</p>
+                    </>
+                  );
+                })()}
+                <div className="flex gap-4 justify-center">
                   <button
-                    type='button'
-                    onClick={() => handleMove(-1, 0)}
-                    className='w-14 h-14 flex items-center justify-center rounded-2xl bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-2xl font-black text-slate-700 hover:bg-indigo-50 active:scale-95 transition-all'
-                    aria-label='Move left'
+                    onClick={handleGameComplete}
+                    className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl"
                   >
-                    ←
+                    Play Again
                   </button>
-                  <div className='w-14 h-14 flex items-center justify-center opacity-0' />
                   <button
-                    type='button'
-                    onClick={() => handleMove(1, 0)}
-                    className='w-14 h-14 flex items-center justify-center rounded-2xl bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-2xl font-black text-slate-700 hover:bg-indigo-50 active:scale-95 transition-all'
-                    aria-label='Move right'
+                    onClick={() => navigate('/games')}
+                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl"
                   >
-                    →
+                    Exit
                   </button>
                 </div>
-                <button
-                  type='button'
-                  onClick={() => handleMove(0, 1)}
-                  className='w-14 h-14 flex items-center justify-center rounded-2xl bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-2xl font-black text-slate-700 hover:bg-indigo-50 active:scale-95 transition-all'
-                  aria-label='Move down'
-                >
-                  ↓
-                </button>
-              </div>
-            </>
+              </motion.div>
+            </motion.div>
           )}
-
-          {/* Won */}
-          {gameState === 'won' && (
-            <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <div className='text-7xl'>🏆</div>
-              <h2 className='text-4xl font-black text-slate-900'>You Made It!</h2>
-              <div className='grid grid-cols-2 gap-4 w-full max-w-sm'>
-                <div className='bg-indigo-50 border-2 border-indigo-200 px-4 py-3 rounded-xl'>
-                  <p className='text-xs font-black uppercase text-indigo-600'>Moves</p>
-                  <p className='text-3xl font-black text-indigo-700'>{moves}</p>
-                </div>
-                <div className='bg-emerald-50 border-2 border-emerald-200 px-4 py-3 rounded-xl'>
-                  <p className='text-xs font-black uppercase text-emerald-600'>Score</p>
-                  <p className='text-3xl font-black text-emerald-700'>{score}</p>
-                </div>
-              </div>
-              <div className='flex gap-3'>
-                <button
-                  type='button'
-                  onClick={startGame}
-                  className='px-8 py-4 bg-[#6366F1] text-white rounded-xl font-black shadow-[0_4px_0_#3730A3] hover:scale-105 active:scale-95 transition-all'
-                >
-                  Play Again
-                </button>
-                <button
-                  type='button'
-                  onClick={handleFinish}
-                  className='px-8 py-4 bg-slate-100 text-slate-700 rounded-xl font-black border-2 border-slate-200 hover:bg-slate-200 transition-all'
-                >
-                  Finish
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        </AnimatePresence>
       </div>
     </GameContainer>
   );
 });
 
-// Main export wrapped with GameShell
-export const MazeRunner = memo(function MazeRunnerComponent() {
+export const MazeRunner = memo(function MazeRunnerShell() {
   return (
-    <GameShell
-      gameId="maze-runner"
-      gameName="Maze Runner"
-      showWellnessTimer={true}
-      enableErrorBoundary={true}
-    >
-      <MazeRunnerGame />
+    <GameShell gameId="maze-runner" gameName="Maze Runner">
+      <MazeRunnerContent />
     </GameShell>
   );
 });
+
+export default MazeRunner;

@@ -6,7 +6,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
@@ -22,6 +22,7 @@ import {
   type Bubble,
 } from '../games/virtualBubblesLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 400;
@@ -33,6 +34,7 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
   const hasAccess = canAccessGame('virtual-bubbles');
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('virtual-bubbles');
+  const { saveProgress } = useGameProgress('virtual-bubbles');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -101,16 +103,10 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
       if (!currentProfile) return;
 
       try {
-        await progressQueue.add({
-          profileId: currentProfile.id,
-          gameId: 'virtual-bubbles',
+        await saveProgress({
           score: finalScore,
           completed: true,
-          metadata: {
-            level: currentLevel,
-            popped: poppedCount,
-            target: levelConfig.bubblesToPop,
-          },
+          level: currentLevel,
         });
         onGameComplete(finalScore);
       } catch (err) {
@@ -118,7 +114,7 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
         setError(err as Error);
       }
     },
-    [currentProfile, currentLevel, poppedCount, levelConfig, onGameComplete],
+    [currentProfile, currentLevel, poppedCount, levelConfig, onGameComplete, saveProgress],
   );
 
   useGameSessionProgress({
@@ -370,7 +366,7 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
               {streak > 0 && (
                 <div>
                   <span className='text-text-secondary text-sm'>Streak:</span>
-                  <span className='font-bold text-orange-600 ml-2'>🔥 {streak}</span>
+                  <span className='font-bold text-orange-600 ml-2 flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak}</span>
                 </div>
               )}
             </div>
@@ -384,7 +380,7 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
                 className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'
               >
                 <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg'>
-                  🔥 {streak} Streak! 🔥
+                  <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
                 </div>
               </motion.div>
             )}

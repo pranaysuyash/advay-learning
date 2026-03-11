@@ -8,7 +8,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -16,6 +16,7 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 import {
   LEVELS,
   buildBeginningSoundsRound,
@@ -38,6 +39,7 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const hasAccess = canAccessGame('beginning-sounds');
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('beginning-sounds');
+  const { saveProgress } = useGameProgress('beginning-sounds');
   
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentRound, setCurrentRound] = useState<BeginningSoundsRound | null>(null);
@@ -147,25 +149,19 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   // Save progress on game complete
   const handleGameComplete = useCallback(async (finalScore: number) => {
     if (!currentProfile) return;
-    
+
     try {
-      await progressQueue.add({
-        profileId: currentProfile.id,
-        gameId: 'beginning-sounds',
+      await saveProgress({
         score: finalScore,
         completed: true,
-        metadata: {
-          level: currentLevel,
-          correct: correctCount,
-          rounds: levelConfig.roundCount,
-        },
+        level: currentLevel,
       });
       onGameComplete(finalScore);
     } catch (err) {
       console.error('Failed to save progress:', err);
       setError(err as Error);
     }
-  }, [currentProfile, currentLevel, correctCount, levelConfig, onGameComplete]);
+  }, [currentProfile, currentLevel, correctCount, levelConfig, onGameComplete, saveProgress]);
 
   const speakWord = useCallback((word: string) => {
     try {
@@ -347,7 +343,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
         onHome={() => navigate('/games')}
         reportSession={false}
       >
-        <div className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
+        <div className="relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
+          <GameBackground type="solid_cloud" className="absolute inset-0 -z-10" />
           {voiceFallback && (
             <div className="w-full bg-yellow-100 text-yellow-800 p-2 rounded text-center">
               Voice fallback enabled. You can tap answers if voice recognition fails.

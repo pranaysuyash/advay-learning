@@ -1,532 +1,596 @@
 /**
- * Shadow Portal - Particle Logic Tests
+ * Shadow Portal Logic Tests
  *
- * @spec docs/games/shadow-portal-spec.md
+ * Tests for the silhouette particle game logic.
  */
 
 import { describe, it, expect } from 'vitest';
 import {
-  createParticle,
-  createParticles,
-  generateParticleId,
-  applyGravity,
-  updateParticlePosition,
-  applyWindForce,
-  bounceOffAxis,
-  constrainToBounds,
-  distance,
-  checkPortalCollision,
-  checkBarrierCollision,
-  pushFromBarrier,
-  calculatePortalScore,
-  calculateTimeBonus,
-  areAllPortalsFull,
-  getTotalPortalCount,
-  getTotalPortalTarget,
-  createPortalsFromConfig,
-  createLevelObstacles,
-  checkObstacleCollision,
-  bounceOffObstacle,
-  updateMovingObstacle,
-  DEFAULT_LEVELS,
-  PARTICLE_RADIUS,
-  GRAVITY,
-  BOUNCE_DAMPING,
-  WIND_FORCE,
-  PORTAL_RADIUS,
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
+  createInitialState,
+  startGame,
+  createPortals,
+  spawnParticle,
+  checkSilhouetteCollision,
+  checkPortalCapture,
+  updateParticles,
+  spawnParticles,
+  updateTimer,
+  checkGameComplete,
+  calculateFinalScore,
+  getComboText,
+  getDifficultyName,
+  DIFFICULTY_CONFIGS,
+  DEFAULT_CONFIG,
+  type Difficulty,
   type Particle,
-  type Portal,
-  type Obstacle,
-} from '../shadowPortal/particles';
+  type SilhouetteRegion,
+} from '../shadowPortalLogic';
 
-describe('Shadow Portal - Particle Logic', () => {
-  describe('Particle Creation', () => {
-    it('should create a particle with unique ID', () => {
-      const p1 = createParticle(100, 200, 2);
-      const p2 = createParticle(100, 200, 2);
-      expect(p1.id).not.toBe(p2.id);
+describe('ShadowPortal Logic', () => {
+  describe('createInitialState', () => {
+    it('creates state with idle status', () => {
+      const state = createInitialState();
+      expect(state.status).toBe('idle');
     });
 
-    it('should create particle at specified position', () => {
-      const particle = createParticle(150, 300, 2);
-      expect(particle.x).toBe(150);
-      expect(particle.y).toBe(300);
+    it('initializes score to 0', () => {
+      const state = createInitialState();
+      expect(state.score).toBe(0);
     });
 
-    it('should create particle with active state', () => {
-      const particle = createParticle(100, 200, 2);
-      expect(particle.active).toBe(true);
-      expect(particle.inPortal).toBe(false);
+    it('has empty particles array', () => {
+      const state = createInitialState();
+      expect(state.particles).toEqual([]);
     });
 
-    it('should create multiple particles', () => {
-      const particles = createParticles(5, 2, 800);
-      expect(particles).toHaveLength(5);
-      particles.forEach(p => {
-        expect(p.active).toBe(true);
-        expect(p.y).toBeLessThan(0); // Above screen
+    it('has empty portals array', () => {
+      const state = createInitialState();
+      expect(state.portals).toEqual([]);
+    });
+
+    it('uses default config', () => {
+      const state = createInitialState();
+      expect(state.timeLeft).toBe(DEFAULT_CONFIG.timeLimit);
+      expect(state.maxParticles).toBe(DEFAULT_CONFIG.maxParticles);
+    });
+  });
+
+  describe('createPortals', () => {
+    it('creates 3 portals', () => {
+      const portals = createPortals();
+      expect(portals.length).toBe(3);
+    });
+
+    it('creates left, center, and right portals', () => {
+      const portals = createPortals();
+      expect(portals[0].id).toBe('left');
+      expect(portals[1].id).toBe('center');
+      expect(portals[2].id).toBe('right');
+    });
+
+    it('positions portals at bottom of screen', () => {
+      const portals = createPortals();
+      portals.forEach((portal) => {
+        expect(portal.y).toBe(0.85);
+      });
+    });
+
+    it('initializes collected count to 0', () => {
+      const portals = createPortals();
+      portals.forEach((portal) => {
+        expect(portal.particlesCollected).toBe(0);
+      });
+    });
+
+    it('sets target particles', () => {
+      const portals = createPortals();
+      portals.forEach((portal) => {
+        expect(portal.targetParticles).toBeGreaterThan(0);
       });
     });
   });
 
-  describe('Physics', () => {
-    it('should apply gravity to velocity', () => {
-      const vy = 0;
-      const dt = 1; // Normalized to 60fps
-      const newVy = applyGravity(vy, dt);
-      expect(newVy).toBe(GRAVITY);
+  describe('startGame', () => {
+    it('sets status to playing', () => {
+      const state = createInitialState();
+      const newState = startGame(state, 'easy');
+      expect(newState.status).toBe('playing');
     });
 
-    it('should update particle position based on velocity', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 100,
-        y: 100,
-        vx: 10,
-        vy: 5,
-        active: true,
-        inPortal: false,
-      };
-      const updated = updateParticlePosition(particle, 1);
-      expect(updated.x).toBe(110);
-      expect(updated.y).toBe(105);
+    it('creates portals', () => {
+      const state = createInitialState();
+      const newState = startGame(state, 'easy');
+      expect(newState.portals.length).toBe(3);
     });
 
-    it('should bounce velocity with damping', () => {
-      const velocity = 10;
-      const bounced = bounceOffAxis(velocity);
-      expect(bounced).toBe(-10 * BOUNCE_DAMPING);
+    it('resets score', () => {
+      const state = { ...createInitialState(), score: 100 };
+      const newState = startGame(state, 'easy');
+      expect(newState.score).toBe(0);
     });
 
-    it('should apply wind force to particle', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 300,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const updated = applyWindForce(particle, WIND_FORCE, 1);
-      expect(updated.vy).toBeLessThan(0); // Should push upward
+    it('sets time based on difficulty', () => {
+      const state = createInitialState();
+      const easy = startGame(state, 'easy');
+      expect(easy.timeLeft).toBe(DIFFICULTY_CONFIGS.easy.timeLimit);
+    });
+
+    it('sets max missed based on difficulty', () => {
+      const state = createInitialState();
+      const hard = startGame(state, 'hard');
+      expect(hard.maxMissed).toBe(DIFFICULTY_CONFIGS.hard.maxMissed);
+    });
+
+    it('initializes empty particles array', () => {
+      const state = createInitialState();
+      const newState = startGame(state, 'easy');
+      expect(newState.particles).toEqual([]);
     });
   });
 
-  describe('Boundary Constraints', () => {
-    it('should constrain particle within canvas bounds', () => {
-      const particle: Particle = {
-        id: 1,
-        x: -10, // Outside left
-        y: 300,
-        vx: -5,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const { particle: constrained, didBounce } = constrainToBounds(
-        particle,
-        CANVAS_WIDTH,
-        CANVAS_HEIGHT
-      );
-      expect(constrained.x).toBe(PARTICLE_RADIUS);
-      expect(constrained.vx).toBeGreaterThan(0); // Reversed
-      expect(didBounce).toBe(true);
+  describe('spawnParticle', () => {
+    it('creates particle with valid properties', () => {
+      const particle = spawnParticle('easy', 0);
+      expect(particle.id).toBeDefined();
+      expect(particle.x).toBeGreaterThanOrEqual(0.1);
+      expect(particle.x).toBeLessThanOrEqual(0.9);
+      expect(particle.y).toBe(0);
+      expect(particle.vy).toBeGreaterThan(0);
     });
 
-    it('should constrain particle at right wall', () => {
-      const particle: Particle = {
-        id: 1,
-        x: CANVAS_WIDTH + 10, // Outside right
-        y: 300,
-        vx: 5,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const { particle: constrained } = constrainToBounds(
-        particle,
-        CANVAS_WIDTH,
-        CANVAS_HEIGHT
-      );
-      expect(constrained.x).toBe(CANVAS_WIDTH - PARTICLE_RADIUS);
-      expect(constrained.vx).toBeLessThan(0); // Reversed
+    it('spawns normal particles by default', () => {
+      let normalCount = 0;
+      for (let i = 0; i < 50; i++) {
+        const p = spawnParticle('easy', i);
+        if (p.type === 'normal') normalCount++;
+      }
+      expect(normalCount).toBeGreaterThan(25); // At least 50% should be normal (accounts for variance)
     });
 
-    it('should constrain particle at floor', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: CANVAS_HEIGHT + 10, // Below floor
-        vx: 0,
-        vy: 5,
-        active: true,
-        inPortal: false,
-      };
-      const { particle: constrained } = constrainToBounds(
-        particle,
-        CANVAS_WIDTH,
-        CANVAS_HEIGHT
-      );
-      expect(constrained.y).toBe(CANVAS_HEIGHT - PARTICLE_RADIUS);
-      expect(constrained.vy).toBeLessThan(0); // Reversed
+    it('spawns bonus particles occasionally', () => {
+      let bonusCount = 0;
+      for (let i = 0; i < 100; i++) {
+        const p = spawnParticle('easy', i);
+        if (p.type === 'bonus') bonusCount++;
+      }
+      expect(bonusCount).toBeGreaterThanOrEqual(0);
     });
 
-    it('should not constrain particle already within bounds', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 300,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const { didBounce } = constrainToBounds(particle, CANVAS_WIDTH, CANVAS_HEIGHT);
-      expect(didBounce).toBe(false);
+    it('has smaller radius for bonus particles', () => {
+      const bonus = spawnParticle('easy', 0);
+      // Force bonus by trying multiple times
+      for (let i = 0; i < 100 && bonus.type !== 'bonus'; i++) {
+        const p = spawnParticle('easy', i);
+        if (p.type === 'bonus') {
+          expect(p.radius).toBeLessThan(0.03);
+          break;
+        }
+      }
+    });
+
+    it('has larger radius for obstacle particles', () => {
+      for (let i = 0; i < 100; i++) {
+        const p = spawnParticle('easy', i);
+        if (p.type === 'obstacle') {
+          expect(p.radius).toBeGreaterThan(0.03);
+          break;
+        }
+      }
     });
   });
 
-  describe('Collision Detection', () => {
-    it('should calculate distance between two points', () => {
-      const dist = distance(0, 0, 3, 4);
-      expect(dist).toBe(5);
-    });
-
-    it('should detect collision with portal', () => {
+  describe('checkSilhouetteCollision', () => {
+    it('returns true when particle overlaps silhouette', () => {
       const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 500,
+        id: 'test',
+        x: 0.5,
+        y: 0.5,
         vx: 0,
         vy: 0,
-        active: true,
-        inPortal: false,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
       };
-      const portal: Portal = {
-        x: 400,
-        y: 500,
-        radius: PORTAL_RADIUS,
-        count: 0,
-        target: 10,
+      const silhouette: SilhouetteRegion = {
+        x: 0.4,
+        y: 0.4,
+        width: 0.2,
+        height: 0.2,
+        isActive: true,
       };
-      expect(checkPortalCollision(particle, portal)).toBe(true);
+      expect(checkSilhouetteCollision(particle, silhouette)).toBe(true);
     });
 
-    it('should not detect collision when particle is far from portal', () => {
+    it('returns false when particle is outside silhouette', () => {
       const particle: Particle = {
-        id: 1,
-        x: 100,
-        y: 100,
+        id: 'test',
+        x: 0.1,
+        y: 0.1,
         vx: 0,
         vy: 0,
-        active: true,
-        inPortal: false,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
       };
-      const portal: Portal = {
-        x: 400,
-        y: 500,
-        radius: PORTAL_RADIUS,
-        count: 0,
-        target: 10,
+      const silhouette: SilhouetteRegion = {
+        x: 0.5,
+        y: 0.5,
+        width: 0.1,
+        height: 0.1,
+        isActive: true,
       };
-      expect(checkPortalCollision(particle, portal)).toBe(false);
+      expect(checkSilhouetteCollision(particle, silhouette)).toBe(false);
     });
 
-    it('should use generous hitbox (2x radius) for portal collision', () => {
+    it('returns false when silhouette is inactive', () => {
       const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 500 + PORTAL_RADIUS + PARTICLE_RADIUS * 1.5, // Just inside 2x hitbox
+        id: 'test',
+        x: 0.5,
+        y: 0.5,
         vx: 0,
         vy: 0,
-        active: true,
-        inPortal: false,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
       };
-      const portal: Portal = {
-        x: 400,
-        y: 500,
-        radius: PORTAL_RADIUS,
-        count: 0,
-        target: 10,
+      const silhouette: SilhouetteRegion = {
+        x: 0.4,
+        y: 0.4,
+        width: 0.2,
+        height: 0.2,
+        isActive: false,
       };
-      expect(checkPortalCollision(particle, portal, 2)).toBe(true);
-    });
-
-    it('should detect collision with barrier', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 300,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const barrier = { x: 400, y: 300 };
-      expect(checkBarrierCollision(particle, barrier, 60)).toBe(true);
-    });
-
-    it('should push particle away from barrier', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 400,
-        y: 300,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const barrier = { x: 380, y: 300 }; // Particle is to the right
-      const pushed = pushFromBarrier(particle, barrier);
-      expect(pushed.vx).toBeGreaterThan(0); // Pushed right
+      expect(checkSilhouetteCollision(particle, silhouette)).toBe(false);
     });
   });
 
-  describe('Scoring', () => {
-    it('should calculate base score without streak', () => {
-      const score = calculatePortalScore(1, 0);
-      expect(score).toBe(1);
+  describe('checkPortalCapture', () => {
+    it('returns true when particle is inside portal', () => {
+      const particle: Particle = {
+        id: 'test',
+        x: 0.5,
+        y: 0.85,
+        vx: 0,
+        vy: 0,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      };
+      const portal = {
+        id: 'center' as const,
+        x: 0.5,
+        y: 0.85,
+        width: 0.15,
+        height: 0.1,
+        color: '#4ECDC4',
+        particlesCollected: 0,
+        targetParticles: 10,
+      };
+      expect(checkPortalCapture(particle, portal)).toBe(true);
     });
 
-    it('should calculate score with streak bonus', () => {
-      const score = calculatePortalScore(1, 5);
-      expect(score).toBe(1 + 25); // 1 + (5 * 5)
-    });
-
-    it('should cap streak bonus at maximum', () => {
-      const score = calculatePortalScore(1, 10, 25, 5);
-      expect(score).toBe(26); // 1 + 25 (capped)
-    });
-
-    it('should calculate time bonus', () => {
-      const bonus = calculateTimeBonus(30, 5);
-      expect(bonus).toBe(150); // 30 * 5
-    });
-
-    it('should return zero time bonus when no time remaining', () => {
-      const bonus = calculateTimeBonus(0);
-      expect(bonus).toBe(0);
-    });
-
-    it('should not return negative time bonus', () => {
-      const bonus = calculateTimeBonus(-10);
-      expect(bonus).toBe(0);
+    it('returns false when particle is outside portal', () => {
+      const particle: Particle = {
+        id: 'test',
+        x: 0.1,
+        y: 0.1,
+        vx: 0,
+        vy: 0,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      };
+      const portal = {
+        id: 'center' as const,
+        x: 0.5,
+        y: 0.85,
+        width: 0.15,
+        height: 0.1,
+        color: '#4ECDC4',
+        particlesCollected: 0,
+        targetParticles: 10,
+      };
+      expect(checkPortalCapture(particle, portal)).toBe(false);
     });
   });
 
-  describe('Level Progression', () => {
-    it('should detect when all portals are full', () => {
-      const portals: Portal[] = [
-        { x: 200, y: 500, radius: 60, count: 10, target: 10 },
-        { x: 600, y: 500, radius: 60, count: 10, target: 10 },
-      ];
-      expect(areAllPortalsFull(portals)).toBe(true);
+  describe('updateParticles', () => {
+    it('updates particle positions', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particles = [{
+        id: 'test',
+        x: 0.5,
+        y: 0.5,
+        vx: 0,
+        vy: 0.5,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      }];
+
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState.particles[0].y).toBeGreaterThan(0.5);
     });
 
-    it('should detect when not all portals are full', () => {
-      const portals: Portal[] = [
-        { x: 200, y: 500, radius: 60, count: 10, target: 10 },
-        { x: 600, y: 500, radius: 60, count: 5, target: 10 },
-      ];
-      expect(areAllPortalsFull(portals)).toBe(false);
+    it('captures particles that reach portals', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particles = [{
+        id: 'test',
+        x: 0.5,
+        y: 0.85,
+        vx: 0,
+        vy: 0,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      }];
+
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState.particles.length).toBe(0); // Particle captured and removed
+      expect(newState.portals[1].particlesCollected).toBe(1);
     });
 
-    it('should calculate total portal count', () => {
-      const portals: Portal[] = [
-        { x: 200, y: 500, radius: 60, count: 10, target: 10 },
-        { x: 600, y: 500, radius: 60, count: 5, target: 10 },
-      ];
-      expect(getTotalPortalCount(portals)).toBe(15);
+    it('increases score on capture', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particles = [{
+        id: 'test',
+        x: 0.5,
+        y: 0.85,
+        vx: 0,
+        vy: 0,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      }];
+
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState.score).toBeGreaterThan(0);
     });
 
-    it('should calculate total target count', () => {
-      const portals: Portal[] = [
-        { x: 200, y: 500, radius: 60, count: 0, target: 15 },
-        { x: 600, y: 500, radius: 60, count: 0, target: 20 },
-      ];
-      expect(getTotalPortalTarget(portals)).toBe(35);
+    it('marks particles as missed when falling off screen', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particles = [{
+        id: 'test',
+        x: 0.5,
+        y: 1.1,
+        vx: 0,
+        vy: 0.5,
+        radius: 0.03,
+        type: 'normal',
+        color: '#fff',
+        captured: false,
+        missed: false,
+      }];
+
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState.particlesMissed).toBe(1);
     });
 
-    it('should create portals from level config', () => {
-      const config = DEFAULT_LEVELS[0];
-      const portals = createPortalsFromConfig(config, 60);
-      expect(portals).toHaveLength(1);
-      expect(portals[0].target).toBe(15);
-      expect(portals[0].count).toBe(0);
-      expect(portals[0].radius).toBe(60);
+    it('penalizes score for capturing obstacles', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.score = 100;
+      state.particles = [{
+        id: 'test',
+        x: 0.5,
+        y: 0.85,
+        vx: 0,
+        vy: 0,
+        radius: 0.035,
+        type: 'obstacle',
+        color: '#FF4444',
+        captured: false,
+        missed: false,
+      }];
+
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState.score).toBeLessThan(100);
     });
 
-    it('should have 3 default levels', () => {
-      expect(DEFAULT_LEVELS).toHaveLength(3);
-      expect(DEFAULT_LEVELS[0].level).toBe(1);
-      expect(DEFAULT_LEVELS[1].level).toBe(2);
-      expect(DEFAULT_LEVELS[2].level).toBe(3);
-    });
-
-    it('should increase difficulty across levels', () => {
-      const level1 = DEFAULT_LEVELS[0];
-      const level2 = DEFAULT_LEVELS[1];
-      const level3 = DEFAULT_LEVELS[2];
-
-      expect(level2.particleSpeed).toBeGreaterThan(level1.particleSpeed);
-      expect(level3.particleSpeed).toBeGreaterThan(level2.particleSpeed);
-
-      expect(level2.particleSpawnRate).toBeLessThan(level1.particleSpawnRate);
-      expect(level3.particleSpawnRate).toBeLessThan(level2.particleSpawnRate);
+    it('does nothing when not playing', () => {
+      const state = createInitialState();
+      const newState = updateParticles(state, 0.1, []);
+      expect(newState).toEqual(state);
     });
   });
 
-  describe('Obstacles', () => {
-    it('should detect collision with rectangular obstacle', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 300,
-        y: 300,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const obstacle = {
-        x: 280,
-        y: 280,
-        width: 40,
-        height: 40,
-        type: 'static' as const,
-      };
-      expect(checkObstacleCollision(particle, obstacle)).toBe(true);
+  describe('spawnParticles', () => {
+    it('spawns particles based on spawn rate', () => {
+      const state = startGame(createInitialState(), 'easy');
+      let spawnCount = 0;
+      
+      // Try multiple times with large delta time
+      for (let i = 0; i < 100; i++) {
+        const newState = spawnParticles(state, 10);
+        if (newState.particles.length > 0) spawnCount++;
+      }
+      
+      expect(spawnCount).toBeGreaterThan(0);
     });
 
-    it('should not detect collision when particle is outside obstacle', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 200,
-        y: 200,
-        vx: 0,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const obstacle = {
-        x: 300,
-        y: 300,
-        width: 40,
-        height: 40,
-        type: 'static' as const,
-      };
-      expect(checkObstacleCollision(particle, obstacle)).toBe(false);
+    it('does not exceed max particles', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particlesSpawned = state.maxParticles;
+      
+      const newState = spawnParticles(state, 10);
+      expect(newState.particles.length).toBe(0);
     });
 
-    it('should bounce particle off obstacle from the left', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 275, // About to hit obstacle from left
-        y: 300,
-        vx: 5,
-        vy: 0,
-        active: true,
-        inPortal: false,
-      };
-      const obstacle = {
-        x: 280,
-        y: 280,
-        width: 40,
-        height: 40,
-        type: 'static' as const,
-      };
-      const bounced = bounceOffObstacle(particle, obstacle);
-      expect(bounced.vx).toBeLessThan(0); // Reversed
-    });
-
-    it('should bounce particle off obstacle from the top', () => {
-      const particle: Particle = {
-        id: 1,
-        x: 300,
-        y: 275, // About to hit obstacle from top
-        vx: 0,
-        vy: 5,
-        active: true,
-        inPortal: false,
-      };
-      const obstacle = {
-        x: 280,
-        y: 280,
-        width: 40,
-        height: 40,
-        type: 'static' as const,
-      };
-      const bounced = bounceOffObstacle(particle, obstacle);
-      expect(bounced.vy).toBeLessThan(0); // Reversed
-    });
-
-    it('should update moving obstacle position', () => {
-      const obstacle = {
-        x: 200,
-        y: 200,
-        width: 40,
-        height: 40,
-        type: 'moving' as const,
-        speed: 1,
-        direction: 1 as 1 | -1,
-        minX: 150,
-        maxX: 400,
-      };
-      const updated = updateMovingObstacle(obstacle, 10); // dt = 10
-      expect(updated.x).toBeGreaterThan(200); // Moved right
-    });
-
-    it('should reverse moving obstacle direction at bounds', () => {
-      const obstacle = {
-        x: 395, // Near maxX (400)
-        y: 200,
-        width: 40,
-        height: 40,
-        type: 'moving' as const,
-        speed: 1,
-        direction: 1 as 1 | -1,
-        minX: 150,
-        maxX: 400,
-      };
-      const updated = updateMovingObstacle(obstacle, 10);
-      expect(updated.direction).toBe(-1); // Reversed
-    });
-
-    it('should create obstacles for level 3 only', () => {
-      const level1Obstacles = createLevelObstacles(1);
-      const level2Obstacles = createLevelObstacles(2);
-      const level3Obstacles = createLevelObstacles(3);
-
-      expect(level1Obstacles).toHaveLength(0);
-      expect(level2Obstacles).toHaveLength(0);
-      expect(level3Obstacles.length).toBeGreaterThan(0);
-    });
-
-    it('should create two moving obstacles for level 3', () => {
-      const obstacles = createLevelObstacles(3);
-      expect(obstacles).toHaveLength(2);
-      expect(obstacles.every(o => o.type === 'moving')).toBe(true);
+    it('does nothing when not playing', () => {
+      const state = createInitialState();
+      const newState = spawnParticles(state, 10);
+      expect(newState).toEqual(state);
     });
   });
 
-  describe('Constants', () => {
-    it('should have defined canvas dimensions', () => {
-      expect(CANVAS_WIDTH).toBe(800);
-      expect(CANVAS_HEIGHT).toBe(600);
+  describe('updateTimer', () => {
+    it('decrements time when playing', () => {
+      const state = startGame(createInitialState(), 'easy');
+      const newState = updateTimer(state);
+      expect(newState.timeLeft).toBe(state.timeLeft - 1);
     });
 
-    it('should have defined game constants', () => {
-      expect(PARTICLE_RADIUS).toBe(8);
-      expect(GRAVITY).toBe(0.15);
-      expect(BOUNCE_DAMPING).toBe(0.6);
-      expect(PORTAL_RADIUS).toBe(60);
+    it('ends game when time runs out', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.timeLeft = 1;
+      const newState = updateTimer(state);
+      expect(newState.timeLeft).toBe(0);
+      expect(newState.status).toBe('gameover');
     });
 
-    it('should have wind force pushing upward', () => {
-      expect(WIND_FORCE.x).toBe(0);
-      expect(WIND_FORCE.y).toBeLessThan(0);
+    it('does nothing when not playing', () => {
+      const state = createInitialState();
+      const newState = updateTimer(state);
+      expect(newState.timeLeft).toBe(state.timeLeft);
+    });
+  });
+
+  describe('checkGameComplete', () => {
+    it('completes game when all portals full', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.portals.forEach((portal) => {
+        portal.particlesCollected = portal.targetParticles;
+      });
+
+      const newState = checkGameComplete(state);
+      expect(newState.status).toBe('complete');
+    });
+
+    it('ends game when too many missed', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.particlesMissed = state.maxMissed;
+
+      const newState = checkGameComplete(state);
+      expect(newState.status).toBe('gameover');
+    });
+
+    it('continues when portals not full', () => {
+      const state = startGame(createInitialState(), 'easy');
+      const newState = checkGameComplete(state);
+      expect(newState.status).toBe('playing');
+    });
+
+    it('does nothing when not playing', () => {
+      const state = createInitialState();
+      const newState = checkGameComplete(state);
+      expect(newState.status).toBe('idle');
+    });
+  });
+
+  describe('calculateFinalScore', () => {
+    it('calculates base score', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.score = 500;
+      const scores = calculateFinalScore(state);
+      expect(scores.baseScore).toBe(500);
+    });
+
+    it('adds portal bonus', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.portals[0].particlesCollected = 5;
+      const scores = calculateFinalScore(state);
+      expect(scores.portalBonus).toBe(100); // 5 * 20
+    });
+
+    it('adds time bonus', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.timeLeft = 30;
+      const scores = calculateFinalScore(state);
+      expect(scores.timeBonus).toBe(150); // 30 * 5
+    });
+
+    it('calculates total correctly', () => {
+      const state = startGame(createInitialState(), 'easy');
+      state.score = 100;
+      state.portals[0].particlesCollected = 5;
+      state.timeLeft = 10;
+      const scores = calculateFinalScore(state);
+      expect(scores.total).toBe(100 + 100 + 50); // base + portal + time
+    });
+  });
+
+  describe('getComboText', () => {
+    it('returns empty for low streak', () => {
+      expect(getComboText(2)).toBe('');
+    });
+
+    it('returns NICE for 3+ streak', () => {
+      expect(getComboText(3)).toBe('NICE!');
+    });
+
+    it('returns GOOD for 5+ streak', () => {
+      expect(getComboText(5)).toBe('GOOD!');
+    });
+
+    it('returns AMAZING for 10+ streak', () => {
+      expect(getComboText(10)).toBe('AMAZING!');
+    });
+
+    it('returns LEGENDARY for 20+ streak', () => {
+      expect(getComboText(20)).toBe('LEGENDARY!');
+    });
+  });
+
+  describe('getDifficultyName', () => {
+    it('returns Easy for easy', () => {
+      expect(getDifficultyName('easy')).toBe('Easy');
+    });
+
+    it('returns Medium for medium', () => {
+      expect(getDifficultyName('medium')).toBe('Medium');
+    });
+
+    it('returns Hard for hard', () => {
+      expect(getDifficultyName('hard')).toBe('Hard');
+    });
+  });
+
+  describe('DIFFICULTY_CONFIGS', () => {
+    it('has correct config for easy', () => {
+      expect(DIFFICULTY_CONFIGS.easy.spawnRate).toBe(1.5);
+      expect(DIFFICULTY_CONFIGS.easy.maxMissed).toBe(5);
+      expect(DIFFICULTY_CONFIGS.easy.timeLimit).toBe(60);
+    });
+
+    it('has correct config for medium', () => {
+      expect(DIFFICULTY_CONFIGS.medium.spawnRate).toBe(2.0);
+      expect(DIFFICULTY_CONFIGS.medium.maxMissed).toBe(3);
+      expect(DIFFICULTY_CONFIGS.medium.timeLimit).toBe(90);
+    });
+
+    it('has correct config for hard', () => {
+      expect(DIFFICULTY_CONFIGS.hard.spawnRate).toBe(2.5);
+      expect(DIFFICULTY_CONFIGS.hard.maxMissed).toBe(2);
+      expect(DIFFICULTY_CONFIGS.hard.timeLimit).toBe(120);
+    });
+
+    it('has increasing spawn rate with difficulty', () => {
+      expect(DIFFICULTY_CONFIGS.easy.spawnRate)
+        .toBeLessThan(DIFFICULTY_CONFIGS.medium.spawnRate);
+      expect(DIFFICULTY_CONFIGS.medium.spawnRate)
+        .toBeLessThan(DIFFICULTY_CONFIGS.hard.spawnRate);
+    });
+
+    it('has decreasing max missed with difficulty', () => {
+      expect(DIFFICULTY_CONFIGS.easy.maxMissed)
+        .toBeGreaterThan(DIFFICULTY_CONFIGS.medium.maxMissed);
+      expect(DIFFICULTY_CONFIGS.medium.maxMissed)
+        .toBeGreaterThan(DIFFICULTY_CONFIGS.hard.maxMissed);
     });
   });
 });

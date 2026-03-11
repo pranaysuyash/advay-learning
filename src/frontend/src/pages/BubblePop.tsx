@@ -11,6 +11,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameProgress } from '../hooks/useGameProgress';
@@ -37,6 +38,12 @@ import {
   type Bubble,
 } from '../games/bubblePopLogic';
 import { GameHUD } from '../components/game/GameHUD';
+import { GameBackground } from '../components/game/GameBackground';
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 // Animation constants
 const TARGET_FPS = 60;
@@ -57,6 +64,7 @@ interface BubblePopGameProps {
 const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: BubblePopGameProps) {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { onGameComplete } = useGameDrops('bubble-pop');
 
   // Audio
@@ -350,7 +358,20 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
   // Stats for display
   const stats = getStats(gameState);
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
+    <div className="relative">
+      <GameBackground type="solid_sky" className="absolute inset-0" />
+      <div className="relative z-10">
     <GameContainer
       title="Bubble Pop"
       score={gameState.score}
@@ -549,6 +570,8 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
         )}
       </div>
     </GameContainer>
+      </div>
+    </div>
   );
 });
 

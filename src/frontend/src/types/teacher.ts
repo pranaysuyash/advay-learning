@@ -50,3 +50,10 @@ export interface GroupProgress {
   commonStruggles: string[];
   recommendations: string[];
 }
+
+// basic teacher profile information
+export interface Teacher {
+  id: string;
+  name: string;
+  subject?: string;
+}

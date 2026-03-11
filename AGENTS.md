@@ -536,6 +536,7 @@ The audit-to-ticket gap exists because:
 - [ ] Check existing venv (don't create duplicates)
 - [ ] Check running servers (frontend on 6173, backend on 8001)
 - [ ] **Document every user inquiry or idea**: whenever a user asks for ideas, feedback, analysis, or requests, create or append an appropriate file under `docs/` (e.g. `BRAINSTORM_IDEAS.md`). Requests are a mandate, not optional.
+- [ ] **Translate brainstorms into tickets**: after recording ideas, create worklog ticket(s) in `docs/tickets/` and open corresponding GitHub issues; reference the brainstorm doc and update the living architecture.
 ```
 
 ### Before Code Changes
@@ -1216,6 +1217,12 @@ prompts/
 - `tools/README.md` - Tool catalog with use cases and examples
 - `tools/video_frame_analyzer.html` - Frame-by-frame video analysis for UX audits
 - `tools/contrast_calculator.py` - WCAG contrast ratio calculator
+
+---
+
+### Agent Protocols
+
+- **Intent-First Implementor**: `docs/process/INTENT_FIRST_IMPLEMENTOR_PROTOCOL.md` — Protocol for resolving tests, type checks, lint, and build errors while preserving intended behavior. Use when fixing broken builds or integrating incomplete code.
 
 ---
 

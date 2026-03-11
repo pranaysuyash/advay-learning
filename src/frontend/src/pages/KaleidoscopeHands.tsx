@@ -26,7 +26,7 @@ interface KaleidoscopeHandsGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress: _saveProgress }: KaleidoscopeHandsGameProps) {
+const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress }: KaleidoscopeHandsGameProps) {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -186,9 +186,10 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 10);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
     await onGameComplete(finalScore);
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick]);
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer

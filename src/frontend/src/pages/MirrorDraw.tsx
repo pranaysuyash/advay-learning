@@ -26,6 +26,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader } from '../components/AssetPreloader';
 import {
   assetLoader,
   SOUND_ASSETS,
@@ -45,7 +46,13 @@ import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 const MAX_LEVEL = 4;
 const TEMPLATES_TO_PASS = 3; // pass 3/5 to unlock next level
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const MirrorDrawGame = memo(function MirrorDrawComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -466,6 +473,16 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
       variant: 'primary',
     },
   ];
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <GameContainer webcamRef={webcamRef} title='Mirror Draw'

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -15,9 +16,17 @@ import {
 } from '../games/moneyMatchLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { GameBackground } from '../components/game/GameBackground';
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/coin_gold.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 function MoneyMatchContent() {
   const navigate = useNavigate();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetAmount, setTargetAmount] = useState(0);
   const [selectedCoins, setSelectedCoins] = useState<Coin[]>([]);
@@ -120,13 +129,25 @@ function MoneyMatchContent() {
 
   const currentTotal = selectedCoins.reduce((sum, c) => sum + c.value, 0);
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <GameContainer
       title='Money Match'
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className='flex flex-col items-center gap-4 p-4'>
+      <div className="relative">
+        <GameBackground type="solid_cloud" className="absolute inset-0" />
+        <div className="relative z-10 flex flex-col items-center gap-4 p-4">
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
             <button
@@ -282,6 +303,7 @@ function MoneyMatchContent() {
             </button>
           </div>
         )}
+      </div>
       </div>
     </GameContainer>
   );

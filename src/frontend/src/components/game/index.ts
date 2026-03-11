@@ -52,3 +52,29 @@ export { DwellTarget } from './DwellTarget';
 // Camera
 export { CameraThumbnail } from './CameraThumbnail';
 export { HandDetectionProvider } from './HandDetectionProvider';
+
+// Backgrounds
+export {
+  GameBackground,
+  BackgroundSelector,
+  BackgroundPreview,
+  getRandomBackground,
+  BACKGROUND_METADATA,
+} from './GameBackground';
+export type { BackgroundType, BackgroundVariant } from './GameBackground';
+
+// Character & Enemy Sprites (Kenney Assets)
+export {
+  KenneyCharacterAnimated,
+  KenneyCharacter,
+  CharacterColorSelector,
+} from './KenneyCharacterAnimated';
+export type { CharacterColor, CharacterAnimation } from './KenneyCharacterAnimated';
+
+export {
+  EnemySprite,
+  EnemyGallery,
+  getAllEnemyTypes,
+  getEnemiesByCategory,
+} from './EnemySprite';
+export type { EnemyType } from './EnemySprite';

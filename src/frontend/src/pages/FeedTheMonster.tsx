@@ -7,6 +7,7 @@
 import { memo, useCallback, useState, useEffect, useRef } from 'react';
 
 import { GameShell } from '../components/GameShell';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -29,6 +30,7 @@ import {
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { EnemySprite } from '../components/game/EnemySprite';
 import type { TrackedHandFrame } from '../types/tracking';
 import { DragDropSystem, type DraggableItem, type DropZone } from '../components/game/DragDropSystem';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
@@ -47,7 +49,16 @@ const GAME_COLORS = {
   wrong: '#EF4444',
 };
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/enemies/frog.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/enemies/slime_normal.png', priority: 'high' },
+  { type: 'image', src: '/assets/kenney/platformer/enemies/snail.png', priority: 'high' },
+];
+
 function FeedTheMonsterGameComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { onGameComplete } = useGameDrops('feed-the-monster');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
@@ -61,6 +72,7 @@ function FeedTheMonsterGameComponent() {
   const [gameStarted, setGameStarted] = useState(false);
 
   const [monster, setMonster] = useState<MonsterEmotion | null>(null);
+  const [monsterEnemy] = useState<'frog' | 'slime_normal' | 'snail'>('frog');
   const [draggables, setDraggables] = useState<DraggableItem[]>([]);
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
 
@@ -276,6 +288,16 @@ function FeedTheMonsterGameComponent() {
     }
   };
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <div className='w-screen h-screen overflow-hidden relative font-sans' style={{ backgroundColor: GAME_COLORS.background }}>
       <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameStarted} />
@@ -318,7 +340,7 @@ function FeedTheMonsterGameComponent() {
               className={`w-64 h-64 mx-auto rounded-full flex items-center justify-center text-9xl shadow-[0_12px_40px_rgba(0,0,0,0.15)] border-8 border-white transition-all duration-300 ${isEating ? 'scale-110 drop-shadow-2xl' : ''}`}
               style={getMonsterStyle()}
             >
-              {monster.emoji}
+              <EnemySprite type={monsterEnemy} size={96} />
             </div>
             <div className="mt-8 bg-white/90 px-8 py-4 rounded-3xl shadow-sm border-2 border-slate-100 inline-block">
               <p className="text-2xl font-black text-slate-800">

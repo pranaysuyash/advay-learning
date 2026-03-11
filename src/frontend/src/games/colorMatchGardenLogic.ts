@@ -6,18 +6,12 @@
  */
 
 import type { Point } from '../types/tracking';
-
+import type { GardenTarget } from '../types/game';
 /**
  * A flower target displayed in the garden
  */
-export interface GardenTarget {
-  id: number;
-  name: string;
-  color: string;
-  emoji: string;
-  assetId: string;
-  position: Point;
-}
+// INTENTIONAL_EXPORT_REMOVAL: GardenTarget
+export type { GardenTarget } from '../types/game';
 
 /**
  * Result of building a new round
@@ -103,15 +97,17 @@ export function isCorrectMatch(
  * calculateScore(3)  // 18 (12 + 3*2)
  * calculateScore(9)  // 30 (12 + 18 max bonus)
  */
+// score is delegated to shared utility to keep calculations consistent across games
+import { calculateScore as sharedCalculateScore } from '../utils/scoring';
+
 export function calculateScore(streak: number): number {
-  const basePoints = GAME_CONFIG.BASE_POINTS_PER_MATCH;
-  // Use Math.max(0, streak) to ensure negative streak doesn't reduce score
-  const effectiveStreak = Math.max(0, streak);
-  const streakBonus = Math.min(
-    GAME_CONFIG.MAX_STREAK_BONUS,
-    effectiveStreak * GAME_CONFIG.STREAK_BONUS_MULTIPLIER,
-  );
-  return basePoints + streakBonus;
+  const normalizedStreak = Math.max(0, streak);
+  // map local config to shared scoring parameters
+  return sharedCalculateScore(normalizedStreak, 1, {
+    baseScore: GAME_CONFIG.BASE_POINTS_PER_MATCH,
+    streakMultiplier: GAME_CONFIG.STREAK_BONUS_MULTIPLIER,
+    maxStreakBonus: GAME_CONFIG.MAX_STREAK_BONUS,
+  });
 }
 
 /**

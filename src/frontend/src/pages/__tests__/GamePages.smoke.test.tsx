@@ -17,6 +17,15 @@ vi.mock('../../hooks/useTTS', () => ({
   }),
 }));
 
+// Mock AssetPreloader to complete immediately
+vi.mock('../../components/AssetPreloader', () => ({
+  AssetPreloader: ({ onComplete }: { onComplete: () => void }) => {
+    // Call completion immediately
+    onComplete();
+    return null;
+  },
+}));
+
 // @mediapipe/tasks-vision is already mocked globally in setupTests.ts
 
 // Mock AudioContext for useSoundEffects

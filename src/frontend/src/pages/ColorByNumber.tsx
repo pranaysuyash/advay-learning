@@ -5,6 +5,7 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -141,7 +142,8 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
         reportSession={false}
       >
         <div className='h-full overflow-auto p-4 md:p-6'>
-          <div className='max-w-5xl mx-auto space-y-5'>
+          <div className='relative max-w-5xl mx-auto space-y-5'>
+        <GameBackground type="solid_cloud" className="absolute inset-0 -z-10 rounded-3xl" />
             <section className='rounded-3xl border-2 border-[#F2CC8F] p-6 bg-gradient-to-br from-[#FEF3C7] via-white to-[#DBEAFE] shadow-[0_6px_0_#E5B86E]'>
               <p className='text-sm font-black uppercase tracking-widest text-[#B45309]'>New Game</p>
               <h2 className='text-4xl font-black text-slate-900 mt-2'>Color by Number Adventure</h2>

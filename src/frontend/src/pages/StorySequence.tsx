@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-
+import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -47,6 +47,12 @@ import {
 } from '../games/storySequenceLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { GameBackground } from '../components/game/GameBackground';
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 type DragSource = { type: 'slot' | 'pool'; index: number };
 
@@ -435,6 +441,7 @@ function StreakMilestoneOverlay({ streak }: { streak: number }) {
 }
 
 function StorySequenceContent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   // ===== AUDIO =====
   const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -746,7 +753,20 @@ function StorySequenceContent() {
   const totalSlots = gameState?.slots.length || 0;
 
   // ===== RENDER =====
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
+    <div className="relative">
+      <GameBackground type="clouds" variant="solid" className="absolute inset-0" />
+      <div className="relative z-10">
     <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
@@ -794,6 +814,8 @@ function StorySequenceContent() {
 
       {showStreakMilestone && <StreakMilestoneOverlay streak={streak} />}
     </GameContainer>
+      </div>
+    </div>
   );
 }
 

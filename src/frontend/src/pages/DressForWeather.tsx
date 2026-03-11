@@ -33,11 +33,13 @@ import {
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import type { TrackedHandFrame } from '../types/tracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useWindowSize } from '../hooks/useWindowSize';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 /**
  * Dress for Weather - Weather awareness and clothing matching game
@@ -184,6 +186,11 @@ const ITEM_EMOJIS: Record<string, string> = {
   sandals: '🩴',
 };
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const LEVELS: Level[] = [
   {
     weather: 'sunny',
@@ -216,6 +223,7 @@ const LEVELS: Level[] = [
 ];
 
 function DressForWeatherGame() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   // Hand tracking with modern hooks
   const { onGameComplete } = useGameDrops('dress-for-weather');
   const { playClick } = useAudio();
@@ -456,6 +464,16 @@ function DressForWeatherGame() {
 
   const level = LEVELS[currentLevel];
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <div
       className='w-screen h-screen overflow-hidden relative transition-colors duration-700'
@@ -503,7 +521,7 @@ function DressForWeatherGame() {
                 Score: <span className='text-[#10B981]'>{score}</span>
               </p>
               {streak > 0 && (
-                <span className='text-orange-500 font-bold'>🔥 {streak}</span>
+                <span className='text-orange-500 font-bold flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak}</span>
               )}
             </div>
             <p className='text-sm font-bold text-slate-400 m-0 mt-1 flex items-center justify-center gap-1'>
@@ -594,7 +612,7 @@ function DressForWeatherGame() {
       {showMilestone && (
         <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
           <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
-            🔥 {streak} Streak! 🔥
+            <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
           </div>
         </div>
       )}

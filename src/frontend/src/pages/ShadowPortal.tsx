@@ -1,885 +1,513 @@
 /**
  * Shadow Portal Game
  *
- * A magical game where children use their body silhouette to guide
- * falling light particles into portals. Raise both arms to create a wind gust!
+ * Your body silhouette blocks and guides falling light particles into portals.
+ * Move your body, raise arms, make "tunnels" with your silhouette!
  *
- * @ticket GQ-001
- * @spec docs/games/shadow-portal-spec.md
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
-import { GameCursor } from '../components/game/GameCursor';
-import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
-import { CameraThumbnail } from '../components/game/CameraThumbnail';
-import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { VoiceInstructions } from '../components/game/VoiceInstructions';
-
+import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
-import type { TrackedHandFrame } from '../utils/handTrackingFrame';
-
-// Import particle logic module
+import { useTTS } from '../hooks/useTTS';
+import type { TrackedHandFrame } from '../types/tracking';
 import {
-  createParticles,
-  distance,
-  calculatePortalScore,
-  areAllPortalsFull,
-  createPortalsFromConfig,
-  createLevelObstacles,
-  checkObstacleCollision,
-  bounceOffObstacle,
-  updateMovingObstacle,
-  DEFAULT_LEVELS,
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
-  LEVEL_DURATION_SECONDS,
-  GRACE_PERIOD_SECONDS,
-  WIND_GUST_COOLDOWN_MS,
-  WIND_GUST_DURATION_MS,
-  WIND_FORCE,
-  ARMS_UP_THRESHOLD,
-  PORTAL_RADIUS,
-  PARTICLE_RADIUS,
-  GRAVITY,
-  BOUNCE_DAMPING,
-  type Particle,
-  type Portal,
-  type Obstacle,
-} from '../games/shadowPortal/particles';
+  type Difficulty,
+  type GameState,
+  type SilhouetteRegion,
+  createInitialState,
+  startGame,
+  updateParticles,
+  spawnParticles,
+  updateTimer,
+  checkGameComplete,
+  calculateFinalScore,
+  getComboText,
+  getDifficultyName,
+} from '../games/shadowPortalLogic';
 
-// ─── COLORS ───────────────────────────────────────────────────────────────────
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
 
-const COLORS = {
-  background: '#0f0f23',
-  portalGlow: '#a855f7',
-  portalInner: '#7c3aed',
-  particle: '#fbbf24',
-  silhouette: 'rgba(15, 15, 35, 0.8)',
-  silhouetteBorder: '#4c1d95',
-  windGust: 'rgba(56, 189, 248, 0.3)',
-};
-
-// ─── TYPES ─────────────────────────────────────────────────────────────────────
-
-type GameState = 'tutorial' | 'playing' | 'levelComplete' | 'gameOver' | 'paused';
-
-// ─── RENDER STATE ─────────────────────────────────────────────────────────────
-
-interface RenderState {
-  portals: Portal[];
-  obstacles: Obstacle[];
-  windGustActive: boolean;
-  leftHandX: number;
-  leftHandY: number;
-  rightHandX: number;
-  rightHandY: number;
-  mouseBarrier: { x: number; y: number } | null;
-  particles: Particle[];
-}
-
-// ─── MODULE-LEVEL HELPERS ─────────────────────────────────────────────────────
-
-function updateParticle(
-  particle: Particle,
-  dt: number,
-  windGustActive: boolean,
-  obstacles: Obstacle[],
-  mouseBarrier: { x: number; y: number } | null
-): void {
-  particle.vy += GRAVITY * dt;
-  particle.y += particle.vy * dt;
-  particle.x += particle.vx * dt;
-
-  if (windGustActive) {
-    particle.vy += WIND_FORCE.y * 0.1 * dt;
-  }
-
-  if (particle.x < PARTICLE_RADIUS) {
-    particle.x = PARTICLE_RADIUS;
-    particle.vx *= -BOUNCE_DAMPING;
-  }
-  if (particle.x > CANVAS_WIDTH - PARTICLE_RADIUS) {
-    particle.x = CANVAS_WIDTH - PARTICLE_RADIUS;
-    particle.vx *= -BOUNCE_DAMPING;
-  }
-  if (particle.y < PARTICLE_RADIUS) {
-    particle.y = PARTICLE_RADIUS;
-    particle.vy *= -BOUNCE_DAMPING;
-  }
-  if (particle.y > CANVAS_HEIGHT - PARTICLE_RADIUS) {
-    particle.y = CANVAS_HEIGHT - PARTICLE_RADIUS;
-    particle.vy *= -BOUNCE_DAMPING;
-  }
-
-  if (obstacles.length > 0) {
-    for (const obstacle of obstacles) {
-      if (checkObstacleCollision(particle, obstacle)) {
-        const bounced = bounceOffObstacle(particle, obstacle);
-        particle.x = bounced.x;
-        particle.y = bounced.y;
-        particle.vx = bounced.vx;
-        particle.vy = bounced.vy;
-        break;
-      }
-    }
-  }
-
-  if (mouseBarrier) {
-    const dist = distance(particle.x, particle.y, mouseBarrier.x, mouseBarrier.y);
-    if (dist < 60) {
-      const angle = Math.atan2(particle.y - mouseBarrier.y, particle.x - mouseBarrier.x);
-      particle.vx = Math.cos(angle) * 2;
-      particle.vy = Math.sin(angle) * 2;
-    }
-  }
-}
-
-function renderFrame(ctx: CanvasRenderingContext2D, state: RenderState): void {
-  const {
-    portals,
-    obstacles,
-    windGustActive,
-    leftHandX,
-    leftHandY,
-    rightHandX,
-    rightHandY,
-    mouseBarrier,
-    particles,
-  } = state;
-
-  ctx.fillStyle = COLORS.background;
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  if (windGustActive) {
-    ctx.fillStyle = COLORS.windGust;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    for (let i = 0; i < 20; i++) {
-      const x = Math.random() * CANVAS_WIDTH;
-      const y = Math.random() * CANVAS_HEIGHT;
-      ctx.beginPath();
-      ctx.arc(x, y, 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  portals.forEach(portal => {
-    const progress = portal.count / portal.target;
-
-    const gradient = ctx.createRadialGradient(
-      portal.x, portal.y, 0,
-      portal.x, portal.y, portal.radius * 1.5
-    );
-    gradient.addColorStop(0, `${COLORS.portalGlow}88`);
-    gradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(portal.x, portal.y, portal.radius * 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = COLORS.portalInner;
-    ctx.beginPath();
-    ctx.arc(portal.x, portal.y, portal.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (progress > 0) {
-      ctx.fillStyle = `${COLORS.particle}cc`;
-      ctx.beginPath();
-      ctx.arc(portal.x, portal.y, portal.radius * progress, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${portal.count}/${portal.target}`, portal.x, portal.y);
-  });
-
-  obstacles.forEach(obstacle => {
-    ctx.fillStyle = '#4a5568';
-    ctx.strokeStyle = '#718096';
-    ctx.lineWidth = 3;
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-    ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-
-    ctx.fillStyle = '#fbbf24';
-    const stripeWidth = 10;
-    for (let i = 0; i < obstacle.width + obstacle.height; i += stripeWidth * 2) {
-      const startY = obstacle.y + (i % obstacle.height);
-      const startX = obstacle.x + Math.floor(i / obstacle.height) * stripeWidth;
-      if (startY < obstacle.y + obstacle.height && startX < obstacle.x + obstacle.width) {
-        ctx.fillRect(startX, startY, stripeWidth, 5);
-      }
-    }
-
-    if (obstacle.type === 'moving') {
-      ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
-      ctx.beginPath();
-      const arrowY = obstacle.y + obstacle.height / 2;
-      ctx.moveTo(obstacle.x - 5, arrowY - 10);
-      ctx.lineTo(obstacle.x - 5, arrowY + 10);
-      ctx.lineTo(obstacle.x + 5, arrowY);
-      ctx.fill();
-      ctx.beginPath();
-      const arrowX2 = obstacle.x + obstacle.width;
-      ctx.moveTo(arrowX2 + 5, arrowY - 10);
-      ctx.lineTo(arrowX2 + 5, arrowY + 10);
-      ctx.lineTo(arrowX2 - 5, arrowY);
-      ctx.fill();
-    }
-  });
-
-  const handIndicatorRadius = 20;
-
-  if (leftHandY < 0.95) {
-    const leftX = leftHandX * CANVAS_WIDTH;
-    const leftY = leftHandY * CANVAS_HEIGHT;
-
-    const gradL = ctx.createRadialGradient(leftX, leftY, 0, leftX, leftY, handIndicatorRadius * 2);
-    gradL.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
-    gradL.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradL;
-    ctx.beginPath();
-    ctx.arc(leftX, leftY, handIndicatorRadius * 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(168, 85, 247, 0.9)';
-    ctx.beginPath();
-    ctx.arc(leftX, leftY, handIndicatorRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('L', leftX, leftY + 4);
-  }
-
-  if (rightHandY < 0.95) {
-    const rightX = rightHandX * CANVAS_WIDTH;
-    const rightY = rightHandY * CANVAS_HEIGHT;
-
-    const gradR = ctx.createRadialGradient(rightX, rightY, 0, rightX, rightY, handIndicatorRadius * 2);
-    gradR.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
-    gradR.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradR;
-    ctx.beginPath();
-    ctx.arc(rightX, rightY, handIndicatorRadius * 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(168, 85, 247, 0.9)';
-    ctx.beginPath();
-    ctx.arc(rightX, rightY, handIndicatorRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('R', rightX, rightY + 4);
-  }
-
-  if (leftHandY < ARMS_UP_THRESHOLD && rightHandY < ARMS_UP_THRESHOLD) {
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
-    ctx.lineWidth = 4;
-    ctx.setLineDash([10, 10]);
-    ctx.beginPath();
-    ctx.moveTo(leftHandX * CANVAS_WIDTH, leftHandY * CANVAS_HEIGHT);
-    ctx.lineTo(rightHandX * CANVAS_WIDTH, rightHandY * CANVAS_HEIGHT);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  ctx.fillStyle = COLORS.particle;
-  particles.forEach(particle => {
-    if (!particle.active) return;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, PARTICLE_RADIUS, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = `${COLORS.particle}44`;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, PARTICLE_RADIUS * 2, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  if (mouseBarrier) {
-    ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
-    ctx.beginPath();
-    ctx.arc(mouseBarrier.x, mouseBarrier.y, 60, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = COLORS.portalGlow;
-    ctx.lineWidth = 3;
-    ctx.stroke();
-  }
-}
-
-// ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
-
-const ShadowPortalGame = memo(function ShadowPortalGameComponent() {
+export const ShadowPortalContent = memo(function ShadowPortalGame() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafIdRef = useRef<number | null>(null);
-  const webcamRef = useRef<any>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const gameLoopRef = useRef<number | null>(null);
+  const lastTimeRef = useRef(0);
 
-  const { playClick, playSuccess, playPop, playCelebration, playError } = useAudio();
-  const { speak } = useTTS();
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [gameState, setGameState] = useState<GameState>(() => createInitialState());
+  const [silhouetteRegions, setSilhouetteRegions] = useState<SilhouetteRegion[]>([]);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [comboText, setComboText] = useState<string>('');
+
   const { onGameComplete } = useGameDrops('shadow-portal');
+  const { playSuccess, playError, playCelebration } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
 
-  // Game state
-  const [gameState, setGameState] = useState<GameState>('tutorial');
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(LEVEL_DURATION_SECONDS);
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
 
-  // Portals and particles
-  const [portals, setPortals] = useState<Portal[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
+  // Draw game
+  const drawGame = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      // Clear with gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(1, '#16213e');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  // Wind gust state
-  const [windGustActive, setWindGustActive] = useState(false);
-  const [canWindGust, setCanWindGust] = useState(true);
-  const windGustTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Hand tracking
-  const [leftHandY, setLeftHandY] = useState(1);
-  const [rightHandY, setRightHandY] = useState(1);
-  const [leftHandX, setLeftHandX] = useState(0.5);
-  const [rightHandX, setRightHandX] = useState(0.5);
-  const [isTrackingLost, _setIsTrackingLost] = useState(false);
-
-  // Fallback mouse position
-  const [mouseBarrier, setMouseBarrier] = useState<{ x: number; y: number } | null>(null);
-
-  // Obstacles for Level 3
-  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-
-  // Streak tracking
-  const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
-
-  // Session progress
-  useGameSessionProgress({
-    gameName: 'Shadow Portal',
-    score,
-    level: currentLevel + 1,
-    isPlaying: gameState === 'playing',
-    metaData: { particles: particlesRef.current.filter(p => p.active).length },
-  });
-
-  // Initialize level
-  const initLevel = useCallback((levelIndex: number) => {
-    const config = DEFAULT_LEVELS[levelIndex];
-    const newPortals = createPortalsFromConfig(config, PORTAL_RADIUS);
-
-    setPortals(newPortals);
-    setObstacles(createLevelObstacles(config.level));
-    particlesRef.current = [];
-    setTimeLeft(LEVEL_DURATION_SECONDS);
-    setScore(0);
-    resetStreak();
-    setCanWindGust(true);
-    setWindGustActive(false);
-  }, [resetStreak]);
-
-  // Start game
-  const startGame = useCallback(() => {
-    setCurrentLevel(0);
-    initLevel(0);
-    setGameState('playing');
-    playClick();
-    speak("Move your body to guide the lights into the portal!");
-  }, [initLevel, playClick, speak]);
-
-  // Next level
-  const nextLevel = useCallback(() => {
-    if (currentLevel < DEFAULT_LEVELS.length - 1) {
-      const next = currentLevel + 1;
-      setCurrentLevel(next);
-      initLevel(next);
-      setGameState('playing');
-      speak(`Level ${next + 1}! Guide more lights into the portals!`);
-    } else {
-      // Game complete!
-      setGameState('levelComplete');
-      playCelebration();
-      void onGameComplete();
-      speak("Amazing! You completed all the levels!");
-    }
-  }, [currentLevel, initLevel, playCelebration, speak, onGameComplete]);
-
-  // Handle hand tracking frame
-  const handleFrame = useCallback((frame: TrackedHandFrame) => {
-    if (gameState !== 'playing') return;
-
-    // Get hand positions from hands array
-    // hands[0] is typically the left hand, hands[1] is the right hand
-    // We check the x position to determine which is which (left < 0.5, right > 0.5)
-    if (frame.hands.length >= 2) {
-      const hand0 = frame.hands[0];
-      const hand1 = frame.hands[1];
-
-      // Use index finger tip (landmark 8) for hand position
-      const hand0Tip = hand0[8];
-      const hand1Tip = hand1[8];
-
-      if (hand0Tip && hand1Tip) {
-        // Determine which is left and which is right based on x position
-        if (hand0Tip.x < hand1Tip.x) {
-          setLeftHandY(hand0Tip.y);
-          setLeftHandX(hand0Tip.x);
-          setRightHandY(hand1Tip.y);
-          setRightHandX(hand1Tip.x);
-        } else {
-          setLeftHandY(hand1Tip.y);
-          setLeftHandX(hand1Tip.x);
-          setRightHandY(hand0Tip.y);
-          setRightHandX(hand0Tip.x);
-        }
+      // Draw stars
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 50; i++) {
+        const x = (i * 137.5) % CANVAS_WIDTH;
+        const y = (i * 73.3) % CANVAS_HEIGHT;
+        const size = (i % 3) + 1;
+        ctx.globalAlpha = 0.3 + (i % 5) * 0.1;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
       }
-    } else if (frame.hands.length === 1) {
-      const hand = frame.hands[0];
-      const tip = hand[8];
-      if (tip) {
-        // If only one hand, assume it's the dominant hand
-        if (tip.x < 0.5) {
-          setLeftHandY(tip.y);
-          setLeftHandX(tip.x);
-        } else {
-          setRightHandY(tip.y);
-          setRightHandX(tip.x);
-        }
-      }
-    }
+      ctx.globalAlpha = 1;
 
-    // Check for wind gust gesture (both arms up)
-    const armsUp =
-      leftHandY < ARMS_UP_THRESHOLD && rightHandY < ARMS_UP_THRESHOLD;
+      // Draw portals
+      gameState.portals.forEach((portal) => {
+        const x = portal.x * CANVAS_WIDTH;
+        const y = portal.y * CANVAS_HEIGHT;
+        const w = portal.width * CANVAS_WIDTH;
+        const h = portal.height * CANVAS_HEIGHT;
 
-    if (armsUp && canWindGust) {
-      setCanWindGust(false);
-      setWindGustActive(true);
-      playPop();
+        // Portal glow
+        const portalGradient = ctx.createRadialGradient(x, y, 0, x, y, w);
+        portalGradient.addColorStop(0, portal.color);
+        portalGradient.addColorStop(0.5, `${portal.color}80`);
+        portalGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = portalGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, w, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Apply wind force to all particles
-      particlesRef.current.forEach(p => {
-        if (p.active && !p.inPortal) {
-          p.vy += WIND_FORCE.y;
+        // Portal core
+        ctx.fillStyle = portal.color;
+        ctx.beginPath();
+        ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Progress indicator
+        const progress = portal.particlesCollected / portal.targetParticles;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, w / 2 + 5, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+        ctx.stroke();
+
+        // Count
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${portal.particlesCollected}/${portal.targetParticles}`, x, y + 5);
+      });
+
+      // Draw silhouette regions (for debugging/visualization)
+      silhouetteRegions.forEach((region) => {
+        if (region.isActive) {
+          const x = region.x * CANVAS_WIDTH;
+          const y = region.y * CANVAS_HEIGHT;
+          const w = region.width * CANVAS_WIDTH;
+          const h = region.height * CANVAS_HEIGHT;
+
+          ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeStyle = 'rgba(100, 200, 255, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, w, h);
         }
       });
 
-      // Reset wind gust
-      setTimeout(() => setWindGustActive(false), WIND_GUST_DURATION_MS);
+      // Draw particles
+      gameState.particles.forEach((particle) => {
+        if (particle.captured || particle.missed) return;
 
-      // Cooldown
-      if (windGustTimerRef.current) {
-        clearTimeout(windGustTimerRef.current);
-      }
-      windGustTimerRef.current = setTimeout(() => {
-        setCanWindGust(true);
-      }, WIND_GUST_COOLDOWN_MS);
-    }
-  }, [gameState, canWindGust, playPop]);
+        const x = particle.x * CANVAS_WIDTH;
+        const y = particle.y * CANVAS_HEIGHT;
+        const r = particle.radius * Math.min(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  // Hand tracking setup
-  const {
-    startTracking,
-    stopTracking,
-  } = useGameHandTracking({
-    gameName: 'ShadowPortal',
-    targetFps: 30,
-    webcamRef,
-    onFrame: handleFrame,
-  });
+        // Glow
+        const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, r * 2);
+        glowGradient.addColorStop(0, particle.color);
+        glowGradient.addColorStop(0.5, `${particle.color}80`);
+        glowGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, r * 2, 0, Math.PI * 2);
+        ctx.fill();
 
-  // Fallback mode state (not yet implemented, placeholder for future use)
-  const [isFallbackMode, _setIsFallbackMode] = useState(false);
+        // Core
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
 
-  // Fallback controls - simpler mouse tracking
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (gameState === 'playing') {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const rect = canvas.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH;
-          const y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT;
-          setMouseBarrier({ x, y });
+        // Type indicator
+        if (particle.type === 'bonus') {
+          ctx.fillStyle = '#FFD700';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('★', x, y + 4);
+        } else if (particle.type === 'obstacle') {
+          ctx.strokeStyle = '#FF4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x - r * 0.5, y - r * 0.5);
+          ctx.lineTo(x + r * 0.5, y + r * 0.5);
+          ctx.moveTo(x + r * 0.5, y - r * 0.5);
+          ctx.lineTo(x - r * 0.5, y + r * 0.5);
+          ctx.stroke();
         }
-      }
-    };
+      });
+    },
+    [gameState, silhouetteRegions]
+  );
 
-    const handleMouseClick = () => {
-      if (gameState === 'playing' && canWindGust) {
-        setCanWindGust(false);
-        setWindGustActive(true);
-        playPop();
-        particlesRef.current.forEach(p => {
-          if (p.active && !p.inPortal) {
-            p.vy += WIND_FORCE.y;
-          }
-        });
-        setTimeout(() => setWindGustActive(false), WIND_GUST_DURATION_MS);
-        setTimeout(() => setCanWindGust(true), WIND_GUST_COOLDOWN_MS);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setMouseBarrier(null);
-    };
-
-    if (isFallbackMode) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('click', handleMouseClick);
-      window.addEventListener('mouseup', handleMouseUp);
-
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('click', handleMouseClick);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [gameState, canWindGust, isFallbackMode, playPop]);
-
-  // Game loop
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
-      return;
-    }
-
-    const config = DEFAULT_LEVELS[currentLevel];
-    let lastSpawnTime = 0;
-    let lastTime = performance.now();
-    let gracePeriodActive = true;
-    let gracePeriodTimer = setTimeout(() => {
-      gracePeriodActive = false;
-    }, GRACE_PERIOD_SECONDS * 1000);
-
-    // Timer countdown
-    const timerInterval = setInterval(() => {
-      if (!gracePeriodActive) {
-        setTimeLeft(prev => {
-          const newTime = prev - 1;
-          if (newTime <= 0) {
-            clearInterval(timerInterval);
-            setGameState('gameOver');
-            playError();
-            speak("Time's up! Try again!");
-            return 0;
-          }
-          return newTime;
-        });
-      }
-    }, 1000);
-
-    const gameLoop = (time: number) => {
-      const dt = (time - lastTime) / 16.66; // Normalize to 60fps
-      lastTime = time;
-
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        rafIdRef.current = requestAnimationFrame(gameLoop);
+  // Handle hand tracking for silhouette
+  const handleHandFrame = useCallback(
+    (frame: TrackedHandFrame) => {
+      if (!frame.indexTip) {
+        setSilhouetteRegions([]);
         return;
       }
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Spawn new particles
-      if (time - lastSpawnTime > config.particleSpawnRate) {
-        const newParticles = createParticles(1, config.particleSpeed, CANVAS_WIDTH);
-        particlesRef.current.push(...newParticles);
-        lastSpawnTime = time;
+      // Create silhouette region based on hand position
+      // In a real implementation, this would use body segmentation
+      // For now, we use hand position as a simple silhouette
+      if (frame.indexTip) {
+        setSilhouetteRegions([
+          {
+            x: frame.indexTip.x - 0.08,
+            y: frame.indexTip.y - 0.08,
+            width: 0.16,
+            height: 0.16,
+            isActive: true,
+          },
+        ]);
+      } else {
+        setSilhouetteRegions([]);
       }
+    },
+    []
+  );
 
-      // Update particles
-      particlesRef.current.forEach(particle => {
-        if (!particle.active) return;
+  const { handVisible } = useGameHandTracking({
+    gameName: 'ShadowPortal',
+    webcamRef,
+    onFrame: handleHandFrame,
+  });
 
-        updateParticle(particle, dt, windGustActive, obstacles, mouseBarrier);
+  // Game loop
+  useEffect(() => {
+    const gameLoop = (timestamp: number) => {
+      const deltaTime = (timestamp - lastTimeRef.current) / 1000;
+      lastTimeRef.current = timestamp;
 
-        // Check portal collision (needs React state setters — kept inline)
-        portals.forEach(portal => {
-          const dist = distance(particle.x, particle.y, portal.x, portal.y);
-          const hitRadius = portal.radius + PARTICLE_RADIUS * 2; // Generous hitbox
+      if (gameStateRef.current.status === 'playing') {
+        setGameState((prev) => {
+          let updated = spawnParticles(prev, deltaTime);
+          updated = updateParticles(updated, deltaTime, silhouetteRegions);
+          updated = checkGameComplete(updated);
 
-          if (dist < hitRadius && !particle.inPortal) {
-            // Particle enters portal!
-            particle.inPortal = true;
-            particle.active = false;
-
-            // Update portal
-            setPortals(prev => prev.map((p, i) =>
-              i === portals.indexOf(portal)
-                ? { ...p, count: p.count + 1 }
-                : p
-            ));
-
-            // Score
-            const newStreak = incrementStreak(1);
-            const points = calculatePortalScore(1, newStreak);
-            setScore(s => s + points);
-
+          if (updated.status === 'complete' && prev.status === 'playing') {
             playSuccess();
-            triggerHaptic('success');
-
-            // Check if portal is full
-            if (portal.count >= portal.target) {
-              speak("Portal full!");
-            }
+            playCelebration();
+            triggerHaptic('celebration');
+            setShowCelebration(true);
+            const scores = calculateFinalScore(updated);
+            onGameComplete(scores.total);
+            if (ttsEnabled) speak('All portals filled! Amazing!');
           }
+
+          if (updated.status === 'gameover' && prev.status === 'playing') {
+            playError();
+            if (ttsEnabled) speak('Game over! Try again!');
+          }
+
+          return updated;
         });
-
-        // Remove particles that are in portals
-        if (particle.inPortal) {
-          particle.active = false;
-        }
-      });
-
-      // Clean up inactive particles
-      particlesRef.current = particlesRef.current.filter(p => p.active);
-
-      // Check win condition (all portals full)
-      if (areAllPortalsFull(portals)) {
-        clearInterval(timerInterval);
-        clearTimeout(gracePeriodTimer);
-        setGameState('levelComplete');
-        playCelebration();
-        triggerHaptic('celebration');
-        speak(`Amazing! You filled all the portals!`);
-        setTimeout(nextLevel, 3000);
-        return; // Stop game loop
       }
 
-      // Update moving obstacles
-      if (obstacles.some(o => o.type === 'moving')) {
-        setObstacles(prev => prev.map(o =>
-          o.type === 'moving' ? updateMovingObstacle(o, dt) : o
-        ));
-      }
-
-      // ─── RENDER ─────────────────────────────────────────────────────
-      renderFrame(ctx, {
-        portals,
-        obstacles,
-        windGustActive,
-        leftHandX,
-        leftHandY,
-        rightHandX,
-        rightHandY,
-        mouseBarrier,
-        particles: particlesRef.current,
-      });
-
-      rafIdRef.current = requestAnimationFrame(gameLoop);
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
 
-    rafIdRef.current = requestAnimationFrame(gameLoop);
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
-      clearInterval(timerInterval);
-      clearTimeout(gracePeriodTimer);
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, currentLevel, portals, obstacles, windGustActive, mouseBarrier, playSuccess, playCelebration, speak, nextLevel, incrementStreak, triggerHaptic, playError]);
+  }, [silhouetteRegions, playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]);
 
-  // Start tracking when playing
+  // Timer
   useEffect(() => {
-    if (gameState === 'playing') {
-      if (!isFallbackMode) {
-        startTracking();
-      }
-    } else {
-      stopTracking();
+    if (gameState.status !== 'playing') return;
+
+    const timer = setInterval(() => {
+      setGameState((prev) => updateTimer(prev));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState.status]);
+
+  // Combo text effect
+  useEffect(() => {
+    const text = getComboText(gameState.streak);
+    if (text) {
+      setComboText(text);
+      const timer = setTimeout(() => setComboText(''), 1500);
+      return () => clearTimeout(timer);
     }
-  }, [gameState, isFallbackMode, startTracking, stopTracking]);
+  }, [gameState.streak]);
+
+  // Draw canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    drawGame(ctx);
+  }, [drawGame]);
+
+  const handleStart = useCallback(() => {
+    setGameState((prev) => startGame(prev, difficulty));
+    if (ttsEnabled) {
+      speak('Shadow Portal! Use your hands to guide particles into the portals!');
+    }
+  }, [difficulty, speak, ttsEnabled]);
+
+  const handleGameComplete = useCallback(() => {
+    setShowCelebration(false);
+    setGameState(createInitialState());
+  }, []);
+
+  // Mouse fallback
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      setSilhouetteRegions([
+        {
+          x: x - 0.05,
+          y: y - 0.05,
+          width: 0.1,
+          height: 0.1,
+          isActive: true,
+        },
+      ]);
+    },
+    []
+  );
 
   return (
-    <GameShell gameId="shadow-portal" gameName="Shadow Portal" showWellnessTimer={true}>
-      <div className="relative w-full h-screen bg-gradient-to-b from-indigo-950 to-purple-950">
-        {/* Canvas */}
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className="absolute inset-0 w-full h-full object-contain"
-        />
+    <GameContainer
+      title="Shadow Portal"
+      score={gameState.score}
+      isPlaying={gameState.status === 'playing'}
+      isHandDetected={handVisible}
+      webcamRef={webcamRef}
+    >
+      <div className="relative w-full h-full flex flex-col items-center justify-center">
+        {gameState.status === 'idle' ? (
+          <div className="flex flex-col items-center gap-6">
+            <h2 className="text-3xl font-bold text-white drop-shadow-lg">Shadow Portal</h2>
+            <p className="text-gray-300 text-center max-w-md">
+              Use your hands to guide falling light particles into the portals!
+              <br />
+              ✨ Block, deflect, and guide the particles
+            </p>
 
-        {/* UI Overlay */}
-        {gameState === 'tutorial' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-3xl p-8 max-w-md mx-4 text-center"
+            <div className="flex gap-4">
+              {(['easy', 'medium', 'hard'] as Difficulty[]).map((diff) => (
+                <button
+                  key={diff}
+                  onClick={() => setDifficulty(diff)}
+                  className={`px-6 py-3 rounded-xl font-bold capitalize transition-all ${
+                    difficulty === diff
+                      ? 'bg-purple-500 text-white scale-110'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {getDifficultyName(diff)}
+                </button>
+              ))}
+            </div>
+
+            <div className="text-sm text-gray-400">
+              Fill all 3 portals to win!
+            </div>
+
+            <button
+              onClick={handleStart}
+              className="mt-4 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xl font-bold rounded-2xl shadow-lg transition-all hover:scale-105"
             >
-              <div className="text-6xl mb-4">✨</div>
-              <h1 className="text-3xl font-black text-purple-900 mb-4">
-                Shadow Portal
-              </h1>
-              <p className="text-lg text-purple-700 mb-6">
-                Move your body to guide magical light particles into the portal!
-              </p>
-              <button
-                onClick={startGame}
-                className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-xl shadow-lg"
-              >
-                Start! 🌟
-              </button>
-              <VoiceInstructions
-                instructions="Move your body to guide the lights into the portal!"
-                autoSpeak={true}
-                showReplayButton={true}
-              />
-            </motion.div>
+              Start Game! ✨
+            </button>
           </div>
-        )}
-
-        {/* In-game HUD */}
-        {(gameState === 'playing' || gameState === 'levelComplete' || gameState === 'gameOver') && (
+        ) : (
           <>
-            {/* Top HUD */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-              {/* Level */}
-              <div className="bg-white/90 backdrop-blur rounded-2xl px-4 py-2">
-                <p className="text-sm font-bold text-purple-600">Level</p>
-                <p className="text-2xl font-black text-purple-900">{currentLevel + 1}</p>
+            {/* HUD */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-6 bg-black/50 backdrop-blur px-6 py-3 rounded-2xl">
+              <div className="text-center">
+                <div className="text-xs text-gray-400 uppercase">Time</div>
+                <div className={`text-xl font-bold ${gameState.timeLeft < 10 ? 'text-red-400' : 'text-white'}`}>
+                  {gameState.timeLeft}s
+                </div>
               </div>
-
-              {/* Timer */}
-              <div className="bg-white/90 backdrop-blur rounded-2xl px-4 py-2">
-                <p className="text-sm font-bold text-purple-600">Time</p>
-                <p className={`text-2xl font-black ${timeLeft <= 10 ? 'text-red-500' : 'text-purple-900'}`}>
-                  {timeLeft}s
-                </p>
+              <div className="text-center">
+                <div className="text-xs text-gray-400 uppercase">Score</div>
+                <div className="text-xl font-bold text-white">{gameState.score}</div>
               </div>
-
-              {/* Score */}
-              <div className="bg-white/90 backdrop-blur rounded-2xl px-4 py-2">
-                <p className="text-sm font-bold text-purple-600">Score</p>
-                <p className="text-2xl font-black text-purple-900">{score}</p>
+              <div className="text-center">
+                <div className="text-xs text-gray-400 uppercase">Missed</div>
+                <div className={`text-xl font-bold ${
+                  gameState.particlesMissed >= gameState.maxMissed - 1 ? 'text-red-400' : 'text-white'
+                }`}>
+                  {gameState.particlesMissed}/{gameState.maxMissed}
+                </div>
               </div>
+              {gameState.comboMultiplier > 1 && (
+                <div className="text-center">
+                  <div className="text-xs text-yellow-400 uppercase">Combo</div>
+                  <div className="text-xl font-bold text-yellow-400">x{gameState.comboMultiplier.toFixed(1)}</div>
+                </div>
+              )}
             </div>
 
-            {/* Wind Gust Indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-              <div className={`px-6 py-3 rounded-full font-bold text-white ${canWindGust ? 'bg-purple-500' : 'bg-gray-500'} shadow-lg`}>
-                {canWindGust ? 'Raise both arms! 🌬️' : 'Cooling down... ⏳'}
-              </div>
+            {/* Game Canvas */}
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              className="rounded-xl shadow-2xl cursor-crosshair"
+              style={{ maxWidth: '90vw', maxHeight: '60vh' }}
+              onMouseMove={handleMouseMove}
+            />
+
+            {/* Instructions */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur text-white px-4 py-2 rounded-lg text-sm">
+              Move your hands to block and guide particles into portals!
             </div>
 
-            {/* Fallback indicator */}
-            {isFallbackMode && (
-              <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full font-bold">
-                Mouse mode active
-              </div>
-            )}
+            {/* Combo Text */}
+            <AnimatePresence>
+              {comboText && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="absolute top-1/4 left-1/2 -translate-x-1/2 text-4xl font-bold text-yellow-400 drop-shadow-lg"
+                  style={{ textShadow: '0 0 20px rgba(255, 215, 0, 0.8)' }}
+                >
+                  {comboText}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </>
         )}
 
-        {/* Level Complete */}
-        {gameState === 'levelComplete' && (
-          <CelebrationOverlay
-            show={true}
-            letter={<span className="text-6xl">✨</span>}
-            accuracy={100}
-            onComplete={nextLevel}
-            message={`Amazing! Score: ${score}`}
-          />
-        )}
-
-        {/* Game Over */}
-        {gameState === 'gameOver' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-3xl p-8 max-w-md mx-4 text-center"
-            >
-              <div className="text-6xl mb-4">⏰</div>
-              <h1 className="text-3xl font-black text-purple-900 mb-2">
-                Time's Up!
-              </h1>
-              <p className="text-lg text-purple-700 mb-2">Final Score: {score}</p>
-              <div className="flex gap-4 justify-center">
-                <button
-                  onClick={startGame}
-                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold"
-                >
-                  Try Again
-                </button>
-                <button
-                  onClick={() => navigate('/games')}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-2xl font-bold"
-                >
-                  Games
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {/* Streak Milestone */}
+        {/* Celebration / Game Over */}
         <AnimatePresence>
-          {showMilestone && (
+          {(showCelebration || gameState.status === 'gameover') && (
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/70 flex items-center justify-center z-50"
             >
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg">
-                🔥 {streak} Streak! 🔥
-              </div>
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-gradient-to-br from-purple-900 to-blue-900 rounded-3xl p-8 text-center max-w-md border border-purple-500/50"
+              >
+                {gameState.status === 'complete' ? (
+                  <>
+                    <div className="text-6xl mb-4">🌟✨🌟</div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Portals Filled!</h2>
+                    <p className="text-purple-200 mb-4">You guided the particles to safety!</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-6xl mb-4">💫</div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Game Over</h2>
+                    <p className="text-gray-300 mb-4">Too many particles missed!</p>
+                  </>
+                )}
+                {(() => {
+                  const scores = calculateFinalScore(gameState);
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 gap-3 text-sm mb-6">
+                        <div className="bg-white/10 p-2 rounded">
+                          <div className="text-gray-400">Base</div>
+                          <div className="font-bold text-white">{scores.baseScore}</div>
+                        </div>
+                        <div className="bg-white/10 p-2 rounded">
+                          <div className="text-green-400">Portal</div>
+                          <div className="font-bold text-white">+{scores.portalBonus}</div>
+                        </div>
+                        <div className="bg-white/10 p-2 rounded">
+                          <div className="text-yellow-400">Time</div>
+                          <div className="font-bold text-white">+{scores.timeBonus}</div>
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-yellow-400 mb-6">Total: {scores.total}</p>
+                    </>
+                  );
+                })()}
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={handleGameComplete}
+                    className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-xl"
+                  >
+                    Play Again
+                  </button>
+                  <button
+                    onClick={() => navigate('/games')}
+                    className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-xl"
+                  >
+                    Exit
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+    </GameContainer>
+  );
+});
 
-      {/* Camera Thumbnail */}
-      <CameraThumbnail webcamRef={webcamRef} isHandDetected={!isTrackingLost} visible={gameState === 'playing'} />
-
-      {/* Hand Tracking Status */}
-      {gameState === 'playing' && (
-        <HandTrackingStatus
-          isHandDetected={!isTrackingLost}
-          pauseOnHandLost={true}
-          voicePrompt={true}
-          showMascot={true}
-        />
-      )}
-
-      {/* Fallback Cursor */}
-      {isFallbackMode && gameState === 'playing' && mouseBarrier && (
-        <GameCursor
-          position={{
-            x: mouseBarrier.x / CANVAS_WIDTH,
-            y: mouseBarrier.y / CANVAS_HEIGHT,
-          }}
-          size={84}
-          isPinching={false}
-          isHandDetected={true}
-          showTrail={true}
-          coordinateSpace="normalized"
-        />
-      )}
+export const ShadowPortal = memo(function ShadowPortalShell() {
+  return (
+    <GameShell gameId="shadow-portal" gameName="Shadow Portal">
+      <ShadowPortalContent />
     </GameShell>
   );
 });
 
-export default function ShadowPortal() {
-  return <ShadowPortalGame />;
-}
+export default ShadowPortal;

@@ -20,7 +20,9 @@ import {
 } from '../games/airGuitarHeroLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { KenneyCharacter } from '../components/game/KenneyCharacterAnimated';
 import { AssetPreloader, type AssetToPreload } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 
 // Note color map for visual variety
 const NOTE_COLORS: Record<
@@ -163,7 +165,8 @@ function AirGuitarHeroInner({
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <GameBackground type="mushrooms" variant="color" className="absolute inset-0" />
+      <div className='h-full overflow-auto p-4 md:p-6 relative z-10'>
         <div className='max-w-2xl mx-auto space-y-4'>
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>
@@ -235,6 +238,7 @@ function AirGuitarHeroInner({
             <>
               {/* Streak HUD */}
               <div className='flex items-center justify-center gap-3 bg-white rounded-2xl border-2 border-[#F2CC8F] p-3 shadow-[0_3px_0_#E5B86E]'>
+                <KenneyCharacter color="pink" pose="walk_a" size={48} />
                 <span className='font-black text-lg'>🔥 Streak</span>
                 <div className='flex gap-1'>
                   {[1, 2, 3, 4, 5].map((i) => (

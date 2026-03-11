@@ -8,6 +8,7 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { triggerHaptic } from '../utils/haptics';
+import { AssetPreloader } from '../components/AssetPreloader';
 import {
   advanceObstacleCourseState,
   completeCurrentObstacle,
@@ -28,6 +29,7 @@ import {
   type PoseMetrics,
 } from '../games/poseMovementAnalysis';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 type GamePhase = 'menu' | 'calibrating' | 'playing' | 'summary';
 
@@ -42,6 +44,11 @@ interface FinalSummary {
 const TOTAL_LEVELS = 3;
 const CALIBRATION_SAMPLE_TARGET = 24;
 const MOVEMENT_COOLDOWN_MS = 900;
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 function getMovementLabel(movement: MovementSignal | null) {
   if (!movement) {
@@ -75,6 +82,7 @@ function laneFromOffset(offset: number) {
 }
 
 const ObstacleCourseContent = memo(function ObstacleCourse() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
@@ -478,6 +486,16 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 
   const currentObstacle = roundState ? getCurrentObstacle(roundState) : null;
   const laneLabels = ['Left', 'Center', 'Right'];
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <GameContainer
@@ -930,7 +948,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       {showStreakMilestone && (
         <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
           <div className='bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse'>
-            🔥 {streak} Streak! 🔥
+            <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
           </div>
         </div>
       )}

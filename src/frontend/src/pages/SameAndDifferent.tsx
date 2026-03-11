@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
@@ -16,6 +17,7 @@ function SameAndDifferentGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('same-and-different');
+  const { saveProgress } = useGameProgress('same-and-different');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -64,7 +66,9 @@ function SameAndDifferentGame() {
 
     if (round >= roundsPerSession) {
       playCelebration();
-      await onGameComplete(score + (ok ? 20 : 0));
+      const finalScore = score + (ok ? 20 : 0);
+      await saveProgress({ score: finalScore, completed: true, level: 1 });
+      await onGameComplete(finalScore);
       setTimeout(() => setActiveRound(null), 850);
       return;
     }

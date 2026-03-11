@@ -132,11 +132,15 @@ export function buildOddOneOutRound(
     const fallbackItems = CATEGORY_BANKS[fallbackCat];
     const shuffled = [...fallbackItems].sort(() => random() - 0.5);
     const sameItems = shuffled.slice(0, 3);
-    
+
     const differentCategories = CATEGORY_NAMES.filter((c) => c !== fallbackCat);
     const oddCategory = differentCategories[Math.floor(random() * differentCategories.length)];
     const oddPool = CATEGORY_BANKS[oddCategory];
-    const oddItem = oddPool[Math.floor(random() * oddPool.length)];
+
+    // Filter out items whose names already exist in sameItems to ensure uniqueness
+    const sameItemNames = new Set(sameItems.map(i => i.name));
+    const availableOddItems = oddPool.filter(i => !sameItemNames.has(i.name));
+    const oddItem = availableOddItems[Math.floor(random() * availableOddItems.length)] || oddPool[0];
 
     const allItems = [...sameItems, oddItem].sort(() => random() - 0.5);
 
@@ -150,12 +154,16 @@ export function buildOddOneOutRound(
   // Shuffle and pick 3 for the "same" group
   const shuffled = [...items].sort(() => random() - 0.5);
   const sameItems = shuffled.slice(0, 3);
-  
+
   // Pick a different category's item as the odd one
   const differentCategories = CATEGORY_NAMES.filter((c) => c !== category);
   const oddCategory = differentCategories[Math.floor(random() * differentCategories.length)];
   const oddPool = CATEGORY_BANKS[oddCategory];
-  const oddItem = oddPool[Math.floor(random() * oddPool.length)];
+
+  // Filter out items whose names already exist in sameItems to ensure uniqueness
+  const sameItemNames = new Set(sameItems.map(i => i.name));
+  const availableOddItems = oddPool.filter(i => !sameItemNames.has(i.name));
+  const oddItem = availableOddItems[Math.floor(random() * availableOddItems.length)] || oddPool[0];
 
   // Combine and shuffle
   const allItems = [...sameItems, oddItem].sort(() => random() - 0.5);

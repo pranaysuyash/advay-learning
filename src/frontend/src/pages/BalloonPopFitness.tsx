@@ -572,20 +572,22 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       return nextState;
     });
 
-    renderCanvas();
+    renderCanvasFrame();
 
     animationRef.current = requestAnimationFrame(doGameLoop);
   }
 
   const gameLoop = useCallback(doGameLoop, [
-    gameState,
     cameraReady,
-    showMenu,
+    gameState?.gameActive,
+    incrementStreak,
     lastSpawnTime,
+    onGameComplete,
+    playCelebration,
     playPop,
     playSuccess,
-    playCelebration,
-    onGameComplete,
+    showMenu,
+    showCelebration,
   ]);
 
   // Start game loop when ready
@@ -610,7 +612,6 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     if (!ctx) return;
     renderGameFrame(ctx, gameState, currentAction);
   }
-  const renderCanvas = useCallback(renderCanvasFrame, [gameState, currentAction]);
 
   // ===== GAME FLOW =====
   const startGame = () => {

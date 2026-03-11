@@ -7,10 +7,12 @@ import './index.css';
 import { scan } from 'react-scan';
 import { initializeI18n, I18nProvider } from './i18n';
 import { preloadItemsManifest } from './utils/itemsManifest';
+import { registerServiceWorker } from './pwa/registerServiceWorker';
 
 // Initialize i18n before app render
 initializeI18n();
 void preloadItemsManifest();
+void registerServiceWorker();
 
 // Initialize React Scan for performance monitoring (development only)
 scan({

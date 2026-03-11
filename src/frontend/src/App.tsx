@@ -5,551 +5,144 @@ import { ToastProvider } from './components/ui/Toast';
 import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { ItemDropToast } from './components/inventory/ItemDropToast';
 import { BackpackButton } from './components/inventory/BackpackButton';
-import { Suspense, lazy, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { CameraSafeRoute } from './components/routing/CameraSafeRoute';
 import { useAudio } from './utils/hooks/useAudio';
 import { GlobalErrorBoundary } from './components/errors/GlobalErrorBoundary';
 import { useProgressSync } from './hooks/useProgressSync';
 import { CalmModeProvider } from './components/CalmModeProvider';
 
-// Lazy load pages for code splitting
-const Home = lazy(() =>
-  import('./pages/Home').then((module) => ({ default: module.Home })),
-);
-const Login = lazy(() =>
-  import('./pages/Login').then((module) => ({ default: module.Login })),
-);
-const Register = lazy(() =>
-  import('./pages/Register').then((module) => ({ default: module.Register })),
-);
-const ForgotPassword = lazy(() =>
-  import('./pages/ForgotPassword').then((module) => ({
-    default: module.ForgotPassword,
-  })),
-);
-const ResetPassword = lazy(() =>
-  import('./pages/ResetPassword').then((module) => ({
-    default: module.ResetPassword,
-  })),
-);
-const Pricing = lazy(() =>
-  import('./pages/Pricing').then((module) => ({ default: module.Pricing })),
-);
-const GameSelection = lazy(() =>
-  import('./pages/GameSelection').then((module) => ({
-    default: module.GameSelection,
-  })),
-);
-const Dashboard = lazy(() =>
-  import('./pages/Dashboard').then((module) => ({ default: module.Dashboard })),
-);
-const AlphabetGame = lazy(() =>
-  import('./pages/AlphabetGame').then((module) => ({
-    default: module.default,
-  })),
-);
-const Games = lazy(() =>
-  import('./pages/Games').then((module) => ({ default: module.Games })),
-);
-const ConnectTheDots = lazy(() =>
-  import('./pages/ConnectTheDots').then((module) => ({
-    default: module.ConnectTheDots,
-  })),
-);
-const LetterHunt = lazy(() =>
-  import('./pages/LetterHunt').then((module) => ({
-    default: module.LetterHunt,
-  })),
-);
-const MusicPinchBeat = lazy(() =>
-  import('./pages/MusicPinchBeat').then((module) => ({
-    default: module.MusicPinchBeat,
-  })),
-);
-const SteadyHandLab = lazy(() =>
-  import('./pages/SteadyHandLab').then((module) => ({
-    default: module.SteadyHandLab,
-  })),
-);
-const ShapePop = lazy(() =>
-  import('./pages/ShapePop').then((module) => ({ default: module.ShapePop })),
-);
-const ColorMatchGarden = lazy(() =>
-  import('./pages/ColorMatchGarden').then((module) => ({
-    default: module.ColorMatchGarden,
-  })),
-);
-const ColorByNumber = lazy(() =>
-  import('./pages/ColorByNumber').then((module) => ({
-    default: module.ColorByNumber,
-  })),
-);
-const ColorPotions = lazy(() =>
-  import('./pages/ColorPotions').then((module) => ({
-    default: module.ColorPotions,
-  })),
-);
-const MemoryMatch = lazy(() =>
-  import('./pages/MemoryMatch').then((module) => ({
-    default: module.MemoryMatch,
-  })),
-);
-const NumberTracing = lazy(() =>
-  import('./pages/NumberTracing').then((module) => ({
-    default: module.NumberTracing,
-  })),
-);
-const NumberTapTrail = lazy(() =>
-  import('./pages/NumberTapTrail').then((module) => ({
-    default: module.NumberTapTrail,
-  })),
-);
-const NumberSequence = lazy(() =>
-  import('./pages/NumberSequence').then((module) => ({
-    default: module.NumberSequence,
-  })),
-);
-const ShapeSequence = lazy(() =>
-  import('./pages/ShapeSequence').then((module) => ({
-    default: module.ShapeSequence,
-  })),
-);
-const YogaAnimals = lazy(() =>
-  import('./pages/YogaAnimals').then((module) => ({
-    default: module.YogaAnimals,
-  })),
-);
-const BalloonPopFitness = lazy(() =>
-  import('./pages/BalloonPopFitness').then((module) => ({
-    default: module.BalloonPopFitness,
-  })),
-);
-const ObstacleCourse = lazy(() =>
-  import('./pages/ObstacleCourse').then((module) => ({
-    default: module.ObstacleCourse,
-  })),
-);
-const FollowTheLeader = lazy(() =>
-  import('./pages/FollowTheLeader').then((module) => ({
-    default: module.FollowTheLeader,
-  })),
-);
-const MusicalStatues = lazy(() =>
-  import('./pages/MusicalStatues').then((module) => ({
-    default: module.MusicalStatues,
-  })),
-);
-const FreezeDance = lazy(() =>
-  import('./pages/FreezeDance').then((module) => ({
-    default: module.FreezeDance,
-  })),
-);
-const SimonSays = lazy(() =>
-  import('./pages/SimonSays').then((module) => ({
-    default: module.SimonSays,
-  })),
-);
-const Progress = lazy(() =>
-  import('./pages/Progress').then((module) => ({ default: module.Progress })),
-);
-const Settings = lazy(() =>
-  import('./pages/Settings').then((module) => ({ default: module.Settings })),
-);
-const StyleTest = lazy(() =>
-  import('./components/StyleTest').then((module) => ({
-    default: module.StyleTest,
-  })),
-);
-const FingerNumberShow = lazy(() =>
-  import('./games/FingerNumberShow').then((module) => ({
-    default: module.FingerNumberShow,
-  })),
-);
-const VirtualChemistryLab = lazy(() =>
-  import('./pages/VirtualChemistryLab').then((module) => ({
-    default: module.VirtualChemistryLab,
-  })),
-);
-const WordBuilder = lazy(() =>
-  import('./pages/WordBuilder').then((module) => ({
-    default: module.WordBuilder,
-  })),
-);
-const EmojiMatch = lazy(() =>
-  import('./pages/EmojiMatch').then((module) => ({
-    default: module.EmojiMatch,
-  })),
-);
-const MediaPipeTest = lazy(() =>
-  import('./pages/MediaPipeTest').then((module) => ({
-    default: module.MediaPipeTest,
-  })),
-);
-const AirCanvas = lazy(() =>
-  import('./pages/AirCanvas').then((module) => ({
-    default: module.AirCanvas,
-  })),
-);
-const MirrorDraw = lazy(() =>
-  import('./pages/MirrorDraw').then((module) => ({
-    default: module.MirrorDraw,
-  })),
-);
-const PhonicsSounds = lazy(() =>
-  import('./pages/PhonicsSounds').then((module) => ({
-    default: module.PhonicsSounds,
-  })),
-);
-const PhonicsTracing = lazy(() =>
-  import('./pages/PhonicsTracing').then((module) => ({
-    default: module.PhonicsTracing,
-  })),
-);
-const BeginningSounds = lazy(() =>
-  import('./pages/BeginningSounds').then((module) => ({
-    default: module.BeginningSounds,
-  })),
-);
-const EndingSounds = lazy(() =>
-  import('./pages/EndingSounds').then((module) => ({
-    default: module.EndingSounds,
-  })),
-);
-const OddOneOut = lazy(() =>
-  import('./pages/OddOneOut').then((module) => ({
-    default: module.OddOneOut,
-  })),
-);
-const SameAndDifferent = lazy(() =>
-  import('./pages/SameAndDifferent').then((module) => ({
-    default: module.SameAndDifferent,
-  })),
-);
-const ShadowMatch = lazy(() =>
-  import('./pages/ShadowMatch').then((module) => ({
-    default: module.ShadowMatch,
-  })),
-);
-const ShadowPuppetTheater = lazy(() =>
-  import('./pages/ShadowPuppetTheater').then((module) => ({
-    default: module.ShadowPuppetTheater,
-  })),
-);
-const VirtualBubbles = lazy(() =>
-  import('./pages/VirtualBubbles').then((module) => ({
-    default: module.VirtualBubbles,
-  })),
-);
-const KaleidoscopeHands = lazy(() =>
-  import('./pages/KaleidoscopeHands').then((module) => ({
-    default: module.KaleidoscopeHands,
-  })),
-);
-const ShadowPortal = lazy(() =>
-  import('./pages/ShadowPortal').then((module) => ({
-    default: module.default,
-  })),
-);
-const AirGuitarHero = lazy(() =>
-  import('./pages/AirGuitarHero').then((module) => ({
-    default: module.AirGuitarHero,
-  })),
-);
-const FruitNinjaAir = lazy(() =>
-  import('./pages/FruitNinjaAir').then((module) => ({
-    default: module.FruitNinjaAir,
-  })),
-);
-const CountingObjects = lazy(() =>
-  import('./pages/CountingObjects').then((module) => ({
-    default: module.CountingObjects,
-  })),
-);
-const MoreOrLess = lazy(() =>
-  import('./pages/MoreOrLess').then((module) => ({
-    default: module.MoreOrLess,
-  })),
-);
-const BlendBuilder = lazy(() =>
-  import('./pages/BlendBuilder').then((module) => ({
-    default: module.BlendBuilder,
-  })),
-);
-const SyllableClap = lazy(() =>
-  import('./pages/SyllableClap').then((module) => ({
-    default: module.SyllableClap,
-  })),
-);
-const SightWordFlash = lazy(() =>
-  import('./pages/SightWordFlash').then((module) => ({
-    default: module.SightWordFlash,
-  })),
-);
-const MazeRunner = lazy(() =>
-  import('./pages/MazeRunner').then((module) => ({
-    default: module.MazeRunner,
-  })),
-);
-const PathFollowing = lazy(() =>
-  import('./pages/PathFollowing').then((module) => ({
-    default: module.PathFollowing,
-  })),
-);
-const RhythmTap = lazy(() =>
-  import('./pages/RhythmTap').then((module) => ({
-    default: module.RhythmTap,
-  })),
-);
-const AnimalSounds = lazy(() =>
-  import('./pages/AnimalSounds').then((module) => ({
-    default: module.AnimalSounds,
-  })),
-);
-const BodyParts = lazy(() =>
-  import('./pages/BodyParts').then((module) => ({
-    default: module.BodyParts,
-  })),
-);
-const VoiceStories = lazy(() =>
-  import('./pages/VoiceStories').then((module) => ({
-    default: module.VoiceStories,
-  })),
-);
-const ReadingAlong = lazy(() =>
-  import('./pages/ReadingAlong').then((module) => ({
-    default: module.ReadingAlong,
-  })),
-);
-const WordSearch = lazy(() =>
-  import('./pages/WordSearch').then((module) => ({
-    default: module.WordSearch,
-  })),
-);
-const LetterSoundMatch = lazy(() =>
-  import('./pages/LetterSoundMatch').then((module) => ({
-    default: module.LetterSoundMatch,
-  })),
-);
-const StoryBuilder = lazy(() =>
-  import('./pages/StoryBuilder').then((module) => ({
-    default: module.StoryBuilder,
-  })),
-);
-const MathSmash = lazy(() =>
-  import('./pages/MathSmash').then((module) => ({
-    default: module.MathSmash,
-  })),
-);
-const ColorSortGame = lazy(() =>
-  import('./pages/ColorSortGame').then((module) => ({
-    default: module.ColorSortGame,
-  })),
-);
-const LetterCatcher = lazy(() =>
-  import('./pages/LetterCatcher').then((module) => ({
-    default: module.LetterCatcher,
-  })),
-);
-const SpellPainter = lazy(() =>
-  import('./pages/SpellPainter').then((module) => ({
-    default: module.SpellPainter,
-  })),
-);
-const MusicConductor = lazy(() =>
-  import('./pages/MusicConductor').then((module) => ({
-    default: module.MusicConductor,
-  })),
-);
-const BubbleBiology = lazy(() =>
-  import('./pages/BubbleBiology').then((module) => ({
-    default: module.BubbleBiology,
-  })),
-);
-const PopTheNumber = lazy(() =>
-  import('./pages/PopTheNumber').then((module) => ({
-    default: module.PopTheNumber,
-  })),
-);
-const ColorSplash = lazy(() =>
-  import('./pages/ColorSplash').then((module) => ({
-    default: module.ColorSplash,
-  })),
-);
-const ColorMixing = lazy(() =>
-  import('./pages/ColorMixing').then((module) => ({
-    default: module.ColorMixing,
-  })),
-);
-const RainbowBridge = lazy(() =>
-  import('./pages/RainbowBridge').then((module) => ({
-    default: module.RainbowBridge,
-  })),
-);
-const BeatBounce = lazy(() =>
-  import('./pages/BeatBounce').then((module) => ({
-    default: module.BeatBounce,
-  })),
-);
-const BubbleCount = lazy(() =>
-  import('./pages/BubbleCount').then((module) => ({
-    default: module.BubbleCount,
-  })),
-);
-const FeedTheMonster = lazy(() =>
-  import('./pages/FeedTheMonster').then((module) => ({
-    default: module.FeedTheMonster,
-  })),
-);
-const ShapeStacker = lazy(() =>
-  import('./pages/ShapeStacker').then((module) => ({
-    default: module.ShapeStacker,
-  })),
-);
-const SizeSorting = lazy(() =>
-  import('./pages/SizeSorting').then((module) => ({
-    default: module.SizeSorting,
-  })),
-);
-const NumberBubblePop = lazy(() =>
-  import('./pages/NumberBubblePop').then((module) => ({
-    default: module.NumberBubblePop,
-  })),
-);
-const DigitalJenga = lazy(() =>
-  import('./pages/DigitalJenga').then((module) => ({
-    default: module.DigitalJenga,
-  })),
-);
-const WeatherMatch = lazy(() =>
-  import('./pages/WeatherMatch').then((module) => ({
-    default: module.WeatherMatch,
-  })),
-);
-const FractionPizza = lazy(() =>
-  import('./pages/FractionPizza').then((module) => ({
-    default: module.FractionPizza,
-  })),
-);
-const TimeTell = lazy(() =>
-  import('./pages/TimeTell').then((module) => ({
-    default: module.TimeTell,
-  })),
-);
-const MoneyMatch = lazy(() =>
-  import('./pages/MoneyMatch').then((module) => ({
-    default: module.MoneyMatch,
-  })),
-);
-const PatternPlay = lazy(() =>
-  import('./pages/PatternPlay').then((module) => ({
-    default: module.PatternPlay,
-  })),
-);
-const BubblePopSymphony = lazy(() =>
-  import('./pages/BubblePopSymphony').then((module) => ({
-    default: module.default,
-  })),
-);
-const DressForWeather = lazy(() =>
-  import('./pages/DressForWeather').then((module) => ({
-    default: module.default,
-  })),
-);
-const StorySequence = lazy(() =>
-  import('./pages/StorySequence').then((module) => ({
-    default: module.default,
-  })),
-);
-const ShapeSafari = lazy(() =>
-  import('./pages/ShapeSafari').then((module) => ({
-    default: module.default,
-  })),
-);
-const FreeDraw = lazy(() =>
-  import('./pages/FreeDraw').then((module) => ({
-    default: module.FreeDraw,
-  })),
-);
-const MathMonsters = lazy(() =>
-  import('./pages/MathMonsters').then((module) => ({
-    default: module.default,
-  })),
-);
-const BubblePop = lazy(() =>
-  import('./pages/BubblePop').then((module) => ({
-    default: module.BubblePop,
-  })),
-);
-const RhymeTime = lazy(() =>
-  import('./pages/RhymeTime').then((module) => ({
-    default: module.default,
-  })),
-);
-const PhysicsPlayground = lazy(() =>
-  import('./pages/PhysicsPlayground').then((module) => ({
-    default: module.default,
-  })),
-);
-const InventoryPage = lazy(() =>
-  import('./pages/Inventory').then((module) => ({
-    default: module.Inventory,
-  })),
-);
-const DiscoveryLab = lazy(() =>
-  import('./pages/DiscoveryLab').then((module) => ({
-    default: module.DiscoveryLab,
-  })),
-);
-const PlatformerRunner = lazy(() =>
-  import('./pages/PlatformerRunner').then((module) => ({
-    default: module.PlatformerRunner,
-  })),
-);
-const CountingCollectathon = lazy(() =>
-  import('./pages/CountingCollectathon').then((module) => ({
-    default: module.CountingCollectathon,
-  })),
-);
-const MathJumpers = lazy(() =>
-  import('./pages/MathJumpers').then((module) => ({
-    default: module.MathJumpers,
-  })),
-);
-const TargetPractice = lazy(() =>
-  import('./pages/TargetPractice').then((module) => ({
-    default: module.default,
-  })),
-);
-const CuttingPractice = lazy(() =>
-  import('./pages/CuttingPractice').then((module) => ({
-    default: module.default,
-  })),
-);
-const PinchPractice = lazy(() =>
-  import('./pages/PinchPractice').then((module) => ({
-    default: module.PinchPractice,
-  })),
-);
-const CircleDrawing = lazy(() =>
-  import('./pages/CircleDrawing').then((module) => ({
-    default: module.default,
-  })),
-);
-const WashHandsDance = lazy(() =>
-  import('./pages/WashHandsDance').then((module) => ({
-    default: module.default,
-  })),
-);
-const PackLunchbox = lazy(() =>
-  import('./pages/PackLunchbox').then((module) => ({
-    default: module.default,
-  })),
-);
-const SetTheTable = lazy(() =>
-  import('./pages/SetTheTable').then((module) => ({
-    default: module.default,
-  })),
-);
+import * as lazyPages from './routes/lazyPages';
+
+const {
+  Home,
+  Login,
+  Register,
+  ForgotPassword,
+  ResetPassword,
+  Pricing,
+  GameSelection,
+  Dashboard,
+  AlphabetGame,
+  Games,
+  ConnectTheDots,
+  LetterHunt,
+  MusicPinchBeat,
+  SteadyHandLab,
+  ShapePop,
+  ColorMatchGarden,
+  ColorByNumber,
+  ColorPotions,
+  MemoryMatch,
+  NumberTracing,
+  NumberTapTrail,
+  NumberSequence,
+  ShapeSequence,
+  YogaAnimals,
+  BalloonPopFitness,
+  ObstacleCourse,
+  FollowTheLeader,
+  MusicalStatues,
+  BalanceBeam,
+  FreezeDance,
+  SimonSays,
+  Progress,
+  Settings,
+  StyleTest,
+  FingerNumberShow,
+  VirtualChemistryLab,
+  WordBuilder,
+  EmojiMatch,
+  MediaPipeTest,
+  AirCanvas,
+  MirrorDraw,
+  PhonicsSounds,
+  PhonicsTracing,
+  BeginningSounds,
+  EndingSounds,
+  OddOneOut,
+  SameAndDifferent,
+  ShadowMatch,
+  ShadowPuppetTheater,
+  VirtualBubbles,
+  KaleidoscopeHands,
+  ShadowPortal,
+  AirGuitarHero,
+  FruitNinjaAir,
+  CountingObjects,
+  MoreOrLess,
+  BlendBuilder,
+  SyllableClap,
+  SightWordFlash,
+  MazeRunner,
+  PathFollowing,
+  RhythmTap,
+  AnimalSounds,
+  BodyParts,
+  VoiceStories,
+  ReadingAlong,
+  WordSearch,
+  LetterSoundMatch,
+  StoryBuilder,
+  MathSmash,
+  ColorSortGame,
+  LetterCatcher,
+  SpellPainter,
+  MusicConductor,
+  BubbleBiology,
+  MirrorMaze,
+  CircuitBuilder,
+  WeatherLab,
+  MirrorDuel,
+  PopTheNumber,
+  ColorSplash,
+  ColorMixing,
+  RainbowBridge,
+  BeatBounce,
+  BubbleCount,
+  FeedTheMonster,
+  ShapeStacker,
+  SizeSorting,
+  NumberBubblePop,
+  DigitalJenga,
+  WeatherMatch,
+  FractionPizza,
+  TimeTell,
+  MoneyMatch,
+  PatternPlay,
+  BubblePopSymphony,
+  DressForWeather,
+  StorySequence,
+  ShapeSafari,
+  FreeDraw,
+  MathMonsters,
+  BubblePop,
+  RhymeTime,
+  PhysicsPlayground,
+  InventoryPage,
+  DiscoveryLab,
+  PlatformerRunner,
+  CountingCollectathon,
+  MathJumpers,
+  SimpleAddition,
+  TargetPractice,
+  CuttingPractice,
+  PinchPractice,
+  CircleDrawing,
+  SpellingRun,
+  WashHandsDance,
+  PackLunchbox,
+  SetTheTable,
+  TemperatureSort,
+  PlantGarden,
+  SoundGarden,
+  TasteMatch,
+  FarmFriends,
+  VowelValley,
+  TextureExplorer,
+  DinosaurDig,
+  LightPainter,
+} = lazyPages;
 
 // Loading component for suspense boundaries
 const PageLoader = () => (
@@ -836,6 +429,16 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/balance-beam'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Balance Beam'>
+                        <BalanceBeam />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/freeze-dance'
                   element={
                     <ProtectedRoute>
@@ -1066,14 +669,6 @@ function App() {
                   }
                 />
                 <Route
-                  path='/games/maze-runner'
-                  element={
-                    <ProtectedRoute>
-                      <MazeRunner />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path='/games/path-following'
                   element={
                     <ProtectedRoute>
@@ -1150,6 +745,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <NumberBubblePop />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/weather-lab'
+                  element={
+                    <ProtectedRoute>
+                      <WeatherLab />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/mirror-duel'
+                  element={
+                    <ProtectedRoute>
+                      <MirrorDuel />
                     </ProtectedRoute>
                   }
                 />
@@ -1388,6 +999,26 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/simple-addition'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Simple Addition'>
+                        <SimpleAddition />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/maze-runner'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Maze Runner'>
+                        <MazeRunner />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/bubble-pop'
                   element={
                     <ProtectedRoute>
@@ -1422,6 +1053,14 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/circuit-builder'
+                  element={
+                    <ProtectedRoute>
+                      <CircuitBuilder />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/cutting-practice'
                   element={
                     <ProtectedRoute>
@@ -1452,6 +1091,26 @@ function App() {
                   }
                 />
                 <Route
+                  path='/games/spelling-run'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Spelling Run'>
+                        <SpellingRun />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/vowel-valley'
+                  element={
+                    <ProtectedRoute>
+                      <CameraSafeRoute gameName='Vowel Valley'>
+                        <VowelValley />
+                      </CameraSafeRoute>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path='/games/wash-hands-dance'
                   element={
                     <ProtectedRoute>
@@ -1477,6 +1136,70 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SetTheTable />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/temperature-sort'
+                  element={
+                    <ProtectedRoute>
+                      <TemperatureSort />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/plant-garden'
+                  element={
+                    <ProtectedRoute>
+                      <PlantGarden />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/sound-garden'
+                  element={
+                    <ProtectedRoute>
+                      <SoundGarden />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/taste-match'
+                  element={
+                    <ProtectedRoute>
+                      <TasteMatch />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/farm-friends'
+                  element={
+                    <ProtectedRoute>
+                      <FarmFriends />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/texture-explorer'
+                  element={
+                    <ProtectedRoute>
+                      <TextureExplorer />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/dinosaur-dig'
+                  element={
+                    <ProtectedRoute>
+                      <DinosaurDig />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/light-painter'
+                  element={
+                    <ProtectedRoute>
+                      <LightPainter />
                     </ProtectedRoute>
                   }
                 />
@@ -1563,6 +1286,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <BubbleBiology />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/mirror-maze'
+                  element={
+                    <ProtectedRoute>
+                      <MirrorMaze />
                     </ProtectedRoute>
                   }
                 />

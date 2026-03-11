@@ -22,7 +22,9 @@ import { triggerHaptic } from '../utils/haptics';
 import { GamePage } from '../components/GamePage';
 import { useTTS } from '../hooks/useTTS';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { KenneyCharacter } from '../components/game/KenneyCharacterAnimated';
 import { AssetPreloader, type AssetToPreload } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 
 interface InnerProps {
   score: number;
@@ -227,7 +229,9 @@ function AnimalSoundsGame({
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className='flex flex-col items-center gap-4 p-4'>
+      <div className="relative">
+        <GameBackground type="trees" variant="color" className="absolute inset-0" />
+        <div className="relative z-10 flex flex-col items-center gap-4 p-4">
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
             <button
@@ -290,6 +294,15 @@ function AnimalSoundsGame({
               <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
                 {streak}
               </span>
+            </div>
+
+            {/* Character mascot */}
+            <div className='flex justify-center mb-4'>
+              <KenneyCharacter 
+                color="beige" 
+                pose={feedback?.includes('Correct') ? 'jump' : 'idle'} 
+                size={64} 
+              />
             </div>
 
             {/* Streak milestone popup */}
@@ -432,6 +445,7 @@ function AnimalSoundsGame({
             </button>
           </div>
         )}
+      </div>
       </div>
     </GameContainer>
   );

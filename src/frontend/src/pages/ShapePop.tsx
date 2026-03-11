@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AssetPreloader } from '../components/AssetPreloader';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -16,6 +17,7 @@ import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
+import { GameBackground } from '../components/game/GameBackground';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -38,6 +40,14 @@ const KENNEY_TARGETS = [
 // Heart HUD for streak visualization
 const HEART_FULL = '/assets/kenney/platformer/hud/hud_heart.png';
 const HEART_EMPTY = '/assets/kenney/platformer/hud/hud_heart_empty.png';
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/coin_gold.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/gem_blue.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 // Particle effect types
 interface Particle {
@@ -64,6 +74,7 @@ interface FloatingText {
 const ShapePopContent = memo(function ShapePopComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -414,6 +425,16 @@ const ShapePopContent = memo(function ShapePopComponent() {
     },
   ];
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <GameContainer
       title='Shape Pop'
@@ -423,9 +444,10 @@ const ShapePopContent = memo(function ShapePopComponent() {
       isHandDetected={isHandTrackingReady}
       isPlaying={isPlaying}
     >
+      <GameBackground type="hills" variant="color" className="absolute inset-0" />
       <div
         ref={gameAreaRef}
-        className='absolute inset-0 bg-blue-50 overflow-hidden'
+        className='absolute inset-0 overflow-hidden relative z-10'
         style={{
           transform: screenShake > 0
             ? `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`
