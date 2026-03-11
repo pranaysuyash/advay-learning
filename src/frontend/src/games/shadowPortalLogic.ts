@@ -310,7 +310,7 @@ export function updateParticles(
   let newCombo = state.comboMultiplier;
   let newCollected = state.particlesCollected;
   let newMissed = state.particlesMissed;
-  const updatedPortals = state.portals.map((portal) => ({ ...portal }));
+  let updatedPortals = state.portals.map((portal) => ({ ...portal }));
   
   for (const particle of state.particles) {
     if (particle.captured || particle.missed) {
@@ -365,7 +365,11 @@ export function updateParticles(
           newCombo = Math.min(5, 1 + Math.floor(newStreak / 5) * 0.5);
           newScore += Math.floor(basePoints * newCombo);
           newCollected++;
-          updatedPortals[i].particlesCollected++;
+          updatedPortals = updatedPortals.map((portal, portalIndex) =>
+            portalIndex === i
+              ? { ...portal, particlesCollected: portal.particlesCollected + 1 }
+              : portal
+          );
         }
         break;
       }

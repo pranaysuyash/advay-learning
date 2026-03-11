@@ -100,7 +100,8 @@ export const EnemySprite = memo(function EnemySprite({
     return () => clearInterval(interval);
   }, [enemyConfig, frameSpeed]);
 
-  const frameName = enemyConfig.frames[currentFrame];
+  const frameCount = enemyConfig.frames.length;
+  const frameName = enemyConfig.frames[frameCount > 0 ? currentFrame % frameCount : 0];
   const imagePath = `${BASE_PATH}/${type}_${frameName}.png`;
 
   return (
@@ -135,20 +136,20 @@ export const EnemyGallery = memo(function EnemyGallery({
   return (
     <div className="flex flex-wrap gap-3">
       {enemies.map((enemy) => (
-        <div
+        <button
           key={enemy}
+          type="button"
           onClick={() => onSelect?.(enemy)}
           className={`p-2 rounded-lg transition-all cursor-pointer ${
             selected === enemy
               ? 'ring-2 ring-red-500 bg-red-50'
               : 'hover:bg-gray-100'
           }`}
-          role={onSelect ? 'button' : undefined}
-          tabIndex={onSelect ? 0 : undefined}
+          aria-label={`Select ${enemy.replace('_', ' ')} enemy`}
         >
           <EnemySprite type={enemy} size={size} />
           <p className="text-xs text-center mt-1 capitalize">{enemy.replace('_', ' ')}</p>
-        </div>
+        </button>
       ))}
     </div>
   );

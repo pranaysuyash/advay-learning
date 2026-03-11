@@ -101,6 +101,7 @@ export const initializeGame = (level: number = 1): GameState => {
 export const spawnItems = (state: GameState): GameState => {
     const letters: Letter[] = [];
     const enemies: Enemy[] = [];
+    const platforms = [...state.platforms];
     let lastX = 400;
 
     // Guaranteed correct letters in order but spread out
@@ -128,7 +129,7 @@ export const spawnItems = (state: GameState): GameState => {
         });
 
         // Add a platform near the letter if it's high
-        state.platforms.push({
+        platforms.push({
             id: Date.now() + i,
             x: lastX + 300,
             y: 450,
@@ -139,7 +140,7 @@ export const spawnItems = (state: GameState): GameState => {
         lastX += 800;
     }
 
-    return { ...state, letters, enemies };
+    return { ...state, platforms, letters, enemies };
 };
 
 /**

@@ -146,16 +146,15 @@ describe('weatherMatchLogic', () => {
     });
 
     it('generates different weather on each call', () => {
-      const pairs1 = generateGame(1);
-      const pairs2 = generateGame(1);
-      const pairs3 = generateGame(1);
+      const weatherCombinations = new Set<string>();
 
-      const weathers1 = pairs1.map(p => p.weather.name);
-      const weathers2 = pairs2.map(p => p.weather.name);
-      const weathers3 = pairs3.map(p => p.weather.name);
+      for (let i = 0; i < 10; i++) {
+        const pairs = generateGame(1);
+        weatherCombinations.add(pairs.map((pair) => pair.weather.name).join('|'));
+      }
 
-      // Due to shuffling, likely different selection
-      expect(weathers1).not.toEqual(weathers2);
+      // Multiple calls should eventually produce more than one combination.
+      expect(weatherCombinations.size).toBeGreaterThan(1);
     });
 
     it('selects random clothing for each weather', () => {

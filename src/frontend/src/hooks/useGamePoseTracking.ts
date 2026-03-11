@@ -34,7 +34,7 @@ export function useGamePoseTracking({
             try {
                 setIsLoading(true);
                 const vision = await FilesetResolver.forVisionTasks(
-                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm'
                 );
 
                 const options: PoseLandmarkerOptions = {
@@ -77,7 +77,11 @@ export function useGamePoseTracking({
 
     // Processing loop
     const processFrame = useCallback(() => {
-        if (!enabled || !landmarkerRef.current || !webcamRef.current?.video) {
+        if (!enabled) {
+            return;
+        }
+
+        if (!landmarkerRef.current || !webcamRef.current?.video) {
             animationFrameRef.current = requestAnimationFrame(processFrame);
             return;
         }

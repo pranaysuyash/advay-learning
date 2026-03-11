@@ -140,10 +140,23 @@ export const GameBackground = memo(function GameBackground({
   children,
 }: GameBackgroundProps) {
   const getBackgroundPath = (): string => {
-    if (variant === 'solid' || type.startsWith('solid_')) {
+    const meta = BACKGROUND_METADATA[type];
+    let effectiveVariant: BackgroundVariant = variant;
+
+    if (meta) {
+      if (effectiveVariant === 'color' && !meta.hasColor) {
+        effectiveVariant = meta.hasFade ? 'fade' : 'solid';
+      } else if (effectiveVariant === 'fade' && !meta.hasFade) {
+        effectiveVariant = meta.hasColor ? 'color' : 'solid';
+      } else if (effectiveVariant === 'solid' && !meta.hasSolid) {
+        effectiveVariant = meta.hasColor ? 'color' : 'fade';
+      }
+    }
+
+    if (effectiveVariant === 'solid' || type.startsWith('solid_')) {
       return `${BASE_PATH}/background_${type}.png`;
     }
-    return `${BASE_PATH}/background_${variant}_${type}.png`;
+    return `${BASE_PATH}/background_${effectiveVariant}_${type}.png`;
   };
 
   const backgroundStyle: React.CSSProperties = {

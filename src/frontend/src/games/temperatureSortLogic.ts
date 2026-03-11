@@ -107,7 +107,8 @@ export function calculateScore(correct: number, total: number): number {
 }
 
 export function calculateStars(score: number, total: number): number {
-  const accuracy = total > 0 ? score / (total * 20) : 0;
+  const cappedScore = Math.min(score, total * 20);
+  const accuracy = total > 0 ? cappedScore / (total * 20) : 0;
   if (accuracy >= 1 && total >= 6) return 5;
   if (accuracy >= 0.8) return 4;
   if (accuracy >= 0.6) return 3;

@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     initializeGame,
     updatePhysics,
-    checkCollisions,
-    GRAVITY,
-    JUMP_FORCE
+    checkCollisions
 } from './spellingRunLogic';
 
 describe('spellingRunLogic', () => {

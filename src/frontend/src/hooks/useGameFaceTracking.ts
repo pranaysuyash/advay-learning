@@ -78,7 +78,11 @@ export function useGameFaceTracking({
 
     // Processing loop
     const processFrame = useCallback(() => {
-        if (!enabled || !landmarkerRef.current || !webcamRef.current?.video) {
+        if (!enabled) {
+            return;
+        }
+
+        if (!landmarkerRef.current || !webcamRef.current?.video) {
             animationFrameRef.current = requestAnimationFrame(processFrame);
             return;
         }

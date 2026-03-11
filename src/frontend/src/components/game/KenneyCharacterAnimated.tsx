@@ -68,9 +68,10 @@ export const KenneyCharacterAnimated = memo(function KenneyCharacterAnimated({
     }, frameSpeed);
 
     return () => clearInterval(interval);
-  }, [frames.length, frameSpeed]);
+  }, [frames, frameSpeed]);
 
-  const frameName = frames[currentFrame];
+  const frameCount = frames.length;
+  const frameName = frames[frameCount > 0 ? currentFrame % frameCount : 0];
   const imagePath = `${BASE_PATH}/character_${color}_${frameName}.png`;
 
   return (
