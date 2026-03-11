@@ -1,3 +1,4 @@
+FROM ghcr.io/astral-sh/uv:0.8.17@sha256:e4644cb5bd56fdc2c5ea3ee0525d9d21eed1603bccd6a21f887a938be7e85be1 AS uvbin
 FROM python:3.13-slim@sha256:8bc60ca09afaa8ea0d6d1220bde073bacfedd66a4bf8129cbdc8ef0e16c8a952
 
 WORKDIR /app
@@ -8,8 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN pip install uv
+# Install uv without pip to keep build dependencies immutable
+COPY --from=uvbin /uv /uvx /bin/
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./

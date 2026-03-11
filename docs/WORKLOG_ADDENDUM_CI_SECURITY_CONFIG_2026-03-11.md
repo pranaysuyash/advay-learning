@@ -104,3 +104,55 @@ Execution log:
 Status updates:
 
 - [2026-03-11 16:39 IST] **IN PROGRESS** — Remediation edits complete; running staged local gate and preparing PR for reviewer re-check.
+
+### TCK-20260311-009 :: Scorecard Follow-up Remediation (Residual Pinned/Permissions Findings)
+
+Ticket Stamp: STAMP-20260311T162900Z-codex-scorecard-pass2
+
+Type: TOOLING
+Owner: Pranay (execution: Codex)
+Created: 2026-03-11
+Status: **IN PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope: eliminate remaining repository-fixable Scorecard findings after PR #35 merge, specifically residual `PinnedDependenciesID` and `TokenPermissionsID` alerts.
+- Out-of-scope: organization-level Scorecard checks not tied to repository files (`BranchProtectionID`, `CodeReviewID`, etc.).
+- Behavior change allowed: YES (CI/tooling scripts and container build pipelines only).
+
+Targets:
+
+- Repo: learning_for_kids
+- Files:
+  - `.github/workflows/codeql.yml`
+  - `.github/workflows/trivy.yml`
+  - `.github/workflows/deploy.yml`
+  - `src/backend/Dockerfile`
+  - `src/frontend/Dockerfile`
+  - `scripts/setup.sh`
+  - `evaluations/run-angel-evaluation.sh`
+
+Acceptance Criteria:
+
+- [ ] Residual `TokenPermissionsID` alerts for `codeql.yml` and `trivy.yml` are removed by least-privilege job-level scoping.
+- [ ] Residual `PinnedDependenciesID` alerts tied to `pip/npm install` commands are removed by replacing unpinned install commands with immutable/pinned alternatives.
+- [ ] Local staged gate passes.
+- [ ] Follow-up PR merged and post-merge scan confirms reduced total.
+
+Prompt Trace:
+
+- prompts/review/local-pre-commit-review-v1.0.md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Execution log:
+
+- [2026-03-11 16:34 IST] Verified post-PR #35 scan reduction from `103` to `76` open alerts and isolated residual Scorecard findings (`17`). | Evidence: `gh api repos/pranaysuyash/advay-learning/code-scanning/alerts?state=open`
+- [2026-03-11 16:36 IST] Queried residual Scorecard alert instances and extracted exact file/line diagnostics for remaining repo-fixable alerts. | Evidence: `gh api repos/pranaysuyash/advay-learning/code-scanning/alerts/{id}`
+- [2026-03-11 16:39 IST] Moved `security-events: write` from workflow top-level to job-level permissions for CodeQL/Trivy to preserve required SARIF access while reducing token scope. | Evidence: `.github/workflows/codeql.yml`, `.github/workflows/trivy.yml`
+- [2026-03-11 16:42 IST] Replaced workflow/runtime unpinned install commands with safer alternatives (`astral-sh/setup-uv` action, `npm ci`, uv binary copy from pinned image). | Evidence: `.github/workflows/deploy.yml`, `src/backend/Dockerfile`, `src/frontend/Dockerfile`
+- [2026-03-11 16:44 IST] Removed automatic ad-hoc npm install in investor evaluation script; script now requires locked project dependencies to be installed first. | Evidence: `evaluations/run-angel-evaluation.sh`
+
+Status updates:
+
+- [2026-03-11 16:45 IST] **IN PROGRESS** — Pass-2 fixes applied; running local gate + PR workflow.
