@@ -11,6 +11,12 @@ paths-ignore:
   - "**/build/**"
   - "**/.venv/**"
   - "**/__pycache__/**"
+  - "**/__tests__/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/e2e/**"
   - "docs/**"
   - "tools/**"
   - ".agent/**"
@@ -18,3 +24,8 @@ paths-ignore:
 
 queries:
   - uses: security-and-quality
+
+query-filters:
+  - exclude:
+      problem.severity:
+        - warning

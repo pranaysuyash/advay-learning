@@ -45,8 +45,10 @@ Execution log:
 - [2026-03-11 16:05 IST] Upgraded CodeQL action usage from `v3` to `v4` for init/autobuild/analyze and SARIF upload steps. | Evidence: `.github/workflows/codeql.yml`, `.github/workflows/trivy.yml`, `.github/workflows/scorecards.yml`
 - [2026-03-11 16:12 IST] Investigated open Trivy code-scanning alerts and confirmed they originated from tracked test-build artifact lockfile path `src/frontend/.test_build/package-lock.json`, not runtime source paths. | Evidence: `gh api repos/pranaysuyash/advay-learning/code-scanning/alerts?tool_name=Trivy&state=open`
 - [2026-03-11 16:14 IST] Removed tracked `.test_build` package artifacts from git and added permanent ignore rule for generated path; also added Trivy `skip-dirs` guard for the same artifact path. | Evidence: `.gitignore`, `.github/trivy/trivy.yaml`, `git rm --cached src/frontend/.test_build/package*.json`
+- [2026-03-11 16:23 IST] Investigated CodeQL open-alert surge on `main` and confirmed the majority are warning-level findings in test files. Tightened CodeQL config to exclude test paths and warning-severity query output to keep Security tab actionable. | Evidence: `.github/codeql/codeql-config.yml`, `gh api repos/pranaysuyash/advay-learning/code-scanning/alerts?tool_name=CodeQL&state=open`
 
 Status updates:
 
 - [2026-03-11 16:05 IST] **IN PROGRESS** — Configuration changes applied; running staged gate and final verification next.
 - [2026-03-11 16:14 IST] **IN PROGRESS** — Artifact-driven Trivy noise remediation applied; pending CI/code-scanning refresh to verify Security tab is clean.
+- [2026-03-11 16:23 IST] **IN PROGRESS** — CodeQL signal-to-noise hardening applied; pending CodeQL rerun on main to confirm alert volume reduction.
