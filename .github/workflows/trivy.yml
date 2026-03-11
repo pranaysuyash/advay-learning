@@ -29,16 +29,13 @@ jobs:
             -v "$PWD:/src" \
             -w /src \
             aquasec/trivy:0.56.2 fs \
-            --scanners vuln,misconfig,secret \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            --format sarif \
+            --config .github/trivy/trivy.yaml \
             --output trivy-results.sarif \
             --exit-code "${TRIVY_EXIT_CODE}" \
             .
 
       - name: Upload SARIF to GitHub code scanning
         if: always() && hashFiles('trivy-results.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif

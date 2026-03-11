@@ -1,0 +1,20 @@
+name: "repo-codeql-config"
+
+# Keep analysis focused on shipped source while avoiding generated artifacts.
+paths:
+  - src
+  - scripts
+
+paths-ignore:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.venv/**"
+  - "**/__pycache__/**"
+  - "docs/**"
+  - "tools/**"
+  - ".agent/**"
+  - "src/frontend/public/assets/**"
+
+queries:
+  - uses: security-and-quality
