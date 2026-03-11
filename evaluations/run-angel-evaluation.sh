@@ -21,7 +21,7 @@ cd /Users/pranay/Projects/learning_for_kids
 # Install Playwright if needed
 if ! npx playwright --version > /dev/null 2>&1; then
   echo "📦 Installing Playwright..."
-  npm install @playwright/test --timeout=300000
+  npm install @playwright/test@1.58.2 --timeout=300000 --no-audit --no-fund
 fi
 
 echo "🎬 Running evaluation with Playwright..."

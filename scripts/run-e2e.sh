@@ -27,7 +27,7 @@ fi
 cd "$ROOT_DIR/src/frontend"
 if [ ! -d "node_modules/playwright" ]; then
   echo "[e2e] Installing Playwright browsers..."
-  npm install --no-audit
+  npm ci --no-audit --no-fund
   npx playwright install --with-deps
 else
   echo "[e2e] Playwright appears installed"
