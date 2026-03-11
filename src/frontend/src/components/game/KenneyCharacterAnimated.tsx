@@ -55,6 +55,10 @@ export const KenneyCharacterAnimated = memo(function KenneyCharacterAnimated({
   const frames = ANIMATION_FRAMES[animation];
   const [currentFrame, setCurrentFrame] = useState(0);
 
+  useEffect(() => {
+    setCurrentFrame(0);
+  }, [animation]);
+
   // Animate through frames
   useEffect(() => {
     if (frames.length <= 1) return;

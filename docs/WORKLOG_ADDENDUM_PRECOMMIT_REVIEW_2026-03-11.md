@@ -35,6 +35,7 @@ Prompt Trace:
 - prompts/workflow/code-quality-remediation-v1.0.md
 - prompts/workflow/pr-merge-quality-gate-v1.0.md
 - prompts/security/dependency-audit-v1.0.md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 Execution log:
 
@@ -51,6 +52,7 @@ Execution log:
 - [2026-03-11 14:30 IST] Resolved maintainability gate failures without gate overrides by splitting oversized modules: extracted lazy route component registry from `App.tsx` into `src/frontend/src/routes/lazyPages.tsx`, and split Shadow Portal particle tests into two focused files. | Evidence: `src/frontend/src/App.tsx`, `src/frontend/src/routes/lazyPages.tsx`, `src/frontend/src/games/shadowPortal/__tests__/particles.test.ts`, `src/frontend/src/games/shadowPortal/__tests__/particles.levels-and-integration.test.ts`
 - [2026-03-11 14:32 IST] Re-ran staged gate successfully with only documented worklog policy override (`ALLOW_WORKLOG_REWRITE=1`) and no maintainability/security gate overrides. | Evidence: `ALLOW_WORKLOG_REWRITE=1 ./scripts/agent_gate.sh --staged`
 - [2026-03-11 14:36 IST] Enforced pre-launch modernization policy by removing temporary legacy compatibility exports in `mazeRunnerLogic.ts` and documenting intentional API removals via `INTENTIONAL_EXPORT_REMOVAL` markers for regression-gate traceability. | Evidence: `src/frontend/src/games/mazeRunnerLogic.ts`, `src/frontend/src/games/colorMatchGardenLogic.ts`
+- [2026-03-11 15:15 IST] Addressed external agent review findings (identified by cubic): fixed PWA `cacheFirst` offline handling, corrected weather and game-logic edge cases, removed state mutation in Shadow Portal logic, reset animation frame indices on type/animation switches, normalized/portable `.agent` path artifacts, and removed unused inconsistent Kenney atlas JSON artifacts. | Evidence: `src/frontend/public/sw.js`, `src/frontend/src/games/weatherLabLogic.ts`, `src/frontend/src/games/shadowPortalLogic.ts`, `src/frontend/src/games/mirrorMazeLogic.ts`, `src/frontend/src/games/spellingRunLogic.ts`, `src/frontend/src/games/mirrorDuelLogic.ts`, `src/frontend/src/components/game/EnemySprite.tsx`, `src/frontend/src/components/game/KenneyCharacterAnimated.tsx`, `src/frontend/src/games/mazeRunnerLogic.ts`, `src/frontend/src/*/.agent/*`, `git rm src/frontend/public/assets/kenney/atlas/*.json`
 
 Status updates:
 
@@ -60,3 +62,4 @@ Status updates:
 - [2026-03-11 13:42 IST] **DONE** — PWA capability restored with manual service-worker implementation as the primary architecture (no plugin fallback path).
 - [2026-03-11 14:32 IST] **DONE** — Staged maintainability gate now passes without any gate-skip environment flags.
 - [2026-03-11 14:36 IST] **DONE** — No legacy compatibility layer retained; intentional API removals are explicitly documented for pre-launch cleanup.
+- [2026-03-11 15:15 IST] **IN PROGRESS** — External agent review findings addressed locally; awaiting CI + external re-review confirmation on updated commit.

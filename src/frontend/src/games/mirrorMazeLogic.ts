@@ -174,6 +174,12 @@ export function updateBall(
         newY = ball.y;
         newVy = -newVy * 0.3;
       }
+      if (collision.axis === 'both') {
+        newX = ball.x;
+        newY = ball.y;
+        newVx = -newVx * 0.3;
+        newVy = -newVy * 0.3;
+      }
     }
   }
   

@@ -219,6 +219,9 @@ export function posToCell(pos: Position, mazeSize: number): { x: number; y: numb
  * Check if a position is within a cell (not near walls).
  */
 export function isSafePosition(pos: Position, maze: Maze): boolean {
+  if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y)) {
+    return false;
+  }
   const cellSize = 1 / maze.width;
   const margin = cellSize * 0.2; // 20% margin from walls
 

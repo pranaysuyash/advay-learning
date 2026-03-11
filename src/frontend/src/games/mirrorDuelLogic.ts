@@ -139,11 +139,12 @@ export function checkPoseMatch(current: Pose, target: Pose): boolean {
 
 export function scorePose(state: GameState, match: boolean): GameState {
   const level = getCurrentLevel(state.level);
-  const isComplete = state.score >= level.targetScore;
+  const nextScore = match ? state.score + 1 : Math.max(0, state.score - 1);
+  const isComplete = nextScore >= level.targetScore;
   
   return {
     ...state,
-    score: match ? state.score + 1 : Math.max(0, state.score - 1),
+    score: nextScore,
     moves: state.moves + 1,
     isComplete,
   };

@@ -249,11 +249,12 @@ export function updateWindSpeed(state: GameState, delta: number): GameState {
 }
 
 export function updateWindDirection(state: GameState, angle: number): GameState {
+  const normalizedAngle = ((angle % 360) + 360) % 360;
   return {
     ...state,
     weather: {
       ...state.weather,
-      windDirection: angle % 360,
+      windDirection: normalizedAngle,
     },
     moves: state.moves + 1,
   };
@@ -272,14 +273,14 @@ export function getCurrentWeather(state: GameState): WeatherCondition | null {
   if (w.humidity > 85 && w.windSpeed > 30) {
     return WEATHER_CONDITIONS.find(c => c.id === 'stormy') || null;
   }
-  if (w.humidity > 70) {
-    return WEATHER_CONDITIONS.find(c => c.id === 'rainy') || null;
-  }
   if (w.humidity > 60 && w.windSpeed > 20) {
     return WEATHER_CONDITIONS.find(c => c.id === 'windy') || null;
   }
   if (w.humidity > 85) {
     return WEATHER_CONDITIONS.find(c => c.id === 'foggy') || null;
+  }
+  if (w.humidity > 70) {
+    return WEATHER_CONDITIONS.find(c => c.id === 'rainy') || null;
   }
   if (w.temperature > 25 && w.humidity < 40) {
     return WEATHER_CONDITIONS.find(c => c.id === 'sunny') || null;
@@ -299,8 +300,14 @@ export function checkWeatherMatch(
   if (!current) return false;
 
   if (targetWeatherId === 'mixed') {
-    // For level 5, just ensure we've triggered multiple weather conditions
-    return true;
+    // Mixed weather should require active control across all dimensions.
+    const w = state.weather;
+    return (
+      Math.abs(w.temperature - 20) >= 5 &&
+      Math.abs(w.humidity - 50) >= 10 &&
+      Math.abs(w.pressure - 1013) >= 10 &&
+      Math.abs(w.windSpeed - 10) >= 10
+    );
   }
 
   return current.id === targetWeatherId;

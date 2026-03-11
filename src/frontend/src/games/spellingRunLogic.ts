@@ -196,7 +196,7 @@ export const checkCollisions = (state: GameState): GameState => {
         if (dist < 40) {
             // Check if it's the next correct character
             const nextChar = state.targetWord[currentWord.length];
-            if (letter.char === nextChar) {
+            if (letter.isCorrect && letter.char === nextChar) {
                 currentWord += letter.char;
                 score += 100;
                 if (currentWord === state.targetWord) {

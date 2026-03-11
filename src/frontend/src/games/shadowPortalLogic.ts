@@ -310,7 +310,7 @@ export function updateParticles(
   let newCombo = state.comboMultiplier;
   let newCollected = state.particlesCollected;
   let newMissed = state.particlesMissed;
-  const updatedPortals = [...state.portals];
+  const updatedPortals = state.portals.map((portal) => ({ ...portal }));
   
   for (const particle of state.particles) {
     if (particle.captured || particle.missed) {
@@ -322,12 +322,14 @@ export function updateParticles(
     let newY = particle.y + particle.vy * deltaTime;
     
     // Bounce off walls
+    let nextVx = particle.vx;
+    let nextVy = particle.vy;
     if (newX < particle.radius || newX > 1 - particle.radius) {
       newX = Math.max(particle.radius, Math.min(1 - particle.radius, newX));
-      particle.vx *= -0.8; // Dampen bounce
+      nextVx *= -0.8; // Dampen bounce
     }
-    
-    const updatedParticle = { ...particle, x: newX, y: newY };
+
+    let updatedParticle: Particle = { ...particle, x: newX, y: newY, vx: nextVx, vy: nextVy };
 
     // Check silhouette collisions (block/deflect)
     for (const silhouette of silhouetteRegions) {
@@ -335,8 +337,11 @@ export function updateParticles(
         // Deflect particle based on silhouette position
         const centerX = silhouette.x + silhouette.width / 2;
         const deflectX = (updatedParticle.x - centerX) * 0.5;
-        updatedParticle.vx += deflectX;
-        updatedParticle.vy *= 0.5; // Slow down when blocked
+        updatedParticle = {
+          ...updatedParticle,
+          vx: updatedParticle.vx + deflectX,
+          vy: updatedParticle.vy * 0.5, // Slow down when blocked
+        };
         break;
       }
     }
@@ -346,7 +351,7 @@ export function updateParticles(
     for (let i = 0; i < updatedPortals.length; i++) {
       if (checkPortalCapture(updatedParticle, updatedPortals[i])) {
         captured = true;
-        updatedParticle.captured = true;
+        updatedParticle = { ...updatedParticle, captured: true };
         
         if (updatedParticle.type === 'obstacle') {
           // Penalty for capturing obstacle
@@ -368,7 +373,7 @@ export function updateParticles(
     
     // Check if missed (fell off bottom)
     if (!captured && updatedParticle.y > 1) {
-      updatedParticle.missed = true;
+      updatedParticle = { ...updatedParticle, missed: true };
       if (updatedParticle.type !== 'obstacle') {
         newMissed++;
         newStreak = 0;

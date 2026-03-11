@@ -85,6 +85,10 @@ export const EnemySprite = memo(function EnemySprite({
   const enemyConfig = ENEMY_FRAMES[type];
   const [currentFrame, setCurrentFrame] = useState(0);
 
+  useEffect(() => {
+    setCurrentFrame(0);
+  }, [type]);
+
   // Animate through frames
   useEffect(() => {
     if (!enemyConfig.hasAnimation || enemyConfig.frames.length <= 1) return;

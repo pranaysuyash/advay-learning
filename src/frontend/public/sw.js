@@ -67,11 +67,17 @@ async function cacheFirst(request, cacheName) {
   const cached = await cache.match(request);
   if (cached) return cached;
 
-  const response = await fetch(request);
-  if (response && response.ok) {
-    cache.put(request, response.clone());
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const fallback = await cache.match(request);
+    if (fallback) return fallback;
+    return new Response("Offline", { status: 503 });
   }
-  return response;
 }
 
 async function networkFirst(request, cacheName, fallbackUrl) {
