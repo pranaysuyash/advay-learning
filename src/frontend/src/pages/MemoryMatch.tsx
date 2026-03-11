@@ -16,6 +16,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { AssetPreloader } from '../components/AssetPreloader';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -46,6 +47,7 @@ import {
 } from '../games/memoryMatchLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { GameBackground } from '../components/game/GameBackground';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -57,6 +59,11 @@ const GAME_CONFIG = {
 } as const;
 
 const FLIP_PAUSE_MS = 600; // pause before hiding non-matching pair (legacy, use GAME_CONFIG)
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -77,6 +84,7 @@ function gridCols(pairCount: number) {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { onGameComplete } = useGameDrops('memory-match');
   const { playFlip, playSuccess, playError, playCelebration, playClick } =
     useAudio();
@@ -397,7 +405,20 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
   const cols = gridCols(getPairsForDifficulty(difficulty));
 
   // ── Render ─────────────────────────────────────────────────────────────────
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
+    <div className="relative">
+      <GameBackground type="mushrooms" variant="color" className="absolute inset-0" />
+      <div className="relative z-10">
     <GameContainer
       webcamRef={webcamRef}
       title='Memory Match'
@@ -772,6 +793,8 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
         onComplete={() => setShowCelebration(false)}
       />
     </GameContainer>
+      </div>
+    </div>
   );
 });
 

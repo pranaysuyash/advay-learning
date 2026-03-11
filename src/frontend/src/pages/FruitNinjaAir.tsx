@@ -152,68 +152,82 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
     return () => clearInterval(spawner);
   }, [gameState, fruits.length, levelConfig.spawnRate]);
 
+  // Combined physics + canvas render loop using rAF instead of setInterval
+  // This avoids setInterval(16ms) calling setFruits() 60x/sec which caused
+  // React re-render + canvas repaint on every tick.
+  const fruitsRef = useRef<Fruit[]>(fruits);
+  fruitsRef.current = fruits;
+
   useEffect(() => {
     if (gameState !== 'playing') return;
-    const loop = setInterval(() => {
-      setFruits((prev) => updateFruits(prev, CANVAS_HEIGHT, 0.4));
+    let rafId: number;
+
+    const renderLoop = () => {
+      // Update physics via ref to avoid React re-render per frame
+      const updated = updateFruits(fruitsRef.current, CANVAS_HEIGHT, 0.4);
 
       // Decay slice trail when hand isn't moving
       if (slicePathRef.current.length > 0) {
         slicePathRef.current.shift();
       }
-    }, 16);
-    return () => clearInterval(loop);
+
+      // Only push state update if array length changed (fruit expired off-screen)
+      if (updated.length !== fruitsRef.current.length) {
+        setFruits(updated);
+      }
+      fruitsRef.current = updated;
+
+      // Canvas render directly — no React dependency
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctx.fillStyle = '#87CEEB';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+          // Draw slice path
+          if (slicePathRef.current.length > 1) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(slicePathRef.current[0].x, slicePathRef.current[0].y);
+            for (let i = 1; i < slicePathRef.current.length; i++) {
+              ctx.lineTo(slicePathRef.current[i].x, slicePathRef.current[i].y);
+            }
+            ctx.stroke();
+
+            ctx.strokeStyle = '#60A5FA';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(slicePathRef.current[0].x, slicePathRef.current[0].y);
+            for (let i = 1; i < slicePathRef.current.length; i++) {
+              ctx.lineTo(slicePathRef.current[i].x, slicePathRef.current[i].y);
+            }
+            ctx.stroke();
+          }
+
+          updated.forEach((fruit) => {
+            ctx.save();
+            ctx.translate(fruit.x, fruit.y);
+            ctx.rotate(fruit.rotation * Math.PI);
+            ctx.font = '60px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(fruit.emoji, 0, 0);
+            ctx.restore();
+          });
+        }
+      }
+
+      rafId = requestAnimationFrame(renderLoop);
+    };
+
+    rafId = requestAnimationFrame(renderLoop);
+    return () => cancelAnimationFrame(rafId);
   }, [gameState]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(1, '#87CEEB'); // Plain sky
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // Draw slice path safely
-    if (slicePathRef.current.length > 1) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.lineWidth = 12; // Thicker blade effect
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(slicePathRef.current[0].x, slicePathRef.current[0].y);
-      for (let i = 1; i < slicePathRef.current.length; i++) {
-        ctx.lineTo(slicePathRef.current[i].x, slicePathRef.current[i].y);
-      }
-      ctx.stroke();
-
-      // glowing inner core
-      ctx.strokeStyle = '#60A5FA';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(slicePathRef.current[0].x, slicePathRef.current[0].y);
-      for (let i = 1; i < slicePathRef.current.length; i++) {
-        ctx.lineTo(slicePathRef.current[i].x, slicePathRef.current[i].y);
-      }
-      ctx.stroke();
-    }
-
-    fruits.forEach((fruit) => {
-      ctx.save();
-      ctx.translate(fruit.x, fruit.y);
-      ctx.rotate(fruit.rotation * Math.PI); // Convert generic rot to radians if not strictly set
-      ctx.font = '60px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(fruit.emoji, 0, 0);
-      ctx.restore();
-    });
-
-  }, [fruits]); // Drives render loop whenever fruits array is updated (~60fps)
 
   const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
     // Basic fallback support

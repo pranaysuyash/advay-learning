@@ -578,14 +578,8 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   }
 
   const gameLoop = useCallback(doGameLoop, [
-    gameState,
     cameraReady,
     showMenu,
-    lastSpawnTime,
-    playPop,
-    playSuccess,
-    playCelebration,
-    onGameComplete,
   ]);
 
   // Start game loop when ready

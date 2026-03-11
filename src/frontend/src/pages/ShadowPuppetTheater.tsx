@@ -27,7 +27,7 @@ interface ShadowPuppetTheaterGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({ saveProgress: _saveProgress }: ShadowPuppetTheaterGameProps) {
+const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({ saveProgress }: ShadowPuppetTheaterGameProps) {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentShape, setCurrentShape] = useState<PuppetShape | null>(null);
@@ -127,9 +127,10 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / levelConfig.shapesPerRound);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
     await onGameComplete(finalScore);
     navigate('/games');
-  }, [score, levelConfig, onGameComplete, navigate, playClick]);
+  }, [score, levelConfig, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const handleRestart = () => {
     playClick();

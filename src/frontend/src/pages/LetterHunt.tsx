@@ -22,11 +22,14 @@ import { useSettingsStore } from '../store';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
@@ -64,7 +67,13 @@ const getLetterColorClass = (color?: string) =>
   (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
   'text-pip-orange';
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const LetterHuntGame = memo(function LetterHuntComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const webcamRef = useRef<Webcam>(null);
@@ -140,6 +149,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   const { playFanfare: playCelebration, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('letter-hunt');
+  const { saveProgress } = useGameProgress('letter-hunt');
   const foundCountRef = useRef(0);
 
   // Get alphabet based on settings
@@ -286,8 +296,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         }
       }
       if (level >= 3) {
-        setTimeout(() => {
+        setTimeout(async () => {
           setShowCelebration(false);
+          await saveProgress({ score, completed: true, level });
           onGameComplete();
           setGameCompleted(true);
         }, 2500);
@@ -498,6 +509,16 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
     },
   ];
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <>
       {/* Full Screen Game Mode */}
@@ -583,7 +604,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                   className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
                 >
                   <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
-                    🔥 {streak} Streak! 🔥
+                    <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak!</div>
                   </div>
                 </motion.div>
               )}

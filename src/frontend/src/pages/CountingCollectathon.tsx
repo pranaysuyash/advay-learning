@@ -18,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { KenneyCharacter } from '../components/game/KenneyCharacterAnimated';
+import { GameBackground } from '../components/game/GameBackground';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -342,10 +344,14 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
   return (
     <GameContainer title="Counting Collect-a-thon" onHome={handleHome}>
       <div className="relative">
+        <GameBackground type="hills" variant="color" className="absolute inset-0 rounded-xl" />
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
-          <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow-lg">
-            <div className="text-sm text-slate-600">Score</div>
-            <div className="text-2xl font-bold text-blue-600">{gameState.score}</div>
+          <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow-lg flex items-center gap-3">
+            <KenneyCharacter color="green" pose="idle" size={48} />
+            <div>
+              <div className="text-sm text-slate-600">Score</div>
+              <div className="text-2xl font-bold text-blue-600">{gameState.score}</div>
+            </div>
           </div>
 
           <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow-lg text-center">

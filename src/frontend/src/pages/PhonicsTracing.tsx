@@ -5,7 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -33,6 +33,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
   const hasAccess = canAccessGame('phonics-tracing');
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('phonics-tracing');
+  const { saveProgress } = useGameProgress('phonics-tracing');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLetter, setCurrentLetter] = useState('S');
@@ -106,17 +107,10 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
       if (!currentProfile) return;
 
       try {
-        await progressQueue.add({
-          profileId: currentProfile.id,
-          gameId: 'phonics-tracing',
+        await saveProgress({
           score: finalScore,
           completed: true,
-          metadata: {
-            level: currentLevel,
-            letters_completed: lettersCompleted,
-            total_score: totalScore,
-            last_accuracy: lastAccuracy,
-          },
+          level: currentLevel,
         });
         onGameComplete(finalScore);
       } catch (err) {
@@ -131,6 +125,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
       totalScore,
       lastAccuracy,
       onGameComplete,
+      saveProgress,
     ],
   );
 

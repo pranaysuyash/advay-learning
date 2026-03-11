@@ -28,6 +28,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader } from '../components/AssetPreloader';
 import {
   type GameState,
   initializeGame,
@@ -38,7 +40,13 @@ import {
 } from '../games/musicalStatuesLogic';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const MusicalStatuesContent = memo(function MusicalStatues() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('musical-statues');
   // saveProgress returned by hook isn't used in this game yet, so omit it to avoid
@@ -281,7 +289,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
     if (gameState.combo > 1) {
       ctx.font = 'bold 24px Arial';
       ctx.fillStyle = '#FFD700';
-      ctx.fillText(`🔥 ${gameState.combo}x Combo!`, width / 2, height * 0.92);
+      ctx.fillText(`${gameState.combo}x Combo!`, width / 2, height * 0.92);
     }
   }, [gameState]);
 
@@ -314,6 +322,16 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
   };
 
   // ===== RENDER =====
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <GameContainer webcamRef={webcamRef} title="Musical Statues" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
@@ -343,7 +361,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
               ease: 'easeInOut',
             }}
           >
-            <div className="text-8xl">🎵</div>
+            <div className="flex justify-center"><KenneyIcon type='star' size={80} /></div>
             <div className="absolute -top-2 -right-2 text-4xl animate-bounce">🗿</div>
           </motion.div>
 
@@ -358,7 +376,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
           <div className="grid grid-cols-1 gap-4 mb-6 max-w-md w-full">
             <div className="bg-gradient-to-r from-pink-100 to-purple-100 border-2 border-pink-300 rounded-lg p-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="text-3xl">🎵</div>
+                <div className="flex justify-center"><KenneyIcon type='star' size={32} /></div>
                 <div className="font-bold text-pink-700">When Music Plays</div>
               </div>
               <div className="text-sm text-pink-600">Dance! Move your body and have fun!</div>
@@ -374,7 +392,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
 
             <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 rounded-lg p-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="text-3xl">⭐</div>
+                <div className="flex justify-center"><KenneyIcon type='star' size={32} /></div>
                 <div className="font-bold text-green-700">Score Points</div>
               </div>
               <div className="text-sm text-green-600">Stay frozen to score! Build combos for bonus points!</div>
@@ -387,7 +405,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
             disabled={isLoading}
             className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl text-lg font-bold shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Loading...' : 'Start Dancing! 🎵'}
+            {isLoading ? 'Loading...' : 'Start Dancing!'}
           </button>
 
           {/* Error Message */}
@@ -418,7 +436,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
               </div>
               {gameState?.combo && gameState.combo > 1 && (
                 <div className="text-orange-500 font-bold">
-                  🔥 {gameState.combo}x Combo!
+                  <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {gameState.combo}x Combo!</div>
                 </div>
               )}
             </div>
@@ -435,7 +453,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
             {gameState && !gameState.gameActive && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <div className="bg-white rounded-2xl p-8 text-center max-w-md">
-                  <div className="text-5xl mb-4">🎉</div>
+                  <div className="flex justify-center mb-4"><KenneyIcon type='star' size={64} /></div>
                   <h3 className="text-2xl font-bold text-advay-slate mb-2">Great Dancing!</h3>
                   <p className="text-advay-slate mb-2">
                     Final Score: <span className="text-purple-600 font-bold">{gameState.score}</span>
@@ -461,7 +479,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
       {/* Celebration Overlay */}
       <CelebrationOverlay
         show={showCelebration}
-        letter="🎵"
+        letter={<KenneyIcon type='star' size={48} />}
         accuracy={100}
         onComplete={() => {
           setShowCelebration(false);

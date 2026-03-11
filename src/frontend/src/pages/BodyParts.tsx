@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { AssetPreloader } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -21,6 +23,11 @@ import {
 } from '../games/bodyPartsLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
 
 interface BodyPartsCtx {
   score: number;
@@ -38,6 +45,7 @@ function BodyPartsGame({
   finishContext,
 }: BodyPartsCtx) {
   const navigate = useNavigate();
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [parts, setParts] = useState<BodyPart[]>([]);
   const [targetPart, setTargetPart] = useState<BodyPart | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -147,13 +155,24 @@ function BodyPartsGame({
     navigate('/games');
   }, [correct, onGameComplete, navigate, playClick, handleGameComplete, score]);
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <GameContainer
       title='Body Parts'
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className='flex flex-col items-center gap-4 p-4'>
+      <div className='relative flex flex-col items-center gap-4 p-4'>
+        <GameBackground type="solid_sky" className="absolute inset-0 -z-10" />
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
             <button

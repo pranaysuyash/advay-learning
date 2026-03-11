@@ -52,8 +52,10 @@ const useEyeTracking = (
     left: false,
     right: false,
   });
+  const lastProcessedTimeRef = useRef<number>(0);
 
-  // Note: Throttling can be added here if needed for performance optimization
+  // Throttle to ~15 FPS — blink detection doesn't need 60fps
+  const PROCESS_INTERVAL_MS = 66;
 
   // Initialize FaceLandmarker
   useEffect(() => {
@@ -126,6 +128,14 @@ const useEyeTracking = (
       animationFrameRef.current = requestAnimationFrame(processVideoFrame);
       return;
     }
+
+    // Throttle inference to ~15 FPS
+    const now = performance.now();
+    if (now - lastProcessedTimeRef.current < PROCESS_INTERVAL_MS) {
+      animationFrameRef.current = requestAnimationFrame(processVideoFrame);
+      return;
+    }
+    lastProcessedTimeRef.current = now;
 
     try {
       const startTime = performance.now();
@@ -213,12 +223,22 @@ const useEyeTracking = (
           right: rightEyeClosed,
         };
 
-        setResults({
-          isBlinking,
-          leftEyeClosed,
-          rightEyeClosed,
-          blinkCount: blinkCountRef.current,
-          lastBlinkTime: lastBlinkTimeRef.current,
+        setResults((prev) => {
+          if (
+            prev.isBlinking === isBlinking &&
+            prev.leftEyeClosed === leftEyeClosed &&
+            prev.rightEyeClosed === rightEyeClosed &&
+            prev.blinkCount === blinkCountRef.current
+          ) {
+            return prev; // No change — skip re-render
+          }
+          return {
+            isBlinking,
+            leftEyeClosed,
+            rightEyeClosed,
+            blinkCount: blinkCountRef.current,
+            lastBlinkTime: lastBlinkTimeRef.current,
+          };
         });
       }
     } catch (err) {

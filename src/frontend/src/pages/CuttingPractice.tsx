@@ -12,12 +12,15 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { AssetPreloader } from '../components/AssetPreloader';
+import { GameBackground } from '../components/game/GameBackground';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import {
   LEVELS,
   generateCutLines,
@@ -43,7 +46,13 @@ interface CuttingSession {
   isActive: boolean;
 }
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [lines, setLines] = useState<CutLine[]>([]);
@@ -448,6 +457,16 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
     setGameState('start');
   }, [playClick]);
 
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
+
   return (
     <GameContainer
       title="Cutting Practice"
@@ -457,7 +476,8 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
       onHome={() => navigate('/games')}
       reportSession={false}
     >
-      <div className="flex flex-col items-center gap-4 p-4 h-full overflow-auto">
+      <div className="relative flex flex-col items-center gap-4 p-4 h-full overflow-auto">
+        <GameBackground type="solid_grass" className="absolute inset-0 -z-10" />
         {/* Level Selection */}
         {gameState === 'start' && (
           <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
@@ -565,7 +585,7 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
 
               {streak > 0 && (
                 <div className="bg-orange-500 text-white px-3 py-1 rounded-full font-bold flex items-center gap-1">
-                  <span>🔥</span>
+                  <KenneyIcon type='heart' size={20} />
                   <span>{streak}</span>
                 </div>
               )}
@@ -594,7 +614,7 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
                   className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
                 >
                   <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-black text-3xl shadow-2xl border-4 border-white">
-                    🔥 {streak} Perfect Cuts! 🔥
+                    <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Perfect Cuts!</div>
                   </div>
                 </motion.div>
               )}
@@ -646,7 +666,7 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
               animate={{ scale: 1 }}
               className="text-center"
             >
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="flex justify-center mb-4"><KenneyIcon type='star' size={64} /></div>
               <h2 className="text-3xl font-black text-slate-900 mb-2">
                 All Cuts Complete!
               </h2>

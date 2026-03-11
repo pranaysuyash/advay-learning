@@ -93,13 +93,16 @@ export function shuffleArray<T>(array: T[]): T[] {
 
 export function getFoodsForLevel(level: number): FoodItem[] {
   const allFoods = FOOD_ITEMS;
-  
+
   if (level === 1) {
     return shuffleArray(allFoods.filter(f => f.category !== 'treat')).slice(0, 6);
   } else if (level === 2) {
     return shuffleArray(allFoods.filter(f => f.category !== 'treat')).slice(0, 8);
   } else {
-    return shuffleArray(allFoods).slice(0, 10);
+    // Level 3: ensure at least 2 treats are always included
+    const treats = shuffleArray(allFoods.filter(f => f.category === 'treat')).slice(0, 2);
+    const nonTreats = shuffleArray(allFoods.filter(f => f.category !== 'treat')).slice(0, 8);
+    return shuffleArray([...treats, ...nonTreats]);
   }
 }
 

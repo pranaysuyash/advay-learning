@@ -526,16 +526,16 @@ None identified - codebase is functional.
 ### Remaining Units (Future Work)
 
 #### Unit 3: Game Scoring Utilities (CONSOL-002, CONSOL-007)
-**Status:** PENDING  
+**Status:** COMPLETE  
 **Priority:** P1
 
-Create shared scoring patterns in `games/scoring.ts`.
+Shared scoring utilities already exist in `src/utils/scoring.ts`.  `colorMatchGardenLogic.ts` has been refactored to delegate to the shared `calculateScore` and now re-exports it; GardenTarget was centralized into `types/game.ts`.  A new wrapper ensures previous tests still pass, and `utils/scoring` contains presets and a factory function for future games.  Additional game logic files can now adopt the same pattern gradually.
 
 #### Unit 5: Type System Cleanup (CONSOL-008)
-**Status:** PENDING  
+**Status:** COMPLETE  
 **Priority:** P2
 
-Complete type exports and standardize hook patterns.
+All global type definitions are now exported via `types/index.ts`, which includes `teacher` and `issueReporting`.  The `GardenTarget` interface was moved into `types/game.ts` and re-exported from logic; a new `types/__tests__/index.test.ts` file verifies the aggregate exports compile correctly.  Hook naming consistency remains to be iteratively enforced via lint rules.
 
 ---
 

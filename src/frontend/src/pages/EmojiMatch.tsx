@@ -29,6 +29,7 @@ import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { AssetPreloader } from '../components/AssetPreloader';
 import { buildRound, type EmotionTarget } from '../games/emojiMatchLogic';
 import { UIIcon } from '../components/ui/Icon';
 import {
@@ -72,7 +73,13 @@ const TUTORIAL_STEPS = [
   },
 ] as const;
 
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
+  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+];
+
 const EmojiMatchGame = memo(function EmojiMatchComponent() {
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerRectRef = useRef<DOMRect | null>(null);
@@ -633,6 +640,16 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   ];
 
   const promptTarget = targets[correctId];
+
+  if (!assetsLoaded) {
+    return (
+      <AssetPreloader
+        assets={CRITICAL_ASSETS}
+        onComplete={() => setAssetsLoaded(true)}
+        minDisplayTime={800}
+      />
+    );
+  }
 
   return (
     <GameContainer

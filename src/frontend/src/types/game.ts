@@ -15,3 +15,13 @@ export interface GameSessionState {
   level: number;
   feedback: string;
 }
+
+// Specific target shape used by Color Match Garden and similar games
+export interface GardenTarget {
+  id: number;
+  name: string;
+  color: string;
+  emoji: string;
+  assetId: string;
+  position: Point;
+}

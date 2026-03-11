@@ -88,6 +88,8 @@ This layer should be treated as a potential alternative to the “Open Playgroun
 
 *Gesture & body as controller:* Many high‑value ideas revolve around using the body as the joystick.  Key micro‑mechanics from Kimi’s stack brainstorm complement this navigation layer and should be held in a sub‑module called **Controller Gestures** (air typing, puppeteering, shadow physics, breath control, velocity spells, occlusion, mirror cooperation).  These gestures can be reused across navigation, mini‑games and story interactions.
 
+*Object-as-controller extensions:* The physical toys in the child’s environment are treated as programmable peripherals.  The camera maps toy history, scale and orientation into digital momentum, quantum‑drift cheat modes, and size transformations.  This extends the earlier seed idea to include Hot‑Wheels loop momentum, wobbly controller drift, and scale treason, making the room itself part of the control schema.
+
 
 ### 2.1 Progression Systems
 *How children move through content without "progressing"*
@@ -160,6 +162,19 @@ This layer should be treated as a potential alternative to the “Open Playgroun
 
 *Note: Many of these could live as floating games in the Infinite Canvas map.*
 
+### 3.3 UPGRADE OPPORTUNITIES FOR EXISTING GAMES 🛠
+These upgrade ideas came from a recent review of the current catalogue. They can seed specific tickets or incremental prototype tasks.
+- **Free Draw**: add collaborative multi‑user layer, AR object casting, tool progression, narrative skinning.
+- **Alphabet Tracing**: weather‑adaptive tracing, ghost replay, physics letters, multi‑script selection via voice.
+- **Physics Demo → Playground**: full sandbox with elemental reactions, room‑mapped obstacles, tutorial narrative, curriculum hooks.
+- **Air Guitar Hero & Music Games**: conductor mapping, real‑instrument mic input, dynamic sheet music AR.
+- **Hand Pong & Social Titles**: asymmetric co‑op, mirror rebellion, toy‑driven power‑ups.
+
+These opportunities should be cross‑referenced in the game‑quality audit framework and prioritized via the Priority Engine.  Initial work has been ticketed (see TCK-20260311-001 through TCK-20260311-005) to track implementation.
+
+*Prototype Status:* Initial skeleton components have been created for the top-priority upgrades (physics playground P0, Free Draw P1, Alphabet Tracing P1) under `src/frontend/src/games/prototypes`.  Continue fleshing these as experiments before merging into production paths.
+
+
 *Subject domains:* Kimi’s ideas yield a quick taxonomy worth adding to the master list:
 - Literacy & language (air typing, phonics tai chi, story co‑author, ASL bridge)
 - STEM & logic (molecule builder, geometry gymnastics, coding by choreography)
@@ -167,6 +182,8 @@ This layer should be treated as a potential alternative to the “Open Playgroun
 - SEL (emotion mirror, personal space bubble)
 
 These domains should overlay the existing play patterns table to ensure coverage and avoid blind spots.
+
+*Advanced themes from recent brainstorm:* Object alchemy (syntax of stuff, weight of imagination, lost property souls), portal mechanics (orientation-based gravity flips, functional shape powers), narrative possessions (haunted toys, traitor objects, scale models), physics betrayal (anti‑gravity spoon, friction heist, string theory).  These concepts are excellent candidates for P1‑P2 implementations once the core portal/physics frameworks are in place.
 
 
 
@@ -432,7 +449,8 @@ improvement → growth (only if organic)
 - Session engagement tracked via gesture variety (no daily-streak pressure; aligns with "No temporal pressure" principle).  
 - Sticker album unlocked through CV‑detected rare poses.  
 - Async ghost mode records pose data for friendly races.  
-- Accessibility adjustments: seated mode toggle, low‑vision audio cues, motor forgiveness slider.
+- Accessibility adjustments: seated mode toggle, low‑vision audio cues, motor forgiveness slider.  
+- Object‑history momentum and quantum‑drift cheat modes from physical toys; scale‑based powerups from toy distance.
 
 ### 8.1 Aligned Metrics (Measure This)
 

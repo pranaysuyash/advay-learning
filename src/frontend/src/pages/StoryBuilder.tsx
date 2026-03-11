@@ -5,6 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
   createStoryBuilderRound,
@@ -16,6 +17,7 @@ function StoryBuilderGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('story-builder');
+  const { saveProgress } = useGameProgress('story-builder');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -76,7 +78,9 @@ function StoryBuilderGame() {
 
     if (round >= roundsPerSession) {
       playCelebration();
-      await onGameComplete(score + 25);
+      const finalScore = score + 25;
+      await saveProgress({ score: finalScore, completed: true, level: 1 });
+      await onGameComplete(finalScore);
       setTimeout(() => {
         setActiveRound(null);
       }, 1100);

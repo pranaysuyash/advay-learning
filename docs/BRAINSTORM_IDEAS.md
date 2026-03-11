@@ -9,14 +9,14 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 
 ### Kimi Stack Ideas (2026‑03‑10)
 
-#### Gesture & Body as Controller
-- Air Typing/Drawing with hand landmarks and phonetic Kokoro feedback.
-- Puppeteering bodies control Kenny NL joints, pinch=grab, open=jump.
-- Shadow Physics: silhouette segmentation produces realtime colliders letting child become platforms or shields.
-- Breath Control via face mesh to power wind in sailing or candle counting.
-- Velocity-based spells (fast swipe fire, slow circle ice).
-- Occlusion games hide virtual objects behind real hand (depth‑aware).
-- Two-Player Mirror cooperation via pose mapping.
+#### Gesture & Body as Controller <!-- priority: P1 -->
+- Air Typing/Drawing with hand landmarks and phonetic Kokoro feedback. <!-- priority: P1 -->
+- Puppeteering bodies control Kenny NL joints, pinch=grab, open=jump. <!-- priority: P2 -->
+- Shadow Physics: silhouette segmentation produces realtime colliders letting child become platforms or shields. <!-- priority: P0 -->
+- Breath Control via face mesh to power wind in sailing or candle counting. <!-- priority: P2 -->
+- Velocity-based spells (fast swipe fire, slow circle ice). <!-- priority: P1 -->
+- Occlusion games hide virtual objects behind real hand (depth‑aware). <!-- priority: P1 -->
+- Two-Player Mirror cooperation via pose mapping. <!-- priority: P1 -->
 
 #### Subject Matter Explorations
 - Phonics Tai Chi: body shapes match letter forms with Kokoro songs.
@@ -30,8 +30,8 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 - Color Hunter: segmentation isolates real object color to validate.
 
 #### Social-Emotional Learning
-- Emotion Mirror: face mesh drives avatar emotions for regulation.
-- Personal Space Bubble: pose detection field teaches consent.
+- Emotion Mirror: face mesh drives avatar emotions for regulation. <!-- priority: P2 -->
+- Personal Space Bubble: pose detection field teaches consent. <!-- priority: P2 -->
 
 #### Technical Architecture Ideas
 - WebWorker+WASM for MediaPipe off‑main thread.
@@ -116,6 +116,62 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 
 ### Wild Creative Sparks
 - Augmented Shadow Orchestra, Reverse Day controls, Emotion‑Powered Cosmetics.
+
+## 🧠 Priority Scoring
+
+To transform this freeform vault into actionable work, apply the audit/priority framework:
+
+1. Review each idea and assign a priority (P0, P1, P2, P3) based on impact/effort.
+2. Stamp ideas with `<!-- priority: P# -->` comments or move them into a "scored" section below.
+3. New high-priority ideas automatically spawn tickets via the general Brainstorm Scoring & Queue issue (TCK-20260311-005).
+4. Periodically run `./scripts/audit_review.sh` to ensure high-value vault entries have tickets.
+
+Use this section as a living checklist; when an idea graduates, remove it or mark as done to keep the vault lean.
+
+---
+
+### Kimi Stack Ideas Continued (2026‑03‑10)
+
+#### Object-as-Controller (Your Seed, Extended)
+- **The Hot Wheels Hypnosis:** physical car history grants digital loop momentum; drive in real world to climb walls digitally; Kokoro narrates the car's dreams.
+- **The Wobbly Controller:** CV loss triggers "quantum drift" allowing strategic cheating; teaches CV failure states as mechanic.
+- **Scale Treason:** toy distance to camera controls in-game scale (monster truck vs micro-machine) teaching parallax.
+
+#### Puppetry Dimension (Object = Character)
+- **The Lego Possession:** minifig silhouette controls avatar movement; toy articulation shapes personality.
+- **The Stuffed Animal Skin:** scan plushie color histogram to generate terrain.
+- **The Shadow Government:** character exists in shadow; move toy to change shadow, light source puzzles.
+
+#### Object Alchemy (Combinatorics)
+- **The Syntax of Stuff:** proximity of objects crafts new items; physical banging as crafting gesture.
+- **The Weight of Imagination:** CV size sets character weight; vocal lying (stress/tone) overrides reality.
+- **The Lost Property Office:** objects have "souls"; show toy creates matching NPC; carry toy to edge to reunite.
+
+#### Portal Mechanics (Object as Key)
+- **The Backside of Things:** show toy underside vs top flips gravity/level.
+- **The Secret Life of Chairs:** shape detection grants powers (roll, bridge, cloud platform).
+- **The Memory Card:** show photo unlocks themed levels via meta-vision face detection.
+
+#### Physics Betrayal
+- **The Anti-Gravity Spoon:** spoon orientation flips game gravity using reflection mapping.
+- **The Friction Heist:** rub toy on surfaces; texture recognition imports friction.
+- **The String Theory:** string tension controls slingshot/stealth; tether UI.
+
+#### Narrative Possessions
+- **The Hitchhiker:** toy haunted; Kokoro narrates as toy; toy earns XP via real-world travel; neglect kills it.
+- **The Traitor Object:** real toy spawns enemy clone; hide physical toy to vanish enemy.
+- **The Scale Model:** physical diorama becomes game world; move pieces to alter history.
+
+#### Absurd/Surreal Layer
+- **The Object Confusion:** CV misclassification (banana=phone) teaches ML limits.
+- **The Existential Controller:** game runs only when you’re not looking; rely on voice/proprioception.
+- **The Object Hunger:** digital character eats physical toy when close; toy vanishes until traded.
+- **The Reflection Rebellion:** mirror image as enemy, race lagging self.
+
+#### Curriculum Integration (Stealth Learning)
+- **The Taxonomy Chase:** Kokoro prompts find symmetry, etc., using toybox as database.
+- **The Material Science Gauntlet:** detect conductivity via specular reflection to complete circuits.
+- **The Archaeological Brush:** brush toy to clean digital fossil; tactile feedback loop.
 
 ---
 

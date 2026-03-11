@@ -26,6 +26,7 @@ import { getGameRecommendationsForProfile, type GameRecommendation } from '../se
 import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
 import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -73,7 +74,7 @@ const RECOMMENDED_GAMES = [
   {
     id: 'physics-playground',
     title: 'Physics Playground',
-    description: 'Explore sand, water, and fire with your hands! 🌟',
+    description: 'Explore sand, water, and fire with your hands!',
     path: '/games/physics-playground',
     icon: 'sparkles' as IconName,
     ageRange: '4-8 years',
@@ -312,7 +313,7 @@ export const Dashboard = memo(function Dashboard() {
         <div className='flex items-center gap-4'>
           {/* STAR CURRENCY */}
           <div className='bg-white border-2 border-yellow-200 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm font-bold text-yellow-600 cursor-pointer hover:bg-yellow-50 transition-colors'>
-            <span className='text-2xl'>⭐</span>
+            <KenneyIcon type='star' size={24} />
             <span className='text-xl'>{totalStars.toLocaleString()}</span>
           </div>
 

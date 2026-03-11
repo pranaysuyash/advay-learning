@@ -20,6 +20,7 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 import {
   type UtensilItem,
   getUtensilsForLevel,
@@ -365,7 +366,9 @@ function SetTheTableGame() {
             animate={{ scale: 1 }}
             className="text-center"
           >
-            <div className="text-8xl mb-4">🎉</div>
+            <div className="flex justify-center mb-4">
+              <KenneyIcon type="star" size={64} />
+            </div>
             <h2 className="text-4xl font-black text-amber-600 mb-2">
               Table All Set!
             </h2>
@@ -374,13 +377,13 @@ function SetTheTableGame() {
             </p>
 
             {/* Stars */}
-            <div className="flex justify-center gap-2 mb-6 text-5xl">
+            <div className="flex justify-center gap-2 mb-6">
               <motion.span
                 key="star-r-0"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: stars >= 1 ? 1 : 0.5, opacity: stars >= 1 ? 1 : 0.3 }}
               >
-                {stars >= 1 ? '⭐' : '☆'}
+                <KenneyIcon type={stars >= 1 ? 'star' : 'heart_empty'} size={48} />
               </motion.span>
               <motion.span
                 key="star-r-1"
@@ -388,7 +391,7 @@ function SetTheTableGame() {
                 animate={{ scale: stars >= 2 ? 1 : 0.5, opacity: stars >= 2 ? 1 : 0.3 }}
                 transition={{ delay: 0.1 }}
               >
-                {stars >= 2 ? '⭐' : '☆'}
+                <KenneyIcon type={stars >= 2 ? 'star' : 'heart_empty'} size={48} />
               </motion.span>
               <motion.span
                 key="star-r-2"
@@ -396,7 +399,7 @@ function SetTheTableGame() {
                 animate={{ scale: stars >= 3 ? 1 : 0.5, opacity: stars >= 3 ? 1 : 0.3 }}
                 transition={{ delay: 0.2 }}
               >
-                {stars >= 3 ? '⭐' : '☆'}
+                <KenneyIcon type={stars >= 3 ? 'star' : 'heart_empty'} size={48} />
               </motion.span>
               <motion.span
                 key="star-r-3"
@@ -404,7 +407,7 @@ function SetTheTableGame() {
                 animate={{ scale: stars >= 4 ? 1 : 0.5, opacity: stars >= 4 ? 1 : 0.3 }}
                 transition={{ delay: 0.3 }}
               >
-                {stars >= 4 ? '⭐' : '☆'}
+                <KenneyIcon type={stars >= 4 ? 'star' : 'heart_empty'} size={48} />
               </motion.span>
               <motion.span
                 key="star-r-4"
@@ -412,7 +415,7 @@ function SetTheTableGame() {
                 animate={{ scale: stars >= 5 ? 1 : 0.5, opacity: stars >= 5 ? 1 : 0.3 }}
                 transition={{ delay: 0.4 }}
               >
-                {stars >= 5 ? '⭐' : '☆'}
+                <KenneyIcon type={stars >= 5 ? 'star' : 'heart_empty'} size={48} />
               </motion.span>
             </div>
 

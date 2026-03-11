@@ -10,6 +10,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 function RhythmTapContent() {
   const navigate = useNavigate();
@@ -101,7 +102,7 @@ function RhythmTapContent() {
           setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
         }
         
-        setFeedback('🎵 Perfect rhythm!');
+        setFeedback('Perfect rhythm!');
       } else {
         playError();
         setStreak(0);
@@ -198,7 +199,7 @@ function RhythmTapContent() {
               className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
             >
               <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
-                🔥 {streak} Streak! 🔥
+                <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
               </div>
             </motion.div>
           )}
@@ -211,7 +212,7 @@ function RhythmTapContent() {
                   Round {round + 1} of 5
                 </p>
                 {streak > 0 && (
-                  <span className='text-orange-500 font-bold'>🔥 {streak}</span>
+                  <span className='text-orange-500 font-bold flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak}</span>
                 )}
               </div>
               <div className='text-5xl'>👂</div>
@@ -235,7 +236,7 @@ function RhythmTapContent() {
               {/* Streak Display */}
               {streak > 0 && (
                 <div className='bg-orange-100 px-4 py-2 rounded-full border-2 border-orange-200'>
-                  <span className='text-orange-600 font-bold'>🔥 {streak} Streak</span>
+                  <span className='text-orange-600 font-bold flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak} Streak</span>
                 </div>
               )}
               
@@ -243,7 +244,7 @@ function RhythmTapContent() {
               {feedback && (
                 <div
                   className={`w-full rounded-2xl px-5 py-4 border-2 font-bold text-lg text-center ${
-                    feedback.startsWith('🎵')
+                    feedback.includes('Perfect')
                       ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                       : feedback.startsWith('❌')
                         ? 'bg-red-50 border-red-300 text-red-700'
@@ -300,7 +301,7 @@ function RhythmTapContent() {
           {/* Complete */}
           {gameState === 'complete' && (
             <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <div className='text-7xl'>🎉</div>
+              <div className='flex justify-center'><KenneyIcon type='star' size={80} /></div>
               <h2 className='text-4xl font-black text-slate-900'>
                 Rhythm Master!
               </h2>

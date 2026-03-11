@@ -119,4 +119,33 @@ export const NUMBER_JUNGLE_EXTRA_GAMES: GameManifest[] = [
       },
     ],
   },
+  {
+    id: 'simple-addition',
+    name: 'Simple Addition',
+    tagline: 'Add numbers with pictures! 2 + 3 = ? 🍎➕🍎',
+    path: '/games/simple-addition',
+    icon: 'plus',
+    worldId: 'number-jungle',
+    vibe: 'educational',
+    ageRange: '4-7',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'shape-star', chance: 0.2 },
+      { itemId: 'element-c', chance: 0.1 },
+      { itemId: 'element-au', chance: 0.02, minScore: 95 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-addition-whiz',
+        name: 'Addition Whiz',
+        description: 'Solve 10 problems with a perfect streak!',
+        trigger: 'perfect-streak-10',
+        reward: { itemId: 'element-au', quantity: 1 },
+        hint: 'Quick and correct answers build the best streaks...',
+        difficulty: 'hard',
+      },
+    ],
+  },
 ];
