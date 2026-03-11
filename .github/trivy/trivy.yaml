@@ -1,0 +1,12 @@
+format: sarif
+scanners:
+  - vuln
+  - misconfig
+  - secret
+severity:
+  - CRITICAL
+  - HIGH
+ignore-unfixed: true
+skip-policy-update: true
+timeout: 10m
+no-progress: true
