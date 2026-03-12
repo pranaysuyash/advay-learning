@@ -1,0 +1,192 @@
+name: Merge Readiness Gate
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  workflow-policy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce branch naming and linked work items
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const errors = [];
+
+            if (!pr.head.ref.startsWith("codex/wip-")) {
+              errors.push(`PR head branch must start with codex/wip-. Found: ${pr.head.ref}`);
+            }
+
+            if (pr.base.ref !== "main") {
+              errors.push(`PR base branch must be main. Found: ${pr.base.ref}`);
+            }
+
+            const body = pr.body || "";
+            const closesPattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+\b/i;
+            const tckPattern = /\bTCK-\d{8}-\d{3}\b/;
+
+            if (!closesPattern.test(body)) {
+              errors.push("Missing linked issue. Add `Closes #<issue-number>` in PR body.");
+            }
+
+            if (!tckPattern.test(body)) {
+              errors.push("Missing worklog ticket. Add `TCK-YYYYMMDD-NNN` in PR body.");
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(errors.join("\n"));
+              return;
+            }
+
+            core.info("Workflow policy passed.");
+
+  review-policy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block merge without approval and resolved review threads
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = context.payload.pull_request.number;
+
+            const query = `
+              query($owner: String!, $repo: String!, $pullNumber: Int!, $after: String) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pullNumber) {
+                    reviewDecision
+                    reviewRequests(first: 50) { nodes { requestedReviewer { __typename } } }
+                    reviewThreads(first: 100, after: $after) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes { isResolved }
+                    }
+                  }
+                }
+              }
+            `;
+
+            let unresolvedThreads = 0;
+            let reviewDecision = null;
+            let openReviewRequests = 0;
+            let after = null;
+
+            while (true) {
+              const res = await github.graphql(query, {
+                owner,
+                repo,
+                pullNumber,
+                after,
+              });
+
+              const pr = res.repository.pullRequest;
+              if (reviewDecision === null) {
+                reviewDecision = pr.reviewDecision;
+                openReviewRequests = pr.reviewRequests.nodes.length;
+              }
+
+              const nodes = pr.reviewThreads.nodes || [];
+              unresolvedThreads += nodes.filter((t) => !t.isResolved).length;
+
+              const pageInfo = pr.reviewThreads.pageInfo;
+              if (!pageInfo.hasNextPage) {
+                break;
+              }
+              after = pageInfo.endCursor;
+            }
+
+            const errors = [];
+            if (reviewDecision !== "APPROVED") {
+              errors.push(`PR reviewDecision must be APPROVED. Found: ${reviewDecision || "NONE"}`);
+            }
+            if (openReviewRequests > 0) {
+              errors.push(`PR has ${openReviewRequests} outstanding review request(s).`);
+            }
+            if (unresolvedThreads > 0) {
+              errors.push(`PR has ${unresolvedThreads} unresolved review thread(s).`);
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(errors.join("\n"));
+              return;
+            }
+
+            core.info("Review policy passed.");
+
+  code-scanning-policy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: read
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Block merge when open code-scanning alerts exist on PR merge ref
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = context.payload.pull_request.number;
+            const ref = `refs/pull/${pullNumber}/merge`;
+
+            let page = 1;
+            const openAlerts = [];
+            while (true) {
+              const res = await github.request("GET /repos/{owner}/{repo}/code-scanning/alerts", {
+                owner,
+                repo,
+                state: "open",
+                ref,
+                per_page: 100,
+                page,
+              });
+
+              const batch = res.data || [];
+              openAlerts.push(...batch);
+
+              if (batch.length < 100) {
+                break;
+              }
+              page += 1;
+            }
+
+            if (openAlerts.length > 0) {
+              const sample = openAlerts
+                .slice(0, 20)
+                .map((a, i) => `${i + 1}. #${a.number} ${a.rule?.id || "unknown-rule"} (${a.rule?.security_severity_level || a.rule?.severity || "unknown"}) ${a.html_url || ""}`)
+                .join("\n");
+              core.setFailed(
+                `Found ${openAlerts.length} open code-scanning alert(s) on ${ref}. Resolve or dismiss them before merge.\n${sample}`
+              );
+              return;
+            }
+
+            core.info("Code scanning policy passed.");
+
+  regression-policy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install frontend dependencies
+        run: cd src/frontend && npm ci
+
+      - name: Run regression check
+        run: ./scripts/regression_check.sh
+
+      - name: Run feature regression check
+        run: ./scripts/feature_regression_check.sh

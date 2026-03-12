@@ -108,12 +108,15 @@ describe('createStoryBuilderRound', () => {
     expect(STORY_PROMPTS.find(p => p.id === round.id)).toBeDefined();
   });
 
-  it('generates different orders on multiple calls', () => {
-    const round1 = createStoryBuilderRound([]);
-    const round2 = createStoryBuilderRound([]);
+  it('produces at least two distinct option orders across repeated calls', () => {
+    const seenOrders = new Set<string>();
 
-    // Due to shuffling, order should differ
-    expect(round1.options).not.toEqual(round2.options);
+    for (let i = 0; i < 10; i += 1) {
+      const round = createStoryBuilderRound([]);
+      seenOrders.add(round.options.join('|'));
+    }
+
+    expect(seenOrders.size).toBeGreaterThan(1);
   });
 });
 

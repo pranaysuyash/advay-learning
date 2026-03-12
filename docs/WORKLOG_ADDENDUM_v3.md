@@ -53,6 +53,95 @@ Risks/notes:
 
 ---
 
+### TCK-20260312-004 :: Enforce no-shortcut merge block policy
+
+Type: IMPROVEMENT
+Owner: Pranay (human owner, agent: Codex)
+Created: 2026-03-12
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope: add enforceable merge-block automation for branch naming, review approval, comment resolution, regression checks, code scanning checks, and branch deletion on merge.
+- Out-of-scope: remediating pre-existing open code scanning backlog in application code.
+- Behavior change allowed: YES (workflow and repo governance hardening).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `.github/workflows/merge-readiness-gate.yml`, `scripts/enforce_merge_block.sh`, `docs/SETUP.md`
+- Branch/PR: `codex/wip-pr39-followup-20260312` -> `main`
+
+Acceptance Criteria:
+
+- [x] New PR workflow gate added for branch/work item/review/thread/code-scanning/regression checks.
+- [x] Script exists to configure branch protection + required checks + auto branch deletion.
+- [x] Setup docs updated with one-command enforcement workflow.
+- [ ] Branch protection applied on GitHub repo using admin token.
+
+Prompt Trace:
+
+- `prompts/hardening/hardening-v1.1.md` (governance hardening lens)
+- `prompts/merge/post-merge-v1.0.md` (merge controls lens)
+
+Execution log:
+
+- 2026-03-12 | Added workflow `.github/workflows/merge-readiness-gate.yml` with policy/review/code-scanning/regression jobs.
+- 2026-03-12 | Added `scripts/enforce_merge_block.sh` to apply required branch protection and enable delete-on-merge.
+- 2026-03-12 | Updated `docs/SETUP.md` with merge-block setup steps and required checks.
+
+Status updates:
+
+- 2026-03-12 **IN_PROGRESS** — Repo changes committed locally; pending GitHub branch-protection application and PR merge.
+
+---
+
+
+### TCK-20260312-003 :: Post-merge review closure for PR #39 regression
+
+Type: BUG
+Owner: Pranay (human owner, agent: Codex)
+Created: 2026-03-12
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope: fix the reported replay button corruption in `TidyUpTime.tsx`, validate frontend lint/typecheck, and resolve PR #39 review thread.
+- Out-of-scope: broad repository-wide code scanning backlog remediation.
+- Behavior change allowed: YES (bug fix only, no feature changes).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/pages/TidyUpTime.tsx`
+- Branch/PR: `codex/wip-pr39-followup-20260312` -> `main`
+- GitHub Issue: #40
+
+Acceptance Criteria:
+
+- [ ] Replay button icon class corrected (`w-5 h-5`).
+- [ ] Replay button label corrected (`Play Again`).
+- [ ] Frontend lint and typecheck pass locally.
+- [ ] PR #39 review thread is resolved.
+
+Prompt Trace:
+
+- `prompts/review/pr-review-v1.6.1.md` (review closure lens)
+- `prompts/merge/post-merge-v1.0.md` (post-merge validation lens)
+
+Execution log:
+
+- 2026-03-12 | Created linked issue #40 for post-merge regression and review-thread closure.
+- 2026-03-12 | Confirmed unresolved PR #39 review thread at `discussion_r2922712427`.
+
+Status updates:
+
+- 2026-03-12 **IN_PROGRESS** — Ticket opened for post-merge regression fix and comment closure.
+
+---
+
 ### TCK-20260309-001 :: Feature-Folder Architecture Audit Across All Games
 
 Ticket Stamp: STAMP-20260309T044149Z-amp-0i7u
