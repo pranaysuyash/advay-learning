@@ -4,6 +4,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, createPath, isOnPath, type PathPoint } from '../games/pathFollowingLogic';
@@ -23,6 +24,7 @@ function PathFollowingContent() {
 
   const { playClick, playSuccess, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('path-following');
+  const { saveProgress } = useGameProgress('path-following');
 
   useGameSessionProgress({
     gameName: 'Path Following',
@@ -86,9 +88,11 @@ function PathFollowingContent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
-    await onGameComplete(Math.round(score / 20));
+    const finalScore = Math.round(score / 20);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick]);
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const pathWidth = path.length > 0 ? 50 : 0;
 

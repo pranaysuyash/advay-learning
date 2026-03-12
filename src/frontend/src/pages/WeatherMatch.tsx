@@ -30,7 +30,7 @@ function WeatherMatchContent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('weather-match');
-  const { saveProgress: _saveProgress } = useGameProgress('weather-match');
+  const { saveProgress } = useGameProgress('weather-match');
 
   useGameSessionProgress({ gameName: 'Weather Match', score, level: currentLevel, isPlaying: true, metaData: { correct } });
 
@@ -84,7 +84,12 @@ function WeatherMatchContent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => {
+    playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
+    await onGameComplete(correct);
+    navigate('/games');
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer title="Weather Match" onHome={() => navigate('/games')} reportSession={false}>

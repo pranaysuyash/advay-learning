@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -42,6 +43,7 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('digital-jenga');
+  const { saveProgress } = useGameProgress('digital-jenga');
 
   useGameSessionProgress({
     gameName: 'Digital Jenga',
@@ -196,9 +198,10 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: towerHeight, completed: true, level: currentLevel });
     await onGameComplete(towerHeight);
     navigate('/games');
-  }, [towerHeight, onGameComplete, navigate, playClick]);
+  }, [towerHeight, currentLevel, onGameComplete, navigate, playClick, saveProgress]);
 
   return (
     <GameContainer

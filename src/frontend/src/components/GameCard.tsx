@@ -23,6 +23,11 @@ interface GameCardProps {
     onPlay?: () => void;
     buttonText?: string;
     reducedMotion?: boolean;
+    badge?: {
+        icon: string;
+        label: string;
+        subtitle?: string;
+    };
 }
 
 // Category color mappings - Bright, fun V1 colors
@@ -69,6 +74,7 @@ export const GameCard = memo(function GameCard({
     onPlay,
     buttonText = 'Play Game',
     reducedMotion = false,
+    badge,
 }: GameCardProps) {
     const categoryColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.default;
 
@@ -177,14 +183,39 @@ export const GameCard = memo(function GameCard({
 
                     {/* NEW badge */}
                     {isNew && (
-                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-[#E85D04] text-white text-xs font-black rounded-full shadow-[0_4px_0_#E5B86E] tracking-widest uppercase border-2 border-white">
+                        <div className={`absolute ${badge ? 'top-12' : 'top-4'} left-4 px-3 py-1.5 bg-[#E85D04] text-white text-xs font-black rounded-full shadow-[0_4px_0_#E5B86E] tracking-widest uppercase border-2 border-white z-20`}>
                             NEW
+                        </div>
+                    )}
+
+                    {/* Recommendation badge */}
+                    {badge && (
+                        <div 
+                            className={`
+                                absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 
+                                text-white text-[10px] font-black rounded-full 
+                                tracking-wider uppercase border-2 border-white z-30
+                                shadow-[0_4px_0_rgba(0,0,0,0.1)]
+                                ${(() => {
+                                    switch (badge.label) {
+                                        case 'Trending': return 'bg-gradient-to-r from-orange-500 to-red-500 shadow-orange-200';
+                                        case 'Top Rated': return 'bg-gradient-to-r from-yellow-400 to-orange-400 shadow-yellow-200';
+                                        case 'Most Played': return 'bg-gradient-to-r from-blue-500 to-indigo-500 shadow-blue-200';
+                                        case 'Kid Favorite': return 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-200';
+                                        default: return 'bg-[#3B82F6]';
+                                    }
+                                })()}
+                            `}
+                            title={badge.subtitle}
+                        >
+                            <span className="text-sm leading-none">{badge.icon}</span>
+                            <span className="leading-none mt-0.5">{badge.label}</span>
                         </div>
                     )}
 
                     {/* COMING SOON badge */}
                     {comingSoon && (
-                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-800 text-white text-xs font-black rounded-full shadow-[0_4px_0_#E5B86E] tracking-widest uppercase border-2 border-white">
+                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-800 text-white text-xs font-black rounded-full shadow-[0_4px_0_#E5B86E] tracking-widest uppercase border-2 border-white z-20">
                             SOON
                         </div>
                     )}

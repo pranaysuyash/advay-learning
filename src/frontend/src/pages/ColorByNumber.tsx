@@ -39,7 +39,7 @@ interface ColorByNumberGameProps {
   saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress: _saveProgress }: ColorByNumberGameProps) {
+const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress }: ColorByNumberGameProps) {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('color-by-number');
@@ -104,7 +104,10 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
           );
           playCelebration();
           triggerHaptic('celebration');
-          onGameComplete(outcome.state.score);
+          (async () => {
+            await saveProgress({ score: outcome.state.score, completed: true, level: templateIndex + 1 });
+            onGameComplete(outcome.state.score);
+          })();
         } else {
           playSuccess();
           triggerHaptic('success');

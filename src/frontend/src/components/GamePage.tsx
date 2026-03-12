@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from './GameContainer';
 import { AccessDenied } from './ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
-import { progressQueue } from '../services/progressQueue';
 import { useGameDrops } from '../hooks/useGameDrops';
 
 // exported interface describes the shape of the context value
@@ -115,6 +115,7 @@ export function GamePage({
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const { currentProfile, recordGamePlay } = useProgressStore();
   const { onGameComplete } = useGameDrops(gameId);
+  const { saveProgress } = useGameProgress(gameId);
 
   // internal refs keep the latest values synchronously so callers can
   // update and immediately finish without having to pass explicit opts.
@@ -163,16 +164,14 @@ export function GamePage({
       }
       const durationSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
       recordGamePlay(currentProfile.id, gameId, durationSeconds, finalScore);
-      await progressQueue.add({
-        profileId: currentProfile.id,
-        gameId,
+      await saveProgress({
         score: finalScore,
         completed: true,
-        metadata: { level },
+        level,
       });
       onGameComplete(finalScore);
     },
-    [currentProfile, gameId, onGameComplete, recordGamePlay],
+    [currentProfile, gameId, onGameComplete, recordGamePlay, saveProgress],
   );
 
   const handleFinish = useCallback(

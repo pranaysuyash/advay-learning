@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameHUD } from '../components/game/GameHUD';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
@@ -454,12 +455,21 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
-
+        {isPlaying && (
+          <GameHUD
+            score={score}
+            streak={streak}
+            level={level}
+            round={round}
+            totalRounds={lvlCfg.roundCount}
+            showHearts={true}
+          />
+        )}
 
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-purple-100/40 pointer-events-none' />
 
         {/* Feedback */}
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
 
@@ -468,21 +478,11 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
           Take your time!
         </div>
 
-        {/* Round info */}
-        {targetPhoneme && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
+        {/* Round info - specific to this game if needed, but round count is in HUD now */}
+        {isPlaying && targetPhoneme && (
+          <div className='absolute top-24 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
             <button onClick={repeatSound} className='text-xl mr-1 hover:scale-110 transition-transform active:scale-95'>🔊</button>
             <span className='font-black text-2xl text-[#3B82F6]'>"{targetPhoneme.sound}"</span>
-            <span className='text-sm font-bold text-slate-400 uppercase tracking-widest ml-3 bg-slate-100 px-3 py-1 rounded-full'>
-              R{round}/{lvlCfg.roundCount}
-            </span>
-          </div>
-        )}
-
-        {/* Streak HUD */}
-        {streak > 0 && (
-          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full border-3 border-orange-200 bg-orange-100/90 text-orange-600 font-black text-lg shadow-[0_4px_0_#E5B86E] drop-shadow-[0_4px_0_#E5B86E]'>
-            🔥 {streak} streak!
           </div>
         )}
 

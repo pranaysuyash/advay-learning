@@ -7,6 +7,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { GameHUD } from '../components/game/GameHUD';
 import {
   createLetterSoundMatchRound,
   isLetterSoundMatchCorrect,
@@ -26,6 +28,9 @@ function LetterSoundMatchGame() {
   const [activeRound, setActiveRound] = useState<LetterSoundMatchRound | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Pick the sound that matches the letter.');
+
+  // Streak tracking
+  const { streak, incrementStreak, resetStreak } = useStreakTracking();
 
   const roundsPerSession = 8;
 
@@ -60,12 +65,14 @@ function LetterSoundMatchGame() {
 
     if (ok) {
       playSuccess();
+      incrementStreak();
       setCorrect((prev) => prev + 1);
       setScore((prev) => prev + 20);
       setFeedback(
         `Yes. ${activeRound.target.letter} says ${activeRound.target.sound} like ${activeRound.target.example}.`,
       );
     } else {
+      resetStreak();
       playError();
       setFeedback(`Try again next round. Correct sound: ${activeRound.target.sound}.`);
     }
@@ -116,8 +123,15 @@ function LetterSoundMatchGame() {
             </div>
           ) : (
             <>
+              <GameHUD
+                score={score}
+                streak={streak}
+                level={1}
+                round={round}
+                totalRounds={roundsPerSession}
+                showHearts={true}
+              />
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
-                <p className='text-sm font-black uppercase tracking-wide text-slate-500'>Round {round} / {roundsPerSession}</p>
                 <p className='text-base font-bold text-slate-500 mt-1'>Which sound matches this letter?</p>
                 <p className='text-7xl font-black text-[#7C3AED] text-center mt-2'>{activeRound.target.letter}</p>
               </div>

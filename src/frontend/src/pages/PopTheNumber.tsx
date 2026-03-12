@@ -29,7 +29,7 @@ function PopTheNumberContent() {
 
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const { onGameComplete } = useGameDrops('pop-the-number');
-  const { saveProgress: _saveProgress } = useGameProgress('pop-the-number');
+  const { saveProgress } = useGameProgress('pop-the-number');
   useGameSessionProgress({ gameName: 'Pop the Number', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.id === currentLevel) || LEVELS[0];
@@ -50,11 +50,12 @@ function PopTheNumberContent() {
     playClick();
   }, [level, playClick]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     setGameState('complete');
-    onGameComplete(score);
+    await saveProgress({ score, completed: true, level: currentLevel });
+    await onGameComplete(score);
     playSuccess();
-  }, [score, onGameComplete, playSuccess]);
+  }, [score, onGameComplete, playSuccess, saveProgress, currentLevel]);
 
   const handleBubbleClick = useCallback((bubbleId: number) => {
     if (gameState !== 'playing') return;
@@ -123,24 +124,28 @@ function PopTheNumberContent() {
   useEffect(() => {
     if (gameState === 'playing') {
       timerRef.current = window.setInterval(() => {
-        setTimeLeft(t => {
+        setTimeLeft((t) => {
           if (t <= 1) {
             setGameState('complete');
-            onGameComplete(score);
-            playSuccess();
+            // Schedule async operations after state update
+            setTimeout(async () => {
+              await saveProgress({ score, completed: true, level: currentLevel });
+              await onGameComplete(score);
+              playSuccess();
+            }, 0);
             return 0;
           }
           return t - 1;
         });
       }, 1000);
     }
-    
+
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, [gameState, score, onGameComplete, playSuccess]);
+  }, [gameState, score, onGameComplete, playSuccess, saveProgress, currentLevel]);
 
   return (
     <GameContainer title="Pop the Number" onHome={handleBack} reportSession={false}>

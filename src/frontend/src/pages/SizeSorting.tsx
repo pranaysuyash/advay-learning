@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -19,6 +20,7 @@ function SizeSortingGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('size-sorting');
+  const { saveProgress } = useGameProgress('size-sorting');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -109,6 +111,7 @@ function SizeSortingGame() {
       if (isFinalRound) {
         playCelebration();
         triggerHaptic('celebration');
+        await saveProgress({ score: nextScore, completed: true, level: 1 });
         await onGameComplete(nextScore);
         setTimeout(() => {
           setActiveRound(null);
@@ -127,6 +130,7 @@ function SizeSortingGame() {
 
   const handleFinish = async () => {
     playClick();
+    await saveProgress({ score, completed: true, level: 1 });
     await onGameComplete(score);
     navigate('/games');
   };

@@ -294,7 +294,7 @@ describe('gameRecommendations', () => {
       const trendingGames = result
         .find(r => r.slot === 'trending')?.games || [];
       
-      expect(trendingGames.some(g => g.badge?.label === 'TRENDING')).toBe(true);
+      expect(trendingGames.some(g => g.badge?.label === 'Trending')).toBe(true);
     });
   });
 });

@@ -53,6 +53,12 @@ export { DwellTarget } from './DwellTarget';
 export { CameraThumbnail } from './CameraThumbnail';
 export { HandDetectionProvider } from './HandDetectionProvider';
 
+// Hand Cursors
+export { KenneyHandCursor } from './KenneyHandCursor';
+export type { HandCursorState } from './KenneyHandCursor';
+export { RaymanHand } from './RaymanHand';
+export type { HandState } from './RaymanHand';
+
 // Backgrounds
 export {
   GameBackground,

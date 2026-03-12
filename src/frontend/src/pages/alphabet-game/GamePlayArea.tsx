@@ -5,6 +5,7 @@ import { GameContainer } from '../../components/GameContainer';
 import { Mascot } from '../../components/Mascot';
 import { GameControls } from '../../components/GameControls';
 import type { GameControl } from '../../components/GameControls';
+import { GameHUD } from '../../components/game/GameHUD';
 
 interface GamePlayAreaProps {
   webcamRef: React.RefObject<Webcam | null>;
@@ -84,11 +85,21 @@ export function GamePlayArea({
       isPlaying={isPlaying}
     >
       <div className='relative w-full h-full'>
+        {isPlaying && (
+          <GameHUD
+            score={score}
+            streak={streak}
+            level={currentLetterIndex + 1}
+            progress={accuracy}
+            showHearts={true}
+          />
+        )}
+
         {/* Accuracy Bar */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-5 mb-6 shadow-[0_4px_0_#E5B86E] absolute top-4 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
+          className='bg-white border-3 border-[#F2CC8F] rounded-3xl p-5 mb-6 shadow-[0_4px_0_#E5B86E] absolute top-20 left-1/2 -translate-x-1/2 z-40 w-[min(90%,720px)]'
         >
           <div className='flex justify-between items-center mb-3'>
             <label
@@ -129,7 +140,7 @@ export function GamePlayArea({
 
           {/* Pinch Status (hidden in mouse mode) */}
           {!useMouseMode && (
-            <div className='absolute top-28 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
+            <div className='absolute top-44 left-1/2 -translate-x-1/2 pointer-events-none z-50'>
               <div className='px-5 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] text-sm md:text-base font-bold'>
                 {isHandPresent ? (
                   isPinching ? (
@@ -155,7 +166,7 @@ export function GamePlayArea({
 
           {/* Consistent letter prompt */}
           {isPlaying && showLetterPrompt && (
-            <div className='absolute top-4 left-4 z-10'>
+            <div className='absolute top-20 left-4 z-10'>
               <div className='bg-white px-6 py-5 rounded-[2rem] border-3 border-[#F2CC8F] text-advay-slate shadow-[0_4px_0_#E5B86E] relative top-[-2px]'>
                 <div className='flex items-center gap-4'>
                   <div className='text-5xl md:text-6xl font-black leading-none text-advay-slate'>
@@ -195,23 +206,8 @@ export function GamePlayArea({
             <Mascot state={mascotState} message={mascotMessage} />
           </div>
 
-          {/* Standardized Game Controls */}
+          {/* Standardized Game Controls will be in GameHUD soon but for now let's keep bottom-right */}
           <GameControls controls={gameControls} position='bottom-right' />
-
-          {/* Kenney Heart HUD */}
-          <div className='absolute bottom-20 right-4 flex items-center gap-1 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] z-20'>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <img
-                key={i}
-                src={streak >= (i + 1) * 2
-                  ? '/assets/kenney/platformer/hud/hud_heart.png'
-                  : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                alt=''
-                className='w-7 h-7'
-              />
-            ))}
-            <span className='ml-2 text-base font-bold text-pink-500'>x{streak}</span>
-          </div>
 
           {/* Score Popup Animation */}
           {scorePopup && (

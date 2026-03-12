@@ -16,6 +16,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { GameHUD } from '../components/game/GameHUD';
 import { AssetPreloader } from '../components/AssetPreloader';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -26,6 +27,7 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
@@ -86,6 +88,7 @@ function gridCols(pairCount: number) {
 const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { onGameComplete } = useGameDrops('memory-match');
+  const { saveProgress } = useGameProgress('memory-match');
   const { playFlip, playSuccess, playError, playCelebration, playClick } =
     useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -207,9 +210,12 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
       playCelebration();
       triggerHaptic('celebration');
       setShowCelebration(true);
-      onGameComplete(score);
+      (async () => {
+        await saveProgress({ score, completed: true, level: 1 });
+        onGameComplete(score);
+      })();
     }
-  }, [completed]);
+  }, [completed, score, saveProgress, onGameComplete, playCelebration]);
 
   // ── Hint function ──────────────────────────────────────────────────────────
   const useHint = useCallback(() => {
@@ -497,42 +503,19 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
       {/* ── Game board ── */}
       {gameStarted && !showMenu && (
         <div className='absolute inset-0 flex flex-col items-center justify-center p-4 gap-4'>
-          {/* Header bar */}
-          <div className='flex items-center justify-between w-full max-w-3xl'>
-            <div className='bg-white rounded-2xl px-5 py-2 border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] font-black text-advay-slate text-lg'>
-              Moves: {moves}
-            </div>
-
-            {/* Kenney Heart HUD */}
-            <div className='bg-white rounded-2xl px-4 py-2 border-2 border-pink-200 shadow-[0_4px_0_#F9A8D4] flex items-center gap-1'>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <img
-                  key={i}
-                  src={
-                    streak >= (i + 1) * 2
-                      ? '/assets/kenney/platformer/hud/hud_heart.png'
-                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                  }
-                  alt=''
-                  className='w-6 h-6'
-                />
-              ))}
-              <span className='ml-2 text-sm font-bold text-pink-500'>
-                x{streak}
-              </span>
-            </div>
-
-            <div className='bg-white rounded-2xl px-5 py-2 border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] font-black text-advay-slate text-lg'>
-              Pairs: <span className='text-[#10B981]'>{matches}</span> /{' '}
-              {getPairsForDifficulty(difficulty)}
-            </div>
-            <div
-              className={`rounded-2xl px-5 py-2 border-2 shadow-[0_4px_0_#E5B86E] font-black text-lg ${secondsLeft <= 30 ? 'bg-red-50 border-red-300 text-red-700' : 'bg-white border-[#F2CC8F] text-advay-slate'}`}
-            >
-              ⏱ {Math.floor(secondsLeft / 60)}:
-              {String(secondsLeft % 60).padStart(2, '0')}
-            </div>
-          </div>
+          <GameHUD
+            score={score}
+            streak={streak}
+            level={difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3}
+            timeLeft={secondsLeft}
+            progressPercentage={(matches / getPairsForDifficulty(difficulty)) * 100}
+            leftHeaderContent={
+              <div className='flex flex-col'>
+                <span className='text-xs font-black uppercase tracking-wider text-slate-400'>Moves</span>
+                <span className='text-xl font-black text-slate-700'>{moves}</span>
+              </div>
+            }
+          />
 
           {/* Score Popup Animation */}
           {scorePopup && (

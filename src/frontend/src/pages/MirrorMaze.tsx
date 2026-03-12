@@ -24,6 +24,7 @@ import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -62,6 +63,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
   const { playPop, playSuccess } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('mirror-maze');
+  const { saveProgress } = useGameProgress('mirror-maze');
 
   // Get current maze
   const maze = getCurrentMaze(gameState.level);
@@ -155,7 +157,10 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
           setShowMenu(true);
         } else {
           // All levels complete
-          onGameComplete(score);
+          (async () => {
+            await saveProgress({ score, completed: true, level: 3 });
+            onGameComplete(score);
+          })();
         }
       }, 2000);
 

@@ -10,6 +10,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -33,6 +34,7 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('blend-builder');
+  const { saveProgress } = useGameProgress('blend-builder');
 
   useGameSessionProgress({
     gameName: 'Blend Builder',
@@ -100,9 +102,10 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick]);
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const currentWord = words[currentIndex];
 

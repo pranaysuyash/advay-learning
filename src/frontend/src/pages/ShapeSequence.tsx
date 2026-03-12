@@ -15,6 +15,7 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameHUD } from '../components/game/GameHUD';
 import { findHitTarget } from '../games/hitTarget';
 import { pickSpacedPoints } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
@@ -357,29 +358,25 @@ export const ShapeSequenceContent = memo(function ShapeSequenceComponent() {
       >
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
+        {isPlaying && (
+          <GameHUD
+            score={score}
+            streak={streak}
+            level={level}
+            leftHeaderContent={
+              <div className='flex items-center gap-3 bg-white/50 px-4 py-1.5 rounded-xl border-2 border-slate-100'>
+                <span className='text-xs font-black uppercase text-slate-400'>Sequence:</span>
+                <span className='font-black text-xl tracking-widest text-[#D946EF]'>
+                  {sequenceShapes.join(' ')}
+                </span>
+              </div>
+            }
+          />
+        )}
+
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
-
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg'>
-          <span className='text-slate-400'>Take your time!</span>
-        </div>
-
-        <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
-          Sequence:
-          <span className='font-black text-2xl tracking-widest text-[#D946EF] drop-shadow-[0_4px_0_#E5B86E] ml-2'>
-            {sequenceShapes.join(' ')}
-          </span>
-        </div>
-
-        {isPlaying && (
-          <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-text-secondary font-bold text-lg flex items-center gap-3'>
-            <span className='text-2xl'>{streak > 0 ? '🔥' : '⚡'}</span>
-            <span className={`${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`}>
-              {streak}x Streak
-            </span>
-          </div>
-        )}
 
         {scorePopup && (
           <motion.div

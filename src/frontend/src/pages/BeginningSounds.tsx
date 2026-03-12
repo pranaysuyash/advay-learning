@@ -3,19 +3,16 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useFallbackControls } from '../hooks/useFallbackControls';
 import { GameCursor } from '../components/game/GameCursor';
+import { GameHUD } from '../components/game/GameHUD';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { AccessDenied } from '../components/ui/AccessDenied';
-import { useSubscription } from '../hooks/useSubscription';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
-import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
-import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
 import {
   LEVELS,
@@ -25,24 +22,18 @@ import {
   type BeginningSoundsRound,
 } from '../games/beginningSoundsLogic';
 
-const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
-];
-
 // Inner game component
 const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
-  const { canAccessGame, isLoading: subLoading } = useSubscription();
-  const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const hasAccess = canAccessGame('beginning-sounds');
-  const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('beginning-sounds');
   const { saveProgress } = useGameProgress('beginning-sounds');
-  
+  const { currentProfile } = useProgressStore();
+
   const [currentLevel, setCurrentLevel] = useState(1);
-  const [currentRound, setCurrentRound] = useState<BeginningSoundsRound | null>(null);
+  const [currentRound, setCurrentRound] = useState<BeginningSoundsRound | null>(
+    null,
+  );
   const [roundIndex, setRoundIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -50,8 +41,11 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const [showResult, setShowResult] = useState(false);
   const [gameState, setGameState] = useState<'playing' | 'complete'>('playing');
   const [usedWords, setUsedWords] = useState<string[]>([]);
-  const [feedback, setFeedback] = useState('Tap the sound you hear at the start!');
-  const [error, setError] = useState<Error | null>(null);
+  const [feedback, setFeedback] = useState(
+    'Tap the sound you hear at the start!',
+  );
+  const [, setError] = useState<Error | null>(null);
+
   const {
     streak,
     maxStreak,
@@ -64,7 +58,10 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
 
-  const levelConfig = useMemo(() => LEVELS.find((l) => l.level === currentLevel) ?? LEVELS[0], [currentLevel]);
+  const levelConfig = useMemo(
+    () => LEVELS.find((l) => l.level === currentLevel) ?? LEVELS[0],
+    [currentLevel],
+  );
 
   // voice fallback flag (placeholder)
   const voiceFallback = useFeatureFlag('controls.voiceFallbackV1');
@@ -76,18 +73,20 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     const container = containerRef.current;
     if (!container || !currentRound) return [];
     const rect = container.getBoundingClientRect();
-    return currentRound.options.map((option, idx) => {
-      const el = optionRefs.current[idx];
-      if (el) {
-        const r = el.getBoundingClientRect();
-        return {
-          x: r.left + r.width / 2 - rect.left,
-          y: r.top + r.height / 2 - rect.top,
-          id: option.letter,
-        };
-      }
-      return null;
-    }).filter((t): t is { x: number; y: number; id: string } => !!t);
+    return currentRound.options
+      .map((option, idx) => {
+        const el = optionRefs.current[idx];
+        if (el) {
+          const r = el.getBoundingClientRect();
+          return {
+            x: r.left + r.width / 2 - rect.left,
+            y: r.top + r.height / 2 - rect.top,
+            id: option.letter,
+          };
+        }
+        return null;
+      })
+      .filter((t): t is { x: number; y: number; id: string } => !!t);
   }, [currentRound]);
 
   const fallback = useFallbackControls({
@@ -107,61 +106,32 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     }
   }, [voiceFallback, fallback]);
 
-  // Show loading while checking subscription or loading assets
-  if (subLoading || !assetsLoaded) {
-    return (
-      <AssetPreloader
-        assets={CRITICAL_ASSETS}
-        onComplete={() => setAssetsLoaded(true)}
-        minDisplayTime={800}
-      />
-    );
-  }
-
-  // Check subscription access
-  if (!hasAccess) {
-    return <AccessDenied gameName="Beginning Sounds" gameId="beginning-sounds" />;
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <GameContainer title="Beginning Sounds" onHome={() => navigate('/games')}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h2>
-            <p className="text-slate-600 mb-4">{error.message}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                window.location.reload();
-              }}
-              className="px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </GameContainer>
-    );
-  }
-
   // Save progress on game complete
-  const handleGameComplete = useCallback(async (finalScore: number) => {
-    if (!currentProfile) return;
+  const handleGameComplete = useCallback(
+    async (finalScore: number) => {
+      if (!currentProfile) return;
 
-    try {
-      await saveProgress({
-        score: finalScore,
-        completed: true,
-        level: currentLevel,
-      });
-      onGameComplete(finalScore);
-    } catch (err) {
-      console.error('Failed to save progress:', err);
-      setError(err as Error);
-    }
-  }, [currentProfile, currentLevel, correctCount, levelConfig, onGameComplete, saveProgress]);
+      try {
+        await saveProgress({
+          score: finalScore,
+          completed: true,
+          level: currentLevel,
+        });
+        onGameComplete(finalScore);
+      } catch (err) {
+        console.error('Failed to save progress:', err);
+        setError(err as Error);
+      }
+    },
+    [
+      currentProfile,
+      currentLevel,
+      correctCount,
+      levelConfig,
+      onGameComplete,
+      saveProgress,
+    ],
+  );
 
   const speakWord = useCallback((word: string) => {
     try {
@@ -207,7 +177,9 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
           Y: 'Yuh like in Yellow',
           Z: 'Zuh like in Zoo',
         };
-        const utterance = new SpeechSynthesisUtterance(sounds[letter] || letter);
+        const utterance = new SpeechSynthesisUtterance(
+          sounds[letter] || letter,
+        );
         utterance.rate = 0.8;
         utterance.pitch = 1.2;
         speechSynthesis.speak(utterance);
@@ -230,67 +202,99 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     }
   }, [gameState, currentLevel, currentRound, usedWords]);
 
-  const handleAnswer = useCallback((letter: string) => {
-    if (showResult || !currentRound) return;
+  const handleAnswer = useCallback(
+    (letter: string) => {
+      if (showResult || !currentRound) return;
 
-    try {
-      playClick();
-      setSelectedAnswer(letter);
-      setShowResult(true);
+      try {
+        playClick();
+        setSelectedAnswer(letter);
+        setShowResult(true);
 
-      const isCorrect = checkAnswer(letter, currentRound.targetWord.firstLetter);
-      
-      if (isCorrect) {
-        // Correct - build streak
-        incrementStreak();
+        const isCorrect = checkAnswer(
+          letter,
+          currentRound.targetWord.firstLetter,
+        );
 
-        // Calculate score with streak
-        const roundScore = calculateScore(true, 5, levelConfig.timePerRound) + Math.min((streak + 1) * 3, 15);
-        setScore((prev) => prev + roundScore);
+        if (isCorrect) {
+          // Correct - build streak
+          incrementStreak();
 
-        // Show popup
-        setScorePopup({ points: roundScore, x: 50, y: 30 });
-        setTimeout(() => setScorePopup(null), 700);
+          // Calculate score with streak
+          const roundScore =
+            calculateScore(true, 5, levelConfig.timePerRound) +
+            Math.min((streak + 1) * 3, 15);
+          setScore((prev) => prev + roundScore);
 
-        // Haptics
-        triggerHaptic('success');
+          // Show popup
+          setScorePopup({ points: roundScore, x: 50, y: 30 });
+          setTimeout(() => setScorePopup(null), 700);
 
-        playSuccess();
-        setCorrectCount((prev) => prev + 1);
-        setFeedback(`Yes! ${currentRound.targetWord.firstSound} is for ${currentRound.targetWord.word}! ${currentRound.targetWord.emoji}`);
-        speakSound(currentRound.targetWord.firstLetter);
-      } else {
-        // Wrong - break streak
-        resetStreak();
-        triggerHaptic('error');
+          // Haptics
+          triggerHaptic('success');
 
-        playError();
-        setFeedback(`Oops! The answer is ${currentRound.targetWord.firstLetter} for ${currentRound.targetWord.word} ${currentRound.targetWord.emoji}`);
-        speakSound(currentRound.targetWord.firstLetter);
-      }
-
-      setTimeout(async () => {
-        const nextIndex = roundIndex + 1;
-        if (nextIndex >= levelConfig.roundCount) {
-          setGameState('complete');
-          playCelebration();
-          triggerHaptic('celebration');
-          await handleGameComplete(score + (isCorrect ? calculateScore(true, 5, levelConfig.timePerRound) + Math.min(streak + 1, 5) * 3 : 0));
+          playSuccess();
+          setCorrectCount((prev) => prev + 1);
+          setFeedback(
+            `Yes! ${currentRound.targetWord.firstSound} is for ${currentRound.targetWord.word}! ${currentRound.targetWord.emoji}`,
+          );
+          speakSound(currentRound.targetWord.firstLetter);
         } else {
-          setRoundIndex(nextIndex);
-          const newRound = buildBeginningSoundsRound(currentLevel, usedWords);
-          setCurrentRound(newRound);
-          setUsedWords((prev) => [...prev, newRound.targetWord.word]);
-          setSelectedAnswer(null);
-          setShowResult(false);
-          setFeedback('Tap the sound you hear at the start!');
+          // Wrong - break streak
+          resetStreak();
+          triggerHaptic('error');
+
+          playError();
+          setFeedback(
+            `Oops! The answer is ${currentRound.targetWord.firstLetter} for ${currentRound.targetWord.word} ${currentRound.targetWord.emoji}`,
+          );
+          speakSound(currentRound.targetWord.firstLetter);
         }
-      }, 2000);
-    } catch (err) {
-      console.error('Answer handling failed:', err);
-      setError(err as Error);
-    }
-  }, [showResult, currentRound, levelConfig, roundIndex, usedWords, currentLevel, score, handleGameComplete, playClick, playSuccess, playError, playCelebration, speakSound]);
+
+        setTimeout(async () => {
+          const nextIndex = roundIndex + 1;
+          if (nextIndex >= levelConfig.roundCount) {
+            setGameState('complete');
+            playCelebration();
+            triggerHaptic('celebration');
+            await handleGameComplete(
+              score +
+                (isCorrect
+                  ? calculateScore(true, 5, levelConfig.timePerRound) +
+                    Math.min(streak + 1, 5) * 3
+                  : 0),
+            );
+          } else {
+            setRoundIndex(nextIndex);
+            const newRound = buildBeginningSoundsRound(currentLevel, usedWords);
+            setCurrentRound(newRound);
+            setUsedWords((prev) => [...prev, newRound.targetWord.word]);
+            setSelectedAnswer(null);
+            setShowResult(false);
+            setFeedback('Tap the sound you hear at the start!');
+          }
+        }, 2000);
+      } catch (err) {
+        console.error('Answer handling failed:', err);
+        setError(err as Error);
+      }
+    },
+    [
+      showResult,
+      currentRound,
+      levelConfig,
+      roundIndex,
+      usedWords,
+      currentLevel,
+      score,
+      handleGameComplete,
+      playClick,
+      playSuccess,
+      playError,
+      playCelebration,
+      speakSound,
+    ],
+  );
 
   const handlePlayWord = useCallback(() => {
     if (currentRound) {
@@ -298,20 +302,23 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     }
   }, [currentRound, speakWord]);
 
-  const handleLevelChange = useCallback((level: number) => {
-    playClick();
-    setCurrentLevel(level);
-    setRoundIndex(0);
-    setScore(0);
-    setCorrectCount(0);
-    setUsedWords([]);
-    setCurrentRound(null);
-    setGameState('playing');
-    setSelectedAnswer(null);
-    setShowResult(false);
-    setFeedback('Tap the sound you hear at the start!');
-    resetStreak();
-  }, [playClick, resetStreak]);
+  const handleLevelChange = useCallback(
+    (level: number) => {
+      playClick();
+      setCurrentLevel(level);
+      setRoundIndex(0);
+      setScore(0);
+      setCorrectCount(0);
+      setUsedWords([]);
+      setCurrentRound(null);
+      setGameState('playing');
+      setSelectedAnswer(null);
+      setShowResult(false);
+      setFeedback('Tap the sound you hear at the start!');
+      resetStreak();
+    },
+    [playClick, resetStreak],
+  );
 
   const handleRestart = useCallback(() => {
     playClick();
@@ -335,206 +342,230 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   }, [score, levelConfig, handleGameComplete, navigate, playClick]);
 
   return (
-    <GlobalErrorBoundary>
-      <GameContainer
-        title="Beginning Sounds"
-        score={score}
-        level={currentLevel}
-        onHome={() => navigate('/games')}
-        reportSession={false}
-      >
-        <div className="relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
-          <GameBackground type="solid_cloud" className="absolute inset-0 -z-10" />
-          {voiceFallback && (
-            <div className="w-full bg-yellow-100 text-yellow-800 p-2 rounded text-center">
-              Voice fallback enabled. You can tap answers if voice recognition fails.
-            </div>
-          )}
-          {/* Level selector */}
-          <div className="flex gap-2">
-            {LEVELS.map((level) => (
+    <GameContainer
+      title='Beginning Sounds'
+      score={score}
+      level={currentLevel}
+      onHome={() => navigate('/games')}
+      reportSession={false}
+    >
+      <div className='relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
+        <GameBackground type='solid_cloud' className='absolute inset-0 -z-10' />
+        {voiceFallback && (
+          <div className='w-full bg-yellow-100 text-yellow-800 p-2 rounded text-center'>
+            Voice fallback enabled. You can tap answers if voice recognition
+            fails.
+          </div>
+        )}
+        {/* Level selector */}
+        <div className='flex gap-2'>
+          {LEVELS.map((level) => (
+            <motion.button
+              type='button'
+              key={level.level}
+              onClick={() => handleLevelChange(level.level)}
+              whileHover={reducedMotion ? {} : { scale: 1.05 }}
+              whileTap={reducedMotion ? {} : { scale: 0.95 }}
+              className={`px-4 py-2 rounded-full font-bold transition-all ${
+                currentLevel === level.level
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
+              }`}
+            >
+              Level {level.level}
+            </motion.button>
+          ))}
+        </div>
+
+        {gameState === 'playing' && currentRound && (
+          <>
+            <div className='text-center'>
+              <p className='text-lg text-gray-700 font-medium mb-2'>
+                What sound does this word start with?
+              </p>
               <motion.button
-                type="button"
-                key={level.level}
-                onClick={() => handleLevelChange(level.level)}
+                type='button'
+                onClick={handlePlayWord}
                 whileHover={reducedMotion ? {} : { scale: 1.05 }}
                 whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                className={`px-4 py-2 rounded-full font-bold transition-all ${
-                  currentLevel === level.level
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
-                }`}
+                className='text-6xl bg-white p-4 rounded-2xl shadow-md transition-transform'
               >
-                Level {level.level}
+                {currentRound.targetWord.emoji}
               </motion.button>
-            ))}
-          </div>
-
-          {gameState === 'playing' && currentRound && (
-            <>
-              <div className="text-center">
-                <p className="text-lg text-gray-700 font-medium mb-2">What sound does this word start with?</p>
-                <motion.button
-                  type="button"
-                  onClick={handlePlayWord}
-                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                  className="text-6xl bg-white p-4 rounded-2xl shadow-md transition-transform"
-                >
-                  {currentRound.targetWord.emoji}
-                </motion.button>
-                <p className="text-2xl font-bold text-gray-800 mt-2">{currentRound.targetWord.word}</p>
-                <motion.button
-                  type="button"
-                  onClick={handlePlayWord}
-                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                  className="mt-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200 transition-colors"
-                >
-                  🔊 Hear Word
-                </motion.button>
-              </div>
-
-              <p className="text-lg text-purple-600 font-medium">{feedback}</p>
-
-              <div ref={containerRef} {...fallback.handlers} className="grid grid-cols-2 gap-3 w-full max-w-md">
-                {currentRound.options.map((option, idx) => {
-                  let buttonClass = 'bg-white border-4 border-gray-200 hover:border-blue-300';
-
-                  if (showResult) {
-                    if (option.isCorrect) {
-                      buttonClass = 'bg-green-100 border-4 border-green-400';
-                    } else if (selectedAnswer === option.letter && !option.isCorrect) {
-                      buttonClass = 'bg-red-100 border-4 border-red-400';
-                    }
-                  }
-
-                  return (
-                    <motion.button
-                      type="button"
-                      key={option.letter}
-                      ref={(el) => { optionRefs.current[idx] = el; }}
-                      onClick={() => handleAnswer(option.letter)}
-                      disabled={showResult}
-                      whileHover={reducedMotion ? {} : { scale: showResult ? 1 : 1.05 }}
-                      whileTap={reducedMotion ? {} : { scale: showResult ? 1 : 0.95 }}
-                      className={`${buttonClass} p-4 rounded-2xl font-bold text-3xl transition-all disabled:cursor-not-allowed`}
-                    >
-                      {option.letter}
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              {cursor && (
-                <GameCursor
-                  position={cursor}
-                  isPinching={false}
-                  isHandDetected={false}
-                  size={48}
-                  highContrast={true}
-                  icon="👆"
-                />
-              )}
-
-              {/* Kenney Heart HUD */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <img
-                    key={i}
-                    src={streak >= (i + 1) * 2
-                      ? '/assets/kenney/platformer/hud/hud_heart.png'
-                      : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                    alt=""
-                    className="w-8 h-8"
-                  />
-                ))}
-                <span className="ml-2 text-lg font-bold text-pink-500">x{streak}</span>
-              </div>
-
-              {/* Score Popup Animation */}
-              {scorePopup && (
-                <motion.div
-                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, y: -40, scale: 1.2 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
-                >
-                  <div className="text-5xl font-black text-green-500 drop-shadow-lg">
-                    +{scorePopup.points}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Streak Milestone */}
-              {showMilestone && (
-                <motion.div
-                  initial={{ scale: 0, rotate: -20 }}
-                  animate={{ scale: 1.2, rotate: 0 }}
-                  exit={{ scale: 0 }}
-                  className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
-                >
-                  <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
-                    🔥 {streak} Streak! 🔥
-                  </div>
-                </motion.div>
-              )}
-
-              <div className="flex gap-4 text-center">
-                <div className="bg-green-100 px-4 py-2 rounded-xl">
-                  <p className="text-sm text-green-600 font-medium">Correct</p>
-                  <p className="text-2xl font-bold text-green-700">{correctCount}</p>
-                </div>
-                <div className="bg-blue-100 px-4 py-2 rounded-xl">
-                  <p className="text-sm text-blue-600 font-medium">Score</p>
-                  <p className="text-2xl font-bold text-blue-700">{score}</p>
-                </div>
-                <div className="bg-purple-100 px-4 py-2 rounded-xl">
-                  <p className="text-sm text-purple-600 font-medium">Round</p>
-                  <p className="text-2xl font-bold text-purple-700">{roundIndex + 1}/{levelConfig.roundCount}</p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {gameState === 'complete' && (
-            <div className="text-center">
-              <p className="text-4xl mb-4">🎉</p>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Great Job!</h2>
-              <p className="text-xl text-gray-600 mb-4">
-                You got {correctCount} out of {levelConfig.roundCount} correct!
+              <p className='text-2xl font-bold text-gray-800 mt-2'>
+                {currentRound.targetWord.word}
               </p>
-              <p className="text-2xl font-bold text-purple-600 mb-2">Score: {score}</p>
-              {maxStreak >= 5 && (
-                <p className="text-lg font-bold text-orange-500 mb-6">🔥 Best Streak: {maxStreak}!</p>
-              )}
+              <motion.button
+                type='button'
+                onClick={handlePlayWord}
+                whileHover={reducedMotion ? {} : { scale: 1.05 }}
+                whileTap={reducedMotion ? {} : { scale: 0.95 }}
+                className='mt-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200 transition-colors'
+              >
+                🔊 Hear Word
+              </motion.button>
             </div>
-          )}
 
-          <div className="flex gap-3">
-            <motion.button
-              type="button"
-              onClick={handleRestart}
-              whileHover={reducedMotion ? {} : { scale: 1.05 }}
-              whileTap={reducedMotion ? {} : { scale: 0.95 }}
-              className="px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all"
+            <p className='text-lg text-purple-600 font-medium'>{feedback}</p>
+
+            <div
+              ref={containerRef}
+              {...fallback.handlers}
+              className='grid grid-cols-2 gap-3 w-full max-w-md'
             >
-              Play Again
-            </motion.button>
-            <motion.button
-              type="button"
-              onClick={handleFinish}
-              whileHover={reducedMotion ? {} : { scale: 1.05 }}
-              whileTap={reducedMotion ? {} : { scale: 0.95 }}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-bold shadow-lg transition-all"
-            >
-              Finish
-            </motion.button>
+              {currentRound.options.map((option, idx) => {
+                let buttonClass =
+                  'bg-white border-4 border-gray-200 hover:border-blue-300';
+
+                if (showResult) {
+                  if (option.isCorrect) {
+                    buttonClass = 'bg-green-100 border-4 border-green-400';
+                  } else if (
+                    selectedAnswer === option.letter &&
+                    !option.isCorrect
+                  ) {
+                    buttonClass = 'bg-red-100 border-4 border-red-400';
+                  }
+                }
+
+                return (
+                  <motion.button
+                    type='button'
+                    key={option.letter}
+                    ref={(el) => {
+                      optionRefs.current[idx] = el;
+                    }}
+                    onClick={() => handleAnswer(option.letter)}
+                    disabled={showResult}
+                    whileHover={
+                      reducedMotion ? {} : { scale: showResult ? 1 : 1.05 }
+                    }
+                    whileTap={
+                      reducedMotion ? {} : { scale: showResult ? 1 : 0.95 }
+                    }
+                    className={`${buttonClass} p-4 rounded-2xl font-bold text-3xl transition-all disabled:cursor-not-allowed`}
+                  >
+                    {option.letter}
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {cursor && (
+              <GameCursor
+                position={cursor}
+                isPinching={false}
+                isHandDetected={false}
+                size={48}
+                highContrast={true}
+                icon='👆'
+              />
+            )}
+
+            <div className='w-full relative z-10 -mt-2 mb-4'>
+              <GameHUD
+                score={score}
+                streak={streak}
+                levelInfo={`Level ${currentLevel}`}
+                rightHeaderContent={
+                  <div className='bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm'>
+                    🎯 {roundIndex + 1}/{levelConfig.roundCount}
+                  </div>
+                }
+              />
+            </div>
+
+            {/* Score Popup Animation */}
+            {scorePopup && (
+              <motion.div
+                initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                animate={{ opacity: 1, y: -40, scale: 1.2 }}
+                exit={{ opacity: 0 }}
+                className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50'
+              >
+                <div className='text-5xl font-black text-green-500 drop-shadow-lg'>
+                  +{scorePopup.points}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Streak Milestone */}
+            {showMilestone && (
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1.2, rotate: 0 }}
+                exit={{ scale: 0 }}
+                className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
+              >
+                <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
+                  🔥 {streak} Streak! 🔥
+                </div>
+              </motion.div>
+            )}
+
+            <div className='flex gap-4 text-center'>
+              <div className='bg-green-100 px-4 py-2 rounded-xl'>
+                <p className='text-sm text-green-600 font-medium'>Correct</p>
+                <p className='text-2xl font-bold text-green-700'>
+                  {correctCount}
+                </p>
+              </div>
+              <div className='bg-blue-100 px-4 py-2 rounded-xl'>
+                <p className='text-sm text-blue-600 font-medium'>Score</p>
+                <p className='text-2xl font-bold text-blue-700'>{score}</p>
+              </div>
+              <div className='bg-purple-100 px-4 py-2 rounded-xl'>
+                <p className='text-sm text-purple-600 font-medium'>Round</p>
+                <p className='text-2xl font-bold text-purple-700'>
+                  {roundIndex + 1}/{levelConfig.roundCount}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {gameState === 'complete' && (
+          <div className='text-center'>
+            <p className='text-4xl mb-4'>🎉</p>
+            <h2 className='text-3xl font-bold text-gray-800 mb-2'>
+              Great Job!
+            </h2>
+            <p className='text-xl text-gray-600 mb-4'>
+              You got {correctCount} out of {levelConfig.roundCount} correct!
+            </p>
+            <p className='text-2xl font-bold text-purple-600 mb-2'>
+              Score: {score}
+            </p>
+            {maxStreak >= 5 && (
+              <p className='text-lg font-bold text-orange-500 mb-6'>
+                🔥 Best Streak: {maxStreak}!
+              </p>
+            )}
           </div>
+        )}
+
+        <div className='flex gap-3'>
+          <motion.button
+            type='button'
+            onClick={handleRestart}
+            whileHover={reducedMotion ? {} : { scale: 1.05 }}
+            whileTap={reducedMotion ? {} : { scale: 0.95 }}
+            className='px-6 py-3 bg-slate-100 border-2 border-slate-200 hover:bg-slate-200 text-slate-700 rounded-xl font-black transition-all'
+          >
+            Play Again
+          </motion.button>
+          <motion.button
+            type='button'
+            onClick={handleFinish}
+            whileHover={reducedMotion ? {} : { scale: 1.05 }}
+            whileTap={reducedMotion ? {} : { scale: 0.95 }}
+            className='px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-bold shadow-lg transition-all'
+          >
+            Finish
+          </motion.button>
         </div>
-        
-      </GameContainer>
-    </GlobalErrorBoundary>
+      </div>
+    </GameContainer>
   );
 });
 
@@ -542,8 +573,8 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
 export const BeginningSounds = memo(function BeginningSoundsComponent() {
   return (
     <GameShell
-      gameId="beginning-sounds"
-      gameName="Beginning Sounds"
+      gameId='beginning-sounds'
+      gameName='Beginning Sounds'
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >

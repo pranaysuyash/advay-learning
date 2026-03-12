@@ -262,6 +262,25 @@ export const WELLNESS_GAMES: GameManifest[] = [
     ],
     easterEggs: [],
   },
+  {
+    id: 'tidy-up-time',
+    name: 'Tidy Up Time',
+    tagline: 'Clean up the messy room! Put things where they belong. 🧹',
+    path: '/games/tidy-up-time',
+    icon: 'broom',
+    worldId: 'wellness',
+    vibe: 'active',
+    ageRange: '3-5',
+    isNew: true,
+    cv: [],
+    listed: true,
+    drops: [
+      { itemId: 'item-star', chance: 0.4 },
+      { itemId: 'item-sparkle', chance: 0.3 },
+      { itemId: 'item-trophy', chance: 0.2 },
+    ],
+    easterEggs: [],
+  },
 ];
 
 export const FEELING_FOREST_GAMES: GameManifest[] = [

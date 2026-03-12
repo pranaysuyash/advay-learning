@@ -11,7 +11,9 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { GameHUD } from '../components/game/GameHUD';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -43,6 +45,7 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('letter-catcher');
+  const { saveProgress } = useGameProgress('letter-catcher');
   useGameSessionProgress({
     gameName: 'Letter Catcher',
     score,
@@ -133,9 +136,10 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: caught, completed: true, level: currentLevel });
     await onGameComplete(caught);
     navigate('/games');
-  }, [caught, onGameComplete, navigate, playClick]);
+  }, [caught, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -182,18 +186,16 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
 
         {gameState === 'playing' && (
           <div
-            className='relative w-80 h-64 bg-slate-100 rounded-xl overflow-hidden cursor-crosshair'
+            className='relative w-80 h-100 bg-slate-100 rounded-xl overflow-hidden cursor-crosshair'
             onMouseMove={handleMouseMove}
           >
-            <div className='absolute top-2 left-2 bg-white px-3 py-1 rounded-full text-amber-600 font-bold'>
-              Catch: {targetLetter}
-            </div>
-            {streak > 0 && (
-              <div className='absolute top-2 right-2 bg-orange-500 text-white px-3 py-1 rounded-full font-bold flex items-center gap-1'>
-                <span>🔥</span>
-                <span>{streak}</span>
-              </div>
-            )}
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={currentLevel}
+              levelInfo={`Catch: ${targetLetter}`}
+              showHearts={true}
+            />
             <AnimatePresence>
               {scorePopup && (
                 <motion.div

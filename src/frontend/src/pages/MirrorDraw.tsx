@@ -15,6 +15,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
@@ -84,6 +85,7 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('mirror-draw');
+  const { saveProgress } = useGameProgress('mirror-draw');
 
   useEffect(() => {
     let mounted = true;
@@ -294,9 +296,10 @@ const MirrorDrawGame = memo(function MirrorDrawComponent() {
               void speak('Level complete! Great mirror drawing!');
             }
           }
-          levelTimeoutRef.current = setTimeout(() => {
+          levelTimeoutRef.current = setTimeout(async () => {
             setShowCelebration(false);
             if (level >= MAX_LEVEL) {
+              await saveProgress({ score: passedCount, completed: true, level });
               onGameComplete();
               setGameCompleted(true);
               setIsPlaying(false);

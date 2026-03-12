@@ -5,6 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
@@ -49,7 +50,7 @@ function MoneyMatchContent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('money-match');
-  // saveProgress hook is available but we don't currently record progress for this game
+  const { saveProgress } = useGameProgress('money-match');
 
   useGameSessionProgress({
     gameName: 'Money Match',
@@ -123,9 +124,10 @@ function MoneyMatchContent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick]);
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const currentTotal = selectedCoins.reduce((sum, c) => sum + c.value, 0);
 

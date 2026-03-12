@@ -4,6 +4,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateQuestion, calculateScore, type CompareQuestion } from '../games/moreOrLessLogic';
@@ -31,6 +32,7 @@ function MoreOrLessContent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('more-or-less');
+  const { saveProgress } = useGameProgress('more-or-less');
 
   useGameSessionProgress({
     gameName: 'More or Less',
@@ -101,9 +103,11 @@ function MoreOrLessContent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
-    await onGameComplete(Math.round(score / 20));
+    const finalScore = Math.round(score / 20);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick]);
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const renderGroup = (emoji: string, count: number, side: 'left' | 'right') => {
     const correctSide = question ? getCorrectSide(question) : null;

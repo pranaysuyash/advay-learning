@@ -25,6 +25,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -83,6 +84,7 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
   const [isLoading, setIsLoading] = useState(true);
 
   const { onGameComplete } = useGameDrops('counting-collectathon');
+  const { saveProgress } = useGameProgress('counting-collectathon');
   const { playSuccess, playError, playCelebration, play } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -288,9 +290,12 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
 
         if (newState.status === 'GAME_COMPLETE') {
           const finalScore = calculateFinalScore(newState);
-          onGameComplete(finalScore);
           setShowCelebration(true);
           playCelebration();
+          (async () => {
+            await saveProgress({ score: finalScore, completed: true, level: 1 });
+            onGameComplete(finalScore);
+          })();
         }
 
         return newState;
@@ -299,7 +304,7 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
 
     render();
     gameLoopRef.current = requestAnimationFrame(gameLoop);
-  }, [render, play, playError, playSuccess, playCelebration, onGameComplete]);
+  }, [render, play, playError, playSuccess, playCelebration, onGameComplete, saveProgress]);
 
   useEffect(() => {
     gameLoopRef.current = requestAnimationFrame(gameLoop);

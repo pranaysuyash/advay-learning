@@ -6,11 +6,13 @@
 
 import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateCountingScene, calculateScore, type CountingScene } from '../games/countingObjectsLogic';
@@ -31,7 +33,6 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const [correct, setCorrect] = useState(0);
   const {
     streak,
-    maxStreak,
     showMilestone,
     scorePopup,
     incrementStreak,
@@ -44,6 +45,7 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('counting-objects');
+  const { saveProgress } = useGameProgress('counting-objects');
 
   useGameSessionProgress({
     gameName: 'Counting Objects',
@@ -105,9 +107,11 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
-    await onGameComplete(Math.round(score / 20));
+    const finalScore = Math.round(score / 20);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick]);
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const answerOptions = scene
     ? [...new Set([scene.answer, scene.answer + 1, scene.answer - 1, scene.answer + 2])]
@@ -178,27 +182,14 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
             </div>
           ) : (
             <>
-              {/* Streak HUD */}
-              <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 shadow-sm'>
-                <span className='font-black text-lg'>🔥 Streak</span>
-                <div className='flex gap-1'>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <img
-                      key={i}
-                      src={
-                        streak >= i * 2
-                          ? '/assets/kenney/platformer/hud/hud_heart.png'
-                          : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                      }
-                      alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
-                      className='w-6 h-6'
-                    />
-                  ))}
-                </div>
-                <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
-                  {streak}
-                </span>
-              </div>
+              {/* Game HUD */}
+              <GameHUD
+                score={score}
+                streak={streak}
+                level={currentLevel}
+                round={round}
+                showHearts={true}
+              />
 
               {/* Streak milestone popup */}
               {showMilestone && (
@@ -275,39 +266,21 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
                 }`}>
                 {feedback}
               </div>
-
-              {/* Stats + controls */}
-              <div className='flex items-center justify-between gap-3'>
-                <div className='flex gap-3'>
-                  <div className='bg-emerald-50 border-2 border-emerald-200 px-4 py-2 rounded-xl text-center'>
-                    <p className='text-xs font-black uppercase text-emerald-600'>Correct</p>
-                    <p className='text-2xl font-black text-emerald-700'>{correct}</p>
-                  </div>
-                  <div className='bg-orange-50 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
-                    <p className='text-xs font-black uppercase text-orange-600'>Score</p>
-                    <p className='text-2xl font-black text-orange-700'>{score}</p>
-                  </div>
-                  <div className='bg-orange-100 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
-                    <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
-                    <p className='text-2xl font-black text-orange-700'>{maxStreak}</p>
-                  </div>
-                </div>
-                <div className='flex gap-2'>
-                  <button
-                    type='button'
-                    onClick={startNewRound}
-                    className='px-5 py-3 rounded-xl border-2 border-slate-200 bg-white font-black text-slate-700 hover:border-slate-300 transition-all'
-                  >
-                    Skip
-                  </button>
-                  <button
-                    type='button'
-                    onClick={handleFinish}
-                    className='px-5 py-3 rounded-xl bg-[#F97316] text-white font-black shadow-[0_3px_0_#C2410C] hover:scale-105 active:scale-95 transition-all'
-                  >
-                    Finish
-                  </button>
-                </div>
+              <div className='flex gap-2 justify-center mt-4'>
+                <button
+                  type='button'
+                  onClick={startNewRound}
+                  className='px-5 py-3 rounded-xl border-2 border-slate-200 bg-white font-black text-slate-700 hover:border-slate-300 transition-all'
+                >
+                  Skip
+                </button>
+                <button
+                  type='button'
+                  onClick={handleFinish}
+                  className='px-5 py-3 rounded-xl bg-[#F97316] text-white font-black shadow-[0_3px_0_#C2410C] hover:scale-105 active:scale-95 transition-all'
+                >
+                  Finish
+                </button>
               </div>
             </>
           )}

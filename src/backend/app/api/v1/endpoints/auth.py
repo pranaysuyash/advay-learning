@@ -264,12 +264,7 @@ async def reset_password(
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
 
-    # Validate password length
-    if len(new_password) < 8:
-        from app.core.exceptions import PasswordStrengthError
-        raise PasswordStrengthError()
-
-    # Reset password
+    # Reset password (validation handled in UserService)
     await UserService.reset_password(db, user, new_password)
 
     return {"message": "Password reset successfully. You can now log in with your new password."}

@@ -14,7 +14,9 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { GameHUD } from '../components/game/GameHUD';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -101,6 +103,7 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('target-practice');
+  const { saveProgress } = useGameProgress('target-practice');
 
   // Progress tracking
   useGameSessionProgress({
@@ -329,9 +332,10 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
   // Handle finish
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score, completed: true, level: difficulty.level });
     await onGameComplete(score);
     navigate('/games');
-  }, [playClick, onGameComplete, score, navigate]);
+  }, [playClick, onGameComplete, score, navigate, saveProgress, difficulty.level]);
 
   // Handle play again
   const handlePlayAgain = useCallback(() => {
@@ -422,26 +426,16 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
         {/* Playing State */}
         {gameState === 'playing' && (
           <div className="flex flex-col items-center gap-4 w-full max-w-4xl">
-            {/* HUD */}
-            <div className="flex items-center gap-4 w-full justify-between">
-              {/* Timer */}
-              <div className="bg-white px-4 py-2 rounded-xl border-2 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
-                <span
-                  className={`text-2xl font-black ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-700'
-                    }`}
-                >
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={difficulty.level}
+              rightHeaderContent={
+                <div className={`bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 shadow-sm ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-slate-600'}`}>
                   ⏱️ {timeLeft}s
-                </span>
-              </div>
-
-              {/* Streak */}
-              {streak > 0 && (
-                <div className="bg-orange-500 text-white px-4 py-2 rounded-xl font-black shadow-lg flex items-center gap-2">
-                  <KenneyIcon type='heart' size={20} />
-                  <span className="text-xl">{streak}</span>
                 </div>
-              )}
-            </div>
+              }
+            />
 
             {/* Streak Milestone Overlay */}
             <AnimatePresence>

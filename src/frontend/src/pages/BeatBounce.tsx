@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -55,6 +56,7 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
 
   const { playSuccess, playClick, playError } = useAudio();
   const { onGameComplete } = useGameDrops('beat-bounce');
+  const { saveProgress } = useGameProgress('beat-bounce');
   useGameSessionProgress({ gameName: 'Beat Bounce', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.level === currentLevel) || LEVELS[0];
@@ -81,11 +83,12 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
     playClick();
   }, [currentLevel, playClick, resetStreak]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     setGameState('complete');
+    await saveProgress({ score, completed: true, level: currentLevel });
     onGameComplete(score);
     playSuccess();
-  }, [score, onGameComplete, playSuccess]);
+  }, [score, currentLevel, onGameComplete, playSuccess, saveProgress]);
 
   const handleTap = useCallback(() => {
     if (gameState !== 'playing') return;

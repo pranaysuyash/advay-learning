@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
+import { GameHUD } from '../components/game/GameHUD';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -17,6 +18,8 @@ import {
   type TargetSlot,
 } from '../games/shapeStackerLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import { useTTS } from '../hooks/useTTS';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 
 
 // SVG shapes for rendering
@@ -49,16 +52,19 @@ function ShapeStackerContent() {
   const [streak, setStreak] = useState(0);
   const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const [feedback, setFeedback] = useState('Match the falling shapes!');
 
   const timerRef = useRef<number | null>(null);
   const gameLoopRef = useRef<number | null>(null);
 
   const { playSuccess, playClick, playError } = useAudio();
+  const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('shape-stacker');
-  const { saveProgress: _saveProgress } = useGameProgress('shape-stacker');
+  const { saveProgress } = useGameProgress('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
-  const FALL_SPEED = 0.15;
+  // Slower fall speed, scaling with level
+  const FALL_SPEED = currentLevel === 1 ? 0.05 : currentLevel === 2 ? 0.08 : 0.12;
 
   const startGame = useCallback(() => {
     const newShapes = createShapes(currentLevel);
@@ -68,20 +74,22 @@ function ShapeStackerContent() {
     setScore(0);
     setMatches(0);
     setStreak(0);
-    setScorePopup(null);
-    setShowStreakMilestone(false);
-    setTimeLeft(45);
+    setFeedback('Match the falling shapes!');
     setGameState('playing');
     playClick();
-  }, [currentLevel, playClick]);
+    if (ttsEnabled) {
+      speak('Tap the falling shapes to drop them into the matching slots below!');
+    }
+  }, [currentLevel, playClick, speak, ttsEnabled]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     const finalScore = calculateScore(matches, targets.length, timeLeft);
     setScore(finalScore);
     setGameState('complete');
-    onGameComplete(finalScore);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
     playSuccess();
-  }, [matches, targets.length, timeLeft, onGameComplete, playSuccess]);
+  }, [matches, targets.length, timeLeft, onGameComplete, playSuccess, saveProgress, currentLevel]);
 
   const handleShapeClick = useCallback((shape: FallingShape) => {
     if (gameState !== 'playing') return;
@@ -107,6 +115,7 @@ function ShapeStackerContent() {
       setScorePopup({ points: totalPoints, x: shape.x, y: shape.y });
       setTimeout(() => setScorePopup(null), 700);
       
+      setFeedback(`Great match! ${newStreak > 1 ? `✨ ${newStreak}x Streak!` : ''}`);
       playSuccess();
       triggerHaptic('success');
 
@@ -124,6 +133,7 @@ function ShapeStackerContent() {
         handleComplete();
       }
     } else {
+      setFeedback(`Oops! That's a ${shape.shape}.`);
       playError();
       triggerHaptic('error');
       setStreak(0);
@@ -196,12 +206,14 @@ function ShapeStackerContent() {
   if (gameState === 'start') {
     return (
       <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false}>
-        <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
-          <h2 className="text-3xl font-bold text-indigo-600">Shape Stacker 🔷</h2>
-          <p className="text-lg text-slate-700 text-center">
-            Tap the falling shapes to match them with the target slots!
+        <div className="flex flex-col items-center justify-center h-full gap-6 p-8 relative">
+          <VoiceInstructions text="Tap the falling shapes to match them with the target slots!" autoPlay={true} />
+          
+          <h2 className="text-4xl font-extrabold text-indigo-600 mb-2">Shape Stacker 🔷</h2>
+          <p className="text-xl text-slate-700 font-bold text-center max-w-lg mb-4 bg-white/50 p-6 rounded-2xl border-2 border-indigo-100 shadow-sm">
+            Watch carefully! As shapes fall from the top, <span className="text-indigo-600">tap</span> them to drop them into the matching empty slots at the bottom. Fill all slots to win!
           </p>
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 items-center mb-4">
             <button
               type="button"
               onClick={() => setCurrentLevel(prev => Math.max(1, prev - 1))}
@@ -264,21 +276,25 @@ function ShapeStackerContent() {
         className="relative w-full h-full"
         style={{ backgroundColor: GAME_COLORS.background }}
       >
-        <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
-            <span className="font-bold text-slate-700">Score: {score}</span>
-          </div>
-          <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
-            <span className="font-bold text-slate-700">Matches: {matches}/{targets.length}</span>
-          </div>
-          {streak > 0 && (
-            <div className="bg-orange-100 rounded-lg px-4 py-2 shadow border-2 border-orange-200">
-              <span className="font-bold text-orange-600">🔥 {streak}</span>
+        <GameHUD
+          score={score}
+          streak={streak}
+          level={currentLevel}
+          progressPercentage={(matches / targets.length) * 100}
+          rightHeaderContent={
+            <div className="flex gap-4 items-center">
+              <div className="bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm text-sm">
+                🎯 {matches} / {targets.length}
+              </div>
+              <div className={`bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 shadow-sm text-sm ${timeLeft <= 10 ? 'text-red-500 animate-pulse border-red-200' : 'text-slate-600 border-slate-200'}`}>
+                ⏱️ {timeLeft}s
+              </div>
             </div>
-          )}
-          <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
-            <span className="font-bold text-slate-700">Time: {timeLeft}s</span>
-          </div>
+          }
+        />
+
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-indigo-200 shadow-[0_4px_0_#A5B4FC] text-advay-slate font-bold text-lg text-center min-w-[320px] z-10'>
+          {feedback}
         </div>
 
         {/* Score Popup */}

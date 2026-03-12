@@ -4,9 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface GameHUDProps {
     score?: number;
     streak?: number;
+    showHearts?: boolean; // Legacy no-op toggle used by older game pages
     maxStreakHearts?: number; // Visual limit, usually 5 hearts
+    level?: number;
     levelInfo?: React.ReactNode;
+    leftHeaderContent?: React.ReactNode; // Legacy/custom content slot
+    round?: number;
+    totalRounds?: number;
+    progress?: number; // Legacy alias for progressPercentage
     progressPercentage?: number;
+    timeLeft?: number; // Legacy timer prop used by some pages
     rightHeaderContent?: React.ReactNode;
 }
 
@@ -18,21 +25,46 @@ interface GameHUDProps {
 export const GameHUD: React.FC<GameHUDProps> = ({
     score,
     streak,
+    showHearts = true,
     maxStreakHearts = 5,
+    level,
     levelInfo,
+    leftHeaderContent,
+    round,
+    totalRounds,
+    progress,
     progressPercentage,
+    timeLeft,
     rightHeaderContent,
 }) => {
+    const effectiveProgress = progressPercentage ?? progress;
+
     return (
         <div className="px-4 py-3 bg-white/90 backdrop-blur-md border-b-4 border-[#F2CC8F] z-10 relative shadow-[0_4px_15px_rgba(0,0,0,0.05)] rounded-b-2xl mb-4 max-w-4xl mx-auto w-full">
-            <div className="flex justify-between items-center text-sm text-text-secondary mb-2">
-                {levelInfo ? (
-                    <span className="font-black text-advay-slate text-lg">{levelInfo}</span>
-                ) : (
-                    <div /> // Filler for flex space-between
-                )}
+            <div className="flex justify-between items-start text-sm text-text-secondary mb-2">
+                <div className="flex flex-col gap-1">
+                    {leftHeaderContent}
+                    {levelInfo ? (
+                        <div className="font-black text-advay-slate text-lg">{levelInfo}</div>
+                    ) : level !== undefined ? (
+                        <div className="bg-amber-100 text-amber-700 px-4 py-1 rounded-xl font-black border-2 border-amber-200 shadow-sm text-sm uppercase tracking-wider inline-block">
+                            Level {level}
+                        </div>
+                    ) : null}
+
+                    {round !== undefined && (
+                        <div className="text-slate-400 font-bold text-xs uppercase tracking-widest ml-1">
+                            Round {round} {totalRounds !== undefined ? `/ ${totalRounds}` : ''}
+                        </div>
+                    )}
+                </div>
 
                 <div className="flex items-center gap-3">
+                    {timeLeft !== undefined && (
+                        <div className="bg-slate-50 border-2 border-slate-200 px-3 py-1 rounded-xl shadow-inner font-black text-slate-600 text-sm">
+                            ⏱ {Math.ceil(timeLeft)}s
+                        </div>
+                    )}
                     {rightHeaderContent}
                     {score !== undefined && (
                         <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-200 px-3 py-1 rounded-xl shadow-inner">
@@ -43,16 +75,16 @@ export const GameHUD: React.FC<GameHUDProps> = ({
                 </div>
             </div>
 
-            {progressPercentage !== undefined && (
+            {effectiveProgress !== undefined && (
                 <div className="h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner mb-3 border-2 border-slate-300/50">
                     <div
                         className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-300 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]"
-                        style={{ width: `${Math.min(100, Math.max(0, progressPercentage))}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, effectiveProgress))}%` }}
                     />
                 </div>
             )}
 
-            {streak !== undefined && (
+            {streak !== undefined && showHearts && (
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 bg-pink-50/50 rounded-xl px-3 py-2 border-2 border-pink-200 shadow-[0_2px_0_#FBCFE8]">
                         {/* Display up to maxStreakHearts based on 2 streak points = 1 full heart */}

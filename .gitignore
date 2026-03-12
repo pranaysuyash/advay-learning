@@ -111,6 +111,8 @@ src/backend/public/profile_photos/**
 
 # Runtime temp files
 .tmp/
+tmp/
+*.tmp
 *.pid
 
 # Secrets

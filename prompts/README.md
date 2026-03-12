@@ -13,16 +13,18 @@ This folder contains the reusable prompts that govern how agents work on this re
 **Active Sprint**: See `docs/LAUNCH_SPRINT_SPEC.md` for 4-day launch readiness plan.
 
 ### Quick Links
+
 - Spec: `docs/LAUNCH_SPRINT_SPEC.md`
 - Ticket: `TCK-20260308-002` in `docs/WORKLOG_ADDENDUM_v4.md`
 
 ### Sprint Tasks
-| Track | Priority | Spec Section |
-|-------|----------|-------------|
-| Subscription + Progress (45 games) | P0 | Track A |
-| Test Stability | P0 | Track B |
-| Security (npm audit) | P1 | Track C |
-| Accessibility | P2 | Track D |
+
+| Track                              | Priority | Spec Section |
+| ---------------------------------- | -------- | ------------ |
+| Subscription + Progress (45 games) | P0       | Track A      |
+| Test Stability                     | P0       | Track B      |
+| Security (npm audit)               | P1       | Track C      |
+| Accessibility                      | P2       | Track D      |
 
 ## 🚫 Critical Rules
 
@@ -59,6 +61,7 @@ This folder contains the reusable prompts that govern how agents work on this re
   - Core principle: "Docs are hypotheses. Code is ground truth."
   - 7-phase process: orientation → standards discovery → docs inventory → code verification → discrepancy handling → doc debt closure → readiness assessment
   - Use for: comprehensive audits, readiness checks, documentation debt identification
+- **Expanded launch-readiness auditor** (public-launch reality check beyond code/tests): `prompts/audit/launch-readiness-expanded-v1.0.md`
 - **Full-flow findings auditor** (stakeholder simulation + immediate finding capture across runtime, logic, structure, and optimization): `prompts/audit/full-flow-findings-auditor-v1.0.md`
 - One-file audit: `prompts/audit/audit-v1.5.1.md`
 - Master audit agent prompt (full coverage + research runway; two-pass): `prompts/audit/master-audit-agent-v1.0.md`
@@ -140,7 +143,6 @@ This folder contains the reusable prompts that govern how agents work on this re
   - Shared infrastructure principles (centralized hand tracking, progress, camera)
   - Game development guidelines
   - ADR-001 and ADR-002
-  
 - **Hand Tracking Architecture**: `docs/architecture/HAND_TRACKING_ARCHITECTURE.md`
   - Centralized hand tracking service design
   - Migration plan from decentralized implementations

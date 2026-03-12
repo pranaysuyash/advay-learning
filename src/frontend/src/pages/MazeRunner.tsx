@@ -16,6 +16,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -49,6 +50,7 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
   const { onGameComplete } = useGameDrops('maze-runner');
+  const { saveProgress } = useGameProgress('maze-runner');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -172,7 +174,7 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
 
   // Handle hand tracking
   const handleHandFrame = useCallback(
-    (frame: TrackedHandFrame) => {
+    async (frame: TrackedHandFrame) => {
       if (!frame.indexTip || gameStateRef.current.status !== 'playing') return;
 
       const cursor = { x: frame.indexTip.x, y: frame.indexTip.y };
@@ -206,12 +208,13 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
         triggerHaptic('celebration');
         playCelebration();
         const scores = calculateFinalScore(newState);
+        await saveProgress({ score: scores.total, completed: true, level: 1 });
         onGameComplete(scores.total);
         setShowCelebration(true);
         if (ttsEnabled) speak('Maze complete! Great job!');
       }
     },
-    [playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]
+    [playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete, saveProgress]
   );
 
   const { handVisible } = useGameHandTracking({

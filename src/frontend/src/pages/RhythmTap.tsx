@@ -30,7 +30,7 @@ function RhythmTapContent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('rhythm-tap');
-  const { saveProgress: _saveProgress } = useGameProgress('rhythm-tap');
+  const { saveProgress } = useGameProgress('rhythm-tap');
 
   useGameSessionProgress({
     gameName: 'Rhythm Tap',
@@ -123,9 +123,10 @@ function RhythmTapContent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick]);
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer

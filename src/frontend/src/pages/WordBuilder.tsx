@@ -7,6 +7,7 @@ import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
+import { GameHUD } from '../components/game/GameHUD';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -551,16 +552,25 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
         <div className='absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-[3rem] border-[8px] border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
           <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-          <div className='absolute top-8 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
+          {isPlaying && (
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={level}
+              showHearts={true}
+            />
+          )}
+
+          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
             {feedback}
           </div>
 
-          <div className='absolute top-8 right-8 px-6 py-3 rounded-[1.5rem] bg-white/95 border-3 border-[#F2CC8F] text-slate-400 font-bold text-xl shadow-[0_4px_0_#E5B86E] z-20'>
+          <div className='absolute top-24 right-8 px-6 py-3 rounded-[1.5rem] bg-white/95 border-3 border-[#F2CC8F] text-slate-400 font-bold text-xl shadow-[0_4px_0_#E5B86E] z-20'>
             Take your time!
           </div>
 
           {word && (
-            <div className='absolute top-8 left-8 px-8 py-4 rounded-[2rem] bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] z-20'>
+            <div className='absolute top-24 left-8 px-8 py-4 rounded-[2rem] bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] z-20'>
               <span className='font-black tracking-widest text-3xl flex gap-2'>
                 {word.split('').map((letter, i) => (
                   <span
@@ -577,23 +587,6 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
                   </span>
                 ))}
               </span>
-            </div>
-          )}
-
-          {/* Kenney Heart HUD */}
-          {isPlaying && (
-            <div className="absolute bottom-8 left-8 flex items-center gap-1 bg-white/95 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] z-20">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <img
-                  key={i}
-                  src={streak >= (i + 1) * 2
-                    ? '/assets/kenney/platformer/hud/hud_heart.png'
-                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                  alt=""
-                  className="w-7 h-7"
-                />
-              ))}
-              <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
             </div>
           )}
 

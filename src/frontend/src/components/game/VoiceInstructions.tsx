@@ -17,10 +17,14 @@ import { ttsService } from '../../services/ai/tts/TTSService';
 
 interface VoiceInstructionsProps {
   /** Instructions to speak (text) */
-  instructions: string | string[];
+  instructions?: string | string[];
+  /** Legacy alias used by older callers */
+  text?: string | string[];
 
   /** Auto-speak on mount (default: true) */
   autoSpeak?: boolean;
+  /** Legacy alias used by older callers */
+  autoPlay?: boolean;
 
   /** Show visual indicator while speaking (default: true) */
   showIndicator?: boolean;
@@ -52,7 +56,9 @@ interface VoiceInstructionsProps {
 
 export function VoiceInstructions({
   instructions,
-  autoSpeak = true,
+  text,
+  autoSpeak,
+  autoPlay,
   showIndicator = true,
   lang = 'en-US',
   rate = 0.9, // MANDATORY: Slightly slower for clarity
@@ -64,6 +70,8 @@ export function VoiceInstructions({
   replayButtonPosition = 'top-right',
 }: VoiceInstructionsProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const resolvedInstructions = instructions ?? text ?? '';
+  const shouldAutoSpeak = autoSpeak ?? autoPlay ?? true;
 
   // Cleanup on unmount
   useEffect(() => {
@@ -76,9 +84,9 @@ export function VoiceInstructions({
   const speak = useCallback(() => {
     ttsService.stop();
 
-    const textToSpeak = Array.isArray(instructions)
-      ? instructions.join(' ... ')
-      : instructions;
+    const textToSpeak = Array.isArray(resolvedInstructions)
+      ? resolvedInstructions.join(' ... ')
+      : resolvedInstructions;
 
     setIsSpeaking(true);
     onSpeechStart?.();
@@ -89,11 +97,11 @@ export function VoiceInstructions({
     }).catch(() => {
       setIsSpeaking(false);
     });
-  }, [instructions, lang, pitch, rate, voiceName, onSpeechStart, onSpeechEnd]);
+  }, [resolvedInstructions, lang, pitch, rate, voiceName, onSpeechStart, onSpeechEnd]);
 
   // Auto-speak on mount or instruction change
   useEffect(() => {
-    if (autoSpeak) {
+    if (shouldAutoSpeak) {
       // Delay slightly to avoid browser blocking (requires user interaction)
       const timer = setTimeout(() => {
         speak();
@@ -101,7 +109,7 @@ export function VoiceInstructions({
 
       return () => clearTimeout(timer);
     }
-  }, [instructions, autoSpeak, speak]);
+  }, [shouldAutoSpeak, speak]);
 
   return (
     <>

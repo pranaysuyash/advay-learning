@@ -12,6 +12,7 @@ import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { GameHUD } from '../components/game/GameHUD';
 import {
   LEVELS,
   getAnimalsForLevel,
@@ -274,27 +275,14 @@ function AnimalSoundsGame({
 
         {gameState === 'playing' && targetAnimal && (
           <div className='text-center w-full max-w-2xl'>
-            {/* Streak HUD */}
-            <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
-              <div className='flex items-center gap-1'><KenneyIcon type='heart' size={20} /><span className='font-black text-lg'>Streak</span></div>
-              <div className='flex gap-1'>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <img
-                    key={i}
-                    src={
-                      streak >= i * 2
-                        ? '/assets/kenney/platformer/hud/hud_heart.png'
-                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                    }
-                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
-                    className='w-6 h-6'
-                  />
-                ))}
-              </div>
-              <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
-                {streak}
-              </span>
-            </div>
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={currentLevel}
+              round={round + 1}
+              totalRounds={5}
+              showHearts={true}
+            />
 
             {/* Character mascot */}
             <div className='flex justify-center mb-4'>
@@ -383,20 +371,6 @@ function AnimalSoundsGame({
                   </motion.p>
                 )}
               </AnimatePresence>
-            </div>
-            <div className='flex gap-4 mt-4'>
-              <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
-                <p className='text-xs font-black uppercase text-green-600'>Correct</p>
-                <p className='text-2xl font-bold text-green-700'>{correct}</p>
-              </div>
-              <div className='bg-amber-100 px-4 py-2 rounded-xl text-center border-2 border-amber-200'>
-                <p className='text-xs font-black uppercase text-amber-600'>Round</p>
-                <p className='text-2xl font-bold text-amber-700'>{round + 1}/5</p>
-              </div>
-              <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
-                <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
-                <p className='text-2xl font-bold text-orange-700'>{maxStreak}</p>
-              </div>
             </div>
           </div>
         )}

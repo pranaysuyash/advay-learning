@@ -23,7 +23,7 @@ function VoiceStoriesContent() {
 
   const { playClick, playSuccess } = useAudio();
   const { onGameComplete } = useGameDrops('voice-stories');
-  const { saveProgress: _saveProgress } = useGameProgress('voice-stories');
+  const { saveProgress } = useGameProgress('voice-stories');
 
   useGameSessionProgress({ gameName: 'Voice Stories', score, level: currentLevel, isPlaying: true, metaData: { currentLine } });
 
@@ -62,7 +62,13 @@ function VoiceStoriesContent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(Math.round(score / 20)); navigate('/games'); }, [score, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => {
+    playClick();
+    const finalScore = Math.round(score / 20);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
+    navigate('/games');
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const currentLineData = currentStory?.lines[currentLine];
 
