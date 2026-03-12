@@ -61,7 +61,7 @@ Ticket Stamp: STAMP-20260312T074137Z-codex-h30k
 Type: IMPROVEMENT
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
-Status: **DONE**
+Status: **IN_PROGRESS**
 Priority: P0
 
 Scope contract:
@@ -118,7 +118,7 @@ Ticket Stamp: STAMP-20260312T074137Z-codex-onun
 Type: BUG
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
@@ -14463,7 +14463,7 @@ Ticket Stamp: STAMP-20260312T084900Z-codex-n4i2
 Type: IMPROVEMENT
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
@@ -14497,6 +14497,7 @@ Execution log:
 - 2026-03-12 | Prepared duplicate closure for #22 and completion closures for #26/#27.
 - 2026-03-12 | Closed issue #22 as duplicate of #23.
 - 2026-03-12 | Closed triage workspace issues #26 and #27 after publishing queue snapshot.
+- 2026-03-12 | Addressed PR #43 review findings in docs (`MEDIAPIPE_INTEGRATION_AUDIT.md`, ticket status consistency) to clear unresolved review threads.
 
 Status updates:
 

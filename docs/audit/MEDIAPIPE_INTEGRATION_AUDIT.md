@@ -93,14 +93,16 @@ INPUT SOURCE
 │ - Use pinch.isPinching for interaction │
 │ - Custom game loop logic (physics, scoring, etc.) │
 │ │
-└───────────────────────────────────────────────────────────────────┘ 2. Bottlenecks Identified
+└───────────────────────────────────────────────────────────────────┘
+
+2. Bottlenecks Identified
 🔴 Critical Issues
 B1. Unnecessary Frame Copies in Worker Mode
 Location: useVisionWorkerRuntime.ts:236-260
 
 Issue: When transferMode is 'imageData', the code creates a canvas, draws the video frame, and calls getImageData() - this is a CPU-intensive synchronous copy.
 
-typescript
+```typescript
 // Current code (SLOW):
 const canvas = canvasRef.current;
 canvas.width = video.videoWidth;
@@ -109,6 +111,7 @@ const ctx = canvas.getContext('2d', { willReadFrequently: true });
 ctx.drawImage(video, 0, 0, canvas.width, canvas.height); // ⚠️ Copy 1: GPU→CPU
 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); // ⚠️ Copy 2: CPU memory allocation
 worker.postMessage(request); // ⚠️ Copy 3: PostMessage copy
+```
 Impact: ~15-20ms extra latency per frame, causing frame drops below 60fps.
 
 Root Cause:
@@ -120,11 +123,12 @@ Location: useVisionWorkerRuntime.ts:223-234
 
 Issue: The code checks typeof createImageBitmap === 'function' but doesn't catch errors if the browser supports it but fails for video elements.
 
-typescript
+```typescript
 if (transferMode === 'bitmap' && typeof createImageBitmap === 'function') {
 const bitmap = await createImageBitmap(video); // May fail silently
 // ... continue with assumption it worked
 }
+```
 Impact: If createImageBitmap fails, it silently degrades to the slow imageData path without user awareness.
 
 B3. Redundant Landmark Processing
@@ -132,7 +136,7 @@ Location: vision.worker.ts:60-68
 
 Issue: Every frame processes ALL 21 landmarks even though most games only need the index finger tip (landmark 8).
 
-typescript
+```typescript
 const results = handLandmarker.detect(req.frame);
 const hands = getHandLandmarkLists(results); // Processes all landmarks
 const trackedFrame = buildTrackedHandFrame({ // Extracts only tip
@@ -141,6 +145,7 @@ previousPinchState: pinchState,
 pinchOptions,
 // ...
 });
+```
 Impact: Wasted CPU cycles processing unused landmarks (10-15% overhead).
 
 B4. Main Thread Blocking with RunningMode: 'VIDEO'
@@ -148,10 +153,11 @@ Location: VisionService.ts:132, MediaPipeVisionProvider.ts:78
 
 Issue: Both services set runningMode: 'VIDEO' which is synchronous in MediaPipe Tasks API, blocking the main thread during inference.
 
-typescript
+```typescript
 // VisionService.ts:132
 runningMode: 'VIDEO', // ⚠️ Synchronous
-Contrast: The worker correctly uses runningMode: 'IMAGE' (async), but main-thread mode blocks.
+```
+Contrast: Worker `detect()` calls are still synchronous; switching to `runningMode: 'IMAGE'` alone does not make inference async.
 
 Impact: On slower devices, this can block for 20-40ms, causing visible stutter.
 
@@ -298,7 +304,7 @@ sentAt: performance.now(),
 transferMode: 'imageData',
 frame: imageData,
 };
-worker.postMessage(request, [imageData.buffer]); // Transfer ownership
+worker.postMessage(request, [imageData.data.buffer]); // Transfer ownership
 Expected improvement: 15-20ms latency reduction, 60fps achievable on mid-range devices.
 
 C2. Optimize Main Thread Running Mode
@@ -306,18 +312,21 @@ File: src/frontend/src/services/ai/vision/VisionService.ts
 
 Current code (line 132):
 
-typescript
+```typescript
 runningMode: 'VIDEO', // ⚠️ Synchronous
+```
 Recommended fix:
 
-typescript
-// Use 'IMAGE' mode for async processing with manual timestamp tracking
-runningMode: 'IMAGE', // ✅ Asynchronous
-And update MediaPipeVisionProvider.ts:78 similarly:
+```typescript
+// Keep VIDEO mode for streaming input and reduce contention via worker/runtime throttling.
+runningMode: 'VIDEO',
+```
+And keep MediaPipeVisionProvider.ts aligned:
 
-typescript
-runningMode: 'IMAGE', // ✅ Asynchronous
-Note: When using 'IMAGE' mode, ensure detect() is called without timestamp parameter, and manual frame rate limiting is applied via useGameLoop.
+```typescript
+runningMode: 'VIDEO',
+```
+Note: `detect()` is synchronous in both `'VIDEO'` and `'IMAGE'` modes; async behavior comes from worker isolation, not mode selection.
 
 Expected improvement: 20-40ms main thread blocking eliminated.
 
@@ -469,8 +478,8 @@ const dyA = pointA.y - centerY;
 const dxB = pointB.x - centerX;
 const dyB = pointB.y - centerY;
 
-const distFromCenterA = Math.sqrt(dxA _ dxA + dyA _ dyA);
-const distFromCenterB = Math.sqrt(dxB _ dxB + dyB _ dyB);
+const distFromCenterA = Math.sqrt(dxA * dxA + dyA * dyA);
+const distFromCenterB = Math.sqrt(dxB * dxB + dyB * dyB);
 
 if (distFromCenterA > threshold || distFromCenterB > threshold) {
 // Hand too far from center, maintain previous state
