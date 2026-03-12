@@ -97,6 +97,7 @@ Execution log:
 - 2026-03-12 | Added review-request triggers and code-scanning producer wait logic to merge-readiness gate.
 - 2026-03-12 | Added frontend lint to regression-policy and fixed CI test command flag duplication.
 - 2026-03-12 | Added `resend` backend dependency to align CI test environment imports.
+- 2026-03-12 | Updated merge policy to not require human approval; keep unresolved-thread + required-check enforcement.
 
 Status updates:
 
