@@ -259,6 +259,25 @@ This document governs how AI agents (including myself and others) work on the Ad
 - Command evidence showing checks pass on the merge result.
 - Explicit note of any known risks/follow-ups.
 
+### 6.3 No-Shortcut Merge Protocol (Mandatory, Effective 2026-03-12)
+
+**Purpose:** prevent premature merges and ensure every branch follows full review-to-closure workflow.
+
+Rules (hard requirements):
+
+- Do not merge until all **review required** files are explicitly reviewed and logged in the active worklog addendum ticket.
+- Do not merge with unresolved PR threads/comments. Verify with:
+  - `gh pr view <number> --comments`
+  - review-thread query (GraphQL) showing `isResolved=true` for all threads.
+- Do not merge if any regression gate fails (including flaky tests). Fix or isolate with explicit evidence first; no silent bypasses.
+- Do not mark work as `DONE` while linked issue(s), in-scope PR comments, or in-scope code scanning findings remain open.
+- Before requesting merge approval, publish a **pre-merge checklist snapshot** in the ticket/PR comment with:
+  - gate results
+  - review-thread status
+  - issue status
+  - code-scanning status
+- If any gate is ambiguous, unavailable, or requires bypass/override, stop and ask the user for explicit approval before proceeding.
+
 ### 7. Create Reusable Tools, Not One-Off Scripts
 
 **Principle:** When you create helpful code (analyzers, converters, validators, test harnesses), save it as a documented, reusable tool for future use—by any project.
@@ -591,10 +610,16 @@ The audit-to-ticket gap exists because:
 ### Before Merge
 
 ```markdown
+- [ ] All review-required files have explicit review notes in the current worklog addendum ticket
 - [ ] PR Review completed (APPROVE/REQUEST CHANGES/BLOCK)
+- [ ] `gh pr view <number> --comments` checked; no unresolved review conversations
+- [ ] Review-thread GraphQL check confirms all threads `isResolved=true`
 - [ ] Verification audit passed
 - [ ] All findings marked FIXED/PARTIAL/NOT FIXED/REGRESSED/NA
-- [ ] CI status noted (signal, not gate)
+- [ ] Regression gates pass (including flaky-test handling with explicit evidence)
+- [ ] CI/status checks pass (required gates are merge blockers)
+- [ ] Linked issue(s), in-scope PR comments, and in-scope code scanning findings are closed/resolved
+- [ ] Pre-merge checklist snapshot posted (gates + review threads + issues + code scanning)
 - [ ] No merge conflicts (or resolved via Merge Conflict prompt)
 - [ ] Post-merge validation plan ready
 ```
