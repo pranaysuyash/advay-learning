@@ -151,13 +151,14 @@ Impact: Wasted CPU cycles processing unused landmarks (10-15% overhead).
 B4. Main Thread Blocking with RunningMode: 'VIDEO'
 Location: VisionService.ts:132, MediaPipeVisionProvider.ts:78
 
-Issue: Both services set runningMode: 'VIDEO' which is synchronous in MediaPipe Tasks API, blocking the main thread during inference.
+Issue: Main-thread inference is synchronous in MediaPipe Tasks API and blocks rendering during inference windows.
 
 ```typescript
 // VisionService.ts:132
 runningMode: 'VIDEO', // ⚠️ Synchronous
 ```
 Contrast: Worker `detect()` calls are still synchronous; switching to `runningMode: 'IMAGE'` alone does not make inference async.
+Only `LIVE_STREAM` mode provides callback-based asynchronous dispatch.
 
 Impact: On slower devices, this can block for 20-40ms, causing visible stutter.
 
@@ -581,15 +582,16 @@ console.warn(`Performance degraded by ${degradationRate.toFixed(1)}%`);
 ```
 
 Summary of Recommendations
-Priority Issue Impact Implementation Effort
-P0 Frame copy bottleneck -15-20ms latency Medium
-P0 Main thread blocking (VIDEO mode) -20-40ms blocking Low
-P0 Unnecessary landmark processing -5-10% CPU Low
-P1 FPS monitoring lag Better debugging Low
-P1 Inefficient pinch detection -15-20% CPU Medium
-P1 Missing fallback logging Better debugging Low
-P2 Duplicate model loading -50MB memory Medium
-P2 No performance metrics Better monitoring Low
+| Priority | Issue | Impact | Implementation Effort |
+| --- | --- | --- | --- |
+| P0 | Frame copy bottleneck | -15-20ms latency | Medium |
+| P0 | Main-thread synchronous inference | -20-40ms blocking | Low |
+| P0 | Unnecessary landmark processing | -5-10% CPU | Low |
+| P1 | FPS monitoring lag | Better debugging | Low |
+| P1 | Inefficient pinch detection | -15-20% CPU | Medium |
+| P1 | Missing fallback logging | Better debugging | Low |
+| P2 | Duplicate model loading | -50MB memory | Medium |
+| P2 | No performance metrics | Better monitoring | Low |
 Expected Total Impact: With P0 fixes applied, stable 60fps should be achievable on devices with ≥2 CPU cores and WebGL 2.0 support.
 
 Testing Recommendations

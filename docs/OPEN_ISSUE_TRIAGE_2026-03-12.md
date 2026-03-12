@@ -1,6 +1,7 @@
 # Open Issue Triage - 2026-03-12
 
 Date: 2026-03-12
+Work Ticket: TCK-20260312-005
 Scope: Open GitHub issues #22-#27
 Method: Reviewed issue body scope, mapped against existing brainstorm and roadmap docs, and normalized duplicates.
 
@@ -31,6 +32,19 @@ Method: Reviewed issue body scope, mapped against existing brainstorm and roadma
 
 ## Evidence Anchors
 
+- Worklog ticket: `docs/WORKLOG_ADDENDUM_v3.md` (`TCK-20260312-005`)
+- PR: https://github.com/pranaysuyash/advay-learning/pull/43 (`Closes #22`, `Closes #26`, `Closes #27`, `Refs: TCK-20260312-005`)
 - `docs/BRAINSTORM_IDEAS.md`
 - `docs/PLAYGROUND_ARCHITECTURE_LIVING.md`
 - `docs/github_issues_to_open.md`
+
+## Evidence Log (Observed via gh CLI on 2026-03-12)
+
+- `gh issue view 22 --json number,state,stateReason,closedAt,url,title` ->
+  `{"number":22,"state":"CLOSED","stateReason":"COMPLETED","closedAt":"2026-03-12T09:00:17Z","url":"https://github.com/pranaysuyash/advay-learning/issues/22"}`
+- `gh issue view 26 --json number,state,stateReason,closedAt,url,title` ->
+  `{"number":26,"state":"CLOSED","stateReason":"COMPLETED","closedAt":"2026-03-12T09:00:17Z","url":"https://github.com/pranaysuyash/advay-learning/issues/26"}`
+- `gh issue view 27 --json number,state,stateReason,closedAt,url,title` ->
+  `{"number":27,"state":"CLOSED","stateReason":"COMPLETED","closedAt":"2026-03-12T09:00:17Z","url":"https://github.com/pranaysuyash/advay-learning/issues/27"}`
+- `gh issue list --state open --json number,title,url` ->
+  `[#23,#24,#25]` remain open delivery epics.
