@@ -167,12 +167,13 @@ Location: pinchDetection.ts:84-147
 
 Issue: Pinch detection runs every frame even when the hand is far from the screen.
 
-typescript
+```typescript
 export function detectPinch(landmarks: Landmark[], ...): PinchResult {
 // Always runs distance calculation
 const distance = landmarkDistance(pointA, pointB);
 // ... even when hand is not visible
 }
+```
 Impact: Unnecessary calculations when hand is out of frame.
 
 B6. FPS Measurement Lag
@@ -180,11 +181,12 @@ Location: useGameLoop.ts:151-166
 
 Issue: FPS is updated only once per second, making it hard to detect transient performance issues.
 
-typescript
+```typescript
 if (currentTime - lastFpsUpdateRef.current >= FPS_UPDATE_INTERVAL_MS) { // 1000ms
 const measuredFps = frameCountRef.current;
 // ... update only once per second
 }
+```
 Impact: Real-time debugging is difficult; frame drops are hidden from the UI.
 
 B7. OneEuro Filter Repeated Allocation
@@ -192,11 +194,12 @@ Location: handTrackingFrame.ts:106-108
 
 Issue: Filter is called every frame even when smoothing is disabled or not needed.
 
-typescript
+```typescript
 const smoothedTip =
 mirroredTip && indexTipSmoother && timestamp != null
 ? indexTipSmoother.filter(mirroredTip, timestamp) // ⚠️ Always called
 : mirroredTip;
+```
 Impact: Overhead of conditional checks on every frame.
 
 🟢 Minor Issues
@@ -212,11 +215,12 @@ Location: useGameHandTracking.ts:342-347
 
 Issue: Runtime fallback to main thread doesn't log why it happened.
 
-typescript
+```typescript
 onRuntimeFallback: useCallback((reason: string) => {
 setRuntimeFallbackReason(reason);
 onRuntimeFallback?.(reason);
 }, [onRuntimeFallback]),
+```
 Impact: Hard to debug performance regressions.
 
 3. Code Changes with File Paths
@@ -226,7 +230,7 @@ Impact: Hard to debug performance regressions.
 
 Current code (lines 236-260):
 
-typescript
+```typescript
 if (!canvasRef.current) {
 canvasRef.current = document.createElement('canvas');
 }
@@ -251,9 +255,10 @@ transferMode: 'imageData',
 frame: imageData,
 };
 worker.postMessage(request);
+```
 Recommended fix:
 
-typescript
+```typescript
 // PREFERRED: Use zero-copy ImageBitmap transfer
 try {
 const bitmap = await createImageBitmap(video, {
@@ -305,6 +310,7 @@ transferMode: 'imageData',
 frame: imageData,
 };
 worker.postMessage(request, [imageData.data.buffer]); // Transfer ownership
+```
 Expected improvement: 15-20ms latency reduction, 60fps achievable on mid-range devices.
 
 C2. Optimize Main Thread Running Mode
@@ -335,7 +341,7 @@ File: src/frontend/src/workers/vision.worker.ts
 
 Current code (lines 44-92):
 
-typescript
+```typescript
 async function processFrame(req: Extract<VisionWorkerRequest, { type: 'frame' }>): Promise<WorkerFrameResult> {
 // ...
 const results = handLandmarker.detect(req.frame);
@@ -346,9 +352,10 @@ hands,
 });
 // ...
 }
+```
 Recommended fix:
 
-typescript
+```typescript
 async function processFrame(req: Extract<VisionWorkerRequest, { type: 'frame' }>): Promise<WorkerFrameResult> {
 // ...
 const results = handLandmarker.detect(req.frame);
@@ -381,6 +388,7 @@ timestamp: performance.now() / 1000,
 });
 // ...
 }
+```
 Expected improvement: 5-10% CPU reduction on frames with no hands.
 
 ✅ Priority 2: Medium Impact Fixes
@@ -389,15 +397,16 @@ File: src/frontend/src/hooks/useGameLoop.ts
 
 Current code (lines 151-166):
 
-typescript
+```typescript
 // Update FPS metrics once per second
 if (currentTime - lastFpsUpdateRef.current >= FPS_UPDATE_INTERVAL_MS) {
 const measuredFps = frameCountRef.current;
 // ... update
 }
+```
 Recommended fix:
 
-typescript
+```typescript
 // Update FPS metrics more frequently for real-time monitoring
 const FPS_UPDATE_INTERVAL_MS = 250; // 4x faster updates
 
@@ -422,6 +431,7 @@ console.warn(`[useGameLoop] FPS degraded: ${measuredFps}/${targetFpsRef.current}
 frameCountRef.current = 0;
 lastFpsUpdateRef.current = currentTime;
 }
+```
 Expected improvement: Better visibility into performance issues, earlier detection of frame drops.
 
 C5. Optimize Pinch Detection
@@ -429,7 +439,7 @@ File: src/frontend/src/utils/pinchDetection.ts
 
 Current code (lines 84-147):
 
-typescript
+```typescript
 export function detectPinch(landmarks: Landmark[], previousState: PinchState | null, options?: PinchOptions): PinchResult {
 const opts = { ...DEFAULT_PINCH_OPTIONS, ...options };
 
@@ -449,9 +459,10 @@ return { state: previousState || createDefaultPinchState(options), transition: '
 const distance = landmarkDistance(pointA, pointB);
 // ... hysteresis logic
 }
+```
 Recommended fix:
 
-typescript
+```typescript
 export function detectPinch(landmarks: Landmark[], previousState: PinchState | null, options?: PinchOptions): PinchResult {
 const opts = { ...DEFAULT_PINCH_OPTIONS, ...options };
 
@@ -490,6 +501,7 @@ return { state: previousState || createDefaultPinchState(options), transition: '
 const distance = landmarkDistance(pointA, pointB);
 // ... hysteresis logic
 }
+```
 Expected improvement: 15-20% CPU reduction on frames where hands are at screen edges.
 
 C6. Add Worker Performance Logging
@@ -497,14 +509,15 @@ File: src/frontend/src/hooks/useGameHandTracking.ts
 
 Current code (lines 342-347):
 
-typescript
+```typescript
 onRuntimeFallback: useCallback((reason: string) => {
 setRuntimeFallbackReason(reason);
 onRuntimeFallback?.(reason);
 }, [onRuntimeFallback]),
+```
 Recommended fix:
 
-typescript
+```typescript
 onRuntimeFallback: useCallback((reason: string) => {
 console.warn(`[useGameHandTracking] Runtime fallback triggered: ${reason}`);
 console.log('[useGameHandTracking] Active runtime mode:', activeRuntimeMode);
@@ -514,6 +527,7 @@ console.log('[useGameHandTracking] Worker ready:', isWorkerReady);
 setRuntimeFallbackReason(reason);
 onRuntimeFallback?.(reason);
 }, [activeRuntimeMode, supportsWorkerRuntime, isWorkerReady, onRuntimeFallback]),
+```
 Expected improvement: Better debugging of performance issues.
 
 ✅ Priority 3: Cleanup & Best Practices
@@ -524,7 +538,7 @@ Current code: Independent handLandmarker creation (line 71-79)
 
 Recommended fix: Use VisionService singleton exclusively:
 
-typescript
+```typescript
 // Remove local handLandmarker, use VisionService instead
 case 'hand':
 // Use VisionService for shared instance
@@ -537,6 +551,7 @@ delegate: 'GPU', // Or read from opts
 };
 this.handLandmarker = await visionService.getHandLandmarker(config);
 break;
+```
 Expected improvement: Reduced memory usage (~50MB per game session).
 
 C8. Add Performance Metrics Export
@@ -544,7 +559,7 @@ File: src/frontend/src/hooks/useGameLoop.ts
 
 Add new function:
 
-typescript
+```typescript
 export function useGameLoopPerformance() {
 const { fps, averageFps } = useGameLoop();
 
@@ -555,14 +570,16 @@ isStable: averageFps >= 55, // Consider stable if ≥ 55fps
 degradationRate: ((60 - averageFps) / 60) \* 100, // % degradation
 };
 }
+```
 Usage:
-
-typescript
+```typescript
 const { isStable, degradationRate } = useGameLoopPerformance();
 
 if (!isStable) {
 console.warn(`Performance degraded by ${degradationRate.toFixed(1)}%`);
 }
+```
+
 Summary of Recommendations
 Priority Issue Impact Implementation Effort
 P0 Frame copy bottleneck -15-20ms latency Medium

@@ -14498,6 +14498,7 @@ Execution log:
 - 2026-03-12 | Closed issue #22 as duplicate of #23.
 - 2026-03-12 | Closed triage workspace issues #26 and #27 after publishing queue snapshot.
 - 2026-03-12 | Addressed PR #43 review findings in docs (`MEDIAPIPE_INTEGRATION_AUDIT.md`, ticket status consistency) to clear unresolved review threads.
+- 2026-03-12 | Normalized TypeScript code fences in `MEDIAPIPE_INTEGRATION_AUDIT.md` and corrected inaccurate MediaPipe mode guidance.
 
 Status updates:
 
