@@ -155,7 +155,7 @@ Execution log:
 
 Status updates:
 
-- 2026-03-12 **IN_PROGRESS** — Ticket opened for post-merge regression fix and comment closure.
+- 2026-03-12 **DONE** — Replay-button regression fix shipped and PR #39 review thread resolved.
 
 ---
 
