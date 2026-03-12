@@ -94,6 +94,9 @@ Execution log:
 - 2026-03-12 | Added `scripts/enforce_merge_block.sh` to apply required branch protection and enable delete-on-merge.
 - 2026-03-12 | Updated `docs/SETUP.md` with merge-block setup steps and required checks.
 - 2026-03-12 | Applied branch protection + required checks and enabled delete-on-merge via `scripts/enforce_merge_block.sh`.
+- 2026-03-12 | Added review-request triggers and code-scanning producer wait logic to merge-readiness gate.
+- 2026-03-12 | Added frontend lint to regression-policy and fixed CI test command flag duplication.
+- 2026-03-12 | Added `resend` backend dependency to align CI test environment imports.
 
 Status updates:
 
