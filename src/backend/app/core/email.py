@@ -172,6 +172,11 @@ class EmailService:
     @staticmethod
     async def _send_email(to: str, subject: str, html_body: str) -> None:
         """Send email via Resend API."""
+        import os
+        if os.environ.get("TESTING") == "true":
+            logger.info("TESTING mode: Skipping actual email send")
+            return
+
         api_key = getattr(settings, "RESEND_API_KEY", None)
 
         if not api_key:

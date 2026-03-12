@@ -98,6 +98,7 @@ Execution log:
 - 2026-03-12 | Added frontend lint to regression-policy and fixed CI test command flag duplication.
 - 2026-03-12 | Added `resend` backend dependency to align CI test environment imports.
 - 2026-03-12 | Updated merge policy to not require human approval; keep unresolved-thread + required-check enforcement.
+- 2026-03-12 | Added `checks: read` permission for code-scanning policy check-run polling and reran local lint/type/test gates for touched files.
 
 Status updates:
 
@@ -147,6 +148,7 @@ Execution log:
 - 2026-03-12 | Confirmed unresolved PR #39 review thread at `discussion_r2922712427`.
 - 2026-03-12 | Fixed replay button text/icon corruption in `TidyUpTime.tsx`.
 - 2026-03-12 | Resolved PR #39 review thread `discussion_r2922712427`.
+- 2026-03-12 | Hardened backend password reset test credentials/cleanup to remove CI auth failure in `tests/test_security.py::TestPasswordReset::test_reset_password_with_valid_token`.
 
 Status updates:
 

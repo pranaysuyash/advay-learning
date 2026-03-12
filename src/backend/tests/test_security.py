@@ -325,7 +325,7 @@ class TestPasswordReset:
         # Reset password
         response = await client.post(
             "/api/v1/auth/reset-password",
-            params={"token": token, "new_password": "newpassword456"},
+            params={"token": token, "new_password": "NewPassword123!!"},
         )
 
 # After a successful reset the token/expiry should be cleared in the
@@ -339,12 +339,6 @@ class TestPasswordReset:
                 assert response.status_code == 200
             assert "reset successfully" in response.json()["message"].lower()
 
-            # Cleanup test data after successful test
-            async with async_session() as cleanup_session:
-                cleanup_user = await UserService.get_by_email(cleanup_session, "reset2@test.com")
-                if cleanup_user:
-                    await cleanup_session.delete(cleanup_user)
-
         # Old password should not work
         old_login = await client.post(
             "/api/v1/auth/login",
@@ -355,9 +349,16 @@ class TestPasswordReset:
         # New password should work
         new_login = await client.post(
             "/api/v1/auth/login",
-            data={"username": "reset2@test.com", "password": "newpassword456"},
+            data={"username": "reset2@test.com", "password": "NewPassword123!!"},
         )
         assert new_login.status_code == 200
+
+        # Cleanup test data after successful test
+        async with async_session() as cleanup_session:
+            cleanup_user = await UserService.get_by_email(cleanup_session, "reset2@test.com")
+            if cleanup_user:
+                await cleanup_session.delete(cleanup_user)
+                await cleanup_session.commit()
 
     async def test_reset_password_invalid_token(self, client: AsyncClient):
         """Test password reset with invalid token fails."""
