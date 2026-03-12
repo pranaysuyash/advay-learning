@@ -3,11 +3,17 @@ name: Merge Readiness Gate
 on:
   pull_request:
     branches: [main]
-    types: [opened, reopened, synchronize, edited, ready_for_review, converted_to_draft]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+      - converted_to_draft
+      - review_requested
+      - review_request_removed
   pull_request_review:
     types: [submitted, edited, dismissed]
-  pull_request_review_thread:
-    types: [resolved, unresolved]
 
 permissions:
   contents: read
@@ -140,8 +146,51 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const pullNumber = context.payload.pull_request.number;
+            const pr = context.payload.pull_request;
+            const pullNumber = pr.number;
+            const headSha = pr.head.sha;
             const ref = `refs/pull/${pullNumber}/merge`;
+            const requiredChecks = ["Analyze (python)", "Analyze (javascript-typescript)", "trivy"];
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const deadline = Date.now() + 15 * 60 * 1000;
+
+            // Wait for code-scanning producers to finish for this head SHA before querying alerts.
+            while (Date.now() < deadline) {
+              const checkRuns = await github.paginate("GET /repos/{owner}/{repo}/commits/{ref}/check-runs", {
+                owner,
+                repo,
+                ref: headSha,
+                per_page: 100,
+              });
+
+              const byName = new Map(checkRuns.map((run) => [run.name, run]));
+              const missing = requiredChecks.filter((name) => !byName.has(name));
+              const pending = requiredChecks.filter((name) => {
+                const run = byName.get(name);
+                return run && run.status !== "completed";
+              });
+              const failed = requiredChecks.filter((name) => {
+                const run = byName.get(name);
+                return run && run.status === "completed" && run.conclusion !== "success";
+              });
+
+              if (failed.length > 0) {
+                core.setFailed(`Required code scanning check(s) failed before alert evaluation: ${failed.join(", ")}`);
+                return;
+              }
+
+              if (missing.length === 0 && pending.length === 0) {
+                break;
+              }
+
+              await sleep(15000);
+            }
+
+            if (Date.now() >= deadline) {
+              core.setFailed("Timed out waiting for code-scanning producer checks to complete.");
+              return;
+            }
 
             let page = 1;
             const openAlerts = [];
@@ -188,6 +237,9 @@ jobs:
 
       - name: Install frontend dependencies
         run: cd src/frontend && npm ci
+
+      - name: Run frontend lint
+        run: cd src/frontend && npm run lint
 
       - name: Run frontend tests
         run: cd src/frontend && npm test -- --run --reporter=dot

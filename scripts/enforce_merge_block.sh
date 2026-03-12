@@ -82,7 +82,7 @@ echo "[INFO] Enabling auto-delete for merged branches..."
 gh api \
   --method PATCH \
   "repos/${OWNER}/${REPO}" \
-  -f delete_branch_on_merge=true >/dev/null
+  -F delete_branch_on_merge=true >/dev/null
 
 echo "[OK] Merge block policy configured."
 echo "[OK] Verify in GitHub settings -> Branches and Pull Requests."

@@ -55,6 +55,8 @@ Risks/notes:
 
 ### TCK-20260312-004 :: Enforce no-shortcut merge block policy
 
+Ticket Stamp: STAMP-20260312T074137Z-codex-h30k
+
 Type: IMPROVEMENT
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
@@ -69,9 +71,10 @@ Scope contract:
 
 Targets:
 
-- Repo: learning_for_kids
+- Repo: pranaysuyash/advay-learning
 - File(s): `.github/workflows/merge-readiness-gate.yml`, `scripts/enforce_merge_block.sh`, `docs/SETUP.md`
 - Branch/PR: `codex/wip-pr39-followup-20260312` -> `main`
+- GitHub Issue: #42
 
 Acceptance Criteria:
 
@@ -101,6 +104,8 @@ Status updates:
 
 ### TCK-20260312-003 :: Post-merge review closure for PR #39 regression
 
+Ticket Stamp: STAMP-20260312T074137Z-codex-onun
+
 Type: BUG
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
@@ -122,10 +127,10 @@ Targets:
 
 Acceptance Criteria:
 
-- [ ] Replay button icon class corrected (`w-5 h-5`).
-- [ ] Replay button label corrected (`Play Again`).
-- [ ] Frontend lint and typecheck pass locally.
-- [ ] PR #39 review thread is resolved.
+- [x] Replay button icon class corrected (`w-5 h-5`).
+- [x] Replay button label corrected (`Play Again`).
+- [x] Frontend lint and typecheck pass locally.
+- [x] PR #39 review thread is resolved.
 
 Prompt Trace:
 
@@ -136,6 +141,8 @@ Execution log:
 
 - 2026-03-12 | Created linked issue #40 for post-merge regression and review-thread closure.
 - 2026-03-12 | Confirmed unresolved PR #39 review thread at `discussion_r2922712427`.
+- 2026-03-12 | Fixed replay button text/icon corruption in `TidyUpTime.tsx`.
+- 2026-03-12 | Resolved PR #39 review thread `discussion_r2922712427`.
 
 Status updates:
 
