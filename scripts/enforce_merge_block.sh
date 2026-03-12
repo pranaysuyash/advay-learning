@@ -16,9 +16,21 @@ if ! gh auth status >/dev/null 2>&1; then
   exit 1
 fi
 
-OWNER="${1:-pranaysuyash}"
-REPO="${2:-advay-learning}"
-BRANCH="${3:-main}"
+if [[ $# -ge 2 ]]; then
+  OWNER="$1"
+  REPO="$2"
+  BRANCH="${3:-main}"
+else
+  name_with_owner="$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || true)"
+  if [[ -z "${name_with_owner}" ]]; then
+    echo "[ERROR] Unable to determine repository from current directory."
+    echo "        Usage: $0 OWNER REPO [BRANCH]"
+    exit 1
+  fi
+  OWNER="${name_with_owner%%/*}"
+  REPO="${name_with_owner##*/}"
+  BRANCH="${1:-main}"
+fi
 
 echo "[INFO] Configuring merge block policy for ${OWNER}/${REPO} (${BRANCH})"
 

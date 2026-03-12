@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
     types: [opened, reopened, synchronize, edited, ready_for_review, converted_to_draft]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_review_thread:
+    types: [resolved, unresolved]
 
 permissions:
   contents: read
@@ -185,8 +189,8 @@ jobs:
       - name: Install frontend dependencies
         run: cd src/frontend && npm ci
 
-      - name: Run regression check
-        run: ./scripts/regression_check.sh
+      - name: Run frontend tests
+        run: cd src/frontend && npm test -- --run --reporter=dot
 
-      - name: Run feature regression check
-        run: ./scripts/feature_regression_check.sh
+      - name: Run frontend type-check
+        run: cd src/frontend && npm run type-check

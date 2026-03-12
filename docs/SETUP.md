@@ -100,7 +100,9 @@ PRs now must include both:
 
 To hard-block merges until workflow requirements are satisfied:
 
-1. Run `./scripts/enforce_merge_block.sh` (admin token required).
+1. Run one of:
+   - `./scripts/enforce_merge_block.sh` (auto-detect current `owner/repo`, defaults branch to `main`)
+   - `./scripts/enforce_merge_block.sh <OWNER> <REPO> <BRANCH>` (explicit target)
 2. This enforces on `main`:
    - Pull request required
    - At least 1 approval

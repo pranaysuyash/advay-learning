@@ -16,7 +16,7 @@ Scope contract:
 
 Targets:
 
-- Repo: learning_for_kids
+- Repo: pranaysuyash/advay-learning
 - File(s): `src/frontend/src/services/progressConstants.ts`, `src/frontend/src/services/progressQueue.ts`, `src/frontend/src/services/__tests__/progressQueue.test.ts`
 
 Source:
@@ -78,7 +78,7 @@ Acceptance Criteria:
 - [x] New PR workflow gate added for branch/work item/review/thread/code-scanning/regression checks.
 - [x] Script exists to configure branch protection + required checks + auto branch deletion.
 - [x] Setup docs updated with one-command enforcement workflow.
-- [ ] Branch protection applied on GitHub repo using admin token.
+- [x] Branch protection applied on GitHub repo using admin token.
 
 Prompt Trace:
 
@@ -90,10 +90,11 @@ Execution log:
 - 2026-03-12 | Added workflow `.github/workflows/merge-readiness-gate.yml` with policy/review/code-scanning/regression jobs.
 - 2026-03-12 | Added `scripts/enforce_merge_block.sh` to apply required branch protection and enable delete-on-merge.
 - 2026-03-12 | Updated `docs/SETUP.md` with merge-block setup steps and required checks.
+- 2026-03-12 | Applied branch protection + required checks and enabled delete-on-merge via `scripts/enforce_merge_block.sh`.
 
 Status updates:
 
-- 2026-03-12 **IN_PROGRESS** — Repo changes committed locally; pending GitHub branch-protection application and PR merge.
+- 2026-03-12 **IN_PROGRESS** — Branch-protection policy applied; pending PR review completion and merge.
 
 ---
 
