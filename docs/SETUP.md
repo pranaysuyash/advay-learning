@@ -73,7 +73,11 @@ Then set repository configuration:
 
 1. Add repository variable `PROJECT_URL` (URL printed by bootstrap script).
 2. Add repository secret `PROJECT_TOKEN` (token with repo + project scope).
-3. In branch protection, require status check: `PR Link Gate / enforce-pr-linking`.
+3. Apply merge-block policy (branch protection + required checks + auto branch deletion):
+
+```bash
+./scripts/enforce_merge_block.sh
+```
 
 Current repo state (as of 2026-03-09):
 
@@ -92,31 +96,47 @@ PRs now must include both:
 - `Closes #<issue-number>`
 - `TCK-YYYYMMDD-NNN`
 
-## Enforce PR Comment Closure Before Merge (Required)
+## Enforce Full Merge Block Before Merge (Required)
 
-To hard-block merges with unresolved PR conversations:
+To hard-block merges until workflow requirements are satisfied:
 
-1. Enable branch protection on `main`:
-   - `Require a pull request before merging`
-   - `Require approvals` (recommended: at least 1)
-   - `Dismiss stale approvals when new commits are pushed`
-   - `Require conversation resolution before merging`
-   - `Require status checks to pass before merging`
+1. Run one of:
+   - `./scripts/enforce_merge_block.sh` (auto-detect current `owner/repo`, defaults branch to `main`)
+   - `./scripts/enforce_merge_block.sh <OWNER> <REPO> <BRANCH>` (explicit target)
+2. This enforces on `main`:
+   - Pull request required
+   - At least 1 approval
+   - Dismiss stale approvals
+   - Require last push approval
+   - Require conversation resolution
+   - Require linear history
+   - Require status checks
+   - Include administrators
+   - Auto-delete branch on merge
 
-2. Mark this check as required:
+3. Required checks include:
+   - `PR Link Gate / enforce-pr-linking`
    - `PR Comment Gate / pr-comment-gate`
-   - `CI/CD Pipeline / backend-test`
-   - `CI/CD Pipeline / frontend-test`
+   - `Merge Readiness Gate / workflow-policy`
+   - `Merge Readiness Gate / review-policy`
+   - `Merge Readiness Gate / code-scanning-policy`
+   - `Merge Readiness Gate / regression-policy`
    - `CodeQL / Analyze (python)`
    - `CodeQL / Analyze (javascript-typescript)`
    - `Dependency Review / dependency-review`
    - `Secret Scan (Gitleaks) / gitleaks`
    - `Trivy Security Scan / trivy`
 
-The workflow is defined at:
+Workflows:
 - `.github/workflows/pr-comment-gate.yml`
+- `.github/workflows/merge-readiness-gate.yml`
 
-It fails whenever any review thread is unresolved.
+The merge-readiness workflow blocks merge when:
+- PR branch is not `codex/wip-*`
+- PR is missing `Closes #...` or `TCK-...`
+- PR is not approved / has unresolved review threads / has open review requests
+- Open code-scanning alerts exist on the PR merge ref
+- Regression checks fail
 
 Additional security workflows:
 

@@ -232,8 +232,8 @@ function TidyUpTimeGameContent() {
                 type='button'
                 className='flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-full'
               >
-                <RotateCcw className='w-' />
-                Play5 h-5 Again
+                <RotateCcw className='w-5 h-5' />
+                Play Again
               </motion.button>
 
               <motion.button

@@ -108,12 +108,24 @@ describe('createStoryBuilderRound', () => {
     expect(STORY_PROMPTS.find(p => p.id === round.id)).toBeDefined();
   });
 
-  it('generates different orders on multiple calls', () => {
-    const round1 = createStoryBuilderRound([]);
-    const round2 = createStoryBuilderRound([]);
+  it('produces at least two distinct option orders across repeated calls', () => {
+    const singlePromptId = 'bird-sings';
+    const usedPromptIds = STORY_PROMPTS.filter((p) => p.id !== singlePromptId).map((p) => p.id);
+    const makeSequenceRng = (values: number[]) => {
+      let index = 0;
+      return () => {
+        const value = values[index] ?? values[values.length - 1] ?? 0;
+        index += 1;
+        return value;
+      };
+    };
 
-    // Due to shuffling, order should differ
-    expect(round1.options).not.toEqual(round2.options);
+    const roundA = createStoryBuilderRound(usedPromptIds, makeSequenceRng([0.0, 0.1, 0.1]));
+    const roundB = createStoryBuilderRound(usedPromptIds, makeSequenceRng([0.0, 0.9, 0.9]));
+
+    expect(roundA.id).toBe(singlePromptId);
+    expect(roundB.id).toBe(singlePromptId);
+    expect(roundA.options).not.toEqual(roundB.options);
   });
 });
 

@@ -118,7 +118,7 @@ class UserService:
     @staticmethod
     async def reset_password(db: AsyncSession, user: User, new_password: str) -> User:
         """Reset user's password and clear reset token."""
-        from app.core.exceptions import PasswordStrengthError, ValidationError
+        from app.core.exceptions import ValidationError
         from app.core.security import get_password_hash
         from app.schemas.user import (
             check_password_not_based_on_email,
@@ -156,7 +156,7 @@ class UserService:
                 check_password_not_based_on_email(update_data["password"], current_email)
             except ValueError as e:
                 raise ValidationError(str(e))
-                
+
             update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
 
         for field, value in update_data.items():

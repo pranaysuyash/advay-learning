@@ -85,16 +85,16 @@ class EmailService:
                     <p style="margin:0 0 8px 0;font-size:18px;font-weight:700;color:{c['text']};">Hi there! 👋</p>
                     <p style="margin:0 0 24px 0;font-size:16px;color:{c['text_light']};line-height:1.6;">Thank you for joining <strong>Advay Vision Learning</strong>! We're thrilled to have you as part of our learning family.</p>
                     <p style="margin:0 0 28px 0;font-size:15px;color:{c['text_light']};line-height:1.6;">To get started with your child's learning adventure, please verify your email address below:</p>
-                    
+
                     <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 24px 0;">
                         <a href="{verification_url}" style="display:inline-block;background:linear-gradient(135deg,{c['coral_orange']} 0%,#F97316 100%);color:{c['white']};font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:12px;box-shadow:0 4px 12px rgba(255,140,66,0.4);transition:all 0.2s;">Verify Email Address</a>
                     </td></tr></table>
-                    
+
                     <div style="background:{c['background']};border-radius:12px;padding:16px;margin-bottom:24px;">
                         <p style="margin:0;font-size:13px;color:{c['text_light']};text-align:center;">Having trouble clicking the button?</p>
                         <p style="margin:8px 0 0 0;font-size:12px;color:{c['primary']};word-break:break-all;text-align:center;text-decoration:underline;">{verification_url}</p>
                     </div>
-                    
+
                     <p style="margin:0;font-size:13px;color:{c['text_light']};">⏰ This link expires in 24 hours</p>
                 </td>
             </tr>
@@ -141,16 +141,16 @@ class EmailService:
                     <p style="margin:0 0 8px 0;font-size:18px;font-weight:700;color:{c['text']};">Hello! 🔑</p>
                     <p style="margin:0 0 24px 0;font-size:16px;color:{c['text_light']};line-height:1.6;">We received a request to reset your password for <strong>Advay Vision Learning</strong>.</p>
                     <p style="margin:0 0 28px 0;font-size:15px;color:{c['text_light']};line-height:1.6;">No worries — let's get you back to your child's learning adventure! Click the button below to create a new password:</p>
-                    
+
                     <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 24px 0;">
                         <a href="{reset_url}" style="display:inline-block;background:linear-gradient(135deg,{c['primary']} 0%,#7C3AED 100%);color:{c['white']};font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:12px;box-shadow:0 4px 12px rgba(79,70,229,0.4);transition:all 0.2s;">Reset Password</a>
                     </td></tr></table>
-                    
+
                     <div style="background:{c['background']};border-radius:12px;padding:16px;margin-bottom:24px;">
                         <p style="margin:0;font-size:13px;color:{c['text_light']};text-align:center;">Having trouble clicking the button?</p>
                         <p style="margin:8px 0 0 0;font-size:12px;color:{c['primary']};word-break:break-all;text-align:center;text-decoration:underline;">{reset_url}</p>
                     </div>
-                    
+
                     <div style="background:#FEF3C7;border-radius:12px;padding:16px;margin-bottom:24px;">
                         <p style="margin:0;font-size:13px;color:#92400E;text-align:center;"><strong>⏰ This link expires in 1 hour</strong></p>
                         <p style="margin:8px 0 0 0;font-size:12px;color:#B45309;text-align:center;">For security, please don't share this link with anyone.</p>
@@ -172,6 +172,11 @@ class EmailService:
     @staticmethod
     async def _send_email(to: str, subject: str, html_body: str) -> None:
         """Send email via Resend API."""
+        import os
+        if os.environ.get("TESTING") == "true":
+            logger.info("TESTING mode: Skipping actual email send")
+            return
+
         api_key = getattr(settings, "RESEND_API_KEY", None)
 
         if not api_key:
