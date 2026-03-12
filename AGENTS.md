@@ -72,8 +72,8 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.8  
-**Last Updated**: 2026-03-09  
+**Version**: 1.9  
+**Last Updated**: 2026-03-12  
 **Applies To**: All AI agents working on this codebase
 
 ---
@@ -270,7 +270,7 @@ Rules (hard requirements):
   - `gh pr view <number> --comments`
   - review-thread query (GraphQL) showing `isResolved=true` for all threads.
 - Do not merge if any regression gate fails (including flaky tests). Fix or isolate with explicit evidence first; no silent bypasses.
-- Do not mark work as `DONE` while linked issue(s), in-scope PR comments, or in-scope code scanning findings remain open.
+- Do not mark work as `DONE` while linked issue(s) remain open, any review thread is unresolved, required non-thread PR comments remain unaddressed, or in-scope code scanning findings remain open.
 - Before requesting merge approval, publish a **pre-merge checklist snapshot** in the ticket/PR comment with:
   - gate results
   - review-thread status
@@ -281,7 +281,8 @@ Rules (hard requirements):
 Enforcement note:
 
 - CI/branch-protection currently enforces PR metadata, review status, unresolved thread status, code-scanning policy, and regression checks.
-- Linked-issue closure state and pre-merge checklist snapshot remain mandatory reviewer/agent process obligations and must be recorded in worklog/PR notes.
+- Linked-issue closure state, follow-up on required non-thread PR comments, and pre-merge checklist snapshot remain mandatory reviewer/agent process obligations and must be recorded in worklog/PR notes.
+- `.github/workflows/merge-readiness-gate.yml` enforces review thread resolution (`reviewThreads.isResolved`) and open code-scanning alert checks; non-thread comment follow-ups remain manual obligations to document.
 
 ### 7. Create Reusable Tools, Not One-Off Scripts
 
@@ -623,7 +624,7 @@ The audit-to-ticket gap exists because:
 - [ ] All findings marked FIXED/PARTIAL/NOT FIXED/REGRESSED/NA
 - [ ] Regression gates pass (including flaky-test handling with explicit evidence)
 - [ ] CI/status checks pass (required gates are merge blockers)
-- [ ] Linked issue(s), in-scope PR comments, and in-scope code scanning findings are closed/resolved
+- [ ] Linked issue(s) are closed, review threads are resolved, required non-thread PR comments are addressed, and in-scope code scanning findings are closed/resolved
 - [ ] Pre-merge checklist snapshot posted (gates + review threads + issues + code scanning)
 - [ ] No merge conflicts (or resolved via Merge Conflict prompt)
 - [ ] Post-merge validation plan ready
@@ -1350,6 +1351,7 @@ Risks/notes:
 
 | Version | Date       | Changes                                                                                                            |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1.9     | 2026-03-12 | Added no-shortcut merge protocol metadata/wording alignment and clarified review-thread vs non-thread comment duties |
 | 1.7     | 2026-02-26 | Added strict secret-remediation scope: do not touch `.env*` by default; remove hardcoded secrets in code/config |
 | 1.6     | 2026-02-20 | Strengthened reusable-tool policy: mandatory `/tmp` migration to `tools/` and long-term maintenance requirement  |
 | 1.5     | 2026-02-20 | Added Core Principle #7: Create Reusable Tools; documented `tools/` directory; added prohibition #11              |

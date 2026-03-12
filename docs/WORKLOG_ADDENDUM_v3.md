@@ -65,7 +65,7 @@ Priority: P0
 
 Scope contract:
 
-- In-scope: add enforceable merge-block automation for branch naming, review approval, comment resolution, regression checks, code scanning checks, and branch deletion on merge.
+- In-scope: add enforceable merge-block automation for branch naming, comment/thread resolution, regression checks, code scanning checks, and branch deletion on merge.
 - Out-of-scope: remediating pre-existing open code scanning backlog in application code.
 - Behavior change allowed: YES (workflow and repo governance hardening).
 
@@ -82,6 +82,7 @@ Acceptance Criteria:
 - [x] Script exists to configure branch protection + required checks + auto branch deletion.
 - [x] Setup docs updated with one-command enforcement workflow.
 - [x] Branch protection applied on GitHub repo using admin token.
+- [x] Human approval is not a required merge gate; automated policy checks remain mandatory.
 
 Prompt Trace:
 
@@ -99,6 +100,7 @@ Execution log:
 - 2026-03-12 | Added `resend` backend dependency to align CI test environment imports.
 - 2026-03-12 | Updated merge policy to not require human approval; keep unresolved-thread + required-check enforcement.
 - 2026-03-12 | Added `checks: read` permission for code-scanning policy check-run polling and reran local lint/type/test gates for touched files.
+- 2026-03-12 | Stabilized backend password-reset security test credentials/cleanup to clear CI backend-test failure.
 
 Status updates:
 
@@ -125,7 +127,7 @@ Scope contract:
 
 Targets:
 
-- Repo: learning_for_kids
+- Repo: pranaysuyash/advay-learning
 - File(s): `src/frontend/src/pages/TidyUpTime.tsx`
 - Branch/PR: `codex/wip-pr39-followup-20260312` -> `main`
 - GitHub Issue: #40
@@ -148,7 +150,6 @@ Execution log:
 - 2026-03-12 | Confirmed unresolved PR #39 review thread at `discussion_r2922712427`.
 - 2026-03-12 | Fixed replay button text/icon corruption in `TidyUpTime.tsx`.
 - 2026-03-12 | Resolved PR #39 review thread `discussion_r2922712427`.
-- 2026-03-12 | Hardened backend password reset test credentials/cleanup to remove CI auth failure in `tests/test_security.py::TestPasswordReset::test_reset_password_with_valid_token`.
 
 Status updates:
 
