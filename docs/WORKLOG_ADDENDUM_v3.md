@@ -53,6 +53,7 @@ Risks/notes:
 
 ---
 
+
 ### TCK-20260312-004 :: Enforce no-shortcut merge block policy
 
 Ticket Stamp: STAMP-20260312T074137Z-codex-h30k
@@ -117,7 +118,7 @@ Ticket Stamp: STAMP-20260312T074137Z-codex-onun
 Type: BUG
 Owner: Pranay (human owner, agent: Codex)
 Created: 2026-03-12
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
@@ -154,7 +155,7 @@ Execution log:
 
 Status updates:
 
-- 2026-03-12 **IN_PROGRESS** — Ticket opened for post-merge regression fix and comment closure.
+- 2026-03-12 **DONE** — Replay-button regression fix shipped and PR #39 review thread resolved.
 
 ---
 
@@ -14452,5 +14453,64 @@ Files Modified:
 Testing:
 - TypeScript: ✅ Passes
 - Visual: Rayman-style floating hand with pinch animation
+
+---
+
+### TCK-20260312-005 :: Open-Issue Triage and Closure Sweep
+
+Ticket Stamp: STAMP-20260312T084900Z-codex-n4i2
+
+Type: IMPROVEMENT
+Owner: Pranay (human owner, agent: Codex)
+Created: 2026-03-12
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: triage current open GitHub issues, close duplicates/administrative-complete items, and publish a queue snapshot for remaining delivery epics.
+- Out-of-scope: implementing feature epics #23/#24/#25 in this pass.
+- Behavior change allowed: NO (issue/process management only).
+
+Targets:
+
+- Repo: pranaysuyash/advay-learning
+- File(s): `docs/OPEN_ISSUE_TRIAGE_2026-03-12.md`, `docs/WORKLOG_ADDENDUM_v3.md`, `docs/audit/MEDIAPIPE_INTEGRATION_AUDIT.md`
+- Branch/PR: `codex/wip-open-issues-20260312` -> `main`
+- GitHub Issues: #22, #26, #27 (closed in this sweep)
+
+Acceptance Criteria:
+
+- [x] Open issues reviewed with scope-based triage.
+- [x] Duplicate issue(s) closed with rationale.
+- [x] Administrative triage issues closed after snapshot publication.
+- [x] Remaining open epics queued with explicit order.
+
+Prompt Trace:
+
+- `prompts/triage/out-of-scope-v1.0.md` (triage lens)
+- `prompts/review/local-pre-commit-review-v1.0.md` (local gate lens)
+
+Execution log:
+
+- 2026-03-12 | Reviewed open issues #22-#27 and mapped scope overlap.
+- 2026-03-12 | Published triage/priority snapshot in `docs/OPEN_ISSUE_TRIAGE_2026-03-12.md`.
+- 2026-03-12 | Prepared duplicate closure for #22 and completion closures for #26/#27.
+- 2026-03-12 | Closed issue #22 as duplicate of #23.
+- 2026-03-12 | Closed triage workspace issues #26 and #27 after publishing queue snapshot.
+- 2026-03-12 | Addressed PR #43 review findings in docs (`MEDIAPIPE_INTEGRATION_AUDIT.md`, ticket status consistency) to clear unresolved review threads.
+- 2026-03-12 | Normalized TypeScript code fences in `MEDIAPIPE_INTEGRATION_AUDIT.md` and corrected inaccurate MediaPipe mode guidance.
+- 2026-03-12 | Added traceability/evidence metadata (ticket linkage, issue-state command outputs, PR linkage) requested in PR review.
+
+Evidence log:
+
+- `gh issue view 22 --json number,state,stateReason,closedAt,url,title` -> CLOSED, COMPLETED, `2026-03-12T09:00:17Z`
+- `gh issue view 26 --json number,state,stateReason,closedAt,url,title` -> CLOSED, COMPLETED, `2026-03-12T09:00:17Z`
+- `gh issue view 27 --json number,state,stateReason,closedAt,url,title` -> CLOSED, COMPLETED, `2026-03-12T09:00:17Z`
+- `gh issue list --state open --json number,title,url` -> remaining open epics: #23, #24, #25
+
+Status updates:
+
+- 2026-03-12 **DONE** — Closed #22/#26/#27 and left delivery epics #23/#24/#25 open with queue order.
 
 ---
