@@ -278,6 +278,11 @@ Rules (hard requirements):
   - code-scanning status
 - If any gate is ambiguous, unavailable, or requires bypass/override, stop and ask the user for explicit approval before proceeding.
 
+Enforcement note:
+
+- CI/branch-protection currently enforces PR metadata, review status, unresolved thread status, code-scanning policy, and regression checks.
+- Linked-issue closure state and pre-merge checklist snapshot remain mandatory reviewer/agent process obligations and must be recorded in worklog/PR notes.
+
 ### 7. Create Reusable Tools, Not One-Off Scripts
 
 **Principle:** When you create helpful code (analyzers, converters, validators, test harnesses), save it as a documented, reusable tool for future use—by any project.
