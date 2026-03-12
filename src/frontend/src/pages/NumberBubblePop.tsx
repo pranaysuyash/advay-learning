@@ -31,7 +31,7 @@ function NumberBubblePopContent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('number-bubble-pop');
-  const { saveProgress: _saveProgress } = useGameProgress('number-bubble-pop');
+  const { saveProgress } = useGameProgress('number-bubble-pop');
 
   useGameSessionProgress({ gameName: 'Number Bubble Pop', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
@@ -90,7 +90,12 @@ function NumberBubblePopContent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => {
+    playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
+    await onGameComplete(correct);
+    navigate('/games');
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer title="Number Bubble Pop" onHome={() => navigate('/games')} reportSession={false}>

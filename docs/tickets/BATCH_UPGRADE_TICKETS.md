@@ -3,7 +3,7 @@
 **Created**: 2026-02-27  
 **Batch**: B (Automated) + A (Manual)  
 **Total Games**: 39  
-**Completed**: 3 (manual) + 33 (batch) = 36/39 (92%)
+**Completed**: 4 (manual) + 33 (batch) = 37/39 (95%)
 
 ---
 
@@ -138,7 +138,7 @@ All batch-upgraded games need manual review to ensure:
 |----------|-------|--------|
 | Manually upgraded (perfect) | 3 | ✅ Complete |
 | Batch upgraded (needs review) | 33 | 🔍 Review needed |
-| Not found / special cases | 1 | ⚠️ Locate & fix |
+| Not found / special cases | 0 | ✅ Complete |
 | Already good (AlphabetGame) | 1 | ✅ Minor tweaks only |
 | **TOTAL** | **39** | **92% complete** |
 

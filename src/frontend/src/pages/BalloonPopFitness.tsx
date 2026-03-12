@@ -25,6 +25,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useStreakTracking, type ScorePopup } from '../hooks/useStreakTracking';
@@ -312,19 +313,15 @@ const BalloonGameArea = memo(function BalloonGameArea({
         <GameHUD
           score={gameState?.score}
           streak={streak}
-          levelInfo={
-            <div className="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-xl font-black border-2 border-purple-200 shadow-sm">
-              Level {gameState?.level}
-            </div>
-          }
+          level={gameState?.level}
           rightHeaderContent={
             <div className="flex gap-4 items-center">
               {comboActive && (
-                <div className='bg-orange-100 text-orange-600 px-3 py-1 rounded-xl font-black border-2 border-orange-200 shadow-sm animate-pulse'>
-                  ⚡ {gameState!.combo}x
+                <div className='bg-orange-100 text-orange-600 px-3 py-1 rounded-xl font-black border-2 border-orange-200 shadow-sm animate-pulse text-xs uppercase'>
+                  ⚡ {gameState!.combo}x Combo
                 </div>
               )}
-              <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm ${timerClass}`}>
+              <div className={`px-4 py-1.5 rounded-xl font-black border-2 shadow-sm text-sm ${timerClass}`}>
                 ⏳ {Math.ceil(timeMs / 1000)}s
               </div>
             </div>
@@ -398,6 +395,7 @@ const BalloonGameArea = memo(function BalloonGameArea({
 const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('balloon-pop-fitness');
+  const { saveProgress } = useGameProgress('balloon-pop-fitness');
   const { playPop, playSuccess, playCelebration, playClick } = useAudio();
 
   // ===== GAME STATE =====
@@ -562,9 +560,10 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       if (levelAdvanced) playCelebration();
 
       if (gameEnded && !showCelebration) {
-        setTimeout(() => {
+        setTimeout(async () => {
           setShowCelebration(true);
           playCelebration();
+          await saveProgress({ score: gameState?.score || 0, completed: true, level: gameState?.level || 1 });
           onGameComplete();
         }, 500);
       }
@@ -629,10 +628,11 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     setGameState(null);
   };
 
-  const handleShowMenu = () => {
+  const handleShowMenu = async () => {
     playClick();
     // Reward completion only when the game actually finished.
     if (gameState && !gameState.gameActive) {
+      await saveProgress({ score: gameState.score, completed: true, level: gameState.level });
       onGameComplete();
     }
     setShowMenu(true);

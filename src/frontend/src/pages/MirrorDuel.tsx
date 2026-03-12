@@ -22,6 +22,7 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -50,6 +51,7 @@ const MirrorDuelContent = memo(function MirrorDuelContent() {
   const { playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('mirror-duel');
+  const { saveProgress } = useGameProgress('mirror-duel');
   
   const level = getCurrentLevel(gameState.level);
   
@@ -130,16 +132,19 @@ const MirrorDuelContent = memo(function MirrorDuelContent() {
       triggerHaptic('celebration');
       incrementStreak();
       setShowCelebration(true);
-      
+
       const timeMs = Date.now() - gameState.startTime;
       const score = calculateScore(gameState.moves, timeMs, gameState.level);
-      onGameComplete(score);
-      
+      (async () => {
+        await saveProgress({ score, completed: true, level: gameState.level });
+        onGameComplete(score);
+      })();
+
       if (ttsEnabled) {
         speak('Amazing mirror master!');
       }
     }
-  }, [gameState.isComplete, showCelebration, playSuccess, incrementStreak, onGameComplete, gameState, ttsEnabled, speak]);
+  }, [gameState.isComplete, showCelebration, playSuccess, incrementStreak, onGameComplete, gameState, ttsEnabled, speak, saveProgress]);
   
   const gameControls: GameControl[] = [
     { id: 'reset', label: 'Reset', icon: 'rotate-ccw', onClick: handleReset },

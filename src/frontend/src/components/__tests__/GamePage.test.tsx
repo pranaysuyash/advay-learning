@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GamePage, GamePageContext } from '../GamePage';
-import { progressQueue } from '../../services/progressQueue';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useProgressStore } from '../../store';
+import { useGameProgress } from '../../hooks/useGameProgress';
 import { vi } from 'vitest';
 
 // mock navigation so we can verify home-button behaviour
@@ -19,6 +19,12 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('../../hooks/useSubscription', () => ({
   useSubscription: vi.fn(),
+}));
+
+// Controllable mock for useGameProgress
+export const mockSaveProgress = vi.fn();
+vi.mock('../../hooks/useGameProgress', () => ({
+  useGameProgress: vi.fn(() => ({ saveProgress: mockSaveProgress })),
 }));
 
 // for convenience in tests
@@ -39,6 +45,8 @@ beforeEach(() => {
   vi.resetAllMocks();
   // give store a fake profile so handleFinish doesn't throw
   useProgressStore.setState({ currentProfile: { id: 'profile-1' } });
+  // reset saveProgress mock to resolve successfully
+  mockSaveProgress.mockResolvedValue(undefined);
 });
 
 describe('GamePage', () => {
@@ -97,9 +105,7 @@ describe('GamePage', () => {
       canAccessGame: () => true,
       isLoading: false,
     });
-    const spy = vi
-      .spyOn(progressQueue, 'add')
-      .mockResolvedValue(undefined as any);
+    const spy = mockSaveProgress.mockResolvedValue(undefined as any);
     let doFinish: () => Promise<void>;
 
     function Child() {
@@ -186,8 +192,8 @@ describe('GamePage', () => {
       canAccessGame: () => true,
       isLoading: false,
     });
-    // force progressQueue to throw so error state is shown
-    vi.spyOn(progressQueue, 'add').mockRejectedValue(new Error('fail'));
+    // force saveProgress to throw so error state is shown
+    mockSaveProgress.mockRejectedValue(new Error('fail'));
     let doFinish: () => Promise<void>;
     function Child() {
       const ctx = React.useContext(GamePageContext)!;

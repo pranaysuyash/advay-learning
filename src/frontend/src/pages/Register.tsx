@@ -45,6 +45,25 @@ export function Register() {
       return;
     }
 
+    // Check if password is derived from email
+    const emailPrefix = email.split('@')[0].toLowerCase();
+    const passwordLower = password.toLowerCase();
+    const emailSegments = emailPrefix.split(/[._-]/);
+
+    if (passwordLower.includes(emailPrefix)) {
+      playError();
+      setLocalError('Password cannot be based on your email address');
+      return;
+    }
+
+    for (const segment of emailSegments) {
+      if (segment.length >= 3 && passwordLower.includes(segment)) {
+        playError();
+        setLocalError('Password cannot be based on your email address');
+        return;
+      }
+    }
+
     if (showChildFields && !childName.trim()) {
       playError();
       setLocalError('Please enter your child\'s name');

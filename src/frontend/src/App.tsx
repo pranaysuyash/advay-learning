@@ -13,6 +13,7 @@ import { useProgressSync } from './hooks/useProgressSync';
 import { CalmModeProvider } from './components/CalmModeProvider';
 
 import * as lazyPages from './routes/lazyPages';
+import { VerifyEmail } from './routes/lazyPages';
 
 const {
   Home,
@@ -142,6 +143,7 @@ const {
   TextureExplorer,
   DinosaurDig,
   LightPainter,
+  TidyUpTime,
 } = lazyPages;
 
 // Loading component for suspense boundaries
@@ -177,6 +179,7 @@ function App() {
                 <Route path='/register' element={<Register />} />
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/reset-password' element={<ResetPassword />} />
+                <Route path='/verify-email' element={<VerifyEmail />} />
 
                 {/* All other pages use Layout */}
                 <Route
@@ -1200,6 +1203,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <LightPainter />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='/games/tidy-up-time'
+                  element={
+                    <ProtectedRoute>
+                      <TidyUpTime />
                     </ProtectedRoute>
                   }
                 />

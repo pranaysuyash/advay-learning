@@ -25,6 +25,7 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameShell } from '../components/GameShell';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
@@ -49,6 +50,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   // ===== HOOKS =====
   const { onGameComplete } = useGameDrops('musical-statues');
+  const { saveProgress } = useGameProgress('musical-statues');
   // saveProgress returned by hook isn't used in this game yet, so omit it to avoid
   // an unused variable error.
   const { playClick } = useAudio();
@@ -307,9 +309,10 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
     setGameState(null);
   };
 
-  const handleShowMenu = () => {
+  const handleShowMenu = async () => {
     playClick();
     if (gameState) {
+      await saveProgress({ score: gameState.score, completed: true, level: gameState.level });
       onGameComplete();
     }
     setShowMenu(true);

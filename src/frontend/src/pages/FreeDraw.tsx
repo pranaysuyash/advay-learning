@@ -7,16 +7,18 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Palette, Paintbrush, Trash2, Save } from 'lucide-react';
+import { Palette, Paintbrush } from 'lucide-react';
+import { GameHUD } from '../components/game/GameHUD';
+import { GameControls, type GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -42,6 +44,7 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
   const hasAccess = canAccessGame('free-draw');
   const { currentProfile } = useProgressStore();
   const { onGameComplete } = useGameDrops('free-draw');
+  const { saveProgress } = useGameProgress('free-draw');
 
   const { playClick } = useAudio();
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -100,11 +103,10 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
       if (!currentProfile) return;
 
       try {
-        await progressQueue.add({
-          profileId: currentProfile.id,
-          gameId: 'free-draw',
+        await saveProgress({
           score: finalScore,
           completed: true,
+          level: 1,
           metadata: {
             strokesCreated: gameState.canvas.strokes.length,
             brushType: gameState.currentBrush.type,
@@ -118,6 +120,7 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
     },
     [
       currentProfile,
+      saveProgress,
       onGameComplete,
       // explicitly derive primitive dependencies to keep callback stable
       gameState.canvas.strokes.length,
@@ -256,6 +259,30 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
     }
   }, [playClick]);
 
+  const controls: GameControl[] = [
+    {
+      id: 'back',
+      icon: 'arrow-left' as any,
+      label: 'Back',
+      onClick: handleStop,
+      variant: 'secondary',
+    },
+    {
+      id: 'clear',
+      icon: 'trash-2' as any,
+      label: 'Clear',
+      onClick: handleClear,
+      variant: 'secondary',
+    },
+    {
+      id: 'save',
+      icon: 'save' as any,
+      label: 'Save',
+      onClick: handleSave,
+      variant: 'success',
+    },
+  ];
+
   return (
     <GlobalErrorBoundary>
       <div className='min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4'>
@@ -288,37 +315,13 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
           </motion.div>
         ) : (
           <div className='max-w-6xl mx-auto'>
-            <div className='flex justify-between items-center mb-4'>
-              <motion.button
-                onClick={handleStop}
-                whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                className='px-6 py-3 bg-white border-2 border-[#F2CC8F] rounded-xl font-bold hover:bg-slate-50'
-              >
-                Back
-              </motion.button>
+            <GameHUD
+              score={strokeCount}
+              streak={0}
+              levelInfo='Free Draw'
+            />
 
-              <div className='flex gap-2'>
-                <motion.button
-                  onClick={handleClear}
-                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                  className='px-4 py-2 bg-red-100 text-red-600 rounded-xl font-bold'
-                >
-                  <Trash2 className='w-5 h-5 inline' /> Clear
-                </motion.button>
-                <motion.button
-                  onClick={handleSave}
-                  whileHover={reducedMotion ? {} : { scale: 1.05 }}
-                  whileTap={reducedMotion ? {} : { scale: 0.95 }}
-                  className='px-4 py-2 bg-green-100 text-green-600 rounded-xl font-bold'
-                >
-                  <Save className='w-5 h-5 inline' /> Save
-                </motion.button>
-              </div>
-            </div>
-
-            <div className='bg-white rounded-2xl border-3 border-[#F2CC8F] p-4 shadow-lg'>
+            <div className='bg-white rounded-2xl border-3 border-[#F2CC8F] p-4 shadow-lg mt-4'>
               <canvas
                 ref={canvasRef}
                 width={800}
@@ -395,6 +398,8 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
                 />
               ))}
             </div>
+
+            <GameControls controls={controls} position='bottom-right' />
           </div>
         )}
 

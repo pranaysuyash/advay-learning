@@ -27,7 +27,7 @@ export function FingerNumberShowHud(props: Props) {
   return (
     <>
       {promptStage === 'side' ? (
-        <div className='absolute top-4 left-4 flex gap-2 flex-wrap pointer-events-none'>
+        <div className='absolute top-20 left-4 flex gap-2 flex-wrap pointer-events-none'>
           <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
             <span className='flex items-center gap-2'>
               <UIIcon name='target' size={16} className='text-yellow-300' />
@@ -45,7 +45,7 @@ export function FingerNumberShowHud(props: Props) {
         </div>
       ) : null}
 
-      <div className='absolute top-4 right-4 pointer-events-none'>
+      <div className='absolute top-20 right-4 pointer-events-none'>
         <div className='bg-black/55 backdrop-blur px-4 py-2 rounded-full text-sm md:text-base font-bold border border-white/30 text-white shadow-soft'>
           <span className='flex items-center gap-2'>
             <span

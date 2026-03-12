@@ -1,262 +1,365 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+/**
+ * Weather Lab Logic Tests
+ */
+
+import { describe, it, expect } from 'vitest';
 import {
-  initializeGame,
-  getCurrentLevel,
-  updateTemperature,
-  updateHumidity,
-  updatePressure,
-  updateWindSpeed,
-  updateWindDirection,
-  getCurrentWeather,
-  checkWeatherMatch,
-  updateWeather,
-  startGame,
-  resetLevel,
-  nextLevel,
-  calculateScore,
+  createInitialState,
+  startChallenge,
+  updateConditions,
+  calculateWeather,
+  checkChallenge,
+  submitChallenge,
+  resetChallenge,
+  updateTimer,
   getWeatherInfo,
-  WEATHER_CONDITIONS,
-  LEVELS,
+  calculateFinalScore,
+  CHALLENGES,
 } from '../weatherLabLogic';
 
-describe('weatherLabLogic', () => {
-  describe('initializeGame', () => {
-    it('should initialize game with level 1', () => {
-      const state = initializeGame(1);
-      expect(state.level).toBe(1);
-      expect(state.weather.temperature).toBe(20);
-      expect(state.weather.humidity).toBe(50);
-      expect(state.weather.pressure).toBe(1013);
-      expect(state.weather.windSpeed).toBe(10);
+describe('Weather Lab Logic', () => {
+  describe('createInitialState', () => {
+    it('creates state with menu status', () => {
+      const state = createInitialState();
+      expect(state.status).toBe('menu');
+    });
+
+    it('initializes default conditions', () => {
+      const state = createInitialState();
+      expect(state.conditions.temperature).toBe(20);
+      expect(state.conditions.humidity).toBe(50);
+      expect(state.conditions.windSpeed).toBe(20);
+      expect(state.conditions.pressure).toBe(1013);
+    });
+
+    it('starts with zero score', () => {
+      const state = createInitialState();
+      expect(state.score).toBe(0);
+    });
+
+    it('has empty discovered weathers', () => {
+      const state = createInitialState();
+      expect(state.discoveredWeathers).toEqual([]);
     });
   });
 
-  describe('getCurrentLevel', () => {
-    it('should return correct level', () => {
-      const level = getCurrentLevel(2);
-      expect(level.name).toBe('Rainy Day');
+  describe('startChallenge', () => {
+    it('sets status to playing', () => {
+      const state = startChallenge(createInitialState(), 'make-it-snow');
+      expect(state.status).toBe('playing');
     });
 
-    it('should return level 1 for invalid id', () => {
-      const level = getCurrentLevel(999);
-      expect(level.id).toBe(1);
-    });
-  });
-
-  describe('WEATHER_CONDITIONS', () => {
-    it('should have 8 weather conditions', () => {
-      expect(WEATHER_CONDITIONS).toHaveLength(8);
+    it('sets challenge ID', () => {
+      const state = startChallenge(createInitialState(), 'desert-heat');
+      expect(state.currentChallengeId).toBe('desert-heat');
     });
 
-    it('should have unique IDs', () => {
-      const ids = WEATHER_CONDITIONS.map(c => c.id);
-      const uniqueIds = [...new Set(ids)];
-      expect(ids.length).toBe(uniqueIds.length);
-    });
-  });
-
-  describe('updateTemperature', () => {
-    it('should increase temperature', () => {
-      let state = initializeGame(1);
-      const oldTemp = state.weather.temperature;
-      state = updateTemperature(state, 5);
-      expect(state.weather.temperature).toBe(oldTemp + 5);
+    it('resets conditions to defaults', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: 35 });
+      state = startChallenge(state, 'make-it-snow');
+      expect(state.conditions.temperature).toBe(20);
     });
 
-    it('should decrease temperature', () => {
-      let state = initializeGame(1);
-      const oldTemp = state.weather.temperature;
-      state = updateTemperature(state, -5);
-      expect(state.weather.temperature).toBe(oldTemp - 5);
-    });
-
-    it('should clamp to max 50', () => {
-      let state = initializeGame(1);
-      state = updateTemperature(state, 100);
-      expect(state.weather.temperature).toBe(50);
-    });
-
-    it('should clamp to min -20', () => {
-      let state = initializeGame(1);
-      state = updateTemperature(state, -100);
-      expect(state.weather.temperature).toBe(-20);
+    it('resets attempts', () => {
+      let state = createInitialState();
+      state = { ...state, attempts: 5 };
+      state = startChallenge(state, 'make-it-snow');
+      expect(state.attempts).toBe(0);
     });
   });
 
-  describe('updateHumidity', () => {
-    it('should increase humidity', () => {
-      let state = initializeGame(1);
-      state = updateHumidity(state, 10);
-      expect(state.weather.humidity).toBe(60);
+  describe('calculateWeather', () => {
+    it('returns snowy for cold + humid', () => {
+      const weather = calculateWeather({
+        temperature: -5,
+        humidity: 80,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('snowy');
     });
 
-    it('should clamp to 0-100', () => {
-      let state = initializeGame(1);
-      state = updateHumidity(state, 200);
-      expect(state.weather.humidity).toBe(100);
-    });
-  });
-
-  describe('updatePressure', () => {
-    it('should update pressure', () => {
-      let state = initializeGame(1);
-      state = updatePressure(state, 10);
-      expect(state.weather.pressure).toBe(1023);
+    it('returns desert for hot + dry', () => {
+      const weather = calculateWeather({
+        temperature: 35,
+        humidity: 20,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('desert');
     });
 
-    it('should clamp to 950-1050', () => {
-      let state = initializeGame(1);
-      state = updatePressure(state, 200);
-      expect(state.weather.pressure).toBe(1050);
-    });
-  });
-
-  describe('updateWindSpeed', () => {
-    it('should increase wind speed', () => {
-      let state = initializeGame(1);
-      state = updateWindSpeed(state, 20);
-      expect(state.weather.windSpeed).toBe(30);
+    it('returns thunderstorm for hot + very humid', () => {
+      const weather = calculateWeather({
+        temperature: 30,
+        humidity: 90,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('thunderstorm');
     });
 
-    it('should clamp to 0-100', () => {
-      let state = initializeGame(1);
-      state = updateWindSpeed(state, 200);
-      expect(state.weather.windSpeed).toBe(100);
-    });
-  });
-
-  describe('updateWindDirection', () => {
-    it('should update wind direction', () => {
-      let state = initializeGame(1);
-      state = updateWindDirection(state, 90);
-      expect(state.weather.windDirection).toBe(90);
+    it('returns clear winter for cold + dry', () => {
+      const weather = calculateWeather({
+        temperature: 0,
+        humidity: 30,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('winter-sun');
     });
 
-    it('should wrap to 0-360', () => {
-      let state = initializeGame(1);
-      state = updateWindDirection(state, 400);
-      expect(state.weather.windDirection).toBe(40);
-    });
-  });
-
-  describe('getCurrentWeather', () => {
-    it('should return sunny for hot and dry', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = 30;
-      state.weather.humidity = 20;
-      const weather = getCurrentWeather(state);
-      expect(weather?.id).toBe('sunny');
+    it('returns rainy for moderate + humid', () => {
+      const weather = calculateWeather({
+        temperature: 15,
+        humidity: 80,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('rainy');
     });
 
-    it('should return snowy for cold and humid', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = -5;
-      state.weather.humidity = 80;
-      const weather = getCurrentWeather(state);
-      expect(weather?.id).toBe('snowy');
+    it('returns stormy for low pressure + high wind', () => {
+      const weather = calculateWeather({
+        temperature: 20,
+        humidity: 50,
+        windSpeed: 70,
+        pressure: 990,
+      });
+      expect(weather.type).toBe('stormy');
     });
 
-    it('should return rainy for high humidity', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = 15;
-      state.weather.humidity = 80;
-      const weather = getCurrentWeather(state);
-      expect(weather?.id).toBe('rainy');
+    it('returns cloudy for moderate humidity', () => {
+      const weather = calculateWeather({
+        temperature: 20,
+        humidity: 60,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('cloudy');
     });
 
-    it('should return stormy for high humidity and wind', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = 22;
-      state.weather.humidity = 90;
-      state.weather.windSpeed = 50;
-      const weather = getCurrentWeather(state);
-      expect(weather?.id).toBe('stormy');
+    it('returns clear for low humidity', () => {
+      const weather = calculateWeather({
+        temperature: 20,
+        humidity: 40,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.type).toBe('clear');
     });
 
-    it('should return windy for high wind speed', () => {
-      let state = initializeGame(1);
-      state.weather.windSpeed = 50;
-      const weather = getCurrentWeather(state);
-      expect(weather?.id).toBe('windy');
+    it('has educational content', () => {
+      const weather = calculateWeather({
+        temperature: -5,
+        humidity: 80,
+        windSpeed: 20,
+        pressure: 1013,
+      });
+      expect(weather.educational).toContain('Snow');
     });
   });
 
-  describe('checkWeatherMatch', () => {
-    it('should match sunny weather', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = 30;
-      state.weather.humidity = 20;
-      state = updateWeather(state);
-      const match = checkWeatherMatch(state, 'sunny');
-      expect(match).toBe(true);
+  describe('updateConditions', () => {
+    it('updates temperature', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: 30 });
+      expect(state.conditions.temperature).toBe(30);
     });
 
-    it('should not match wrong weather', () => {
-      let state = initializeGame(1);
-      state.weather.temperature = -5;
-      state.weather.humidity = 80;
-      state = updateWeather(state);
-      const match = checkWeatherMatch(state, 'sunny');
-      expect(match).toBe(false);
+    it('updates humidity', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { humidity: 80 });
+      expect(state.conditions.humidity).toBe(80);
+    });
+
+    it('clamps temperature to max 40', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: 50 });
+      expect(state.conditions.temperature).toBe(40);
+    });
+
+    it('clamps temperature to min -10', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: -20 });
+      expect(state.conditions.temperature).toBe(-10);
+    });
+
+    it('clamps humidity to max 100', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { humidity: 150 });
+      expect(state.conditions.humidity).toBe(100);
+    });
+
+    it('clamps humidity to min 0', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { humidity: -10 });
+      expect(state.conditions.humidity).toBe(0);
+    });
+
+    it('calculates weather after update', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: -5, humidity: 80 });
+      expect(state.currentWeather).not.toBeNull();
+      expect(state.currentWeather?.type).toBe('snowy');
+    });
+
+    it('adds to discovered weathers', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: -5, humidity: 80 });
+      expect(state.discoveredWeathers).toContain('snowy');
+    });
+
+    it('does not duplicate discovered weathers', () => {
+      let state = createInitialState();
+      state = updateConditions(state, { temperature: -5, humidity: 80 });
+      state = updateConditions(state, { temperature: -6, humidity: 81 });
+      expect(state.discoveredWeathers.filter((w) => w === 'snowy')).toHaveLength(1);
     });
   });
 
-  describe('startGame', () => {
-    it('should set isPlaying to true', () => {
-      const state = initializeGame(1);
-      const newState = startGame(state);
-      expect(newState.isPlaying).toBe(true);
-      expect(newState.startTime).toBeGreaterThan(0);
+  describe('checkChallenge', () => {
+    it('returns error when no challenge selected', () => {
+      const state = createInitialState();
+      const result = checkChallenge(state);
+      expect(result.success).toBe(false);
+      expect(result.feedback).toContain('No challenge');
+    });
+
+    it('detects successful snowy challenge', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = updateConditions(state, { temperature: -5, humidity: 80 });
+      const result = checkChallenge(state);
+      expect(result.success).toBe(true);
+    });
+
+    it('detects failed challenge with feedback', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = updateConditions(state, { temperature: 35, humidity: 20 }); // Desert instead of snow
+      const result = checkChallenge(state);
+      expect(result.success).toBe(false);
+      expect(result.feedback).toContain('Desert');
+    });
+
+    it('detects successful desert challenge', () => {
+      let state = startChallenge(createInitialState(), 'desert-heat');
+      state = updateConditions(state, { temperature: 35, humidity: 20 });
+      const result = checkChallenge(state);
+      expect(result.success).toBe(true);
+    });
+
+    it('detects successful thunderstorm challenge', () => {
+      let state = startChallenge(createInitialState(), 'thunderstorm');
+      state = updateConditions(state, { temperature: 30, humidity: 90 });
+      const result = checkChallenge(state);
+      expect(result.success).toBe(true);
     });
   });
 
-  describe('resetLevel', () => {
-    it('should reset to initial state', () => {
-      let state = initializeGame(1);
-      state = updateTemperature(state, 20);
-      const resetState = resetLevel(state);
-      expect(resetState.weather.temperature).toBe(20);
+  describe('submitChallenge', () => {
+    it('awards points on success', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = updateConditions(state, { temperature: -5, humidity: 80 });
+      state = submitChallenge(state);
+      expect(state.status).toBe('success');
+      expect(state.score).toBeGreaterThan(0);
+    });
+
+    it('increments attempts on failure', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = updateConditions(state, { temperature: 30, humidity: 20 });
+      state = submitChallenge(state);
+      expect(state.status).toBe('failure');
+      expect(state.attempts).toBe(1);
     });
   });
 
-  describe('nextLevel', () => {
-    it('should advance to next level', () => {
-      const state = initializeGame(1);
-      const newState = nextLevel(state);
-      expect(newState.level).toBe(2);
+  describe('resetChallenge', () => {
+    it('resets conditions', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = updateConditions(state, { temperature: -5 });
+      state = resetChallenge(state);
+      expect(state.conditions.temperature).toBe(20);
     });
 
-    it('should not advance past last level', () => {
-      const state = initializeGame(5);
-      const newState = nextLevel(state);
-      expect(newState.level).toBe(5);
+    it('sets status to playing', () => {
+      let state = startChallenge(createInitialState(), 'make-it-snow');
+      state = submitChallenge(state);
+      state = resetChallenge(state);
+      expect(state.status).toBe('playing');
     });
   });
 
-  describe('calculateScore', () => {
-    it('should calculate score with base value', () => {
-      const score = calculateScore(5, 10000, 1);
-      expect(score).toBeGreaterThan(0);
-    });
-
-    it('should penalize excessive moves', () => {
-      const lowMoves = calculateScore(5, 10000, 1);
-      const highMoves = calculateScore(30, 10000, 1);
-      expect(highMoves).toBeLessThan(lowMoves);
+  describe('updateTimer', () => {
+    it('increments time elapsed', () => {
+      let state = createInitialState();
+      state = updateTimer(state);
+      expect(state.timeElapsed).toBe(1);
     });
   });
 
   describe('getWeatherInfo', () => {
-    it('should return info for sunny', () => {
-      const info = getWeatherInfo('sunny');
-      expect(info.name).toBe('Sunny');
-      expect(info.emoji).toBe('☀️');
+    it('returns info for snowy', () => {
+      const info = getWeatherInfo('snowy');
+      expect(info.emoji).toBe('❄️');
+      expect(info.name).toBe('Snowy');
     });
 
-    it('should return info for snowy', () => {
-      const info = getWeatherInfo('snowy');
-      expect(info.name).toBe('Snowy');
-      expect(info.emoji).toBe('❄️');
+    it('returns info for desert', () => {
+      const info = getWeatherInfo('desert');
+      expect(info.emoji).toBe('🏜️');
+    });
+
+    it('returns unique colors for each type', () => {
+      const types = ['clear', 'cloudy', 'rainy', 'snowy', 'stormy', 'foggy', 'desert', 'winter-sun', 'thunderstorm'] as const;
+      const colors = types.map((t) => getWeatherInfo(t).color);
+      const uniqueColors = new Set(colors);
+      expect(uniqueColors.size).toBe(types.length);
+    });
+  });
+
+  describe('calculateFinalScore', () => {
+    it('calculates total score', () => {
+      const state = { ...createInitialState(), score: 250 };
+      const result = calculateFinalScore(state);
+      expect(result.totalScore).toBe(250);
+    });
+
+    it('counts discovered weathers', () => {
+      const state = { ...createInitialState(), discoveredWeathers: ['clear', 'cloudy', 'rainy'] };
+      const result = calculateFinalScore(state);
+      expect(result.weathersDiscovered).toBe(3);
+    });
+
+    it('estimates challenges completed', () => {
+      const state = { ...createInitialState(), score: 250 };
+      const result = calculateFinalScore(state);
+      expect(result.challengesCompleted).toBe(2);
+    });
+  });
+
+  describe('CHALLENGES', () => {
+    it('has 6 challenges', () => {
+      expect(CHALLENGES).toHaveLength(6);
+    });
+
+    it('has make-it-snow challenge', () => {
+      const challenge = CHALLENGES.find((c) => c.id === 'make-it-snow');
+      expect(challenge).toBeDefined();
+      expect(challenge?.targetWeather).toBe('snowy');
+    });
+
+    it('each challenge has tolerance settings', () => {
+      CHALLENGES.forEach((challenge) => {
+        expect(challenge.tolerance).toBeDefined();
+      });
+    });
+
+    it('each challenge has hint', () => {
+      CHALLENGES.forEach((challenge) => {
+        expect(challenge.hint).toBeTruthy();
+      });
     });
   });
 });

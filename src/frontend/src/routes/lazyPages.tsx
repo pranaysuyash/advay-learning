@@ -20,6 +20,11 @@ export const ResetPassword = lazy(() =>
     default: module.ResetPassword,
   })),
 );
+export const VerifyEmail = lazy(() =>
+  import('../pages/VerifyEmail').then((module) => ({
+    default: module.VerifyEmail,
+  })),
+);
 export const Pricing = lazy(() =>
   import('../pages/Pricing').then((module) => ({ default: module.Pricing })),
 );
@@ -609,6 +614,11 @@ export const DinosaurDig = lazy(() =>
 );
 export const LightPainter = lazy(() =>
   import('../pages/LightPainter').then((module) => ({
+    default: module.default,
+  })),
+);
+export const TidyUpTime = lazy(() =>
+  import('../pages/TidyUpTime').then((module) => ({
     default: module.default,
   })),
 );

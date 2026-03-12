@@ -12,6 +12,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useSubscription } from '../hooks/useSubscription';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -33,6 +34,7 @@ function LightPainterGameContent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('light-painter');
   const { onGameComplete: _onGameComplete } = useGameDrops('light-painter');
+  const { saveProgress: _saveProgress } = useGameProgress('light-painter');
 
   const { playClick } = useAudio();
   const [gameState, setGameState] = useState<GameState>(createInitialState());

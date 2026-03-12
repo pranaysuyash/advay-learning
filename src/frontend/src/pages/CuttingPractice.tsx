@@ -16,6 +16,7 @@ import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -78,6 +79,7 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('cutting-practice');
+  const { saveProgress } = useGameProgress('cutting-practice');
 
   // Hand tracking
   const {
@@ -448,9 +450,10 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score, completed: true, level: currentLevel });
     await onGameComplete(score);
     navigate('/games');
-  }, [playClick, onGameComplete, score, navigate]);
+  }, [playClick, onGameComplete, score, navigate, currentLevel, saveProgress]);
 
   const handlePlayAgain = useCallback(() => {
     playClick();

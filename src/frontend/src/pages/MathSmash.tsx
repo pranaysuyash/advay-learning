@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateQuestion, generateOptions, type Question } from '../games/mathSmashLogic';
 import { GameCursor } from '../components/game/GameCursor';
@@ -31,6 +32,7 @@ import { useWindowSize } from '../hooks/useWindowSize';
 
 function MathSmashGameComponent() {
   const { onGameComplete } = useGameDrops('math-smash');
+  const { saveProgress } = useGameProgress('math-smash');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
 
@@ -156,13 +158,14 @@ function MathSmashGameComponent() {
 
       setTargets(prev => prev.filter(t => t.id !== target.id));
 
-      setTimeout(() => {
+      setTimeout(async () => {
         if (round >= 4) {
           if (currentLevel < LEVELS.length - 1) {
             setCurrentLevel(l => l + 1);
             setRound(0);
             speak("Awesome! Let's try harder math!");
           } else {
+            await saveProgress({ score: correct + 1, completed: true, level: currentLevel + 1 });
             onGameComplete(correct + 1);
             speak("You're a Math Master!");
           }

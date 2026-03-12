@@ -4,8 +4,8 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 
 ## Recent Brainstorm (2026‑03‑10)
 
-### Environmental Augmenter
-- Camera scans room and plants virtual flora/fauna reacting to real conditions (light, temperature via microphone, movement via accelerometer).
+### Environmental Augmenter <!-- priority: P1 -->
+- Camera scans room and plants virtual flora/fauna reacting to real conditions (light, temperature via microphone, movement via accelerometer). <!-- priority: P1 -->
 
 ### Kimi Stack Ideas (2026‑03‑10)
 
@@ -19,43 +19,43 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 - Two-Player Mirror cooperation via pose mapping. <!-- priority: P1 -->
 
 #### Subject Matter Explorations
-- Phonics Tai Chi: body shapes match letter forms with Kokoro songs.
-- Story Co-Author: act verbs, Kokoro generates mad‑lib narrative.
-- Sign Language Bridge: ASL fingerspelling validation with Kokoro audio.
-- Molecule Builder: pinch atoms to bond; surprise face triggers reaction.
-- Geometry Gymnastics: arm angles measured and displayed.
-- Coding by Choreography: dance sequences become code blocks.
-- Conductor Mode: hand height/position control tempo/pitch in orchestra.
-- Pottery wheel via circular hand motion and pinch to shape clay.
-- Color Hunter: segmentation isolates real object color to validate.
+- Phonics Tai Chi: body shapes match letter forms with Kokoro songs. <!-- priority: P2 -->
+- Story Co-Author: act verbs, Kokoro generates mad‑lib narrative. <!-- priority: P1 -->
+- Sign Language Bridge: ASL fingerspelling validation with Kokoro audio. <!-- priority: P1 -->
+- Molecule Builder: pinch atoms to bond; surprise face triggers reaction. <!-- priority: P2 -->
+- Geometry Gymnastics: arm angles measured and displayed. <!-- priority: P2 -->
+- Coding by Choreography: dance sequences become code blocks. <!-- priority: P2 -->
+- Conductor Mode: hand height/position control tempo/pitch in orchestra. <!-- priority: P1 -->
+- Pottery wheel via circular hand motion and pinch to shape clay. <!-- priority: P2 -->
+- Color Hunter: segmentation isolates real object color to validate. <!-- priority: P2 -->
 
 #### Social-Emotional Learning
 - Emotion Mirror: face mesh drives avatar emotions for regulation. <!-- priority: P2 -->
 - Personal Space Bubble: pose detection field teaches consent. <!-- priority: P2 -->
 
-#### Technical Architecture Ideas
-- WebWorker+WASM for MediaPipe off‑main thread.
-- Adaptive complexity auto‑fallback Holistic→Hands based on FPS.
-- Calibration mini-game wave to establish limb baselines.
-- Kokoro TTS modes whisper/excited; JSON scripts for dynamic character voices.
-- Phonetic highlighting synced with Kokoro audio.
-- Kenny NL modularity: swap textures based on CV input.
-- Procedural backgrounds using segmentation masks.
+#### Technical Architecture Ideas <!-- priority: P2 -->
+- WebWorker+WASM for MediaPipe off‑main thread. <!-- priority: P2 -->
+- Adaptive complexity auto‑fallback Holistic→Hands based on FPS. <!-- priority: P2 -->
+- Calibration mini-game wave to establish limb baselines. <!-- priority: P2 -->
+- Kokoro TTS modes whisper/excited; JSON scripts for dynamic character voices. <!-- priority: P2 -->
+- Phonetic highlighting synced with Kokoro audio. <!-- priority: P2 -->
+- Kenny NL modularity: swap textures based on CV input. <!-- priority: P2 -->
+- Procedural backgrounds using segmentation masks. <!-- priority: P3 -->
 
-#### Engagement Mechanics
-- Daily streaks via biometrics gesture similarity score.
-- Sticker album unlocking via CV-detected feats.
-- Async Ghost Mode recording pose data to race friends.
-- Accessibility: Seated Mode toggle, Low‑Vision audio cues, Motor forgiveness slider.
+#### Engagement Mechanics <!-- priority: P2 -->
+- Daily streaks via biometrics gesture similarity score. <!-- priority: P3 -->
+- Sticker album unlocking via CV-detected feats. <!-- priority: P2 -->
+- Async Ghost Mode recording pose data to race friends. <!-- priority: P2 -->
+- Accessibility: Seated Mode toggle, Low‑Vision audio cues, Motor forgiveness slider. <!-- priority: P2 -->
 
-#### Wild Card Concepts
-- AR Shadow Puppets interactive.
-- Paper Craft Bridge print‑scan templates to import characters.
-- Full-Body Typing using pose→keyboard zones.
-- Whisper Detection with lip-reading validation.
+#### Wild Card Concepts <!-- priority: P3 -->
+- AR Shadow Puppets interactive. <!-- priority: P2 -->
+- Paper Craft Bridge print‑scan templates to import characters. <!-- priority: P2 -->
+- Full-Body Typing using pose→keyboard zones. <!-- priority: P3 -->
+- Whisper Detection with lip-reading validation. <!-- priority: P2 -->
 
-#### Content Expansion Vectors Table
-- Zoology, Cooking Math, Astronomy, History with Kokoro roles and CV mechanics.
+#### Content Expansion Vectors Table <!-- priority: P3 -->
+- Zoology, Cooking Math, Astronomy, History with Kokoro roles and CV mechanics. <!-- priority: P3 -->
 
 #### Immediate Prototype Next Steps
 1. Hand Tracker sandbox debug view overlays.
@@ -69,50 +69,50 @@ This document captures uncapped, free‑thinking concepts generated on demand.  
 
 *Next brainstorming session: TBD. Future ideas should append above.*
 
-### Object‑As‑Controller
-- Recognize household objects to turn them into in‑app tools (cup = paintbrush, toy car = in‑game vehicle, spoon = stirring tool).
+### Object‑As‑Controller <!-- priority: P1 -->
+- Recognize household objects to turn them into in‑app tools (cup = paintbrush, toy car = in‑game vehicle, spoon = stirring tool). <!-- priority: P1 -->
 
-### Time‑Layered Play
-- Games change based on time of day/season; night‑flowers, shadows matching actual room time.
+### Time‑Layered Play <!-- priority: P2 -->
+- Games change based on time of day/season; night‑flowers, shadows matching actual room time. <!-- priority: P2 -->
 
-### Tangible‑to‑Digital Bridges
-- Printable cut‑outs unlocking in‑app content when shown to the camera; stickers triggering secret modes.
+### Tangible‑to‑Digital Bridges <!-- priority: P1 -->
+- Printable cut‑outs unlocking in‑app content when shown to the camera; stickers triggering secret modes. <!-- priority: P1 -->
 
-### Peer‑to‑Peer Play
-- Nearby devices share canvas/physics via WebRTC; drag on one moves object on the other.
+### Peer‑to‑Peer Play <!-- priority: P1 -->
+- Nearby devices share canvas/physics via WebRTC; drag on one moves object on the other. <!-- priority: P1 -->
 
-### Parent‑Child Co‑Creation
-- Simple authoring UI that turns a parent sketch or word list into a playable prototype via LLMs/vision.
+### Parent‑Child Co‑Creation <!-- priority: P2 -->
+- Simple authoring UI that turns a parent sketch or word list into a playable prototype via LLMs/vision. <!-- priority: P2 -->
 
-### Sensory‑Augmented Stories
-- Smart bulbs and camera coordinate with story narration to change room ambience.
+### Sensory‑Augmented Stories <!-- priority: P2 -->
+- Smart bulbs and camera coordinate with story narration to change room ambience. <!-- priority: P2 -->
 
-### Gesture‑Triggered World Events
-- Global events activated when enough children perform a gesture (e.g. Rainbow Day, Treasure Hunt unlocking).
+### Gesture‑Triggered World Events <!-- priority: P2 -->
+- Global events activated when enough children perform a gesture (e.g. Rainbow Day, Treasure Hunt unlocking). <!-- priority: P2 -->
 
-### Adaptive Soundscapes
-- Microphone ambient noise becomes part of game audio (quiet → nature, loud → party).
+### Adaptive Soundscapes <!-- priority: P2 -->
+- Microphone ambient noise becomes part of game audio (quiet → nature, loud → party). <!-- priority: P2 -->
 
-### Memory‑Tower Game
-- Persistent tower in parent dashboard built from play sessions; children can visit it in "explore" mode.
+### Memory‑Tower Game <!-- priority: P2 -->
+- Persistent tower in parent dashboard built from play sessions; children can visit it in "explore" mode. <!-- priority: P2 -->
 
-### Mood Mesh System
-- Multi‑vector mood state (energy, curiosity, focus, frustration) that games can query.
+### Mood Mesh System <!-- priority: P3 -->
+- Multi‑vector mood state (energy, curiosity, focus, frustration) that games can query. <!-- priority: P3 -->
 
-### Gesture Analytics Playground
-- Internal tool to design gesture sequences and simulate age‑based performance with real data.
+### Gesture Analytics Playground <!-- priority: P3 -->
+- Internal tool to design gesture sequences and simulate age‑based performance with real data. <!-- priority: P3 -->
 
-### Play‑Style Personas
-- Automatic clustering into emergent personas like "Builder" or "Artist" displayed non‑judgmentally in parent view.
+### Play‑Style Personas <!-- priority: P2 -->
+- Automatic clustering into emergent personas like "Builder" or "Artist" displayed non‑judgmentally in parent view. <!-- priority: P2 -->
 
-### Sci‑Fi Themes and API for External Toys
-- Seasonal themes (Space Ship Repair) and open API for IoT toy interaction.
+### Sci‑Fi Themes and API for External Toys <!-- priority: P3 -->
+- Seasonal themes (Space Ship Repair) and open API for IoT toy interaction. <!-- priority: P3 -->
 
-### Composite & Forbidden Metrics
-- Define Play Quotient; maintain living "Never‑Metrics" registry with linter.
+### Composite & Forbidden Metrics <!-- priority: P3 -->
+- Define Play Quotient; maintain living "Never‑Metrics" registry with linter. <!-- priority: P3 -->
 
-### Privilege‑Aware Mode
-- Detect school vs home network and toggle "field trip" mode.
+### Privilege‑Aware Mode <!-- priority: P2 -->
+- Detect school vs home network and toggle "field trip" mode. <!-- priority: P2 -->
 
 ### Wild Creative Sparks
 - Augmented Shadow Orchestra, Reverse Day controls, Emotion‑Powered Cosmetics.

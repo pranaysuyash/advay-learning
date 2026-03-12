@@ -107,7 +107,7 @@ function shuffle<T>(array: T[]): T[] {
   return result;
 }
 
-function createRecommendedGame(
+export function createRecommendedGame(
   game: GameManifest,
   stats?: GlobalGameStat,
   matchReason?: string,
@@ -118,14 +118,26 @@ function createRecommendedGame(
     if (stats.age_cohort_rank <= 3) {
       badge = {
         icon: '🔥',
-        label: 'TRENDING',
+        label: 'Trending',
         subtitle: `${stats.total_plays.toLocaleString()} kids played this week!`,
       };
-    } else if (stats.completion_rate >= 0.8) {
+    } else if (stats.completion_rate >= 0.85) {
       badge = {
         icon: '⭐',
-        label: 'TOP RATED',
+        label: 'Top Rated',
         subtitle: `${Math.round(stats.completion_rate * 100)}% finish rate`,
+      };
+    } else if (stats.total_plays > 500) {
+      badge = {
+        icon: '📈',
+        label: 'Most Played',
+        subtitle: 'A community favorite!',
+      };
+    } else if (stats.avg_session_minutes > 5) {
+      badge = {
+        icon: '❤️',
+        label: 'Kid Favorite',
+        subtitle: 'Kids play this longest!',
       };
     }
   }

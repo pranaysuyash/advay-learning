@@ -7,6 +7,8 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useStreakTracking } from '../hooks/useStreakTracking';
+import { GameHUD } from '../components/game/GameHUD';
 import {
   createEndingSoundsRound,
   isEndingSoundCorrect,
@@ -26,6 +28,9 @@ function EndingSoundsGame() {
   const [activeRound, setActiveRound] = useState<EndingSoundsRound | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Find the ending sound.');
+
+  // Streak tracking
+  const { streak, incrementStreak, resetStreak } = useStreakTracking();
 
   const roundsPerSession = 8;
 
@@ -60,10 +65,12 @@ function EndingSoundsGame() {
 
     if (ok) {
       playSuccess();
+      incrementStreak();
       setCorrect((prev) => prev + 1);
       setScore((prev) => prev + 20);
       setFeedback(`Great! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`);
     } else {
+      resetStreak();
       playError();
       setFeedback(`Nice try! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`);
     }
@@ -121,8 +128,15 @@ function EndingSoundsGame() {
             </div>
           ) : (
             <>
+              <GameHUD
+                score={score}
+                streak={streak}
+                level={1}
+                round={round}
+                totalRounds={roundsPerSession}
+                showHearts={true}
+              />
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
-                <p className='text-sm font-black uppercase tracking-wide text-slate-500'>Round {round} / {roundsPerSession}</p>
                 <div className='mt-3 text-center'>
                   <p className='text-6xl'>{activeRound.target.emoji}</p>
                   <p className='text-4xl font-black text-slate-900 mt-2'>{activeRound.target.word}</p>

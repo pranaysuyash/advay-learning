@@ -18,6 +18,7 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
 import { GameBackground } from '../components/game/GameBackground';
+import { GameHUD } from '../components/game/GameHUD';
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -45,8 +46,8 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
   { type: 'image', src: '/assets/kenney/platformer/collectibles/coin_gold.png', priority: 'critical' },
   { type: 'image', src: '/assets/kenney/platformer/collectibles/gem_blue.png', priority: 'critical' },
   { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
+  { type: 'image', src: HEART_FULL, priority: 'critical' },
+  { type: 'image', src: HEART_EMPTY, priority: 'critical' },
 ];
 
 // Particle effect types
@@ -457,24 +458,18 @@ const ShapePopContent = memo(function ShapePopComponent() {
       >
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
+        {isPlaying && (
+          <GameHUD
+            score={score}
+            streak={streak}
+            level={Math.max(1, Math.floor(score / 120) + 1)}
+            showHearts={true}
+          />
+        )}
+
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
           {feedback}
         </div>
-
-        {/* Streak display with Kenney hearts */}
-        {isPlaying && (
-          <div className='absolute top-6 right-6 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-2xl border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold text-advay-slate mr-2'>Streak:</span>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <img
-                key={i}
-                src={streak >= i ? HEART_FULL : HEART_EMPTY}
-                alt={streak >= i ? 'Full heart' : 'Empty heart'}
-                className='w-6 h-6'
-              />
-            ))}
-          </div>
-        )}
 
         {/* Kenney collectible target */}
         <div

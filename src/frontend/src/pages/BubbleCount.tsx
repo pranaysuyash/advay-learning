@@ -10,6 +10,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -50,6 +51,7 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
 
   const { playSuccess, playClick, playError } = useAudio();
   const { onGameComplete } = useGameDrops('bubble-count');
+  const { saveProgress } = useGameProgress('bubble-count');
   useGameSessionProgress({ gameName: 'Bubble Count', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const TOTAL_ROUNDS = 5;
@@ -70,11 +72,12 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
     playClick();
   }, [currentLevel, playClick, resetStreak]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     setGameState('complete');
+    await saveProgress({ score, completed: true, level: currentLevel });
     onGameComplete(score);
     playSuccess();
-  }, [score, onGameComplete, playSuccess]);
+  }, [score, currentLevel, onGameComplete, playSuccess, saveProgress]);
 
   const handleGroupClick = useCallback((groupId: number) => {
     if (gameState !== 'playing' || showResult !== null) return;

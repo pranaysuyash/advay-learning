@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -45,6 +46,7 @@ function DinosaurDigGame() {
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('dinosaur-dig');
+  const { saveProgress } = useGameProgress('dinosaur-dig');
 
   useGameSessionProgress({
     gameName: 'Dinosaur Dig',
@@ -179,29 +181,30 @@ function DinosaurDigGame() {
     measureUncover();
   }, [measureUncover]);
 
-  const handleBoneClick = useCallback((bone: DinoBone) => {
+  const handleBoneClick = useCallback(async (bone: DinoBone) => {
     if (gameState !== 'assembling') return;
-    
+
     playSuccess();
     triggerHaptic('success');
-    
+
     const newPlaced = [...placedBones, bone];
     setPlacedBones(newPlaced);
     setAvailableBones(prev => prev.filter(b => b.id !== bone.id));
-    
+
     const newScore = calculateScore(UNCOVER_TARGET, newPlaced.length);
     setScore(newScore);
-    
+
     if (newPlaced.length >= (currentDino?.bones.length || 0)) {
       setShowDino(true);
       setGameState('complete');
       playCelebration();
+      await saveProgress({ score: newScore, completed: true, level: 1 });
       onGameComplete(calculateStars(newScore));
       speakText(`You assembled a ${currentDino?.name}! Amazing!`);
     } else {
       speakText(`Found the ${bone.name}! Keep going!`);
     }
-  }, [gameState, placedBones, currentDino, playSuccess, playCelebration, onGameComplete, speakText]);
+  }, [gameState, placedBones, currentDino, playSuccess, playCelebration, onGameComplete, speakText, saveProgress]);
 
   const handlePlayAgain = () => {
     startGame();

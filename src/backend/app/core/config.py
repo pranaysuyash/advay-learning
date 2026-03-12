@@ -88,6 +88,9 @@ class Settings(BaseSettings):
     # Redis (optional)
     REDIS_URL: Optional[str] = None
 
+    # Email (Resend)
+    RESEND_API_KEY: Optional[str] = None
+
     # Progress event-time handling
     USE_CLIENT_EVENT_TIME: bool = False
 

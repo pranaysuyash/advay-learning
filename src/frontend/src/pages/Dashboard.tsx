@@ -420,6 +420,7 @@ export const Dashboard = memo(function Dashboard() {
                         difficulty='Easy'
                         animationDelay={idx * 0.1}
                         isNew={game.isNew}
+                        badge={game.badge}
                         buttonText={t('dashboard:featuredGames.playNow')}
                         onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
                         reducedMotion={false}

@@ -6,6 +6,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -63,6 +64,7 @@ export function RainbowBridgeContent() {
 
   const { playPop, playSuccess, playClick } = useAudio();
   const { onGameComplete } = useGameDrops('rainbow-bridge');
+  const { saveProgress } = useGameProgress('rainbow-bridge');
   useGameSessionProgress({ gameName: 'Rainbow Bridge', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.level === currentLevel) || LEVELS[0];
@@ -82,11 +84,12 @@ export function RainbowBridgeContent() {
     playClick();
   }, [currentLevel, playClick]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     setGameState('complete');
+    await saveProgress({ score, completed: true, level: currentLevel });
     onGameComplete(score);
     playSuccess();
-  }, [score, onGameComplete, playSuccess]);
+  }, [score, currentLevel, onGameComplete, playSuccess, saveProgress]);
 
   const handleDotPress = useCallback((x: number, y: number) => {
     if (gameState !== 'playing') return;

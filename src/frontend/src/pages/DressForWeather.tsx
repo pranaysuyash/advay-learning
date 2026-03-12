@@ -31,6 +31,7 @@ import {
 } from '../components/ClothingSVGs';
 
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { AssetPreloader } from '../components/AssetPreloader';
@@ -226,6 +227,7 @@ function DressForWeatherGame() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   // Hand tracking with modern hooks
   const { onGameComplete } = useGameDrops('dress-for-weather');
+  const { saveProgress } = useGameProgress('dress-for-weather');
   const { playClick } = useAudio();
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
@@ -417,13 +419,14 @@ function DressForWeatherGame() {
         const requiredItems = Math.min(3, level.correctItems.length); // Need 3 correct items
 
         if (newCorrect.size >= requiredItems) {
-          setTimeout(() => {
+          setTimeout(async () => {
             if (currentLevel < LEVELS.length - 1) {
               void playClick();
               setCurrentLevel((prev) => prev + 1);
               speak("Amazing! Let's try the next weather!");
             } else {
               void playClick();
+              await saveProgress({ score, completed: true, level: currentLevel });
               onGameComplete();
               speak("You finished all the weather! You're a weather expert!");
             }
@@ -438,7 +441,7 @@ function DressForWeatherGame() {
         );
       }
     },
-    [currentLevel, correctlyPlaced, onGameComplete, resetStreak, speak],
+    [currentLevel, correctlyPlaced, onGameComplete, resetStreak, speak, score, saveProgress],
   );
 
   // Handle item dropped outside

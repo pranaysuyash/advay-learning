@@ -29,7 +29,7 @@ function SyllableClapContent() {
 
   const { playClick, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('syllable-clap');
-  const { saveProgress: _saveProgress } = useGameProgress('syllable-clap');
+  const { saveProgress } = useGameProgress('syllable-clap');
 
   useGameSessionProgress({
     gameName: 'Syllable Clap',
@@ -115,9 +115,10 @@ function SyllableClapContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick]);
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const currentWord = words[currentIndex];
   const maxSyllables = LEVELS[currentLevel - 1]?.maxSyllables ?? 3;

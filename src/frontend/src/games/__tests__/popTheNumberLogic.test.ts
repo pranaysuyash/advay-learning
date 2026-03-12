@@ -122,15 +122,19 @@ describe('generateBubbles', () => {
     expect(values[values.length - 1]).toBe(LEVELS[0].numberRange);
   });
 
-  it('generates different values on multiple calls', () => {
+  it('generates valid permutations on multiple calls', () => {
     const bubbles1 = generateBubbles(LEVELS[1]);
     const bubbles2 = generateBubbles(LEVELS[1]);
 
-    const values1 = bubbles1.map(b => b.value).join(',');
-    const values2 = bubbles2.map(b => b.value).join(',');
+    const sorted1 = bubbles1.map((b) => b.value).sort((a, b) => a - b);
+    const sorted2 = bubbles2.map((b) => b.value).sort((a, b) => a - b);
+    const expected = Array.from(
+      { length: LEVELS[1].numberRange },
+      (_, i) => i + 1,
+    );
 
-    // Due to shuffling, order should differ
-    expect(values1).not.toBe(values2);
+    expect(sorted1).toEqual(expected);
+    expect(sorted2).toEqual(expected);
   });
 
   it('bubbles have sequential IDs', () => {

@@ -7,7 +7,7 @@
  * @see docs/audit/KENNEY_ASSET_AUDIT_COMPLETE.md
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface AssetToPreload {
   type: 'image' | 'audio';
@@ -112,6 +112,18 @@ export function AssetPreloader({
     isComplete: false,
   });
   const [showContent, setShowContent] = useState(false);
+  
+  // Store callbacks in refs so changing them doesn't restart preloading
+  const onCompleteRef = useRef(onComplete);
+  const onProgressRef = useRef(onProgress);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  }, [onProgress]);
 
   const loadAsset = useCallback(async (asset: AssetToPreload): Promise<void> => {
     try {
@@ -157,7 +169,9 @@ export function AssetPreloader({
               if (!cancelled) {
                 loaded++;
                 setState(prev => ({ ...prev, loaded }));
-                onProgress?.(assets.length > 0 ? loaded / assets.length : 0);
+                if (onProgressRef.current) {
+                  onProgressRef.current(assets.length > 0 ? loaded / assets.length : 0);
+                }
               }
             } catch {
               errors.push(asset.src);
@@ -180,7 +194,7 @@ export function AssetPreloader({
           isComplete: true,
         });
         setShowContent(true);
-        onComplete();
+        onCompleteRef.current();
       }
     };
 
@@ -189,7 +203,7 @@ export function AssetPreloader({
     return () => {
       cancelled = true;
     };
-  }, [assets, loadAsset, onComplete, onProgress, minDisplayTime]);
+  }, [assets, loadAsset, minDisplayTime]);
 
   if (showContent) {
     return <>{children}</>;

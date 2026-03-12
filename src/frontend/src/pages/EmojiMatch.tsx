@@ -10,7 +10,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameShell } from '../components/GameShell';
-import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { GameHUD } from '../components/game/GameHUD';
+import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
@@ -639,13 +640,15 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
     },
   ];
 
-  const promptTarget = targets[correctId];
+  const handleAssetsLoaded = useCallback(() => {
+    setAssetsLoaded(true);
+  }, []);
 
   if (!assetsLoaded) {
     return (
       <AssetPreloader
         assets={CRITICAL_ASSETS}
-        onComplete={() => setAssetsLoaded(true)}
+        onComplete={handleAssetsLoaded}
         minDisplayTime={800}
       />
     );
@@ -672,48 +675,24 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       >
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-        <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-advay-slate font-bold text-base md:text-lg text-center shadow-[0_4px_0_#E5B86E] min-w-max'>
+        <GameHUD
+          score={score}
+          streak={streak}
+          level={level}
+          round={round}
+          totalRounds={ROUNDS_PER_LEVEL}
+          rightHeaderContent={
+            <div className="flex gap-4 items-center">
+              <div className={`bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 shadow-sm text-sm ${timeLeft <= 10 ? 'text-red-500 animate-pulse border-red-200' : 'text-slate-600 border-slate-200'}`}>
+                ⏱️ {timeLeft}s
+              </div>
+            </div>
+          }
+        />
+
+        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
           {feedback}
         </div>
-
-        <div className='absolute top-6 right-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary font-bold text-base shadow-[0_4px_0_#E5B86E]'>
-          {timeLeft > 15 ? 'Take your time!' : 'Almost there, keep going!'}
-        </div>
-
-        {promptTarget && (
-          <div className='absolute top-6 left-6 px-6 py-3 rounded-full bg-white border-3 border-[#F2CC8F] text-text-secondary text-lg shadow-[0_4px_0_#E5B86E]'>
-            <span className='font-bold uppercase tracking-widest text-xs mr-2 opacity-60'>
-              Find
-            </span>
-            <span className='font-black text-advay-slate tracking-tight text-xl'>
-              {promptTarget.name}
-            </span>
-            <span className='text-xs font-bold text-slate-400 ml-3 uppercase tracking-wider'>
-              Round {round} of {ROUNDS_PER_LEVEL}
-            </span>
-          </div>
-        )}
-
-        {/* Kenney Heart HUD */}
-        {isPlaying && (
-          <div className='absolute bottom-6 left-6 flex items-center gap-1 bg-white/90 rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4]'>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <img
-                key={i}
-                src={
-                  streak >= (i + 1) * 2
-                    ? '/assets/kenney/platformer/hud/hud_heart.png'
-                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                }
-                alt=''
-                className='w-7 h-7'
-              />
-            ))}
-            <span className='ml-2 text-base font-bold text-pink-500'>
-              x{streak}
-            </span>
-          </div>
-        )}
 
         {/* Score Popup Animation */}
         {scorePopup && (
@@ -802,17 +781,14 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         })}
 
         {cursorPx && (
-          <CursorEmbodiment
-            gameName='EmojiMatch'
+          <KenneyHandCursor
             position={cursorPx}
             isPinching={isPinching}
             isHandDetected={isHandDetected}
-            icon='👆'
-            size={84}
-            highContrast
-            state={
-              showSuccess ? 'success' : isPinching ? 'pinching' : 'tracking'
-            }
+            state={showSuccess ? 'grab' : isPinching ? 'pinch' : 'point'}
+            size={72}
+            color="yellow"
+            showTrail
           />
         )}
 

@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameHUD } from '../components/game/GameHUD';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generatePattern, generateOptions, type PatternItem } from '../games/patternPlayLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
@@ -31,6 +33,7 @@ export function PatternPlayContent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { onGameComplete } = useGameDrops('pattern-play');
+  const { saveProgress } = useGameProgress('pattern-play');
 
   useGameSessionProgress({ gameName: 'Pattern Play', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
@@ -102,7 +105,7 @@ export function PatternPlayContent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => { playClick(); await saveProgress({ score: correct, completed: true, level: currentLevel }); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer title="Pattern Play" onHome={() => navigate('/games')} reportSession={false}>
@@ -127,19 +130,21 @@ export function PatternPlayContent() {
 
         {gameState === 'playing' && pattern && (
           <div className="text-center">
-            {/* Kenney Heart HUD */}
-            <div className="flex items-center justify-center gap-1 mb-4 bg-white rounded-2xl px-4 py-2 border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] inline-flex">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <img
-                  key={i}
-                  src={streak >= (i + 1) * 2
-                    ? '/assets/kenney/platformer/hud/hud_heart.png'
-                    : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                  alt=""
-                  className="w-7 h-7"
-                />
-              ))}
-              <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={currentLevel}
+              progressPercentage={(round / 5) * 100}
+              leftHeaderContent={
+                <div className='flex flex-col'>
+                  <span className='text-xs font-black uppercase tracking-wider text-slate-400'>Correct</span>
+                  <span className='text-xl font-black text-slate-700'>{correct}</span>
+                </div>
+              }
+            />
+
+            <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] text-advay-slate font-bold text-lg text-center min-w-[320px] mb-8'>
+              {feedback || 'What comes next?'}
             </div>
 
             {/* Score Popup Animation */}
@@ -187,12 +192,7 @@ export function PatternPlayContent() {
                 </button>
               ))}
             </div>
-            <p className="text-lg font-medium text-purple-600">{feedback}</p>
-            <div className="flex gap-4 mt-4">
-              <div className="bg-green-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Correct</p><p className="text-2xl font-bold">{correct}</p></div>
-              <div className="bg-pink-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Score</p><p className="text-2xl font-bold">{score}</p></div>
-              <div className="bg-blue-100 px-4 py-2 rounded-xl text-center"><p className="text-sm">Round</p><p className="text-2xl font-bold">{round + 1}/5</p></div>
-            </div>
+            <p className="text-lg font-medium text-purple-600 mt-4">{feedback}</p>
           </div>
         )}
 

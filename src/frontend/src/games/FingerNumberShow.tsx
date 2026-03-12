@@ -16,6 +16,8 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { getMaxHandsForDifficultyIndex } from './finger-number-show/handTrackingConfig';
 import { FingerNumberShowMenu } from './finger-number-show/FingerNumberShowMenu';
 import { FingerNumberShowHud } from './finger-number-show/FingerNumberShowHud';
+import { GameShell } from '../components/GameShell';
+import { GameHUD } from '../components/game/GameHUD';
 import type { Point, Landmark } from '../types/tracking';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
@@ -57,7 +59,7 @@ const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   { name: 'Duo Mode', minNumber: 0, maxNumber: 20, rewardMultiplier: 0.6 },
 ];
 
-export const FingerNumberShow = memo(function FingerNumberShowComponent() {
+export const FingerNumberShowContent = memo(function FingerNumberShowContentComponent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -653,6 +655,13 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
               aria-hidden="true"
             />
 
+            <GameHUD
+              score={score}
+              streak={streak}
+              level={difficulty + 1}
+              showHearts={true}
+            />
+
             <FingerNumberShowHud
               promptStage={promptStage}
               gameMode={gameMode}
@@ -687,3 +696,18 @@ export const FingerNumberShow = memo(function FingerNumberShowComponent() {
     </>
   );
 });
+
+export const FingerNumberShow = memo(function FingerNumberShowShell() {
+  return (
+    <GameShell
+      gameId="finger-number-show"
+      gameName="Finger Number Show"
+      showWellnessTimer={true}
+      enableErrorBoundary={true}
+    >
+      <FingerNumberShowContent />
+    </GameShell>
+  );
+});
+
+export default FingerNumberShow;

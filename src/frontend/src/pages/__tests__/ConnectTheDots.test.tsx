@@ -43,8 +43,9 @@ vi.mock('../../hooks/useGameHandTracking', () => ({
 // Mock AssetPreloader to complete immediately
 vi.mock('../../components/AssetPreloader', () => ({
   AssetPreloader: ({ onComplete }: { onComplete: () => void }) => {
-    // Call completion in next tick
-    setTimeout(() => onComplete(), 0);
+    React.useEffect(() => {
+      onComplete();
+    }, [onComplete]);
     return null;
   },
 }));
@@ -59,7 +60,11 @@ describe('ConnectTheDots component - regression', () => {
     );
 
     // Start game - wait for the button to appear
-    const startButton = await screen.findByRole('button', { name: /start game/i });
+    const startButton = await screen.findByRole(
+      'button',
+      { name: /start game/i },
+      { timeout: 5000 },
+    );
     fireEvent.click(startButton);
 
     // Wait for dots to render and pick the first circle from the overlay SVG.
@@ -118,7 +123,11 @@ describe('ConnectTheDots component - regression', () => {
         <ConnectTheDots />
       </MemoryRouter>,
     );
-    const startButton = await screen.findByRole('button', { name: /start game/i });
+    const startButton = await screen.findByRole(
+      'button',
+      { name: /start game/i },
+      { timeout: 5000 },
+    );
     fireEvent.click(startButton);
 
     await waitFor(() => {

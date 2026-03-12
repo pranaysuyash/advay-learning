@@ -10,6 +10,7 @@ import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   getEmotionForLevel,
@@ -60,6 +61,7 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 function FeedTheMonsterGameComponent() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { onGameComplete } = useGameDrops('feed-the-monster');
+  const { saveProgress } = useGameProgress('feed-the-monster');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
 
@@ -159,12 +161,13 @@ function FeedTheMonsterGameComponent() {
     };
   }, [gameStarted, showSuccess]);
 
-  const handleGameOver = useCallback(() => {
+  const handleGameOver = useCallback(async () => {
     setGameStarted(false);
+    await saveProgress({ score, completed: true, level: currentLevel });
     onGameComplete(score);
     playSuccess();
     speak(`Game over! You scored ${score} points!`);
-  }, [onGameComplete, score, playSuccess, speak]);
+  }, [score, currentLevel, onGameComplete, playSuccess, speak, saveProgress]);
 
   const setupRound = useCallback(() => {
     const newMonster = getEmotionForLevel(currentLevel);

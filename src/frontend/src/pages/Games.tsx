@@ -13,6 +13,8 @@ import {
   VIBE_CONFIG,
 } from '../data/gameRegistry';
 import { WORLDS_BY_ID } from '../data/worlds';
+import { useGameStatsMapForProfile } from '../hooks/useGameStats';
+import { createRecommendedGame } from '../services/gameRecommendations';
 
 import type { Profile } from '../store';
 
@@ -23,6 +25,7 @@ export const Games = memo(function Games() {
   const { currentProfile, profiles, setCurrentProfile } = useProfileStore();
   const [showProfilePicker, setShowProfilePicker] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<string | 'all'>('all');
+  const { statsMap } = useGameStatsMapForProfile(currentProfile?.age);
 
   const normalizeTranslationList = (value: unknown): string[] => {
     if (!Array.isArray(value)) return [];
@@ -188,6 +191,9 @@ export const Games = memo(function Games() {
           {availableGames.map((game, index) => {
             const world = WORLDS_BY_ID[game.worldId];
             const vibe = VIBE_CONFIG[game.vibe];
+            const stats = statsMap instanceof Map ? statsMap.get(game.id) : (statsMap as any)[game.id];
+            const recommended = createRecommendedGame(game, stats);
+
             return (
               <GameCard
                 key={game.id}
@@ -201,6 +207,7 @@ export const Games = memo(function Games() {
                 difficulty={vibe?.label ?? 'Unknown'}
                 animationDelay={index * 0.05}
                 isNew={game.isNew}
+                badge={recommended.badge}
                 buttonText={
                   game.id === 'alphabet-tracing' && currentProfile
                     ? `Play in ${getLanguageLabel(currentProfile.preferred_language)}`

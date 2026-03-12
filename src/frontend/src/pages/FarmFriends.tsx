@@ -17,6 +17,7 @@ import {
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -51,6 +52,7 @@ function FarmFriendsGame() {
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('farm-friends');
+  const { saveProgress } = useGameProgress('farm-friends');
 
   useGameSessionProgress({
     gameName: 'Farm Friends',
@@ -134,9 +136,10 @@ function FarmFriendsGame() {
       speakText(`${currentAnimal.name} loves ${food.name}!`);
       
       if (newFed >= FEEDS_NEEDED) {
-        setTimeout(() => {
+        setTimeout(async () => {
           setGameState('complete');
           playCelebration();
+          await saveProgress({ score: score + 25, completed: true, level: 1, metadata: { fedCount: newFed } });
           onGameComplete(calculateStars(score + 25));
           speakText('Great job! You fed all the animals!');
         }, 1000);

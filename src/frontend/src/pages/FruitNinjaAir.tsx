@@ -11,6 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
@@ -44,6 +45,7 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
 
   const { playClick, playPop, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('fruit-ninja-air');
+  const { saveProgress } = useGameProgress('fruit-ninja-air');
   const levelConfig = LEVELS[currentLevel - 1];
 
   useGameSessionProgress({
@@ -251,7 +253,13 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   };
 
   const handleLevelChange = (level: number) => { playClick(); setCurrentLevel(level); };
-  const handleFinish = useCallback(async () => { playClick(); await onGameComplete(Math.round(score / 10)); navigate('/games'); }, [score, onGameComplete, navigate, playClick]);
+  const handleFinish = useCallback(async () => {
+    playClick();
+    const finalScore = Math.round(score / 10);
+    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
+    await onGameComplete(finalScore);
+    navigate('/games');
+  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   return (
     <GameContainer title="Fruit Ninja Air" onHome={() => navigate('/games')} reportSession={false}>
@@ -344,11 +352,8 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
               <GameHUD
                 score={score}
                 streak={streak}
-                levelInfo={
-                  <div className="bg-green-100 text-green-700 px-4 py-1.5 rounded-xl font-black border-2 border-green-200 shadow-sm">
-                    Level {currentLevel}
-                  </div>
-                }
+                level={currentLevel}
+                progressPercentage={(slicedCount / levelConfig.fruitsToSlice) * 100}
                 rightHeaderContent={
                   <div className="bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm">
                     🍎 {slicedCount} / {levelConfig.fruitsToSlice}

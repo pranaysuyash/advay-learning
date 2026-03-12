@@ -8,6 +8,7 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
+import { GameHUD } from '../components/game/GameHUD';
 import { LEVELS, getWordsForLevel, type SightWord } from '../games/sightWordFlashLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
@@ -27,7 +28,7 @@ function SightWordFlashContent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { onGameComplete } = useGameDrops('sight-word-flash');
-  const { saveProgress: _saveProgress } = useGameProgress('sight-word-flash');
+  const { saveProgress } = useGameProgress('sight-word-flash');
   const showPending = useRef(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -124,9 +125,10 @@ function SightWordFlashContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick]);
+  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
 
   const currentWord = words[currentIndex];
 
@@ -196,6 +198,19 @@ function SightWordFlashContent() {
                 </div>
               )}
 
+              <div className="w-full relative z-10 -mt-2">
+                <GameHUD
+                  score={score}
+                  streak={streak}
+                  levelInfo={`Level ${currentLevel}`}
+                  rightHeaderContent={
+                    <div className="bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm">
+                      👀 Word {currentIndex + 1}/{words.length}
+                    </div>
+                  }
+                />
+              </div>
+
               <div className='bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl border-3 border-[#F2CC8F] py-16 px-10 shadow-[0_6px_0_#E5B86E] text-center w-full min-h-48 flex items-center justify-center'>
                 {showWord ? (
                   <p className='text-7xl md:text-8xl font-black text-purple-700 tracking-tight'>
@@ -211,9 +226,6 @@ function SightWordFlashContent() {
                 )}
               </div>
 
-              <div className='text-sm font-bold text-slate-400 text-center'>
-                Word {currentIndex + 1} of {words.length}
-              </div>
             </div>
           )}
 
@@ -234,6 +246,19 @@ function SightWordFlashContent() {
           {/* Answering */}
           {gameState === 'answering' && !showWord && currentWord && (
             <>
+              <div className="w-full relative z-10 -mt-2 mb-4">
+                <GameHUD
+                  score={score}
+                  streak={streak}
+                  levelInfo={`Level ${currentLevel}`}
+                  rightHeaderContent={
+                    <div className="bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-xl font-black border-2 border-slate-200 text-slate-600 shadow-sm">
+                      🎯 Word {currentIndex + 1}/{words.length}
+                    </div>
+                  }
+                />
+              </div>
+
               <div className='bg-gradient-to-br from-slate-50 to-purple-50 rounded-3xl border-3 border-[#F2CC8F] py-10 px-10 shadow-[0_4px_0_#E5B86E] text-center'>
                 <p className='text-sm font-black uppercase tracking-widest text-slate-400 mb-3'>Did you know this word?</p>
                 <p className='text-6xl font-black text-purple-700'>{currentWord.word}</p>
@@ -256,29 +281,13 @@ function SightWordFlashContent() {
                 </button>
               </div>
 
-              <div className='flex items-center justify-between'>
-                <div className='flex gap-3'>
-                  <div className='bg-emerald-50 border-2 border-emerald-200 px-4 py-2 rounded-xl text-center'>
-                    <p className='text-xs font-black uppercase text-emerald-600'>Knew</p>
-                    <p className='text-2xl font-black text-emerald-700'>{correct}</p>
-                  </div>
-                  <div className='bg-slate-50 border-2 border-slate-200 px-4 py-2 rounded-xl text-center'>
-                    <p className='text-xs font-black uppercase text-slate-500'>Word</p>
-                    <p className='text-2xl font-black text-slate-700'>{currentIndex + 1}/{words.length}</p>
-                  </div>
-                  {streak > 0 && (
-                    <div className='bg-orange-50 border-2 border-orange-200 px-4 py-2 rounded-xl text-center'>
-                      <p className='text-xs font-black uppercase text-orange-600'>Streak</p>
-                      <p className='text-2xl font-black text-orange-700'>🔥 {streak}</p>
-                    </div>
-                  )}
-                </div>
+              <div className='flex items-center justify-center mt-6'>
                 <button
                   type='button'
                   onClick={handleFinish}
-                  className='px-5 py-3 rounded-xl bg-red-500 text-white font-black shadow-[0_3px_0_#B91C1C] hover:scale-105 active:scale-95 transition-all'
+                  className='px-8 py-4 rounded-xl bg-red-500 text-white font-black shadow-[0_4px_0_#B91C1C] hover:scale-105 active:scale-95 transition-all text-xl'
                 >
-                  Finish
+                  Finish Game
                 </button>
               </div>
             </>

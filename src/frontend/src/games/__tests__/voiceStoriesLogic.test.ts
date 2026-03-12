@@ -383,7 +383,7 @@ describe('voiceStoriesLogic', () => {
 
     it('includes "The Friendly Dragon" story', () => {
       const stories = [];
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 100; i++) {
         stories.push(getStoriesForLevel(1)[0]);
       }
 
@@ -393,7 +393,7 @@ describe('voiceStoriesLogic', () => {
 
     it('includes "The Magic Garden" story', () => {
       const stories = [];
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 100; i++) {
         stories.push(getStoriesForLevel(1)[0]);
       }
 

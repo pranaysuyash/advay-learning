@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
+import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -538,12 +539,21 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
               className='relative w-full h-full overflow-hidden m-0 border-3 border-[#F2CC8F] rounded-[2.5rem]'
               {...fallback.handlers}
             >
-              
+              {gameStarted && (
+                <GameHUD
+                  score={score}
+                  streak={streak}
+                  level={level}
+                  round={round}
+                  totalRounds={totalRounds}
+                  showHearts={true}
+                />
+              )}
 
               <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-              {/* Top HUD */}
-              <div className='absolute inset-x-0 top-0 p-6 flex flex-wrap gap-4 items-start justify-between pointer-events-none z-10'>
+              {/* Target Letter Display (Adjusted position) */}
+              <div className='absolute top-24 left-6 p-6 z-10 pointer-events-none'>
                 <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
                   <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-1'>Find this letter</div>
                   <div className='flex items-baseline gap-3'>
@@ -556,28 +566,6 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                       {targetLetterMeta?.name}
                     </div>
                   </div>
-                </div>
-
-                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-right'>
-                  <div className='text-xl font-bold text-text-secondary mb-1'>Score: <span className='text-[#10B981] font-black'>{score}</span></div>
-                  <div className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
-                    Level {level} · Round {round}/{totalRounds} · <span className='text-slate-400'>Take your time!</span>
-                  </div>
-                </div>
-
-                {/* Kenney Heart HUD */}
-                <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-[1.5rem] border-3 border-pink-200 shadow-[0_4px_0_#F9A8D4] flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <img
-                      key={i}
-                      src={streak >= (i + 1) * 2
-                        ? '/assets/kenney/platformer/hud/hud_heart.png'
-                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'}
-                      alt=""
-                      className="w-7 h-7"
-                    />
-                  ))}
-                  <span className="ml-2 text-base font-bold text-pink-500">x{streak}</span>
                 </div>
               </div>
 

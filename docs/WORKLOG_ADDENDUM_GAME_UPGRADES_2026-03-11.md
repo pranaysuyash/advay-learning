@@ -62,6 +62,7 @@ Status updates:
   - Game Quality Audit: https://github.com/pranaysuyash/advay-learning/issues/26
   - Brainstorm Scoring: https://github.com/pranaysuyash/advay-learning/issues/27
 - [2026-03-11] **OPEN** — Linked issue URLs into worklog and confirmed all five issues exist. Manual step completed.
+- [2026-03-11] **OPEN** — Applied priority tags to remaining brainstorm vault entries; scoring complete. High‑impact items (P0/P1) are now easily identifiable for ticket creation.
 - [2026-03-11] **OPEN** — Added type export test to ensure index.ts covers new files.
 
 Risks/notes:

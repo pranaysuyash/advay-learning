@@ -97,6 +97,23 @@ def validate_password_strength(password: str) -> str:
     return password
 
 
+def check_password_not_based_on_email(password: str, email: str) -> None:
+    """Validate password is not derived from email address.
+
+    Check both the full local part and significant segments (split by ._-).
+    """
+    email_local = email.split("@")[0].lower()
+    password_lower = password.lower()
+
+    if email_local in password_lower:
+        raise ValueError("Password cannot be based on your email address")
+
+    email_parts = re.split(r"[._-]", email_local)
+    for part in email_parts:
+        if len(part) >= 3 and part in password_lower:
+            raise ValueError("Password cannot be based on your email address")
+
+
 class UserBase(BaseModel):
     """Base user schema."""
 
@@ -120,17 +137,7 @@ class UserCreate(UserBase):
     @model_validator(mode="after")
     def validate_password_not_based_on_email(self) -> "UserCreate":
         """Validate password is not derived from email address."""
-        email_local = self.email.split("@")[0].lower()
-        password_lower = self.password.lower()
-
-        if email_local in password_lower:
-            raise ValueError("Password cannot be based on your email address")
-
-        email_parts = re.split(r"[._-]", email_local)
-        for part in email_parts:
-            if len(part) >= 3 and part in password_lower:
-                raise ValueError("Password cannot be based on your email address")
-
+        check_password_not_based_on_email(self.password, self.email)
         return self
 
 
@@ -148,6 +155,13 @@ class UserUpdate(BaseModel):
         if v is not None:
             return validate_password_strength(v)
         return v
+
+    @model_validator(mode="after")
+    def validate_password_not_based_on_email(self) -> "UserUpdate":
+        """Validate password is not derived from email address if both are provided."""
+        if self.password and self.email:
+            check_password_not_based_on_email(self.password, self.email)
+        return self
 
 
 class UserRoleUpdate(BaseModel):

@@ -772,7 +772,7 @@ Ticket Stamp: STAMP-20260227T095331Z-codex-g7ym
 Type: SECURITY_REMEDIATION
 Owner: Pranay
 Created: 2026-02-27 12:00 PST
-Status: **OPEN**
+Status: **DONE**
 Priority: P0 (HIGH severity security finding)
 
 ---
@@ -14249,3 +14249,103 @@ Status updates:
 
 ---
 
+
+
+### TCK-20260311-002 :: Implement Weather Lab Game (Discovery Lab)
+
+Ticket Stamp: STAMP-20260311T075145Z-codex-2xrp
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-03-11 13:20 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Implement Weather Lab game for ages 4-10 with weather controls (temperature, humidity, wind, pressure), 6 challenges, real-time weather calculation
+- Out-of-scope: AR mode, microphone wind input
+- Behavior change allowed: YES (new game)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/games/weatherLabLogic.ts`
+  - `src/frontend/src/games/__tests__/weatherLabLogic.test.ts`
+  - `src/frontend/src/pages/WeatherLab.tsx`
+
+Acceptance Criteria:
+
+- [x] Game logic with 9 weather types (clear, cloudy, rainy, snowy, stormy, foggy, desert, winter-sun, thunderstorm)
+- [x] 4 weather condition sliders (temperature, humidity, wind, pressure)
+- [x] 6 challenges with educational content
+- [x] Real-time weather calculation based on conditions
+- [x] Weather discovery tracking
+- [x] 46 unit tests covering all logic
+- [x] React component with interactive sliders
+- [x] Registry entry already existed - verified
+- [x] Route already existed - verified
+- [x] TypeScript compilation passes (no new errors)
+
+Execution log:
+
+- 2026-03-11 13:20 IST | Created game logic module | Evidence: `weatherLabLogic.ts` with 9 weather types
+- 2026-03-11 13:30 IST | Created comprehensive test suite | Evidence: 46 tests passing
+- 2026-03-11 13:40 IST | Created React component | Evidence: `WeatherLab.tsx` with interactive controls
+- 2026-03-11 13:45 IST | Verified registry entry exists | Evidence: Found in `labOfWonders.ts`
+- 2026-03-11 13:45 IST | Verified route exists | Evidence: Route at `/games/weather-lab` in App.tsx
+- 2026-03-11 13:50 IST | Test verification | Evidence: 46 tests passing
+
+Status updates:
+
+- 2026-03-11 13:50 IST **DONE** — Weather Lab game fully implemented with 46 tests
+
+---
+
+
+### TCK-20260310-035 :: Fix Hand Cursor - Rayman/Kenney Style
+
+Ticket Stamp: STAMP-20260312T060158Z-codex-k67r
+
+Type: BUG_FIX / FEATURE
+Owner: Pranay
+Created: 2026-03-10 07:15 IST
+Status: **DONE**
+Priority: P0
+
+Problem Reported:
+- EmojiMatch showing "horrendous hand shape" (SVG rectangles)
+- User wants Rayman-style floating animated hand
+- Need proper pinch action animations
+
+Solution:
+
+1. Created RaymanHand.tsx (12KB)
+   - Floating, disconnected hand style (Rayman-inspired)
+   - 5 states: idle, pointing, pinching, grabbing, success
+   - Smooth animations with spring physics
+   - 4 color variants
+
+2. Created KenneyHandCursor.tsx (8KB)
+   - Pixel-art style using CSS box-shadow technique
+   - Kenney platformer aesthetic
+   - 5 states: idle, point, pinch, grab, open
+   - Trail effects and glow
+
+3. Updated EmojiMatch.tsx
+   - Replaced old SVG hand (HandAvatarCursor)
+   - Now uses KenneyHandCursor with proper animations
+   - Pinch state clearly visible with green indicator
+
+Files Modified:
+- src/frontend/src/components/game/RaymanHand.tsx (NEW)
+- src/frontend/src/components/game/KenneyHandCursor.tsx (NEW)
+- src/frontend/src/components/game/index.ts (exports)
+- src/frontend/src/pages/EmojiMatch.tsx (integrated)
+
+Testing:
+- TypeScript: ✅ Passes
+- Visual: Rayman-style floating hand with pinch animation
+
+---

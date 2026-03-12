@@ -7,6 +7,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGamePoseTracking } from '../hooks/useGamePoseTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -25,6 +26,7 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
     const [showCelebration, setShowCelebration] = useState(false);
 
     const { onGameComplete } = useGameDrops('balance-beam');
+    const { saveProgress } = useGameProgress('balance-beam');
     const { playSuccess, playError, playCelebration } = useAudio();
     const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -97,7 +99,10 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
             setShowCelebration(true);
             playSuccess();
             playCelebration();
-            onGameComplete(gameState.score);
+            (async () => {
+                await saveProgress({ score: gameState.score, completed: true, level: 1 });
+                onGameComplete(gameState.score);
+            })();
             if (ttsEnabled) speak('Amazing balance!');
         } else if (gameState.status === 'fallen') {
             if (ttsEnabled) speak('Whoops! Try to stay in the center.');
@@ -105,7 +110,7 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
                 setGameState(createInitialState());
             }, 3000);
         }
-    }, [gameState.status, gameState.score, showCelebration, playSuccess, playCelebration, onGameComplete, ttsEnabled, speak]);
+    }, [gameState.status, gameState.score, showCelebration, playSuccess, playCelebration, onGameComplete, ttsEnabled, speak, saveProgress]);
 
     const startGame = () => {
         setGameState(prev => ({ ...prev, status: 'playing' }));
