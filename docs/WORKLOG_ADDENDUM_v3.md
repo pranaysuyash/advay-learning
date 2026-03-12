@@ -101,6 +101,7 @@ Execution log:
 - 2026-03-12 | Updated merge policy to not require human approval; keep unresolved-thread + required-check enforcement.
 - 2026-03-12 | Added `checks: read` permission for code-scanning policy check-run polling and reran local lint/type/test gates for touched files.
 - 2026-03-12 | Stabilized backend password-reset security test credentials/cleanup to clear CI backend-test failure.
+- 2026-03-12 | Corrected branch-protection required check contexts to actual check-run names (no workflow-name prefix) so merge gates are enforceable and satisfiable.
 
 Status updates:
 

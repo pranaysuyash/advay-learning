@@ -35,17 +35,17 @@ fi
 echo "[INFO] Configuring merge block policy for ${OWNER}/${REPO} (${BRANCH})"
 
 required_contexts_json="$(jq -n '[
-  "PR Link Gate / enforce-pr-linking",
-  "PR Comment Gate / pr-comment-gate",
-  "Merge Readiness Gate / workflow-policy",
-  "Merge Readiness Gate / review-policy",
-  "Merge Readiness Gate / code-scanning-policy",
-  "Merge Readiness Gate / regression-policy",
-  "CodeQL / Analyze (python)",
-  "CodeQL / Analyze (javascript-typescript)",
-  "Dependency Review / dependency-review",
-  "Secret Scan (Gitleaks) / gitleaks",
-  "Trivy Security Scan / trivy"
+  "enforce-pr-linking",
+  "pr-comment-gate",
+  "workflow-policy",
+  "review-policy",
+  "code-scanning-policy",
+  "regression-policy",
+  "Analyze (python)",
+  "Analyze (javascript-typescript)",
+  "dependency-review",
+  "gitleaks",
+  "trivy"
 ]')"
 
 protection_payload="$(jq -n \
