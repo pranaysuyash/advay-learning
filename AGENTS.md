@@ -664,10 +664,12 @@ source .venv/bin/activate  # macOS/Linux
 # or: .venv\Scripts\activate  # Windows
 
 # If venv missing:
-uv venv && source .venv/bin/activate
+uv venv --python python3.13 && source .venv/bin/activate
 ```
 
-**NEVER create nested venvs.**
+**Canonical env**: use the repo root `/.venv` for backend and repo tooling.
+
+**NEVER create nested venvs.** `src/backend/.venv` and `src/backend/venv` are legacy local environments and should not be recreated.
 
 ### Node.js (Frontend)
 

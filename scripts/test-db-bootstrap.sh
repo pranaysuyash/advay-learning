@@ -39,14 +39,15 @@ fi
 
 # Change to backend directory
 BACKEND_DIR="$(dirname "$0")/../src/backend"
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$BACKEND_DIR"
 
 # Activate virtual environment
-if [ -d ".venv" ]; then
-    source .venv/bin/activate
-    echo "✅ Activated backend virtual environment"
+if [ -d "$REPO_DIR/.venv" ]; then
+    source "$REPO_DIR/.venv/bin/activate"
+    echo "✅ Activated repo virtual environment"
 else
-    echo "❌ Backend virtual environment not found. Run setup first: cd src/backend && uv venv"
+    echo "❌ Repo virtual environment not found. Run setup first: ./scripts/setup.sh"
     exit 1
 fi
 

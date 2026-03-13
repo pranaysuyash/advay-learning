@@ -439,17 +439,18 @@ psql postgres -c "CREATE DATABASE advay_learning;"
 ## Backend Setup
 
 ```bash
-cd src/backend
-
-# Create virtual environment
-uv venv
+# Create the single repo virtual environment
+uv venv --python python3.13
 
 # Activate
 source .venv/bin/activate  # macOS/Linux
 # or: .venv\Scripts\activate  # Windows
 
-# Install dependencies
-uv pip install -e ".[dev]"
+# Install repo + backend dependencies into the same env
+uv pip install -e ".[dev]" -e "./src/backend[dev]"
+
+# Change to backend package
+cd src/backend
 
 # Copy environment template
 cp .env.example .env
@@ -507,12 +508,11 @@ This script:
 
 ```bash
 # Backend
+source .venv/bin/activate
 cd src/backend
-# Prefer running via the project environment (avoids accidentally using system `pytest`)
-uv run pytest
-# or:
-./.venv/bin/python -m pytest
-# (If you activate the venv, plain `pytest` is fine too)
+pytest
+# or from repo root:
+.venv/bin/python -m pytest src/backend/tests
 
 # Frontend
 cd src/frontend
@@ -521,6 +521,8 @@ npm test
 # UI design-system consistency guard (audit scope files)
 npm run audit:ui-design
 ```
+
+Use only the repo root `/.venv`. `src/backend/.venv` and `src/backend/venv` are legacy local environments and should not be recreated.
 
 ## IDE Setup
 
