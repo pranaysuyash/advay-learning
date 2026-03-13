@@ -59,10 +59,17 @@ def resolve_storage_path(current_user_id: str, filename: str) -> Path:
     This function prevents path traversal by treating `filename` as a basename. Any
     path separators or absolute paths provided by a client will be sanitized.
     """
+    # Reject null bytes and path separators before any path construction
+    if not filename or "\x00" in filename:
+        raise HTTPException(status_code=400, detail="Invalid file name")
+
     profile_dir = (LOCAL_STORAGE_DIR / current_user_id).resolve()
 
     # Force filename to be a basename (drops any ../ or absolute path parts)
     safe_filename = Path(filename).name
+
+    if not safe_filename or safe_filename in (".", ".."):
+        raise HTTPException(status_code=400, detail="Invalid file name")
 
     file_path = (profile_dir / safe_filename).resolve()
 
