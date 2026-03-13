@@ -14,8 +14,6 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-logger = logging.getLogger(__name__)
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +34,8 @@ from app.schemas.consent import (
     ParentalConsentResponse,
 )
 from app.services.dodo_payment_service import DodoPaymentService, get_dodo_client
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

@@ -12,6 +12,7 @@ from app.core.validation import (
 )
 from app.schemas.user import validate_password_strength
 
+
 def make_valid_password(label: str) -> str:
     suffix = str(sum(ord(ch) for ch in label) % 1000)
     return "".join(["Valid", "Pass", suffix, "!", "Aa"])
